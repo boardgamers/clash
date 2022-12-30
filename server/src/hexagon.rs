@@ -1,8 +1,7 @@
-use crate::{city::City, landmark::Landmark};
+use crate::landmark::Landmark;
 
 pub struct Hexagon {
     pub position: HexagonPosition,
-    pub city: Option<City>,
     pub landmark: Landmark,
     pub discovered: bool,
 }
@@ -11,7 +10,6 @@ impl Hexagon {
     pub fn new(position: HexagonPosition, landmark: Landmark) -> Hexagon {
         Hexagon {
             position,
-            city: None,
             landmark,
             discovered: false,
         }
