@@ -1,123 +1,90 @@
+pub const WONDER_VICTORY_POINTS: u32 = 4;
+
 use crate::{
-    events::EventMut,
-    player_setup::{self, InitializerAndDeinitializer, PlayerSetup},
-    Hexagon, Player, PlayerEvents, ResourcePile,
+    player::{self, PlayerSetup, PlayerInitializer},
+    Hexagon, ResourcePile
 };
 
 type PlacementChecker = Box<dyn Fn(&Hexagon) -> bool>;
 
 pub struct Wonder {
-    //* tho different wonders must not have the same name
     pub name: String,
     pub cost: ResourcePile,
-    pub required_technologies: Vec<usize>,
+    pub required_technologies: Vec<String>,
     pub placement_requirement: Option<PlacementChecker>,
-    pub builder: Option<Player>,
-    pub initializer: PlayerSetup,
-    pub deinitializer: PlayerSetup,
+    pub player_initializer: PlayerInitializer,
+    pub player_deinitializer: PlayerInitializer,
 }
 
 impl Wonder {
-    pub fn create<F, G>(
+    pub fn builder(
         name: &str,
         cost: ResourcePile,
-        required_technologies: Vec<usize>,
+        required_technologies: Vec<&str>,
     ) -> WonderBuilder {
-        WonderBuilder {
-            name: name.to_string(),
+        WonderBuilder::new(
+            name.to_string(),
             cost,
-            required_technologies,
-            placement_requirement: None,
-            initializers: Vec::new(),
-            deinitializers: Vec::new(),
-        }
-    }
-
-    fn new(
-        name: String,
-        cost: ResourcePile,
-        required_technologies: Vec<usize>,
-        placement_requirement: Option<PlacementChecker>,
-        initializer: PlayerSetup,
-        deinitializer: PlayerSetup,
-    ) -> Self {
-        Self {
-            name,
-            cost,
-            required_technologies,
-            placement_requirement,
-            builder: None,
-            initializer,
-            deinitializer,
-        }
+            required_technologies
+                .into_iter()
+                .map(|name| name.to_string())
+                .collect(),
+        )
     }
 }
 
 pub struct WonderBuilder {
     name: String,
     cost: ResourcePile,
-    required_technologies: Vec<usize>,
+    required_technologies: Vec<String>,
     placement_requirement: Option<PlacementChecker>,
-    initializers: Vec<PlayerSetup>,
-    deinitializers: Vec<PlayerSetup>,
+    player_initializers: Vec<PlayerInitializer>,
+    player_deinitializers: Vec<PlayerInitializer>,
 }
 
 impl WonderBuilder {
+    fn new(name: String, cost: ResourcePile, required_technologies: Vec<String>) -> Self {
+        Self {
+            name,
+            cost,
+            required_technologies,
+            placement_requirement: None,
+            player_initializers: Vec::new(),
+            player_deinitializers: Vec::new(),
+        }
+    }
+
     pub fn placement_requirement(&mut self, placement_requirement: PlacementChecker) -> &mut Self {
         self.placement_requirement = Some(placement_requirement);
         self
     }
 
     pub fn build(self) -> Wonder {
-        let initializer = player_setup::join_player_setup(self.initializers);
-        let deinitializer = player_setup::join_player_setup(self.deinitializers);
-        Wonder::new(
-            self.name,
-            self.cost,
-            self.required_technologies,
-            self.placement_requirement,
-            initializer,
-            deinitializer,
-        )
+        let player_initializer = player::join_player_initializers(self.player_initializers);
+        let player_deinitializer = player::join_player_initializers(self.player_deinitializers);
+        Wonder {
+            name: self.name,
+            cost: self.cost,
+            required_technologies: self.required_technologies,
+            placement_requirement: self.placement_requirement,
+            player_initializer,
+            player_deinitializer,
+        }
     }
 }
 
-impl InitializerAndDeinitializer for WonderBuilder {
-    fn add_initializer(mut self, initializer: PlayerSetup) -> Self {
-        self.initializers.push(initializer);
+impl PlayerSetup for WonderBuilder {
+    fn add_player_initializer(mut self, initializer: PlayerInitializer) -> Self {
+        self.player_initializers.push(initializer);
         self
     }
 
-    fn add_deinitializer(mut self, deinitializer: PlayerSetup) -> Self {
-        self.deinitializers.push(deinitializer);
+    fn add_player_deinitializer(mut self, deinitializer: PlayerInitializer) -> Self {
+        self.player_deinitializers.push(deinitializer);
         self
     }
 
-    fn add_event_listener<T, E, F>(self, event: E, listener: F, priority: i32) -> Self
-    where
-        E: Fn(&mut PlayerEvents) -> &mut EventMut<T> + 'static + Clone,
-        F: Fn(&mut T) + 'static + Clone,
-    {
-        let name = self.name.clone();
-        let deinitialize_event = event.clone();
-        let initializer = Box::new(move |player: &mut Player| {
-            player
-                .wonder_event_listener_indices
-                .entry(name.clone())
-                .or_default()
-                .push(event(&mut player.events).add_listener_mut(listener.clone(), priority))
-        });
-        let name = self.name.clone();
-        let deinitializer = Box::new(move |player: &mut Player| {
-            deinitialize_event(&mut player.events).remove_listener_mut(
-                player
-                    .wonder_event_listener_indices
-                    .entry(name.clone())
-                    .or_default()
-                    .remove(0),
-            )
-        });
-        self.add_initializer(initializer)
-            .add_deinitializer(deinitializer)
+    fn name(&self) -> String {
+        self.name.clone()
     }
 }

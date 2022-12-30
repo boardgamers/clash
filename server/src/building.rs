@@ -1,11 +1,6 @@
 use crate::wonder::Wonder;
 
-pub struct Building {
-    pub influencer: usize,
-    pub building_type: BuildingType,
-}
-
-pub enum BuildingType {
+pub enum Building {
     Academy,
     Market,
     Obelisk,

@@ -1,74 +1,59 @@
-use crate::{
-    events::EventMut,
-    player_setup::{self, InitializerAndDeinitializer, PlayerSetup},
-    Player, PlayerEvents,
-};
+use crate::player::{self, PlayerSetup, PlayerInitializer};
 
 pub struct Leader {
     pub name: String,
-    pub initializer: PlayerSetup,
-    pub deinitializer: PlayerSetup,
+    pub player_initializer: PlayerInitializer,
+    pub player_deinitializer: PlayerInitializer,
 }
 
 impl Leader {
-    pub fn create(name: &str) -> LeaderBuilder {
-        LeaderBuilder {
-            name: name.to_string(),
-            initializers: Vec::new(),
-            deinitializers: Vec::new(),
-        }
+    pub fn builder(name: &str) -> LeaderBuilder {
+        LeaderBuilder::new(name.to_string())
     }
 
-    fn new(name: String, initializer: PlayerSetup, deinitializer: PlayerSetup) -> Self {
+    fn new(name: String, player_initializer: PlayerInitializer, player_deinitializer: PlayerInitializer) -> Self {
         Self {
             name,
-            initializer,
-            deinitializer,
+            player_initializer,
+            player_deinitializer,
         }
     }
 }
 
 pub struct LeaderBuilder {
     name: String,
-    initializers: Vec<PlayerSetup>,
-    deinitializers: Vec<PlayerSetup>,
+    player_initializers: Vec<PlayerInitializer>,
+    player_deinitializers: Vec<PlayerInitializer>,
 }
 
 impl LeaderBuilder {
+    fn new(name: String) -> Self {
+        Self {
+            name,
+            player_initializers: Vec::new(),
+            player_deinitializers: Vec::new(),
+        }
+    }
+
     pub fn build(self) -> Leader {
-        let initializer = player_setup::join_player_setup(self.initializers);
-        let deinitializer = player_setup::join_player_setup(self.deinitializers);
-        Leader::new(self.name, initializer, deinitializer)
+        let player_initializer = player::join_player_initializers(self.player_initializers);
+        let player_deinitializer = player::join_player_initializers(self.player_deinitializers);
+        Leader::new(self.name, player_initializer, player_deinitializer)
     }
 }
 
-impl InitializerAndDeinitializer for LeaderBuilder {
-    fn add_initializer(mut self, initializer: PlayerSetup) -> Self {
-        self.initializers.push(initializer);
+impl PlayerSetup for LeaderBuilder {
+    fn add_player_initializer(mut self, initializer: PlayerInitializer) -> Self {
+        self.player_initializers.push(initializer);
         self
     }
 
-    fn add_deinitializer(mut self, deinitializer: PlayerSetup) -> Self {
-        self.deinitializers.push(deinitializer);
+    fn add_player_deinitializer(mut self, deinitializer: PlayerInitializer) -> Self {
+        self.player_deinitializers.push(deinitializer);
         self
     }
 
-    fn add_event_listener<T, E, F>(self, event: E, listener: F, priority: i32) -> Self
-    where
-        E: Fn(&mut PlayerEvents) -> &mut EventMut<T> + 'static + Clone,
-        F: Fn(&mut T) + 'static + Clone,
-    {
-        let deinitialize_event = event.clone();
-        let initializer = Box::new(move |player: &mut Player| {
-            player
-                .leader_event_listener_indices
-                .push(event(&mut player.events).add_listener_mut(listener.clone(), priority))
-        });
-        let deinitializer = Box::new(move |player: &mut Player| {
-            deinitialize_event(&mut player.events)
-                .remove_listener_mut(player.leader_event_listener_indices.remove(0))
-        });
-        self.add_initializer(initializer)
-            .add_deinitializer(deinitializer)
+    fn name(&self) -> String {
+        self.name.clone()
     }
 }

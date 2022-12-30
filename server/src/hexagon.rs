@@ -1,12 +1,21 @@
-use crate::{city::City, landmark::LandMark, player::Player, unit::Unit};
+use crate::{city::City, landmark::Landmark};
 
 pub struct Hexagon {
     pub position: HexagonPosition,
     pub city: Option<City>,
-    pub land_mark: LandMark,
+    pub landmark: Landmark,
     pub discovered: bool,
-    pub occupier: Option<Player>,
-    pub units: Vec<Unit>,
+}
+
+impl Hexagon {
+    pub fn new(position: HexagonPosition, landmark: Landmark) -> Hexagon {
+        Hexagon {
+            position,
+            city: None,
+            landmark,
+            discovered: false,
+        }
+    }
 }
 
 pub struct HexagonPosition {

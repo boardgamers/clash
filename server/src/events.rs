@@ -28,19 +28,20 @@ impl<T> Event<T> {
     }
 }
 
-type ListenerMut<T> = (Box<dyn Fn(&mut T)>, i32);
+type ListenerMut<T, U> = (Box<dyn Fn(&mut T, &U)>, i32);
+type ListenerImmutable<T, U> = (Box<dyn Fn(&T, &U)>, i32);
 
 #[derive(Default)]
-pub struct EventMut<T> {
-    listeners: Vec<Listener<T>>,
-    listeners_mut: Vec<ListenerMut<T>>,
+pub struct EventMut<T, U> {
+    listeners: Vec<ListenerImmutable<T, U>>,
+    listeners_mut: Vec<ListenerMut<T, U>>,
 }
 
-impl<T> EventMut<T> {
+impl<T, U> EventMut<T, U> {
     //return the index of the listener witch can be used to remove the listener later
     pub fn add_listener<F>(&mut self, new_listener: F, priority: i32) -> usize
     where
-        F: Fn(&T) + 'static,
+        F: Fn(&T, &U) + 'static,
     {
         self.listeners.push((Box::new(new_listener), priority));
         self.listeners.sort_by_key(|(_, priority)| *priority);
@@ -55,7 +56,7 @@ impl<T> EventMut<T> {
     //return the index of the listener witch can be used to remove the listener later
     pub fn add_listener_mut<F>(&mut self, new_listener: F, priority: i32) -> usize
     where
-        F: Fn(&mut T) + 'static,
+        F: Fn(&mut T, &U) + 'static,
     {
         self.listeners_mut.push((Box::new(new_listener), priority));
         self.listeners_mut.sort_by_key(|(_, priority)| *priority);
@@ -67,12 +68,12 @@ impl<T> EventMut<T> {
         self.listeners_mut.remove(index);
     }
 
-    pub fn trigger(&mut self, value: &mut T) {
+    pub fn trigger(&mut self, value_mut: &mut T, value: &U) {
         for (listener, _) in self.listeners_mut.iter_mut() {
-            listener(value);
+            listener(value_mut, value);
         }
         for (listener, _) in self.listeners.iter() {
-            listener(value);
+            listener(value_mut, value);
         }
     }
 }

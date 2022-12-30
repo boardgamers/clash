@@ -1,4 +1,4 @@
-pub enum LandMark {
+pub enum Landmark {
     Barren,
     Mountain,
     Fertile,
