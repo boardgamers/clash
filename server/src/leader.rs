@@ -1,4 +1,6 @@
-use crate::player::{self, PlayerSetup, PlayerInitializer};
+use std::fmt::Display;
+
+use crate::player::{self, PlayerInitializer, PlayerSetup};
 
 pub struct Leader {
     pub name: String,
@@ -11,7 +13,11 @@ impl Leader {
         LeaderBuilder::new(name.to_string())
     }
 
-    fn new(name: String, player_initializer: PlayerInitializer, player_deinitializer: PlayerInitializer) -> Self {
+    fn new(
+        name: String,
+        player_initializer: PlayerInitializer,
+        player_deinitializer: PlayerInitializer,
+    ) -> Self {
         Self {
             name,
             player_initializer,
@@ -42,6 +48,12 @@ impl LeaderBuilder {
     }
 }
 
+impl Display for LeaderBuilder {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.name.clone())
+    }
+}
+
 impl PlayerSetup for LeaderBuilder {
     fn add_player_initializer(mut self, initializer: PlayerInitializer) -> Self {
         self.player_initializers.push(initializer);
@@ -51,9 +63,5 @@ impl PlayerSetup for LeaderBuilder {
     fn add_player_deinitializer(mut self, deinitializer: PlayerInitializer) -> Self {
         self.player_deinitializers.push(deinitializer);
         self
-    }
-
-    fn name(&self) -> String {
-        self.name.clone()
     }
 }

@@ -1,47 +1,65 @@
-use crate::player::{self, PlayerSetup, PlayerInitializer};
+use std::fmt::Display;
+
+use crate::{
+    player::{self, PlayerInitializer, PlayerSetup},
+    resource_pile::ResourcePile,
+};
+
+use AdvanceBonus::*;
 
 pub struct Technology {
     pub name: String,
-    pub required_technology: Option<usize>,
-    pub contradicting_technology: Option<usize>,
-    pub initializer: PlayerInitializer,
-    pub deinitializer: PlayerInitializer,
+    pub advance_bonus: Option<AdvanceBonus>,
+    pub required_technology: Option<String>,
+    pub contradicting_technology: Option<String>,
+    pub player_initializer: PlayerInitializer,
+    pub player_deinitializer: PlayerInitializer,
 }
 
 impl Technology {
-    pub fn builder(name: &str) -> TechnologyBuilder {
-        TechnologyBuilder::new(name.to_string())
+    pub fn builder(name: &str, advance_bonus: Option<AdvanceBonus>) -> TechnologyBuilder {
+        TechnologyBuilder::new(name.to_string(), advance_bonus)
     }
 
     fn new(
         name: String,
-        required_technology: Option<usize>,
-        contradicting_technology: Option<usize>,
-        initializer: PlayerInitializer,
-        deinitializer: PlayerInitializer,
+        advance_bonus: Option<AdvanceBonus>,
+        required_technology: Option<String>,
+        contradicting_technology: Option<String>,
+        player_initializer: PlayerInitializer,
+        player_deinitializer: PlayerInitializer,
     ) -> Self {
         Self {
             name,
+            advance_bonus,
             required_technology,
             contradicting_technology,
-            initializer,
-            deinitializer,
+            player_initializer,
+            player_deinitializer,
         }
+    }
+}
+
+impl PartialEq for Technology {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
     }
 }
 
 pub struct TechnologyBuilder {
     name: String,
-    required_technology: Option<usize>,
-    contradicting_technology: Option<usize>,
+    advance_bonus: Option<AdvanceBonus>,
+    required_technology: Option<String>,
+    contradicting_technology: Option<String>,
     initializers: Vec<PlayerInitializer>,
     deinitializers: Vec<PlayerInitializer>,
 }
 
 impl TechnologyBuilder {
-    fn new(name: String) -> Self {
+    fn new(name: String, advance_bonus: Option<AdvanceBonus>) -> Self {
         Self {
             name,
+            advance_bonus,
             required_technology: None,
             contradicting_technology: None,
             initializers: Vec::new(),
@@ -49,12 +67,12 @@ impl TechnologyBuilder {
         }
     }
 
-    pub fn with_required_technology(mut self, required_technology: usize) -> Self {
+    pub fn with_required_technology(mut self, required_technology: String) -> Self {
         self.required_technology = Some(required_technology);
         self
     }
 
-    pub fn with_contradicting_technology(mut self, contradicting_technology: usize) -> Self {
+    pub fn with_contradicting_technology(mut self, contradicting_technology: String) -> Self {
         self.contradicting_technology = Some(contradicting_technology);
         self
     }
@@ -64,11 +82,18 @@ impl TechnologyBuilder {
         let deinitializer = player::join_player_initializers(self.deinitializers);
         Technology::new(
             self.name,
+            self.advance_bonus,
             self.required_technology,
             self.contradicting_technology,
             initializer,
             deinitializer,
         )
+    }
+}
+
+impl Display for TechnologyBuilder {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.name.clone())
     }
 }
 
@@ -82,8 +107,18 @@ impl PlayerSetup for TechnologyBuilder {
         self.deinitializers.push(deinitializer);
         self
     }
+}
 
-    fn name(&self) -> String {
-        self.name.clone()
+pub enum AdvanceBonus {
+    MoodToken,
+    CultureToken,
+}
+
+impl AdvanceBonus {
+    pub fn resources(&self) -> ResourcePile {
+        match self {
+            MoodToken => ResourcePile::mood_tokens(1),
+            CultureToken => ResourcePile::culture_tokens(1),
+        }
     }
 }

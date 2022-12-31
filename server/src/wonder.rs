@@ -1,8 +1,10 @@
-pub const WONDER_VICTORY_POINTS: u32 = 4;
+pub const WONDER_VICTORY_POINTS: f32 = 4.0;
+
+use std::fmt::Display;
 
 use crate::{
-    player::{self, PlayerSetup, PlayerInitializer},
-    Hexagon, ResourcePile
+    player::{self, PlayerInitializer, PlayerSetup},
+    Hexagon, ResourcePile,
 };
 
 type PlacementChecker = Box<dyn Fn(&Hexagon) -> bool>;
@@ -73,6 +75,12 @@ impl WonderBuilder {
     }
 }
 
+impl Display for WonderBuilder {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.name.clone())
+    }
+}
+
 impl PlayerSetup for WonderBuilder {
     fn add_player_initializer(mut self, initializer: PlayerInitializer) -> Self {
         self.player_initializers.push(initializer);
@@ -82,9 +90,5 @@ impl PlayerSetup for WonderBuilder {
     fn add_player_deinitializer(mut self, deinitializer: PlayerInitializer) -> Self {
         self.player_deinitializers.push(deinitializer);
         self
-    }
-
-    fn name(&self) -> String {
-        self.name.clone()
     }
 }

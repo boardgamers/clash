@@ -1,6 +1,6 @@
-use std::ops::{AddAssign, SubAssign};
+use std::ops::{Add, AddAssign, SubAssign};
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct ResourcePile {
     pub wood: u32,
     pub stone: u32,
@@ -32,6 +32,34 @@ impl ResourcePile {
         }
     }
 
+    pub fn wood(amount: u32) -> Self {
+        Self::new(amount, 0, 0, 0, 0, 0, 0)
+    }
+
+    pub fn stone(amount: u32) -> Self {
+        Self::new(0, amount, 0, 0, 0, 0, 0)
+    }
+
+    pub fn gold(amount: u32) -> Self {
+        Self::new(0, 0, amount, 0, 0, 0, 0)
+    }
+
+    pub fn food(amount: u32) -> Self {
+        Self::new(0, 0, 0, amount, 0, 0, 0)
+    }
+
+    pub fn ideas(amount: u32) -> Self {
+        Self::new(0, 0, 0, 0, amount, 0, 0)
+    }
+
+    pub fn mood_tokens(amount: u32) -> Self {
+        Self::new(0, 0, 0, 0, 0, amount, 0)
+    }
+
+    pub fn culture_tokens(amount: u32) -> Self {
+        Self::new(0, 0, 0, 0, 0, 0, amount)
+    }
+
     pub fn can_afford(&self, other: &Self) -> bool {
         let mut resource_deficit = 0;
         if other.wood > self.wood {
@@ -50,6 +78,27 @@ impl ResourcePile {
             && self.mood_tokens >= other.mood_tokens
             && self.culture_tokens >= other.culture_tokens
     }
+
+    pub fn apply_resource_limit(&mut self, limit: &ResourcePile) {
+        if self.wood > limit.wood {
+            self.wood = limit.wood;
+        }
+        if self.stone > limit.stone {
+            self.stone = limit.stone;
+        }
+        if self.food > limit.food {
+            self.food = limit.food;
+        }
+        if self.ideas > limit.ideas {
+            self.ideas = limit.ideas;
+        }
+        if self.mood_tokens > limit.mood_tokens {
+            self.mood_tokens = limit.mood_tokens;
+        }
+        if self.culture_tokens > limit.culture_tokens {
+            self.culture_tokens = limit.culture_tokens;
+        }
+    }
 }
 
 impl AddAssign for ResourcePile {
@@ -61,6 +110,22 @@ impl AddAssign for ResourcePile {
         self.ideas += rhs.ideas;
         self.mood_tokens += rhs.mood_tokens;
         self.culture_tokens += rhs.culture_tokens;
+    }
+}
+
+impl Add for ResourcePile {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self::new(
+            self.wood + rhs.wood,
+            self.stone + rhs.stone,
+            self.gold + rhs.gold,
+            self.food + rhs.food,
+            self.ideas + rhs.ideas,
+            self.mood_tokens + rhs.mood_tokens,
+            self.culture_tokens + rhs.culture_tokens,
+        )
     }
 }
 

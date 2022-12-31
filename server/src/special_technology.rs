@@ -1,10 +1,12 @@
-use crate::player::{self, PlayerSetup, PlayerInitializer};
+use std::fmt::Display;
+
+use crate::player::{self, PlayerInitializer, PlayerSetup};
 
 pub struct SpecialTechnology {
     pub name: String,
     pub required_technology: String,
-    pub initializer: PlayerInitializer,
-    pub deinitializer: PlayerInitializer,
+    pub player_initializer: PlayerInitializer,
+    pub player_deinitializer: PlayerInitializer,
 }
 
 impl SpecialTechnology {
@@ -15,14 +17,14 @@ impl SpecialTechnology {
     fn new(
         name: String,
         required_technology: String,
-        initializer: PlayerInitializer,
-        deinitializer: PlayerInitializer,
+        player_initializer: PlayerInitializer,
+        player_deinitializer: PlayerInitializer,
     ) -> Self {
         Self {
             name,
             required_technology,
-            initializer,
-            deinitializer,
+            player_initializer,
+            player_deinitializer,
         }
     }
 }
@@ -56,6 +58,12 @@ impl SpecialTechnologyBuilder {
     }
 }
 
+impl Display for SpecialTechnologyBuilder {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.name.clone())
+    }
+}
+
 impl PlayerSetup for SpecialTechnologyBuilder {
     fn add_player_initializer(mut self, initializer: PlayerInitializer) -> Self {
         self.initializers.push(initializer);
@@ -65,9 +73,5 @@ impl PlayerSetup for SpecialTechnologyBuilder {
     fn add_player_deinitializer(mut self, deinitializer: PlayerInitializer) -> Self {
         self.deinitializers.push(deinitializer);
         self
-    }
-
-    fn name(&self) -> String {
-        self.name.clone()
     }
 }

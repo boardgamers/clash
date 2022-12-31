@@ -1,6 +1,5 @@
-type Listener<T> = (Box<dyn Fn(&T)>, i32);
+type Listener<T> = (Box<dyn Fn(&T)>, i32, usize);
 
-#[derive(Default)]
 pub struct Event<T> {
     listeners: Vec<Listener<T>>,
 }
@@ -11,76 +10,105 @@ impl<T> Event<T> {
     where
         F: Fn(&T) + 'static,
     {
-        self.listeners.push((Box::new(new_listener), priority));
-        self.listeners.sort_by_key(|(_, priority)| *priority);
+        let id = self.listeners.len();
+        self.listeners.push((Box::new(new_listener), priority, id));
+        self.listeners.sort_by_key(|(_, priority, _)| *priority);
         self.listeners.reverse();
-        self.listeners.len() - 1
+        id
     }
 
-    pub fn remove_listener(&mut self, index: usize) {
-        self.listeners.remove(index);
+    pub fn remove_listener(&mut self, id: usize) {
+        self.listeners.remove(
+            self.listeners
+                .iter()
+                .position(|(_, _, value)| value == &id)
+                .expect("Listeners should include this id"),
+        );
     }
 
     pub fn trigger(&self, value: T) {
-        for (listener, _) in self.listeners.iter() {
+        for (listener, _, _) in self.listeners.iter() {
             listener(&value);
         }
     }
 }
 
-type ListenerMut<T, U> = (Box<dyn Fn(&mut T, &U)>, i32);
-type ListenerImmutable<T, U> = (Box<dyn Fn(&T, &U)>, i32);
-
-#[derive(Default)]
-pub struct EventMut<T, U> {
-    listeners: Vec<ListenerImmutable<T, U>>,
-    listeners_mut: Vec<ListenerMut<T, U>>,
+impl<T> Default for Event<T> {
+    fn default() -> Self {
+        Self { listeners: Vec::new() }
+    }
 }
 
-impl<T, U> EventMut<T, U> {
+type ListenerMut<T, U, V> = (Box<dyn Fn(&mut T, &U, &V)>, i32, usize);
+type ListenerImmutable<T, U, V> = (Box<dyn Fn(&T, &U, &V)>, i32, usize);
+
+pub struct EventMut<T, U = (), V = ()> {
+    listeners: Vec<ListenerImmutable<T, U, V>>,
+    listeners_mut: Vec<ListenerMut<T, U, V>>,
+}
+
+impl<T, U, V> EventMut<T, U, V> {
     //return the index of the listener witch can be used to remove the listener later
     pub fn add_listener<F>(&mut self, new_listener: F, priority: i32) -> usize
     where
-        F: Fn(&T, &U) + 'static,
+        F: Fn(&T, &U, &V) + 'static,
     {
-        self.listeners.push((Box::new(new_listener), priority));
-        self.listeners.sort_by_key(|(_, priority)| *priority);
+        let id = self.listeners.len();
+        self.listeners.push((Box::new(new_listener), priority, id));
+        self.listeners.sort_by_key(|(_, priority, _)| *priority);
         self.listeners.reverse();
-        self.listeners.len() - 1
+        id
     }
 
-    pub fn remove_listener(&mut self, index: usize) {
-        self.listeners.remove(index);
+    pub fn remove_listener(&mut self, id: usize) {
+        self.listeners.remove(
+            self.listeners
+                .iter()
+                .position(|(_, _, value)| value == &id)
+                .expect("Listeners should include this id"),
+        );
     }
 
     //return the index of the listener witch can be used to remove the listener later
     pub fn add_listener_mut<F>(&mut self, new_listener: F, priority: i32) -> usize
     where
-        F: Fn(&mut T, &U) + 'static,
+        F: Fn(&mut T, &U, &V) + 'static,
     {
-        self.listeners_mut.push((Box::new(new_listener), priority));
-        self.listeners_mut.sort_by_key(|(_, priority)| *priority);
+        let id = self.listeners_mut.len();
+        self.listeners_mut
+            .push((Box::new(new_listener), priority, id));
+        self.listeners_mut.sort_by_key(|(_, priority, _)| *priority);
         self.listeners_mut.reverse();
-        self.listeners_mut.len() - 1
+        id
     }
 
-    pub fn remove_listener_mut(&mut self, index: usize) {
-        self.listeners_mut.remove(index);
+    pub fn remove_listener_mut(&mut self, id: usize) {
+        self.listeners_mut.remove(
+            self.listeners_mut
+                .iter()
+                .position(|(_, _, value)| value == &id)
+                .expect("Listeners should include this id"),
+        );
     }
 
-    pub fn trigger(&mut self, value_mut: &mut T, value: &U) {
-        for (listener, _) in self.listeners_mut.iter_mut() {
-            listener(value_mut, value);
+    pub fn trigger(&mut self, value_mut: &mut T, info: &U, details: &V) {
+        for (listener, _, _) in self.listeners_mut.iter_mut() {
+            listener(value_mut, info, details);
         }
-        for (listener, _) in self.listeners.iter() {
-            listener(value_mut, value);
+        for (listener, _, _) in self.listeners.iter() {
+            listener(value_mut, info, details);
         }
     }
 }
 
-type StaticListener = (Box<dyn Fn() + 'static>, i32);
+impl<T, U, V> Default for EventMut<T, U, V> {
+    fn default() -> Self {
+        Self { listeners: Vec::new(), listeners_mut: Vec::new() }
+    }
+}
 
-#[derive(Default)]
+type StaticListener = (Box<dyn Fn() + 'static>, i32, usize);
+
 pub struct StaticEvent {
     listeners: Vec<StaticListener>,
 }
@@ -91,19 +119,31 @@ impl StaticEvent {
     where
         F: Fn() + 'static,
     {
-        self.listeners.push((Box::new(new_listener), priority));
-        self.listeners.sort_by_key(|(_, priority)| *priority);
+        let id = self.listeners.len();
+        self.listeners.push((Box::new(new_listener), priority, id));
+        self.listeners.sort_by_key(|(_, priority, _)| *priority);
         self.listeners.reverse();
-        self.listeners.len() - 1
+        id
     }
 
-    pub fn remove_listener(&mut self, index: usize) {
-        self.listeners.remove(index);
+    pub fn remove_listener(&mut self, id: usize) {
+        self.listeners.remove(
+            self.listeners
+                .iter()
+                .position(|(_, _, value)| value == &id)
+                .expect("Listeners should include this id"),
+        );
     }
 
     pub fn trigger(&self) {
-        for (listener, _) in self.listeners.iter() {
+        for (listener, _, _) in self.listeners.iter() {
             listener();
         }
+    }
+}
+
+impl Default for StaticEvent {
+    fn default() -> Self {
+        Self { listeners: Vec::new()}
     }
 }
