@@ -3,8 +3,9 @@ pub const WONDER_VICTORY_POINTS: f32 = 4.0;
 use std::fmt::Display;
 
 use crate::{
+    hexagon::Hexagon,
     player::{self, PlayerInitializer, PlayerSetup},
-    Hexagon, ResourcePile,
+    resource_pile::ResourcePile,
 };
 
 type PlacementChecker = Box<dyn Fn(&Hexagon) -> bool>;

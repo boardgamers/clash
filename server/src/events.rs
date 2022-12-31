@@ -35,7 +35,9 @@ impl<T> Event<T> {
 
 impl<T> Default for Event<T> {
     fn default() -> Self {
-        Self { listeners: Vec::new() }
+        Self {
+            listeners: Vec::new(),
+        }
     }
 }
 
@@ -91,19 +93,22 @@ impl<T, U, V> EventMut<T, U, V> {
         );
     }
 
-    pub fn trigger(&mut self, value_mut: &mut T, info: &U, details: &V) {
+    pub fn trigger(&mut self, value: &mut T, info: &U, details: &V) {
         for (listener, _, _) in self.listeners_mut.iter_mut() {
-            listener(value_mut, info, details);
+            listener(value, info, details);
         }
         for (listener, _, _) in self.listeners.iter() {
-            listener(value_mut, info, details);
+            listener(value, info, details);
         }
     }
 }
 
 impl<T, U, V> Default for EventMut<T, U, V> {
     fn default() -> Self {
-        Self { listeners: Vec::new(), listeners_mut: Vec::new() }
+        Self {
+            listeners: Vec::new(),
+            listeners_mut: Vec::new(),
+        }
     }
 }
 
@@ -144,6 +149,8 @@ impl StaticEvent {
 
 impl Default for StaticEvent {
     fn default() -> Self {
-        Self { listeners: Vec::new()}
+        Self {
+            listeners: Vec::new(),
+        }
     }
 }

@@ -1,18 +1,27 @@
-use std::{collections::{HashMap, VecDeque}, fmt::Display};
+use std::{
+    collections::{HashMap, VecDeque},
+    fmt::Display,
+};
 
 use crate::{
-    army::Unit, city::{City, Building}, events::EventMut, hexagon::HexagonPosition, leader::Leader,
-    resource_pile::ResourcePile, special_technology::SpecialTechnology, technology::Technology,
-    Civilization,
+    army::Unit,
+    city::{Building, City},
+    civilization::Civilization,
+    events::EventMut,
+    hexagon::HexagonPosition,
+    leader::Leader,
+    resource_pile::ResourcePile,
+    special_technology::SpecialTechnology,
+    technology::Technology,
 };
 
 const TECHNOLOGY_COST: u32 = 2;
 
 pub struct Player {
     pub name: String,
-    pub resources: ResourcePile,
+    resources: ResourcePile,
     pub resource_limit: ResourcePile,
-    pub events: PlayerEvents,
+    events: Option<PlayerEvents>,
     event_listener_indices: HashMap<String, VecDeque<usize>>,
     pub cities: Vec<City>,
     pub units: Vec<Unit>,
@@ -21,6 +30,7 @@ pub struct Player {
     pub available_leaders: Vec<Leader>,
     pub researched_technologies: Vec<String>,
     pub leader_position: Option<HexagonPosition>,
+    event_tokens: u8,
     victory_points: u32,
 }
 
@@ -31,8 +41,8 @@ impl Player {
         Self {
             name: name.to_string(),
             resources: ResourcePile::food(2),
-            resource_limit: ResourcePile::new(7, 7, 7, 2, 7, 7, 7),
-            events: PlayerEvents::default(),
+            resource_limit: ResourcePile::new(2, 7, 7, 7, 7, 7, 7),
+            events: Some(PlayerEvents::default()),
             event_listener_indices: HashMap::new(),
             cities: Vec::new(),
             units: Vec::new(),
@@ -41,6 +51,7 @@ impl Player {
             available_leaders: leaders,
             researched_technologies: Vec::new(),
             leader_position: None,
+            event_tokens: 3,
             victory_points: 0,
         }
     }
@@ -48,6 +59,14 @@ impl Player {
     pub fn gain_resources(&mut self, resources: ResourcePile) {
         self.resources += resources;
         self.resources.apply_resource_limit(&self.resource_limit);
+    }
+
+    pub fn loose_resources(&mut self, resources: ResourcePile) {
+        self.resources -= resources;
+    }
+
+    pub fn resources(&self) -> &ResourcePile {
+        &self.resources
     }
 
     pub fn kill_leader(&mut self) {
@@ -65,6 +84,9 @@ impl Player {
 
     pub fn can_research_technology(&self, technology: &Technology) -> bool {
         if self.resources.food + self.resources.ideas + self.resources.gold < TECHNOLOGY_COST {
+            return false;
+        }
+        if self.has_technology(&technology.name) {
             return false;
         }
         if let Some(required_technology) = &technology.required_technology {
@@ -93,12 +115,18 @@ impl Player {
         for i in 0..self.civilization.special_technologies.len() {
             if self.civilization.special_technologies[i].required_technology == technology.name {
                 let special_technology = self.civilization.special_technologies.remove(i);
-                self.unlock_special_technology(special_technology);
+                self.unlock_special_technology(&special_technology);
+                self.civilization.special_technologies.insert(i, special_technology);
                 break;
             }
         }
         (technology.player_initializer)(self);
         self.researched_technologies.push(technology.name.clone());
+        self.event_tokens -= 1;
+        if self.event_tokens == 0 {
+            self.event_tokens = 3;
+            self.trigger_game_event();
+        }
     }
 
     pub fn remove_technology(&mut self, technology: &Technology) {
@@ -112,7 +140,7 @@ impl Player {
         }
     }
 
-    fn unlock_special_technology(&mut self, special_technology: SpecialTechnology) {
+    fn unlock_special_technology(&mut self, special_technology: &SpecialTechnology) {
         (special_technology.player_initializer)(self);
     }
 
@@ -122,6 +150,32 @@ impl Player {
 
     pub fn gain_victory_points(&mut self, victory_points: f32) {
         self.victory_points += (victory_points * 2.0) as u32;
+    }
+
+    pub fn loose_victory_points(&mut self, victory_points: f32) {
+        self.victory_points -= (victory_points * 2.0) as u32;
+    }
+
+    pub fn events(&mut self) -> &mut PlayerEvents {
+        self.events
+            .as_mut()
+            .expect("Events should be set after use")
+    }
+
+    pub fn take_events(&mut self) -> PlayerEvents {
+        self.events.take().expect("Events should be set after use")
+    }
+
+    pub fn set_events(&mut self, events: PlayerEvents) {
+        self.events = Some(events);
+    }
+
+    pub fn event_tokens(&self) -> u8 {
+        self.event_tokens
+    }
+
+    fn trigger_game_event(&mut self) {
+        todo!()
     }
 }
 
@@ -151,11 +205,25 @@ pub trait PlayerSetup: Display {
                 .event_listener_indices
                 .entry(key.clone())
                 .or_default()
-                .push_back(event(&mut player.events).add_listener_mut(listener.clone(), priority))
+                .push_back(
+                    event(
+                        player
+                            .events
+                            .as_mut()
+                            .expect("Events should be set after use"),
+                    )
+                    .add_listener_mut(listener.clone(), priority),
+                )
         });
         let key = self.to_string();
         let deinitializer = Box::new(move |player: &mut Player| {
-            deinitialize_event(&mut player.events).remove_listener_mut(
+            deinitialize_event(
+                player
+                    .events
+                    .as_mut()
+                    .expect("Events should be set after use"),
+            )
+            .remove_listener_mut(
                 player
                     .event_listener_indices
                     .entry(key.clone())

@@ -1,4 +1,7 @@
-use std::ops::{Add, AddAssign, SubAssign};
+use std::{
+    cmp,
+    ops::{Add, AddAssign, SubAssign},
+};
 
 #[derive(Default, Clone)]
 pub struct ResourcePile {
@@ -13,11 +16,11 @@ pub struct ResourcePile {
 
 impl ResourcePile {
     pub fn new(
+        food: u32,
         wood: u32,
         stone: u32,
-        gold: u32,
-        food: u32,
         ideas: u32,
+        gold: u32,
         mood_tokens: u32,
         culture_tokens: u32,
     ) -> Self {
@@ -131,12 +134,12 @@ impl Add for ResourcePile {
 
 impl SubAssign for ResourcePile {
     fn sub_assign(&mut self, rhs: Self) {
-        self.wood -= rhs.wood;
-        self.stone -= rhs.stone;
-        self.gold -= rhs.gold;
-        self.food -= rhs.food;
-        self.ideas -= rhs.ideas;
-        self.mood_tokens -= rhs.mood_tokens;
-        self.culture_tokens -= rhs.culture_tokens;
+        self.wood = cmp::max(self.wood - rhs.wood, 0);
+        self.stone = cmp::max(self.stone - rhs.stone, 0);
+        self.gold = cmp::max(self.gold - rhs.gold, 0);
+        self.food = cmp::max(self.food - rhs.food, 0);
+        self.ideas = cmp::max(self.ideas - rhs.ideas, 0);
+        self.mood_tokens = cmp::max(self.mood_tokens - rhs.mood_tokens, 0);
+        self.culture_tokens = cmp::max(self.culture_tokens - rhs.culture_tokens, 0);
     }
 }

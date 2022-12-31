@@ -23,15 +23,24 @@ pub struct City {
     pub buildings: Buildings,
     pub mood_state: MoodState,
     pub is_activated: bool,
+    pub player: String,
 }
 
 impl City {
-    pub fn new() -> Self {
+    pub fn new(player: String) -> Self {
         Self {
             buildings: Buildings::default(),
             mood_state: Neutral,
             is_activated: false,
+            player
         }
+    }
+
+    pub fn activate(&mut self) {
+        if self.is_activated {
+            self.decrease_mood_state();
+        }
+        self.is_activated = true;
     }
 
     pub fn can_increase_size(&self, building: Building, player: &mut Player) -> bool {
@@ -45,12 +54,17 @@ impl City {
             Wonder(wonder) => wonder.cost.clone(),
             _ => BUILDING_COST,
         };
-        player.events.city_size_increase_cost.trigger(&mut cost, self, &building);
-        player.resources.can_afford(&cost)
+        player
+            .events()
+            .city_size_increase_cost
+            .trigger(&mut cost, self, &building);
+        player.resources().can_afford(&cost)
     }
 
     pub fn increase_size(&mut self, building: Building, player: &mut Player) {
-        player.events.city_size_increase.trigger(player, self, &building);
+        let mut events = player.take_events();
+        events.city_size_increase.trigger(player, self, &building);
+        player.set_events(events);
         let victory_points = match &building {
             Wonder(_) => WONDER_VICTORY_POINTS,
             _ => CITY_PIECE_VICTORY_POINTS,
@@ -61,11 +75,29 @@ impl City {
             Wonder(wonder) => (wonder.player_initializer)(player),
             _ => (),
         }
-        self.buildings.add_building(building);
+        self.buildings.add_building(building, self.player.clone());
+    }
+
+    pub fn conquer(&mut self, new_player: &mut Player, old_player: &mut Player) {
+        self.player = new_player.name.clone();
+        self.mood_state = Angry;
+        if let Some(wonder) = &self.buildings.wonder {
+            (wonder.player_deinitializer)(old_player);
+            (wonder.player_initializer)(new_player);
+            new_player.gain_victory_points(WONDER_VICTORY_POINTS / 2.0 - 1.0);
+            old_player.loose_victory_points(WONDER_VICTORY_POINTS / 2.0 - 1.0);
+        }
+        new_player.gain_victory_points(self.size() as f32);
+        old_player.loose_victory_points(self.size() as f32);
+        if self.buildings.obelisk.is_some() {
+            new_player.loose_victory_points(1.0);
+            old_player.gain_victory_points(1.0);
+        }
+        self.buildings.change_player(new_player.name.clone());
     }
 
     pub fn size(&self) -> usize {
-        self.buildings.amount()
+        self.buildings.amount() + 1
     }
 
     pub fn mood_modified_size(&self) -> usize {
@@ -104,70 +136,91 @@ pub enum Building {
 
 #[derive(Default)]
 pub struct Buildings {
-    academy: bool,
-    market: bool,
-    obelisk: bool,
-    apothecary: bool,
-    fortress: bool,
-    port: bool,
-    temple: bool,
-    wonders: Option<Wonder>,
+    academy: Option<String>,
+    market: Option<String>,
+    obelisk: Option<String>,
+    apothecary: Option<String>,
+    fortress: Option<String>,
+    port: Option<String>,
+    temple: Option<String>,
+    wonder: Option<Wonder>,
 }
 
 impl Buildings {
     fn can_add_building(&self, building: &Building) -> bool {
         match building {
-            Academy => !self.academy,
-            Market => !self.market,
-            Obelisk => !self.obelisk,
-            Apothecary => !self.apothecary,
-            Fortress => !self.fortress,
-            Port => !self.port,
-            Temple => !self.temple,
-            Wonder(_) => self.wonders.is_none(),
+            Academy => self.academy.is_none(),
+            Market => self.market.is_none(),
+            Obelisk => self.obelisk.is_none(),
+            Apothecary => self.apothecary.is_none(),
+            Fortress => self.fortress.is_none(),
+            Port => self.port.is_none(),
+            Temple => self.temple.is_none(),
+            Wonder(_) => self.wonder.is_none(),
         }
     }
 
-    fn add_building(&mut self, building: Building) {
+    fn add_building(&mut self, building: Building, player: String) {
         match building {
-            Academy => self.academy = true,
-            Market => self.market = true,
-            Obelisk => self.obelisk = true,
-            Apothecary => self.apothecary = true,
-            Fortress => self.fortress = true,
-            Port => self.port = true,
-            Temple => self.temple = true,
-            Wonder(wonder) => self.wonders = Some(wonder),
+            Academy => self.academy = Some(player),
+            Market => self.market = Some(player),
+            Obelisk => self.obelisk = Some(player),
+            Apothecary => self.apothecary = Some(player),
+            Fortress => self.fortress = Some(player),
+            Port => self.port = Some(player),
+            Temple => self.temple = Some(player),
+            Wonder(wonder) => self.wonder = Some(wonder),
         }
     }
 
     fn amount(&self) -> usize {
         let mut amount = 0;
-        if self.academy {
+        if self.academy.is_some() {
             amount += 1;
         }
-        if self.market {
+        if self.market.is_some() {
             amount += 1;
         }
-        if self.obelisk {
+        if self.obelisk.is_some() {
             amount += 1;
         }
-        if self.apothecary {
+        if self.apothecary.is_some() {
             amount += 1;
         }
-        if self.fortress {
+        if self.fortress.is_some() {
             amount += 1;
         }
-        if self.port {
+        if self.port.is_some() {
             amount += 1;
         }
-        if self.temple {
+        if self.temple.is_some() {
             amount += 1;
         }
-        if self.wonders.is_some() {
+        if self.wonder.is_some() {
             amount += 1;
         }
         amount
+    }
+
+    fn change_player(&mut self, new_player: String) {
+        if let Some(academy) = self.academy.as_mut() {
+            *academy = new_player.clone();
+        }
+        if let Some(market) = self.market.as_mut() {
+            *market = new_player.clone();
+        }
+        if let Some(apothecary) = self.apothecary.as_mut() {
+            *apothecary = new_player.clone();
+        }
+        if let Some(fortress) = self.fortress.as_mut() {
+            *fortress = new_player.clone();
+        }
+        if let Some(port) = self.port.as_mut() {
+            *port = new_player.clone();
+        }
+        if let Some(temple) = self.temple.as_mut() {
+            *temple = new_player;
+        }
     }
 }
 
