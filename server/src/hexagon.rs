@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use crate::landmark::Landmark;
 
 pub struct Hexagon {
@@ -16,6 +18,7 @@ impl Hexagon {
     }
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct HexagonPosition {
     pub x: i32,
     pub y: i32,

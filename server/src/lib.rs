@@ -1,6 +1,7 @@
 mod army;
 mod city;
 mod civilization;
+mod content;
 mod events;
 mod game_api;
 mod hexagon;

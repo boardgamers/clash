@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::{
     collections::{HashMap, VecDeque},
     fmt::Display,
@@ -5,8 +6,9 @@ use std::{
 
 use crate::{
     army::Unit,
-    city::{Building, City},
+    city::{Building, City, CityData},
     civilization::Civilization,
+    content::{civilizations, technologies},
     events::EventMut,
     hexagon::HexagonPosition,
     leader::Leader,
@@ -35,6 +37,73 @@ pub struct Player {
 }
 
 impl Player {
+    pub fn from_data(data: PlayerData) -> Self {
+        let mut player = Self {
+            name: data.name,
+            resources: data.resources,
+            resource_limit: data.resource_limit,
+            events: Some(PlayerEvents::default()),
+            event_listener_indices: HashMap::new(),
+            cities: data.cities.into_iter().map(City::from_data).collect(),
+            units: data.units,
+            civilization: civilizations::get_civilization_by_name(data.civilization.clone()),
+            active_leader: data
+                .active_leader
+                .map(|leader| civilizations::get_leader_by_name(leader, data.civilization.clone())),
+            available_leaders: data
+                .available_leaders
+                .into_iter()
+                .map(|leader| civilizations::get_leader_by_name(leader, data.civilization.clone()))
+                .collect(),
+            researched_technologies: data.researched_technologies,
+            leader_position: data.leader_position,
+            event_tokens: data.event_tokens,
+            victory_points: data.victory_points,
+        };
+        let technologies = player
+            .researched_technologies
+            .iter()
+            .map(|technology| technologies::get_technology_by_name(technology.clone()))
+            .collect::<Vec<Technology>>();
+        for technology in technologies.into_iter() {
+            player.research_technology(&technology);
+        }
+        if let Some(leader) = player.active_leader.take() {
+            (leader.player_initializer)(&mut player);
+            player.active_leader = Some(leader);
+        }
+        let mut cities = Vec::new();
+        cities.append(&mut player.cities);
+        for city in cities.iter_mut() {
+            if let Some(wonder) = city.buildings.wonder.take() {
+                (wonder.player_initializer)(&mut player);
+                city.buildings.wonder = Some(wonder);
+            }
+        }
+        player.cities.append(&mut cities);
+        player
+    }
+
+    pub fn to_data(self) -> PlayerData {
+        PlayerData::new(
+            self.name,
+            self.resources,
+            self.resource_limit,
+            self.cities.into_iter().map(|city| city.to_data()).collect(),
+            self.units,
+            self.civilization.name,
+            self.active_leader.map(|leader| leader.name),
+            self.available_leaders
+                .into_iter()
+                .map(|leader| leader.name)
+                .collect(),
+            self.researched_technologies,
+            self.leader_position,
+            self.event_tokens,
+            self.victory_points,
+        )
+    }
+
     pub fn new(name: &str, mut civilization: Civilization) -> Self {
         let mut leaders = Vec::new();
         leaders.append(&mut civilization.leaders);
@@ -116,7 +185,9 @@ impl Player {
             if self.civilization.special_technologies[i].required_technology == technology.name {
                 let special_technology = self.civilization.special_technologies.remove(i);
                 self.unlock_special_technology(&special_technology);
-                self.civilization.special_technologies.insert(i, special_technology);
+                self.civilization
+                    .special_technologies
+                    .insert(i, special_technology);
                 break;
             }
         }
@@ -176,6 +247,54 @@ impl Player {
 
     fn trigger_game_event(&mut self) {
         todo!()
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct PlayerData {
+    name: String,
+    resources: ResourcePile,
+    resource_limit: ResourcePile,
+    cities: Vec<CityData>,
+    units: Vec<Unit>,
+    civilization: String,
+    active_leader: Option<String>,
+    available_leaders: Vec<String>,
+    researched_technologies: Vec<String>,
+    leader_position: Option<HexagonPosition>,
+    event_tokens: u8,
+    victory_points: u32,
+}
+
+impl PlayerData {
+    pub fn new(
+        name: String,
+        resources: ResourcePile,
+        resource_limit: ResourcePile,
+        cities: Vec<CityData>,
+        units: Vec<Unit>,
+        civilization: String,
+        active_leader: Option<String>,
+        available_leaders: Vec<String>,
+        researched_technologies: Vec<String>,
+        leader_position: Option<HexagonPosition>,
+        event_tokens: u8,
+        victory_points: u32,
+    ) -> Self {
+        Self {
+            name,
+            resources,
+            resource_limit,
+            cities,
+            units,
+            civilization,
+            active_leader,
+            available_leaders,
+            researched_technologies,
+            leader_position,
+            event_tokens,
+            victory_points,
+        }
     }
 }
 

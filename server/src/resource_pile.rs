@@ -3,7 +3,9 @@ use std::{
     ops::{Add, AddAssign, SubAssign},
 };
 
-#[derive(Default, Clone)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Default, Clone, Serialize, Deserialize)]
 pub struct ResourcePile {
     pub wood: u32,
     pub stone: u32,

@@ -1,9 +1,11 @@
 use crate::{
+    content::wonders,
     player::Player,
     resource_pile::ResourcePile,
     wonder::{Wonder, WONDER_VICTORY_POINTS},
 };
 
+use serde::{Deserialize, Serialize};
 use Building::*;
 use MoodState::*;
 
@@ -27,12 +29,30 @@ pub struct City {
 }
 
 impl City {
+    pub fn from_data(data: CityData) -> Self {
+        Self {
+            buildings: Buildings::from_data(data.buildings),
+            mood_state: data.mood_state,
+            is_activated: data.is_activated,
+            player: data.player,
+        }
+    }
+
+    pub fn to_data(self) -> CityData {
+        CityData::new(
+            self.buildings.to_data(),
+            self.mood_state,
+            self.is_activated,
+            self.player,
+        )
+    }
+
     pub fn new(player: String) -> Self {
         Self {
             buildings: Buildings::default(),
             mood_state: Neutral,
             is_activated: false,
-            player
+            player,
         }
     }
 
@@ -123,6 +143,30 @@ impl City {
     }
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct CityData {
+    buildings: BuildingsData,
+    mood_state: MoodState,
+    is_activated: bool,
+    player: String,
+}
+
+impl CityData {
+    pub fn new(
+        buildings: BuildingsData,
+        mood_state: MoodState,
+        is_activated: bool,
+        player: String,
+    ) -> Self {
+        Self {
+            buildings,
+            mood_state,
+            is_activated,
+            player,
+        }
+    }
+}
+
 pub enum Building {
     Academy,
     Market,
@@ -136,17 +180,65 @@ pub enum Building {
 
 #[derive(Default)]
 pub struct Buildings {
-    academy: Option<String>,
-    market: Option<String>,
-    obelisk: Option<String>,
-    apothecary: Option<String>,
-    fortress: Option<String>,
-    port: Option<String>,
-    temple: Option<String>,
-    wonder: Option<Wonder>,
+    pub academy: Option<String>,
+    pub market: Option<String>,
+    pub obelisk: Option<String>,
+    pub apothecary: Option<String>,
+    pub fortress: Option<String>,
+    pub port: Option<String>,
+    pub temple: Option<String>,
+    pub wonder: Option<Wonder>,
 }
 
 impl Buildings {
+    fn from_data(data: BuildingsData) -> Self {
+        Self::new(
+            data.academy,
+            data.market,
+            data.obelisk,
+            data.apothecary,
+            data.fortress,
+            data.port,
+            data.temple,
+            data.wonder.map(wonders::get_wonder_by_name),
+        )
+    }
+
+    fn to_data(self) -> BuildingsData {
+        BuildingsData::new(
+            self.academy,
+            self.market,
+            self.obelisk,
+            self.apothecary,
+            self.fortress,
+            self.port,
+            self.temple,
+            self.wonder.map(|wonder| wonder.name),
+        )
+    }
+
+    fn new(
+        academy: Option<String>,
+        market: Option<String>,
+        obelisk: Option<String>,
+        apothecary: Option<String>,
+        fortress: Option<String>,
+        port: Option<String>,
+        temple: Option<String>,
+        wonder: Option<Wonder>,
+    ) -> Self {
+        Self {
+            academy,
+            market,
+            obelisk,
+            apothecary,
+            fortress,
+            port,
+            temple,
+            wonder,
+        }
+    }
+
     fn can_add_building(&self, building: &Building) -> bool {
         match building {
             Academy => self.academy.is_none(),
@@ -224,6 +316,43 @@ impl Buildings {
     }
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct BuildingsData {
+    academy: Option<String>,
+    market: Option<String>,
+    obelisk: Option<String>,
+    apothecary: Option<String>,
+    fortress: Option<String>,
+    port: Option<String>,
+    temple: Option<String>,
+    wonder: Option<String>,
+}
+
+impl BuildingsData {
+    pub fn new(
+        academy: Option<String>,
+        market: Option<String>,
+        obelisk: Option<String>,
+        apothecary: Option<String>,
+        fortress: Option<String>,
+        port: Option<String>,
+        temple: Option<String>,
+        wonder: Option<String>,
+    ) -> Self {
+        Self {
+            academy,
+            market,
+            obelisk,
+            apothecary,
+            fortress,
+            port,
+            temple,
+            wonder,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize)]
 pub enum MoodState {
     Happy,
     Neutral,
