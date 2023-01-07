@@ -1,17 +1,17 @@
-pub const WONDER_VICTORY_POINTS: f32 = 4.0;
-
 use std::fmt::Display;
 
 use crate::{
-    hexagon::Hexagon,
+    hexagon::HexagonPosition,
     player::{self, PlayerInitializer, PlayerSetup},
     resource_pile::ResourcePile,
 };
 
-type PlacementChecker = Box<dyn Fn(&Hexagon) -> bool>;
+//todo! provide more info for position
+type PlacementChecker = Box<dyn Fn(&HexagonPosition) -> bool>;
 
 pub struct Wonder {
     pub name: String,
+    pub description: String,
     pub cost: ResourcePile,
     pub required_technologies: Vec<String>,
     pub placement_requirement: Option<PlacementChecker>,
@@ -38,6 +38,7 @@ impl Wonder {
 
 pub struct WonderBuilder {
     name: String,
+    descriptions: Vec<String>,
     cost: ResourcePile,
     required_technologies: Vec<String>,
     placement_requirement: Option<PlacementChecker>,
@@ -49,12 +50,18 @@ impl WonderBuilder {
     fn new(name: String, cost: ResourcePile, required_technologies: Vec<String>) -> Self {
         Self {
             name,
+            descriptions: Vec::new(),
             cost,
             required_technologies,
             placement_requirement: None,
             player_initializers: Vec::new(),
             player_deinitializers: Vec::new(),
         }
+    }
+
+    pub fn add_description(mut self, description: String) -> Self {
+        self.descriptions.push(description);
+        self
     }
 
     pub fn placement_requirement(&mut self, placement_requirement: PlacementChecker) -> &mut Self {
@@ -67,6 +74,7 @@ impl WonderBuilder {
         let player_deinitializer = player::join_player_initializers(self.player_deinitializers);
         Wonder {
             name: self.name,
+            description: String::from("● ") + &self.descriptions.join("\n● "),
             cost: self.cost,
             required_technologies: self.required_technologies,
             placement_requirement: self.placement_requirement,

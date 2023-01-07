@@ -1,12 +1,14 @@
 use serde::{Deserialize, Serialize};
 use std::{
+    cmp::Ordering::{self, *},
     collections::{HashMap, VecDeque},
     fmt::Display,
+    mem,
 };
 
 use crate::{
     army::Unit,
-    city::{Building, City, CityData},
+    city::{City, CityData, CityPiece},
     civilization::Civilization,
     content::{civilizations, technologies},
     events::EventMut,
@@ -19,8 +21,14 @@ use crate::{
 
 const TECHNOLOGY_COST: u32 = 2;
 
+const BUILDING_VICTORY_POINTS: f32 = 1.0;
+const TECHNOLOGY_VICTORY_POINTS: f32 = 0.5;
+const OBJECTIVE_VICTORY_POINTS: f32 = 2.0;
+const WONDER_VICTORY_POINTS: f32 = 4.0;
+const DEFEATED_LEADER_VICTORY_POINTS: f32 = 2.0;
+
 pub struct Player {
-    pub name: String,
+    name: Option<String>,
     resources: ResourcePile,
     pub resource_limit: ResourcePile,
     events: Option<PlayerEvents>,
@@ -31,9 +39,16 @@ pub struct Player {
     pub active_leader: Option<Leader>,
     pub available_leaders: Vec<Leader>,
     pub researched_technologies: Vec<String>,
+    pub unlocked_special_technologies: Vec<String>,
+    pub wonders: Vec<String>,
+    pub wonders_build: usize,
     pub leader_position: Option<HexagonPosition>,
-    event_tokens: u8,
-    victory_points: u32,
+    pub influenced_buildings: u32,
+    pub event_tokens: u8,
+    pub completed_objectives: Vec<String>,
+    pub defeated_leaders: Vec<String>,
+    pub event_victory_points: f32,
+    pub custom_actions: Vec<String>,
 }
 
 impl Player {
@@ -46,69 +61,82 @@ impl Player {
             event_listener_indices: HashMap::new(),
             cities: data.cities.into_iter().map(City::from_data).collect(),
             units: data.units,
-            civilization: civilizations::get_civilization_by_name(data.civilization.clone()),
+            civilization: civilizations::get_civilization_by_name(&data.civilization)
+                .expect("player data should have a valid civilization"),
             active_leader: data
                 .active_leader
-                .map(|leader| civilizations::get_leader_by_name(leader, data.civilization.clone())),
+                .map(|leader| civilizations::get_leader_by_name(&leader, &data.civilization))
+                .expect("player data should contain a valid leader"),
             available_leaders: data
                 .available_leaders
                 .into_iter()
-                .map(|leader| civilizations::get_leader_by_name(leader, data.civilization.clone()))
+                .map(|leader| {
+                    civilizations::get_leader_by_name(&leader, &data.civilization)
+                        .expect("player data should contain valid leaders")
+                })
                 .collect(),
             researched_technologies: data.researched_technologies,
+            unlocked_special_technologies: data.unlocked_special_technologies,
+            wonders: data.wonders,
+            wonders_build: data.wonders_build,
             leader_position: data.leader_position,
             event_tokens: data.event_tokens,
-            victory_points: data.victory_points,
+            influenced_buildings: data.influenced_buildings,
+            completed_objectives: data.completed_objectives,
+            defeated_leaders: data.defeated_leaders,
+            event_victory_points: data.event_victory_points,
+            custom_actions: data.custom_actions,
         };
-        let technologies = player
-            .researched_technologies
-            .iter()
-            .map(|technology| technologies::get_technology_by_name(technology.clone()))
-            .collect::<Vec<Technology>>();
-        for technology in technologies.into_iter() {
-            player.research_technology(&technology);
+        let technologies = mem::take(&mut player.researched_technologies);
+        for technology in technologies.iter() {
+            player.research_technology(technology);
         }
+        player.researched_technologies = technologies;
         if let Some(leader) = player.active_leader.take() {
             (leader.player_initializer)(&mut player);
             player.active_leader = Some(leader);
         }
-        let mut cities = Vec::new();
-        cities.append(&mut player.cities);
+        let mut cities = mem::take(&mut player.cities);
         for city in cities.iter_mut() {
-            if let Some(wonder) = city.buildings.wonder.take() {
+            for wonder in city.city_pieces.wonders.iter() {
                 (wonder.player_initializer)(&mut player);
-                city.buildings.wonder = Some(wonder);
             }
         }
         player.cities.append(&mut cities);
         player
     }
 
-    pub fn to_data(self) -> PlayerData {
-        PlayerData::new(
-            self.name,
-            self.resources,
-            self.resource_limit,
-            self.cities.into_iter().map(|city| city.to_data()).collect(),
-            self.units,
-            self.civilization.name,
-            self.active_leader.map(|leader| leader.name),
-            self.available_leaders
+    pub fn data(self) -> PlayerData {
+        PlayerData {
+            name: self.name,
+            resources: self.resources,
+            resource_limit: self.resource_limit,
+            cities: self.cities.into_iter().map(|city| city.data()).collect(),
+            units: self.units,
+            civilization: self.civilization.name,
+            active_leader: self.active_leader.map(|leader| leader.name),
+            available_leaders: self
+                .available_leaders
                 .into_iter()
                 .map(|leader| leader.name)
                 .collect(),
-            self.researched_technologies,
-            self.leader_position,
-            self.event_tokens,
-            self.victory_points,
-        )
+            researched_technologies: self.researched_technologies,
+            unlocked_special_technologies: self.unlocked_special_technologies,
+            wonders: self.wonders,
+            wonders_build: self.wonders_build,
+            leader_position: self.leader_position,
+            event_tokens: self.event_tokens,
+            influenced_buildings: self.influenced_buildings,
+            completed_objectives: self.completed_objectives,
+            defeated_leaders: self.defeated_leaders,
+            event_victory_points: self.event_victory_points,
+            custom_actions: self.custom_actions,
+        }
     }
 
-    pub fn new(name: &str, mut civilization: Civilization) -> Self {
-        let mut leaders = Vec::new();
-        leaders.append(&mut civilization.leaders);
+    pub fn new(civilization: Civilization) -> Self {
         Self {
-            name: name.to_string(),
+            name: None,
             resources: ResourcePile::food(2),
             resource_limit: ResourcePile::new(2, 7, 7, 7, 7, 7, 7),
             events: Some(PlayerEvents::default()),
@@ -117,12 +145,30 @@ impl Player {
             units: Vec::new(),
             civilization,
             active_leader: None,
-            available_leaders: leaders,
+            available_leaders: Vec::new(),
             researched_technologies: Vec::new(),
+            unlocked_special_technologies: Vec::new(),
+            wonders: Vec::new(),
+            wonders_build: 0,
             leader_position: None,
             event_tokens: 3,
-            victory_points: 0,
+            influenced_buildings: 0,
+            completed_objectives: Vec::new(),
+            defeated_leaders: Vec::new(),
+            event_victory_points: 0.0,
+            custom_actions: Vec::new(),
         }
+    }
+
+    pub fn name(&self) -> String {
+        self.name
+            .as_ref()
+            .expect("name should be set at this point")
+            .clone()
+    }
+
+    pub fn set_name(&mut self, name: String) {
+        self.name = Some(name);
     }
 
     pub fn gain_resources(&mut self, resources: ResourcePile) {
@@ -151,8 +197,12 @@ impl Player {
         self.active_leader = Some(new_leader);
     }
 
-    pub fn can_research_technology(&self, technology: &Technology) -> bool {
-        if self.resources.food + self.resources.ideas + self.resources.gold < TECHNOLOGY_COST {
+    pub fn can_research_technology(&self, technology: &str) -> bool {
+        let technology =
+            technologies::get_technology_by_name(technology).expect("technology should exist");
+        if self.resources.food + self.resources.ideas + (self.resources.gold as u32)
+            < TECHNOLOGY_COST
+        {
             return false;
         }
         if self.has_technology(&technology.name) {
@@ -177,7 +227,9 @@ impl Player {
             .any(|research_technology| research_technology == technology)
     }
 
-    pub fn research_technology(&mut self, technology: &Technology) {
+    pub fn research_technology(&mut self, technology: &String) {
+        let technology =
+            technologies::get_technology_by_name(technology).expect("technology should exist");
         if let Some(advance_bonus) = &technology.advance_bonus {
             self.gain_resources(advance_bonus.resources());
         }
@@ -192,7 +244,7 @@ impl Player {
             }
         }
         (technology.player_initializer)(self);
-        self.researched_technologies.push(technology.name.clone());
+        self.researched_technologies.push(technology.name);
         self.event_tokens -= 1;
         if self.event_tokens == 0 {
             self.event_tokens = 3;
@@ -213,18 +265,25 @@ impl Player {
 
     fn unlock_special_technology(&mut self, special_technology: &SpecialTechnology) {
         (special_technology.player_initializer)(self);
+        self.unlocked_special_technologies
+            .push(special_technology.name.clone());
     }
 
-    pub fn victory_points(&self) -> u32 {
-        self.victory_points / 2
-    }
-
-    pub fn gain_victory_points(&mut self, victory_points: f32) {
-        self.victory_points += (victory_points * 2.0) as u32;
-    }
-
-    pub fn loose_victory_points(&mut self, victory_points: f32) {
-        self.victory_points -= (victory_points * 2.0) as u32;
+    pub fn victory_points(&self) -> f32 {
+        let mut victory_points = 0.0;
+        for city in self.cities.iter() {
+            victory_points += city.buildings() as f32 * BUILDING_VICTORY_POINTS;
+        }
+        victory_points += self.influenced_buildings as f32 * BUILDING_VICTORY_POINTS;
+        victory_points += (self.researched_technologies.len()
+            + self.unlocked_special_technologies.len()) as f32
+            * TECHNOLOGY_VICTORY_POINTS;
+        victory_points += self.completed_objectives.len() as f32 * OBJECTIVE_VICTORY_POINTS;
+        victory_points += self.wonders.len() as f32 * WONDER_VICTORY_POINTS / 2.0;
+        victory_points += self.wonders_build as f32 * WONDER_VICTORY_POINTS / 2.0;
+        victory_points += self.event_victory_points;
+        victory_points += self.defeated_leaders.len() as f32 * DEFEATED_LEADER_VICTORY_POINTS;
+        victory_points
     }
 
     pub fn events(&mut self) -> &mut PlayerEvents {
@@ -248,11 +307,58 @@ impl Player {
     fn trigger_game_event(&mut self) {
         todo!()
     }
+
+    pub fn strip_secret(&mut self) {
+        todo!()
+    }
+
+    pub fn compare_score(&self, other: &Self) -> Ordering {
+        let mut building_score = 0;
+        for city in self.cities.iter() {
+            building_score += city.buildings();
+        }
+        building_score += self.influenced_buildings;
+        let mut other_building_score = 0;
+        for city in self.cities.iter() {
+            other_building_score += city.buildings();
+        }
+        other_building_score += self.influenced_buildings;
+        match building_score.cmp(&other_building_score) {
+            Less => return Less,
+            Equal => (),
+            Greater => return Greater,
+        }
+        match (self.researched_technologies.len() + self.unlocked_special_technologies.len())
+            .cmp(&(other.researched_technologies.len() + other.unlocked_special_technologies.len()))
+        {
+            Less => return Less,
+            Equal => (),
+            Greater => return Greater,
+        }
+        match self
+            .completed_objectives
+            .len()
+            .cmp(&other.completed_objectives.len())
+        {
+            Less => return Less,
+            Equal => (),
+            Greater => return Greater,
+        }
+        match (self.wonders.len() + self.wonders_build)
+            .cmp(&(other.wonders.len() + other.wonders_build))
+        {
+            Less => return Less,
+            Equal => (),
+            Greater => return Greater,
+        }
+        self.event_victory_points
+            .total_cmp(&other.event_victory_points)
+    }
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct PlayerData {
-    name: String,
+    name: Option<String>,
     resources: ResourcePile,
     resource_limit: ResourcePile,
     cities: Vec<CityData>,
@@ -261,48 +367,22 @@ pub struct PlayerData {
     active_leader: Option<String>,
     available_leaders: Vec<String>,
     researched_technologies: Vec<String>,
+    unlocked_special_technologies: Vec<String>,
+    wonders: Vec<String>,
+    wonders_build: usize,
     leader_position: Option<HexagonPosition>,
     event_tokens: u8,
-    victory_points: u32,
-}
-
-impl PlayerData {
-    pub fn new(
-        name: String,
-        resources: ResourcePile,
-        resource_limit: ResourcePile,
-        cities: Vec<CityData>,
-        units: Vec<Unit>,
-        civilization: String,
-        active_leader: Option<String>,
-        available_leaders: Vec<String>,
-        researched_technologies: Vec<String>,
-        leader_position: Option<HexagonPosition>,
-        event_tokens: u8,
-        victory_points: u32,
-    ) -> Self {
-        Self {
-            name,
-            resources,
-            resource_limit,
-            cities,
-            units,
-            civilization,
-            active_leader,
-            available_leaders,
-            researched_technologies,
-            leader_position,
-            event_tokens,
-            victory_points,
-        }
-    }
+    influenced_buildings: u32,
+    completed_objectives: Vec<String>,
+    defeated_leaders: Vec<String>,
+    event_victory_points: f32,
+    custom_actions: Vec<String>,
 }
 
 #[derive(Default)]
 pub struct PlayerEvents {
-    pub some_event: EventMut<i32, String>,
-    pub city_size_increase: EventMut<Player, City, Building>,
-    pub city_size_increase_cost: EventMut<ResourcePile, City, Building>,
+    pub city_size_increase: EventMut<Player, City, CityPiece>,
+    pub city_size_increase_cost: EventMut<ResourcePile, City, CityPiece>,
 }
 
 pub type PlayerInitializer = Box<dyn Fn(&mut Player)>;

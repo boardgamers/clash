@@ -1,58 +1,60 @@
+use std::fmt::Display;
+
 use crate::{
-    content::wonders,
-    player::Player,
-    resource_pile::ResourcePile,
-    wonder::{Wonder, WONDER_VICTORY_POINTS},
+    content::wonders, hexagon::HexagonPosition, player::Player, resource_pile::ResourcePile,
+    wonder::Wonder,
 };
 
 use serde::{Deserialize, Serialize};
-use Building::*;
 use MoodState::*;
 
-const MAX_CITY_SIZE: usize = 4;
-const CITY_PIECE_VICTORY_POINTS: f32 = 1.0;
-const BUILDING_COST: ResourcePile = ResourcePile {
-    wood: 1,
-    stone: 1,
-    gold: 0,
+const MAX_CITY_SIZE: u32 = 4;
+pub const BUILDING_COST: ResourcePile = ResourcePile {
     food: 1,
+    wood: 1,
+    ore: 1,
     ideas: 0,
+    gold: 0,
     mood_tokens: 0,
     culture_tokens: 0,
 };
 
 pub struct City {
-    pub buildings: Buildings,
+    pub city_pieces: CityPieces,
     pub mood_state: MoodState,
     pub is_activated: bool,
     pub player: String,
+    pub position: HexagonPosition,
 }
 
 impl City {
     pub fn from_data(data: CityData) -> Self {
         Self {
-            buildings: Buildings::from_data(data.buildings),
+            city_pieces: CityPieces::from_data(data.city_pieces),
             mood_state: data.mood_state,
             is_activated: data.is_activated,
             player: data.player,
+            position: data.position,
         }
     }
 
-    pub fn to_data(self) -> CityData {
+    pub fn data(self) -> CityData {
         CityData::new(
-            self.buildings.to_data(),
+            self.city_pieces.data(),
             self.mood_state,
             self.is_activated,
             self.player,
+            self.position,
         )
     }
 
-    pub fn new(player: String) -> Self {
+    pub fn new(player: String, position: HexagonPosition) -> Self {
         Self {
-            buildings: Buildings::default(),
+            city_pieces: CityPieces::default(),
             mood_state: Neutral,
             is_activated: false,
             player,
+            position,
         }
     }
 
@@ -63,64 +65,97 @@ impl City {
         self.is_activated = true;
     }
 
-    pub fn can_increase_size(&self, building: Building, player: &mut Player) -> bool {
-        if self.buildings.amount() == MAX_CITY_SIZE {
+    pub fn can_increase_size(&self, city_piece: &CityPiece, player: &mut Player) -> bool {
+        if self.city_pieces.amount() == MAX_CITY_SIZE {
             return false;
         }
-        if self.buildings.can_add_building(&building) {
+        if matches!(self.mood_state, Angry) {
             return false;
         }
-        let mut cost = match &building {
-            Wonder(wonder) => wonder.cost.clone(),
+        if self.city_pieces.can_add_city_piece(city_piece) {
+            return false;
+        }
+        let mut cost = match &city_piece {
+            CityPiece::Wonder(wonder) => wonder.cost.clone(),
             _ => BUILDING_COST,
         };
         player
             .events()
             .city_size_increase_cost
-            .trigger(&mut cost, self, &building);
+            .trigger(&mut cost, self, city_piece);
         player.resources().can_afford(&cost)
     }
 
-    pub fn increase_size(&mut self, building: Building, player: &mut Player) {
+    pub fn increase_size(&mut self, city_piece: CityPiece, player: &mut Player) {
+        self.activate();
         let mut events = player.take_events();
-        events.city_size_increase.trigger(player, self, &building);
+        events.city_size_increase.trigger(player, self, &city_piece);
         player.set_events(events);
-        let victory_points = match &building {
-            Wonder(_) => WONDER_VICTORY_POINTS,
-            _ => CITY_PIECE_VICTORY_POINTS,
-        };
-        player.gain_victory_points(victory_points);
-        match &building {
-            Academy => player.gain_resources(ResourcePile::ideas(2)),
-            Wonder(wonder) => (wonder.player_initializer)(player),
+        match &city_piece {
+            CityPiece::Academy => player.gain_resources(ResourcePile::ideas(2)),
+            CityPiece::Wonder(wonder) => {
+                (wonder.player_initializer)(player);
+                player.wonders.push(wonder.name.clone());
+                player.wonders_build += 1;
+            }
             _ => (),
         }
-        self.buildings.add_building(building, self.player.clone());
+        self.city_pieces
+            .add_city_piece(city_piece, self.player.clone());
     }
 
     pub fn conquer(&mut self, new_player: &mut Player, old_player: &mut Player) {
-        self.player = new_player.name.clone();
+        let new_player_name = new_player.name();
+        self.player = new_player_name.clone();
         self.mood_state = Angry;
-        if let Some(wonder) = &self.buildings.wonder {
+        for wonder in self.city_pieces.wonders.iter() {
             (wonder.player_deinitializer)(old_player);
             (wonder.player_initializer)(new_player);
-            new_player.gain_victory_points(WONDER_VICTORY_POINTS / 2.0 - 1.0);
-            old_player.loose_victory_points(WONDER_VICTORY_POINTS / 2.0 - 1.0);
+            let wonder = old_player.wonders.remove(
+                old_player
+                    .wonders
+                    .iter()
+                    .position(|player_wonder| player_wonder == &wonder.name)
+                    .expect("player should have conquered wonder"),
+            );
+            new_player.wonders.push(wonder);
         }
-        new_player.gain_victory_points(self.size() as f32);
-        old_player.loose_victory_points(self.size() as f32);
-        if self.buildings.obelisk.is_some() {
-            new_player.loose_victory_points(1.0);
-            old_player.gain_victory_points(1.0);
+        if let Some(player) = &self.city_pieces.obelisk {
+            if player == &old_player.name() {
+                old_player.influenced_buildings += 1;
+            }
         }
-        self.buildings.change_player(new_player.name.clone());
+        let mut previously_influenced_building = 0;
+        if self.city_pieces.academy == Some(new_player_name.clone()) {
+            previously_influenced_building += 1;
+        }
+        if self.city_pieces.market == Some(new_player_name.clone()) {
+            previously_influenced_building += 1;
+        }
+        if self.city_pieces.obelisk == Some(new_player_name.clone()) {
+            previously_influenced_building += 1;
+        }
+        if self.city_pieces.observatory == Some(new_player_name.clone()) {
+            previously_influenced_building += 1;
+        }
+        if self.city_pieces.fortress == Some(new_player_name.clone()) {
+            previously_influenced_building += 1;
+        }
+        if self.city_pieces.port == Some(new_player_name.clone()) {
+            previously_influenced_building += 1;
+        }
+        if self.city_pieces.temple == Some(new_player_name.clone()) {
+            previously_influenced_building += 1;
+        }
+        new_player.influenced_buildings -= previously_influenced_building;
+        self.city_pieces.change_player(new_player_name);
     }
 
-    pub fn size(&self) -> usize {
-        self.buildings.amount() + 1
+    pub fn size(&self) -> u32 {
+        self.city_pieces.amount() + 1
     }
 
-    pub fn mood_modified_size(&self) -> usize {
+    pub fn mood_modified_size(&self) -> u32 {
         match self.mood_state {
             Happy => self.size() + 1,
             Neutral => self.size(),
@@ -141,131 +176,223 @@ impl City {
             Neutral | Angry => Angry,
         }
     }
+
+    pub fn buildings(&self) -> u32 {
+        let mut value = 0;
+        if self.city_pieces.academy == Some(self.player.clone()) {
+            value += 1;
+        }
+        if self.city_pieces.market == Some(self.player.clone()) {
+            value += 1;
+        }
+        if self.city_pieces.obelisk == Some(self.player.clone()) {
+            value += 1;
+        }
+        if self.city_pieces.observatory == Some(self.player.clone()) {
+            value += 1;
+        }
+        if self.city_pieces.fortress == Some(self.player.clone()) {
+            value += 1;
+        }
+        if self.city_pieces.port == Some(self.player.clone()) {
+            value += 1;
+        }
+        if self.city_pieces.temple == Some(self.player.clone()) {
+            value += 1;
+        }
+        value
+    }
+
+    pub fn influence_culture(&mut self, player: &mut Player, building: CityPiece) {
+        todo!()
+    }
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct CityData {
-    buildings: BuildingsData,
+    city_pieces: CityPiecesData,
     mood_state: MoodState,
     is_activated: bool,
     player: String,
+    position: HexagonPosition,
 }
 
 impl CityData {
     pub fn new(
-        buildings: BuildingsData,
+        city_pieces: CityPiecesData,
         mood_state: MoodState,
         is_activated: bool,
         player: String,
+        position: HexagonPosition,
     ) -> Self {
         Self {
-            buildings,
+            city_pieces,
             mood_state,
             is_activated,
             player,
+            position,
         }
     }
 }
 
-pub enum Building {
+pub enum CityPiece {
     Academy,
     Market,
     Obelisk,
-    Apothecary,
+    Observatory,
     Fortress,
     Port,
     Temple,
     Wonder(Wonder),
 }
 
+impl CityPiece {
+    pub fn json(&self) -> String {
+        serde_json::to_string(&self.to_data()).expect("city piece data should be valid json")
+    }
+
+    pub fn from_json(json: &str) -> Self {
+        Self::from_data(
+            serde_json::from_str(json)
+                .as_ref()
+                .expect("API call should receive valid city piece data json"),
+        )
+    }
+
+    fn to_data(&self) -> CityPieceData {
+        match self {
+            Self::Academy => CityPieceData::Academy,
+            Self::Market => CityPieceData::Market,
+            Self::Obelisk => CityPieceData::Obelisk,
+            Self::Observatory => CityPieceData::Observatory,
+            Self::Fortress => CityPieceData::Fortress,
+            Self::Port => CityPieceData::Port,
+            Self::Temple => CityPieceData::Temple,
+            Self::Wonder(wonder) => CityPieceData::Wonder(wonder.name.clone()),
+        }
+    }
+
+    pub fn from_data(data: &CityPieceData) -> Self {
+        match data {
+            CityPieceData::Academy => Self::Academy,
+            CityPieceData::Market => Self::Market,
+            CityPieceData::Obelisk => Self::Obelisk,
+            CityPieceData::Observatory => Self::Observatory,
+            CityPieceData::Fortress => Self::Fortress,
+            CityPieceData::Port => Self::Port,
+            CityPieceData::Temple => Self::Temple,
+            CityPieceData::Wonder(name) => Self::Wonder(
+                wonders::get_wonder_by_name(name)
+                    .expect("city piece data should have a valid wonder name"),
+            ),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum CityPieceData {
+    Academy,
+    Market,
+    Obelisk,
+    Observatory,
+    Fortress,
+    Port,
+    Temple,
+    Wonder(String),
+}
+
+impl Display for CityPieceData {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Academy => "a academy",
+                Self::Market => "a market",
+                Self::Obelisk => "an obelisk",
+                Self::Observatory => "an observatory",
+                Self::Fortress => "a fortress",
+                Self::Port => "a port",
+                Self::Temple => "a temple",
+                Self::Wonder(name) => return write!(f, "the wonder \"{name}\""),
+            }
+        )
+    }
+}
+
 #[derive(Default)]
-pub struct Buildings {
+pub struct CityPieces {
     pub academy: Option<String>,
     pub market: Option<String>,
     pub obelisk: Option<String>,
-    pub apothecary: Option<String>,
+    pub observatory: Option<String>,
     pub fortress: Option<String>,
     pub port: Option<String>,
     pub temple: Option<String>,
-    pub wonder: Option<Wonder>,
+    pub wonders: Vec<Wonder>,
 }
 
-impl Buildings {
-    fn from_data(data: BuildingsData) -> Self {
-        Self::new(
-            data.academy,
-            data.market,
-            data.obelisk,
-            data.apothecary,
-            data.fortress,
-            data.port,
-            data.temple,
-            data.wonder.map(wonders::get_wonder_by_name),
-        )
-    }
-
-    fn to_data(self) -> BuildingsData {
-        BuildingsData::new(
-            self.academy,
-            self.market,
-            self.obelisk,
-            self.apothecary,
-            self.fortress,
-            self.port,
-            self.temple,
-            self.wonder.map(|wonder| wonder.name),
-        )
-    }
-
-    fn new(
-        academy: Option<String>,
-        market: Option<String>,
-        obelisk: Option<String>,
-        apothecary: Option<String>,
-        fortress: Option<String>,
-        port: Option<String>,
-        temple: Option<String>,
-        wonder: Option<Wonder>,
-    ) -> Self {
+impl CityPieces {
+    fn from_data(data: CityPiecesData) -> Self {
         Self {
-            academy,
-            market,
-            obelisk,
-            apothecary,
-            fortress,
-            port,
-            temple,
-            wonder,
+            academy: data.academy,
+            market: data.market,
+            obelisk: data.obelisk,
+            observatory: data.observatory,
+            fortress: data.fortress,
+            port: data.port,
+            temple: data.temple,
+            wonders: data
+                .wonders
+                .iter()
+                .map(|wonder| {
+                    wonders::get_wonder_by_name(&wonder)
+                        .expect("city piece data should contain a valid wonder")
+                })
+                .collect(),
         }
     }
 
-    fn can_add_building(&self, building: &Building) -> bool {
-        match building {
-            Academy => self.academy.is_none(),
-            Market => self.market.is_none(),
-            Obelisk => self.obelisk.is_none(),
-            Apothecary => self.apothecary.is_none(),
-            Fortress => self.fortress.is_none(),
-            Port => self.port.is_none(),
-            Temple => self.temple.is_none(),
-            Wonder(_) => self.wonder.is_none(),
+    fn data(self) -> CityPiecesData {
+        CityPiecesData {
+            academy: self.academy,
+            market: self.market,
+            obelisk: self.obelisk,
+            observatory: self.observatory,
+            fortress: self.fortress,
+            port: self.port,
+            temple: self.temple,
+            wonders: self.wonders.into_iter().map(|wonder| wonder.name).collect(),
         }
     }
 
-    fn add_building(&mut self, building: Building, player: String) {
-        match building {
-            Academy => self.academy = Some(player),
-            Market => self.market = Some(player),
-            Obelisk => self.obelisk = Some(player),
-            Apothecary => self.apothecary = Some(player),
-            Fortress => self.fortress = Some(player),
-            Port => self.port = Some(player),
-            Temple => self.temple = Some(player),
-            Wonder(wonder) => self.wonder = Some(wonder),
+    fn can_add_city_piece(&self, city_piece: &CityPiece) -> bool {
+        match city_piece {
+            CityPiece::Academy => self.academy.is_none(),
+            CityPiece::Market => self.market.is_none(),
+            CityPiece::Obelisk => self.obelisk.is_none(),
+            CityPiece::Observatory => self.observatory.is_none(),
+            CityPiece::Fortress => self.fortress.is_none(),
+            CityPiece::Port => self.port.is_none(),
+            CityPiece::Temple => self.temple.is_none(),
+            CityPiece::Wonder(_) => true,
         }
     }
 
-    fn amount(&self) -> usize {
+    fn add_city_piece(&mut self, city_piece: CityPiece, player: String) {
+        match city_piece {
+            CityPiece::Academy => self.academy = Some(player),
+            CityPiece::Market => self.market = Some(player),
+            CityPiece::Obelisk => self.obelisk = Some(player),
+            CityPiece::Observatory => self.observatory = Some(player),
+            CityPiece::Fortress => self.fortress = Some(player),
+            CityPiece::Port => self.port = Some(player),
+            CityPiece::Temple => self.temple = Some(player),
+            CityPiece::Wonder(wonder) => self.wonders.push(wonder),
+        }
+    }
+
+    fn amount(&self) -> u32 {
         let mut amount = 0;
         if self.academy.is_some() {
             amount += 1;
@@ -276,7 +403,7 @@ impl Buildings {
         if self.obelisk.is_some() {
             amount += 1;
         }
-        if self.apothecary.is_some() {
+        if self.observatory.is_some() {
             amount += 1;
         }
         if self.fortress.is_some() {
@@ -288,9 +415,7 @@ impl Buildings {
         if self.temple.is_some() {
             amount += 1;
         }
-        if self.wonder.is_some() {
-            amount += 1;
-        }
+        amount += self.wonders.len() as u32;
         amount
     }
 
@@ -301,8 +426,8 @@ impl Buildings {
         if let Some(market) = self.market.as_mut() {
             *market = new_player.clone();
         }
-        if let Some(apothecary) = self.apothecary.as_mut() {
-            *apothecary = new_player.clone();
+        if let Some(observatory) = self.observatory.as_mut() {
+            *observatory = new_player.clone();
         }
         if let Some(fortress) = self.fortress.as_mut() {
             *fortress = new_player.clone();
@@ -317,39 +442,15 @@ impl Buildings {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct BuildingsData {
+pub struct CityPiecesData {
     academy: Option<String>,
     market: Option<String>,
     obelisk: Option<String>,
-    apothecary: Option<String>,
+    observatory: Option<String>,
     fortress: Option<String>,
     port: Option<String>,
     temple: Option<String>,
-    wonder: Option<String>,
-}
-
-impl BuildingsData {
-    pub fn new(
-        academy: Option<String>,
-        market: Option<String>,
-        obelisk: Option<String>,
-        apothecary: Option<String>,
-        fortress: Option<String>,
-        port: Option<String>,
-        temple: Option<String>,
-        wonder: Option<String>,
-    ) -> Self {
-        Self {
-            academy,
-            market,
-            obelisk,
-            apothecary,
-            fortress,
-            port,
-            temple,
-            wonder,
-        }
-    }
+    wonders: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize)]

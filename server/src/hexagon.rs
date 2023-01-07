@@ -1,24 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::landmark::Landmark;
-
-pub struct Hexagon {
-    pub position: HexagonPosition,
-    pub landmark: Landmark,
-    pub discovered: bool,
-}
-
-impl Hexagon {
-    pub fn new(position: HexagonPosition, landmark: Landmark) -> Hexagon {
-        Hexagon {
-            position,
-            landmark,
-            discovered: false,
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub struct HexagonPosition {
     pub x: i32,
     pub y: i32,
@@ -38,6 +20,11 @@ impl HexagonPosition {
     }
 }
 
-pub struct Tile {
-    hexagons: Vec<Hexagon>,
+pub enum Landmark {
+    Barren,
+    Mountain,
+    Fertile,
+    Forest,
+    Unusable,
+    Water,
 }

@@ -1,17 +1,18 @@
 use std::{
     cmp,
-    ops::{Add, AddAssign, SubAssign},
+    fmt::Display,
+    ops::{Add, AddAssign, Mul, SubAssign},
 };
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Serialize, Deserialize)]
+#[derive(Default, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ResourcePile {
-    pub wood: u32,
-    pub stone: u32,
-    pub gold: u32,
     pub food: u32,
+    pub wood: u32,
+    pub ore: u32,
     pub ideas: u32,
+    pub gold: i32,
     pub mood_tokens: u32,
     pub culture_tokens: u32,
 }
@@ -20,40 +21,40 @@ impl ResourcePile {
     pub fn new(
         food: u32,
         wood: u32,
-        stone: u32,
+        ore: u32,
         ideas: u32,
-        gold: u32,
+        gold: i32,
         mood_tokens: u32,
         culture_tokens: u32,
     ) -> Self {
         Self {
-            wood,
-            stone,
-            gold,
             food,
+            wood,
+            ore,
             ideas,
+            gold,
             mood_tokens,
             culture_tokens,
         }
     }
 
-    pub fn wood(amount: u32) -> Self {
+    pub fn food(amount: u32) -> Self {
         Self::new(amount, 0, 0, 0, 0, 0, 0)
     }
 
-    pub fn stone(amount: u32) -> Self {
+    pub fn wood(amount: u32) -> Self {
         Self::new(0, amount, 0, 0, 0, 0, 0)
     }
 
-    pub fn gold(amount: u32) -> Self {
+    pub fn ore(amount: u32) -> Self {
         Self::new(0, 0, amount, 0, 0, 0, 0)
     }
 
-    pub fn food(amount: u32) -> Self {
+    pub fn ideas(amount: u32) -> Self {
         Self::new(0, 0, 0, amount, 0, 0, 0)
     }
 
-    pub fn ideas(amount: u32) -> Self {
+    pub fn gold(amount: i32) -> Self {
         Self::new(0, 0, 0, 0, amount, 0, 0)
     }
 
@@ -67,35 +68,38 @@ impl ResourcePile {
 
     pub fn can_afford(&self, other: &Self) -> bool {
         let mut resource_deficit = 0;
+        if other.food > self.food {
+            resource_deficit += other.food - self.food;
+        }
         if other.wood > self.wood {
             resource_deficit += other.wood - self.wood;
         }
-        if other.stone > self.stone {
-            resource_deficit += other.stone - self.stone;
-        }
-        if other.food > self.food {
-            resource_deficit += other.food - self.food;
+        if other.ore > self.ore {
+            resource_deficit += other.ore - self.ore;
         }
         if other.ideas > self.ideas {
             resource_deficit += other.ideas - self.ideas;
         }
-        self.gold >= other.gold + resource_deficit
+        self.gold >= other.gold + resource_deficit as i32
             && self.mood_tokens >= other.mood_tokens
             && self.culture_tokens >= other.culture_tokens
     }
 
     pub fn apply_resource_limit(&mut self, limit: &ResourcePile) {
-        if self.wood > limit.wood {
-            self.wood = limit.wood;
-        }
-        if self.stone > limit.stone {
-            self.stone = limit.stone;
-        }
         if self.food > limit.food {
             self.food = limit.food;
         }
+        if self.wood > limit.wood {
+            self.wood = limit.wood;
+        }
+        if self.ore > limit.ore {
+            self.ore = limit.ore;
+        }
         if self.ideas > limit.ideas {
             self.ideas = limit.ideas;
+        }
+        if self.gold > limit.gold {
+            self.gold = limit.gold;
         }
         if self.mood_tokens > limit.mood_tokens {
             self.mood_tokens = limit.mood_tokens;
@@ -104,15 +108,46 @@ impl ResourcePile {
             self.culture_tokens = limit.culture_tokens;
         }
     }
+
+    //this function assumes that `budget` can afford `self`
+    pub fn get_payment_options(&self, budged: &Self) -> PaymentOptions {
+        let mut gold_left = budged.gold as u32;
+        let mut gold_cost = self.gold;
+        let mut jokers_left = 0;
+        if gold_cost >= 0 {
+            gold_left -= gold_cost as u32;
+        } else {
+            jokers_left = (-gold_cost) as u32;
+            gold_cost = 0;
+        }
+        if self.wood > budged.wood {
+            let joker_cost = self.wood - budged.wood;
+            if joker_cost > jokers_left {
+                gold_left -= joker_cost - jokers_left;
+                gold_cost += (joker_cost - jokers_left) as i32;
+            }
+            jokers_left = cmp::max(jokers_left - joker_cost, 0);
+        }
+        let default = Self::new(
+            cmp::min(self.food, budged.food),
+            cmp::min(self.wood, budged.wood),
+            cmp::min(self.ore, budged.ore),
+            cmp::min(self.ideas, budged.ideas),
+            gold_cost,
+            self.mood_tokens,
+            self.culture_tokens,
+        );
+        PaymentOptions::new(default, gold_left, jokers_left)
+    }
 }
 
 impl AddAssign for ResourcePile {
     fn add_assign(&mut self, rhs: Self) {
-        self.wood += rhs.wood;
-        self.stone += rhs.stone;
-        self.gold += rhs.gold;
         self.food += rhs.food;
+        self.wood += rhs.wood;
+        self.ore += rhs.ore;
         self.ideas += rhs.ideas;
+        self.gold += rhs.gold;
         self.mood_tokens += rhs.mood_tokens;
         self.culture_tokens += rhs.culture_tokens;
     }
@@ -123,11 +158,11 @@ impl Add for ResourcePile {
 
     fn add(self, rhs: Self) -> Self::Output {
         Self::new(
-            self.wood + rhs.wood,
-            self.stone + rhs.stone,
-            self.gold + rhs.gold,
             self.food + rhs.food,
+            self.wood + rhs.wood,
+            self.ore + rhs.ore,
             self.ideas + rhs.ideas,
+            self.gold + rhs.gold,
             self.mood_tokens + rhs.mood_tokens,
             self.culture_tokens + rhs.culture_tokens,
         )
@@ -136,12 +171,84 @@ impl Add for ResourcePile {
 
 impl SubAssign for ResourcePile {
     fn sub_assign(&mut self, rhs: Self) {
-        self.wood = cmp::max(self.wood - rhs.wood, 0);
-        self.stone = cmp::max(self.stone - rhs.stone, 0);
-        self.gold = cmp::max(self.gold - rhs.gold, 0);
         self.food = cmp::max(self.food - rhs.food, 0);
+        self.wood = cmp::max(self.wood - rhs.wood, 0);
+        self.ore = cmp::max(self.ore - rhs.ore, 0);
         self.ideas = cmp::max(self.ideas - rhs.ideas, 0);
+        self.gold = cmp::max(self.gold - rhs.gold, 0);
         self.mood_tokens = cmp::max(self.mood_tokens - rhs.mood_tokens, 0);
         self.culture_tokens = cmp::max(self.culture_tokens - rhs.culture_tokens, 0);
+    }
+}
+
+impl Mul<u32> for ResourcePile {
+    type Output = Self;
+
+    fn mul(self, rhs: u32) -> Self::Output {
+        Self::new(
+            self.food * rhs,
+            self.wood * rhs,
+            self.ore * rhs,
+            self.ideas * rhs,
+            self.gold * rhs as i32,
+            self.mood_tokens * rhs,
+            self.culture_tokens * rhs,
+        )
+    }
+}
+
+impl Display for ResourcePile {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut resources = Vec::new();
+        if self.food > 0 {
+            resources.push(format!("{} food", self.food));
+        }
+        if self.wood > 0 {
+            resources.push(format!("{} wood", self.wood));
+        }
+        if self.ore > 0 {
+            resources.push(format!("{} ore", self.ore));
+        }
+        if self.ideas > 0 {
+            resources.push(format!("{} ideas", self.ideas));
+        }
+        if self.gold > 0 {
+            resources.push(format!("{} gold", self.gold));
+        }
+        if self.mood_tokens > 0 {
+            resources.push(format!("{} mood tokens", self.mood_tokens));
+        }
+        if self.culture_tokens > 0 {
+            resources.push(format!("{} culture tokens", self.culture_tokens));
+        }
+        match &resources[..] {
+            [] => write!(f, "nothing"),
+            [resource] => write!(f, "{resource}"),
+            _ => write!(
+                f,
+                "{} and {}",
+                &resources[..resources.len() - 1].join(", "),
+                resources
+                    .last()
+                    .as_ref()
+                    .expect("resources should have a length greater or equal to 2")
+            ),
+        }
+    }
+}
+
+pub struct PaymentOptions {
+    default: ResourcePile,
+    gold_left: u32,
+    jokers_left: u32,
+}
+
+impl PaymentOptions {
+    fn new(default: ResourcePile, gold_left: u32, jokers_left: u32) -> Self {
+        Self {
+            default,
+            gold_left,
+            jokers_left,
+        }
     }
 }

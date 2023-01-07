@@ -4,6 +4,7 @@ use crate::player::{self, PlayerInitializer, PlayerSetup};
 
 pub struct SpecialTechnology {
     pub name: String,
+    pub description: String,
     pub required_technology: String,
     pub player_initializer: PlayerInitializer,
     pub player_deinitializer: PlayerInitializer,
@@ -16,12 +17,14 @@ impl SpecialTechnology {
 
     fn new(
         name: String,
+        description: String,
         required_technology: String,
         player_initializer: PlayerInitializer,
         player_deinitializer: PlayerInitializer,
     ) -> Self {
         Self {
             name,
+            description,
             required_technology,
             player_initializer,
             player_deinitializer,
@@ -31,6 +34,7 @@ impl SpecialTechnology {
 
 pub struct SpecialTechnologyBuilder {
     name: String,
+    descriptions: Vec<String>,
     required_technology: String,
     initializers: Vec<PlayerInitializer>,
     deinitializers: Vec<PlayerInitializer>,
@@ -40,10 +44,16 @@ impl SpecialTechnologyBuilder {
     fn new(name: String, required_technology: String) -> Self {
         Self {
             name,
+            descriptions: Vec::new(),
             required_technology,
             initializers: Vec::new(),
             deinitializers: Vec::new(),
         }
+    }
+
+    pub fn add_description(mut self, description: String) -> Self {
+        self.descriptions.push(description);
+        self
     }
 
     pub fn build(self) -> SpecialTechnology {
@@ -51,6 +61,7 @@ impl SpecialTechnologyBuilder {
         let deinitializer = player::join_player_initializers(self.deinitializers);
         SpecialTechnology::new(
             self.name,
+            String::from("● ") + &self.descriptions.join("\n● "),
             self.required_technology,
             initializer,
             deinitializer,

@@ -1,9 +1,9 @@
 use crate::wonder::Wonder;
 
 pub fn get_wonders() -> Vec<Wonder> {
-    todo!()
+    vec![]
 }
 
-pub fn get_wonder_by_name(name: String) -> Wonder {
-    todo!()
+pub fn get_wonder_by_name(name: &str) -> Option<Wonder> {
+    get_wonders().into_iter().find(|wonder| wonder.name == name)
 }
