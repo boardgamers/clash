@@ -10,6 +10,8 @@ mod hexagon;
 mod leader;
 mod player;
 mod resource_pile;
+#[cfg(test)]
+mod resource_pile_tests;
 mod special_technology;
 mod technology;
 mod wonder;
