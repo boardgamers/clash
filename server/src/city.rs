@@ -82,8 +82,24 @@ impl City {
         self.city_pieces.set_building(building, self.player.clone());
     }
 
-    pub fn can_build_wonder(&self, wonder: &Wonder, player: &Player) {
-        todo!()
+    pub fn can_build_wonder(&self, wonder: &Wonder, player: &Player) -> bool {
+        if self.city_pieces.amount() == MAX_CITY_SIZE {
+            return false;
+        }
+        if !matches!(self.mood_state, Happy) {
+            return false;
+        }
+        let cost = player.wonder_cost(wonder, self);
+        if !player.resources().can_afford(&cost) {
+            return false;
+        }
+        for advance in wonder.required_advances.iter() {
+            if !player.has_advance(advance) {
+                return false;
+            }
+        }
+        //todo! use wonder's placement checker
+        true
     }
 
     pub fn build_wonder(&mut self, wonder: Wonder, player: &mut Player) {

@@ -17,7 +17,7 @@ use crate::{
     leader::Leader,
     resource_pile::ResourcePile,
     special_advance::SpecialAdvance,
-    advance::Advance,
+    advance::Advance, wonder::Wonder,
 };
 pub const BUILDING_COST: ResourcePile = ResourcePile {
     food: 1,
@@ -377,6 +377,12 @@ impl Player {
         cost
     }
 
+    pub fn wonder_cost(&self, wonder: &Wonder, city: &City) -> ResourcePile {
+        let mut cost = wonder.cost.clone();
+        self.events().wonder_cost.trigger(&mut cost, city, wonder);
+        cost
+    }
+
     pub fn get_city(&mut self, position: &Position) -> Option<&mut City> {
         let position = self
             .cities
@@ -430,6 +436,7 @@ pub struct PlayerData {
 pub struct PlayerEvents {
     pub city_size_increase: EventMut<Player, City, Building>,
     pub building_cost: EventMut<ResourcePile, City, Building>,
+    pub wonder_cost: EventMut<ResourcePile, City, Wonder>,
 }
 
 pub type PlayerInitializer = Box<dyn Fn(&mut Player)>;
