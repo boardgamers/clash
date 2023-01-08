@@ -1,5 +1,6 @@
 use crate::{leader::Leader, special_technology::SpecialTechnology};
 
+//todo! add optional special starting tile
 pub struct Civilization {
     pub name: String,
     pub special_technologies: Vec<SpecialTechnology>,

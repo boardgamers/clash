@@ -6,7 +6,7 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Default, Clone, Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct ResourcePile {
     pub food: u32,
     pub wood: u32,
@@ -120,13 +120,37 @@ impl ResourcePile {
             jokers_left = (-gold_cost) as u32;
             gold_cost = 0;
         }
+        if self.food > budged.food {
+            let joker_cost = self.food - budged.food;
+            if joker_cost > jokers_left {
+                gold_left -= joker_cost - jokers_left;
+                gold_cost += (joker_cost - jokers_left) as i32;
+            }
+            jokers_left = jokers_left.saturating_sub(joker_cost);
+        }
         if self.wood > budged.wood {
             let joker_cost = self.wood - budged.wood;
             if joker_cost > jokers_left {
                 gold_left -= joker_cost - jokers_left;
                 gold_cost += (joker_cost - jokers_left) as i32;
             }
-            jokers_left = cmp::max(jokers_left - joker_cost, 0);
+            jokers_left = jokers_left.saturating_sub(joker_cost);
+        }
+        if self.ore > budged.ore {
+            let joker_cost = self.ore - budged.ore;
+            if joker_cost > jokers_left {
+                gold_left -= joker_cost - jokers_left;
+                gold_cost += (joker_cost - jokers_left) as i32;
+            }
+            jokers_left = jokers_left.saturating_sub(joker_cost);
+        }
+        if self.ideas > budged.ideas {
+            let joker_cost = self.ideas - budged.ideas;
+            if joker_cost > jokers_left {
+                gold_left -= joker_cost - jokers_left;
+                gold_cost += (joker_cost - jokers_left) as i32;
+            }
+            jokers_left = jokers_left.saturating_sub(joker_cost);
         }
         let default = Self::new(
             cmp::min(self.food, budged.food),
@@ -171,13 +195,13 @@ impl Add for ResourcePile {
 
 impl SubAssign for ResourcePile {
     fn sub_assign(&mut self, rhs: Self) {
-        self.food = cmp::max(self.food - rhs.food, 0);
-        self.wood = cmp::max(self.wood - rhs.wood, 0);
-        self.ore = cmp::max(self.ore - rhs.ore, 0);
-        self.ideas = cmp::max(self.ideas - rhs.ideas, 0);
-        self.gold = cmp::max(self.gold - rhs.gold, 0);
-        self.mood_tokens = cmp::max(self.mood_tokens - rhs.mood_tokens, 0);
-        self.culture_tokens = cmp::max(self.culture_tokens - rhs.culture_tokens, 0);
+        self.food = self.food.saturating_sub(rhs.food);
+        self.wood = self.wood.saturating_sub(rhs.wood);
+        self.ore = self.ore.saturating_sub(rhs.ore);
+        self.ideas = self.ideas.saturating_sub(rhs.ideas);
+        self.gold = self.gold - rhs.gold;
+        self.mood_tokens = self.mood_tokens.saturating_sub(rhs.mood_tokens);
+        self.culture_tokens = self.culture_tokens.saturating_sub(rhs.culture_tokens);
     }
 }
 
@@ -210,16 +234,37 @@ impl Display for ResourcePile {
             resources.push(format!("{} ore", self.ore));
         }
         if self.ideas > 0 {
-            resources.push(format!("{} ideas", self.ideas));
+            resources.push(format!(
+                "{} {}",
+                self.ideas,
+                match self.ideas == 1 {
+                    true => "idea",
+                    false => "ideas",
+                }
+            ));
         }
         if self.gold > 0 {
             resources.push(format!("{} gold", self.gold));
         }
         if self.mood_tokens > 0 {
-            resources.push(format!("{} mood tokens", self.mood_tokens));
+            resources.push(format!(
+                "{} {}",
+                self.mood_tokens,
+                match self.mood_tokens == 1 {
+                    true => "mood token",
+                    false => "mood tokens",
+                }
+            ));
         }
         if self.culture_tokens > 0 {
-            resources.push(format!("{} culture tokens", self.culture_tokens));
+            resources.push(format!(
+                "{} {}",
+                self.culture_tokens,
+                match self.culture_tokens == 1 {
+                    true => "culture token",
+                    false => "culture tokens",
+                }
+            ));
         }
         match &resources[..] {
             [] => write!(f, "nothing"),
@@ -237,6 +282,7 @@ impl Display for ResourcePile {
     }
 }
 
+#[derive(PartialEq, Eq, Debug)]
 pub struct PaymentOptions {
     default: ResourcePile,
     gold_left: u32,
@@ -244,7 +290,7 @@ pub struct PaymentOptions {
 }
 
 impl PaymentOptions {
-    fn new(default: ResourcePile, gold_left: u32, jokers_left: u32) -> Self {
+    pub fn new(default: ResourcePile, gold_left: u32, jokers_left: u32) -> Self {
         Self {
             default,
             gold_left,

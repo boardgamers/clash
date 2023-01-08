@@ -8,7 +8,7 @@ use std::{
 
 use crate::{
     army::Unit,
-    city::{City, CityData, CityPiece},
+    city::{Building, City, CityData},
     civilization::Civilization,
     content::{civilizations, technologies},
     events::EventMut,
@@ -227,7 +227,7 @@ impl Player {
             .any(|research_technology| research_technology == technology)
     }
 
-    pub fn research_technology(&mut self, technology: &String) {
+    pub fn research_technology(&mut self, technology: &str) {
         let technology =
             technologies::get_technology_by_name(technology).expect("technology should exist");
         if let Some(advance_bonus) = &technology.advance_bonus {
@@ -272,7 +272,7 @@ impl Player {
     pub fn victory_points(&self) -> f32 {
         let mut victory_points = 0.0;
         for city in self.cities.iter() {
-            victory_points += city.buildings() as f32 * BUILDING_VICTORY_POINTS;
+            victory_points += city.uninfluenced_buildings() as f32 * BUILDING_VICTORY_POINTS;
         }
         victory_points += self.influenced_buildings as f32 * BUILDING_VICTORY_POINTS;
         victory_points += (self.researched_technologies.len()
@@ -315,12 +315,12 @@ impl Player {
     pub fn compare_score(&self, other: &Self) -> Ordering {
         let mut building_score = 0;
         for city in self.cities.iter() {
-            building_score += city.buildings();
+            building_score += city.uninfluenced_buildings();
         }
         building_score += self.influenced_buildings;
         let mut other_building_score = 0;
         for city in self.cities.iter() {
-            other_building_score += city.buildings();
+            other_building_score += city.uninfluenced_buildings();
         }
         other_building_score += self.influenced_buildings;
         match building_score.cmp(&other_building_score) {
@@ -381,8 +381,8 @@ pub struct PlayerData {
 
 #[derive(Default)]
 pub struct PlayerEvents {
-    pub city_size_increase: EventMut<Player, City, CityPiece>,
-    pub city_size_increase_cost: EventMut<ResourcePile, City, CityPiece>,
+    pub city_size_increase: EventMut<Player, City, Building>,
+    pub city_size_increase_cost: EventMut<ResourcePile, City, Building>,
 }
 
 pub type PlayerInitializer = Box<dyn Fn(&mut Player)>;

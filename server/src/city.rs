@@ -65,43 +65,33 @@ impl City {
         self.is_activated = true;
     }
 
-    pub fn can_increase_size(&self, city_piece: &CityPiece, player: &mut Player) -> bool {
+    pub fn can_increase_size(&self, building: &Building, player: &mut Player) -> bool {
         if self.city_pieces.amount() == MAX_CITY_SIZE {
             return false;
         }
         if matches!(self.mood_state, Angry) {
             return false;
         }
-        if self.city_pieces.can_add_city_piece(city_piece) {
+        if self.city_pieces.can_add_building(building) {
             return false;
         }
-        let mut cost = match &city_piece {
-            CityPiece::Wonder(wonder) => wonder.cost.clone(),
-            _ => BUILDING_COST,
-        };
+        let mut cost = BUILDING_COST;
         player
             .events()
             .city_size_increase_cost
-            .trigger(&mut cost, self, city_piece);
+            .trigger(&mut cost, self, building);
         player.resources().can_afford(&cost)
     }
 
-    pub fn increase_size(&mut self, city_piece: CityPiece, player: &mut Player) {
+    pub fn increase_size(&mut self, building: Building, player: &mut Player) {
         self.activate();
         let mut events = player.take_events();
-        events.city_size_increase.trigger(player, self, &city_piece);
+        events.city_size_increase.trigger(player, self, &building);
         player.set_events(events);
-        match &city_piece {
-            CityPiece::Academy => player.gain_resources(ResourcePile::ideas(2)),
-            CityPiece::Wonder(wonder) => {
-                (wonder.player_initializer)(player);
-                player.wonders.push(wonder.name.clone());
-                player.wonders_build += 1;
-            }
-            _ => (),
+        if let Building::Academy = &building {
+            player.gain_resources(ResourcePile::ideas(2))
         }
-        self.city_pieces
-            .add_city_piece(city_piece, self.player.clone());
+        self.city_pieces.add_building(building, self.player.clone());
     }
 
     pub fn conquer(&mut self, new_player: &mut Player, old_player: &mut Player) {
@@ -177,7 +167,7 @@ impl City {
         }
     }
 
-    pub fn buildings(&self) -> u32 {
+    pub fn uninfluenced_buildings(&self) -> u32 {
         let mut value = 0;
         if self.city_pieces.academy == Some(self.player.clone()) {
             value += 1;
@@ -203,8 +193,18 @@ impl City {
         value
     }
 
-    pub fn influence_culture(&mut self, player: &mut Player, building: CityPiece) {
-        todo!()
+    //this function assumes action is legal
+    pub fn influence_culture(&mut self, influencer: &mut Player, building: &Building) {
+        match building {
+            Building::Academy => self.city_pieces.academy = Some(influencer.name()),
+            Building::Market => self.city_pieces.market = Some(influencer.name()),
+            Building::Observatory => self.city_pieces.observatory = Some(influencer.name()),
+            Building::Fortress => self.city_pieces.fortress = Some(influencer.name()),
+            Building::Port => self.city_pieces.port = Some(influencer.name()),
+            Building::Temple => self.city_pieces.temple = Some(influencer.name()),
+            Building::Obelisk => unreachable!("obelisks cannot be culturally influenced"),
+        }
+        influencer.influenced_buildings += 1;
     }
 }
 
@@ -235,7 +235,7 @@ impl CityData {
     }
 }
 
-pub enum CityPiece {
+pub enum Building {
     Academy,
     Market,
     Obelisk,
@@ -243,10 +243,9 @@ pub enum CityPiece {
     Fortress,
     Port,
     Temple,
-    Wonder(Wonder),
 }
 
-impl CityPiece {
+impl Building {
     pub fn json(&self) -> String {
         serde_json::to_string(&self.to_data()).expect("city piece data should be valid json")
     }
@@ -259,38 +258,33 @@ impl CityPiece {
         )
     }
 
-    fn to_data(&self) -> CityPieceData {
+    fn to_data(&self) -> BuildingData {
         match self {
-            Self::Academy => CityPieceData::Academy,
-            Self::Market => CityPieceData::Market,
-            Self::Obelisk => CityPieceData::Obelisk,
-            Self::Observatory => CityPieceData::Observatory,
-            Self::Fortress => CityPieceData::Fortress,
-            Self::Port => CityPieceData::Port,
-            Self::Temple => CityPieceData::Temple,
-            Self::Wonder(wonder) => CityPieceData::Wonder(wonder.name.clone()),
+            Self::Academy => BuildingData::Academy,
+            Self::Market => BuildingData::Market,
+            Self::Obelisk => BuildingData::Obelisk,
+            Self::Observatory => BuildingData::Observatory,
+            Self::Fortress => BuildingData::Fortress,
+            Self::Port => BuildingData::Port,
+            Self::Temple => BuildingData::Temple,
         }
     }
 
-    pub fn from_data(data: &CityPieceData) -> Self {
+    pub fn from_data(data: &BuildingData) -> Self {
         match data {
-            CityPieceData::Academy => Self::Academy,
-            CityPieceData::Market => Self::Market,
-            CityPieceData::Obelisk => Self::Obelisk,
-            CityPieceData::Observatory => Self::Observatory,
-            CityPieceData::Fortress => Self::Fortress,
-            CityPieceData::Port => Self::Port,
-            CityPieceData::Temple => Self::Temple,
-            CityPieceData::Wonder(name) => Self::Wonder(
-                wonders::get_wonder_by_name(name)
-                    .expect("city piece data should have a valid wonder name"),
-            ),
+            BuildingData::Academy => Self::Academy,
+            BuildingData::Market => Self::Market,
+            BuildingData::Obelisk => Self::Obelisk,
+            BuildingData::Observatory => Self::Observatory,
+            BuildingData::Fortress => Self::Fortress,
+            BuildingData::Port => Self::Port,
+            BuildingData::Temple => Self::Temple,
         }
     }
 }
 
 #[derive(Serialize, Deserialize)]
-pub enum CityPieceData {
+pub enum BuildingData {
     Academy,
     Market,
     Obelisk,
@@ -298,10 +292,9 @@ pub enum CityPieceData {
     Fortress,
     Port,
     Temple,
-    Wonder(String),
 }
 
-impl Display for CityPieceData {
+impl Display for BuildingData {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -314,7 +307,6 @@ impl Display for CityPieceData {
                 Self::Fortress => "a fortress",
                 Self::Port => "a port",
                 Self::Temple => "a temple",
-                Self::Wonder(name) => return write!(f, "the wonder \"{name}\""),
             }
         )
     }
@@ -346,7 +338,7 @@ impl CityPieces {
                 .wonders
                 .iter()
                 .map(|wonder| {
-                    wonders::get_wonder_by_name(&wonder)
+                    wonders::get_wonder_by_name(wonder)
                         .expect("city piece data should contain a valid wonder")
                 })
                 .collect(),
@@ -366,29 +358,27 @@ impl CityPieces {
         }
     }
 
-    fn can_add_city_piece(&self, city_piece: &CityPiece) -> bool {
-        match city_piece {
-            CityPiece::Academy => self.academy.is_none(),
-            CityPiece::Market => self.market.is_none(),
-            CityPiece::Obelisk => self.obelisk.is_none(),
-            CityPiece::Observatory => self.observatory.is_none(),
-            CityPiece::Fortress => self.fortress.is_none(),
-            CityPiece::Port => self.port.is_none(),
-            CityPiece::Temple => self.temple.is_none(),
-            CityPiece::Wonder(_) => true,
+    fn can_add_building(&self, building: &Building) -> bool {
+        match building {
+            Building::Academy => self.academy.is_none(),
+            Building::Market => self.market.is_none(),
+            Building::Obelisk => self.obelisk.is_none(),
+            Building::Observatory => self.observatory.is_none(),
+            Building::Fortress => self.fortress.is_none(),
+            Building::Port => self.port.is_none(),
+            Building::Temple => self.temple.is_none(),
         }
     }
 
-    fn add_city_piece(&mut self, city_piece: CityPiece, player: String) {
-        match city_piece {
-            CityPiece::Academy => self.academy = Some(player),
-            CityPiece::Market => self.market = Some(player),
-            CityPiece::Obelisk => self.obelisk = Some(player),
-            CityPiece::Observatory => self.observatory = Some(player),
-            CityPiece::Fortress => self.fortress = Some(player),
-            CityPiece::Port => self.port = Some(player),
-            CityPiece::Temple => self.temple = Some(player),
-            CityPiece::Wonder(wonder) => self.wonders.push(wonder),
+    fn add_building(&mut self, building: Building, player: String) {
+        match building {
+            Building::Academy => self.academy = Some(player),
+            Building::Market => self.market = Some(player),
+            Building::Obelisk => self.obelisk = Some(player),
+            Building::Observatory => self.observatory = Some(player),
+            Building::Fortress => self.fortress = Some(player),
+            Building::Port => self.port = Some(player),
+            Building::Temple => self.temple = Some(player),
         }
     }
 

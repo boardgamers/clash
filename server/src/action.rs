@@ -2,13 +2,12 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     city::{
-        City, CityData,
-        CityPiece::{self, *},
-        CityPieceData, BUILDING_COST,
+        Building::{self, *},
+        BuildingData, City, CityData, BUILDING_COST,
     },
     content::custom_actions,
     player::Player,
-    resource_pile::ResourcePile,
+    resource_pile::ResourcePile, game::Game,
 };
 
 use PlayingAction::*;
@@ -21,7 +20,7 @@ pub enum PlayingAction {
     },
     Build {
         city: CityData,
-        city_piece: CityPieceData,
+        city_piece: BuildingData,
         payment: ResourcePile,
     },
     IncreaseHappiness {
@@ -31,7 +30,7 @@ pub enum PlayingAction {
         success: bool,
         starting_city: Box<CityData>,
         target_city: CityData,
-        city_piece: CityPieceData,
+        city_piece: BuildingData,
         range_boost: u32,
         result_boost: u32,
     },
@@ -43,7 +42,7 @@ pub enum PlayingAction {
 }
 
 impl PlayingAction {
-    pub fn execute(self, player: &mut Player, user_specification: Option<String>) {
+    pub fn execute(self, player: &mut Player, user_specification: Option<String>, game: &mut Game) {
         let player_name = player.name();
         match self {
             Advance {
@@ -64,19 +63,19 @@ impl PlayingAction {
                 payment,
             } => {
                 let city = City::from_data(city);
-                let city_piece = CityPiece::from_data(&city_piece);
+                let building = Building::from_data(&city_piece);
                 let mut cost = BUILDING_COST;
                 player
                     .events()
                     .city_size_increase_cost
-                    .trigger(&mut cost, &city, &city_piece);
+                    .trigger(&mut cost, &city, &building);
                 if city.player != player_name
-                    || !city.can_increase_size(&city_piece, player)
+                    || !city.can_increase_size(&building, player)
                     || !payment.can_afford(&cost)
                 {
                     panic!("Illegal action");
                 }
-                if matches!(city_piece, Temple) {
+                if matches!(building, Temple) {
                     let building_bonus = serde_json::from_str(
                         &user_specification.expect("user should have specified the building bonus"),
                     )
@@ -96,7 +95,7 @@ impl PlayingAction {
                         .position(|player_city| player_city.position == city.position)
                         .expect("city should exist"),
                 );
-                city.increase_size(city_piece, player);
+                city.increase_size(building, player);
                 player.cities.push(city);
             }
             IncreaseHappiness { cities } => {
@@ -107,12 +106,9 @@ impl PlayingAction {
                         panic!("Illegal action");
                     }
                     player.loose_resources(cost);
-                    for player_city in player.cities.iter_mut() {
-                        if player_city.position == city.position {
-                            for _ in 0..steps {
-                                player_city.increase_mood_state();
-                            }
-                        }
+                    let city = player.cities.iter_mut().find(|player_city| player_city.position == city.position).expect("city should exist");
+                    for _ in 0..steps {
+                        city.increase_mood_state();
                     }
                 }
             }
@@ -126,10 +122,9 @@ impl PlayingAction {
             } => {
                 let starting_city = City::from_data(*starting_city);
                 let target_city = City::from_data(target_city);
-                let city_piece = CityPiece::from_data(&city_piece);
+                let building = Building::from_data(&city_piece);
                 let cost = ResourcePile::culture_tokens(range_boost + result_boost);
-                if matches!(city_piece, Obelisk)
-                    || matches!(city_piece, Wonder(_))
+                if matches!(building, Obelisk)
                     || starting_city.position.distance(&target_city.position)
                         > starting_city.size() + range_boost
                     || starting_city.player != player_name
@@ -141,12 +136,16 @@ impl PlayingAction {
                     return;
                 }
                 player.loose_resources(cost);
-                todo!()
+
+                //todo! in the future get the city directly from its position on the map instead
+                let target_player = &target_city.player;
+                let target_player = game.players.iter_mut().find(|player| &player.name() == target_player).expect("player should exist");
+                let target_city = target_player.cities.iter_mut().find(|city| city.position == target_city.position).expect("city should exist");
+                target_city.influence_culture(player, &building);
             }
-            Custom { name, contents } => {
-                custom_actions::get_custom_action(&name, &contents).execute(player)
-            }
-            EndTurn => unreachable!(),
+            Custom { name, contents } => custom_actions::get_custom_action(&name, &contents)
+                .execute(player, user_specification),
+            EndTurn => unreachable!("end turn should be returned before executing the action"),
         }
     }
 
@@ -161,7 +160,7 @@ impl PlayingAction {
 }
 
 pub trait CustomAction {
-    fn execute(&self, player: &mut Player);
+    fn execute(&self, player: &mut Player, user_specification: Option<String>);
     fn action_type(&self) -> ActionType;
     fn name(&self) -> String;
 }

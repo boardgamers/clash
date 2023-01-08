@@ -9,16 +9,10 @@ use crate::{
 };
 
 use GameState::*;
+use StatusPhaseState::*;
 
 const DICE_ROLL_BUFFER: u32 = 200;
 const AGES: u32 = 6;
-
-#[derive(Serialize, Deserialize)]
-pub enum GameState {
-    Playing,
-    StatusPhase,
-    Finished,
-}
 
 pub struct Game {
     pub state: GameState,
@@ -152,7 +146,9 @@ impl Game {
                 self.played_limited_actions.push(name.clone());
             }
         }
-        action.execute(&mut self.players[player_index], user_specification);
+        let mut player = self.players.remove(player_index);
+        action.execute(&mut player, user_specification, self);
+        self.players.insert(player_index, player);
         if !free_action {
             self.actions_left -= 1;
         }
@@ -172,19 +168,30 @@ impl Game {
         self.round += 1;
         if self.round > 3 {
             self.round = 1;
-            self.next_age();
+            self.enter_status_phase();
         }
     }
 
+    fn enter_status_phase(&mut self) {
+        if self.players.iter().any(|player| player.cities.is_empty()) {
+            self.end_game();
+        }
+        self.state = StatusPhase(ChangeGovernmentType);
+    }
+
     fn next_age(&mut self) {
+        self.state = Playing;
         self.age += 1;
         if self.age > AGES {
-            self.add_message("Game has ended");
-            self.state = Finished;
+            self.end_game();
             return;
         }
         self.messages.push(format!("Age {} has started", self.age));
-        self.state = StatusPhase;
+    }
+
+    fn end_game(&mut self) {
+        self.state = Finished;
+        self.add_message("Game has ended");
     }
 
     fn add_message(&mut self, message: &str) {
@@ -205,4 +212,21 @@ struct GameData {
     age: u32,
     messages: Vec<String>,
     dice_roll_outcomes: Vec<u8>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum GameState {
+    Playing,
+    StatusPhase(StatusPhaseState),
+    Finished,
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum StatusPhaseState {
+    CompleteObjectives,
+    FreeAdvance,
+    DrawNewCards,
+    RaseSize1City,
+    ChangeGovernmentType,
+    DetermineFirstPlayer,
 }
