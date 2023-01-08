@@ -2,50 +2,50 @@ use std::fmt::Display;
 
 use crate::player::{self, PlayerInitializer, PlayerSetup};
 
-pub struct SpecialTechnology {
+pub struct SpecialAdvance {
     pub name: String,
     pub description: String,
-    pub required_technology: String,
+    pub required_advance: String,
     pub player_initializer: PlayerInitializer,
     pub player_deinitializer: PlayerInitializer,
 }
 
-impl SpecialTechnology {
-    pub fn builder(name: &str, required_technology: &str) -> SpecialTechnologyBuilder {
-        SpecialTechnologyBuilder::new(name.to_string(), required_technology.to_string())
+impl SpecialAdvance {
+    pub fn builder(name: &str, required_advance: &str) -> SpecialAdvanceBuilder {
+        SpecialAdvanceBuilder::new(name.to_string(), required_advance.to_string())
     }
 
     fn new(
         name: String,
         description: String,
-        required_technology: String,
+        required_advance: String,
         player_initializer: PlayerInitializer,
         player_deinitializer: PlayerInitializer,
     ) -> Self {
         Self {
             name,
             description,
-            required_technology,
+            required_advance,
             player_initializer,
             player_deinitializer,
         }
     }
 }
 
-pub struct SpecialTechnologyBuilder {
+pub struct SpecialAdvanceBuilder {
     name: String,
     descriptions: Vec<String>,
-    required_technology: String,
+    required_advance: String,
     initializers: Vec<PlayerInitializer>,
     deinitializers: Vec<PlayerInitializer>,
 }
 
-impl SpecialTechnologyBuilder {
-    fn new(name: String, required_technology: String) -> Self {
+impl SpecialAdvanceBuilder {
+    fn new(name: String, required_advance: String) -> Self {
         Self {
             name,
             descriptions: Vec::new(),
-            required_technology,
+            required_advance,
             initializers: Vec::new(),
             deinitializers: Vec::new(),
         }
@@ -56,26 +56,26 @@ impl SpecialTechnologyBuilder {
         self
     }
 
-    pub fn build(self) -> SpecialTechnology {
+    pub fn build(self) -> SpecialAdvance {
         let initializer = player::join_player_initializers(self.initializers);
         let deinitializer = player::join_player_initializers(self.deinitializers);
-        SpecialTechnology::new(
+        SpecialAdvance::new(
             self.name,
             String::from("● ") + &self.descriptions.join("\n● "),
-            self.required_technology,
+            self.required_advance,
             initializer,
             deinitializer,
         )
     }
 }
 
-impl Display for SpecialTechnologyBuilder {
+impl Display for SpecialAdvanceBuilder {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.name.clone())
     }
 }
 
-impl PlayerSetup for SpecialTechnologyBuilder {
+impl PlayerSetup for SpecialAdvanceBuilder {
     fn add_player_initializer(mut self, initializer: PlayerInitializer) -> Self {
         self.initializers.push(initializer);
         self

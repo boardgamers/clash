@@ -10,13 +10,14 @@ use crate::{
     army::Unit,
     city::{Building, City, CityData},
     civilization::Civilization,
-    content::{civilizations, technologies},
+    content::{civilizations, advances},
     events::EventMut,
-    hexagon::HexagonPosition,
+    game::Game,
+    hexagon::Position,
     leader::Leader,
     resource_pile::ResourcePile,
-    special_technology::SpecialTechnology,
-    technology::Technology,
+    special_advance::SpecialAdvance,
+    advance::Advance,
 };
 pub const BUILDING_COST: ResourcePile = ResourcePile {
     food: 1,
@@ -28,10 +29,10 @@ pub const BUILDING_COST: ResourcePile = ResourcePile {
     culture_tokens: 0,
 };
 
-const TECHNOLOGY_COST: u32 = 2;
+const ADVANCE_COST: u32 = 2;
 
 const BUILDING_VICTORY_POINTS: f32 = 1.0;
-const TECHNOLOGY_VICTORY_POINTS: f32 = 0.5;
+const ADVANCE_VICTORY_POINTS: f32 = 0.5;
 const OBJECTIVE_VICTORY_POINTS: f32 = 2.0;
 const WONDER_VICTORY_POINTS: f32 = 4.0;
 const DEFEATED_LEADER_VICTORY_POINTS: f32 = 2.0;
@@ -47,13 +48,13 @@ pub struct Player {
     pub civilization: Civilization,
     pub active_leader: Option<Leader>,
     pub available_leaders: Vec<Leader>,
-    pub researched_technologies: Vec<String>,
-    pub unlocked_special_technologies: Vec<String>,
+    pub advances: Vec<String>,
+    pub unlocked_special_advances: Vec<String>,
     pub wonders: Vec<String>,
     pub wonders_build: usize,
-    pub leader_position: Option<HexagonPosition>,
+    pub leader_position: Option<Position>,
     pub influenced_buildings: u32,
-    pub event_tokens: u8,
+    pub game_event_tokens: u8,
     pub completed_objectives: Vec<String>,
     pub defeated_leaders: Vec<String>,
     pub event_victory_points: f32,
@@ -84,23 +85,23 @@ impl Player {
                         .expect("player data should contain valid leaders")
                 })
                 .collect(),
-            researched_technologies: data.researched_technologies,
-            unlocked_special_technologies: data.unlocked_special_technologies,
+            advances: data.advances,
+            unlocked_special_advances: data.unlocked_special_advance,
             wonders: data.wonders,
             wonders_build: data.wonders_build,
             leader_position: data.leader_position,
-            event_tokens: data.event_tokens,
+            game_event_tokens: data.event_tokens,
             influenced_buildings: data.influenced_buildings,
             completed_objectives: data.completed_objectives,
             defeated_leaders: data.defeated_leaders,
             event_victory_points: data.event_victory_points,
             custom_actions: data.custom_actions,
         };
-        let technologies = mem::take(&mut player.researched_technologies);
-        for technology in technologies.iter() {
-            player.research_technology(technology);
+        let advances = mem::take(&mut player.advances);
+        for advance in advances.iter() {
+            player.advance(advance);
         }
-        player.researched_technologies = technologies;
+        player.advances = advances;
         if let Some(leader) = player.active_leader.take() {
             (leader.player_initializer)(&mut player);
             player.active_leader = Some(leader);
@@ -129,12 +130,12 @@ impl Player {
                 .into_iter()
                 .map(|leader| leader.name)
                 .collect(),
-            researched_technologies: self.researched_technologies,
-            unlocked_special_technologies: self.unlocked_special_technologies,
+            advances: self.advances,
+            unlocked_special_advance: self.unlocked_special_advances,
             wonders: self.wonders,
             wonders_build: self.wonders_build,
             leader_position: self.leader_position,
-            event_tokens: self.event_tokens,
+            event_tokens: self.game_event_tokens,
             influenced_buildings: self.influenced_buildings,
             completed_objectives: self.completed_objectives,
             defeated_leaders: self.defeated_leaders,
@@ -155,12 +156,12 @@ impl Player {
             civilization,
             active_leader: None,
             available_leaders: Vec::new(),
-            researched_technologies: Vec::new(),
-            unlocked_special_technologies: Vec::new(),
+            advances: Vec::new(),
+            unlocked_special_advances: Vec::new(),
             wonders: Vec::new(),
             wonders_build: 0,
             leader_position: None,
-            event_tokens: 3,
+            game_event_tokens: 3,
             influenced_buildings: 0,
             completed_objectives: Vec::new(),
             defeated_leaders: Vec::new(),
@@ -206,76 +207,80 @@ impl Player {
         self.active_leader = Some(new_leader);
     }
 
-    pub fn can_research_technology(&self, technology: &str) -> bool {
-        let technology =
-            technologies::get_technology_by_name(technology).expect("technology should exist");
-        if self.resources.food + self.resources.ideas + (self.resources.gold as u32)
-            < TECHNOLOGY_COST
-        {
+    pub fn can_advance_free(&self, advance: &str) -> bool {
+        let advance =
+            advances::get_advance_by_name(advance).expect("advance should exist");
+        if self.has_advance(&advance.name) {
             return false;
         }
-        if self.has_technology(&technology.name) {
-            return false;
-        }
-        if let Some(required_technology) = &technology.required_technology {
-            if !self.has_technology(required_technology) {
+        if let Some(required_advance) = &advance.required_advance {
+            if !self.has_advance(required_advance) {
                 return false;
             }
         }
-        if let Some(contradicting_technology) = &technology.contradicting_technology {
-            if self.has_technology(contradicting_technology) {
+        if let Some(contradicting_advance) = &advance.contradicting_advance {
+            if self.has_advance(contradicting_advance) {
                 return false;
             }
         }
         true
     }
 
-    pub fn has_technology(&self, technology: &String) -> bool {
-        self.researched_technologies
-            .iter()
-            .any(|research_technology| research_technology == technology)
+    pub fn can_advance(&self, advance: &str) -> bool {
+        if self.resources.food + self.resources.ideas + (self.resources.gold as u32)
+            < ADVANCE_COST
+        {
+            return false;
+        }
+        self.can_advance_free(advance)
     }
 
-    pub fn research_technology(&mut self, technology: &str) {
-        let technology =
-            technologies::get_technology_by_name(technology).expect("technology should exist");
-        if let Some(advance_bonus) = &technology.advance_bonus {
+    pub fn has_advance(&self, advance: &String) -> bool {
+        self.advances
+            .iter()
+            .any(|advances| advances == advance)
+    }
+
+    pub fn advance(&mut self, advance: &str) {
+        let advance =
+            advances::get_advance_by_name(advance).expect("advance should exist");
+        if let Some(advance_bonus) = &advance.advance_bonus {
             self.gain_resources(advance_bonus.resources());
         }
-        for i in 0..self.civilization.special_technologies.len() {
-            if self.civilization.special_technologies[i].required_technology == technology.name {
-                let special_technology = self.civilization.special_technologies.remove(i);
-                self.unlock_special_technology(&special_technology);
+        for i in 0..self.civilization.special_advances.len() {
+            if self.civilization.special_advances[i].required_advance == advance.name {
+                let special_advance = self.civilization.special_advances.remove(i);
+                self.unlock_special_advance(&special_advance);
                 self.civilization
-                    .special_technologies
-                    .insert(i, special_technology);
+                    .special_advances
+                    .insert(i, special_advance);
                 break;
             }
         }
-        (technology.player_initializer)(self);
-        self.researched_technologies.push(technology.name);
-        self.event_tokens -= 1;
-        if self.event_tokens == 0 {
-            self.event_tokens = 3;
+        (advance.player_initializer)(self);
+        self.advances.push(advance.name);
+        self.game_event_tokens -= 1;
+        if self.game_event_tokens == 0 {
+            self.game_event_tokens = 3;
             self.trigger_game_event();
         }
     }
 
-    pub fn remove_technology(&mut self, technology: &Technology) {
+    pub fn remove_advance(&mut self, advance: &Advance) {
         if let Some(position) = self
-            .researched_technologies
+            .advances
             .iter()
-            .position(|researched_technology| researched_technology == &technology.name)
+            .position(|advances| advances == &advance.name)
         {
-            (technology.player_deinitializer)(self);
-            self.researched_technologies.remove(position);
+            (advance.player_deinitializer)(self);
+            self.advances.remove(position);
         }
     }
 
-    fn unlock_special_technology(&mut self, special_technology: &SpecialTechnology) {
-        (special_technology.player_initializer)(self);
-        self.unlocked_special_technologies
-            .push(special_technology.name.clone());
+    fn unlock_special_advance(&mut self, special_advance: &SpecialAdvance) {
+        (special_advance.player_initializer)(self);
+        self.unlocked_special_advances
+            .push(special_advance.name.clone());
     }
 
     pub fn victory_points(&self) -> f32 {
@@ -284,9 +289,9 @@ impl Player {
             victory_points += city.uninfluenced_buildings() as f32 * BUILDING_VICTORY_POINTS;
         }
         victory_points += self.influenced_buildings as f32 * BUILDING_VICTORY_POINTS;
-        victory_points += (self.researched_technologies.len()
-            + self.unlocked_special_technologies.len()) as f32
-            * TECHNOLOGY_VICTORY_POINTS;
+        victory_points += (self.advances.len()
+            + self.unlocked_special_advances.len()) as f32
+            * ADVANCE_VICTORY_POINTS;
         victory_points += self.completed_objectives.len() as f32 * OBJECTIVE_VICTORY_POINTS;
         victory_points += self.wonders.len() as f32 * WONDER_VICTORY_POINTS / 2.0;
         victory_points += self.wonders_build as f32 * WONDER_VICTORY_POINTS / 2.0;
@@ -295,9 +300,9 @@ impl Player {
         victory_points
     }
 
-    pub fn events(&mut self) -> &mut PlayerEvents {
+    pub fn events(&self) -> &PlayerEvents {
         self.events
-            .as_mut()
+            .as_ref()
             .expect("Events should be set after use")
     }
 
@@ -309,8 +314,8 @@ impl Player {
         self.events = Some(events);
     }
 
-    pub fn event_tokens(&self) -> u8 {
-        self.event_tokens
+    pub fn game_event_tokens(&self) -> u8 {
+        self.game_event_tokens
     }
 
     fn trigger_game_event(&mut self) {
@@ -337,8 +342,8 @@ impl Player {
             Equal => (),
             Greater => return Greater,
         }
-        match (self.researched_technologies.len() + self.unlocked_special_technologies.len())
-            .cmp(&(other.researched_technologies.len() + other.unlocked_special_technologies.len()))
+        match (self.advances.len() + self.unlocked_special_advances.len())
+            .cmp(&(other.advances.len() + other.unlocked_special_advances.len()))
         {
             Less => return Less,
             Equal => (),
@@ -364,12 +369,37 @@ impl Player {
             .total_cmp(&other.event_victory_points)
     }
 
-    pub(crate) fn building_cost(&mut self, building: &Building, city: &City) -> ResourcePile {
+    pub fn building_cost(&self, building: &Building, city: &City) -> ResourcePile {
         let mut cost = BUILDING_COST;
         self.events()
             .building_cost
             .trigger(&mut cost, city, building);
         cost
+    }
+
+    pub fn get_city(&mut self, position: &Position) -> Option<&mut City> {
+        let position = self
+            .cities
+            .iter()
+            .position(|city| &city.position == position)?;
+        Some(&mut self.cities[position])
+    }
+
+    pub fn take_city(&mut self, position: &Position) -> Option<City> {
+        Some(
+            self.cities.remove(
+                self.cities
+                    .iter()
+                    .position(|city| &city.position == position)?,
+            ),
+        )
+    }
+
+    pub fn raze_city(&mut self, position: &Position, game: &mut Game) {
+        let city = self
+            .take_city(position)
+            .expect("player should have this city");
+        city.raze(self, game)
     }
 }
 
@@ -383,11 +413,11 @@ pub struct PlayerData {
     civilization: String,
     active_leader: Option<String>,
     available_leaders: Vec<String>,
-    researched_technologies: Vec<String>,
-    unlocked_special_technologies: Vec<String>,
+    advances: Vec<String>,
+    unlocked_special_advance: Vec<String>,
     wonders: Vec<String>,
     wonders_build: usize,
-    leader_position: Option<HexagonPosition>,
+    leader_position: Option<Position>,
     event_tokens: u8,
     influenced_buildings: u32,
     completed_objectives: Vec<String>,

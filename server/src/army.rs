@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
 
-use crate::hexagon::HexagonPosition;
+use crate::hexagon::Position;
 
 #[derive(Serialize, Deserialize)]
 pub struct Unit {
     pub player: String,
     pub unit_type: UnitType,
-    pub transporter: Option<HexagonPosition>,
+    pub transporter: Option<Position>,
     pub can_attack: bool,
 }
 

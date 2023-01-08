@@ -2,7 +2,7 @@ use std::fmt::Display;
 use std::vec::IntoIter;
 
 use crate::{
-    content::wonders, hexagon::HexagonPosition, player::Player, resource_pile::ResourcePile,
+    content::wonders, game::Game, hexagon::Position, player::Player, resource_pile::ResourcePile,
     wonder::Wonder,
 };
 
@@ -16,7 +16,7 @@ pub struct City {
     pub mood_state: MoodState,
     pub is_activated: bool,
     pub player: String,
-    pub position: HexagonPosition,
+    pub position: Position,
 }
 
 impl City {
@@ -40,7 +40,7 @@ impl City {
         )
     }
 
-    pub fn new(player: String, position: HexagonPosition) -> Self {
+    pub fn new(player: String, position: Position) -> Self {
         Self {
             city_pieces: CityPieces::default(),
             mood_state: Neutral,
@@ -57,14 +57,14 @@ impl City {
         self.is_activated = true;
     }
 
-    pub fn can_increase_size(&self, building: &Building, player: &mut Player) -> bool {
+    pub fn can_increase_size(&self, building: &Building, player: &Player) -> bool {
         if self.city_pieces.amount() == MAX_CITY_SIZE {
             return false;
         }
         if matches!(self.mood_state, Angry) {
             return false;
         }
-        if self.city_pieces.can_add_building(building) {
+        if !self.city_pieces.can_add_building(building) {
             return false;
         }
         let cost = player.building_cost(building, self);
@@ -73,13 +73,26 @@ impl City {
 
     pub fn increase_size(&mut self, building: &Building, player: &mut Player) {
         self.activate();
-        let mut events = player.take_events();
+        let events = player.take_events();
         events.city_size_increase.trigger(player, self, building);
         player.set_events(events);
         if matches!(building, Building::Academy) {
             player.gain_resources(ResourcePile::ideas(2))
         }
         self.city_pieces.set_building(building, self.player.clone());
+    }
+
+    pub fn can_build_wonder(&self, wonder: &Wonder, player: &Player) {
+        todo!()
+    }
+
+    pub fn build_wonder(&mut self, wonder: Wonder, player: &mut Player) {
+        let mut wonder = wonder;
+        (wonder.player_initializer)(player);
+        player.wonders_build += 1;
+        player.wonders.push(wonder.name.clone());
+        wonder.builder = Some(player.name());
+        self.city_pieces.wonders.push(wonder);
     }
 
     pub fn conquer(&mut self, new_player: &mut Player, old_player: &mut Player) {
@@ -109,6 +122,26 @@ impl City {
             .len() as u32;
         new_player.influenced_buildings -= previously_influenced_building;
         self.city_pieces.change_player(new_player_name);
+    }
+
+    pub fn raze(self, player: &mut Player, game: &mut Game) {
+        for wonder in self.city_pieces.wonders.into_iter() {
+            (wonder.player_deinitializer)(player);
+            player.wonders.remove(
+                player
+                    .wonders
+                    .iter()
+                    .position(|player_wonder| player_wonder == &wonder.name)
+                    .expect("player should have razed wonder"),
+            );
+            let builder = wonder.builder.expect("Wonder should have a builder");
+            let builder = game
+                .players
+                .iter_mut()
+                .find(|player| player.name() == builder)
+                .expect("builder should be a player");
+            builder.wonders_build -= 1;
+        }
     }
 
     pub fn size(&self) -> u32 {
@@ -144,7 +177,7 @@ impl City {
     //this function assumes action is legal
     pub fn influence_culture(&mut self, influencer: &mut Player, building: &Building) {
         self.city_pieces.set_building(building, influencer.name());
-        if let Building::Obelisk = building {
+        if matches!(building, Building::Obelisk) {
             panic!("obelisks cannot be culturally influenced")
         }
         influencer.influenced_buildings += 1;
@@ -157,7 +190,7 @@ pub struct CityData {
     mood_state: MoodState,
     is_activated: bool,
     player: String,
-    position: HexagonPosition,
+    position: Position,
 }
 
 impl CityData {
@@ -166,7 +199,7 @@ impl CityData {
         mood_state: MoodState,
         is_activated: bool,
         player: String,
-        position: HexagonPosition,
+        position: Position,
     ) -> Self {
         Self {
             city_pieces,
@@ -243,7 +276,7 @@ impl Display for BuildingData {
             f,
             "{}",
             match self {
-                Self::Academy => "a academy",
+                Self::Academy => "an academy",
                 Self::Market => "a market",
                 Self::Obelisk => "an obelisk",
                 Self::Observatory => "an observatory",

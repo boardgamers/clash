@@ -16,7 +16,7 @@ use PlayingAction::*;
 #[derive(Serialize, Deserialize)]
 pub enum PlayingAction {
     Advance {
-        technology: String,
+        advance: String,
         payment: ResourcePile,
     },
     Build {
@@ -48,16 +48,16 @@ impl PlayingAction {
         let player_name = player.name();
         match self {
             Advance {
-                technology,
+                advance,
                 payment,
             } => {
-                if !player.can_research_technology(&technology)
+                if !player.can_advance(&advance)
                     || payment.food + payment.ideas + payment.gold as u32 != 2
                 {
                     panic!("Illegal action");
                 }
                 player.loose_resources(payment);
-                player.research_technology(&technology);
+                player.advance(&advance);
             }
             Build {
                 city,
@@ -67,7 +67,7 @@ impl PlayingAction {
             } => {
                 let city = City::from_data(city);
                 let building = Building::from_data(&city_piece);
-                let mut cost = player.building_cost(&building, &city);
+                let cost = player.building_cost(&building, &city);
                 if city.player != player_name
                     || !city.can_increase_size(&building, player)
                     || !payment.can_afford(&cost)
@@ -75,7 +75,8 @@ impl PlayingAction {
                     panic!("Illegal action");
                 }
                 if matches!(building, Temple) {
-                    let building_bonus = temple_bonus.expect("build data should contain temple bonus");
+                    let building_bonus =
+                        temple_bonus.expect("build data should contain temple bonus");
                     if building_bonus != ResourcePile::mood_tokens(1)
                         && building_bonus != ResourcePile::culture_tokens(1)
                     {
@@ -84,13 +85,7 @@ impl PlayingAction {
                     player.gain_resources(building_bonus);
                 }
                 player.loose_resources(payment);
-                let mut city = player.cities.remove(
-                    player
-                        .cities
-                        .iter()
-                        .position(|player_city| player_city.position == city.position)
-                        .expect("city should exist"),
-                );
+                let mut city = player.take_city(&city.position).expect("city should exist");
                 city.increase_size(&building, player);
                 player.cities.push(city);
             }
@@ -103,10 +98,8 @@ impl PlayingAction {
                     }
                     player.loose_resources(cost);
                     let city = player
-                        .cities
-                        .iter_mut()
-                        .find(|player_city| player_city.position == city.position)
-                        .expect("city should exist");
+                        .get_city(&city.position)
+                        .expect("player should have city");
                     for _ in 0..steps {
                         city.increase_mood_state();
                     }
@@ -139,20 +132,15 @@ impl PlayingAction {
 
                 //todo! in the future get the city directly from its position on the map instead
                 let target_player = &target_city.player;
-                let target_player = game
-                    .players
-                    .iter_mut()
-                    .find(|player| &player.name() == target_player)
-                    .expect("player should exist");
+                let target_player = game.get_player(target_player).expect("player should exist");
                 let target_city = target_player
-                    .cities
-                    .iter_mut()
-                    .find(|city| city.position == target_city.position)
+                    .get_city(&target_city.position)
                     .expect("city should exist");
                 target_city.influence_culture(player, &building);
             }
-            Custom { name, contents } => custom_actions::get_custom_action(&name, &contents)
-                .execute(player),
+            Custom { name, contents } => {
+                custom_actions::get_custom_action(&name, &contents).execute(player)
+            }
             EndTurn => unreachable!("end turn should be returned before executing the action"),
         }
     }

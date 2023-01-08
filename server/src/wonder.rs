@@ -1,34 +1,35 @@
 use std::fmt::Display;
 
 use crate::{
-    hexagon::HexagonPosition,
+    hexagon::Position,
     player::{self, PlayerInitializer, PlayerSetup},
     resource_pile::ResourcePile,
 };
 
 //todo! provide more info for position
-type PlacementChecker = Box<dyn Fn(&HexagonPosition) -> bool>;
+type PlacementChecker = Box<dyn Fn(&Position) -> bool>;
 
 pub struct Wonder {
     pub name: String,
     pub description: String,
     pub cost: ResourcePile,
-    pub required_technologies: Vec<String>,
+    pub required_advances: Vec<String>,
     pub placement_requirement: Option<PlacementChecker>,
     pub player_initializer: PlayerInitializer,
     pub player_deinitializer: PlayerInitializer,
+    pub builder: Option<String>,
 }
 
 impl Wonder {
     pub fn builder(
         name: &str,
         cost: ResourcePile,
-        required_technologies: Vec<&str>,
+        required_advances: Vec<&str>,
     ) -> WonderBuilder {
         WonderBuilder::new(
             name.to_string(),
             cost,
-            required_technologies
+            required_advances
                 .into_iter()
                 .map(|name| name.to_string())
                 .collect(),
@@ -40,19 +41,19 @@ pub struct WonderBuilder {
     name: String,
     descriptions: Vec<String>,
     cost: ResourcePile,
-    required_technologies: Vec<String>,
+    required_advance: Vec<String>,
     placement_requirement: Option<PlacementChecker>,
     player_initializers: Vec<PlayerInitializer>,
     player_deinitializers: Vec<PlayerInitializer>,
 }
 
 impl WonderBuilder {
-    fn new(name: String, cost: ResourcePile, required_technologies: Vec<String>) -> Self {
+    fn new(name: String, cost: ResourcePile, required_advances: Vec<String>) -> Self {
         Self {
             name,
             descriptions: Vec::new(),
             cost,
-            required_technologies,
+            required_advance: required_advances,
             placement_requirement: None,
             player_initializers: Vec::new(),
             player_deinitializers: Vec::new(),
@@ -76,10 +77,11 @@ impl WonderBuilder {
             name: self.name,
             description: String::from("● ") + &self.descriptions.join("\n● "),
             cost: self.cost,
-            required_technologies: self.required_technologies,
+            required_advances: self.required_advance,
             placement_requirement: self.placement_requirement,
             player_initializer,
             player_deinitializer,
+            builder: None,
         }
     }
 }

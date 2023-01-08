@@ -4,21 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::game::Game;
 use crate::game::GameState::*;
-
-#[derive(Serialize, Deserialize)]
-pub struct UserAction {
-    pub action: String,
-    pub specification: Option<String>,
-}
-
-impl UserAction {
-    pub fn new(action: String, specification: Option<String>) -> Self {
-        Self {
-            action,
-            specification,
-        }
-    }
-}
+use crate::game::LogItem;
 
 #[derive(Serialize, Deserialize)]
 pub struct LogSliceOptions {
@@ -29,7 +15,13 @@ pub struct LogSliceOptions {
 
 #[derive(Serialize, Deserialize)]
 pub struct Log {
-    items: Vec<String>,
+    items: Vec<LogItem>,
+}
+
+impl Log {
+    pub fn new(items: Vec<LogItem>) -> Self {
+        Self { items }
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -56,10 +48,7 @@ pub async extern "C" fn init(
 #[export_name = "move"]
 pub extern "C" fn execute_action(game: String, r#move: String, player: usize) -> String {
     let mut game = Game::from_json(&game);
-    let user_action =
-        serde_json::from_str(&r#move).expect("API call should receive valid move json");
-    game.log.push(r#move);
-    game.execute_action(user_action, player);
+    game.execute_action(r#move, player);
     game.json()
 }
 
@@ -82,7 +71,7 @@ pub extern "C" fn scores(game: String) -> Vec<f32> {
 #[export_name = "dropPlayer"]
 pub async extern "C" fn drop_player(game: String, player: usize) -> String {
     let mut game = Game::from_json(&game);
-    game.players.remove(player);
+    game.drop_player(player);
     game.json()
 }
 
@@ -111,7 +100,8 @@ pub async extern "C" fn log_slice(game: String, options: String) -> String {
         None => &game.log[options.start..],
     }
     .to_vec();
-    serde_json::to_string(&log_slice).expect("log slice should be serializable")
+    let log = Log::new(log_slice);
+    serde_json::to_string(&log).expect("log slice should be serializable")
 }
 
 #[export_name = "setPlayerMetaData"]

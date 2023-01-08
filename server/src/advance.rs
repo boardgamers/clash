@@ -7,113 +7,91 @@ use crate::{
 
 use AdvanceBonus::*;
 
-pub struct Technology {
+pub struct Advance {
     pub name: String,
     pub description: String,
     pub advance_bonus: Option<AdvanceBonus>,
-    pub required_technology: Option<String>,
-    pub contradicting_technology: Option<String>,
+    pub required_advance: Option<String>,
+    pub contradicting_advance: Option<String>,
     pub unlocked_building: Option<String>,
     pub player_initializer: PlayerInitializer,
     pub player_deinitializer: PlayerInitializer,
 }
 
-impl Technology {
+impl Advance {
     pub fn builder(
         name: &str,
         description: &str,
         advance_bonus: Option<AdvanceBonus>,
-    ) -> TechnologyBuilder {
-        TechnologyBuilder::new(name.to_string(), description.to_string(), advance_bonus)
-    }
-
-    fn new(
-        name: String,
-        description: String,
-        advance_bonus: Option<AdvanceBonus>,
-        required_technology: Option<String>,
-        contradicting_technology: Option<String>,
-        unlocked_building: Option<String>,
-        player_initializer: PlayerInitializer,
-        player_deinitializer: PlayerInitializer,
-    ) -> Self {
-        Self {
-            name,
-            description,
-            advance_bonus,
-            required_technology,
-            contradicting_technology,
-            unlocked_building,
-            player_initializer,
-            player_deinitializer,
-        }
+    ) -> AdvanceBuilder {
+        AdvanceBuilder::new(name.to_string(), description.to_string(), advance_bonus)
     }
 }
 
-impl PartialEq for Technology {
+impl PartialEq for Advance {
     fn eq(&self, other: &Self) -> bool {
         self.name == other.name
     }
 }
 
-pub struct TechnologyBuilder {
+pub struct AdvanceBuilder {
     name: String,
     description: String,
     advance_bonus: Option<AdvanceBonus>,
-    required_technology: Option<String>,
-    contradicting_technology: Option<String>,
+    required_advance: Option<String>,
+    contradicting_advance: Option<String>,
     unlocked_building: Option<String>,
     initializers: Vec<PlayerInitializer>,
     deinitializers: Vec<PlayerInitializer>,
 }
 
-impl TechnologyBuilder {
+impl AdvanceBuilder {
     fn new(name: String, description: String, advance_bonus: Option<AdvanceBonus>) -> Self {
         Self {
             name,
             description,
             advance_bonus,
-            required_technology: None,
-            contradicting_technology: None,
+            required_advance: None,
+            contradicting_advance: None,
             unlocked_building: None,
             initializers: Vec::new(),
             deinitializers: Vec::new(),
         }
     }
 
-    pub fn with_required_technology(mut self, required_technology: String) -> Self {
-        self.required_technology = Some(required_technology);
+    pub fn with_required_advance(mut self, required_advance: String) -> Self {
+        self.required_advance = Some(required_advance);
         self
     }
 
-    pub fn with_contradicting_technology(mut self, contradicting_technology: String) -> Self {
-        self.contradicting_technology = Some(contradicting_technology);
+    pub fn with_contradicting_advance(mut self, contradicting_advance: String) -> Self {
+        self.contradicting_advance = Some(contradicting_advance);
         self
     }
 
-    pub fn build(self) -> Technology {
+    pub fn build(self) -> Advance {
         let initializer = player::join_player_initializers(self.initializers);
         let deinitializer = player::join_player_initializers(self.deinitializers);
-        Technology::new(
-            self.name,
-            self.description,
-            self.advance_bonus,
-            self.required_technology,
-            self.contradicting_technology,
-            self.unlocked_building,
-            initializer,
-            deinitializer,
-        )
+        Advance {
+            name: self.name,
+            description: self.description,
+            advance_bonus: self.advance_bonus,
+            required_advance: self.required_advance,
+            contradicting_advance: self.contradicting_advance,
+            unlocked_building: self.unlocked_building,
+            player_initializer: initializer,
+            player_deinitializer: deinitializer,
+        }
     }
 }
 
-impl Display for TechnologyBuilder {
+impl Display for AdvanceBuilder {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.name.clone())
     }
 }
 
-impl PlayerSetup for TechnologyBuilder {
+impl PlayerSetup for AdvanceBuilder {
     fn add_player_initializer(mut self, initializer: PlayerInitializer) -> Self {
         self.initializers.push(initializer);
         self
