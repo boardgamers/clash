@@ -346,12 +346,14 @@ impl CityPieces {
             (Building::Temple, self.temple.clone()),
         ]
         .into_iter()
-        .filter(|(_, owner)| owner.is_some())
-        .filter(|(_, owner)| match owned_by {
-            Some(want_owner) => owner == &Some(want_owner.to_string()),
-            None => true,
+        .filter_map(|(building, owner)| {
+            owner
+                .filter(|owner| match owned_by {
+                    Some(want_owner) => owner == want_owner,
+                    None => true,
+                })
+                .map(|_| building)
         })
-        .map(|(t, _)| t)
         .collect()
     }
 }
