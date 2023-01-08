@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use std::vec::IntoIter;
 
 use crate::{
     content::wonders, hexagon::HexagonPosition, player::Player, resource_pile::ResourcePile,
@@ -9,15 +10,6 @@ use serde::{Deserialize, Serialize};
 use MoodState::*;
 
 const MAX_CITY_SIZE: u32 = 4;
-pub const BUILDING_COST: ResourcePile = ResourcePile {
-    food: 1,
-    wood: 1,
-    ore: 1,
-    ideas: 0,
-    gold: 0,
-    mood_tokens: 0,
-    culture_tokens: 0,
-};
 
 pub struct City {
     pub city_pieces: CityPieces,
@@ -75,23 +67,19 @@ impl City {
         if self.city_pieces.can_add_building(building) {
             return false;
         }
-        let mut cost = BUILDING_COST;
-        player
-            .events()
-            .city_size_increase_cost
-            .trigger(&mut cost, self, building);
+        let cost = player.building_cost(building, self);
         player.resources().can_afford(&cost)
     }
 
-    pub fn increase_size(&mut self, building: Building, player: &mut Player) {
+    pub fn increase_size(&mut self, building: &Building, player: &mut Player) {
         self.activate();
         let mut events = player.take_events();
-        events.city_size_increase.trigger(player, self, &building);
+        events.city_size_increase.trigger(player, self, building);
         player.set_events(events);
-        if let Building::Academy = &building {
+        if matches!(building, Building::Academy) {
             player.gain_resources(ResourcePile::ideas(2))
         }
-        self.city_pieces.add_building(building, self.player.clone());
+        self.city_pieces.set_building(building, self.player.clone());
     }
 
     pub fn conquer(&mut self, new_player: &mut Player, old_player: &mut Player) {
@@ -115,28 +103,10 @@ impl City {
                 old_player.influenced_buildings += 1;
             }
         }
-        let mut previously_influenced_building = 0;
-        if self.city_pieces.academy == Some(new_player_name.clone()) {
-            previously_influenced_building += 1;
-        }
-        if self.city_pieces.market == Some(new_player_name.clone()) {
-            previously_influenced_building += 1;
-        }
-        if self.city_pieces.obelisk == Some(new_player_name.clone()) {
-            previously_influenced_building += 1;
-        }
-        if self.city_pieces.observatory == Some(new_player_name.clone()) {
-            previously_influenced_building += 1;
-        }
-        if self.city_pieces.fortress == Some(new_player_name.clone()) {
-            previously_influenced_building += 1;
-        }
-        if self.city_pieces.port == Some(new_player_name.clone()) {
-            previously_influenced_building += 1;
-        }
-        if self.city_pieces.temple == Some(new_player_name.clone()) {
-            previously_influenced_building += 1;
-        }
+        let previously_influenced_building = self
+            .city_pieces
+            .buildings(Option::Some(&new_player.name()))
+            .len() as u32;
         new_player.influenced_buildings -= previously_influenced_building;
         self.city_pieces.change_player(new_player_name);
     }
@@ -168,41 +138,14 @@ impl City {
     }
 
     pub fn uninfluenced_buildings(&self) -> u32 {
-        let mut value = 0;
-        if self.city_pieces.academy == Some(self.player.clone()) {
-            value += 1;
-        }
-        if self.city_pieces.market == Some(self.player.clone()) {
-            value += 1;
-        }
-        if self.city_pieces.obelisk == Some(self.player.clone()) {
-            value += 1;
-        }
-        if self.city_pieces.observatory == Some(self.player.clone()) {
-            value += 1;
-        }
-        if self.city_pieces.fortress == Some(self.player.clone()) {
-            value += 1;
-        }
-        if self.city_pieces.port == Some(self.player.clone()) {
-            value += 1;
-        }
-        if self.city_pieces.temple == Some(self.player.clone()) {
-            value += 1;
-        }
-        value
+        self.city_pieces.buildings(Some(&self.player)).len() as u32
     }
 
     //this function assumes action is legal
     pub fn influence_culture(&mut self, influencer: &mut Player, building: &Building) {
-        match building {
-            Building::Academy => self.city_pieces.academy = Some(influencer.name()),
-            Building::Market => self.city_pieces.market = Some(influencer.name()),
-            Building::Observatory => self.city_pieces.observatory = Some(influencer.name()),
-            Building::Fortress => self.city_pieces.fortress = Some(influencer.name()),
-            Building::Port => self.city_pieces.port = Some(influencer.name()),
-            Building::Temple => self.city_pieces.temple = Some(influencer.name()),
-            Building::Obelisk => unreachable!("obelisks cannot be culturally influenced"),
+        self.city_pieces.set_building(building, influencer.name());
+        if let Building::Obelisk = building {
+            panic!("obelisks cannot be culturally influenced")
         }
         influencer.influenced_buildings += 1;
     }
@@ -370,7 +313,7 @@ impl CityPieces {
         }
     }
 
-    fn add_building(&mut self, building: Building, player: String) {
+    fn set_building(&mut self, building: &Building, player: String) {
         match building {
             Building::Academy => self.academy = Some(player),
             Building::Market => self.market = Some(player),
@@ -383,51 +326,33 @@ impl CityPieces {
     }
 
     fn amount(&self) -> u32 {
-        let mut amount = 0;
-        if self.academy.is_some() {
-            amount += 1;
-        }
-        if self.market.is_some() {
-            amount += 1;
-        }
-        if self.obelisk.is_some() {
-            amount += 1;
-        }
-        if self.observatory.is_some() {
-            amount += 1;
-        }
-        if self.fortress.is_some() {
-            amount += 1;
-        }
-        if self.port.is_some() {
-            amount += 1;
-        }
-        if self.temple.is_some() {
-            amount += 1;
-        }
-        amount += self.wonders.len() as u32;
-        amount
+        (self.buildings(None).len() + self.wonders.len()) as u32
     }
 
     fn change_player(&mut self, new_player: String) {
-        if let Some(academy) = self.academy.as_mut() {
-            *academy = new_player.clone();
+        for b in self.buildings(None) {
+            self.set_building(&b, new_player.clone());
         }
-        if let Some(market) = self.market.as_mut() {
-            *market = new_player.clone();
-        }
-        if let Some(observatory) = self.observatory.as_mut() {
-            *observatory = new_player.clone();
-        }
-        if let Some(fortress) = self.fortress.as_mut() {
-            *fortress = new_player.clone();
-        }
-        if let Some(port) = self.port.as_mut() {
-            *port = new_player.clone();
-        }
-        if let Some(temple) = self.temple.as_mut() {
-            *temple = new_player;
-        }
+    }
+
+    pub fn buildings(&self, owned_by: Option<&str>) -> Vec<Building> {
+        vec![
+            (Building::Academy, self.academy.clone()),
+            (Building::Market, self.market.clone()),
+            (Building::Obelisk, self.obelisk.clone()),
+            (Building::Observatory, self.observatory.clone()),
+            (Building::Fortress, self.fortress.clone()),
+            (Building::Port, self.port.clone()),
+            (Building::Temple, self.temple.clone()),
+        ]
+        .into_iter()
+        .filter(|(_, owner)| owner.is_some())
+        .filter(|(_, owner)| match owned_by {
+            Some(want_owner) => owner == &Some(want_owner.to_string()),
+            None => true,
+        })
+        .map(|(t, _)| t)
+        .collect()
     }
 }
 

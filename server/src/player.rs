@@ -18,6 +18,15 @@ use crate::{
     special_technology::SpecialTechnology,
     technology::Technology,
 };
+pub const BUILDING_COST: ResourcePile = ResourcePile {
+    food: 1,
+    wood: 1,
+    ore: 1,
+    ideas: 0,
+    gold: 0,
+    mood_tokens: 0,
+    culture_tokens: 0,
+};
 
 const TECHNOLOGY_COST: u32 = 2;
 
@@ -354,6 +363,14 @@ impl Player {
         self.event_victory_points
             .total_cmp(&other.event_victory_points)
     }
+
+    pub(crate) fn building_cost(&mut self, building: &Building, city: &City) -> ResourcePile {
+        let mut cost = BUILDING_COST;
+        self.events()
+            .building_cost
+            .trigger(&mut cost, city, building);
+        cost
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -382,7 +399,7 @@ pub struct PlayerData {
 #[derive(Default)]
 pub struct PlayerEvents {
     pub city_size_increase: EventMut<Player, City, Building>,
-    pub city_size_increase_cost: EventMut<ResourcePile, City, Building>,
+    pub building_cost: EventMut<ResourcePile, City, Building>,
 }
 
 pub type PlayerInitializer = Box<dyn Fn(&mut Player)>;

@@ -3,11 +3,12 @@ use serde::{Deserialize, Serialize};
 use crate::{
     city::{
         Building::{self, *},
-        BuildingData, City, CityData, BUILDING_COST,
+        BuildingData, City, CityData,
     },
     content::custom_actions,
+    game::Game,
     player::Player,
-    resource_pile::ResourcePile, game::Game,
+    resource_pile::ResourcePile,
 };
 
 use PlayingAction::*;
@@ -64,11 +65,7 @@ impl PlayingAction {
             } => {
                 let city = City::from_data(city);
                 let building = Building::from_data(&city_piece);
-                let mut cost = BUILDING_COST;
-                player
-                    .events()
-                    .city_size_increase_cost
-                    .trigger(&mut cost, &city, &building);
+                let mut cost = player.building_cost(&building, &city);
                 if city.player != player_name
                     || !city.can_increase_size(&building, player)
                     || !payment.can_afford(&cost)
@@ -95,7 +92,7 @@ impl PlayingAction {
                         .position(|player_city| player_city.position == city.position)
                         .expect("city should exist"),
                 );
-                city.increase_size(building, player);
+                city.increase_size(&building, player);
                 player.cities.push(city);
             }
             IncreaseHappiness { cities } => {
@@ -106,7 +103,11 @@ impl PlayingAction {
                         panic!("Illegal action");
                     }
                     player.loose_resources(cost);
-                    let city = player.cities.iter_mut().find(|player_city| player_city.position == city.position).expect("city should exist");
+                    let city = player
+                        .cities
+                        .iter_mut()
+                        .find(|player_city| player_city.position == city.position)
+                        .expect("city should exist");
                     for _ in 0..steps {
                         city.increase_mood_state();
                     }
@@ -139,8 +140,16 @@ impl PlayingAction {
 
                 //todo! in the future get the city directly from its position on the map instead
                 let target_player = &target_city.player;
-                let target_player = game.players.iter_mut().find(|player| &player.name() == target_player).expect("player should exist");
-                let target_city = target_player.cities.iter_mut().find(|city| city.position == target_city.position).expect("city should exist");
+                let target_player = game
+                    .players
+                    .iter_mut()
+                    .find(|player| &player.name() == target_player)
+                    .expect("player should exist");
+                let target_city = target_player
+                    .cities
+                    .iter_mut()
+                    .find(|city| city.position == target_city.position)
+                    .expect("city should exist");
                 target_city.influence_culture(player, &building);
             }
             Custom { name, contents } => custom_actions::get_custom_action(&name, &contents)
