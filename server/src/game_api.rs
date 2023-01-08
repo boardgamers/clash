@@ -2,18 +2,17 @@ use std::{cmp::Ordering::*, mem};
 
 use serde::{Deserialize, Serialize};
 
-use crate::action::PlayingAction;
 use crate::game::Game;
 use crate::game::GameState::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct UserAction {
-    pub action: PlayingAction,
+    pub action: String,
     pub specification: Option<String>,
 }
 
 impl UserAction {
-    pub fn new(action: PlayingAction, specification: Option<String>) -> Self {
+    pub fn new(action: String, specification: Option<String>) -> Self {
         Self {
             action,
             specification,
@@ -60,7 +59,7 @@ pub extern "C" fn execute_action(game: String, r#move: String, player: usize) ->
     let user_action =
         serde_json::from_str(&r#move).expect("API call should receive valid move json");
     game.log.push(r#move);
-    game.execute_playing_action(user_action, player);
+    game.execute_action(user_action, player);
     game.json()
 }
 

@@ -22,6 +22,7 @@ pub enum PlayingAction {
         city: CityData,
         city_piece: BuildingData,
         payment: ResourcePile,
+        temple_bonus: Option<ResourcePile>,
     },
     IncreaseHappiness {
         cities: Vec<(CityData, u32)>,
@@ -42,7 +43,7 @@ pub enum PlayingAction {
 }
 
 impl PlayingAction {
-    pub fn execute(self, player: &mut Player, user_specification: Option<String>, game: &mut Game) {
+    pub fn execute(self, player: &mut Player, game: &mut Game) {
         let player_name = player.name();
         match self {
             Advance {
@@ -61,6 +62,7 @@ impl PlayingAction {
                 city,
                 city_piece,
                 payment,
+                temple_bonus,
             } => {
                 let city = City::from_data(city);
                 let building = Building::from_data(&city_piece);
@@ -76,10 +78,7 @@ impl PlayingAction {
                     panic!("Illegal action");
                 }
                 if matches!(building, Temple) {
-                    let building_bonus = serde_json::from_str(
-                        &user_specification.expect("user should have specified the building bonus"),
-                    )
-                    .expect("use should have specified the building bonus");
+                    let building_bonus = temple_bonus.expect("build data should contain temple bonus");
                     if building_bonus != ResourcePile::mood_tokens(1)
                         && building_bonus != ResourcePile::culture_tokens(1)
                     {
@@ -144,7 +143,7 @@ impl PlayingAction {
                 target_city.influence_culture(player, &building);
             }
             Custom { name, contents } => custom_actions::get_custom_action(&name, &contents)
-                .execute(player, user_specification),
+                .execute(player),
             EndTurn => unreachable!("end turn should be returned before executing the action"),
         }
     }
@@ -160,7 +159,7 @@ impl PlayingAction {
 }
 
 pub trait CustomAction {
-    fn execute(&self, player: &mut Player, user_specification: Option<String>);
+    fn execute(&self, player: &mut Player);
     fn action_type(&self) -> ActionType;
     fn name(&self) -> String;
 }

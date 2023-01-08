@@ -5,11 +5,10 @@ use crate::{
     action::PlayingAction::*,
     content::civilizations,
     game_api::UserAction,
-    player::{Player, PlayerData},
+    player::{Player, PlayerData}, city::CityData,
 };
 
 use GameState::*;
-use StatusPhaseState::*;
 
 const DICE_ROLL_BUFFER: u32 = 200;
 const AGES: u32 = 6;
@@ -126,9 +125,13 @@ impl Game {
             .expect("dice roll outcomes should not be empty")
     }
 
-    pub fn execute_playing_action(&mut self, user_action: UserAction, player_index: usize) {
+    pub fn execute_action(&mut self, user_action: UserAction, player_index: usize) {
         let action = user_action.action;
         let user_specification = user_action.specification;
+        if let StatusPhase(phase) = &self.state {
+            return;
+        }
+        let action = serde_json::from_str(&action).expect("action should be valid playing action json");
         if matches!(action, EndTurn) {
             self.next_turn();
             return;
@@ -147,7 +150,7 @@ impl Game {
             }
         }
         let mut player = self.players.remove(player_index);
-        action.execute(&mut player, user_specification, self);
+        action.execute(&mut player, self);
         self.players.insert(player_index, player);
         if !free_action {
             self.actions_left -= 1;
@@ -176,7 +179,7 @@ impl Game {
         if self.players.iter().any(|player| player.cities.is_empty()) {
             self.end_game();
         }
-        self.state = StatusPhase(ChangeGovernmentType);
+        self.state = StatusPhase(StatusPhaseState::ChangeGovernmentType);
     }
 
     fn next_age(&mut self) {
@@ -225,8 +228,32 @@ pub enum GameState {
 pub enum StatusPhaseState {
     CompleteObjectives,
     FreeAdvance,
-    DrawNewCards,
     RaseSize1City,
     ChangeGovernmentType,
     DetermineFirstPlayer,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct CompleteObjectives {
+    objectives: Vec<usize>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct FreeAdvance {
+    technology: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct RaseSize1City {
+    city: Option<CityData>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ChangeGovernmentType {
+    new_government_technology: Option<String>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct DetermineFirstPlayer {
+    first_player: usize,
 }

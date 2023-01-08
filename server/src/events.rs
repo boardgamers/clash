@@ -18,7 +18,7 @@ impl<T> Event<T> {
     }
 
     pub fn remove_listener(&mut self, id: usize) {
-        self.listeners.remove(
+        let _ = self.listeners.remove(
             self.listeners
                 .iter()
                 .position(|(_, _, value)| value == &id)
@@ -63,7 +63,7 @@ impl<T, U, V> EventMut<T, U, V> {
     }
 
     pub fn remove_listener(&mut self, id: usize) {
-        self.listeners.remove(
+        let _ = self.listeners.remove(
             self.listeners
                 .iter()
                 .position(|(_, _, value)| value == &id)
@@ -85,7 +85,7 @@ impl<T, U, V> EventMut<T, U, V> {
     }
 
     pub fn remove_listener_mut(&mut self, id: usize) {
-        self.listeners_mut.remove(
+        let _ = self.listeners_mut.remove(
             self.listeners_mut
                 .iter()
                 .position(|(_, _, value)| value == &id)
@@ -93,8 +93,8 @@ impl<T, U, V> EventMut<T, U, V> {
         );
     }
 
-    pub fn trigger(&mut self, value: &mut T, info: &U, details: &V) {
-        for (listener, _, _) in self.listeners_mut.iter_mut() {
+    pub fn trigger(&self, value: &mut T, info: &U, details: &V) {
+        for (listener, _, _) in self.listeners_mut.iter() {
             listener(value, info, details);
         }
         for (listener, _, _) in self.listeners.iter() {
@@ -132,7 +132,7 @@ impl StaticEvent {
     }
 
     pub fn remove_listener(&mut self, id: usize) {
-        self.listeners.remove(
+        let _ = self.listeners.remove(
             self.listeners
                 .iter()
                 .position(|(_, _, value)| value == &id)
@@ -143,14 +143,6 @@ impl StaticEvent {
     pub fn trigger(&self) {
         for (listener, _, _) in self.listeners.iter() {
             listener();
-        }
-    }
-}
-
-impl Default for StaticEvent {
-    fn default() -> Self {
-        Self {
-            listeners: Vec::new(),
         }
     }
 }
