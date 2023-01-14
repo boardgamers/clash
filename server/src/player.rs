@@ -301,11 +301,12 @@ impl Player {
             .expect("Events should be set after use")
     }
 
-    pub fn take_events(&mut self) -> PlayerEvents {
-        self.events.take().expect("Events should be set after use")
-    }
-
-    pub fn set_events(&mut self, events: PlayerEvents) {
+    pub fn with_events<F>(&mut self, action: F)
+    where
+        F: FnOnce(&mut Player, &PlayerEvents),
+    {
+        let events = self.events.take().expect("Events should be set after use");
+        action(self, &events);
         self.events = Some(events);
     }
 

@@ -73,9 +73,7 @@ impl City {
 
     pub fn increase_size(&mut self, building: &Building, player: &mut Player) {
         self.activate();
-        let events = player.take_events();
-        events.city_size_increase.trigger(player, self, building);
-        player.set_events(events);
+        player.with_events(|p, e| e.city_size_increase.trigger(p, self, building));
         if matches!(building, Building::Academy) {
             player.gain_resources(ResourcePile::ideas(2))
         }
@@ -132,10 +130,8 @@ impl City {
                 old_player.influenced_buildings += 1;
             }
         }
-        let previously_influenced_building = self
-            .city_pieces
-            .buildings(Option::Some(&new_player.name()))
-            .len() as u32;
+        let previously_influenced_building =
+            self.city_pieces.buildings(Some(&new_player.name())).len() as u32;
         new_player.influenced_buildings -= previously_influenced_building;
         self.city_pieces.change_player(new_player_name);
     }
