@@ -2,10 +2,11 @@ use rand::{rngs::StdRng, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    content::{civilizations, self, wonders},
+    content::{self, civilizations, wonders},
     player::{Player, PlayerData},
     playing_actions::PlayingAction::*,
-    status_phase_actions::StatusPhaseAction, wonder::Wonder,
+    status_phase_actions::StatusPhaseAction,
+    wonder::Wonder,
 };
 
 use GameState::*;
@@ -103,7 +104,14 @@ impl Game {
             messages: data.messages,
             dice_roll_outcomes: data.dice_roll_outcomes,
             dropped_players: data.dropped_players,
-            wonders_left: data.wonders_left.into_iter().map(|wonder| wonders::get_wonder_by_name(&wonder).expect("wonder data should have valid wonder names")).collect(),
+            wonders_left: data
+                .wonders_left
+                .into_iter()
+                .map(|wonder| {
+                    wonders::get_wonder_by_name(&wonder)
+                        .expect("wonder data should have valid wonder names")
+                })
+                .collect(),
             wonder_amount_left: data.wonder_amount_left,
         }
     }
@@ -126,7 +134,11 @@ impl Game {
             messages: self.messages,
             dice_roll_outcomes: self.dice_roll_outcomes,
             dropped_players: self.dropped_players,
-            wonders_left: self.wonders_left.into_iter().map(|wonder| wonder.name).collect(),
+            wonders_left: self
+                .wonders_left
+                .into_iter()
+                .map(|wonder| wonder.name)
+                .collect(),
             wonder_amount_left: self.wonder_amount_left,
         }
     }

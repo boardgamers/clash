@@ -492,7 +492,9 @@ pub trait PlayerSetup: Display + Sized {
 
     fn add_custom_action(self, action: &str) -> Self {
         let action = action.to_string();
-        self.add_player_initializer(Box::new(move |player: &mut Player| player.custom_actions.push(action.clone())))
+        self.add_player_initializer(Box::new(move |player: &mut Player| {
+            player.custom_actions.push(action.clone())
+        }))
     }
 }
 
