@@ -109,7 +109,7 @@ impl City {
         self.city_pieces.wonders.push(wonder);
     }
 
-    pub fn conquer(&mut self, new_player: &mut Player, old_player: &mut Player) {
+    pub fn conquer(mut self, new_player: &mut Player, old_player: &mut Player) {
         let new_player_name = new_player.name();
         self.player = new_player_name.clone();
         self.mood_state = Angry;
@@ -134,6 +134,7 @@ impl City {
             self.city_pieces.buildings(Some(&new_player.name())).len() as u32;
         new_player.influenced_buildings -= previously_influenced_building;
         self.city_pieces.change_player(new_player_name);
+        new_player.cities.push(self)
     }
 
     pub fn raze(self, player: &mut Player, game: &mut Game) {
@@ -376,7 +377,9 @@ impl CityPieces {
 
     fn change_player(&mut self, new_player: String) {
         for b in self.buildings(None) {
-            self.set_building(&b, new_player.clone());
+            if (!matches!(b, Building::Obelisk)) {
+                self.set_building(&b, new_player.clone());
+            }
         }
     }
 
@@ -415,7 +418,7 @@ pub struct CityPiecesData {
     wonders: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub enum MoodState {
     Happy,
     Neutral,

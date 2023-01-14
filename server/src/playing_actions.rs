@@ -82,9 +82,9 @@ impl PlayingAction {
                     player.gain_resources(building_bonus);
                 }
                 player.loose_resources(payment);
-                let mut city = player.take_city(&city.position).expect("city should exist");
-                city.increase_size(&building, player);
-                player.cities.push(city);
+                player.with_city(&city.position, |p, c| {
+                    c.increase_size(&building, p);
+                });
             }
             IncreaseHappiness { cities } => {
                 for (city, steps) in cities {

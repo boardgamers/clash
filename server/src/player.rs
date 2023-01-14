@@ -314,6 +314,23 @@ impl Player {
         self.events = Some(events);
     }
 
+    pub fn conquer_city(&mut self, position: &Position, new_player: &mut Player) {
+        self.take_city(&position)
+            .expect("player should own city")
+            .conquer(new_player, self);
+    }
+
+    pub fn with_city<F>(&mut self, position: &Position, action: F)
+    where
+        F: FnOnce(&mut Player, &mut City),
+    {
+        let mut city = self
+            .take_city(position)
+            .expect("player should have this city");
+        action(self, &mut city);
+        self.cities.push(city);
+    }
+
     pub fn game_event_tokens(&self) -> u8 {
         self.game_event_tokens
     }
@@ -392,7 +409,7 @@ impl Player {
         Some(&mut self.cities[position])
     }
 
-    pub fn take_city(&mut self, position: &Position) -> Option<City> {
+    fn take_city(&mut self, position: &Position) -> Option<City> {
         Some(
             self.cities.remove(
                 self.cities

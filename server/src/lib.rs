@@ -1,6 +1,8 @@
 mod advance;
 mod army;
 mod city;
+#[cfg(test)]
+mod city_tests;
 mod civilization;
 mod content;
 mod events;
