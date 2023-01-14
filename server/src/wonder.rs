@@ -21,11 +21,7 @@ pub struct Wonder {
 }
 
 impl Wonder {
-    pub fn builder(
-        name: &str,
-        cost: ResourcePile,
-        required_advances: Vec<&str>,
-    ) -> WonderBuilder {
+    pub fn builder(name: &str, cost: ResourcePile, required_advances: Vec<&str>) -> WonderBuilder {
         WonderBuilder::new(
             name.to_string(),
             cost,

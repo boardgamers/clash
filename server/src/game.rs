@@ -286,6 +286,15 @@ impl Game {
             .position(|player| player.name() == name)?;
         Some(&mut self.players[position])
     }
+
+    pub fn get_available_custom_actions(&self) -> Vec<String> {
+        let custom_actions = &self.players[self.current_player].custom_actions;
+        custom_actions
+            .iter()
+            .filter(|&action| !self.played_limited_actions.contains(action))
+            .cloned()
+            .collect()
+    }
 }
 
 #[derive(Serialize, Deserialize)]

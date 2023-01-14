@@ -1,3 +1,4 @@
+mod advance;
 mod army;
 mod city;
 mod civilization;
@@ -14,5 +15,4 @@ mod resource_pile;
 mod resource_pile_tests;
 mod special_advance;
 mod status_phase_actions;
-mod advance;
 mod wonder;

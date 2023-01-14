@@ -7,17 +7,18 @@ use std::{
 };
 
 use crate::{
+    advance::Advance,
     army::Unit,
     city::{Building, City, CityData},
     civilization::Civilization,
-    content::{civilizations, advances},
+    content::{advances, civilizations},
     events::EventMut,
     game::Game,
     hexagon::Position,
     leader::Leader,
     resource_pile::ResourcePile,
     special_advance::SpecialAdvance,
-    advance::Advance, wonder::Wonder,
+    wonder::Wonder,
 };
 pub const BUILDING_COST: ResourcePile = ResourcePile {
     food: 1,
@@ -208,8 +209,7 @@ impl Player {
     }
 
     pub fn can_advance_free(&self, advance: &str) -> bool {
-        let advance =
-            advances::get_advance_by_name(advance).expect("advance should exist");
+        let advance = advances::get_advance_by_name(advance).expect("advance should exist");
         if self.has_advance(&advance.name) {
             return false;
         }
@@ -227,8 +227,7 @@ impl Player {
     }
 
     pub fn can_advance(&self, advance: &str) -> bool {
-        if self.resources.food + self.resources.ideas + (self.resources.gold as u32)
-            < ADVANCE_COST
+        if self.resources.food + self.resources.ideas + (self.resources.gold as u32) < ADVANCE_COST
         {
             return false;
         }
@@ -236,14 +235,11 @@ impl Player {
     }
 
     pub fn has_advance(&self, advance: &String) -> bool {
-        self.advances
-            .iter()
-            .any(|advances| advances == advance)
+        self.advances.iter().any(|advances| advances == advance)
     }
 
     pub fn advance(&mut self, advance: &str) {
-        let advance =
-            advances::get_advance_by_name(advance).expect("advance should exist");
+        let advance = advances::get_advance_by_name(advance).expect("advance should exist");
         if let Some(advance_bonus) = &advance.advance_bonus {
             self.gain_resources(advance_bonus.resources());
         }
@@ -289,8 +285,7 @@ impl Player {
             victory_points += city.uninfluenced_buildings() as f32 * BUILDING_VICTORY_POINTS;
         }
         victory_points += self.influenced_buildings as f32 * BUILDING_VICTORY_POINTS;
-        victory_points += (self.advances.len()
-            + self.unlocked_special_advances.len()) as f32
+        victory_points += (self.advances.len() + self.unlocked_special_advances.len()) as f32
             * ADVANCE_VICTORY_POINTS;
         victory_points += self.completed_objectives.len() as f32 * OBJECTIVE_VICTORY_POINTS;
         victory_points += self.wonders.len() as f32 * WONDER_VICTORY_POINTS / 2.0;

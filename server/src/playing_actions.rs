@@ -47,10 +47,7 @@ impl PlayingAction {
     pub fn execute(self, player: &mut Player, game: &mut Game) {
         let player_name = player.name();
         match self {
-            Advance {
-                advance,
-                payment,
-            } => {
+            Advance { advance, payment } => {
                 if !player.can_advance(&advance)
                     || payment.food + payment.ideas + payment.gold as u32 != 2
                 {
