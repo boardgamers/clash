@@ -153,6 +153,7 @@ pub extern "C" fn strip_secret(game: String, player: Option<usize>) -> String {
     let player_index = player;
     let mut game = Game::from_json(&game);
     game.dice_roll_outcomes = Vec::new();
+    game.wonders_left = Vec::new();
     for (i, player) in game.players.iter_mut().enumerate() {
         if player_index != Some(i) {
             player.strip_secret()

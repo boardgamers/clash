@@ -60,6 +60,7 @@ pub struct Player {
     pub defeated_leaders: Vec<String>,
     pub event_victory_points: f32,
     pub custom_actions: Vec<String>,
+    pub wonder_cards: Vec<String>,
 }
 
 impl Player {
@@ -97,6 +98,7 @@ impl Player {
             defeated_leaders: data.defeated_leaders,
             event_victory_points: data.event_victory_points,
             custom_actions: data.custom_actions,
+            wonder_cards: data.wonder_cards,
         };
         let advances = mem::take(&mut player.advances);
         for advance in advances.iter() {
@@ -142,6 +144,7 @@ impl Player {
             defeated_leaders: self.defeated_leaders,
             event_victory_points: self.event_victory_points,
             custom_actions: self.custom_actions,
+            wonder_cards: self.wonder_cards,
         }
     }
 
@@ -168,6 +171,7 @@ impl Player {
             defeated_leaders: Vec::new(),
             event_victory_points: 0.0,
             custom_actions: Vec::new(),
+            wonder_cards: Vec::new(),
         }
     }
 
@@ -319,7 +323,8 @@ impl Player {
     }
 
     pub fn strip_secret(&mut self) {
-        todo!()
+        self.wonder_cards = Vec::new();
+        //todo! strip information about other hand cards
     }
 
     pub fn compare_score(&self, other: &Self) -> Ordering {
@@ -426,6 +431,7 @@ pub struct PlayerData {
     defeated_leaders: Vec<String>,
     event_victory_points: f32,
     custom_actions: Vec<String>,
+    wonder_cards: Vec<String>,
 }
 
 #[derive(Default)]
@@ -437,13 +443,12 @@ pub struct PlayerEvents {
 
 pub type PlayerInitializer = Box<dyn Fn(&mut Player)>;
 
-pub trait PlayerSetup: Display {
+pub trait PlayerSetup: Display + Sized {
     fn add_player_initializer(self, initializer: PlayerInitializer) -> Self;
     fn add_player_deinitializer(self, deinitializer: PlayerInitializer) -> Self;
 
     fn add_player_event_listener<T, U, V, E, F>(self, event: E, listener: F, priority: i32) -> Self
     where
-        Self: Sized,
         E: Fn(&mut PlayerEvents) -> &mut EventMut<T, U, V> + 'static + Clone,
         F: Fn(&mut T, &U, &V) + 'static + Clone,
     {
@@ -483,6 +488,11 @@ pub trait PlayerSetup: Display {
         });
         self.add_player_initializer(initializer)
             .add_player_deinitializer(deinitializer)
+    }
+
+    fn add_custom_action(self, action: &str) -> Self {
+        let action = action.to_string();
+        self.add_player_initializer(Box::new(move |player: &mut Player| player.custom_actions.push(action.clone())))
     }
 }
 

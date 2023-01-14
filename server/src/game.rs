@@ -2,10 +2,10 @@ use rand::{rngs::StdRng, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    content::civilizations,
+    content::{civilizations, self, wonders},
     player::{Player, PlayerData},
     playing_actions::PlayingAction::*,
-    status_phase_actions::StatusPhaseAction,
+    status_phase_actions::StatusPhaseAction, wonder::Wonder,
 };
 
 use GameState::*;
@@ -27,6 +27,8 @@ pub struct Game {
     pub messages: Vec<String>,
     pub dice_roll_outcomes: Vec<u8>,
     dropped_players: Vec<usize>,
+    pub wonders_left: Vec<Wonder>,
+    pub wonder_amount_left: usize,
 }
 
 impl Game {
@@ -56,6 +58,9 @@ impl Game {
             dice_roll_outcomes.push(random_number_generator.gen_range(1..=12));
         }
 
+        let wonders = wonders::get_wonders();
+        let wonder_amount = wonders.len();
+
         Self {
             state: Playing,
             players,
@@ -69,6 +74,8 @@ impl Game {
             messages: vec![String::from("Game has started")],
             dice_roll_outcomes,
             dropped_players: Vec::new(),
+            wonders_left: wonders,
+            wonder_amount_left: wonder_amount,
         }
     }
 
@@ -96,6 +103,8 @@ impl Game {
             messages: data.messages,
             dice_roll_outcomes: data.dice_roll_outcomes,
             dropped_players: data.dropped_players,
+            wonders_left: data.wonders_left.into_iter().map(|wonder| wonders::get_wonder_by_name(&wonder).expect("wonder data should have valid wonder names")).collect(),
+            wonder_amount_left: data.wonder_amount_left,
         }
     }
 
@@ -117,6 +126,8 @@ impl Game {
             messages: self.messages,
             dice_roll_outcomes: self.dice_roll_outcomes,
             dropped_players: self.dropped_players,
+            wonders_left: self.wonders_left.into_iter().map(|wonder| wonder.name).collect(),
+            wonder_amount_left: self.wonder_amount_left,
         }
     }
 
@@ -311,6 +322,8 @@ struct GameData {
     messages: Vec<String>,
     dice_roll_outcomes: Vec<u8>,
     dropped_players: Vec<usize>,
+    wonders_left: Vec<String>,
+    wonder_amount_left: usize,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
