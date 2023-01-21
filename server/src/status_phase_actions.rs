@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    city::CityData,
     game::{Game, StatusPhaseState},
     hexagon::Position,
     player::Player,
@@ -101,15 +100,15 @@ pub fn player_that_chooses_next_first_player(
                 potential_deciding_players.push(i);
                 best_total = Some(total);
             }
-            Some(t) => {
-                if total > t {
-                    potential_deciding_players.clear();
-                    best_total = Some(total);
-                    potential_deciding_players.push(i);
-                } else if total == t {
-                    potential_deciding_players.push(i);
-                }
+            Some(t) if total > t => {
+                potential_deciding_players.clear();
+                best_total = Some(total);
+                potential_deciding_players.push(i);
             }
+            Some(t) if total == t => {
+                potential_deciding_players.push(i);
+            }
+            Some(_) => {}
         }
     }
     potential_deciding_players
@@ -136,27 +135,36 @@ mod tests {
         expected_player: usize,
     ) {
         let mut player0 = Player::new(civ::get_test_civilization(), 0);
-        player0.gain_resources(ResourcePile::mood_tokens(player0_mood));
-        let mut player1 = Player::new(civ::get_test_civilization(), 1);
-        player1.gain_resources(ResourcePile::mood_tokens(player1_mood));
-        let mut player2 = Player::new(civ::get_test_civilization(), 2);
-        player2.gain_resources(ResourcePile::mood_tokens(player2_mood));
-        let players = vec![player0, player1, player2];
-        let got = player_that_chooses_next_first_player(&players, 1);
-        assert_eq!(got, expected_player, "{name}");
-    }
+        fn assert_next_player(
+            name: &str,
+            player0_mood: u32,
+            player1_mood: u32,
+            player2_mood: u32,
+            expected_player: usize,
+        ) {
+            let mut player0 = Player::new(civ::get_test_civilization(), 0);
+            player0.gain_resources(ResourcePile::mood_tokens(player0_mood));
+            let mut player1 = Player::new(civ::get_test_civilization(), 1);
+            player1.gain_resources(ResourcePile::mood_tokens(player1_mood));
+            let mut player2 = Player::new(civ::get_test_civilization(), 2);
+            player2.gain_resources(ResourcePile::mood_tokens(player2_mood));
+            let players = vec![player0, player1, player2];
+            let got = player_that_chooses_next_first_player(&players, 1);
+            assert_eq!(got, expected_player, "{name}");
+        }
 
-    #[test]
-    fn test_player_that_chooses_next_first_player() {
-        assert_next_player("player 0 has more mood", 1, 0, 0, 0);
-        assert_next_player("player 1 has more mood", 0, 1, 0, 1);
-        assert_next_player("tie between 0 and 1 - player 1 stays", 1, 1, 0, 1);
-        assert_next_player(
-            "tie between 0 and 2 - player 2 is the next player after the current first player",
-            1,
-            0,
-            1,
-            2,
-        );
+        #[test]
+        fn test_player_that_chooses_next_first_player() {
+            assert_next_player("player 0 has more mood", 1, 0, 0, 0);
+            assert_next_player("player 1 has more mood", 0, 1, 0, 1);
+            assert_next_player("tie between 0 and 1 - player 1 stays", 1, 1, 0, 1);
+            assert_next_player(
+                "tie between 0 and 2 - player 2 is the next player after the current first player",
+                1,
+                0,
+                1,
+                2,
+            );
+        }
     }
 }
