@@ -162,6 +162,15 @@ impl Game {
         self.execute_playing_action(action, player_index);
     }
 
+    pub fn with_player<F>(&mut self, player_index: usize, action: F)
+    where
+        F: FnOnce(&mut Player, &mut Game),
+    {
+        let mut player = self.players.remove(player_index);
+        action(&mut player, self);
+        self.players.insert(player_index, player);
+    }
+
     fn execute_playing_action(&mut self, action: String, player_index: usize) {
         let playing_action =
             serde_json::from_str(&action).expect("action should be valid playing action json");
@@ -184,9 +193,7 @@ impl Game {
                 self.played_limited_actions.push(name.clone());
             }
         }
-        let mut player = self.players.remove(player_index);
-        action.execute(&mut player, self);
-        self.players.insert(player_index, player);
+        self.with_player(player_index, |p, g| action.execute(p, g));
         if !free_action {
             self.actions_left -= 1;
         }
@@ -202,9 +209,8 @@ impl Game {
         self.log.push(LogItem::StatusPhaseAction(
             serde_json::to_string(&action).expect("status phase action should be serializable"),
         ));
-        let mut player = self.players.remove(player_index);
-        action.execute(&mut player, self);
-        self.players.insert(player_index, player);
+
+        self.with_player(player_index, |p, g| action.execute(p, g));
         if matches!(phase, DetermineFirstPlayer) {
             self.next_age();
             return;
