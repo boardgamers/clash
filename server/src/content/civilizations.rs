@@ -16,3 +16,13 @@ pub fn get_leader_by_name(name: &str, civilization: &str) -> Option<Leader> {
         .into_iter()
         .find(|leader| leader.name == name)
 }
+
+#[cfg(test)]
+pub mod tests {
+    use crate::civilization::Civilization;
+
+    pub fn get_test_civilization() -> Civilization {
+        Civilization::new("test", vec![], vec![])
+    }
+}
+
