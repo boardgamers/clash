@@ -221,8 +221,7 @@ impl Game {
             self.next_age();
             return;
         }
-        self.current_player += 1;
-        self.current_player %= self.players.len();
+        self.next_player();
         if self.current_player == self.starting_player {
             let next_phase = next_status_phase(phase);
             match next_phase {
@@ -240,24 +239,28 @@ impl Game {
 
             self.state = StatusPhase(next_phase)
         }
-        if self.dropped_players.contains(&self.current_player) {
-            self.current_player += 1;
-            self.current_player %= self.players.len()
+        self.skip_dropped_players();
+    }
+
+    fn next_player(&mut self) {
+        self.current_player += 1;
+        self.current_player %= self.players.len();
+    }
+
+    fn skip_dropped_players(&mut self) {
+        while self.dropped_players.contains(&self.current_player) {
+            self.next_player();
         }
     }
 
     fn next_turn(&mut self) {
         self.actions_left = 3;
         self.once_per_turn_actions = Vec::new();
-        self.current_player += 1;
-        self.current_player %= self.players.len();
+        self.next_player();
         if self.current_player == self.starting_player {
             self.next_round();
         }
-        if self.dropped_players.contains(&self.current_player) {
-            self.current_player += 1;
-            self.current_player %= self.players.len()
-        }
+        self.skip_dropped_players();
     }
 
     fn next_round(&mut self) {
@@ -296,10 +299,7 @@ impl Game {
 
     pub fn drop_player(&mut self, player_index: usize) {
         self.dropped_players.push(player_index);
-        if self.current_player == player_index {
-            self.current_player += 1;
-            self.current_player %= self.players.len();
-        }
+        self.skip_dropped_players();
     }
 
     pub fn get_available_custom_actions(&self) -> Vec<String> {
