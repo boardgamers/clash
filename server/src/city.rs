@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use crate::{
-    content::wonders, game::Game, hexagon::Position, player, player::Player,
+    content::wonders, game::Game, hexagon::Position, player::Player,
     resource_pile::ResourcePile, wonder::Wonder,
 };
 
@@ -14,7 +14,7 @@ pub struct City {
     pub city_pieces: CityPieces,
     pub mood_state: MoodState,
     pub is_activated: bool,
-    pub player: String,
+    pub player: usize,
     pub position: Position,
 }
 
@@ -39,7 +39,7 @@ impl City {
         )
     }
 
-    pub fn new(player: String, position: Position) -> Self {
+    pub fn new(player: usize, position: Position) -> Self {
         Self {
             city_pieces: CityPieces::default(),
             mood_state: Neutral,
@@ -109,8 +109,7 @@ impl City {
     }
 
     pub fn conquer(mut self, new_player: &mut Player, old_player: &mut Player) {
-        let new_player_name = new_player.name();
-        self.player = new_player_name.clone();
+        self.player = new_player.id;
         self.mood_state = Angry;
         for wonder in self.city_pieces.wonders.iter() {
             (wonder.player_deinitializer)(old_player);
@@ -119,14 +118,14 @@ impl City {
             new_player.wonders.push(wonder.name.clone());
         }
         if let Some(player) = &self.city_pieces.obelisk {
-            if player == &old_player.name() {
+            if player == &old_player.id {
                 old_player.influenced_buildings += 1;
             }
         }
         let previously_influenced_building =
-            self.city_pieces.buildings(Some(&new_player.name())).len() as u32;
+            self.city_pieces.buildings(Some(new_player.id)).len() as u32;
         new_player.influenced_buildings -= previously_influenced_building;
-        self.city_pieces.change_player(new_player_name);
+        self.city_pieces.change_player(new_player.id);
         new_player.cities.push(self)
     }
 
@@ -171,12 +170,12 @@ impl City {
     }
 
     pub fn uninfluenced_buildings(&self) -> u32 {
-        self.city_pieces.buildings(Some(&self.player)).len() as u32
+        self.city_pieces.buildings(Some(self.player)).len() as u32
     }
 
     //this function assumes action is legal
     pub fn influence_culture(&mut self, influencer: &mut Player, building: &Building) {
-        self.city_pieces.set_building(building, influencer.name());
+        self.city_pieces.set_building(building, influencer.id);
         if matches!(building, Building::Obelisk) {
             panic!("obelisks cannot be culturally influenced")
         }
@@ -189,7 +188,7 @@ pub struct CityData {
     city_pieces: CityPiecesData,
     mood_state: MoodState,
     is_activated: bool,
-    player: String,
+    player: usize,
     position: Position,
 }
 
@@ -198,7 +197,7 @@ impl CityData {
         city_pieces: CityPiecesData,
         mood_state: MoodState,
         is_activated: bool,
-        player: String,
+        player: usize,
         position: Position,
     ) -> Self {
         Self {
@@ -290,13 +289,13 @@ impl Display for BuildingData {
 
 #[derive(Default)]
 pub struct CityPieces {
-    pub academy: Option<String>,
-    pub market: Option<String>,
-    pub obelisk: Option<String>,
-    pub observatory: Option<String>,
-    pub fortress: Option<String>,
-    pub port: Option<String>,
-    pub temple: Option<String>,
+    pub academy: Option<usize>,
+    pub market: Option<usize>,
+    pub obelisk: Option<usize>,
+    pub observatory: Option<usize>,
+    pub fortress: Option<usize>,
+    pub port: Option<usize>,
+    pub temple: Option<usize>,
     pub wonders: Vec<Wonder>,
 }
 
@@ -346,7 +345,7 @@ impl CityPieces {
         }
     }
 
-    fn set_building(&mut self, building: &Building, player: String) {
+    fn set_building(&mut self, building: &Building, player: usize) {
         match building {
             Building::Academy => self.academy = Some(player),
             Building::Market => self.market = Some(player),
@@ -362,7 +361,7 @@ impl CityPieces {
         (self.buildings(None).len() + self.wonders.len()) as u32
     }
 
-    fn change_player(&mut self, new_player: String) {
+    fn change_player(&mut self, new_player: usize) {
         for b in self.buildings(None) {
             if !matches!(b, Building::Obelisk) {
                 self.set_building(&b, new_player.clone());
@@ -370,7 +369,7 @@ impl CityPieces {
         }
     }
 
-    pub fn buildings(&self, owned_by: Option<&str>) -> Vec<Building> {
+    pub fn buildings(&self, owned_by: Option<usize>) -> Vec<Building> {
         vec![
             (Building::Academy, self.academy.clone()),
             (Building::Market, self.market.clone()),
@@ -384,7 +383,7 @@ impl CityPieces {
         .filter_map(|(building, owner)| {
             owner
                 .filter(|owner| match owned_by {
-                    Some(want_owner) => owner == want_owner,
+                    Some(want_owner) => owner == &want_owner,
                     None => true,
                 })
                 .map(|_| building)
@@ -395,13 +394,13 @@ impl CityPieces {
 
 #[derive(Serialize, Deserialize)]
 pub struct CityPiecesData {
-    academy: Option<String>,
-    market: Option<String>,
-    obelisk: Option<String>,
-    observatory: Option<String>,
-    fortress: Option<String>,
-    port: Option<String>,
-    temple: Option<String>,
+    academy: Option<usize>,
+    market: Option<usize>,
+    obelisk: Option<usize>,
+    observatory: Option<usize>,
+    fortress: Option<usize>,
+    port: Option<usize>,
+    temple: Option<usize>,
     wonders: Vec<String>,
 }
 
@@ -410,4 +409,45 @@ pub enum MoodState {
     Happy,
     Neutral,
     Angry,
+}
+
+#[cfg(test)]
+mod city_tests {
+    use super::{Building, City, MoodState};
+    use crate::civilization::Civilization;
+    use crate::hexagon::Position;
+    use crate::player::Player;
+    use crate::resource_pile::ResourcePile;
+    use crate::wonder::Wonder;
+
+    #[test]
+    fn conquer_test() {
+        let mut old = Player::new(Civilization::new("old civ", vec![], vec![]), 0);
+        let mut new = Player::new(Civilization::new("new civ", vec![], vec![]), 0);
+
+        let wonder = Wonder::builder("wonder", ResourcePile::default(), vec![]).build();
+
+        let position = Position::new(0, 0, 0);
+        old.cities.push(City::new(old.id, position.clone()));
+        old.with_city(&position, |p, c| {
+            c.build_wonder(wonder, p);
+            c.increase_size(&Building::Academy, p);
+            c.increase_size(&Building::Obelisk, p);
+        });
+
+        assert_eq!(6.0, old.victory_points());
+
+        old.conquer_city(&position, &mut new);
+
+        let c = new.get_city(&position).unwrap();
+        assert_eq!(1, c.player);
+        assert_eq!(MoodState::Angry, c.mood_state);
+
+        assert_eq!(3.0, old.victory_points());
+        assert_eq!(3.0, new.victory_points());
+        assert_eq!(0, old.wonders.len());
+        assert_eq!(1, new.wonders.len());
+        assert_eq!(1, old.influenced_buildings);
+        assert_eq!(0, new.influenced_buildings);
+    }
 }

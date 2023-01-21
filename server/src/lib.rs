@@ -1,8 +1,6 @@
 mod advance;
 mod army;
 mod city;
-#[cfg(test)]
-mod city_tests;
 mod civilization;
 mod content;
 mod events;
@@ -13,8 +11,6 @@ mod leader;
 mod player;
 mod playing_actions;
 mod resource_pile;
-#[cfg(test)]
-mod resource_pile_tests;
 mod special_advance;
 mod status_phase_actions;
 mod wonder;

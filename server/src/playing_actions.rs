@@ -45,7 +45,6 @@ pub enum PlayingAction {
 
 impl PlayingAction {
     pub fn execute(self, player: &mut Player, game: &mut Game) {
-        let player_name = player.name();
         match self {
             Advance { advance, payment } => {
                 if !player.can_advance(&advance)
@@ -65,7 +64,7 @@ impl PlayingAction {
                 let city = City::from_data(city);
                 let building = Building::from_data(&city_piece);
                 let cost = player.building_cost(&building, &city);
-                if city.player != player_name
+                if city.player != player.id
                     || !city.can_increase_size(&building, player)
                     || !payment.can_afford(&cost)
                 {
@@ -90,7 +89,7 @@ impl PlayingAction {
                 for (city, steps) in cities {
                     let city = City::from_data(city);
                     let cost = ResourcePile::mood_tokens(city.size()) * steps;
-                    if city.player != player_name || !player.resources().can_afford(&cost) {
+                    if city.player != player.id || !player.resources().can_afford(&cost) {
                         panic!("Illegal action");
                     }
                     player.loose_resources(cost);
@@ -117,7 +116,7 @@ impl PlayingAction {
                 if matches!(building, Obelisk)
                     || starting_city.position.distance(&target_city.position)
                         > starting_city.size() + range_boost
-                    || starting_city.player != player_name
+                    || starting_city.player != player.id
                     || !player.resources().can_afford(&cost)
                 {
                     panic!("Illegal action");
@@ -128,8 +127,7 @@ impl PlayingAction {
                 player.loose_resources(cost);
 
                 //todo! in the future get the city directly from its position on the map instead
-                let target_player = &target_city.player;
-                let target_player = game.get_player(target_player).expect("player should exist");
+                let target_player = &mut game.players[target_city.player];
                 let target_city = target_player
                     .get_city(&target_city.position)
                     .expect("city should exist");
@@ -165,6 +163,14 @@ pub struct ActionType {
 }
 
 impl ActionType {
+    pub fn free() -> Self {
+        Self::new(true, false)
+    }
+
+    pub fn once_per_turn() -> Self {
+        Self::new(false, true)
+    }
+
     pub fn new(free: bool, once_per_turn: bool) -> Self {
         Self {
             free,

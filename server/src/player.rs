@@ -11,7 +11,7 @@ use crate::{
     army::Unit,
     city::{Building, City, CityData},
     civilization::Civilization,
-    content::{advances, civilizations},
+    content::{advances, civilizations, wonders},
     events::EventMut,
     game::Game,
     hexagon::Position,
@@ -31,7 +31,6 @@ pub const BUILDING_COST: ResourcePile = ResourcePile {
 };
 
 const ADVANCE_COST: u32 = 2;
-
 const BUILDING_VICTORY_POINTS: f32 = 1.0;
 const ADVANCE_VICTORY_POINTS: f32 = 0.5;
 const OBJECTIVE_VICTORY_POINTS: f32 = 2.0;
@@ -40,6 +39,7 @@ const DEFEATED_LEADER_VICTORY_POINTS: f32 = 2.0;
 
 pub struct Player {
     name: Option<String>,
+    pub id: usize,
     resources: ResourcePile,
     pub resource_limit: ResourcePile,
     events: Option<PlayerEvents>,
@@ -60,13 +60,14 @@ pub struct Player {
     pub defeated_leaders: Vec<String>,
     pub event_victory_points: f32,
     pub custom_actions: Vec<String>,
-    pub wonder_cards: Vec<String>,
+    pub wonder_cards: Vec<Wonder>,
 }
 
 impl Player {
     pub fn from_data(data: PlayerData) -> Self {
         let mut player = Self {
             name: data.name,
+            id: data.id,
             resources: data.resources,
             resource_limit: data.resource_limit,
             events: Some(PlayerEvents::default()),
@@ -98,7 +99,7 @@ impl Player {
             defeated_leaders: data.defeated_leaders,
             event_victory_points: data.event_victory_points,
             custom_actions: data.custom_actions,
-            wonder_cards: data.wonder_cards,
+            wonder_cards: data.wonder_cards.iter().map(|wonder| wonders::get_wonder_by_name(wonder).expect("player data should have valid wonder cards")).collect(),
         };
         let advances = mem::take(&mut player.advances);
         for advance in advances.iter() {
@@ -122,6 +123,7 @@ impl Player {
     pub fn data(self) -> PlayerData {
         PlayerData {
             name: self.name,
+            id: self.id,
             resources: self.resources,
             resource_limit: self.resource_limit,
             cities: self.cities.into_iter().map(|city| city.data()).collect(),
@@ -144,13 +146,14 @@ impl Player {
             defeated_leaders: self.defeated_leaders,
             event_victory_points: self.event_victory_points,
             custom_actions: self.custom_actions,
-            wonder_cards: self.wonder_cards,
+            wonder_cards: self.wonder_cards.into_iter().map(|wonder| wonder.name).collect(),
         }
     }
 
-    pub fn new(civilization: Civilization) -> Self {
+    pub fn new(civilization: Civilization, id: usize) -> Self {
         Self {
             name: None,
+            id,
             resources: ResourcePile::food(2),
             resource_limit: ResourcePile::new(2, 7, 7, 7, 7, 7, 7),
             events: Some(PlayerEvents::default()),
@@ -439,6 +442,7 @@ impl Player {
 #[derive(Serialize, Deserialize)]
 pub struct PlayerData {
     name: Option<String>,
+    id: usize,
     resources: ResourcePile,
     resource_limit: ResourcePile,
     cities: Vec<CityData>,

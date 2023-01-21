@@ -1,8 +1,8 @@
-use rand::{rngs::StdRng, Rng, SeedableRng};
+use rand::{rngs::StdRng, Rng, SeedableRng, seq::SliceRandom};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    content::{self, civilizations, wonders},
+    content::{civilizations, wonders},
     player::{Player, PlayerData},
     playing_actions::PlayingAction::*,
     status_phase_actions::StatusPhaseAction,
@@ -44,22 +44,23 @@ impl Game {
             .as_bytes()
             .try_into()
             .expect("seed should be of length 32");
-        let mut random_number_generator = StdRng::from_seed(seed);
+        let mut rng = StdRng::from_seed(seed);
 
         let mut players = Vec::new();
         let mut civilizations = civilizations::get_civilizations();
-        for _ in 0..player_amount {
-            let civilization = random_number_generator.gen_range(0..civilizations.len());
-            players.push(Player::new(civilizations.remove(civilization)));
+        for i in 0..player_amount {
+            let civilization = rng.gen_range(0..civilizations.len());
+            players.push(Player::new(civilizations.remove(civilization), i));
         }
 
-        let starting_player = random_number_generator.gen_range(0..players.len());
+        let starting_player = rng.gen_range(0..players.len());
         let mut dice_roll_outcomes = Vec::new();
         for _ in 0..DICE_ROLL_BUFFER {
-            dice_roll_outcomes.push(random_number_generator.gen_range(1..=12));
+            dice_roll_outcomes.push(rng.gen_range(1..=12));
         }
 
-        let wonders = wonders::get_wonders();
+        let mut wonders = wonders::get_wonders();
+        wonders.shuffle(&mut rng);
         let wonder_amount = wonders.len();
 
         Self {
@@ -302,14 +303,6 @@ impl Game {
         }
     }
 
-    pub fn get_player(&mut self, name: &str) -> Option<&mut Player> {
-        let position = self
-            .players
-            .iter()
-            .position(|player| player.name() == name)?;
-        Some(&mut self.players[position])
-    }
-
     pub fn get_available_custom_actions(&self) -> Vec<String> {
         let custom_actions = &self.players[self.current_player].custom_actions;
         custom_actions
@@ -317,6 +310,15 @@ impl Game {
             .filter(|&action| !self.played_limited_actions.contains(action))
             .cloned()
             .collect()
+    }
+
+    pub fn draw_wonder_card(&mut self, player: usize) {
+        let wonder = match self.wonders_left.pop() {
+            Some(wonder) => wonder,
+            None => return,
+        };
+        self.wonder_amount_left -= 1;
+        self.players[player].wonder_cards.push(wonder);
     }
 }
 
