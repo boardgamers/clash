@@ -420,7 +420,7 @@ pub enum MoodState {
 #[cfg(test)]
 mod tests {
     use super::{Building, City, MoodState};
-    use crate::civilization::{Civilization, self};
+    use crate::civilization::{self, Civilization};
     use crate::content::civilizations;
     use crate::game;
     use crate::hexagon::Position;
