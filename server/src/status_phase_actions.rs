@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use StatusPhaseState::*;
 
 use crate::{
     game::{Game, StatusPhaseState},
@@ -85,6 +86,18 @@ pub struct ChangeGovernmentType {
 #[derive(Serialize, Deserialize)]
 pub struct DetermineFirstPlayer {
     player: usize,
+}
+
+pub fn next_status_phase(phase: StatusPhaseState) -> StatusPhaseState {
+    match phase {
+        CompleteObjectives => FreeAdvance,
+        FreeAdvance => RaseSize1City,
+        RaseSize1City => ChangeGovernmentType,
+        ChangeGovernmentType => DetermineFirstPlayer,
+        DetermineFirstPlayer => {
+            unreachable!("function should return early with this action")
+        }
+    }
 }
 
 pub fn player_that_chooses_next_first_player(

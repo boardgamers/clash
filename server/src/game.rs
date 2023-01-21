@@ -9,7 +9,7 @@ use crate::{
     wonder::Wonder,
 };
 
-use crate::status_phase_actions::player_that_chooses_next_first_player;
+use crate::status_phase_actions::{next_status_phase, player_that_chooses_next_first_player};
 use GameState::*;
 use StatusPhaseState::*;
 
@@ -22,10 +22,10 @@ pub struct Game {
     pub starting_player: usize,
     pub current_player: usize,
     pub log: Vec<LogItem>,
-    pub played_limited_actions: Vec<String>,
+    pub once_per_turn_actions: Vec<String>,
     pub actions_left: u32,
-    pub round: u32,
-    pub age: u32,
+    pub round: u32, // starts with 1
+    pub age: u32,   // starts with 1
     pub messages: Vec<String>,
     pub dice_roll_outcomes: Vec<u8>,
     dropped_players: Vec<usize>,
@@ -70,7 +70,7 @@ impl Game {
             starting_player,
             current_player: starting_player,
             log: Vec::new(),
-            played_limited_actions: Vec::new(),
+            once_per_turn_actions: Vec::new(),
             actions_left: 3,
             round: 1,
             age: 1,
@@ -100,7 +100,7 @@ impl Game {
             current_player: data.current_player,
             actions_left: data.actions_left,
             log: data.log,
-            played_limited_actions: data.played_limited_actions,
+            once_per_turn_actions: data.played_limited_actions,
             round: data.round,
             age: data.age,
             messages: data.messages,
@@ -135,7 +135,7 @@ impl Game {
             starting_player: self.starting_player,
             current_player: self.current_player,
             log: self.log,
-            played_limited_actions: self.played_limited_actions,
+            played_limited_actions: self.once_per_turn_actions,
             actions_left: self.actions_left,
             round: self.round,
             age: self.age,
@@ -192,12 +192,11 @@ impl Game {
             panic!("Illegal action");
         }
         if let Custom { name, .. } = &action {
-            if self.played_limited_actions.contains(name) {
+            if self.once_per_turn_actions.contains(name) {
                 panic!("Illegal action");
             }
-            let action_type = action.action_type();
-            if action_type.once_per_turn {
-                self.played_limited_actions.push(name.clone());
+            if action.action_type().once_per_turn {
+                self.once_per_turn_actions.push(name.clone());
             }
         }
         self.with_player(player_index, |p, g| action.execute(g, p.id));
@@ -222,44 +221,46 @@ impl Game {
             self.next_age();
             return;
         }
-        self.current_player += 1;
-        self.current_player %= self.players.len();
+        self.next_player();
         if self.current_player == self.starting_player {
-            match phase {
-                CompleteObjectives => self.state = StatusPhase(FreeAdvance),
-                FreeAdvance => {
-                    self.state = StatusPhase(RaseSize1City);
-                    //todo! draw cards
-                }
-                RaseSize1City => self.state = StatusPhase(ChangeGovernmentType),
+            let next_phase = next_status_phase(phase);
+            match next_phase {
                 ChangeGovernmentType => {
-                    self.state = StatusPhase(DetermineFirstPlayer);
+                    // todo! draw cards (this is a phase of it's on in the rules,
+                    // before change government, but execute it right away without storing
+                    // the status phase
+                }
+                DetermineFirstPlayer => {
                     self.current_player =
                         player_that_chooses_next_first_player(&self.players, self.starting_player);
                 }
-                DetermineFirstPlayer => {
-                    unreachable!("function should return early with this action")
-                }
+                _ => {}
             }
+
+            self.state = StatusPhase(next_phase)
         }
-        if self.dropped_players.contains(&self.current_player) {
-            self.current_player += 1;
-            self.current_player %= self.players.len()
+        self.skip_dropped_players();
+    }
+
+    fn next_player(&mut self) {
+        self.current_player += 1;
+        self.current_player %= self.players.len();
+    }
+
+    fn skip_dropped_players(&mut self) {
+        while self.dropped_players.contains(&self.current_player) {
+            self.next_player();
         }
     }
 
     fn next_turn(&mut self) {
         self.actions_left = 3;
-        self.played_limited_actions = Vec::new();
-        self.current_player += 1;
-        self.current_player %= self.players.len();
+        self.once_per_turn_actions = Vec::new();
+        self.next_player();
         if self.current_player == self.starting_player {
             self.next_round();
         }
-        if self.dropped_players.contains(&self.current_player) {
-            self.current_player += 1;
-            self.current_player %= self.players.len()
-        }
+        self.skip_dropped_players();
     }
 
     fn next_round(&mut self) {
@@ -274,7 +275,7 @@ impl Game {
         if self.players.iter().any(|player| player.cities.is_empty()) {
             self.end_game();
         }
-        self.state = StatusPhase(ChangeGovernmentType);
+        self.state = StatusPhase(CompleteObjectives);
     }
 
     fn next_age(&mut self) {
@@ -298,17 +299,14 @@ impl Game {
 
     pub fn drop_player(&mut self, player_index: usize) {
         self.dropped_players.push(player_index);
-        if self.current_player == player_index {
-            self.current_player += 1;
-            self.current_player %= self.players.len();
-        }
+        self.skip_dropped_players();
     }
 
     pub fn get_available_custom_actions(&self) -> Vec<String> {
         let custom_actions = &self.players[self.current_player].custom_actions;
         custom_actions
             .iter()
-            .filter(|&action| !self.played_limited_actions.contains(action))
+            .filter(|&action| !self.once_per_turn_actions.contains(action))
             .cloned()
             .collect()
     }
@@ -375,7 +373,7 @@ pub mod tests {
             starting_player: 0,
             current_player: 0,
             log: Vec::new(),
-            played_limited_actions: Vec::new(),
+            once_per_turn_actions: Vec::new(),
             actions_left: 3,
             round: 1,
             age: 1,
