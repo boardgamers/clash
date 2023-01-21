@@ -1,6 +1,4 @@
-use std::fmt::Display;
-
-use crate::player::{self, PlayerInitializer, PlayerSetup};
+use crate::ability_initializer::{self, AbilityInitializer, AbilityInitializerSetup};
 
 pub struct Leader {
     pub name: String,
@@ -8,8 +6,8 @@ pub struct Leader {
     pub first_ability_description: String,
     pub second_ability: String,
     pub second_ability_description: String,
-    pub player_initializer: PlayerInitializer,
-    pub player_deinitializer: PlayerInitializer,
+    pub player_initializer: AbilityInitializer,
+    pub player_deinitializer: AbilityInitializer,
 }
 
 impl Leader {
@@ -35,8 +33,8 @@ impl Leader {
         first_ability_description: String,
         second_ability: String,
         second_ability_description: String,
-        player_initializer: PlayerInitializer,
-        player_deinitializer: PlayerInitializer,
+        player_initializer: AbilityInitializer,
+        player_deinitializer: AbilityInitializer,
     ) -> Self {
         Self {
             name,
@@ -56,8 +54,8 @@ pub struct LeaderBuilder {
     first_ability_description: String,
     second_ability: String,
     second_ability_description: String,
-    player_initializers: Vec<PlayerInitializer>,
-    player_deinitializers: Vec<PlayerInitializer>,
+    player_initializers: Vec<AbilityInitializer>,
+    player_deinitializers: Vec<AbilityInitializer>,
 }
 
 impl LeaderBuilder {
@@ -80,8 +78,10 @@ impl LeaderBuilder {
     }
 
     pub fn build(self) -> Leader {
-        let player_initializer = player::join_player_initializers(self.player_initializers);
-        let player_deinitializer = player::join_player_initializers(self.player_deinitializers);
+        let player_initializer =
+            ability_initializer::join_ability_initializers(self.player_initializers);
+        let player_deinitializer =
+            ability_initializer::join_ability_initializers(self.player_deinitializers);
         Leader::new(
             self.name,
             self.first_ability,
@@ -94,20 +94,18 @@ impl LeaderBuilder {
     }
 }
 
-impl Display for LeaderBuilder {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.name.clone())
-    }
-}
-
-impl PlayerSetup for LeaderBuilder {
-    fn add_player_initializer(mut self, initializer: PlayerInitializer) -> Self {
+impl AbilityInitializerSetup for LeaderBuilder {
+    fn add_ability_initializer(mut self, initializer: AbilityInitializer) -> Self {
         self.player_initializers.push(initializer);
         self
     }
 
-    fn add_player_deinitializer(mut self, deinitializer: PlayerInitializer) -> Self {
+    fn add_ability_deinitializer(mut self, deinitializer: AbilityInitializer) -> Self {
         self.player_deinitializers.push(deinitializer);
         self
+    }
+
+    fn key(&self) -> String {
+        self.name.clone()
     }
 }

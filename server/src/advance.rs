@@ -1,7 +1,5 @@
-use std::fmt::Display;
-
 use crate::{
-    player::{self, PlayerInitializer, PlayerSetup},
+    ability_initializer::{self, AbilityInitializer, AbilityInitializerSetup},
     resource_pile::ResourcePile,
 };
 
@@ -14,8 +12,8 @@ pub struct Advance {
     pub required_advance: Option<String>,
     pub contradicting_advance: Option<String>,
     pub unlocked_building: Option<String>,
-    pub player_initializer: PlayerInitializer,
-    pub player_deinitializer: PlayerInitializer,
+    pub player_initializer: AbilityInitializer,
+    pub player_deinitializer: AbilityInitializer,
 }
 
 impl Advance {
@@ -41,8 +39,8 @@ pub struct AdvanceBuilder {
     required_advance: Option<String>,
     contradicting_advance: Option<String>,
     unlocked_building: Option<String>,
-    initializers: Vec<PlayerInitializer>,
-    deinitializers: Vec<PlayerInitializer>,
+    initializers: Vec<AbilityInitializer>,
+    deinitializers: Vec<AbilityInitializer>,
 }
 
 impl AdvanceBuilder {
@@ -70,8 +68,8 @@ impl AdvanceBuilder {
     }
 
     pub fn build(self) -> Advance {
-        let initializer = player::join_player_initializers(self.initializers);
-        let deinitializer = player::join_player_initializers(self.deinitializers);
+        let initializer = ability_initializer::join_ability_initializers(self.initializers);
+        let deinitializer = ability_initializer::join_ability_initializers(self.deinitializers);
         Advance {
             name: self.name,
             description: self.description,
@@ -85,21 +83,19 @@ impl AdvanceBuilder {
     }
 }
 
-impl Display for AdvanceBuilder {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.name.clone())
-    }
-}
-
-impl PlayerSetup for AdvanceBuilder {
-    fn add_player_initializer(mut self, initializer: PlayerInitializer) -> Self {
+impl AbilityInitializerSetup for AdvanceBuilder {
+    fn add_ability_initializer(mut self, initializer: AbilityInitializer) -> Self {
         self.initializers.push(initializer);
         self
     }
 
-    fn add_player_deinitializer(mut self, deinitializer: PlayerInitializer) -> Self {
+    fn add_ability_deinitializer(mut self, deinitializer: AbilityInitializer) -> Self {
         self.deinitializers.push(deinitializer);
         self
+    }
+
+    fn key(&self) -> String {
+        self.name.clone()
     }
 }
 

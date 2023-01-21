@@ -2,7 +2,6 @@ use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering::{self, *},
     collections::{HashMap, VecDeque},
-    fmt::Display,
     mem,
 };
 
@@ -12,10 +11,10 @@ use crate::{
     city::{Building, City, CityData},
     civilization::Civilization,
     content::{advances, civilizations, wonders},
-    events::EventMut,
     game::Game,
     hexagon::Position,
     leader::Leader,
+    player_events::PlayerEvents,
     resource_pile::ResourcePile,
     special_advance::SpecialAdvance,
     wonder::Wonder,
@@ -42,8 +41,8 @@ pub struct Player {
     pub id: usize,
     resources: ResourcePile,
     pub resource_limit: ResourcePile,
-    events: Option<PlayerEvents>,
-    event_listener_indices: HashMap<String, VecDeque<usize>>,
+    pub events: Option<PlayerEvents>,
+    pub event_listener_indices: HashMap<String, VecDeque<usize>>,
     pub cities: Vec<City>,
     pub units: Vec<Unit>,
     pub civilization: Civilization,
@@ -64,7 +63,7 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn from_data(data: PlayerData) -> Self {
+    pub fn from_data(data: PlayerData, game: &mut Game) -> Self {
         let mut player = Self {
             name: data.name,
             id: data.id,
@@ -99,21 +98,28 @@ impl Player {
             defeated_leaders: data.defeated_leaders,
             event_victory_points: data.event_victory_points,
             custom_actions: data.custom_actions,
-            wonder_cards: data.wonder_cards.iter().map(|wonder| wonders::get_wonder_by_name(wonder).expect("player data should have valid wonder cards")).collect(),
+            wonder_cards: data
+                .wonder_cards
+                .iter()
+                .map(|wonder| {
+                    wonders::get_wonder_by_name(wonder)
+                        .expect("player data should have valid wonder cards")
+                })
+                .collect(),
         };
         let advances = mem::take(&mut player.advances);
         for advance in advances.iter() {
-            player.advance(advance);
+            player.advance(advance, game);
         }
         player.advances = advances;
         if let Some(leader) = player.active_leader.take() {
-            (leader.player_initializer)(&mut player);
+            (leader.player_initializer)(game, player.id);
             player.active_leader = Some(leader);
         }
         let mut cities = mem::take(&mut player.cities);
         for city in cities.iter_mut() {
             for wonder in city.city_pieces.wonders.iter() {
-                (wonder.player_initializer)(&mut player);
+                (wonder.player_initializer)(game, player.id);
             }
         }
         player.cities.append(&mut cities);
@@ -146,7 +152,11 @@ impl Player {
             defeated_leaders: self.defeated_leaders,
             event_victory_points: self.event_victory_points,
             custom_actions: self.custom_actions,
-            wonder_cards: self.wonder_cards.into_iter().map(|wonder| wonder.name).collect(),
+            wonder_cards: self
+                .wonder_cards
+                .into_iter()
+                .map(|wonder| wonder.name)
+                .collect(),
         }
     }
 
@@ -202,16 +212,16 @@ impl Player {
         &self.resources
     }
 
-    pub fn kill_leader(&mut self) {
+    pub fn kill_leader(&mut self, game: &mut Game) {
         if let Some(leader) = self.active_leader.take() {
-            (leader.player_deinitializer)(self);
+            (leader.player_deinitializer)(game, self.id);
         }
     }
 
-    pub fn set_active_leader(&mut self, index: usize) {
-        self.kill_leader();
+    pub fn set_active_leader(&mut self, index: usize, game: &mut Game) {
+        self.kill_leader(game);
         let new_leader = self.available_leaders.remove(index);
-        (new_leader.player_initializer)(self);
+        (new_leader.player_initializer)(game, self.id);
         self.active_leader = Some(new_leader);
     }
 
@@ -245,7 +255,7 @@ impl Player {
         self.advances.iter().any(|advances| advances == advance)
     }
 
-    pub fn advance(&mut self, advance: &str) {
+    pub fn advance(&mut self, advance: &str, game: &mut Game) {
         let advance = advances::get_advance_by_name(advance).expect("advance should exist");
         if let Some(advance_bonus) = &advance.advance_bonus {
             self.gain_resources(advance_bonus.resources());
@@ -253,14 +263,14 @@ impl Player {
         for i in 0..self.civilization.special_advances.len() {
             if self.civilization.special_advances[i].required_advance == advance.name {
                 let special_advance = self.civilization.special_advances.remove(i);
-                self.unlock_special_advance(&special_advance);
+                self.unlock_special_advance(&special_advance, game);
                 self.civilization
                     .special_advances
                     .insert(i, special_advance);
                 break;
             }
         }
-        (advance.player_initializer)(self);
+        (advance.player_initializer)(game, self.id);
         self.advances.push(advance.name);
         self.game_event_tokens -= 1;
         if self.game_event_tokens == 0 {
@@ -269,19 +279,19 @@ impl Player {
         }
     }
 
-    pub fn remove_advance(&mut self, advance: &Advance) {
+    pub fn remove_advance(&mut self, advance: &Advance, game: &mut Game) {
         if let Some(position) = self
             .advances
             .iter()
             .position(|advances| advances == &advance.name)
         {
-            (advance.player_deinitializer)(self);
+            (advance.player_deinitializer)(game, self.id);
             self.advances.remove(position);
         }
     }
 
-    fn unlock_special_advance(&mut self, special_advance: &SpecialAdvance) {
-        (special_advance.player_initializer)(self);
+    fn unlock_special_advance(&mut self, special_advance: &SpecialAdvance, game: &mut Game) {
+        (special_advance.player_initializer)(game, self.id);
         self.unlocked_special_advances
             .push(special_advance.name.clone());
     }
@@ -317,10 +327,10 @@ impl Player {
         self.events = Some(events);
     }
 
-    pub fn conquer_city(&mut self, position: &Position, new_player: &mut Player) {
+    pub fn conquer_city(&mut self, position: &Position, new_player: usize, game: &mut Game) {
         self.take_city(&position)
             .expect("player should own city")
-            .conquer(new_player, self);
+            .conquer(game, new_player, self.id);
     }
 
     pub fn with_city<F>(&mut self, position: &Position, action: F)
@@ -462,76 +472,4 @@ pub struct PlayerData {
     event_victory_points: f32,
     custom_actions: Vec<String>,
     wonder_cards: Vec<String>,
-}
-
-#[derive(Default)]
-pub struct PlayerEvents {
-    pub city_size_increase: EventMut<Player, City, Building>,
-    pub building_cost: EventMut<ResourcePile, City, Building>,
-    pub wonder_cost: EventMut<ResourcePile, City, Wonder>,
-}
-
-pub type PlayerInitializer = Box<dyn Fn(&mut Player)>;
-
-pub trait PlayerSetup: Display + Sized {
-    fn add_player_initializer(self, initializer: PlayerInitializer) -> Self;
-    fn add_player_deinitializer(self, deinitializer: PlayerInitializer) -> Self;
-
-    fn add_player_event_listener<T, U, V, E, F>(self, event: E, listener: F, priority: i32) -> Self
-    where
-        E: Fn(&mut PlayerEvents) -> &mut EventMut<T, U, V> + 'static + Clone,
-        F: Fn(&mut T, &U, &V) + 'static + Clone,
-    {
-        let key = self.to_string();
-        let deinitialize_event = event.clone();
-        let initializer = Box::new(move |player: &mut Player| {
-            player
-                .event_listener_indices
-                .entry(key.clone())
-                .or_default()
-                .push_back(
-                    event(
-                        player
-                            .events
-                            .as_mut()
-                            .expect("Events should be set after use"),
-                    )
-                    .add_listener_mut(listener.clone(), priority),
-                )
-        });
-        let key = self.to_string();
-        let deinitializer = Box::new(move |player: &mut Player| {
-            deinitialize_event(
-                player
-                    .events
-                    .as_mut()
-                    .expect("Events should be set after use"),
-            )
-            .remove_listener_mut(
-                player
-                    .event_listener_indices
-                    .entry(key.clone())
-                    .or_default()
-                    .pop_front()
-                    .unwrap_or_else(|| panic!("{}: tried to remove non-existing element", key)),
-            )
-        });
-        self.add_player_initializer(initializer)
-            .add_player_deinitializer(deinitializer)
-    }
-
-    fn add_custom_action(self, action: &str) -> Self {
-        let action = action.to_string();
-        self.add_player_initializer(Box::new(move |player: &mut Player| {
-            player.custom_actions.push(action.clone())
-        }))
-    }
-}
-
-pub fn join_player_initializers(setup: Vec<PlayerInitializer>) -> PlayerInitializer {
-    Box::new(move |player: &mut Player| {
-        for initializer in setup.iter() {
-            initializer(player)
-        }
-    })
 }

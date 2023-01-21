@@ -1,8 +1,6 @@
-use std::fmt::Display;
-
 use crate::{
+    ability_initializer::{self, AbilityInitializer, AbilityInitializerSetup},
     hexagon::Position,
-    player::{self, PlayerInitializer, PlayerSetup},
     resource_pile::ResourcePile,
 };
 
@@ -15,8 +13,8 @@ pub struct Wonder {
     pub cost: ResourcePile,
     pub required_advances: Vec<String>,
     pub placement_requirement: Option<PlacementChecker>,
-    pub player_initializer: PlayerInitializer,
-    pub player_deinitializer: PlayerInitializer,
+    pub player_initializer: AbilityInitializer,
+    pub player_deinitializer: AbilityInitializer,
     pub builder: Option<String>,
 }
 
@@ -39,8 +37,8 @@ pub struct WonderBuilder {
     cost: ResourcePile,
     required_advances: Vec<String>,
     placement_requirement: Option<PlacementChecker>,
-    player_initializers: Vec<PlayerInitializer>,
-    player_deinitializers: Vec<PlayerInitializer>,
+    player_initializers: Vec<AbilityInitializer>,
+    player_deinitializers: Vec<AbilityInitializer>,
 }
 
 impl WonderBuilder {
@@ -67,8 +65,10 @@ impl WonderBuilder {
     }
 
     pub fn build(self) -> Wonder {
-        let player_initializer = player::join_player_initializers(self.player_initializers);
-        let player_deinitializer = player::join_player_initializers(self.player_deinitializers);
+        let player_initializer =
+            ability_initializer::join_ability_initializers(self.player_initializers);
+        let player_deinitializer =
+            ability_initializer::join_ability_initializers(self.player_deinitializers);
         Wonder {
             name: self.name,
             description: String::from("● ") + &self.descriptions.join("\n● "),
@@ -82,20 +82,18 @@ impl WonderBuilder {
     }
 }
 
-impl Display for WonderBuilder {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.name.clone())
-    }
-}
-
-impl PlayerSetup for WonderBuilder {
-    fn add_player_initializer(mut self, initializer: PlayerInitializer) -> Self {
+impl AbilityInitializerSetup for WonderBuilder {
+    fn add_ability_initializer(mut self, initializer: AbilityInitializer) -> Self {
         self.player_initializers.push(initializer);
         self
     }
 
-    fn add_player_deinitializer(mut self, deinitializer: PlayerInitializer) -> Self {
+    fn add_ability_deinitializer(mut self, deinitializer: AbilityInitializer) -> Self {
         self.player_deinitializers.push(deinitializer);
         self
+    }
+
+    fn key(&self) -> String {
+        self.name.clone()
     }
 }

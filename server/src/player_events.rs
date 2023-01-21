@@ -1,4 +1,10 @@
-use crate::{events::EventMut, player::Player, city::{City, Building}, wonder::Wonder, resource_pile::ResourcePile};
+use crate::{
+    city::{Building, City},
+    events::EventMut,
+    player::Player,
+    resource_pile::ResourcePile,
+    wonder::Wonder,
+};
 
 #[derive(Default)]
 pub struct PlayerEvents {

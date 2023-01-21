@@ -1,10 +1,10 @@
-use crate::{events::EventMut, player_events::PlayerEvents, game::Game};
+use crate::{events::EventMut, game::Game, player_events::PlayerEvents};
 
 pub type AbilityInitializer = Box<dyn Fn(&mut Game, usize)>;
 
 pub trait AbilityInitializerSetup: Sized {
-    fn add_player_initializer(self, initializer: AbilityInitializer) -> Self;
-    fn add_player_deinitializer(self, deinitializer: AbilityInitializer) -> Self;
+    fn add_ability_initializer(self, initializer: AbilityInitializer) -> Self;
+    fn add_ability_deinitializer(self, deinitializer: AbilityInitializer) -> Self;
     fn key(&self) -> String;
 
     fn add_player_event_listener<T, U, V, E, F>(self, event: E, listener: F, priority: i32) -> Self
@@ -48,15 +48,26 @@ pub trait AbilityInitializerSetup: Sized {
                     .unwrap_or_else(|| panic!("{}: tried to remove non-existing element", key)),
             )
         });
-        self.add_player_initializer(initializer)
-            .add_player_deinitializer(deinitializer)
+        self.add_ability_initializer(initializer)
+            .add_ability_deinitializer(deinitializer)
     }
 
     fn add_custom_action(self, action: &str) -> Self {
         let action = action.to_string();
-        self.add_player_initializer(Box::new(move |game: &mut Game, player: usize| {
+        let deinitializer_action = action.clone();
+        self.add_ability_initializer(Box::new(move |game, player| {
             let player = &mut game.players[player];
             player.custom_actions.push(action.clone())
+        }))
+        .add_ability_deinitializer(Box::new(move |game, player| {
+            let player = &mut game.players[player];
+            player.custom_actions.remove(
+                player
+                    .custom_actions
+                    .iter()
+                    .position(|custom_action| custom_action == &deinitializer_action)
+                    .expect("player should have custom action before deinitialization"),
+            );
         }))
     }
 }

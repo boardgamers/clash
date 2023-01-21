@@ -25,4 +25,3 @@ pub mod tests {
         Civilization::new("test", vec![], vec![])
     }
 }
-

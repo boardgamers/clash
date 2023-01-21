@@ -1,8 +1,8 @@
 use std::fmt::Display;
 
 use crate::{
-    content::wonders, game::Game, hexagon::Position, player::Player,
-    resource_pile::ResourcePile, wonder::Wonder,
+    content::wonders, game::Game, hexagon::Position, player::Player, resource_pile::ResourcePile,
+    wonder::Wonder,
 };
 
 use serde::{Deserialize, Serialize};
@@ -99,39 +99,45 @@ impl City {
         true
     }
 
-    pub fn build_wonder(&mut self, wonder: Wonder, player: &mut Player) {
+    pub fn build_wonder(&mut self, wonder: Wonder, game: &mut Game, player: usize) {
         let mut wonder = wonder;
-        (wonder.player_initializer)(player);
+        (wonder.player_initializer)(game, player);
+        let player = &mut game.players[player];
         player.wonders_build += 1;
         player.wonders.push(wonder.name.clone());
         wonder.builder = Some(player.name());
         self.city_pieces.wonders.push(wonder);
     }
 
-    pub fn conquer(mut self, new_player: &mut Player, old_player: &mut Player) {
-        self.player = new_player.id;
-        self.mood_state = Angry;
+    pub fn conquer(mut self, game: &mut Game, new_player: usize, old_player: usize) {
         for wonder in self.city_pieces.wonders.iter() {
-            (wonder.player_deinitializer)(old_player);
-            (wonder.player_initializer)(new_player);
-            old_player.remove_wonder(wonder);
-            new_player.wonders.push(wonder.name.clone());
+            (wonder.player_deinitializer)(game, old_player);
+            (wonder.player_initializer)(game, new_player);
         }
-        if let Some(player) = &self.city_pieces.obelisk {
-            if player == &old_player.id {
-                old_player.influenced_buildings += 1;
+        game.with_player(new_player, |new_player, game| {
+            let old_player = &mut game.players[old_player];
+            self.player = new_player.id;
+            self.mood_state = Angry;
+            for wonder in self.city_pieces.wonders.iter() {
+                old_player.remove_wonder(wonder);
+                new_player.wonders.push(wonder.name.clone());
             }
-        }
-        let previously_influenced_building =
-            self.city_pieces.buildings(Some(new_player.id)).len() as u32;
-        new_player.influenced_buildings -= previously_influenced_building;
-        self.city_pieces.change_player(new_player.id);
-        new_player.cities.push(self)
+            if let Some(player) = &self.city_pieces.obelisk {
+                if player == &old_player.id {
+                    old_player.influenced_buildings += 1;
+                }
+            }
+            let previously_influenced_building =
+                self.city_pieces.buildings(Some(new_player.id)).len() as u32;
+            new_player.influenced_buildings -= previously_influenced_building;
+            self.city_pieces.change_player(new_player.id);
+            new_player.cities.push(self)
+        });
     }
 
     pub fn raze(self, player: &mut Player, game: &mut Game) {
         for wonder in self.city_pieces.wonders.into_iter() {
-            (wonder.player_deinitializer)(player);
+            (wonder.player_deinitializer)(game, player.id);
             player.remove_wonder(&wonder);
             let builder = wonder.builder.expect("Wonder should have a builder");
             let builder = game
@@ -412,9 +418,10 @@ pub enum MoodState {
 }
 
 #[cfg(test)]
-mod city_tests {
+mod tests {
     use super::{Building, City, MoodState};
     use crate::civilization::Civilization;
+    use crate::game::tests;
     use crate::hexagon::Position;
     use crate::player::Player;
     use crate::resource_pile::ResourcePile;
@@ -422,32 +429,39 @@ mod city_tests {
 
     #[test]
     fn conquer_test() {
-        let mut old = Player::new(Civilization::new("old civ", vec![], vec![]), 0);
-        let mut new = Player::new(Civilization::new("new civ", vec![], vec![]), 0);
+        let old = Player::new(Civilization::new("old civ", vec![], vec![]), 0);
+        let new = Player::new(Civilization::new("new civ", vec![], vec![]), 1);
 
         let wonder = Wonder::builder("wonder", ResourcePile::default(), vec![]).build();
+        let mut game = tests::test_game();
+        game.players.push(old);
+        game.players.push(new);
 
         let position = Position::new(0, 0, 0);
-        old.cities.push(City::new(old.id, position.clone()));
-        old.with_city(&position, |p, c| {
-            c.build_wonder(wonder, p);
-            c.increase_size(&Building::Academy, p);
-            c.increase_size(&Building::Obelisk, p);
+        game.with_player(0, |old, game| {
+            game.with_player(1, |new, game| {
+                old.cities.push(City::new(old.id, position.clone()));
+                old.with_city(&position, |p, c| {
+                    c.build_wonder(wonder, game, p.id);
+                    c.increase_size(&Building::Academy, p);
+                    c.increase_size(&Building::Obelisk, p);
+                });
+
+                assert_eq!(6.0, old.victory_points());
+
+                old.conquer_city(&position, new.id, game);
+
+                let c = new.get_city(&position).unwrap();
+                assert_eq!(1, c.player);
+                assert_eq!(MoodState::Angry, c.mood_state);
+
+                assert_eq!(3.0, old.victory_points());
+                assert_eq!(3.0, new.victory_points());
+                assert_eq!(0, old.wonders.len());
+                assert_eq!(1, new.wonders.len());
+                assert_eq!(1, old.influenced_buildings);
+                assert_eq!(0, new.influenced_buildings);
+            });
         });
-
-        assert_eq!(6.0, old.victory_points());
-
-        old.conquer_city(&position, &mut new);
-
-        let c = new.get_city(&position).unwrap();
-        assert_eq!(1, c.player);
-        assert_eq!(MoodState::Angry, c.mood_state);
-
-        assert_eq!(3.0, old.victory_points());
-        assert_eq!(3.0, new.victory_points());
-        assert_eq!(0, old.wonders.len());
-        assert_eq!(1, new.wonders.len());
-        assert_eq!(1, old.influenced_buildings);
-        assert_eq!(0, new.influenced_buildings);
     }
 }

@@ -1,13 +1,11 @@
-use std::fmt::Display;
-
-use crate::player::{self, PlayerInitializer, PlayerSetup};
+use crate::ability_initializer::{self, AbilityInitializer, AbilityInitializerSetup};
 
 pub struct SpecialAdvance {
     pub name: String,
     pub description: String,
     pub required_advance: String,
-    pub player_initializer: PlayerInitializer,
-    pub player_deinitializer: PlayerInitializer,
+    pub player_initializer: AbilityInitializer,
+    pub player_deinitializer: AbilityInitializer,
 }
 
 impl SpecialAdvance {
@@ -19,8 +17,8 @@ impl SpecialAdvance {
         name: String,
         description: String,
         required_advance: String,
-        player_initializer: PlayerInitializer,
-        player_deinitializer: PlayerInitializer,
+        player_initializer: AbilityInitializer,
+        player_deinitializer: AbilityInitializer,
     ) -> Self {
         Self {
             name,
@@ -36,8 +34,8 @@ pub struct SpecialAdvanceBuilder {
     name: String,
     descriptions: Vec<String>,
     required_advance: String,
-    initializers: Vec<PlayerInitializer>,
-    deinitializers: Vec<PlayerInitializer>,
+    initializers: Vec<AbilityInitializer>,
+    deinitializers: Vec<AbilityInitializer>,
 }
 
 impl SpecialAdvanceBuilder {
@@ -57,8 +55,8 @@ impl SpecialAdvanceBuilder {
     }
 
     pub fn build(self) -> SpecialAdvance {
-        let initializer = player::join_player_initializers(self.initializers);
-        let deinitializer = player::join_player_initializers(self.deinitializers);
+        let initializer = ability_initializer::join_ability_initializers(self.initializers);
+        let deinitializer = ability_initializer::join_ability_initializers(self.deinitializers);
         SpecialAdvance::new(
             self.name,
             String::from("● ") + &self.descriptions.join("\n● "),
@@ -69,20 +67,18 @@ impl SpecialAdvanceBuilder {
     }
 }
 
-impl Display for SpecialAdvanceBuilder {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.name.clone())
-    }
-}
-
-impl PlayerSetup for SpecialAdvanceBuilder {
-    fn add_player_initializer(mut self, initializer: PlayerInitializer) -> Self {
+impl AbilityInitializerSetup for SpecialAdvanceBuilder {
+    fn add_ability_initializer(mut self, initializer: AbilityInitializer) -> Self {
         self.initializers.push(initializer);
         self
     }
 
-    fn add_player_deinitializer(mut self, deinitializer: PlayerInitializer) -> Self {
+    fn add_ability_deinitializer(mut self, deinitializer: AbilityInitializer) -> Self {
         self.deinitializers.push(deinitializer);
         self
+    }
+
+    fn key(&self) -> String {
+        self.name.clone()
     }
 }

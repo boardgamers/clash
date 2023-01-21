@@ -1,3 +1,4 @@
+mod ability_initializer;
 mod advance;
 mod army;
 mod city;
@@ -9,6 +10,7 @@ mod game_api;
 mod hexagon;
 mod leader;
 mod player;
+mod player_events;
 mod playing_actions;
 mod resource_pile;
 mod special_advance;

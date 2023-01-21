@@ -300,7 +300,7 @@ impl PaymentOptions {
 }
 
 #[cfg(test)]
-mod resource_pile_tests {
+mod tests {
     use super::{PaymentOptions, ResourcePile};
 
     fn assert_can_afford(name: &str, cost: ResourcePile) {

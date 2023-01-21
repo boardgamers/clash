@@ -1,4 +1,4 @@
-use rand::{rngs::StdRng, Rng, SeedableRng, seq::SliceRandom};
+use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -93,9 +93,9 @@ impl Game {
     }
 
     fn from_data(data: GameData) -> Self {
-        Self {
+        let mut game = Self {
             state: data.state,
-            players: data.players.into_iter().map(Player::from_data).collect(),
+            players: Vec::new(),
             starting_player: data.current_player,
             current_player: data.current_player,
             actions_left: data.actions_left,
@@ -115,7 +115,13 @@ impl Game {
                 })
                 .collect(),
             wonder_amount_left: data.wonder_amount_left,
+        };
+        let mut players = Vec::new();
+        for player in data.players.into_iter() {
+            players.push(Player::from_data(player, &mut game));
         }
+        game.players = players;
+        game
     }
 
     fn data(self) -> GameData {
@@ -194,7 +200,7 @@ impl Game {
                 self.played_limited_actions.push(name.clone());
             }
         }
-        self.with_player(player_index, |p, g| action.execute(p, g));
+        self.with_player(player_index, |p, g| action.execute(g, p.id));
         if !free_action {
             self.actions_left -= 1;
         }
@@ -355,4 +361,29 @@ pub enum StatusPhaseState {
 pub enum LogItem {
     PlayingAction(String),
     StatusPhaseAction(String),
+}
+
+#[cfg(test)]
+pub mod tests {
+    use super::Game;
+    use super::GameState::Playing;
+
+    pub fn test_game() -> Game {
+        Game {
+            state: Playing,
+            players: Vec::new(),
+            starting_player: 0,
+            current_player: 0,
+            log: Vec::new(),
+            played_limited_actions: Vec::new(),
+            actions_left: 3,
+            round: 1,
+            age: 1,
+            messages: vec![String::from("Game has started")],
+            dice_roll_outcomes: vec![12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+            dropped_players: Vec::new(),
+            wonders_left: Vec::new(),
+            wonder_amount_left: 0,
+        }
+    }
 }
