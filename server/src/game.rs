@@ -9,6 +9,7 @@ use crate::{
     wonder::Wonder,
 };
 
+use crate::status_phase_actions::player_that_chooses_next_first_player;
 use GameState::*;
 use StatusPhaseState::*;
 
@@ -227,20 +228,8 @@ impl Game {
                 RaseSize1City => self.state = StatusPhase(ChangeGovernmentType),
                 ChangeGovernmentType => {
                     self.state = StatusPhase(DetermineFirstPlayer);
-                    let mut potential_deciding_players = Vec::new();
-                    let mut best_total = 0;
-                    for (i, player) in self.players.iter().enumerate() {
-                        let total =
-                            player.resources().mood_tokens + player.resources().culture_tokens;
-                        if total > best_total {
-                            best_total = total;
-                        }
-                        if total == best_total {
-                            potential_deciding_players.push(i);
-                        }
-                    }
-                    self.current_player = potential_deciding_players.into_iter().min_by_key(|&index| (index as isize - self.starting_player as isize) % self.players.len() as isize
-                ).expect("there should at least be one player with the most mood and culture tokens");
+                    self.current_player =
+                        player_that_chooses_next_first_player(&self.players, self.starting_player);
                 }
                 DetermineFirstPlayer => {
                     unreachable!("function should return early with this action")

@@ -87,3 +87,62 @@ pub struct ChangeGovernmentType {
 pub struct DetermineFirstPlayer {
     player: usize,
 }
+
+pub fn player_that_chooses_next_first_player(
+    players: &Vec<Player>,
+    current_start_player: usize,
+) -> usize {
+    let mut potential_deciding_players = Vec::new();
+    let mut best_total: Option<u32> = None;
+    for (i, player) in players.iter().enumerate() {
+        let total = player.resources().mood_tokens + player.resources().culture_tokens;
+        match best_total {
+            None => {
+                potential_deciding_players.push(i);
+                best_total = Some(total);
+            },
+            Some(t) => if total > t {
+                potential_deciding_players.clear();
+                best_total = Some(total);
+                potential_deciding_players.push(i);
+            } else if total == t {
+                potential_deciding_players.push(i);
+            },
+        }
+    }
+    potential_deciding_players
+        .into_iter()
+        .min_by_key(|&index| {
+            (index as isize - current_start_player as isize).rem_euclid(players.len() as isize)
+        })
+        .expect("there should at least be one player with the most mood and culture tokens")
+}
+
+#[cfg(test)]
+mod tests {
+    use content::civilizations::tests as civ;
+    use crate::content;
+    use crate::player::Player;
+    use crate::resource_pile::ResourcePile;
+    use crate::status_phase_actions::player_that_chooses_next_first_player;
+
+    fn assert_next_player(name: &str, player0_mood: u32, player1_mood: u32, player2_mood: u32, expected_player: usize) {
+        let mut player0 = Player::new(civ::get_test_civilization());
+        player0.gain_resources(ResourcePile::mood_tokens(player0_mood));
+        let mut player1 = Player::new(civ::get_test_civilization());
+        player1.gain_resources(ResourcePile::mood_tokens(player1_mood));
+        let mut player2 = Player::new(civ::get_test_civilization());
+        player2.gain_resources(ResourcePile::mood_tokens(player2_mood));
+        let players = vec!(player0, player1, player2);
+        let got = player_that_chooses_next_first_player(&players, 1);
+        assert_eq!(got, expected_player, "{name}");
+    }
+
+    #[test]
+    fn test_player_that_chooses_next_first_player() {
+        assert_next_player("player 0 has more mood", 1, 0, 0, 0);
+        assert_next_player("player 1 has more mood", 0, 1, 0, 1);
+        assert_next_player("tie between 0 and 1 - player 1 stays", 1, 1, 0, 1);
+        assert_next_player("tie between 0 and 2 - player 2 is the next player after the current first player", 1, 0, 1, 2);
+    }
+}
