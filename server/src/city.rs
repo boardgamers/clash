@@ -1,9 +1,8 @@
 use std::fmt::Display;
-use std::vec::IntoIter;
 
 use crate::{
-    content::wonders, game::Game, hexagon::Position, player::Player, resource_pile::ResourcePile,
-    wonder::Wonder,
+    content::wonders, game::Game, hexagon::Position, player, player::Player,
+    resource_pile::ResourcePile, wonder::Wonder,
 };
 
 use serde::{Deserialize, Serialize};
@@ -116,14 +115,8 @@ impl City {
         for wonder in self.city_pieces.wonders.iter() {
             (wonder.player_deinitializer)(old_player);
             (wonder.player_initializer)(new_player);
-            let wonder = old_player.wonders.remove(
-                old_player
-                    .wonders
-                    .iter()
-                    .position(|player_wonder| player_wonder == &wonder.name)
-                    .expect("player should have conquered wonder"),
-            );
-            new_player.wonders.push(wonder);
+            old_player.remove_wonder(&wonder);
+            new_player.wonders.push(wonder.name.clone());
         }
         if let Some(player) = &self.city_pieces.obelisk {
             if player == &old_player.name() {
@@ -140,13 +133,7 @@ impl City {
     pub fn raze(self, player: &mut Player, game: &mut Game) {
         for wonder in self.city_pieces.wonders.into_iter() {
             (wonder.player_deinitializer)(player);
-            player.wonders.remove(
-                player
-                    .wonders
-                    .iter()
-                    .position(|player_wonder| player_wonder == &wonder.name)
-                    .expect("player should have razed wonder"),
-            );
+            player.remove_wonder(&wonder);
             let builder = wonder.builder.expect("Wonder should have a builder");
             let builder = game
                 .players
@@ -377,7 +364,7 @@ impl CityPieces {
 
     fn change_player(&mut self, new_player: String) {
         for b in self.buildings(None) {
-            if (!matches!(b, Building::Obelisk)) {
+            if !matches!(b, Building::Obelisk) {
                 self.set_building(&b, new_player.clone());
             }
         }

@@ -331,6 +331,15 @@ impl Player {
         self.cities.push(city);
     }
 
+    pub fn remove_wonder(&mut self, wonder: &Wonder) {
+        self.wonders.remove(
+            self.wonders
+                .iter()
+                .position(|player_wonder| player_wonder == &wonder.name)
+                .expect("player should have wonder"),
+        );
+    }
+
     pub fn game_event_tokens(&self) -> u8 {
         self.game_event_tokens
     }

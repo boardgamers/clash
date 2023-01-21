@@ -11,8 +11,8 @@ fn assert_cannot_afford(name: &str, cost: ResourcePile) {
 }
 
 fn assert_payment_options(name: &str, cost: ResourcePile, options: PaymentOptions) {
-    let budged = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
-    assert_eq!(options, cost.get_payment_options(&budged), "{name}");
+    let budget = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
+    assert_eq!(options, cost.get_payment_options(&budget), "{name}");
 }
 
 fn assert_to_string(resource_pile: ResourcePile, expected: &str) {
