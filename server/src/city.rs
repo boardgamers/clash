@@ -420,8 +420,9 @@ pub enum MoodState {
 #[cfg(test)]
 mod tests {
     use super::{Building, City, MoodState};
-    use crate::civilization::Civilization;
-    use crate::game::tests;
+    use crate::civilization::{Civilization, self};
+    use crate::content::civilizations;
+    use crate::game;
     use crate::hexagon::Position;
     use crate::player::Player;
     use crate::resource_pile::ResourcePile;
@@ -429,11 +430,11 @@ mod tests {
 
     #[test]
     fn conquer_test() {
-        let old = Player::new(Civilization::new("old civ", vec![], vec![]), 0);
-        let new = Player::new(Civilization::new("new civ", vec![], vec![]), 1);
+        let old = Player::new(civilizations::tests::get_test_civilization(), 0);
+        let new = Player::new(civilizations::tests::get_test_civilization(), 1);
 
         let wonder = Wonder::builder("wonder", ResourcePile::default(), vec![]).build();
-        let mut game = tests::test_game();
+        let mut game = game::tests::test_game();
         game.players.push(old);
         game.players.push(new);
 
