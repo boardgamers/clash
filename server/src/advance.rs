@@ -20,9 +20,8 @@ impl Advance {
     pub fn builder(
         name: &str,
         description: &str,
-        advance_bonus: Option<AdvanceBonus>,
     ) -> AdvanceBuilder {
-        AdvanceBuilder::new(name.to_string(), description.to_string(), advance_bonus)
+        AdvanceBuilder::new(name.to_string(), description.to_string())
     }
 }
 
@@ -44,17 +43,22 @@ pub struct AdvanceBuilder {
 }
 
 impl AdvanceBuilder {
-    fn new(name: String, description: String, advance_bonus: Option<AdvanceBonus>) -> Self {
+    fn new(name: String, description: String) -> Self {
         Self {
             name,
             description,
-            advance_bonus,
+            advance_bonus: None,
             required_advance: None,
             contradicting_advance: None,
             unlocked_building: None,
             initializers: Vec::new(),
             deinitializers: Vec::new(),
         }
+    }
+
+    pub fn with_advance_bonus(mut self, advance_bonus: AdvanceBonus) -> Self {
+        self.advance_bonus = Some(advance_bonus);
+        self
     }
 
     pub fn with_required_advance(mut self, required_advance: String) -> Self {

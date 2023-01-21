@@ -57,6 +57,9 @@ impl City {
     }
 
     pub fn can_increase_size(&self, building: &Building, player: &Player) -> bool {
+        if self.player != player.id {
+            return false;
+        }
         if self.city_pieces.amount() == MAX_CITY_SIZE {
             return false;
         }
@@ -80,6 +83,9 @@ impl City {
     }
 
     pub fn can_build_wonder(&self, wonder: &Wonder, player: &Player) -> bool {
+        if self.player != player.id {
+            return false;
+        }
         if self.city_pieces.amount() == MAX_CITY_SIZE {
             return false;
         }
@@ -189,7 +195,7 @@ impl City {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct CityData {
     city_pieces: CityPiecesData,
     mood_state: MoodState,
@@ -398,7 +404,7 @@ impl CityPieces {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct CityPiecesData {
     academy: Option<usize>,
     market: Option<usize>,
@@ -410,7 +416,7 @@ pub struct CityPiecesData {
     wonders: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub enum MoodState {
     Happy,
     Neutral,
@@ -420,7 +426,6 @@ pub enum MoodState {
 #[cfg(test)]
 mod tests {
     use super::{Building, City, MoodState};
-    use crate::civilization::{self, Civilization};
     use crate::content::civilizations;
     use crate::game;
     use crate::hexagon::Position;

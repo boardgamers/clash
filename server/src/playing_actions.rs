@@ -64,8 +64,8 @@ impl PlayingAction {
                     let city = City::from_data(city);
                     let building = Building::from_data(&city_piece);
                     let cost = player.building_cost(&building, &city);
-                    if city.player != player.id
-                        || !city.can_increase_size(&building, player)
+                    if 
+                        !city.can_increase_size(&building, player)
                         || !payment.can_afford(&cost)
                     {
                         panic!("Illegal action");
@@ -76,7 +76,7 @@ impl PlayingAction {
                         if building_bonus != ResourcePile::mood_tokens(1)
                             && building_bonus != ResourcePile::culture_tokens(1)
                         {
-                            panic!("Illegal action");
+                            panic!("Invalid temple bonus");
                         }
                         player.gain_resources(building_bonus);
                     }
