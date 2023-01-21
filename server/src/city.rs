@@ -115,7 +115,7 @@ impl City {
         for wonder in self.city_pieces.wonders.iter() {
             (wonder.player_deinitializer)(old_player);
             (wonder.player_initializer)(new_player);
-            old_player.remove_wonder(&wonder);
+            old_player.remove_wonder(wonder);
             new_player.wonders.push(wonder.name.clone());
         }
         if let Some(player) = &self.city_pieces.obelisk {
