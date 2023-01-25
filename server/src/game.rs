@@ -2,9 +2,11 @@ use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    content::{civilizations, wonders},
+    content::{advances, civilizations, wonders},
+    hexagon::Position,
     player::{Player, PlayerData},
     playing_actions::PlayingAction::*,
+    special_advance::SpecialAdvance,
     status_phase_actions::StatusPhaseAction,
     wonder::Wonder,
 };
@@ -19,8 +21,8 @@ const AGES: u32 = 6;
 pub struct Game {
     pub state: GameState,
     pub players: Vec<Player>,
-    pub starting_player: usize,
-    pub current_player: usize,
+    pub starting_player_index: usize,
+    pub current_player_index: usize,
     pub log: Vec<LogItem>,
     pub once_per_turn_actions: Vec<String>,
     pub actions_left: u32,
@@ -67,8 +69,8 @@ impl Game {
         Self {
             state: Playing,
             players,
-            starting_player,
-            current_player: starting_player,
+            starting_player_index: starting_player,
+            current_player_index: starting_player,
             log: Vec::new(),
             once_per_turn_actions: Vec::new(),
             actions_left: 3,
@@ -96,8 +98,8 @@ impl Game {
         let mut game = Self {
             state: data.state,
             players: Vec::new(),
-            starting_player: data.current_player,
-            current_player: data.current_player,
+            starting_player_index: data.current_player_index,
+            current_player_index: data.current_player_index,
             actions_left: data.actions_left,
             log: data.log,
             once_per_turn_actions: data.played_limited_actions,
@@ -132,8 +134,8 @@ impl Game {
                 .into_iter()
                 .map(|player| player.data())
                 .collect(),
-            starting_player: self.starting_player,
-            current_player: self.current_player,
+            starting_player_index: self.starting_player_index,
+            current_player_index: self.current_player_index,
             log: self.log,
             played_limited_actions: self.once_per_turn_actions,
             actions_left: self.actions_left,
@@ -169,15 +171,6 @@ impl Game {
         self.execute_playing_action(action, player_index);
     }
 
-    pub fn with_player<F>(&mut self, player_index: usize, action: F)
-    where
-        F: FnOnce(&mut Player, &mut Game),
-    {
-        let mut player = self.players.remove(player_index);
-        action(&mut player, self);
-        self.players.insert(player_index, player);
-    }
-
     fn execute_playing_action(&mut self, action: String, player_index: usize) {
         let playing_action =
             serde_json::from_str(&action).expect("action should be valid playing action json");
@@ -199,7 +192,7 @@ impl Game {
                 self.once_per_turn_actions.push(name.clone());
             }
         }
-        self.with_player(player_index, |p, g| action.execute(g, p.id));
+        action.execute(self, player_index);
         if !free_action {
             self.actions_left -= 1;
         }
@@ -215,14 +208,13 @@ impl Game {
         self.log.push(LogItem::StatusPhaseAction(
             serde_json::to_string(&action).expect("status phase action should be serializable"),
         ));
-
-        self.with_player(player_index, |p, g| action.execute(p, g));
+        action.execute(self, player_index);
         if matches!(phase, DetermineFirstPlayer) {
             self.next_age();
             return;
         }
         self.next_player();
-        if self.current_player == self.starting_player {
+        if self.current_player_index == self.starting_player_index {
             let next_phase = next_status_phase(phase);
             match next_phase {
                 ChangeGovernmentType => {
@@ -231,8 +223,10 @@ impl Game {
                     // the status phase
                 }
                 DetermineFirstPlayer => {
-                    self.current_player =
-                        player_that_chooses_next_first_player(&self.players, self.starting_player);
+                    self.current_player_index = player_that_chooses_next_first_player(
+                        &self.players,
+                        self.starting_player_index,
+                    );
                 }
                 _ => {}
             }
@@ -243,12 +237,12 @@ impl Game {
     }
 
     fn next_player(&mut self) {
-        self.current_player += 1;
-        self.current_player %= self.players.len();
+        self.current_player_index += 1;
+        self.current_player_index %= self.players.len();
     }
 
     fn skip_dropped_players(&mut self) {
-        while self.dropped_players.contains(&self.current_player) {
+        while self.dropped_players.contains(&self.current_player_index) {
             self.next_player();
         }
     }
@@ -257,7 +251,7 @@ impl Game {
         self.actions_left = 3;
         self.once_per_turn_actions = Vec::new();
         self.next_player();
-        if self.current_player == self.starting_player {
+        if self.current_player_index == self.starting_player_index {
             self.next_round();
         }
         self.skip_dropped_players();
@@ -303,7 +297,7 @@ impl Game {
     }
 
     pub fn get_available_custom_actions(&self) -> Vec<String> {
-        let custom_actions = &self.players[self.current_player].custom_actions;
+        let custom_actions = &self.players[self.current_player_index].custom_actions;
         custom_actions
             .iter()
             .filter(|&action| !self.once_per_turn_actions.contains(action))
@@ -311,13 +305,119 @@ impl Game {
             .collect()
     }
 
-    pub fn draw_wonder_card(&mut self, player: usize) {
+    pub fn draw_wonder_card(&mut self, player_index: usize) {
         let wonder = match self.wonders_left.pop() {
             Some(wonder) => wonder,
             None => return,
         };
         self.wonder_amount_left -= 1;
-        self.players[player].wonder_cards.push(wonder);
+        self.players[player_index].wonder_cards.push(wonder);
+    }
+
+    pub fn kill_leader(&mut self, player_index: usize) {
+        if let Some(leader) = self.players[player_index].active_leader.take() {
+            (leader.player_deinitializer)(self, player_index);
+        }
+    }
+
+    pub fn set_active_leader(&mut self, index: usize, player_index: usize) {
+        self.kill_leader(player_index);
+        let new_leader = self.players[player_index].available_leaders.remove(index);
+        (new_leader.player_initializer)(self, player_index);
+        self.players[player_index].active_leader = Some(new_leader);
+    }
+
+    pub fn advance(&mut self, advance: &str, player_index: usize) {
+        let advance = advances::get_advance_by_name(advance).expect("advance should exist");
+        (advance.player_initializer)(self, player_index);
+        for i in 0..self.players[player_index]
+            .civilization
+            .special_advances
+            .len()
+        {
+            if self.players[player_index].civilization.special_advances[i].required_advance
+                == advance.name
+            {
+                let special_advance = self.players[player_index]
+                    .civilization
+                    .special_advances
+                    .remove(i);
+                self.unlock_special_advance(&special_advance, player_index);
+                self.players[player_index]
+                    .civilization
+                    .special_advances
+                    .insert(i, special_advance);
+                break;
+            }
+        }
+        let player_index = player_index;
+        let player = &mut self.players[player_index];
+        if let Some(advance_bonus) = &advance.advance_bonus {
+            player.gain_resources(advance_bonus.resources());
+        }
+        player.advances.push(advance.name);
+        player.game_event_tokens -= 1;
+        if player.game_event_tokens == 0 {
+            player.game_event_tokens = 3;
+            self.trigger_game_event(player_index);
+        }
+    }
+
+    fn trigger_game_event(&mut self, player_index: usize) {
+        todo!()
+    }
+
+    pub fn remove_advance(&mut self, advance: &str, player_index: usize) {
+        if let Some(position) = self.players[player_index]
+            .advances
+            .iter()
+            .position(|advances| advances == &advance)
+        {
+            let advance = advances::get_advance_by_name(advance).expect("advance should exist");
+            (advance.player_deinitializer)(self, player_index);
+            self.players[player_index].advances.remove(position);
+        }
+    }
+
+    fn unlock_special_advance(&mut self, special_advance: &SpecialAdvance, player_index: usize) {
+        (special_advance.player_initializer)(self, player_index);
+        self.players[player_index]
+            .unlocked_special_advances
+            .push(special_advance.name.clone());
+    }
+
+    pub fn conquer_city(
+        &mut self,
+        position: &Position,
+        new_player_index: usize,
+        old_player_index: usize,
+    ) {
+        self.players[old_player_index]
+            .take_city(&position)
+            .expect("player should own city")
+            .conquer(self, new_player_index, old_player_index);
+    }
+
+    pub fn raze_city(&mut self, position: &Position, player_index: usize) {
+        let city = self.players[player_index]
+            .take_city(position)
+            .expect("player should have this city");
+        city.raze(self, player_index);
+    }
+
+    pub fn build_wonder(&mut self, wonder: Wonder, city: &Position, player_index: usize) {
+        let mut wonder = wonder;
+        (wonder.player_initializer)(self, player_index);
+        wonder.builder = Some(player_index);
+        let player = &mut self.players[player_index];
+        player.wonders_build += 1;
+        player.wonders.push(wonder.name.clone());
+        player
+            .get_city_mut(city)
+            .expect("player should have city")
+            .city_pieces
+            .wonders
+            .push(wonder);
     }
 }
 
@@ -325,8 +425,8 @@ impl Game {
 struct GameData {
     state: GameState,
     players: Vec<PlayerData>,
-    starting_player: usize,
-    current_player: usize,
+    starting_player_index: usize,
+    current_player_index: usize,
     log: Vec<LogItem>,
     played_limited_actions: Vec<String>,
     actions_left: u32,
@@ -370,8 +470,8 @@ pub mod tests {
         Game {
             state: Playing,
             players: Vec::new(),
-            starting_player: 0,
-            current_player: 0,
+            starting_player_index: 0,
+            current_player_index: 0,
             log: Vec::new(),
             once_per_turn_actions: Vec::new(),
             actions_left: 3,

@@ -14,39 +14,29 @@ pub trait AbilityInitializerSetup: Sized {
     {
         let key = self.key();
         let deinitialize_event = event.clone();
-        let initializer = Box::new(move |game: &mut Game, player: usize| {
-            let player = &mut game.players[player];
+        let initializer = Box::new(move |game: &mut Game, player_index: usize| {
+            let player = &mut game.players[player_index];
             player
                 .event_listener_indices
                 .entry(key.clone())
                 .or_default()
                 .push_back(
-                    event(
-                        player
-                            .events
-                            .as_mut()
-                            .expect("Events should be set after use"),
-                    )
-                    .add_listener_mut(listener.clone(), priority),
+                    event(&mut player.events.as_mut().expect("events should be set"))
+                        .add_listener_mut(listener.clone(), priority),
                 )
         });
         let key = self.key();
-        let deinitializer = Box::new(move |game: &mut Game, player: usize| {
-            let player = &mut game.players[player];
-            deinitialize_event(
-                player
-                    .events
-                    .as_mut()
-                    .expect("Events should be set after use"),
-            )
-            .remove_listener_mut(
-                player
-                    .event_listener_indices
-                    .entry(key.clone())
-                    .or_default()
-                    .pop_front()
-                    .unwrap_or_else(|| panic!("{}: tried to remove non-existing element", key)),
-            )
+        let deinitializer = Box::new(move |game: &mut Game, player_index: usize| {
+            let player = &mut game.players[player_index];
+            deinitialize_event(&mut player.events.as_mut().expect("events should be set"))
+                .remove_listener_mut(
+                    player
+                        .event_listener_indices
+                        .entry(key.clone())
+                        .or_default()
+                        .pop_front()
+                        .unwrap_or_else(|| panic!("{}: tried to remove non-existing element", key)),
+                )
         });
         self.add_ability_initializer(initializer)
             .add_ability_deinitializer(deinitializer)
@@ -73,9 +63,9 @@ pub trait AbilityInitializerSetup: Sized {
 }
 
 pub fn join_ability_initializers(setup: Vec<AbilityInitializer>) -> AbilityInitializer {
-    Box::new(move |game: &mut Game, player: usize| {
+    Box::new(move |game: &mut Game, player_index: usize| {
         for initializer in setup.iter() {
-            initializer(game, player)
+            initializer(game, player_index)
         }
     })
 }

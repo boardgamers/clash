@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
 use std::{
+    cell::RefCell,
     cmp::Ordering::{self, *},
     collections::{HashMap, VecDeque},
     mem,
 };
 
 use crate::{
-    advance::Advance,
     army::Unit,
     city::{Building, City, CityData},
     civilization::Civilization,
@@ -16,7 +16,6 @@ use crate::{
     leader::Leader,
     player_events::PlayerEvents,
     resource_pile::ResourcePile,
-    special_advance::SpecialAdvance,
     wonder::Wonder,
 };
 pub const BUILDING_COST: ResourcePile = ResourcePile {
@@ -38,7 +37,7 @@ const DEFEATED_LEADER_VICTORY_POINTS: f32 = 2.0;
 
 pub struct Player {
     name: Option<String>,
-    pub id: usize,
+    pub index: usize,
     resources: ResourcePile,
     pub resource_limit: ResourcePile,
     pub events: Option<PlayerEvents>,
@@ -66,7 +65,7 @@ impl Player {
     pub fn from_data(data: PlayerData, game: &mut Game) -> Self {
         let mut player = Self {
             name: data.name,
-            id: data.id,
+            index: data.id,
             resources: data.resources,
             resource_limit: data.resource_limit,
             events: Some(PlayerEvents::default()),
@@ -109,17 +108,17 @@ impl Player {
         };
         let advances = mem::take(&mut player.advances);
         for advance in advances.iter() {
-            player.advance(advance, game);
+            game.advance(advance, player.index);
         }
         player.advances = advances;
         if let Some(leader) = player.active_leader.take() {
-            (leader.player_initializer)(game, player.id);
+            (leader.player_initializer)(game, player.index);
             player.active_leader = Some(leader);
         }
         let mut cities = mem::take(&mut player.cities);
         for city in cities.iter_mut() {
             for wonder in city.city_pieces.wonders.iter() {
-                (wonder.player_initializer)(game, player.id);
+                (wonder.player_initializer)(game, player.index);
             }
         }
         player.cities.append(&mut cities);
@@ -129,7 +128,7 @@ impl Player {
     pub fn data(self) -> PlayerData {
         PlayerData {
             name: self.name,
-            id: self.id,
+            id: self.index,
             resources: self.resources,
             resource_limit: self.resource_limit,
             cities: self.cities.into_iter().map(|city| city.data()).collect(),
@@ -163,7 +162,7 @@ impl Player {
     pub fn new(civilization: Civilization, id: usize) -> Self {
         Self {
             name: None,
-            id,
+            index: id,
             resources: ResourcePile::food(2),
             resource_limit: ResourcePile::new(2, 7, 7, 7, 7, 7, 7),
             events: Some(PlayerEvents::default()),
@@ -188,13 +187,6 @@ impl Player {
         }
     }
 
-    pub fn name(&self) -> String {
-        self.name
-            .as_ref()
-            .expect("name should be set at this point")
-            .clone()
-    }
-
     pub fn set_name(&mut self, name: String) {
         self.name = Some(name);
     }
@@ -210,19 +202,6 @@ impl Player {
 
     pub fn resources(&self) -> &ResourcePile {
         &self.resources
-    }
-
-    pub fn kill_leader(&mut self, game: &mut Game) {
-        if let Some(leader) = self.active_leader.take() {
-            (leader.player_deinitializer)(game, self.id);
-        }
-    }
-
-    pub fn set_active_leader(&mut self, index: usize, game: &mut Game) {
-        self.kill_leader(game);
-        let new_leader = self.available_leaders.remove(index);
-        (new_leader.player_initializer)(game, self.id);
-        self.active_leader = Some(new_leader);
     }
 
     pub fn can_advance_free(&self, advance: &str) -> bool {
@@ -255,47 +234,6 @@ impl Player {
         self.advances.iter().any(|advances| advances == advance)
     }
 
-    pub fn advance(&mut self, advance: &str, game: &mut Game) {
-        let advance = advances::get_advance_by_name(advance).expect("advance should exist");
-        if let Some(advance_bonus) = &advance.advance_bonus {
-            self.gain_resources(advance_bonus.resources());
-        }
-        for i in 0..self.civilization.special_advances.len() {
-            if self.civilization.special_advances[i].required_advance == advance.name {
-                let special_advance = self.civilization.special_advances.remove(i);
-                self.unlock_special_advance(&special_advance, game);
-                self.civilization
-                    .special_advances
-                    .insert(i, special_advance);
-                break;
-            }
-        }
-        (advance.player_initializer)(game, self.id);
-        self.advances.push(advance.name);
-        self.game_event_tokens -= 1;
-        if self.game_event_tokens == 0 {
-            self.game_event_tokens = 3;
-            self.trigger_game_event();
-        }
-    }
-
-    pub fn remove_advance(&mut self, advance: &Advance, game: &mut Game) {
-        if let Some(position) = self
-            .advances
-            .iter()
-            .position(|advances| advances == &advance.name)
-        {
-            (advance.player_deinitializer)(game, self.id);
-            self.advances.remove(position);
-        }
-    }
-
-    fn unlock_special_advance(&mut self, special_advance: &SpecialAdvance, game: &mut Game) {
-        (special_advance.player_initializer)(game, self.id);
-        self.unlocked_special_advances
-            .push(special_advance.name.clone());
-    }
-
     pub fn victory_points(&self) -> f32 {
         let mut victory_points = 0.0;
         for city in self.cities.iter() {
@@ -312,38 +250,6 @@ impl Player {
         victory_points
     }
 
-    pub fn events(&self) -> &PlayerEvents {
-        self.events
-            .as_ref()
-            .expect("Events should be set after use")
-    }
-
-    pub fn with_events<F>(&mut self, action: F)
-    where
-        F: FnOnce(&mut Player, &PlayerEvents),
-    {
-        let events = self.events.take().expect("Events should be set after use");
-        action(self, &events);
-        self.events = Some(events);
-    }
-
-    pub fn conquer_city(&mut self, position: &Position, new_player: usize, game: &mut Game) {
-        self.take_city(&position)
-            .expect("player should own city")
-            .conquer(game, new_player, self.id);
-    }
-
-    pub fn with_city<F>(&mut self, position: &Position, action: F)
-    where
-        F: FnOnce(&mut Player, &mut City),
-    {
-        let mut city = self
-            .take_city(position)
-            .expect("player should have this city");
-        action(self, &mut city);
-        self.cities.push(city);
-    }
-
     pub fn remove_wonder(&mut self, wonder: &Wonder) {
         self.wonders.remove(
             self.wonders
@@ -355,10 +261,6 @@ impl Player {
 
     pub fn game_event_tokens(&self) -> u8 {
         self.game_event_tokens
-    }
-
-    fn trigger_game_event(&mut self) {
-        todo!()
     }
 
     pub fn strip_secret(&mut self) {
@@ -411,7 +313,7 @@ impl Player {
 
     pub fn building_cost(&self, building: &Building, city: &City) -> ResourcePile {
         let mut cost = BUILDING_COST;
-        self.events()
+        self.get_events()
             .building_cost
             .trigger(&mut cost, city, building);
         cost
@@ -419,11 +321,21 @@ impl Player {
 
     pub fn wonder_cost(&self, wonder: &Wonder, city: &City) -> ResourcePile {
         let mut cost = wonder.cost.clone();
-        self.events().wonder_cost.trigger(&mut cost, city, wonder);
+        self.get_events()
+            .wonder_cost
+            .trigger(&mut cost, city, wonder);
         cost
     }
 
-    pub fn get_city(&mut self, position: &Position) -> Option<&mut City> {
+    pub fn get_city(&self, position: &Position) -> Option<&City> {
+        let position = self
+            .cities
+            .iter()
+            .position(|city| &city.position == position)?;
+        Some(&self.cities[position])
+    }
+
+    pub fn get_city_mut(&mut self, position: &Position) -> Option<&mut City> {
         let position = self
             .cities
             .iter()
@@ -431,7 +343,7 @@ impl Player {
         Some(&mut self.cities[position])
     }
 
-    fn take_city(&mut self, position: &Position) -> Option<City> {
+    pub fn take_city(&mut self, position: &Position) -> Option<City> {
         Some(
             self.cities.remove(
                 self.cities
@@ -441,11 +353,34 @@ impl Player {
         )
     }
 
-    pub fn raze_city(&mut self, position: &Position, game: &mut Game) {
-        let city = self
-            .take_city(position)
-            .expect("player should have this city");
-        city.raze(self, game)
+    pub fn increase_size(&mut self, building: &Building, city: &Position) {
+        self.get_city_mut(city)
+            .expect("player should have city")
+            .activate();
+        self.take_events(|events, player| {
+            events.city_size_increase.trigger(player, city, building)
+        });
+        if matches!(building, Building::Academy) {
+            self.gain_resources(ResourcePile::ideas(2))
+        }
+        let index = self.index;
+        self.get_city_mut(city)
+            .expect("player should have city")
+            .city_pieces
+            .set_building(building, index);
+    }
+
+    fn get_events(&self) -> &PlayerEvents {
+        self.events.as_ref().expect("events should be set")
+    }
+
+    fn take_events<F>(&mut self, action: F)
+    where
+        F: FnOnce(&PlayerEvents, &mut Player),
+    {
+        let events = self.events.take().expect("events should be set");
+        action(&events, self);
+        self.events = Some(events);
     }
 }
 

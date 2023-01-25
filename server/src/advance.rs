@@ -17,10 +17,7 @@ pub struct Advance {
 }
 
 impl Advance {
-    pub fn builder(
-        name: &str,
-        description: &str,
-    ) -> AdvanceBuilder {
+    pub fn builder(name: &str, description: &str) -> AdvanceBuilder {
         AdvanceBuilder::new(name.to_string(), description.to_string())
     }
 }

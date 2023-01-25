@@ -15,7 +15,7 @@ pub struct Wonder {
     pub placement_requirement: Option<PlacementChecker>,
     pub player_initializer: AbilityInitializer,
     pub player_deinitializer: AbilityInitializer,
-    pub builder: Option<String>,
+    pub builder: Option<usize>,
 }
 
 impl Wonder {

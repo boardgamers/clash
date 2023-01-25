@@ -4,7 +4,7 @@ use crate::hexagon::Position;
 
 #[derive(Serialize, Deserialize)]
 pub struct Unit {
-    pub player: usize,
+    pub player_index: usize,
     pub unit_type: UnitType,
     pub transporter: Option<Position>,
     pub can_attack: bool,

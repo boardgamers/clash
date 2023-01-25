@@ -1,9 +1,6 @@
 use std::fmt::Display;
 
-use crate::{
-    content::wonders, game::Game, hexagon::Position, player::Player, resource_pile::ResourcePile,
-    wonder::Wonder,
-};
+use crate::{content::wonders, game::Game, hexagon::Position, player::Player, wonder::Wonder};
 
 use serde::{Deserialize, Serialize};
 use MoodState::*;
@@ -14,7 +11,7 @@ pub struct City {
     pub city_pieces: CityPieces,
     pub mood_state: MoodState,
     pub is_activated: bool,
-    pub player: usize,
+    pub player_index: usize,
     pub position: Position,
 }
 
@@ -24,7 +21,7 @@ impl City {
             city_pieces: CityPieces::from_data(data.city_pieces),
             mood_state: data.mood_state,
             is_activated: data.is_activated,
-            player: data.player,
+            player_index: data.player_index,
             position: data.position,
         }
     }
@@ -34,17 +31,17 @@ impl City {
             self.city_pieces.data(),
             self.mood_state,
             self.is_activated,
-            self.player,
+            self.player_index,
             self.position,
         )
     }
 
-    pub fn new(player: usize, position: Position) -> Self {
+    pub fn new(player_index: usize, position: Position) -> Self {
         Self {
             city_pieces: CityPieces::default(),
             mood_state: Neutral,
             is_activated: false,
-            player,
+            player_index,
             position,
         }
     }
@@ -57,7 +54,7 @@ impl City {
     }
 
     pub fn can_increase_size(&self, building: &Building, player: &Player) -> bool {
-        if self.player != player.id {
+        if self.player_index != player.index {
             return false;
         }
         if self.city_pieces.amount() == MAX_CITY_SIZE {
@@ -73,17 +70,8 @@ impl City {
         player.resources().can_afford(&cost)
     }
 
-    pub fn increase_size(&mut self, building: &Building, player: &mut Player) {
-        self.activate();
-        player.with_events(|p, e| e.city_size_increase.trigger(p, self, building));
-        if matches!(building, Building::Academy) {
-            player.gain_resources(ResourcePile::ideas(2))
-        }
-        self.city_pieces.set_building(building, self.player.clone());
-    }
-
     pub fn can_build_wonder(&self, wonder: &Wonder, player: &Player) -> bool {
-        if self.player != player.id {
+        if self.player_index != player.index {
             return false;
         }
         if self.city_pieces.amount() == MAX_CITY_SIZE {
@@ -105,52 +93,37 @@ impl City {
         true
     }
 
-    pub fn build_wonder(&mut self, wonder: Wonder, game: &mut Game, player: usize) {
-        let mut wonder = wonder;
-        (wonder.player_initializer)(game, player);
-        let player = &mut game.players[player];
-        player.wonders_build += 1;
-        player.wonders.push(wonder.name.clone());
-        wonder.builder = Some(player.name());
-        self.city_pieces.wonders.push(wonder);
-    }
-
-    pub fn conquer(mut self, game: &mut Game, new_player: usize, old_player: usize) {
+    pub fn conquer(mut self, game: &mut Game, new_player_index: usize, old_player_index: usize) {
         for wonder in self.city_pieces.wonders.iter() {
-            (wonder.player_deinitializer)(game, old_player);
-            (wonder.player_initializer)(game, new_player);
+            (wonder.player_deinitializer)(game, old_player_index);
+            (wonder.player_initializer)(game, new_player_index);
         }
-        game.with_player(new_player, |new_player, game| {
-            let old_player = &mut game.players[old_player];
-            self.player = new_player.id;
-            self.mood_state = Angry;
-            for wonder in self.city_pieces.wonders.iter() {
-                old_player.remove_wonder(wonder);
-                new_player.wonders.push(wonder.name.clone());
+        self.player_index = new_player_index;
+        self.mood_state = Angry;
+        for wonder in self.city_pieces.wonders.iter() {
+            game.players[old_player_index].remove_wonder(wonder);
+            game.players[new_player_index]
+                .wonders
+                .push(wonder.name.clone());
+        }
+        if let Some(player) = &self.city_pieces.obelisk {
+            if player == &old_player_index {
+                game.players[old_player_index].influenced_buildings += 1;
             }
-            if let Some(player) = &self.city_pieces.obelisk {
-                if player == &old_player.id {
-                    old_player.influenced_buildings += 1;
-                }
-            }
-            let previously_influenced_building =
-                self.city_pieces.buildings(Some(new_player.id)).len() as u32;
-            new_player.influenced_buildings -= previously_influenced_building;
-            self.city_pieces.change_player(new_player.id);
-            new_player.cities.push(self)
-        });
+        }
+        let previously_influenced_building =
+            self.city_pieces.buildings(Some(new_player_index)).len() as u32;
+        self.city_pieces.change_player(new_player_index);
+        let new_player = &mut game.players[new_player_index];
+        new_player.influenced_buildings -= previously_influenced_building;
+        new_player.cities.push(self)
     }
 
-    pub fn raze(self, player: &mut Player, game: &mut Game) {
+    pub fn raze(self, game: &mut Game, player_index: usize) {
         for wonder in self.city_pieces.wonders.into_iter() {
-            (wonder.player_deinitializer)(game, player.id);
-            player.remove_wonder(&wonder);
-            let builder = wonder.builder.expect("Wonder should have a builder");
-            let builder = game
-                .players
-                .iter_mut()
-                .find(|player| player.name() == builder)
-                .expect("builder should be a player");
+            (wonder.player_deinitializer)(game, player_index);
+            game.players[player_index].remove_wonder(&wonder);
+            let builder = &mut game.players[wonder.builder.expect("Wonder should have a builder")];
             builder.wonders_build -= 1;
         }
     }
@@ -182,12 +155,12 @@ impl City {
     }
 
     pub fn uninfluenced_buildings(&self) -> u32 {
-        self.city_pieces.buildings(Some(self.player)).len() as u32
+        self.city_pieces.buildings(Some(self.player_index)).len() as u32
     }
 
     //this function assumes action is legal
     pub fn influence_culture(&mut self, influencer: &mut Player, building: &Building) {
-        self.city_pieces.set_building(building, influencer.id);
+        self.city_pieces.set_building(building, influencer.index);
         if matches!(building, Building::Obelisk) {
             panic!("obelisks cannot be culturally influenced")
         }
@@ -200,7 +173,7 @@ pub struct CityData {
     city_pieces: CityPiecesData,
     mood_state: MoodState,
     is_activated: bool,
-    player: usize,
+    player_index: usize,
     position: Position,
 }
 
@@ -209,14 +182,14 @@ impl CityData {
         city_pieces: CityPiecesData,
         mood_state: MoodState,
         is_activated: bool,
-        player: usize,
+        player_index: usize,
         position: Position,
     ) -> Self {
         Self {
             city_pieces,
             mood_state,
             is_activated,
-            player,
+            player_index,
             position,
         }
     }
@@ -357,15 +330,15 @@ impl CityPieces {
         }
     }
 
-    fn set_building(&mut self, building: &Building, player: usize) {
+    pub fn set_building(&mut self, building: &Building, player_index: usize) {
         match building {
-            Building::Academy => self.academy = Some(player),
-            Building::Market => self.market = Some(player),
-            Building::Obelisk => self.obelisk = Some(player),
-            Building::Observatory => self.observatory = Some(player),
-            Building::Fortress => self.fortress = Some(player),
-            Building::Port => self.port = Some(player),
-            Building::Temple => self.temple = Some(player),
+            Building::Academy => self.academy = Some(player_index),
+            Building::Market => self.market = Some(player_index),
+            Building::Obelisk => self.obelisk = Some(player_index),
+            Building::Observatory => self.observatory = Some(player_index),
+            Building::Fortress => self.fortress = Some(player_index),
+            Building::Port => self.port = Some(player_index),
+            Building::Temple => self.temple = Some(player_index),
         }
     }
 
@@ -373,10 +346,10 @@ impl CityPieces {
         (self.buildings(None).len() + self.wonders.len()) as u32
     }
 
-    fn change_player(&mut self, new_player: usize) {
+    fn change_player(&mut self, new_player_index: usize) {
         for b in self.buildings(None) {
             if !matches!(b, Building::Obelisk) {
-                self.set_building(&b, new_player.clone());
+                self.set_building(&b, new_player_index.clone());
             }
         }
     }
@@ -442,32 +415,32 @@ mod tests {
         let mut game = game::tests::test_game();
         game.players.push(old);
         game.players.push(new);
+        let old = 0;
+        let new = 1;
 
         let position = Position::new(0, 0, 0);
-        game.with_player(0, |old, game| {
-            game.with_player(1, |new, game| {
-                old.cities.push(City::new(old.id, position.clone()));
-                old.with_city(&position, |p, c| {
-                    c.build_wonder(wonder, game, p.id);
-                    c.increase_size(&Building::Academy, p);
-                    c.increase_size(&Building::Obelisk, p);
-                });
+        game.players[old]
+            .cities
+            .push(City::new(old, position.clone()));
+        game.build_wonder(wonder, &position, old);
+        game.players[old].increase_size(&Building::Academy, &position);
+        game.players[old].increase_size(&Building::Obelisk, &position);
 
-                assert_eq!(6.0, old.victory_points());
+        assert_eq!(6.0, game.players[old].victory_points());
 
-                old.conquer_city(&position, new.id, game);
+        game.conquer_city(&position, new, old);
 
-                let c = new.get_city(&position).unwrap();
-                assert_eq!(1, c.player);
-                assert_eq!(MoodState::Angry, c.mood_state);
+        let c = game.players[new].get_city_mut(&position).unwrap();
+        assert_eq!(1, c.player_index);
+        assert_eq!(MoodState::Angry, c.mood_state);
 
-                assert_eq!(3.0, old.victory_points());
-                assert_eq!(3.0, new.victory_points());
-                assert_eq!(0, old.wonders.len());
-                assert_eq!(1, new.wonders.len());
-                assert_eq!(1, old.influenced_buildings);
-                assert_eq!(0, new.influenced_buildings);
-            });
-        });
+        let old = &game.players[old];
+        let new = &game.players[new];
+        assert_eq!(3.0, old.victory_points());
+        assert_eq!(3.0, new.victory_points());
+        assert_eq!(0, old.wonders.len());
+        assert_eq!(1, new.wonders.len());
+        assert_eq!(1, old.influenced_buildings);
+        assert_eq!(0, new.influenced_buildings);
     }
 }

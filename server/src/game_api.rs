@@ -46,9 +46,9 @@ pub async extern "C" fn init(
 }
 
 #[export_name = "move"]
-pub extern "C" fn execute_action(game: String, r#move: String, player: usize) -> String {
+pub extern "C" fn execute_action(game: String, r#move: String, player_index: usize) -> String {
     let mut game = Game::from_json(&game);
-    game.execute_action(r#move, player);
+    game.execute_action(r#move, player_index);
     game.json()
 }
 
@@ -69,9 +69,9 @@ pub extern "C" fn scores(game: String) -> Vec<f32> {
 }
 
 #[export_name = "dropPlayer"]
-pub async extern "C" fn drop_player(game: String, player: usize) -> String {
+pub async extern "C" fn drop_player(game: String, player_index: usize) -> String {
     let mut game = Game::from_json(&game);
-    game.drop_player(player);
+    game.drop_player(player_index);
     game.json()
 }
 
@@ -80,7 +80,7 @@ pub async extern "C" fn current_player(game: String) -> Option<usize> {
     let game = Game::from_json(&game);
     match game.state {
         Finished => None,
-        _ => Some(game.current_player),
+        _ => Some(game.current_player_index),
     }
 }
 

@@ -18,7 +18,7 @@ impl StatusPhaseAction {
         Self { data, phase }
     }
 
-    pub fn execute(self, player: &mut Player, game: &mut Game) {
+    pub fn execute(self, game: &mut Game, player_index: usize) {
         match self.phase {
             StatusPhaseState::CompleteObjectives => {
                 let completed_objectives = serde_json::from_str::<CompleteObjectives>(&self.data)
@@ -30,17 +30,17 @@ impl StatusPhaseAction {
                 let advance = serde_json::from_str::<FreeAdvance>(&self.data)
                     .expect("data should be valid free advance json")
                     .advance;
-                if !player.can_advance_free(&advance) {
+                if !game.players[player_index].can_advance_free(&advance) {
                     panic!("Illegal action");
                 }
-                player.advance(&advance, game);
+                game.advance(&advance, player_index);
             }
             StatusPhaseState::RaseSize1City => {
                 let city = serde_json::from_str::<RaseSize1City>(&self.data)
                     .expect("data should be valid rase city json")
                     .city;
                 if let Some(city) = city {
-                    player.raze_city(&city, game);
+                    game.raze_city(&city, player_index);
                 }
             }
             StatusPhaseState::ChangeGovernmentType => {
@@ -55,9 +55,9 @@ impl StatusPhaseAction {
             StatusPhaseState::DetermineFirstPlayer => {
                 let player = serde_json::from_str::<DetermineFirstPlayer>(&self.data)
                     .expect("data should be valid determine first player json")
-                    .player;
-                game.starting_player = player;
-                game.current_player = player;
+                    .player_index;
+                game.starting_player_index = player;
+                game.current_player_index = player;
             }
         }
     }
@@ -85,7 +85,7 @@ pub struct ChangeGovernmentType {
 
 #[derive(Serialize, Deserialize)]
 pub struct DetermineFirstPlayer {
-    player: usize,
+    player_index: usize,
 }
 
 pub fn next_status_phase(phase: StatusPhaseState) -> StatusPhaseState {
@@ -102,7 +102,7 @@ pub fn next_status_phase(phase: StatusPhaseState) -> StatusPhaseState {
 
 pub fn player_that_chooses_next_first_player(
     players: &Vec<Player>,
-    current_start_player: usize,
+    current_start_player_index: usize,
 ) -> usize {
     let mut potential_deciding_players = Vec::new();
     let mut best_total: Option<u32> = None;
@@ -127,7 +127,8 @@ pub fn player_that_chooses_next_first_player(
     potential_deciding_players
         .into_iter()
         .min_by_key(|&index| {
-            (index as isize - current_start_player as isize).rem_euclid(players.len() as isize)
+            (index as isize - current_start_player_index as isize)
+                .rem_euclid(players.len() as isize)
         })
         .expect("there should at least be one player with the most mood and culture tokens")
 }
@@ -144,7 +145,7 @@ mod tests {
         player0_mood: u32,
         player1_mood: u32,
         player2_mood: u32,
-        expected_player: usize,
+        expected_player_index: usize,
     ) {
         let mut player0 = Player::new(civ::get_test_civilization(), 0);
         player0.gain_resources(ResourcePile::mood_tokens(player0_mood));
@@ -154,7 +155,7 @@ mod tests {
         player2.gain_resources(ResourcePile::mood_tokens(player2_mood));
         let players = vec![player0, player1, player2];
         let got = super::player_that_chooses_next_first_player(&players, 1);
-        assert_eq!(got, expected_player, "{name}");
+        assert_eq!(got, expected_player_index, "{name}");
     }
 
     #[test]
