@@ -2,6 +2,7 @@ use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    city::Building,
     content::{advances, civilizations, wonders},
     hexagon::Position,
     player::{Player, PlayerData},
@@ -418,6 +419,22 @@ impl Game {
             .city_pieces
             .wonders
             .push(wonder);
+    }
+
+    //this function assumes action is legal
+    pub fn influence_culture(
+        &mut self,
+        influencer_index: usize,
+        influenced_player_index: usize,
+        city_position: &Position,
+        building: &Building,
+    ) {
+        self.players[influenced_player_index]
+            .get_city_mut(city_position)
+            .expect("influenced should have influenced city")
+            .city_pieces
+            .set_building(building, influencer_index);
+        self.players[influencer_index].influenced_buildings += 1;
     }
 }
 

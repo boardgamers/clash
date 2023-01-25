@@ -125,10 +125,17 @@ impl PlayingAction {
                 player.loose_resources(cost);
 
                 //todo! in the future get the city directly from its position on the map instead
+                let target_city_position = target_city.position;
                 let target_city = game.players[target_city.player_index]
-                    .get_city_mut(&target_city.position)
+                    .get_city(&target_city_position)
                     .expect("city should exist");
-                //todo! influence culture in target city
+                let target_player = target_city.player_index;
+                game.influence_culture(
+                    player_index,
+                    target_player,
+                    &target_city_position,
+                    &building,
+                );
             }
             Custom { name, contents } => {
                 custom_actions::get_custom_action(&name, &contents).execute(game, player_index)

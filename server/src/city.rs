@@ -157,15 +157,6 @@ impl City {
     pub fn uninfluenced_buildings(&self) -> u32 {
         self.city_pieces.buildings(Some(self.player_index)).len() as u32
     }
-
-    //this function assumes action is legal
-    pub fn influence_culture(&mut self, influencer: &mut Player, building: &Building) {
-        self.city_pieces.set_building(building, influencer.index);
-        if matches!(building, Building::Obelisk) {
-            panic!("obelisks cannot be culturally influenced")
-        }
-        influencer.influenced_buildings += 1;
-    }
 }
 
 #[derive(Serialize, Deserialize, Clone)]
