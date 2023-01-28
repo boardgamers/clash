@@ -1,11 +1,17 @@
 [package]
-name = "game"
+name = "server"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "server"
+crate-type = ["lib"]
+
 [dependencies]
+hex2d = "1.1.0"
 rand = "0.8.5"
 serde = { version = "1.0.152", features = ["derive"] }
 serde_json = "1.0.91"
+getrandom = { version = "0.2", features = ["js"] }

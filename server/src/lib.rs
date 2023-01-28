@@ -1,13 +1,13 @@
 mod ability_initializer;
 mod advance;
 mod army;
-mod city;
+pub mod city;
 mod civilization;
 mod content;
 mod events;
-mod game;
+pub mod game;
 mod game_api;
-mod hexagon;
+pub mod hexagon;
 mod leader;
 mod player;
 mod player_events;

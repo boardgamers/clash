@@ -409,7 +409,7 @@ mod tests {
         let old = 0;
         let new = 1;
 
-        let position = Position::new(0, 0, 0);
+        let position = Position::new(0, 0);
         game.players[old]
             .cities
             .push(City::new(old, position.clone()));

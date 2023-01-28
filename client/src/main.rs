@@ -1,136 +1,52 @@
-use bevy::prelude::*;
-use bevy_ecs_tilemap::prelude::*;
+mod map;
+mod ui;
 
-mod helpers;
+use crate::map::pixel_to_coordinate;
+use macroquad::prelude::*;
+use server::city::City;
+use server::game::Game;
+use server::hexagon::Position;
 
-// Side length of a colored quadrant (in "number of tiles").
-const QUADRANT_SIDE_LENGTH: u32 = 80;
+#[macroquad::main("Clash")]
+async fn main() {
+    let mut status: String = "".to_string();
 
-fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(Camera2dBundle::default());
+    let mut game = Game::new(1, "a".repeat(32));
+    game.players[0]
+        .cities
+        .push(City::new(0, Position::from_offset("A1")));
+    game.players[0]
+        .cities
+        .push(City::new(0, Position::from_offset("C2")));
 
-    let texture_handle: Handle<Image> = asset_server.load("flat_hex_tiles.png");
+    loop {
+        clear_background(RED);
 
-    // In total, there will be `(QUADRANT_SIDE_LENGTH * 2) * (QUADRANT_SIDE_LENGTH * 2)` tiles.
-    let map_size = TilemapSize {
-        x: QUADRANT_SIDE_LENGTH * 2,
-        y: QUADRANT_SIDE_LENGTH * 2,
-    };
-    let quadrant_size = TilemapSize {
-        x: QUADRANT_SIDE_LENGTH,
-        y: QUADRANT_SIDE_LENGTH,
-    };
-
-    let mut tile_storage = TileStorage::empty(map_size);
-    let tilemap_entity = commands.spawn_empty().id();
-    let tilemap_id = TilemapId(tilemap_entity);
-
-    fill_tilemap_rect(
-        TileTextureIndex(0),
-        TilePos { x: 0, y: 0 },
-        quadrant_size,
-        tilemap_id,
-        &mut commands,
-        &mut tile_storage,
-    );
-
-    fill_tilemap_rect(
-        TileTextureIndex(1),
-        TilePos {
-            x: QUADRANT_SIDE_LENGTH,
-            y: 0,
-        },
-        quadrant_size,
-        tilemap_id,
-        &mut commands,
-        &mut tile_storage,
-    );
-
-    fill_tilemap_rect(
-        TileTextureIndex(2),
-        TilePos {
-            x: 0,
-            y: QUADRANT_SIDE_LENGTH,
-        },
-        quadrant_size,
-        tilemap_id,
-        &mut commands,
-        &mut tile_storage,
-    );
-
-    fill_tilemap_rect(
-        TileTextureIndex(3),
-        TilePos {
-            x: QUADRANT_SIDE_LENGTH,
-            y: QUADRANT_SIDE_LENGTH,
-        },
-        quadrant_size,
-        tilemap_id,
-        &mut commands,
-        &mut tile_storage,
-    );
-
-    let tile_size = TilemapTileSize { x: 17.0, y: 15.0 };
-    let grid_size = TilemapGridSize { x: 17.0, y: 15.0 };
-    let map_type = TilemapType::Hexagon(HexCoordSystem::Column);
-
-    commands.entity(tilemap_entity).insert(TilemapBundle {
-        grid_size,
-        size: map_size,
-        storage: tile_storage,
-        texture: TilemapTexture::Single(texture_handle),
-        tile_size,
-        map_type,
-        transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 0.0),
-        ..Default::default()
-    });
-}
-
-fn swap_mesh_type(
-    mut query: Query<(
-        &mut Transform,
-        &TilemapSize,
-        &TilemapGridSize,
-        &mut TilemapType,
-    )>,
-    keyboard_input: Res<Input<KeyCode>>,
-) {
-    if keyboard_input.just_pressed(KeyCode::Space) {
-        for (mut transform, map_size, grid_size, mut map_type) in query.iter_mut() {
-            match *map_type {
-                TilemapType::Hexagon(HexCoordSystem::Column) => {
-                    *map_type = TilemapType::Hexagon(HexCoordSystem::ColumnEven);
-                }
-                TilemapType::Hexagon(HexCoordSystem::ColumnEven) => {
-                    *map_type = TilemapType::Hexagon(HexCoordSystem::ColumnOdd);
-                }
-                TilemapType::Hexagon(HexCoordSystem::ColumnOdd) => {
-                    *map_type = TilemapType::Hexagon(HexCoordSystem::Column);
-                }
-                _ => {}
+        for p in game.players.iter() {
+            for city in p.cities.iter() {
+                map::draw_hex(&city.position);
             }
-
-            *transform = get_tilemap_center_transform(&map_size, &grid_size, &map_type, 0.0);
         }
-    }
-}
 
-fn main() {
-    App::new()
-        .add_plugins(
-            DefaultPlugins
-                .set(WindowPlugin {
-                    window: WindowDescriptor {
-                        title: String::from("Hexagon Column Example"),
-                        ..Default::default()
-                    },
-                    ..default()
-                })
-                .set(ImagePlugin::default_nearest()),
-        )
-        .add_plugin(TilemapPlugin)
-        .add_startup_system(startup)
-        .add_system(helpers::camera::movement)
-        .add_system(swap_mesh_type)
-        .run();
+        if is_mouse_button_pressed(MouseButton::Left) {
+            let (x, y) = mouse_position();
+
+            let c = pixel_to_coordinate(x, y);
+
+            status = "".to_string();
+
+            for p in game.players.iter() {
+                for city in p.cities.iter() {
+                    let pos = &city.position;
+                    if c == pos.coordinate() {
+                        let n = pos.name();
+                        status = format!("clicked city {n}")
+                    };
+                }
+            }
+        }
+        draw_text(&status, 20.0, 20.0, 30.0, DARKGRAY);
+
+        next_frame().await
+    }
 }
