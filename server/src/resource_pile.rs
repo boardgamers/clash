@@ -66,6 +66,10 @@ impl ResourcePile {
         Self::new(0, 0, 0, 0, 0, 0, amount)
     }
 
+    pub fn empty() -> Self {
+        Self::default()
+    }
+
     pub fn can_afford(&self, other: &Self) -> bool {
         let mut resource_deficit = 0;
         if other.food > self.food {
@@ -388,7 +392,7 @@ mod tests {
 
     #[test]
     fn resource_pile_display_test() {
-        assert_to_string(ResourcePile::default(), "nothing");
+        assert_to_string(ResourcePile::empty(), "nothing");
         assert_to_string(ResourcePile::ore(1), "1 ore");
         assert_to_string(ResourcePile::mood_tokens(2), "2 mood tokens");
         assert_to_string(

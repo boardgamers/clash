@@ -13,3 +13,9 @@ pub struct PlayerEvents {
     pub building_cost: EventMut<ResourcePile, City, Building>,
     pub wonder_cost: EventMut<ResourcePile, City, Wonder>,
 }
+
+impl PlayerEvents {
+    pub fn new() -> PlayerEvents {
+        Self::default()
+    }
+}

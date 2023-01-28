@@ -3,10 +3,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     city::Building,
-    content::{advances, civilizations, wonders},
+    content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     hexagon::Position,
     player::{Player, PlayerData},
     playing_actions::PlayingAction::*,
+    resource_pile::ResourcePile,
     special_advance::SpecialAdvance,
     status_phase_actions::StatusPhaseAction,
     wonder::Wonder,
@@ -25,7 +26,7 @@ pub struct Game {
     pub starting_player_index: usize,
     pub current_player_index: usize,
     pub log: Vec<LogItem>,
-    pub once_per_turn_actions: Vec<String>,
+    pub played_once_per_turn_actions: Vec<CustomActionType>,
     pub actions_left: u32,
     pub round: u32, // starts with 1
     pub age: u32,   // starts with 1
@@ -73,7 +74,7 @@ impl Game {
             starting_player_index: starting_player,
             current_player_index: starting_player,
             log: Vec::new(),
-            once_per_turn_actions: Vec::new(),
+            played_once_per_turn_actions: Vec::new(),
             actions_left: 3,
             round: 1,
             age: 1,
@@ -103,7 +104,7 @@ impl Game {
             current_player_index: data.current_player_index,
             actions_left: data.actions_left,
             log: data.log,
-            once_per_turn_actions: data.played_limited_actions,
+            played_once_per_turn_actions: data.played_once_per_turn_actions,
             round: data.round,
             age: data.age,
             messages: data.messages,
@@ -138,7 +139,7 @@ impl Game {
             starting_player_index: self.starting_player_index,
             current_player_index: self.current_player_index,
             log: self.log,
-            played_limited_actions: self.once_per_turn_actions,
+            played_once_per_turn_actions: self.played_once_per_turn_actions,
             actions_left: self.actions_left,
             round: self.round,
             age: self.age,
@@ -185,18 +186,30 @@ impl Game {
         if !free_action && self.actions_left == 0 {
             panic!("Illegal action");
         }
-        if let Custom { name, .. } = &action {
-            if self.once_per_turn_actions.contains(name) {
+        if let Custom(action) = &action {
+            let action = action.custom_action_type();
+            if self.played_once_per_turn_actions.contains(&action) {
                 panic!("Illegal action");
             }
             if action.action_type().once_per_turn {
-                self.once_per_turn_actions.push(name.clone());
+                self.played_once_per_turn_actions.push(action);
             }
         }
         action.execute(self, player_index);
         if !free_action {
             self.actions_left -= 1;
         }
+        if self.players[player_index].resources() != &ResourcePile::empty() {
+            return;
+        }
+        if self
+            .get_available_custom_actions()
+            .iter()
+            .any(|action| action.action_type().free)
+        {
+            return;
+        }
+        self.next_turn()
     }
 
     fn execute_status_phase_action(
@@ -250,7 +263,7 @@ impl Game {
 
     fn next_turn(&mut self) {
         self.actions_left = 3;
-        self.once_per_turn_actions = Vec::new();
+        self.played_once_per_turn_actions = Vec::new();
         self.next_player();
         if self.current_player_index == self.starting_player_index {
             self.next_round();
@@ -297,11 +310,11 @@ impl Game {
         self.skip_dropped_players();
     }
 
-    pub fn get_available_custom_actions(&self) -> Vec<String> {
+    pub fn get_available_custom_actions(&self) -> Vec<CustomActionType> {
         let custom_actions = &self.players[self.current_player_index].custom_actions;
         custom_actions
             .iter()
-            .filter(|&action| !self.once_per_turn_actions.contains(action))
+            .filter(|&action| !self.played_once_per_turn_actions.contains(action))
             .cloned()
             .collect()
     }
@@ -445,7 +458,7 @@ struct GameData {
     starting_player_index: usize,
     current_player_index: usize,
     log: Vec<LogItem>,
-    played_limited_actions: Vec<String>,
+    played_once_per_turn_actions: Vec<CustomActionType>,
     actions_left: u32,
     round: u32,
     age: u32,
@@ -490,7 +503,7 @@ pub mod tests {
             starting_player_index: 0,
             current_player_index: 0,
             log: Vec::new(),
-            once_per_turn_actions: Vec::new(),
+            played_once_per_turn_actions: Vec::new(),
             actions_left: 3,
             round: 1,
             age: 1,

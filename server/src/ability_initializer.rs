@@ -1,4 +1,7 @@
-use crate::{events::EventMut, game::Game, player_events::PlayerEvents};
+use crate::{
+    content::custom_actions::CustomActionType, events::EventMut, game::Game,
+    player_events::PlayerEvents,
+};
 
 pub type AbilityInitializer = Box<dyn Fn(&mut Game, usize)>;
 
@@ -42,8 +45,7 @@ pub trait AbilityInitializerSetup: Sized {
             .add_ability_deinitializer(deinitializer)
     }
 
-    fn add_custom_action(self, action: &str) -> Self {
-        let action = action.to_string();
+    fn add_custom_action(self, action: CustomActionType) -> Self {
         let deinitializer_action = action.clone();
         self.add_ability_initializer(Box::new(move |game, player| {
             let player = &mut game.players[player];

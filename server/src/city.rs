@@ -402,7 +402,7 @@ mod tests {
         let old = Player::new(civilizations::tests::get_test_civilization(), 0);
         let new = Player::new(civilizations::tests::get_test_civilization(), 1);
 
-        let wonder = Wonder::builder("wonder", ResourcePile::default(), vec![]).build();
+        let wonder = Wonder::builder("wonder", ResourcePile::empty(), vec![]).build();
         let mut game = game::tests::test_game();
         game.players.push(old);
         game.players.push(new);

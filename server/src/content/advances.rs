@@ -1,3 +1,4 @@
+use super::custom_actions::CustomActionType::*;
 use crate::{ability_initializer::AbilityInitializerSetup, advance::Advance};
 
 pub fn get_technologies() -> Vec<Advance> {
@@ -6,7 +7,7 @@ pub fn get_technologies() -> Vec<Advance> {
         "● Immediately draw 1 wonder\n● May Construct wonder happy cities",
     )
     .add_ability_initializer(Box::new(|game, player| game.draw_wonder_card(player)))
-    .add_custom_action("Construct wonder")
+    .add_custom_action(ConstructWonder)
     .build()]
 }
 

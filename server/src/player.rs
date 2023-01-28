@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 use std::{
-    cell::RefCell,
     cmp::Ordering::{self, *},
     collections::{HashMap, VecDeque},
     mem,
@@ -10,7 +9,7 @@ use crate::{
     army::Unit,
     city::{Building, City, CityData},
     civilization::Civilization,
-    content::{advances, civilizations, wonders},
+    content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     game::Game,
     hexagon::Position,
     leader::Leader,
@@ -57,7 +56,7 @@ pub struct Player {
     pub completed_objectives: Vec<String>,
     pub defeated_leaders: Vec<String>,
     pub event_victory_points: f32,
-    pub custom_actions: Vec<String>,
+    pub custom_actions: Vec<CustomActionType>,
     pub wonder_cards: Vec<Wonder>,
 }
 
@@ -165,7 +164,7 @@ impl Player {
             index: id,
             resources: ResourcePile::food(2),
             resource_limit: ResourcePile::new(2, 7, 7, 7, 7, 7, 7),
-            events: Some(PlayerEvents::default()),
+            events: Some(PlayerEvents::new()),
             event_listener_indices: HashMap::new(),
             cities: Vec::new(),
             units: Vec::new(),
@@ -405,6 +404,6 @@ pub struct PlayerData {
     completed_objectives: Vec<String>,
     defeated_leaders: Vec<String>,
     event_victory_points: f32,
-    custom_actions: Vec<String>,
+    custom_actions: Vec<CustomActionType>,
     wonder_cards: Vec<String>,
 }

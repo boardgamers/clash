@@ -5,7 +5,7 @@ pub struct Event<T> {
 }
 
 impl<T> Event<T> {
-    //return the index of the listener witch can be used to remove the listener later
+    //return the id of the listener witch can be used to remove the listener later
     pub fn add_listener<F>(&mut self, new_listener: F, priority: i32) -> usize
     where
         F: Fn(&T) + 'static,
@@ -41,16 +41,16 @@ impl<T> Default for Event<T> {
     }
 }
 
-type ListenerMut<T, U, V> = (Box<dyn Fn(&mut T, &U, &V)>, i32, usize);
 type ListenerImmutable<T, U, V> = (Box<dyn Fn(&T, &U, &V)>, i32, usize);
+type ListenerMutable<T, U, V> = (Box<dyn Fn(&mut T, &U, &V)>, i32, usize);
 
 pub struct EventMut<T, U = (), V = ()> {
     listeners: Vec<ListenerImmutable<T, U, V>>,
-    listeners_mut: Vec<ListenerMut<T, U, V>>,
+    listeners_mut: Vec<ListenerMutable<T, U, V>>,
 }
 
 impl<T, U, V> EventMut<T, U, V> {
-    //return the index of the listener witch can be used to remove the listener later
+    //return the id of the listener witch can be used to remove the listener later
     pub fn add_listener<F>(&mut self, new_listener: F, priority: i32) -> usize
     where
         F: Fn(&T, &U, &V) + 'static,
@@ -71,7 +71,7 @@ impl<T, U, V> EventMut<T, U, V> {
         );
     }
 
-    //return the index of the listener witch can be used to remove the listener later
+    //return the id of the listener witch can be used to remove the listener later
     pub fn add_listener_mut<F>(&mut self, new_listener: F, priority: i32) -> usize
     where
         F: Fn(&mut T, &U, &V) + 'static,
@@ -114,12 +114,13 @@ impl<T, U, V> Default for EventMut<T, U, V> {
 
 type StaticListener = (Box<dyn Fn() + 'static>, i32, usize);
 
+#[derive(Default)]
 pub struct StaticEvent {
     listeners: Vec<StaticListener>,
 }
 
 impl StaticEvent {
-    //return the index of the listener witch can be used to remove the listener later
+    //return the id of the listener witch can be used to remove the listener later
     pub fn add_listener<F>(&mut self, new_listener: F, priority: i32) -> usize
     where
         F: Fn() + 'static,
@@ -144,5 +145,33 @@ impl StaticEvent {
         for (listener, _, _) in self.listeners.iter() {
             listener();
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{EventMut, StaticEvent};
+
+    #[test]
+    fn mutable_event() {
+        let mut event = EventMut::default();
+        event.add_listener_mut(|item, _, _| *item += 1, 0);
+        let id = event.add_listener_mut(|item, _, _| *item *= 3, -1);
+        let mut item = 0;
+        event.trigger(&mut item, &0, &0);
+        assert_eq!(3, item);
+
+        event.remove_listener_mut(id);
+        let mut item = 0;
+        event.trigger(&mut item, &0, &0);
+        assert_eq!(1, item);
+    }
+
+    #[test]
+    #[should_panic]
+    fn static_event() {
+        let mut event = StaticEvent::default();
+        event.add_listener(|| panic!(), 0);
+        event.trigger()
     }
 }
