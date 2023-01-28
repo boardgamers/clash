@@ -104,33 +104,20 @@ pub fn player_that_chooses_next_first_player(
     players: &Vec<Player>,
     current_start_player_index: usize,
 ) -> usize {
-    let mut potential_deciding_players = Vec::new();
-    let mut best_total: Option<u32> = None;
-    for (i, player) in players.iter().enumerate() {
-        let total = player.resources().mood_tokens + player.resources().culture_tokens;
-        match best_total {
-            None => {
-                potential_deciding_players.push(i);
-                best_total = Some(total);
-            }
-            Some(t) if total > t => {
-                potential_deciding_players.clear();
-                best_total = Some(total);
-                potential_deciding_players.push(i);
-            }
-            Some(t) if total == t => {
-                potential_deciding_players.push(i);
-            }
-            Some(_) => {}
-        }
+    fn score(player: &Player) -> u32 {
+        player.resources().mood_tokens + player.resources().culture_tokens
     }
-    potential_deciding_players
-        .into_iter()
-        .min_by_key(|&index| {
-            (index as isize - current_start_player_index as isize)
+
+    let best = players.iter().map(score).max().expect("no player found");
+    players
+        .iter()
+        .filter(|p| score(p) == best)
+        .min_by_key(|&p| {
+            (p.index as isize - current_start_player_index as isize)
                 .rem_euclid(players.len() as isize)
         })
         .expect("there should at least be one player with the most mood and culture tokens")
+        .index
 }
 
 #[cfg(test)]
