@@ -254,7 +254,7 @@ impl Player {
         self.can_advance_free(advance)
     }
 
-    pub fn has_advance(&self, advance: &String) -> bool {
+    pub fn has_advance(&self, advance: &str) -> bool {
         self.advances.iter().any(|advances| advances == advance)
     }
 

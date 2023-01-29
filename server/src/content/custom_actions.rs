@@ -38,7 +38,7 @@ impl CustomAction {
                 {
                     panic!("Illegal action");
                 }
-                game.players[player_index].loose_resources(payment.clone());
+                game.players[player_index].loose_resources(payment);
                 game.build_wonder(wonder, &city_position, player_index);
             }
         }

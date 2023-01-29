@@ -69,6 +69,9 @@ impl City {
         if self.city_pieces.amount() >= player.cities.len() {
             return false;
         }
+        if !player.has_advance(&building.required_advance()) {
+            return false;
+        }
         let cost = player.construct_cost(building, self);
         player.resources().can_afford(&cost)
     }
@@ -358,20 +361,20 @@ impl CityPieces {
     fn change_player(&mut self, new_player_index: usize) {
         for b in self.buildings(None) {
             if !matches!(b, Building::Obelisk) {
-                self.set_building(&b, new_player_index.clone());
+                self.set_building(&b, new_player_index);
             }
         }
     }
 
     pub fn buildings(&self, owned_by: Option<usize>) -> Vec<Building> {
         vec![
-            (Building::Academy, self.academy.clone()),
-            (Building::Market, self.market.clone()),
-            (Building::Obelisk, self.obelisk.clone()),
-            (Building::Observatory, self.observatory.clone()),
-            (Building::Fortress, self.fortress.clone()),
-            (Building::Port, self.port.clone()),
-            (Building::Temple, self.temple.clone()),
+            (Building::Academy, self.academy),
+            (Building::Market, self.market),
+            (Building::Obelisk, self.obelisk),
+            (Building::Observatory, self.observatory),
+            (Building::Fortress, self.fortress),
+            (Building::Port, self.port),
+            (Building::Temple, self.temple),
         ]
         .into_iter()
         .filter_map(|(building, owner)| {
