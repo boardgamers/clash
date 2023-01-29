@@ -199,6 +199,9 @@ impl Game {
         if !free_action {
             self.actions_left -= 1;
         }
+        if self.actions_left > 0 {
+            return;
+        }
         if self.players[player_index].resources() != &ResourcePile::empty() {
             return;
         }
@@ -334,16 +337,18 @@ impl Game {
         }
     }
 
-    pub fn set_active_leader(&mut self, index: usize, player_index: usize) {
+    pub fn set_active_leader(&mut self, leader_index: usize, player_index: usize) {
         self.kill_leader(player_index);
-        let new_leader = self.players[player_index].available_leaders.remove(index);
+        let new_leader = self.players[player_index].available_leaders.remove(leader_index);
         (new_leader.player_initializer)(self, player_index);
+        (new_leader.player_one_time_initializer)(self, leader_index);
         self.players[player_index].active_leader = Some(new_leader);
     }
 
     pub fn advance(&mut self, advance: &str, player_index: usize) {
         let advance = advances::get_advance_by_name(advance).expect("advance should exist");
         (advance.player_initializer)(self, player_index);
+        (advance.player_one_time_initializer)(self, player_index);
         for i in 0..self.players[player_index]
             .civilization
             .special_advances
@@ -364,7 +369,6 @@ impl Game {
                 break;
             }
         }
-        let player_index = player_index;
         let player = &mut self.players[player_index];
         if let Some(advance_bonus) = &advance.advance_bonus {
             player.gain_resources(advance_bonus.resources());
@@ -385,7 +389,7 @@ impl Game {
         if let Some(position) = self.players[player_index]
             .advances
             .iter()
-            .position(|advances| advances == &advance)
+            .position(|other_advance| other_advance == advance)
         {
             let advance = advances::get_advance_by_name(advance).expect("advance should exist");
             (advance.player_deinitializer)(self, player_index);
@@ -395,6 +399,7 @@ impl Game {
 
     fn unlock_special_advance(&mut self, special_advance: &SpecialAdvance, player_index: usize) {
         (special_advance.player_initializer)(self, player_index);
+        (special_advance.player_one_time_initializer)(self, player_index);
         self.players[player_index]
             .unlocked_special_advances
             .push(special_advance.name.clone());
@@ -407,7 +412,7 @@ impl Game {
         old_player_index: usize,
     ) {
         self.players[old_player_index]
-            .take_city(&position)
+            .take_city(position)
             .expect("player should own city")
             .conquer(self, new_player_index, old_player_index);
     }
@@ -422,6 +427,7 @@ impl Game {
     pub fn build_wonder(&mut self, wonder: Wonder, city: &Position, player_index: usize) {
         let mut wonder = wonder;
         (wonder.player_initializer)(self, player_index);
+        (wonder.player_one_time_initializer)(self, player_index);
         wonder.builder = Some(player_index);
         let player = &mut self.players[player_index];
         player.wonders_build += 1;

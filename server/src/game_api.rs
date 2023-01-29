@@ -1,6 +1,5 @@
-use std::{cmp::Ordering::*, mem};
-
 use serde::{Deserialize, Serialize};
+use std::{cmp::Ordering::*, mem};
 
 use crate::game::Game;
 use crate::game::GameState::*;

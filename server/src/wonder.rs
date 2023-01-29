@@ -15,6 +15,7 @@ pub struct Wonder {
     pub placement_requirement: Option<PlacementChecker>,
     pub player_initializer: AbilityInitializer,
     pub player_deinitializer: AbilityInitializer,
+    pub player_one_time_initializer: AbilityInitializer,
     pub builder: Option<usize>,
 }
 
@@ -39,6 +40,7 @@ pub struct WonderBuilder {
     placement_requirement: Option<PlacementChecker>,
     player_initializers: Vec<AbilityInitializer>,
     player_deinitializers: Vec<AbilityInitializer>,
+    player_one_time_initializers: Vec<AbilityInitializer>,
 }
 
 impl WonderBuilder {
@@ -51,6 +53,7 @@ impl WonderBuilder {
             placement_requirement: None,
             player_initializers: Vec::new(),
             player_deinitializers: Vec::new(),
+            player_one_time_initializers: Vec::new(),
         }
     }
 
@@ -69,6 +72,7 @@ impl WonderBuilder {
             ability_initializer::join_ability_initializers(self.player_initializers);
         let player_deinitializer =
             ability_initializer::join_ability_initializers(self.player_deinitializers);
+        let player_one_time_initializer = ability_initializer::join_ability_initializers(self.player_one_time_initializers);
         Wonder {
             name: self.name,
             description: String::from("● ") + &self.descriptions.join("\n● "),
@@ -77,6 +81,7 @@ impl WonderBuilder {
             placement_requirement: self.placement_requirement,
             player_initializer,
             player_deinitializer,
+            player_one_time_initializer,
             builder: None,
         }
     }
@@ -93,7 +98,12 @@ impl AbilityInitializerSetup for WonderBuilder {
         self
     }
 
-    fn key(&self) -> String {
+    fn add_ability_one_time_ability_initializer(mut self, initializer: AbilityInitializer) -> Self {
+        self.player_one_time_initializers.push(initializer);
+        self
+    }
+
+    fn get_key(&self) -> String {
         self.name.clone()
     }
 }

@@ -5,7 +5,7 @@ use crate::{content::wonders, game::Game, hexagon::Position, player::Player, won
 use serde::{Deserialize, Serialize};
 use MoodState::*;
 
-const MAX_CITY_SIZE: u32 = 4;
+const MAX_CITY_SIZE: usize = 4;
 
 pub struct City {
     pub city_pieces: CityPieces,
@@ -53,7 +53,7 @@ impl City {
         self.is_activated = true;
     }
 
-    pub fn can_increase_size(&self, building: &Building, player: &Player) -> bool {
+    pub fn can_construct(&self, building: &Building, player: &Player) -> bool {
         if self.player_index != player.index {
             return false;
         }
@@ -66,7 +66,10 @@ impl City {
         if !self.city_pieces.can_add_building(building) {
             return false;
         }
-        let cost = player.building_cost(building, self);
+        if self.city_pieces.amount() >= player.cities.len() {
+            return false;
+        }
+        let cost = player.construct_cost(building, self);
         player.resources().can_afford(&cost)
     }
 
@@ -75,6 +78,9 @@ impl City {
             return false;
         }
         if self.city_pieces.amount() == MAX_CITY_SIZE {
+            return false;
+        }
+        if self.city_pieces.amount() >= player.cities.len() {
             return false;
         }
         if !matches!(self.mood_state, Happy) {
@@ -128,11 +134,11 @@ impl City {
         }
     }
 
-    pub fn size(&self) -> u32 {
+    pub fn size(&self) -> usize {
         self.city_pieces.amount() + 1
     }
 
-    pub fn mood_modified_size(&self) -> u32 {
+    pub fn mood_modified_size(&self) -> usize {
         match self.mood_state {
             Happy => self.size() + 1,
             Neutral => self.size(),
@@ -231,6 +237,18 @@ impl Building {
             BuildingData::Port => Self::Port,
             BuildingData::Temple => Self::Temple,
         }
+    }
+
+    fn required_advance(&self) -> String {
+        String::from(match self {
+            Self::Academy => "Writing",
+            Self::Market => "Bartering",
+            Self::Obelisk => "Arts",
+            Self::Observatory => "Math",
+            Self::Fortress => "Tactics",
+            Self::Port => "Fishing",
+            Self::Temple => "Myths",
+        })
     }
 }
 
@@ -333,8 +351,8 @@ impl CityPieces {
         }
     }
 
-    fn amount(&self) -> u32 {
-        (self.buildings(None).len() + self.wonders.len()) as u32
+    fn amount(&self) -> usize {
+        self.buildings(None).len() + self.wonders.len()
     }
 
     fn change_player(&mut self, new_player_index: usize) {
@@ -414,10 +432,10 @@ mod tests {
             .cities
             .push(City::new(old, position.clone()));
         game.build_wonder(wonder, &position, old);
-        game.players[old].increase_size(&Building::Academy, &position);
-        game.players[old].increase_size(&Building::Obelisk, &position);
+        game.players[old].construct(&Building::Academy, &position);
+        game.players[old].construct(&Building::Obelisk, &position);
 
-        assert_eq!(6.0, game.players[old].victory_points());
+        assert_eq!(7.0, game.players[old].victory_points());
 
         game.conquer_city(&position, new, old);
 
@@ -428,7 +446,7 @@ mod tests {
         let old = &game.players[old];
         let new = &game.players[new];
         assert_eq!(3.0, old.victory_points());
-        assert_eq!(3.0, new.victory_points());
+        assert_eq!(4.0, new.victory_points());
         assert_eq!(0, old.wonders.len());
         assert_eq!(1, new.wonders.len());
         assert_eq!(1, old.influenced_buildings);

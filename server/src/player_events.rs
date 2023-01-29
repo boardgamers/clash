@@ -9,9 +9,10 @@ use crate::{
 
 #[derive(Default)]
 pub struct PlayerEvents {
-    pub city_size_increase: EventMut<Player, Position, Building>,
-    pub building_cost: EventMut<ResourcePile, City, Building>,
+    pub on_construct: EventMut<Player, Position, Building>,
+    pub construct_cost: EventMut<ResourcePile, City, Building>,
     pub wonder_cost: EventMut<ResourcePile, City, Wonder>,
+    pub advance_cost: EventMut<u32, String>,
 }
 
 impl PlayerEvents {

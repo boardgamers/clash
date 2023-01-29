@@ -17,7 +17,7 @@ use crate::{
     resource_pile::ResourcePile,
     wonder::Wonder,
 };
-pub const BUILDING_COST: ResourcePile = ResourcePile {
+pub const CONSTRUCT_COST: ResourcePile = ResourcePile {
     food: 1,
     wood: 1,
     ore: 1,
@@ -62,7 +62,7 @@ pub struct Player {
 
 impl Player {
     pub fn from_data(data: PlayerData, game: &mut Game) -> Self {
-        let mut player = Self {
+        let player = Self {
             name: data.name,
             index: data.id,
             resources: data.resources,
@@ -73,10 +73,10 @@ impl Player {
             units: data.units,
             civilization: civilizations::get_civilization_by_name(&data.civilization)
                 .expect("player data should have a valid civilization"),
-            active_leader: data
-                .active_leader
-                .map(|leader| civilizations::get_leader_by_name(&leader, &data.civilization))
-                .expect("player data should contain a valid leader"),
+            active_leader: data.active_leader.map(|leader| {
+                civilizations::get_leader_by_name(&leader, &data.civilization)
+                    .expect("player data should contain a valid leader")
+            }),
             available_leaders: data
                 .available_leaders
                 .into_iter()
@@ -105,22 +105,46 @@ impl Player {
                 })
                 .collect(),
         };
-        let advances = mem::take(&mut player.advances);
+        let player_index = player.index;
+        game.players.push(player);
+        let advances = mem::take(&mut game.players[player_index].advances);
         for advance in advances.iter() {
-            game.advance(advance, player.index);
-        }
-        player.advances = advances;
-        if let Some(leader) = player.active_leader.take() {
-            (leader.player_initializer)(game, player.index);
-            player.active_leader = Some(leader);
-        }
-        let mut cities = mem::take(&mut player.cities);
-        for city in cities.iter_mut() {
-            for wonder in city.city_pieces.wonders.iter() {
-                (wonder.player_initializer)(game, player.index);
+            let advance = advances::get_advance_by_name(advance).expect("advance should exist");
+            (advance.player_initializer)(game, player_index);
+            for i in 0..game.players[player_index]
+                .civilization
+                .special_advances
+                .len()
+            {
+                if game.players[player_index].civilization.special_advances[i].required_advance
+                    == advance.name
+                {
+                    let special_advance = game.players[player_index]
+                        .civilization
+                        .special_advances
+                        .remove(i);
+                    (special_advance.player_initializer)(game, player_index);
+                    game.players[player_index]
+                        .civilization
+                        .special_advances
+                        .insert(i, special_advance);
+                    break;
+                }
             }
         }
-        player.cities.append(&mut cities);
+        if let Some(leader) = game.players[player_index].active_leader.take() {
+            (leader.player_initializer)(game, player_index);
+            game.players[player_index].active_leader = Some(leader);
+        }
+        let mut cities = mem::take(&mut game.players[player_index].cities);
+        for city in cities.iter_mut() {
+            for wonder in city.city_pieces.wonders.iter() {
+                (wonder.player_initializer)(game, player_index);
+            }
+        }
+        let mut player = game.players.remove(player_index);
+        player.cities = cities;
+        player.advances = advances;
         player
     }
 
@@ -222,7 +246,8 @@ impl Player {
     }
 
     pub fn can_advance(&self, advance: &str) -> bool {
-        if self.resources.food + self.resources.ideas + (self.resources.gold as u32) < ADVANCE_COST
+        if self.resources.food + self.resources.ideas + (self.resources.gold as u32)
+            < self.advance_cost(advance)
         {
             return false;
         }
@@ -237,6 +262,7 @@ impl Player {
         let mut victory_points = 0.0;
         for city in self.cities.iter() {
             victory_points += city.uninfluenced_buildings() as f32 * BUILDING_VICTORY_POINTS;
+            victory_points += 1.0;
         }
         victory_points += self.influenced_buildings as f32 * BUILDING_VICTORY_POINTS;
         victory_points += (self.advances.len() + self.unlocked_special_advances.len()) as f32
@@ -310,10 +336,10 @@ impl Player {
             .total_cmp(&other.event_victory_points)
     }
 
-    pub fn building_cost(&self, building: &Building, city: &City) -> ResourcePile {
-        let mut cost = BUILDING_COST;
+    pub fn construct_cost(&self, building: &Building, city: &City) -> ResourcePile {
+        let mut cost = CONSTRUCT_COST;
         self.get_events()
-            .building_cost
+            .construct_cost
             .trigger(&mut cost, city, building);
         cost
     }
@@ -323,6 +349,14 @@ impl Player {
         self.get_events()
             .wonder_cost
             .trigger(&mut cost, city, wonder);
+        cost
+    }
+
+    pub fn advance_cost(&self, advance: &str) -> u32 {
+        let mut cost = ADVANCE_COST;
+        self.get_events()
+            .advance_cost
+            .trigger(&mut cost, &advance.to_string(), &());
         cost
     }
 
@@ -352,12 +386,12 @@ impl Player {
         )
     }
 
-    pub fn increase_size(&mut self, building: &Building, city: &Position) {
+    pub fn construct(&mut self, building: &Building, city: &Position) {
         self.get_city_mut(city)
             .expect("player should have city")
             .activate();
         self.take_events(|events, player| {
-            events.city_size_increase.trigger(player, city, building)
+            events.on_construct.trigger(player, city, building)
         });
         if matches!(building, Building::Academy) {
             self.gain_resources(ResourcePile::ideas(2))

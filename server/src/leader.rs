@@ -8,6 +8,7 @@ pub struct Leader {
     pub second_ability_description: String,
     pub player_initializer: AbilityInitializer,
     pub player_deinitializer: AbilityInitializer,
+    pub player_one_time_initializer: AbilityInitializer,
 }
 
 impl Leader {
@@ -26,26 +27,6 @@ impl Leader {
             second_ability_description.to_string(),
         )
     }
-
-    fn new(
-        name: String,
-        first_ability: String,
-        first_ability_description: String,
-        second_ability: String,
-        second_ability_description: String,
-        player_initializer: AbilityInitializer,
-        player_deinitializer: AbilityInitializer,
-    ) -> Self {
-        Self {
-            name,
-            first_ability,
-            first_ability_description,
-            second_ability,
-            second_ability_description,
-            player_initializer,
-            player_deinitializer,
-        }
-    }
 }
 
 pub struct LeaderBuilder {
@@ -56,6 +37,7 @@ pub struct LeaderBuilder {
     second_ability_description: String,
     player_initializers: Vec<AbilityInitializer>,
     player_deinitializers: Vec<AbilityInitializer>,
+    player_one_time_initializers: Vec<AbilityInitializer>,
 }
 
 impl LeaderBuilder {
@@ -74,6 +56,7 @@ impl LeaderBuilder {
             second_ability_description,
             player_initializers: Vec::new(),
             player_deinitializers: Vec::new(),
+            player_one_time_initializers: Vec::new(),
         }
     }
 
@@ -82,15 +65,17 @@ impl LeaderBuilder {
             ability_initializer::join_ability_initializers(self.player_initializers);
         let player_deinitializer =
             ability_initializer::join_ability_initializers(self.player_deinitializers);
-        Leader::new(
-            self.name,
-            self.first_ability,
-            self.first_ability_description,
-            self.second_ability,
-            self.second_ability_description,
+        let player_one_time_initializer = ability_initializer::join_ability_initializers(self.player_one_time_initializers);
+        Leader {
+            name: self.name,
+            first_ability: self.first_ability,
+            first_ability_description: self.first_ability_description,
+            second_ability: self.second_ability,
+            second_ability_description: self.second_ability_description,
             player_initializer,
             player_deinitializer,
-        )
+            player_one_time_initializer,
+        }
     }
 }
 
@@ -105,7 +90,12 @@ impl AbilityInitializerSetup for LeaderBuilder {
         self
     }
 
-    fn key(&self) -> String {
+    fn add_ability_one_time_ability_initializer(mut self, initializer: AbilityInitializer) -> Self {
+        self.player_one_time_initializers.push(initializer);
+        self
+    }
+
+    fn get_key(&self) -> String {
         self.name.clone()
     }
 }

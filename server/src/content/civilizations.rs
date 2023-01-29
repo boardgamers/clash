@@ -2,9 +2,7 @@ use super::custom_actions::CustomActionType::*;
 use crate::{civilization::Civilization, leader::Leader};
 
 pub fn get_civilizations() -> Vec<Civilization> {
-    vec![
-        Civilization::new("test", vec![], vec![])
-    ]
+    vec![Civilization::new("test", vec![], vec![])]
 }
 
 pub fn get_civilization_by_name(name: &str) -> Option<Civilization> {

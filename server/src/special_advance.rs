@@ -6,6 +6,7 @@ pub struct SpecialAdvance {
     pub required_advance: String,
     pub player_initializer: AbilityInitializer,
     pub player_deinitializer: AbilityInitializer,
+    pub player_one_time_initializer: AbilityInitializer,
 }
 
 impl SpecialAdvance {
@@ -19,6 +20,7 @@ impl SpecialAdvance {
         required_advance: String,
         player_initializer: AbilityInitializer,
         player_deinitializer: AbilityInitializer,
+        player_one_time_initializer: AbilityInitializer,
     ) -> Self {
         Self {
             name,
@@ -26,6 +28,7 @@ impl SpecialAdvance {
             required_advance,
             player_initializer,
             player_deinitializer,
+            player_one_time_initializer,
         }
     }
 }
@@ -34,8 +37,9 @@ pub struct SpecialAdvanceBuilder {
     name: String,
     descriptions: Vec<String>,
     required_advance: String,
-    initializers: Vec<AbilityInitializer>,
-    deinitializers: Vec<AbilityInitializer>,
+    player_initializers: Vec<AbilityInitializer>,
+    player_deinitializers: Vec<AbilityInitializer>,
+    player_one_time_initializers: Vec<AbilityInitializer>,
 }
 
 impl SpecialAdvanceBuilder {
@@ -44,8 +48,9 @@ impl SpecialAdvanceBuilder {
             name,
             descriptions: Vec::new(),
             required_advance,
-            initializers: Vec::new(),
-            deinitializers: Vec::new(),
+            player_initializers: Vec::new(),
+            player_deinitializers: Vec::new(),
+            player_one_time_initializers: Vec::new(),
         }
     }
 
@@ -55,30 +60,37 @@ impl SpecialAdvanceBuilder {
     }
 
     pub fn build(self) -> SpecialAdvance {
-        let initializer = ability_initializer::join_ability_initializers(self.initializers);
-        let deinitializer = ability_initializer::join_ability_initializers(self.deinitializers);
+        let player_initializer = ability_initializer::join_ability_initializers(self.player_initializers);
+        let player_deinitializer = ability_initializer::join_ability_initializers(self.player_deinitializers);
+        let player_one_time_initializer = ability_initializer::join_ability_initializers(self.player_one_time_initializers);
         SpecialAdvance::new(
             self.name,
             String::from("● ") + &self.descriptions.join("\n● "),
             self.required_advance,
-            initializer,
-            deinitializer,
+            player_initializer,
+            player_deinitializer,
+            player_one_time_initializer,
         )
     }
 }
 
 impl AbilityInitializerSetup for SpecialAdvanceBuilder {
     fn add_ability_initializer(mut self, initializer: AbilityInitializer) -> Self {
-        self.initializers.push(initializer);
+        self.player_initializers.push(initializer);
         self
     }
 
     fn add_ability_deinitializer(mut self, deinitializer: AbilityInitializer) -> Self {
-        self.deinitializers.push(deinitializer);
+        self.player_deinitializers.push(deinitializer);
         self
     }
 
-    fn key(&self) -> String {
+    fn add_ability_one_time_ability_initializer(mut self, initializer: AbilityInitializer) -> Self {
+        self.player_one_time_initializers.push(initializer);
+        self
+    }
+
+    fn get_key(&self) -> String {
         self.name.clone()
     }
 }

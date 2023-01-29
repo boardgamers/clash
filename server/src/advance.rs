@@ -14,6 +14,7 @@ pub struct Advance {
     pub unlocked_building: Option<String>,
     pub player_initializer: AbilityInitializer,
     pub player_deinitializer: AbilityInitializer,
+    pub player_one_time_initializer: AbilityInitializer,
 }
 
 impl Advance {
@@ -35,8 +36,9 @@ pub struct AdvanceBuilder {
     required_advance: Option<String>,
     contradicting_advance: Option<String>,
     unlocked_building: Option<String>,
-    initializers: Vec<AbilityInitializer>,
-    deinitializers: Vec<AbilityInitializer>,
+    player_initializers: Vec<AbilityInitializer>,
+    player_deinitializers: Vec<AbilityInitializer>,
+    player_one_time_initializers: Vec<AbilityInitializer>,
 }
 
 impl AdvanceBuilder {
@@ -48,8 +50,9 @@ impl AdvanceBuilder {
             required_advance: None,
             contradicting_advance: None,
             unlocked_building: None,
-            initializers: Vec::new(),
-            deinitializers: Vec::new(),
+            player_initializers: Vec::new(),
+            player_deinitializers: Vec::new(),
+            player_one_time_initializers: Vec::new(),
         }
     }
 
@@ -68,9 +71,15 @@ impl AdvanceBuilder {
         self
     }
 
+    pub fn with_unlocked_building(mut self, unlocked_building: &str) -> Self {
+        self.unlocked_building = Some(unlocked_building.to_string());
+        self
+    }
+
     pub fn build(self) -> Advance {
-        let initializer = ability_initializer::join_ability_initializers(self.initializers);
-        let deinitializer = ability_initializer::join_ability_initializers(self.deinitializers);
+        let player_initializer = ability_initializer::join_ability_initializers(self.player_initializers);
+        let player_deinitializer = ability_initializer::join_ability_initializers(self.player_deinitializers);
+        let player_one_time_initializer = ability_initializer::join_ability_initializers(self.player_one_time_initializers);
         Advance {
             name: self.name,
             description: self.description,
@@ -78,24 +87,30 @@ impl AdvanceBuilder {
             required_advance: self.required_advance,
             contradicting_advance: self.contradicting_advance,
             unlocked_building: self.unlocked_building,
-            player_initializer: initializer,
-            player_deinitializer: deinitializer,
+            player_initializer,
+            player_deinitializer,
+            player_one_time_initializer,
         }
     }
 }
 
 impl AbilityInitializerSetup for AdvanceBuilder {
     fn add_ability_initializer(mut self, initializer: AbilityInitializer) -> Self {
-        self.initializers.push(initializer);
+        self.player_initializers.push(initializer);
         self
     }
 
     fn add_ability_deinitializer(mut self, deinitializer: AbilityInitializer) -> Self {
-        self.deinitializers.push(deinitializer);
+        self.player_deinitializers.push(deinitializer);
         self
     }
-
-    fn key(&self) -> String {
+    
+    fn add_ability_one_time_ability_initializer(mut self, initializer: AbilityInitializer) -> Self {
+        self.player_one_time_initializers.push(initializer);
+        self
+    }
+    
+    fn get_key(&self) -> String {
         self.name.clone()
     }
 }

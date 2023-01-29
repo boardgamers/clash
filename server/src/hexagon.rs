@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use hex2d::Coordinate;
 use serde::{Deserialize, Serialize};
 
@@ -16,18 +18,14 @@ impl Position {
     pub fn from_offset(s: &str) -> Position {
         let mut chars = s.chars();
         let row = chars.next().expect("string is emtpy") as u32 - 'A' as u32;
-        let col = s.get(1..).expect("string is too short").parse::<u32>().expect("not a number");
+        let col = s
+            .get(1..)
+            .expect("string is too short")
+            .parse::<u32>()
+            .expect("not a number");
         let q = (col - 1) as i32;
         let r = (row as i32) - (q - (q % 2)) / 2;
-        Position::new (q, r)
-    }
-
-    pub fn name(&self) -> String {
-        let c = self.q;
-        let r = self.r + (self.q - (self.q % 2)) / 2;
-        let row = char::from_u32(('A' as u32) + r as u32).unwrap();
-        let col = c + 1;
-        format!("{row}{col}")
+        Position::new(q, r)
     }
 
     pub fn coordinate(&self) -> Coordinate {
@@ -41,9 +39,13 @@ impl Position {
     }
 }
 
-impl ToString for Position {
-    fn to_string(&self) -> String {
-        self.name()
+impl Display for Position {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let c = self.q;
+        let r = self.r + (self.q - (self.q % 2)) / 2;
+        let row = char::from_u32(('A' as u32) + r as u32).unwrap();
+        let col = c + 1;
+        write!(f, "{row}{col}")
     }
 }
 
@@ -64,6 +66,6 @@ mod tests {
     fn convert_position() {
         let position = Position::from_offset("A1");
         assert_eq!(Position::new(0, 0), position);
-        assert_eq!("A1", position.name());
+        assert_eq!("A1", position.to_string());
     }
 }

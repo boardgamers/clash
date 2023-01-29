@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     city::{
         Building::{self, *},
-        BuildingData, City, CityData,
+        BuildingData,
     },
     content::custom_actions::CustomAction,
     game::Game,
@@ -19,7 +19,7 @@ pub enum PlayingAction {
         advance: String,
         payment: ResourcePile,
     },
-    Build {
+    Construct {
         city_position: Position,
         city_piece: BuildingData,
         payment: ResourcePile,
@@ -46,15 +46,16 @@ impl PlayingAction {
         match self {
             Advance { advance, payment } => {
                 let player = &mut game.players[player_index];
+                let cost = player.advance_cost(&advance);
                 if !player.can_advance(&advance)
-                    || payment.food + payment.ideas + payment.gold as u32 != 2
+                    || payment.food + payment.ideas + payment.gold as u32 != cost
                 {
                     panic!("Illegal action");
                 }
                 player.loose_resources(payment);
                 game.advance(&advance, player_index);
             }
-            Build {
+            Construct {
                 city_position,
                 city_piece,
                 payment,
@@ -65,8 +66,8 @@ impl PlayingAction {
                 let city = player
                     .get_city(&city_position)
                     .expect("player should have city");
-                let cost = player.building_cost(&building, &city);
-                if !city.can_increase_size(&building, player) || !payment.can_afford(&cost) {
+                let cost = player.construct_cost(&building, city);
+                if !city.can_construct(&building, player) || !payment.can_afford(&cost) {
                     panic!("Illegal action");
                 }
                 if matches!(building, Temple) {
@@ -80,7 +81,7 @@ impl PlayingAction {
                     player.gain_resources(building_bonus);
                 }
                 player.loose_resources(payment);
-                player.increase_size(&building, &city_position);
+                player.construct(&building, &city_position);
             }
             IncreaseHappiness {
                 happiness_increases,
@@ -90,7 +91,7 @@ impl PlayingAction {
                     let city = player
                         .get_city(&city_position)
                         .expect("player should have city");
-                    let cost = ResourcePile::mood_tokens(city.size()) * steps;
+                    let cost = ResourcePile::mood_tokens(city.size() as u32) * steps;
                     if city.player_index != player_index || !player.resources().can_afford(&cost) {
                         panic!("Illegal action");
                     }
@@ -120,7 +121,7 @@ impl PlayingAction {
                     .expect("player should have position");
                 if matches!(building, Obelisk)
                     || starting_city_position.distance(&target_city_position)
-                        > starting_city.size() + range_boost
+                        > starting_city.size() as u32 + range_boost
                     || starting_city.player_index != player_index
                     || !player.resources().can_afford(&cost)
                 {

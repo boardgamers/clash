@@ -14,10 +14,52 @@ async fn main() {
     let mut game = Game::new(1, "a".repeat(32));
     game.players[0]
         .cities
+        .push(City::new(0, Position::from_offset("A4")));
+    game.players[0]
+        .cities
         .push(City::new(0, Position::from_offset("A1")));
     game.players[0]
         .cities
+        .push(City::new(0, Position::from_offset("A2")));
+    game.players[0]
+        .cities
+        .push(City::new(0, Position::from_offset("A3")));
+    game.players[0]
+        .cities
+        .push(City::new(0, Position::from_offset("B4")));
+    game.players[0]
+        .cities
+        .push(City::new(0, Position::from_offset("B1")));
+    game.players[0]
+        .cities
+        .push(City::new(0, Position::from_offset("B2")));
+    game.players[0]
+        .cities
+        .push(City::new(0, Position::from_offset("B3")));
+    game.players[0]
+        .cities
+        .push(City::new(0, Position::from_offset("C4")));
+    game.players[0]
+        .cities
+        .push(City::new(0, Position::from_offset("C1")));
+    game.players[0]
+        .cities
         .push(City::new(0, Position::from_offset("C2")));
+    game.players[0]
+        .cities
+        .push(City::new(0, Position::from_offset("C3")));
+    game.players[0]
+        .cities
+        .push(City::new(0, Position::from_offset("D4")));
+    game.players[0]
+        .cities
+        .push(City::new(0, Position::from_offset("D1")));
+    game.players[0]
+        .cities
+        .push(City::new(0, Position::from_offset("D2")));
+    game.players[0]
+        .cities
+        .push(City::new(0, Position::from_offset("D3")));
 
     loop {
         clear_background(RED);
@@ -39,7 +81,7 @@ async fn main() {
                 for city in p.cities.iter() {
                     let pos = &city.position;
                     if c == pos.coordinate() {
-                        let n = pos.name();
+                        let n = pos.to_string();
                         status = format!("clicked city {n}")
                     };
                 }
