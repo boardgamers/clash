@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
 use crate::{content::wonders, game::Game, hexagon::Position, player::Player, wonder::Wonder};
+use strum_macros::{Display, EnumIter, ToString};
 
 use serde::{Deserialize, Serialize};
 use MoodState::*;
@@ -186,6 +187,7 @@ impl CityData {
     }
 }
 
+#[derive(Debug, EnumIter, Display)]
 pub enum Building {
     Academy,
     Market,
@@ -347,13 +349,13 @@ impl CityPieces {
 
     pub fn buildings(&self, owned_by: Option<usize>) -> Vec<Building> {
         vec![
-            (Building::Academy, self.academy.clone()),
-            (Building::Market, self.market.clone()),
-            (Building::Obelisk, self.obelisk.clone()),
-            (Building::Observatory, self.observatory.clone()),
-            (Building::Fortress, self.fortress.clone()),
-            (Building::Port, self.port.clone()),
-            (Building::Temple, self.temple.clone()),
+            (Building::Academy, self.academy),
+            (Building::Market, self.market),
+            (Building::Obelisk, self.obelisk),
+            (Building::Observatory, self.observatory),
+            (Building::Fortress, self.fortress),
+            (Building::Port, self.port),
+            (Building::Temple, self.temple),
         ]
         .into_iter()
         .filter_map(|(building, owner)| {
@@ -412,7 +414,7 @@ mod tests {
         let position = Position::new(0, 0);
         game.players[old]
             .cities
-            .push(City::new(old, position.clone()));
+            .push(City::new(old, position));
         game.build_wonder(wonder, &position, old);
         game.players[old].increase_size(&Building::Academy, &position);
         game.players[old].increase_size(&Building::Obelisk, &position);

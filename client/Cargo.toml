@@ -9,3 +9,4 @@ edition = "2021"
 macroquad = "0.3"
 hex2d = "1.1.0"
 server = { path = "../server", version = "0.1.0" }
+strum = "0.24.1"

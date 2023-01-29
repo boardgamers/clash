@@ -1,7 +1,7 @@
 use hex2d::Coordinate;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug, Copy)]
 pub struct Position {
     pub q: i32,
     pub r: i32,
