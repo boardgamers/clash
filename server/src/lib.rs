@@ -9,7 +9,7 @@ pub mod game;
 pub mod game_api;
 pub mod hexagon;
 mod leader;
-mod player;
+pub mod player;
 mod player_events;
 pub mod playing_actions;
 pub mod resource_pile;
