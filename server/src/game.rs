@@ -339,7 +339,9 @@ impl Game {
 
     pub fn set_active_leader(&mut self, leader_index: usize, player_index: usize) {
         self.kill_leader(player_index);
-        let new_leader = self.players[player_index].available_leaders.remove(leader_index);
+        let new_leader = self.players[player_index]
+            .available_leaders
+            .remove(leader_index);
         (new_leader.player_initializer)(self, player_index);
         (new_leader.player_one_time_initializer)(self, leader_index);
         self.players[player_index].active_leader = Some(new_leader);

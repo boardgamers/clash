@@ -77,9 +77,12 @@ impl AdvanceBuilder {
     }
 
     pub fn build(self) -> Advance {
-        let player_initializer = ability_initializer::join_ability_initializers(self.player_initializers);
-        let player_deinitializer = ability_initializer::join_ability_initializers(self.player_deinitializers);
-        let player_one_time_initializer = ability_initializer::join_ability_initializers(self.player_one_time_initializers);
+        let player_initializer =
+            ability_initializer::join_ability_initializers(self.player_initializers);
+        let player_deinitializer =
+            ability_initializer::join_ability_initializers(self.player_deinitializers);
+        let player_one_time_initializer =
+            ability_initializer::join_ability_initializers(self.player_one_time_initializers);
         Advance {
             name: self.name,
             description: self.description,
@@ -104,12 +107,12 @@ impl AbilityInitializerSetup for AdvanceBuilder {
         self.player_deinitializers.push(deinitializer);
         self
     }
-    
+
     fn add_ability_one_time_ability_initializer(mut self, initializer: AbilityInitializer) -> Self {
         self.player_one_time_initializers.push(initializer);
         self
     }
-    
+
     fn get_key(&self) -> String {
         self.name.clone()
     }

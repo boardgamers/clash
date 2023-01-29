@@ -390,9 +390,7 @@ impl Player {
         self.get_city_mut(city)
             .expect("player should have city")
             .activate();
-        self.take_events(|events, player| {
-            events.on_construct.trigger(player, city, building)
-        });
+        self.take_events(|events, player| events.on_construct.trigger(player, city, building));
         if matches!(building, Building::Academy) {
             self.gain_resources(ResourcePile::ideas(2))
         }

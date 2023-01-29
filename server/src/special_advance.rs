@@ -60,9 +60,12 @@ impl SpecialAdvanceBuilder {
     }
 
     pub fn build(self) -> SpecialAdvance {
-        let player_initializer = ability_initializer::join_ability_initializers(self.player_initializers);
-        let player_deinitializer = ability_initializer::join_ability_initializers(self.player_deinitializers);
-        let player_one_time_initializer = ability_initializer::join_ability_initializers(self.player_one_time_initializers);
+        let player_initializer =
+            ability_initializer::join_ability_initializers(self.player_initializers);
+        let player_deinitializer =
+            ability_initializer::join_ability_initializers(self.player_deinitializers);
+        let player_one_time_initializer =
+            ability_initializer::join_ability_initializers(self.player_one_time_initializers);
         SpecialAdvance::new(
             self.name,
             String::from("● ") + &self.descriptions.join("\n● "),

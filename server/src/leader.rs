@@ -65,7 +65,8 @@ impl LeaderBuilder {
             ability_initializer::join_ability_initializers(self.player_initializers);
         let player_deinitializer =
             ability_initializer::join_ability_initializers(self.player_deinitializers);
-        let player_one_time_initializer = ability_initializer::join_ability_initializers(self.player_one_time_initializers);
+        let player_one_time_initializer =
+            ability_initializer::join_ability_initializers(self.player_one_time_initializers);
         Leader {
             name: self.name,
             first_ability: self.first_ability,
