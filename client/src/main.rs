@@ -71,20 +71,25 @@ fn show_resources(game: &Game, player_index: usize) {
     let player = &game.players[player_index];
     let r: &ResourcePile = player.resources();
 
-    root_ui().window(
-        hash!(),
-        vec2(600., 300. + player_index as f32 * 200.),
-        vec2(100., 200.),
-        |ui| {
-            ui.label(None, &format!("Food {}", r.food));
-            ui.label(None, &format!("Wood {}", r.wood));
-            ui.label(None, &format!("Ore {}", r.ore));
-            ui.label(None, &format!("Ideas {}", r.ideas));
-            ui.label(None, &format!("Gold {}", r.gold));
-            ui.label(None, &format!("Mood {}", r.mood_tokens));
-            ui.label(None, &format!("Culture {}", r.culture_tokens));
-        },
-    );
+     let mut i: f32 = 0.;
+    let mut res = |label: String| {
+        draw_text(
+            &label,
+            600.,
+            300. + player_index as f32 * 200. + i,
+            20.,
+            BLACK,
+        );
+        i += 30.;
+    };
+
+    res(format!("Food {}", r.food));
+    res(format!("Wood {}", r.wood));
+    res(format!("Ore {}", r.ore));
+    res(format!("Ideas {}", r.ideas));
+    res(format!("Gold {}", r.gold));
+    res(format!("Mood {}", r.mood_tokens));
+    res(format!("Culture {}", r.culture_tokens));
 }
 
 fn show_city_menu(game: &mut Game, player_index: usize, city_position: &Position) {
