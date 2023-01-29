@@ -31,27 +31,11 @@ async fn main() {
     loop {
         clear_background(RED);
 
-        for p in game.players.iter() {
-            for city in p.cities.iter() {
-                map::draw_city(p, city);
-            }
-        }
+        draw_map(&mut game);
+        show_resources(&game, 0);
 
         if let Some((player_index, city_position)) = focused_city {
-            root_ui().window(hash!(), vec2(20., 20.), vec2(100., 50.), |ui| {
-                for b in Building::iter() {
-                    if game.players[player_index]
-                        .get_city(&city_position)
-                        .expect("city not found")
-                        .can_increase_size(&b, &game.players[0])
-                    {
-                        let string = format!("{b}");
-                        if ui.button(None, string) {
-                            game.players[0].increase_size(&b, &city_position);
-                        }
-                    }
-                }
-            });
+            show_city_menu(&mut game, player_index, &city_position);
         }
 
         if is_mouse_button_pressed(MouseButton::Left) {
@@ -73,4 +57,49 @@ async fn main() {
 
         next_frame().await
     }
+}
+
+fn draw_map(game: &mut Game) {
+    for p in game.players.iter() {
+        for city in p.cities.iter() {
+            map::draw_city(p, city);
+        }
+    }
+}
+
+fn show_resources(game: &Game, player_index: usize) {
+    let player = &game.players[player_index];
+    let r: &ResourcePile = player.resources();
+
+    root_ui().window(
+        hash!(),
+        vec2(600., 300. + player_index as f32 * 200.),
+        vec2(100., 200.),
+        |ui| {
+            ui.label(None, &format!("Food {}", r.food));
+            ui.label(None, &format!("Wood {}", r.wood));
+            ui.label(None, &format!("Ore {}", r.ore));
+            ui.label(None, &format!("Ideas {}", r.ideas));
+            ui.label(None, &format!("Gold {}", r.gold));
+            ui.label(None, &format!("Mood {}", r.mood_tokens));
+            ui.label(None, &format!("Culture {}", r.culture_tokens));
+        },
+    );
+}
+
+fn show_city_menu(game: &mut Game, player_index: usize, city_position: &Position) {
+    root_ui().window(hash!(), vec2(600., 20.), vec2(100., 200.), |ui| {
+        for b in Building::iter() {
+            if game.players[player_index]
+                .get_city(city_position)
+                .expect("city not found")
+                .can_increase_size(&b, &game.players[0])
+            {
+                let string = format!("{b}");
+                if ui.button(None, string) {
+                    game.players[0].increase_size(&b, city_position);
+                }
+            }
+        }
+    });
 }
