@@ -1,5 +1,6 @@
 use crate::{
     ability_initializer::{self, AbilityInitializer, AbilityInitializerSetup},
+    game::Game,
     resource_pile::ResourcePile,
 };
 
@@ -61,13 +62,13 @@ impl AdvanceBuilder {
         self
     }
 
-    pub fn with_required_advance(mut self, required_advance: String) -> Self {
-        self.required_advance = Some(required_advance);
+    pub fn with_required_advance(mut self, required_advance: &str) -> Self {
+        self.required_advance = Some(required_advance.to_string());
         self
     }
 
-    pub fn with_contradicting_advance(mut self, contradicting_advance: String) -> Self {
-        self.contradicting_advance = Some(contradicting_advance);
+    pub fn with_contradicting_advance(mut self, contradicting_advance: &str) -> Self {
+        self.contradicting_advance = Some(contradicting_advance.to_string());
         self
     }
 
@@ -98,18 +99,28 @@ impl AdvanceBuilder {
 }
 
 impl AbilityInitializerSetup for AdvanceBuilder {
-    fn add_ability_initializer(mut self, initializer: AbilityInitializer) -> Self {
-        self.player_initializers.push(initializer);
+    fn add_ability_initializer<F>(mut self, initializer: F) -> Self
+    where
+        F: Fn(&mut Game, usize) + 'static,
+    {
+        self.player_initializers.push(Box::new(initializer));
         self
     }
 
-    fn add_ability_deinitializer(mut self, deinitializer: AbilityInitializer) -> Self {
-        self.player_deinitializers.push(deinitializer);
+    fn add_ability_deinitializer<F>(mut self, deinitializer: F) -> Self
+    where
+        F: Fn(&mut Game, usize) + 'static,
+    {
+        self.player_deinitializers.push(Box::new(deinitializer));
         self
     }
 
-    fn add_ability_one_time_ability_initializer(mut self, initializer: AbilityInitializer) -> Self {
-        self.player_one_time_initializers.push(initializer);
+    fn add_one_time_ability_initializer<F>(mut self, initializer: F) -> Self
+    where
+        F: Fn(&mut Game, usize) + 'static,
+    {
+        self.player_one_time_initializers
+            .push(Box::new(initializer));
         self
     }
 

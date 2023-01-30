@@ -11,7 +11,9 @@ use crate::{
 pub struct PlayerEvents {
     pub on_construct: EventMut<Player, Position, Building>,
     pub construct_cost: EventMut<ResourcePile, City, Building>,
+    pub on_construct_wonder: EventMut<Player, Position, Wonder>,
     pub wonder_cost: EventMut<ResourcePile, City, Wonder>,
+    pub on_advance: EventMut<Player, String, ()>,
     pub advance_cost: EventMut<u32, String>,
 }
 

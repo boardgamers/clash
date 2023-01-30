@@ -348,6 +348,7 @@ impl Game {
     }
 
     pub fn advance(&mut self, advance: &str, player_index: usize) {
+        self.players[player_index].take_events(|events, player| events.on_advance.trigger(player, &advance.to_string(), &()));
         let advance = advances::get_advance_by_name(advance).expect("advance should exist");
         (advance.player_initializer)(self, player_index);
         (advance.player_one_time_initializer)(self, player_index);
@@ -426,7 +427,8 @@ impl Game {
         city.raze(self, player_index);
     }
 
-    pub fn build_wonder(&mut self, wonder: Wonder, city: &Position, player_index: usize) {
+    pub fn build_wonder(&mut self, wonder: Wonder, city_position: &Position, player_index: usize) {
+        self.players[player_index].take_events(|events, player| events.on_construct_wonder.trigger(player, city_position, &wonder));
         let mut wonder = wonder;
         (wonder.player_initializer)(self, player_index);
         (wonder.player_one_time_initializer)(self, player_index);
@@ -435,7 +437,7 @@ impl Game {
         player.wonders_build += 1;
         player.wonders.push(wonder.name.clone());
         player
-            .get_city_mut(city)
+            .get_city_mut(city_position)
             .expect("player should have city")
             .city_pieces
             .wonders

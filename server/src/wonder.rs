@@ -1,5 +1,6 @@
 use crate::{
     ability_initializer::{self, AbilityInitializer, AbilityInitializerSetup},
+    game::Game,
     hexagon::Position,
     resource_pile::ResourcePile,
 };
@@ -57,8 +58,8 @@ impl WonderBuilder {
         }
     }
 
-    pub fn add_description(mut self, description: String) -> Self {
-        self.descriptions.push(description);
+    pub fn add_description(mut self, description: &str) -> Self {
+        self.descriptions.push(description.to_string());
         self
     }
 
@@ -89,18 +90,28 @@ impl WonderBuilder {
 }
 
 impl AbilityInitializerSetup for WonderBuilder {
-    fn add_ability_initializer(mut self, initializer: AbilityInitializer) -> Self {
-        self.player_initializers.push(initializer);
+    fn add_ability_initializer<F>(mut self, initializer: F) -> Self
+    where
+        F: Fn(&mut Game, usize) + 'static,
+    {
+        self.player_initializers.push(Box::new(initializer));
         self
     }
 
-    fn add_ability_deinitializer(mut self, deinitializer: AbilityInitializer) -> Self {
-        self.player_deinitializers.push(deinitializer);
+    fn add_ability_deinitializer<F>(mut self, deinitializer: F) -> Self
+    where
+        F: Fn(&mut Game, usize) + 'static,
+    {
+        self.player_deinitializers.push(Box::new(deinitializer));
         self
     }
 
-    fn add_ability_one_time_ability_initializer(mut self, initializer: AbilityInitializer) -> Self {
-        self.player_one_time_initializers.push(initializer);
+    fn add_one_time_ability_initializer<F>(mut self, initializer: F) -> Self
+    where
+        F: Fn(&mut Game, usize) + 'static,
+    {
+        self.player_one_time_initializers
+            .push(Box::new(initializer));
         self
     }
 

@@ -104,12 +104,12 @@ pub async extern "C" fn log_slice(game: String, options: String) -> String {
 }
 
 #[export_name = "setPlayerMetaData"]
-pub extern "C" fn set_player_meta_data(game: String, player: usize, meta_data: String) -> String {
+pub extern "C" fn set_player_meta_data(game: String, player_index: usize, meta_data: String) -> String {
     let name = serde_json::from_str::<PlayerMetaData>(&meta_data)
         .expect("")
         .name;
     let mut game = Game::from_json(&game);
-    game.players[player].set_name(name);
+    game.players[player_index].set_name(name);
     game.json()
 }
 

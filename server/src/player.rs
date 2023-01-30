@@ -386,16 +386,16 @@ impl Player {
         )
     }
 
-    pub fn construct(&mut self, building: &Building, city: &Position) {
-        self.get_city_mut(city)
+    pub fn construct(&mut self, building: &Building, city_position: &Position) {
+        self.get_city_mut(city_position)
             .expect("player should have city")
             .activate();
-        self.take_events(|events, player| events.on_construct.trigger(player, city, building));
+        self.take_events(|events, player| events.on_construct.trigger(player, city_position, building));
         if matches!(building, Building::Academy) {
             self.gain_resources(ResourcePile::ideas(2))
         }
         let index = self.index;
-        self.get_city_mut(city)
+        self.get_city_mut(city_position)
             .expect("player should have city")
             .city_pieces
             .set_building(building, index);
@@ -405,7 +405,7 @@ impl Player {
         self.events.as_ref().expect("events should be set")
     }
 
-    fn take_events<F>(&mut self, action: F)
+    pub fn take_events<F>(&mut self, action: F)
     where
         F: FnOnce(&PlayerEvents, &mut Player),
     {
