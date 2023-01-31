@@ -20,26 +20,27 @@ mod ui;
 async fn main() {
     let mut game = Game::new(1, "a".repeat(32));
     let city = City::new(0, Position::from_offset("A1"));
-    game.players[0].gain_resources(ResourcePile::new(50, 50, 50, 50, 50, 50, 50));
-    game.players[0].cities.push(city);
-    game.players[0]
+    let player = &mut game.players[0];
+    player.gain_resources(ResourcePile::new(50, 50, 50, 50, 50, 50, 50));
+    player.cities.push(city);
+    player
         .cities
         .push(City::new(0, Position::from_offset("C2")));
-    game.players[0]
+    player
         .cities
         .push(City::new(0, Position::from_offset("C1")));
 
     let mut focused_city: Option<(usize, Position)> = None;
 
     loop {
-        clear_background(RED);
+        clear_background(GREEN);
 
         draw_map(&game);
         show_research_menu(&mut game, 0);
         show_resources(&game, 0);
 
-        if let Some((player_index, city_position)) = focused_city {
-            show_city_menu(&mut game, player_index, &city_position);
+        if let Some((player_index, city_position)) = &focused_city {
+            show_city_menu(&mut game, *player_index, city_position);
         }
 
         if is_mouse_button_pressed(MouseButton::Left) {
@@ -51,7 +52,7 @@ async fn main() {
 
             for p in game.players.iter() {
                 for city in p.cities.iter() {
-                    let pos = city.position;
+                    let pos = city.position.clone();
                     if c == pos.coordinate() {
                         focused_city = Some((p.index, pos));
                     };
@@ -110,7 +111,7 @@ fn show_city_menu(game: &mut Game, player_index: usize, city_position: &Position
                 let cost = player.construct_cost(&building, city);
                 game.execute_playing_action(
                     PlayingAction::Construct {
-                        city_position: *city_position,
+                        city_position: city_position.clone(),
                         city_piece: building,
                         payment: cost,
                         temple_bonus: None,

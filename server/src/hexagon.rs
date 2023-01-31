@@ -4,7 +4,7 @@ use std::ops::Rem;
 use hex2d::Coordinate;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug, Copy)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct Position {
     pub q: i32,
     pub r: i32,

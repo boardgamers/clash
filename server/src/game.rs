@@ -9,11 +9,10 @@ use crate::{
     playing_actions::PlayingAction::*,
     resource_pile::ResourcePile,
     special_advance::SpecialAdvance,
-    status_phase_actions::StatusPhaseAction,
+    status_phase_actions::{StatusPhaseAction, self},
     wonder::Wonder,
 };
 
-use crate::status_phase_actions::{next_status_phase, player_that_chooses_next_first_player};
 use GameState::*;
 use StatusPhaseState::*;
 use crate::playing_actions::PlayingAction;
@@ -168,11 +167,15 @@ impl Game {
 
     pub fn execute_action(&mut self, action: String, player_index: usize) {
         if let StatusPhase(phase) = self.state.clone() {
+            let action = StatusPhaseAction::new(action, phase.clone());
+            self.log.push(LogItem::StatusPhaseAction(
+                serde_json::to_string(&action).expect("status phase action should be serializable"),
+            ));
             self.execute_status_phase_action(action, phase, player_index);
             return;
         }
         let playing_action =
-            serde_json::from_str(&action).expect("action should be valid playing action json");
+        serde_json::from_str(&action).expect("action should be valid playing action json");
         self.log.push(LogItem::PlayingAction(action));
         self.execute_playing_action(playing_action, player_index);
     }
@@ -217,22 +220,18 @@ impl Game {
 
     fn execute_status_phase_action(
         &mut self,
-        action: String,
-        phase: StatusPhaseState,
+        action: StatusPhaseAction,
+        state: StatusPhaseState,
         player_index: usize,
     ) {
-        let action = StatusPhaseAction::new(action, phase.clone());
-        self.log.push(LogItem::StatusPhaseAction(
-            serde_json::to_string(&action).expect("status phase action should be serializable"),
-        ));
         action.execute(self, player_index);
-        if matches!(phase, DetermineFirstPlayer) {
+        if matches!(state, DetermineFirstPlayer) {
             self.next_age();
             return;
         }
         self.next_player();
         if self.current_player_index == self.starting_player_index {
-            let next_phase = next_status_phase(phase);
+            let next_phase = status_phase_actions::next_status_phase(state);
             match next_phase {
                 ChangeGovernmentType => {
                     // todo! draw cards (this is a phase of it's on in the rules,
@@ -240,7 +239,7 @@ impl Game {
                     // the status phase
                 }
                 DetermineFirstPlayer => {
-                    self.current_player_index = player_that_chooses_next_first_player(
+                    self.current_player_index = status_phase_actions::player_that_chooses_next_first_player(
                         &self.players,
                         self.starting_player_index,
                     );

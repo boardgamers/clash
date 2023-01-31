@@ -13,6 +13,7 @@ pub mod player;
 mod player_events;
 pub mod playing_actions;
 pub mod resource_pile;
+pub mod game_api_wrapper;
 mod special_advance;
 mod status_phase_actions;
 mod wonder;
