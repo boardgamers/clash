@@ -1,9 +1,10 @@
 use std::fmt::Display;
+use std::ops::Rem;
 
 use hex2d::Coordinate;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug, Copy)]
 pub struct Position {
     pub q: i32,
     pub r: i32,
@@ -17,21 +18,21 @@ impl Position {
     // using Odd Q - https://www.redblobgames.com/grids/hexagons/#coordinates-offset
     pub fn from_offset(s: &str) -> Position {
         let mut chars = s.chars();
-        let row = chars.next().expect("string is emtpy") as u32 - 'A' as u32;
-        let col = s
+        let col = chars.next().expect("string is emtpy") as u32 - 'A' as u32;
+        let row = s
             .get(1..)
             .expect("string is too short")
             .parse::<u32>()
-            .expect("not a number");
-        let q = (col - 1) as i32;
-        let r = (row as i32) - (q - (q % 2)) / 2;
+            .expect("not a number") - 1;
+        let q = col as i32;
+        let r = (row  as i32) - (q - (q.rem_euclid(2))) / 2;
         Position::new(q, r)
     }
 
     pub fn coordinate(&self) -> Coordinate {
-        // x == r
-        // y == q
-        Coordinate::new(self.r, self.q)
+        // x == q
+        // y == r
+        Coordinate::new(self.q, self.r)
     }
 
     pub fn distance(&self, other: &Self) -> u32 {
@@ -41,11 +42,9 @@ impl Position {
 
 impl Display for Position {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let c = self.q;
-        let r = self.r + (self.q - (self.q % 2)) / 2;
-        let row = char::from_u32(('A' as u32) + r as u32).unwrap();
-        let col = c + 1;
-        write!(f, "{row}{col}")
+        let row = (self.r + (self.q - (self.q.rem_euclid(2))) / 2) + 1;
+        let col = char::from_u32(('A' as u32) + self.q as u32).unwrap();
+        write!(f, "{col}{row}")
     }
 }
 
@@ -64,8 +63,16 @@ mod tests {
 
     #[test]
     fn convert_position() {
-        let position = Position::from_offset("A1");
-        assert_eq!(Position::new(0, 0), position);
-        assert_eq!("A1", position.to_string());
+        assert_eq!(Position::new(2, -1), Position::from_offset("C1"));
+        assert_eq!(Position::new(0, 0), Position::from_offset("A1"));
+        assert_eq!(Position::new(1, 2), Position::from_offset("B3"));
+        assert_inverse("B1");
+        assert_inverse("A1");
+        assert_inverse("B2");
+        assert_inverse("B5");
+    }
+
+    fn assert_inverse(offset: &str) {
+        assert_eq!(offset, Position::from_offset(offset).to_string());
     }
 }

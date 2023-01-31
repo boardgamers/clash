@@ -1,73 +1,45 @@
+extern crate core;
+
+use macroquad::hash;
+use macroquad::prelude::*;
+use macroquad::ui::root_ui;
+
+use server::city::City;
+use server::content::advances::get_technologies;
+use server::game::Game;
+use server::hexagon::Position;
+use server::playing_actions::PlayingAction;
+use server::resource_pile::ResourcePile;
+
+use crate::map::{building_names, pixel_to_coordinate};
+
 mod map;
 mod ui;
 
-use crate::map::pixel_to_coordinate;
-use macroquad::prelude::*;
-use server::city::City;
-use server::game::Game;
-use server::hexagon::Position;
-
 #[macroquad::main("Clash")]
 async fn main() {
-    let mut status: String = "".to_string();
-
     let mut game = Game::new(1, "a".repeat(32));
-    game.players[0]
-        .cities
-        .push(City::new(0, Position::from_offset("A4")));
-    game.players[0]
-        .cities
-        .push(City::new(0, Position::from_offset("A1")));
-    game.players[0]
-        .cities
-        .push(City::new(0, Position::from_offset("A2")));
-    game.players[0]
-        .cities
-        .push(City::new(0, Position::from_offset("A3")));
-    game.players[0]
-        .cities
-        .push(City::new(0, Position::from_offset("B4")));
-    game.players[0]
-        .cities
-        .push(City::new(0, Position::from_offset("B1")));
-    game.players[0]
-        .cities
-        .push(City::new(0, Position::from_offset("B2")));
-    game.players[0]
-        .cities
-        .push(City::new(0, Position::from_offset("B3")));
-    game.players[0]
-        .cities
-        .push(City::new(0, Position::from_offset("C4")));
-    game.players[0]
-        .cities
-        .push(City::new(0, Position::from_offset("C1")));
+    let city = City::new(0, Position::from_offset("A1"));
+    game.players[0].gain_resources(ResourcePile::new(50, 50, 50, 50, 50, 50, 50));
+    game.players[0].cities.push(city);
     game.players[0]
         .cities
         .push(City::new(0, Position::from_offset("C2")));
     game.players[0]
         .cities
-        .push(City::new(0, Position::from_offset("C3")));
-    game.players[0]
-        .cities
-        .push(City::new(0, Position::from_offset("D4")));
-    game.players[0]
-        .cities
-        .push(City::new(0, Position::from_offset("D1")));
-    game.players[0]
-        .cities
-        .push(City::new(0, Position::from_offset("D2")));
-    game.players[0]
-        .cities
-        .push(City::new(0, Position::from_offset("D3")));
+        .push(City::new(0, Position::from_offset("C1")));
+
+    let mut focused_city: Option<(usize, Position)> = None;
 
     loop {
         clear_background(RED);
 
-        for p in game.players.iter() {
-            for city in p.cities.iter() {
-                map::draw_hex(&city.position);
-            }
+        draw_map(&game);
+        show_research_menu(&mut game, 0);
+        show_resources(&game, 0);
+
+        if let Some((player_index, city_position)) = focused_city {
+            show_city_menu(&mut game, player_index, &city_position);
         }
 
         if is_mouse_button_pressed(MouseButton::Left) {
@@ -75,20 +47,87 @@ async fn main() {
 
             let c = pixel_to_coordinate(x, y);
 
-            status = "".to_string();
+            focused_city = None;
 
             for p in game.players.iter() {
                 for city in p.cities.iter() {
-                    let pos = &city.position;
+                    let pos = city.position;
                     if c == pos.coordinate() {
-                        let n = pos.to_string();
-                        status = format!("clicked city {n}")
+                        focused_city = Some((p.index, pos));
                     };
                 }
             }
         }
-        draw_text(&status, 20.0, 20.0, 30.0, DARKGRAY);
 
         next_frame().await
     }
+}
+
+fn draw_map(game: &Game) {
+    for p in game.players.iter() {
+        for city in p.cities.iter() {
+            map::draw_city(p, city);
+        }
+    }
+}
+
+fn show_resources(game: &Game, player_index: usize) {
+    let player = &game.players[player_index];
+    let r: &ResourcePile = player.resources();
+
+    let mut i: f32 = 0.;
+    let mut res = |label: String| {
+        draw_text(
+            &label,
+            600.,
+            300. + player_index as f32 * 200. + i,
+            20.,
+            BLACK,
+        );
+        i += 30.;
+    };
+
+    res(format!("Food {}", r.food));
+    res(format!("Wood {}", r.wood));
+    res(format!("Ore {}", r.ore));
+    res(format!("Ideas {}", r.ideas));
+    res(format!("Gold {}", r.gold));
+    res(format!("Mood {}", r.mood_tokens));
+    res(format!("Culture {}", r.culture_tokens));
+}
+
+fn show_city_menu(game: &mut Game, player_index: usize, city_position: &Position) {
+    root_ui().window(hash!(), vec2(600., 20.), vec2(100., 200.), |ui| {
+        for (b, name) in building_names() {
+            if game.players[player_index]
+                .get_city(city_position)
+                .expect("city not found")
+                .can_construct(&b, &game.players[0])
+                && ui.button(None, name)
+            {
+                game.players[0].construct(&b, city_position);
+            }
+        }
+    });
+}
+
+fn show_research_menu(game: &mut Game, player_index: usize) {
+    root_ui().window(hash!(), vec2(20., 300.), vec2(400., 200.), |ui| {
+        for a in get_technologies().into_iter() {
+            let name = a.name.clone();
+            if game.players[player_index].can_advance(&name) {
+                if ui.button(None, name.clone()) {
+                    game.execute_playing_action(
+                        PlayingAction::Advance {
+                            advance: name,
+                            payment: ResourcePile::gold(2),
+                        },
+                        player_index,
+                    );
+                }
+            } else if game.players[player_index].advances.contains(&name) {
+                ui.label(None, &name);
+            }
+        }
+    });
 }

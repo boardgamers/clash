@@ -16,6 +16,7 @@ use crate::{
 use crate::status_phase_actions::{next_status_phase, player_that_chooses_next_first_player};
 use GameState::*;
 use StatusPhaseState::*;
+use crate::playing_actions::PlayingAction;
 
 const DICE_ROLL_BUFFER: u32 = 200;
 const AGES: u32 = 6;
@@ -170,14 +171,13 @@ impl Game {
             self.execute_status_phase_action(action, phase, player_index);
             return;
         }
-        self.execute_playing_action(action, player_index);
-    }
-
-    fn execute_playing_action(&mut self, action: String, player_index: usize) {
         let playing_action =
             serde_json::from_str(&action).expect("action should be valid playing action json");
         self.log.push(LogItem::PlayingAction(action));
-        let action = playing_action;
+        self.execute_playing_action(playing_action, player_index);
+    }
+
+    pub fn execute_playing_action(&mut self, action: PlayingAction, player_index: usize) {
         if matches!(action, EndTurn) {
             self.next_turn();
             return;

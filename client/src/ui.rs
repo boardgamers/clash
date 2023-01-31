@@ -1,3 +1,5 @@
+use macroquad::prelude::*;
+
 const TOP_BORDER: f32 = 130.0;
 const LEFT_BORDER: f32 = 90.0;
 
@@ -23,4 +25,14 @@ impl Point {
         let y = TOP_BORDER - self.y;
         Point { x, y }
     }
+}
+
+pub fn player_color(player_index: usize) -> Color {
+    return match player_index {
+        0 => RED,
+        1 => BLUE,
+        2 => YELLOW,
+        3 => BLACK,
+        _ => panic!("unexpected player index"),
+    };
 }

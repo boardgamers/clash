@@ -195,6 +195,7 @@ impl CityData {
     }
 }
 
+#[derive(Eq, PartialEq, Hash)]
 pub enum Building {
     Academy,
     Market,
