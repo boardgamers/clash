@@ -98,15 +98,26 @@ fn show_resources(game: &Game, player_index: usize) {
 
 fn show_city_menu(game: &mut Game, player_index: usize, city_position: &Position) {
     root_ui().window(hash!(), vec2(600., 20.), vec2(100., 200.), |ui| {
-        for (b, name) in building_names() {
-            if game.players[player_index]
+        for (building, name) in building_names() {
+            let player = &game.players[player_index];
+            let city = player
                 .get_city(city_position)
-                .expect("city not found")
-                .can_construct(&b, &game.players[0])
+                .expect("city not found");
+            if city
+                .can_construct(&building, player)
                 && ui.button(None, name)
             {
-                game.players[0].construct(&b, city_position);
-            }
+                let cost = player.construct_cost(&building, city);
+                game.execute_playing_action(
+                    PlayingAction::Construct {
+                        city_position: *city_position,
+                        city_piece: building,
+                        payment: cost,
+                        temple_bonus: None,
+                    },
+                    player_index,
+                );
+            };
         }
     });
 }

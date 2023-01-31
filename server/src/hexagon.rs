@@ -23,9 +23,10 @@ impl Position {
             .get(1..)
             .expect("string is too short")
             .parse::<u32>()
-            .expect("not a number") - 1;
+            .expect("not a number")
+            - 1;
         let q = col as i32;
-        let r = (row  as i32) - (q - (q.rem_euclid(2))) / 2;
+        let r = (row as i32) - (q - (q.rem_euclid(2))) / 2;
         Position::new(q, r)
     }
 

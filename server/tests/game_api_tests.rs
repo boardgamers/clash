@@ -1,5 +1,5 @@
 use server::{
-    city::{BuildingData, City, MoodState::*},
+    city::{Building, City, MoodState::*},
     content::custom_actions::CustomAction::*,
     game::Game,
     game_api,
@@ -60,7 +60,7 @@ async fn one_player() {
 
     let construct_action = serde_json::to_string(&Construct {
         city_position: city_position.clone(),
-        city_piece: BuildingData::Observatory,
+        city_piece: Building::Observatory,
         payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
         temple_bonus: None,
     })

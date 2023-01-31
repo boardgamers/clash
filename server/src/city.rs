@@ -1,5 +1,3 @@
-use std::fmt::Display;
-
 use crate::{content::wonders, game::Game, hexagon::Position, player::Player, wonder::Wonder};
 
 use serde::{Deserialize, Serialize};
@@ -195,7 +193,7 @@ impl CityData {
     }
 }
 
-#[derive(Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Eq, PartialEq, Hash)]
 pub enum Building {
     Academy,
     Market,
@@ -208,39 +206,11 @@ pub enum Building {
 
 impl Building {
     pub fn json(&self) -> String {
-        serde_json::to_string(&self.to_data()).expect("city piece data should be valid json")
+        serde_json::to_string(&self).expect("city piece data should be valid json")
     }
 
     pub fn from_json(json: &str) -> Self {
-        Self::from_data(
-            serde_json::from_str(json)
-                .as_ref()
-                .expect("API call should receive valid city piece data json"),
-        )
-    }
-
-    fn to_data(&self) -> BuildingData {
-        match self {
-            Self::Academy => BuildingData::Academy,
-            Self::Market => BuildingData::Market,
-            Self::Obelisk => BuildingData::Obelisk,
-            Self::Observatory => BuildingData::Observatory,
-            Self::Fortress => BuildingData::Fortress,
-            Self::Port => BuildingData::Port,
-            Self::Temple => BuildingData::Temple,
-        }
-    }
-
-    pub fn from_data(data: &BuildingData) -> Self {
-        match data {
-            BuildingData::Academy => Self::Academy,
-            BuildingData::Market => Self::Market,
-            BuildingData::Obelisk => Self::Obelisk,
-            BuildingData::Observatory => Self::Observatory,
-            BuildingData::Fortress => Self::Fortress,
-            BuildingData::Port => Self::Port,
-            BuildingData::Temple => Self::Temple,
-        }
+        serde_json::from_str(json).expect("API call should receive valid city piece data json")
     }
 
     fn required_advance(&self) -> String {
@@ -253,35 +223,6 @@ impl Building {
             Self::Port => "Fishing",
             Self::Temple => "Myths",
         })
-    }
-}
-
-#[derive(Serialize, Deserialize)]
-pub enum BuildingData {
-    Academy,
-    Market,
-    Obelisk,
-    Observatory,
-    Fortress,
-    Port,
-    Temple,
-}
-
-impl Display for BuildingData {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                Self::Academy => "an academy",
-                Self::Market => "a market",
-                Self::Obelisk => "an obelisk",
-                Self::Observatory => "an observatory",
-                Self::Fortress => "a fortress",
-                Self::Port => "a port",
-                Self::Temple => "a temple",
-            }
-        )
     }
 }
 

@@ -1,10 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    city::{
-        Building::{self, *},
-        BuildingData,
-    },
+    city::Building::{self, *},
     content::custom_actions::CustomAction,
     game::Game,
     hexagon::Position,
@@ -21,7 +18,7 @@ pub enum PlayingAction {
     },
     Construct {
         city_position: Position,
-        city_piece: BuildingData,
+        city_piece: Building,
         payment: ResourcePile,
         temple_bonus: Option<ResourcePile>,
     },
@@ -33,7 +30,7 @@ pub enum PlayingAction {
         starting_city_position: Position,
         target_player_index: usize,
         target_city_position: Position,
-        city_piece: BuildingData,
+        city_piece: Building,
         range_boost: u32,
         result_boost: u32,
     },
@@ -61,7 +58,7 @@ impl PlayingAction {
                 payment,
                 temple_bonus,
             } => {
-                let building = Building::from_data(&city_piece);
+                let building = &city_piece;
                 let player = &mut game.players[player_index];
                 let city = player
                     .get_city(&city_position)
@@ -113,7 +110,7 @@ impl PlayingAction {
                 range_boost,
                 result_boost,
             } => {
-                let building = Building::from_data(&city_piece);
+                let building = &city_piece;
                 let cost = ResourcePile::culture_tokens(range_boost + result_boost);
                 let player = &mut game.players[player_index];
                 let starting_city = player
