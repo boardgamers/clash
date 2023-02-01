@@ -22,5 +22,5 @@ jobs:
       run: cargo test --verbose
     #- name: Run clippy
     #  run: cargo clippy
-    - name: Format
-      run: cargo fmt
+    # - name: Format
+    #   run: cargo fmt
