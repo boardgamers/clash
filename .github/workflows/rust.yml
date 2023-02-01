@@ -16,11 +16,27 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Build
+    - name: Build server
+      working_directory: ./server
       run: cargo build --verbose
-    - name: Run tests
+    - name: Run tests server
+      working_directory: ./server
       run: cargo test --verbose
-    #- name: Run clippy
+    #- name: Run clippy client
+    #  working_directory: ./server
     #  run: cargo clippy
-    # - name: Format
+    # - name: Format client
+    #  working_directory: ./server
+    #   run: cargo fmt
+    - name: Build client
+      working_directory: ./client
+      run: cargo build --verbose
+    - name: Run tests client
+      working_directory: ./client
+      run: cargo test --verbose
+    #- name: Run clippy client
+    #  working_directory: ./client
+    #  run: cargo clippy
+    # - name: Format client
+    #  working_directory: ./client
     #   run: cargo fmt
