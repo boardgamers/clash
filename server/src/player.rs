@@ -1,13 +1,16 @@
 use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering::{self, *},
-    collections::{HashMap, VecDeque, HashSet},
+    collections::{HashMap, HashSet, VecDeque},
     mem,
 };
 
 use crate::{
     army::Unit,
-    city::{Building::{self, *}, City, CityData},
+    city::{
+        Building::{self, *},
+        City, CityData,
+    },
     civilization::Civilization,
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     game::Game,
@@ -390,7 +393,9 @@ impl Player {
         self.get_city_mut(city_position)
             .expect("player should have city")
             .activate();
-        self.take_events(|events, player| events.on_construct.trigger(player, city_position, building));
+        self.take_events(|events, player| {
+            events.on_construct.trigger(player, city_position, building)
+        });
         if matches!(building, Academy) {
             self.gain_resources(ResourcePile::ideas(2))
         }

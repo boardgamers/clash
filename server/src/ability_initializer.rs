@@ -60,9 +60,7 @@ pub trait AbilityInitializerSetup: Sized {
         })
         .add_ability_deinitializer(move |game, player_index| {
             let player = &mut game.players[player_index];
-            player.custom_actions.remove(
-                &deinitializer_action
-            );
+            player.custom_actions.remove(&deinitializer_action);
         })
     }
 }

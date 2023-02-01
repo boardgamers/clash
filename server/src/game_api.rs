@@ -26,18 +26,20 @@ impl Log {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct Messages{messages: Vec<String>, data: GameData}
+pub struct Messages {
+    messages: Vec<String>,
+    data: GameData,
+}
 
 impl Messages {
-    pub fn new(messages: Vec<String>, data: GameData) -> Self { Self { messages, data } }
+    pub fn new(messages: Vec<String>, data: GameData) -> Self {
+        Self { messages, data }
+    }
 }
 
 // Game API methods, see https://docs.boardgamers.space/guide/engine-api.html#required-methods
 
-pub fn init(
-    player_amount: usize,
-    seed: String,
-) -> Game {
+pub fn init(player_amount: usize, seed: String) -> Game {
     Game::new(player_amount, seed)
 }
 

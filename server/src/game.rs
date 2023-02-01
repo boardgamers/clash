@@ -9,13 +9,13 @@ use crate::{
     playing_actions::PlayingAction::*,
     resource_pile::ResourcePile,
     special_advance::SpecialAdvance,
-    status_phase_actions::{StatusPhaseAction, self},
+    status_phase_actions::{self, StatusPhaseAction},
     wonder::Wonder,
 };
 
+use crate::playing_actions::PlayingAction;
 use GameState::*;
 use StatusPhaseState::*;
-use crate::playing_actions::PlayingAction;
 
 const DICE_ROLL_BUFFER: u32 = 200;
 const AGES: u32 = 6;
@@ -165,7 +165,9 @@ impl Game {
             return;
         }
         let action = action.playing_action();
-        self.log.push(LogItem::PlayingAction(serde_json::to_string(&action).expect("playing action should be serializable")));
+        self.log.push(LogItem::PlayingAction(
+            serde_json::to_string(&action).expect("playing action should be serializable"),
+        ));
         self.execute_playing_action(action, player_index);
     }
 
@@ -228,10 +230,11 @@ impl Game {
                     // the status phase
                 }
                 DetermineFirstPlayer => {
-                    self.current_player_index = status_phase_actions::player_that_chooses_next_first_player(
-                        &self.players,
-                        self.starting_player_index,
-                    );
+                    self.current_player_index =
+                        status_phase_actions::player_that_chooses_next_first_player(
+                            &self.players,
+                            self.starting_player_index,
+                        );
                 }
                 _ => {}
             }
@@ -336,7 +339,9 @@ impl Game {
     }
 
     pub fn advance(&mut self, advance: &str, player_index: usize) {
-        self.players[player_index].take_events(|events, player| events.on_advance.trigger(player, &advance.to_string(), &()));
+        self.players[player_index].take_events(|events, player| {
+            events.on_advance.trigger(player, &advance.to_string(), &())
+        });
         let advance = advances::get_advance_by_name(advance).expect("advance should exist");
         (advance.player_initializer)(self, player_index);
         (advance.player_one_time_initializer)(self, player_index);
@@ -416,7 +421,11 @@ impl Game {
     }
 
     pub fn build_wonder(&mut self, wonder: Wonder, city_position: &Position, player_index: usize) {
-        self.players[player_index].take_events(|events, player| events.on_construct_wonder.trigger(player, city_position, &wonder));
+        self.players[player_index].take_events(|events, player| {
+            events
+                .on_construct_wonder
+                .trigger(player, city_position, &wonder)
+        });
         let mut wonder = wonder;
         (wonder.player_initializer)(self, player_index);
         (wonder.player_one_time_initializer)(self, player_index);
@@ -513,7 +522,7 @@ pub enum LogItem {
 
 #[cfg(test)]
 pub mod tests {
-    use crate::city::{City, Building::*, MoodState::*};
+    use crate::city::{Building::*, City, MoodState::*};
     use crate::content::civilizations;
     use crate::hexagon::Position;
     use crate::player::Player;

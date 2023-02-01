@@ -14,7 +14,9 @@ pub fn get_technologies() -> Vec<Advance> {
         .add_one_time_ability_initializer(|game, player_index| {
             game.players[player_index].resource_limit.food = 7
         })
-        .add_ability_deinitializer(|game, player_index| game.players[player_index].resource_limit.food = 2)
+        .add_ability_deinitializer(|game, player_index| {
+            game.players[player_index].resource_limit.food = 2
+        })
         .with_advance_bonus(MoodToken)
         .build(),
         Advance::builder(

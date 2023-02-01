@@ -1,7 +1,7 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
-use crate::{game_api, game::Game};
+use crate::{game::Game, game_api};
 
 #[derive(Serialize, Deserialize)]
 pub struct PlayerMetaData {
@@ -24,7 +24,9 @@ pub async fn init(
     seed: JsValue,
     _creator: JsValue,
 ) -> JsValue {
-    let player_amount = players.as_f64().expect("number of players should be a number") as usize;
+    let player_amount = players
+        .as_f64()
+        .expect("number of players should be a number") as usize;
     let seed = seed.as_string().expect("seed should be a string");
     let game = game_api::init(player_amount, seed);
     from_game(game)
@@ -69,7 +71,7 @@ pub async fn current_player(game: JsValue) -> JsValue {
     let player_index = game_api::current_player(game);
     match player_index {
         Some(index) => JsValue::from_f64(index as f64),
-        None => JsValue::undefined()
+        None => JsValue::undefined(),
     }
 }
 
@@ -85,8 +87,7 @@ pub async fn log_length(game: JsValue) -> JsValue {
 #[export_name = "logSlice"]
 pub async fn log_slice(game: JsValue, options: JsValue) -> JsValue {
     let game = get_game(game);
-    let options =
-        serde_wasm_bindgen::from_value(options).expect("options should be serializable");
+    let options = serde_wasm_bindgen::from_value(options).expect("options should be serializable");
     let log = game_api::log_slice(game, options);
     serde_wasm_bindgen::to_value(&log).expect("log should be serializable")
 }
@@ -95,7 +96,9 @@ pub async fn log_slice(game: JsValue, options: JsValue) -> JsValue {
 #[export_name = "setPlayerMetaData"]
 pub fn set_player_meta_data(game: JsValue, player_index: JsValue, meta_data: JsValue) -> JsValue {
     let game = get_game(game);
-    let player_index = player_index.as_f64().expect("player index should be a number") as usize;
+    let player_index = player_index
+        .as_f64()
+        .expect("player index should be a number") as usize;
     let name = serde_wasm_bindgen::from_value::<PlayerMetaData>(meta_data)
         .expect("meta data should be of type player meta data")
         .name;
@@ -116,7 +119,7 @@ pub fn round(game: JsValue) -> JsValue {
     let round = game_api::round(game);
     match round {
         Some(round) => JsValue::from_f64(round as f64),
-        None => JsValue::undefined()
+        None => JsValue::undefined(),
     }
 }
 

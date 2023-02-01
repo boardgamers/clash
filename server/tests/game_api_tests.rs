@@ -15,8 +15,7 @@ async fn one_player() {
         String::new(),
         String::new(),
         String::new(),
-    )
-    ;
+    );
     let advance_action = serde_json::to_string(&Advance {
         advance: String::from("Math"),
         payment: ResourcePile::food(2),
