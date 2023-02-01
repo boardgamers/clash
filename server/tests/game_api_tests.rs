@@ -1,7 +1,7 @@
 use server::{
     city::{Building, City, MoodState::*},
     content::custom_actions::CustomAction::*,
-    game::{Action},
+    game::Action,
     game_api,
     hexagon::Position,
     playing_actions::PlayingAction::*,
@@ -10,10 +10,7 @@ use server::{
 
 #[test]
 fn one_player() {
-    let game = game_api::init(
-        1,
-        String::new(),
-    );
+    let game = game_api::init(1, String::new());
     let advance_action = Action::PlayingAction(Advance {
         advance: String::from("Math"),
         payment: ResourcePile::food(2),
@@ -77,11 +74,7 @@ fn one_player() {
     assert_eq!(&ResourcePile::new(1, 3, 3, 0, 2, 2, 4), player.resources());
     assert_eq!(0, game.actions_left);
 
-    let game = game_api::execute_action(
-        game,
-        Action::PlayingAction(EndTurn),
-        0,
-    );
+    let game = game_api::execute_action(game, Action::PlayingAction(EndTurn), 0);
 
     assert_eq!(3, game.actions_left);
     assert_eq!(0, game.current_player_index);

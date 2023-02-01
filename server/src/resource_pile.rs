@@ -113,10 +113,10 @@ impl ResourcePile {
         }
     }
 
-    //this function assumes that `budget` can afford `self`
-    pub fn get_payment_options(&self, budget: &Self) -> PaymentOptions {
-        let mut gold_left = budget.gold as u32;
-        let mut gold_cost = self.gold;
+    //this function assumes that `self` can afford `cost`
+    pub fn get_payment_options(&self, cost: &Self) -> PaymentOptions {
+        let mut gold_left = self.gold as u32;
+        let mut gold_cost = cost.gold;
         let mut jokers_left = 0;
         if gold_cost >= 0 {
             gold_left -= gold_cost as u32;
@@ -124,32 +124,32 @@ impl ResourcePile {
             jokers_left = (-gold_cost) as u32;
             gold_cost = 0;
         }
-        if self.food > budget.food {
-            let joker_cost = self.food - budget.food;
+        if cost.food > self.food {
+            let joker_cost = cost.food - self.food;
             if joker_cost > jokers_left {
                 gold_left -= joker_cost - jokers_left;
                 gold_cost += (joker_cost - jokers_left) as i32;
             }
             jokers_left = jokers_left.saturating_sub(joker_cost);
         }
-        if self.wood > budget.wood {
-            let joker_cost = self.wood - budget.wood;
+        if cost.wood > self.wood {
+            let joker_cost = cost.wood - self.wood;
             if joker_cost > jokers_left {
                 gold_left -= joker_cost - jokers_left;
                 gold_cost += (joker_cost - jokers_left) as i32;
             }
             jokers_left = jokers_left.saturating_sub(joker_cost);
         }
-        if self.ore > budget.ore {
-            let joker_cost = self.ore - budget.ore;
+        if cost.ore > self.ore {
+            let joker_cost = cost.ore - self.ore;
             if joker_cost > jokers_left {
                 gold_left -= joker_cost - jokers_left;
                 gold_cost += (joker_cost - jokers_left) as i32;
             }
             jokers_left = jokers_left.saturating_sub(joker_cost);
         }
-        if self.ideas > budget.ideas {
-            let joker_cost = self.ideas - budget.ideas;
+        if cost.ideas > self.ideas {
+            let joker_cost = cost.ideas - self.ideas;
             if joker_cost > jokers_left {
                 gold_left -= joker_cost - jokers_left;
                 gold_cost += (joker_cost - jokers_left) as i32;
@@ -157,15 +157,39 @@ impl ResourcePile {
             jokers_left = jokers_left.saturating_sub(joker_cost);
         }
         let default = Self::new(
-            cmp::min(self.food, budget.food),
-            cmp::min(self.wood, budget.wood),
-            cmp::min(self.ore, budget.ore),
-            cmp::min(self.ideas, budget.ideas),
+            cmp::min(cost.food, self.food),
+            cmp::min(cost.wood, self.wood),
+            cmp::min(cost.ore, self.ore),
+            cmp::min(cost.ideas, self.ideas),
             gold_cost,
-            self.mood_tokens,
-            self.culture_tokens,
+            cost.mood_tokens,
+            cost.culture_tokens,
         );
         PaymentOptions::new(default, gold_left, jokers_left)
+    }
+
+    //this function assumes that `self` can afford `cost`
+    pub fn get_advance_payment_options(&self, cost: u32) -> AdvancePaymentOptions {
+        let mut idea_cost = 0;
+        let mut food_cost = 0;
+        let mut gold_cost = 0;
+        for _ in 0..cost {
+            if idea_cost < self.ideas {
+                idea_cost += 1;
+                continue;
+            }
+            if food_cost < self.food {
+                food_cost += 1;
+                continue;
+            }
+            gold_cost += 1;
+        }
+        let food_left = self.food - food_cost;
+        let gold_left = self.gold as u32 - gold_cost;
+        let default = ResourcePile::ideas(idea_cost)
+            + ResourcePile::food(food_cost)
+            + ResourcePile::gold(gold_cost as i32);
+        AdvancePaymentOptions::new(default, food_left, gold_left)
     }
 }
 
@@ -303,9 +327,26 @@ impl PaymentOptions {
     }
 }
 
+#[derive(PartialEq, Eq, Debug)]
+pub struct AdvancePaymentOptions {
+    default: ResourcePile,
+    food_left: u32,
+    gold_left: u32,
+}
+
+impl AdvancePaymentOptions {
+    pub fn new(default: ResourcePile, food_left: u32, gold_left: u32) -> Self {
+        Self {
+            default,
+            food_left,
+            gold_left,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{PaymentOptions, ResourcePile};
+    use super::{AdvancePaymentOptions, PaymentOptions, ResourcePile};
 
     fn assert_can_afford(name: &str, cost: ResourcePile) {
         let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
@@ -319,7 +360,15 @@ mod tests {
 
     fn assert_payment_options(name: &str, cost: ResourcePile, options: PaymentOptions) {
         let budget = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
-        assert_eq!(options, cost.get_payment_options(&budget), "{name}");
+        assert_eq!(options, budget.get_payment_options(&cost), "{name}");
+    }
+
+    fn assert_advance_payment_options(
+        name: &str,
+        budget: ResourcePile,
+        options: AdvancePaymentOptions,
+    ) {
+        assert_eq!(options, budget.get_advance_payment_options(2), "{name}");
     }
 
     fn assert_to_string(resource_pile: ResourcePile, expected: &str) {
@@ -387,7 +436,31 @@ mod tests {
             "jokers",
             ResourcePile::ore(4) + ResourcePile::ideas(4) + ResourcePile::gold(-3),
             PaymentOptions::new(ResourcePile::ore(3) + ResourcePile::ideas(4), 5, 2),
-        )
+        );
+    }
+
+    #[test]
+    fn advance_payment_options_test() {
+        assert_advance_payment_options(
+            "enough of all resources",
+            ResourcePile::food(3) + ResourcePile::ideas(3) + ResourcePile::gold(3),
+            AdvancePaymentOptions::new(ResourcePile::ideas(2), 3, 3),
+        );
+        assert_advance_payment_options(
+            "using food",
+            ResourcePile::food(3) + ResourcePile::gold(3),
+            AdvancePaymentOptions::new(ResourcePile::food(2), 1, 3),
+        );
+        assert_advance_payment_options(
+            "using 1 gold",
+            ResourcePile::ideas(1) + ResourcePile::gold(3),
+            AdvancePaymentOptions::new(ResourcePile::ideas(1) + ResourcePile::gold(1), 0, 2),
+        );
+        assert_advance_payment_options(
+            "one possible payment",
+            ResourcePile::food(1) + ResourcePile::gold(1),
+            AdvancePaymentOptions::new(ResourcePile::food(1) + ResourcePile::gold(1), 0, 0),
+        );
     }
 
     #[test]
