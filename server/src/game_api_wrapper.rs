@@ -33,7 +33,6 @@ pub async fn init(
 }
 
 #[wasm_bindgen]
-#[export_name = "move"]
 pub fn execute_move(game: JsValue, r#move: JsValue, player: JsValue) -> JsValue {
     let game = get_game(game);
     let action = serde_wasm_bindgen::from_value(r#move).expect("move should be of type action");
@@ -56,7 +55,6 @@ pub fn scores(game: JsValue) -> JsValue {
 }
 
 #[wasm_bindgen]
-#[export_name = "dropPlayer"]
 pub async fn drop_player(game: JsValue, player: JsValue) -> JsValue {
     let game = get_game(game);
     let player_index = player.as_f64().expect("player index should be a number") as usize;
@@ -65,7 +63,6 @@ pub async fn drop_player(game: JsValue, player: JsValue) -> JsValue {
 }
 
 #[wasm_bindgen]
-#[export_name = "currentPlayer"]
 pub async fn current_player(game: JsValue) -> JsValue {
     let game = get_game(game);
     let player_index = game_api::current_player(game);
@@ -76,7 +73,6 @@ pub async fn current_player(game: JsValue) -> JsValue {
 }
 
 #[wasm_bindgen]
-#[export_name = "logLength"]
 pub async fn log_length(game: JsValue) -> JsValue {
     let game = get_game(game);
     let log_length = game_api::log_length(game);
@@ -84,7 +80,6 @@ pub async fn log_length(game: JsValue) -> JsValue {
 }
 
 #[wasm_bindgen]
-#[export_name = "logSlice"]
 pub async fn log_slice(game: JsValue, options: JsValue) -> JsValue {
     let game = get_game(game);
     let options = serde_wasm_bindgen::from_value(options).expect("options should be serializable");
@@ -93,7 +88,6 @@ pub async fn log_slice(game: JsValue, options: JsValue) -> JsValue {
 }
 
 #[wasm_bindgen]
-#[export_name = "setPlayerMetaData"]
 pub fn set_player_meta_data(game: JsValue, player_index: JsValue, meta_data: JsValue) -> JsValue {
     let game = get_game(game);
     let player_index = player_index
@@ -131,7 +125,6 @@ pub fn factions(game: JsValue) -> JsValue {
 }
 
 #[wasm_bindgen]
-#[export_name = "stripSecret"]
 pub fn strip_secret(game: JsValue, player: JsValue) -> JsValue {
     let game = get_game(game);
     let player_index = player.as_f64().map(|player_index| player_index as usize);
