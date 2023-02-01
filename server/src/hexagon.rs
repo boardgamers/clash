@@ -1,5 +1,4 @@
 use std::fmt::Display;
-use std::ops::Rem;
 
 use hex2d::Coordinate;
 use serde::{Deserialize, Serialize};

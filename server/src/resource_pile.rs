@@ -114,8 +114,8 @@ impl ResourcePile {
     }
 
     //this function assumes that `budget` can afford `self`
-    pub fn get_payment_options(&self, budged: &Self) -> PaymentOptions {
-        let mut gold_left = budged.gold as u32;
+    pub fn get_payment_options(&self, budget: &Self) -> PaymentOptions {
+        let mut gold_left = budget.gold as u32;
         let mut gold_cost = self.gold;
         let mut jokers_left = 0;
         if gold_cost >= 0 {
@@ -124,32 +124,32 @@ impl ResourcePile {
             jokers_left = (-gold_cost) as u32;
             gold_cost = 0;
         }
-        if self.food > budged.food {
-            let joker_cost = self.food - budged.food;
+        if self.food > budget.food {
+            let joker_cost = self.food - budget.food;
             if joker_cost > jokers_left {
                 gold_left -= joker_cost - jokers_left;
                 gold_cost += (joker_cost - jokers_left) as i32;
             }
             jokers_left = jokers_left.saturating_sub(joker_cost);
         }
-        if self.wood > budged.wood {
-            let joker_cost = self.wood - budged.wood;
+        if self.wood > budget.wood {
+            let joker_cost = self.wood - budget.wood;
             if joker_cost > jokers_left {
                 gold_left -= joker_cost - jokers_left;
                 gold_cost += (joker_cost - jokers_left) as i32;
             }
             jokers_left = jokers_left.saturating_sub(joker_cost);
         }
-        if self.ore > budged.ore {
-            let joker_cost = self.ore - budged.ore;
+        if self.ore > budget.ore {
+            let joker_cost = self.ore - budget.ore;
             if joker_cost > jokers_left {
                 gold_left -= joker_cost - jokers_left;
                 gold_cost += (joker_cost - jokers_left) as i32;
             }
             jokers_left = jokers_left.saturating_sub(joker_cost);
         }
-        if self.ideas > budged.ideas {
-            let joker_cost = self.ideas - budged.ideas;
+        if self.ideas > budget.ideas {
+            let joker_cost = self.ideas - budget.ideas;
             if joker_cost > jokers_left {
                 gold_left -= joker_cost - jokers_left;
                 gold_cost += (joker_cost - jokers_left) as i32;
@@ -157,10 +157,10 @@ impl ResourcePile {
             jokers_left = jokers_left.saturating_sub(joker_cost);
         }
         let default = Self::new(
-            cmp::min(self.food, budged.food),
-            cmp::min(self.wood, budged.wood),
-            cmp::min(self.ore, budged.ore),
-            cmp::min(self.ideas, budged.ideas),
+            cmp::min(self.food, budget.food),
+            cmp::min(self.wood, budget.wood),
+            cmp::min(self.ore, budget.ore),
+            cmp::min(self.ideas, budget.ideas),
             gold_cost,
             self.mood_tokens,
             self.culture_tokens,

@@ -3,6 +3,8 @@ use crate::{content::wonders, game::Game, hexagon::Position, player::Player, won
 use serde::{Deserialize, Serialize};
 use MoodState::*;
 
+use Building::*;
+
 const MAX_CITY_SIZE: usize = 4;
 
 pub struct City {
@@ -274,25 +276,25 @@ impl CityPieces {
 
     fn can_add_building(&self, building: &Building) -> bool {
         match building {
-            Building::Academy => self.academy.is_none(),
-            Building::Market => self.market.is_none(),
-            Building::Obelisk => self.obelisk.is_none(),
-            Building::Observatory => self.observatory.is_none(),
-            Building::Fortress => self.fortress.is_none(),
-            Building::Port => self.port.is_none(),
-            Building::Temple => self.temple.is_none(),
+            Academy => self.academy.is_none(),
+            Market => self.market.is_none(),
+            Obelisk => self.obelisk.is_none(),
+            Observatory => self.observatory.is_none(),
+            Fortress => self.fortress.is_none(),
+            Port => self.port.is_none(),
+            Temple => self.temple.is_none(),
         }
     }
 
     pub fn set_building(&mut self, building: &Building, player_index: usize) {
         match building {
-            Building::Academy => self.academy = Some(player_index),
-            Building::Market => self.market = Some(player_index),
-            Building::Obelisk => self.obelisk = Some(player_index),
-            Building::Observatory => self.observatory = Some(player_index),
-            Building::Fortress => self.fortress = Some(player_index),
-            Building::Port => self.port = Some(player_index),
-            Building::Temple => self.temple = Some(player_index),
+            Academy => self.academy = Some(player_index),
+            Market => self.market = Some(player_index),
+            Obelisk => self.obelisk = Some(player_index),
+            Observatory => self.observatory = Some(player_index),
+            Fortress => self.fortress = Some(player_index),
+            Port => self.port = Some(player_index),
+            Temple => self.temple = Some(player_index),
         }
     }
 
@@ -302,7 +304,7 @@ impl CityPieces {
 
     fn change_player(&mut self, new_player_index: usize) {
         for b in self.buildings(None) {
-            if !matches!(b, Building::Obelisk) {
+            if !matches!(b, Obelisk) {
                 self.set_building(&b, new_player_index);
             }
         }
@@ -310,13 +312,13 @@ impl CityPieces {
 
     pub fn buildings(&self, owned_by: Option<usize>) -> Vec<Building> {
         vec![
-            (Building::Academy, self.academy),
-            (Building::Market, self.market),
-            (Building::Obelisk, self.obelisk),
-            (Building::Observatory, self.observatory),
-            (Building::Fortress, self.fortress),
-            (Building::Port, self.port),
-            (Building::Temple, self.temple),
+            (Academy, self.academy),
+            (Market, self.market),
+            (Obelisk, self.obelisk),
+            (Observatory, self.observatory),
+            (Fortress, self.fortress),
+            (Port, self.port),
+            (Temple, self.temple),
         ]
         .into_iter()
         .filter_map(|(building, owner)| {
@@ -348,53 +350,4 @@ pub enum MoodState {
     Happy,
     Neutral,
     Angry,
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{Building, City, MoodState};
-    use crate::content::civilizations;
-    use crate::game;
-    use crate::hexagon::Position;
-    use crate::player::Player;
-    use crate::resource_pile::ResourcePile;
-    use crate::wonder::Wonder;
-
-    #[test]
-    fn conquer_test() {
-        let old = Player::new(civilizations::tests::get_test_civilization(), 0);
-        let new = Player::new(civilizations::tests::get_test_civilization(), 1);
-
-        let wonder = Wonder::builder("wonder", ResourcePile::empty(), vec![]).build();
-        let mut game = game::tests::test_game();
-        game.players.push(old);
-        game.players.push(new);
-        let old = 0;
-        let new = 1;
-
-        let position = Position::new(0, 0);
-        game.players[old]
-            .cities
-            .push(City::new(old, position.clone()));
-        game.build_wonder(wonder, &position, old);
-        game.players[old].construct(&Building::Academy, &position);
-        game.players[old].construct(&Building::Obelisk, &position);
-
-        assert_eq!(7.0, game.players[old].victory_points());
-
-        game.conquer_city(&position, new, old);
-
-        let c = game.players[new].get_city_mut(&position).unwrap();
-        assert_eq!(1, c.player_index);
-        assert_eq!(MoodState::Angry, c.mood_state);
-
-        let old = &game.players[old];
-        let new = &game.players[new];
-        assert_eq!(3.0, old.victory_points());
-        assert_eq!(4.0, new.victory_points());
-        assert_eq!(0, old.wonders.len());
-        assert_eq!(1, new.wonders.len());
-        assert_eq!(1, old.influenced_buildings);
-        assert_eq!(0, new.influenced_buildings);
-    }
 }

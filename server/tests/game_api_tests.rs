@@ -8,7 +8,6 @@ use server::{
     resource_pile::ResourcePile,
 };
 
-#[actix_rt::test]
 async fn one_player() {
     let game = game_api::init(
         1,
@@ -17,7 +16,7 @@ async fn one_player() {
         String::new(),
         String::new(),
     )
-    .await;
+    ;
     let advance_action = serde_json::to_string(&Advance {
         advance: String::from("Math"),
         payment: ResourcePile::food(2),

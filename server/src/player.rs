@@ -1,13 +1,13 @@
 use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering::{self, *},
-    collections::{HashMap, VecDeque},
+    collections::{HashMap, VecDeque, HashSet},
     mem,
 };
 
 use crate::{
     army::Unit,
-    city::{Building, City, CityData},
+    city::{Building::{self, *}, City, CityData},
     civilization::Civilization,
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     game::Game,
@@ -56,7 +56,7 @@ pub struct Player {
     pub completed_objectives: Vec<String>,
     pub defeated_leaders: Vec<String>,
     pub event_victory_points: f32,
-    pub custom_actions: Vec<CustomActionType>,
+    pub custom_actions: HashSet<CustomActionType>,
     pub wonder_cards: Vec<Wonder>,
 }
 
@@ -95,7 +95,7 @@ impl Player {
             completed_objectives: data.completed_objectives,
             defeated_leaders: data.defeated_leaders,
             event_victory_points: data.event_victory_points,
-            custom_actions: data.custom_actions,
+            custom_actions: data.custom_actions.into_iter().collect(),
             wonder_cards: data
                 .wonder_cards
                 .iter()
@@ -173,7 +173,7 @@ impl Player {
             completed_objectives: self.completed_objectives,
             defeated_leaders: self.defeated_leaders,
             event_victory_points: self.event_victory_points,
-            custom_actions: self.custom_actions,
+            custom_actions: self.custom_actions.into_iter().collect(),
             wonder_cards: self
                 .wonder_cards
                 .into_iter()
@@ -205,7 +205,7 @@ impl Player {
             completed_objectives: Vec::new(),
             defeated_leaders: Vec::new(),
             event_victory_points: 0.0,
-            custom_actions: Vec::new(),
+            custom_actions: HashSet::new(),
             wonder_cards: Vec::new(),
         }
     }
@@ -391,7 +391,7 @@ impl Player {
             .expect("player should have city")
             .activate();
         self.take_events(|events, player| events.on_construct.trigger(player, city_position, building));
-        if matches!(building, Building::Academy) {
+        if matches!(building, Academy) {
             self.gain_resources(ResourcePile::ideas(2))
         }
         let index = self.index;

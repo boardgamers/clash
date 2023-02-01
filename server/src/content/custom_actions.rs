@@ -15,7 +15,7 @@ pub enum CustomAction {
     },
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash)]
 pub enum CustomActionType {
     ConstructWonder,
 }

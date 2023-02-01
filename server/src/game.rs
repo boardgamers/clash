@@ -86,17 +86,7 @@ impl Game {
         }
     }
 
-    pub fn from_json(json: &str) -> Self {
-        Self::from_data(
-            serde_json::from_str(json).expect("API call should receive valid game data json"),
-        )
-    }
-
-    pub fn json(self) -> String {
-        serde_json::to_string(&self.data()).expect("game data should be valid json")
-    }
-
-    fn from_data(data: GameData) -> Self {
+    pub fn from_data(data: GameData) -> Self {
         let mut game = Self {
             state: data.state,
             players: Vec::new(),
@@ -128,7 +118,7 @@ impl Game {
         game
     }
 
-    fn data(self) -> GameData {
+    pub fn data(self) -> GameData {
         GameData {
             state: self.state,
             players: self
@@ -165,19 +155,18 @@ impl Game {
             .expect("dice roll outcomes should not be empty")
     }
 
-    pub fn execute_action(&mut self, action: String, player_index: usize) {
+    pub fn execute_action(&mut self, action: Action, player_index: usize) {
         if let StatusPhase(phase) = self.state.clone() {
-            let action = StatusPhaseAction::new(action, phase.clone());
+            let action = action.status_phase_action();
             self.log.push(LogItem::StatusPhaseAction(
                 serde_json::to_string(&action).expect("status phase action should be serializable"),
             ));
             self.execute_status_phase_action(action, phase, player_index);
             return;
         }
-        let playing_action =
-        serde_json::from_str(&action).expect("action should be valid playing action json");
-        self.log.push(LogItem::PlayingAction(action));
-        self.execute_playing_action(playing_action, player_index);
+        let action = action.playing_action();
+        self.log.push(LogItem::PlayingAction(serde_json::to_string(&action).expect("playing action should be serializable")));
+        self.execute_playing_action(action, player_index);
     }
 
     pub fn execute_playing_action(&mut self, action: PlayingAction, player_index: usize) {
@@ -384,7 +373,7 @@ impl Game {
     }
 
     fn trigger_game_event(&mut self, player_index: usize) {
-        todo!()
+        //todo!
     }
 
     pub fn remove_advance(&mut self, advance: &str, player_index: usize) {
@@ -461,7 +450,7 @@ impl Game {
 }
 
 #[derive(Serialize, Deserialize)]
-struct GameData {
+pub struct GameData {
     state: GameState,
     players: Vec<PlayerData>,
     starting_player_index: usize,
@@ -494,6 +483,28 @@ pub enum StatusPhaseState {
     DetermineFirstPlayer,
 }
 
+#[derive(Serialize, Deserialize)]
+pub enum Action {
+    PlayingAction(PlayingAction),
+    StatusPhaseAction(StatusPhaseAction),
+}
+
+impl Action {
+    fn playing_action(self) -> PlayingAction {
+        let Action::PlayingAction(action) = self else {
+            panic!("action should be of type playing action");
+        };
+        action
+    }
+
+    fn status_phase_action(self) -> StatusPhaseAction {
+        let Action::StatusPhaseAction(action) = self else {
+            panic!("action should be of type status phase action");
+        };
+        action
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub enum LogItem {
     PlayingAction(String),
@@ -502,6 +513,13 @@ pub enum LogItem {
 
 #[cfg(test)]
 pub mod tests {
+    use crate::city::{City, Building::*, MoodState::*};
+    use crate::content::civilizations;
+    use crate::hexagon::Position;
+    use crate::player::Player;
+    use crate::resource_pile::ResourcePile;
+    use crate::wonder::Wonder;
+
     use super::Game;
     use super::GameState::Playing;
 
@@ -522,5 +540,43 @@ pub mod tests {
             wonders_left: Vec::new(),
             wonder_amount_left: 0,
         }
+    }
+
+    #[test]
+    fn conquer_test() {
+        let old = Player::new(civilizations::tests::get_test_civilization(), 0);
+        let new = Player::new(civilizations::tests::get_test_civilization(), 1);
+
+        let wonder = Wonder::builder("wonder", ResourcePile::empty(), vec![]).build();
+        let mut game = test_game();
+        game.players.push(old);
+        game.players.push(new);
+        let old = 0;
+        let new = 1;
+
+        let position = Position::new(0, 0);
+        game.players[old]
+            .cities
+            .push(City::new(old, position.clone()));
+        game.build_wonder(wonder, &position, old);
+        game.players[old].construct(&Academy, &position);
+        game.players[old].construct(&Obelisk, &position);
+
+        assert_eq!(7.0, game.players[old].victory_points());
+
+        game.conquer_city(&position, new, old);
+
+        let c = game.players[new].get_city_mut(&position).unwrap();
+        assert_eq!(1, c.player_index);
+        assert_eq!(Angry, c.mood_state);
+
+        let old = &game.players[old];
+        let new = &game.players[new];
+        assert_eq!(3.0, old.victory_points());
+        assert_eq!(4.0, new.victory_points());
+        assert_eq!(0, old.wonders.len());
+        assert_eq!(1, new.wonders.len());
+        assert_eq!(1, old.influenced_buildings);
+        assert_eq!(0, new.influenced_buildings);
     }
 }

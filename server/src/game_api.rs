@@ -1,7 +1,9 @@
 use serde::{Deserialize, Serialize};
 use std::{cmp::Ordering::*, mem};
 
+use crate::game::Action;
 use crate::game::Game;
+use crate::game::GameData;
 use crate::game::GameState::*;
 use crate::game::LogItem;
 
@@ -24,42 +26,31 @@ impl Log {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct PlayerMetaData {
-    name: String,
-}
+pub struct Messages{messages: Vec<String>, data: GameData}
 
-#[derive(Serialize, Deserialize)]
-pub struct Messages(Vec<String>, String);
+impl Messages {
+    pub fn new(messages: Vec<String>, data: GameData) -> Self { Self { messages, data } }
+}
 
 // Game API methods, see https://docs.boardgamers.space/guide/engine-api.html#required-methods
 
-#[export_name = "init"]
-pub async extern "C" fn init(
-    players: usize,
-    _expansions: String,
-    _options: String,
+pub fn init(
+    player_amount: usize,
     seed: String,
-    _creator: String,
-) -> String {
-    Game::new(players, seed).json()
+) -> Game {
+    Game::new(player_amount, seed)
 }
 
-#[export_name = "move"]
-pub extern "C" fn execute_action(game: String, r#move: String, player_index: usize) -> String {
-    let mut game = Game::from_json(&game);
-    game.execute_action(r#move, player_index);
-    game.json()
+pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Game {
+    game.execute_action(action, player_index);
+    game
 }
 
-#[export_name = "ended"]
-pub extern "C" fn ended(game: String) -> bool {
-    let game = Game::from_json(&game);
+pub fn ended(game: Game) -> bool {
     matches!(game.state, Finished)
 }
 
-#[export_name = "scores"]
-pub extern "C" fn scores(game: String) -> Vec<f32> {
-    let game = Game::from_json(&game);
+pub fn scores(game: Game) -> Vec<f32> {
     let mut scores: Vec<f32> = Vec::new();
     for player in game.players.iter() {
         scores.push(player.victory_points());
@@ -67,55 +58,37 @@ pub extern "C" fn scores(game: String) -> Vec<f32> {
     scores
 }
 
-#[export_name = "dropPlayer"]
-pub async extern "C" fn drop_player(game: String, player_index: usize) -> String {
-    let mut game = Game::from_json(&game);
+pub fn drop_player(mut game: Game, player_index: usize) -> Game {
     game.drop_player(player_index);
-    game.json()
+    game
 }
 
-#[export_name = "currentPlayer"]
-pub async extern "C" fn current_player(game: String) -> Option<usize> {
-    let game = Game::from_json(&game);
+pub fn current_player(game: Game) -> Option<usize> {
     match game.state {
         Finished => None,
         _ => Some(game.current_player_index),
     }
 }
 
-#[export_name = "logLength"]
-pub async extern "C" fn log_length(game: String) -> usize {
-    let game = Game::from_json(&game);
+pub fn log_length(game: Game) -> usize {
     game.log.len()
 }
 
-#[export_name = "logSlice"]
-pub async extern "C" fn log_slice(game: String, options: String) -> String {
-    let game = Game::from_json(&game);
-    let options =
-        serde_json::from_str::<LogSliceOptions>(&options).expect("options should be serializable");
+pub fn log_slice(game: Game, options: LogSliceOptions) -> Log {
     let log_slice = match options.end {
         Some(end) => &game.log[options.start..=end],
         None => &game.log[options.start..],
     }
     .to_vec();
-    let log = Log::new(log_slice);
-    serde_json::to_string(&log).expect("log slice should be serializable")
+    Log::new(log_slice)
 }
 
-#[export_name = "setPlayerMetaData"]
-pub extern "C" fn set_player_meta_data(game: String, player_index: usize, meta_data: String) -> String {
-    let name = serde_json::from_str::<PlayerMetaData>(&meta_data)
-        .expect("")
-        .name;
-    let mut game = Game::from_json(&game);
+pub fn set_player_name(mut game: Game, player_index: usize, name: String) -> Game {
     game.players[player_index].set_name(name);
-    game.json()
+    game
 }
 
-#[export_name = "rankings"]
-pub extern "C" fn rankings(game: String) -> Vec<u32> {
-    let game = Game::from_json(&game);
+pub fn rankings(game: Game) -> Vec<u32> {
     let mut rankings = Vec::new();
     for player in game.players.iter() {
         let mut rank = 1;
@@ -129,28 +102,22 @@ pub extern "C" fn rankings(game: String) -> Vec<u32> {
     rankings
 }
 
-#[export_name = "round"]
-pub extern "C" fn round(game: String) -> Option<u32> {
-    let game = Game::from_json(&game);
+pub fn round(game: Game) -> Option<u32> {
     match game.state {
         Playing => Some((game.age - 1) * 3 + game.round),
         _ => None,
     }
 }
 
-#[export_name = "factions"]
-pub extern "C" fn civilizations(game: String) -> Vec<String> {
-    let game = Game::from_json(&game);
+pub fn civilizations(game: Game) -> Vec<String> {
     game.players
         .into_iter()
         .map(|player| player.civilization.name)
         .collect()
 }
 
-#[export_name = "stripSecret"]
-pub extern "C" fn strip_secret(game: String, player: Option<usize>) -> String {
-    let player_index = player;
-    let mut game = Game::from_json(&game);
+pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
+    let player_index = player_index;
     game.dice_roll_outcomes = Vec::new();
     game.wonders_left = Vec::new();
     for (i, player) in game.players.iter_mut().enumerate() {
@@ -158,13 +125,10 @@ pub extern "C" fn strip_secret(game: String, player: Option<usize>) -> String {
             player.strip_secret()
         }
     }
-    game.json()
+    game
 }
 
-#[export_name = "messages"]
-pub extern "C" fn messages(game: String) -> String {
-    let mut game = Game::from_json(&game);
+pub fn messages(mut game: Game) -> Messages {
     let messages = mem::take(&mut game.messages);
-    serde_json::to_string(&Messages(messages, game.json()))
-        .expect("Messages should be serializable")
+    Messages::new(messages, game.data())
 }

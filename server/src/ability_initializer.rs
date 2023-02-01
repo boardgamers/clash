@@ -54,18 +54,14 @@ pub trait AbilityInitializerSetup: Sized {
 
     fn add_custom_action(self, action: CustomActionType) -> Self {
         let deinitializer_action = action.clone();
-        self.add_one_time_ability_initializer(move |game, player_index| {
+        self.add_ability_initializer(move |game, player_index| {
             let player = &mut game.players[player_index];
-            player.custom_actions.push(action.clone())
+            player.custom_actions.insert(action.clone());
         })
         .add_ability_deinitializer(move |game, player_index| {
             let player = &mut game.players[player_index];
             player.custom_actions.remove(
-                player
-                    .custom_actions
-                    .iter()
-                    .position(|custom_action| custom_action == &deinitializer_action)
-                    .expect("player should have custom action before deinitialization"),
+                &deinitializer_action
             );
         })
     }

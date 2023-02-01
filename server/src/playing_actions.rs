@@ -63,8 +63,8 @@ impl PlayingAction {
                 let city = player
                     .get_city(&city_position)
                     .expect("player should have city");
-                let cost = player.construct_cost(&building, city);
-                if !city.can_construct(&building, player) || !payment.can_afford(&cost) {
+                let cost = player.construct_cost(building, city);
+                if !city.can_construct(building, player) || !payment.can_afford(&cost) {
                     panic!("Illegal action");
                 }
                 if matches!(building, Temple) {
@@ -78,7 +78,7 @@ impl PlayingAction {
                     player.gain_resources(building_bonus);
                 }
                 player.loose_resources(payment);
-                player.construct(&building, &city_position);
+                player.construct(building, &city_position);
             }
             IncreaseHappiness {
                 happiness_increases,
@@ -132,7 +132,7 @@ impl PlayingAction {
                     player_index,
                     target_player_index,
                     &target_city_position,
-                    &building,
+                    building,
                 );
             }
             Custom(custom_action) => custom_action.execute(game, player_index),
