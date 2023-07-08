@@ -113,13 +113,14 @@ impl PlayingAction {
                     .distance(&target_city_position)
                     .saturating_sub(starting_city.size() as u32);
                 let range_boost_cost = ResourcePile::culture_tokens(range_boost);
+                let self_influence = starting_city_position == target_city_position;
                 if matches!(&city_piece, Obelisk)
                     || starting_city.player_index != player_index
                     || !player.resources().can_afford(&range_boost_cost)
-                //todo! check if    -building exists
-                //                  -starting city has no cultural influences unless it targets itself
-                //                  -one successful cultural influence per turn
-                //                  -building limit
+                    || (starting_city.influenced() && self_influence)
+                    || game.successful_cultural_influence
+                    || !player.available_buildings.can_build(&city_piece)
+                //todo! check if target building exists
                 {
                     panic!("Illegal action");
                 }
@@ -138,10 +139,7 @@ impl PlayingAction {
                 let can_afford_roll_boost_cost = game.players[player_index]
                     .resources()
                     .can_afford(&ResourcePile::culture_tokens(roll_boost_cost));
-                if roll > 6
-                    || starting_city_position == target_city_position
-                    || !can_afford_roll_boost_cost
-                {
+                if roll > 6 || self_influence || !can_afford_roll_boost_cost {
                     return;
                 }
                 game.state = CulturalInfluenceResolution {

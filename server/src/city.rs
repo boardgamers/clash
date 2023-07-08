@@ -1,3 +1,5 @@
+use std::ops::{AddAssign, SubAssign};
+
 use crate::{content::wonders, game::Game, hexagon::Position, player::Player, wonder::Wonder};
 
 use serde::{Deserialize, Serialize};
@@ -54,7 +56,6 @@ impl City {
     }
 
     pub fn can_construct(&self, building: &Building, player: &Player) -> bool {
-        //todo! check building limit
         if self.player_index != player.index {
             return false;
         }
@@ -73,12 +74,17 @@ impl City {
         if !player.has_advance(&building.required_advance()) {
             return false;
         }
+        if !player.available_buildings.can_build(building) {
+            return false;
+        }
         let cost = player.construct_cost(building, self);
         player.resources().can_afford(&cost)
     }
 
     pub fn can_build_wonder(&self, wonder: &Wonder, player: &Player) -> bool {
-        //todo! check if wonder card is in player's hand
+        if !player.wonder_cards.iter().map(|wonder| &wonder.name).any(|name| name == &wonder.name) {
+            return false;
+        }
         if self.player_index != player.index {
             return false;
         }
@@ -124,13 +130,31 @@ impl City {
         }
         let previously_influenced_building =
             self.city_pieces.buildings(Some(new_player_index)).len() as u32;
-        self.city_pieces.change_player(new_player_index);
+        for (building, owner) in self.city_pieces.building_owners() {
+            if matches!(building, Obelisk) {
+                continue;
+            }
+            let Some(owner) = owner else {
+                continue;
+            };
+            if owner != old_player_index {
+                continue;
+            }
+            self.city_pieces.set_building(&building, new_player_index);
+            game.players[old_player_index].available_buildings += &building;
+            game.players[new_player_index].available_buildings -= &building;
+        }
         let new_player = &mut game.players[new_player_index];
         new_player.influenced_buildings -= previously_influenced_building;
         new_player.cities.push(self)
     }
 
     pub fn raze(self, game: &mut Game, player_index: usize) {
+        for (building, owner) in self.city_pieces.building_owners().iter() {
+            if let Some(owner) = owner {
+                game.players[*owner].available_buildings += building;
+            }
+        }
         for wonder in self.city_pieces.wonders.into_iter() {
             (wonder.player_deinitializer)(game, player_index);
             game.players[player_index].remove_wonder(&wonder);
@@ -167,6 +191,10 @@ impl City {
 
     pub fn uninfluenced_buildings(&self) -> u32 {
         self.city_pieces.buildings(Some(self.player_index)).len() as u32
+    }
+
+    pub fn influenced(&self) -> bool {
+        self.uninfluenced_buildings() as usize == self.city_pieces.amount()
     }
 }
 
@@ -304,15 +332,7 @@ impl CityPieces {
         self.buildings(None).len() + self.wonders.len()
     }
 
-    fn change_player(&mut self, new_player_index: usize) {
-        for b in self.buildings(None) {
-            if !matches!(b, Obelisk) {
-                self.set_building(&b, new_player_index);
-            }
-        }
-    }
-
-    pub fn buildings(&self, owned_by: Option<usize>) -> Vec<Building> {
+    pub fn building_owners(&self) -> Vec<(Building, Option<usize>)> {
         vec![
             (Academy, self.academy),
             (Market, self.market),
@@ -322,16 +342,21 @@ impl CityPieces {
             (Port, self.port),
             (Temple, self.temple),
         ]
-        .into_iter()
-        .filter_map(|(building, owner)| {
-            owner
-                .filter(|owner| match owned_by {
-                    Some(want_owner) => owner == &want_owner,
-                    None => true,
-                })
-                .map(|_| building)
-        })
-        .collect()
+    }
+
+    pub fn buildings(&self, owned_by: Option<usize>) -> Vec<Building> {
+        self
+            .building_owners()
+            .into_iter()
+            .filter_map(|(building, owner)| {
+                owner
+                    .filter(|owner| match owned_by {
+                        Some(want_owner) => owner == &want_owner,
+                        None => true,
+                    })
+                    .map(|_| building)
+            })
+            .collect()
     }
 }
 
@@ -352,4 +377,77 @@ pub enum MoodState {
     Happy,
     Neutral,
     Angry,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct AvailableBuildings {
+    academies: u8,
+    markets: u8,
+    obelisks: u8,
+    observatories: u8,
+    fortresses: u8,
+    ports: u8,
+    temples: u8,
+}
+
+impl AddAssign<&Building> for AvailableBuildings {
+    fn add_assign(&mut self, rhs: &Building) {
+        match *rhs {
+            Academy => self.academies += 1,
+            Market => self.markets += 1,
+            Obelisk => self.obelisks += 1,
+            Observatory => self.observatories += 1,
+            Fortress => self.fortresses += 1,
+            Port => self.ports += 1,
+            Temple => self.temples += 1,
+        };
+    }
+}
+
+impl SubAssign<&Building> for AvailableBuildings {
+    fn sub_assign(&mut self, rhs: &Building) {
+        match *rhs {
+            Academy => self.academies -= 1,
+            Market => self.markets -= 1,
+            Obelisk => self.obelisks -= 1,
+            Observatory => self.observatories -= 1,
+            Fortress => self.fortresses -= 1,
+            Port => self.ports -= 1,
+            Temple => self.temples -= 1,
+        };
+    }
+}
+
+impl AvailableBuildings {
+    pub fn new(
+        academies: u8,
+        markets: u8,
+        obelisks: u8,
+        observatories: u8,
+        fortresses: u8,
+        ports: u8,
+        temples: u8,
+    ) -> Self {
+        Self {
+            academies,
+            markets,
+            obelisks,
+            observatories,
+            fortresses,
+            ports,
+            temples,
+        }
+    }
+
+    pub fn can_build(&self, building: &Building) -> bool {
+        match *building {
+            Academy => self.academies > 0,
+            Market => self.markets > 0,
+            Obelisk => self.obelisks > 0,
+            Observatory => self.observatories > 0,
+            Fortress => self.fortresses > 0,
+            Port => self.ports > 0,
+            Temple => self.temples > 0,
+        }
+    }
 }
