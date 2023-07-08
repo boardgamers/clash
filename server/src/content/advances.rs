@@ -7,6 +7,7 @@ use crate::{
 
 pub fn get_technologies() -> Vec<Advance> {
     vec![
+        //Agriculture
         Advance::builder(
             "Storage",
             "Your maximum food limit is increased from 2 to 7",
@@ -19,6 +20,7 @@ pub fn get_technologies() -> Vec<Advance> {
         })
         .with_advance_bonus(MoodToken)
         .build(),
+        //Construction
         Advance::builder(
             "Engineering",
             "● Immediately draw 1 wonder\n● May Construct wonder happy cities",
@@ -26,6 +28,7 @@ pub fn get_technologies() -> Vec<Advance> {
         .add_one_time_ability_initializer(|game, player| game.draw_wonder_card(player))
         .add_custom_action(ConstructWonder)
         .build(),
+        //Education
         Advance::builder(
             "Philosophy",
             "● Immediately gain 1 idea\n● Gain 1 idea after getting a Science advance",
@@ -48,6 +51,7 @@ pub fn get_technologies() -> Vec<Advance> {
         )
         .with_advance_bonus(MoodToken)
         .build(),
+        //Science
         Advance::builder(
             "Math",
             "Engineering and Roads can be bought at no food cost",

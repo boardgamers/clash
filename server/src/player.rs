@@ -98,7 +98,7 @@ impl Player {
             completed_objectives: data.completed_objectives,
             defeated_leaders: data.defeated_leaders,
             event_victory_points: data.event_victory_points,
-            custom_actions: data.custom_actions.into_iter().collect(),
+            custom_actions: HashSet::new(),
             wonder_cards: data
                 .wonder_cards
                 .iter()
@@ -176,7 +176,6 @@ impl Player {
             completed_objectives: self.completed_objectives,
             defeated_leaders: self.defeated_leaders,
             event_victory_points: self.event_victory_points,
-            custom_actions: self.custom_actions.into_iter().collect(),
             wonder_cards: self
                 .wonder_cards
                 .into_iter()
@@ -441,6 +440,5 @@ pub struct PlayerData {
     completed_objectives: Vec<String>,
     defeated_leaders: Vec<String>,
     event_victory_points: f32,
-    custom_actions: Vec<CustomActionType>,
     wonder_cards: Vec<String>,
 }

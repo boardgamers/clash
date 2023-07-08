@@ -146,29 +146,37 @@ impl Game {
     }
 
     pub fn get_next_dice_roll(&mut self) -> u8 {
-        if self.dice_roll_outcomes.is_empty() {
+        self.dice_roll_outcomes.pop().unwrap_or_else(|| {
             println!("ran out of predetermined dice roll outcomes, unseeded rng is no being used");
-            return rand::thread_rng().gen_range(1..=12);
-        }
-        self.dice_roll_outcomes
-            .pop()
-            .expect("dice roll outcomes should not be empty")
+            rand::thread_rng().gen_range(1..=12)
+        })
     }
 
     pub fn execute_action(&mut self, action: Action, player_index: usize) {
-        if let StatusPhase(phase) = self.state.clone() {
-            let action = action.status_phase_action();
-            self.log.push(LogItem::StatusPhaseAction(
-                serde_json::to_string(&action).expect("status phase action should be serializable"),
-            ));
-            self.execute_status_phase_action(action, phase, player_index);
-            return;
+        match self.state.clone() {
+            StatusPhase(phase) => {
+                let action = action.status_phase_action();
+                self.log.push(LogItem::StatusPhaseAction(
+                    serde_json::to_string(&action).expect("status phase action should be serializable"),
+                ));
+                self.execute_status_phase_action(action, phase, player_index);
+            },
+            CulturalInfluenceResolution { roll_boost_cost, target_player_index, target_city_position, city_piece } => {
+                let action = action.cultural_influence_resolution_action();
+                self.log.push(LogItem::CulturalInfluenceResolutionAction(
+                    serde_json::to_string(&action).expect("playing action should be serializable"),
+                ));
+                self.execute_cultural_influence_resolution_action(action, roll_boost_cost, target_player_index, target_city_position, city_piece, player_index);
+            },
+            Playing => {
+                let action = action.playing_action();
+                self.log.push(LogItem::PlayingAction(
+                    serde_json::to_string(&action).expect("playing action should be serializable"),
+                ));
+                self.execute_playing_action(action, player_index);
+            },
+            Finished => panic!("action can't be executed when the game is finished"),
         }
-        let action = action.playing_action();
-        self.log.push(LogItem::PlayingAction(
-            serde_json::to_string(&action).expect("playing action should be serializable"),
-        ));
-        self.execute_playing_action(action, player_index);
     }
 
     pub fn execute_playing_action(&mut self, action: PlayingAction, player_index: usize) {
@@ -193,20 +201,6 @@ impl Game {
         if !free_action {
             self.actions_left -= 1;
         }
-        if self.actions_left > 0 {
-            return;
-        }
-        if self.players[player_index].resources() != &ResourcePile::empty() {
-            return;
-        }
-        if self
-            .get_available_custom_actions()
-            .iter()
-            .any(|action| action.action_type().free)
-        {
-            return;
-        }
-        self.next_turn()
     }
 
     fn execute_status_phase_action(
@@ -242,6 +236,15 @@ impl Game {
             self.state = StatusPhase(next_phase)
         }
         self.skip_dropped_players();
+    }
+
+    fn execute_cultural_influence_resolution_action(&mut self, action: bool, roll_boost_cost: u32, target_player_index: usize, target_city_position: Position, city_piece: Building, player_index: usize) {
+        self.state = Playing;
+        if !action {
+            return;
+        }
+        self.players[player_index].loose_resources(ResourcePile::culture_tokens(roll_boost_cost));
+        self.influence_culture(player_index, target_player_index, &target_city_position, &city_piece)
     }
 
     fn next_player(&mut self) {
@@ -480,6 +483,12 @@ pub struct GameData {
 pub enum GameState {
     Playing,
     StatusPhase(StatusPhaseState),
+    CulturalInfluenceResolution {
+        roll_boost_cost: u32,
+        target_player_index: usize,
+        target_city_position: Position,
+        city_piece: Building,
+    },
     Finished,
 }
 
@@ -496,6 +505,7 @@ pub enum StatusPhaseState {
 pub enum Action {
     PlayingAction(PlayingAction),
     StatusPhaseAction(StatusPhaseAction),
+    CulturalInfluenceResolutionAction(bool),
 }
 
 impl Action {
@@ -512,12 +522,20 @@ impl Action {
         };
         action
     }
+
+    fn cultural_influence_resolution_action(self) -> bool {
+        let Action::CulturalInfluenceResolutionAction(action) = self else {
+            panic!("action should be of type status phase action");
+        };
+        action
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 pub enum LogItem {
     PlayingAction(String),
     StatusPhaseAction(String),
+    CulturalInfluenceResolutionAction(String),
 }
 
 #[cfg(test)]

@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     city::Building::{self, *},
     content::custom_actions::CustomAction,
-    game::Game,
+    game::{Game, GameState::*},
     hexagon::Position,
     resource_pile::ResourcePile,
 };
@@ -25,14 +25,11 @@ pub enum PlayingAction {
     IncreaseHappiness {
         happiness_increases: Vec<(Position, u32)>,
     },
-    InfluenceCulture {
-        success: bool,
+    InfluenceCultureAttempt {
         starting_city_position: Position,
         target_player_index: usize,
         target_city_position: Position,
         city_piece: Building,
-        range_boost: u32,
-        result_boost: u32,
     },
     Custom(CustomAction),
     EndTurn,
@@ -101,39 +98,48 @@ impl PlayingAction {
                     }
                 }
             }
-            InfluenceCulture {
-                success,
+            InfluenceCultureAttempt {
                 starting_city_position,
                 target_player_index,
                 target_city_position,
                 city_piece,
-                range_boost,
-                result_boost,
             } => {
-                let building = &city_piece;
-                let cost = ResourcePile::culture_tokens(range_boost + result_boost);
+                //todo! allow cultural influence of barbarians
                 let player = &mut game.players[player_index];
                 let starting_city = player
                     .get_city(&starting_city_position)
                     .expect("player should have position");
-                if matches!(building, Obelisk)
-                    || starting_city_position.distance(&target_city_position)
-                        > starting_city.size() as u32 + range_boost
+                let range_boost = starting_city_position
+                    .distance(&target_city_position)
+                    .saturating_sub(starting_city.size() as u32);
+                let range_boost_cost = ResourcePile::culture_tokens(range_boost);
+                if matches!(&city_piece, Obelisk)
                     || starting_city.player_index != player_index
-                    || !player.resources().can_afford(&cost)
+                    || !player.resources().can_afford(&range_boost_cost)
+                //todo! check if    -building exists
+                //                  -starting city has no cultural influences unless it targets itself
+                //                  -one successful cultural influence per turn
+                //                  -building limit
                 {
                     panic!("Illegal action");
                 }
-                if !success {
+                player.loose_resources(range_boost_cost);
+                let roll = game.get_next_dice_roll();
+                let success = roll == 5 || roll == 6;
+                if success {
+                    game.influence_culture(
+                        player_index,
+                        target_player_index,
+                        &target_city_position,
+                        &city_piece,
+                    );
+                }
+                let roll_boost_cost = 5 - roll as u32;
+                let can_afford_roll_boost_cost = game.players[player_index].resources().can_afford(&ResourcePile::culture_tokens(roll_boost_cost));
+                if roll > 6 || starting_city_position == target_city_position || !can_afford_roll_boost_cost {
                     return;
                 }
-                player.loose_resources(cost);
-                game.influence_culture(
-                    player_index,
-                    target_player_index,
-                    &target_city_position,
-                    building,
-                );
+                game.state = CulturalInfluenceResolution { roll_boost_cost, target_player_index, target_city_position, city_piece };
             }
             Custom(custom_action) => custom_action.execute(game, player_index),
             EndTurn => unreachable!("end turn should be returned before executing the action"),
