@@ -101,13 +101,8 @@ fn show_city_menu(game: &mut Game, player_index: usize, city_position: &Position
     root_ui().window(hash!(), vec2(600., 20.), vec2(100., 200.), |ui| {
         for (building, name) in building_names() {
             let player = &game.players[player_index];
-            let city = player
-                .get_city(city_position)
-                .expect("city not found");
-            if city
-                .can_construct(&building, player)
-                && ui.button(None, name)
-            {
+            let city = player.get_city(city_position).expect("city not found");
+            if city.can_construct(&building, player) && ui.button(None, name) {
                 let cost = player.construct_cost(&building, city);
                 game.execute_playing_action(
                     PlayingAction::Construct {

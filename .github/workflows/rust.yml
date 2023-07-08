@@ -27,21 +27,21 @@ jobs:
     - name: Run tests server
       working-directory: ./server
       run: cargo test
-    #- name: Run clippy client
-    #  working-directory: ./server
-    #  run: cargo clippy
-    # - name: Format client
-    #  working-directory: ./server
-    #   run: cargo fmt
+    - name: Run clippy client
+      working-directory: ./server
+      run: cargo clippy
+    - name: Format client
+      working-directory: ./server
+      run: cargo fmt --check
     - name: Build client
       working-directory: ./client
       run: cargo build
     - name: Run tests client
       working-directory: ./client
       run: cargo test
-    #- name: Run clippy client
-    #  working-directory: ./client
-    #  run: cargo clippy
-    # - name: Format client
-    #  working-directory: ./client
-    #   run: cargo fmt
+    - name: Run clippy client
+      working-directory: ./client
+      run: cargo clippy
+    - name: Format client
+      working-directory: ./client
+      run: cargo fmt --check
