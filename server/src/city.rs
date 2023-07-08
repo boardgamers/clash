@@ -54,6 +54,7 @@ impl City {
     }
 
     pub fn can_construct(&self, building: &Building, player: &Player) -> bool {
+        //todo! check building limit
         if self.player_index != player.index {
             return false;
         }
@@ -77,6 +78,7 @@ impl City {
     }
 
     pub fn can_build_wonder(&self, wonder: &Wonder, player: &Player) -> bool {
+        //todo! check if wonder card is in player's hand
         if self.player_index != player.index {
             return false;
         }
@@ -195,7 +197,7 @@ impl CityData {
     }
 }
 
-#[derive(Serialize, Deserialize, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Eq, PartialEq, Hash, Clone)]
 pub enum Building {
     Academy,
     Market,
