@@ -82,7 +82,12 @@ impl City {
     }
 
     pub fn can_build_wonder(&self, wonder: &Wonder, player: &Player) -> bool {
-        if !player.wonder_cards.iter().map(|wonder| &wonder.name).any(|name| name == &wonder.name) {
+        if !player
+            .wonder_cards
+            .iter()
+            .map(|wonder| &wonder.name)
+            .any(|name| name == &wonder.name)
+        {
             return false;
         }
         if self.player_index != player.index {
@@ -332,6 +337,18 @@ impl CityPieces {
         self.buildings(None).len() + self.wonders.len()
     }
 
+    pub fn building_owner(&self, building: &Building) -> Option<usize> {
+        match *building {
+            Academy => self.academy,
+            Market => self.market,
+            Obelisk => self.obelisk,
+            Observatory => self.observatory,
+            Fortress => self.fortress,
+            Port => self.port,
+            Temple => self.temple,
+        }
+    }
+
     pub fn building_owners(&self) -> Vec<(Building, Option<usize>)> {
         vec![
             (Academy, self.academy),
@@ -345,8 +362,7 @@ impl CityPieces {
     }
 
     pub fn buildings(&self, owned_by: Option<usize>) -> Vec<Building> {
-        self
-            .building_owners()
+        self.building_owners()
             .into_iter()
             .filter_map(|(building, owner)| {
                 owner

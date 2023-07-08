@@ -57,9 +57,7 @@ impl PlayingAction {
             } => {
                 let building = &city_piece;
                 let player = &mut game.players[player_index];
-                let city = player
-                    .get_city(&city_position)
-                    .expect("player should have city");
+                let city = player.get_city(&city_position).expect("Illegal action");
                 let cost = player.construct_cost(building, city);
                 if !city.can_construct(building, player) || !payment.can_afford(&cost) {
                     panic!("Illegal action");
@@ -82,17 +80,13 @@ impl PlayingAction {
             } => {
                 for (city_position, steps) in happiness_increases {
                     let player = &mut game.players[player_index];
-                    let city = player
-                        .get_city(&city_position)
-                        .expect("player should have city");
+                    let city = player.get_city(&city_position).expect("Illegal action");
                     let cost = ResourcePile::mood_tokens(city.size() as u32) * steps;
                     if city.player_index != player_index || !player.resources().can_afford(&cost) {
                         panic!("Illegal action");
                     }
                     player.loose_resources(cost);
-                    let city = player
-                        .get_city_mut(&city_position)
-                        .expect("player should have city");
+                    let city = player.get_city_mut(&city_position).expect("Illegal action");
                     for _ in 0..steps {
                         city.increase_mood_state();
                     }
@@ -114,13 +108,24 @@ impl PlayingAction {
                     .saturating_sub(starting_city.size() as u32);
                 let range_boost_cost = ResourcePile::culture_tokens(range_boost);
                 let self_influence = starting_city_position == target_city_position;
+                let target_city = game.players[target_player_index]
+                    .get_city(&target_city_position)
+                    .expect("Illegal action");
+                let target_building_owner = target_city
+                    .city_pieces
+                    .building_owner(&city_piece)
+                    .expect("Illegal action");
+                let player = &mut game.players[player_index];
+                let starting_city = player
+                    .get_city(&starting_city_position)
+                    .expect("player should have position");
                 if matches!(&city_piece, Obelisk)
                     || starting_city.player_index != player_index
                     || !player.resources().can_afford(&range_boost_cost)
                     || (starting_city.influenced() && self_influence)
                     || game.successful_cultural_influence
                     || !player.available_buildings.can_build(&city_piece)
-                //todo! check if target building exists
+                    || target_building_owner == player_index
                 {
                     panic!("Illegal action");
                 }
