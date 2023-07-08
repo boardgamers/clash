@@ -157,24 +157,37 @@ impl Game {
             StatusPhase(phase) => {
                 let action = action.status_phase_action();
                 self.log.push(LogItem::StatusPhaseAction(
-                    serde_json::to_string(&action).expect("status phase action should be serializable"),
+                    serde_json::to_string(&action)
+                        .expect("status phase action should be serializable"),
                 ));
                 self.execute_status_phase_action(action, phase, player_index);
-            },
-            CulturalInfluenceResolution { roll_boost_cost, target_player_index, target_city_position, city_piece } => {
+            }
+            CulturalInfluenceResolution {
+                roll_boost_cost,
+                target_player_index,
+                target_city_position,
+                city_piece,
+            } => {
                 let action = action.cultural_influence_resolution_action();
                 self.log.push(LogItem::CulturalInfluenceResolutionAction(
                     serde_json::to_string(&action).expect("playing action should be serializable"),
                 ));
-                self.execute_cultural_influence_resolution_action(action, roll_boost_cost, target_player_index, target_city_position, city_piece, player_index);
-            },
+                self.execute_cultural_influence_resolution_action(
+                    action,
+                    roll_boost_cost,
+                    target_player_index,
+                    target_city_position,
+                    city_piece,
+                    player_index,
+                );
+            }
             Playing => {
                 let action = action.playing_action();
                 self.log.push(LogItem::PlayingAction(
                     serde_json::to_string(&action).expect("playing action should be serializable"),
                 ));
                 self.execute_playing_action(action, player_index);
-            },
+            }
             Finished => panic!("action can't be executed when the game is finished"),
         }
     }
@@ -238,13 +251,26 @@ impl Game {
         self.skip_dropped_players();
     }
 
-    fn execute_cultural_influence_resolution_action(&mut self, action: bool, roll_boost_cost: u32, target_player_index: usize, target_city_position: Position, city_piece: Building, player_index: usize) {
+    fn execute_cultural_influence_resolution_action(
+        &mut self,
+        action: bool,
+        roll_boost_cost: u32,
+        target_player_index: usize,
+        target_city_position: Position,
+        city_piece: Building,
+        player_index: usize,
+    ) {
         self.state = Playing;
         if !action {
             return;
         }
         self.players[player_index].loose_resources(ResourcePile::culture_tokens(roll_boost_cost));
-        self.influence_culture(player_index, target_player_index, &target_city_position, &city_piece)
+        self.influence_culture(
+            player_index,
+            target_player_index,
+            &target_city_position,
+            &city_piece,
+        )
     }
 
     fn next_player(&mut self) {

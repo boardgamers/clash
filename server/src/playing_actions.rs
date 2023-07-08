@@ -135,11 +135,21 @@ impl PlayingAction {
                     );
                 }
                 let roll_boost_cost = 5 - roll as u32;
-                let can_afford_roll_boost_cost = game.players[player_index].resources().can_afford(&ResourcePile::culture_tokens(roll_boost_cost));
-                if roll > 6 || starting_city_position == target_city_position || !can_afford_roll_boost_cost {
+                let can_afford_roll_boost_cost = game.players[player_index]
+                    .resources()
+                    .can_afford(&ResourcePile::culture_tokens(roll_boost_cost));
+                if roll > 6
+                    || starting_city_position == target_city_position
+                    || !can_afford_roll_boost_cost
+                {
                     return;
                 }
-                game.state = CulturalInfluenceResolution { roll_boost_cost, target_player_index, target_city_position, city_piece };
+                game.state = CulturalInfluenceResolution {
+                    roll_boost_cost,
+                    target_player_index,
+                    target_city_position,
+                    city_piece,
+                };
             }
             Custom(custom_action) => custom_action.execute(game, player_index),
             EndTurn => unreachable!("end turn should be returned before executing the action"),
