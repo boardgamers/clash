@@ -8,6 +8,7 @@ use std::{
 use crate::{
     army::Unit,
     city::{
+        AvailableBuildings,
         Building::{self, *},
         City, CityData,
     },
@@ -61,6 +62,7 @@ pub struct Player {
     pub event_victory_points: f32,
     pub custom_actions: HashSet<CustomActionType>,
     pub wonder_cards: Vec<Wonder>,
+    pub available_buildings: AvailableBuildings,
 }
 
 impl Player {
@@ -107,6 +109,7 @@ impl Player {
                         .expect("player data should have valid wonder cards")
                 })
                 .collect(),
+            available_buildings: data.available_buildings,
         };
         let player_index = player.index;
         game.players.push(player);
@@ -181,6 +184,7 @@ impl Player {
                 .into_iter()
                 .map(|wonder| wonder.name)
                 .collect(),
+            available_buildings: self.available_buildings,
         }
     }
 
@@ -209,6 +213,7 @@ impl Player {
             event_victory_points: 0.0,
             custom_actions: HashSet::new(),
             wonder_cards: Vec::new(),
+            available_buildings: AvailableBuildings::new(5, 5, 5, 5, 5, 5, 5),
         }
     }
 
@@ -403,6 +408,7 @@ impl Player {
             .expect("player should have city")
             .city_pieces
             .set_building(building, index);
+        self.available_buildings -= building;
     }
 
     fn get_events(&self) -> &PlayerEvents {
@@ -441,4 +447,5 @@ pub struct PlayerData {
     defeated_leaders: Vec<String>,
     event_victory_points: f32,
     wonder_cards: Vec<String>,
+    available_buildings: AvailableBuildings,
 }

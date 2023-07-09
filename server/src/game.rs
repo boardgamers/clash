@@ -28,6 +28,7 @@ pub struct Game {
     pub log: Vec<LogItem>,
     pub played_once_per_turn_actions: Vec<CustomActionType>,
     pub actions_left: u32,
+    pub successful_cultural_influence: bool,
     pub round: u32, // starts with 1
     pub age: u32,   // starts with 1
     pub messages: Vec<String>,
@@ -76,6 +77,7 @@ impl Game {
             log: Vec::new(),
             played_once_per_turn_actions: Vec::new(),
             actions_left: 3,
+            successful_cultural_influence: false,
             round: 1,
             age: 1,
             messages: vec![String::from("Game has started")],
@@ -93,6 +95,7 @@ impl Game {
             starting_player_index: data.current_player_index,
             current_player_index: data.current_player_index,
             actions_left: data.actions_left,
+            successful_cultural_influence: data.successful_cultural_influence,
             log: data.log,
             played_once_per_turn_actions: data.played_once_per_turn_actions,
             round: data.round,
@@ -131,6 +134,7 @@ impl Game {
             log: self.log,
             played_once_per_turn_actions: self.played_once_per_turn_actions,
             actions_left: self.actions_left,
+            successful_cultural_influence: self.successful_cultural_influence,
             round: self.round,
             age: self.age,
             messages: self.messages,
@@ -286,6 +290,7 @@ impl Game {
 
     fn next_turn(&mut self) {
         self.actions_left = 3;
+        self.successful_cultural_influence = false;
         self.played_once_per_turn_actions = Vec::new();
         self.next_player();
         if self.current_player_index == self.starting_player_index {
@@ -484,6 +489,9 @@ impl Game {
             .city_pieces
             .set_building(building, influencer_index);
         self.players[influencer_index].influenced_buildings += 1;
+        self.successful_cultural_influence = true;
+        self.players[influenced_player_index].available_buildings += building;
+        self.players[influencer_index].available_buildings -= building;
     }
 }
 
@@ -496,6 +504,7 @@ pub struct GameData {
     log: Vec<LogItem>,
     played_once_per_turn_actions: Vec<CustomActionType>,
     actions_left: u32,
+    successful_cultural_influence: bool,
     round: u32,
     age: u32,
     messages: Vec<String>,
@@ -505,7 +514,7 @@ pub struct GameData {
     wonder_amount_left: usize,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum GameState {
     Playing,
     StatusPhase(StatusPhaseState),
@@ -518,7 +527,7 @@ pub enum GameState {
     Finished,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum StatusPhaseState {
     CompleteObjectives,
     FreeAdvance,
@@ -585,6 +594,7 @@ pub mod tests {
             log: Vec::new(),
             played_once_per_turn_actions: Vec::new(),
             actions_left: 3,
+            successful_cultural_influence: false,
             round: 1,
             age: 1,
             messages: vec![String::from("Game has started")],
