@@ -201,7 +201,7 @@ impl City {
     }
 
     pub fn influenced(&self) -> bool {
-        self.uninfluenced_buildings() as usize == self.city_pieces.amount()
+        self.uninfluenced_buildings() as usize != self.city_pieces.amount()
     }
 }
 
@@ -232,7 +232,7 @@ impl CityData {
     }
 }
 
-#[derive(Serialize, Deserialize, Eq, PartialEq, Hash, Clone)]
+#[derive(Serialize, Deserialize, Eq, PartialEq, Hash, Clone, Debug)]
 pub enum Building {
     Academy,
     Market,
@@ -397,7 +397,7 @@ pub enum MoodState {
     Angry,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct AvailableBuildings {
     academies: u8,
     markets: u8,

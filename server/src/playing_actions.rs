@@ -111,6 +111,7 @@ impl PlayingAction {
                 let target_city = game.players[target_player_index]
                     .get_city(&target_city_position)
                     .expect("Illegal action");
+                let target_city_owner = target_city.player_index;
                 let target_building_owner = target_city
                     .city_pieces
                     .building_owner(&city_piece)
@@ -122,9 +123,10 @@ impl PlayingAction {
                 if matches!(&city_piece, Obelisk)
                     || starting_city.player_index != player_index
                     || !player.resources().can_afford(&range_boost_cost)
-                    || (starting_city.influenced() && self_influence)
+                    || (starting_city.influenced() && !self_influence)
                     || game.successful_cultural_influence
                     || !player.available_buildings.can_build(&city_piece)
+                    || target_city_owner != target_player_index
                     || target_building_owner == player_index
                 {
                     panic!("Illegal action");
@@ -139,16 +141,15 @@ impl PlayingAction {
                         &target_city_position,
                         &city_piece,
                     );
+                    return;
                 }
-                let roll_boost_cost = 5 - roll as u32;
-                let can_afford_roll_boost_cost = game.players[player_index]
+                if roll > 6 || self_influence || !game.players[player_index]
                     .resources()
-                    .can_afford(&ResourcePile::culture_tokens(roll_boost_cost));
-                if roll > 6 || self_influence || !can_afford_roll_boost_cost {
+                    .can_afford(&ResourcePile::culture_tokens(5 - roll as u32)) {
                     return;
                 }
                 game.state = CulturalInfluenceResolution {
-                    roll_boost_cost,
+                    roll_boost_cost: 5 - roll as u32,
                     target_player_index,
                     target_city_position,
                     city_piece,

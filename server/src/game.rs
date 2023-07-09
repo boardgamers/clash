@@ -514,7 +514,7 @@ pub struct GameData {
     wonder_amount_left: usize,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum GameState {
     Playing,
     StatusPhase(StatusPhaseState),
@@ -527,7 +527,7 @@ pub enum GameState {
     Finished,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum StatusPhaseState {
     CompleteObjectives,
     FreeAdvance,

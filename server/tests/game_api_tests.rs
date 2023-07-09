@@ -1,7 +1,7 @@
 use server::{
-    city::{Building, City, MoodState::*},
+    city::{AvailableBuildings, Building, City, MoodState::*},
     content::custom_actions::CustomAction::*,
-    game::Action,
+    game::{Action, GameState::*},
     game_api,
     hexagon::Position,
     playing_actions::PlayingAction::*,
@@ -55,6 +55,11 @@ fn one_player() {
     });
     let game = game_api::execute_action(game, construct_action, 0);
     let player = &game.players[0];
+
+    assert_eq!(
+        AvailableBuildings::new(5, 5, 5, 4, 5, 5, 5),
+        player.available_buildings
+    );
 
     assert_eq!(
         Some(0),
@@ -117,4 +122,86 @@ fn one_player() {
             .len()
     );
     assert_eq!(1, game.actions_left);
+}
+
+#[test]
+fn cultural_influence() {
+    let mut game = game_api::init(2, String::new());
+    game.dice_roll_outcomes = vec![6, 4, 5, 3, 7];
+    game.current_player_index = 0;
+    game.players[0].gain_resources(ResourcePile::culture_tokens(4));
+    game.players[1].gain_resources(ResourcePile::culture_tokens(1));
+    let city0position = Position::new(0, 0);
+    let city1position = Position::new(2, 0);
+    assert_eq!(city0position.distance(&city1position), 2);
+    game.players[0]
+        .cities
+        .push(City::new(0, city0position.clone()));
+    game.players[1]
+        .cities
+        .push(City::new(1, city1position.clone()));
+    game.players[1].construct(&Building::Academy, &city1position);
+    let influence_action = Action::PlayingAction(InfluenceCultureAttempt {
+        starting_city_position: city0position.clone(),
+        target_player_index: 1,
+        target_city_position: city1position.clone(),
+        city_piece: Building::Academy,
+    });
+    let game = game_api::execute_action(game, influence_action, 0);
+    assert!(!game.players[1].cities[0].influenced());
+    assert_eq!(game.state, Playing);
+    let influence_action = Action::PlayingAction(InfluenceCultureAttempt {
+        starting_city_position: city0position.clone(),
+        target_player_index: 1,
+        target_city_position: city1position.clone(),
+        city_piece: Building::Academy,
+    });
+    let game = game_api::execute_action(game, influence_action, 0);
+    assert!(!game.players[1].cities[0].influenced());
+    assert_eq!(
+        game.state,
+        CulturalInfluenceResolution {
+            roll_boost_cost: 2,
+            target_player_index: 1,
+            target_city_position: city1position.clone(),
+            city_piece: Building::Academy
+        }
+    );
+    let influence_resolution_decline_action = Action::CulturalInfluenceResolutionAction(false);
+    let game = game_api::execute_action(game, influence_resolution_decline_action, 0);
+    assert!(!game.players[1].cities[0].influenced());
+    assert_eq!(game.state, Playing);
+    assert!(!game.successful_cultural_influence);
+    let influence_action = Action::PlayingAction(InfluenceCultureAttempt {
+        starting_city_position: city0position,
+        target_player_index: 1,
+        target_city_position: city1position.clone(),
+        city_piece: Building::Academy,
+    });
+    let game = game_api::execute_action(game, influence_action, 0);
+    assert!(game.players[1].cities[0].influenced());
+    assert_eq!(game.state, Playing);
+    assert!(game.successful_cultural_influence);
+    let game = game_api::execute_action(game, Action::PlayingAction(EndTurn), 0);
+    assert_eq!(game.current_player_index, 1);
+    let influence_action = Action::PlayingAction(InfluenceCultureAttempt {
+        starting_city_position: city1position.clone(),
+        target_player_index: 1,
+        target_city_position: city1position.clone(),
+        city_piece: Building::Academy,
+    });
+    let game = game_api::execute_action(game, influence_action, 1);
+    assert!(game.players[1].cities[0].influenced());
+    assert_eq!(game.state, Playing);
+    assert!(!game.successful_cultural_influence);
+    let influence_action = Action::PlayingAction(InfluenceCultureAttempt {
+        starting_city_position: city1position.clone(),
+        target_player_index: 1,
+        target_city_position: city1position,
+        city_piece: Building::Academy,
+    });
+    let game = game_api::execute_action(game, influence_action, 1);
+    assert!(!game.players[1].cities[0].influenced());
+    assert_eq!(game.state, Playing);
+    assert!(game.successful_cultural_influence);
 }
