@@ -143,9 +143,12 @@ impl PlayingAction {
                     );
                     return;
                 }
-                if roll > 6 || self_influence || !game.players[player_index]
-                    .resources()
-                    .can_afford(&ResourcePile::culture_tokens(5 - roll as u32)) {
+                if roll > 6
+                    || self_influence
+                    || !game.players[player_index]
+                        .resources()
+                        .can_afford(&ResourcePile::culture_tokens(5 - roll as u32))
+                {
                     return;
                 }
                 game.state = CulturalInfluenceResolution {

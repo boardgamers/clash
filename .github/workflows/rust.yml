@@ -32,7 +32,7 @@ jobs:
     - name: Run clippy client
       working-directory: ./server
       run: cargo clippy
-    - name: Format client
+    - name: Format server
       working-directory: ./server
       run: cargo fmt --check
     - name: Run cargo audit server
