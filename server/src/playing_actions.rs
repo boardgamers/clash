@@ -118,7 +118,7 @@ impl PlayingAction {
                 let player = &mut game.players[player_index];
                 let starting_city = player
                     .get_city(&starting_city_position)
-                    .expect("player should have position");
+                    .expect("Illegal action");
                 if matches!(&city_piece, Obelisk)
                     || starting_city.player_index != player_index
                     || !player.resources().can_afford(&range_boost_cost)

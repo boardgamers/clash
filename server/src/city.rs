@@ -111,7 +111,9 @@ impl City {
                 return false;
             }
         }
-        //todo! use wonder's placement checker
+        if let Some(placement_requirement) = &wonder.placement_requirement {
+            return placement_requirement(&self.position);
+        }
         true
     }
 
