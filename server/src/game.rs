@@ -174,7 +174,9 @@ impl Game {
         }
         match self.state.clone() {
             StatusPhase(phase) => {
-                let action = action.as_status_phase_action().expect("action should be a status phase action");
+                let action = action
+                    .as_status_phase_action()
+                    .expect("action should be a status phase action");
                 self.add_log_item(LogItem::StatusPhaseAction(
                     serde_json::to_string(&action)
                         .expect("status phase action should be serializable"),
@@ -187,7 +189,9 @@ impl Game {
                 target_city_position,
                 city_piece,
             } => {
-                let action = action.as_cultural_influence_resolution_action().expect("action should be a cultural influence resolution action");
+                let action = action
+                    .as_cultural_influence_resolution_action()
+                    .expect("action should be a cultural influence resolution action");
                 self.add_log_item(LogItem::CulturalInfluenceResolutionAction(
                     serde_json::to_string(&action).expect("playing action should be serializable"),
                 ));
@@ -206,8 +210,11 @@ impl Game {
                         panic!("actions revealing new information can't be undone");
                     }
                     self.log_index -= 1;
-                    let action = self.log[self.log_index].as_playing_action().expect("previous action should be a playing action");
-                    let action = serde_json::from_str::<PlayingAction>(action).expect("action should be deserializable");
+                    let action = self.log[self.log_index]
+                        .as_playing_action()
+                        .expect("previous action should be a playing action");
+                    let action = serde_json::from_str::<PlayingAction>(action)
+                        .expect("action should be deserializable");
                     action.undo(self, player_index);
                     return;
                 }
@@ -215,13 +222,18 @@ impl Game {
                     if !self.can_redo() {
                         panic!("no action can be redone");
                     }
-                    let action = self.log[self.log_index].as_playing_action().expect("undone actions should be playing actions");
-                    let action = serde_json::from_str::<PlayingAction>(action).expect("action should be deserializable");
+                    let action = self.log[self.log_index]
+                        .as_playing_action()
+                        .expect("undone actions should be playing actions");
+                    let action = serde_json::from_str::<PlayingAction>(action)
+                        .expect("action should be deserializable");
                     action.execute(self, player_index);
                     self.log_index += 1;
                     return;
                 }
-                let action = action.as_playing_action().expect("action should be a playing action");
+                let action = action
+                    .as_playing_action()
+                    .expect("action should be a playing action");
                 self.add_log_item(LogItem::PlayingAction(
                     serde_json::to_string(&action).expect("playing action should be serializable"),
                 ));
