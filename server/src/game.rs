@@ -6,7 +6,6 @@ use crate::{
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     hexagon::Position,
     player::{Player, PlayerData},
-    playing_actions::PlayingAction::*,
     resource_pile::ResourcePile,
     special_advance::SpecialAdvance,
     status_phase_actions::{self, StatusPhaseAction},
@@ -26,6 +25,8 @@ pub struct Game {
     pub starting_player_index: usize,
     pub current_player_index: usize,
     pub log: Vec<LogItem>,
+    log_index: usize,
+    undo_limit: usize,
     pub played_once_per_turn_actions: Vec<CustomActionType>,
     pub actions_left: u32,
     pub successful_cultural_influence: bool,
@@ -75,6 +76,8 @@ impl Game {
             starting_player_index: starting_player,
             current_player_index: starting_player,
             log: Vec::new(),
+            log_index: 0,
+            undo_limit: 0,
             played_once_per_turn_actions: Vec::new(),
             actions_left: 3,
             successful_cultural_influence: false,
@@ -97,6 +100,8 @@ impl Game {
             actions_left: data.actions_left,
             successful_cultural_influence: data.successful_cultural_influence,
             log: data.log,
+            log_index: data.log_index,
+            undo_limit: data.undo_limit,
             played_once_per_turn_actions: data.played_once_per_turn_actions,
             round: data.round,
             age: data.age,
@@ -132,6 +137,8 @@ impl Game {
             starting_player_index: self.starting_player_index,
             current_player_index: self.current_player_index,
             log: self.log,
+            log_index: self.log_index,
+            undo_limit: self.undo_limit,
             played_once_per_turn_actions: self.played_once_per_turn_actions,
             actions_left: self.actions_left,
             successful_cultural_influence: self.successful_cultural_influence,
@@ -149,18 +156,28 @@ impl Game {
         }
     }
 
-    pub fn get_next_dice_roll(&mut self) -> u8 {
-        self.dice_roll_outcomes.pop().unwrap_or_else(|| {
-            println!("ran out of predetermined dice roll outcomes, unseeded rng is no being used");
-            rand::thread_rng().gen_range(1..=12)
-        })
+    fn add_log_item(&mut self, item: LogItem) {
+        if self.log_index < self.log.len() {
+            self.log.drain(self.log_index..);
+        }
+        self.log.push(item);
+        self.log_index += 1;
+    }
+
+    pub fn lock_undo(&mut self) {
+        self.undo_limit = self.log_index;
     }
 
     pub fn execute_action(&mut self, action: Action, player_index: usize) {
+        if player_index != self.current_player_index {
+            panic!("Illegal action");
+        }
         match self.state.clone() {
             StatusPhase(phase) => {
-                let action = action.status_phase_action();
-                self.log.push(LogItem::StatusPhaseAction(
+                let action = action
+                    .as_status_phase_action()
+                    .expect("action should be a status phase action");
+                self.add_log_item(LogItem::StatusPhaseAction(
                     serde_json::to_string(&action)
                         .expect("status phase action should be serializable"),
                 ));
@@ -172,8 +189,10 @@ impl Game {
                 target_city_position,
                 city_piece,
             } => {
-                let action = action.cultural_influence_resolution_action();
-                self.log.push(LogItem::CulturalInfluenceResolutionAction(
+                let action = action
+                    .as_cultural_influence_resolution_action()
+                    .expect("action should be a cultural influence resolution action");
+                self.add_log_item(LogItem::CulturalInfluenceResolutionAction(
                     serde_json::to_string(&action).expect("playing action should be serializable"),
                 ));
                 self.execute_cultural_influence_resolution_action(
@@ -186,38 +205,50 @@ impl Game {
                 );
             }
             Playing => {
-                let action = action.playing_action();
-                self.log.push(LogItem::PlayingAction(
+                if let Action::Undo = action {
+                    if !self.can_undo() {
+                        panic!("actions revealing new information can't be undone");
+                    }
+                    self.log_index -= 1;
+                    let action = self.log[self.log_index]
+                        .as_playing_action()
+                        .expect("previous action should be a playing action");
+                    let action = serde_json::from_str::<PlayingAction>(action)
+                        .expect("action should be deserializable");
+                    action.undo(self, player_index);
+                    return;
+                }
+                if let Action::Redo = action {
+                    if !self.can_redo() {
+                        panic!("no action can be redone");
+                    }
+                    let action = self.log[self.log_index]
+                        .as_playing_action()
+                        .expect("undone actions should be playing actions");
+                    let action = serde_json::from_str::<PlayingAction>(action)
+                        .expect("action should be deserializable");
+                    action.execute(self, player_index);
+                    self.log_index += 1;
+                    return;
+                }
+                let action = action
+                    .as_playing_action()
+                    .expect("action should be a playing action");
+                self.add_log_item(LogItem::PlayingAction(
                     serde_json::to_string(&action).expect("playing action should be serializable"),
                 ));
-                self.execute_playing_action(action, player_index);
+                action.execute(self, player_index);
             }
-            Finished => panic!("action can't be executed when the game is finished"),
+            Finished => panic!("actions can't be executed when the game is finished"),
         }
     }
 
-    pub fn execute_playing_action(&mut self, action: PlayingAction, player_index: usize) {
-        if matches!(action, EndTurn) {
-            self.next_turn();
-            return;
-        }
-        let free_action = action.action_type().free;
-        if !free_action && self.actions_left == 0 {
-            panic!("Illegal action");
-        }
-        if let Custom(action) = &action {
-            let action = action.custom_action_type();
-            if self.played_once_per_turn_actions.contains(&action) {
-                panic!("Illegal action");
-            }
-            if action.action_type().once_per_turn {
-                self.played_once_per_turn_actions.push(action);
-            }
-        }
-        action.execute(self, player_index);
-        if !free_action {
-            self.actions_left -= 1;
-        }
+    pub fn can_undo(&self) -> bool {
+        self.undo_limit < self.log_index
+    }
+
+    pub fn can_redo(&self) -> bool {
+        self.log_index < self.log.len()
     }
 
     fn execute_status_phase_action(
@@ -280,6 +311,7 @@ impl Game {
     fn next_player(&mut self) {
         self.current_player_index += 1;
         self.current_player_index %= self.players.len();
+        self.lock_undo();
     }
 
     fn skip_dropped_players(&mut self) {
@@ -288,10 +320,13 @@ impl Game {
         }
     }
 
-    fn next_turn(&mut self) {
+    pub fn next_turn(&mut self) {
         self.actions_left = 3;
         self.successful_cultural_influence = false;
         self.played_once_per_turn_actions = Vec::new();
+        for city in self.players[self.current_player_index].cities.iter_mut() {
+            city.deactivate();
+        }
         self.next_player();
         if self.current_player_index == self.starting_player_index {
             self.next_round();
@@ -317,16 +352,25 @@ impl Game {
     fn next_age(&mut self) {
         self.state = Playing;
         self.age += 1;
+        self.lock_undo();
         if self.age > AGES {
             self.end_game();
             return;
         }
-        self.messages.push(format!("Age {} has started", self.age));
+        self.add_message(&format!("Age {} has started", self.age));
     }
 
     fn end_game(&mut self) {
         self.state = Finished;
         self.add_message("Game has ended");
+    }
+
+    pub fn get_next_dice_roll(&mut self) -> u8 {
+        self.lock_undo();
+        self.dice_roll_outcomes.pop().unwrap_or_else(|| {
+            println!("ran out of predetermined dice roll outcomes, unseeded rng is no being used");
+            rand::thread_rng().gen_range(1..=12)
+        })
     }
 
     fn add_message(&mut self, message: &str) {
@@ -335,6 +379,7 @@ impl Game {
 
     pub fn drop_player(&mut self, player_index: usize) {
         self.dropped_players.push(player_index);
+        self.add_message(&format!("Player {} had left the game", player_index + 1));
         self.skip_dropped_players();
     }
 
@@ -354,6 +399,7 @@ impl Game {
         };
         self.wonder_amount_left -= 1;
         self.players[player_index].wonder_cards.push(wonder);
+        self.lock_undo()
     }
 
     pub fn kill_leader(&mut self, player_index: usize) {
@@ -411,7 +457,45 @@ impl Game {
         }
     }
 
+    pub fn undo_advance(&mut self, advance: &str, player_index: usize) {
+        self.players[player_index].take_events(|events, player| {
+            events
+                .on_undo_advance
+                .trigger(player, &advance.to_string(), &())
+        });
+        let advance = advances::get_advance_by_name(advance).expect("advance should exist");
+        (advance.player_deinitializer)(self, player_index);
+        (advance.player_undo_deinitializer)(self, player_index);
+        for i in 0..self.players[player_index]
+            .civilization
+            .special_advances
+            .len()
+        {
+            if self.players[player_index].civilization.special_advances[i].required_advance
+                == advance.name
+            {
+                let special_advance = self.players[player_index]
+                    .civilization
+                    .special_advances
+                    .remove(i);
+                self.undo_unlock_special_advance(&special_advance, player_index);
+                self.players[player_index]
+                    .civilization
+                    .special_advances
+                    .insert(i, special_advance);
+                break;
+            }
+        }
+        let player = &mut self.players[player_index];
+        if let Some(advance_bonus) = &advance.advance_bonus {
+            player.loose_resources(advance_bonus.resources());
+        }
+        player.advances.pop();
+        player.game_event_tokens += 1;
+    }
+
     fn trigger_game_event(&mut self, player_index: usize) {
+        self.lock_undo();
         //todo!
     }
 
@@ -433,6 +517,16 @@ impl Game {
         self.players[player_index]
             .unlocked_special_advances
             .push(special_advance.name.clone());
+    }
+
+    fn undo_unlock_special_advance(
+        &mut self,
+        special_advance: &SpecialAdvance,
+        player_index: usize,
+    ) {
+        (special_advance.player_deinitializer)(self, player_index);
+        (special_advance.player_undo_deinitializer)(self, player_index);
+        self.players[player_index].unlocked_special_advances.pop();
     }
 
     pub fn conquer_city(
@@ -475,6 +569,28 @@ impl Game {
             .push(wonder);
     }
 
+    pub fn undo_build_wonder(&mut self, city_position: &Position, player_index: usize) -> Wonder {
+        let player = &mut self.players[player_index];
+        player.wonders_build -= 1;
+        player.wonders.pop();
+        let mut wonder = player
+            .get_city_mut(city_position)
+            .expect("player should have city")
+            .city_pieces
+            .wonders
+            .pop()
+            .expect("city should have a wonder");
+        self.players[player_index].take_events(|events, player| {
+            events
+                .on_undo_construct_wonder
+                .trigger(player, city_position, &wonder)
+        });
+        (wonder.player_deinitializer)(self, player_index);
+        (wonder.player_undo_deinitializer)(self, player_index);
+        wonder.builder = None;
+        wonder
+    }
+
     //this function assumes action is legal
     pub fn influence_culture(
         &mut self,
@@ -502,6 +618,8 @@ pub struct GameData {
     starting_player_index: usize,
     current_player_index: usize,
     log: Vec<LogItem>,
+    log_index: usize,
+    undo_limit: usize,
     played_once_per_turn_actions: Vec<CustomActionType>,
     actions_left: u32,
     successful_cultural_influence: bool,
@@ -541,28 +659,33 @@ pub enum Action {
     PlayingAction(PlayingAction),
     StatusPhaseAction(StatusPhaseAction),
     CulturalInfluenceResolutionAction(bool),
+    Undo,
+    Redo,
 }
 
 impl Action {
-    fn playing_action(self) -> PlayingAction {
-        let Action::PlayingAction(action) = self else {
-            panic!("action should be of type playing action");
-        };
-        action
+    pub fn as_playing_action(self) -> Option<PlayingAction> {
+        if let Self::PlayingAction(v) = self {
+            Some(v)
+        } else {
+            None
+        }
     }
 
-    fn status_phase_action(self) -> StatusPhaseAction {
-        let Action::StatusPhaseAction(action) = self else {
-            panic!("action should be of type status phase action");
-        };
-        action
+    pub fn as_status_phase_action(self) -> Option<StatusPhaseAction> {
+        if let Self::StatusPhaseAction(v) = self {
+            Some(v)
+        } else {
+            None
+        }
     }
 
-    fn cultural_influence_resolution_action(self) -> bool {
-        let Action::CulturalInfluenceResolutionAction(action) = self else {
-            panic!("action should be of type status phase action");
-        };
-        action
+    pub fn as_cultural_influence_resolution_action(self) -> Option<bool> {
+        if let Self::CulturalInfluenceResolutionAction(v) = self {
+            Some(v)
+        } else {
+            None
+        }
     }
 }
 
@@ -571,6 +694,16 @@ pub enum LogItem {
     PlayingAction(String),
     StatusPhaseAction(String),
     CulturalInfluenceResolutionAction(String),
+}
+
+impl LogItem {
+    pub fn as_playing_action(&self) -> Option<&str> {
+        if let Self::PlayingAction(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
 }
 
 #[cfg(test)]
@@ -592,6 +725,8 @@ pub mod tests {
             starting_player_index: 0,
             current_player_index: 0,
             log: Vec::new(),
+            log_index: 0,
+            undo_limit: 0,
             played_once_per_turn_actions: Vec::new(),
             actions_left: 3,
             successful_cultural_influence: false,

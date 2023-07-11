@@ -13,6 +13,7 @@ pub struct City {
     pub city_pieces: CityPieces,
     pub mood_state: MoodState,
     pub is_activated: bool,
+    activations: u32,
     pub player_index: usize,
     pub position: Position,
 }
@@ -23,6 +24,7 @@ impl City {
             city_pieces: CityPieces::from_data(data.city_pieces),
             mood_state: data.mood_state,
             is_activated: data.is_activated,
+            activations: data.activations,
             player_index: data.player_index,
             position: data.position,
         }
@@ -33,6 +35,7 @@ impl City {
             self.city_pieces.data(),
             self.mood_state,
             self.is_activated,
+            self.activations,
             self.player_index,
             self.position,
         )
@@ -43,16 +46,32 @@ impl City {
             city_pieces: CityPieces::default(),
             mood_state: Neutral,
             is_activated: false,
+            activations: 0,
             player_index,
             position,
         }
     }
 
     pub fn activate(&mut self) {
-        if self.is_activated {
+        if self.is_activated() {
             self.decrease_mood_state();
         }
-        self.is_activated = true;
+        self.activations += 1;
+    }
+
+    pub fn deactivate(&mut self) {
+        self.activations = 0;
+    }
+
+    pub fn undo_activate(&mut self) {
+        self.activations -= 1;
+        if self.is_activated() {
+            self.increase_mood_state();
+        }
+    }
+
+    pub fn is_activated(&self) -> bool {
+        self.activations > 0
     }
 
     pub fn can_construct(&self, building: &Building, player: &Player) -> bool {
@@ -82,14 +101,6 @@ impl City {
     }
 
     pub fn can_build_wonder(&self, wonder: &Wonder, player: &Player) -> bool {
-        if !player
-            .wonder_cards
-            .iter()
-            .map(|wonder| &wonder.name)
-            .any(|name| name == &wonder.name)
-        {
-            return false;
-        }
         if self.player_index != player.index {
             return false;
         }
@@ -210,6 +221,7 @@ pub struct CityData {
     city_pieces: CityPiecesData,
     mood_state: MoodState,
     is_activated: bool,
+    activations: u32,
     player_index: usize,
     position: Position,
 }
@@ -219,6 +231,7 @@ impl CityData {
         city_pieces: CityPiecesData,
         mood_state: MoodState,
         is_activated: bool,
+        activations: u32,
         player_index: usize,
         position: Position,
     ) -> Self {
@@ -226,6 +239,7 @@ impl CityData {
             city_pieces,
             mood_state,
             is_activated,
+            activations,
             player_index,
             position,
         }
@@ -332,6 +346,18 @@ impl CityPieces {
             Fortress => self.fortress = Some(player_index),
             Port => self.port = Some(player_index),
             Temple => self.temple = Some(player_index),
+        }
+    }
+
+    pub fn remove_building(&mut self, building: &Building) {
+        match building {
+            Academy => self.academy = None,
+            Market => self.market = None,
+            Obelisk => self.obelisk = None,
+            Observatory => self.observatory = None,
+            Fortress => self.fortress = None,
+            Port => self.port = None,
+            Temple => self.temple = None,
         }
     }
 

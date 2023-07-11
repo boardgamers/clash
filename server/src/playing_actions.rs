@@ -37,6 +37,10 @@ pub enum PlayingAction {
 
 impl PlayingAction {
     pub fn execute(self, game: &mut Game, player_index: usize) {
+        let free_action = self.action_type().free;
+        if !free_action && game.actions_left == 0 {
+            panic!("Illegal action");
+        }
         match self {
             Advance { advance, payment } => {
                 let player = &mut game.players[player_index];
@@ -55,14 +59,13 @@ impl PlayingAction {
                 payment,
                 temple_bonus,
             } => {
-                let building = &city_piece;
                 let player = &mut game.players[player_index];
                 let city = player.get_city(&city_position).expect("Illegal action");
-                let cost = player.construct_cost(building, city);
-                if !city.can_construct(building, player) || !payment.can_afford(&cost) {
+                let cost = player.construct_cost(&city_piece, city);
+                if !city.can_construct(&city_piece, player) || !payment.can_afford(&cost) {
                     panic!("Illegal action");
                 }
-                if matches!(building, Temple) {
+                if matches!(&city_piece, Temple) {
                     let building_bonus =
                         temple_bonus.expect("build data should contain temple bonus");
                     if building_bonus != ResourcePile::mood_tokens(1)
@@ -73,13 +76,13 @@ impl PlayingAction {
                     player.gain_resources(building_bonus);
                 }
                 player.loose_resources(payment);
-                player.construct(building, &city_position);
+                player.construct(&city_piece, &city_position);
             }
             IncreaseHappiness {
                 happiness_increases,
             } => {
+                let player = &mut game.players[player_index];
                 for (city_position, steps) in happiness_increases {
-                    let player = &mut game.players[player_index];
                     let city = player.get_city(&city_position).expect("Illegal action");
                     let cost = ResourcePile::mood_tokens(city.size() as u32) * steps;
                     if city.player_index != player_index || !player.resources().can_afford(&cost) {
@@ -158,15 +161,74 @@ impl PlayingAction {
                     city_piece,
                 };
             }
-            Custom(custom_action) => custom_action.execute(game, player_index),
-            EndTurn => unreachable!("end turn should be returned before executing the action"),
+            Custom(custom_action) => {
+                let action = custom_action.custom_action_type();
+                if game.played_once_per_turn_actions.contains(&action) {
+                    panic!("Illegal action");
+                }
+                if action.action_type().once_per_turn {
+                    game.played_once_per_turn_actions.push(action);
+                }
+                custom_action.execute(game, player_index)
+            }
+            EndTurn => game.next_turn(),
+        }
+        if !free_action {
+            game.actions_left -= 1;
         }
     }
 
     pub fn action_type(&self) -> ActionType {
         match self {
             Custom(custom_action) => custom_action.custom_action_type().action_type(),
+            EndTurn => ActionType::free(),
             _ => ActionType::default(),
+        }
+    }
+
+    pub fn undo(self, game: &mut Game, player_index: usize) {
+        let free_action = self.action_type().free;
+        if !free_action {
+            game.actions_left += 1;
+        }
+        match self {
+            Advance { advance, payment } => {
+                let player = &mut game.players[player_index];
+                player.gain_resources(payment);
+                game.undo_advance(&advance, player_index);
+            }
+            Construct {
+                city_position,
+                city_piece,
+                payment,
+                temple_bonus,
+            } => {
+                let player = &mut game.players[player_index];
+                player.undo_construct(&city_piece, &city_position);
+                player.gain_resources(payment);
+                if matches!(&city_piece, Temple) {
+                    player.loose_resources(
+                        temple_bonus.expect("build data should contain temple bonus"),
+                    );
+                }
+            }
+            IncreaseHappiness {
+                happiness_increases,
+            } => {
+                let mut cost = 0;
+                let player = &mut game.players[player_index];
+                for (city_position, steps) in happiness_increases {
+                    let city = player.get_city(&city_position).expect("Illegal action");
+                    cost += city.size() as u32 * steps;
+                    let city = player.get_city_mut(&city_position).expect("Illegal action");
+                    for _ in 0..steps {
+                        city.decrease_mood_state();
+                    }
+                }
+                player.gain_resources(ResourcePile::mood_tokens(cost));
+            }
+            Custom(custom_action) => custom_action.undo(game, player_index),
+            InfluenceCultureAttempt { .. } | EndTurn => panic!("Action can't be undone"),
         }
     }
 }
@@ -186,7 +248,11 @@ impl ActionType {
         Self::new(false, true)
     }
 
-    pub fn new(free: bool, once_per_turn: bool) -> Self {
+    pub fn free_and_once_per_turn() -> Self {
+        Self::new(true, true)
+    }
+
+    fn new(free: bool, once_per_turn: bool) -> Self {
         Self {
             free,
             once_per_turn,

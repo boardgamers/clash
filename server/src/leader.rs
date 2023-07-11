@@ -12,6 +12,7 @@ pub struct Leader {
     pub player_initializer: AbilityInitializer,
     pub player_deinitializer: AbilityInitializer,
     pub player_one_time_initializer: AbilityInitializer,
+    pub player_undo_deinitializer: AbilityInitializer,
 }
 
 impl Leader {
@@ -41,6 +42,7 @@ pub struct LeaderBuilder {
     player_initializers: Vec<AbilityInitializer>,
     player_deinitializers: Vec<AbilityInitializer>,
     player_one_time_initializers: Vec<AbilityInitializer>,
+    player_undo_deinitializers: Vec<AbilityInitializer>,
 }
 
 impl LeaderBuilder {
@@ -60,6 +62,7 @@ impl LeaderBuilder {
             player_initializers: Vec::new(),
             player_deinitializers: Vec::new(),
             player_one_time_initializers: Vec::new(),
+            player_undo_deinitializers: Vec::new(),
         }
     }
 
@@ -70,6 +73,8 @@ impl LeaderBuilder {
             ability_initializer::join_ability_initializers(self.player_deinitializers);
         let player_one_time_initializer =
             ability_initializer::join_ability_initializers(self.player_one_time_initializers);
+        let player_undo_deinitializer =
+            ability_initializer::join_ability_initializers(self.player_undo_deinitializers);
         Leader {
             name: self.name,
             first_ability: self.first_ability,
@@ -79,6 +84,7 @@ impl LeaderBuilder {
             player_initializer,
             player_deinitializer,
             player_one_time_initializer,
+            player_undo_deinitializer,
         }
     }
 }
@@ -106,6 +112,15 @@ impl AbilityInitializerSetup for LeaderBuilder {
     {
         self.player_one_time_initializers
             .push(Box::new(initializer));
+        self
+    }
+
+    fn add_ability_undo_deinitializer<F>(mut self, deinitializer: F) -> Self
+    where
+        F: Fn(&mut Game, usize) + 'static,
+    {
+        self.player_undo_deinitializers
+            .push(Box::new(deinitializer));
         self
     }
 

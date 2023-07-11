@@ -394,12 +394,12 @@ impl Player {
     }
 
     pub fn construct(&mut self, building: &Building, city_position: &Position) {
-        self.get_city_mut(city_position)
-            .expect("player should have city")
-            .activate();
         self.take_events(|events, player| {
             events.on_construct.trigger(player, city_position, building)
         });
+        self.get_city_mut(city_position)
+            .expect("player should have city")
+            .activate();
         if matches!(building, Academy) {
             self.gain_resources(ResourcePile::ideas(2))
         }
@@ -409,6 +409,25 @@ impl Player {
             .city_pieces
             .set_building(building, index);
         self.available_buildings -= building;
+    }
+
+    pub fn undo_construct(&mut self, building: &Building, city_position: &Position) {
+        self.take_events(|events, player| {
+            events
+                .on_undo_construct
+                .trigger(player, city_position, building)
+        });
+        self.get_city_mut(city_position)
+            .expect("player should have city")
+            .undo_activate();
+        if matches!(building, Academy) {
+            self.loose_resources(ResourcePile::ideas(2))
+        }
+        self.get_city_mut(city_position)
+            .expect("player should have city")
+            .city_pieces
+            .remove_building(building);
+        self.available_buildings += building;
     }
 
     fn get_events(&self) -> &PlayerEvents {

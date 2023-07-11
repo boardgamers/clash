@@ -4,8 +4,6 @@ use crate::{
     game::Game, hexagon::Position, playing_actions::ActionType, resource_pile::ResourcePile,
 };
 
-use super::wonders;
-
 #[derive(Serialize, Deserialize)]
 pub enum CustomAction {
     ConstructWonder {
@@ -28,8 +26,14 @@ impl CustomAction {
                 wonder,
                 payment,
             } => {
-                let wonder = wonders::get_wonder_by_name(&wonder)
-                    .expect("construct wonder data should include a valid wonder name");
+                let wonder_cards_index = game.players[player_index]
+                    .wonder_cards
+                    .iter()
+                    .position(|wonder_card| wonder_card.name == wonder)
+                    .expect("Illegal action");
+                let wonder = game.players[player_index]
+                    .wonder_cards
+                    .remove(wonder_cards_index);
                 let city = game.players[player_index]
                     .get_city(&city_position)
                     .expect("player should have city");
@@ -39,6 +43,7 @@ impl CustomAction {
                     panic!("Illegal action");
                 }
                 game.players[player_index].loose_resources(payment);
+
                 game.build_wonder(wonder, &city_position, player_index);
             }
         }
@@ -49,12 +54,26 @@ impl CustomAction {
             CustomAction::ConstructWonder { .. } => CustomActionType::ConstructWonder,
         }
     }
+
+    pub fn undo(self, game: &mut Game, player_index: usize) {
+        match self {
+            CustomAction::ConstructWonder {
+                city_position,
+                wonder: _,
+                payment,
+            } => {
+                game.players[player_index].gain_resources(payment);
+                let wonder = game.undo_build_wonder(&city_position, player_index);
+                game.players[player_index].wonder_cards.push(wonder);
+            }
+        }
+    }
 }
 
 impl CustomActionType {
     pub fn action_type(&self) -> ActionType {
         match self {
-            _ => ActionType::default(),
+            CustomActionType::ConstructWonder => ActionType::default(),
         }
     }
 }

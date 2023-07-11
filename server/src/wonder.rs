@@ -5,7 +5,7 @@ use crate::{
     resource_pile::ResourcePile,
 };
 
-//todo! provide more info for position
+//todo! provide tile as information
 type PlacementChecker = Box<dyn Fn(&Position) -> bool>;
 
 pub struct Wonder {
@@ -17,6 +17,7 @@ pub struct Wonder {
     pub player_initializer: AbilityInitializer,
     pub player_deinitializer: AbilityInitializer,
     pub player_one_time_initializer: AbilityInitializer,
+    pub player_undo_deinitializer: AbilityInitializer,
     pub builder: Option<usize>,
 }
 
@@ -42,6 +43,7 @@ pub struct WonderBuilder {
     player_initializers: Vec<AbilityInitializer>,
     player_deinitializers: Vec<AbilityInitializer>,
     player_one_time_initializers: Vec<AbilityInitializer>,
+    player_undo_deinitializers: Vec<AbilityInitializer>,
 }
 
 impl WonderBuilder {
@@ -55,6 +57,7 @@ impl WonderBuilder {
             player_initializers: Vec::new(),
             player_deinitializers: Vec::new(),
             player_one_time_initializers: Vec::new(),
+            player_undo_deinitializers: Vec::new(),
         }
     }
 
@@ -75,6 +78,8 @@ impl WonderBuilder {
             ability_initializer::join_ability_initializers(self.player_deinitializers);
         let player_one_time_initializer =
             ability_initializer::join_ability_initializers(self.player_one_time_initializers);
+        let player_undo_deinitializer =
+            ability_initializer::join_ability_initializers(self.player_undo_deinitializers);
         Wonder {
             name: self.name,
             description: String::from("● ") + &self.descriptions.join("\n● "),
@@ -84,6 +89,7 @@ impl WonderBuilder {
             player_initializer,
             player_deinitializer,
             player_one_time_initializer,
+            player_undo_deinitializer,
             builder: None,
         }
     }
@@ -112,6 +118,15 @@ impl AbilityInitializerSetup for WonderBuilder {
     {
         self.player_one_time_initializers
             .push(Box::new(initializer));
+        self
+    }
+
+    fn add_ability_undo_deinitializer<F>(mut self, deinitializer: F) -> Self
+    where
+        F: Fn(&mut Game, usize) + 'static,
+    {
+        self.player_undo_deinitializers
+            .push(Box::new(deinitializer));
         self
     }
 
