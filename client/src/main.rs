@@ -6,6 +6,7 @@ use macroquad::ui::root_ui;
 
 use server::city::City;
 use server::content::advances::get_technologies;
+use server::game::Action;
 use server::game::Game;
 use server::hexagon::Position;
 use server::playing_actions::PlayingAction;
@@ -104,13 +105,13 @@ fn show_city_menu(game: &mut Game, player_index: usize, city_position: &Position
             let city = player.get_city(city_position).expect("city not found");
             if city.can_construct(&building, player) && ui.button(None, name) {
                 let cost = player.construct_cost(&building, city);
-                game.execute_playing_action(
-                    PlayingAction::Construct {
+                game.execute_action(
+                    Action::PlayingAction(PlayingAction::Construct {
                         city_position: city_position.clone(),
                         city_piece: building,
                         payment: cost,
                         temple_bonus: None,
-                    },
+                    }),
                     player_index,
                 );
             };
@@ -124,11 +125,11 @@ fn show_research_menu(game: &mut Game, player_index: usize) {
             let name = a.name.clone();
             if game.players[player_index].can_advance(&name) {
                 if ui.button(None, name.clone()) {
-                    game.execute_playing_action(
-                        PlayingAction::Advance {
+                    game.execute_action(
+                        Action::PlayingAction(PlayingAction::Advance {
                             advance: name,
                             payment: ResourcePile::gold(2),
-                        },
+                        }),
                         player_index,
                     );
                 }

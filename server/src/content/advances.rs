@@ -13,10 +13,10 @@ pub fn get_technologies() -> Vec<Advance> {
             "Your maximum food limit is increased from 2 to 7",
         )
         .add_one_time_ability_initializer(|game, player_index| {
-            game.players[player_index].resource_limit.food = 7
+            game.players[player_index].resource_limit.food = 7;
         })
-        .add_ability_deinitializer(|game, player_index| {
-            game.players[player_index].resource_limit.food = 2
+        .add_ability_undo_deinitializer(|game, player_index| {
+            game.players[player_index].resource_limit.food = 2;
         })
         .with_advance_bonus(MoodToken)
         .build(),
@@ -34,7 +34,10 @@ pub fn get_technologies() -> Vec<Advance> {
             "● Immediately gain 1 idea\n● Gain 1 idea after getting a Science advance",
         )
         .add_one_time_ability_initializer(|game, player_index| {
-            game.players[player_index].gain_resources(ResourcePile::ideas(1))
+            game.players[player_index].gain_resources(ResourcePile::ideas(1));
+        })
+        .add_ability_undo_deinitializer(|game, player_index| {
+            game.players[player_index].loose_resources(ResourcePile::ideas(1));
         })
         .add_player_event_listener(
             |event| &mut event.on_advance,
@@ -44,7 +47,20 @@ pub fn get_technologies() -> Vec<Advance> {
                     || advance == "Medicine"
                     || advance == "Metallurgy"
                 {
-                    player.gain_resources(ResourcePile::ideas(2))
+                    player.gain_resources(ResourcePile::ideas(2));
+                }
+            },
+            0,
+        )
+        .add_player_event_listener(
+            |event| &mut event.on_undo_advance,
+            |player, advance, _| {
+                if advance == "Math"
+                    || advance == "Astronomy"
+                    || advance == "Medicine"
+                    || advance == "Metallurgy"
+                {
+                    player.loose_resources(ResourcePile::ideas(2));
                 }
             },
             0,

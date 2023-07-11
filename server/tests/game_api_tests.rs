@@ -9,7 +9,7 @@ use server::{
 };
 
 #[test]
-fn one_player() {
+fn basic_actions() {
     let game = game_api::init(1, String::new());
     let advance_action = Action::PlayingAction(Advance {
         advance: String::from("Math"),

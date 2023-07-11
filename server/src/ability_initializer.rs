@@ -15,6 +15,9 @@ pub trait AbilityInitializerSetup: Sized {
     fn add_one_time_ability_initializer<F>(self, initializer: F) -> Self
     where
         F: Fn(&mut Game, usize) + 'static;
+    fn add_ability_undo_deinitializer<F>(self, deinitializer: F) -> Self
+    where
+        F: Fn(&mut Game, usize) + 'static;
     fn get_key(&self) -> String;
 
     fn add_player_event_listener<T, U, V, E, F>(self, event: E, listener: F, priority: i32) -> Self
