@@ -1,10 +1,6 @@
 use crate::{
-    city::{Building, City},
-    events::EventMut,
-    hexagon::Position,
-    player::Player,
-    resource_pile::ResourcePile,
-    wonder::Wonder,
+    city::City, city_pieces::Building, events::EventMut, hexagon::Position, player::Player,
+    resource_pile::ResourcePile, wonder::Wonder,
 };
 
 #[derive(Default)]

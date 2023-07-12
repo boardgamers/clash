@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    city::Building::{self, *},
+    city_pieces::Building::{self, *},
     content::custom_actions::CustomAction,
     game::{Game, GameState::*},
     hexagon::Position,
@@ -10,7 +10,7 @@ use crate::{
 
 use PlayingAction::*;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayingAction {
     Advance {
         advance: String,
@@ -85,7 +85,11 @@ impl PlayingAction {
                 for (city_position, steps) in happiness_increases {
                     let city = player.get_city(&city_position).expect("Illegal action");
                     let cost = ResourcePile::mood_tokens(city.size() as u32) * steps;
-                    if city.player_index != player_index || !player.resources().can_afford(&cost) {
+                    let max_steps = 2 - city.mood_state.clone() as u32;
+                    if city.player_index != player_index
+                        || !player.resources().can_afford(&cost)
+                        || steps > max_steps
+                    {
                         panic!("Illegal action");
                     }
                     player.loose_resources(cost);

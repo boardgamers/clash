@@ -2,7 +2,7 @@ use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    city::Building,
+    city_pieces::Building,
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     hexagon::Position,
     player::{Player, PlayerData},
@@ -25,8 +25,8 @@ pub struct Game {
     pub starting_player_index: usize,
     pub current_player_index: usize,
     pub log: Vec<LogItem>,
-    log_index: usize,
-    undo_limit: usize,
+    pub log_index: usize,
+    pub undo_limit: usize,
     pub played_once_per_turn_actions: Vec<CustomActionType>,
     pub actions_left: u32,
     pub successful_cultural_influence: bool,
@@ -234,6 +234,19 @@ impl Game {
                 let action = action
                     .as_playing_action()
                     .expect("action should be a playing action");
+                if self.can_redo()
+                    && serde_json::from_str::<PlayingAction>(
+                        self.log[self.log_index]
+                            .as_playing_action()
+                            .expect("undone actions should be playing actions"),
+                    )
+                    .expect("action should be deserializable")
+                        == action
+                {
+                    self.log_index += 1;
+                    action.execute(self, player_index);
+                    return;
+                }
                 self.add_log_item(LogItem::PlayingAction(
                     serde_json::to_string(&action).expect("playing action should be serializable"),
                 ));
@@ -708,7 +721,8 @@ impl LogItem {
 
 #[cfg(test)]
 pub mod tests {
-    use crate::city::{Building::*, City, MoodState::*};
+    use crate::city::{City, MoodState::*};
+    use crate::city_pieces::Building::*;
     use crate::content::civilizations;
     use crate::hexagon::Position;
     use crate::player::Player;

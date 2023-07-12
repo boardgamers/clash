@@ -1,7 +1,7 @@
 mod ability_initializer;
 mod advance;
-mod army;
 pub mod city;
+pub mod city_pieces;
 mod civilization;
 pub mod content;
 mod events;
@@ -16,4 +16,5 @@ pub mod playing_actions;
 pub mod resource_pile;
 mod special_advance;
 mod status_phase_actions;
+mod unit;
 mod wonder;
