@@ -1,21 +1,23 @@
 extern crate core;
 
+use std::fmt::Debug;
 use macroquad::hash;
 use macroquad::prelude::*;
-use macroquad::ui::root_ui;
+use macroquad::ui::{root_ui, Ui};
 
 use server::city::City;
 use server::content::advances::get_technologies;
-use server::game::Action;
 use server::game::Game;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
 use crate::map::{building_names, pixel_to_coordinate};
+use crate::payment::{Payment};
 
 mod map;
 mod ui;
+mod payment;
 
 #[macroquad::main("Clash")]
 async fn main() {
@@ -105,13 +107,13 @@ fn show_city_menu(game: &mut Game, player_index: usize, city_position: &Position
             let city = player.get_city(city_position).expect("city not found");
             if city.can_construct(&building, player) && ui.button(None, name) {
                 let cost = player.construct_cost(&building, city);
-                game.execute_action(
-                    Action::PlayingAction(PlayingAction::Construct {
+                game.execute_playing_action(
+                    PlayingAction::Construct {
                         city_position: city_position.clone(),
                         city_piece: building,
                         payment: cost,
                         temple_bonus: None,
-                    }),
+                    },
                     player_index,
                 );
             };
@@ -122,20 +124,46 @@ fn show_city_menu(game: &mut Game, player_index: usize, city_position: &Position
 fn show_research_menu(game: &mut Game, player_index: usize) {
     root_ui().window(hash!(), vec2(20., 300.), vec2(400., 200.), |ui| {
         for a in get_technologies().into_iter() {
-            let name = a.name.clone();
+            let name = a.name;
             if game.players[player_index].can_advance(&name) {
-                if ui.button(None, name.clone()) {
-                    game.execute_action(
-                        Action::PlayingAction(PlayingAction::Advance {
-                            advance: name,
-                            payment: ResourcePile::gold(2),
-                        }),
-                        player_index,
-                    );
-                }
+                ui.tree_node(hash!(&name), &name, | ui | {
+                    buy_research_menu(game, player_index, &name, ui);
+                });
             } else if game.players[player_index].advances.contains(&name) {
                 ui.label(None, &name);
             }
         }
     });
+}
+
+fn buy_research_menu(game: &mut Game, player_index: usize, name: &String, ui: &mut Ui) {
+    let mut payment = Payment::new_advance_resource_payment(game.players[player_index].resources().get_advance_payment_options(2));
+
+    // parent.window(hash!(), vec2(00., 00.), vec2(400., 200.), |ui| {
+        for p in payment.resources.iter_mut() {
+            if p.max > 0 {
+                let s = format!("{} {}", &p.resource.to_string(), p.current);
+                print!("{}", s);
+                ui.label(None, &s);
+                if p.current > p.min && ui.button(None, "-") {
+                    p.current -= 1;
+                    //something else must be increased instead
+                }
+                if p.current < p.max && ui.button(None, "+") {
+                    p.current += 1;
+                    //something else must be decreased instead
+                }
+            }
+        }
+
+        if ui.button(None, "OK") {
+            game.execute_playing_action(
+                PlayingAction::Advance {
+                    advance: name.clone(),
+                    payment: payment.to_resource_pile(),
+                },
+                player_index,
+            );
+        }
+    // });
 }

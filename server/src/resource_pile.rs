@@ -340,9 +340,9 @@ impl PaymentOptions {
 
 #[derive(PartialEq, Eq, Debug)]
 pub struct AdvancePaymentOptions {
-    default: ResourcePile,
-    food_left: u32,
-    gold_left: u32,
+    pub default: ResourcePile,
+    pub food_left: u32,
+    pub gold_left: u32,
 }
 
 impl AdvancePaymentOptions {
