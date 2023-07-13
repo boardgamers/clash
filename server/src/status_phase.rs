@@ -2,15 +2,15 @@ use serde::{Deserialize, Serialize};
 use StatusPhaseState::*;
 
 use crate::{
-    game::{Game, StatusPhaseState},
+    game::{Game, GameState::*},
     hexagon::Position,
-    player::Player,
+    player::Player, resource_pile::ResourcePile,
 };
 
 #[derive(Serialize, Deserialize)]
 pub struct StatusPhaseAction {
     data: String,
-    phase: StatusPhaseState,
+    pub phase: StatusPhaseState,
 }
 
 impl StatusPhaseAction {
@@ -21,7 +21,7 @@ impl StatusPhaseAction {
     pub fn execute(self, game: &mut Game, player_index: usize) {
         match self.phase {
             StatusPhaseState::CompleteObjectives => {
-                let completed_objectives = serde_json::from_str::<CompleteObjectives>(&self.data)
+                let _completed_objectives = serde_json::from_str::<CompleteObjectives>(&self.data)
                     .expect("data should be valid complete objectives json")
                     .objectives;
                 todo!()
@@ -41,6 +41,7 @@ impl StatusPhaseAction {
                     .city;
                 if let Some(city) = city {
                     game.raze_city(&city, player_index);
+                    game.players[player_index].gain_resources(ResourcePile::gold(1));
                 }
             }
             StatusPhaseState::ChangeGovernmentType => {
@@ -48,7 +49,7 @@ impl StatusPhaseAction {
                     serde_json::from_str::<ChangeGovernmentType>(&self.data)
                         .expect("data should be valid change government type json")
                         .new_government_advance;
-                if let Some(new_government_advance) = new_government_advance {
+                if let Some(_new_government_advance) = new_government_advance {
                     todo!()
                 }
             }
@@ -58,9 +59,35 @@ impl StatusPhaseAction {
                     .player_index;
                 game.starting_player_index = player;
                 game.current_player_index = player;
+                game.next_age();
+                return;
             }
         }
+        game.next_player();
+        if game.current_player_index == game.starting_player_index {
+            if let StatusPhaseState::FreeAdvance = self.phase {
+                game.draw_new_cards();
+            }
+            let next_phase = next_status_phase(self.phase);
+            if let StatusPhaseState::DetermineFirstPlayer = next_phase {
+                game.current_player_index = player_that_chooses_next_first_player(
+                    &game.players,
+                    game.starting_player_index,
+                );
+            }
+            game.state = StatusPhase(next_phase)
+        }
+        game.skip_dropped_players();
     }
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub enum StatusPhaseState {
+    CompleteObjectives,
+    FreeAdvance,
+    RaseSize1City,
+    ChangeGovernmentType,
+    DetermineFirstPlayer,
 }
 
 #[derive(Serialize, Deserialize)]
