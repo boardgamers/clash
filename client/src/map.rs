@@ -1,12 +1,9 @@
-use crate::ui::{player_color, Point};
-use hex2d::Coordinate;
-use hex2d::Spacing;
+use hex2d::{Coordinate, Spacing};
 use macroquad::prelude::*;
-use server::city::{Building, City};
-use server::hexagon::Position;
-use server::player::Player;
-use std::collections::HashMap;
-use std::f32::consts::PI;
+use server::{city::City, city_pieces::Building, hexagon::Position, player::Player};
+use std::{collections::HashMap, f32::consts::PI};
+
+use crate::ui::{self, Point};
 
 const SIZE: f32 = 60.0;
 const SPACING: Spacing = Spacing::FlatTop(SIZE);
@@ -22,7 +19,7 @@ pub fn draw_city(owner: &Player, city: &City) {
 
     let c = center(&city.position).to_screen();
 
-    draw_circle(c.x, c.y, 10.0, player_color(owner.index));
+    draw_circle(c.x, c.y, 10.0, ui::player_color(owner.index));
 
     let mut i = 0;
     for player_index in 0..4 {
@@ -33,7 +30,7 @@ pub fn draw_city(owner: &Player, city: &City) {
                 p.x - 12.0,
                 p.y + 12.0,
                 50.0,
-                player_color(player_index),
+                ui::player_color(player_index),
             );
             i += 1;
         }

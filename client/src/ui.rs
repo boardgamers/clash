@@ -28,11 +28,11 @@ impl Point {
 }
 
 pub fn player_color(player_index: usize) -> Color {
-    return match player_index {
+    match player_index {
         0 => RED,
         1 => BLUE,
         2 => YELLOW,
         3 => BLACK,
         _ => panic!("unexpected player index"),
-    };
+    }
 }
