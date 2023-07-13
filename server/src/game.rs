@@ -2,19 +2,21 @@ use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    city::Building,
+    city_pieces::Building,
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     hexagon::Position,
     player::{Player, PlayerData},
     resource_pile::ResourcePile,
     special_advance::SpecialAdvance,
-    status_phase_actions::{self, StatusPhaseAction},
+    status_phase::{
+        StatusPhaseAction,
+        StatusPhaseState::{self, *},
+    },
     wonder::Wonder,
 };
 
 use crate::playing_actions::PlayingAction;
 use GameState::*;
-use StatusPhaseState::*;
 
 const DICE_ROLL_BUFFER: u32 = 200;
 const AGES: u32 = 6;
@@ -25,8 +27,8 @@ pub struct Game {
     pub starting_player_index: usize,
     pub current_player_index: usize,
     pub log: Vec<LogItem>,
-    log_index: usize,
-    undo_limit: usize,
+    pub log_index: usize,
+    pub undo_limit: usize,
     pub played_once_per_turn_actions: Vec<CustomActionType>,
     pub actions_left: u32,
     pub successful_cultural_influence: bool,
@@ -181,7 +183,10 @@ impl Game {
                     serde_json::to_string(&action)
                         .expect("status phase action should be serializable"),
                 ));
-                self.execute_status_phase_action(action, phase, player_index);
+                if phase != action.phase {
+                    panic!("Illegal action");
+                }
+                action.execute(self, player_index);
             }
             CulturalInfluenceResolution {
                 roll_boost_cost,
@@ -234,6 +239,19 @@ impl Game {
                 let action = action
                     .as_playing_action()
                     .expect("action should be a playing action");
+                if self.can_redo()
+                    && serde_json::from_str::<PlayingAction>(
+                        self.log[self.log_index]
+                            .as_playing_action()
+                            .expect("undone actions should be playing actions"),
+                    )
+                    .expect("action should be deserializable")
+                        == action
+                {
+                    self.log_index += 1;
+                    action.execute(self, player_index);
+                    return;
+                }
                 self.add_log_item(LogItem::PlayingAction(
                     serde_json::to_string(&action).expect("playing action should be serializable"),
                 ));
@@ -249,41 +267,6 @@ impl Game {
 
     pub fn can_redo(&self) -> bool {
         self.log_index < self.log.len()
-    }
-
-    fn execute_status_phase_action(
-        &mut self,
-        action: StatusPhaseAction,
-        state: StatusPhaseState,
-        player_index: usize,
-    ) {
-        action.execute(self, player_index);
-        if matches!(state, DetermineFirstPlayer) {
-            self.next_age();
-            return;
-        }
-        self.next_player();
-        if self.current_player_index == self.starting_player_index {
-            let next_phase = status_phase_actions::next_status_phase(state);
-            match next_phase {
-                ChangeGovernmentType => {
-                    // todo! draw cards (this is a phase of it's on in the rules,
-                    // before change government, but execute it right away without storing
-                    // the status phase
-                }
-                DetermineFirstPlayer => {
-                    self.current_player_index =
-                        status_phase_actions::player_that_chooses_next_first_player(
-                            &self.players,
-                            self.starting_player_index,
-                        );
-                }
-                _ => {}
-            }
-
-            self.state = StatusPhase(next_phase)
-        }
-        self.skip_dropped_players();
     }
 
     fn execute_cultural_influence_resolution_action(
@@ -308,13 +291,13 @@ impl Game {
         )
     }
 
-    fn next_player(&mut self) {
+    pub fn next_player(&mut self) {
         self.current_player_index += 1;
         self.current_player_index %= self.players.len();
         self.lock_undo();
     }
 
-    fn skip_dropped_players(&mut self) {
+    pub fn skip_dropped_players(&mut self) {
         while self.dropped_players.contains(&self.current_player_index) {
             self.next_player();
         }
@@ -349,7 +332,7 @@ impl Game {
         self.state = StatusPhase(CompleteObjectives);
     }
 
-    fn next_age(&mut self) {
+    pub fn next_age(&mut self) {
         self.state = Playing;
         self.age += 1;
         self.lock_undo();
@@ -379,7 +362,7 @@ impl Game {
 
     pub fn drop_player(&mut self, player_index: usize) {
         self.dropped_players.push(player_index);
-        self.add_message(&format!("Player {} had left the game", player_index + 1));
+        self.add_message(&format!("Player{} had left the game", player_index + 1));
         self.skip_dropped_players();
     }
 
@@ -494,7 +477,7 @@ impl Game {
         player.game_event_tokens += 1;
     }
 
-    fn trigger_game_event(&mut self, player_index: usize) {
+    fn trigger_game_event(&mut self, _player_index: usize) {
         self.lock_undo();
         //todo!
     }
@@ -609,6 +592,11 @@ impl Game {
         self.players[influenced_player_index].available_buildings += building;
         self.players[influencer_index].available_buildings -= building;
     }
+
+    pub fn draw_new_cards(&mut self) {
+        //every player draws 1 action card and 1 objective card
+        todo!()
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -643,15 +631,6 @@ pub enum GameState {
         city_piece: Building,
     },
     Finished,
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub enum StatusPhaseState {
-    CompleteObjectives,
-    FreeAdvance,
-    RaseSize1City,
-    ChangeGovernmentType,
-    DetermineFirstPlayer,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -708,7 +687,8 @@ impl LogItem {
 
 #[cfg(test)]
 pub mod tests {
-    use crate::city::{Building::*, City, MoodState::*};
+    use crate::city::{City, MoodState::*};
+    use crate::city_pieces::Building::*;
     use crate::content::civilizations;
     use crate::hexagon::Position;
     use crate::player::Player;

@@ -6,11 +6,10 @@ use std::{
 };
 
 use crate::{
-    army::Unit,
-    city::{
+    city::{City, CityData},
+    city_pieces::{
         AvailableBuildings,
         Building::{self, *},
-        City, CityData,
     },
     civilization::Civilization,
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
@@ -19,6 +18,7 @@ use crate::{
     leader::Leader,
     player_events::PlayerEvents,
     resource_pile::ResourcePile,
+    unit::Unit,
     wonder::Wonder,
 };
 pub const CONSTRUCT_COST: ResourcePile = ResourcePile {
