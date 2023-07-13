@@ -8,7 +8,10 @@ use crate::{
     player::{Player, PlayerData},
     resource_pile::ResourcePile,
     special_advance::SpecialAdvance,
-    status_phase::{StatusPhaseAction, StatusPhaseState::{self, *}},
+    status_phase::{
+        StatusPhaseAction,
+        StatusPhaseState::{self, *},
+    },
     wonder::Wonder,
 };
 

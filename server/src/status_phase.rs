@@ -4,7 +4,8 @@ use StatusPhaseState::*;
 use crate::{
     game::{Game, GameState::*},
     hexagon::Position,
-    player::Player, resource_pile::ResourcePile,
+    player::Player,
+    resource_pile::ResourcePile,
 };
 
 #[derive(Serialize, Deserialize)]
