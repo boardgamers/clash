@@ -1,12 +1,13 @@
 use std::{
     cmp,
     fmt::Display,
+    iter::Sum,
     ops::{Add, AddAssign, Mul, SubAssign},
 };
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[derive(Default, Clone, Serialize, Deserialize, PartialEq, Eq, Debug, Hash)]
 pub struct ResourcePile {
     pub food: u32,
     pub wood: u32,
@@ -246,6 +247,16 @@ impl Mul<u32> for ResourcePile {
             self.mood_tokens * rhs,
             self.culture_tokens * rhs,
         )
+    }
+}
+
+impl Sum for ResourcePile {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        let mut sum = Self::empty();
+        for addend in iter {
+            sum += addend;
+        }
+        sum
     }
 }
 

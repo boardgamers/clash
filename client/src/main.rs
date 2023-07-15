@@ -8,8 +8,8 @@ use server::city::City;
 use server::content::advances::get_technologies;
 use server::game::Action;
 use server::game::Game;
-use server::hexagon::Position;
 use server::playing_actions::PlayingAction;
+use server::position::Position;
 use server::resource_pile::ResourcePile;
 
 use crate::map::{building_names, pixel_to_coordinate};

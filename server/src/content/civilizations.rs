@@ -1,4 +1,3 @@
-use super::custom_actions::CustomActionType::*;
 use crate::{civilization::Civilization, leader::Leader};
 
 pub fn get_civilizations() -> Vec<Civilization> {
