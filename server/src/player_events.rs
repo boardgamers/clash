@@ -1,5 +1,5 @@
 use crate::{
-    city::City, city_pieces::Building, events::EventMut, hexagon::Position, player::Player,
+    city::City, city_pieces::Building, events::EventMut, player::Player, position::Position,
     resource_pile::ResourcePile, wonder::Wonder,
 };
 

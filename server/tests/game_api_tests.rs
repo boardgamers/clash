@@ -4,8 +4,9 @@ use server::{
     content::custom_actions::CustomAction::*,
     game::{Action, Game, GameState::*},
     game_api,
-    hexagon::Position,
+    map::Terrain::*,
     playing_actions::PlayingAction::*,
+    position::Position,
     resource_pile::ResourcePile,
 };
 
@@ -106,7 +107,7 @@ fn basic_actions() {
         wonder: String::from("test"),
         payment: ResourcePile::new(1, 3, 3, 0, 2, 0, 4),
     }));
-    let game = game_api::execute_action(game, construct_wonder_action, 0);
+    let mut game = game_api::execute_action(game, construct_wonder_action, 0);
     let player = &game.players[0];
 
     assert_eq!(9.0, player.victory_points());
@@ -122,7 +123,29 @@ fn basic_actions() {
             .wonders
             .len()
     );
+    assert_eq!(
+        4,
+        player
+            .get_city(&city_position)
+            .expect("player should have a city at this position")
+            .mood_modified_size()
+    );
     assert_eq!(1, game.actions_left);
+
+    let tile_position = Position::new(1, 0);
+    game.map.tiles.insert(tile_position.clone(), Mountain);
+    let collect_action = Action::PlayingAction(Collect {
+        city_position: city_position.clone(),
+        collections: vec![(tile_position, ResourcePile::ore(1))],
+    });
+    let game = game_api::execute_action(game, collect_action, 0);
+    let player = &game.players[0];
+    assert_eq!(&ResourcePile::ore(1), player.resources());
+    assert!(player
+        .get_city(&city_position)
+        .expect("player should have a city at this position")
+        .is_activated());
+    assert_eq!(0, game.actions_left);
 }
 
 #[test]

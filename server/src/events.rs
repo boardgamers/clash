@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 type Listener<T> = (Box<dyn Fn(&T)>, i32, usize);
 
 pub struct Event<T> {

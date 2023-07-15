@@ -3,8 +3,8 @@ use StatusPhaseState::*;
 
 use crate::{
     game::{Game, GameState::*},
-    hexagon::Position,
     player::Player,
+    position::Position,
     resource_pile::ResourcePile,
 };
 
