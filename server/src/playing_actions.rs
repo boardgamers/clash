@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -21,6 +23,10 @@ pub enum PlayingAction {
         city_piece: Building,
         payment: ResourcePile,
         temple_bonus: Option<ResourcePile>,
+    },
+    Collect {
+        city_position: Position,
+        collections: Vec<(Position, ResourcePile)>,
     },
     IncreaseHappiness {
         happiness_increases: Vec<(Position, u32)>,
@@ -71,12 +77,42 @@ impl PlayingAction {
                     if building_bonus != ResourcePile::mood_tokens(1)
                         && building_bonus != ResourcePile::culture_tokens(1)
                     {
-                        panic!("Invalid temple bonus");
+                        panic!("Illegal action");
                     }
                     player.gain_resources(building_bonus);
                 }
                 player.loose_resources(payment);
                 player.construct(&city_piece, &city_position);
+            }
+            Collect {
+                city_position,
+                collections,
+            } => {
+                let city = game.players[player_index]
+                    .get_city(&city_position)
+                    .expect("Illegal action");
+                if city.mood_modified_size() < collections.len()
+                    || city.player_index != player_index
+                {
+                    panic!("Illegal action");
+                }
+                let mut total_collect = ResourcePile::empty();
+                let mut used_tiles = HashSet::new();
+                for (tile, collect) in collections.into_iter() {
+                    if used_tiles.contains(&tile)
+                        || !city_position.neighbors().contains(&tile)
+                        || !game.players[player_index]
+                            .collect_options
+                            .get(game.map.tiles.get(&tile).expect("Illegal action"))
+                            .expect("Illegal action")
+                            .contains(&collect)
+                    {
+                        panic!("Illegal action");
+                    }
+                    used_tiles.insert(tile);
+                    total_collect += collect;
+                }
+                game.players[player_index].gain_resources(total_collect);
             }
             IncreaseHappiness {
                 happiness_increases,
@@ -215,6 +251,13 @@ impl PlayingAction {
                         temple_bonus.expect("build data should contain temple bonus"),
                     );
                 }
+            }
+            Collect {
+                city_position: _,
+                collections,
+            } => {
+                let total_collect = collections.into_iter().map(|(_, collect)| collect).sum();
+                game.players[player_index].loose_resources(total_collect);
             }
             IncreaseHappiness {
                 happiness_increases,
