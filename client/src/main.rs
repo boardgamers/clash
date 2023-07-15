@@ -8,7 +8,7 @@ use macroquad::ui::root_ui;
 use macroquad::ui::widgets::Group;
 use server::city::City;
 use server::content::advances::get_technologies;
-use server::game::Game;
+use server::game::{Action, Game};
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
@@ -130,13 +130,13 @@ fn show_city_menu(game: &mut Game, player_index: usize, city_position: &Position
             let city = player.get_city(city_position).expect("city not found");
             if city.can_construct(&building, player) && ui.button(None, name) {
                 let cost = player.construct_cost(&building, city);
-                game.execute_playing_action(
-                    PlayingAction::Construct {
+                game.execute_action(
+                    Action::PlayingAction(PlayingAction::Construct {
                         city_position: city_position.clone(),
                         city_piece: building,
                         payment: cost,
                         temple_bonus: None,
-                    },
+                    }),
                     player_index,
                 );
             };
@@ -188,11 +188,11 @@ fn buy_research_menu(game: &mut Game, rp: &mut ResearchPayment) -> bool {
         let label: &str = if rp.valid() { "OK" } else { "(OK)" };
         if ui.button(Vec2::new(0., 40.), label) {
             if rp.valid() {
-                game.execute_playing_action(
-                    PlayingAction::Advance {
+                game.execute_action(
+                    Action::PlayingAction(PlayingAction::Advance {
                         advance: rp.name.clone(),
                         payment: rp.payment.to_resource_pile(),
-                    },
+                    }),
                     rp.player_index,
                 );
                 result = true;
