@@ -1,8 +1,8 @@
+use server::resource_pile::{AdvancePaymentOptions, ResourcePile};
 use std::collections::HashMap;
 use std::fmt;
-use server::resource_pile::{AdvancePaymentOptions, ResourcePile};
 
-#[derive(PartialEq, Eq, Debug, Clone, Hash)]
+#[derive(PartialEq, Eq, Debug, Clone, Hash, Ord, PartialOrd)]
 pub enum ResourceType {
     Food,
     Wood,
@@ -16,13 +16,35 @@ pub enum ResourceType {
 impl fmt::Display for ResourceType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self)
-        // or, alternatively:
-        // fmt::Debug::fmt(self, f)
     }
 }
 
+pub struct ResearchPayment {
+    pub player_index: usize,
+    pub name: String,
+    pub payment: Payment,
+}
 
-#[derive(PartialEq, Eq, Debug)]
+impl ResearchPayment {
+    pub fn new(player_index: usize, name: String, payment: Payment) -> ResearchPayment {
+        ResearchPayment {
+            player_index,
+            name,
+            payment,
+        }
+    }
+
+    pub fn valid(&self) -> bool {
+        self.payment
+            .resources
+            .iter()
+            .map(|r| r.current)
+            .sum::<u32>()
+            == 2
+    }
+}
+
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct ResourcePayment {
     pub resource: ResourceType,
     pub current: u32,
@@ -42,18 +64,18 @@ impl Payment {
             (ResourceType::Gold, a.gold_left),
         ]);
 
-        let resources: Vec<ResourcePayment> = new_resource_map(a.default).into_iter().map(|e| {
-            ResourcePayment {
+        let mut resources: Vec<ResourcePayment> = new_resource_map(a.default)
+            .into_iter()
+            .map(|e| ResourcePayment {
                 resource: e.0.clone(),
                 current: e.1,
-                min: e.1,
-                max: e.1 + left.get(&e.0).unwrap_or(&(0 as u32)),
-            }
-        }).collect();
+                min: 0,
+                max: e.1 + left.get(&e.0).unwrap_or(&(0u32)),
+            })
+            .collect();
+        resources.sort_by_key(|r| r.resource.clone());
 
-        return Payment {
-            resources
-        };
+        return Payment { resources };
     }
 
     pub fn to_resource_pile(&self) -> ResourcePile {
@@ -70,7 +92,10 @@ impl Payment {
     }
 
     fn current(r: &Vec<ResourcePayment>, resource_type: ResourceType) -> u32 {
-        r.iter().find(|p| p.resource == resource_type).unwrap().current
+        r.iter()
+            .find(|p| p.resource == resource_type)
+            .unwrap()
+            .current
     }
 }
 
@@ -89,4 +114,3 @@ pub fn new_resource_map(p: ResourcePile) -> HashMap<ResourceType, u32> {
 fn add_resource(m: &mut HashMap<ResourceType, u32>, amount: u32, resource_type: ResourceType) {
     m.insert(resource_type, amount);
 }
-
