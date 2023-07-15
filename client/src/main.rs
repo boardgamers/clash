@@ -1,7 +1,5 @@
 extern crate core;
 
-use std::fmt::Debug;
-
 use macroquad::hash;
 use macroquad::prelude::*;
 use macroquad::ui::root_ui;
@@ -150,15 +148,15 @@ fn show_research_menu(game: &mut Game, player_index: usize, state: &mut State) {
             let name = a.name;
             if game.players[player_index].can_advance(&name) {
                 if ui.button(None, name.clone()) {
-                    state.active_dialog = ActiveDialog::ResearchPayment(ResearchPayment {
+                    state.active_dialog = ActiveDialog::ResearchPayment(ResearchPayment::new(
                         player_index,
-                        name: name.clone(),
-                        payment: Payment::new_advance_resource_payment(
+                        name.clone(),
+                        Payment::new_advance_resource_payment(
                             game.players[player_index]
                                 .resources()
                                 .get_advance_payment_options(2),
                         ),
-                    });
+                    ));
                 }
             } else if game.players[player_index].advances.contains(&name) {
                 ui.label(None, &name);
@@ -186,18 +184,16 @@ fn buy_research_menu(game: &mut Game, rp: &mut ResearchPayment) -> bool {
         }
 
         let label: &str = if rp.valid() { "OK" } else { "(OK)" };
-        if ui.button(Vec2::new(0., 40.), label) {
-            if rp.valid() {
-                game.execute_action(
-                    Action::PlayingAction(PlayingAction::Advance {
-                        advance: rp.name.clone(),
-                        payment: rp.payment.to_resource_pile(),
-                    }),
-                    rp.player_index,
-                );
-                result = true;
-            }
+        if ui.button(Vec2::new(0., 40.), label) && rp.valid() {
+            game.execute_action(
+                Action::PlayingAction(PlayingAction::Advance {
+                    advance: rp.name.clone(),
+                    payment: rp.payment.to_resource_pile(),
+                }),
+                rp.player_index,
+            );
+            result = true;
         };
     });
-    return result;
+    result
 }

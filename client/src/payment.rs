@@ -75,7 +75,7 @@ impl Payment {
             .collect();
         resources.sort_by_key(|r| r.resource.clone());
 
-        return Payment { resources };
+        Payment { resources }
     }
 
     pub fn to_resource_pile(&self) -> ResourcePile {
@@ -91,7 +91,7 @@ impl Payment {
         )
     }
 
-    fn current(r: &Vec<ResourcePayment>, resource_type: ResourceType) -> u32 {
+    fn current(r: &[ResourcePayment], resource_type: ResourceType) -> u32 {
         r.iter()
             .find(|p| p.resource == resource_type)
             .unwrap()
@@ -108,7 +108,7 @@ pub fn new_resource_map(p: ResourcePile) -> HashMap<ResourceType, u32> {
     add_resource(&mut m, p.gold as u32, ResourceType::Gold);
     add_resource(&mut m, p.mood_tokens, ResourceType::MoodTokens);
     add_resource(&mut m, p.culture_tokens, ResourceType::CultureTokens);
-    return m;
+    m
 }
 
 fn add_resource(m: &mut HashMap<ResourceType, u32>, amount: u32, resource_type: ResourceType) {
