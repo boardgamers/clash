@@ -15,6 +15,7 @@ use crate::{
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     game::Game,
     leader::Leader,
+    map::Terrain::{self, *},
     player_events::PlayerEvents,
     position::Position,
     resource_pile::ResourcePile,
@@ -63,6 +64,7 @@ pub struct Player {
     pub custom_actions: HashSet<CustomActionType>,
     pub wonder_cards: Vec<Wonder>,
     pub available_buildings: AvailableBuildings,
+    pub collect_options: HashMap<Terrain, HashSet<ResourcePile>>,
 }
 
 impl Player {
@@ -110,6 +112,11 @@ impl Player {
                 })
                 .collect(),
             available_buildings: data.available_buildings,
+            collect_options: data
+                .collect_options
+                .into_iter()
+                .map(|(terrain, options)| (terrain, options.into_iter().collect()))
+                .collect(),
         };
         let player_index = player.index;
         game.players.push(player);
@@ -185,6 +192,11 @@ impl Player {
                 .map(|wonder| wonder.name)
                 .collect(),
             available_buildings: self.available_buildings,
+            collect_options: self
+                .collect_options
+                .into_iter()
+                .map(|(terrain, options)| (terrain, options.into_iter().collect()))
+                .collect(),
         }
     }
 
@@ -214,6 +226,11 @@ impl Player {
             custom_actions: HashSet::new(),
             wonder_cards: Vec::new(),
             available_buildings: AvailableBuildings::new(5, 5, 5, 5, 5, 5, 5),
+            collect_options: HashMap::from([
+                (Mountain, HashSet::from([ResourcePile::ore(1)])),
+                (Fertile, HashSet::from([ResourcePile::food(1)])),
+                (Forest, HashSet::from([ResourcePile::wood(1)])),
+            ]),
         }
     }
 
@@ -467,4 +484,5 @@ pub struct PlayerData {
     event_victory_points: f32,
     wonder_cards: Vec<String>,
     available_buildings: AvailableBuildings,
+    collect_options: Vec<(Terrain, Vec<ResourcePile>)>,
 }

@@ -1,6 +1,6 @@
 use hex2d::{Coordinate, Spacing};
 use macroquad::prelude::*;
-use server::{city::City, city_pieces::Building, hexagon::Position, player::Player};
+use server::{city::City, city_pieces::Building, player::Player, position::Position};
 use std::{collections::HashMap, f32::consts::PI};
 
 use crate::ui::{self, Point};

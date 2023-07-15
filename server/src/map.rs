@@ -5,11 +5,11 @@ use serde::{Deserialize, Serialize};
 use crate::position::Position;
 
 pub struct Map {
-    pub tiles: HashMap<Position, Landmark>,
+    pub tiles: HashMap<Position, Terrain>,
 }
 
 impl Map {
-    pub fn new(tiles: HashMap<Position, Landmark>) -> Self {
+    pub fn new(tiles: HashMap<Position, Terrain>) -> Self {
         Self { tiles }
     }
 
@@ -28,11 +28,11 @@ impl Map {
 
 #[derive(Serialize, Deserialize)]
 pub struct MapData {
-    pub tiles: Vec<(Position, Landmark)>,
+    pub tiles: Vec<(Position, Terrain)>,
 }
 
-#[derive(Serialize, Deserialize, Hash)]
-pub enum Landmark {
+#[derive(Serialize, Deserialize, Hash, PartialEq, Eq, Clone)]
+pub enum Terrain {
     Barren,
     Mountain,
     Fertile,

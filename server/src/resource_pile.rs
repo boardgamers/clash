@@ -6,7 +6,7 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[derive(Default, Clone, Serialize, Deserialize, PartialEq, Eq, Debug, Hash)]
 pub struct ResourcePile {
     pub food: u32,
     pub wood: u32,
