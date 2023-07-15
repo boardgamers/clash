@@ -3,7 +3,7 @@ use std::fmt::Display;
 use hex2d::Coordinate;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug, Hash)]
 pub struct Position {
     pub q: i32,
     pub r: i32,
@@ -48,18 +48,9 @@ impl Display for Position {
     }
 }
 
-pub enum Landmark {
-    Barren,
-    Mountain,
-    Fertile,
-    Forest,
-    Unusable,
-    Water,
-}
-
 #[cfg(test)]
 mod tests {
-    use crate::hexagon::Position;
+    use crate::position::Position;
 
     #[test]
     fn convert_position() {

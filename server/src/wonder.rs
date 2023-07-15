@@ -1,12 +1,11 @@
 use crate::{
     ability_initializer::{self, AbilityInitializer, AbilityInitializerSetup},
     game::Game,
-    hexagon::Position,
+    position::Position,
     resource_pile::ResourcePile,
 };
 
-//todo! provide tile as information
-type PlacementChecker = Box<dyn Fn(&Position) -> bool>;
+type PlacementChecker = Box<dyn Fn(&Position, &Game) -> bool>;
 
 pub struct Wonder {
     pub name: String,

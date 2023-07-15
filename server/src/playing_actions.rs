@@ -4,7 +4,7 @@ use crate::{
     city_pieces::Building::{self, *},
     content::custom_actions::CustomAction,
     game::{Game, GameState::*},
-    hexagon::Position,
+    position::Position,
     resource_pile::ResourcePile,
 };
 

@@ -1,11 +1,14 @@
+use std::collections::HashMap;
+
 use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     city_pieces::Building,
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
-    hexagon::Position,
+    map::{Map, MapData},
     player::{Player, PlayerData},
+    position::Position,
     resource_pile::ResourcePile,
     special_advance::SpecialAdvance,
     status_phase::{
@@ -24,6 +27,7 @@ const AGES: u32 = 6;
 pub struct Game {
     pub state: GameState,
     pub players: Vec<Player>,
+    pub map: Map,
     pub starting_player_index: usize,
     pub current_player_index: usize,
     pub log: Vec<LogItem>,
@@ -72,9 +76,13 @@ impl Game {
         wonders.shuffle(&mut rng);
         let wonder_amount = wonders.len();
 
+        let map = HashMap::new();
+        //todo! generate map
+
         Self {
             state: Playing,
             players,
+            map: Map::new(map),
             starting_player_index: starting_player,
             current_player_index: starting_player,
             log: Vec::new(),
@@ -97,6 +105,7 @@ impl Game {
         let mut game = Self {
             state: data.state,
             players: Vec::new(),
+            map: Map::from_data(data.map),
             starting_player_index: data.current_player_index,
             current_player_index: data.current_player_index,
             actions_left: data.actions_left,
@@ -136,6 +145,7 @@ impl Game {
                 .into_iter()
                 .map(|player| player.data())
                 .collect(),
+            map: self.map.data(),
             starting_player_index: self.starting_player_index,
             current_player_index: self.current_player_index,
             log: self.log,
@@ -603,6 +613,7 @@ impl Game {
 pub struct GameData {
     state: GameState,
     players: Vec<PlayerData>,
+    map: MapData,
     starting_player_index: usize,
     current_player_index: usize,
     log: Vec<LogItem>,
@@ -687,21 +698,26 @@ impl LogItem {
 
 #[cfg(test)]
 pub mod tests {
-    use crate::city::{City, MoodState::*};
-    use crate::city_pieces::Building::*;
-    use crate::content::civilizations;
-    use crate::hexagon::Position;
-    use crate::player::Player;
-    use crate::resource_pile::ResourcePile;
-    use crate::wonder::Wonder;
+    use std::collections::HashMap;
 
-    use super::Game;
-    use super::GameState::Playing;
+    use crate::{
+        city::{City, MoodState::*},
+        city_pieces::Building::*,
+        content::civilizations,
+        map::Map,
+        player::Player,
+        position::Position,
+        resource_pile::ResourcePile,
+        wonder::Wonder,
+    };
+
+    use super::{Game, GameState::Playing};
 
     pub fn test_game() -> Game {
         Game {
             state: Playing,
             players: Vec::new(),
+            map: Map::new(HashMap::new()),
             starting_player_index: 0,
             current_player_index: 0,
             log: Vec::new(),

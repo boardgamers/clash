@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::hexagon::Position;
+use crate::position::Position;
 
 #[derive(Serialize, Deserialize)]
 pub struct Unit {

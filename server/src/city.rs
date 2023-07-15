@@ -4,8 +4,8 @@ use crate::city_pieces::Building::*;
 use crate::{
     city_pieces::{Building, CityPieces, CityPiecesData},
     game::Game,
-    hexagon::Position,
     player::Player,
+    position::Position,
     wonder::Wonder,
 };
 use MoodState::*;
@@ -103,7 +103,7 @@ impl City {
         player.resources().can_afford(&cost)
     }
 
-    pub fn can_build_wonder(&self, wonder: &Wonder, player: &Player) -> bool {
+    pub fn can_build_wonder(&self, wonder: &Wonder, player: &Player, game: &Game) -> bool {
         if self.player_index != player.index {
             return false;
         }
@@ -126,7 +126,7 @@ impl City {
             }
         }
         if let Some(placement_requirement) = &wonder.placement_requirement {
-            return placement_requirement(&self.position);
+            return placement_requirement(&self.position, game);
         }
         true
     }

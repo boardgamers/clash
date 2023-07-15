@@ -4,8 +4,8 @@ use server::{
     content::custom_actions::CustomAction::*,
     game::{Action, Game, GameState::*},
     game_api,
-    hexagon::Position,
     playing_actions::PlayingAction::*,
+    position::Position,
     resource_pile::ResourcePile,
 };
 

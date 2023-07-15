@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    game::Game, hexagon::Position, playing_actions::ActionType, resource_pile::ResourcePile,
+    game::Game, playing_actions::ActionType, position::Position, resource_pile::ResourcePile,
 };
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
@@ -37,7 +37,7 @@ impl CustomAction {
                 let city = game.players[player_index]
                     .get_city(&city_position)
                     .expect("player should have city");
-                if !city.can_build_wonder(&wonder, &game.players[player_index])
+                if !city.can_build_wonder(&wonder, &game.players[player_index], game)
                     || !payment.can_afford(&wonder.cost)
                 {
                     panic!("Illegal action");
