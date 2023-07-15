@@ -113,6 +113,10 @@ impl PlayingAction {
                     total_collect += collect;
                 }
                 game.players[player_index].gain_resources(total_collect);
+                game.players[player_index]
+                    .get_city_mut(&city_position)
+                    .expect("Illegal action")
+                    .activate();
             }
             IncreaseHappiness {
                 happiness_increases,
