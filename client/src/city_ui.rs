@@ -47,8 +47,8 @@ impl ConstructionPayment {
 
         ConstructionPayment {
             player_index,
-            city_position: city_position.clone(),
-            city_piece: city_piece.clone(),
+            city_position,
+            city_piece,
             payment,
             payment_options,
         }
