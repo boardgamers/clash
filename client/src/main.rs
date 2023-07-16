@@ -1,21 +1,19 @@
 extern crate core;
 
-use macroquad::hash;
 use macroquad::prelude::*;
-use macroquad::ui::root_ui;
 use server::city::City;
-use server::game::{Action, Game};
-use server::playing_actions::PlayingAction;
+use server::game::Game;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
-use crate::map::{building_names, pixel_to_coordinate};
+use crate::map::pixel_to_coordinate;
 use advance_ui::AdvancePayment;
 
 mod map;
 mod payment;
 mod ui;
 mod advance_ui;
+mod city_ui;
 
 pub enum ActiveDialog {
     None,
@@ -54,7 +52,7 @@ async fn main() {
         show_resources(&game, 0);
 
         if let Some((player_index, city_position)) = &state.focused_city {
-            show_city_menu(&mut game, *player_index, city_position);
+            city_ui::show_city_menu(&mut game, *player_index, city_position);
         }
 
         match &mut state.active_dialog {
@@ -90,7 +88,7 @@ async fn main() {
 fn draw_map(game: &Game) {
     for p in game.players.iter() {
         for city in p.cities.iter() {
-            map::draw_city(p, city);
+            city_ui::draw_city(p, city);
         }
     }
 }
@@ -118,25 +116,4 @@ fn show_resources(game: &Game, player_index: usize) {
     res(format!("Gold {}", r.gold));
     res(format!("Mood {}", r.mood_tokens));
     res(format!("Culture {}", r.culture_tokens));
-}
-
-fn show_city_menu(game: &mut Game, player_index: usize, city_position: &Position) {
-    root_ui().window(hash!(), vec2(600., 20.), vec2(100., 200.), |ui| {
-        for (building, name) in building_names() {
-            let player = &game.players[player_index];
-            let city = player.get_city(city_position).expect("city not found");
-            if city.can_construct(&building, player) && ui.button(None, name) {
-                let cost = player.construct_cost(&building, city);
-                game.execute_action(
-                    Action::PlayingAction(PlayingAction::Construct {
-                        city_position: city_position.clone(),
-                        city_piece: building,
-                        payment: cost,
-                        temple_bonus: None,
-                    }),
-                    player_index,
-                );
-            };
-        }
-    });
 }
