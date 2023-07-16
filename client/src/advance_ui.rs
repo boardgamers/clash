@@ -1,14 +1,15 @@
 use std::collections::HashMap;
-use server::game::{Action, Game};
-use macroquad::ui::root_ui;
+
 use macroquad::hash;
-use macroquad::math::{bool, vec2, Vec2};
+use macroquad::math::{bool, vec2};
+use macroquad::ui::root_ui;
 use server::content::advances::get_technologies;
-use macroquad::ui::widgets::Group;
+use server::game::{Action, Game};
 use server::playing_actions::PlayingAction;
 use server::resource_pile::AdvancePaymentOptions;
+
 use crate::{ActiveDialog, State};
-use crate::payment::{new_resource_map, Payment, ResourcePayment, ResourceType};
+use crate::payment::{HasPayment, new_resource_map, Payment, payment_dialog, ResourcePayment, ResourceType};
 
 pub struct AdvancePayment {
     pub player_index: usize,
@@ -23,7 +24,7 @@ impl AdvancePayment {
         AdvancePayment {
             player_index,
             name: name.to_string(),
-            payment: AdvancePayment::new_advance_resource_payment(
+            payment: AdvancePayment::new_payment(
                 game.players[player_index]
                     .resources()
                     .get_advance_payment_options(cost),
@@ -32,7 +33,7 @@ impl AdvancePayment {
         }
     }
 
-    pub fn new_advance_resource_payment(a: AdvancePaymentOptions) -> Payment {
+    pub fn new_payment(a: AdvancePaymentOptions) -> Payment {
         let left = HashMap::from([
             (ResourceType::Food, a.food_left),
             (ResourceType::Gold, a.gold_left),
@@ -62,6 +63,11 @@ impl AdvancePayment {
     }
 }
 
+impl HasPayment for AdvancePayment {
+    fn payment(&self) -> &Payment {
+        &self.payment
+    }
+}
 
 pub fn show_advance_menu(game: &mut Game, player_index: usize, state: &mut State) {
     root_ui().window(hash!(), vec2(20., 300.), vec2(400., 200.), |ui| {
@@ -78,36 +84,27 @@ pub fn show_advance_menu(game: &mut Game, player_index: usize, state: &mut State
     });
 }
 
-pub fn buy_advance_menu(game: &mut Game, rp: &mut AdvancePayment) -> bool {
-    let mut result = false;
-    root_ui().window(hash!(), vec2(20., 510.), vec2(400., 200.), |ui| {
-        for (i, p) in rp.payment.resources.iter_mut().enumerate() {
-            if p.max > 0 {
-                Group::new(hash!("res", i), Vec2::new(70., 200.)).ui(ui, |ui| {
-                    let s = format!("{} {}", &p.resource.to_string(), p.current);
-                    ui.label(Vec2::new(0., 0.), &s);
-                    if p.current > p.min && ui.button(Vec2::new(0., 20.), "-") {
-                        p.current -= 1;
-                    }
-                    if p.current < p.max && ui.button(Vec2::new(20., 20.), "+") {
-                        p.current += 1;
-                    };
-                });
-            }
-        }
+pub fn pay_advance_dialog(game: &mut Game, ap: &mut AdvancePayment) -> bool {
+    payment_dialog(ap,
+                   |ap| ap.valid(),
+                   |ap| game.execute_action(
+                       Action::PlayingAction(PlayingAction::Advance {
+                           advance: ap.name.clone(),
+                           payment: ap.payment.to_resource_pile(),
+                       }),
+                       ap.player_index,
+                   ),
+                   |ap, r| {
+                       add(ap, r, 1);
+                   },
+                   |ap, r| {
+                       add(ap, r, -1);
+                   }
+    )
+}
 
-        let label = if rp.valid() { "OK" } else { "(OK)" };
-        if ui.button(Vec2::new(0., 40.), label) && rp.valid() {
-            game.execute_action(
-                Action::PlayingAction(PlayingAction::Advance {
-                    advance: rp.name.clone(),
-                    payment: rp.payment.to_resource_pile(),
-                }),
-                rp.player_index,
-            );
-            result = true;
-        };
-    });
-    result
+fn add(ap: &mut AdvancePayment, r: ResourceType, i: i32) {
+    let x = ap.payment.resources.iter_mut().find(|p| p.resource == r).unwrap();
+    x.current = (x.current as i32 + i) as u32
 }
 

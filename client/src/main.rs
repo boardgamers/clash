@@ -6,8 +6,9 @@ use server::game::Game;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
-use crate::map::pixel_to_coordinate;
 use advance_ui::AdvancePayment;
+use city_ui::ConstructionPayment;
+use map::pixel_to_coordinate;
 
 mod map;
 mod payment;
@@ -18,6 +19,7 @@ mod city_ui;
 pub enum ActiveDialog {
     None,
     AdvancePayment(AdvancePayment),
+    ConstructionPayment(ConstructionPayment),
 }
 
 pub struct State {
@@ -28,16 +30,17 @@ pub struct State {
 #[macroquad::main("Clash")]
 async fn main() {
     let mut game = Game::new(1, "a".repeat(32));
-    let city = City::new(0, Position::from_offset("A1"));
-    let player = &mut game.players[0];
+    let player_index = 0;
+    let city = City::new(player_index, Position::from_offset("A1"));
+    let player = &mut game.players[player_index];
     player.gain_resources(ResourcePile::new(50, 50, 50, 50, 50, 50, 50));
     player.cities.push(city);
     player
         .cities
-        .push(City::new(0, Position::from_offset("C2")));
+        .push(City::new(player_index, Position::from_offset("C2")));
     player
         .cities
-        .push(City::new(0, Position::from_offset("C1")));
+        .push(City::new(player_index, Position::from_offset("C1")));
 
     let mut state = State {
         active_dialog: ActiveDialog::None,
@@ -48,16 +51,24 @@ async fn main() {
         clear_background(GREEN);
 
         draw_map(&game);
-        advance_ui::show_advance_menu(&mut game, 0, &mut state);
-        show_resources(&game, 0);
+        advance_ui::show_advance_menu(&mut game, player_index, &mut state);
+        show_resources(&game, player_index);
 
         if let Some((player_index, city_position)) = &state.focused_city {
-            city_ui::show_city_menu(&mut game, *player_index, city_position);
+            let dialog = city_ui::show_city_menu(&mut game, *player_index, city_position);
+            if let Some(dialog) = dialog {
+                state.active_dialog = dialog;
+            }
         }
 
         match &mut state.active_dialog {
             ActiveDialog::AdvancePayment(p) => {
-                if advance_ui::buy_advance_menu(&mut game, p) {
+                if advance_ui::pay_advance_dialog(&mut game, p) {
+                    state.active_dialog = ActiveDialog::None;
+                }
+            }
+            ActiveDialog::ConstructionPayment(p) => {
+                if city_ui::pay_construction_dialog(&mut game, p) {
                     state.active_dialog = ActiveDialog::None;
                 }
             }

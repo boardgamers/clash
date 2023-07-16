@@ -1,37 +1,102 @@
-use server::game::{Action, Game};
-use server::position::Position;
-use macroquad::ui::root_ui;
+use std::collections::HashMap;
+use std::f32::consts::PI;
+
 use macroquad::hash;
 use macroquad::math::{f32, i32, vec2};
-use server::playing_actions::PlayingAction;
-use server::player::Player;
-use server::city::City;
 use macroquad::prelude::{draw_circle, draw_text};
-use std::collections::HashMap;
+use macroquad::ui::root_ui;
+use server::city::City;
 use server::city_pieces::Building;
-use std::f32::consts::PI;
-use crate::{map, ui};
+use server::game::Game;
+use server::player::Player;
+use server::position::Position;
+use server::resource_pile::PaymentOptions;
+
+use crate::{ActiveDialog, map, ui};
+use crate::payment::{new_resource_map, Payment, ResourcePayment, ResourceType};
 use crate::ui::Point;
 
-pub fn show_city_menu(game: &mut Game, player_index: usize, city_position: &Position) {
+pub struct ConstructionPayment {
+    pub player_index: usize,
+    city_position: Position,
+    city_piece: Building,
+    payment: Payment,
+}
+
+impl ConstructionPayment {
+    fn new(game: &mut Game, player_index: usize, city_position: Position, city_piece: Building) -> ConstructionPayment {
+        let cost = game.players[player_index].construct_cost(&city_piece, game.players[player_index].get_city(&city_position).unwrap());
+        let payment_options = game.players[player_index].resources().get_payment_options(&cost);
+
+        let payment = ConstructionPayment::new_payment(payment_options);
+
+        ConstructionPayment {
+            player_index,
+            city_position: city_position.clone(),
+            city_piece: city_piece.clone(),
+            payment,
+        }
+    }
+
+    pub fn new_payment(a: PaymentOptions) -> Payment {
+        let left = HashMap::from([
+            (ResourceType::Discount, a.jokers_left),
+            (ResourceType::Gold, a.gold_left),
+        ]);
+
+        let mut resources: Vec<ResourcePayment> = new_resource_map(a.default)
+            .into_iter()
+            .map(|e| match e.0 {
+                ResourceType::Discount | ResourceType::Gold => ResourcePayment {
+                    resource: e.0.clone(),
+                    current: e.1,
+                    min: e.1,
+                    max: e.1,
+                },
+                _ => ResourcePayment {
+                    resource: e.0.clone(),
+                    current: e.1,
+                    min: e.1 - a.jokers_left - a.gold_left,
+                    max: e.1,
+                },
+            })
+            .collect();
+
+        resources.sort_by_key(|r| r.resource.clone());
+
+        Payment {
+            resources
+        }
+    }
+}
+
+pub fn show_city_menu(game: &mut Game, player_index: usize, city_position: &Position) -> Option<ActiveDialog> {
+    let mut result = None;
     root_ui().window(hash!(), vec2(600., 20.), vec2(100., 200.), |ui| {
         for (building, name) in building_names() {
             let player = &game.players[player_index];
             let city = player.get_city(city_position).expect("city not found");
             if city.can_construct(&building, player) && ui.button(None, name) {
-                let cost = player.construct_cost(&building, city);
-                game.execute_action(
-                    Action::PlayingAction(PlayingAction::Construct {
-                        city_position: city_position.clone(),
-                        city_piece: building,
-                        payment: cost,
-                        temple_bonus: None,
-                    }),
-                    player_index,
-                );
+                result = Some(ActiveDialog::ConstructionPayment(ConstructionPayment::new(game, player_index, city_position.clone(), building)));
             };
         }
     });
+    result
+}
+
+pub fn pay_construction_dialog(game: &mut Game, payment: &mut ConstructionPayment) -> bool {
+    // payment_dialog()
+    //
+    // game.execute_action(
+    //     Action::PlayingAction(PlayingAction::Construct {
+    //         city_position: city_position.clone(),
+    //         city_piece: building,
+    //         payment: cost,
+    //         temple_bonus: None,
+    //     }),
+    //     player_index,
+    // );
+    false
 }
 
 pub fn draw_city(owner: &Player, city: &City) {
