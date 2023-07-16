@@ -1,46 +1,46 @@
 extern crate core;
 
-use macroquad::hash;
 use macroquad::prelude::*;
-use macroquad::ui::root_ui;
-use macroquad::ui::widgets::Group;
 use server::city::City;
-use server::content::advances::get_technologies;
-use server::game::{Action, Game};
-use server::playing_actions::PlayingAction;
+use server::game::Game;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
-use crate::map::{building_names, pixel_to_coordinate};
-use crate::payment::{Payment, ResearchPayment};
+use advance_ui::AdvancePayment;
+use city_ui::ConstructionPayment;
+use map::pixel_to_coordinate;
 
+mod advance_ui;
+mod city_ui;
 mod map;
 mod payment;
 mod ui;
 
-enum ActiveDialog {
+pub enum ActiveDialog {
     None,
-    ResearchPayment(ResearchPayment),
+    AdvancePayment(AdvancePayment),
+    ConstructionPayment(ConstructionPayment),
 }
 
-struct State {
-    focused_city: Option<(usize, Position)>,
-    active_dialog: ActiveDialog,
+pub struct State {
+    pub focused_city: Option<(usize, Position)>,
+    pub active_dialog: ActiveDialog,
 }
 
 #[macroquad::main("Clash")]
 async fn main() {
     let mut game = Game::new(1, "a".repeat(32));
-    let city = City::new(0, Position::from_offset("A1"));
-    let player = &mut game.players[0];
+    let player_index = 0;
+    let city = City::new(player_index, Position::from_offset("A1"));
+    let player = &mut game.players[player_index];
     player.gain_resources(ResourcePile::new(50, 50, 50, 50, 50, 50, 50));
     player.cities.push(city);
     player
         .cities
-        .push(City::new(0, Position::from_offset("C2")));
+        .push(City::new(player_index, Position::from_offset("C2")));
     player
         .cities
-        .push(City::new(0, Position::from_offset("C1")));
+        .push(City::new(player_index, Position::from_offset("C1")));
 
     let mut state = State {
         active_dialog: ActiveDialog::None,
@@ -51,16 +51,24 @@ async fn main() {
         clear_background(GREEN);
 
         draw_map(&game);
-        show_research_menu(&mut game, 0, &mut state);
-        show_resources(&game, 0);
+        advance_ui::show_advance_menu(&mut game, player_index, &mut state);
+        show_resources(&game, player_index);
 
         if let Some((player_index, city_position)) = &state.focused_city {
-            show_city_menu(&mut game, *player_index, city_position);
+            let dialog = city_ui::show_city_menu(&mut game, *player_index, city_position);
+            if let Some(dialog) = dialog {
+                state.active_dialog = dialog;
+            }
         }
 
         match &mut state.active_dialog {
-            ActiveDialog::ResearchPayment(p) => {
-                if buy_research_menu(&mut game, p) {
+            ActiveDialog::AdvancePayment(p) => {
+                if advance_ui::pay_advance_dialog(&mut game, p) {
+                    state.active_dialog = ActiveDialog::None;
+                }
+            }
+            ActiveDialog::ConstructionPayment(p) => {
+                if city_ui::pay_construction_dialog(&mut game, p) {
                     state.active_dialog = ActiveDialog::None;
                 }
             }
@@ -91,7 +99,7 @@ async fn main() {
 fn draw_map(game: &Game) {
     for p in game.players.iter() {
         for city in p.cities.iter() {
-            map::draw_city(p, city);
+            city_ui::draw_city(p, city);
         }
     }
 }
@@ -119,81 +127,4 @@ fn show_resources(game: &Game, player_index: usize) {
     res(format!("Gold {}", r.gold));
     res(format!("Mood {}", r.mood_tokens));
     res(format!("Culture {}", r.culture_tokens));
-}
-
-fn show_city_menu(game: &mut Game, player_index: usize, city_position: &Position) {
-    root_ui().window(hash!(), vec2(600., 20.), vec2(100., 200.), |ui| {
-        for (building, name) in building_names() {
-            let player = &game.players[player_index];
-            let city = player.get_city(city_position).expect("city not found");
-            if city.can_construct(&building, player) && ui.button(None, name) {
-                let cost = player.construct_cost(&building, city);
-                game.execute_action(
-                    Action::PlayingAction(PlayingAction::Construct {
-                        city_position: city_position.clone(),
-                        city_piece: building,
-                        payment: cost,
-                        temple_bonus: None,
-                    }),
-                    player_index,
-                );
-            };
-        }
-    });
-}
-
-fn show_research_menu(game: &mut Game, player_index: usize, state: &mut State) {
-    root_ui().window(hash!(), vec2(20., 300.), vec2(400., 200.), |ui| {
-        for a in get_technologies().into_iter() {
-            let name = a.name;
-            if game.players[player_index].can_advance(&name) {
-                if ui.button(None, name.clone()) {
-                    state.active_dialog = ActiveDialog::ResearchPayment(ResearchPayment::new(
-                        player_index,
-                        name.clone(),
-                        Payment::new_advance_resource_payment(
-                            game.players[player_index]
-                                .resources()
-                                .get_advance_payment_options(2),
-                        ),
-                    ));
-                }
-            } else if game.players[player_index].advances.contains(&name) {
-                ui.label(None, &name);
-            }
-        }
-    });
-}
-
-fn buy_research_menu(game: &mut Game, rp: &mut ResearchPayment) -> bool {
-    let mut result = false;
-    root_ui().window(hash!(), vec2(20., 510.), vec2(400., 200.), |ui| {
-        for (i, p) in rp.payment.resources.iter_mut().enumerate() {
-            if p.max > 0 {
-                Group::new(hash!("res", i), Vec2::new(70., 200.)).ui(ui, |ui| {
-                    let s = format!("{} {}", &p.resource.to_string(), p.current);
-                    ui.label(Vec2::new(0., 0.), &s);
-                    if p.current > p.min && ui.button(Vec2::new(0., 20.), "-") {
-                        p.current -= 1;
-                    }
-                    if p.current < p.max && ui.button(Vec2::new(20., 20.), "+") {
-                        p.current += 1;
-                    };
-                });
-            }
-        }
-
-        let label: &str = if rp.valid() { "OK" } else { "(OK)" };
-        if ui.button(Vec2::new(0., 40.), label) && rp.valid() {
-            game.execute_action(
-                Action::PlayingAction(PlayingAction::Advance {
-                    advance: rp.name.clone(),
-                    payment: rp.payment.to_resource_pile(),
-                }),
-                rp.player_index,
-            );
-            result = true;
-        };
-    });
-    result
 }

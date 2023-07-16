@@ -323,9 +323,9 @@ impl Display for ResourcePile {
 
 #[derive(PartialEq, Eq, Debug)]
 pub struct PaymentOptions {
-    default: ResourcePile,
-    gold_left: u32,
-    jokers_left: u32,
+    pub default: ResourcePile,
+    pub gold_left: u32,
+    pub jokers_left: u32,
 }
 
 impl PaymentOptions {
