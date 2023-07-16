@@ -1,3 +1,4 @@
+use std::cmp;
 use std::collections::HashMap;
 use std::f32::consts::PI;
 
@@ -7,44 +8,54 @@ use macroquad::prelude::{draw_circle, draw_text};
 use macroquad::ui::root_ui;
 use server::city::City;
 use server::city_pieces::Building;
-use server::game::Game;
+use server::game::{Action, Game};
 use server::player::Player;
+use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::PaymentOptions;
 
-use crate::{ActiveDialog, map, ui};
-use crate::payment::{new_resource_map, Payment, ResourcePayment, ResourceType};
+use crate::payment::{
+    new_resource_map, payment_dialog, HasPayment, Payment, ResourcePayment, ResourceType,
+};
 use crate::ui::Point;
+use crate::{map, ui, ActiveDialog};
 
 pub struct ConstructionPayment {
-    pub player_index: usize,
+    player_index: usize,
     city_position: Position,
     city_piece: Building,
     payment: Payment,
+    payment_options: PaymentOptions,
 }
 
 impl ConstructionPayment {
-    fn new(game: &mut Game, player_index: usize, city_position: Position, city_piece: Building) -> ConstructionPayment {
-        let cost = game.players[player_index].construct_cost(&city_piece, game.players[player_index].get_city(&city_position).unwrap());
-        let payment_options = game.players[player_index].resources().get_payment_options(&cost);
+    fn new(
+        game: &mut Game,
+        player_index: usize,
+        city_position: Position,
+        city_piece: Building,
+    ) -> ConstructionPayment {
+        let cost = game.players[player_index].construct_cost(
+            &city_piece,
+            game.players[player_index].get_city(&city_position).unwrap(),
+        );
+        let payment_options = game.players[player_index]
+            .resources()
+            .get_payment_options(&cost);
 
-        let payment = ConstructionPayment::new_payment(payment_options);
+        let payment = ConstructionPayment::new_payment(&payment_options);
 
         ConstructionPayment {
             player_index,
             city_position: city_position.clone(),
             city_piece: city_piece.clone(),
             payment,
+            payment_options,
         }
     }
 
-    pub fn new_payment(a: PaymentOptions) -> Payment {
-        let left = HashMap::from([
-            (ResourceType::Discount, a.jokers_left),
-            (ResourceType::Gold, a.gold_left),
-        ]);
-
-        let mut resources: Vec<ResourcePayment> = new_resource_map(a.default)
+    pub fn new_payment(a: &PaymentOptions) -> Payment {
+        let mut resources: Vec<ResourcePayment> = new_resource_map(&a.default)
             .into_iter()
             .map(|e| match e.0 {
                 ResourceType::Discount | ResourceType::Gold => ResourcePayment {
@@ -56,7 +67,7 @@ impl ConstructionPayment {
                 _ => ResourcePayment {
                     resource: e.0.clone(),
                     current: e.1,
-                    min: e.1 - a.jokers_left - a.gold_left,
+                    min: cmp::max(0, e.1 as i32 - a.jokers_left as i32 - a.gold_left as i32) as u32,
                     max: e.1,
                 },
             })
@@ -64,20 +75,33 @@ impl ConstructionPayment {
 
         resources.sort_by_key(|r| r.resource.clone());
 
-        Payment {
-            resources
-        }
+        Payment { resources }
     }
 }
 
-pub fn show_city_menu(game: &mut Game, player_index: usize, city_position: &Position) -> Option<ActiveDialog> {
+impl HasPayment for ConstructionPayment {
+    fn payment(&self) -> &Payment {
+        &self.payment
+    }
+}
+
+pub fn show_city_menu(
+    game: &mut Game,
+    player_index: usize,
+    city_position: &Position,
+) -> Option<ActiveDialog> {
     let mut result = None;
     root_ui().window(hash!(), vec2(600., 20.), vec2(100., 200.), |ui| {
         for (building, name) in building_names() {
             let player = &game.players[player_index];
             let city = player.get_city(city_position).expect("city not found");
             if city.can_construct(&building, player) && ui.button(None, name) {
-                result = Some(ActiveDialog::ConstructionPayment(ConstructionPayment::new(game, player_index, city_position.clone(), building)));
+                result = Some(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
+                    game,
+                    player_index,
+                    city_position.clone(),
+                    building,
+                )));
             };
         }
     });
@@ -85,18 +109,44 @@ pub fn show_city_menu(game: &mut Game, player_index: usize, city_position: &Posi
 }
 
 pub fn pay_construction_dialog(game: &mut Game, payment: &mut ConstructionPayment) -> bool {
-    // payment_dialog()
-    //
-    // game.execute_action(
-    //     Action::PlayingAction(PlayingAction::Construct {
-    //         city_position: city_position.clone(),
-    //         city_piece: building,
-    //         payment: cost,
-    //         temple_bonus: None,
-    //     }),
-    //     player_index,
-    // );
-    false
+    payment_dialog(
+        payment,
+        |cp| cp.payment.get(ResourceType::Discount).current == 0,
+        |cp| {
+            game.execute_action(
+                Action::PlayingAction(PlayingAction::Construct {
+                    city_position: cp.city_position.clone(),
+                    city_piece: cp.city_piece.clone(),
+                    payment: cp.payment.to_resource_pile(),
+                    temple_bonus: None,
+                }),
+                cp.player_index,
+            )
+        },
+        |ap, r| match r {
+            ResourceType::Gold => ap.payment_options.gold_left > 0,
+            ResourceType::Discount => ap.payment_options.jokers_left > 0,
+            _ => ap.payment.get(r).max > 0,
+        },
+        |cp, r| {
+            let gold = cp.payment.get_mut(ResourceType::Gold);
+            if gold.current > 0 {
+                gold.current -= 1;
+            } else {
+                cp.payment.get_mut(ResourceType::Discount).current += 1;
+            }
+            cp.payment.get_mut(r).current += 1;
+        },
+        |cp, r| {
+            let discount = cp.payment.get_mut(ResourceType::Discount);
+            if discount.current > 0 {
+                discount.current -= 1;
+            } else {
+                cp.payment.get_mut(ResourceType::Gold).current += 1;
+            }
+            cp.payment.get_mut(r).current -= 1;
+        },
+    )
 }
 
 pub fn draw_city(owner: &Player, city: &City) {

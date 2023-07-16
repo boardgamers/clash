@@ -10,11 +10,11 @@ use advance_ui::AdvancePayment;
 use city_ui::ConstructionPayment;
 use map::pixel_to_coordinate;
 
+mod advance_ui;
+mod city_ui;
 mod map;
 mod payment;
 mod ui;
-mod advance_ui;
-mod city_ui;
 
 pub enum ActiveDialog {
     None,

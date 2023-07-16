@@ -1,7 +1,7 @@
+use crate::ui::Point;
 use hex2d::{Coordinate, Spacing};
 use macroquad::prelude::*;
 use server::position::Position;
-use crate::ui::Point;
 
 const SIZE: f32 = 60.0;
 const SPACING: Spacing = Spacing::FlatTop(SIZE);

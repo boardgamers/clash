@@ -8,14 +8,16 @@ use server::game::{Action, Game};
 use server::playing_actions::PlayingAction;
 use server::resource_pile::AdvancePaymentOptions;
 
+use crate::payment::{
+    new_resource_map, payment_dialog, HasPayment, Payment, ResourcePayment, ResourceType,
+};
 use crate::{ActiveDialog, State};
-use crate::payment::{HasPayment, new_resource_map, Payment, payment_dialog, ResourcePayment, ResourceType};
 
 pub struct AdvancePayment {
-    pub player_index: usize,
-    pub name: String,
-    pub payment: Payment,
-    pub cost: u32,
+    player_index: usize,
+    name: String,
+    payment: Payment,
+    cost: u32,
 }
 
 impl AdvancePayment {
@@ -39,7 +41,7 @@ impl AdvancePayment {
             (ResourceType::Gold, a.gold_left),
         ]);
 
-        let mut resources: Vec<ResourcePayment> = new_resource_map(a.default)
+        let mut resources: Vec<ResourcePayment> = new_resource_map(&a.default)
             .into_iter()
             .map(|e| ResourcePayment {
                 resource: e.0.clone(),
@@ -75,7 +77,11 @@ pub fn show_advance_menu(game: &mut Game, player_index: usize, state: &mut State
             let name = a.name;
             if game.players[player_index].can_advance(&name) {
                 if ui.button(None, name.clone()) {
-                    state.active_dialog = ActiveDialog::AdvancePayment(AdvancePayment::new(game, player_index, &name));
+                    state.active_dialog = ActiveDialog::AdvancePayment(AdvancePayment::new(
+                        game,
+                        player_index,
+                        &name,
+                    ));
                 }
             } else if game.players[player_index].advances.contains(&name) {
                 ui.label(None, &name);
@@ -85,26 +91,29 @@ pub fn show_advance_menu(game: &mut Game, player_index: usize, state: &mut State
 }
 
 pub fn pay_advance_dialog(game: &mut Game, ap: &mut AdvancePayment) -> bool {
-    payment_dialog(ap,
-                   |ap| ap.valid(),
-                   |ap| game.execute_action(
-                       Action::PlayingAction(PlayingAction::Advance {
-                           advance: ap.name.clone(),
-                           payment: ap.payment.to_resource_pile(),
-                       }),
-                       ap.player_index,
-                   ),
-                   |ap, r| {
-                       add(ap, r, 1);
-                   },
-                   |ap, r| {
-                       add(ap, r, -1);
-                   }
+    payment_dialog(
+        ap,
+        |ap| ap.valid(),
+        |ap| {
+            game.execute_action(
+                Action::PlayingAction(PlayingAction::Advance {
+                    advance: ap.name.clone(),
+                    payment: ap.payment.to_resource_pile(),
+                }),
+                ap.player_index,
+            )
+        },
+        |ap, r| ap.payment.get(r).max > 0,
+        |ap, r| {
+            add(ap, r, 1);
+        },
+        |ap, r| {
+            add(ap, r, -1);
+        },
     )
 }
 
 fn add(ap: &mut AdvancePayment, r: ResourceType, i: i32) {
-    let x = ap.payment.resources.iter_mut().find(|p| p.resource == r).unwrap();
-    x.current = (x.current as i32 + i) as u32
+    let p = ap.payment.get_mut(r);
+    p.current = (p.current as i32 + i) as u32
 }
-

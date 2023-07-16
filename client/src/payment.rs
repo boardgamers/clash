@@ -52,6 +52,19 @@ impl Payment {
         )
     }
 
+    pub fn get_mut(&mut self, r: ResourceType) -> &mut ResourcePayment {
+        self.resources
+            .iter_mut()
+            .find(|p| p.resource == r)
+            .unwrap_or_else(|| panic!("Resource {:?} not found in payment", r))
+    }
+    pub fn get(&self, r: ResourceType) -> &ResourcePayment {
+        self.resources
+            .iter()
+            .find(|p| p.resource == r)
+            .unwrap_or_else(|| panic!("Resource {:?} not found in payment", r))
+    }
+
     fn current(r: &[ResourcePayment], resource_type: ResourceType) -> u32 {
         r.iter()
             .find(|p| p.resource == resource_type)
@@ -60,7 +73,7 @@ impl Payment {
     }
 }
 
-pub fn new_resource_map(p: ResourcePile) -> HashMap<ResourceType, u32> {
+pub fn new_resource_map(p: &ResourcePile) -> HashMap<ResourceType, u32> {
     let mut m: HashMap<ResourceType, u32> = HashMap::new();
     add_resource(&mut m, p.food, ResourceType::Food);
     add_resource(&mut m, p.wood, ResourceType::Wood);
@@ -69,6 +82,7 @@ pub fn new_resource_map(p: ResourcePile) -> HashMap<ResourceType, u32> {
     add_resource(&mut m, p.gold as u32, ResourceType::Gold);
     add_resource(&mut m, p.mood_tokens, ResourceType::MoodTokens);
     add_resource(&mut m, p.culture_tokens, ResourceType::CultureTokens);
+    add_resource(&mut m, 0, ResourceType::Discount);
     m
 }
 
@@ -80,13 +94,18 @@ pub trait HasPayment {
     fn payment(&self) -> &Payment;
 }
 
-pub fn payment_dialog<T: HasPayment>(has_payment: &mut T,
-                      is_valid: impl FnOnce(&T) -> bool, execute_action: impl FnOnce(&T),
-                      plus: impl Fn(&mut T, ResourceType), minus: impl Fn(&mut T, ResourceType)) -> bool {
+pub fn payment_dialog<T: HasPayment>(
+    has_payment: &mut T,
+    is_valid: impl FnOnce(&T) -> bool,
+    execute_action: impl FnOnce(&T),
+    show: impl Fn(&T, ResourceType) -> bool,
+    plus: impl Fn(&mut T, ResourceType),
+    minus: impl Fn(&mut T, ResourceType),
+) -> bool {
     let mut result = false;
     root_ui().window(hash!(), vec2(20., 510.), vec2(400., 200.), |ui| {
         for (i, p) in has_payment.payment().resources.clone().iter().enumerate() {
-            if p.max > 0 {
+            if show(has_payment, p.resource.clone()) {
                 Group::new(hash!("res", i), Vec2::new(70., 200.)).ui(ui, |ui| {
                     let s = format!("{} {}", &p.resource.to_string(), p.current);
                     ui.label(Vec2::new(0., 0.), &s);
