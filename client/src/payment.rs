@@ -1,6 +1,7 @@
-use server::resource_pile::{AdvancePaymentOptions, ResourcePile};
 use std::collections::HashMap;
 use std::fmt;
+
+use server::resource_pile::ResourcePile;
 
 #[derive(PartialEq, Eq, Debug, Clone, Hash, Ord, PartialOrd)]
 pub enum ResourceType {
@@ -19,31 +20,6 @@ impl fmt::Display for ResourceType {
     }
 }
 
-pub struct ResearchPayment {
-    pub player_index: usize,
-    pub name: String,
-    pub payment: Payment,
-}
-
-impl ResearchPayment {
-    pub fn new(player_index: usize, name: String, payment: Payment) -> ResearchPayment {
-        ResearchPayment {
-            player_index,
-            name,
-            payment,
-        }
-    }
-
-    pub fn valid(&self) -> bool {
-        self.payment
-            .resources
-            .iter()
-            .map(|r| r.current)
-            .sum::<u32>()
-            == 2
-    }
-}
-
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct ResourcePayment {
     pub resource: ResourceType,
@@ -58,26 +34,6 @@ pub struct Payment {
 }
 
 impl Payment {
-    pub fn new_advance_resource_payment(a: AdvancePaymentOptions) -> Payment {
-        let left = HashMap::from([
-            (ResourceType::Food, a.food_left),
-            (ResourceType::Gold, a.gold_left),
-        ]);
-
-        let mut resources: Vec<ResourcePayment> = new_resource_map(a.default)
-            .into_iter()
-            .map(|e| ResourcePayment {
-                resource: e.0.clone(),
-                current: e.1,
-                min: 0,
-                max: e.1 + left.get(&e.0).unwrap_or(&(0u32)),
-            })
-            .collect();
-        resources.sort_by_key(|r| r.resource.clone());
-
-        Payment { resources }
-    }
-
     pub fn to_resource_pile(&self) -> ResourcePile {
         let r = &self.resources;
         ResourcePile::new(
