@@ -25,23 +25,26 @@ mod ui;
 
 #[macroquad::main("Clash")]
 async fn main() {
-    let mut game = Game::new(1, "a".repeat(32));
-    let player_index = 0;
-    let city = City::new(player_index, Position::from_offset("A1"));
-    let player = &mut game.players[player_index];
-    player.gain_resources(ResourcePile::new(50, 50, 50, 50, 50, 50, 50));
-    player.cities.push(city);
-    player
+    let mut game = Game::new(2, "a".repeat(32));
+    let player_index1 = 0;
+    let player_index2 = 1;
+    game.players[player_index1].gain_resources(ResourcePile::new(50, 50, 50, 50, 50, 50, 50));
+    game.players[player_index2].gain_resources(ResourcePile::new(50, 50, 50, 50, 50, 50, 50));
+    game.players[player_index1]
         .cities
-        .push(City::new(player_index, Position::from_offset("C2")));
-    player
+        .push(City::new(player_index1, Position::from_offset("A1")));
+    game.players[player_index1]
         .cities
-        .push(City::new(player_index, Position::from_offset("C1")));
+        .push(City::new(player_index1, Position::from_offset("C2")));
+    game.players[player_index2]
+        .cities
+        .push(City::new(player_index2, Position::from_offset("C1")));
 
     let mut state = State::new();
 
     set_fullscreen(true);
     loop {
+        let player_index = game.current_player_index;
         clear_background(GREEN);
 
         draw_map(&game, &state);

@@ -13,9 +13,16 @@ pub fn show_globals(game: &Game) {
     draw_text(&format!("Age {}", game.age), 600., 20., 20., BLACK);
     draw_text(&format!("Round {}", game.round), 600., 50., 20., BLACK);
     draw_text(
-        &format!("Actions Left {}", game.actions_left),
+        &format!("Player {}", game.current_player_index),
         600.,
         80.,
+        20.,
+        BLACK,
+    );
+    draw_text(
+        &format!("Actions Left {}", game.actions_left),
+        600.,
+        110.,
         20.,
         BLACK,
     );
@@ -27,13 +34,7 @@ pub fn show_resources(game: &Game, player_index: usize) {
 
     let mut i: f32 = 0.;
     let mut res = |label: String| {
-        draw_text(
-            &label,
-            600.,
-            200. + player_index as f32 * 200. + i,
-            20.,
-            BLACK,
-        );
+        draw_text(&label, 600., 200. + i, 20., BLACK);
         i += 30.;
     };
 

@@ -169,9 +169,8 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
             .steps
             .iter()
             .find(|(p, _)| p == &city.position)
-            .expect("city not found")
-            .1;
-        draw_text(&format!("{}", steps), x, y, font_size, BLACK);
+            .map_or(String::new(), |(_, s)| format!("{}", s));
+        draw_text(&steps, x, y, font_size, BLACK);
     } else {
         match city.mood_state {
             MoodState::Happy => draw_text("+", x, y, font_size, BLACK),
