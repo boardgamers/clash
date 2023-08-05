@@ -1,5 +1,3 @@
-
-
 use crate::{
     content::custom_actions::CustomActionType, events::EventMut, game::Game, map::Terrain,
     player_events::PlayerEvents, resource_pile::ResourcePile,
