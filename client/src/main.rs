@@ -1,8 +1,9 @@
 extern crate core;
 
 use macroquad::prelude::*;
+use macroquad::ui::root_ui;
 use server::city::City;
-use server::game::Game;
+use server::game::{Action, Game};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
@@ -47,12 +48,14 @@ async fn main() {
         focused_city: None,
     };
 
+    set_fullscreen(true);
     loop {
         clear_background(GREEN);
 
         draw_map(&game);
         advance_ui::show_advance_menu(&game, player_index, &mut state);
         show_resources(&game, player_index);
+        show_undo_redo(&mut game, player_index);
 
         if let Some((player_index, city_position)) = &state.focused_city {
             let dialog = city_ui::show_city_menu(&game, *player_index, city_position);
@@ -128,4 +131,13 @@ fn show_resources(game: &Game, player_index: usize) {
     res(format!("Gold {}", r.gold));
     res(format!("Mood {}", r.mood_tokens));
     res(format!("Culture {}", r.culture_tokens));
+}
+
+fn show_undo_redo(game: &mut Game, player_index: usize) {
+    if game.can_undo() && root_ui().button(vec2(600., 510.), "Undo") {
+        game.execute_action(Action::Undo, player_index);
+    }
+    if game.can_redo() && root_ui().button(vec2(650., 510.), "Redo") {
+        game.execute_action(Action::Redo, player_index);
+    }
 }

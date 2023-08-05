@@ -103,7 +103,7 @@ pub fn payment_dialog<T: HasPayment>(
     minus: impl Fn(&mut T, ResourceType),
 ) -> bool {
     let mut result = false;
-    root_ui().window(hash!(), vec2(20., 510.), vec2(400., 200.), |ui| {
+    root_ui().window(hash!(), vec2(20., 510.), vec2(400., 80.), |ui| {
         for (i, p) in has_payment.payment().resources.clone().iter().enumerate() {
             if show(has_payment, p.resource.clone()) {
                 Group::new(hash!("res", i), Vec2::new(70., 200.)).ui(ui, |ui| {
