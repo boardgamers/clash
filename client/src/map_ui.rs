@@ -1,9 +1,10 @@
-use crate::ui::Point;
 use hex2d::{Coordinate, Spacing};
 use macroquad::prelude::*;
 use server::game::Game;
 use server::position::Position;
-use crate::city_ui;
+
+use crate::city_ui::draw_city;
+use crate::ui::{Point, State};
 
 const SIZE: f32 = 60.0;
 const SPACING: Spacing = Spacing::FlatTop(SIZE);
@@ -25,10 +26,10 @@ pub fn pixel_to_coordinate(x: f32, y: f32) -> Coordinate {
     Coordinate::from_pixel(p.x, p.y, SPACING)
 }
 
-pub fn draw_map(game: &Game) {
+pub fn draw_map(game: &Game, state: &State) {
     for p in game.players.iter() {
         for city in p.cities.iter() {
-            city_ui::draw_city(p, city);
+            draw_city(p, city, state);
         }
     }
 }

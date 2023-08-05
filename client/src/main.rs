@@ -7,7 +7,7 @@ use server::position::Position;
 use server::resource_pile::ResourcePile;
 
 use crate::advance_ui::{pay_advance_dialog, show_advance_menu};
-use crate::city_ui::{city_click, pay_construction_dialog, show_city_menu};
+use crate::city_ui::{pay_construction_dialog, show_city_menu, try_city_click};
 use crate::log_ui::show_log;
 use crate::map_ui::draw_map;
 use crate::player_ui::{show_global_controls, show_globals, show_resources};
@@ -15,12 +15,11 @@ use crate::ui::{ActiveDialog, State};
 
 mod advance_ui;
 mod city_ui;
+mod log_ui;
 mod map_ui;
 mod payment_ui;
-mod ui;
-mod log_ui;
 mod player_ui;
-
+mod ui;
 
 #[macroquad::main("Clash")]
 async fn main() {
@@ -43,7 +42,7 @@ async fn main() {
     loop {
         clear_background(GREEN);
 
-        draw_map(&game);
+        draw_map(&game, &state);
         show_advance_menu(&game, player_index, &mut state);
         show_globals(&game);
         show_log(&game);
@@ -71,9 +70,8 @@ async fn main() {
             ActiveDialog::None => {}
         }
 
-        city_click(&game, &mut state);
+        try_city_click(&game, &mut state);
 
         next_frame().await
     }
 }
-

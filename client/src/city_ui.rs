@@ -1,11 +1,11 @@
+use macroquad::color::BLACK;
 use std::cmp;
 use std::collections::HashMap;
 use std::f32::consts::PI;
-use macroquad::color::BLACK;
 
-use macroquad::prelude::*;
 use macroquad::hash;
 use macroquad::math::{f32, i32, vec2};
+use macroquad::prelude::*;
 use macroquad::ui::root_ui;
 use server::city::{City, MoodState};
 use server::city_pieces::Building;
@@ -15,12 +15,12 @@ use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::PaymentOptions;
 
+use crate::map_ui::pixel_to_coordinate;
 use crate::payment_ui::{
     new_resource_map, payment_dialog, HasPayment, Payment, ResourcePayment, ResourceType,
 };
 use crate::ui::{Point, State};
 use crate::{map_ui, ui, ActiveDialog};
-use crate::map_ui::pixel_to_coordinate;
 
 pub struct ConstructionPayment {
     player_index: usize,
@@ -97,7 +97,10 @@ pub fn show_city_menu(
         for (building, name) in building_names() {
             let player = &game.players[player_index];
             let city = player.get_city(city_position).expect("city not found");
-            if game.actions_left > 0 &&  city.can_construct(&building, player) && ui.button(None, name) {
+            if game.actions_left > 0
+                && city.can_construct(&building, player)
+                && ui.button(None, name)
+            {
                 result = Some(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
                     game,
                     player_index,
@@ -151,16 +154,30 @@ pub fn pay_construction_dialog(game: &mut Game, payment: &mut ConstructionPaymen
     )
 }
 
-pub fn draw_city(owner: &Player, city: &City) {
+pub fn draw_city(owner: &Player, city: &City, state: &State) {
     map_ui::draw_hex(&city.position);
 
     let c = map_ui::center(&city.position).to_screen();
 
     draw_circle(c.x, c.y, 15.0, ui::player_color(owner.index));
-    match city.mood_state {
-        MoodState::Happy => draw_text("+", c.x, c.y, 15.0, BLACK),
-        MoodState::Neutral => {},
-        MoodState::Angry => draw_text("-", c.x, c.y, 15.0, BLACK),
+
+    let font_size = 25.0;
+    let x = c.x - 5.;
+    let y = c.y + 6.;
+    if state.happiness_selection_active() {
+        let steps = state
+            .increase_happiness_cities
+            .iter()
+            .find(|(p, _)| p == &city.position)
+            .expect("city not found")
+            .1;
+        draw_text(&format!("{}", steps), x, y, font_size, BLACK);
+    } else {
+        match city.mood_state {
+            MoodState::Happy => draw_text("+", x, y, font_size, BLACK),
+            MoodState::Neutral => {}
+            MoodState::Angry => draw_text("-", x, y, font_size, BLACK),
+        }
     }
 
     let mut i = 0;
@@ -211,23 +228,33 @@ pub fn building_names() -> HashMap<Building, &'static str> {
     ])
 }
 
-
-pub fn city_click(game: &Game, state: &mut State) {
+pub fn try_city_click(game: &Game, state: &mut State) {
     if is_mouse_button_pressed(MouseButton::Left) {
         let (x, y) = mouse_position();
 
         let c = pixel_to_coordinate(x, y);
 
-        state.focused_city = None;
-
         for p in game.players.iter() {
             for city in p.cities.iter() {
-                let pos = city.position.clone();
-                if c == pos.coordinate() {
-                    state.clear();
-                    state.focused_city = Some((p.index, pos));
+                if c == city.position.coordinate() {
+                    city_click(state, p, city);
                 };
             }
         }
+    }
+}
+
+fn city_click(state: &mut State, player: &Player, city: &City) {
+    let pos = city.position.clone();
+    if state.happiness_selection_active() {
+        state.increase_happiness_cities = state
+            .increase_happiness_cities
+            .clone()
+            .into_iter()
+            .map(|(p, step)| if p == pos { (p, step + 1) } else { (p, step) })
+            .collect();
+    } else {
+        state.clear();
+        state.focused_city = Some((player.index, pos));
     }
 }

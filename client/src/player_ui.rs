@@ -1,18 +1,24 @@
 use macroquad::color::BLACK;
 use macroquad::math::vec2;
+use macroquad::prelude::*;
 use macroquad::text::draw_text;
 use macroquad::ui::root_ui;
-use macroquad::prelude::*;
 
+use crate::ui::State;
 use server::game::{Action, Game};
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
-use crate::ui::State;
 
 pub fn show_globals(game: &Game) {
     draw_text(&format!("Age {}", game.age), 600., 20., 20., BLACK);
     draw_text(&format!("Round {}", game.round), 600., 50., 20., BLACK);
-    draw_text(&format!("Actions Left {}", game.actions_left), 600., 80., 20., BLACK);
+    draw_text(
+        &format!("Actions Left {}", game.actions_left),
+        600.,
+        80.,
+        20.,
+        BLACK,
+    );
 }
 
 pub fn show_resources(game: &Game, player_index: usize) {
@@ -41,12 +47,18 @@ pub fn show_resources(game: &Game, player_index: usize) {
 }
 
 pub fn show_global_controls(game: &mut Game, player_index: usize, state: &mut State) {
-    let happiness_selection_active = !state.increase_happiness_cities.is_empty();
-    if game.actions_left > 0 && root_ui().button(vec2(600., 480.), "Increase Happiness") && !happiness_selection_active {
+    if game.actions_left > 0
+        && root_ui().button(vec2(600., 480.), "Increase Happiness")
+        && !state.happiness_selection_active()
+    {
         state.clear();
-        state.increase_happiness_cities = game.players[player_index].cities.iter().map(|c| (c.position.clone(), 0)).collect();
+        state.increase_happiness_cities = game.players[player_index]
+            .cities
+            .iter()
+            .map(|c| (c.position.clone(), 0))
+            .collect();
     }
-    if happiness_selection_active && root_ui().button(vec2(750., 480.), "Cancel") {
+    if state.happiness_selection_active() && root_ui().button(vec2(750., 480.), "Cancel") {
         state.clear();
     }
 

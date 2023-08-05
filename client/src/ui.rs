@@ -1,7 +1,7 @@
-use macroquad::prelude::*;
-use server::position::Position;
 use crate::advance_ui::AdvancePayment;
 use crate::city_ui::ConstructionPayment;
+use macroquad::prelude::*;
+use server::position::Position;
 
 const TOP_BORDER: f32 = 130.0;
 const LEFT_BORDER: f32 = 90.0;
@@ -64,5 +64,9 @@ impl State {
         self.active_dialog = ActiveDialog::None;
         self.focused_city = None;
         self.increase_happiness_cities = vec![];
+    }
+
+    pub fn happiness_selection_active(&self) -> bool {
+        !self.increase_happiness_cities.is_empty()
     }
 }
