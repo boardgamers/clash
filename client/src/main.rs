@@ -37,11 +37,7 @@ async fn main() {
         .cities
         .push(City::new(player_index, Position::from_offset("C1")));
 
-    let mut state = State {
-        active_dialog: ActiveDialog::None,
-        focused_city: None,
-        increase_happiness_cities: vec![],
-    };
+    let mut state = State::new();
 
     set_fullscreen(true);
     loop {
@@ -52,7 +48,7 @@ async fn main() {
         show_globals(&game);
         show_log(&game);
         show_resources(&game, player_index);
-        show_global_controls(&mut game, player_index);
+        show_global_controls(&mut game, player_index, &mut state);
 
         if let Some((player_index, city_position)) = &state.focused_city {
             let dialog = show_city_menu(&game, *player_index, city_position);

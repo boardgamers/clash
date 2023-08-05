@@ -224,8 +224,8 @@ pub fn city_click(game: &Game, state: &mut State) {
             for city in p.cities.iter() {
                 let pos = city.position.clone();
                 if c == pos.coordinate() {
+                    state.clear();
                     state.focused_city = Some((p.index, pos));
-                    state.active_dialog = ActiveDialog::None;
                 };
             }
         }

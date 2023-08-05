@@ -51,3 +51,18 @@ pub struct State {
     pub active_dialog: ActiveDialog,
     pub increase_happiness_cities: Vec<(Position, u32)>,
 }
+
+impl State {
+    pub fn new() -> State {
+        State {
+            active_dialog: ActiveDialog::None,
+            focused_city: None,
+            increase_happiness_cities: vec![],
+        }
+    }
+    pub fn clear(&mut self) {
+        self.active_dialog = ActiveDialog::None;
+        self.focused_city = None;
+        self.increase_happiness_cities = vec![];
+    }
+}

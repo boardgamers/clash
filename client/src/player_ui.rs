@@ -7,6 +7,7 @@ use macroquad::prelude::*;
 use server::game::{Action, Game};
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
+use crate::ui::State;
 
 pub fn show_globals(game: &Game) {
     draw_text(&format!("Age {}", game.age), 600., 20., 20., BLACK);
@@ -39,7 +40,16 @@ pub fn show_resources(game: &Game, player_index: usize) {
     res(format!("Culture {}", r.culture_tokens));
 }
 
-pub fn show_global_controls(game: &mut Game, player_index: usize) {
+pub fn show_global_controls(game: &mut Game, player_index: usize, state: &mut State) {
+    let happiness_selection_active = !state.increase_happiness_cities.is_empty();
+    if game.actions_left > 0 && root_ui().button(vec2(600., 480.), "Increase Happiness") && !happiness_selection_active {
+        state.clear();
+        state.increase_happiness_cities = game.players[player_index].cities.iter().map(|c| (c.position.clone(), 0)).collect();
+    }
+    if happiness_selection_active && root_ui().button(vec2(750., 480.), "Cancel") {
+        state.clear();
+    }
+
     if game.can_undo() && root_ui().button(vec2(600., 510.), "Undo") {
         game.execute_action(Action::Undo, player_index);
     }
