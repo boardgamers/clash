@@ -14,11 +14,11 @@ use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::PaymentOptions;
 
-use crate::payment::{
+use crate::payment_ui::{
     new_resource_map, payment_dialog, HasPayment, Payment, ResourcePayment, ResourceType,
 };
 use crate::ui::Point;
-use crate::{map, ui, ActiveDialog};
+use crate::{map_ui, ui, ActiveDialog};
 
 pub struct ConstructionPayment {
     player_index: usize,
@@ -150,9 +150,9 @@ pub fn pay_construction_dialog(game: &mut Game, payment: &mut ConstructionPaymen
 }
 
 pub fn draw_city(owner: &Player, city: &City) {
-    map::draw_hex(&city.position);
+    map_ui::draw_hex(&city.position);
 
-    let c = map::center(&city.position).to_screen();
+    let c = map_ui::center(&city.position).to_screen();
 
     draw_circle(c.x, c.y, 10.0, ui::player_color(owner.index));
 

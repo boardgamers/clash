@@ -10,13 +10,13 @@ use server::resource_pile::ResourcePile;
 
 use advance_ui::AdvancePayment;
 use city_ui::ConstructionPayment;
-use map::pixel_to_coordinate;
+use map_ui::pixel_to_coordinate;
 use crate::log_ui::show_log;
 
 mod advance_ui;
 mod city_ui;
-mod map;
-mod payment;
+mod map_ui;
+mod payment_ui;
 mod ui;
 mod log_ui;
 
