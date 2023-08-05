@@ -36,10 +36,8 @@ pub struct Game {
     pub played_once_per_turn_actions: Vec<CustomActionType>,
     pub actions_left: u32,
     pub successful_cultural_influence: bool,
-    pub round: u32,
-    // starts with 1
-    pub age: u32,
-    // starts with 1
+    pub round: u32, // starts with 1
+    pub age: u32,   // starts with 1
     pub messages: Vec<String>,
     pub dice_roll_outcomes: Vec<u8>,
     dropped_players: Vec<usize>,
