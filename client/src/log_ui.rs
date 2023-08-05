@@ -10,6 +10,6 @@ pub fn show_log(game: &Game) {
             StatusPhaseAction(a) => a,
             CulturalInfluenceResolutionAction(a) => a,
         };
-        draw_text(&s, 800., 120. + i as f32 * 20., 20., BLACK);
+        draw_text(s, 800., 120. + i as f32 * 20., 20., BLACK);
     });
 }
