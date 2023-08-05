@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
-use PlayingAction::*;
 use serde::{Deserialize, Serialize};
+use PlayingAction::*;
 
 use crate::{
     city_pieces::Building::{self, *},
@@ -30,7 +30,7 @@ pub enum PlayingAction {
     IncreaseHappiness {
         happiness_increases: Vec<(Position, u32)>,
     },
-        InfluenceCultureAttempt {
+    InfluenceCultureAttempt {
         starting_city_position: Position,
         target_player_index: usize,
         target_city_position: Position,
@@ -140,13 +140,15 @@ impl PlayingAction {
                 target_city_position,
                 city_piece,
             } => {
-                let range_boost_cost = game.influence_culture_boost_cost(
-                    player_index,
-                    &starting_city_position,
-                    target_player_index,
-                    &target_city_position,
-                    &city_piece,
-                ).expect("Illegal action");
+                let range_boost_cost = game
+                    .influence_culture_boost_cost(
+                        player_index,
+                        &starting_city_position,
+                        target_player_index,
+                        &target_city_position,
+                        &city_piece,
+                    )
+                    .expect("Illegal action");
 
                 let self_influence = starting_city_position == target_city_position;
 
