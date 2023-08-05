@@ -9,6 +9,7 @@ use crate::{
     wonder::Wonder,
 };
 use MoodState::*;
+use crate::resource_pile::ResourcePile;
 
 const MAX_CITY_SIZE: usize = 4;
 
@@ -216,6 +217,15 @@ impl City {
 
     pub fn influenced(&self) -> bool {
         self.uninfluenced_buildings() as usize != self.city_pieces.amount()
+    }
+
+    pub fn increase_happiness_cost(&self, steps: u32) -> Option<ResourcePile> {
+        let max_steps = 2 - self.mood_state.clone() as u32;
+        if steps > max_steps {
+            None
+        } else {
+            Some(ResourcePile::mood_tokens(self.size() as u32) * steps)
+        }
     }
 }
 

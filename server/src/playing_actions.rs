@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use PlayingAction::*;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -9,8 +10,6 @@ use crate::{
     position::Position,
     resource_pile::ResourcePile,
 };
-
-use PlayingAction::*;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayingAction {
@@ -124,11 +123,9 @@ impl PlayingAction {
                 let player = &mut game.players[player_index];
                 for (city_position, steps) in happiness_increases {
                     let city = player.get_city(&city_position).expect("Illegal action");
-                    let cost = ResourcePile::mood_tokens(city.size() as u32) * steps;
-                    let max_steps = 2 - city.mood_state.clone() as u32;
+                    let cost = city.increase_happiness_cost(steps).expect("Illegal action");
                     if city.player_index != player_index
                         || !player.resources().can_afford(&cost)
-                        || steps > max_steps
                     {
                         panic!("Illegal action");
                     }

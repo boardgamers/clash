@@ -10,7 +10,7 @@ use crate::advance_ui::{pay_advance_dialog, show_advance_menu};
 use crate::city_ui::{pay_construction_dialog, show_city_menu, try_city_click};
 use crate::log_ui::show_log;
 use crate::map_ui::draw_map;
-use crate::player_ui::{show_global_controls, show_globals, show_resources};
+use crate::player_ui::{show_global_controls, show_globals, show_increase_happiness, show_resources};
 use crate::ui::{ActiveDialog, State};
 
 mod advance_ui;
@@ -47,7 +47,8 @@ async fn main() {
         show_globals(&game);
         show_log(&game);
         show_resources(&game, player_index);
-        show_global_controls(&mut game, player_index, &mut state);
+        show_increase_happiness(&mut game, player_index, &mut state);
+        show_global_controls(&mut game, player_index);
 
         if let Some((player_index, city_position)) = &state.focused_city {
             let dialog = show_city_menu(&game, *player_index, city_position);

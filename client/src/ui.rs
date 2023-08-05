@@ -1,7 +1,9 @@
 use crate::advance_ui::AdvancePayment;
 use crate::city_ui::ConstructionPayment;
+
 use macroquad::prelude::*;
 use server::position::Position;
+use server::resource_pile::ResourcePile;
 
 const TOP_BORDER: f32 = 130.0;
 const LEFT_BORDER: f32 = 90.0;
@@ -46,10 +48,21 @@ pub enum ActiveDialog {
     ConstructionPayment(ConstructionPayment),
 }
 
+pub struct IncreaseHappiness {
+    pub steps: Vec<(Position, u32)>,
+    pub cost: ResourcePile,
+}
+
+impl IncreaseHappiness {
+    pub fn new(steps: Vec<(Position, u32)>, cost: ResourcePile) -> IncreaseHappiness {
+        IncreaseHappiness { steps, cost }
+    }
+}
+
 pub struct State {
     pub focused_city: Option<(usize, Position)>,
     pub active_dialog: ActiveDialog,
-    pub increase_happiness_cities: Vec<(Position, u32)>,
+    pub increase_happiness: Option<IncreaseHappiness>,
 }
 
 impl State {
@@ -57,16 +70,12 @@ impl State {
         State {
             active_dialog: ActiveDialog::None,
             focused_city: None,
-            increase_happiness_cities: vec![],
+            increase_happiness: None,
         }
     }
     pub fn clear(&mut self) {
         self.active_dialog = ActiveDialog::None;
         self.focused_city = None;
-        self.increase_happiness_cities = vec![];
-    }
-
-    pub fn happiness_selection_active(&self) -> bool {
-        !self.increase_happiness_cities.is_empty()
+        self.increase_happiness = None;
     }
 }

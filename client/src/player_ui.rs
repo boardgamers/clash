@@ -4,7 +4,7 @@ use macroquad::prelude::*;
 use macroquad::text::draw_text;
 use macroquad::ui::root_ui;
 
-use crate::ui::State;
+use crate::ui::{IncreaseHappiness, State};
 use server::game::{Action, Game};
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
@@ -46,29 +46,54 @@ pub fn show_resources(game: &Game, player_index: usize) {
     res(format!("Culture {}", r.culture_tokens));
 }
 
-pub fn show_global_controls(game: &mut Game, player_index: usize, state: &mut State) {
-    if game.actions_left > 0
-        && root_ui().button(vec2(600., 480.), "Increase Happiness")
-        && !state.happiness_selection_active()
-    {
-        state.clear();
-        state.increase_happiness_cities = game.players[player_index]
-            .cities
-            .iter()
-            .map(|c| (c.position.clone(), 0))
-            .collect();
-    }
-    if state.happiness_selection_active() && root_ui().button(vec2(750., 480.), "Cancel") {
-        state.clear();
-    }
-
-    if game.can_undo() && root_ui().button(vec2(600., 510.), "Undo") {
+pub fn show_global_controls(game: &mut Game, player_index: usize) {
+    let y = 540.;
+    if game.can_undo() && root_ui().button(vec2(600., y), "Undo") {
         game.execute_action(Action::Undo, player_index);
     }
-    if game.can_redo() && root_ui().button(vec2(650., 510.), "Redo") {
+    if game.can_redo() && root_ui().button(vec2(650., y), "Redo") {
         game.execute_action(Action::Redo, player_index);
     }
-    if game.actions_left == 0 && root_ui().button(vec2(700., 510.), "End Turn") {
+    if game.actions_left == 0 && root_ui().button(vec2(700., y), "End Turn") {
         game.execute_action(Action::PlayingAction(PlayingAction::EndTurn), player_index);
+    }
+}
+
+pub fn show_increase_happiness(game: &mut Game, player_index: usize, state: &mut State) {
+    let y = 480.;
+    if game.actions_left > 0
+        && root_ui().button(vec2(600., y), "Increase Happiness")
+        && state.increase_happiness.is_none()
+    {
+        state.clear();
+        state.increase_happiness = Some(IncreaseHappiness::new(
+            game.players[player_index]
+                .cities
+                .iter()
+                .map(|c| (c.position.clone(), 0))
+                .collect(),
+            ResourcePile::empty(),
+        ));
+    }
+    if let Some(increase_happiness) = &state.increase_happiness {
+        if root_ui().button(vec2(750., y), "Cancel") {
+            state.clear();
+        } else if root_ui().button(vec2(800., y), "Confirm") {
+            game.execute_action(
+                Action::PlayingAction(PlayingAction::IncreaseHappiness {
+                    happiness_increases: increase_happiness.steps.clone(),
+                }),
+                player_index,
+            );
+            state.clear();
+        } else {
+            draw_text(
+                &format!("Cost: {}", increase_happiness.cost),
+                600.,
+                520.,
+                20.,
+                BLACK,
+            );
+        }
     }
 }
