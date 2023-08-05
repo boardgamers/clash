@@ -91,11 +91,11 @@ pub fn show_city_menu(
     city_position: &Position,
 ) -> Option<ActiveDialog> {
     let mut result = None;
-    root_ui().window(hash!(), vec2(600., 20.), vec2(100., 200.), |ui| {
+    root_ui().window(hash!(), vec2(400., 20.), vec2(100., 200.), |ui| {
         for (building, name) in building_names() {
             let player = &game.players[player_index];
             let city = player.get_city(city_position).expect("city not found");
-            if city.can_construct(&building, player) && ui.button(None, name) {
+            if game.actions_left > 0 &&  city.can_construct(&building, player) && ui.button(None, name) {
                 result = Some(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
                     game,
                     player_index,

@@ -4,6 +4,7 @@ use macroquad::prelude::*;
 use macroquad::ui::root_ui;
 use server::city::City;
 use server::game::{Action, Game};
+use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
@@ -54,8 +55,9 @@ async fn main() {
 
         draw_map(&game);
         advance_ui::show_advance_menu(&game, player_index, &mut state);
+        show_globals(&game);
         show_resources(&game, player_index);
-        show_undo_redo(&mut game, player_index);
+        show_global_controls(&mut game, player_index);
 
         if let Some((player_index, city_position)) = &state.focused_city {
             let dialog = city_ui::show_city_menu(&game, *player_index, city_position);
@@ -108,6 +110,12 @@ fn draw_map(game: &Game) {
     }
 }
 
+fn show_globals(game: &Game) {
+    draw_text(&format!("Age {}", game.age), 600., 20., 20., BLACK);
+    draw_text(&format!("Round {}", game.round), 600., 50., 20., BLACK);
+    draw_text(&format!("Actions Left {}", game.actions_left), 600., 80., 20., BLACK);
+}
+
 fn show_resources(game: &Game, player_index: usize) {
     let player = &game.players[player_index];
     let r: &ResourcePile = player.resources();
@@ -117,7 +125,7 @@ fn show_resources(game: &Game, player_index: usize) {
         draw_text(
             &label,
             600.,
-            300. + player_index as f32 * 200. + i,
+            200. + player_index as f32 * 200. + i,
             20.,
             BLACK,
         );
@@ -133,11 +141,15 @@ fn show_resources(game: &Game, player_index: usize) {
     res(format!("Culture {}", r.culture_tokens));
 }
 
-fn show_undo_redo(game: &mut Game, player_index: usize) {
+fn show_global_controls(game: &mut Game, player_index: usize) {
     if game.can_undo() && root_ui().button(vec2(600., 510.), "Undo") {
         game.execute_action(Action::Undo, player_index);
     }
     if game.can_redo() && root_ui().button(vec2(650., 510.), "Redo") {
         game.execute_action(Action::Redo, player_index);
     }
+    if game.actions_left == 0 && root_ui().button(vec2(700., 510.), "End Turn") {
+        game.execute_action(Action::PlayingAction(PlayingAction::EndTurn), player_index);
+    }
+
 }
