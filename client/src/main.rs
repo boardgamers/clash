@@ -11,12 +11,14 @@ use server::resource_pile::ResourcePile;
 use advance_ui::AdvancePayment;
 use city_ui::ConstructionPayment;
 use map::pixel_to_coordinate;
+use crate::log_ui::show_log;
 
 mod advance_ui;
 mod city_ui;
 mod map;
 mod payment;
 mod ui;
+mod log_ui;
 
 pub enum ActiveDialog {
     None,
@@ -56,6 +58,7 @@ async fn main() {
         draw_map(&game);
         advance_ui::show_advance_menu(&game, player_index, &mut state);
         show_globals(&game);
+        show_log(&game);
         show_resources(&game, player_index);
         show_global_controls(&mut game, player_index);
 
