@@ -1,4 +1,7 @@
 use macroquad::prelude::*;
+use server::position::Position;
+use crate::advance_ui::AdvancePayment;
+use crate::city_ui::ConstructionPayment;
 
 const TOP_BORDER: f32 = 130.0;
 const LEFT_BORDER: f32 = 90.0;
@@ -35,4 +38,16 @@ pub fn player_color(player_index: usize) -> Color {
         3 => BLACK,
         _ => panic!("unexpected player index"),
     }
+}
+
+pub enum ActiveDialog {
+    None,
+    AdvancePayment(AdvancePayment),
+    ConstructionPayment(ConstructionPayment),
+}
+
+pub struct State {
+    pub focused_city: Option<(usize, Position)>,
+    pub active_dialog: ActiveDialog,
+    pub increase_happiness_cities: Vec<(Position, u32)>,
 }

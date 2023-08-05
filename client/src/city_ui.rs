@@ -1,12 +1,13 @@
 use std::cmp;
 use std::collections::HashMap;
 use std::f32::consts::PI;
+use macroquad::color::BLACK;
 
+use macroquad::prelude::*;
 use macroquad::hash;
 use macroquad::math::{f32, i32, vec2};
-use macroquad::prelude::{draw_circle, draw_text};
 use macroquad::ui::root_ui;
-use server::city::City;
+use server::city::{City, MoodState};
 use server::city_pieces::Building;
 use server::game::{Action, Game};
 use server::player::Player;
@@ -17,8 +18,9 @@ use server::resource_pile::PaymentOptions;
 use crate::payment_ui::{
     new_resource_map, payment_dialog, HasPayment, Payment, ResourcePayment, ResourceType,
 };
-use crate::ui::Point;
+use crate::ui::{Point, State};
 use crate::{map_ui, ui, ActiveDialog};
+use crate::map_ui::pixel_to_coordinate;
 
 pub struct ConstructionPayment {
     player_index: usize,
@@ -154,7 +156,12 @@ pub fn draw_city(owner: &Player, city: &City) {
 
     let c = map_ui::center(&city.position).to_screen();
 
-    draw_circle(c.x, c.y, 10.0, ui::player_color(owner.index));
+    draw_circle(c.x, c.y, 15.0, ui::player_color(owner.index));
+    match city.mood_state {
+        MoodState::Happy => draw_text("+", c.x, c.y, 15.0, BLACK),
+        MoodState::Neutral => {},
+        MoodState::Angry => draw_text("-", c.x, c.y, 15.0, BLACK),
+    }
 
     let mut i = 0;
     for player_index in 0..4 {
@@ -202,4 +209,25 @@ pub fn building_names() -> HashMap<Building, &'static str> {
         (Building::Port, "Port"),
         (Building::Temple, "Temple"),
     ])
+}
+
+
+pub fn city_click(game: &Game, state: &mut State) {
+    if is_mouse_button_pressed(MouseButton::Left) {
+        let (x, y) = mouse_position();
+
+        let c = pixel_to_coordinate(x, y);
+
+        state.focused_city = None;
+
+        for p in game.players.iter() {
+            for city in p.cities.iter() {
+                let pos = city.position.clone();
+                if c == pos.coordinate() {
+                    state.focused_city = Some((p.index, pos));
+                    state.active_dialog = ActiveDialog::None;
+                };
+            }
+        }
+    }
 }
