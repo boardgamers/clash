@@ -224,26 +224,14 @@ impl Game {
                     if !self.can_undo() {
                         panic!("actions revealing new information can't be undone");
                     }
-                    self.log_index -= 1;
-                    let action = self.log[self.log_index]
-                        .as_playing_action()
-                        .expect("previous action should be a playing action");
-                    let action = serde_json::from_str::<PlayingAction>(action)
-                        .expect("action should be deserializable");
-                    action.undo(self, player_index);
+                    self.undo(player_index);
                     return;
                 }
                 if let Action::Redo = action {
                     if !self.can_redo() {
                         panic!("no action can be redone");
                     }
-                    let action = self.log[self.log_index]
-                        .as_playing_action()
-                        .expect("undone actions should be playing actions");
-                    let action = serde_json::from_str::<PlayingAction>(action)
-                        .expect("action should be deserializable");
-                    action.execute(self, player_index);
-                    self.log_index += 1;
+                    self.redo(player_index);
                     return;
                 }
                 let action = action
@@ -258,8 +246,7 @@ impl Game {
                     .expect("action should be deserializable")
                         == action
                 {
-                    self.log_index += 1;
-                    action.execute(self, player_index);
+                    self.redo(player_index);
                     return;
                 }
                 self.add_log_item(LogItem::PlayingAction(
@@ -269,6 +256,26 @@ impl Game {
             }
             Finished => panic!("actions can't be executed when the game is finished"),
         }
+    }
+
+    fn undo(&mut self, player_index: usize) {
+        let action = self.log[self.log_index]
+            .as_playing_action()
+            .expect("previous action should be a playing action");
+        let action =
+            serde_json::from_str::<PlayingAction>(action).expect("action should be deserializable");
+        action.undo(self, player_index);
+        self.log_index -= 1;
+    }
+
+    fn redo(&mut self, player_index: usize) {
+        let action = self.log[self.log_index]
+            .as_playing_action()
+            .expect("undone actions should be playing actions");
+        let action =
+            serde_json::from_str::<PlayingAction>(action).expect("action should be deserializable");
+        action.execute(self, player_index);
+        self.log_index += 1;
     }
 
     pub fn can_undo(&self) -> bool {
@@ -317,9 +324,7 @@ impl Game {
         self.actions_left = 3;
         self.successful_cultural_influence = false;
         self.played_once_per_turn_actions = Vec::new();
-        for city in self.players[self.current_player_index].cities.iter_mut() {
-            city.deactivate();
-        }
+        self.players[self.current_player_index].end_turn();
         self.next_player();
         if self.current_player_index == self.starting_player_index {
             self.next_round();

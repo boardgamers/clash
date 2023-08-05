@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use crate::{
     content::custom_actions::CustomActionType, events::EventMut, game::Game, map::Terrain,
     player_events::PlayerEvents, resource_pile::ResourcePile,
@@ -69,24 +67,39 @@ pub trait AbilityInitializerSetup: Sized {
         })
     }
 
-    fn add_collect_option(self, terrain: Terrain, option: ResourcePile) -> Self {
+    fn add_collect_option(
+        self,
+        terrain: Terrain,
+        option: ResourcePile,
+        use_limit: Option<u32>,
+    ) -> Self {
         let deinitializer_terrain = terrain.clone();
         let deinitializer_option = option.clone();
+        let deinitializer_use_limit = use_limit;
         self.add_one_time_ability_initializer(move |game, player_index| {
             let player = &mut game.players[player_index];
             player
                 .collect_options
                 .entry(terrain.clone())
-                .or_insert(HashSet::new())
-                .insert(option.clone());
+                .or_insert(Vec::new())
+                .push((option.clone(), use_limit));
         })
         .add_ability_undo_deinitializer(move |game, player_index| {
             let player = &mut game.players[player_index];
+            let index = player
+                .collect_options
+                .get(&deinitializer_terrain)
+                .expect("player should have options for terrain type")
+                .iter()
+                .position(|(option, use_limit)| {
+                    option == &deinitializer_option || use_limit == &deinitializer_use_limit
+                })
+                .expect("player should have previously added collect option");
             player
                 .collect_options
                 .get_mut(&deinitializer_terrain)
                 .expect("player should have options for terrain type")
-                .remove(&deinitializer_option);
+                .remove(index);
         })
     }
 }

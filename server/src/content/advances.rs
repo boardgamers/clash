@@ -2,6 +2,7 @@ use super::custom_actions::CustomActionType::*;
 use crate::{
     ability_initializer::AbilityInitializerSetup,
     advance::{Advance, AdvanceBonus::*},
+    map::Terrain::*,
     resource_pile::ResourcePile,
 };
 
@@ -28,6 +29,11 @@ pub fn get_technologies() -> Vec<Advance> {
         .add_one_time_ability_initializer(|game, player| game.draw_wonder_card(player))
         .add_custom_action(ConstructWonder)
         .build(),
+        //Maritime
+        Advance::builder("Fishing", "Your cities may Collect food from one Sea space")
+            .add_collect_option(Water, ResourcePile::food(1), Some(1))
+            .with_advance_bonus(MoodToken)
+            .build(),
         //Education
         Advance::builder(
             "Philosophy",
