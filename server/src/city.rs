@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::city_pieces::Building::*;
+use crate::resource_pile::ResourcePile;
 use crate::{
     city_pieces::{Building, CityPieces, CityPiecesData},
     game::Game,
@@ -9,7 +10,6 @@ use crate::{
     wonder::Wonder,
 };
 use MoodState::*;
-use crate::resource_pile::ResourcePile;
 
 const MAX_CITY_SIZE: usize = 4;
 

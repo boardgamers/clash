@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
-use PlayingAction::*;
 use serde::{Deserialize, Serialize};
+use PlayingAction::*;
 
 use crate::{
     city_pieces::Building::{self, *},
@@ -124,9 +124,7 @@ impl PlayingAction {
                 for (city_position, steps) in happiness_increases {
                     let city = player.get_city(&city_position).expect("Illegal action");
                     let cost = city.increase_happiness_cost(steps).expect("Illegal action");
-                    if city.player_index != player_index
-                        || !player.resources().can_afford(&cost)
-                    {
+                    if city.player_index != player_index || !player.resources().can_afford(&cost) {
                         panic!("Illegal action");
                     }
                     player.loose_resources(cost);

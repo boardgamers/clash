@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+
 
 use crate::{
     content::custom_actions::CustomActionType, events::EventMut, game::Game, map::Terrain,
@@ -77,7 +77,7 @@ pub trait AbilityInitializerSetup: Sized {
             player
                 .collect_options
                 .entry(terrain.clone())
-                .or_insert(HashSet::new())
+                .or_default()
                 .insert(option.clone());
         })
         .add_ability_undo_deinitializer(move |game, player_index| {
