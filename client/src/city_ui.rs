@@ -272,7 +272,7 @@ fn increase_happiness_click(
         .iter()
         .map(|(p, steps)| {
             let old_steps = *steps;
-            if p == pos  {
+            if p == pos {
                 if let Some(r) = increase_happiness_steps(player, city, &total_cost, old_steps) {
                     total_cost = r.1;
                     return (p.clone(), r.0);

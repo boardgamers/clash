@@ -78,7 +78,9 @@ pub fn show_increase_happiness(game: &mut Game, player_index: usize, state: &mut
     if let Some(increase_happiness) = &state.increase_happiness {
         if root_ui().button(vec2(750., y), "Cancel") {
             state.clear();
-        } else if root_ui().button(vec2(800., y), "Confirm") {
+        } else if increase_happiness.cost != ResourcePile::empty()
+            && root_ui().button(vec2(800., y), "Confirm")
+        {
             game.execute_action(
                 Action::PlayingAction(PlayingAction::IncreaseHappiness {
                     happiness_increases: increase_happiness.steps.clone(),
