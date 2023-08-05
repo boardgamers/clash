@@ -2,6 +2,7 @@ use crate::advance_ui::AdvancePayment;
 use crate::city_ui::ConstructionPayment;
 
 use macroquad::prelude::*;
+use server::game::{Game, GameState};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
@@ -78,4 +79,8 @@ impl State {
         self.focused_city = None;
         self.increase_happiness = None;
     }
+}
+
+pub fn can_play_action(game: &Game) -> bool {
+    game.state == GameState::Playing && game.actions_left > 0
 }

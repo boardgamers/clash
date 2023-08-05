@@ -12,6 +12,7 @@ use server::resource_pile::AdvancePaymentOptions;
 use crate::payment_ui::{
     new_resource_map, payment_dialog, HasPayment, Payment, ResourcePayment, ResourceType,
 };
+use crate::ui::can_play_action;
 use crate::{ActiveDialog, State};
 
 pub struct AdvancePayment {
@@ -77,7 +78,7 @@ pub fn show_advance_menu(game: &Game, player_index: usize, state: &mut State) {
     root_ui().window(hash!(), vec2(20., 300.), vec2(400., 200.), |ui| {
         for a in get_technologies().into_iter() {
             let name = a.name;
-            if game.actions_left > 0 && game.players[player_index].can_advance(&name) {
+            if can_play_action(game) && game.players[player_index].can_advance(&name) {
                 if ui.button(None, name.clone()) {
                     state.active_dialog = ActiveDialog::AdvancePayment(AdvancePayment::new(
                         game,

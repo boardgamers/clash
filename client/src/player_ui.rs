@@ -3,11 +3,11 @@ use macroquad::math::vec2;
 use macroquad::prelude::*;
 use macroquad::text::draw_text;
 use macroquad::ui::root_ui;
-
-use crate::ui::{IncreaseHappiness, State};
-use server::game::{Action, Game};
+use server::game::{Action, Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
+
+use crate::ui::{can_play_action, IncreaseHappiness, State};
 
 pub fn show_globals(game: &Game) {
     draw_text(&format!("Age {}", game.age), 600., 20., 20., BLACK);
@@ -19,10 +19,19 @@ pub fn show_globals(game: &Game) {
         20.,
         BLACK,
     );
+    let status = match game.state {
+        GameState::Playing => String::from("Play Actions"),
+        GameState::StatusPhase(_) => String::from("Status Phase"),
+        GameState::CulturalInfluenceResolution { .. } => {
+            String::from("Cultural Influence Resolution")
+        }
+        GameState::Finished => String::from("Finished"),
+    };
+    draw_text(&status, 600., 110., 20., BLACK);
     draw_text(
         &format!("Actions Left {}", game.actions_left),
         600.,
-        110.,
+        140.,
         20.,
         BLACK,
     );
@@ -47,7 +56,7 @@ pub fn show_resources(game: &Game, player_index: usize) {
     res(format!("Culture {}", r.culture_tokens));
 }
 
-pub fn show_global_controls(game: &mut Game, player_index: usize) {
+pub fn show_global_controls(game: &mut Game, player_index: usize, state: &mut State) {
     let y = 540.;
     if game.can_undo() && root_ui().button(vec2(600., y), "Undo") {
         game.execute_action(Action::Undo, player_index);
@@ -55,14 +64,39 @@ pub fn show_global_controls(game: &mut Game, player_index: usize) {
     if game.can_redo() && root_ui().button(vec2(650., y), "Redo") {
         game.execute_action(Action::Redo, player_index);
     }
-    if game.actions_left == 0 && root_ui().button(vec2(700., y), "End Turn") {
+    if let GameState::CulturalInfluenceResolution {
+        roll_boost_cost,
+        city_piece: _,
+        target_player_index: _,
+        target_city_position: _,
+    } = game.state
+    {
+        if root_ui().button(
+            vec2(600., 480.),
+            format!("Cultural Influence Resolution for {}", roll_boost_cost),
+        ) {
+            game.execute_action(
+                Action::CulturalInfluenceResolutionAction(true),
+                player_index,
+            );
+        } else if root_ui().button(vec2(900., 480.), "Cancel") {
+            game.execute_action(
+                Action::CulturalInfluenceResolutionAction(false),
+                player_index,
+            );
+        }
+    } else if game.state == GameState::Playing
+        && game.actions_left == 0
+        && root_ui().button(vec2(700., y), "End Turn")
+    {
+        state.clear();
         game.execute_action(Action::PlayingAction(PlayingAction::EndTurn), player_index);
-    }
+    };
 }
 
 pub fn show_increase_happiness(game: &mut Game, player_index: usize, state: &mut State) {
     let y = 480.;
-    if game.actions_left > 0
+    if can_play_action(game)
         && root_ui().button(vec2(600., y), "Increase Happiness")
         && state.increase_happiness.is_none()
     {

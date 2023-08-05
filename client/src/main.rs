@@ -53,10 +53,10 @@ async fn main() {
         show_log(&game);
         show_resources(&game, player_index);
         show_increase_happiness(&mut game, player_index, &mut state);
-        show_global_controls(&mut game, player_index);
+        show_global_controls(&mut game, player_index, &mut state);
 
-        if let Some((player_index, city_position)) = &state.focused_city {
-            let dialog = show_city_menu(&game, *player_index, city_position);
+        if let Some((city_owner_index, city_position)) = &state.focused_city {
+            let dialog = show_city_menu(&mut game, player_index, *city_owner_index, city_position);
             if let Some(dialog) = dialog {
                 state.active_dialog = dialog;
             }
