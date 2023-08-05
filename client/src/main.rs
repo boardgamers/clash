@@ -51,11 +51,11 @@ async fn main() {
         clear_background(GREEN);
 
         draw_map(&game);
-        advance_ui::show_advance_menu(&mut game, player_index, &mut state);
+        advance_ui::show_advance_menu(&game, player_index, &mut state);
         show_resources(&game, player_index);
 
         if let Some((player_index, city_position)) = &state.focused_city {
-            let dialog = city_ui::show_city_menu(&mut game, *player_index, city_position);
+            let dialog = city_ui::show_city_menu(&game, *player_index, city_position);
             if let Some(dialog) = dialog {
                 state.active_dialog = dialog;
             }
@@ -87,6 +87,7 @@ async fn main() {
                     let pos = city.position.clone();
                     if c == pos.coordinate() {
                         state.focused_city = Some((p.index, pos));
+                        state.active_dialog = ActiveDialog::None;
                     };
                 }
             }

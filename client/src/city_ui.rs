@@ -30,7 +30,7 @@ pub struct ConstructionPayment {
 
 impl ConstructionPayment {
     fn new(
-        game: &mut Game,
+        game: &Game,
         player_index: usize,
         city_position: Position,
         city_piece: Building,
@@ -86,7 +86,7 @@ impl HasPayment for ConstructionPayment {
 }
 
 pub fn show_city_menu(
-    game: &mut Game,
+    game: &Game,
     player_index: usize,
     city_position: &Position,
 ) -> Option<ActiveDialog> {
