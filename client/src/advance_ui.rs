@@ -15,10 +15,10 @@ use crate::payment_ui::{
 use crate::ui::can_play_action;
 use crate::{ActiveDialog, State};
 
-pub struct AdvancePayment {
-    player_index: usize,
-    name: String,
-    payment: Payment,
+pub struct AdvancePayment<'a> {
+    player_index: &'a usize,
+    name: &'a str,
+    payment: &'a Payment,
     cost: u32,
 }
 

@@ -2,7 +2,7 @@ use server::game::Game;
 use macroquad::prelude::{clear_background, next_frame, set_fullscreen};
 use macroquad::color::GREEN;
 use crate::advance_ui::{pay_advance_dialog, show_advance_menu};
-use crate::city_ui::{pay_construction_dialog, show_city_menu, try_city_click};
+use crate::city_ui::{CityMenu, pay_construction_dialog, show_city_menu, try_city_click};
 use crate::log_ui::show_log;
 use crate::map_ui::draw_map;
 use crate::player_ui::{show_global_controls, show_globals, show_increase_happiness, show_resources};
@@ -31,7 +31,7 @@ fn game_loop(game: &mut Game, state: &mut State) {
     show_global_controls(game, player_index, state);
 
     if let Some((city_owner_index, city_position)) = &state.focused_city {
-        let dialog = show_city_menu(game, player_index, *city_owner_index, city_position);
+        let dialog = show_city_menu(game, &CityMenu::new(&player_index, city_owner_index, city_position));
         if let Some(dialog) = dialog {
             state.active_dialog = dialog;
         }
