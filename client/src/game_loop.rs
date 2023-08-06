@@ -6,8 +6,7 @@ use crate::player_ui::{
     show_global_controls, show_globals, show_increase_happiness, show_resources,
 };
 use crate::ui::{ActiveDialog, State};
-use macroquad::color::GREEN;
-use macroquad::prelude::{clear_background, next_frame, set_fullscreen};
+use macroquad::prelude::{clear_background, next_frame, set_fullscreen, WHITE};
 use server::game::Game;
 
 pub async fn run(game: &mut Game) {
@@ -22,7 +21,7 @@ pub async fn run(game: &mut Game) {
 
 fn game_loop(game: &mut Game, state: &mut State) {
     let player_index = game.current_player_index;
-    clear_background(GREEN);
+    clear_background(WHITE);
 
     draw_map(game, state);
     show_advance_menu(game, player_index, state);

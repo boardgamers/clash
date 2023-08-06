@@ -74,7 +74,7 @@ impl HasPayment for AdvancePayment {
 }
 
 pub fn show_advance_menu<'a>(game: &'a Game, player_index: usize, state: &'a mut State) {
-    root_ui().window(hash!(), vec2(20., 300.), vec2(400., 200.), |ui| {
+    root_ui().window(hash!(), vec2(20., 900.), vec2(400., 200.), |ui| {
         for a in get_technologies().into_iter() {
             let name = a.name;
             let p = game.get_player(player_index);

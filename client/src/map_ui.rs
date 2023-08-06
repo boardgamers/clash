@@ -1,32 +1,26 @@
-use hex2d::{Coordinate, Spacing};
+use crate::city_ui::draw_city;
+use crate::hex_ui;
+use crate::ui::State;
 use macroquad::prelude::*;
 use server::game::Game;
-use server::position::Position;
+use server::map::Terrain;
 
-use crate::city_ui::draw_city;
-use crate::ui::{Point, State};
-
-const SIZE: f32 = 60.0;
-const SPACING: Spacing = Spacing::FlatTop(SIZE);
-
-pub fn center(pos: &Position) -> Point {
-    let c = pos.coordinate();
-    let p = c.to_pixel(SPACING);
-    Point { x: p.0, y: p.1 }
-}
-
-pub fn draw_hex(p: &Position) {
-    let c = center(p).to_screen();
-    draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, WHITE);
-    draw_text(&p.to_string(), c.x - 30.0, c.y - 35.0, 20.0, DARKGRAY);
-}
-
-pub fn pixel_to_coordinate(x: f32, y: f32) -> Coordinate {
-    let p = Point::new(x, y).to_game();
-    Coordinate::from_pixel(p.x, p.y, SPACING)
+fn terrain_color(t: &Terrain) -> (Color, bool) {
+    match t {
+        Terrain::Barren => (BROWN, true),
+        Terrain::Mountain => (RED, true),
+        Terrain::Fertile => (LIME, false),
+        Terrain::Forest => (DARKGREEN, true),
+        Terrain::Unusable => (BLACK, true),
+        Terrain::Water => (BLUE, true),
+    }
 }
 
 pub fn draw_map(game: &Game, state: &State) {
+    game.map.tiles.iter().for_each(|(p, t)| {
+        let c = terrain_color(t);
+        hex_ui::draw_hex(p, c.0, if c.1 { WHITE } else { BLACK })
+    });
     for p in game.players.iter() {
         for city in p.cities.iter() {
             draw_city(p, city, state);

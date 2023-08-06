@@ -15,12 +15,12 @@ use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::{PaymentOptions, ResourcePile};
 
-use crate::map_ui::pixel_to_coordinate;
+use crate::hex_ui::pixel_to_coordinate;
 use crate::payment_ui::{
     new_resource_map, payment_dialog, HasPayment, Payment, ResourcePayment, ResourceType,
 };
 use crate::ui::{can_play_action, IncreaseHappiness, Point, State};
-use crate::{map_ui, ui, ActiveDialog};
+use crate::{hex_ui, ui, ActiveDialog};
 
 pub struct CityMenu<'a> {
     player_index: usize,
@@ -29,11 +29,7 @@ pub struct CityMenu<'a> {
 }
 
 impl<'a> CityMenu<'a> {
-    pub fn new(
-        player_index: usize,
-        city_owner_index: usize,
-        city_position: &'a Position,
-    ) -> Self {
+    pub fn new(player_index: usize, city_owner_index: usize, city_position: &'a Position) -> Self {
         CityMenu {
             player_index,
             city_owner_index,
@@ -250,9 +246,7 @@ pub fn pay_construction_dialog(game: &mut Game, payment: &mut ConstructionPaymen
 }
 
 pub fn draw_city(owner: &Player, city: &City, state: &State) {
-    map_ui::draw_hex(&city.position);
-
-    let c = map_ui::center(&city.position).to_screen();
+    let c = hex_ui::center(&city.position).to_screen();
 
     draw_circle(c.x, c.y, 15.0, ui::player_color(owner.index));
 
