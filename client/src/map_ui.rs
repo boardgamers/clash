@@ -7,12 +7,12 @@ use server::map::Terrain;
 
 fn terrain_color(t: &Terrain) -> (Color, bool) {
     match t {
-        Terrain::Barren => (BROWN, true),
-        Terrain::Mountain => (RED, true),
-        Terrain::Fertile => (LIME, false),
-        Terrain::Forest => (DARKGREEN, true),
-        Terrain::Unusable => (BLACK, true),
-        Terrain::Water => (BLUE, true),
+        Terrain::Barren => (Color::from_hex(0xB26C19), true),
+        Terrain::Mountain => (Color::from_hex(0x575757), true),
+        Terrain::Fertile => (Color::from_hex(0x5DB521), false),
+        Terrain::Forest => (Color::from_hex(0x08570D), true),
+        Terrain::Unusable => (RED, false),
+        Terrain::Water => (Color::from_hex(0x1D70F5), false),
     }
 }
 

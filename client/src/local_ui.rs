@@ -20,7 +20,7 @@ pub fn setup_local_game() -> Game {
     add_terrain(&mut game, "B1", Terrain::Mountain);
     add_terrain(&mut game, "B2", Terrain::Forest);
     add_terrain(&mut game, "B3", Terrain::Fertile);
-    add_terrain(&mut game, "C1", Terrain::Mountain);
+    add_terrain(&mut game, "C1", Terrain::Barren);
     add_terrain(&mut game, "C2", Terrain::Forest);
     add_terrain(&mut game, "C3", Terrain::Water);
 
