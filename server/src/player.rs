@@ -18,8 +18,8 @@ use crate::{
     map::Terrain::{self, *},
     player_events::PlayerEvents,
     position::Position,
-    resource_pile::ResourcePile,
-    unit::Unit,
+    resource_pile::{AdvancePaymentOptions, ResourcePile},
+    unit::{MovementRestriction, Unit},
     wonder::Wonder,
 };
 pub const CONSTRUCT_COST: ResourcePile = ResourcePile {
@@ -64,7 +64,7 @@ pub struct Player {
     pub custom_actions: HashSet<CustomActionType>,
     pub wonder_cards: Vec<Wonder>,
     pub available_buildings: AvailableBuildings,
-    pub collect_options: HashMap<Terrain, HashSet<ResourcePile>>,
+    pub collect_options: HashMap<Terrain, Vec<ResourcePile>>,
 }
 
 impl Player {
@@ -227,10 +227,19 @@ impl Player {
             wonder_cards: Vec::new(),
             available_buildings: AvailableBuildings::new(5, 5, 5, 5, 5, 5, 5),
             collect_options: HashMap::from([
-                (Mountain, HashSet::from([ResourcePile::ore(1)])),
-                (Fertile, HashSet::from([ResourcePile::food(1)])),
-                (Forest, HashSet::from([ResourcePile::wood(1)])),
+                (Mountain, vec![ResourcePile::ore(1)]),
+                (Fertile, vec![ResourcePile::food(1)]),
+                (Forest, vec![ResourcePile::wood(1)]),
             ]),
+        }
+    }
+
+    pub fn end_turn(&mut self) {
+        for city in self.cities.iter_mut() {
+            city.deactivate();
+        }
+        for unit in self.units.iter_mut() {
+            unit.movement_restriction = MovementRestriction::None;
         }
     }
 
@@ -382,6 +391,11 @@ impl Player {
             .advance_cost
             .trigger(&mut cost, &advance.to_string(), &());
         cost
+    }
+
+    pub fn get_advance_payment_options(&self, advance: &str) -> AdvancePaymentOptions {
+        self.resources()
+            .get_advance_payment_options(self.advance_cost(advance))
     }
 
     pub fn get_city(&self, position: &Position) -> Option<&City> {

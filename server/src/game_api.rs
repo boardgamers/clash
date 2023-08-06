@@ -119,7 +119,6 @@ pub fn civilizations(game: Game) -> Vec<String> {
 }
 
 pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
-    let player_index = player_index;
     game.dice_roll_outcomes = Vec::new();
     game.wonders_left = Vec::new();
     for (i, player) in game.players.iter_mut().enumerate() {

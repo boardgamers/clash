@@ -325,7 +325,7 @@ impl Display for ResourcePile {
 pub struct PaymentOptions {
     pub default: ResourcePile,
     pub gold_left: u32,
-    pub jokers_left: u32,
+    pub discount: u32,
 }
 
 impl PaymentOptions {
@@ -333,7 +333,7 @@ impl PaymentOptions {
         Self {
             default,
             gold_left,
-            jokers_left,
+            discount: jokers_left,
         }
     }
 }
