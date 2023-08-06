@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use PlayingAction::*;
 
 use crate::{
     city_pieces::Building::{self, *},
@@ -8,8 +9,6 @@ use crate::{
     position::Position,
     resource_pile::ResourcePile,
 };
-
-use PlayingAction::*;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayingAction {
@@ -113,12 +112,8 @@ impl PlayingAction {
                 let player = &mut game.players[player_index];
                 for (city_position, steps) in happiness_increases {
                     let city = player.get_city(&city_position).expect("Illegal action");
-                    let cost = ResourcePile::mood_tokens(city.size() as u32) * steps;
-                    let max_steps = 2 - city.mood_state.clone() as u32;
-                    if city.player_index != player_index
-                        || !player.resources().can_afford(&cost)
-                        || steps > max_steps
-                    {
+                    let cost = city.increase_happiness_cost(steps).expect("Illegal action");
+                    if city.player_index != player_index || !player.resources().can_afford(&cost) {
                         panic!("Illegal action");
                     }
                     player.loose_resources(cost);
@@ -134,40 +129,19 @@ impl PlayingAction {
                 target_city_position,
                 city_piece,
             } => {
-                //todo! allow cultural influence of barbarians
-                let player = &mut game.players[player_index];
-                let starting_city = player
-                    .get_city(&starting_city_position)
-                    .expect("player should have position");
-                let range_boost = starting_city_position
-                    .distance(&target_city_position)
-                    .saturating_sub(starting_city.size() as u32);
-                let range_boost_cost = ResourcePile::culture_tokens(range_boost);
+                let range_boost_cost = game
+                    .influence_culture_boost_cost(
+                        player_index,
+                        &starting_city_position,
+                        target_player_index,
+                        &target_city_position,
+                        &city_piece,
+                    )
+                    .expect("Illegal action");
+
                 let self_influence = starting_city_position == target_city_position;
-                let target_city = game.players[target_player_index]
-                    .get_city(&target_city_position)
-                    .expect("Illegal action");
-                let target_city_owner = target_city.player_index;
-                let target_building_owner = target_city
-                    .city_pieces
-                    .building_owner(&city_piece)
-                    .expect("Illegal action");
-                let player = &mut game.players[player_index];
-                let starting_city = player
-                    .get_city(&starting_city_position)
-                    .expect("Illegal action");
-                if matches!(&city_piece, Obelisk)
-                    || starting_city.player_index != player_index
-                    || !player.resources().can_afford(&range_boost_cost)
-                    || (starting_city.influenced() && !self_influence)
-                    || game.successful_cultural_influence
-                    || !player.available_buildings.can_build(&city_piece)
-                    || target_city_owner != target_player_index
-                    || target_building_owner == player_index
-                {
-                    panic!("Illegal action");
-                }
-                player.loose_resources(range_boost_cost);
+
+                game.players[player_index].loose_resources(range_boost_cost);
                 let roll = game.get_next_dice_roll();
                 let success = roll == 5 || roll == 6;
                 if success {

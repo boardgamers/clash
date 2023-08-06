@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::city_pieces::Building::*;
+use crate::resource_pile::ResourcePile;
 use crate::{
     city_pieces::{Building, CityPieces, CityPiecesData},
     game::Game,
@@ -15,8 +16,7 @@ const MAX_CITY_SIZE: usize = 4;
 pub struct City {
     pub city_pieces: CityPieces,
     pub mood_state: MoodState,
-    pub is_activated: bool,
-    activations: u32,
+    pub activations: u32,
     pub player_index: usize,
     pub position: Position,
 }
@@ -26,7 +26,6 @@ impl City {
         Self {
             city_pieces: CityPieces::from_data(data.city_pieces),
             mood_state: data.mood_state,
-            is_activated: data.is_activated,
             activations: data.activations,
             player_index: data.player_index,
             position: data.position,
@@ -37,7 +36,6 @@ impl City {
         CityData::new(
             self.city_pieces.data(),
             self.mood_state,
-            self.is_activated,
             self.activations,
             self.player_index,
             self.position,
@@ -48,7 +46,6 @@ impl City {
         Self {
             city_pieces: CityPieces::default(),
             mood_state: Neutral,
-            is_activated: false,
             activations: 0,
             player_index,
             position,
@@ -217,13 +214,21 @@ impl City {
     pub fn influenced(&self) -> bool {
         self.uninfluenced_buildings() as usize != self.city_pieces.amount()
     }
+
+    pub fn increase_happiness_cost(&self, steps: u32) -> Option<ResourcePile> {
+        let max_steps = 2 - self.mood_state.clone() as u32;
+        if steps > max_steps {
+            None
+        } else {
+            Some(ResourcePile::mood_tokens(self.size() as u32) * steps)
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct CityData {
     city_pieces: CityPiecesData,
     mood_state: MoodState,
-    is_activated: bool,
     activations: u32,
     player_index: usize,
     position: Position,
@@ -233,7 +238,6 @@ impl CityData {
     pub fn new(
         city_pieces: CityPiecesData,
         mood_state: MoodState,
-        is_activated: bool,
         activations: u32,
         player_index: usize,
         position: Position,
@@ -241,7 +245,6 @@ impl CityData {
         Self {
             city_pieces,
             mood_state,
-            is_activated,
             activations,
             player_index,
             position,
