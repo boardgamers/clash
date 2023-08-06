@@ -251,7 +251,7 @@ pub fn pay_construction_dialog(game: &mut Game, payment: &mut ConstructionPaymen
 pub fn draw_city(owner: &Player, city: &City, state: &State) {
     let c = hex_ui::center(&city.position).to_screen();
 
-if city.is_activated() {
+    if city.is_activated() {
         draw_circle(c.x, c.y, 18.0, WHITE);
     }
     draw_circle(c.x, c.y, 15.0, ui::player_color(owner.index));
