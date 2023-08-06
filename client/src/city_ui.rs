@@ -29,7 +29,7 @@ pub struct CityMenu<'a> {
 }
 
 impl<'a> CityMenu<'a> {
-    pub fn new(player_index: &usize, city_owner_index: &usize, city_position: &'a Position) -> Self {
+    pub fn new(player_index: &'a usize, city_owner_index: &'a usize, city_position: &'a Position) -> Self {
         CityMenu {
             player_index,
             city_owner_index,
@@ -37,47 +37,48 @@ impl<'a> CityMenu<'a> {
         }
     }
 
-    pub fn get_player(&self, game: &Game) -> &Player {
-        &game.players[*self.player_index]
+    pub fn get_player(&self, game: &'a Game) -> &'a Player {
+        game.get_player(self.player_index)
     }
 
-    pub fn get_city_owner(&self, game: &Game) -> &Player {
-        &game.players[*self.city_owner_index]
+    pub fn get_city_owner(&self, game: &'a Game) -> &Player {
+        game.get_player(self.city_owner_index)
     }
 
-    pub fn get_city(&self, game: &Game) -> &City {
-        return  &game.players[*self.city_owner_index].get_city(self.city_position).expect("city not found");
+    pub fn get_city(&self, game: &'a Game) -> &City {
+        return game.players[*self.city_owner_index].get_city(self.city_position).expect("city not found");
     }
 
-    pub fn is_owner(&self) -> bool {
+    pub fn is_city_owner(&self) -> bool {
         self.player_index == self.city_owner_index
     }
 }
 
-pub struct ConstructionPayment<'a> {
-    player_index: &'a usize,
-    city_position: &'a Position,
-    city_piece: &'a Building,
-    payment: &'a Payment,
-    payment_options: &'a PaymentOptions,
+pub struct ConstructionPayment {
+    player_index: usize,
+    city_position: Position,
+    city_piece: Building,
+    payment: Payment,
+    payment_options: PaymentOptions,
 }
 
-impl<'a> ConstructionPayment<'a> {
+impl ConstructionPayment {
     fn new(
         game: &Game,
-        player_index: &usize,
-        city_position: &Position,
-        city_piece: &Building,
-    ) -> ConstructionPayment<'a> {
-        let cost = game.get_player(player_index).construct_cost(
+        player_index: usize,
+        city_position: Position,
+        city_piece: Building,
+    ) -> ConstructionPayment {
+        let p = game.get_player(&player_index);
+        let cost = p.construct_cost(
             &city_piece,
-            game.get_player(player_index).get_city(&city_position).unwrap(),
+            p.get_city(&city_position).unwrap(),
         );
-        let payment_options = &game.get_player(player_index)
+        let payment_options = p
             .resources()
             .get_payment_options(&cost);
 
-        let payment = &ConstructionPayment::new_payment(&payment_options);
+        let payment = ConstructionPayment::new_payment(&payment_options);
 
         ConstructionPayment {
             player_index,
@@ -121,7 +122,7 @@ impl HasPayment for ConstructionPayment {
 
 pub fn show_city_menu(
     game: &mut Game,
-    menu: &CityMenu,
+    menu: CityMenu,
 ) -> Option<ActiveDialog> {
     let mut result: Option<ActiveDialog> = None;
 
@@ -131,15 +132,16 @@ pub fn show_city_menu(
             .iter()
             .min_by_key(|c| c.position.distance(menu.city_position))
             .unwrap()
-            .position;
+            .position
+            .clone();
 
         for (building, name) in building_names() {
             if can_play_action(game) {
-                if let Some(d) = add_construct_button(game, menu, ui, &building, name) {
+                if let Some(d) = add_construct_button(game, &menu, ui, &building, name) {
                     let _ = result.insert(d);
                 }
 
-                add_influence_button(game, menu, ui, closet_city_pos, &building, name);
+                add_influence_button(game, &menu, ui, closet_city_pos, &building, name);
             };
         }
     });
@@ -149,12 +151,12 @@ pub fn show_city_menu(
 fn add_construct_button(game: &Game, menu: &CityMenu, ui: &mut Ui, building: &Building, name: &str) -> Option<ActiveDialog> {
     let owner = menu.get_city_owner(game);
     let city = menu.get_city(game);
-    if (menu.is_owner()) && city.can_construct(building, owner) && ui.button(None, name) {
+    if (menu.is_city_owner()) && city.can_construct(building, owner) && ui.button(None, name) {
         return Some(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
             game,
-            menu.player_index,
-            menu.city_position,
-            building,
+            *menu.player_index,
+            menu.city_position.clone(),
+            building.clone(),
         )));
     }
     None
@@ -164,7 +166,7 @@ fn add_influence_button(game: &mut Game, menu: &CityMenu, ui: &mut Ui, closet_ci
     let city = menu.get_city(game);
 
     if !city.city_pieces.can_add_building(building) {
-        let start_position = if menu.is_owner() {
+        let start_position = if menu.is_city_owner() {
             menu.city_position
         } else {
             closet_city_pos
@@ -203,7 +205,7 @@ pub fn pay_construction_dialog(game: &mut Game, payment: &mut ConstructionPaymen
                     payment: cp.payment.to_resource_pile(),
                     temple_bonus: None,
                 }),
-                *cp.player_index,
+                cp.player_index,
             )
         },
         |ap, r| match r {

@@ -43,10 +43,10 @@ pub fn player_color(player_index: usize) -> Color {
     }
 }
 
-pub enum ActiveDialog<'a> {
+pub enum ActiveDialog {
     None,
     AdvancePayment(AdvancePayment),
-    ConstructionPayment(ConstructionPayment<'a>),
+    ConstructionPayment(ConstructionPayment),
 }
 
 pub struct IncreaseHappiness {
