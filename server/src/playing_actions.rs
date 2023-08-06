@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -44,9 +42,11 @@ pub enum PlayingAction {
 
 impl PlayingAction {
     pub fn execute(self, game: &mut Game, player_index: usize) {
-        let free_action = self.action_type().free;
-        if !free_action && game.actions_left == 0 {
-            panic!("Illegal action");
+        if !self.action_type().free {
+            if game.actions_left == 0 {
+                panic!("Illegal action");
+            }
+            game.actions_left -= 1;
         }
         match self {
             Advance { advance, payment } => {
@@ -98,7 +98,7 @@ impl PlayingAction {
                     panic!("Illegal action");
                 }
                 let mut total_collect = ResourcePile::empty();
-                for (terrain, collect) in collections.into_iter() {
+                for (_terrain, collect) in collections.into_iter() {
                     total_collect += collect;
                 }
                 game.players[player_index].gain_resources(total_collect);
@@ -205,9 +205,6 @@ impl PlayingAction {
                 custom_action.execute(game, player_index)
             }
             EndTurn => game.next_turn(),
-        }
-        if !free_action {
-            game.actions_left -= 1;
         }
     }
 

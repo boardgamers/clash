@@ -64,7 +64,7 @@ pub struct Player {
     pub custom_actions: HashSet<CustomActionType>,
     pub wonder_cards: Vec<Wonder>,
     pub available_buildings: AvailableBuildings,
-    pub collect_options: HashMap<Terrain, Vec<(ResourcePile, /* use limit */ Option<u32>)>>,
+    pub collect_options: HashMap<Terrain, Vec<ResourcePile>>,
 }
 
 impl Player {
@@ -227,9 +227,9 @@ impl Player {
             wonder_cards: Vec::new(),
             available_buildings: AvailableBuildings::new(5, 5, 5, 5, 5, 5, 5),
             collect_options: HashMap::from([
-                (Mountain, vec![(ResourcePile::ore(1), None)]),
-                (Fertile, vec![(ResourcePile::food(1), None)]),
-                (Forest, vec![(ResourcePile::wood(1), None)]),
+                (Mountain, vec![ResourcePile::ore(1)]),
+                (Fertile, vec![ResourcePile::food(1)]),
+                (Forest, vec![ResourcePile::wood(1)]),
             ]),
         }
     }
@@ -475,8 +475,6 @@ impl Player {
     }
 }
 
-type CollectOption = (Terrain, Vec<(ResourcePile, Option<u32>)>);
-
 #[derive(Serialize, Deserialize)]
 pub struct PlayerData {
     name: Option<String>,
@@ -500,5 +498,5 @@ pub struct PlayerData {
     event_victory_points: f32,
     wonder_cards: Vec<String>,
     available_buildings: AvailableBuildings,
-    collect_options: Vec<CollectOption>,
+    collect_options: Vec<(Terrain, Vec<ResourcePile>)>,
 }

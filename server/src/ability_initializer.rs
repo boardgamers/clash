@@ -67,22 +67,16 @@ pub trait AbilityInitializerSetup: Sized {
         })
     }
 
-    fn add_collect_option(
-        self,
-        terrain: Terrain,
-        option: ResourcePile,
-        use_limit: Option<u32>,
-    ) -> Self {
+    fn add_collect_option(self, terrain: Terrain, option: ResourcePile) -> Self {
         let deinitializer_terrain = terrain.clone();
         let deinitializer_option = option.clone();
-        let deinitializer_use_limit = use_limit;
         self.add_one_time_ability_initializer(move |game, player_index| {
             let player = &mut game.players[player_index];
             player
                 .collect_options
                 .entry(terrain.clone())
-                .or_insert(Vec::new())
-                .push((option.clone(), use_limit));
+                .or_default()
+                .push(option.clone());
         })
         .add_ability_undo_deinitializer(move |game, player_index| {
             let player = &mut game.players[player_index];
@@ -91,15 +85,14 @@ pub trait AbilityInitializerSetup: Sized {
                 .get(&deinitializer_terrain)
                 .expect("player should have options for terrain type")
                 .iter()
-                .position(|(option, use_limit)| {
-                    option == &deinitializer_option || use_limit == &deinitializer_use_limit
-                })
+                .position(|option| option == &deinitializer_option)
                 .expect("player should have previously added collect option");
             player
                 .collect_options
                 .get_mut(&deinitializer_terrain)
                 .expect("player should have options for terrain type")
                 .remove(index);
+            //*Note that this will break if multiple effects add the same collect option
         })
     }
 }

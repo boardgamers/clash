@@ -31,7 +31,7 @@ pub fn get_technologies() -> Vec<Advance> {
         .build(),
         //Maritime
         Advance::builder("Fishing", "Your cities may Collect food from one Sea space")
-            .add_collect_option(Water, ResourcePile::food(1), Some(1))
+            .add_collect_option(Water, ResourcePile::food(1))
             .with_advance_bonus(MoodToken)
             .build(),
         //Education

@@ -40,6 +40,7 @@ pub struct Game {
     pub age: u32,   // starts with 1
     pub messages: Vec<String>,
     pub dice_roll_outcomes: Vec<u8>,
+    pub dice_roll_log: Vec<u8>,
     dropped_players: Vec<usize>,
     pub wonders_left: Vec<Wonder>,
     pub wonder_amount_left: usize,
@@ -95,6 +96,7 @@ impl Game {
             age: 1,
             messages: vec![String::from("Game has started")],
             dice_roll_outcomes,
+            dice_roll_log: Vec::new(),
             dropped_players: Vec::new(),
             wonders_left: wonders,
             wonder_amount_left: wonder_amount,
@@ -118,6 +120,7 @@ impl Game {
             age: data.age,
             messages: data.messages,
             dice_roll_outcomes: data.dice_roll_outcomes,
+            dice_roll_log: data.dice_roll_log,
             dropped_players: data.dropped_players,
             wonders_left: data
                 .wonders_left
@@ -158,6 +161,7 @@ impl Game {
             age: self.age,
             messages: self.messages,
             dice_roll_outcomes: self.dice_roll_outcomes,
+            dice_roll_log: self.dice_roll_log,
             dropped_players: self.dropped_players,
             wonders_left: self
                 .wonders_left
@@ -259,12 +263,11 @@ impl Game {
     }
 
     fn undo(&mut self, player_index: usize) {
-        let action = self.log[self.log_index]
-            .as_playing_action()
-            .expect("previous action should be a playing action");
-        let action =
-            serde_json::from_str::<PlayingAction>(action).expect("action should be deserializable");
-        action.undo(self, player_index);
+        match &self.log[self.log_index - 1] {
+            LogItem::PlayingAction(action) => serde_json::from_str::<PlayingAction>(action).expect("log item variant of type playing action should contain a serialized playing action").undo(self, player_index),
+            LogItem::StatusPhaseAction(_) => panic!("status phase actions can't be undone"),
+            LogItem::CulturalInfluenceResolutionAction(action) => self.undo_cultural_influence_resolution_action(serde_json::from_str::<bool>(action).expect("cultural influence resolution log item should contain a serialized boolean representing the confirmation action")),
+        }
         self.log_index -= 1;
     }
 
@@ -306,6 +309,39 @@ impl Game {
             &target_city_position,
             &city_piece,
         )
+    }
+
+    fn undo_cultural_influence_resolution_action(&mut self, action: bool) {
+        let cultural_influence_attempt_action = self.log[self.log_index - 2].as_playing_action().expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
+        let cultural_influence_attempt_action = serde_json::from_str::<PlayingAction>(cultural_influence_attempt_action).expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
+        let PlayingAction::InfluenceCultureAttempt {
+            starting_city_position: _,
+            target_player_index,
+            target_city_position,
+            city_piece,
+        } = cultural_influence_attempt_action
+        else {
+            panic!("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
+        };
+        let roll = self
+            .dice_roll_log
+            .last()
+            .expect("there should be a dice roll before a cultural influence resolution action");
+        self.state = CulturalInfluenceResolution {
+            roll_boost_cost: 5 - *roll as u32,
+            target_player_index,
+            target_city_position: target_city_position.clone(),
+            city_piece: city_piece.clone(),
+        };
+        if !action {
+            return;
+        }
+        self.undo_influence_culture(
+            self.current_player_index,
+            target_player_index,
+            &target_city_position,
+            &city_piece,
+        );
     }
 
     pub fn next_player(&mut self) {
@@ -365,10 +401,12 @@ impl Game {
 
     pub fn get_next_dice_roll(&mut self) -> u8 {
         self.lock_undo();
-        self.dice_roll_outcomes.pop().unwrap_or_else(|| {
+        let dice_roll = self.dice_roll_outcomes.pop().unwrap_or_else(|| {
             println!("ran out of predetermined dice roll outcomes, unseeded rng is no being used");
             rand::thread_rng().gen_range(1..=12)
-        })
+        });
+        self.dice_roll_log.push(dice_roll);
+        dice_roll
     }
 
     fn add_message(&mut self, message: &str) {
@@ -608,6 +646,24 @@ impl Game {
         self.players[influencer_index].available_buildings -= building;
     }
 
+    pub fn undo_influence_culture(
+        &mut self,
+        influencer_index: usize,
+        influenced_player_index: usize,
+        city_position: &Position,
+        building: &Building,
+    ) {
+        self.players[influenced_player_index]
+            .get_city_mut(city_position)
+            .expect("influenced should have influenced city")
+            .city_pieces
+            .set_building(building, influenced_player_index);
+        self.players[influencer_index].influenced_buildings -= 1;
+        self.successful_cultural_influence = false;
+        self.players[influenced_player_index].available_buildings -= building;
+        self.players[influencer_index].available_buildings += building;
+    }
+
     pub fn draw_new_cards(&mut self) {
         //every player draws 1 action card and 1 objective card
         todo!()
@@ -631,6 +687,7 @@ pub struct GameData {
     age: u32,
     messages: Vec<String>,
     dice_roll_outcomes: Vec<u8>,
+    dice_roll_log: Vec<u8>,
     dropped_players: Vec<usize>,
     wonders_left: Vec<String>,
     wonder_amount_left: usize,
@@ -735,6 +792,7 @@ pub mod tests {
             age: 1,
             messages: vec![String::from("Game has started")],
             dice_roll_outcomes: vec![12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+            dice_roll_log: Vec::new(),
             dropped_players: Vec::new(),
             wonders_left: Vec::new(),
             wonder_amount_left: 0,
