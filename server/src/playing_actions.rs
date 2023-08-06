@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use serde::{Deserialize, Serialize};
 use PlayingAction::*;
 
@@ -7,6 +5,7 @@ use crate::{
     city_pieces::Building::{self, *},
     content::custom_actions::CustomAction,
     game::{Game, GameState::*},
+    map::Terrain,
     position::Position,
     resource_pile::ResourcePile,
 };
@@ -25,7 +24,7 @@ pub enum PlayingAction {
     },
     Collect {
         city_position: Position,
-        collections: Vec<(Position, ResourcePile)>,
+        collections: Vec<(Terrain, ResourcePile)>,
     },
     IncreaseHappiness {
         happiness_increases: Vec<(Position, u32)>,
@@ -42,9 +41,11 @@ pub enum PlayingAction {
 
 impl PlayingAction {
     pub fn execute(self, game: &mut Game, player_index: usize) {
-        let free_action = self.action_type().free;
-        if !free_action && game.actions_left == 0 {
-            panic!("Illegal action");
+        if !self.action_type().free {
+            if game.actions_left == 0 {
+                panic!("Illegal action");
+            }
+            game.actions_left -= 1;
         }
         match self {
             Advance { advance, payment } => {
@@ -96,19 +97,7 @@ impl PlayingAction {
                     panic!("Illegal action");
                 }
                 let mut total_collect = ResourcePile::empty();
-                let mut used_tiles = HashSet::new();
-                for (tile, collect) in collections.into_iter() {
-                    if used_tiles.contains(&tile)
-                        || !city_position.neighbors().contains(&tile)
-                        || !game.players[player_index]
-                            .collect_options
-                            .get(game.map.tiles.get(&tile).expect("Illegal action"))
-                            .expect("Illegal action")
-                            .contains(&collect)
-                    {
-                        panic!("Illegal action");
-                    }
-                    used_tiles.insert(tile);
+                for (_terrain, collect) in collections.into_iter() {
                     total_collect += collect;
                 }
                 game.players[player_index].gain_resources(total_collect);
@@ -190,9 +179,6 @@ impl PlayingAction {
                 custom_action.execute(game, player_index)
             }
             EndTurn => game.next_turn(),
-        }
-        if !free_action {
-            game.actions_left -= 1;
         }
     }
 

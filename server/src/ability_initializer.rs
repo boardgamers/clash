@@ -76,15 +76,23 @@ pub trait AbilityInitializerSetup: Sized {
                 .collect_options
                 .entry(terrain.clone())
                 .or_default()
-                .insert(option.clone());
+                .push(option.clone());
         })
         .add_ability_undo_deinitializer(move |game, player_index| {
             let player = &mut game.players[player_index];
+            let index = player
+                .collect_options
+                .get(&deinitializer_terrain)
+                .expect("player should have options for terrain type")
+                .iter()
+                .position(|option| option == &deinitializer_option)
+                .expect("player should have previously added collect option");
             player
                 .collect_options
                 .get_mut(&deinitializer_terrain)
                 .expect("player should have options for terrain type")
-                .remove(&deinitializer_option);
+                .remove(index);
+            //*Note that this will break if multiple effects add the same collect option
         })
     }
 }

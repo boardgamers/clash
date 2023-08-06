@@ -99,7 +99,7 @@ impl ConstructionPayment {
                 _ => ResourcePayment {
                     resource: e.0.clone(),
                     current: e.1,
-                    min: cmp::max(0, e.1 as i32 - a.jokers_left as i32 - a.gold_left as i32) as u32,
+                    min: cmp::max(0, e.1 as i32 - a.discount as i32 - a.gold_left as i32) as u32,
                     max: e.1,
                 },
             })
@@ -224,7 +224,7 @@ pub fn pay_construction_dialog(game: &mut Game, payment: &mut ConstructionPaymen
         },
         |ap, r| match r {
             ResourceType::Gold => ap.payment_options.gold_left > 0,
-            ResourceType::Discount => ap.payment_options.jokers_left > 0,
+            ResourceType::Discount => ap.payment_options.discount > 0,
             _ => ap.payment.get(r).max > 0,
         },
         |cp, r| {
