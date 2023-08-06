@@ -1,14 +1,14 @@
 use crate::ui::{can_play_action, IncreaseHappiness, State};
+use macroquad::color::BLACK;
+use macroquad::math::vec2;
+use macroquad::prelude::draw_text;
+use macroquad::ui::root_ui;
 use server::city::City;
+use server::game::{Action, Game};
 use server::player::Player;
+use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-use server::game::{Action, Game};
-use macroquad::ui::root_ui;
-use macroquad::math::vec2;
-use server::playing_actions::PlayingAction;
-use macroquad::prelude::draw_text;
-use macroquad::color::BLACK;
 
 pub fn increase_happiness_click(
     player: &Player,

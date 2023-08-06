@@ -15,9 +15,14 @@ pub fn center(pos: &Position) -> Point {
     Point { x: p.0, y: p.1 }
 }
 
-pub fn draw_hex(p: &Position, fill_color: Color, text_color: Color) {
+pub fn draw_hex(p: &Position, fill_color: Color, text_color: Color, selected: bool) {
     let c = center(p).to_screen();
-    draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, fill_color);
+    let mut v = fill_color.to_vec();
+    if selected {
+        v.w = 0.5;
+    }
+
+    draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, Color::from_vec(v));
     draw_text(&p.to_string(), c.x - 30.0, c.y - 35.0, 20.0, text_color);
 }
 
