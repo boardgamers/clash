@@ -7,7 +7,7 @@ use server::game::{Action, Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
 
-use crate::ui::{can_play_action, IncreaseHappiness, State};
+use crate::ui::State;
 
 pub fn show_globals(game: &Game) {
     draw_text(&format!("Age {}", game.age), 600., 20., 20., BLACK);
@@ -79,7 +79,7 @@ pub fn show_global_controls(game: &mut Game, player_index: usize, state: &mut St
                 Action::CulturalInfluenceResolutionAction(true),
                 player_index,
             );
-        } else if root_ui().button(vec2(900., 480.), "Cancel") {
+        } else if root_ui().button(vec2(900., 480.), "Decline") {
             game.execute_action(
                 Action::CulturalInfluenceResolutionAction(false),
                 player_index,
@@ -92,45 +92,4 @@ pub fn show_global_controls(game: &mut Game, player_index: usize, state: &mut St
         state.clear();
         game.execute_action(Action::PlayingAction(PlayingAction::EndTurn), player_index);
     };
-}
-
-pub fn show_increase_happiness(game: &mut Game, player_index: usize, state: &mut State) {
-    let y = 480.;
-    if can_play_action(game)
-        && root_ui().button(vec2(600., y), "Increase Happiness")
-        && state.increase_happiness.is_none()
-    {
-        state.clear();
-        state.increase_happiness = Some(IncreaseHappiness::new(
-            game.get_player(player_index)
-                .cities
-                .iter()
-                .map(|c| (c.position.clone(), 0))
-                .collect(),
-            ResourcePile::empty(),
-        ));
-    }
-    if let Some(increase_happiness) = &state.increase_happiness {
-        if root_ui().button(vec2(750., y), "Cancel") {
-            state.clear();
-        } else if increase_happiness.cost != ResourcePile::empty()
-            && root_ui().button(vec2(800., y), "Confirm")
-        {
-            game.execute_action(
-                Action::PlayingAction(PlayingAction::IncreaseHappiness {
-                    happiness_increases: increase_happiness.steps.clone(),
-                }),
-                player_index,
-            );
-            state.clear();
-        } else {
-            draw_text(
-                &format!("Cost: {}", increase_happiness.cost),
-                600.,
-                520.,
-                20.,
-                BLACK,
-            );
-        }
-    }
 }

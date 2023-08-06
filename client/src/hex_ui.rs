@@ -1,9 +1,10 @@
 use crate::ui::Point;
 use hex2d::{Coordinate, Spacing};
 use macroquad::color::{Color, DARKGRAY};
-use macroquad::math::f32;
+use macroquad::math::{f32, i32};
 use macroquad::prelude::{draw_hexagon, draw_text};
 use server::position::Position;
+use std::f32::consts::PI;
 
 const SIZE: f32 = 60.0;
 const SPACING: Spacing = Spacing::FlatTop(SIZE);
@@ -23,4 +24,12 @@ pub fn draw_hex(p: &Position, fill_color: Color, text_color: Color) {
 pub fn pixel_to_coordinate(x: f32, y: f32) -> Coordinate {
     let p = Point::new(x, y).to_game();
     Coordinate::from_pixel(p.x, p.y, SPACING)
+}
+
+pub fn rotate_around(center: Point, radius: f32, angle_deg: i32) -> Point {
+    let angle_rad = PI / 180.0 * (angle_deg as f32);
+    Point {
+        x: center.x + radius * f32::cos(angle_rad),
+        y: center.y + radius * f32::sin(angle_rad),
+    }
 }
