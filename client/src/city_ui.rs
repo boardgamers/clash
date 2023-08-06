@@ -23,15 +23,15 @@ use crate::ui::{can_play_action, IncreaseHappiness, Point, State};
 use crate::{map_ui, ui, ActiveDialog};
 
 pub struct CityMenu<'a> {
-    player_index: &'a usize,
-    city_owner_index: &'a usize,
+    player_index: usize,
+    city_owner_index: usize,
     city_position: &'a Position,
 }
 
 impl<'a> CityMenu<'a> {
     pub fn new(
-        player_index: &'a usize,
-        city_owner_index: &'a usize,
+        player_index: usize,
+        city_owner_index: usize,
         city_position: &'a Position,
     ) -> Self {
         CityMenu {
@@ -75,7 +75,7 @@ impl ConstructionPayment {
         city_position: Position,
         city_piece: Building,
     ) -> ConstructionPayment {
-        let p = game.get_player(&player_index);
+        let p = game.get_player(player_index);
         let cost = p.construct_cost(&city_piece, p.get_city(&city_position).unwrap());
         let payment_options = p.resources().get_payment_options(&cost);
 

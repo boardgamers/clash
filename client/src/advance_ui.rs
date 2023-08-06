@@ -24,7 +24,7 @@ pub struct AdvancePayment {
 
 impl AdvancePayment {
     fn new(game: &Game, player_index: usize, name: &str) -> AdvancePayment {
-        let p = game.get_player(&player_index);
+        let p = game.get_player(player_index);
         let cost = p.advance_cost(name);
         AdvancePayment {
             player_index,
@@ -73,7 +73,7 @@ impl HasPayment for AdvancePayment {
     }
 }
 
-pub fn show_advance_menu<'a>(game: &'a Game, player_index: &'a usize, state: &'a mut State) {
+pub fn show_advance_menu<'a>(game: &'a Game, player_index: usize, state: &'a mut State) {
     root_ui().window(hash!(), vec2(20., 300.), vec2(400., 200.), |ui| {
         for a in get_technologies().into_iter() {
             let name = a.name;
@@ -82,7 +82,7 @@ pub fn show_advance_menu<'a>(game: &'a Game, player_index: &'a usize, state: &'a
                 if ui.button(None, name.clone()) {
                     state.active_dialog = ActiveDialog::AdvancePayment(AdvancePayment::new(
                         game,
-                        *player_index,
+                        player_index,
                         &name,
                     ));
                 }

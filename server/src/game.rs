@@ -169,11 +169,11 @@ impl Game {
         }
     }
 
-    pub fn get_player(&self, player_index: &usize) -> &Player {
-        &self.players[*player_index]
+    pub fn get_player(&self, player_index: usize) -> &Player {
+        &self.players[player_index]
     }
 
-    pub fn get_city(&self, player_index: &usize, position: &Position) -> &City {
+    pub fn get_city(&self, player_index: usize, position: &Position) -> &City {
         self.get_player(player_index)
             .get_city(position)
             .expect("city not found")
@@ -597,9 +597,9 @@ impl Game {
 
     pub fn influence_culture_boost_cost(
         &self,
-        player_index: &usize,
+        player_index: usize,
         starting_city_position: &Position,
-        target_player_index: &usize,
+        target_player_index: usize,
         target_city_position: &Position,
         city_piece: &Building,
     ) -> Option<ResourcePile> {
@@ -611,14 +611,14 @@ impl Game {
         let range_boost_cost = ResourcePile::culture_tokens(range_boost);
         let self_influence = starting_city_position == target_city_position;
         let target_city = self.get_city(target_player_index, target_city_position);
-        let target_city_owner = &target_city.player_index;
-        let target_building_owner = &target_city
+        let target_city_owner = target_city.player_index;
+        let target_building_owner = target_city
             .city_pieces
             .building_owner(city_piece)
             .expect("Illegal action");
-        let player = &self.players[*player_index];
+        let player = &self.players[player_index];
         if matches!(&city_piece, Building::Obelisk)
-            || &starting_city.player_index != player_index
+            || starting_city.player_index != player_index
             || !player.resources().can_afford(&range_boost_cost)
             || (starting_city.influenced() && !self_influence)
             || self.successful_cultural_influence

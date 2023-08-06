@@ -142,9 +142,9 @@ impl PlayingAction {
             } => {
                 let range_boost_cost = game
                     .influence_culture_boost_cost(
-                        &player_index,
+                        player_index,
                         &starting_city_position,
-                        &target_player_index,
+                        target_player_index,
                         &target_city_position,
                         &city_piece,
                     )

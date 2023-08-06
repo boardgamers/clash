@@ -37,7 +37,7 @@ pub fn show_globals(game: &Game) {
     );
 }
 
-pub fn show_resources(game: &Game, player_index: &usize) {
+pub fn show_resources(game: &Game, player_index: usize) {
     let player = game.get_player(player_index);
     let r: &ResourcePile = player.resources();
 
@@ -56,13 +56,13 @@ pub fn show_resources(game: &Game, player_index: &usize) {
     res(format!("Culture {}", r.culture_tokens));
 }
 
-pub fn show_global_controls(game: &mut Game, player_index: &usize, state: &mut State) {
+pub fn show_global_controls(game: &mut Game, player_index: usize, state: &mut State) {
     let y = 540.;
     if game.can_undo() && root_ui().button(vec2(600., y), "Undo") {
-        game.execute_action(Action::Undo, *player_index);
+        game.execute_action(Action::Undo, player_index);
     }
     if game.can_redo() && root_ui().button(vec2(650., y), "Redo") {
-        game.execute_action(Action::Redo, *player_index);
+        game.execute_action(Action::Redo, player_index);
     }
     if let GameState::CulturalInfluenceResolution {
         roll_boost_cost,
@@ -77,12 +77,12 @@ pub fn show_global_controls(game: &mut Game, player_index: &usize, state: &mut S
         ) {
             game.execute_action(
                 Action::CulturalInfluenceResolutionAction(true),
-                *player_index,
+                player_index,
             );
         } else if root_ui().button(vec2(900., 480.), "Cancel") {
             game.execute_action(
                 Action::CulturalInfluenceResolutionAction(false),
-                *player_index,
+                player_index,
             );
         }
     } else if game.state == GameState::Playing
@@ -90,11 +90,11 @@ pub fn show_global_controls(game: &mut Game, player_index: &usize, state: &mut S
         && root_ui().button(vec2(700., y), "End Turn")
     {
         state.clear();
-        game.execute_action(Action::PlayingAction(PlayingAction::EndTurn), *player_index);
+        game.execute_action(Action::PlayingAction(PlayingAction::EndTurn), player_index);
     };
 }
 
-pub fn show_increase_happiness(game: &mut Game, player_index: &usize, state: &mut State) {
+pub fn show_increase_happiness(game: &mut Game, player_index: usize, state: &mut State) {
     let y = 480.;
     if can_play_action(game)
         && root_ui().button(vec2(600., y), "Increase Happiness")
@@ -120,7 +120,7 @@ pub fn show_increase_happiness(game: &mut Game, player_index: &usize, state: &mu
                 Action::PlayingAction(PlayingAction::IncreaseHappiness {
                     happiness_increases: increase_happiness.steps.clone(),
                 }),
-                *player_index,
+                player_index,
             );
             state.clear();
         } else {
