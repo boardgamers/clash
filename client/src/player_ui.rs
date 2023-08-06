@@ -37,6 +37,35 @@ pub fn show_globals(game: &Game) {
     );
 }
 
+pub fn show_wonders(game: &Game, player_index: usize) {
+    let player = game.get_player(player_index);
+    for (i, name) in player.wonders.iter().enumerate() {
+        draw_text(
+            &format!("Wonder {}", name),
+            600.,
+            600. + i as f32 * 30.0,
+            20.,
+            BLACK,
+        );
+    }
+    for (i, card) in player.wonder_cards.iter().enumerate() {
+        let req = match card.required_advances[..] {
+            [] => String::from("no advances"),
+            _ => card.required_advances.join(", "),
+        };
+        draw_text(
+            &format!(
+                "Wonder Card {} cost {} requires {}",
+                &card.name, card.cost, req
+            ),
+            600.,
+            800. + i as f32 * 30.0,
+            20.,
+            BLACK,
+        );
+    }
+}
+
 pub fn show_resources(game: &Game, player_index: usize) {
     let player = game.get_player(player_index);
     let r: &ResourcePile = player.resources();

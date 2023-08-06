@@ -1,4 +1,4 @@
-use crate::construct_ui::add_construct_button;
+use crate::construct_ui::{add_construct_button, add_wonder_buttons};
 use crate::happiness_ui::increase_happiness_click;
 use crate::hex_ui::pixel_to_coordinate;
 use crate::ui_state::{can_play_action, CityMenu, State};
@@ -36,6 +36,12 @@ pub fn show_city_menu(game: &mut Game, menu: CityMenu) -> Option<ActiveDialog> {
                 );
             };
         }
+
+        if can_play_action(game) && menu.is_city_owner() {
+            if let Some(d) = add_wonder_buttons(game, &menu, ui) {
+                let _ = result.insert(d);
+            }
+        }
     });
     result
 }
@@ -67,6 +73,18 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
     }
 
     let mut i = 0;
+    city.city_pieces.wonders.iter().for_each(|w| {
+        let p = hex_ui::rotate_around(c, 30.0, 90 * i);
+        draw_text(
+            &w.name,
+            p.x - 12.0,
+            p.y + 12.0,
+            50.0,
+            player_ui::player_color(owner.index),
+        );
+        i += 1;
+    });
+
     for player_index in 0..4 {
         for b in city.city_pieces.buildings(Some(player_index)).iter() {
             let p = hex_ui::rotate_around(c, 30.0, 90 * i);

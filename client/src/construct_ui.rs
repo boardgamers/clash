@@ -1,6 +1,7 @@
 use macroquad::math::{i32, u32};
 use macroquad::ui::Ui;
 use server::city_pieces::Building;
+use server::content::custom_actions::CustomAction;
 use server::game::{Action, Game};
 use server::playing_actions::PlayingAction;
 use server::position::Position;
@@ -30,8 +31,26 @@ pub fn add_construct_button(
             game,
             menu.player_index,
             menu.city_position.clone(),
-            building.clone(),
+            ConstructionProject::Building(building.clone()),
         )));
+    }
+    None
+}
+
+pub fn add_wonder_buttons(game: &Game, menu: &CityMenu, ui: &mut Ui) -> Option<ActiveDialog> {
+    let city = menu.get_city(game);
+    let owner = menu.get_city_owner(game);
+    for w in owner.wonder_cards.iter() {
+        if city.can_build_wonder(w, owner, game)
+            && ui.button(None, format!("Build Wonder {}", w.name))
+        {
+            return Some(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
+                game,
+                menu.player_index,
+                menu.city_position.clone(),
+                ConstructionProject::Wonder(w.name.clone()),
+            )));
+        }
     }
     None
 }
@@ -40,16 +59,24 @@ pub fn pay_construction_dialog(game: &mut Game, payment: &mut ConstructionPaymen
     payment_dialog(
         payment,
         |cp| cp.payment.get(ResourceType::Discount).current == 0,
-        |cp| {
-            game.execute_action(
+        |cp| match &cp.project {
+            ConstructionProject::Building(b) => game.execute_action(
                 Action::PlayingAction(PlayingAction::Construct {
                     city_position: cp.city_position.clone(),
-                    city_piece: cp.city_piece.clone(),
+                    city_piece: b.clone(),
                     payment: cp.payment.to_resource_pile(),
                     temple_bonus: None,
                 }),
                 cp.player_index,
-            )
+            ),
+            ConstructionProject::Wonder(w) => game.execute_action(
+                Action::PlayingAction(PlayingAction::Custom(CustomAction::ConstructWonder {
+                    city_position: cp.city_position.clone(),
+                    payment: cp.payment.to_resource_pile(),
+                    wonder: w.clone(),
+                })),
+                cp.player_index,
+            ),
         },
         |ap, r| match r {
             ResourceType::Gold => ap.payment_options.gold_left > 0,
@@ -77,10 +104,15 @@ pub fn pay_construction_dialog(game: &mut Game, payment: &mut ConstructionPaymen
     )
 }
 
+pub enum ConstructionProject {
+    Building(Building),
+    Wonder(String),
+}
+
 pub struct ConstructionPayment {
     pub player_index: usize,
     pub city_position: Position,
-    pub city_piece: Building,
+    pub project: ConstructionProject,
     pub payment: Payment,
     pub payment_options: PaymentOptions,
 }
@@ -90,10 +122,22 @@ impl ConstructionPayment {
         game: &Game,
         player_index: usize,
         city_position: Position,
-        city_piece: Building,
+        project: ConstructionProject,
     ) -> ConstructionPayment {
         let p = game.get_player(player_index);
-        let cost = p.construct_cost(&city_piece, p.get_city(&city_position).unwrap());
+        let cost = match &project {
+            ConstructionProject::Building(b) => {
+                p.construct_cost(b, p.get_city(&city_position).unwrap())
+            }
+            ConstructionProject::Wonder(name) => p
+                .wonder_cards
+                .iter()
+                .find(|w| w.name == *name)
+                .unwrap()
+                .cost
+                .clone(),
+        };
+
         let payment_options = p.resources().get_payment_options(&cost);
 
         let payment = ConstructionPayment::new_payment(&payment_options);
@@ -101,7 +145,7 @@ impl ConstructionPayment {
         ConstructionPayment {
             player_index,
             city_position,
-            city_piece,
+            project,
             payment,
             payment_options,
         }

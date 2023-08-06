@@ -4,7 +4,7 @@ use crate::construct_ui::pay_construction_dialog;
 use crate::happiness_ui::show_increase_happiness;
 use crate::log_ui::show_log;
 use crate::map_ui::draw_map;
-use crate::player_ui::{show_global_controls, show_globals, show_resources};
+use crate::player_ui::{show_global_controls, show_globals, show_resources, show_wonders};
 use crate::ui_state::{ActiveDialog, CityMenu, State};
 use macroquad::prelude::{clear_background, next_frame, set_fullscreen, WHITE};
 use server::game::Game;
@@ -28,6 +28,7 @@ fn game_loop(game: &mut Game, state: &mut State) {
     show_globals(game);
     show_log(game);
     show_resources(game, player_index);
+    show_wonders(game, player_index);
     show_increase_happiness(game, player_index, state);
     show_global_controls(game, player_index, state);
 
