@@ -16,8 +16,7 @@ const MAX_CITY_SIZE: usize = 4;
 pub struct City {
     pub city_pieces: CityPieces,
     pub mood_state: MoodState,
-    pub is_activated: bool,
-    activations: u32,
+    pub activations: u32,
     pub player_index: usize,
     pub position: Position,
 }
@@ -27,7 +26,6 @@ impl City {
         Self {
             city_pieces: CityPieces::from_data(data.city_pieces),
             mood_state: data.mood_state,
-            is_activated: data.is_activated,
             activations: data.activations,
             player_index: data.player_index,
             position: data.position,
@@ -38,7 +36,6 @@ impl City {
         CityData::new(
             self.city_pieces.data(),
             self.mood_state,
-            self.is_activated,
             self.activations,
             self.player_index,
             self.position,
@@ -49,7 +46,6 @@ impl City {
         Self {
             city_pieces: CityPieces::default(),
             mood_state: Neutral,
-            is_activated: false,
             activations: 0,
             player_index,
             position,
@@ -233,7 +229,6 @@ impl City {
 pub struct CityData {
     city_pieces: CityPiecesData,
     mood_state: MoodState,
-    is_activated: bool,
     activations: u32,
     player_index: usize,
     position: Position,
@@ -243,7 +238,6 @@ impl CityData {
     pub fn new(
         city_pieces: CityPiecesData,
         mood_state: MoodState,
-        is_activated: bool,
         activations: u32,
         player_index: usize,
         position: Position,
@@ -251,7 +245,6 @@ impl CityData {
         Self {
             city_pieces,
             mood_state,
-            is_activated,
             activations,
             player_index,
             position,

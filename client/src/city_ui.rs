@@ -121,6 +121,8 @@ pub fn show_city_menu(game: &mut Game, menu: CityMenu) -> Option<ActiveDialog> {
     let mut result: Option<ActiveDialog> = None;
 
     root_ui().window(hash!(), vec2(30., 700.), vec2(500., 200.), |ui| {
+        ui.label(None, &menu.city_position.to_string());
+
         let closet_city_pos = &menu
             .get_player(game)
             .cities
@@ -152,7 +154,10 @@ fn add_construct_button(
 ) -> Option<ActiveDialog> {
     let owner = menu.get_city_owner(game);
     let city = menu.get_city(game);
-    if (menu.is_city_owner()) && city.can_construct(building, owner) && ui.button(None, name) {
+    if (menu.is_city_owner())
+        && city.can_construct(building, owner)
+        && ui.button(None, format!("Build {}", name))
+    {
         return Some(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
             game,
             menu.player_index,
@@ -171,9 +176,7 @@ fn add_influence_button(
     building: &Building,
     building_name: &str,
 ) {
-    let city = menu.get_city(game);
-
-    if !city.city_pieces.can_add_building(building) {
+    if !menu.get_city(game).city_pieces.can_add_building(building) {
         let start_position = if menu.is_city_owner() {
             menu.city_position
         } else {
@@ -248,6 +251,9 @@ pub fn pay_construction_dialog(game: &mut Game, payment: &mut ConstructionPaymen
 pub fn draw_city(owner: &Player, city: &City, state: &State) {
     let c = hex_ui::center(&city.position).to_screen();
 
+if city.is_activated() {
+        draw_circle(c.x, c.y, 18.0, WHITE);
+    }
     draw_circle(c.x, c.y, 15.0, ui::player_color(owner.index));
 
     let font_size = 25.0;
