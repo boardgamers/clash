@@ -21,7 +21,7 @@ pub async fn run(game: &mut Game) {
 }
 
 fn game_loop(game: &mut Game, state: &mut State) {
-    let player_index = &game.current_player_index.clone();
+    let player_index = game.current_player_index;
     clear_background(GREEN);
 
     draw_map(game, state);
@@ -32,10 +32,10 @@ fn game_loop(game: &mut Game, state: &mut State) {
     show_increase_happiness(game, player_index, state);
     show_global_controls(game, player_index, state);
 
-    if let Some((city_owner_index, city_position)) = &state.focused_city {
+    if let Some((city_owner_index, city_position)) = state.focused_city.clone() {
         let dialog = show_city_menu(
             game,
-            CityMenu::new(player_index, city_owner_index, city_position),
+            CityMenu::new(player_index, city_owner_index, &city_position),
         );
         if let Some(dialog) = dialog {
             state.active_dialog = dialog;

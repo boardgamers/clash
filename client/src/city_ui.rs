@@ -50,7 +50,7 @@ impl<'a> CityMenu<'a> {
     }
 
     pub fn get_city(&self, game: &'a Game) -> &City {
-        return game.players[*self.city_owner_index]
+        return game.players[self.city_owner_index]
             .get_city(self.city_position)
             .expect("city not found");
     }
@@ -159,7 +159,7 @@ fn add_construct_button(
     if (menu.is_city_owner()) && city.can_construct(building, owner) && ui.button(None, name) {
         return Some(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
             game,
-            *menu.player_index,
+            menu.player_index,
             menu.city_position.clone(),
             building.clone(),
         )));
@@ -197,11 +197,11 @@ fn add_influence_button(
                 game.execute_action(
                     Action::PlayingAction(PlayingAction::InfluenceCultureAttempt {
                         starting_city_position: start_position.clone(),
-                        target_player_index: *menu.city_owner_index,
+                        target_player_index: menu.city_owner_index,
                         target_city_position: menu.city_position.clone(),
                         city_piece: building.clone(),
                     }),
-                    *menu.player_index,
+                    menu.player_index,
                 );
             }
         }
