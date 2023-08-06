@@ -24,14 +24,13 @@ pub struct AdvancePayment {
 
 impl AdvancePayment {
     fn new(game: &Game, player_index: usize, name: &str) -> AdvancePayment {
-        let cost = game.players[player_index].advance_cost(name);
+        let p = game.get_player(player_index);
+        let cost = p.advance_cost(name);
         AdvancePayment {
             player_index,
             name: name.to_string(),
             payment: AdvancePayment::new_payment(
-                game.players[player_index]
-                    .resources()
-                    .get_advance_payment_options(cost),
+                p.resources().get_advance_payment_options(cost),
                 cost,
             ),
             cost,
@@ -74,11 +73,12 @@ impl HasPayment for AdvancePayment {
     }
 }
 
-pub fn show_advance_menu(game: &Game, player_index: usize, state: &mut State) {
+pub fn show_advance_menu<'a>(game: &'a Game, player_index: usize, state: &'a mut State) {
     root_ui().window(hash!(), vec2(20., 300.), vec2(400., 200.), |ui| {
         for a in get_technologies().into_iter() {
             let name = a.name;
-            if can_play_action(game) && game.players[player_index].can_advance(&name) {
+            let p = game.get_player(player_index);
+            if can_play_action(game) && p.can_advance(&name) {
                 if ui.button(None, name.clone()) {
                     state.active_dialog = ActiveDialog::AdvancePayment(AdvancePayment::new(
                         game,
@@ -86,7 +86,7 @@ pub fn show_advance_menu(game: &Game, player_index: usize, state: &mut State) {
                         &name,
                     ));
                 }
-            } else if game.players[player_index].advances.contains(&name) {
+            } else if p.advances.contains(&name) {
                 ui.label(None, &name);
             }
         }
@@ -100,7 +100,7 @@ pub fn pay_advance_dialog(game: &mut Game, ap: &mut AdvancePayment) -> bool {
         |ap| {
             game.execute_action(
                 Action::PlayingAction(PlayingAction::Advance {
-                    advance: ap.name.clone(),
+                    advance: ap.name.to_string(),
                     payment: ap.payment.to_resource_pile(),
                 }),
                 ap.player_index,

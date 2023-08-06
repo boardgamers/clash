@@ -38,7 +38,7 @@ pub fn show_globals(game: &Game) {
 }
 
 pub fn show_resources(game: &Game, player_index: usize) {
-    let player = &game.players[player_index];
+    let player = game.get_player(player_index);
     let r: &ResourcePile = player.resources();
 
     let mut i: f32 = 0.;
@@ -102,7 +102,7 @@ pub fn show_increase_happiness(game: &mut Game, player_index: usize, state: &mut
     {
         state.clear();
         state.increase_happiness = Some(IncreaseHappiness::new(
-            game.players[player_index]
+            game.get_player(player_index)
                 .cities
                 .iter()
                 .map(|c| (c.position.clone(), 0))
