@@ -29,7 +29,11 @@ pub struct CityMenu<'a> {
 }
 
 impl<'a> CityMenu<'a> {
-    pub fn new(player_index: &'a usize, city_owner_index: &'a usize, city_position: &'a Position) -> Self {
+    pub fn new(
+        player_index: &'a usize,
+        city_owner_index: &'a usize,
+        city_position: &'a Position,
+    ) -> Self {
         CityMenu {
             player_index,
             city_owner_index,
@@ -46,7 +50,9 @@ impl<'a> CityMenu<'a> {
     }
 
     pub fn get_city(&self, game: &'a Game) -> &City {
-        return game.players[*self.city_owner_index].get_city(self.city_position).expect("city not found");
+        return game.players[*self.city_owner_index]
+            .get_city(self.city_position)
+            .expect("city not found");
     }
 
     pub fn is_city_owner(&self) -> bool {
@@ -70,13 +76,8 @@ impl ConstructionPayment {
         city_piece: Building,
     ) -> ConstructionPayment {
         let p = game.get_player(&player_index);
-        let cost = p.construct_cost(
-            &city_piece,
-            p.get_city(&city_position).unwrap(),
-        );
-        let payment_options = p
-            .resources()
-            .get_payment_options(&cost);
+        let cost = p.construct_cost(&city_piece, p.get_city(&city_position).unwrap());
+        let payment_options = p.resources().get_payment_options(&cost);
 
         let payment = ConstructionPayment::new_payment(&payment_options);
 
@@ -120,14 +121,12 @@ impl HasPayment for ConstructionPayment {
     }
 }
 
-pub fn show_city_menu(
-    game: &mut Game,
-    menu: CityMenu,
-) -> Option<ActiveDialog> {
+pub fn show_city_menu(game: &mut Game, menu: CityMenu) -> Option<ActiveDialog> {
     let mut result: Option<ActiveDialog> = None;
 
     root_ui().window(hash!(), vec2(30., 700.), vec2(500., 200.), |ui| {
-        let closet_city_pos = &menu.get_player(game)
+        let closet_city_pos = &menu
+            .get_player(game)
             .cities
             .iter()
             .min_by_key(|c| c.position.distance(menu.city_position))
@@ -148,7 +147,13 @@ pub fn show_city_menu(
     result
 }
 
-fn add_construct_button(game: &Game, menu: &CityMenu, ui: &mut Ui, building: &Building, name: &str) -> Option<ActiveDialog> {
+fn add_construct_button(
+    game: &Game,
+    menu: &CityMenu,
+    ui: &mut Ui,
+    building: &Building,
+    name: &str,
+) -> Option<ActiveDialog> {
     let owner = menu.get_city_owner(game);
     let city = menu.get_city(game);
     if (menu.is_city_owner()) && city.can_construct(building, owner) && ui.button(None, name) {
@@ -162,7 +167,14 @@ fn add_construct_button(game: &Game, menu: &CityMenu, ui: &mut Ui, building: &Bu
     None
 }
 
-fn add_influence_button(game: &mut Game, menu: &CityMenu, ui: &mut Ui, closet_city_pos: &Position, building: &Building, building_name: &str) {
+fn add_influence_button(
+    game: &mut Game,
+    menu: &CityMenu,
+    ui: &mut Ui,
+    closet_city_pos: &Position,
+    building: &Building,
+    building_name: &str,
+) {
     let city = menu.get_city(game);
 
     if !city.city_pieces.can_add_building(building) {
@@ -178,7 +190,10 @@ fn add_influence_button(game: &mut Game, menu: &CityMenu, ui: &mut Ui, closet_ci
             menu.city_position,
             building,
         ) {
-            if ui.button(None, format!("Attempt Influence {} for {}", building_name, cost)) {
+            if ui.button(
+                None,
+                format!("Attempt Influence {} for {}", building_name, cost),
+            ) {
                 game.execute_action(
                     Action::PlayingAction(PlayingAction::InfluenceCultureAttempt {
                         starting_city_position: start_position.clone(),

@@ -1,7 +1,8 @@
-use server::game::Game;
-use server::resource_pile::ResourcePile;
 use server::city::City;
+use server::game::Game;
+use server::map::Terrain;
 use server::position::Position;
+use server::resource_pile::ResourcePile;
 
 pub fn setup_local_game() -> Game {
     let mut game = Game::new(2, "a".repeat(32));
@@ -18,5 +19,10 @@ pub fn setup_local_game() -> Game {
     game.players[player_index2]
         .cities
         .push(City::new(player_index2, Position::from_offset("C1")));
+
+    game.map
+        .tiles
+        .insert(Position::from_offset("A1"), Terrain::Fertile);
+
     game
 }

@@ -30,9 +30,7 @@ impl AdvancePayment {
             player_index,
             name: name.to_string(),
             payment: AdvancePayment::new_payment(
-                p
-                    .resources()
-                    .get_advance_payment_options(cost),
+                p.resources().get_advance_payment_options(cost),
                 cost,
             ),
             cost,
