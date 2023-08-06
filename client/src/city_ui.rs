@@ -1,118 +1,17 @@
-use std::cmp;
-
+use crate::construct_ui::add_construct_button;
+use crate::happiness_ui::increase_happiness_click;
+use crate::hex_ui::pixel_to_coordinate;
+use crate::ui_state::{can_play_action, CityMenu, State};
+use crate::{hex_ui, influence_ui, player_ui, ActiveDialog};
 use macroquad::color::BLACK;
 use macroquad::hash;
-use macroquad::math::{i32, u32, vec2};
+use macroquad::math::vec2;
 use macroquad::prelude::*;
 use macroquad::ui::root_ui;
 use server::city::{City, MoodState};
 use server::city_pieces::Building;
 use server::game::Game;
 use server::player::Player;
-use server::position::Position;
-use server::resource_pile::PaymentOptions;
-
-use crate::construct_ui::add_construct_button;
-use crate::happiness_ui::increase_happiness_click;
-use crate::hex_ui::pixel_to_coordinate;
-use crate::payment_ui::{new_resource_map, HasPayment, Payment, ResourcePayment, ResourceType};
-use crate::ui::{can_play_action, State};
-use crate::{hex_ui, influence_ui, ui, ActiveDialog};
-
-pub struct CityMenu<'a> {
-    pub player_index: usize,
-    pub city_owner_index: usize,
-    pub city_position: &'a Position,
-}
-
-impl<'a> CityMenu<'a> {
-    pub fn new(player_index: usize, city_owner_index: usize, city_position: &'a Position) -> Self {
-        CityMenu {
-            player_index,
-            city_owner_index,
-            city_position,
-        }
-    }
-
-    pub fn get_player(&self, game: &'a Game) -> &'a Player {
-        game.get_player(self.player_index)
-    }
-
-    pub fn get_city_owner(&self, game: &'a Game) -> &Player {
-        game.get_player(self.city_owner_index)
-    }
-
-    pub fn get_city(&self, game: &'a Game) -> &City {
-        return game.players[self.city_owner_index]
-            .get_city(self.city_position)
-            .expect("city not found");
-    }
-
-    pub fn is_city_owner(&self) -> bool {
-        self.player_index == self.city_owner_index
-    }
-}
-
-pub struct ConstructionPayment {
-    pub player_index: usize,
-    pub city_position: Position,
-    pub city_piece: Building,
-    pub payment: Payment,
-    pub payment_options: PaymentOptions,
-}
-
-impl ConstructionPayment {
-    pub fn new(
-        game: &Game,
-        player_index: usize,
-        city_position: Position,
-        city_piece: Building,
-    ) -> ConstructionPayment {
-        let p = game.get_player(player_index);
-        let cost = p.construct_cost(&city_piece, p.get_city(&city_position).unwrap());
-        let payment_options = p.resources().get_payment_options(&cost);
-
-        let payment = ConstructionPayment::new_payment(&payment_options);
-
-        ConstructionPayment {
-            player_index,
-            city_position,
-            city_piece,
-            payment,
-            payment_options,
-        }
-    }
-
-    pub fn new_payment(a: &PaymentOptions) -> Payment {
-        let mut resources: Vec<ResourcePayment> = new_resource_map(&a.default)
-            .into_iter()
-            .map(|e| match e.0 {
-                ResourceType::Discount | ResourceType::Gold => ResourcePayment {
-                    resource: e.0.clone(),
-                    current: e.1,
-                    min: e.1,
-                    max: e.1,
-                },
-                _ => ResourcePayment {
-                    resource: e.0.clone(),
-                    current: e.1,
-                    min: cmp::max(0, e.1 as i32 - a.discount as i32 - a.gold_left as i32) as u32,
-                    max: e.1,
-                },
-            })
-            .collect();
-
-        resources.sort_by_key(|r| r.resource.clone());
-
-        Payment { resources }
-    }
-}
-
-impl HasPayment for ConstructionPayment {
-    fn payment(&self) -> &Payment {
-        &self.payment
-    }
-}
 
 pub fn show_city_menu(game: &mut Game, menu: CityMenu) -> Option<ActiveDialog> {
     let mut result: Option<ActiveDialog> = None;
@@ -147,7 +46,7 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
     if city.is_activated() {
         draw_circle(c.x, c.y, 18.0, WHITE);
     }
-    draw_circle(c.x, c.y, 15.0, ui::player_color(owner.index));
+    draw_circle(c.x, c.y, 15.0, player_ui::player_color(owner.index));
 
     let font_size = 25.0;
     let x = c.x - 5.;
@@ -176,7 +75,7 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
                 p.x - 12.0,
                 p.y + 12.0,
                 50.0,
-                ui::player_color(player_index),
+                player_ui::player_color(player_index),
             );
             i += 1;
         }
@@ -195,7 +94,7 @@ fn building_symbol(b: &Building) -> &str {
     }
 }
 
-pub fn building_names() -> [(Building, &'static str); 7] {
+fn building_names() -> [(Building, &'static str); 7] {
     [
         (Building::Academy, "Academy"),
         (Building::Market, "Market"),

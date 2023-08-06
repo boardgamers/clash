@@ -1,11 +1,11 @@
 use crate::advance_ui::{pay_advance_dialog, show_advance_menu};
-use crate::city_ui::{show_city_menu, try_city_click, CityMenu};
+use crate::city_ui::{show_city_menu, try_city_click};
 use crate::construct_ui::pay_construction_dialog;
 use crate::happiness_ui::show_increase_happiness;
 use crate::log_ui::show_log;
 use crate::map_ui::draw_map;
 use crate::player_ui::{show_global_controls, show_globals, show_resources};
-use crate::ui::{ActiveDialog, State};
+use crate::ui_state::{ActiveDialog, CityMenu, State};
 use macroquad::prelude::{clear_background, next_frame, set_fullscreen, WHITE};
 use server::game::Game;
 

@@ -1,4 +1,3 @@
-use crate::ui::Point;
 use hex2d::{Coordinate, Spacing};
 use macroquad::color::{Color, DARKGRAY};
 use macroquad::math::{f32, i32};
@@ -38,3 +37,30 @@ pub fn rotate_around(center: Point, radius: f32, angle_deg: i32) -> Point {
         y: center.y + radius * f32::sin(angle_rad),
     }
 }
+
+#[derive(Debug, Copy, Clone)]
+pub struct Point {
+    pub x: f32,
+    pub y: f32,
+}
+
+impl Point {
+    pub fn new(x: f32, y: f32) -> Point {
+        Point { x, y }
+    }
+
+    pub fn to_screen(self) -> Point {
+        let x = self.x + LEFT_BORDER;
+        let y = TOP_BORDER - self.y;
+        Point { x, y }
+    }
+
+    pub fn to_game(self) -> Point {
+        let x = self.x - LEFT_BORDER;
+        let y = TOP_BORDER - self.y;
+        Point { x, y }
+    }
+}
+
+const TOP_BORDER: f32 = 130.0;
+const LEFT_BORDER: f32 = 90.0;

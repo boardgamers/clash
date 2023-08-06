@@ -1,6 +1,6 @@
 extern crate core;
 
-use crate::ui::{ActiveDialog, State};
+use crate::ui_state::{ActiveDialog, State};
 
 mod advance_ui;
 mod city_ui;
@@ -14,7 +14,7 @@ mod log_ui;
 mod map_ui;
 mod payment_ui;
 mod player_ui;
-mod ui;
+mod ui_state;
 
 #[macroquad::main("Clash")]
 async fn main() {

@@ -1,11 +1,17 @@
+use macroquad::math::{i32, u32};
 use macroquad::ui::Ui;
 use server::city_pieces::Building;
 use server::game::{Action, Game};
 use server::playing_actions::PlayingAction;
+use server::position::Position;
+use server::resource_pile::PaymentOptions;
+use std::cmp;
 
-use crate::city_ui::{CityMenu, ConstructionPayment};
-use crate::payment_ui::{payment_dialog, ResourceType};
-use crate::ui::ActiveDialog;
+use crate::payment_ui::{
+    new_resource_map, payment_dialog, HasPayment, Payment, ResourcePayment, ResourceType,
+};
+use crate::ui_state::ActiveDialog;
+use crate::ui_state::CityMenu;
 
 pub fn add_construct_button(
     game: &Game,
@@ -69,4 +75,65 @@ pub fn pay_construction_dialog(game: &mut Game, payment: &mut ConstructionPaymen
             cp.payment.get_mut(r).current -= 1;
         },
     )
+}
+
+pub struct ConstructionPayment {
+    pub player_index: usize,
+    pub city_position: Position,
+    pub city_piece: Building,
+    pub payment: Payment,
+    pub payment_options: PaymentOptions,
+}
+
+impl ConstructionPayment {
+    pub fn new(
+        game: &Game,
+        player_index: usize,
+        city_position: Position,
+        city_piece: Building,
+    ) -> ConstructionPayment {
+        let p = game.get_player(player_index);
+        let cost = p.construct_cost(&city_piece, p.get_city(&city_position).unwrap());
+        let payment_options = p.resources().get_payment_options(&cost);
+
+        let payment = ConstructionPayment::new_payment(&payment_options);
+
+        ConstructionPayment {
+            player_index,
+            city_position,
+            city_piece,
+            payment,
+            payment_options,
+        }
+    }
+
+    pub fn new_payment(a: &PaymentOptions) -> Payment {
+        let mut resources: Vec<ResourcePayment> = new_resource_map(&a.default)
+            .into_iter()
+            .map(|e| match e.0 {
+                ResourceType::Discount | ResourceType::Gold => ResourcePayment {
+                    resource: e.0.clone(),
+                    current: e.1,
+                    min: e.1,
+                    max: e.1,
+                },
+                _ => ResourcePayment {
+                    resource: e.0.clone(),
+                    current: e.1,
+                    min: cmp::max(0, e.1 as i32 - a.discount as i32 - a.gold_left as i32) as u32,
+                    max: e.1,
+                },
+            })
+            .collect();
+
+        resources.sort_by_key(|r| r.resource.clone());
+
+        Payment { resources }
+    }
+}
+
+impl HasPayment for ConstructionPayment {
+    fn payment(&self) -> &Payment {
+        &self.payment
+    }
 }

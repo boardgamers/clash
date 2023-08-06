@@ -7,7 +7,7 @@ use server::game::{Action, Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
 
-use crate::ui::State;
+use crate::ui_state::State;
 
 pub fn show_globals(game: &Game) {
     draw_text(&format!("Age {}", game.age), 600., 20., 20., BLACK);
@@ -92,4 +92,14 @@ pub fn show_global_controls(game: &mut Game, player_index: usize, state: &mut St
         state.clear();
         game.execute_action(Action::PlayingAction(PlayingAction::EndTurn), player_index);
     };
+}
+
+pub fn player_color(player_index: usize) -> Color {
+    match player_index {
+        0 => RED,
+        1 => BLUE,
+        2 => YELLOW,
+        3 => BLACK,
+        _ => panic!("unexpected player index"),
+    }
 }

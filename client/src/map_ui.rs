@@ -1,6 +1,6 @@
 use crate::city_ui::draw_city;
 use crate::hex_ui;
-use crate::ui::State;
+use crate::ui_state::State;
 use macroquad::prelude::*;
 use server::game::Game;
 use server::map::Terrain;

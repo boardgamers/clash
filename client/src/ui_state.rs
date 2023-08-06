@@ -1,47 +1,12 @@
 use crate::advance_ui::AdvancePayment;
-use crate::city_ui::ConstructionPayment;
+use crate::construct_ui::ConstructionPayment;
 
 use macroquad::prelude::*;
+use server::city::City;
 use server::game::{Game, GameState};
+use server::player::Player;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-
-const TOP_BORDER: f32 = 130.0;
-const LEFT_BORDER: f32 = 90.0;
-
-#[derive(Debug, Copy, Clone)]
-pub struct Point {
-    pub x: f32,
-    pub y: f32,
-}
-
-impl Point {
-    pub fn new(x: f32, y: f32) -> Point {
-        Point { x, y }
-    }
-
-    pub fn to_screen(self) -> Point {
-        let x = self.x + LEFT_BORDER;
-        let y = TOP_BORDER - self.y;
-        Point { x, y }
-    }
-
-    pub fn to_game(self) -> Point {
-        let x = self.x - LEFT_BORDER;
-        let y = TOP_BORDER - self.y;
-        Point { x, y }
-    }
-}
-
-pub fn player_color(player_index: usize) -> Color {
-    match player_index {
-        0 => RED,
-        1 => BLUE,
-        2 => YELLOW,
-        3 => BLACK,
-        _ => panic!("unexpected player index"),
-    }
-}
 
 pub enum ActiveDialog {
     None,
@@ -83,4 +48,38 @@ impl State {
 
 pub fn can_play_action(game: &Game) -> bool {
     game.state == GameState::Playing && game.actions_left > 0
+}
+
+pub struct CityMenu<'a> {
+    pub player_index: usize,
+    pub city_owner_index: usize,
+    pub city_position: &'a Position,
+}
+
+impl<'a> CityMenu<'a> {
+    pub fn new(player_index: usize, city_owner_index: usize, city_position: &'a Position) -> Self {
+        CityMenu {
+            player_index,
+            city_owner_index,
+            city_position,
+        }
+    }
+
+    pub fn get_player(&self, game: &'a Game) -> &'a Player {
+        game.get_player(self.player_index)
+    }
+
+    pub fn get_city_owner(&self, game: &'a Game) -> &Player {
+        game.get_player(self.city_owner_index)
+    }
+
+    pub fn get_city(&self, game: &'a Game) -> &City {
+        return game.players[self.city_owner_index]
+            .get_city(self.city_position)
+            .expect("city not found");
+    }
+
+    pub fn is_city_owner(&self) -> bool {
+        self.player_index == self.city_owner_index
+    }
 }
