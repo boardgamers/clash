@@ -18,9 +18,9 @@ use crate::{
     wonder::Wonder,
 };
 
+use crate::city::City;
 use crate::playing_actions::PlayingAction;
 use GameState::*;
-use crate::city::City;
 
 const DICE_ROLL_BUFFER: u32 = 200;
 const AGES: u32 = 6;
@@ -174,7 +174,9 @@ impl Game {
     }
 
     pub fn get_city(&self, player_index: &usize, position: &Position) -> &City {
-        self.get_player(player_index).get_city(position).expect("city not found")
+        self.get_player(player_index)
+            .get_city(position)
+            .expect("city not found")
     }
 
     fn add_log_item(&mut self, item: LogItem) {
