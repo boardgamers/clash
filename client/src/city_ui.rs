@@ -1,3 +1,5 @@
+use std::cmp;
+
 use macroquad::color::BLACK;
 use macroquad::hash;
 use macroquad::math::{i32, u32, vec2};
@@ -9,8 +11,6 @@ use server::game::Game;
 use server::player::Player;
 use server::position::Position;
 use server::resource_pile::PaymentOptions;
-use std::cmp;
-use std::collections::HashMap;
 
 use crate::construct_ui::add_construct_button;
 use crate::happiness_ui::increase_happiness_click;
@@ -195,8 +195,8 @@ fn building_symbol(b: &Building) -> &str {
     }
 }
 
-pub fn building_names() -> HashMap<Building, &'static str> {
-    HashMap::from([
+pub fn building_names() -> [(Building, &'static str); 7] {
+    [
         (Building::Academy, "Academy"),
         (Building::Market, "Market"),
         (Building::Obelisk, "Obelisk"),
@@ -204,7 +204,7 @@ pub fn building_names() -> HashMap<Building, &'static str> {
         (Building::Fortress, "Fortress"),
         (Building::Port, "Port"),
         (Building::Temple, "Temple"),
-    ])
+    ]
 }
 
 pub fn try_city_click(game: &Game, state: &mut State) {
