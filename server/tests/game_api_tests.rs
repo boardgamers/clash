@@ -104,7 +104,7 @@ fn basic_actions() {
 
     let construct_wonder_action = Action::PlayingAction(Custom(ConstructWonder {
         city_position: city_position.clone(),
-        wonder: String::from("test"),
+        wonder: String::from("X"),
         payment: ResourcePile::new(1, 3, 3, 0, 2, 0, 4),
     }));
     let mut game = game_api::execute_action(game, construct_wonder_action, 0);
@@ -113,7 +113,7 @@ fn basic_actions() {
     assert_eq!(9.0, player.victory_points());
     assert_eq!(&ResourcePile::empty(), player.resources());
     assert_eq!(1, player.wonders_build);
-    assert_eq!(vec![String::from("test")], player.wonders);
+    assert_eq!(vec![String::from("X")], player.wonders);
     assert_eq!(
         1,
         player

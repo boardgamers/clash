@@ -285,6 +285,9 @@ impl Display for ResourcePile {
         if self.gold > 0 {
             resources.push(format!("{} gold", self.gold));
         }
+        if self.gold < 0 {
+            resources.push(format!("{} discount", -self.gold));
+        }
         if self.mood_tokens > 0 {
             resources.push(format!(
                 "{} {}",

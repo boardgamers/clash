@@ -12,7 +12,7 @@ use server::resource_pile::AdvancePaymentOptions;
 use crate::payment_ui::{
     new_resource_map, payment_dialog, HasPayment, Payment, ResourcePayment, ResourceType,
 };
-use crate::ui::can_play_action;
+use crate::ui_state::can_play_action;
 use crate::{ActiveDialog, State};
 
 pub struct AdvancePayment {
