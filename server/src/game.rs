@@ -292,7 +292,10 @@ impl Game {
 
     fn redo(&mut self, player_index: usize) {
         let action_log_item = &self.action_log[self.action_log_index];
-        self.log.push(log::format_action_log_item(&action_log_item.as_action(), self));
+        self.log.push(log::format_action_log_item(
+            &action_log_item.as_action(),
+            self,
+        ));
         match action_log_item {
             ActionLogItem::Playing(action) => serde_json::from_str::<PlayingAction>(action)
                 .expect("action should be deserializable")
