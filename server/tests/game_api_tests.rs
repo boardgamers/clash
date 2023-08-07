@@ -2,7 +2,8 @@ use server::{
     city::{City, MoodState::*},
     city_pieces::{AvailableBuildings, Building},
     content::custom_actions::CustomAction::*,
-    game::{Action, Game, GameState::*},
+    game::{Game, GameState::*},
+    action::Action,
     game_api,
     map::Terrain::*,
     playing_actions::PlayingAction::*,
@@ -13,7 +14,7 @@ use server::{
 #[test]
 fn basic_actions() {
     let game = game_api::init(1, String::new());
-    let advance_action = Action::PlayingAction(Advance {
+    let advance_action = Action::Playing(Advance {
         advance: String::from("Math"),
         payment: ResourcePile::food(2),
     });
@@ -23,7 +24,7 @@ fn basic_actions() {
     assert_eq!(&ResourcePile::culture_tokens(1), player.resources());
     assert_eq!(2, game.actions_left);
 
-    let advance_action = Action::PlayingAction(Advance {
+    let advance_action = Action::Playing(Advance {
         advance: String::from("Engineering"),
         payment: ResourcePile::empty(),
     });
@@ -49,10 +50,11 @@ fn basic_actions() {
         .cities
         .push(City::new(0, Position::new(0, 2)));
 
-    let construct_action = Action::PlayingAction(Construct {
+    let construct_action = Action::Playing(Construct {
         city_position: city_position.clone(),
         city_piece: Building::Observatory,
         payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
+        port_position: None,
         temple_bonus: None,
     });
     let game = game_api::execute_action(game, construct_action, 0);
@@ -81,12 +83,12 @@ fn basic_actions() {
     assert_eq!(&ResourcePile::new(1, 3, 3, 0, 2, 2, 4), player.resources());
     assert_eq!(0, game.actions_left);
 
-    let game = game_api::execute_action(game, Action::PlayingAction(EndTurn), 0);
+    let game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
 
     assert_eq!(3, game.actions_left);
     assert_eq!(0, game.current_player_index);
 
-    let increase_happiness_action = Action::PlayingAction(IncreaseHappiness {
+    let increase_happiness_action = Action::Playing(IncreaseHappiness {
         happiness_increases: vec![(city_position.clone(), 1)],
     });
     let game = game_api::execute_action(game, increase_happiness_action, 0);
@@ -102,7 +104,7 @@ fn basic_actions() {
     ));
     assert_eq!(2, game.actions_left);
 
-    let construct_wonder_action = Action::PlayingAction(Custom(ConstructWonder {
+    let construct_wonder_action = Action::Playing(Custom(ConstructWonder {
         city_position: city_position.clone(),
         wonder: String::from("X"),
         payment: ResourcePile::new(1, 3, 3, 0, 2, 0, 4),
@@ -134,7 +136,7 @@ fn basic_actions() {
 
     let tile_position = Position::new(1, 0);
     game.map.tiles.insert(tile_position, Mountain);
-    let collect_action = Action::PlayingAction(Collect {
+    let collect_action = Action::Playing(Collect {
         city_position: city_position.clone(),
         collections: vec![(Mountain, ResourcePile::ore(1))],
     });
@@ -164,8 +166,8 @@ fn cultural_influence() {
     game.players[1]
         .cities
         .push(City::new(1, city1position.clone()));
-    game.players[1].construct(&Building::Academy, &city1position);
-    let influence_action = Action::PlayingAction(InfluenceCultureAttempt {
+    game.players[1].construct(&Building::Academy, &city1position, None);
+    let influence_action = Action::Playing(InfluenceCultureAttempt {
         starting_city_position: city0position.clone(),
         target_player_index: 1,
         target_city_position: city1position.clone(),
@@ -174,7 +176,7 @@ fn cultural_influence() {
     let game = game_api::execute_action(game, influence_action, 0);
     assert!(!game.players[1].cities[0].influenced());
     assert_eq!(game.state, Playing);
-    let influence_action = Action::PlayingAction(InfluenceCultureAttempt {
+    let influence_action = Action::Playing(InfluenceCultureAttempt {
         starting_city_position: city0position.clone(),
         target_player_index: 1,
         target_city_position: city1position.clone(),
@@ -191,12 +193,12 @@ fn cultural_influence() {
             city_piece: Building::Academy
         }
     );
-    let influence_resolution_decline_action = Action::CulturalInfluenceResolutionAction(false);
+    let influence_resolution_decline_action = Action::CulturalInfluenceResolution(false);
     let game = game_api::execute_action(game, influence_resolution_decline_action, 0);
     assert!(!game.players[1].cities[0].influenced());
     assert_eq!(game.state, Playing);
     assert!(!game.successful_cultural_influence);
-    let influence_action = Action::PlayingAction(InfluenceCultureAttempt {
+    let influence_action = Action::Playing(InfluenceCultureAttempt {
         starting_city_position: city0position,
         target_player_index: 1,
         target_city_position: city1position.clone(),
@@ -206,9 +208,9 @@ fn cultural_influence() {
     assert!(game.players[1].cities[0].influenced());
     assert_eq!(game.state, Playing);
     assert!(game.successful_cultural_influence);
-    let game = game_api::execute_action(game, Action::PlayingAction(EndTurn), 0);
+    let game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
     assert_eq!(game.current_player_index, 1);
-    let influence_action = Action::PlayingAction(InfluenceCultureAttempt {
+    let influence_action = Action::Playing(InfluenceCultureAttempt {
         starting_city_position: city1position.clone(),
         target_player_index: 1,
         target_city_position: city1position.clone(),
@@ -218,7 +220,7 @@ fn cultural_influence() {
     assert!(game.players[1].cities[0].influenced());
     assert_eq!(game.state, Playing);
     assert!(!game.successful_cultural_influence);
-    let influence_action = Action::PlayingAction(InfluenceCultureAttempt {
+    let influence_action = Action::Playing(InfluenceCultureAttempt {
         starting_city_position: city1position.clone(),
         target_player_index: 1,
         target_city_position: city1position,
@@ -246,7 +248,7 @@ fn assert_undo(
 }
 
 fn increase_happiness(game: Game) -> Game {
-    let increase_happiness_action = Action::PlayingAction(IncreaseHappiness {
+    let increase_happiness_action = Action::Playing(IncreaseHappiness {
         happiness_increases: vec![(Position::new(0, 0), 1)],
     });
     game_api::execute_action(game, increase_happiness_action, 0)
@@ -288,7 +290,7 @@ fn undo() {
     assert_undo(&game, false, true, 2, 0, 0);
     assert_eq!(Angry, game.players[0].cities[0].mood_state);
 
-    let advance_action = Action::PlayingAction(Advance {
+    let advance_action = Action::Playing(Advance {
         advance: String::from("Math"),
         payment: ResourcePile::food(2),
     });
@@ -297,7 +299,7 @@ fn undo() {
     let game = game_api::execute_action(game, Action::Undo, 0);
     assert_undo(&game, false, true, 1, 0, 0);
     assert!(game.players[0].advances.is_empty());
-    let advance_action = Action::PlayingAction(Advance {
+    let advance_action = Action::Playing(Advance {
         advance: String::from("Engineering"),
         payment: ResourcePile::food(2),
     });

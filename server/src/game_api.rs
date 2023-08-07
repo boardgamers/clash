@@ -1,11 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::{cmp::Ordering::*, mem};
 
-use crate::game::Action;
-use crate::game::Game;
-use crate::game::GameData;
-use crate::game::GameState::*;
-use crate::game::LogItem;
+use crate::{action::Action, game::{Game, GameData, GameState::*, LogItem}};
 
 #[derive(Serialize, Deserialize)]
 pub struct LogSliceOptions {

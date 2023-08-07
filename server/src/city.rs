@@ -19,6 +19,7 @@ pub struct City {
     pub activations: u32,
     pub player_index: usize,
     pub position: Position,
+    pub port_position: Option<Position>,
 }
 
 impl City {
@@ -29,6 +30,7 @@ impl City {
             activations: data.activations,
             player_index: data.player_index,
             position: data.position,
+            port_position: data.port_position,
         }
     }
 
@@ -39,6 +41,7 @@ impl City {
             self.activations,
             self.player_index,
             self.position,
+            self.port_position,
         )
     }
 
@@ -49,6 +52,7 @@ impl City {
             activations: 0,
             player_index,
             position,
+            port_position: None,
         }
     }
 
@@ -232,6 +236,7 @@ pub struct CityData {
     activations: u32,
     player_index: usize,
     position: Position,
+    port_position: Option<Position>,
 }
 
 impl CityData {
@@ -241,6 +246,7 @@ impl CityData {
         activations: u32,
         player_index: usize,
         position: Position,
+        port_position: Option<Position>,
     ) -> Self {
         Self {
             city_pieces,
@@ -248,6 +254,7 @@ impl CityData {
             activations,
             player_index,
             position,
+            port_position,
         }
     }
 }

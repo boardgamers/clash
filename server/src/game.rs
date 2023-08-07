@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-
 use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
 
@@ -11,15 +10,10 @@ use crate::{
     position::Position,
     resource_pile::ResourcePile,
     special_advance::SpecialAdvance,
-    status_phase::{
-        StatusPhaseAction,
-        StatusPhaseState::{self, *},
-    },
-    wonder::Wonder,
+    status_phase::StatusPhaseState::{self, *},
+    wonder::Wonder, city::City, playing_actions::PlayingAction, action::Action,
 };
 
-use crate::city::City;
-use crate::playing_actions::PlayingAction;
 use GameState::*;
 
 const DICE_ROLL_BUFFER: u32 = 200;
@@ -199,10 +193,25 @@ impl Game {
         if player_index != self.current_player_index {
             panic!("Illegal action");
         }
+        if let Action::Undo = action {
+            if !self.can_undo() {
+                panic!("actions revealing new information can't be undone");
+            }
+            println!("undo!");
+            self.undo(player_index);
+            return;
+        }
+        if let Action::Redo = action {
+            if !self.can_redo() {
+                panic!("no action can be redone");
+            }
+            self.redo(player_index);
+            return;
+        }
         match self.state.clone() {
             StatusPhase(phase) => {
                 let action = action
-                    .as_status_phase_action()
+                    .status_phase()
                     .expect("action should be a status phase action");
                 self.add_log_item(LogItem::StatusPhaseAction(
                     serde_json::to_string(&action)
@@ -220,7 +229,7 @@ impl Game {
                 city_piece,
             } => {
                 let action = action
-                    .as_cultural_influence_resolution_action()
+                    .cultural_influence_resolution()
                     .expect("action should be a cultural influence resolution action");
                 self.add_log_item(LogItem::CulturalInfluenceResolutionAction(
                     serde_json::to_string(&action).expect("playing action should be serializable"),
@@ -235,22 +244,8 @@ impl Game {
                 );
             }
             Playing => {
-                if let Action::Undo = action {
-                    if !self.can_undo() {
-                        panic!("actions revealing new information can't be undone");
-                    }
-                    self.undo(player_index);
-                    return;
-                }
-                if let Action::Redo = action {
-                    if !self.can_redo() {
-                        panic!("no action can be redone");
-                    }
-                    self.redo(player_index);
-                    return;
-                }
                 let action = action
-                    .as_playing_action()
+                    .playing()
                     .expect("action should be a playing action");
                 if self.can_redo()
                     && serde_json::from_str::<PlayingAction>(
@@ -283,12 +278,19 @@ impl Game {
     }
 
     fn redo(&mut self, player_index: usize) {
-        let action = self.log[self.log_index]
-            .as_playing_action()
-            .expect("undone actions should be playing actions");
-        let action =
-            serde_json::from_str::<PlayingAction>(action).expect("action should be deserializable");
-        action.execute(self, player_index);
+        match &self.log[self.log_index] {
+            LogItem::PlayingAction(action) => serde_json::from_str::<PlayingAction>(action)
+                .expect("action should be deserializable")
+                .execute(self, player_index),
+            LogItem::StatusPhaseAction(_) => panic!("status phase actions can't be redone"),
+            LogItem::CulturalInfluenceResolutionAction(action) => {
+                let action = serde_json::from_str::<bool>(action).expect("action should be a serialized boolean representing the cultural influence resolution confirmation action");
+                let CulturalInfluenceResolution { roll_boost_cost, target_player_index, target_city_position, city_piece  } = &self.state else {
+                    panic!("cultural influence resolution actions can only be redone if the game is in a cultural influence resolution state");
+                };
+                self.execute_cultural_influence_resolution_action(action, *roll_boost_cost, *target_player_index, target_city_position.clone(), city_piece.clone(), player_index);
+            }
+        }
         self.log_index += 1;
     }
 
@@ -324,6 +326,7 @@ impl Game {
 
     fn undo_cultural_influence_resolution_action(&mut self, action: bool) {
         let cultural_influence_attempt_action = self.log[self.log_index - 2].as_playing_action().expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
+        println!("action: {}", cultural_influence_attempt_action);
         let cultural_influence_attempt_action = serde_json::from_str::<PlayingAction>(cultural_influence_attempt_action).expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
         let PlayingAction::InfluenceCultureAttempt {
             starting_city_position: _,
@@ -754,41 +757,6 @@ pub enum GameState {
     Finished,
 }
 
-#[derive(Serialize, Deserialize)]
-pub enum Action {
-    PlayingAction(PlayingAction),
-    StatusPhaseAction(StatusPhaseAction),
-    CulturalInfluenceResolutionAction(bool),
-    Undo,
-    Redo,
-}
-
-impl Action {
-    pub fn as_playing_action(self) -> Option<PlayingAction> {
-        if let Self::PlayingAction(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-
-    pub fn as_status_phase_action(self) -> Option<StatusPhaseAction> {
-        if let Self::StatusPhaseAction(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-
-    pub fn as_cultural_influence_resolution_action(self) -> Option<bool> {
-        if let Self::CulturalInfluenceResolutionAction(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-}
-
 #[derive(Serialize, Deserialize, Clone)]
 pub enum LogItem {
     PlayingAction(String),
@@ -864,8 +832,8 @@ pub mod tests {
             .cities
             .push(City::new(old, position.clone()));
         game.build_wonder(wonder, &position, old);
-        game.players[old].construct(&Academy, &position);
-        game.players[old].construct(&Obelisk, &position);
+        game.players[old].construct(&Academy, &position, None);
+        game.players[old].construct(&Obelisk, &position, None);
 
         assert_eq!(7.0, game.players[old].victory_points());
 
