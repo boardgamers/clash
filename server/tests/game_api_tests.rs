@@ -1,9 +1,9 @@
 use server::{
+    action::Action,
     city::{City, MoodState::*},
     city_pieces::{AvailableBuildings, Building},
     content::custom_actions::CustomAction::*,
     game::{Game, GameState::*},
-    action::Action,
     game_api,
     map::Terrain::*,
     playing_actions::PlayingAction::*,
@@ -236,14 +236,14 @@ fn assert_undo(
     game: &Game,
     can_undo: bool,
     can_redo: bool,
-    log_len: usize,
-    log_index: usize,
+    action_log_len: usize,
+    action_log_index: usize,
     undo_limit: usize,
 ) {
     assert_eq!(can_undo, game.can_undo());
     assert_eq!(can_redo, game.can_redo());
-    assert_eq!(log_len, game.log.len());
-    assert_eq!(log_index, game.log_index);
+    assert_eq!(action_log_len, game.action_log.len());
+    assert_eq!(action_log_index, game.action_log_index);
     assert_eq!(undo_limit, game.undo_limit);
 }
 

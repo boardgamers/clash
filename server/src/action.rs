@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use crate::status_phase::StatusPhaseAction;
 use crate::playing_actions::PlayingAction;
+use crate::status_phase::StatusPhaseAction;
 
 #[derive(Serialize, Deserialize)]
 pub enum Action {

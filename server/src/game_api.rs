@@ -1,37 +1,10 @@
-use serde::{Deserialize, Serialize};
 use std::{cmp::Ordering::*, mem};
 
-use crate::{action::Action, game::{Game, GameData, GameState::*, LogItem}};
-
-#[derive(Serialize, Deserialize)]
-pub struct LogSliceOptions {
-    player: Option<usize>,
-    start: usize,
-    end: Option<usize>,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Log {
-    items: Vec<LogItem>,
-}
-
-impl Log {
-    pub fn new(items: Vec<LogItem>) -> Self {
-        Self { items }
-    }
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Messages {
-    messages: Vec<String>,
-    data: GameData,
-}
-
-impl Messages {
-    pub fn new(messages: Vec<String>, data: GameData) -> Self {
-        Self { messages, data }
-    }
-}
+use crate::{
+    action::Action,
+    game::{Game, GameState::*, Messages},
+    log::LogSliceOptions,
+};
 
 // Game API methods, see https://docs.boardgamers.space/guide/engine-api.html#required-methods
 
@@ -72,13 +45,12 @@ pub fn log_length(game: Game) -> usize {
     game.log.len()
 }
 
-pub fn log_slice(game: Game, options: LogSliceOptions) -> Log {
-    let log_slice = match options.end {
+pub fn log_slice(game: Game, options: LogSliceOptions) -> Vec<String> {
+    match options.end {
         Some(end) => &game.log[options.start..=end],
         None => &game.log[options.start..],
     }
-    .to_vec();
-    Log::new(log_slice)
+    .to_vec()
 }
 
 pub fn set_player_name(mut game: Game, player_index: usize, name: String) -> Game {

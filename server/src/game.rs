@@ -1,17 +1,22 @@
-use std::collections::HashMap;
 use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 use crate::{
+    action::Action,
+    city::City,
     city_pieces::Building,
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
+    log::{self, ActionLogItem},
     map::{Map, MapData},
     player::{Player, PlayerData},
+    playing_actions::PlayingAction,
     position::Position,
     resource_pile::ResourcePile,
     special_advance::SpecialAdvance,
     status_phase::StatusPhaseState::{self, *},
-    wonder::Wonder, city::City, playing_actions::PlayingAction, action::Action,
+    utils,
+    wonder::Wonder,
 };
 
 use GameState::*;
@@ -25,8 +30,9 @@ pub struct Game {
     pub map: Map,
     pub starting_player_index: usize,
     pub current_player_index: usize,
-    pub log: Vec<LogItem>,
-    pub log_index: usize,
+    pub action_log: Vec<ActionLogItem>,
+    pub action_log_index: usize,
+    pub log: Vec<String>,
     pub undo_limit: usize,
     pub played_once_per_turn_actions: Vec<CustomActionType>,
     pub actions_left: u32,
@@ -81,15 +87,16 @@ impl Game {
             map: Map::new(map),
             starting_player_index: starting_player,
             current_player_index: starting_player,
-            log: Vec::new(),
-            log_index: 0,
+            action_log: Vec::new(),
+            action_log_index: 0,
+            log: vec![String::from("The game has started")],
             undo_limit: 0,
             played_once_per_turn_actions: Vec::new(),
             actions_left: 3,
             successful_cultural_influence: false,
             round: 1,
             age: 1,
-            messages: vec![String::from("Game has started")],
+            messages: vec![String::from("The game has started")],
             dice_roll_outcomes,
             dice_roll_log: Vec::new(),
             dropped_players: Vec::new(),
@@ -107,8 +114,9 @@ impl Game {
             current_player_index: data.current_player_index,
             actions_left: data.actions_left,
             successful_cultural_influence: data.successful_cultural_influence,
+            action_log: data.action_log,
+            action_log_index: data.action_log_index,
             log: data.log,
-            log_index: data.log_index,
             undo_limit: data.undo_limit,
             played_once_per_turn_actions: data.played_once_per_turn_actions,
             round: data.round,
@@ -146,8 +154,9 @@ impl Game {
             map: self.map.data(),
             starting_player_index: self.starting_player_index,
             current_player_index: self.current_player_index,
+            action_log: self.action_log,
+            action_log_index: self.action_log_index,
             log: self.log,
-            log_index: self.log_index,
             undo_limit: self.undo_limit,
             played_once_per_turn_actions: self.played_once_per_turn_actions,
             actions_left: self.actions_left,
@@ -177,16 +186,21 @@ impl Game {
             .expect("city not found")
     }
 
-    fn add_log_item(&mut self, item: LogItem) {
-        if self.log_index < self.log.len() {
-            self.log.drain(self.log_index..);
+    fn add_action_log_item(&mut self, item: ActionLogItem) {
+        if self.action_log_index < self.action_log.len() {
+            self.action_log.drain(self.action_log_index..);
         }
-        self.log.push(item);
-        self.log_index += 1;
+        self.action_log.push(item);
+        self.action_log_index += 1;
+    }
+
+    fn add_info_log_item(&mut self, info: String) {
+        self.log.push(info);
+        self.lock_undo();
     }
 
     pub fn lock_undo(&mut self) {
-        self.undo_limit = self.log_index;
+        self.undo_limit = self.action_log_index;
     }
 
     pub fn execute_action(&mut self, action: Action, player_index: usize) {
@@ -197,7 +211,6 @@ impl Game {
             if !self.can_undo() {
                 panic!("actions revealing new information can't be undone");
             }
-            println!("undo!");
             self.undo(player_index);
             return;
         }
@@ -208,12 +221,13 @@ impl Game {
             self.redo(player_index);
             return;
         }
+        self.log.push(log::format_action_log_item(&action, self));
         match self.state.clone() {
             StatusPhase(phase) => {
                 let action = action
                     .status_phase()
                     .expect("action should be a status phase action");
-                self.add_log_item(LogItem::StatusPhaseAction(
+                self.add_action_log_item(ActionLogItem::StatusPhase(
                     serde_json::to_string(&action)
                         .expect("status phase action should be serializable"),
                 ));
@@ -231,7 +245,7 @@ impl Game {
                 let action = action
                     .cultural_influence_resolution()
                     .expect("action should be a cultural influence resolution action");
-                self.add_log_item(LogItem::CulturalInfluenceResolutionAction(
+                self.add_action_log_item(ActionLogItem::CulturalInfluenceResolution(
                     serde_json::to_string(&action).expect("playing action should be serializable"),
                 ));
                 self.execute_cultural_influence_resolution_action(
@@ -244,12 +258,10 @@ impl Game {
                 );
             }
             Playing => {
-                let action = action
-                    .playing()
-                    .expect("action should be a playing action");
+                let action = action.playing().expect("action should be a playing action");
                 if self.can_redo()
                     && serde_json::from_str::<PlayingAction>(
-                        self.log[self.log_index]
+                        self.action_log[self.action_log_index]
                             .as_playing_action()
                             .expect("undone actions should be playing actions"),
                     )
@@ -259,7 +271,7 @@ impl Game {
                     self.redo(player_index);
                     return;
                 }
-                self.add_log_item(LogItem::PlayingAction(
+                self.add_action_log_item(ActionLogItem::Playing(
                     serde_json::to_string(&action).expect("playing action should be serializable"),
                 ));
                 action.execute(self, player_index);
@@ -269,37 +281,53 @@ impl Game {
     }
 
     fn undo(&mut self, player_index: usize) {
-        match &self.log[self.log_index - 1] {
-            LogItem::PlayingAction(action) => serde_json::from_str::<PlayingAction>(action).expect("log item variant of type playing action should contain a serialized playing action").undo(self, player_index),
-            LogItem::StatusPhaseAction(_) => panic!("status phase actions can't be undone"),
-            LogItem::CulturalInfluenceResolutionAction(action) => self.undo_cultural_influence_resolution_action(serde_json::from_str::<bool>(action).expect("cultural influence resolution log item should contain a serialized boolean representing the confirmation action")),
+        match &self.action_log[self.action_log_index - 1] {
+            ActionLogItem::Playing(action) => serde_json::from_str::<PlayingAction>(action).expect("log item variant of type playing action should contain a serialized playing action").undo(self, player_index),
+            ActionLogItem::StatusPhase(_) => panic!("status phase actions can't be undone"),
+            ActionLogItem::CulturalInfluenceResolution(action) => self.undo_cultural_influence_resolution_action(serde_json::from_str::<bool>(action).expect("cultural influence resolution log item should contain a serialized boolean representing the confirmation action")),
         }
-        self.log_index -= 1;
+        self.action_log_index -= 1;
+        self.log.remove(self.log.len() - 1);
     }
 
     fn redo(&mut self, player_index: usize) {
-        match &self.log[self.log_index] {
-            LogItem::PlayingAction(action) => serde_json::from_str::<PlayingAction>(action)
+        let action_log_item = &self.action_log[self.action_log_index];
+        self.log.push(log::format_action_log_item(&action_log_item.as_action(), self));
+        match action_log_item {
+            ActionLogItem::Playing(action) => serde_json::from_str::<PlayingAction>(action)
                 .expect("action should be deserializable")
                 .execute(self, player_index),
-            LogItem::StatusPhaseAction(_) => panic!("status phase actions can't be redone"),
-            LogItem::CulturalInfluenceResolutionAction(action) => {
+            ActionLogItem::StatusPhase(_) => panic!("status phase actions can't be redone"),
+            ActionLogItem::CulturalInfluenceResolution(action) => {
                 let action = serde_json::from_str::<bool>(action).expect("action should be a serialized boolean representing the cultural influence resolution confirmation action");
-                let CulturalInfluenceResolution { roll_boost_cost, target_player_index, target_city_position, city_piece  } = &self.state else {
+                let CulturalInfluenceResolution {
+                    roll_boost_cost,
+                    target_player_index,
+                    target_city_position,
+                    city_piece,
+                } = &self.state
+                else {
                     panic!("cultural influence resolution actions can only be redone if the game is in a cultural influence resolution state");
                 };
-                self.execute_cultural_influence_resolution_action(action, *roll_boost_cost, *target_player_index, target_city_position.clone(), city_piece.clone(), player_index);
+                self.execute_cultural_influence_resolution_action(
+                    action,
+                    *roll_boost_cost,
+                    *target_player_index,
+                    target_city_position.clone(),
+                    city_piece.clone(),
+                    player_index,
+                );
             }
         }
-        self.log_index += 1;
+        self.action_log_index += 1;
     }
 
     pub fn can_undo(&self) -> bool {
-        self.undo_limit < self.log_index
+        self.undo_limit < self.action_log_index
     }
 
     pub fn can_redo(&self) -> bool {
-        self.log_index < self.log.len()
+        self.action_log_index < self.action_log.len()
     }
 
     fn execute_cultural_influence_resolution_action(
@@ -325,7 +353,7 @@ impl Game {
     }
 
     fn undo_cultural_influence_resolution_action(&mut self, action: bool) {
-        let cultural_influence_attempt_action = self.log[self.log_index - 2].as_playing_action().expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
+        let cultural_influence_attempt_action = self.action_log[self.action_log_index - 2].as_playing_action().expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
         println!("action: {}", cultural_influence_attempt_action);
         let cultural_influence_attempt_action = serde_json::from_str::<PlayingAction>(cultural_influence_attempt_action).expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
         let PlayingAction::InfluenceCultureAttempt {
@@ -358,9 +386,18 @@ impl Game {
         );
     }
 
+    pub fn add_to_last_log_item(&mut self, edit: &str) {
+        let last_item_index = self.log.len() - 1;
+        self.log[last_item_index] += edit;
+    }
+
     pub fn next_player(&mut self) {
         self.current_player_index += 1;
         self.current_player_index %= self.players.len();
+        self.add_info_log_item(format!(
+            "It's {}'s turn",
+            self.players[self.current_player_index].get_name()
+        ));
         self.lock_undo();
     }
 
@@ -387,7 +424,9 @@ impl Game {
         if self.round > 3 {
             self.round = 1;
             self.enter_status_phase();
+            return;
         }
+        self.add_info_log_item(format!("Round {}/3", self.round));
     }
 
     fn enter_status_phase(&mut self) {
@@ -395,6 +434,10 @@ impl Game {
             self.end_game();
         }
         self.state = StatusPhase(CompleteObjectives);
+        self.add_info_log_item(format!(
+            "The game has entered the {} status phase",
+            utils::ordinal_number(self.age)
+        ))
     }
 
     pub fn next_age(&mut self) {
@@ -405,12 +448,21 @@ impl Game {
             self.end_game();
             return;
         }
-        self.add_message(&format!("Age {} has started", self.age));
+        self.add_info_log_item(format!("Age {} has started", self.age));
     }
 
     fn end_game(&mut self) {
         self.state = Finished;
-        self.add_message("Game has ended");
+        let winner_player_index = self
+            .players
+            .iter()
+            .enumerate()
+            .max_by(|(_, player), (_, other)| player.compare_score(other))
+            .expect("there should be at least one player in the game")
+            .0;
+        let winner_name = self.players[winner_player_index].get_name();
+        self.add_info_log_item(format!("The game has ended\n{winner_name} has won"));
+        self.add_message("The game has ended");
     }
 
     pub fn get_next_dice_roll(&mut self) -> u8 {
@@ -429,7 +481,10 @@ impl Game {
 
     pub fn drop_player(&mut self, player_index: usize) {
         self.dropped_players.push(player_index);
-        self.add_message(&format!("Player{} had left the game", player_index + 1));
+        self.add_message(&format!(
+            "{} has left the game",
+            self.players[player_index].get_name()
+        ));
         self.skip_dropped_players();
     }
 
@@ -728,8 +783,9 @@ pub struct GameData {
     map: MapData,
     starting_player_index: usize,
     current_player_index: usize,
-    log: Vec<LogItem>,
-    log_index: usize,
+    action_log: Vec<ActionLogItem>,
+    action_log_index: usize,
+    log: Vec<String>,
     undo_limit: usize,
     played_once_per_turn_actions: Vec<CustomActionType>,
     actions_left: u32,
@@ -757,20 +813,15 @@ pub enum GameState {
     Finished,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-pub enum LogItem {
-    PlayingAction(String),
-    StatusPhaseAction(String),
-    CulturalInfluenceResolutionAction(String),
+#[derive(Serialize, Deserialize)]
+pub struct Messages {
+    messages: Vec<String>,
+    data: GameData,
 }
 
-impl LogItem {
-    pub fn as_playing_action(&self) -> Option<&str> {
-        if let Self::PlayingAction(v) = self {
-            Some(v)
-        } else {
-            None
-        }
+impl Messages {
+    pub fn new(messages: Vec<String>, data: GameData) -> Self {
+        Self { messages, data }
     }
 }
 
@@ -798,8 +849,9 @@ pub mod tests {
             map: Map::new(HashMap::new()),
             starting_player_index: 0,
             current_player_index: 0,
+            action_log: Vec::new(),
+            action_log_index: 0,
             log: Vec::new(),
-            log_index: 0,
             undo_limit: 0,
             played_once_per_turn_actions: Vec::new(),
             actions_left: 3,

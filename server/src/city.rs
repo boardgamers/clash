@@ -1,3 +1,5 @@
+use std::ops::Add;
+
 use serde::{Deserialize, Serialize};
 
 use crate::city_pieces::Building::*;
@@ -264,4 +266,19 @@ pub enum MoodState {
     Happy = 2,
     Neutral = 1,
     Angry = 0,
+}
+
+impl Add<u32> for MoodState {
+    type Output = Self;
+
+    fn add(self, rhs: u32) -> Self::Output {
+        match rhs {
+            0 => self,
+            1 => match self {
+                Happy | Neutral => Happy,
+                Angry => Neutral,
+            },
+            2.. => Happy,
+        }
+    }
 }

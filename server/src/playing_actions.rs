@@ -84,8 +84,7 @@ impl PlayingAction {
                     panic!("Illegal action");
                 }
                 if matches!(&city_piece, Temple) {
-                    let building_bonus =
-                        temple_bonus.expect("Illegal action");
+                    let building_bonus = temple_bonus.expect("Illegal action");
                     if building_bonus != ResourcePile::mood_tokens(1)
                         && building_bonus != ResourcePile::culture_tokens(1)
                     {
@@ -182,14 +181,18 @@ impl PlayingAction {
                         &target_city_position,
                         &city_piece,
                     );
+                    game.add_to_last_log_item(&format!(" and succeeded (rolled {roll})"));
                     return;
                 }
-                if roll > 6
-                    || self_influence
-                    || !game.players[player_index]
-                        .resources()
-                        .can_afford(&ResourcePile::culture_tokens(5 - roll as u32))
+                if roll > 6 || self_influence {
+                    game.add_to_last_log_item(&format!(" and failed (rolled {roll})"));
+                    return;
+                }
+                if !game.players[player_index]
+                    .resources()
+                    .can_afford(&ResourcePile::culture_tokens(5 - roll as u32))
                 {
+                    game.add_to_last_log_item(&format!(" but rolled a {roll} and has not enough culture tokens to increase the roll "));
                     return;
                 }
                 game.state = CulturalInfluenceResolution {
@@ -198,6 +201,7 @@ impl PlayingAction {
                     target_city_position,
                     city_piece,
                 };
+                game.add_to_last_log_item(&format!("and rolled a {roll}. {} now has the option to pay {} culture tokens to increase the dice roll and proceed with the cultural influence", game.players[player_index].get_name(), 5 - roll as u32))
             }
             Custom(custom_action) => {
                 let action = custom_action.custom_action_type();

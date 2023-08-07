@@ -248,6 +248,23 @@ impl Player {
         self.name = Some(name);
     }
 
+    pub fn get_name(&self) -> String {
+        self.name
+            .clone()
+            .unwrap_or(format!("Player{}", self.index + 1))
+    }
+
+    pub fn government(&self) -> Option<String> {
+        self.advances
+            .iter()
+            .filter_map(|advance| {
+                advances::get_advance_by_name(advance)
+                    .expect("all player owned advances should exist")
+                    .government
+            })
+            .next()
+    }
+
     pub fn gain_resources(&mut self, resources: ResourcePile) {
         self.resources += resources;
         self.resources.apply_resource_limit(&self.resource_limit);
@@ -425,12 +442,19 @@ impl Player {
         )
     }
 
-    pub fn construct(&mut self, building: &Building, city_position: &Position, port_position: Option<Position>) {
+    pub fn construct(
+        &mut self,
+        building: &Building,
+        city_position: &Position,
+        port_position: Option<Position>,
+    ) {
         self.take_events(|events, player| {
             events.on_construct.trigger(player, city_position, building)
         });
         let index = self.index;
-        let city = self.get_city_mut(city_position).expect("player should be have the this city");
+        let city = self
+            .get_city_mut(city_position)
+            .expect("player should be have the this city");
         city.activate();
         city.city_pieces.set_building(building, index);
         if let Some(port_position) = port_position {
@@ -448,7 +472,8 @@ impl Player {
                 .on_undo_construct
                 .trigger(player, city_position, building)
         });
-        let city = self.get_city_mut(city_position)
+        let city = self
+            .get_city_mut(city_position)
             .expect("player should have city");
         city.undo_activate();
         city.city_pieces.remove_building(building);

@@ -13,6 +13,7 @@ pub struct Advance {
     pub required_advance: Option<String>,
     pub contradicting_advance: Option<String>,
     pub unlocked_building: Option<String>,
+    pub government: Option<String>,
     pub player_initializer: AbilityInitializer,
     pub player_deinitializer: AbilityInitializer,
     pub player_one_time_initializer: AbilityInitializer,
@@ -38,6 +39,7 @@ pub struct AdvanceBuilder {
     required_advance: Option<String>,
     contradicting_advance: Option<String>,
     unlocked_building: Option<String>,
+    government: Option<String>,
     player_initializers: Vec<AbilityInitializer>,
     player_deinitializers: Vec<AbilityInitializer>,
     player_one_time_initializers: Vec<AbilityInitializer>,
@@ -53,6 +55,7 @@ impl AdvanceBuilder {
             required_advance: None,
             contradicting_advance: None,
             unlocked_building: None,
+            government: None,
             player_initializers: Vec::new(),
             player_deinitializers: Vec::new(),
             player_one_time_initializers: Vec::new(),
@@ -80,6 +83,11 @@ impl AdvanceBuilder {
         self
     }
 
+    pub fn with_government(mut self, government: &str) -> Self {
+        self.government = Some(government.to_string());
+        self
+    }
+
     pub fn build(self) -> Advance {
         let player_initializer =
             ability_initializer::join_ability_initializers(self.player_initializers);
@@ -96,6 +104,7 @@ impl AdvanceBuilder {
             required_advance: self.required_advance,
             contradicting_advance: self.contradicting_advance,
             unlocked_building: self.unlocked_building,
+            government: self.government,
             player_initializer,
             player_deinitializer,
             player_one_time_initializer,
