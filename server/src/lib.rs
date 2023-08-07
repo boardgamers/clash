@@ -10,7 +10,7 @@ pub mod game;
 pub mod game_api;
 pub mod game_api_wrapper;
 mod leader;
-mod log;
+pub mod log;
 pub mod map;
 pub mod player;
 mod player_events;

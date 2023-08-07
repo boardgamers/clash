@@ -1,7 +1,8 @@
 use crate::ui_state::CityMenu;
 use macroquad::ui::Ui;
+use server::action::Action;
 use server::city_pieces::Building;
-use server::game::{Action, Game};
+use server::game::Game;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 
@@ -31,7 +32,7 @@ pub fn add_influence_button(
                 format!("Attempt Influence {} for {}", building_name, cost),
             ) {
                 game.execute_action(
-                    Action::PlayingAction(PlayingAction::InfluenceCultureAttempt {
+                    Action::Playing(PlayingAction::InfluenceCultureAttempt {
                         starting_city_position: start_position.clone(),
                         target_player_index: menu.city_owner_index,
                         target_city_position: menu.city_position.clone(),

@@ -3,7 +3,8 @@ use macroquad::math::vec2;
 use macroquad::prelude::*;
 use macroquad::text::draw_text;
 use macroquad::ui::root_ui;
-use server::game::{Action, Game, GameState};
+use server::action::Action;
+use server::game::{Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
 
@@ -105,12 +106,12 @@ pub fn show_global_controls(game: &mut Game, player_index: usize, state: &mut St
             format!("Cultural Influence Resolution for {}", roll_boost_cost),
         ) {
             game.execute_action(
-                Action::CulturalInfluenceResolutionAction(true),
+                Action::CulturalInfluenceResolution(true),
                 player_index,
             );
         } else if root_ui().button(vec2(900., 480.), "Decline") {
             game.execute_action(
-                Action::CulturalInfluenceResolutionAction(false),
+                Action::CulturalInfluenceResolution(false),
                 player_index,
             );
         }
@@ -119,7 +120,7 @@ pub fn show_global_controls(game: &mut Game, player_index: usize, state: &mut St
         && root_ui().button(vec2(700., y), "End Turn")
     {
         state.clear();
-        game.execute_action(Action::PlayingAction(PlayingAction::EndTurn), player_index);
+        game.execute_action(Action::Playing(PlayingAction::EndTurn), player_index);
     };
 }
 
