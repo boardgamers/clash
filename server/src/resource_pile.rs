@@ -7,6 +7,8 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
+use crate::utils;
+
 #[derive(Default, Clone, Serialize, Deserialize, PartialEq, Eq, Debug, Hash)]
 pub struct ResourcePile {
     pub food: u32,
@@ -308,19 +310,7 @@ impl Display for ResourcePile {
                 }
             ));
         }
-        match &resources[..] {
-            [] => write!(f, "nothing"),
-            [resource] => write!(f, "{resource}"),
-            _ => write!(
-                f,
-                "{} and {}",
-                &resources[..resources.len() - 1].join(", "),
-                resources
-                    .last()
-                    .as_ref()
-                    .expect("resources should have a length greater or equal to 2")
-            ),
-        }
+        write!(f, "{}", utils::format_collection(&resources, "nothing"))
     }
 }
 

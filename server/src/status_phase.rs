@@ -10,7 +10,7 @@ use crate::{
 
 #[derive(Serialize, Deserialize)]
 pub struct StatusPhaseAction {
-    data: String,
+    pub data: String,
     pub phase: StatusPhaseState,
 }
 
@@ -86,6 +86,7 @@ impl StatusPhaseAction {
 pub enum StatusPhaseState {
     CompleteObjectives,
     FreeAdvance,
+    //draw new cards (after free advance)
     RaseSize1City,
     ChangeGovernmentType,
     DetermineFirstPlayer,
@@ -93,27 +94,27 @@ pub enum StatusPhaseState {
 
 #[derive(Serialize, Deserialize)]
 pub struct CompleteObjectives {
-    objectives: Vec<String>,
+    pub objectives: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct FreeAdvance {
-    advance: String,
+    pub advance: String,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct RaseSize1City {
-    city: Option<Position>,
+    pub city: Option<Position>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct ChangeGovernmentType {
-    new_government_advance: Option<String>,
+    pub new_government_advance: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct DetermineFirstPlayer {
-    player_index: usize,
+    pub player_index: usize,
 }
 
 pub fn next_status_phase(phase: StatusPhaseState) -> StatusPhaseState {

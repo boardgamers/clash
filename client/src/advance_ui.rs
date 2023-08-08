@@ -4,8 +4,9 @@ use std::collections::HashMap;
 use macroquad::hash;
 use macroquad::math::{bool, vec2};
 use macroquad::ui::root_ui;
+use server::action::Action;
 use server::content::advances::get_technologies;
-use server::game::{Action, Game};
+use server::game::Game;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::AdvancePaymentOptions;
 
@@ -99,7 +100,7 @@ pub fn pay_advance_dialog(game: &mut Game, ap: &mut AdvancePayment) -> bool {
         |ap| ap.valid(),
         |ap| {
             game.execute_action(
-                Action::PlayingAction(PlayingAction::Advance {
+                Action::Playing(PlayingAction::Advance {
                     advance: ap.name.to_string(),
                     payment: ap.payment.to_resource_pile(),
                 }),

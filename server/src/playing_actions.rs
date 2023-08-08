@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 use PlayingAction::*;
 
@@ -20,6 +22,7 @@ pub enum PlayingAction {
         city_position: Position,
         city_piece: Building,
         payment: ResourcePile,
+        port_position: Option<Position>,
         temple_bonus: Option<ResourcePile>,
     },
     Collect {
@@ -63,6 +66,7 @@ impl PlayingAction {
                 city_position,
                 city_piece,
                 payment,
+                port_position,
                 temple_bonus,
             } => {
                 let player = &mut game.players[player_index];
@@ -71,18 +75,27 @@ impl PlayingAction {
                 if !city.can_construct(&city_piece, player) || !payment.can_afford(&cost) {
                     panic!("Illegal action");
                 }
+                if matches!(&city_piece, Port) {
+                    let port_position = port_position.as_ref().expect("Illegal action");
+                    if !city.position.neighbors().contains(port_position) {
+                        panic!("Illegal action");
+                    }
+                } else if port_position.is_some() {
+                    panic!("Illegal action");
+                }
                 if matches!(&city_piece, Temple) {
-                    let building_bonus =
-                        temple_bonus.expect("build data should contain temple bonus");
+                    let building_bonus = temple_bonus.expect("Illegal action");
                     if building_bonus != ResourcePile::mood_tokens(1)
                         && building_bonus != ResourcePile::culture_tokens(1)
                     {
                         panic!("Illegal action");
                     }
                     player.gain_resources(building_bonus);
+                } else if temple_bonus.is_some() {
+                    panic!("Illegal action");
                 }
                 player.loose_resources(payment);
-                player.construct(&city_piece, &city_position);
+                player.construct(&city_piece, &city_position, port_position);
             }
             Collect {
                 city_position,
@@ -96,8 +109,25 @@ impl PlayingAction {
                 {
                     panic!("Illegal action");
                 }
+                let mut available_terrain = HashMap::new();
+                for adjacent_tile in city.position.neighbors() {
+                    let Some(terrain) = game.map.tiles.get(&adjacent_tile) else {
+                        continue;
+                    };
+                    let terrain_left = available_terrain.entry(terrain.clone()).or_insert(0);
+                    if terrain == &Terrain::Water {
+                        *terrain_left = 1;
+                        continue;
+                    }
+                    *terrain_left += 1;
+                }
                 let mut total_collect = ResourcePile::empty();
-                for (_terrain, collect) in collections.into_iter() {
+                for (terrain, collect) in collections.into_iter() {
+                    let terrain_left = available_terrain.entry(terrain).or_insert(0);
+                    *terrain_left -= 1;
+                    if *terrain_left < 0 {
+                        panic!("Illegal action");
+                    }
                     total_collect += collect;
                 }
                 game.players[player_index].gain_resources(total_collect);
@@ -151,14 +181,18 @@ impl PlayingAction {
                         &target_city_position,
                         &city_piece,
                     );
+                    game.add_to_last_log_item(&format!(" and succeeded (rolled {roll})"));
                     return;
                 }
-                if roll > 6
-                    || self_influence
-                    || !game.players[player_index]
-                        .resources()
-                        .can_afford(&ResourcePile::culture_tokens(5 - roll as u32))
+                if roll > 6 || self_influence {
+                    game.add_to_last_log_item(&format!(" and failed (rolled {roll})"));
+                    return;
+                }
+                if !game.players[player_index]
+                    .resources()
+                    .can_afford(&ResourcePile::culture_tokens(5 - roll as u32))
                 {
+                    game.add_to_last_log_item(&format!(" but rolled a {roll} and has not enough culture tokens to increase the roll "));
                     return;
                 }
                 game.state = CulturalInfluenceResolution {
@@ -167,6 +201,7 @@ impl PlayingAction {
                     target_city_position,
                     city_piece,
                 };
+                game.add_to_last_log_item(&format!("and rolled a {roll}. {} now has the option to pay {} culture tokens to increase the dice roll and proceed with the cultural influence", game.players[player_index].get_name(), 5 - roll as u32))
             }
             Custom(custom_action) => {
                 let action = custom_action.custom_action_type();
@@ -205,6 +240,7 @@ impl PlayingAction {
                 city_position,
                 city_piece,
                 payment,
+                port_position: _,
                 temple_bonus,
             } => {
                 let player = &mut game.players[player_index];

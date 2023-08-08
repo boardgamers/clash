@@ -3,8 +3,9 @@ use macroquad::color::BLACK;
 use macroquad::math::vec2;
 use macroquad::prelude::draw_text;
 use macroquad::ui::root_ui;
+use server::action::Action;
 use server::city::City;
-use server::game::{Action, Game};
+use server::game::Game;
 use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
@@ -97,7 +98,7 @@ pub fn show_increase_happiness(game: &mut Game, player_index: usize, state: &mut
             && root_ui().button(vec2(800., y), "Confirm")
         {
             game.execute_action(
-                Action::PlayingAction(PlayingAction::IncreaseHappiness {
+                Action::Playing(PlayingAction::IncreaseHappiness {
                     happiness_increases: increase_happiness.steps.clone(),
                 }),
                 player_index,

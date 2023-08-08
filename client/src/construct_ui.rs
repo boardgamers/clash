@@ -1,8 +1,9 @@
 use macroquad::math::{i32, u32};
 use macroquad::ui::Ui;
+use server::action::Action;
 use server::city_pieces::Building;
 use server::content::custom_actions::CustomAction;
-use server::game::{Action, Game};
+use server::game::Game;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::PaymentOptions;
@@ -61,16 +62,17 @@ pub fn pay_construction_dialog(game: &mut Game, payment: &mut ConstructionPaymen
         |cp| cp.payment.get(ResourceType::Discount).current == 0,
         |cp| match &cp.project {
             ConstructionProject::Building(b) => game.execute_action(
-                Action::PlayingAction(PlayingAction::Construct {
+                Action::Playing(PlayingAction::Construct {
                     city_position: cp.city_position.clone(),
                     city_piece: b.clone(),
                     payment: cp.payment.to_resource_pile(),
+                    port_position: None,
                     temple_bonus: None,
                 }),
                 cp.player_index,
             ),
             ConstructionProject::Wonder(w) => game.execute_action(
-                Action::PlayingAction(PlayingAction::Custom(CustomAction::ConstructWonder {
+                Action::Playing(PlayingAction::Custom(CustomAction::ConstructWonder {
                     city_position: cp.city_position.clone(),
                     payment: cp.payment.to_resource_pile(),
                     wonder: w.clone(),
