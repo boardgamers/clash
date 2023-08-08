@@ -1,9 +1,11 @@
 use macroquad::math::{i32, u32};
 use macroquad::ui::Ui;
 use server::action::Action;
+use server::city::City;
 use server::city_pieces::Building;
 use server::content::custom_actions::CustomAction;
 use server::game::Game;
+use server::map::{Map, Terrain};
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::PaymentOptions;
@@ -24,18 +26,43 @@ pub fn add_construct_button(
 ) -> Option<ActiveDialog> {
     let owner = menu.get_city_owner(game);
     let city = menu.get_city(game);
-    if (menu.is_city_owner())
-        && city.can_construct(building, owner)
-        && ui.button(None, format!("Build {}", name))
-    {
-        return Some(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
-            game,
-            menu.player_index,
-            menu.city_position.clone(),
-            ConstructionProject::Building(building.clone()),
-        )));
+    if (menu.is_city_owner()) && city.can_construct(building, owner) {
+        for pos in building_positions(building, city, &game.map) {
+            if ui.button(
+                None,
+                format!(
+                    "Build {}{}",
+                    name,
+                    pos.clone().map_or("".to_string(), |p| format!(" at {}", p))
+                ),
+            ) {
+                return Some(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
+                    game,
+                    menu.player_index,
+                    menu.city_position.clone(),
+                    ConstructionProject::Building(building.clone(), pos),
+                )));
+            }
+        }
     }
     None
+}
+
+fn building_positions(building: &Building, city: &City, map: &Map) -> Vec<Option<Position>> {
+    if building != &Building::Port {
+        return vec![None];
+    }
+
+    map.tiles
+        .iter()
+        .filter_map(|(p, t)| {
+            if *t == Terrain::Water && city.position.distance(p) == 1 {
+                Some(Some(p.clone()))
+            } else {
+                None
+            }
+        })
+        .collect()
 }
 
 pub fn add_wonder_buttons(game: &Game, menu: &CityMenu, ui: &mut Ui) -> Option<ActiveDialog> {
@@ -61,12 +88,12 @@ pub fn pay_construction_dialog(game: &mut Game, payment: &mut ConstructionPaymen
         payment,
         |cp| cp.payment.get(ResourceType::Discount).current == 0,
         |cp| match &cp.project {
-            ConstructionProject::Building(b) => game.execute_action(
+            ConstructionProject::Building(b, pos) => game.execute_action(
                 Action::Playing(PlayingAction::Construct {
                     city_position: cp.city_position.clone(),
                     city_piece: b.clone(),
                     payment: cp.payment.to_resource_pile(),
-                    port_position: None,
+                    port_position: pos.clone(),
                     temple_bonus: None,
                 }),
                 cp.player_index,
@@ -107,7 +134,7 @@ pub fn pay_construction_dialog(game: &mut Game, payment: &mut ConstructionPaymen
 }
 
 pub enum ConstructionProject {
-    Building(Building),
+    Building(Building, Option<Position>),
     Wonder(String),
 }
 
@@ -128,7 +155,7 @@ impl ConstructionPayment {
     ) -> ConstructionPayment {
         let p = game.get_player(player_index);
         let cost = match &project {
-            ConstructionProject::Building(b) => {
+            ConstructionProject::Building(b, _) => {
                 p.construct_cost(b, p.get_city(&city_position).unwrap())
             }
             ConstructionProject::Wonder(name) => p
