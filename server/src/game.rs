@@ -89,7 +89,7 @@ impl Game {
             current_player_index: starting_player,
             action_log: Vec::new(),
             action_log_index: 0,
-            log: vec![String::from("The game has started")],
+            log: vec![String::from("The game has started"), String::from("Age 1 has started"), String::from("Round 1/3")],
             undo_limit: 0,
             played_once_per_turn_actions: Vec::new(),
             actions_left: 3,
@@ -405,6 +405,10 @@ impl Game {
     }
 
     pub fn skip_dropped_players(&mut self) {
+        if self.players.is_empty() {
+            println!("There are no remaining players");
+            return;
+        }
         while self.dropped_players.contains(&self.current_player_index) {
             self.next_player();
         }
@@ -854,7 +858,7 @@ pub mod tests {
             current_player_index: 0,
             action_log: Vec::new(),
             action_log_index: 0,
-            log: Vec::new(),
+            log: vec![String::from("The game has started"), String::from("Age 1 has started"), String::from("Round 1/3")],
             undo_limit: 0,
             played_once_per_turn_actions: Vec::new(),
             actions_left: 3,

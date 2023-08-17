@@ -27,7 +27,7 @@ pub enum PlayingAction {
     },
     Collect {
         city_position: Position,
-        collections: Vec<(Terrain, ResourcePile)>,
+        collections: Vec<(Position, ResourcePile)>,
     },
     IncreaseHappiness {
         happiness_increases: Vec<(Position, u32)>,
@@ -122,13 +122,20 @@ impl PlayingAction {
                     *terrain_left += 1;
                 }
                 let mut total_collect = ResourcePile::empty();
-                for (terrain, collect) in collections.into_iter() {
+                for (position, collect) in collections.into_iter() {
+                    total_collect += collect.clone();
+                    if city.port_position == Some(position.clone()) {
+                        if collect != ResourcePile::gold(1) && collect != ResourcePile::mood_tokens(1) {
+                            panic!("Illegal action");
+                        }
+                        continue;
+                    }
+                    let terrain = game.map.tiles.get(&position).expect("Illegal action").clone();
                     let terrain_left = available_terrain.entry(terrain).or_insert(0);
                     *terrain_left -= 1;
                     if *terrain_left < 0 {
                         panic!("Illegal action");
                     }
-                    total_collect += collect;
                 }
                 game.players[player_index].gain_resources(total_collect);
                 game.players[player_index]
