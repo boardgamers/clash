@@ -125,12 +125,19 @@ impl PlayingAction {
                 for (position, collect) in collections.into_iter() {
                     total_collect += collect.clone();
                     if city.port_position == Some(position.clone()) {
-                        if collect != ResourcePile::gold(1) && collect != ResourcePile::mood_tokens(1) {
+                        if collect != ResourcePile::gold(1)
+                            && collect != ResourcePile::mood_tokens(1)
+                        {
                             panic!("Illegal action");
                         }
                         continue;
                     }
-                    let terrain = game.map.tiles.get(&position).expect("Illegal action").clone();
+                    let terrain = game
+                        .map
+                        .tiles
+                        .get(&position)
+                        .expect("Illegal action")
+                        .clone();
                     let terrain_left = available_terrain.entry(terrain).or_insert(0);
                     *terrain_left -= 1;
                     if *terrain_left < 0 {
