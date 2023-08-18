@@ -73,18 +73,13 @@ pub fn try_click(game: &Game, state: &mut State) {
     if is_mouse_button_pressed(MouseButton::Left) {
         let (x, y) = mouse_position();
 
-        let c = pixel_to_coordinate(x, y);
-        let p = Position::from_coordinate(c);
+        let pos = &Position::from_coordinate(pixel_to_coordinate(x, y));
 
         match &mut state.active_dialog {
-            ActiveDialog::CollectResources(col) => click_collect_option(col, &p),
+            ActiveDialog::CollectResources(col) => click_collect_option(col, pos),
             _ => {
-                for p in game.players.iter() {
-                    for city in p.cities.iter() {
-                        if c == city.position.coordinate() {
-                            city_ui::city_click(state, p, city);
-                        };
-                    }
+                if let Some(c) = game.get_any_city(pos) {
+                    city_ui::city_click(state, game.get_player(c.player_index), c);
                 }
             }
         }

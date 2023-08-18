@@ -28,10 +28,10 @@ pub fn setup_local_game() -> Game {
     game
 }
 
-fn add_city(game: &mut Game, player_index1: usize, s: &str) {
-    game.players[player_index1]
+fn add_city(game: &mut Game, player_index: usize, s: &str) {
+    game.players[player_index]
         .cities
-        .push(City::new(player_index1, Position::from_offset(s)));
+        .push(City::new(player_index, Position::from_offset(s)));
 }
 
 fn add_terrain(game: &mut Game, pos: &str, terrain: Terrain) {

@@ -149,12 +149,8 @@ pub fn draw_resource_collect_tile(_game: &Game, state: &State, pos: &Position, _
 
 fn is_blocked(game: &Game, pos: &Position) -> bool {
     //todo also look for enemy units
-    for p in game.players.iter() {
-        for city in p.cities.iter() {
-            if city.position == *pos {
-                return true;
-            }
-        }
+    if game.get_any_city(pos).is_some() {
+        return true;
     }
     false
 }

@@ -83,9 +83,7 @@ impl<'a> CityMenu<'a> {
     }
 
     pub fn get_city(&self, game: &'a Game) -> &City {
-        return game.players[self.city_owner_index]
-            .get_city(self.city_position)
-            .expect("city not found");
+        return game.get_city(self.city_owner_index, self.city_position);
     }
 
     pub fn is_city_owner(&self) -> bool {
