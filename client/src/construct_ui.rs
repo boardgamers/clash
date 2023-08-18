@@ -13,8 +13,8 @@ use std::cmp;
 
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::resource_ui::{new_resource_map, ResourceType};
-use crate::ui_state::ActiveDialog;
 use crate::ui_state::CityMenu;
+use crate::ui_state::{ActiveDialog, ActiveDialogUpdate};
 
 pub fn add_construct_button(
     game: &Game,
@@ -82,29 +82,27 @@ pub fn add_wonder_buttons(game: &Game, menu: &CityMenu, ui: &mut Ui) -> Option<A
     None
 }
 
-pub fn pay_construction_dialog(game: &mut Game, payment: &mut ConstructionPayment) -> bool {
+pub fn pay_construction_dialog(payment: &mut ConstructionPayment) -> ActiveDialogUpdate {
     payment_dialog(
         payment,
         |cp| cp.payment.get(ResourceType::Discount).current == 0,
         |cp| match &cp.project {
-            ConstructionProject::Building(b, pos) => game.execute_action(
-                Action::Playing(PlayingAction::Construct {
+            ConstructionProject::Building(b, pos) => {
+                ActiveDialogUpdate::Execute(Action::Playing(PlayingAction::Construct {
                     city_position: cp.city_position.clone(),
                     city_piece: b.clone(),
                     payment: cp.payment.to_resource_pile(),
                     port_position: pos.clone(),
                     temple_bonus: None,
-                }),
-                cp.player_index,
-            ),
-            ConstructionProject::Wonder(w) => game.execute_action(
-                Action::Playing(PlayingAction::Custom(CustomAction::ConstructWonder {
+                }))
+            }
+            ConstructionProject::Wonder(w) => ActiveDialogUpdate::Execute(Action::Playing(
+                PlayingAction::Custom(CustomAction::ConstructWonder {
                     city_position: cp.city_position.clone(),
                     payment: cp.payment.to_resource_pile(),
                     wonder: w.clone(),
-                })),
-                cp.player_index,
-            ),
+                }),
+            )),
         },
         |ap, r| match r {
             ResourceType::Gold => ap.payment_options.gold_left > 0,

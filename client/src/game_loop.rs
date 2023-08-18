@@ -8,11 +8,12 @@ use crate::hex_ui::pixel_to_coordinate;
 use crate::log_ui::show_log;
 use crate::map_ui::draw_map;
 use crate::player_ui::{show_global_controls, show_globals, show_resources, show_wonders};
-use crate::ui_state::{ActiveDialog, CityMenu, State};
+use crate::ui_state::{ActiveDialog, ActiveDialogUpdate, CityMenu, State};
 use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
 use macroquad::prelude::{clear_background, next_frame, set_fullscreen, WHITE};
 use server::game::Game;
 use server::position::Position;
+use crate::dialog_ui::active_dialog_window;
 
 pub async fn run(game: &mut Game) {
     let mut state = State::new();
@@ -34,6 +35,12 @@ fn game_loop(game: &mut Game, state: &mut State) {
     show_log(game);
     show_resources(game, player_index);
     show_wonders(game, player_index);
+
+    if state.pending_update.is_some() {
+        show_pending_update(game, state, player_index);
+        return;
+    }
+
     show_increase_happiness(game, player_index, state);
     show_global_controls(game, player_index, state);
 
@@ -47,26 +54,31 @@ fn game_loop(game: &mut Game, state: &mut State) {
         }
     }
 
-    match &mut state.active_dialog {
-        ActiveDialog::AdvancePayment(p) => {
-            if pay_advance_dialog(game, p) {
-                state.active_dialog = ActiveDialog::None;
-            }
-        }
-        ActiveDialog::ConstructionPayment(p) => {
-            if pay_construction_dialog(game, p) {
-                state.active_dialog = ActiveDialog::None;
-            }
-        }
-        ActiveDialog::CollectResources(c) => {
-            if collect_resources_dialog(game, c) {
-                state.active_dialog = ActiveDialog::None;
-            }
-        }
-        ActiveDialog::None => {}
-    }
+    let update = match &mut state.active_dialog {
+        ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p),
+        ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(p),
+        ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c),
+        ActiveDialog::None => ActiveDialogUpdate::None,
+    };
+    state.update(game, update);
 
     try_click(game, state);
+}
+
+fn show_pending_update(game: &mut Game, state: &mut State, player_index: usize) {
+    active_dialog_window(|ui| {
+        if let Some(update) = &state.pending_update {
+            ui.label(None, &format!("Warning: {}", update.warning));
+            if ui.button(None, "OK") {
+                game.execute_action(state.pending_update.take().unwrap().action, player_index);
+                state.active_dialog = ActiveDialog::None;
+                state.pending_update = None;
+            }
+            if ui.button(None, "Cancel") {
+                state.pending_update = None;
+            }
+        }
+    });
 }
 
 pub fn try_click(game: &Game, state: &mut State) {

@@ -3,6 +3,7 @@ use crate::construct_ui::ConstructionPayment;
 
 use crate::collect_ui::CollectResources;
 use macroquad::prelude::*;
+use server::action::Action;
 use server::city::City;
 use server::game::{Game, GameState};
 use server::player::Player;
@@ -14,6 +15,28 @@ pub enum ActiveDialog {
     AdvancePayment(AdvancePayment),
     ConstructionPayment(ConstructionPayment),
     CollectResources(CollectResources),
+}
+
+pub struct PendingUpdate {
+    pub action: Action,
+    pub warning: String,
+}
+
+pub enum ActiveDialogUpdate {
+    None,
+    Cancel,
+    Execute(Action),
+    ExecuteWithWarning(PendingUpdate),
+}
+
+impl ActiveDialogUpdate {
+    pub fn execute(action: Action, warning: Option<String>) -> ActiveDialogUpdate {
+        if let Some(warning) = warning {
+            ActiveDialogUpdate::ExecuteWithWarning(PendingUpdate { action, warning })
+        } else {
+            ActiveDialogUpdate::Execute(action)
+        }
+    }
 }
 
 pub struct IncreaseHappiness {
@@ -30,6 +53,7 @@ impl IncreaseHappiness {
 pub struct State {
     pub focused_city: Option<(usize, Position)>,
     pub active_dialog: ActiveDialog,
+    pub pending_update: Option<PendingUpdate>,
     pub increase_happiness: Option<IncreaseHappiness>,
 }
 
@@ -37,6 +61,7 @@ impl State {
     pub fn new() -> State {
         State {
             active_dialog: ActiveDialog::None,
+            pending_update: None,
             focused_city: None,
             increase_happiness: None,
         }
@@ -52,6 +77,22 @@ impl State {
             return true;
         }
         false
+    }
+
+    pub fn update(&mut self, game: &mut Game, update: ActiveDialogUpdate) {
+        match update {
+            ActiveDialogUpdate::None => {}
+            ActiveDialogUpdate::Execute(a) => {
+                game.execute_action(a, game.current_player_index);
+                self.active_dialog = ActiveDialog::None;
+            }
+            ActiveDialogUpdate::ExecuteWithWarning(update) => {
+                self.pending_update = Some(update);
+            }
+            ActiveDialogUpdate::Cancel => {
+                self.active_dialog = ActiveDialog::None;
+            }
+        }
     }
 }
 
