@@ -1,29 +1,10 @@
-use std::collections::HashMap;
-use std::fmt;
-
 use macroquad::hash;
-use macroquad::math::{bool, vec2, Vec2};
-use macroquad::ui::root_ui;
+use macroquad::math::{bool, Vec2};
 use macroquad::ui::widgets::Group;
 use server::resource_pile::ResourcePile;
 
-#[derive(PartialEq, Eq, Debug, Clone, Hash, Ord, PartialOrd)]
-pub enum ResourceType {
-    Food,
-    Wood,
-    Ore,
-    Ideas,
-    Gold,
-    MoodTokens,
-    CultureTokens,
-    Discount, //discount on building cost, which can be used for any resource that is not a token
-}
-
-impl fmt::Display for ResourceType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
+use crate::dialog_ui::active_dialog_window;
+use crate::resource_ui::ResourceType;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct ResourcePayment {
@@ -73,23 +54,6 @@ impl Payment {
     }
 }
 
-pub fn new_resource_map(p: &ResourcePile) -> HashMap<ResourceType, u32> {
-    let mut m: HashMap<ResourceType, u32> = HashMap::new();
-    add_resource(&mut m, p.food, ResourceType::Food);
-    add_resource(&mut m, p.wood, ResourceType::Wood);
-    add_resource(&mut m, p.ore, ResourceType::Ore);
-    add_resource(&mut m, p.ideas, ResourceType::Ideas);
-    add_resource(&mut m, p.gold as u32, ResourceType::Gold);
-    add_resource(&mut m, p.mood_tokens, ResourceType::MoodTokens);
-    add_resource(&mut m, p.culture_tokens, ResourceType::CultureTokens);
-    add_resource(&mut m, 0, ResourceType::Discount);
-    m
-}
-
-fn add_resource(m: &mut HashMap<ResourceType, u32>, amount: u32, resource_type: ResourceType) {
-    m.insert(resource_type, amount);
-}
-
 pub trait HasPayment {
     fn payment(&self) -> &Payment;
 }
@@ -103,7 +67,7 @@ pub fn payment_dialog<T: HasPayment>(
     minus: impl Fn(&mut T, ResourceType),
 ) -> bool {
     let mut result = false;
-    root_ui().window(hash!(), vec2(20., 510.), vec2(400., 80.), |ui| {
+    active_dialog_window(|ui| {
         for (i, p) in has_payment.payment().resources.clone().iter().enumerate() {
             if show(has_payment, p.resource.clone()) {
                 Group::new(hash!("res", i), Vec2::new(70., 200.)).ui(ui, |ui| {

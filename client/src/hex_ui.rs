@@ -1,7 +1,7 @@
 use hex2d::{Coordinate, Spacing};
 use macroquad::color::{Color, DARKGRAY};
 use macroquad::math::{f32, i32};
-use macroquad::prelude::{draw_hexagon, draw_text};
+use macroquad::prelude::{draw_hexagon, draw_text, BLACK};
 use server::position::Position;
 use std::f32::consts::PI;
 
@@ -23,6 +23,11 @@ pub fn draw_hex(p: &Position, fill_color: Color, text_color: Color, selected: bo
 
     draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, Color::from_vec(v));
     draw_text(&p.to_string(), c.x - 30.0, c.y - 35.0, 20.0, text_color);
+}
+
+pub fn draw_hex_center_text(p: &Position, text: &str) {
+    let c = center(p).to_screen();
+    draw_text(text, c.x - 5., c.y + 6., 25.0, BLACK)
 }
 
 pub fn pixel_to_coordinate(x: f32, y: f32) -> Coordinate {

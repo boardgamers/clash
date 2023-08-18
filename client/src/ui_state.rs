@@ -1,6 +1,7 @@
 use crate::advance_ui::AdvancePayment;
 use crate::construct_ui::ConstructionPayment;
 
+use crate::collect_ui::CollectResources;
 use macroquad::prelude::*;
 use server::city::City;
 use server::game::{Game, GameState};
@@ -12,6 +13,7 @@ pub enum ActiveDialog {
     None,
     AdvancePayment(AdvancePayment),
     ConstructionPayment(ConstructionPayment),
+    CollectResources(CollectResources),
 }
 
 pub struct IncreaseHappiness {
@@ -44,6 +46,13 @@ impl State {
         self.focused_city = None;
         self.increase_happiness = None;
     }
+
+    pub fn is_collect(&self) -> bool {
+        if let ActiveDialog::CollectResources(_c) = &self.active_dialog {
+            return true;
+        }
+        false
+    }
 }
 
 pub fn can_play_action(game: &Game) -> bool {
@@ -74,9 +83,7 @@ impl<'a> CityMenu<'a> {
     }
 
     pub fn get_city(&self, game: &'a Game) -> &City {
-        return game.players[self.city_owner_index]
-            .get_city(self.city_position)
-            .expect("city not found");
+        return game.get_city(self.city_owner_index, self.city_position);
     }
 
     pub fn is_city_owner(&self) -> bool {
