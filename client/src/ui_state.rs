@@ -7,6 +7,7 @@ use server::action::Action;
 use server::city::City;
 use server::game::{Game, GameState};
 use server::player::Player;
+use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
@@ -83,8 +84,7 @@ impl State {
         match update {
             ActiveDialogUpdate::None => {}
             ActiveDialogUpdate::Execute(a) => {
-                game.execute_action(a, game.current_player_index);
-                self.active_dialog = ActiveDialog::None;
+                self.execute(game, a);
             }
             ActiveDialogUpdate::ExecuteWithWarning(update) => {
                 self.pending_update = Some(update);
@@ -93,6 +93,16 @@ impl State {
                 self.active_dialog = ActiveDialog::None;
             }
         }
+    }
+
+    pub fn execute(&mut self, game: &mut Game, a: Action) {
+        if let Action::Playing(p) = &a {
+            if p == &PlayingAction::EndTurn {
+                self.clear();
+            }
+        }
+        game.execute_action(a, game.current_player_index);
+        self.active_dialog = ActiveDialog::None;
     }
 }
 

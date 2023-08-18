@@ -3,6 +3,7 @@ use crate::city_ui;
 use crate::city_ui::show_city_menu;
 use crate::collect_ui::{click_collect_option, collect_resources_dialog};
 use crate::construct_ui::pay_construction_dialog;
+use crate::dialog_ui::active_dialog_window;
 use crate::happiness_ui::show_increase_happiness;
 use crate::hex_ui::pixel_to_coordinate;
 use crate::log_ui::show_log;
@@ -13,7 +14,6 @@ use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
 use macroquad::prelude::{clear_background, next_frame, set_fullscreen, WHITE};
 use server::game::Game;
 use server::position::Position;
-use crate::dialog_ui::active_dialog_window;
 
 pub async fn run(game: &mut Game) {
     let mut state = State::new();
@@ -37,12 +37,12 @@ fn game_loop(game: &mut Game, state: &mut State) {
     show_wonders(game, player_index);
 
     if state.pending_update.is_some() {
-        show_pending_update(game, state, player_index);
+        show_pending_update(game, state);
         return;
     }
 
     show_increase_happiness(game, player_index, state);
-    show_global_controls(game, player_index, state);
+    state.update(game, show_global_controls(game));
 
     if let Some((city_owner_index, city_position)) = state.focused_city.clone() {
         let dialog = show_city_menu(
@@ -65,13 +65,13 @@ fn game_loop(game: &mut Game, state: &mut State) {
     try_click(game, state);
 }
 
-fn show_pending_update(game: &mut Game, state: &mut State, player_index: usize) {
+fn show_pending_update(game: &mut Game, state: &mut State) {
     active_dialog_window(|ui| {
         if let Some(update) = &state.pending_update {
             ui.label(None, &format!("Warning: {}", update.warning));
             if ui.button(None, "OK") {
-                game.execute_action(state.pending_update.take().unwrap().action, player_index);
-                state.active_dialog = ActiveDialog::None;
+                let action = state.pending_update.take().unwrap().action;
+                state.execute(game, action);
                 state.pending_update = None;
             }
             if ui.button(None, "Cancel") {
