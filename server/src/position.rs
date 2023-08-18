@@ -43,6 +43,10 @@ impl Position {
         self.coordinate().distance(other.coordinate()) as u32
     }
 
+    pub fn is_neighbor(&self, other: &Self) -> bool {
+        self.coordinate().distance(other.coordinate()) == 1
+    }
+
     pub fn neighbors(&self) -> Vec<Self> {
         /*         vec![
             Position::new(self.q, self.r - 1),

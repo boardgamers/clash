@@ -23,14 +23,15 @@ pub fn setup_local_game() -> Game {
     add_terrain(&mut game, "C1", Terrain::Barren);
     add_terrain(&mut game, "C2", Terrain::Forest);
     add_terrain(&mut game, "C3", Terrain::Water);
+    add_terrain(&mut game, "D2", Terrain::Water);
 
     game
 }
 
-fn add_city(game: &mut Game, player_index1: usize, s: &str) {
-    game.players[player_index1]
+fn add_city(game: &mut Game, player_index: usize, s: &str) {
+    game.players[player_index]
         .cities
-        .push(City::new(player_index1, Position::from_offset(s)));
+        .push(City::new(player_index, Position::from_offset(s)));
 }
 
 fn add_terrain(game: &mut Game, pos: &str, terrain: Terrain) {

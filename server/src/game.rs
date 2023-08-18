@@ -190,6 +190,12 @@ impl Game {
             .expect("city not found")
     }
 
+    pub fn get_any_city(&self, position: &Position) -> Option<&City> {
+        self.players
+            .iter()
+            .find_map(|player| player.get_city(position))
+    }
+
     fn add_action_log_item(&mut self, item: ActionLogItem) {
         if self.action_log_index < self.action_log.len() {
             self.action_log.drain(self.action_log_index..);

@@ -4,7 +4,9 @@ use crate::ui_state::{ActiveDialog, State};
 
 mod advance_ui;
 mod city_ui;
+mod collect_ui;
 mod construct_ui;
+mod dialog_ui;
 mod game_loop;
 mod happiness_ui;
 mod hex_ui;
@@ -14,6 +16,7 @@ mod log_ui;
 mod map_ui;
 mod payment_ui;
 mod player_ui;
+mod resource_ui;
 mod ui_state;
 
 #[macroquad::main("Clash")]

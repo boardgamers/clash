@@ -12,6 +12,36 @@ use crate::{
     resource_pile::ResourcePile,
 };
 
+pub const PORT_CHOICES: [ResourcePile; 3] = [
+    ResourcePile {
+        food: 1,
+        wood: 0,
+        ore: 0,
+        ideas: 0,
+        gold: 0,
+        mood_tokens: 0,
+        culture_tokens: 0,
+    },
+    ResourcePile {
+        food: 0,
+        wood: 0,
+        ore: 0,
+        ideas: 0,
+        gold: 1,
+        mood_tokens: 0,
+        culture_tokens: 0,
+    },
+    ResourcePile {
+        food: 0,
+        wood: 0,
+        ore: 0,
+        ideas: 0,
+        gold: 0,
+        mood_tokens: 1,
+        culture_tokens: 0,
+    },
+];
+
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayingAction {
     Advance {
@@ -101,49 +131,9 @@ impl PlayingAction {
                 city_position,
                 collections,
             } => {
-                let city = game.players[player_index]
-                    .get_city(&city_position)
-                    .expect("Illegal action");
-                if city.mood_modified_size() < collections.len()
-                    || city.player_index != player_index
-                {
-                    panic!("Illegal action");
-                }
-                let mut available_terrain = HashMap::new();
-                for adjacent_tile in city.position.neighbors() {
-                    let Some(terrain) = game.map.tiles.get(&adjacent_tile) else {
-                        continue;
-                    };
-                    let terrain_left = available_terrain.entry(terrain.clone()).or_insert(0);
-                    if terrain == &Terrain::Water {
-                        *terrain_left = 1;
-                        continue;
-                    }
-                    *terrain_left += 1;
-                }
-                let mut total_collect = ResourcePile::empty();
-                for (position, collect) in collections.into_iter() {
-                    total_collect += collect.clone();
-                    if city.port_position == Some(position.clone()) {
-                        if collect != ResourcePile::gold(1)
-                            && collect != ResourcePile::mood_tokens(1)
-                        {
-                            panic!("Illegal action");
-                        }
-                        continue;
-                    }
-                    let terrain = game
-                        .map
-                        .tiles
-                        .get(&position)
-                        .expect("Illegal action")
-                        .clone();
-                    let terrain_left = available_terrain.entry(terrain).or_insert(0);
-                    *terrain_left -= 1;
-                    if *terrain_left < 0 {
-                        panic!("Illegal action");
-                    }
-                }
+                let total_collect =
+                    get_total_collection(game, player_index, &city_position, &collections)
+                        .expect("Illegal action");
                 game.players[player_index].gain_resources(total_collect);
                 game.players[player_index]
                     .get_city_mut(&city_position)
@@ -319,4 +309,62 @@ impl ActionType {
             once_per_turn,
         }
     }
+}
+
+pub fn get_total_collection(
+    game: &Game,
+    player_index: usize,
+    city_position: &Position,
+    collections: &Vec<(Position, ResourcePile)>,
+) -> Option<ResourcePile> {
+    let player = &game.players[player_index];
+    let city = player.get_city(city_position).expect("Illegal action");
+    if city.mood_modified_size() < collections.len() || city.player_index != player_index {
+        return None;
+    }
+    let mut available_terrain = HashMap::new();
+    for adjacent_tile in city.position.neighbors() {
+        if game.get_any_city(&adjacent_tile).is_some() {
+            continue;
+        }
+
+        let Some(terrain) = game.map.tiles.get(&adjacent_tile) else {
+            continue;
+        };
+        let terrain_left = available_terrain.entry(terrain.clone()).or_insert(0);
+        if terrain == &Terrain::Water {
+            *terrain_left = 1;
+            continue;
+        }
+        *terrain_left += 1;
+    }
+    let mut total_collect = ResourcePile::empty();
+    for (position, collect) in collections.iter() {
+        total_collect += collect.clone();
+
+        let terrain = game
+            .map
+            .tiles
+            .get(position)
+            .expect("Illegal action")
+            .clone();
+
+        if city.port_position == Some(position.clone()) {
+            if !PORT_CHOICES.iter().any(|r| r == collect) {
+                return None;
+            }
+        } else if !player
+            .collect_options
+            .get(&terrain)
+            .is_some_and(|o| o.contains(collect))
+        {
+            return None;
+        }
+        let terrain_left = available_terrain.entry(terrain).or_insert(0);
+        *terrain_left -= 1;
+        if *terrain_left < 0 {
+            return None;
+        }
+    }
+    Some(total_collect)
 }

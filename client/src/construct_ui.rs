@@ -11,9 +11,8 @@ use server::position::Position;
 use server::resource_pile::PaymentOptions;
 use std::cmp;
 
-use crate::payment_ui::{
-    new_resource_map, payment_dialog, HasPayment, Payment, ResourcePayment, ResourceType,
-};
+use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
+use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::ui_state::ActiveDialog;
 use crate::ui_state::CityMenu;
 
@@ -56,7 +55,7 @@ fn building_positions(building: &Building, city: &City, map: &Map) -> Vec<Option
     map.tiles
         .iter()
         .filter_map(|(p, t)| {
-            if *t == Terrain::Water && city.position.distance(p) == 1 {
+            if *t == Terrain::Water && city.position.is_neighbor(p) {
                 Some(Some(p.clone()))
             } else {
                 None
