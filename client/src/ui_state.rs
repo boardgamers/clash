@@ -3,9 +3,11 @@ use crate::construct_ui::ConstructionPayment;
 
 use crate::collect_ui::CollectResources;
 use macroquad::prelude::*;
+use server::action::Action;
 use server::city::City;
 use server::game::{Game, GameState};
 use server::player::Player;
+use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
@@ -14,6 +16,42 @@ pub enum ActiveDialog {
     AdvancePayment(AdvancePayment),
     ConstructionPayment(ConstructionPayment),
     CollectResources(CollectResources),
+}
+
+pub struct PendingUpdate {
+    pub action: Action,
+    pub warning: Vec<String>,
+}
+
+pub enum ActiveDialogUpdate {
+    None,
+    Cancel,
+    Execute(Action),
+    ExecuteWithWarning(PendingUpdate),
+}
+
+impl ActiveDialogUpdate {
+    pub fn execute(action: Action, warning: Vec<String>) -> ActiveDialogUpdate {
+        if warning.is_empty() {
+            ActiveDialogUpdate::Execute(action)
+        } else {
+            ActiveDialogUpdate::ExecuteWithWarning(PendingUpdate { action, warning })
+        }
+    }
+
+    pub fn execute_activation(
+        action: Action,
+        warning: Vec<String>,
+        city_is_activated: bool,
+    ) -> ActiveDialogUpdate {
+        if city_is_activated {
+            let mut warn = vec!["City will become unhappy".to_string()];
+            warn.extend(warning);
+            ActiveDialogUpdate::execute(action, warn)
+        } else {
+            ActiveDialogUpdate::execute(action, warning)
+        }
+    }
 }
 
 pub struct IncreaseHappiness {
@@ -30,6 +68,7 @@ impl IncreaseHappiness {
 pub struct State {
     pub focused_city: Option<(usize, Position)>,
     pub active_dialog: ActiveDialog,
+    pub pending_update: Option<PendingUpdate>,
     pub increase_happiness: Option<IncreaseHappiness>,
 }
 
@@ -37,6 +76,7 @@ impl State {
     pub fn new() -> State {
         State {
             active_dialog: ActiveDialog::None,
+            pending_update: None,
             focused_city: None,
             increase_happiness: None,
         }
@@ -52,6 +92,31 @@ impl State {
             return true;
         }
         false
+    }
+
+    pub fn update(&mut self, game: &mut Game, update: ActiveDialogUpdate) {
+        match update {
+            ActiveDialogUpdate::None => {}
+            ActiveDialogUpdate::Execute(a) => {
+                self.execute(game, a);
+            }
+            ActiveDialogUpdate::ExecuteWithWarning(update) => {
+                self.pending_update = Some(update);
+            }
+            ActiveDialogUpdate::Cancel => {
+                self.active_dialog = ActiveDialog::None;
+            }
+        }
+    }
+
+    pub fn execute(&mut self, game: &mut Game, a: Action) {
+        if let Action::Playing(p) = &a {
+            if p == &PlayingAction::EndTurn {
+                self.clear();
+            }
+        }
+        game.execute_action(a, game.current_player_index);
+        self.active_dialog = ActiveDialog::None;
     }
 }
 

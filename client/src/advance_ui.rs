@@ -12,11 +12,10 @@ use server::resource_pile::AdvancePaymentOptions;
 
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::resource_ui::{new_resource_map, ResourceType};
-use crate::ui_state::can_play_action;
+use crate::ui_state::{can_play_action, ActiveDialogUpdate};
 use crate::{ActiveDialog, State};
 
 pub struct AdvancePayment {
-    player_index: usize,
     name: String,
     payment: Payment,
     cost: u32,
@@ -27,7 +26,6 @@ impl AdvancePayment {
         let p = game.get_player(player_index);
         let cost = p.advance_cost(name);
         AdvancePayment {
-            player_index,
             name: name.to_string(),
             payment: AdvancePayment::new_payment(
                 p.resources().get_advance_payment_options(cost),
@@ -93,18 +91,15 @@ pub fn show_advance_menu<'a>(game: &'a Game, player_index: usize, state: &'a mut
     });
 }
 
-pub fn pay_advance_dialog(game: &mut Game, ap: &mut AdvancePayment) -> bool {
+pub fn pay_advance_dialog(ap: &mut AdvancePayment) -> ActiveDialogUpdate {
     payment_dialog(
         ap,
         |ap| ap.valid(),
         |ap| {
-            game.execute_action(
-                Action::Playing(PlayingAction::Advance {
-                    advance: ap.name.to_string(),
-                    payment: ap.payment.to_resource_pile(),
-                }),
-                ap.player_index,
-            )
+            ActiveDialogUpdate::Execute(Action::Playing(PlayingAction::Advance {
+                advance: ap.name.to_string(),
+                payment: ap.payment.to_resource_pile(),
+            }))
         },
         |ap, r| ap.payment.get(r).max > 0,
         |ap, r| {
