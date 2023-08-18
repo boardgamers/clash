@@ -28,29 +28,17 @@ pub trait AbilityInitializerSetup: Sized {
     {
         let key = self.get_key();
         let deinitialize_event = event.clone();
-        let initializer = move |game: &mut Game, player_index: usize| {
-            let player = &mut game.players[player_index];
-            player
-                .event_listener_indices
-                .entry(key.clone())
-                .or_default()
-                .push_back(
-                    event(player.events.as_mut().expect("events should be set"))
-                        .add_listener_mut(listener.clone(), priority, key.clone()),
-                )
-        };
+        let initializer =
+            move |game: &mut Game, player_index: usize| {
+                event(game.players[player_index].events.as_mut().expect("events should be set"))
+                    .add_listener_mut(listener.clone(), priority, key.clone());
+            };
         let key = self.get_key();
         let deinitializer = move |game: &mut Game, player_index: usize| {
-            let player = &mut game.players[player_index];
-            deinitialize_event(player.events.as_mut().expect("events should be set"))
-                .remove_listener_mut(
-                    player
-                        .event_listener_indices
-                        .entry(key.clone())
-                        .or_default()
-                        .pop_front()
-                        .expect("tried to remove non-existing element"),
-                )
+            deinitialize_event(game.players[player_index].events.as_mut().expect("events should be set"))
+                .remove_listener_mut_by_key(
+                    &key
+                );
         };
         self.add_ability_initializer(initializer)
             .add_ability_deinitializer(deinitializer)

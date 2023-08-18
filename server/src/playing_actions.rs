@@ -318,7 +318,7 @@ pub fn get_total_collection(
     collections: &Vec<(Position, ResourcePile)>,
 ) -> Option<ResourcePile> {
     let player = &game.players[player_index];
-    let city = player.get_city(city_position).expect("Illegal action");
+    let city = player.get_city(city_position)?;
     if city.mood_modified_size() < collections.len() || city.player_index != player_index {
         return None;
     }
@@ -342,12 +342,7 @@ pub fn get_total_collection(
     for (position, collect) in collections.iter() {
         total_collect += collect.clone();
 
-        let terrain = game
-            .map
-            .tiles
-            .get(position)
-            .expect("Illegal action")
-            .clone();
+        let terrain = game.map.tiles.get(position)?.clone();
 
         if city.port_position == Some(position.clone()) {
             if !PORT_CHOICES.iter().any(|r| r == collect) {

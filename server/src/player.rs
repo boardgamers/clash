@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering::{self, *},
-    collections::{HashMap, HashSet, VecDeque},
+    collections::{HashMap, HashSet},
     mem,
 };
 
@@ -46,7 +46,6 @@ pub struct Player {
     resources: ResourcePile,
     pub resource_limit: ResourcePile,
     pub events: Option<PlayerEvents>,
-    pub event_listener_indices: HashMap<String, VecDeque<usize>>,
     pub cities: Vec<City>,
     pub units: Vec<Unit>,
     pub civilization: Civilization,
@@ -77,28 +76,41 @@ impl Clone for Player {
 
 impl PartialEq for Player {
     fn eq(&self, other: &Self) -> bool {
-        self.name == other.name &&
-        self.index == other.index &&
-        self.resources == other.resources &&
-        self.resource_limit == other.resource_limit &&
-        self.cities.iter().enumerate().all(|(i, city)| city.position == other.cities[i].position) &&
-        self.units == other.units &&
-        self.civilization.name == other.civilization.name &&
-        self.active_leader.as_ref().map(|leader| &leader.name) == other.active_leader.as_ref().map(|leader| &leader.name) &&
-        self.available_leaders.iter().enumerate().all(|(i, leader)| leader.name == other.available_leaders[i].name) &&
-        self.advances == other.advances &&
-        self.unlocked_special_advances == other.unlocked_special_advances &&
-        self.wonders == other.wonders &&
-        self.wonders_build == other.wonders_build &&
-        self.leader_position == other.leader_position &&
-        self.game_event_tokens == other.game_event_tokens &&
-        self.influenced_buildings == other.influenced_buildings &&
-        self.completed_objectives == other.completed_objectives &&
-        self.defeated_leaders == other.defeated_leaders &&
-        self.event_victory_points == other.event_victory_points &&
-        self.wonder_cards.iter().enumerate().all(|(i, wonder)| wonder.name == other.wonder_cards[i].name) &&
-        self.available_buildings == other.available_buildings &&
-        self.collect_options == other.collect_options
+        self.name == other.name
+            && self.index == other.index
+            && self.resources == other.resources
+            && self.resource_limit == other.resource_limit
+            && self
+                .cities
+                .iter()
+                .enumerate()
+                .all(|(i, city)| city.position == other.cities[i].position)
+            && self.units == other.units
+            && self.civilization.name == other.civilization.name
+            && self.active_leader.as_ref().map(|leader| &leader.name)
+                == other.active_leader.as_ref().map(|leader| &leader.name)
+            && self
+                .available_leaders
+                .iter()
+                .enumerate()
+                .all(|(i, leader)| leader.name == other.available_leaders[i].name)
+            && self.advances == other.advances
+            && self.unlocked_special_advances == other.unlocked_special_advances
+            && self.wonders == other.wonders
+            && self.wonders_build == other.wonders_build
+            && self.leader_position == other.leader_position
+            && self.game_event_tokens == other.game_event_tokens
+            && self.influenced_buildings == other.influenced_buildings
+            && self.completed_objectives == other.completed_objectives
+            && self.defeated_leaders == other.defeated_leaders
+            && self.event_victory_points == other.event_victory_points
+            && self
+                .wonder_cards
+                .iter()
+                .enumerate()
+                .all(|(i, wonder)| wonder.name == other.wonder_cards[i].name)
+            && self.available_buildings == other.available_buildings
+            && self.collect_options == other.collect_options
     }
 }
 
@@ -155,7 +167,6 @@ impl Player {
             resources: data.resources,
             resource_limit: data.resource_limit,
             events: Some(PlayerEvents::default()),
-            event_listener_indices: HashMap::new(),
             cities: data.cities.into_iter().map(City::from_data).collect(),
             units: data.units,
             civilization: civilizations::get_civilization_by_name(&data.civilization)
@@ -249,7 +260,10 @@ impl Player {
             cities: self.cities.iter().map(|city| city.cloned_data()).collect(),
             units: self.units.clone(),
             civilization: self.civilization.name.clone(),
-            active_leader: self.active_leader.as_ref().map(|leader| leader.name.clone()),
+            active_leader: self
+                .active_leader
+                .as_ref()
+                .map(|leader| leader.name.clone()),
             available_leaders: self
                 .available_leaders
                 .iter()
@@ -286,7 +300,6 @@ impl Player {
             resources: ResourcePile::food(2),
             resource_limit: ResourcePile::new(2, 7, 7, 7, 7, 7, 7),
             events: Some(PlayerEvents::new()),
-            event_listener_indices: HashMap::new(),
             cities: Vec::new(),
             units: Vec::new(),
             civilization,
@@ -577,7 +590,6 @@ impl Player {
         self.events = Some(events);
     }
 }
-
 
 #[derive(Serialize, Deserialize, PartialEq)]
 pub struct PlayerData {

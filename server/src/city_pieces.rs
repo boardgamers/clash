@@ -59,7 +59,11 @@ impl CityPieces {
             fortress: self.fortress,
             port: self.port,
             temple: self.temple,
-            wonders: self.wonders.iter().map(|wonder| wonder.name.clone()).collect(),
+            wonders: self
+                .wonders
+                .iter()
+                .map(|wonder| wonder.name.clone())
+                .collect(),
         }
     }
 

@@ -22,10 +22,14 @@ impl StatusPhaseAction {
     pub fn execute(self, game: &mut Game, player_index: usize) {
         match self.phase {
             StatusPhaseState::CompleteObjectives => {
-                let mut completed_objectives = serde_json::from_str::<CompleteObjectives>(&self.data)
-                    .expect("data should be valid complete objectives json")
-                    .objectives;
-                game.players[player_index].completed_objectives.append(&mut completed_objectives);
+                let mut completed_objectives =
+                    serde_json::from_str::<CompleteObjectives>(&self.data)
+                        .expect("data should be valid complete objectives json")
+                        .objectives;
+                //todo legality check
+                game.players[player_index]
+                    .completed_objectives
+                    .append(&mut completed_objectives);
             }
             StatusPhaseState::FreeAdvance => {
                 let advance = serde_json::from_str::<FreeAdvance>(&self.data)
@@ -50,9 +54,7 @@ impl StatusPhaseAction {
                     serde_json::from_str::<ChangeGovernmentType>(&self.data)
                         .expect("data should be valid change government type json")
                         .new_government_advance;
-                if let Some(_new_government_advance) = new_government_advance {
-                    todo!()
-                }
+                if let Some(new_government_advance) = new_government_advance {}
             }
             StatusPhaseState::DetermineFirstPlayer => {
                 let player = serde_json::from_str::<DetermineFirstPlayer>(&self.data)

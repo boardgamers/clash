@@ -418,7 +418,9 @@ impl Game {
         if self.players.is_empty() {
             return;
         }
-        while self.dropped_players.contains(&self.current_player_index) && self.current_player_index < self.players.len() - 1 {
+        while self.dropped_players.contains(&self.current_player_index)
+            && self.current_player_index < self.players.len() - 1
+        {
             self.current_player_index += 1;
         }
     }
