@@ -114,9 +114,9 @@ pub fn show_global_controls(game: &Game) -> ActiveDialogUpdate {
         return ActiveDialogUpdate::execute(
             Action::Playing(PlayingAction::EndTurn),
             if left > 0 {
-                Some(format!("{left} actions left"))
+                vec![(format!("{left} actions left"))]
             } else {
-                None
+                vec![]
             },
         );
     };

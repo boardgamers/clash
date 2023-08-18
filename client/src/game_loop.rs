@@ -68,7 +68,7 @@ fn game_loop(game: &mut Game, state: &mut State) {
 fn show_pending_update(game: &mut Game, state: &mut State) {
     active_dialog_window(|ui| {
         if let Some(update) = &state.pending_update {
-            ui.label(None, &format!("Warning: {}", update.warning));
+            ui.label(None, &format!("Warning: {}", update.warning.join(", ")));
             if ui.button(None, "OK") {
                 let action = state.pending_update.take().unwrap().action;
                 state.execute(game, action);

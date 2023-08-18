@@ -87,22 +87,26 @@ pub fn pay_construction_dialog(payment: &mut ConstructionPayment) -> ActiveDialo
         payment,
         |cp| cp.payment.get(ResourceType::Discount).current == 0,
         |cp| match &cp.project {
-            ConstructionProject::Building(b, pos) => {
-                ActiveDialogUpdate::Execute(Action::Playing(PlayingAction::Construct {
+            ConstructionProject::Building(b, pos) => ActiveDialogUpdate::execute_activation(
+                Action::Playing(PlayingAction::Construct {
                     city_position: cp.city_position.clone(),
                     city_piece: b.clone(),
                     payment: cp.payment.to_resource_pile(),
                     port_position: pos.clone(),
                     temple_bonus: None,
-                }))
-            }
-            ConstructionProject::Wonder(w) => ActiveDialogUpdate::Execute(Action::Playing(
-                PlayingAction::Custom(CustomAction::ConstructWonder {
+                }),
+                vec![],
+                cp.city_is_activated,
+            ),
+            ConstructionProject::Wonder(w) => ActiveDialogUpdate::execute_activation(
+                Action::Playing(PlayingAction::Custom(CustomAction::ConstructWonder {
                     city_position: cp.city_position.clone(),
                     payment: cp.payment.to_resource_pile(),
                     wonder: w.clone(),
-                }),
-            )),
+                })),
+                vec![],
+                cp.city_is_activated,
+            ),
         },
         |ap, r| match r {
             ResourceType::Gold => ap.payment_options.gold_left > 0,
@@ -138,6 +142,7 @@ pub enum ConstructionProject {
 pub struct ConstructionPayment {
     pub player_index: usize,
     pub city_position: Position,
+    pub city_is_activated: bool,
     pub project: ConstructionProject,
     pub payment: Payment,
     pub payment_options: PaymentOptions,
@@ -170,10 +175,11 @@ impl ConstructionPayment {
 
         ConstructionPayment {
             player_index,
-            city_position,
+            city_position: city_position.clone(),
             project,
             payment,
             payment_options,
+            city_is_activated: game.get_city(player_index, &city_position).is_activated(),
         }
     }
 

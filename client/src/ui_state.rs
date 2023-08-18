@@ -20,7 +20,7 @@ pub enum ActiveDialog {
 
 pub struct PendingUpdate {
     pub action: Action,
-    pub warning: String,
+    pub warning: Vec<String>,
 }
 
 pub enum ActiveDialogUpdate {
@@ -31,11 +31,25 @@ pub enum ActiveDialogUpdate {
 }
 
 impl ActiveDialogUpdate {
-    pub fn execute(action: Action, warning: Option<String>) -> ActiveDialogUpdate {
-        if let Some(warning) = warning {
-            ActiveDialogUpdate::ExecuteWithWarning(PendingUpdate { action, warning })
-        } else {
+    pub fn execute(action: Action, warning: Vec<String>) -> ActiveDialogUpdate {
+        if warning.is_empty() {
             ActiveDialogUpdate::Execute(action)
+        } else {
+            ActiveDialogUpdate::ExecuteWithWarning(PendingUpdate { action, warning })
+        }
+    }
+
+    pub fn execute_activation(
+        action: Action,
+        warning: Vec<String>,
+        city_is_activated: bool,
+    ) -> ActiveDialogUpdate {
+        if city_is_activated {
+            let mut warn = vec!["City will become unhappy".to_string()];
+            warn.extend(warning);
+            ActiveDialogUpdate::execute(action, warn)
+        } else {
+            ActiveDialogUpdate::execute(action, warning)
         }
     }
 }

@@ -59,16 +59,17 @@ pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> Acti
         if ui.button(Vec2::new(0., 40.), label) && valid {
             let extra = city.mood_modified_size() - collect.collections.len();
 
-            result = ActiveDialogUpdate::execute(
+            result = ActiveDialogUpdate::execute_activation(
                 Action::Playing(PlayingAction::Collect {
                     city_position: collect.city_position.clone(),
                     collections: collect.collections.clone(),
                 }),
                 if extra > 0 {
-                    Some(format!("{extra} more tiles can be collected"))
+                    vec![format!("{extra} more tiles can be collected")]
                 } else {
-                    None
+                    vec![]
                 },
+                city.is_activated(),
             );
         };
         if ui.button(Vec2::new(80., 40.), "Cancel") {
