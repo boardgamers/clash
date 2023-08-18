@@ -67,6 +67,7 @@ impl StatusPhaseAction {
         game.next_player();
         if game.current_player_index == game.starting_player_index {
             if let StatusPhaseState::FreeAdvance = self.phase {
+                //draw card phase
                 game.draw_new_cards();
             }
             let next_phase = next_status_phase(self.phase);
@@ -78,8 +79,12 @@ impl StatusPhaseAction {
             }
             game.state = StatusPhase(next_phase)
         }
-        game.skip_dropped_players();
+        skip_status_phase_players(game);
     }
+}
+
+fn skip_status_phase_players(game: &mut Game) {
+    game.skip_dropped_players();
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

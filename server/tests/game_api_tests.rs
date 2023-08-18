@@ -135,10 +135,10 @@ fn basic_actions() {
     assert_eq!(1, game.actions_left);
 
     let tile_position = Position::new(1, 0);
-    game.map.tiles.insert(tile_position, Mountain);
+    game.map.tiles.insert(tile_position.clone(), Mountain);
     let collect_action = Action::Playing(Collect {
         city_position: city_position.clone(),
-        collections: vec![(Mountain, ResourcePile::ore(1))],
+        collections: vec![(tile_position, ResourcePile::ore(1))],
     });
     let game = game_api::execute_action(game, collect_action, 0);
     let player = &game.players[0];
