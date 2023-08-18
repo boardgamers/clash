@@ -131,8 +131,9 @@ impl PlayingAction {
                 city_position,
                 collections,
             } => {
-                let total_collect = get_total_collection(
-                    game, player_index, &city_position, &collections).expect("Illegal action");
+                let total_collect =
+                    get_total_collection(game, player_index, &city_position, &collections)
+                        .expect("Illegal action");
                 game.players[player_index].gain_resources(total_collect);
                 game.players[player_index]
                     .get_city_mut(&city_position)
@@ -310,13 +311,14 @@ impl ActionType {
     }
 }
 
-
-pub fn get_total_collection(game: &Game, player_index: usize, city_position: &Position,
-                            collections: &Vec<(Position, ResourcePile)>) -> Option<ResourcePile> {
+pub fn get_total_collection(
+    game: &Game,
+    player_index: usize,
+    city_position: &Position,
+    collections: &Vec<(Position, ResourcePile)>,
+) -> Option<ResourcePile> {
     let player = &game.players[player_index];
-    let city = player
-        .get_city(&city_position)
-        .expect("Illegal action");
+    let city = player.get_city(city_position).expect("Illegal action");
     if city.mood_modified_size() < collections.len() || city.player_index != player_index {
         return None;
     }
@@ -351,10 +353,12 @@ pub fn get_total_collection(game: &Game, player_index: usize, city_position: &Po
             if !PORT_CHOICES.iter().any(|r| r == collect) {
                 return None;
             }
-        } else {
-            if !player.collect_options.get(&terrain).is_some_and(|o| o.contains(collect)) {
-                return None;
-            }
+        } else if !player
+            .collect_options
+            .get(&terrain)
+            .is_some_and(|o| o.contains(collect))
+        {
+            return None;
         }
         let terrain_left = available_terrain.entry(terrain).or_insert(0);
         *terrain_left -= 1;
