@@ -257,9 +257,13 @@ impl PlayingAction {
                 }
             }
             Collect {
-                city_position: _,
+                city_position,
                 collections,
             } => {
+                game.players[player_index]
+                    .get_city_mut(&city_position)
+                    .expect("city should be owned by the player")
+                    .undo_activate();
                 let total_collect = collections.into_iter().map(|(_, collect)| collect).sum();
                 game.players[player_index].loose_resources(total_collect);
             }

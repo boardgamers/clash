@@ -9,7 +9,6 @@ use crate::{
 pub fn get_technologies() -> Vec<Advance> {
     vec![
         //Agriculture
-
         Advance::builder(
             "Storage",
             "Your maximum food limit is increased from 2 to 7",
@@ -22,9 +21,14 @@ pub fn get_technologies() -> Vec<Advance> {
         })
         .with_advance_bonus(MoodToken)
         .build(),
-
+        Advance::builder(
+            "Irrigation",
+            "● Your cities may Collect food from Barren spaces\n● Ignore Famine events",
+        )
+        .add_collect_option(Barren, ResourcePile::food(1))
+        .with_advance_bonus(MoodToken)
+        .build(),
         //Construction
-
         Advance::builder(
             "Engineering",
             "● Immediately draw 1 wonder\n● May Construct wonder happy cities",
@@ -32,17 +36,12 @@ pub fn get_technologies() -> Vec<Advance> {
         .add_one_time_ability_initializer(|game, player| game.draw_wonder_card(player))
         .add_custom_action(ConstructWonder)
         .build(),
-
         //Maritime
-
-        Advance::builder("Fishing",
-            "Your cities may Collect food from one Sea space")
+        Advance::builder("Fishing", "Your cities may Collect food from one Sea space")
             .add_collect_option(Water, ResourcePile::food(1))
             .with_advance_bonus(MoodToken)
             .build(),
-
         //Education
-
         Advance::builder(
             "Philosophy",
             "● Immediately gain 1 idea\n● Gain 1 idea after getting a Science advance",
@@ -81,9 +80,7 @@ pub fn get_technologies() -> Vec<Advance> {
         )
         .with_advance_bonus(MoodToken)
         .build(),
-
         //Science
-
         Advance::builder(
             "Math",
             "Engineering and Roads can be bought at no food cost",
@@ -100,7 +97,6 @@ pub fn get_technologies() -> Vec<Advance> {
         .with_advance_bonus(CultureToken)
         .with_unlocked_building("Observatory")
         .build(),
-
         Advance::builder(
             "Astronomy",
             "Navigation and Cartography can be bought at no food cost",
@@ -127,17 +123,31 @@ pub fn get_advance_by_name(name: &str) -> Option<Advance> {
 }
 
 pub fn get_leading_government_advance(government: &str) -> Option<Advance> {
-    get_technologies()
-        .into_iter().find(|advance| advance.government.as_ref().is_some_and(|value| value.as_str() == government))
+    get_technologies().into_iter().find(|advance| {
+        advance
+            .government
+            .as_ref()
+            .is_some_and(|value| value.as_str() == government)
+    })
 }
 
 pub fn get_government_advances(government: &str) -> Vec<Advance> {
-    let leading_government = get_leading_government_advance(government).expect("government should exist");
+    let leading_government =
+        get_leading_government_advance(government).expect("government should exist");
     let mut government_advances = get_technologies()
         .into_iter()
-        .filter(|advance| advance.required_advance.as_ref().is_some_and(|required_advance| required_advance == &leading_government.name))
+        .filter(|advance| {
+            advance
+                .required_advance
+                .as_ref()
+                .is_some_and(|required_advance| required_advance == &leading_government.name)
+        })
         .collect::<Vec<Advance>>();
-    government_advances.sort_by_key(|advance| advance.government_tier.expect("advance should be a government advance"));
+    government_advances.sort_by_key(|advance| {
+        advance
+            .government_tier
+            .expect("advance should be a government advance")
+    });
     government_advances.push(leading_government);
     government_advances.reverse();
     government_advances

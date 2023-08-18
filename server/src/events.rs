@@ -106,7 +106,12 @@ where
     }
 
     pub fn remove_listener_mut_by_key(&mut self, key: &str) {
-        let _ = self.listeners_mut.remove(self.listeners_mut.iter().position(|(_, _, _, value)| value == key).expect("Listeners should include the key to remove"));
+        let _ = self.listeners_mut.remove(
+            self.listeners_mut
+                .iter()
+                .position(|(_, _, _, value)| value == key)
+                .expect("Listeners should include the key to remove"),
+        );
     }
 
     pub fn trigger(&self, value: &mut T, info: &U, details: &V) -> Vec<String> {
@@ -180,8 +185,16 @@ mod tests {
     #[test]
     fn mutable_event() {
         let mut event = EventMut::default();
-        event.add_listener_mut(|item, constant, _| *item += constant, 0, String::from("add constant"));
-        event.add_listener_mut(|item, _, multiplier| *item *= multiplier, -1, String::from("multiply value"));
+        event.add_listener_mut(
+            |item, constant, _| *item += constant,
+            0,
+            String::from("add constant"),
+        );
+        event.add_listener_mut(
+            |item, _, multiplier| *item *= multiplier,
+            -1,
+            String::from("multiply value"),
+        );
         event.add_listener_mut(
             |item, _, _| {
                 *item += 1;

@@ -305,7 +305,7 @@ impl Player {
             civilization,
             active_leader: None,
             available_leaders: Vec::new(),
-            advances: Vec::new(),
+            advances: vec![String::from("Farming"), String::from("Mining")],
             unlocked_special_advances: Vec::new(),
             wonders: Vec::new(),
             wonders_build: 0,
