@@ -10,9 +10,8 @@ use server::game::Game;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::AdvancePaymentOptions;
 
-use crate::payment_ui::{
-    new_resource_map, payment_dialog, HasPayment, Payment, ResourcePayment, ResourceType,
-};
+use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
+use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::ui_state::can_play_action;
 use crate::{ActiveDialog, State};
 

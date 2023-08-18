@@ -1,6 +1,6 @@
 use crate::city_ui::draw_city;
-use crate::hex_ui;
-use crate::ui_state::State;
+use crate::ui_state::{ActiveDialog, State};
+use crate::{collect_ui, hex_ui};
 use macroquad::prelude::*;
 use server::game::Game;
 use server::map::Terrain;
@@ -20,11 +20,18 @@ pub fn draw_map(game: &Game, state: &State) {
     game.map.tiles.iter().for_each(|(pos, t)| {
         let c = terrain_color(t);
         let selected = state.focused_city.iter().any(|(_, p)| pos == p);
-        hex_ui::draw_hex(pos, c.0, if c.1 { WHITE } else { BLACK }, selected)
+        let text_color = if c.1 { WHITE } else { BLACK };
+        hex_ui::draw_hex(pos, c.0, text_color, selected);
+        collect_ui::draw_resource_collect_tile(game, state, pos, t);
     });
-    for p in game.players.iter() {
-        for city in p.cities.iter() {
-            draw_city(p, city, state);
+    match &state.active_dialog {
+        ActiveDialog::CollectResources(_) => {}
+        _ => {
+            for p in game.players.iter() {
+                for city in p.cities.iter() {
+                    draw_city(p, city, state);
+                }
+            }
         }
     }
 }

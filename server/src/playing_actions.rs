@@ -12,6 +12,24 @@ use crate::{
     resource_pile::ResourcePile,
 };
 
+pub const PORT_CHOICES: [ResourcePile; 2] = [ResourcePile {
+    food: 0,
+    wood: 0,
+    ore: 0,
+    ideas: 0,
+    gold: 1,
+    mood_tokens: 0,
+    culture_tokens: 0,
+}, ResourcePile {
+    food: 0,
+    wood: 0,
+    ore: 0,
+    ideas: 0,
+    gold: 0,
+    mood_tokens: 1,
+    culture_tokens: 0,
+}];
+
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayingAction {
     Advance {
@@ -122,20 +140,15 @@ impl PlayingAction {
                     *terrain_left += 1;
                 }
                 let mut total_collect = ResourcePile::empty();
-                for (position, collect) in collections.into_iter() {
+                for (position, collect) in collections.iter() {
                     total_collect += collect.clone();
-                    if city.port_position == Some(position.clone()) {
-                        if collect != ResourcePile::gold(1)
-                            && collect != ResourcePile::mood_tokens(1)
-                        {
-                            panic!("Illegal action");
-                        }
-                        continue;
+                    if !PORT_CHOICES.iter().any(|r| r == collect) {
+                        panic!("Illegal action");
                     }
                     let terrain = game
                         .map
                         .tiles
-                        .get(&position)
+                        .get(position)
                         .expect("Illegal action")
                         .clone();
                     let terrain_left = available_terrain.entry(terrain).or_insert(0);

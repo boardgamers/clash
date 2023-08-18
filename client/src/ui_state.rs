@@ -1,6 +1,7 @@
 use crate::advance_ui::AdvancePayment;
 use crate::construct_ui::ConstructionPayment;
 
+use crate::collect_ui::CollectResources;
 use macroquad::prelude::*;
 use server::city::City;
 use server::game::{Game, GameState};
@@ -12,6 +13,7 @@ pub enum ActiveDialog {
     None,
     AdvancePayment(AdvancePayment),
     ConstructionPayment(ConstructionPayment),
+    CollectResources(CollectResources),
 }
 
 pub struct IncreaseHappiness {

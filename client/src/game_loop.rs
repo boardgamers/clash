@@ -1,5 +1,6 @@
 use crate::advance_ui::{pay_advance_dialog, show_advance_menu};
 use crate::city_ui::{show_city_menu, try_city_click};
+use crate::collect_ui::collect_resources_dialog;
 use crate::construct_ui::pay_construction_dialog;
 use crate::happiness_ui::show_increase_happiness;
 use crate::log_ui::show_log;
@@ -50,6 +51,11 @@ fn game_loop(game: &mut Game, state: &mut State) {
         }
         ActiveDialog::ConstructionPayment(p) => {
             if pay_construction_dialog(game, p) {
+                state.active_dialog = ActiveDialog::None;
+            }
+        }
+        ActiveDialog::CollectResources(c) => {
+            if collect_resources_dialog(game, c) {
                 state.active_dialog = ActiveDialog::None;
             }
         }
