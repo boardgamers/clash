@@ -22,7 +22,7 @@ pub fn draw_map(game: &Game, state: &State) {
         let selected = state.focused_city.iter().any(|(_, p)| pos == p);
         let text_color = if c.1 { WHITE } else { BLACK };
         hex_ui::draw_hex(pos, c.0, text_color, selected);
-        collect_ui::draw_resource_collect_tile(game, state, pos, t);
+        collect_ui::draw_resource_collect_tile(state, pos);
     });
     if !state.is_collect() {
         for p in game.players.iter() {

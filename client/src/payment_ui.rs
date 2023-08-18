@@ -5,6 +5,7 @@ use server::resource_pile::ResourcePile;
 
 use crate::dialog_ui::active_dialog_window;
 use crate::resource_ui::ResourceType;
+use crate::ui_state::ActiveDialogUpdate;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct ResourcePayment {
@@ -61,12 +62,12 @@ pub trait HasPayment {
 pub fn payment_dialog<T: HasPayment>(
     has_payment: &mut T,
     is_valid: impl FnOnce(&T) -> bool,
-    execute_action: impl FnOnce(&T),
+    execute_action: impl FnOnce(&T) -> ActiveDialogUpdate,
     show: impl Fn(&T, ResourceType) -> bool,
     plus: impl Fn(&mut T, ResourceType),
     minus: impl Fn(&mut T, ResourceType),
-) -> bool {
-    let mut result = false;
+) -> ActiveDialogUpdate {
+    let mut result = ActiveDialogUpdate::None;
     active_dialog_window(|ui| {
         for (i, p) in has_payment.payment().resources.clone().iter().enumerate() {
             if show(has_payment, p.resource.clone()) {
@@ -86,8 +87,7 @@ pub fn payment_dialog<T: HasPayment>(
         let valid = is_valid(has_payment);
         let label = if valid { "OK" } else { "(OK)" };
         if ui.button(Vec2::new(0., 40.), label) && valid {
-            execute_action(has_payment);
-            result = true;
+            result = execute_action(has_payment);
         };
     });
     result

@@ -8,7 +8,7 @@ use server::game::{Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
 
-use crate::ui_state::State;
+use crate::ui_state::ActiveDialogUpdate;
 
 pub fn show_globals(game: &Game) {
     draw_text(&format!("Age {}", game.age), 600., 20., 20., BLACK);
@@ -86,13 +86,13 @@ pub fn show_resources(game: &Game, player_index: usize) {
     res(format!("Culture {}", r.culture_tokens));
 }
 
-pub fn show_global_controls(game: &mut Game, player_index: usize, state: &mut State) {
+pub fn show_global_controls(game: &Game) -> ActiveDialogUpdate {
     let y = 540.;
     if game.can_undo() && root_ui().button(vec2(600., y), "Undo") {
-        game.execute_action(Action::Undo, player_index);
+        return ActiveDialogUpdate::Execute(Action::Undo);
     }
     if game.can_redo() && root_ui().button(vec2(650., y), "Redo") {
-        game.execute_action(Action::Redo, player_index);
+        return ActiveDialogUpdate::Execute(Action::Redo);
     }
     if let GameState::CulturalInfluenceResolution {
         roll_boost_cost,
@@ -105,17 +105,22 @@ pub fn show_global_controls(game: &mut Game, player_index: usize, state: &mut St
             vec2(600., 480.),
             format!("Cultural Influence Resolution for {}", roll_boost_cost),
         ) {
-            game.execute_action(Action::CulturalInfluenceResolution(true), player_index);
+            return ActiveDialogUpdate::Execute(Action::CulturalInfluenceResolution(true));
         } else if root_ui().button(vec2(900., 480.), "Decline") {
-            game.execute_action(Action::CulturalInfluenceResolution(false), player_index);
+            return ActiveDialogUpdate::Execute(Action::CulturalInfluenceResolution(false));
         }
-    } else if game.state == GameState::Playing
-        && game.actions_left == 0
-        && root_ui().button(vec2(700., y), "End Turn")
-    {
-        state.clear();
-        game.execute_action(Action::Playing(PlayingAction::EndTurn), player_index);
+    } else if game.state == GameState::Playing && root_ui().button(vec2(700., y), "End Turn") {
+        let left = game.actions_left;
+        return ActiveDialogUpdate::execute(
+            Action::Playing(PlayingAction::EndTurn),
+            if left > 0 {
+                vec![(format!("{left} actions left"))]
+            } else {
+                vec![]
+            },
+        );
     };
+    ActiveDialogUpdate::None
 }
 
 pub fn player_color(player_index: usize) -> Color {

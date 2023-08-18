@@ -6,7 +6,6 @@ use macroquad::math::i32;
 use macroquad::prelude::{draw_circle_lines, draw_text, Vec2, WHITE};
 use server::action::Action;
 use server::game::Game;
-use server::map::Terrain;
 use server::playing_actions::{get_total_collection, PlayingAction, PORT_CHOICES};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
@@ -14,7 +13,7 @@ use server::resource_pile::ResourcePile;
 use crate::dialog_ui::active_dialog_window;
 use crate::hex_ui;
 use crate::resource_ui::resource_symbol;
-use crate::ui_state::{ActiveDialog, State};
+use crate::ui_state::{ActiveDialog, ActiveDialogUpdate, State};
 
 pub struct CollectResources {
     pub player_index: usize,
@@ -45,10 +44,10 @@ impl CollectResources {
     }
 }
 
-pub fn collect_resources_dialog(game: &mut Game, collect: &CollectResources) -> bool {
-    let mut result = false;
+pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> ActiveDialogUpdate {
+    let mut result = ActiveDialogUpdate::None;
     active_dialog_window(|ui| {
-        let _city = game.get_city(collect.player_index, &collect.city_position);
+        let city = game.get_city(collect.player_index, &collect.city_position);
         let valid = get_total_collection(
             game,
             collect.player_index,
@@ -58,18 +57,23 @@ pub fn collect_resources_dialog(game: &mut Game, collect: &CollectResources) -> 
         .is_some();
         let label = if valid { "OK" } else { "(OK)" };
         if ui.button(Vec2::new(0., 40.), label) && valid {
-            game.execute_action(
+            let extra = city.mood_modified_size() - collect.collections.len();
+
+            result = ActiveDialogUpdate::execute_activation(
                 Action::Playing(PlayingAction::Collect {
                     city_position: collect.city_position.clone(),
                     collections: collect.collections.clone(),
                 }),
-                collect.player_index,
+                if extra > 0 {
+                    vec![format!("{extra} more tiles can be collected")]
+                } else {
+                    vec![]
+                },
+                city.is_activated(),
             );
-
-            result = true;
         };
         if ui.button(Vec2::new(80., 40.), "Cancel") {
-            result = true;
+            result = ActiveDialogUpdate::Cancel;
         };
     });
     result
@@ -120,7 +124,7 @@ pub fn click_collect_option(col: &mut CollectResources, p: &Position) {
     }
 }
 
-pub fn draw_resource_collect_tile(_game: &Game, state: &State, pos: &Position, _t: &Terrain) {
+pub fn draw_resource_collect_tile(state: &State, pos: &Position) {
     if let ActiveDialog::CollectResources(collect) = &state.active_dialog {
         if let Some(possible) = collect.possible_collections.get(pos) {
             draw_circle_lines(
