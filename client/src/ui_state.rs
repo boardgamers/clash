@@ -46,6 +46,13 @@ impl State {
         self.focused_city = None;
         self.increase_happiness = None;
     }
+
+    pub fn is_collect(&self) -> bool {
+        if let ActiveDialog::CollectResources(_c) = &self.active_dialog {
+            return true;
+        }
+        false
+    }
 }
 
 pub fn can_play_action(game: &Game) -> bool {

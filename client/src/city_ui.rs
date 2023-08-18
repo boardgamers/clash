@@ -7,10 +7,10 @@ use server::city_pieces::Building;
 use server::game::Game;
 use server::player::Player;
 
-use crate::collect_ui::CollectResources;
+use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{add_construct_button, add_wonder_buttons};
 use crate::happiness_ui::increase_happiness_click;
-use crate::hex_ui::{draw_hex_center_text, pixel_to_coordinate};
+use crate::hex_ui::draw_hex_center_text;
 use crate::ui_state::{can_play_action, CityMenu, State};
 use crate::{hex_ui, influence_ui, player_ui, ActiveDialog};
 
@@ -20,16 +20,18 @@ pub fn show_city_menu(game: &mut Game, menu: CityMenu) -> Option<ActiveDialog> {
     root_ui().window(hash!(), vec2(30., 700.), vec2(500., 200.), |ui| {
         ui.label(None, &menu.city_position.to_string());
 
-        if ui.button(None, "Collect Resources") {
+        let can_play = can_play_action(game) && menu.is_city_owner();
+        if can_play && ui.button(None, "Collect Resources") {
             result = Some(ActiveDialog::CollectResources(CollectResources::new(
                 menu.player_index,
                 menu.city_position.clone(),
+                possible_resource_collections(game, menu.city_position, menu.city_owner_index),
             )));
         }
 
         add_building_actions(game, &menu, &mut result, ui);
 
-        if can_play_action(game) && menu.is_city_owner() {
+        if can_play {
             if let Some(d) = add_wonder_buttons(game, &menu, ui) {
                 let _ = result.insert(d);
             }
@@ -132,23 +134,7 @@ fn building_names() -> [(Building, &'static str); 7] {
     ]
 }
 
-pub fn try_city_click(game: &Game, state: &mut State) {
-    if is_mouse_button_pressed(MouseButton::Left) {
-        let (x, y) = mouse_position();
-
-        let c = pixel_to_coordinate(x, y);
-
-        for p in game.players.iter() {
-            for city in p.cities.iter() {
-                if c == city.position.coordinate() {
-                    city_click(state, p, city);
-                };
-            }
-        }
-    }
-}
-
-fn city_click(state: &mut State, player: &Player, city: &City) {
+pub fn city_click(state: &mut State, player: &Player, city: &City) {
     let pos = &city.position;
 
     if let Some(increase_happiness) = &state.increase_happiness {

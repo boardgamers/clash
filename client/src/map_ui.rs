@@ -1,5 +1,5 @@
 use crate::city_ui::draw_city;
-use crate::ui_state::{ActiveDialog, State};
+use crate::ui_state::State;
 use crate::{collect_ui, hex_ui};
 use macroquad::prelude::*;
 use server::game::Game;
@@ -24,13 +24,10 @@ pub fn draw_map(game: &Game, state: &State) {
         hex_ui::draw_hex(pos, c.0, text_color, selected);
         collect_ui::draw_resource_collect_tile(game, state, pos, t);
     });
-    match &state.active_dialog {
-        ActiveDialog::CollectResources(_) => {}
-        _ => {
-            for p in game.players.iter() {
-                for city in p.cities.iter() {
-                    draw_city(p, city, state);
-                }
+    if !state.is_collect() {
+        for p in game.players.iter() {
+            for city in p.cities.iter() {
+                draw_city(p, city, state);
             }
         }
     }

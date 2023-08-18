@@ -23,6 +23,7 @@ pub fn setup_local_game() -> Game {
     add_terrain(&mut game, "C1", Terrain::Barren);
     add_terrain(&mut game, "C2", Terrain::Forest);
     add_terrain(&mut game, "C3", Terrain::Water);
+    add_terrain(&mut game, "D2", Terrain::Water);
 
     game
 }
