@@ -119,12 +119,12 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
             )
         }
         crate::status_phase::StatusPhaseState::ChangeGovernmentType => {
-            let new_government_advance = serde_json::from_str::<ChangeGovernmentType>(&action.data)
+            let new_government = serde_json::from_str::<ChangeGovernmentType>(&action.data)
                 .expect("status phase data should match with it's phase")
-                .new_government_advance;
+                .new_government;
             format!(
                 "{player_name} {}",
-                match new_government_advance {
+                match new_government {
                     Some(new_government_advance) => format!(
                         "changed his government from {} to {}",
                         game.players[game.current_player_index]

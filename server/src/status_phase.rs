@@ -5,7 +5,7 @@ use crate::{
     game::{Game, GameState::*},
     player::Player,
     position::Position,
-    resource_pile::ResourcePile,
+    resource_pile::ResourcePile, content::advances, advance::Advance,
 };
 
 #[derive(Serialize, Deserialize)]
@@ -53,8 +53,19 @@ impl StatusPhaseAction {
                 let new_government_advance =
                     serde_json::from_str::<ChangeGovernmentType>(&self.data)
                         .expect("data should be valid change government type json")
-                        .new_government_advance;
-                if let Some(new_government_advance) = new_government_advance {}
+                        .new_government;
+                if let Some(new_government) = new_government_advance {
+                    if !advances::get_leading_government_advance(&new_government).expect("government should exist").required_advance.is_some_and(|required_advance| !game.players[player_index].has_advance(&required_advance)) {
+                        panic!("Illegal action");
+                    }
+                    let current_player_government = game.players[player_index].government().expect("player should have a government");
+                    let player_government_advances = advances::get_government_advances(&current_player_government).into_iter().enumerate().filter(|(_, advance)| game.players[player_index].has_advance(&advance.name)).collect::<Vec<(usize, Advance)>>();
+                    let new_government_advances = advances::get_government_advances(&new_government);
+                    for (tier, advance) in player_government_advances.into_iter() {
+                        game.remove_advance(&advance.name, player_index);
+                        game.advance(&new_government_advances[tier].name, player_index)
+                    }
+                }
             }
             StatusPhaseState::DetermineFirstPlayer => {
                 let player = serde_json::from_str::<DetermineFirstPlayer>(&self.data)
@@ -117,7 +128,7 @@ pub struct RaseSize1City {
 
 #[derive(Serialize, Deserialize)]
 pub struct ChangeGovernmentType {
-    pub new_government_advance: Option<String>,
+    pub new_government: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
