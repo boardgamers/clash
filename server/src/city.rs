@@ -47,6 +47,17 @@ impl City {
         )
     }
 
+    pub fn cloned_data(&self) -> CityData {
+        CityData::new(
+            self.city_pieces.cloned_data(),
+            self.mood_state.clone(),
+            self.activations,
+            self.player_index,
+            self.position.clone(),
+            self.port_position.clone(),
+        )
+    }
+
     pub fn new(player_index: usize, position: Position) -> Self {
         Self {
             city_pieces: CityPieces::default(),
@@ -231,7 +242,7 @@ impl City {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct CityData {
     city_pieces: CityPiecesData,
     mood_state: MoodState,

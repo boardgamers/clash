@@ -22,10 +22,10 @@ impl StatusPhaseAction {
     pub fn execute(self, game: &mut Game, player_index: usize) {
         match self.phase {
             StatusPhaseState::CompleteObjectives => {
-                let _completed_objectives = serde_json::from_str::<CompleteObjectives>(&self.data)
+                let mut completed_objectives = serde_json::from_str::<CompleteObjectives>(&self.data)
                     .expect("data should be valid complete objectives json")
                     .objectives;
-                todo!()
+                game.players[player_index].completed_objectives.append(&mut completed_objectives);
             }
             StatusPhaseState::FreeAdvance => {
                 let advance = serde_json::from_str::<FreeAdvance>(&self.data)
@@ -85,6 +85,7 @@ impl StatusPhaseAction {
 
 fn skip_status_phase_players(game: &mut Game) {
     game.skip_dropped_players();
+    //todo skip players who are unable to make an action depending on the current phase
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

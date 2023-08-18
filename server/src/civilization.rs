@@ -1,6 +1,6 @@
 use crate::{leader::Leader, special_advance::SpecialAdvance};
 
-//todo! add optional special starting tile
+//todo add optional special starting tile
 pub struct Civilization {
     pub name: String,
     pub special_advances: Vec<SpecialAdvance>,

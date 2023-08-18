@@ -44,14 +44,14 @@ impl<T> Default for Event<T> {
 }
 
 type ListenerImmutable<T, U, V> = (Box<dyn Fn(&T, &U, &V)>, i32, usize);
-type ListenerMutable<T, U, V> = (Box<dyn Fn(&mut T, &U, &V)>, i32, usize);
+type ListenerMutable<T, U, V> = (Box<dyn Fn(&mut T, &U, &V)>, i32, usize, String);
 
 pub struct EventMut<T, U = (), V = ()> {
     listeners: Vec<ListenerImmutable<T, U, V>>,
     listeners_mut: Vec<ListenerMutable<T, U, V>>,
 }
 
-impl<T, U, V> EventMut<T, U, V> {
+impl<T, U, V> EventMut<T, U, V> where T: Clone + PartialEq {
     //return the id of the listener witch can be used to remove the listener later
     pub fn add_listener<F>(&mut self, new_listener: F, priority: i32) -> usize
     where
@@ -74,14 +74,14 @@ impl<T, U, V> EventMut<T, U, V> {
     }
 
     //return the id of the listener witch can be used to remove the listener later
-    pub fn add_listener_mut<F>(&mut self, new_listener: F, priority: i32) -> usize
+    pub fn add_listener_mut<F>(&mut self, new_listener: F, priority: i32, key: String) -> usize
     where
         F: Fn(&mut T, &U, &V) + 'static,
     {
         let id = self.listeners_mut.len();
         self.listeners_mut
-            .push((Box::new(new_listener), priority, id));
-        self.listeners_mut.sort_by_key(|(_, priority, _)| *priority);
+            .push((Box::new(new_listener), priority, id, key));
+        self.listeners_mut.sort_by_key(|(_, priority, _, _)| *priority);
         self.listeners_mut.reverse();
         id
     }
@@ -90,18 +90,24 @@ impl<T, U, V> EventMut<T, U, V> {
         let _ = self.listeners_mut.remove(
             self.listeners_mut
                 .iter()
-                .position(|(_, _, value)| value == &id)
+                .position(|(_, _, value, _)| value == &id)
                 .expect("Listeners should include this id"),
         );
     }
 
-    pub fn trigger(&self, value: &mut T, info: &U, details: &V) {
-        for (listener, _, _) in self.listeners_mut.iter() {
+    pub fn trigger(&self, value: &mut T, info: &U, details: &V) -> Vec<String> {
+        let mut modifiers = Vec::new();
+        for (listener, _, _, key) in self.listeners_mut.iter() {
+            let previous_value = value.clone();
             listener(value, info, details);
+            if *value != previous_value {
+                modifiers.push(key.clone())
+            }
         }
         for (listener, _, _) in self.listeners.iter() {
             listener(value, info, details);
         }
+        modifiers
     }
 }
 
@@ -157,16 +163,18 @@ mod tests {
     #[test]
     fn mutable_event() {
         let mut event = EventMut::default();
-        event.add_listener_mut(|item, _, _| *item += 1, 0);
-        let id = event.add_listener_mut(|item, _, _| *item *= 3, -1);
+        event.add_listener_mut(|item, _, _| *item += 1, 0, String::from("add 1"));
+        let multiplier_id = event.add_listener_mut(|item, _, _| *item *= 3, -1, String::from("multiply by 3"));
         let mut item = 0;
-        event.trigger(&mut item, &0, &0);
+        let modifiers = event.trigger(&mut item, &0, &0);
         assert_eq!(3, item);
+        assert_eq!(vec![String::from("add 1"), String::from("multiply by 3")], modifiers);
 
-        event.remove_listener_mut(id);
+        event.remove_listener_mut(multiplier_id);
         let mut item = 0;
-        event.trigger(&mut item, &0, &0);
+        let modifiers = event.trigger(&mut item, &0, &0);
         assert_eq!(1, item);
+        assert_eq!(vec![String::from("add 1")], modifiers);
     }
 
     #[test]

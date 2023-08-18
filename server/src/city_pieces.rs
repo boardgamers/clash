@@ -50,6 +50,19 @@ impl CityPieces {
         }
     }
 
+    pub fn cloned_data(&self) -> CityPiecesData {
+        CityPiecesData {
+            academy: self.academy,
+            market: self.market,
+            obelisk: self.obelisk,
+            observatory: self.observatory,
+            fortress: self.fortress,
+            port: self.port,
+            temple: self.temple,
+            wonders: self.wonders.iter().map(|wonder| wonder.name.clone()).collect(),
+        }
+    }
+
     pub fn can_add_building(&self, building: &Building) -> bool {
         match building {
             Academy => self.academy.is_none(),
@@ -129,7 +142,7 @@ impl CityPieces {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct CityPiecesData {
     academy: Option<usize>,
     market: Option<usize>,
@@ -174,7 +187,7 @@ impl Building {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct AvailableBuildings {
     academies: u8,
     markets: u8,

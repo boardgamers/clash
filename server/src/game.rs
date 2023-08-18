@@ -79,7 +79,7 @@ impl Game {
         let wonder_amount = wonders.len();
 
         let map = HashMap::new();
-        //todo! generate map
+        //todo generate map
 
         Self {
             state: Playing,
@@ -410,11 +410,10 @@ impl Game {
 
     pub fn skip_dropped_players(&mut self) {
         if self.players.is_empty() {
-            println!("There are no remaining players");
             return;
         }
-        while self.dropped_players.contains(&self.current_player_index) {
-            self.next_player();
+        while self.dropped_players.contains(&self.current_player_index) && self.current_player_index < self.players.len() - 1 {
+            self.current_player_index += 1;
         }
     }
 
@@ -432,6 +431,7 @@ impl Game {
 
     fn next_round(&mut self) {
         self.round += 1;
+        self.skip_dropped_players();
         if self.round > 3 {
             self.round = 1;
             self.enter_status_phase();
@@ -536,7 +536,7 @@ impl Game {
 
     pub fn advance(&mut self, advance: &str, player_index: usize) {
         self.players[player_index].take_events(|events, player| {
-            events.on_advance.trigger(player, &advance.to_string(), &())
+            events.on_advance.trigger(player, &advance.to_string(), &());
         });
         let advance = advances::get_advance_by_name(advance).expect("advance should exist");
         (advance.player_initializer)(self, player_index);
@@ -577,7 +577,7 @@ impl Game {
         self.players[player_index].take_events(|events, player| {
             events
                 .on_undo_advance
-                .trigger(player, &advance.to_string(), &())
+                .trigger(player, &advance.to_string(), &());
         });
         let advance = advances::get_advance_by_name(advance).expect("advance should exist");
         (advance.player_deinitializer)(self, player_index);
@@ -612,7 +612,7 @@ impl Game {
 
     fn trigger_game_event(&mut self, _player_index: usize) {
         self.lock_undo();
-        //todo!
+        //todo
     }
 
     pub fn remove_advance(&mut self, advance: &str, player_index: usize) {
@@ -668,7 +668,7 @@ impl Game {
         self.players[player_index].take_events(|events, player| {
             events
                 .on_construct_wonder
-                .trigger(player, city_position, &wonder)
+                .trigger(player, city_position, &wonder);
         });
         let mut wonder = wonder;
         (wonder.player_initializer)(self, player_index);
@@ -699,7 +699,7 @@ impl Game {
         self.players[player_index].take_events(|events, player| {
             events
                 .on_undo_construct_wonder
-                .trigger(player, city_position, &wonder)
+                .trigger(player, city_position, &wonder);
         });
         (wonder.player_deinitializer)(self, player_index);
         (wonder.player_undo_deinitializer)(self, player_index);
@@ -715,7 +715,7 @@ impl Game {
         target_city_position: &Position,
         city_piece: &Building,
     ) -> Option<ResourcePile> {
-        //todo! allow cultural influence of barbarians
+        //todo allow cultural influence of barbarians
         let starting_city = self.get_city(player_index, starting_city_position);
         let range_boost = starting_city_position
             .distance(target_city_position)
@@ -782,8 +782,7 @@ impl Game {
     }
 
     pub fn draw_new_cards(&mut self) {
-        //every player draws 1 action card and 1 objective card
-        todo!()
+        //todo every player draws 1 action card and 1 objective card
     }
 }
 

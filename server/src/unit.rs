@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::position::Position;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct Unit {
     pub player_index: usize,
     pub position: Position,
@@ -23,7 +23,7 @@ impl Unit {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum UnitType {
     Infantry,
     Cavalry,
@@ -33,7 +33,7 @@ pub enum UnitType {
     Settler,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum MovementRestriction {
     None,
     Attack,

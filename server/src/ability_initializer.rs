@@ -22,6 +22,7 @@ pub trait AbilityInitializerSetup: Sized {
 
     fn add_player_event_listener<T, U, V, E, F>(self, event: E, listener: F, priority: i32) -> Self
     where
+        T: Clone + PartialEq,
         E: Fn(&mut PlayerEvents) -> &mut EventMut<T, U, V> + 'static + Clone,
         F: Fn(&mut T, &U, &V) + 'static + Clone,
     {
@@ -35,7 +36,7 @@ pub trait AbilityInitializerSetup: Sized {
                 .or_default()
                 .push_back(
                     event(player.events.as_mut().expect("events should be set"))
-                        .add_listener_mut(listener.clone(), priority),
+                        .add_listener_mut(listener.clone(), priority, key.clone()),
                 )
         };
         let key = self.get_key();
