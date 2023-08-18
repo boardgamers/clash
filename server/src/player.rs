@@ -20,6 +20,7 @@ use crate::{
     position::Position,
     resource_pile::{AdvancePaymentOptions, ResourcePile},
     unit::{MovementRestriction, Unit},
+    utils,
     wonder::Wonder,
 };
 
@@ -418,12 +419,7 @@ impl Player {
     }
 
     pub fn remove_wonder(&mut self, wonder: &Wonder) {
-        self.wonders.remove(
-            self.wonders
-                .iter()
-                .position(|player_wonder| player_wonder == &wonder.name)
-                .expect("player should have wonder"),
-        );
+        utils::remove_element(&mut self.wonders, &wonder.name);
     }
 
     pub fn game_event_tokens(&self) -> u8 {

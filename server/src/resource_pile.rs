@@ -310,7 +310,7 @@ impl Display for ResourcePile {
                 }
             ));
         }
-        write!(f, "{}", utils::format_collection(&resources, "nothing"))
+        write!(f, "{}", utils::format_list(&resources, "nothing"))
     }
 }
 

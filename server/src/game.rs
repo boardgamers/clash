@@ -624,15 +624,12 @@ impl Game {
     }
 
     pub fn remove_advance(&mut self, advance: &str, player_index: usize) {
-        if let Some(position) = self.players[player_index]
-            .advances
-            .iter()
-            .position(|other_advance| other_advance == advance)
-        {
-            let advance = advances::get_advance_by_name(advance).expect("advance should exist");
-            (advance.player_deinitializer)(self, player_index);
-            self.players[player_index].advances.remove(position);
-        }
+        utils::remove_element(
+            &mut self.players[player_index].advances,
+            &advance.to_string(),
+        );
+        let advance = advances::get_advance_by_name(advance).expect("advance should exist");
+        (advance.player_deinitializer)(self, player_index);
     }
 
     fn unlock_special_advance(&mut self, special_advance: &SpecialAdvance, player_index: usize) {
@@ -909,7 +906,7 @@ pub mod tests {
         game.players[old].construct(&Academy, &position, None);
         game.players[old].construct(&Obelisk, &position, None);
 
-        assert_eq!(7.0, game.players[old].victory_points());
+        assert_eq!(8.0, game.players[old].victory_points());
 
         game.conquer_city(&position, new, old);
 
@@ -919,8 +916,8 @@ pub mod tests {
 
         let old = &game.players[old];
         let new = &game.players[new];
-        assert_eq!(3.0, old.victory_points());
-        assert_eq!(4.0, new.victory_points());
+        assert_eq!(4.0, old.victory_points());
+        assert_eq!(5.0, new.victory_points());
         assert_eq!(0, old.wonders.len());
         assert_eq!(1, new.wonders.len());
         assert_eq!(1, old.influenced_buildings);

@@ -32,7 +32,7 @@ fn basic_actions() {
     let player = &game.players[0];
 
     assert_eq!(
-        vec![String::from("Math"), String::from("Engineering")],
+        vec![String::from("Farming"), String::from("Mining"), String::from("Math"), String::from("Engineering")],
         player.advances
     );
     assert_eq!(&ResourcePile::culture_tokens(1), player.resources());
@@ -112,7 +112,7 @@ fn basic_actions() {
     let mut game = game_api::execute_action(game, construct_wonder_action, 0);
     let player = &game.players[0];
 
-    assert_eq!(9.0, player.victory_points());
+    assert_eq!(10.0, player.victory_points());
     assert_eq!(&ResourcePile::empty(), player.resources());
     assert_eq!(1, player.wonders_build);
     assert_eq!(vec![String::from("X")], player.wonders);
@@ -298,7 +298,7 @@ fn undo() {
     assert_undo(&game, true, false, 1, 1, 0);
     let game = game_api::execute_action(game, Action::Undo, 0);
     assert_undo(&game, false, true, 1, 0, 0);
-    assert!(game.players[0].advances.is_empty());
+    assert_eq!(2, game.players[0].advances.len());
     let advance_action = Action::Playing(Advance {
         advance: String::from("Engineering"),
         payment: ResourcePile::food(2),

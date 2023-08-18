@@ -1,6 +1,6 @@
 use crate::{
     content::custom_actions::CustomActionType, events::EventMut, game::Game, map::Terrain,
-    player_events::PlayerEvents, resource_pile::ResourcePile,
+    player_events::PlayerEvents, resource_pile::ResourcePile, utils,
 };
 
 pub type AbilityInitializer = Box<dyn Fn(&mut Game, usize)>;
@@ -76,18 +76,13 @@ pub trait AbilityInitializerSetup: Sized {
         })
         .add_ability_undo_deinitializer(move |game, player_index| {
             let player = &mut game.players[player_index];
-            let index = player
-                .collect_options
-                .get(&deinitializer_terrain)
-                .expect("player should have options for terrain type")
-                .iter()
-                .position(|option| option == &deinitializer_option)
-                .expect("player should have previously added collect option");
-            player
-                .collect_options
-                .get_mut(&deinitializer_terrain)
-                .expect("player should have options for terrain type")
-                .remove(index);
+            utils::remove_element(
+                player
+                    .collect_options
+                    .get_mut(&deinitializer_terrain)
+                    .expect("player should have options for terrain type"),
+                &deinitializer_option,
+            );
             //*Note that this will break if multiple effects add the same collect option
         })
     }
