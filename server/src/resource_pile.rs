@@ -194,6 +194,16 @@ impl ResourcePile {
             + ResourcePile::gold(gold_cost as i32);
         AdvancePaymentOptions::new(default, food_left, gold_left)
     }
+
+    pub fn has_common_resource(&self, other: &Self) -> bool {
+        self.food > 0 && other.food > 0
+            || self.wood > 0 && other.wood > 0
+            || self.ore > 0 && other.ore > 0
+            || self.ideas > 0 && other.ideas > 0
+            || self.gold > 0 && other.gold > 0
+            || self.mood_tokens > 0 && other.mood_tokens > 0
+            || self.culture_tokens > 0 && other.culture_tokens > 0
+    }
 }
 
 impl AddAssign for ResourcePile {

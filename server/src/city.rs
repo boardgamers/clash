@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::ops::{Add, Sub};
 
 use serde::{Deserialize, Serialize};
 
@@ -308,6 +308,21 @@ impl Add<u32> for MoodState {
                 Angry => Neutral,
             },
             2.. => Happy,
+        }
+    }
+}
+
+impl Sub<u32> for MoodState {
+    type Output = Self;
+
+    fn sub(self, rhs: u32) -> Self::Output {
+        match rhs {
+            0 => self,
+            1 => match self {
+                Angry | Neutral => Angry,
+                Happy => Neutral,
+            },
+            2.. => Angry,
         }
     }
 }
