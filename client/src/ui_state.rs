@@ -43,11 +43,7 @@ impl StateUpdate {
         }
     }
 
-    pub fn execute_activation(
-        action: Action,
-        warning: Vec<String>,
-        city: &City,
-    ) -> StateUpdate {
+    pub fn execute_activation(action: Action, warning: Vec<String>, city: &City) -> StateUpdate {
         if city.is_activated() && city.mood_state != MoodState::Angry {
             let mut warn = vec!["City will become angry".to_string()];
             warn.extend(warning);
@@ -130,12 +126,14 @@ impl State {
             StateUpdate::ExecuteWithWarning(update) => {
                 self.pending_update = Some(update);
             }
-            StateUpdate::Cancel => {
-                self.clear()
-            }
+            StateUpdate::Cancel => self.clear(),
             StateUpdate::ResolvePendingUpdate(confirm) => {
                 if confirm {
-                    let action = self.pending_update.take().expect("no pending update").action;
+                    let action = self
+                        .pending_update
+                        .take()
+                        .expect("no pending update")
+                        .action;
                     self.execute(game, action);
                     self.clear();
                 } else {

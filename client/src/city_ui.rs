@@ -11,7 +11,7 @@ use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{add_construct_button, add_wonder_buttons};
 use crate::happiness_ui::init_increase_happiness;
 use crate::hex_ui::draw_hex_center_text;
-use crate::ui_state::{StateUpdate, StateUpdates, can_play_action, CityMenu, State};
+use crate::ui_state::{can_play_action, CityMenu, State, StateUpdate, StateUpdates};
 use crate::{hex_ui, influence_ui, player_ui, ActiveDialog};
 
 pub fn show_city_menu(game: &Game, menu: CityMenu) -> StateUpdate {
@@ -22,11 +22,13 @@ pub fn show_city_menu(game: &Game, menu: CityMenu) -> StateUpdate {
 
         let can_play = can_play_action(game) && menu.is_city_owner();
         if can_play && ui.button(None, "Collect Resources") {
-            updates.add(StateUpdate::SetDialog(ActiveDialog::CollectResources(CollectResources::new(
-                menu.player_index,
-                menu.city_position,
-                possible_resource_collections(game, menu.city_position, menu.city_owner_index),
-            ))));
+            updates.add(StateUpdate::SetDialog(ActiveDialog::CollectResources(
+                CollectResources::new(
+                    menu.player_index,
+                    menu.city_position,
+                    possible_resource_collections(game, menu.city_position, menu.city_owner_index),
+                ),
+            )));
         }
 
         updates.add(add_building_actions(game, &menu, ui));
@@ -39,11 +41,7 @@ pub fn show_city_menu(game: &Game, menu: CityMenu) -> StateUpdate {
     updates.result()
 }
 
-fn add_building_actions(
-    game: &Game,
-    menu: &CityMenu,
-    ui: &mut Ui,
-) -> StateUpdate {
+fn add_building_actions(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpdate {
     let closest_city_pos = influence_ui::closest_city(game, menu);
 
     if !can_play_action(game) {
@@ -53,7 +51,14 @@ fn add_building_actions(
     let mut updates = StateUpdates::new();
     for (building, name) in building_names() {
         updates.add(add_construct_button(game, menu, ui, &building, name));
-        updates.add(influence_ui::add_influence_button(game, menu, ui, closest_city_pos, &building, name));
+        updates.add(influence_ui::add_influence_button(
+            game,
+            menu,
+            ui,
+            closest_city_pos,
+            &building,
+            name,
+        ));
     }
     updates.result()
 }

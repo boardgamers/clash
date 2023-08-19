@@ -13,8 +13,8 @@ use std::cmp;
 
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::resource_ui::{new_resource_map, ResourceType};
-use crate::ui_state::{StateUpdates, CityMenu};
 use crate::ui_state::{ActiveDialog, StateUpdate};
+use crate::ui_state::{CityMenu, StateUpdates};
 
 pub fn add_construct_button(
     game: &Game,
@@ -36,12 +36,14 @@ pub fn add_construct_button(
                     pos.map_or("".to_string(), |p| format!(" at {}", p))
                 ),
             ) {
-                updates.add(StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
-                    game,
-                    menu.player_index,
-                    menu.city_position,
-                    ConstructionProject::Building(building.clone(), pos),
-                ))));
+                updates.add(StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(
+                    ConstructionPayment::new(
+                        game,
+                        menu.player_index,
+                        menu.city_position,
+                        ConstructionProject::Building(building.clone(), pos),
+                    ),
+                )));
             }
         }
     }
@@ -73,12 +75,14 @@ pub fn add_wonder_buttons(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpd
         if city.can_build_wonder(w, owner, game)
             && ui.button(None, format!("Build Wonder {}", w.name))
         {
-            updates.add(StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
-                game,
-                menu.player_index,
-                menu.city_position,
-                ConstructionProject::Wonder(w.name.clone()),
-            ))));
+            updates.add(StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(
+                ConstructionPayment::new(
+                    game,
+                    menu.player_index,
+                    menu.city_position,
+                    ConstructionProject::Wonder(w.name.clone()),
+                ),
+            )));
         }
     }
     updates.result()
@@ -98,7 +102,7 @@ pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> St
                     temple_bonus: None,
                 }),
                 vec![],
-                game.get_any_city(cp.city_position).unwrap()
+                game.get_any_city(cp.city_position).unwrap(),
             ),
             ConstructionProject::Wonder(w) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Custom(CustomAction::ConstructWonder {

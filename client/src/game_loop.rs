@@ -9,7 +9,7 @@ use crate::hex_ui::pixel_to_coordinate;
 use crate::log_ui::show_log;
 use crate::map_ui::draw_map;
 use crate::player_ui::{show_global_controls, show_globals, show_resources, show_wonders};
-use crate::ui_state::{ActiveDialog, StateUpdate, StateUpdates, CityMenu, State};
+use crate::ui_state::{ActiveDialog, CityMenu, State, StateUpdate, StateUpdates};
 use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
 use macroquad::prelude::{clear_background, next_frame, set_fullscreen, WHITE};
 use server::game::Game;
@@ -55,7 +55,7 @@ fn game_loop(game: &Game, state: &State) -> StateUpdate {
 
     updates.add(match &state.active_dialog {
         ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p),
-        ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game,p),
+        ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p),
         ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c),
         ActiveDialog::None => StateUpdate::None,
     });

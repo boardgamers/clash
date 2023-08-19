@@ -1,4 +1,4 @@
-use crate::ui_state::{StateUpdate, can_play_action, IncreaseHappiness, State};
+use crate::ui_state::{can_play_action, IncreaseHappiness, State, StateUpdate};
 use macroquad::color::BLACK;
 use macroquad::math::vec2;
 use macroquad::prelude::draw_text;

@@ -13,7 +13,7 @@ use server::resource_pile::ResourcePile;
 use crate::dialog_ui::active_dialog_window;
 use crate::hex_ui;
 use crate::resource_ui::resource_symbol;
-use crate::ui_state::{ActiveDialog, StateUpdate, StateUpdates, State};
+use crate::ui_state::{ActiveDialog, State, StateUpdate, StateUpdates};
 
 #[derive(Clone)]
 pub struct CollectResources {
@@ -55,7 +55,7 @@ pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> Stat
             collect.city_position,
             &collect.collections,
         )
-            .is_some();
+        .is_some();
         let label = if valid { "OK" } else { "(OK)" };
         if ui.button(Vec2::new(0., 40.), label) && valid {
             let extra = city.mood_modified_size() - collect.collections.len();
@@ -109,9 +109,8 @@ pub fn possible_resource_collections(
 }
 
 pub fn click_collect_option(col: &CollectResources, p: Position) -> StateUpdate {
-       let mut new = col.clone();
+    let mut new = col.clone();
     if let Some(possible) = new.possible_collections.get(&p) {
-
         if let Some(current) = new
             .get_collection(p)
             .and_then(|r| possible.iter().position(|p| p == r))
@@ -128,7 +127,6 @@ pub fn click_collect_option(col: &CollectResources, p: Position) -> StateUpdate 
     }
     StateUpdate::None
 }
-
 
 pub fn draw_resource_collect_tile(state: &State, pos: Position) {
     if let ActiveDialog::CollectResources(collect) = &state.active_dialog {

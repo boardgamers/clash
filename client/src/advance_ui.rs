@@ -10,10 +10,10 @@ use server::game::Game;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::AdvancePaymentOptions;
 
-use crate::ActiveDialog;
-use crate::payment_ui::{HasPayment, Payment, payment_dialog, ResourcePayment};
+use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::ui_state::{can_play_action, StateUpdate, StateUpdates};
+use crate::ActiveDialog;
 
 #[derive(Clone)]
 pub struct AdvancePayment {
@@ -105,12 +105,8 @@ pub fn pay_advance_dialog(ap: &AdvancePayment) -> StateUpdate {
             }))
         },
         |ap, r| ap.payment.get(r).max > 0,
-        |ap, r| {
-            add(ap, r, 1)
-        },
-        |ap, r| {
-            add(ap, r, -1)
-        },
+        |ap, r| add(ap, r, 1),
+        |ap, r| add(ap, r, -1),
     )
 }
 
