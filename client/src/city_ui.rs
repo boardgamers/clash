@@ -76,7 +76,7 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
             .steps
             .iter()
             .find(|(p, _)| p == &city.position)
-            .map_or(String::new(), |(_, s)| format!("{}", s));
+            .map_or(String::new(), |(_, s)| format!("{s}"));
         draw_hex_center_text(city.position, &steps);
     } else {
         match city.mood_state {

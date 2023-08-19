@@ -33,7 +33,7 @@ pub fn add_construct_button(
                 format!(
                     "Build {}{}",
                     name,
-                    pos.map_or(String::new(), |p| format!(" at {}", p))
+                    pos.map_or(String::new(), |p| format!(" at {p}"))
                 ),
             ) {
                 updates.add(StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(
