@@ -57,8 +57,8 @@ impl City {
             self.activations,
             self.angry_activation,
             self.player_index,
-            self.position.clone(),
-            self.port_position.clone(),
+            self.position,
+            self.port_position,
         )
     }
 

@@ -274,7 +274,7 @@ impl Player {
             unlocked_special_advance: self.unlocked_special_advances.clone(),
             wonders: self.wonders.clone(),
             wonders_build: self.wonders_build,
-            leader_position: self.leader_position.clone(),
+            leader_position: self.leader_position,
             game_event_tokens: self.game_event_tokens,
             influenced_buildings: self.influenced_buildings,
             completed_objectives: self.completed_objectives.clone(),

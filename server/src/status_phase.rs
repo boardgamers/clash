@@ -90,33 +90,58 @@ impl StatusPhaseAction {
                     .expect("data should be valid determine first player json")
                     .player_index;
                 game.starting_player_index = player;
-                game.current_player_index = player;
                 game.next_age();
                 return;
             }
         }
         game.next_player();
         if game.current_player_index == game.starting_player_index {
-            if let StatusPhaseState::FreeAdvance = self.phase {
-                //draw card phase
-                game.draw_new_cards();
-            }
-            let next_phase = next_status_phase(self.phase);
-            if let StatusPhaseState::DetermineFirstPlayer = next_phase {
-                game.current_player_index = player_that_chooses_next_first_player(
-                    &game.players,
-                    game.starting_player_index,
-                );
-            }
-            game.state = StatusPhase(next_phase)
+            next_phase(game, &self.phase);
+            return;
         }
-        skip_status_phase_players(game);
+        skip_status_phase_players(game, &self.phase);
     }
+
 }
 
-fn skip_status_phase_players(game: &mut Game) {
-    game.skip_dropped_players();
-    //todo skip players who are unable to make an action depending on the current phase
+fn next_phase(game: &mut Game, phase: &StatusPhaseState) {
+    if let StatusPhaseState::FreeAdvance = phase {
+        //draw card phase
+        game.draw_new_cards();
+    }
+    let next_phase = next_status_phase(phase);
+    if let StatusPhaseState::DetermineFirstPlayer = next_phase {
+        game.current_player_index = player_that_chooses_next_first_player(
+            &game.players,
+            game.starting_player_index,
+            &game.dropped_players,
+        );
+    }
+    game.state = StatusPhase(next_phase.clone());
+    skip_status_phase_players(game, &next_phase);
+}
+
+fn skip_status_phase_players(game: &mut Game, phase: &StatusPhaseState) {
+    while game.current_player_index != game.starting_player_index {
+        game.skip_dropped_players();
+        if !skip_player(game, game.current_player_index, phase) {
+            return;
+        }
+        game.current_player_index += 1;
+        game.current_player_index %= game.players.len();
+    }
+    next_phase(game, phase);
+}
+
+fn skip_player(game: &Game, player_index: usize, state: &StatusPhaseState) -> bool {
+    let player = &game.players[player_index];
+    match state {
+        StatusPhaseState::CompleteObjectives => true, //todo only skip player if the does'nt have objective cards in his hand (don't skip if the can't complete them unless otherwise specified via setting)
+        StatusPhaseState::FreeAdvance => advances::get_all_advances().into_iter().all(|advance| !player.can_advance_free(&advance.name)),
+        StatusPhaseState::RaseSize1City => !player.cities.iter().any(|city| city.size() == 1),
+        StatusPhaseState::ChangeGovernmentType => player.government().is_some() && !advances::get_all_advances().into_iter().any(|advance| !advance.required_advance.is_some_and(|required_advance| !player.has_advance(&required_advance)) && advance.government.is_some_and(|government| government != player.government().expect("player should have government due to previous check"))),
+        StatusPhaseState::DetermineFirstPlayer => false,
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -154,7 +179,7 @@ pub struct DetermineFirstPlayer {
     pub player_index: usize,
 }
 
-pub fn next_status_phase(phase: StatusPhaseState) -> StatusPhaseState {
+pub fn next_status_phase(phase: &StatusPhaseState) -> StatusPhaseState {
     match phase {
         CompleteObjectives => FreeAdvance,
         FreeAdvance => RaseSize1City,
@@ -169,15 +194,16 @@ pub fn next_status_phase(phase: StatusPhaseState) -> StatusPhaseState {
 pub fn player_that_chooses_next_first_player(
     players: &Vec<Player>,
     current_start_player_index: usize,
+    dropped_players: &[usize],
 ) -> usize {
     fn score(player: &Player) -> u32 {
         player.resources().mood_tokens + player.resources().culture_tokens
     }
 
-    let best = players.iter().map(score).max().expect("no player found");
+    let best = players.iter().filter(|player| !dropped_players.contains(&player.index)).map(score).max().expect("no player found");
     players
         .iter()
-        .filter(|p| score(p) == best)
+        .filter(|p| score(p) == best && !dropped_players.contains(&p.index))
         .min_by_key(|&p| {
             (p.index as isize - current_start_player_index as isize)
                 .rem_euclid(players.len() as isize)
@@ -207,7 +233,7 @@ mod tests {
         let mut player2 = Player::new(civ::get_test_civilization(), 2);
         player2.gain_resources(ResourcePile::mood_tokens(player2_mood));
         let players = vec![player0, player1, player2];
-        let got = super::player_that_chooses_next_first_player(&players, 1);
+        let got = super::player_that_chooses_next_first_player(&players, 1, &[]);
         assert_eq!(got, expected_player_index, "{name}");
     }
 

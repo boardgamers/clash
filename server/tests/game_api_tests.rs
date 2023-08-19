@@ -42,7 +42,7 @@ fn basic_actions() {
     let city_position = Position::new(0, 0);
     game.players[0]
         .cities
-        .push(City::new(0, city_position.clone()));
+        .push(City::new(0, city_position));
     game.players[0]
         .cities
         .push(City::new(0, Position::new(0, 1)));
@@ -51,7 +51,7 @@ fn basic_actions() {
         .push(City::new(0, Position::new(0, 2)));
 
     let construct_action = Action::Playing(Construct {
-        city_position: city_position.clone(),
+        city_position,
         city_piece: Building::Observatory,
         payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
         port_position: None,
@@ -89,7 +89,7 @@ fn basic_actions() {
     assert_eq!(0, game.current_player_index);
 
     let increase_happiness_action = Action::Playing(IncreaseHappiness {
-        happiness_increases: vec![(city_position.clone(), 1)],
+        happiness_increases: vec![(city_position, 1)],
     });
     let game = game_api::execute_action(game, increase_happiness_action, 0);
     let player = &game.players[0];
@@ -105,7 +105,7 @@ fn basic_actions() {
     assert_eq!(2, game.actions_left);
 
     let construct_wonder_action = Action::Playing(Custom(ConstructWonder {
-        city_position: city_position.clone(),
+        city_position,
         wonder: String::from("X"),
         payment: ResourcePile::new(1, 3, 3, 0, 2, 0, 4),
     }));
@@ -135,9 +135,9 @@ fn basic_actions() {
     assert_eq!(1, game.actions_left);
 
     let tile_position = Position::new(1, 0);
-    game.map.tiles.insert(tile_position.clone(), Mountain);
+    game.map.tiles.insert(tile_position, Mountain);
     let collect_action = Action::Playing(Collect {
-        city_position: city_position.clone(),
+        city_position,
         collections: vec![(tile_position, ResourcePile::ore(1))],
     });
     let game = game_api::execute_action(game, collect_action, 0);
@@ -162,24 +162,24 @@ fn cultural_influence() {
     assert_eq!(city0position.distance(&city1position), 2);
     game.players[0]
         .cities
-        .push(City::new(0, city0position.clone()));
+        .push(City::new(0, city0position));
     game.players[1]
         .cities
-        .push(City::new(1, city1position.clone()));
+        .push(City::new(1, city1position));
     game.players[1].construct(&Building::Academy, &city1position, None);
     let influence_action = Action::Playing(InfluenceCultureAttempt {
-        starting_city_position: city0position.clone(),
+        starting_city_position: city0position,
         target_player_index: 1,
-        target_city_position: city1position.clone(),
+        target_city_position: city1position,
         city_piece: Building::Academy,
     });
     let game = game_api::execute_action(game, influence_action, 0);
     assert!(!game.players[1].cities[0].influenced());
     assert_eq!(game.state, Playing);
     let influence_action = Action::Playing(InfluenceCultureAttempt {
-        starting_city_position: city0position.clone(),
+        starting_city_position: city0position,
         target_player_index: 1,
-        target_city_position: city1position.clone(),
+        target_city_position: city1position,
         city_piece: Building::Academy,
     });
     let game = game_api::execute_action(game, influence_action, 0);
@@ -189,7 +189,7 @@ fn cultural_influence() {
         CulturalInfluenceResolution {
             roll_boost_cost: 2,
             target_player_index: 1,
-            target_city_position: city1position.clone(),
+            target_city_position: city1position,
             city_piece: Building::Academy
         }
     );
@@ -201,7 +201,7 @@ fn cultural_influence() {
     let influence_action = Action::Playing(InfluenceCultureAttempt {
         starting_city_position: city0position,
         target_player_index: 1,
-        target_city_position: city1position.clone(),
+        target_city_position: city1position,
         city_piece: Building::Academy,
     });
     let game = game_api::execute_action(game, influence_action, 0);
@@ -211,9 +211,9 @@ fn cultural_influence() {
     let game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
     assert_eq!(game.current_player_index, 1);
     let influence_action = Action::Playing(InfluenceCultureAttempt {
-        starting_city_position: city1position.clone(),
+        starting_city_position: city1position,
         target_player_index: 1,
-        target_city_position: city1position.clone(),
+        target_city_position: city1position,
         city_piece: Building::Academy,
     });
     let game = game_api::execute_action(game, influence_action, 1);
@@ -221,7 +221,7 @@ fn cultural_influence() {
     assert_eq!(game.state, Playing);
     assert!(!game.successful_cultural_influence);
     let influence_action = Action::Playing(InfluenceCultureAttempt {
-        starting_city_position: city1position.clone(),
+        starting_city_position: city1position,
         target_player_index: 1,
         target_city_position: city1position,
         city_piece: Building::Academy,

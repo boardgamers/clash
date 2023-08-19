@@ -42,7 +42,7 @@ pub struct Game {
     pub messages: Vec<String>,
     pub dice_roll_outcomes: Vec<u8>,
     pub dice_roll_log: Vec<u8>,
-    dropped_players: Vec<usize>,
+    pub dropped_players: Vec<usize>,
     pub wonders_left: Vec<Wonder>,
     pub wonder_amount_left: usize,
 }
@@ -326,7 +326,7 @@ impl Game {
                     action,
                     *roll_boost_cost,
                     *target_player_index,
-                    target_city_position.clone(),
+                    *target_city_position,
                     city_piece.clone(),
                     player_index,
                 );
@@ -385,7 +385,7 @@ impl Game {
         self.state = CulturalInfluenceResolution {
             roll_boost_cost: 5 - *roll as u32,
             target_player_index,
-            target_city_position: target_city_position.clone(),
+            target_city_position,
             city_piece: city_piece.clone(),
         };
         if !action {
@@ -419,9 +419,10 @@ impl Game {
             return;
         }
         while self.dropped_players.contains(&self.current_player_index)
-            && self.current_player_index < self.players.len() - 1
+            && self.current_player_index != self.starting_player_index
         {
             self.current_player_index += 1;
+            self.current_player_index %= self.players.len();
         }
     }
 
@@ -431,10 +432,10 @@ impl Game {
         self.played_once_per_turn_actions = Vec::new();
         self.players[self.current_player_index].end_turn();
         self.next_player();
+        self.skip_dropped_players();
         if self.current_player_index == self.starting_player_index {
             self.next_round();
         }
-        self.skip_dropped_players();
     }
 
     fn next_round(&mut self) {
@@ -462,6 +463,7 @@ impl Game {
     pub fn next_age(&mut self) {
         self.state = Playing;
         self.age += 1;
+        self.current_player_index = self.starting_player_index;
         self.lock_undo();
         if self.age > AGES {
             self.end_game();
@@ -504,7 +506,13 @@ impl Game {
             "{} has left the game",
             self.players[player_index].get_name()
         ));
+        if self.current_player_index != player_index {
+            return;
+        }
         self.skip_dropped_players();
+        if self.current_player_index == self.starting_player_index {
+            self.next_round();
+        }
     }
 
     pub fn get_available_custom_actions(&self) -> Vec<CustomActionType> {
@@ -901,7 +909,7 @@ pub mod tests {
         let position = Position::new(0, 0);
         game.players[old]
             .cities
-            .push(City::new(old, position.clone()));
+            .push(City::new(old, position));
         game.build_wonder(wonder, &position, old);
         game.players[old].construct(&Academy, &position, None);
         game.players[old].construct(&Obelisk, &position, None);

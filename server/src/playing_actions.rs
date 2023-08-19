@@ -134,14 +134,14 @@ impl PlayingAction {
                 let total_collect =
                     get_total_collection(game, player_index, &city_position, &collections)
                         .expect("Illegal action");
-                game.players[player_index].gain_resources(total_collect);
-                let city = game.players[player_index]
+                    let city = game.players[player_index]
                     .get_city_mut(&city_position)
                     .expect("Illegal action");
                 if !city.can_activate() {
                     panic!("Illegal action");
                 }
                 city.activate();
+                game.players[player_index].gain_resources(total_collect);
             }
             IncreaseHappiness {
                 happiness_increases,
@@ -351,7 +351,7 @@ pub fn get_total_collection(
 
         let terrain = game.map.tiles.get(position)?.clone();
 
-        if city.port_position == Some(position.clone()) {
+        if city.port_position == Some(*position) {
             if !PORT_CHOICES.iter().any(|r| r == collect) {
                 return None;
             }
