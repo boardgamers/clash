@@ -15,6 +15,7 @@ use crate::hex_ui;
 use crate::resource_ui::resource_symbol;
 use crate::ui_state::{ActiveDialog, StateUpdate, StateUpdates, State};
 
+#[derive(Clone)]
 pub struct CollectResources {
     pub player_index: usize,
     pub city_position: Position,
@@ -44,7 +45,7 @@ impl CollectResources {
     }
 }
 
-pub fn collect_resources_dialog<'a>(game: &Game, collect: &CollectResources) -> StateUpdate<'a> {
+pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> StateUpdate {
     let mut updates = StateUpdates::new();
     active_dialog_window(|ui| {
         let city = game.get_city(collect.player_index, &collect.city_position);
@@ -54,7 +55,7 @@ pub fn collect_resources_dialog<'a>(game: &Game, collect: &CollectResources) -> 
             &collect.city_position,
             &collect.collections,
         )
-        .is_some();
+            .is_some();
         let label = if valid { "OK" } else { "(OK)" };
         if ui.button(Vec2::new(0., 40.), label) && valid {
             let extra = city.mood_modified_size() - collect.collections.len();
@@ -107,27 +108,27 @@ pub fn possible_resource_collections(
         .collect()
 }
 
-pub fn click_collect_option<'a>(col: &CollectResources, p: &Position) -> StateUpdate<'a> {
-    if let Some(possible) = col.possible_collections.get(p) {
-        return StateUpdate::UpdateActiveDialog(Box::new(|ad| {
-            if let ActiveDialog::CollectResources(col) = ad {
-                if let Some(current) = col
-                    .get_collection(p)
-                    .and_then(|r| possible.iter().position(|p| p == r))
-                {
-                    col.collections.retain(|(pos, _)| pos != p);
-                    let next = current + 1;
-                    if next < possible.len() {
-                        col.collections.push((p.clone(), possible[next].clone()));
-                    }
-                } else {
-                    col.collections.push((p.clone(), possible[0].clone()));
-                }
+pub fn click_collect_option(col: &CollectResources, p: Position) -> StateUpdate {
+       let mut new = col.clone();
+    if let Some(possible) = new.possible_collections.get(&p) {
+
+        if let Some(current) = new
+            .get_collection(&p)
+            .and_then(|r| possible.iter().position(|p| p == r))
+        {
+            new.collections.retain(|(pos, _)| pos != &p);
+            let next = current + 1;
+            if next < possible.len() {
+                new.collections.push((p.clone(), possible[next].clone()));
             }
-        }));
+        } else {
+            new.collections.push((p.clone(), possible[0].clone()));
+        }
+        return StateUpdate::SetDialog(ActiveDialog::CollectResources(new));
     }
     StateUpdate::None
 }
+
 
 pub fn draw_resource_collect_tile(state: &State, pos: &Position) {
     if let ActiveDialog::CollectResources(collect) = &state.active_dialog {

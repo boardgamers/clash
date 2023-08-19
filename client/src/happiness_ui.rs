@@ -75,13 +75,13 @@ fn increase_happiness_new_steps(
     None
 }
 
-pub fn show_increase_happiness<'a>(game: &Game, player_index: usize, state: &State) -> StateUpdate<'a> {
+pub fn show_increase_happiness(game: &Game, player_index: usize, state: &State) -> StateUpdate {
     let y = 480.;
     if can_play_action(game)
         && root_ui().button(vec2(600., y), "Increase Happiness")
         && state.increase_happiness.is_none()
     {
-        state.increase_happiness = Some(IncreaseHappiness::new(
+        return StateUpdate::SetIncreaseHappiness(IncreaseHappiness::new(
             game.get_player(player_index)
                 .cities
                 .iter()
@@ -92,7 +92,7 @@ pub fn show_increase_happiness<'a>(game: &Game, player_index: usize, state: &Sta
     }
     if let Some(increase_happiness) = &state.increase_happiness {
         if root_ui().button(vec2(750., y), "Cancel") {
-            state.clear();
+            return StateUpdate::Cancel;
         } else if increase_happiness.cost != ResourcePile::empty()
             && root_ui().button(vec2(800., y), "Confirm")
         {

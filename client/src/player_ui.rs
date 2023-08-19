@@ -86,7 +86,7 @@ pub fn show_resources(game: &Game, player_index: usize) {
     res(format!("Culture {}", r.culture_tokens));
 }
 
-pub fn show_global_controls<'a>(game: &Game) -> StateUpdate<'a> {
+pub fn show_global_controls(game: &Game) -> StateUpdate {
     let y = 540.;
     if game.can_undo() && root_ui().button(vec2(600., y), "Undo") {
         return StateUpdate::Execute(Action::Undo);

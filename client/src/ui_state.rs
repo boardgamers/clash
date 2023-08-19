@@ -11,10 +11,10 @@ use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
-pub enum ActiveDialog<'a> {
+pub enum ActiveDialog {
     None,
     AdvancePayment(AdvancePayment),
-    ConstructionPayment(ConstructionPayment<'a>),
+    ConstructionPayment(ConstructionPayment),
     CollectResources(CollectResources),
 }
 
@@ -23,20 +23,19 @@ pub struct PendingUpdate {
     pub warning: Vec<String>,
 }
 
-pub enum StateUpdate<'a> {
+pub enum StateUpdate {
     None,
-    NewDialog(ActiveDialog<'a>),
+    SetDialog(ActiveDialog),
     Cancel,
     ResolvePendingUpdate(bool),
     Execute(Action),
     ExecuteWithWarning(PendingUpdate),
-    InitIncreaseHappiness(IncreaseHappiness),
+    SetIncreaseHappiness(IncreaseHappiness),
     FocusCity(usize, Position),
-    UpdateActiveDialog(Box<dyn FnOnce(&mut ActiveDialog<'a>)>),
 }
 
-impl<'a> StateUpdate<'a> {
-    pub fn execute(action: Action, warning: Vec<String>) -> StateUpdate<'a> {
+impl StateUpdate {
+    pub fn execute(action: Action, warning: Vec<String>) -> StateUpdate {
         if warning.is_empty() {
             StateUpdate::Execute(action)
         } else {
@@ -48,7 +47,7 @@ impl<'a> StateUpdate<'a> {
         action: Action,
         warning: Vec<String>,
         city: &City,
-    ) -> StateUpdate<'a> {
+    ) -> StateUpdate {
         if city.is_activated() && city.mood_state != MoodState::Angry {
             let mut warn = vec!["City will become angry".to_string()];
             warn.extend(warning);
@@ -59,20 +58,20 @@ impl<'a> StateUpdate<'a> {
     }
 }
 
-pub struct StateUpdates<'a> {
-    updates: Vec<StateUpdate<'a>>,
+pub struct StateUpdates {
+    updates: Vec<StateUpdate>,
 }
 
-impl<'a> StateUpdates<'a> {
-    pub fn new() -> StateUpdates<'a> {
+impl StateUpdates {
+    pub fn new() -> StateUpdates {
         StateUpdates { updates: vec![] }
     }
-    pub fn add(&mut self, update: StateUpdate<'a>) {
+    pub fn add(&mut self, update: StateUpdate) {
         self.updates.push(update);
     }
 
     #[must_use]
-    pub fn result(&self) -> StateUpdate<'a> {
+    pub fn result(self) -> StateUpdate {
         self.updates
             .into_iter()
             .find(|u| match u {
@@ -94,15 +93,15 @@ impl IncreaseHappiness {
     }
 }
 
-pub struct State<'a> {
+pub struct State {
     pub focused_city: Option<(usize, Position)>,
-    pub active_dialog: ActiveDialog<'a>,
+    pub active_dialog: ActiveDialog,
     pub pending_update: Option<PendingUpdate>,
     pub increase_happiness: Option<IncreaseHappiness>,
 }
 
-impl<'a> State<'a> {
-    pub fn new() -> State<'a> {
+impl State {
+    pub fn new() -> State {
         State {
             active_dialog: ActiveDialog::None,
             pending_update: None,
@@ -124,7 +123,7 @@ impl<'a> State<'a> {
         false
     }
 
-    pub fn update(&mut self, game: &mut Game, update: StateUpdate<'a>) {
+    pub fn update(&mut self, game: &mut Game, update: StateUpdate) {
         match update {
             StateUpdate::None => {}
             StateUpdate::Execute(a) => {
@@ -146,10 +145,10 @@ impl<'a> State<'a> {
                     self.pending_update = None;
                 }
             }
-            StateUpdate::NewDialog(dialog) => {
+            StateUpdate::SetDialog(dialog) => {
                 self.active_dialog = dialog;
             }
-            StateUpdate::InitIncreaseHappiness(h) => {
+            StateUpdate::SetIncreaseHappiness(h) => {
                 self.clear();
                 self.increase_happiness = Some(h)
             }

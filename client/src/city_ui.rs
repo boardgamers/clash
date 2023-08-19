@@ -14,15 +14,15 @@ use crate::hex_ui::draw_hex_center_text;
 use crate::ui_state::{StateUpdate, StateUpdates, can_play_action, CityMenu, State};
 use crate::{hex_ui, influence_ui, player_ui, ActiveDialog};
 
-pub fn show_city_menu<'a>(game: &'a Game, menu: CityMenu) -> StateUpdate<'a> {
-    let mut updates: StateUpdates<'a> = StateUpdates::new();
+pub fn show_city_menu(game: &Game, menu: CityMenu) -> StateUpdate {
+    let mut updates: StateUpdates = StateUpdates::new();
 
     root_ui().window(hash!(), vec2(30., 700.), vec2(500., 200.), |ui| {
         ui.label(None, &menu.city_position.to_string());
 
         let can_play = can_play_action(game) && menu.is_city_owner();
         if can_play && ui.button(None, "Collect Resources") {
-            updates.add(StateUpdate::NewDialog(ActiveDialog::CollectResources(CollectResources::new(
+            updates.add(StateUpdate::SetDialog(ActiveDialog::CollectResources(CollectResources::new(
                 menu.player_index,
                 menu.city_position.clone(),
                 possible_resource_collections(game, menu.city_position, menu.city_owner_index),
@@ -39,11 +39,11 @@ pub fn show_city_menu<'a>(game: &'a Game, menu: CityMenu) -> StateUpdate<'a> {
     updates.result()
 }
 
-fn add_building_actions<'a>(
-    game: &'a Game,
+fn add_building_actions(
+    game: &Game,
     menu: &CityMenu,
     ui: &mut Ui,
-) -> StateUpdate<'a> {
+) -> StateUpdate {
     let closest_city_pos = &influence_ui::closest_city(&game, menu);
 
     if !can_play_action(game) {
@@ -133,11 +133,11 @@ fn building_names() -> [(Building, &'static str); 7] {
     ]
 }
 
-pub fn city_click<'a>(state: &State, player: &Player, city: &City) -> StateUpdate<'a> {
+pub fn city_click(state: &State, player: &Player, city: &City) -> StateUpdate {
     let pos = &city.position;
 
     if let Some(increase_happiness) = &state.increase_happiness {
-        StateUpdate::InitIncreaseHappiness(init_increase_happiness(
+        StateUpdate::SetIncreaseHappiness(init_increase_happiness(
             player,
             city,
             pos,

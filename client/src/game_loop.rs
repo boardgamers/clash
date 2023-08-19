@@ -20,12 +20,13 @@ pub async fn run(game: &mut Game) {
 
     set_fullscreen(true);
     loop {
-        state.update(game, game_loop(game, &state));
+        let update = game_loop(game, &state);
+        state.update(game, update);
         next_frame().await
     }
 }
 
-fn game_loop<'a>(game: &Game, state: &State) -> StateUpdate<'a> {
+fn game_loop(game: &Game, state: &State) -> StateUpdate {
     let player_index = game.current_player_index;
     clear_background(WHITE);
 
@@ -54,7 +55,7 @@ fn game_loop<'a>(game: &Game, state: &State) -> StateUpdate<'a> {
 
     updates.add(match &state.active_dialog {
         ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p),
-        ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(p),
+        ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game,p),
         ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c),
         ActiveDialog::None => StateUpdate::None,
     });
@@ -65,7 +66,7 @@ fn game_loop<'a>(game: &Game, state: &State) -> StateUpdate<'a> {
 }
 
 #[must_use]
-fn show_pending_update<'a>(state: &State) -> StateUpdate<'a> {
+fn show_pending_update(state: &State) -> StateUpdate {
     let mut updates = StateUpdates::new();
     active_dialog_window(|ui| {
         if let Some(update) = &state.pending_update {
@@ -81,16 +82,16 @@ fn show_pending_update<'a>(state: &State) -> StateUpdate<'a> {
     updates.result()
 }
 
-pub fn try_click<'a>(game: &Game, state: &State) -> StateUpdate<'a> {
+pub fn try_click(game: &Game, state: &State) -> StateUpdate {
     if is_mouse_button_pressed(MouseButton::Left) {
         let (x, y) = mouse_position();
 
-        let pos = &Position::from_coordinate(pixel_to_coordinate(x, y));
+        let pos = Position::from_coordinate(pixel_to_coordinate(x, y));
 
         match &state.active_dialog {
-            ActiveDialog::CollectResources(col) => return click_collect_option(col, pos),
+            ActiveDialog::CollectResources(col) => return click_collect_option(col, pos.clone()),
             _ => {
-                if let Some(c) = game.get_any_city(pos) {
+                if let Some(c) = game.get_any_city(&pos) {
                     return city_ui::city_click(state, game.get_player(c.player_index), c);
                 }
             }

@@ -6,14 +6,14 @@ use server::game::Game;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 
-pub fn add_influence_button<'a>(
+pub fn add_influence_button(
     game: &Game,
     menu: &CityMenu,
     ui: &mut Ui,
     closest_city_pos: &Position,
     building: &Building,
     building_name: &str,
-) -> StateUpdate<'a> {
+) -> StateUpdate {
     if !menu.get_city(game).city_pieces.can_add_building(building) {
         let start_position = if menu.is_city_owner() {
             menu.city_position

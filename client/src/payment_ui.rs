@@ -15,7 +15,7 @@ pub struct ResourcePayment {
     pub max: u32,
 }
 
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Payment {
     pub resources: Vec<ResourcePayment>,
 }
@@ -59,14 +59,14 @@ pub trait HasPayment {
     fn payment(&self) -> &Payment;
 }
 
-pub fn payment_dialog<'a, T: HasPayment>(
+pub fn payment_dialog<T: HasPayment>(
     has_payment: &T,
     is_valid: impl FnOnce(&T) -> bool,
     execute_action: impl FnOnce(&T) -> StateUpdate,
     show: impl Fn(&T, ResourceType) -> bool,
     plus: impl Fn(&T, ResourceType) -> StateUpdate,
     minus: impl Fn(&T, ResourceType) -> StateUpdate,
-) -> StateUpdate<'a> {
+) -> StateUpdate {
     let mut updates = StateUpdates::new();
     active_dialog_window(|ui| {
         for (i, p) in has_payment.payment().resources.clone().iter().enumerate() {

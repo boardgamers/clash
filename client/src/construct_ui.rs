@@ -16,13 +16,13 @@ use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::ui_state::{StateUpdates, CityMenu};
 use crate::ui_state::{ActiveDialog, StateUpdate};
 
-pub fn add_construct_button<'a>(
-    game: &'a Game,
+pub fn add_construct_button(
+    game: &Game,
     menu: &CityMenu,
     ui: &mut Ui,
     building: &Building,
     name: &str,
-) -> StateUpdate<'a> {
+) -> StateUpdate {
     let owner = menu.get_city_owner(game);
     let city = menu.get_city(game);
     let mut updates = StateUpdates::new();
@@ -36,7 +36,7 @@ pub fn add_construct_button<'a>(
                     pos.clone().map_or("".to_string(), |p| format!(" at {}", p))
                 ),
             ) {
-                updates.add(StateUpdate::NewDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
+                updates.add(StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
                     game,
                     menu.player_index,
                     menu.city_position.clone(),
@@ -65,7 +65,7 @@ fn building_positions(building: &Building, city: &City, map: &Map) -> Vec<Option
         .collect()
 }
 
-pub fn add_wonder_buttons<'a>(game: &'a Game, menu: &CityMenu, ui: &mut Ui) -> StateUpdate<'a> {
+pub fn add_wonder_buttons(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpdate {
     let city = menu.get_city(game);
     let owner = menu.get_city_owner(game);
     let mut updates = StateUpdates::new();
@@ -73,7 +73,7 @@ pub fn add_wonder_buttons<'a>(game: &'a Game, menu: &CityMenu, ui: &mut Ui) -> S
         if city.can_build_wonder(w, owner, game)
             && ui.button(None, format!("Build Wonder {}", w.name))
         {
-            updates.add(StateUpdate::NewDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
+            updates.add(StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
                 game,
                 menu.player_index,
                 menu.city_position.clone(),
@@ -84,7 +84,7 @@ pub fn add_wonder_buttons<'a>(game: &'a Game, menu: &CityMenu, ui: &mut Ui) -> S
     updates.result()
 }
 
-pub fn pay_construction_dialog<'a>(payment: &ConstructionPayment) -> StateUpdate<'a> {
+pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> StateUpdate {
     payment_dialog(
         payment,
         |cp| cp.payment.get(ResourceType::Discount).current == 0,
@@ -98,7 +98,7 @@ pub fn pay_construction_dialog<'a>(payment: &ConstructionPayment) -> StateUpdate
                     temple_bonus: None,
                 }),
                 vec![],
-                cp.city,
+                game.get_any_city(&cp.city_position).unwrap()
             ),
             ConstructionProject::Wonder(w) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Custom(CustomAction::ConstructWonder {
@@ -107,7 +107,7 @@ pub fn pay_construction_dialog<'a>(payment: &ConstructionPayment) -> StateUpdate
                     wonder: w.clone(),
                 })),
                 vec![],
-                cp.city,
+                game.get_any_city(&cp.city_position).unwrap(),
             ),
         },
         |ap, r| match r {
@@ -116,49 +116,46 @@ pub fn pay_construction_dialog<'a>(payment: &ConstructionPayment) -> StateUpdate
             _ => ap.payment.get(r).max > 0,
         },
         |cp, r| {
-            StateUpdate::UpdateActiveDialog(Box::new(|ad| {
-                if let ActiveDialog::ConstructionPayment(cp) = ad {
-                    let gold = cp.payment.get_mut(ResourceType::Gold);
-                    if gold.current > 0 {
-                        gold.current -= 1;
-                    } else {
-                        cp.payment.get_mut(ResourceType::Discount).current += 1;
-                    }
-                    cp.payment.get_mut(r).current += 1;
-                }
-            }))
+            let mut new = cp.clone();
+            let gold = new.payment.get_mut(ResourceType::Gold);
+            if gold.current > 0 {
+                gold.current -= 1;
+            } else {
+                new.payment.get_mut(ResourceType::Discount).current += 1;
+            }
+            new.payment.get_mut(r).current += 1;
+            StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(new))
         },
         |cp, r| {
-            StateUpdate::UpdateActiveDialog(Box::new(|ad| {
-                if let ActiveDialog::ConstructionPayment(cp) = ad {
-                    let discount = cp.payment.get_mut(ResourceType::Discount);
-                    if discount.current > 0 {
-                        discount.current -= 1;
-                    } else {
-                        cp.payment.get_mut(ResourceType::Gold).current += 1;
-                    }
-                    cp.payment.get_mut(r).current -= 1;
-                }
-            }))
+            let mut new = cp.clone();
+            let discount = new.payment.get_mut(ResourceType::Discount);
+            if discount.current > 0 {
+                discount.current -= 1;
+            } else {
+                new.payment.get_mut(ResourceType::Gold).current += 1;
+            }
+            new.payment.get_mut(r).current -= 1;
+            StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(new))
         },
     )
 }
 
+#[derive(Clone)]
 pub enum ConstructionProject {
     Building(Building, Option<Position>),
     Wonder(String),
 }
 
-pub struct ConstructionPayment<'a> {
+#[derive(Clone)]
+pub struct ConstructionPayment {
     pub player_index: usize,
     pub city_position: Position,
-    pub city: &'a City,
     pub project: ConstructionProject,
     pub payment: Payment,
     pub payment_options: PaymentOptions,
 }
 
-impl ConstructionPayment<'_> {
+impl ConstructionPayment {
     pub fn new(
         game: &Game,
         player_index: usize,
@@ -189,7 +186,6 @@ impl ConstructionPayment<'_> {
             project,
             payment,
             payment_options,
-            city: game.get_city(player_index, &city_position),
         }
     }
 
@@ -218,7 +214,7 @@ impl ConstructionPayment<'_> {
     }
 }
 
-impl HasPayment for ConstructionPayment<'_> {
+impl HasPayment for ConstructionPayment {
     fn payment(&self) -> &Payment {
         &self.payment
     }
