@@ -29,14 +29,14 @@ impl AdvancePayment {
         AdvancePayment {
             name: name.to_string(),
             payment: AdvancePayment::new_payment(
-                p.resources().get_advance_payment_options(cost),
+                &p.resources().get_advance_payment_options(cost),
                 cost,
             ),
             cost,
         }
     }
 
-    pub fn new_payment(a: AdvancePaymentOptions, cost: u32) -> Payment {
+    pub fn new_payment(a: &AdvancePaymentOptions, cost: u32) -> Payment {
         let left = HashMap::from([
             (ResourceType::Food, a.food_left),
             (ResourceType::Gold, a.gold_left),
@@ -45,13 +45,13 @@ impl AdvancePayment {
         let mut resources: Vec<ResourcePayment> = new_resource_map(&a.default)
             .into_iter()
             .map(|e| ResourcePayment {
-                resource: e.0.clone(),
+                resource: e.0,
                 current: e.1,
                 min: 0,
                 max: min(cost, e.1 + left.get(&e.0).unwrap_or(&(0u32))),
             })
             .collect();
-        resources.sort_by_key(|r| r.resource.clone());
+        resources.sort_by_key(|r| r.resource);
 
         Payment { resources }
     }
@@ -76,7 +76,7 @@ pub fn show_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
     let mut updates = StateUpdates::new();
 
     root_ui().window(hash!(), vec2(20., 900.), vec2(400., 200.), |ui| {
-        for a in get_all_advances().into_iter() {
+        for a in get_all_advances() {
             let name = a.name;
             let p = game.get_player(player_index);
             if can_play_action(game) && p.can_advance(&name) {
@@ -97,7 +97,7 @@ pub fn show_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
 pub fn pay_advance_dialog(ap: &AdvancePayment) -> StateUpdate {
     payment_dialog(
         ap,
-        |ap| ap.valid(),
+        AdvancePayment::valid,
         |ap| {
             StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
                 advance: ap.name.to_string(),
@@ -113,6 +113,7 @@ pub fn pay_advance_dialog(ap: &AdvancePayment) -> StateUpdate {
 fn add(ap: &AdvancePayment, r: ResourceType, i: i32) -> StateUpdate {
     let mut new = ap.clone();
     let p = new.payment.get_mut(r);
+
     p.current = (p.current as i32 + i) as u32;
     StateUpdate::SetDialog(ActiveDialog::AdvancePayment(new))
 }

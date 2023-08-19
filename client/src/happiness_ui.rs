@@ -99,15 +99,14 @@ pub fn show_increase_happiness(game: &Game, player_index: usize, state: &State) 
             return StateUpdate::Execute(Action::Playing(PlayingAction::IncreaseHappiness {
                 happiness_increases: increase_happiness.steps.clone(),
             }));
-        } else {
-            draw_text(
-                &format!("Cost: {}", increase_happiness.cost),
-                600.,
-                520.,
-                20.,
-                BLACK,
-            );
         }
+        draw_text(
+            &format!("Cost: {}", increase_happiness.cost),
+            600.,
+            520.,
+            20.,
+            BLACK,
+        );
     }
     StateUpdate::None
 }

@@ -2,7 +2,7 @@ use server::resource_pile::ResourcePile;
 use std::collections::HashMap;
 use std::fmt;
 
-#[derive(PartialEq, Eq, Debug, Clone, Hash, Ord, PartialOrd)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy, Hash, Ord, PartialOrd)]
 pub enum ResourceType {
     Food,
     Wood,
@@ -16,7 +16,7 @@ pub enum ResourceType {
 
 impl fmt::Display for ResourceType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 

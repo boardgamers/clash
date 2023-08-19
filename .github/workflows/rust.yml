@@ -24,14 +24,16 @@ jobs:
         packages: pkg-config libx11-dev libxi-dev libgl1-mesa-dev libasound2-dev
         version: 1.0
     - name: Install Cargo Audit
-      run: cargo install cargo-audit
+      run: | 
+        cargo --version
+        cargo install cargo-audit
     - name: Build server
       working-directory: ./server
       run: cargo build
     - name: Run tests server
       working-directory: ./server
       run: cargo test
-    - name: Run clippy client
+    - name: Run clippy server
       working-directory: ./server
       run: cargo clippy
     - name: Format server

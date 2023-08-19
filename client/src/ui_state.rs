@@ -121,7 +121,7 @@ impl State {
             StateUpdate::None => {}
             StateUpdate::Execute(a) => {
                 self.execute(game, a);
-                self.clear()
+                self.clear();
             }
             StateUpdate::ExecuteWithWarning(update) => {
                 self.pending_update = Some(update);
@@ -145,11 +145,11 @@ impl State {
             }
             StateUpdate::SetIncreaseHappiness(h) => {
                 self.clear();
-                self.increase_happiness = Some(h)
+                self.increase_happiness = Some(h);
             }
             StateUpdate::FocusCity(p, c) => {
                 self.clear();
-                self.focused_city = Some((p, c))
+                self.focused_city = Some((p, c));
             }
         }
     }

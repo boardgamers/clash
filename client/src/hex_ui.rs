@@ -27,7 +27,7 @@ pub fn draw_hex(p: Position, fill_color: Color, text_color: Color, selected: boo
 
 pub fn draw_hex_center_text(p: Position, text: &str) {
     let c = center(p).to_screen();
-    draw_text(text, c.x - 5., c.y + 6., 25.0, BLACK)
+    draw_text(text, c.x - 5., c.y + 6., 25.0, BLACK);
 }
 
 pub fn pixel_to_coordinate(x: f32, y: f32) -> Coordinate {
