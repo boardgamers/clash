@@ -47,7 +47,7 @@ impl StatusPhaseAction {
                     .expect("data should be valid rase city json")
                     .city;
                 if let Some(city) = city {
-                    game.raze_city(&city, player_index);
+                    game.raze_city(city, player_index);
                     game.players[player_index].gain_resources(ResourcePile::gold(1));
                 }
             }

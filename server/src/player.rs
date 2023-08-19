@@ -503,28 +503,28 @@ impl Player {
             .get_advance_payment_options(self.advance_cost(advance))
     }
 
-    pub fn get_city(&self, position: &Position) -> Option<&City> {
+    pub fn get_city(&self, position: Position) -> Option<&City> {
         let position = self
             .cities
             .iter()
-            .position(|city| &city.position == position)?;
+            .position(|city| city.position == position)?;
         Some(&self.cities[position])
     }
 
-    pub fn get_city_mut(&mut self, position: &Position) -> Option<&mut City> {
+    pub fn get_city_mut(&mut self, position: Position) -> Option<&mut City> {
         let position = self
             .cities
             .iter()
-            .position(|city| &city.position == position)?;
+            .position(|city| city.position == position)?;
         Some(&mut self.cities[position])
     }
 
-    pub fn take_city(&mut self, position: &Position) -> Option<City> {
+    pub fn take_city(&mut self, position: Position) -> Option<City> {
         Some(
             self.cities.remove(
                 self.cities
                     .iter()
-                    .position(|city| &city.position == position)?,
+                    .position(|city| city.position == position)?,
             ),
         )
     }
@@ -532,11 +532,13 @@ impl Player {
     pub fn construct(
         &mut self,
         building: &Building,
-        city_position: &Position,
+        city_position: Position,
         port_position: Option<Position>,
     ) {
         self.take_events(|events, player| {
-            events.on_construct.trigger(player, city_position, building);
+            events
+                .on_construct
+                .trigger(player, &city_position, building);
         });
         let index = self.index;
         let city = self
@@ -553,11 +555,11 @@ impl Player {
         self.available_buildings -= building;
     }
 
-    pub fn undo_construct(&mut self, building: &Building, city_position: &Position) {
+    pub fn undo_construct(&mut self, building: &Building, city_position: Position) {
         self.take_events(|events, player| {
             events
                 .on_undo_construct
-                .trigger(player, city_position, building);
+                .trigger(player, &city_position, building);
         });
         let city = self
             .get_city_mut(city_position)

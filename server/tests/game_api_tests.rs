@@ -71,7 +71,7 @@ fn basic_actions() {
     assert_eq!(
         Some(0),
         player
-            .get_city(&city_position)
+            .get_city(city_position)
             .expect("player should have a city at this position")
             .city_pieces
             .observatory
@@ -79,7 +79,7 @@ fn basic_actions() {
     assert_eq!(
         2,
         player
-            .get_city(&city_position)
+            .get_city(city_position)
             .expect("player should have a city at this position")
             .size()
     );
@@ -100,7 +100,7 @@ fn basic_actions() {
     assert_eq!(&ResourcePile::new(1, 3, 3, 0, 2, 0, 4), player.resources());
     assert!(matches!(
         player
-            .get_city(&city_position)
+            .get_city(city_position)
             .expect("player should have a city at this position")
             .mood_state,
         Happy
@@ -122,7 +122,7 @@ fn basic_actions() {
     assert_eq!(
         1,
         player
-            .get_city(&city_position)
+            .get_city(city_position)
             .expect("player should have a city at this position")
             .city_pieces
             .wonders
@@ -131,7 +131,7 @@ fn basic_actions() {
     assert_eq!(
         4,
         player
-            .get_city(&city_position)
+            .get_city(city_position)
             .expect("player should have a city at this position")
             .mood_modified_size()
     );
@@ -147,7 +147,7 @@ fn basic_actions() {
     let player = &game.players[0];
     assert_eq!(&ResourcePile::ore(1), player.resources());
     assert!(player
-        .get_city(&city_position)
+        .get_city(city_position)
         .expect("player should have a city at this position")
         .is_activated());
     assert_eq!(0, game.actions_left);
@@ -162,10 +162,10 @@ fn cultural_influence() {
     game.players[1].gain_resources(ResourcePile::culture_tokens(1));
     let city0position = Position::new(0, 0);
     let city1position = Position::new(2, 0);
-    assert_eq!(city0position.distance(&city1position), 2);
+    assert_eq!(city0position.distance(city1position), 2);
     game.players[0].cities.push(City::new(0, city0position));
     game.players[1].cities.push(City::new(1, city1position));
-    game.players[1].construct(&Building::Academy, &city1position, None);
+    game.players[1].construct(&Building::Academy, city1position, None);
     let influence_action = Action::Playing(InfluenceCultureAttempt {
         starting_city_position: city0position,
         target_player_index: 1,

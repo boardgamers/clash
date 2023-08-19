@@ -154,7 +154,7 @@ impl City {
             }
         }
         if let Some(placement_requirement) = &wonder.placement_requirement {
-            return placement_requirement(&self.position, game);
+            return placement_requirement(self.position, game);
         }
         true
     }
