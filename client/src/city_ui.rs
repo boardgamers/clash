@@ -9,58 +9,62 @@ use server::player::Player;
 
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{add_construct_button, add_wonder_buttons};
-use crate::happiness_ui::increase_happiness_click;
+use crate::happiness_ui::init_increase_happiness;
 use crate::hex_ui::draw_hex_center_text;
-use crate::ui_state::{can_play_action, CityMenu, State};
+use crate::ui_state::{can_play_action, CityMenu, State, StateUpdate, StateUpdates};
 use crate::{hex_ui, influence_ui, player_ui, ActiveDialog};
 
-pub fn show_city_menu(game: &mut Game, menu: CityMenu) -> Option<ActiveDialog> {
-    let mut result: Option<ActiveDialog> = None;
+pub fn show_city_menu(game: &Game, menu: CityMenu) -> StateUpdate {
+    let mut updates: StateUpdates = StateUpdates::new();
 
     root_ui().window(hash!(), vec2(30., 700.), vec2(500., 200.), |ui| {
         ui.label(None, &menu.city_position.to_string());
 
         let can_play = can_play_action(game) && menu.is_city_owner();
         if can_play && ui.button(None, "Collect Resources") {
-            result = Some(ActiveDialog::CollectResources(CollectResources::new(
-                menu.player_index,
-                menu.city_position.clone(),
-                possible_resource_collections(game, menu.city_position, menu.city_owner_index),
+            updates.add(StateUpdate::SetDialog(ActiveDialog::CollectResources(
+                CollectResources::new(
+                    menu.player_index,
+                    menu.city_position,
+                    possible_resource_collections(game, menu.city_position, menu.city_owner_index),
+                ),
             )));
         }
 
-        add_building_actions(game, &menu, &mut result, ui);
+        updates.add(add_building_actions(game, &menu, ui));
 
         if can_play {
-            if let Some(d) = add_wonder_buttons(game, &menu, ui) {
-                let _ = result.insert(d);
-            }
+            let option = add_wonder_buttons(game, &menu, ui);
+            updates.add(option)
         }
     });
-    result
+    updates.result()
 }
 
-fn add_building_actions(
-    game: &mut Game,
-    menu: &CityMenu,
-    result: &mut Option<ActiveDialog>,
-    ui: &mut Ui,
-) {
-    let closest_city_pos = &influence_ui::closest_city(&game, menu);
+fn add_building_actions(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpdate {
+    let closest_city_pos = influence_ui::closest_city(game, menu);
 
-    for (building, name) in building_names() {
-        if can_play_action(game) {
-            if let Some(d) = add_construct_button(game, menu, ui, &building, name) {
-                let _ = result.insert(d);
-            }
-
-            influence_ui::add_influence_button(game, menu, ui, closest_city_pos, &building, name);
-        };
+    if !can_play_action(game) {
+        return StateUpdate::None;
     }
+
+    let mut updates = StateUpdates::new();
+    for (building, name) in building_names() {
+        updates.add(add_construct_button(game, menu, ui, &building, name));
+        updates.add(influence_ui::add_influence_button(
+            game,
+            menu,
+            ui,
+            closest_city_pos,
+            &building,
+            name,
+        ));
+    }
+    updates.result()
 }
 
 pub fn draw_city(owner: &Player, city: &City, state: &State) {
-    let c = hex_ui::center(&city.position).to_screen();
+    let c = hex_ui::center(city.position).to_screen();
 
     if city.is_activated() {
         draw_circle(c.x, c.y, 18.0, WHITE);
@@ -73,12 +77,12 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
             .iter()
             .find(|(p, _)| p == &city.position)
             .map_or(String::new(), |(_, s)| format!("{}", s));
-        draw_hex_center_text(&city.position, &steps);
+        draw_hex_center_text(city.position, &steps);
     } else {
         match city.mood_state {
-            MoodState::Happy => draw_hex_center_text(&city.position, "+"),
+            MoodState::Happy => draw_hex_center_text(city.position, "+"),
             MoodState::Neutral => {}
-            MoodState::Angry => draw_hex_center_text(&city.position, "-"),
+            MoodState::Angry => draw_hex_center_text(city.position, "-"),
         }
     }
 
@@ -134,18 +138,17 @@ fn building_names() -> [(Building, &'static str); 7] {
     ]
 }
 
-pub fn city_click(state: &mut State, player: &Player, city: &City) {
-    let pos = &city.position;
+pub fn city_click(state: &State, player: &Player, city: &City) -> StateUpdate {
+    let pos = city.position;
 
     if let Some(increase_happiness) = &state.increase_happiness {
-        state.increase_happiness = Some(increase_happiness_click(
+        StateUpdate::SetIncreaseHappiness(init_increase_happiness(
             player,
             city,
             pos,
             increase_happiness,
         ))
     } else {
-        state.clear();
-        state.focused_city = Some((player.index, pos.clone()));
+        StateUpdate::FocusCity(player.index, pos)
     }
 }

@@ -324,7 +324,7 @@ impl Display for ResourcePile {
     }
 }
 
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct PaymentOptions {
     pub default: ResourcePile,
     pub gold_left: u32,

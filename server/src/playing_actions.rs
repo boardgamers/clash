@@ -100,7 +100,7 @@ impl PlayingAction {
                 temple_bonus,
             } => {
                 let player = &mut game.players[player_index];
-                let city = player.get_city(&city_position).expect("Illegal action");
+                let city = player.get_city(city_position).expect("Illegal action");
                 let cost = player.construct_cost(&city_piece, city);
                 if !city.can_construct(&city_piece, player) || !payment.can_afford(&cost) {
                     panic!("Illegal action");
@@ -125,17 +125,17 @@ impl PlayingAction {
                     panic!("Illegal action");
                 }
                 player.loose_resources(payment);
-                player.construct(&city_piece, &city_position, port_position);
+                player.construct(&city_piece, city_position, port_position);
             }
             Collect {
                 city_position,
                 collections,
             } => {
                 let total_collect =
-                    get_total_collection(game, player_index, &city_position, &collections)
+                    get_total_collection(game, player_index, city_position, &collections)
                         .expect("Illegal action");
                 let city = game.players[player_index]
-                    .get_city_mut(&city_position)
+                    .get_city_mut(city_position)
                     .expect("Illegal action");
                 if !city.can_activate() {
                     panic!("Illegal action");
@@ -148,13 +148,13 @@ impl PlayingAction {
             } => {
                 let player = &mut game.players[player_index];
                 for (city_position, steps) in happiness_increases {
-                    let city = player.get_city(&city_position).expect("Illegal action");
+                    let city = player.get_city(city_position).expect("Illegal action");
                     let cost = city.increase_happiness_cost(steps).expect("Illegal action");
                     if city.player_index != player_index || !player.resources().can_afford(&cost) {
                         panic!("Illegal action");
                     }
                     player.loose_resources(cost);
-                    let city = player.get_city_mut(&city_position).expect("Illegal action");
+                    let city = player.get_city_mut(city_position).expect("Illegal action");
                     for _ in 0..steps {
                         city.increase_mood_state();
                     }
@@ -169,9 +169,9 @@ impl PlayingAction {
                 let range_boost_cost = game
                     .influence_culture_boost_cost(
                         player_index,
-                        &starting_city_position,
+                        starting_city_position,
                         target_player_index,
-                        &target_city_position,
+                        target_city_position,
                         &city_piece,
                     )
                     .expect("Illegal action");
@@ -185,7 +185,7 @@ impl PlayingAction {
                     game.influence_culture(
                         player_index,
                         target_player_index,
-                        &target_city_position,
+                        target_city_position,
                         &city_piece,
                     );
                     game.add_to_last_log_item(&format!(" and succeeded (rolled {roll})"));
@@ -251,7 +251,7 @@ impl PlayingAction {
                 temple_bonus,
             } => {
                 let player = &mut game.players[player_index];
-                player.undo_construct(&city_piece, &city_position);
+                player.undo_construct(&city_piece, city_position);
                 player.gain_resources(payment);
                 if matches!(&city_piece, Temple) {
                     player.loose_resources(
@@ -264,7 +264,7 @@ impl PlayingAction {
                 collections,
             } => {
                 game.players[player_index]
-                    .get_city_mut(&city_position)
+                    .get_city_mut(city_position)
                     .expect("city should be owned by the player")
                     .undo_activate();
                 let total_collect = collections.into_iter().map(|(_, collect)| collect).sum();
@@ -276,9 +276,9 @@ impl PlayingAction {
                 let mut cost = 0;
                 let player = &mut game.players[player_index];
                 for (city_position, steps) in happiness_increases {
-                    let city = player.get_city(&city_position).expect("Illegal action");
+                    let city = player.get_city(city_position).expect("Illegal action");
                     cost += city.size() as u32 * steps;
-                    let city = player.get_city_mut(&city_position).expect("Illegal action");
+                    let city = player.get_city_mut(city_position).expect("Illegal action");
                     for _ in 0..steps {
                         city.decrease_mood_state();
                     }
@@ -321,7 +321,7 @@ impl ActionType {
 pub fn get_total_collection(
     game: &Game,
     player_index: usize,
-    city_position: &Position,
+    city_position: Position,
     collections: &Vec<(Position, ResourcePile)>,
 ) -> Option<ResourcePile> {
     let player = &game.players[player_index];
@@ -331,7 +331,7 @@ pub fn get_total_collection(
     }
     let mut available_terrain = HashMap::new();
     for adjacent_tile in city.position.neighbors() {
-        if game.get_any_city(&adjacent_tile).is_some() {
+        if game.get_any_city(adjacent_tile).is_some() {
             continue;
         }
 

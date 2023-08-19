@@ -13,8 +13,9 @@ use server::resource_pile::ResourcePile;
 use crate::dialog_ui::active_dialog_window;
 use crate::hex_ui;
 use crate::resource_ui::resource_symbol;
-use crate::ui_state::{ActiveDialog, ActiveDialogUpdate, State};
+use crate::ui_state::{ActiveDialog, State, StateUpdate, StateUpdates};
 
+#[derive(Clone)]
 pub struct CollectResources {
     pub player_index: usize,
     pub city_position: Position,
@@ -36,22 +37,22 @@ impl CollectResources {
         }
     }
 
-    fn get_collection(&self, p: &Position) -> Option<&ResourcePile> {
+    fn get_collection(&self, p: Position) -> Option<&ResourcePile> {
         self.collections
             .iter()
-            .find(|(pos, _)| pos == p)
+            .find(|(pos, _)| pos == &p)
             .map(|(_, r)| r)
     }
 }
 
-pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> ActiveDialogUpdate {
-    let mut result = ActiveDialogUpdate::None;
+pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> StateUpdate {
+    let mut updates = StateUpdates::new();
     active_dialog_window(|ui| {
-        let city = game.get_city(collect.player_index, &collect.city_position);
+        let city = game.get_city(collect.player_index, collect.city_position);
         let valid = get_total_collection(
             game,
             collect.player_index,
-            &collect.city_position,
+            collect.city_position,
             &collect.collections,
         )
         .is_some();
@@ -59,9 +60,9 @@ pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> Acti
         if ui.button(Vec2::new(0., 40.), label) && valid {
             let extra = city.mood_modified_size() - collect.collections.len();
 
-            result = ActiveDialogUpdate::execute_activation(
+            updates.add(StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Collect {
-                    city_position: collect.city_position.clone(),
+                    city_position: collect.city_position,
                     collections: collect.collections.clone(),
                 }),
                 if extra > 0 {
@@ -69,37 +70,37 @@ pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> Acti
                 } else {
                     vec![]
                 },
-                city.is_activated(),
-            );
+                city,
+            ));
         };
         if ui.button(Vec2::new(80., 40.), "Cancel") {
-            result = ActiveDialogUpdate::Cancel;
+            updates.add(StateUpdate::Cancel);
         };
     });
-    result
+    updates.result()
 }
 
 pub fn possible_resource_collections(
     game: &Game,
-    city_pos: &Position,
+    city_pos: Position,
     player_index: usize,
 ) -> HashMap<Position, Vec<ResourcePile>> {
     let collect_options = &game.get_player(player_index).collect_options;
     let city = game.get_city(player_index, city_pos);
     city_pos
         .neighbors()
-        .iter()
+        .into_iter()
         .chain(iter::once(city_pos))
         .flat_map(|pos| {
-            if city.port_position.as_ref().is_some_and(|p| p == pos) {
-                return Some((pos.clone(), PORT_CHOICES.to_vec()));
+            if city.port_position.is_some_and(|p| p == pos) {
+                return Some((pos, PORT_CHOICES.to_vec()));
             }
-            if let Some(t) = game.map.tiles.get(pos) {
+            if let Some(t) = game.map.tiles.get(&pos) {
                 if let Some(option) = collect_options
                     .get(t)
                     .filter(|_| pos == city_pos || !is_blocked(game, pos))
                 {
-                    return Some((pos.clone(), option.clone()));
+                    return Some((pos, option.clone()));
                 }
             }
             None
@@ -107,26 +108,29 @@ pub fn possible_resource_collections(
         .collect()
 }
 
-pub fn click_collect_option(col: &mut CollectResources, p: &Position) {
-    if let Some(possible) = col.possible_collections.get(p) {
-        if let Some(current) = col
+pub fn click_collect_option(col: &CollectResources, p: Position) -> StateUpdate {
+    let mut new = col.clone();
+    if let Some(possible) = new.possible_collections.get(&p) {
+        if let Some(current) = new
             .get_collection(p)
             .and_then(|r| possible.iter().position(|p| p == r))
         {
-            col.collections.retain(|(pos, _)| pos != p);
+            new.collections.retain(|(pos, _)| pos != &p);
             let next = current + 1;
             if next < possible.len() {
-                col.collections.push((p.clone(), possible[next].clone()));
+                new.collections.push((p, possible[next].clone()));
             }
         } else {
-            col.collections.push((p.clone(), possible[0].clone()));
+            new.collections.push((p, possible[0].clone()));
         }
+        return StateUpdate::SetDialog(ActiveDialog::CollectResources(new));
     }
+    StateUpdate::None
 }
 
-pub fn draw_resource_collect_tile(state: &State, pos: &Position) {
+pub fn draw_resource_collect_tile(state: &State, pos: Position) {
     if let ActiveDialog::CollectResources(collect) = &state.active_dialog {
-        if let Some(possible) = collect.possible_collections.get(pos) {
+        if let Some(possible) = collect.possible_collections.get(&pos) {
             draw_circle_lines(
                 hex_ui::center(pos).to_screen().x,
                 hex_ui::center(pos).to_screen().y,
@@ -151,7 +155,7 @@ pub fn draw_resource_collect_tile(state: &State, pos: &Position) {
     };
 }
 
-fn is_blocked(game: &Game, pos: &Position) -> bool {
+fn is_blocked(game: &Game, pos: Position) -> bool {
     //todo also look for enemy units
     if game.get_any_city(pos).is_some() {
         return true;

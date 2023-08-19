@@ -4,7 +4,7 @@ use crate::construct_ui::ConstructionPayment;
 use crate::collect_ui::CollectResources;
 use macroquad::prelude::*;
 use server::action::Action;
-use server::city::City;
+use server::city::{City, MoodState};
 use server::game::{Game, GameState};
 use server::player::Player;
 use server::playing_actions::PlayingAction;
@@ -23,34 +23,55 @@ pub struct PendingUpdate {
     pub warning: Vec<String>,
 }
 
-pub enum ActiveDialogUpdate {
+pub enum StateUpdate {
     None,
+    SetDialog(ActiveDialog),
     Cancel,
+    ResolvePendingUpdate(bool),
     Execute(Action),
     ExecuteWithWarning(PendingUpdate),
+    SetIncreaseHappiness(IncreaseHappiness),
+    FocusCity(usize, Position),
 }
 
-impl ActiveDialogUpdate {
-    pub fn execute(action: Action, warning: Vec<String>) -> ActiveDialogUpdate {
+impl StateUpdate {
+    pub fn execute(action: Action, warning: Vec<String>) -> StateUpdate {
         if warning.is_empty() {
-            ActiveDialogUpdate::Execute(action)
+            StateUpdate::Execute(action)
         } else {
-            ActiveDialogUpdate::ExecuteWithWarning(PendingUpdate { action, warning })
+            StateUpdate::ExecuteWithWarning(PendingUpdate { action, warning })
         }
     }
 
-    pub fn execute_activation(
-        action: Action,
-        warning: Vec<String>,
-        city_is_activated: bool,
-    ) -> ActiveDialogUpdate {
-        if city_is_activated {
-            let mut warn = vec!["City will become unhappy".to_string()];
+    pub fn execute_activation(action: Action, warning: Vec<String>, city: &City) -> StateUpdate {
+        if city.is_activated() && city.mood_state != MoodState::Angry {
+            let mut warn = vec!["City will become angry".to_string()];
             warn.extend(warning);
-            ActiveDialogUpdate::execute(action, warn)
+            StateUpdate::execute(action, warn)
         } else {
-            ActiveDialogUpdate::execute(action, warning)
+            StateUpdate::execute(action, warning)
         }
+    }
+}
+
+pub struct StateUpdates {
+    updates: Vec<StateUpdate>,
+}
+
+impl StateUpdates {
+    pub fn new() -> StateUpdates {
+        StateUpdates { updates: vec![] }
+    }
+    pub fn add(&mut self, update: StateUpdate) {
+        self.updates.push(update);
+    }
+
+    #[must_use]
+    pub fn result(self) -> StateUpdate {
+        self.updates
+            .into_iter()
+            .find(|u| !matches!(u, StateUpdate::None))
+            .unwrap_or(StateUpdate::None)
     }
 }
 
@@ -85,6 +106,7 @@ impl State {
         self.active_dialog = ActiveDialog::None;
         self.focused_city = None;
         self.increase_happiness = None;
+        self.pending_update = None;
     }
 
     pub fn is_collect(&self) -> bool {
@@ -94,17 +116,40 @@ impl State {
         false
     }
 
-    pub fn update(&mut self, game: &mut Game, update: ActiveDialogUpdate) {
+    pub fn update(&mut self, game: &mut Game, update: StateUpdate) {
         match update {
-            ActiveDialogUpdate::None => {}
-            ActiveDialogUpdate::Execute(a) => {
+            StateUpdate::None => {}
+            StateUpdate::Execute(a) => {
                 self.execute(game, a);
+                self.clear()
             }
-            ActiveDialogUpdate::ExecuteWithWarning(update) => {
+            StateUpdate::ExecuteWithWarning(update) => {
                 self.pending_update = Some(update);
             }
-            ActiveDialogUpdate::Cancel => {
-                self.active_dialog = ActiveDialog::None;
+            StateUpdate::Cancel => self.clear(),
+            StateUpdate::ResolvePendingUpdate(confirm) => {
+                if confirm {
+                    let action = self
+                        .pending_update
+                        .take()
+                        .expect("no pending update")
+                        .action;
+                    self.execute(game, action);
+                    self.clear();
+                } else {
+                    self.pending_update = None;
+                }
+            }
+            StateUpdate::SetDialog(dialog) => {
+                self.active_dialog = dialog;
+            }
+            StateUpdate::SetIncreaseHappiness(h) => {
+                self.clear();
+                self.increase_happiness = Some(h)
+            }
+            StateUpdate::FocusCity(p, c) => {
+                self.clear();
+                self.focused_city = Some((p, c))
             }
         }
     }
@@ -124,14 +169,14 @@ pub fn can_play_action(game: &Game) -> bool {
     game.state == GameState::Playing && game.actions_left > 0
 }
 
-pub struct CityMenu<'a> {
+pub struct CityMenu {
     pub player_index: usize,
     pub city_owner_index: usize,
-    pub city_position: &'a Position,
+    pub city_position: Position,
 }
 
-impl<'a> CityMenu<'a> {
-    pub fn new(player_index: usize, city_owner_index: usize, city_position: &'a Position) -> Self {
+impl CityMenu {
+    pub fn new(player_index: usize, city_owner_index: usize, city_position: Position) -> Self {
         CityMenu {
             player_index,
             city_owner_index,
@@ -139,15 +184,15 @@ impl<'a> CityMenu<'a> {
         }
     }
 
-    pub fn get_player(&self, game: &'a Game) -> &'a Player {
+    pub fn get_player<'a>(&self, game: &'a Game) -> &'a Player {
         game.get_player(self.player_index)
     }
 
-    pub fn get_city_owner(&self, game: &'a Game) -> &Player {
+    pub fn get_city_owner<'a>(&self, game: &'a Game) -> &'a Player {
         game.get_player(self.city_owner_index)
     }
 
-    pub fn get_city(&self, game: &'a Game) -> &City {
+    pub fn get_city<'a>(&self, game: &'a Game) -> &'a City {
         return game.get_city(self.city_owner_index, self.city_position);
     }
 

@@ -184,13 +184,13 @@ impl Game {
         &self.players[player_index]
     }
 
-    pub fn get_city(&self, player_index: usize, position: &Position) -> &City {
+    pub fn get_city(&self, player_index: usize, position: Position) -> &City {
         self.get_player(player_index)
             .get_city(position)
             .expect("city not found")
     }
 
-    pub fn get_any_city(&self, position: &Position) -> Option<&City> {
+    pub fn get_any_city(&self, position: Position) -> Option<&City> {
         self.players
             .iter()
             .find_map(|player| player.get_city(position))
@@ -360,7 +360,7 @@ impl Game {
         self.influence_culture(
             player_index,
             target_player_index,
-            &target_city_position,
+            target_city_position,
             &city_piece,
         )
     }
@@ -394,7 +394,7 @@ impl Game {
         self.undo_influence_culture(
             self.current_player_index,
             target_player_index,
-            &target_city_position,
+            target_city_position,
             &city_piece,
         );
     }
@@ -660,7 +660,7 @@ impl Game {
 
     pub fn conquer_city(
         &mut self,
-        position: &Position,
+        position: Position,
         new_player_index: usize,
         old_player_index: usize,
     ) {
@@ -670,18 +670,18 @@ impl Game {
             .conquer(self, new_player_index, old_player_index);
     }
 
-    pub fn raze_city(&mut self, position: &Position, player_index: usize) {
+    pub fn raze_city(&mut self, position: Position, player_index: usize) {
         let city = self.players[player_index]
             .take_city(position)
             .expect("player should have this city");
         city.raze(self, player_index);
     }
 
-    pub fn build_wonder(&mut self, wonder: Wonder, city_position: &Position, player_index: usize) {
+    pub fn build_wonder(&mut self, wonder: Wonder, city_position: Position, player_index: usize) {
         self.players[player_index].take_events(|events, player| {
             events
                 .on_construct_wonder
-                .trigger(player, city_position, &wonder);
+                .trigger(player, &city_position, &wonder);
         });
         let mut wonder = wonder;
         (wonder.player_initializer)(self, player_index);
@@ -698,7 +698,7 @@ impl Game {
             .push(wonder);
     }
 
-    pub fn undo_build_wonder(&mut self, city_position: &Position, player_index: usize) -> Wonder {
+    pub fn undo_build_wonder(&mut self, city_position: Position, player_index: usize) -> Wonder {
         let player = &mut self.players[player_index];
         player.wonders_build -= 1;
         player.wonders.pop();
@@ -712,7 +712,7 @@ impl Game {
         self.players[player_index].take_events(|events, player| {
             events
                 .on_undo_construct_wonder
-                .trigger(player, city_position, &wonder);
+                .trigger(player, &city_position, &wonder);
         });
         (wonder.player_deinitializer)(self, player_index);
         (wonder.player_undo_deinitializer)(self, player_index);
@@ -723,9 +723,9 @@ impl Game {
     pub fn influence_culture_boost_cost(
         &self,
         player_index: usize,
-        starting_city_position: &Position,
+        starting_city_position: Position,
         target_player_index: usize,
-        target_city_position: &Position,
+        target_city_position: Position,
         city_piece: &Building,
     ) -> Option<ResourcePile> {
         //todo allow cultural influence of barbarians
@@ -762,7 +762,7 @@ impl Game {
         &mut self,
         influencer_index: usize,
         influenced_player_index: usize,
-        city_position: &Position,
+        city_position: Position,
         building: &Building,
     ) {
         self.players[influenced_player_index]
@@ -780,7 +780,7 @@ impl Game {
         &mut self,
         influencer_index: usize,
         influenced_player_index: usize,
-        city_position: &Position,
+        city_position: Position,
         building: &Building,
     ) {
         self.players[influenced_player_index]
@@ -908,15 +908,15 @@ pub mod tests {
 
         let position = Position::new(0, 0);
         game.players[old].cities.push(City::new(old, position));
-        game.build_wonder(wonder, &position, old);
-        game.players[old].construct(&Academy, &position, None);
-        game.players[old].construct(&Obelisk, &position, None);
+        game.build_wonder(wonder, position, old);
+        game.players[old].construct(&Academy, position, None);
+        game.players[old].construct(&Obelisk, position, None);
 
         assert_eq!(8.0, game.players[old].victory_points());
 
-        game.conquer_city(&position, new, old);
+        game.conquer_city(position, new, old);
 
-        let c = game.players[new].get_city_mut(&position).unwrap();
+        let c = game.players[new].get_city_mut(position).unwrap();
         assert_eq!(1, c.player_index);
         assert_eq!(Angry, c.mood_state);
 

@@ -35,7 +35,7 @@ impl CustomAction {
                     .wonder_cards
                     .remove(wonder_cards_index);
                 let city = game.players[player_index]
-                    .get_city(&city_position)
+                    .get_city(city_position)
                     .expect("player should have city");
                 if !city.can_build_wonder(&wonder, &game.players[player_index], game)
                     || !payment.can_afford(&wonder.cost)
@@ -44,7 +44,7 @@ impl CustomAction {
                 }
                 game.players[player_index].loose_resources(payment);
 
-                game.build_wonder(wonder, &city_position, player_index);
+                game.build_wonder(wonder, city_position, player_index);
             }
         }
     }
@@ -63,7 +63,7 @@ impl CustomAction {
                 payment,
             } => {
                 game.players[player_index].gain_resources(payment);
-                let wonder = game.undo_build_wonder(&city_position, player_index);
+                let wonder = game.undo_build_wonder(city_position, player_index);
                 game.players[player_index].wonder_cards.push(wonder);
             }
         }

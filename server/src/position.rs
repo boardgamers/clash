@@ -39,11 +39,11 @@ impl Position {
         Position::new(coordinate.x, coordinate.y)
     }
 
-    pub fn distance(&self, other: &Self) -> u32 {
+    pub fn distance(&self, other: Self) -> u32 {
         self.coordinate().distance(other.coordinate()) as u32
     }
 
-    pub fn is_neighbor(&self, other: &Self) -> bool {
+    pub fn is_neighbor(&self, other: Self) -> bool {
         self.coordinate().distance(other.coordinate()) == 1
     }
 

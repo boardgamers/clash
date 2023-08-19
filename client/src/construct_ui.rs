@@ -13,8 +13,8 @@ use std::cmp;
 
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::resource_ui::{new_resource_map, ResourceType};
-use crate::ui_state::CityMenu;
-use crate::ui_state::{ActiveDialog, ActiveDialogUpdate};
+use crate::ui_state::{ActiveDialog, StateUpdate};
+use crate::ui_state::{CityMenu, StateUpdates};
 
 pub fn add_construct_button(
     game: &Game,
@@ -22,9 +22,10 @@ pub fn add_construct_button(
     ui: &mut Ui,
     building: &Building,
     name: &str,
-) -> Option<ActiveDialog> {
+) -> StateUpdate {
     let owner = menu.get_city_owner(game);
     let city = menu.get_city(game);
+    let mut updates = StateUpdates::new();
     if (menu.is_city_owner()) && city.can_construct(building, owner) {
         for pos in building_positions(building, city, &game.map) {
             if ui.button(
@@ -32,19 +33,21 @@ pub fn add_construct_button(
                 format!(
                     "Build {}{}",
                     name,
-                    pos.clone().map_or("".to_string(), |p| format!(" at {}", p))
+                    pos.map_or("".to_string(), |p| format!(" at {}", p))
                 ),
             ) {
-                return Some(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
-                    game,
-                    menu.player_index,
-                    menu.city_position.clone(),
-                    ConstructionProject::Building(building.clone(), pos),
+                updates.add(StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(
+                    ConstructionPayment::new(
+                        game,
+                        menu.player_index,
+                        menu.city_position,
+                        ConstructionProject::Building(building.clone(), pos),
+                    ),
                 )));
             }
         }
     }
-    None
+    updates.result()
 }
 
 fn building_positions(building: &Building, city: &City, map: &Map) -> Vec<Option<Position>> {
@@ -55,8 +58,8 @@ fn building_positions(building: &Building, city: &City, map: &Map) -> Vec<Option
     map.tiles
         .iter()
         .filter_map(|(p, t)| {
-            if *t == Terrain::Water && city.position.is_neighbor(p) {
-                Some(Some(p.clone()))
+            if *t == Terrain::Water && city.position.is_neighbor(*p) {
+                Some(Some(*p))
             } else {
                 None
             }
@@ -64,48 +67,51 @@ fn building_positions(building: &Building, city: &City, map: &Map) -> Vec<Option
         .collect()
 }
 
-pub fn add_wonder_buttons(game: &Game, menu: &CityMenu, ui: &mut Ui) -> Option<ActiveDialog> {
+pub fn add_wonder_buttons(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpdate {
     let city = menu.get_city(game);
     let owner = menu.get_city_owner(game);
+    let mut updates = StateUpdates::new();
     for w in owner.wonder_cards.iter() {
         if city.can_build_wonder(w, owner, game)
             && ui.button(None, format!("Build Wonder {}", w.name))
         {
-            return Some(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
-                game,
-                menu.player_index,
-                menu.city_position.clone(),
-                ConstructionProject::Wonder(w.name.clone()),
+            updates.add(StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(
+                ConstructionPayment::new(
+                    game,
+                    menu.player_index,
+                    menu.city_position,
+                    ConstructionProject::Wonder(w.name.clone()),
+                ),
             )));
         }
     }
-    None
+    updates.result()
 }
 
-pub fn pay_construction_dialog(payment: &mut ConstructionPayment) -> ActiveDialogUpdate {
+pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> StateUpdate {
     payment_dialog(
         payment,
         |cp| cp.payment.get(ResourceType::Discount).current == 0,
         |cp| match &cp.project {
-            ConstructionProject::Building(b, pos) => ActiveDialogUpdate::execute_activation(
+            ConstructionProject::Building(b, pos) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Construct {
-                    city_position: cp.city_position.clone(),
+                    city_position: cp.city_position,
                     city_piece: b.clone(),
                     payment: cp.payment.to_resource_pile(),
-                    port_position: pos.clone(),
+                    port_position: *pos,
                     temple_bonus: None,
                 }),
                 vec![],
-                cp.city_is_activated,
+                game.get_any_city(cp.city_position).unwrap(),
             ),
-            ConstructionProject::Wonder(w) => ActiveDialogUpdate::execute_activation(
+            ConstructionProject::Wonder(w) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Custom(CustomAction::ConstructWonder {
-                    city_position: cp.city_position.clone(),
+                    city_position: cp.city_position,
                     payment: cp.payment.to_resource_pile(),
                     wonder: w.clone(),
                 })),
                 vec![],
-                cp.city_is_activated,
+                game.get_any_city(cp.city_position).unwrap(),
             ),
         },
         |ap, r| match r {
@@ -114,35 +120,40 @@ pub fn pay_construction_dialog(payment: &mut ConstructionPayment) -> ActiveDialo
             _ => ap.payment.get(r).max > 0,
         },
         |cp, r| {
-            let gold = cp.payment.get_mut(ResourceType::Gold);
+            let mut new = cp.clone();
+            let gold = new.payment.get_mut(ResourceType::Gold);
             if gold.current > 0 {
                 gold.current -= 1;
             } else {
-                cp.payment.get_mut(ResourceType::Discount).current += 1;
+                new.payment.get_mut(ResourceType::Discount).current += 1;
             }
-            cp.payment.get_mut(r).current += 1;
+            new.payment.get_mut(r).current += 1;
+            StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(new))
         },
         |cp, r| {
-            let discount = cp.payment.get_mut(ResourceType::Discount);
+            let mut new = cp.clone();
+            let discount = new.payment.get_mut(ResourceType::Discount);
             if discount.current > 0 {
                 discount.current -= 1;
             } else {
-                cp.payment.get_mut(ResourceType::Gold).current += 1;
+                new.payment.get_mut(ResourceType::Gold).current += 1;
             }
-            cp.payment.get_mut(r).current -= 1;
+            new.payment.get_mut(r).current -= 1;
+            StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(new))
         },
     )
 }
 
+#[derive(Clone)]
 pub enum ConstructionProject {
     Building(Building, Option<Position>),
     Wonder(String),
 }
 
+#[derive(Clone)]
 pub struct ConstructionPayment {
     pub player_index: usize,
     pub city_position: Position,
-    pub city_is_activated: bool,
     pub project: ConstructionProject,
     pub payment: Payment,
     pub payment_options: PaymentOptions,
@@ -158,7 +169,7 @@ impl ConstructionPayment {
         let p = game.get_player(player_index);
         let cost = match &project {
             ConstructionProject::Building(b, _) => {
-                p.construct_cost(b, p.get_city(&city_position).unwrap())
+                p.construct_cost(b, p.get_city(city_position).unwrap())
             }
             ConstructionProject::Wonder(name) => p
                 .wonder_cards
@@ -175,11 +186,10 @@ impl ConstructionPayment {
 
         ConstructionPayment {
             player_index,
-            city_position: city_position.clone(),
+            city_position,
             project,
             payment,
             payment_options,
-            city_is_activated: game.get_city(player_index, &city_position).is_activated(),
         }
     }
 
