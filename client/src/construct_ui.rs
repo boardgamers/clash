@@ -198,13 +198,13 @@ impl ConstructionPayment {
             .into_iter()
             .map(|e| match e.0 {
                 ResourceType::Discount | ResourceType::Gold => ResourcePayment {
-                    resource: e.0.clone(),
+                    resource: e.0,
                     current: e.1,
                     min: e.1,
                     max: e.1,
                 },
                 _ => ResourcePayment {
-                    resource: e.0.clone(),
+                    resource: e.0,
                     current: e.1,
                     min: cmp::max(0, e.1 as i32 - a.discount as i32 - a.gold_left as i32) as u32,
                     max: e.1,
@@ -212,7 +212,7 @@ impl ConstructionPayment {
             })
             .collect();
 
-        resources.sort_by_key(|r| r.resource.clone());
+        resources.sort_by_key(|r| r.resource);
 
         Payment { resources }
     }

@@ -45,13 +45,13 @@ impl AdvancePayment {
         let mut resources: Vec<ResourcePayment> = new_resource_map(&a.default)
             .into_iter()
             .map(|e| ResourcePayment {
-                resource: e.0.clone(),
+                resource: e.0,
                 current: e.1,
                 min: 0,
                 max: min(cost, e.1 + left.get(&e.0).unwrap_or(&(0u32))),
             })
             .collect();
-        resources.sort_by_key(|r| r.resource.clone());
+        resources.sort_by_key(|r| r.resource);
 
         Payment { resources }
     }

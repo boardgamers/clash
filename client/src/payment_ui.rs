@@ -70,15 +70,15 @@ pub fn payment_dialog<T: HasPayment>(
     let mut updates = StateUpdates::new();
     active_dialog_window(|ui| {
         for (i, p) in has_payment.payment().resources.clone().iter().enumerate() {
-            if show(has_payment, p.resource.clone()) {
+            if show(has_payment, p.resource) {
                 Group::new(hash!("res", i), Vec2::new(70., 200.)).ui(ui, |ui| {
                     let s = format!("{} {}", &p.resource.to_string(), p.current);
                     ui.label(Vec2::new(0., 0.), &s);
                     if p.current > p.min && ui.button(Vec2::new(0., 20.), "-") {
-                        updates.add(minus(has_payment, p.resource.clone()));
+                        updates.add(minus(has_payment, p.resource));
                     }
                     if p.current < p.max && ui.button(Vec2::new(20., 20.), "+") {
-                        updates.add(plus(has_payment, p.resource.clone()));
+                        updates.add(plus(has_payment, p.resource));
                     };
                 });
             }

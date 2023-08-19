@@ -2,7 +2,7 @@ use server::resource_pile::ResourcePile;
 use std::collections::HashMap;
 use std::fmt;
 
-#[derive(PartialEq, Eq, Debug, Clone, Hash, Ord, PartialOrd)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy, Hash, Ord, PartialOrd)]
 pub enum ResourceType {
     Food,
     Wood,
