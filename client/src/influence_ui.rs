@@ -29,7 +29,7 @@ pub fn add_influence_button(
         ) {
             if ui.button(
                 None,
-                format!("Attempt Influence {} for {}", building_name, cost),
+                format!("Attempt Influence {building_name} for {cost}"),
             ) {
                 return StateUpdate::Execute(Action::Playing(
                     PlayingAction::InfluenceCultureAttempt {

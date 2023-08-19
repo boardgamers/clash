@@ -1,3 +1,15 @@
+#![deny(
+clippy::all,
+clippy::pedantic
+)]
+#![allow(
+clippy::similar_names,
+clippy::cast_precision_loss,
+clippy::cast_sign_loss,
+clippy::cast_possible_wrap,
+clippy::cast_possible_truncation,
+)]
+
 extern crate core;
 
 use crate::ui_state::ActiveDialog;

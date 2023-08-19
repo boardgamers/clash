@@ -14,7 +14,7 @@ use crate::hex_ui::draw_hex_center_text;
 use crate::ui_state::{can_play_action, CityMenu, State, StateUpdate, StateUpdates};
 use crate::{hex_ui, influence_ui, player_ui, ActiveDialog};
 
-pub fn show_city_menu(game: &Game, menu: CityMenu) -> StateUpdate {
+pub fn show_city_menu(game: &Game, menu: &CityMenu) -> StateUpdate {
     let mut updates: StateUpdates = StateUpdates::new();
 
     root_ui().window(hash!(), vec2(30., 700.), vec2(500., 200.), |ui| {
@@ -31,11 +31,11 @@ pub fn show_city_menu(game: &Game, menu: CityMenu) -> StateUpdate {
             )));
         }
 
-        updates.add(add_building_actions(game, &menu, ui));
+        updates.add(add_building_actions(game, menu, ui));
 
         if can_play {
-            let option = add_wonder_buttons(game, &menu, ui);
-            updates.add(option)
+            let option = add_wonder_buttons(game, menu, ui);
+            updates.add(option);
         }
     });
     updates.result()
@@ -100,7 +100,7 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
     });
 
     for player_index in 0..4 {
-        for b in city.city_pieces.buildings(Some(player_index)).iter() {
+        for b in &city.city_pieces.buildings(Some(player_index)) {
             let p = hex_ui::rotate_around(c, 30.0, 90 * i);
             draw_text(
                 building_symbol(b),

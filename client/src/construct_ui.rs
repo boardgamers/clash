@@ -33,7 +33,7 @@ pub fn add_construct_button(
                 format!(
                     "Build {}{}",
                     name,
-                    pos.map_or("".to_string(), |p| format!(" at {}", p))
+                    pos.map_or(String::new(), |p| format!(" at {}", p))
                 ),
             ) {
                 updates.add(StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(
@@ -71,7 +71,7 @@ pub fn add_wonder_buttons(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpd
     let city = menu.get_city(game);
     let owner = menu.get_city_owner(game);
     let mut updates = StateUpdates::new();
-    for w in owner.wonder_cards.iter() {
+    for w in &owner.wonder_cards {
         if city.can_build_wonder(w, owner, game)
             && ui.button(None, format!("Build Wonder {}", w.name))
         {

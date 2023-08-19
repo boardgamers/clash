@@ -22,7 +22,7 @@ pub async fn run(game: &mut Game) {
     loop {
         let update = game_loop(game, &state);
         state.update(game, update);
-        next_frame().await
+        next_frame().await;
     }
 }
 
@@ -49,7 +49,7 @@ fn game_loop(game: &Game, state: &State) -> StateUpdate {
     if let Some((city_owner_index, city_position)) = state.focused_city {
         updates.add(show_city_menu(
             game,
-            CityMenu::new(player_index, city_owner_index, city_position),
+            &CityMenu::new(player_index, city_owner_index, city_position),
         ));
     }
 

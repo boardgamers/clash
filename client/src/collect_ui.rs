@@ -91,7 +91,7 @@ pub fn possible_resource_collections(
         .neighbors()
         .into_iter()
         .chain(iter::once(city_pos))
-        .flat_map(|pos| {
+        .filter_map(|pos| {
             if city.port_position.is_some_and(|p| p == pos) {
                 return Some((pos, PORT_CHOICES.to_vec()));
             }

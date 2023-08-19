@@ -42,7 +42,7 @@ pub fn show_wonders(game: &Game, player_index: usize) {
     let player = game.get_player(player_index);
     for (i, name) in player.wonders.iter().enumerate() {
         draw_text(
-            &format!("Wonder {}", name),
+            &format!("Wonder {name}"),
             600.,
             600. + i as f32 * 30.0,
             20.,
@@ -103,7 +103,7 @@ pub fn show_global_controls(game: &Game) -> StateUpdate {
     {
         if root_ui().button(
             vec2(600., 480.),
-            format!("Cultural Influence Resolution for {}", roll_boost_cost),
+            format!("Cultural Influence Resolution for {roll_boost_cost}"),
         ) {
             return StateUpdate::Execute(Action::CulturalInfluenceResolution(true));
         } else if root_ui().button(vec2(900., 480.), "Decline") {
