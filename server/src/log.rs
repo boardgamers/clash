@@ -74,7 +74,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             } else {
                 String::new()
             }
-        } else { String::new() }, if player.get_city(city_position).expect("there should be a city at the given position").is_activated() { format!("making it {:?}", player.get_city(city_position).expect("there should be a city at the given position").mood_state.clone() - 1) } else { String::new() }, if let Some(temple_bonus) = temple_bonus {
+        } else { String::new() }, if player.get_city(*city_position).expect("there should be a city at the given position").is_activated() { format!("making it {:?}", player.get_city(*city_position).expect("there should be a city at the given position").mood_state.clone() - 1) } else { String::new() }, if let Some(temple_bonus) = temple_bonus {
             format!(" and chooses to get {temple_bonus}")
         } else { String::new() }),
         PlayingAction::Collect { city_position, collections } => format!("{player_name} collects {}{} in the city at {city_position}{}", utils::format_list(&collections.iter().map(|(_, collection)| collection.to_string()).collect::<Vec<String>>(), "nothing"), if collections.len() > 1 && collections.iter().permutations(2).unique().any(|permutation| permutation[0].1.has_common_resource(&permutation[1].1)) { format!(" for a total of {}", collections.iter().map(|(_, collection)| collection.clone()).sum::<ResourcePile>()) } else { String::new() }, if player.get_city(city_position).expect("there should be a city at the given position").is_activated() { format!("making it {:?}", player.get_city(city_position).expect("there should be a city at the given position").mood_state.clone() - 1) } else { String::new() }),
