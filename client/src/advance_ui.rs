@@ -110,7 +110,6 @@ pub fn pay_advance_dialog(ap: &AdvancePayment) -> StateUpdate {
     )
 }
 
-
 fn add(ap: &AdvancePayment, r: ResourceType, i: i32) -> StateUpdate {
     let mut new = ap.clone();
     let p = new.payment.get_mut(r);
