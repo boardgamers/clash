@@ -19,6 +19,7 @@ pub struct City {
     pub city_pieces: CityPieces,
     pub mood_state: MoodState,
     pub activations: u32,
+    pub angry_activation: bool,
     pub player_index: usize,
     pub position: Position,
     pub port_position: Option<Position>,
@@ -30,6 +31,7 @@ impl City {
             city_pieces: CityPieces::from_data(data.city_pieces),
             mood_state: data.mood_state,
             activations: data.activations,
+            angry_activation: data.angry_activation,
             player_index: data.player_index,
             position: data.position,
             port_position: data.port_position,
@@ -41,6 +43,7 @@ impl City {
             self.city_pieces.data(),
             self.mood_state,
             self.activations,
+            self.angry_activation,
             self.player_index,
             self.position,
             self.port_position,
@@ -52,6 +55,7 @@ impl City {
             self.city_pieces.cloned_data(),
             self.mood_state.clone(),
             self.activations,
+            self.angry_activation,
             self.player_index,
             self.position.clone(),
             self.port_position.clone(),
@@ -63,13 +67,21 @@ impl City {
             city_pieces: CityPieces::default(),
             mood_state: Neutral,
             activations: 0,
+            angry_activation: false,
             player_index,
             position,
             port_position: None,
         }
     }
 
+    pub fn can_activate(&self) -> bool {
+        !self.angry_activation
+    }
+
     pub fn activate(&mut self) {
+        if self.mood_state == Angry {
+            self.angry_activation = true;
+        }
         if self.is_activated() {
             self.decrease_mood_state();
         }
@@ -78,10 +90,12 @@ impl City {
 
     pub fn deactivate(&mut self) {
         self.activations = 0;
+        self.angry_activation = false;
     }
 
     pub fn undo_activate(&mut self) {
         self.activations -= 1;
+        self.angry_activation = false;
         if self.is_activated() {
             self.increase_mood_state();
         }
@@ -214,7 +228,8 @@ impl City {
         self.mood_state = match self.mood_state {
             Happy | Neutral => Happy,
             Angry => Neutral,
-        }
+        };
+        self.angry_activation = false;
     }
 
     pub fn decrease_mood_state(&mut self) {
@@ -247,6 +262,7 @@ pub struct CityData {
     city_pieces: CityPiecesData,
     mood_state: MoodState,
     activations: u32,
+    angry_activation: bool,
     player_index: usize,
     position: Position,
     port_position: Option<Position>,
@@ -257,6 +273,7 @@ impl CityData {
         city_pieces: CityPiecesData,
         mood_state: MoodState,
         activations: u32,
+        angry_activation: bool,
         player_index: usize,
         position: Position,
         port_position: Option<Position>,
@@ -265,6 +282,7 @@ impl CityData {
             city_pieces,
             mood_state,
             activations,
+            angry_activation,
             player_index,
             position,
             port_position,
