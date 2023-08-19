@@ -3,7 +3,7 @@ use std::fmt::{Debug, Display};
 use hex2d::Coordinate;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Copy, Clone, Hash)]
 pub struct Position {
     pub q: i32,
     pub r: i32,
@@ -39,11 +39,11 @@ impl Position {
         Position::new(coordinate.x, coordinate.y)
     }
 
-    pub fn distance(&self, other: &Self) -> u32 {
+    pub fn distance(&self, other: Self) -> u32 {
         self.coordinate().distance(other.coordinate()) as u32
     }
 
-    pub fn is_neighbor(&self, other: &Self) -> bool {
+    pub fn is_neighbor(&self, other: Self) -> bool {
         self.coordinate().distance(other.coordinate()) == 1
     }
 

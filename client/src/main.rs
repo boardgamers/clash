@@ -1,6 +1,6 @@
 extern crate core;
 
-use crate::ui_state::{ActiveDialog, State};
+use crate::ui_state::ActiveDialog;
 
 mod advance_ui;
 mod city_ui;

@@ -8,13 +8,13 @@ use std::f32::consts::PI;
 const SIZE: f32 = 60.0;
 const SPACING: Spacing = Spacing::FlatTop(SIZE);
 
-pub fn center(pos: &Position) -> Point {
+pub fn center(pos: Position) -> Point {
     let c = pos.coordinate();
     let p = c.to_pixel(SPACING);
     Point { x: p.0, y: p.1 }
 }
 
-pub fn draw_hex(p: &Position, fill_color: Color, text_color: Color, selected: bool) {
+pub fn draw_hex(p: Position, fill_color: Color, text_color: Color, selected: bool) {
     let c = center(p).to_screen();
     let mut v = fill_color.to_vec();
     if selected {
@@ -25,7 +25,7 @@ pub fn draw_hex(p: &Position, fill_color: Color, text_color: Color, selected: bo
     draw_text(&p.to_string(), c.x - 30.0, c.y - 35.0, 20.0, text_color);
 }
 
-pub fn draw_hex_center_text(p: &Position, text: &str) {
+pub fn draw_hex_center_text(p: Position, text: &str) {
     let c = center(p).to_screen();
     draw_text(text, c.x - 5., c.y + 6., 25.0, BLACK)
 }

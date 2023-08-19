@@ -5,7 +5,7 @@ use crate::{
     resource_pile::ResourcePile,
 };
 
-type PlacementChecker = Box<dyn Fn(&Position, &Game) -> bool>;
+type PlacementChecker = Box<dyn Fn(Position, &Game) -> bool>;
 
 pub struct Wonder {
     pub name: String,

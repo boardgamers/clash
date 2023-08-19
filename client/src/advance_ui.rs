@@ -5,16 +5,17 @@ use macroquad::hash;
 use macroquad::math::{bool, vec2};
 use macroquad::ui::root_ui;
 use server::action::Action;
-use server::content::advances::get_technologies;
+use server::content::advances::get_all_advances;
 use server::game::Game;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::AdvancePaymentOptions;
 
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::resource_ui::{new_resource_map, ResourceType};
-use crate::ui_state::{can_play_action, ActiveDialogUpdate};
-use crate::{ActiveDialog, State};
+use crate::ui_state::{can_play_action, StateUpdate, StateUpdates};
+use crate::ActiveDialog;
 
+#[derive(Clone)]
 pub struct AdvancePayment {
     name: String,
     payment: Payment,
@@ -71,47 +72,47 @@ impl HasPayment for AdvancePayment {
     }
 }
 
-pub fn show_advance_menu<'a>(game: &'a Game, player_index: usize, state: &'a mut State) {
+pub fn show_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
+    let mut updates = StateUpdates::new();
+
     root_ui().window(hash!(), vec2(20., 900.), vec2(400., 200.), |ui| {
-        for a in get_technologies().into_iter() {
+        for a in get_all_advances().into_iter() {
             let name = a.name;
             let p = game.get_player(player_index);
             if can_play_action(game) && p.can_advance(&name) {
                 if ui.button(None, name.clone()) {
-                    state.active_dialog = ActiveDialog::AdvancePayment(AdvancePayment::new(
-                        game,
-                        player_index,
-                        &name,
-                    ));
+                    return updates.add(StateUpdate::SetDialog(ActiveDialog::AdvancePayment(
+                        AdvancePayment::new(game, player_index, &name),
+                    )));
                 }
             } else if p.advances.contains(&name) {
                 ui.label(None, &name);
             }
         }
     });
+
+    updates.result()
 }
 
-pub fn pay_advance_dialog(ap: &mut AdvancePayment) -> ActiveDialogUpdate {
+pub fn pay_advance_dialog(ap: &AdvancePayment) -> StateUpdate {
     payment_dialog(
         ap,
         |ap| ap.valid(),
         |ap| {
-            ActiveDialogUpdate::Execute(Action::Playing(PlayingAction::Advance {
+            StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
                 advance: ap.name.to_string(),
                 payment: ap.payment.to_resource_pile(),
             }))
         },
         |ap, r| ap.payment.get(r).max > 0,
-        |ap, r| {
-            add(ap, r, 1);
-        },
-        |ap, r| {
-            add(ap, r, -1);
-        },
+        |ap, r| add(ap, r, 1),
+        |ap, r| add(ap, r, -1),
     )
 }
 
-fn add(ap: &mut AdvancePayment, r: ResourceType, i: i32) {
-    let p = ap.payment.get_mut(r);
-    p.current = (p.current as i32 + i) as u32
+fn add(ap: &AdvancePayment, r: ResourceType, i: i32) -> StateUpdate {
+    let mut new = ap.clone();
+    let p = new.payment.get_mut(r);
+    p.current = (p.current as i32 + i) as u32;
+    StateUpdate::SetDialog(ActiveDialog::AdvancePayment(new))
 }

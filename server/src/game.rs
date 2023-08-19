@@ -42,7 +42,7 @@ pub struct Game {
     pub messages: Vec<String>,
     pub dice_roll_outcomes: Vec<u8>,
     pub dice_roll_log: Vec<u8>,
-    dropped_players: Vec<usize>,
+    pub dropped_players: Vec<usize>,
     pub wonders_left: Vec<Wonder>,
     pub wonder_amount_left: usize,
 }
@@ -79,7 +79,7 @@ impl Game {
         let wonder_amount = wonders.len();
 
         let map = HashMap::new();
-        //todo! generate map
+        //todo generate map
 
         Self {
             state: Playing,
@@ -184,13 +184,13 @@ impl Game {
         &self.players[player_index]
     }
 
-    pub fn get_city(&self, player_index: usize, position: &Position) -> &City {
+    pub fn get_city(&self, player_index: usize, position: Position) -> &City {
         self.get_player(player_index)
             .get_city(position)
             .expect("city not found")
     }
 
-    pub fn get_any_city(&self, position: &Position) -> Option<&City> {
+    pub fn get_any_city(&self, position: Position) -> Option<&City> {
         self.players
             .iter()
             .find_map(|player| player.get_city(position))
@@ -326,7 +326,7 @@ impl Game {
                     action,
                     *roll_boost_cost,
                     *target_player_index,
-                    target_city_position.clone(),
+                    *target_city_position,
                     city_piece.clone(),
                     player_index,
                 );
@@ -360,7 +360,7 @@ impl Game {
         self.influence_culture(
             player_index,
             target_player_index,
-            &target_city_position,
+            target_city_position,
             &city_piece,
         )
     }
@@ -385,7 +385,7 @@ impl Game {
         self.state = CulturalInfluenceResolution {
             roll_boost_cost: 5 - *roll as u32,
             target_player_index,
-            target_city_position: target_city_position.clone(),
+            target_city_position,
             city_piece: city_piece.clone(),
         };
         if !action {
@@ -394,7 +394,7 @@ impl Game {
         self.undo_influence_culture(
             self.current_player_index,
             target_player_index,
-            &target_city_position,
+            target_city_position,
             &city_piece,
         );
     }
@@ -416,11 +416,13 @@ impl Game {
 
     pub fn skip_dropped_players(&mut self) {
         if self.players.is_empty() {
-            println!("There are no remaining players");
             return;
         }
-        while self.dropped_players.contains(&self.current_player_index) {
-            self.next_player();
+        while self.dropped_players.contains(&self.current_player_index)
+            && self.current_player_index != self.starting_player_index
+        {
+            self.current_player_index += 1;
+            self.current_player_index %= self.players.len();
         }
     }
 
@@ -430,14 +432,15 @@ impl Game {
         self.played_once_per_turn_actions = Vec::new();
         self.players[self.current_player_index].end_turn();
         self.next_player();
+        self.skip_dropped_players();
         if self.current_player_index == self.starting_player_index {
             self.next_round();
         }
-        self.skip_dropped_players();
     }
 
     fn next_round(&mut self) {
         self.round += 1;
+        self.skip_dropped_players();
         if self.round > 3 {
             self.round = 1;
             self.enter_status_phase();
@@ -460,6 +463,7 @@ impl Game {
     pub fn next_age(&mut self) {
         self.state = Playing;
         self.age += 1;
+        self.current_player_index = self.starting_player_index;
         self.lock_undo();
         if self.age > AGES {
             self.end_game();
@@ -502,7 +506,13 @@ impl Game {
             "{} has left the game",
             self.players[player_index].get_name()
         ));
+        if self.current_player_index != player_index {
+            return;
+        }
         self.skip_dropped_players();
+        if self.current_player_index == self.starting_player_index {
+            self.next_round();
+        }
     }
 
     pub fn get_available_custom_actions(&self) -> Vec<CustomActionType> {
@@ -542,7 +552,7 @@ impl Game {
 
     pub fn advance(&mut self, advance: &str, player_index: usize) {
         self.players[player_index].take_events(|events, player| {
-            events.on_advance.trigger(player, &advance.to_string(), &())
+            events.on_advance.trigger(player, &advance.to_string(), &());
         });
         let advance = advances::get_advance_by_name(advance).expect("advance should exist");
         (advance.player_initializer)(self, player_index);
@@ -583,7 +593,7 @@ impl Game {
         self.players[player_index].take_events(|events, player| {
             events
                 .on_undo_advance
-                .trigger(player, &advance.to_string(), &())
+                .trigger(player, &advance.to_string(), &());
         });
         let advance = advances::get_advance_by_name(advance).expect("advance should exist");
         (advance.player_deinitializer)(self, player_index);
@@ -618,19 +628,16 @@ impl Game {
 
     fn trigger_game_event(&mut self, _player_index: usize) {
         self.lock_undo();
-        //todo!
+        //todo
     }
 
     pub fn remove_advance(&mut self, advance: &str, player_index: usize) {
-        if let Some(position) = self.players[player_index]
-            .advances
-            .iter()
-            .position(|other_advance| other_advance == advance)
-        {
-            let advance = advances::get_advance_by_name(advance).expect("advance should exist");
-            (advance.player_deinitializer)(self, player_index);
-            self.players[player_index].advances.remove(position);
-        }
+        utils::remove_element(
+            &mut self.players[player_index].advances,
+            &advance.to_string(),
+        );
+        let advance = advances::get_advance_by_name(advance).expect("advance should exist");
+        (advance.player_deinitializer)(self, player_index);
     }
 
     fn unlock_special_advance(&mut self, special_advance: &SpecialAdvance, player_index: usize) {
@@ -653,7 +660,7 @@ impl Game {
 
     pub fn conquer_city(
         &mut self,
-        position: &Position,
+        position: Position,
         new_player_index: usize,
         old_player_index: usize,
     ) {
@@ -663,18 +670,18 @@ impl Game {
             .conquer(self, new_player_index, old_player_index);
     }
 
-    pub fn raze_city(&mut self, position: &Position, player_index: usize) {
+    pub fn raze_city(&mut self, position: Position, player_index: usize) {
         let city = self.players[player_index]
             .take_city(position)
             .expect("player should have this city");
         city.raze(self, player_index);
     }
 
-    pub fn build_wonder(&mut self, wonder: Wonder, city_position: &Position, player_index: usize) {
+    pub fn build_wonder(&mut self, wonder: Wonder, city_position: Position, player_index: usize) {
         self.players[player_index].take_events(|events, player| {
             events
                 .on_construct_wonder
-                .trigger(player, city_position, &wonder)
+                .trigger(player, &city_position, &wonder);
         });
         let mut wonder = wonder;
         (wonder.player_initializer)(self, player_index);
@@ -691,7 +698,7 @@ impl Game {
             .push(wonder);
     }
 
-    pub fn undo_build_wonder(&mut self, city_position: &Position, player_index: usize) -> Wonder {
+    pub fn undo_build_wonder(&mut self, city_position: Position, player_index: usize) -> Wonder {
         let player = &mut self.players[player_index];
         player.wonders_build -= 1;
         player.wonders.pop();
@@ -705,7 +712,7 @@ impl Game {
         self.players[player_index].take_events(|events, player| {
             events
                 .on_undo_construct_wonder
-                .trigger(player, city_position, &wonder)
+                .trigger(player, &city_position, &wonder);
         });
         (wonder.player_deinitializer)(self, player_index);
         (wonder.player_undo_deinitializer)(self, player_index);
@@ -716,12 +723,12 @@ impl Game {
     pub fn influence_culture_boost_cost(
         &self,
         player_index: usize,
-        starting_city_position: &Position,
+        starting_city_position: Position,
         target_player_index: usize,
-        target_city_position: &Position,
+        target_city_position: Position,
         city_piece: &Building,
     ) -> Option<ResourcePile> {
-        //todo! allow cultural influence of barbarians
+        //todo allow cultural influence of barbarians
         let starting_city = self.get_city(player_index, starting_city_position);
         let range_boost = starting_city_position
             .distance(target_city_position)
@@ -755,7 +762,7 @@ impl Game {
         &mut self,
         influencer_index: usize,
         influenced_player_index: usize,
-        city_position: &Position,
+        city_position: Position,
         building: &Building,
     ) {
         self.players[influenced_player_index]
@@ -773,7 +780,7 @@ impl Game {
         &mut self,
         influencer_index: usize,
         influenced_player_index: usize,
-        city_position: &Position,
+        city_position: Position,
         building: &Building,
     ) {
         self.players[influenced_player_index]
@@ -788,8 +795,7 @@ impl Game {
     }
 
     pub fn draw_new_cards(&mut self) {
-        //every player draws 1 action card and 1 objective card
-        todo!()
+        //todo every player draws 1 action card and 1 objective card
     }
 }
 
@@ -901,25 +907,23 @@ pub mod tests {
         let new = 1;
 
         let position = Position::new(0, 0);
-        game.players[old]
-            .cities
-            .push(City::new(old, position.clone()));
-        game.build_wonder(wonder, &position, old);
-        game.players[old].construct(&Academy, &position, None);
-        game.players[old].construct(&Obelisk, &position, None);
+        game.players[old].cities.push(City::new(old, position));
+        game.build_wonder(wonder, position, old);
+        game.players[old].construct(&Academy, position, None);
+        game.players[old].construct(&Obelisk, position, None);
 
-        assert_eq!(7.0, game.players[old].victory_points());
+        assert_eq!(8.0, game.players[old].victory_points());
 
-        game.conquer_city(&position, new, old);
+        game.conquer_city(position, new, old);
 
-        let c = game.players[new].get_city_mut(&position).unwrap();
+        let c = game.players[new].get_city_mut(position).unwrap();
         assert_eq!(1, c.player_index);
         assert_eq!(Angry, c.mood_state);
 
         let old = &game.players[old];
         let new = &game.players[new];
-        assert_eq!(3.0, old.victory_points());
-        assert_eq!(4.0, new.victory_points());
+        assert_eq!(4.0, old.victory_points());
+        assert_eq!(5.0, new.victory_points());
         assert_eq!(0, old.wonders.len());
         assert_eq!(1, new.wonders.len());
         assert_eq!(1, old.influenced_buildings);

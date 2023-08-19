@@ -6,7 +6,7 @@ use crate::{
     resource_pile::ResourcePile,
 };
 
-pub fn get_technologies() -> Vec<Advance> {
+pub fn get_all_advances() -> Vec<Advance> {
     vec![
         //Agriculture
         Advance::builder(
@@ -19,6 +19,13 @@ pub fn get_technologies() -> Vec<Advance> {
         .add_ability_undo_deinitializer(|game, player_index| {
             game.players[player_index].resource_limit.food = 2;
         })
+        .with_advance_bonus(MoodToken)
+        .build(),
+        Advance::builder(
+            "Irrigation",
+            "● Your cities may Collect food from Barren spaces\n● Ignore Famine events",
+        )
+        .add_collect_option(Barren, ResourcePile::food(1))
         .with_advance_bonus(MoodToken)
         .build(),
         //Construction
@@ -110,7 +117,38 @@ pub fn get_technologies() -> Vec<Advance> {
 }
 
 pub fn get_advance_by_name(name: &str) -> Option<Advance> {
-    get_technologies()
+    get_all_advances()
         .into_iter()
         .find(|advance| advance.name == name)
+}
+
+pub fn get_leading_government_advance(government: &str) -> Option<Advance> {
+    get_all_advances().into_iter().find(|advance| {
+        advance
+            .government
+            .as_ref()
+            .is_some_and(|value| value.as_str() == government)
+    })
+}
+
+pub fn get_government_advances(government: &str) -> Vec<Advance> {
+    let leading_government =
+        get_leading_government_advance(government).expect("government should exist");
+    let mut government_advances = get_all_advances()
+        .into_iter()
+        .filter(|advance| {
+            advance
+                .required_advance
+                .as_ref()
+                .is_some_and(|required_advance| required_advance == &leading_government.name)
+        })
+        .collect::<Vec<Advance>>();
+    government_advances.sort_by_key(|advance| {
+        advance
+            .government_tier
+            .expect("advance should be a government advance")
+    });
+    government_advances.push(leading_government);
+    government_advances.reverse();
+    government_advances
 }

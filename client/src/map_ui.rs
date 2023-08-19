@@ -5,7 +5,7 @@ use macroquad::prelude::*;
 use server::game::Game;
 use server::map::Terrain;
 
-fn terrain_color(t: &Terrain) -> (Color, bool) {
+fn terrain_color(t: Terrain) -> (Color, bool) {
     match t {
         Terrain::Barren => (Color::from_hex(0xB26C19), true),
         Terrain::Mountain => (Color::from_hex(0x575757), true),
@@ -18,11 +18,11 @@ fn terrain_color(t: &Terrain) -> (Color, bool) {
 
 pub fn draw_map(game: &Game, state: &State) {
     game.map.tiles.iter().for_each(|(pos, t)| {
-        let c = terrain_color(t);
-        let selected = state.focused_city.iter().any(|(_, p)| pos == p);
+        let c = terrain_color(t.clone());
+        let selected = state.focused_city.into_iter().any(|(_, p)| *pos == p);
         let text_color = if c.1 { WHITE } else { BLACK };
-        hex_ui::draw_hex(pos, c.0, text_color, selected);
-        collect_ui::draw_resource_collect_tile(state, pos);
+        hex_ui::draw_hex(*pos, c.0, text_color, selected);
+        collect_ui::draw_resource_collect_tile(state, *pos);
     });
     if !state.is_collect() {
         for p in game.players.iter() {

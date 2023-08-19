@@ -310,11 +310,11 @@ impl Display for ResourcePile {
                 }
             ));
         }
-        write!(f, "{}", utils::format_collection(&resources, "nothing"))
+        write!(f, "{}", utils::format_list(&resources, "nothing"))
     }
 }
 
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct PaymentOptions {
     pub default: ResourcePile,
     pub gold_left: u32,

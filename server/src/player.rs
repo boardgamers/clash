@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering::{self, *},
-    collections::{HashMap, HashSet, VecDeque},
+    collections::{HashMap, HashSet},
     mem,
 };
 
@@ -20,6 +20,7 @@ use crate::{
     position::Position,
     resource_pile::{AdvancePaymentOptions, ResourcePile},
     unit::{MovementRestriction, Unit},
+    utils,
     wonder::Wonder,
 };
 
@@ -46,7 +47,6 @@ pub struct Player {
     resources: ResourcePile,
     pub resource_limit: ResourcePile,
     pub events: Option<PlayerEvents>,
-    pub event_listener_indices: HashMap<String, VecDeque<usize>>,
     pub cities: Vec<City>,
     pub units: Vec<Unit>,
     pub civilization: Civilization,
@@ -68,57 +68,56 @@ pub struct Player {
     pub collect_options: HashMap<Terrain, Vec<ResourcePile>>,
 }
 
-impl Player {
-    pub fn from_data(data: PlayerData, game: &mut Game) -> Self {
-        let player = Self {
-            name: data.name,
-            index: data.id,
-            resources: data.resources,
-            resource_limit: data.resource_limit,
-            events: Some(PlayerEvents::default()),
-            event_listener_indices: HashMap::new(),
-            cities: data.cities.into_iter().map(City::from_data).collect(),
-            units: data.units,
-            civilization: civilizations::get_civilization_by_name(&data.civilization)
-                .expect("player data should have a valid civilization"),
-            active_leader: data.active_leader.map(|leader| {
-                civilizations::get_leader_by_name(&leader, &data.civilization)
-                    .expect("player data should contain a valid leader")
-            }),
-            available_leaders: data
+impl Clone for Player {
+    fn clone(&self) -> Self {
+        let data = self.cloned_data();
+        Self::from_data_uninitialized(data)
+    }
+}
+
+impl PartialEq for Player {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+            && self.index == other.index
+            && self.resources == other.resources
+            && self.resource_limit == other.resource_limit
+            && self
+                .cities
+                .iter()
+                .enumerate()
+                .all(|(i, city)| city.position == other.cities[i].position)
+            && self.units == other.units
+            && self.civilization.name == other.civilization.name
+            && self.active_leader.as_ref().map(|leader| &leader.name)
+                == other.active_leader.as_ref().map(|leader| &leader.name)
+            && self
                 .available_leaders
-                .into_iter()
-                .map(|leader| {
-                    civilizations::get_leader_by_name(&leader, &data.civilization)
-                        .expect("player data should contain valid leaders")
-                })
-                .collect(),
-            advances: data.advances,
-            unlocked_special_advances: data.unlocked_special_advance,
-            wonders: data.wonders,
-            wonders_build: data.wonders_build,
-            leader_position: data.leader_position,
-            game_event_tokens: data.event_tokens,
-            influenced_buildings: data.influenced_buildings,
-            completed_objectives: data.completed_objectives,
-            defeated_leaders: data.defeated_leaders,
-            event_victory_points: data.event_victory_points,
-            custom_actions: HashSet::new(),
-            wonder_cards: data
+                .iter()
+                .enumerate()
+                .all(|(i, leader)| leader.name == other.available_leaders[i].name)
+            && self.advances == other.advances
+            && self.unlocked_special_advances == other.unlocked_special_advances
+            && self.wonders == other.wonders
+            && self.wonders_build == other.wonders_build
+            && self.leader_position == other.leader_position
+            && self.game_event_tokens == other.game_event_tokens
+            && self.influenced_buildings == other.influenced_buildings
+            && self.completed_objectives == other.completed_objectives
+            && self.defeated_leaders == other.defeated_leaders
+            && self.event_victory_points == other.event_victory_points
+            && self
                 .wonder_cards
                 .iter()
-                .map(|wonder| {
-                    wonders::get_wonder_by_name(wonder)
-                        .expect("player data should have valid wonder cards")
-                })
-                .collect(),
-            available_buildings: data.available_buildings,
-            collect_options: data
-                .collect_options
-                .into_iter()
-                .map(|(terrain, options)| (terrain, options.into_iter().collect()))
-                .collect(),
-        };
+                .enumerate()
+                .all(|(i, wonder)| wonder.name == other.wonder_cards[i].name)
+            && self.available_buildings == other.available_buildings
+            && self.collect_options == other.collect_options
+    }
+}
+
+impl Player {
+    pub fn from_data(data: PlayerData, game: &mut Game) -> Self {
+        let player = Self::from_data_uninitialized(data);
         let player_index = player.index;
         game.players.push(player);
         let advances = mem::take(&mut game.players[player_index].advances);
@@ -162,6 +161,58 @@ impl Player {
         player
     }
 
+    fn from_data_uninitialized(data: PlayerData) -> Player {
+        let player = Self {
+            name: data.name,
+            index: data.id,
+            resources: data.resources,
+            resource_limit: data.resource_limit,
+            events: Some(PlayerEvents::default()),
+            cities: data.cities.into_iter().map(City::from_data).collect(),
+            units: data.units,
+            civilization: civilizations::get_civilization_by_name(&data.civilization)
+                .expect("player data should have a valid civilization"),
+            active_leader: data.active_leader.map(|leader| {
+                civilizations::get_leader_by_name(&leader, &data.civilization)
+                    .expect("player data should contain a valid leader")
+            }),
+            available_leaders: data
+                .available_leaders
+                .into_iter()
+                .map(|leader| {
+                    civilizations::get_leader_by_name(&leader, &data.civilization)
+                        .expect("player data should contain valid leaders")
+                })
+                .collect(),
+            advances: data.advances,
+            unlocked_special_advances: data.unlocked_special_advance,
+            wonders: data.wonders,
+            wonders_build: data.wonders_build,
+            leader_position: data.leader_position,
+            game_event_tokens: data.game_event_tokens,
+            influenced_buildings: data.influenced_buildings,
+            completed_objectives: data.completed_objectives,
+            defeated_leaders: data.defeated_leaders,
+            event_victory_points: data.event_victory_points,
+            custom_actions: HashSet::new(),
+            wonder_cards: data
+                .wonder_cards
+                .iter()
+                .map(|wonder| {
+                    wonders::get_wonder_by_name(wonder)
+                        .expect("player data should have valid wonder cards")
+                })
+                .collect(),
+            available_buildings: data.available_buildings,
+            collect_options: data
+                .collect_options
+                .into_iter()
+                .map(|(terrain, options)| (terrain, options.into_iter().collect()))
+                .collect(),
+        };
+        player
+    }
+
     pub fn data(self) -> PlayerData {
         PlayerData {
             name: self.name,
@@ -182,7 +233,7 @@ impl Player {
             wonders: self.wonders,
             wonders_build: self.wonders_build,
             leader_position: self.leader_position,
-            event_tokens: self.game_event_tokens,
+            game_event_tokens: self.game_event_tokens,
             influenced_buildings: self.influenced_buildings,
             completed_objectives: self.completed_objectives,
             defeated_leaders: self.defeated_leaders,
@@ -201,20 +252,61 @@ impl Player {
         }
     }
 
-    pub fn new(civilization: Civilization, id: usize) -> Self {
+    fn cloned_data(&self) -> PlayerData {
+        PlayerData {
+            name: self.name.clone(),
+            id: self.index,
+            resources: self.resources.clone(),
+            resource_limit: self.resource_limit.clone(),
+            cities: self.cities.iter().map(|city| city.cloned_data()).collect(),
+            units: self.units.clone(),
+            civilization: self.civilization.name.clone(),
+            active_leader: self
+                .active_leader
+                .as_ref()
+                .map(|leader| leader.name.clone()),
+            available_leaders: self
+                .available_leaders
+                .iter()
+                .map(|leader| leader.name.clone())
+                .collect(),
+            advances: self.advances.clone(),
+            unlocked_special_advance: self.unlocked_special_advances.clone(),
+            wonders: self.wonders.clone(),
+            wonders_build: self.wonders_build,
+            leader_position: self.leader_position,
+            game_event_tokens: self.game_event_tokens,
+            influenced_buildings: self.influenced_buildings,
+            completed_objectives: self.completed_objectives.clone(),
+            defeated_leaders: self.defeated_leaders.clone(),
+            event_victory_points: self.event_victory_points,
+            wonder_cards: self
+                .wonder_cards
+                .iter()
+                .map(|wonder| wonder.name.clone())
+                .collect(),
+            available_buildings: self.available_buildings.clone(),
+            collect_options: self
+                .collect_options
+                .iter()
+                .map(|(terrain, options)| (terrain.clone(), options.to_vec()))
+                .collect(),
+        }
+    }
+
+    pub fn new(civilization: Civilization, index: usize) -> Self {
         Self {
             name: None,
-            index: id,
+            index,
             resources: ResourcePile::food(2),
             resource_limit: ResourcePile::new(2, 7, 7, 7, 7, 7, 7),
             events: Some(PlayerEvents::new()),
-            event_listener_indices: HashMap::new(),
             cities: Vec::new(),
             units: Vec::new(),
             civilization,
             active_leader: None,
             available_leaders: Vec::new(),
-            advances: Vec::new(),
+            advances: vec![String::from("Farming"), String::from("Mining")],
             unlocked_special_advances: Vec::new(),
             wonders: Vec::new(),
             wonders_build: 0,
@@ -327,12 +419,7 @@ impl Player {
     }
 
     pub fn remove_wonder(&mut self, wonder: &Wonder) {
-        self.wonders.remove(
-            self.wonders
-                .iter()
-                .position(|player_wonder| player_wonder == &wonder.name)
-                .expect("player should have wonder"),
-        );
+        utils::remove_element(&mut self.wonders, &wonder.name);
     }
 
     pub fn game_event_tokens(&self) -> u8 {
@@ -341,7 +428,7 @@ impl Player {
 
     pub fn strip_secret(&mut self) {
         self.wonder_cards = Vec::new();
-        //todo! strip information about other hand cards
+        //todo strip information about other hand cards
     }
 
     pub fn compare_score(&self, other: &Self) -> Ordering {
@@ -416,28 +503,28 @@ impl Player {
             .get_advance_payment_options(self.advance_cost(advance))
     }
 
-    pub fn get_city(&self, position: &Position) -> Option<&City> {
+    pub fn get_city(&self, position: Position) -> Option<&City> {
         let position = self
             .cities
             .iter()
-            .position(|city| &city.position == position)?;
+            .position(|city| city.position == position)?;
         Some(&self.cities[position])
     }
 
-    pub fn get_city_mut(&mut self, position: &Position) -> Option<&mut City> {
+    pub fn get_city_mut(&mut self, position: Position) -> Option<&mut City> {
         let position = self
             .cities
             .iter()
-            .position(|city| &city.position == position)?;
+            .position(|city| city.position == position)?;
         Some(&mut self.cities[position])
     }
 
-    pub fn take_city(&mut self, position: &Position) -> Option<City> {
+    pub fn take_city(&mut self, position: Position) -> Option<City> {
         Some(
             self.cities.remove(
                 self.cities
                     .iter()
-                    .position(|city| &city.position == position)?,
+                    .position(|city| city.position == position)?,
             ),
         )
     }
@@ -445,11 +532,13 @@ impl Player {
     pub fn construct(
         &mut self,
         building: &Building,
-        city_position: &Position,
+        city_position: Position,
         port_position: Option<Position>,
     ) {
         self.take_events(|events, player| {
-            events.on_construct.trigger(player, city_position, building)
+            events
+                .on_construct
+                .trigger(player, &city_position, building);
         });
         let index = self.index;
         let city = self
@@ -466,11 +555,11 @@ impl Player {
         self.available_buildings -= building;
     }
 
-    pub fn undo_construct(&mut self, building: &Building, city_position: &Position) {
+    pub fn undo_construct(&mut self, building: &Building, city_position: Position) {
         self.take_events(|events, player| {
             events
                 .on_undo_construct
-                .trigger(player, city_position, building)
+                .trigger(player, &city_position, building);
         });
         let city = self
             .get_city_mut(city_position)
@@ -500,7 +589,7 @@ impl Player {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq)]
 pub struct PlayerData {
     name: Option<String>,
     id: usize,
@@ -516,7 +605,7 @@ pub struct PlayerData {
     wonders: Vec<String>,
     wonders_build: usize,
     leader_position: Option<Position>,
-    event_tokens: u8,
+    game_event_tokens: u8,
     influenced_buildings: u32,
     completed_objectives: Vec<String>,
     defeated_leaders: Vec<String>,

@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::position::Position;
 
+#[derive(Clone)]
 pub struct Map {
     pub tiles: HashMap<Position, Terrain>,
 }
