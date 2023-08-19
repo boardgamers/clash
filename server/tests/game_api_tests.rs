@@ -32,7 +32,12 @@ fn basic_actions() {
     let player = &game.players[0];
 
     assert_eq!(
-        vec![String::from("Farming"), String::from("Mining"), String::from("Math"), String::from("Engineering")],
+        vec![
+            String::from("Farming"),
+            String::from("Mining"),
+            String::from("Math"),
+            String::from("Engineering")
+        ],
         player.advances
     );
     assert_eq!(&ResourcePile::culture_tokens(1), player.resources());
@@ -40,9 +45,7 @@ fn basic_actions() {
 
     game.players[0].gain_resources(ResourcePile::new(2, 4, 4, 0, 2, 2, 3));
     let city_position = Position::new(0, 0);
-    game.players[0]
-        .cities
-        .push(City::new(0, city_position));
+    game.players[0].cities.push(City::new(0, city_position));
     game.players[0]
         .cities
         .push(City::new(0, Position::new(0, 1)));
@@ -160,12 +163,8 @@ fn cultural_influence() {
     let city0position = Position::new(0, 0);
     let city1position = Position::new(2, 0);
     assert_eq!(city0position.distance(&city1position), 2);
-    game.players[0]
-        .cities
-        .push(City::new(0, city0position));
-    game.players[1]
-        .cities
-        .push(City::new(1, city1position));
+    game.players[0].cities.push(City::new(0, city0position));
+    game.players[1].cities.push(City::new(1, city1position));
     game.players[1].construct(&Building::Academy, &city1position, None);
     let influence_action = Action::Playing(InfluenceCultureAttempt {
         starting_city_position: city0position,

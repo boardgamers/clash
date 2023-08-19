@@ -134,7 +134,7 @@ impl PlayingAction {
                 let total_collect =
                     get_total_collection(game, player_index, &city_position, &collections)
                         .expect("Illegal action");
-                    let city = game.players[player_index]
+                let city = game.players[player_index]
                     .get_city_mut(&city_position)
                     .expect("Illegal action");
                 if !city.can_activate() {

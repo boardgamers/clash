@@ -101,7 +101,6 @@ impl StatusPhaseAction {
         }
         skip_status_phase_players(game, &self.phase);
     }
-
 }
 
 fn next_phase(game: &mut Game, phase: &StatusPhaseState) {
@@ -137,9 +136,24 @@ fn skip_player(game: &Game, player_index: usize, state: &StatusPhaseState) -> bo
     let player = &game.players[player_index];
     match state {
         StatusPhaseState::CompleteObjectives => true, //todo only skip player if the does'nt have objective cards in his hand (don't skip if the can't complete them unless otherwise specified via setting)
-        StatusPhaseState::FreeAdvance => advances::get_all_advances().into_iter().all(|advance| !player.can_advance_free(&advance.name)),
+        StatusPhaseState::FreeAdvance => advances::get_all_advances()
+            .into_iter()
+            .all(|advance| !player.can_advance_free(&advance.name)),
         StatusPhaseState::RaseSize1City => !player.cities.iter().any(|city| city.size() == 1),
-        StatusPhaseState::ChangeGovernmentType => player.government().is_some() && !advances::get_all_advances().into_iter().any(|advance| !advance.required_advance.is_some_and(|required_advance| !player.has_advance(&required_advance)) && advance.government.is_some_and(|government| government != player.government().expect("player should have government due to previous check"))),
+        StatusPhaseState::ChangeGovernmentType => {
+            player.government().is_some()
+                && !advances::get_all_advances().into_iter().any(|advance| {
+                    !advance
+                        .required_advance
+                        .is_some_and(|required_advance| !player.has_advance(&required_advance))
+                        && advance.government.is_some_and(|government| {
+                            government
+                                != player
+                                    .government()
+                                    .expect("player should have government due to previous check")
+                        })
+                })
+        }
         StatusPhaseState::DetermineFirstPlayer => false,
     }
 }
@@ -200,7 +214,12 @@ pub fn player_that_chooses_next_first_player(
         player.resources().mood_tokens + player.resources().culture_tokens
     }
 
-    let best = players.iter().filter(|player| !dropped_players.contains(&player.index)).map(score).max().expect("no player found");
+    let best = players
+        .iter()
+        .filter(|player| !dropped_players.contains(&player.index))
+        .map(score)
+        .max()
+        .expect("no player found");
     players
         .iter()
         .filter(|p| score(p) == best && !dropped_players.contains(&p.index))

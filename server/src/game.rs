@@ -907,9 +907,7 @@ pub mod tests {
         let new = 1;
 
         let position = Position::new(0, 0);
-        game.players[old]
-            .cities
-            .push(City::new(old, position));
+        game.players[old].cities.push(City::new(old, position));
         game.build_wonder(wonder, &position, old);
         game.players[old].construct(&Academy, &position, None);
         game.players[old].construct(&Obelisk, &position, None);
