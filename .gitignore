@@ -3,4 +3,4 @@ target/
 dist/
 .vscode/
 .history/
-.run-client.cmd/
+*.cmd/

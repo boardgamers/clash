@@ -26,9 +26,10 @@ pub struct City {
 }
 
 impl City {
+    #[must_use]
     pub fn from_data(data: CityData) -> Self {
         Self {
-            city_pieces: CityPieces::from_data(data.city_pieces),
+            city_pieces: CityPieces::from_data(&data.city_pieces),
             mood_state: data.mood_state,
             activations: data.activations,
             angry_activation: data.angry_activation,
@@ -38,6 +39,7 @@ impl City {
         }
     }
 
+    #[must_use]
     pub fn data(self) -> CityData {
         CityData::new(
             self.city_pieces.data(),
@@ -50,6 +52,7 @@ impl City {
         )
     }
 
+    #[must_use]
     pub fn cloned_data(&self) -> CityData {
         CityData::new(
             self.city_pieces.cloned_data(),
@@ -62,6 +65,7 @@ impl City {
         )
     }
 
+    #[must_use]
     pub fn new(player_index: usize, position: Position) -> Self {
         Self {
             city_pieces: CityPieces::default(),
@@ -74,6 +78,7 @@ impl City {
         }
     }
 
+    #[must_use]
     pub fn can_activate(&self) -> bool {
         !self.angry_activation
     }
@@ -101,10 +106,12 @@ impl City {
         }
     }
 
+    #[must_use]
     pub fn is_activated(&self) -> bool {
         self.activations > 0
     }
 
+    #[must_use]
     pub fn can_construct(&self, building: &Building, player: &Player) -> bool {
         if self.player_index != player.index {
             return false;
@@ -128,9 +135,10 @@ impl City {
             return false;
         }
         let cost = player.construct_cost(building, self);
-        player.resources().can_afford(&cost)
+        player.resources.can_afford(&cost)
     }
 
+    #[must_use]
     pub fn can_build_wonder(&self, wonder: &Wonder, player: &Player, game: &Game) -> bool {
         if self.player_index != player.index {
             return false;
@@ -145,10 +153,10 @@ impl City {
             return false;
         }
         let cost = player.wonder_cost(wonder, self);
-        if !player.resources().can_afford(&cost) {
+        if !player.resources.can_afford(&cost) {
             return false;
         }
-        for advance in wonder.required_advances.iter() {
+        for advance in &wonder.required_advances {
             if !player.has_advance(advance) {
                 return false;
             }
@@ -160,13 +168,13 @@ impl City {
     }
 
     pub fn conquer(mut self, game: &mut Game, new_player_index: usize, old_player_index: usize) {
-        for wonder in self.city_pieces.wonders.iter() {
+        for wonder in &self.city_pieces.wonders {
             (wonder.player_deinitializer)(game, old_player_index);
             (wonder.player_initializer)(game, new_player_index);
         }
         self.player_index = new_player_index;
         self.mood_state = Angry;
-        for wonder in self.city_pieces.wonders.iter() {
+        for wonder in &self.city_pieces.wonders {
             game.players[old_player_index].remove_wonder(wonder);
             game.players[new_player_index]
                 .wonders
@@ -195,16 +203,21 @@ impl City {
         }
         let new_player = &mut game.players[new_player_index];
         new_player.influenced_buildings -= previously_influenced_building;
-        new_player.cities.push(self)
+        new_player.cities.push(self);
     }
 
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if the city does not have a builder
     pub fn raze(self, game: &mut Game, player_index: usize) {
-        for (building, owner) in self.city_pieces.building_owners().iter() {
+        for (building, owner) in &self.city_pieces.building_owners() {
             if let Some(owner) = owner {
                 game.players[*owner].available_buildings += building;
             }
         }
-        for wonder in self.city_pieces.wonders.into_iter() {
+        for wonder in self.city_pieces.wonders {
             (wonder.player_deinitializer)(game, player_index);
             game.players[player_index].remove_wonder(&wonder);
             let builder = &mut game.players[wonder.builder.expect("Wonder should have a builder")];
@@ -212,10 +225,12 @@ impl City {
         }
     }
 
+    #[must_use]
     pub fn size(&self) -> usize {
         self.city_pieces.amount() + 1
     }
 
+    #[must_use]
     pub fn mood_modified_size(&self) -> usize {
         match self.mood_state {
             Happy => self.size() + 1,
@@ -239,14 +254,17 @@ impl City {
         }
     }
 
+    #[must_use]
     pub fn uninfluenced_buildings(&self) -> u32 {
         self.city_pieces.buildings(Some(self.player_index)).len() as u32
     }
 
+    #[must_use]
     pub fn influenced(&self) -> bool {
         self.uninfluenced_buildings() as usize != self.city_pieces.amount()
     }
 
+    #[must_use]
     pub fn increase_happiness_cost(&self, steps: u32) -> Option<ResourcePile> {
         let max_steps = 2 - self.mood_state.clone() as u32;
         if steps > max_steps {
@@ -269,6 +287,7 @@ pub struct CityData {
 }
 
 impl CityData {
+    #[must_use]
     pub fn new(
         city_pieces: CityPiecesData,
         mood_state: MoodState,

@@ -35,3 +35,10 @@ pub fn ordinal_number(value: u32) -> String {
         }
     )
 }
+
+#[cfg(test)]
+pub mod tests {
+    pub fn eq_f32(a: f32, b: f32) -> bool {
+        (a - b).abs() <= f32::EPSILON
+    }
+}

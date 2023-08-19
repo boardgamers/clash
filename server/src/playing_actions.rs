@@ -73,11 +73,14 @@ pub enum PlayingAction {
 }
 
 impl PlayingAction {
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if action is illegal
     pub fn execute(self, game: &mut Game, player_index: usize) {
         if !self.action_type().free {
-            if game.actions_left == 0 {
-                panic!("Illegal action");
-            }
+            assert_ne!(game.actions_left, 0, "Illegal action");
             game.actions_left -= 1;
         }
         match self {
@@ -102,14 +105,16 @@ impl PlayingAction {
                 let player = &mut game.players[player_index];
                 let city = player.get_city(city_position).expect("Illegal action");
                 let cost = player.construct_cost(&city_piece, city);
-                if !city.can_construct(&city_piece, player) || !payment.can_afford(&cost) {
-                    panic!("Illegal action");
-                }
+                assert!(
+                    city.can_construct(&city_piece, player) && payment.can_afford(&cost),
+                    "Illegal action"
+                );
                 if matches!(&city_piece, Port) {
                     let port_position = port_position.as_ref().expect("Illegal action");
-                    if !city.position.neighbors().contains(port_position) {
-                        panic!("Illegal action");
-                    }
+                    assert!(
+                        city.position.neighbors().contains(port_position),
+                        "Illegal action"
+                    );
                 } else if port_position.is_some() {
                     panic!("Illegal action");
                 }
@@ -137,9 +142,7 @@ impl PlayingAction {
                 let city = game.players[player_index]
                     .get_city_mut(city_position)
                     .expect("Illegal action");
-                if !city.can_activate() {
-                    panic!("Illegal action");
-                }
+                assert!(city.can_activate(), "Illegal action");
                 city.activate();
                 game.players[player_index].gain_resources(total_collect);
             }
@@ -150,9 +153,10 @@ impl PlayingAction {
                 for (city_position, steps) in happiness_increases {
                     let city = player.get_city(city_position).expect("Illegal action");
                     let cost = city.increase_happiness_cost(steps).expect("Illegal action");
-                    if city.player_index != player_index || !player.resources().can_afford(&cost) {
-                        panic!("Illegal action");
-                    }
+                    assert!(
+                        city.player_index == player_index && player.resources.can_afford(&cost),
+                        "Illegal action"
+                    );
                     player.loose_resources(cost);
                     let city = player.get_city_mut(city_position).expect("Illegal action");
                     for _ in 0..steps {
@@ -196,7 +200,7 @@ impl PlayingAction {
                     return;
                 }
                 if !game.players[player_index]
-                    .resources()
+                    .resources
                     .can_afford(&ResourcePile::culture_tokens(5 - roll as u32))
                 {
                     game.add_to_last_log_item(&format!(" but rolled a {roll} and has not enough culture tokens to increase the roll "));
@@ -208,22 +212,24 @@ impl PlayingAction {
                     target_city_position,
                     city_piece,
                 };
-                game.add_to_last_log_item(&format!("and rolled a {roll}. {} now has the option to pay {} culture tokens to increase the dice roll and proceed with the cultural influence", game.players[player_index].get_name(), 5 - roll as u32))
+                game.add_to_last_log_item(&format!("and rolled a {roll}. {} now has the option to pay {} culture tokens to increase the dice roll and proceed with the cultural influence", game.players[player_index].get_name(), 5 - roll as u32));
             }
             Custom(custom_action) => {
                 let action = custom_action.custom_action_type();
-                if game.played_once_per_turn_actions.contains(&action) {
-                    panic!("Illegal action");
-                }
+                assert!(
+                    !game.played_once_per_turn_actions.contains(&action),
+                    "Illegal action"
+                );
                 if action.action_type().once_per_turn {
                     game.played_once_per_turn_actions.push(action);
                 }
-                custom_action.execute(game, player_index)
+                custom_action.execute(game, player_index);
             }
             EndTurn => game.next_turn(),
         }
     }
 
+    #[must_use]
     pub fn action_type(&self) -> ActionType {
         match self {
             Custom(custom_action) => custom_action.custom_action_type().action_type(),
@@ -232,6 +238,11 @@ impl PlayingAction {
         }
     }
 
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if no temple bonus is given when undoing a construct temple action
     pub fn undo(self, game: &mut Game, player_index: usize) {
         let free_action = self.action_type().free;
         if !free_action {
@@ -298,18 +309,22 @@ pub struct ActionType {
 }
 
 impl ActionType {
+    #[must_use]
     pub fn free() -> Self {
         Self::new(true, false)
     }
 
+    #[must_use]
     pub fn once_per_turn() -> Self {
         Self::new(false, true)
     }
 
+    #[must_use]
     pub fn free_and_once_per_turn() -> Self {
         Self::new(true, true)
     }
 
+    #[must_use]
     fn new(free: bool, once_per_turn: bool) -> Self {
         Self {
             free,
@@ -318,6 +333,7 @@ impl ActionType {
     }
 }
 
+#[must_use]
 pub fn get_total_collection(
     game: &Game,
     player_index: usize,
@@ -346,7 +362,7 @@ pub fn get_total_collection(
         *terrain_left += 1;
     }
     let mut total_collect = ResourcePile::empty();
-    for (position, collect) in collections.iter() {
+    for (position, collect) in collections {
         total_collect += collect.clone();
 
         let terrain = game.map.tiles.get(position)?.clone();

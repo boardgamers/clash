@@ -21,7 +21,7 @@ fn basic_actions() {
     let game = game_api::execute_action(game, advance_action, 0);
     let player = &game.players[0];
 
-    assert_eq!(&ResourcePile::culture_tokens(1), player.resources());
+    assert_eq!(ResourcePile::culture_tokens(1), player.resources);
     assert_eq!(2, game.actions_left);
 
     let advance_action = Action::Playing(Advance {
@@ -40,7 +40,7 @@ fn basic_actions() {
         ],
         player.advances
     );
-    assert_eq!(&ResourcePile::culture_tokens(1), player.resources());
+    assert_eq!(ResourcePile::culture_tokens(1), player.resources);
     assert_eq!(1, game.actions_left);
 
     game.players[0].gain_resources(ResourcePile::new(2, 4, 4, 0, 2, 2, 3));
@@ -83,7 +83,7 @@ fn basic_actions() {
             .expect("player should have a city at this position")
             .size()
     );
-    assert_eq!(&ResourcePile::new(1, 3, 3, 0, 2, 2, 4), player.resources());
+    assert_eq!(ResourcePile::new(1, 3, 3, 0, 2, 2, 4), player.resources);
     assert_eq!(0, game.actions_left);
 
     let game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
@@ -97,7 +97,7 @@ fn basic_actions() {
     let game = game_api::execute_action(game, increase_happiness_action, 0);
     let player = &game.players[0];
 
-    assert_eq!(&ResourcePile::new(1, 3, 3, 0, 2, 0, 4), player.resources());
+    assert_eq!(ResourcePile::new(1, 3, 3, 0, 2, 0, 4), player.resources);
     assert!(matches!(
         player
             .get_city(city_position)
@@ -116,7 +116,7 @@ fn basic_actions() {
     let player = &game.players[0];
 
     assert_eq!(10.0, player.victory_points());
-    assert_eq!(&ResourcePile::empty(), player.resources());
+    assert_eq!(ResourcePile::empty(), player.resources);
     assert_eq!(1, player.wonders_build);
     assert_eq!(vec![String::from("X")], player.wonders);
     assert_eq!(
@@ -145,7 +145,7 @@ fn basic_actions() {
     });
     let game = game_api::execute_action(game, collect_action, 0);
     let player = &game.players[0];
-    assert_eq!(&ResourcePile::ore(1), player.resources());
+    assert_eq!(ResourcePile::ore(1), player.resources);
     assert!(player
         .get_city(city_position)
         .expect("player should have a city at this position")

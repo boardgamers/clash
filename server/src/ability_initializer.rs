@@ -90,8 +90,8 @@ pub trait AbilityInitializerSetup: Sized {
 
 pub fn join_ability_initializers(setup: Vec<AbilityInitializer>) -> AbilityInitializer {
     Box::new(move |game: &mut Game, player_index: usize| {
-        for initializer in setup.iter() {
-            initializer(game, player_index)
+        for initializer in &setup {
+            initializer(game, player_index);
         }
     })
 }

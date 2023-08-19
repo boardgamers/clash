@@ -19,6 +19,11 @@ pub enum CustomActionType {
 }
 
 impl CustomAction {
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if action is illegal
     pub fn execute(self, game: &mut Game, player_index: usize) {
         match self {
             CustomAction::ConstructWonder {
@@ -49,6 +54,7 @@ impl CustomAction {
         }
     }
 
+    #[must_use]
     pub fn custom_action_type(&self) -> CustomActionType {
         match self {
             CustomAction::ConstructWonder { .. } => CustomActionType::ConstructWonder,
@@ -69,7 +75,8 @@ impl CustomAction {
         }
     }
 
-    pub fn format_log_item(&self, _game: &Game, player_name: String) -> String {
+    #[must_use]
+    pub fn format_log_item(&self, _game: &Game, player_name: &str) -> String {
         match self {
             CustomAction::ConstructWonder { city_position, wonder, payment } => format!("{player_name} payed {payment} to construct the {wonder} wonder in the city at {city_position}"),
         }
@@ -77,6 +84,7 @@ impl CustomAction {
 }
 
 impl CustomActionType {
+    #[must_use]
     pub fn action_type(&self) -> ActionType {
         match self {
             CustomActionType::ConstructWonder => ActionType::default(),

@@ -1,4 +1,7 @@
+#![allow(clippy::if_not_else)]
+
 use itertools::Itertools;
+
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -23,6 +26,7 @@ pub enum ActionLogItem {
 }
 
 impl ActionLogItem {
+    #[must_use]
     pub fn as_playing_action(&self) -> Option<&str> {
         if let Self::Playing(v) = self {
             Some(v)
@@ -31,6 +35,12 @@ impl ActionLogItem {
         }
     }
 
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if variant does'nt match with it's contents
+    #[must_use]
     pub fn as_action(&self) -> Action {
         match self {
             Self::Playing(action) => Action::Playing(serde_json::from_str::<PlayingAction>(action).expect("data should be a serialized playing action")),
@@ -47,7 +57,13 @@ pub struct LogSliceOptions {
     pub end: Option<usize>,
 }
 
-//* this is called before the action is executed
+///
+///
+/// # Panics
+///
+/// Panics if an undo or redo action is given
+/// this is called before the action is executed
+#[must_use]
 pub fn format_action_log_item(action: &Action, game: &Game) -> String {
     match action {
         Action::Playing(action) => format_playing_action_log_item(action, game),
@@ -83,7 +99,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             format!("{player_name} increased happiness in {}", utils::format_list(&happiness_increases, "no city"))
         },
         PlayingAction::InfluenceCultureAttempt { starting_city_position, target_player_index, target_city_position, city_piece } => format!("{player_name} tried to influence culture the {city_piece:?} in the city at {target_city_position} by {}{}", if target_player_index == &game.current_player_index { String::from("himself")} else { game.players[*target_player_index].get_name() }, if starting_city_position != target_city_position { format!(" with the city at {starting_city_position}")} else { String::new() }),
-        PlayingAction::Custom(action) => action.format_log_item(game, player_name),
+        PlayingAction::Custom(action) => action.format_log_item(game, &player_name),
         PlayingAction::EndTurn => format!("{player_name} ended his turn{}", match game.actions_left {
             0 => String::new(),
             actions_left => format!(" with {actions_left} actions left"),

@@ -1,3 +1,5 @@
+#![allow(clippy::pedantic)]
+
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
@@ -44,13 +46,13 @@ pub fn execute_move(game: JsValue, r#move: JsValue, player: JsValue) -> JsValue 
 #[wasm_bindgen]
 pub fn ended(game: JsValue) -> JsValue {
     let game = get_game(game);
-    JsValue::from_bool(game_api::ended(game))
+    JsValue::from_bool(game_api::ended(&game))
 }
 
 #[wasm_bindgen]
 pub fn scores(game: JsValue) -> JsValue {
     let game = get_game(game);
-    let scores = game_api::scores(game);
+    let scores = game_api::scores(&game);
     serde_wasm_bindgen::to_value(&scores).expect("scores should be serializable")
 }
 
@@ -65,7 +67,7 @@ pub async fn drop_player(game: JsValue, player: JsValue) -> JsValue {
 #[wasm_bindgen]
 pub async fn current_player(game: JsValue) -> JsValue {
     let game = get_game(game);
-    let player_index = game_api::current_player(game);
+    let player_index = game_api::current_player(&game);
     match player_index {
         Some(index) => JsValue::from_f64(index as f64),
         None => JsValue::undefined(),
@@ -75,7 +77,7 @@ pub async fn current_player(game: JsValue) -> JsValue {
 #[wasm_bindgen]
 pub async fn log_length(game: JsValue) -> JsValue {
     let game = get_game(game);
-    let log_length = game_api::log_length(game);
+    let log_length = game_api::log_length(&game);
     JsValue::from_f64(log_length as f64)
 }
 
@@ -83,7 +85,7 @@ pub async fn log_length(game: JsValue) -> JsValue {
 pub async fn log_slice(game: JsValue, options: JsValue) -> JsValue {
     let game = get_game(game);
     let options = serde_wasm_bindgen::from_value(options).expect("options should be serializable");
-    let log = game_api::log_slice(game, options);
+    let log = game_api::log_slice(&game, &options);
     serde_wasm_bindgen::to_value(&log).expect("log should be serializable")
 }
 
@@ -103,14 +105,14 @@ pub fn set_player_meta_data(game: JsValue, player_index: JsValue, meta_data: JsV
 #[wasm_bindgen]
 pub fn rankings(game: JsValue) -> JsValue {
     let game = get_game(game);
-    let rankings = game_api::rankings(game);
+    let rankings = game_api::rankings(&game);
     serde_wasm_bindgen::to_value(&rankings).expect("rankings should be serializable")
 }
 
 #[wasm_bindgen]
 pub fn round(game: JsValue) -> JsValue {
     let game = get_game(game);
-    let round = game_api::round(game);
+    let round = game_api::round(&game);
     match round {
         Some(round) => JsValue::from_f64(round as f64),
         None => JsValue::undefined(),

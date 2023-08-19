@@ -2,11 +2,13 @@ use super::custom_actions::CustomActionType::*;
 use crate::{
     ability_initializer::AbilityInitializerSetup,
     advance::{Advance, AdvanceBonus::*},
+    game::Game,
     map::Terrain::*,
     resource_pile::ResourcePile,
 };
 
-pub fn get_all_advances() -> Vec<Advance> {
+#[must_use]
+pub fn get_all() -> Vec<Advance> {
     vec![
         //Agriculture
         Advance::builder(
@@ -33,7 +35,7 @@ pub fn get_all_advances() -> Vec<Advance> {
             "Engineering",
             "● Immediately draw 1 wonder\n● May Construct wonder happy cities",
         )
-        .add_one_time_ability_initializer(|game, player| game.draw_wonder_card(player))
+        .add_one_time_ability_initializer(Game::draw_wonder_card)
         .add_custom_action(ConstructWonder)
         .build(),
         //Maritime
@@ -116,14 +118,14 @@ pub fn get_all_advances() -> Vec<Advance> {
     ]
 }
 
+#[must_use]
 pub fn get_advance_by_name(name: &str) -> Option<Advance> {
-    get_all_advances()
-        .into_iter()
-        .find(|advance| advance.name == name)
+    get_all().into_iter().find(|advance| advance.name == name)
 }
 
+#[must_use]
 pub fn get_leading_government_advance(government: &str) -> Option<Advance> {
-    get_all_advances().into_iter().find(|advance| {
+    get_all().into_iter().find(|advance| {
         advance
             .government
             .as_ref()
@@ -131,10 +133,16 @@ pub fn get_leading_government_advance(government: &str) -> Option<Advance> {
     })
 }
 
-pub fn get_government_advances(government: &str) -> Vec<Advance> {
+///
+///
+/// # Panics
+///
+/// Panics if government does'nt have a leading government advance or if some of the government advances do no have their government tier specified
+#[must_use]
+pub fn get_government(government: &str) -> Vec<Advance> {
     let leading_government =
         get_leading_government_advance(government).expect("government should exist");
-    let mut government_advances = get_all_advances()
+    let mut government_advances = get_all()
         .into_iter()
         .filter(|advance| {
             advance

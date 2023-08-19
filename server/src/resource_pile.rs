@@ -21,6 +21,7 @@ pub struct ResourcePile {
 }
 
 impl ResourcePile {
+    #[must_use]
     pub fn new(
         food: u32,
         wood: u32,
@@ -41,38 +42,47 @@ impl ResourcePile {
         }
     }
 
+    #[must_use]
     pub fn food(amount: u32) -> Self {
         Self::new(amount, 0, 0, 0, 0, 0, 0)
     }
 
+    #[must_use]
     pub fn wood(amount: u32) -> Self {
         Self::new(0, amount, 0, 0, 0, 0, 0)
     }
 
+    #[must_use]
     pub fn ore(amount: u32) -> Self {
         Self::new(0, 0, amount, 0, 0, 0, 0)
     }
 
+    #[must_use]
     pub fn ideas(amount: u32) -> Self {
         Self::new(0, 0, 0, amount, 0, 0, 0)
     }
 
+    #[must_use]
     pub fn gold(amount: i32) -> Self {
         Self::new(0, 0, 0, 0, amount, 0, 0)
     }
 
+    #[must_use]
     pub fn mood_tokens(amount: u32) -> Self {
         Self::new(0, 0, 0, 0, 0, amount, 0)
     }
 
+    #[must_use]
     pub fn culture_tokens(amount: u32) -> Self {
         Self::new(0, 0, 0, 0, 0, 0, amount)
     }
 
+    #[must_use]
     pub fn empty() -> Self {
         Self::default()
     }
 
+    #[must_use]
     pub fn can_afford(&self, other: &Self) -> bool {
         let mut resource_deficit = 0;
         if other.food > self.food {
@@ -117,6 +127,7 @@ impl ResourcePile {
     }
 
     //this function assumes that `self` can afford `cost`
+    #[must_use]
     pub fn get_payment_options(&self, cost: &Self) -> PaymentOptions {
         let mut gold_left = self.gold as u32;
         let mut gold_cost = cost.gold;
@@ -172,6 +183,7 @@ impl ResourcePile {
     }
 
     //this function assumes that `self` can afford `cost`
+    #[must_use]
     pub fn get_advance_payment_options(&self, cost: u32) -> AdvancePaymentOptions {
         let mut idea_cost = 0;
         let mut food_cost = 0;
@@ -288,10 +300,7 @@ impl Display for ResourcePile {
             resources.push(format!(
                 "{} {}",
                 self.ideas,
-                match self.ideas == 1 {
-                    true => "idea",
-                    false => "ideas",
-                }
+                if self.ideas == 1 { "idea" } else { "ideas" }
             ));
         }
         if self.gold > 0 {
@@ -304,9 +313,10 @@ impl Display for ResourcePile {
             resources.push(format!(
                 "{} {}",
                 self.mood_tokens,
-                match self.mood_tokens == 1 {
-                    true => "mood token",
-                    false => "mood tokens",
+                if self.mood_tokens == 1 {
+                    "mood token"
+                } else {
+                    "mood tokens"
                 }
             ));
         }
@@ -314,9 +324,10 @@ impl Display for ResourcePile {
             resources.push(format!(
                 "{} {}",
                 self.culture_tokens,
-                match self.culture_tokens == 1 {
-                    true => "culture token",
-                    false => "culture tokens",
+                if self.culture_tokens == 1 {
+                    "culture token"
+                } else {
+                    "culture tokens"
                 }
             ));
         }
@@ -332,6 +343,7 @@ pub struct PaymentOptions {
 }
 
 impl PaymentOptions {
+    #[must_use]
     pub fn new(default: ResourcePile, gold_left: u32, jokers_left: u32) -> Self {
         Self {
             default,
@@ -349,6 +361,7 @@ pub struct AdvancePaymentOptions {
 }
 
 impl AdvancePaymentOptions {
+    #[must_use]
     pub fn new(default: ResourcePile, food_left: u32, gold_left: u32) -> Self {
         Self {
             default,
@@ -362,30 +375,30 @@ impl AdvancePaymentOptions {
 mod tests {
     use super::{AdvancePaymentOptions, PaymentOptions, ResourcePile};
 
-    fn assert_can_afford(name: &str, cost: ResourcePile) {
+    fn assert_can_afford(name: &str, cost: &ResourcePile) {
         let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
-        assert!(player_has.can_afford(&cost), "{name}");
+        assert!(player_has.can_afford(cost), "{name}");
     }
 
-    fn assert_cannot_afford(name: &str, cost: ResourcePile) {
+    fn assert_cannot_afford(name: &str, cost: &ResourcePile) {
         let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
-        assert!(!player_has.can_afford(&cost), "{name}");
+        assert!(!player_has.can_afford(cost), "{name}");
     }
 
-    fn assert_payment_options(name: &str, cost: ResourcePile, options: PaymentOptions) {
+    fn assert_payment_options(name: &str, cost: &ResourcePile, options: &PaymentOptions) {
         let budget = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
-        assert_eq!(options, budget.get_payment_options(&cost), "{name}");
+        assert_eq!(options, &budget.get_payment_options(cost), "{name}");
     }
 
     fn assert_advance_payment_options(
         name: &str,
-        budget: ResourcePile,
-        options: AdvancePaymentOptions,
+        budget: &ResourcePile,
+        options: &AdvancePaymentOptions,
     ) {
-        assert_eq!(options, budget.get_advance_payment_options(2), "{name}");
+        assert_eq!(options, &budget.get_advance_payment_options(2), "{name}");
     }
 
-    fn assert_to_string(resource_pile: ResourcePile, expected: &str) {
+    fn assert_to_string(resource_pile: &ResourcePile, expected: &str) {
         assert_eq!(
             expected.to_string(),
             resource_pile.to_string(),
@@ -395,35 +408,35 @@ mod tests {
 
     #[test]
     fn can_afford_test() {
-        assert_can_afford("use 6 gold as wood", ResourcePile::wood(7));
-        assert_cannot_afford("6 gold is not enough", ResourcePile::wood(8));
+        assert_can_afford("use 6 gold as wood", &ResourcePile::wood(7));
+        assert_cannot_afford("6 gold is not enough", &ResourcePile::wood(8));
 
         assert_cannot_afford(
             "gold cannot be converted to mood",
-            ResourcePile::mood_tokens(7),
+            &ResourcePile::mood_tokens(7),
         );
         assert_cannot_afford(
             "gold cannot be converted to culture",
-            ResourcePile::culture_tokens(8),
+            &ResourcePile::culture_tokens(8),
         );
 
         assert_can_afford(
             "negative gold means rebate",
-            ResourcePile::gold(-2) + ResourcePile::wood(9),
+            &(ResourcePile::gold(-2) + ResourcePile::wood(9)),
         );
         assert_cannot_afford(
             "negative gold cannot rebate mood",
-            ResourcePile::gold(-2) + ResourcePile::mood_tokens(9),
+            &(ResourcePile::gold(-2) + ResourcePile::mood_tokens(9)),
         );
         assert_cannot_afford(
             "negative gold cannot rebate culture",
-            ResourcePile::gold(-2) + ResourcePile::mood_tokens(8),
+            &(ResourcePile::gold(-2) + ResourcePile::mood_tokens(8)),
         );
 
-        assert_can_afford("payment costs gold", ResourcePile::wood(5));
+        assert_can_afford("payment costs gold", &ResourcePile::wood(5));
         assert_cannot_afford(
             "gold cannot be converted, because it's already used for payment",
-            ResourcePile::wood(7) + ResourcePile::gold(1),
+            &(ResourcePile::wood(7) + ResourcePile::gold(1)),
         );
     }
 
@@ -438,18 +451,18 @@ mod tests {
     fn payment_options_test() {
         assert_payment_options(
             "no gold use",
-            ResourcePile::new(1, 1, 3, 2, 0, 2, 4),
-            PaymentOptions::new(ResourcePile::new(1, 1, 3, 2, 0, 2, 4), 5, 0),
+            &ResourcePile::new(1, 1, 3, 2, 0, 2, 4),
+            &(PaymentOptions::new(ResourcePile::new(1, 1, 3, 2, 0, 2, 4), 5, 0)),
         );
         assert_payment_options(
             "use some gold",
-            ResourcePile::new(2, 2, 3, 5, 2, 0, 0),
-            PaymentOptions::new(ResourcePile::new(1, 2, 3, 4, 4, 0, 0), 1, 0),
+            &ResourcePile::new(2, 2, 3, 5, 2, 0, 0),
+            &(PaymentOptions::new(ResourcePile::new(1, 2, 3, 4, 4, 0, 0), 1, 0)),
         );
         assert_payment_options(
             "jokers",
-            ResourcePile::ore(4) + ResourcePile::ideas(4) + ResourcePile::gold(-3),
-            PaymentOptions::new(ResourcePile::ore(3) + ResourcePile::ideas(4), 5, 2),
+            &(ResourcePile::ore(4) + ResourcePile::ideas(4) + ResourcePile::gold(-3)),
+            &(PaymentOptions::new(ResourcePile::ore(3) + ResourcePile::ideas(4), 5, 2)),
         );
     }
 
@@ -457,37 +470,37 @@ mod tests {
     fn advance_payment_options_test() {
         assert_advance_payment_options(
             "enough of all resources",
-            ResourcePile::food(3) + ResourcePile::ideas(3) + ResourcePile::gold(3),
-            AdvancePaymentOptions::new(ResourcePile::ideas(2), 3, 3),
+            &(ResourcePile::food(3) + ResourcePile::ideas(3) + ResourcePile::gold(3)),
+            &(AdvancePaymentOptions::new(ResourcePile::ideas(2), 3, 3)),
         );
         assert_advance_payment_options(
             "using food",
-            ResourcePile::food(3) + ResourcePile::gold(3),
-            AdvancePaymentOptions::new(ResourcePile::food(2), 1, 3),
+            &(ResourcePile::food(3) + ResourcePile::gold(3)),
+            &(AdvancePaymentOptions::new(ResourcePile::food(2), 1, 3)),
         );
         assert_advance_payment_options(
             "using 1 gold",
-            ResourcePile::ideas(1) + ResourcePile::gold(3),
-            AdvancePaymentOptions::new(ResourcePile::ideas(1) + ResourcePile::gold(1), 0, 2),
+            &(ResourcePile::ideas(1) + ResourcePile::gold(3)),
+            &(AdvancePaymentOptions::new(ResourcePile::ideas(1) + ResourcePile::gold(1), 0, 2)),
         );
         assert_advance_payment_options(
             "one possible payment",
-            ResourcePile::food(1) + ResourcePile::gold(1),
-            AdvancePaymentOptions::new(ResourcePile::food(1) + ResourcePile::gold(1), 0, 0),
+            &(ResourcePile::food(1) + ResourcePile::gold(1)),
+            &(AdvancePaymentOptions::new(ResourcePile::food(1) + ResourcePile::gold(1), 0, 0)),
         );
     }
 
     #[test]
     fn resource_pile_display_test() {
-        assert_to_string(ResourcePile::empty(), "nothing");
-        assert_to_string(ResourcePile::ore(1), "1 ore");
-        assert_to_string(ResourcePile::mood_tokens(2), "2 mood tokens");
+        assert_to_string(&ResourcePile::empty(), "nothing");
+        assert_to_string(&ResourcePile::ore(1), "1 ore");
+        assert_to_string(&ResourcePile::mood_tokens(2), "2 mood tokens");
         assert_to_string(
-            ResourcePile::food(3) + ResourcePile::culture_tokens(1),
+            &(ResourcePile::food(3) + ResourcePile::culture_tokens(1)),
             "3 food and 1 culture token",
         );
         assert_to_string(
-            ResourcePile::ideas(5) + ResourcePile::wood(1) + ResourcePile::gold(10),
+            &(ResourcePile::ideas(5) + ResourcePile::wood(1) + ResourcePile::gold(10)),
             "1 wood, 5 ideas and 10 gold",
         );
     }

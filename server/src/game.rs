@@ -48,6 +48,12 @@ pub struct Game {
 }
 
 impl Game {
+    /// Creates a new [`Game`].
+    ///
+    /// # Panics
+    ///
+    /// Panics if there is an internal bug
+    #[must_use]
     pub fn new(player_amount: usize, seed: String) -> Self {
         let seed_length = seed.len();
         let seed = if seed_length < 32 {
@@ -62,7 +68,7 @@ impl Game {
         let mut rng = StdRng::from_seed(seed);
 
         let mut players = Vec::new();
-        let mut civilizations = civilizations::get_civilizations();
+        let mut civilizations = civilizations::get_all();
         for i in 0..player_amount {
             let civilization = rng.gen_range(0..civilizations.len());
             players.push(Player::new(civilizations.remove(civilization), i));
@@ -74,7 +80,7 @@ impl Game {
             dice_roll_outcomes.push(rng.gen_range(1..=12));
         }
 
-        let mut wonders = wonders::get_wonders();
+        let mut wonders = wonders::get_all();
         wonders.shuffle(&mut rng);
         let wonder_amount = wonders.len();
 
@@ -109,6 +115,12 @@ impl Game {
         }
     }
 
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if any wonder does not exist
+    #[must_use]
     pub fn from_data(data: GameData) -> Self {
         let mut game = Self {
             state: data.state,
@@ -140,21 +152,18 @@ impl Game {
             wonder_amount_left: data.wonder_amount_left,
         };
         let mut players = Vec::new();
-        for player in data.players.into_iter() {
+        for player in data.players {
             players.push(Player::from_data(player, &mut game));
         }
         game.players = players;
         game
     }
 
+    #[must_use]
     pub fn data(self) -> GameData {
         GameData {
             state: self.state,
-            players: self
-                .players
-                .into_iter()
-                .map(|player| player.data())
-                .collect(),
+            players: self.players.into_iter().map(Player::data).collect(),
             map: self.map.data(),
             starting_player_index: self.starting_player_index,
             current_player_index: self.current_player_index,
@@ -180,16 +189,25 @@ impl Game {
         }
     }
 
+    #[must_use]
     pub fn get_player(&self, player_index: usize) -> &Player {
         &self.players[player_index]
     }
 
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if the city does not exist
+    /// if you want to get an option instead, use `Player::get_city` function
+    #[must_use]
     pub fn get_city(&self, player_index: usize, position: Position) -> &City {
         self.get_player(player_index)
             .get_city(position)
             .expect("city not found")
     }
 
+    #[must_use]
     pub fn get_any_city(&self, position: Position) -> Option<&City> {
         self.players
             .iter()
@@ -213,21 +231,23 @@ impl Game {
         self.undo_limit = self.action_log_index;
     }
 
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if the action is illegal
     pub fn execute_action(&mut self, action: Action, player_index: usize) {
-        if player_index != self.current_player_index {
-            panic!("Illegal action");
-        }
+        assert!(player_index == self.current_player_index, "Illegal action");
         if let Action::Undo = action {
-            if !self.can_undo() {
-                panic!("actions revealing new information can't be undone");
-            }
+            assert!(
+                self.can_undo(),
+                "actions revealing new information can't be undone"
+            );
             self.undo(player_index);
             return;
         }
         if let Action::Redo = action {
-            if !self.can_redo() {
-                panic!("no action can be redone");
-            }
+            assert!(self.can_redo(), "no action can be redone");
             self.redo(player_index);
             return;
         }
@@ -241,9 +261,7 @@ impl Game {
                     serde_json::to_string(&action)
                         .expect("status phase action should be serializable"),
                 ));
-                if phase != action.phase {
-                    panic!("Illegal action");
-                }
+                assert!(phase == action.phase, "Illegal action");
                 action.execute(self, player_index);
             }
             CulturalInfluenceResolution {
@@ -263,7 +281,7 @@ impl Game {
                     roll_boost_cost,
                     target_player_index,
                     target_city_position,
-                    city_piece,
+                    &city_piece,
                     player_index,
                 );
             }
@@ -327,7 +345,7 @@ impl Game {
                     *roll_boost_cost,
                     *target_player_index,
                     *target_city_position,
-                    city_piece.clone(),
+                    &city_piece.clone(),
                     player_index,
                 );
             }
@@ -335,10 +353,12 @@ impl Game {
         self.action_log_index += 1;
     }
 
+    #[must_use]
     pub fn can_undo(&self) -> bool {
         self.undo_limit < self.action_log_index
     }
 
+    #[must_use]
     pub fn can_redo(&self) -> bool {
         self.action_log_index < self.action_log.len()
     }
@@ -349,7 +369,7 @@ impl Game {
         roll_boost_cost: u32,
         target_player_index: usize,
         target_city_position: Position,
-        city_piece: Building,
+        city_piece: &Building,
         player_index: usize,
     ) {
         self.state = Playing;
@@ -361,13 +381,13 @@ impl Game {
             player_index,
             target_player_index,
             target_city_position,
-            &city_piece,
-        )
+            city_piece,
+        );
     }
 
     fn undo_cultural_influence_resolution_action(&mut self, action: bool) {
         let cultural_influence_attempt_action = self.action_log[self.action_log_index - 2].as_playing_action().expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
-        println!("action: {}", cultural_influence_attempt_action);
+        println!("action: {cultural_influence_attempt_action}");
         let cultural_influence_attempt_action = serde_json::from_str::<PlayingAction>(cultural_influence_attempt_action).expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
         let PlayingAction::InfluenceCultureAttempt {
             starting_city_position: _,
@@ -457,7 +477,7 @@ impl Game {
         self.add_info_log_item(format!(
             "The game has entered the {} status phase",
             utils::ordinal_number(self.age)
-        ))
+        ));
     }
 
     pub fn next_age(&mut self) {
@@ -515,6 +535,7 @@ impl Game {
         }
     }
 
+    #[must_use]
     pub fn get_available_custom_actions(&self) -> Vec<CustomActionType> {
         let custom_actions = &self.players[self.current_player_index].custom_actions;
         custom_actions
@@ -525,13 +546,13 @@ impl Game {
     }
 
     pub fn draw_wonder_card(&mut self, player_index: usize) {
-        let wonder = match self.wonders_left.pop() {
-            Some(wonder) => wonder,
-            None => return,
+        let Some(wonder) = self.wonders_left.pop() else {
+            return;
         };
+
         self.wonder_amount_left -= 1;
         self.players[player_index].wonder_cards.push(wonder);
-        self.lock_undo()
+        self.lock_undo();
     }
 
     pub fn kill_leader(&mut self, player_index: usize) {
@@ -550,6 +571,11 @@ impl Game {
         self.players[player_index].active_leader = Some(new_leader);
     }
 
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if advance does not exist
     pub fn advance(&mut self, advance: &str, player_index: usize) {
         self.players[player_index].take_events(|events, player| {
             events.on_advance.trigger(player, &advance.to_string(), &());
@@ -589,6 +615,11 @@ impl Game {
         }
     }
 
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if advance does not exist
     pub fn undo_advance(&mut self, advance: &str, player_index: usize) {
         self.players[player_index].take_events(|events, player| {
             events
@@ -631,6 +662,11 @@ impl Game {
         //todo
     }
 
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if advance does not exist
     pub fn remove_advance(&mut self, advance: &str, player_index: usize) {
         utils::remove_element(
             &mut self.players[player_index].advances,
@@ -658,6 +694,11 @@ impl Game {
         self.players[player_index].unlocked_special_advances.pop();
     }
 
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if city does not exist
     pub fn conquer_city(
         &mut self,
         position: Position,
@@ -670,6 +711,11 @@ impl Game {
             .conquer(self, new_player_index, old_player_index);
     }
 
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if city does not exist
     pub fn raze_city(&mut self, position: Position, player_index: usize) {
         let city = self.players[player_index]
             .take_city(position)
@@ -677,6 +723,11 @@ impl Game {
         city.raze(self, player_index);
     }
 
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if city does not exist
     pub fn build_wonder(&mut self, wonder: Wonder, city_position: Position, player_index: usize) {
         self.players[player_index].take_events(|events, player| {
             events
@@ -698,6 +749,11 @@ impl Game {
             .push(wonder);
     }
 
+    /// .
+    ///
+    /// # Panics
+    ///
+    /// Panics if city or wonder does not exist
     pub fn undo_build_wonder(&mut self, city_position: Position, player_index: usize) -> Wonder {
         let player = &mut self.players[player_index];
         player.wonders_build -= 1;
@@ -720,6 +776,7 @@ impl Game {
         wonder
     }
 
+    #[must_use]
     pub fn influence_culture_boost_cost(
         &self,
         player_index: usize,
@@ -737,14 +794,11 @@ impl Game {
         let self_influence = starting_city_position == target_city_position;
         let target_city = self.get_city(target_player_index, target_city_position);
         let target_city_owner = target_city.player_index;
-        let target_building_owner = target_city
-            .city_pieces
-            .building_owner(city_piece)
-            .expect("Illegal action");
+        let target_building_owner = target_city.city_pieces.building_owner(city_piece)?;
         let player = &self.players[player_index];
         if matches!(&city_piece, Building::Obelisk)
             || starting_city.player_index != player_index
-            || !player.resources().can_afford(&range_boost_cost)
+            || !player.resources.can_afford(&range_boost_cost)
             || (starting_city.influenced() && !self_influence)
             || self.successful_cultural_influence
             || !player.available_buildings.can_build(city_piece)
@@ -757,7 +811,12 @@ impl Game {
         }
     }
 
-    //this function assumes action is legal
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if the influenced player does not have the influenced city
+    /// This function assumes the action is legal
     pub fn influence_culture(
         &mut self,
         influencer_index: usize,
@@ -767,7 +826,7 @@ impl Game {
     ) {
         self.players[influenced_player_index]
             .get_city_mut(city_position)
-            .expect("influenced should have influenced city")
+            .expect("influenced player should have influenced city")
             .city_pieces
             .set_building(building, influencer_index);
         self.players[influencer_index].influenced_buildings += 1;
@@ -776,6 +835,11 @@ impl Game {
         self.players[influencer_index].available_buildings -= building;
     }
 
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if the influenced player does not have the influenced city
     pub fn undo_influence_culture(
         &mut self,
         influencer_index: usize,
@@ -785,7 +849,7 @@ impl Game {
     ) {
         self.players[influenced_player_index]
             .get_city_mut(city_position)
-            .expect("influenced should have influenced city")
+            .expect("influenced player should have influenced city")
             .city_pieces
             .set_building(building, influenced_player_index);
         self.players[influencer_index].influenced_buildings -= 1;
@@ -843,6 +907,7 @@ pub struct Messages {
 }
 
 impl Messages {
+    #[must_use]
     pub fn new(messages: Vec<String>, data: GameData) -> Self {
         Self { messages, data }
     }
@@ -860,11 +925,13 @@ pub mod tests {
         player::Player,
         position::Position,
         resource_pile::ResourcePile,
+        utils,
         wonder::Wonder,
     };
 
     use super::{Game, GameState::Playing};
 
+    #[must_use]
     pub fn test_game() -> Game {
         Game {
             state: Playing,
@@ -912,7 +979,10 @@ pub mod tests {
         game.players[old].construct(&Academy, position, None);
         game.players[old].construct(&Obelisk, position, None);
 
-        assert_eq!(8.0, game.players[old].victory_points());
+        assert!(utils::tests::eq_f32(
+            8.0,
+            game.players[old].victory_points()
+        ));
 
         game.conquer_city(position, new, old);
 
@@ -922,8 +992,8 @@ pub mod tests {
 
         let old = &game.players[old];
         let new = &game.players[new];
-        assert_eq!(4.0, old.victory_points());
-        assert_eq!(5.0, new.victory_points());
+        assert!(utils::tests::eq_f32(4.0, old.victory_points()));
+        assert!(utils::tests::eq_f32(5.0, new.victory_points()));
         assert_eq!(0, old.wonders.len());
         assert_eq!(1, new.wonders.len());
         assert_eq!(1, old.influenced_buildings);

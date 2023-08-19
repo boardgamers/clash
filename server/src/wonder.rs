@@ -27,7 +27,7 @@ impl Wonder {
             cost,
             required_advances
                 .into_iter()
-                .map(|name| name.to_string())
+                .map(ToString::to_string)
                 .collect(),
         )
     }

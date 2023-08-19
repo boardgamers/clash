@@ -1,3 +1,14 @@
+#![warn(clippy::pedantic)]
+#![allow(clippy::similar_names)]
+#![allow(clippy::enum_glob_use)]
+#![allow(clippy::too_many_lines)]
+#![allow(clippy::module_name_repetitions)]
+#![allow(clippy::cast_possible_truncation)]
+#![allow(clippy::cast_lossless)]
+#![allow(clippy::cast_sign_loss)]
+#![allow(clippy::cast_precision_loss)]
+#![allow(clippy::cast_possible_wrap)]
+
 mod ability_initializer;
 pub mod action;
 mod advance;
