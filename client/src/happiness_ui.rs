@@ -14,7 +14,7 @@ use server::resource_pile::ResourcePile;
 pub fn init_increase_happiness(
     player: &Player,
     city: &City,
-    pos: &Position,
+    pos: Position,
     increase_happiness: &IncreaseHappiness,
 ) -> IncreaseHappiness {
     let mut total_cost = increase_happiness.cost.clone();
@@ -26,10 +26,10 @@ pub fn init_increase_happiness(
             if p == pos {
                 if let Some(r) = increase_happiness_steps(player, city, &total_cost, old_steps) {
                     total_cost = r.1;
-                    return (p.clone(), r.0);
+                    return (*p, r.0);
                 };
             }
-            (p.clone(), old_steps)
+            (*p, old_steps)
         })
         .collect();
 
@@ -85,7 +85,7 @@ pub fn show_increase_happiness(game: &Game, player_index: usize, state: &State) 
             game.get_player(player_index)
                 .cities
                 .iter()
-                .map(|c| (c.position.clone(), 0))
+                .map(|c| (c.position, 0))
                 .collect(),
             ResourcePile::empty(),
         ));

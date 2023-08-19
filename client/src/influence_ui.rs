@@ -10,7 +10,7 @@ pub fn add_influence_button(
     game: &Game,
     menu: &CityMenu,
     ui: &mut Ui,
-    closest_city_pos: &Position,
+    closest_city_pos: Position,
     building: &Building,
     building_name: &str,
 ) -> StateUpdate {
@@ -33,9 +33,9 @@ pub fn add_influence_button(
             ) {
                 return StateUpdate::Execute(
                     Action::Playing(PlayingAction::InfluenceCultureAttempt {
-                        starting_city_position: start_position.clone(),
+                        starting_city_position: *start_position,
                         target_player_index: menu.city_owner_index,
-                        target_city_position: menu.city_position.clone(),
+                        target_city_position: *menu.city_position,
                         city_piece: building.clone(),
                     }),
                 );
@@ -52,5 +52,4 @@ pub fn closest_city(game: &Game, menu: &CityMenu) -> Position {
         .min_by_key(|c| c.position.distance(menu.city_position))
         .unwrap()
         .position
-        .clone()
 }

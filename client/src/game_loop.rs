@@ -46,10 +46,10 @@ fn game_loop(game: &Game, state: &State) -> StateUpdate {
     updates.add(show_increase_happiness(game, player_index, state));
     updates.add(show_global_controls(game));
 
-    if let Some((city_owner_index, city_position)) = state.focused_city.clone() {
+    if let Some((city_owner_index, city_position)) = state.focused_city {
         updates.add(show_city_menu(
             game,
-            CityMenu::new(player_index, city_owner_index, &city_position),
+            CityMenu::new(player_index, city_owner_index, city_position),
         ));
     }
 
@@ -89,7 +89,7 @@ pub fn try_click(game: &Game, state: &State) -> StateUpdate {
         let pos = Position::from_coordinate(pixel_to_coordinate(x, y));
 
         match &state.active_dialog {
-            ActiveDialog::CollectResources(col) => return click_collect_option(col, pos.clone()),
+            ActiveDialog::CollectResources(col) => return click_collect_option(col, pos),
             _ => {
                 if let Some(c) = game.get_any_city(&pos) {
                     return city_ui::city_click(state, game.get_player(c.player_index), c);

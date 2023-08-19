@@ -74,10 +74,7 @@ impl StateUpdates {
     pub fn result(self) -> StateUpdate {
         self.updates
             .into_iter()
-            .find(|u| match u {
-                StateUpdate::None => false,
-                _ => true,
-            })
+            .find(|u| !matches!(u, StateUpdate::None))
             .unwrap_or(StateUpdate::None)
     }
 }
@@ -174,14 +171,14 @@ pub fn can_play_action(game: &Game) -> bool {
     game.state == GameState::Playing && game.actions_left > 0
 }
 
-pub struct CityMenu<'a> {
+pub struct CityMenu {
     pub player_index: usize,
     pub city_owner_index: usize,
-    pub city_position: &'a Position,
+    pub city_position: Position,
 }
 
-impl<'a> CityMenu<'a> {
-    pub fn new(player_index: usize, city_owner_index: usize, city_position: &'a Position) -> Self {
+impl CityMenu {
+    pub fn new(player_index: usize, city_owner_index: usize, city_position: Position) -> Self {
         CityMenu {
             player_index,
             city_owner_index,
@@ -189,15 +186,15 @@ impl<'a> CityMenu<'a> {
         }
     }
 
-    pub fn get_player(&self, game: &'a Game) -> &'a Player {
+    pub fn get_player(&self, game: &Game) -> &Player {
         game.get_player(self.player_index)
     }
 
-    pub fn get_city_owner(&self, game: &'a Game) -> &Player {
+    pub fn get_city_owner(&self, game: &Game) -> &Player {
         game.get_player(self.city_owner_index)
     }
 
-    pub fn get_city(&self, game: &'a Game) -> &City {
+    pub fn get_city(&self, game: &Game) -> &City {
         return game.get_city(self.city_owner_index, self.city_position);
     }
 

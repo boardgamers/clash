@@ -24,7 +24,7 @@ pub fn show_city_menu(game: &Game, menu: CityMenu) -> StateUpdate {
         if can_play && ui.button(None, "Collect Resources") {
             updates.add(StateUpdate::SetDialog(ActiveDialog::CollectResources(CollectResources::new(
                 menu.player_index,
-                menu.city_position.clone(),
+                menu.city_position,
                 possible_resource_collections(game, menu.city_position, menu.city_owner_index),
             ))));
         }
@@ -44,7 +44,7 @@ fn add_building_actions(
     menu: &CityMenu,
     ui: &mut Ui,
 ) -> StateUpdate {
-    let closest_city_pos = &influence_ui::closest_city(&game, menu);
+    let closest_city_pos = influence_ui::closest_city(game, menu);
 
     if !can_play_action(game) {
         return StateUpdate::None;
@@ -59,7 +59,7 @@ fn add_building_actions(
 }
 
 pub fn draw_city(owner: &Player, city: &City, state: &State) {
-    let c = hex_ui::center(&city.position).to_screen();
+    let c = hex_ui::center(city.position).to_screen();
 
     if city.is_activated() {
         draw_circle(c.x, c.y, 18.0, WHITE);
@@ -72,12 +72,12 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
             .iter()
             .find(|(p, _)| p == &city.position)
             .map_or(String::new(), |(_, s)| format!("{}", s));
-        draw_hex_center_text(&city.position, &steps);
+        draw_hex_center_text(city.position, &steps);
     } else {
         match city.mood_state {
-            MoodState::Happy => draw_hex_center_text(&city.position, "+"),
+            MoodState::Happy => draw_hex_center_text(city.position, "+"),
             MoodState::Neutral => {}
-            MoodState::Angry => draw_hex_center_text(&city.position, "-"),
+            MoodState::Angry => draw_hex_center_text(city.position, "-"),
         }
     }
 
@@ -134,7 +134,7 @@ fn building_names() -> [(Building, &'static str); 7] {
 }
 
 pub fn city_click(state: &State, player: &Player, city: &City) -> StateUpdate {
-    let pos = &city.position;
+    let pos = city.position;
 
     if let Some(increase_happiness) = &state.increase_happiness {
         StateUpdate::SetIncreaseHappiness(init_increase_happiness(
@@ -144,6 +144,6 @@ pub fn city_click(state: &State, player: &Player, city: &City) -> StateUpdate {
             increase_happiness,
         ))
     } else {
-        StateUpdate::FocusCity(player.index, pos.clone())
+        StateUpdate::FocusCity(player.index, pos)
     }
 }

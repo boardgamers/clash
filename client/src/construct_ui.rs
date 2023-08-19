@@ -33,13 +33,13 @@ pub fn add_construct_button(
                 format!(
                     "Build {}{}",
                     name,
-                    pos.clone().map_or("".to_string(), |p| format!(" at {}", p))
+                    pos.map_or("".to_string(), |p| format!(" at {}", p))
                 ),
             ) {
                 updates.add(StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
                     game,
                     menu.player_index,
-                    menu.city_position.clone(),
+                    *menu.city_position,
                     ConstructionProject::Building(building.clone(), pos),
                 ))));
             }
@@ -57,7 +57,7 @@ fn building_positions(building: &Building, city: &City, map: &Map) -> Vec<Option
         .iter()
         .filter_map(|(p, t)| {
             if *t == Terrain::Water && city.position.is_neighbor(p) {
-                Some(Some(p.clone()))
+                Some(Some(*p))
             } else {
                 None
             }
@@ -76,7 +76,7 @@ pub fn add_wonder_buttons(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpd
             updates.add(StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
                 game,
                 menu.player_index,
-                menu.city_position.clone(),
+                *menu.city_position,
                 ConstructionProject::Wonder(w.name.clone()),
             ))));
         }
@@ -91,10 +91,10 @@ pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> St
         |cp| match &cp.project {
             ConstructionProject::Building(b, pos) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Construct {
-                    city_position: cp.city_position.clone(),
+                    city_position: cp.city_position,
                     city_piece: b.clone(),
                     payment: cp.payment.to_resource_pile(),
-                    port_position: pos.clone(),
+                    port_position: *pos,
                     temple_bonus: None,
                 }),
                 vec![],
@@ -102,7 +102,7 @@ pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> St
             ),
             ConstructionProject::Wonder(w) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Custom(CustomAction::ConstructWonder {
-                    city_position: cp.city_position.clone(),
+                    city_position: cp.city_position,
                     payment: cp.payment.to_resource_pile(),
                     wonder: w.clone(),
                 })),
@@ -165,7 +165,7 @@ impl ConstructionPayment {
         let p = game.get_player(player_index);
         let cost = match &project {
             ConstructionProject::Building(b, _) => {
-                p.construct_cost(b, p.get_city(&city_position).unwrap())
+                p.construct_cost(b, p.get_city(city_position).unwrap())
             }
             ConstructionProject::Wonder(name) => p
                 .wonder_cards
@@ -182,7 +182,7 @@ impl ConstructionPayment {
 
         ConstructionPayment {
             player_index,
-            city_position: city_position.clone(),
+            city_position,
             project,
             payment,
             payment_options,

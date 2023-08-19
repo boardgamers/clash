@@ -5,7 +5,7 @@ use macroquad::hash;
 use macroquad::math::{bool, vec2};
 use macroquad::ui::root_ui;
 use server::action::Action;
-use server::content::advances::get_technologies;
+use server::content::advances::get_all_advances;
 use server::game::Game;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::AdvancePaymentOptions;
@@ -76,7 +76,7 @@ pub fn show_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
     let mut updates = StateUpdates::new();
 
     root_ui().window(hash!(), vec2(20., 900.), vec2(400., 200.), |ui| {
-        for a in get_technologies().into_iter() {
+        for a in get_all_advances().into_iter() {
             let name = a.name;
             let p = game.get_player(player_index);
             if can_play_action(game) && p.can_advance(&name) {
