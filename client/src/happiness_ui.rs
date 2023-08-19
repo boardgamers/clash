@@ -1,4 +1,4 @@
-use crate::ui_state::{can_play_action, IncreaseHappiness, State};
+use crate::ui_state::{StateUpdate, can_play_action, IncreaseHappiness, State};
 use macroquad::color::BLACK;
 use macroquad::math::vec2;
 use macroquad::prelude::draw_text;
@@ -11,7 +11,7 @@ use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
-pub fn increase_happiness_click(
+pub fn init_increase_happiness(
     player: &Player,
     city: &City,
     pos: &Position,
@@ -75,13 +75,12 @@ fn increase_happiness_new_steps(
     None
 }
 
-pub fn show_increase_happiness(game: &mut Game, player_index: usize, state: &mut State) {
+pub fn show_increase_happiness<'a>(game: &Game, player_index: usize, state: &State) -> StateUpdate<'a> {
     let y = 480.;
     if can_play_action(game)
         && root_ui().button(vec2(600., y), "Increase Happiness")
         && state.increase_happiness.is_none()
     {
-        state.clear();
         state.increase_happiness = Some(IncreaseHappiness::new(
             game.get_player(player_index)
                 .cities
@@ -97,13 +96,9 @@ pub fn show_increase_happiness(game: &mut Game, player_index: usize, state: &mut
         } else if increase_happiness.cost != ResourcePile::empty()
             && root_ui().button(vec2(800., y), "Confirm")
         {
-            game.execute_action(
-                Action::Playing(PlayingAction::IncreaseHappiness {
-                    happiness_increases: increase_happiness.steps.clone(),
-                }),
-                player_index,
-            );
-            state.clear();
+            return StateUpdate::Execute(Action::Playing(PlayingAction::IncreaseHappiness {
+                happiness_increases: increase_happiness.steps.clone(),
+            }));
         } else {
             draw_text(
                 &format!("Cost: {}", increase_happiness.cost),
@@ -114,4 +109,5 @@ pub fn show_increase_happiness(game: &mut Game, player_index: usize, state: &mut
             );
         }
     }
+    StateUpdate::None
 }

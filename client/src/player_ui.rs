@@ -8,7 +8,7 @@ use server::game::{Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
 
-use crate::ui_state::ActiveDialogUpdate;
+use crate::ui_state::StateUpdate;
 
 pub fn show_globals(game: &Game) {
     draw_text(&format!("Age {}", game.age), 600., 20., 20., BLACK);
@@ -86,13 +86,13 @@ pub fn show_resources(game: &Game, player_index: usize) {
     res(format!("Culture {}", r.culture_tokens));
 }
 
-pub fn show_global_controls(game: &Game) -> ActiveDialogUpdate {
+pub fn show_global_controls<'a>(game: &Game) -> StateUpdate<'a> {
     let y = 540.;
     if game.can_undo() && root_ui().button(vec2(600., y), "Undo") {
-        return ActiveDialogUpdate::Execute(Action::Undo);
+        return StateUpdate::Execute(Action::Undo);
     }
     if game.can_redo() && root_ui().button(vec2(650., y), "Redo") {
-        return ActiveDialogUpdate::Execute(Action::Redo);
+        return StateUpdate::Execute(Action::Redo);
     }
     if let GameState::CulturalInfluenceResolution {
         roll_boost_cost,
@@ -105,13 +105,13 @@ pub fn show_global_controls(game: &Game) -> ActiveDialogUpdate {
             vec2(600., 480.),
             format!("Cultural Influence Resolution for {}", roll_boost_cost),
         ) {
-            return ActiveDialogUpdate::Execute(Action::CulturalInfluenceResolution(true));
+            return StateUpdate::Execute(Action::CulturalInfluenceResolution(true));
         } else if root_ui().button(vec2(900., 480.), "Decline") {
-            return ActiveDialogUpdate::Execute(Action::CulturalInfluenceResolution(false));
+            return StateUpdate::Execute(Action::CulturalInfluenceResolution(false));
         }
     } else if game.state == GameState::Playing && root_ui().button(vec2(700., y), "End Turn") {
         let left = game.actions_left;
-        return ActiveDialogUpdate::execute(
+        return StateUpdate::execute(
             Action::Playing(PlayingAction::EndTurn),
             if left > 0 {
                 vec![(format!("{left} actions left"))]
@@ -120,7 +120,7 @@ pub fn show_global_controls(game: &Game) -> ActiveDialogUpdate {
             },
         );
     };
-    ActiveDialogUpdate::None
+    StateUpdate::None
 }
 
 pub fn player_color(player_index: usize) -> Color {

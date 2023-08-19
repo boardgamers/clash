@@ -13,7 +13,7 @@ use server::resource_pile::ResourcePile;
 use crate::dialog_ui::active_dialog_window;
 use crate::hex_ui;
 use crate::resource_ui::resource_symbol;
-use crate::ui_state::{ActiveDialog, ActiveDialogUpdate, State};
+use crate::ui_state::{ActiveDialog, StateUpdate, StateUpdates, State};
 
 pub struct CollectResources {
     pub player_index: usize,
@@ -44,8 +44,8 @@ impl CollectResources {
     }
 }
 
-pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> ActiveDialogUpdate {
-    let mut result = ActiveDialogUpdate::None;
+pub fn collect_resources_dialog<'a>(game: &Game, collect: &CollectResources) -> StateUpdate<'a> {
+    let mut updates = StateUpdates::new();
     active_dialog_window(|ui| {
         let city = game.get_city(collect.player_index, &collect.city_position);
         let valid = get_total_collection(
@@ -59,7 +59,7 @@ pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> Acti
         if ui.button(Vec2::new(0., 40.), label) && valid {
             let extra = city.mood_modified_size() - collect.collections.len();
 
-            result = ActiveDialogUpdate::execute_activation(
+            updates.add(StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Collect {
                     city_position: collect.city_position.clone(),
                     collections: collect.collections.clone(),
@@ -69,14 +69,14 @@ pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> Acti
                 } else {
                     vec![]
                 },
-                city.is_activated(),
-            );
+                city,
+            ));
         };
         if ui.button(Vec2::new(80., 40.), "Cancel") {
-            result = ActiveDialogUpdate::Cancel;
+            updates.add(StateUpdate::Cancel);
         };
     });
-    result
+    updates.result()
 }
 
 pub fn possible_resource_collections(
@@ -107,21 +107,26 @@ pub fn possible_resource_collections(
         .collect()
 }
 
-pub fn click_collect_option(col: &mut CollectResources, p: &Position) {
+pub fn click_collect_option<'a>(col: &CollectResources, p: &Position) -> StateUpdate<'a> {
     if let Some(possible) = col.possible_collections.get(p) {
-        if let Some(current) = col
-            .get_collection(p)
-            .and_then(|r| possible.iter().position(|p| p == r))
-        {
-            col.collections.retain(|(pos, _)| pos != p);
-            let next = current + 1;
-            if next < possible.len() {
-                col.collections.push((p.clone(), possible[next].clone()));
+        return StateUpdate::UpdateActiveDialog(Box::new(|ad| {
+            if let ActiveDialog::CollectResources(col) = ad {
+                if let Some(current) = col
+                    .get_collection(p)
+                    .and_then(|r| possible.iter().position(|p| p == r))
+                {
+                    col.collections.retain(|(pos, _)| pos != p);
+                    let next = current + 1;
+                    if next < possible.len() {
+                        col.collections.push((p.clone(), possible[next].clone()));
+                    }
+                } else {
+                    col.collections.push((p.clone(), possible[0].clone()));
+                }
             }
-        } else {
-            col.collections.push((p.clone(), possible[0].clone()));
-        }
+        }));
     }
+    StateUpdate::None
 }
 
 pub fn draw_resource_collect_tile(state: &State, pos: &Position) {

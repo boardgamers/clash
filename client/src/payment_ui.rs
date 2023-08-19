@@ -5,7 +5,7 @@ use server::resource_pile::ResourcePile;
 
 use crate::dialog_ui::active_dialog_window;
 use crate::resource_ui::ResourceType;
-use crate::ui_state::ActiveDialogUpdate;
+use crate::ui_state::{StateUpdate, StateUpdates};
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct ResourcePayment {
@@ -59,15 +59,15 @@ pub trait HasPayment {
     fn payment(&self) -> &Payment;
 }
 
-pub fn payment_dialog<T: HasPayment>(
-    has_payment: &mut T,
+pub fn payment_dialog<'a, T: HasPayment>(
+    has_payment: &T,
     is_valid: impl FnOnce(&T) -> bool,
-    execute_action: impl FnOnce(&T) -> ActiveDialogUpdate,
+    execute_action: impl FnOnce(&T) -> StateUpdate,
     show: impl Fn(&T, ResourceType) -> bool,
-    plus: impl Fn(&mut T, ResourceType),
-    minus: impl Fn(&mut T, ResourceType),
-) -> ActiveDialogUpdate {
-    let mut result = ActiveDialogUpdate::None;
+    plus: impl Fn(&T, ResourceType) -> StateUpdate,
+    minus: impl Fn(&T, ResourceType) -> StateUpdate,
+) -> StateUpdate<'a> {
+    let mut updates = StateUpdates::new();
     active_dialog_window(|ui| {
         for (i, p) in has_payment.payment().resources.clone().iter().enumerate() {
             if show(has_payment, p.resource.clone()) {
@@ -75,10 +75,10 @@ pub fn payment_dialog<T: HasPayment>(
                     let s = format!("{} {}", &p.resource.to_string(), p.current);
                     ui.label(Vec2::new(0., 0.), &s);
                     if p.current > p.min && ui.button(Vec2::new(0., 20.), "-") {
-                        minus(has_payment, p.resource.clone());
+                        updates.add(minus(has_payment, p.resource.clone()));
                     }
                     if p.current < p.max && ui.button(Vec2::new(20., 20.), "+") {
-                        plus(has_payment, p.resource.clone());
+                        updates.add(plus(has_payment, p.resource.clone()));
                     };
                 });
             }
@@ -87,8 +87,8 @@ pub fn payment_dialog<T: HasPayment>(
         let valid = is_valid(has_payment);
         let label = if valid { "OK" } else { "(OK)" };
         if ui.button(Vec2::new(0., 40.), label) && valid {
-            result = execute_action(has_payment);
+            updates.add(execute_action(has_payment));
         };
     });
-    result
+    updates.result()
 }

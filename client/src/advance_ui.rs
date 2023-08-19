@@ -12,7 +12,7 @@ use server::resource_pile::AdvancePaymentOptions;
 
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::resource_ui::{new_resource_map, ResourceType};
-use crate::ui_state::{can_play_action, ActiveDialogUpdate};
+use crate::ui_state::{can_play_action, StateUpdate, StateUpdates};
 use crate::{ActiveDialog, State};
 
 pub struct AdvancePayment {
@@ -71,47 +71,53 @@ impl HasPayment for AdvancePayment {
     }
 }
 
-pub fn show_advance_menu<'a>(game: &'a Game, player_index: usize, state: &'a mut State) {
+pub fn show_advance_menu<'a>(game: &'a Game, player_index: usize) -> StateUpdate<'a> {
+    let mut updates = StateUpdates::new();
+
     root_ui().window(hash!(), vec2(20., 900.), vec2(400., 200.), |ui| {
         for a in get_technologies().into_iter() {
             let name = a.name;
             let p = game.get_player(player_index);
             if can_play_action(game) && p.can_advance(&name) {
                 if ui.button(None, name.clone()) {
-                    state.active_dialog = ActiveDialog::AdvancePayment(AdvancePayment::new(
-                        game,
-                        player_index,
-                        &name,
-                    ));
+                    return updates.add(StateUpdate::NewDialog(ActiveDialog::AdvancePayment(
+                        AdvancePayment::new(game, player_index, &name),
+                    )));
                 }
             } else if p.advances.contains(&name) {
                 ui.label(None, &name);
             }
         }
     });
+
+    updates.result()
 }
 
-pub fn pay_advance_dialog(ap: &mut AdvancePayment) -> ActiveDialogUpdate {
+pub fn pay_advance_dialog<'a>(ap: &AdvancePayment) -> StateUpdate<'a> {
     payment_dialog(
         ap,
         |ap| ap.valid(),
         |ap| {
-            ActiveDialogUpdate::Execute(Action::Playing(PlayingAction::Advance {
+            StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
                 advance: ap.name.to_string(),
                 payment: ap.payment.to_resource_pile(),
             }))
         },
         |ap, r| ap.payment.get(r).max > 0,
         |ap, r| {
-            add(ap, r, 1);
+            add(r, 1)
         },
         |ap, r| {
-            add(ap, r, -1);
+            add(r, -1)
         },
     )
 }
 
-fn add(ap: &mut AdvancePayment, r: ResourceType, i: i32) {
-    let p = ap.payment.get_mut(r);
-    p.current = (p.current as i32 + i) as u32
+fn add<'a>(r: ResourceType, i: i32) -> StateUpdate<'a> {
+    StateUpdate::UpdateActiveDialog(Box::new(|ad| {
+        if let ActiveDialog::AdvancePayment(ap) = ad {
+            let p = ap.payment.get_mut(r);
+            p.current = (p.current as i32 + i) as u32
+        }
+    }))
 }
