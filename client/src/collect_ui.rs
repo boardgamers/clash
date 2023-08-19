@@ -48,11 +48,11 @@ impl CollectResources {
 pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> StateUpdate {
     let mut updates = StateUpdates::new();
     active_dialog_window(|ui| {
-        let city = game.get_city(collect.player_index, &collect.city_position);
+        let city = game.get_city(collect.player_index, collect.city_position);
         let valid = get_total_collection(
             game,
             collect.player_index,
-            &collect.city_position,
+            collect.city_position,
             &collect.collections,
         )
             .is_some();
@@ -89,18 +89,18 @@ pub fn possible_resource_collections(
     let city = game.get_city(player_index, city_pos);
     city_pos
         .neighbors()
-        .iter()
+        .into_iter()
         .chain(iter::once(city_pos))
         .flat_map(|pos| {
-            if city.port_position.as_ref().is_some_and(|p| p == pos) {
-                return Some((*pos, PORT_CHOICES.to_vec()));
+            if city.port_position.is_some_and(|p| p == pos) {
+                return Some((pos, PORT_CHOICES.to_vec()));
             }
-            if let Some(t) = game.map.tiles.get(pos) {
+            if let Some(t) = game.map.tiles.get(&pos) {
                 if let Some(option) = collect_options
                     .get(t)
                     .filter(|_| pos == city_pos || !is_blocked(game, pos))
                 {
-                    return Some((*pos, option.clone()));
+                    return Some((pos, option.clone()));
                 }
             }
             None
@@ -113,7 +113,7 @@ pub fn click_collect_option(col: &CollectResources, p: Position) -> StateUpdate 
     if let Some(possible) = new.possible_collections.get(&p) {
 
         if let Some(current) = new
-            .get_collection(&p)
+            .get_collection(p)
             .and_then(|r| possible.iter().position(|p| p == r))
         {
             new.collections.retain(|(pos, _)| pos != &p);
@@ -132,7 +132,7 @@ pub fn click_collect_option(col: &CollectResources, p: Position) -> StateUpdate 
 
 pub fn draw_resource_collect_tile(state: &State, pos: Position) {
     if let ActiveDialog::CollectResources(collect) = &state.active_dialog {
-        if let Some(possible) = collect.possible_collections.get(pos) {
+        if let Some(possible) = collect.possible_collections.get(&pos) {
             draw_circle_lines(
                 hex_ui::center(pos).to_screen().x,
                 hex_ui::center(pos).to_screen().y,

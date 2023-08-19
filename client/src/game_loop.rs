@@ -91,7 +91,7 @@ pub fn try_click(game: &Game, state: &State) -> StateUpdate {
         match &state.active_dialog {
             ActiveDialog::CollectResources(col) => return click_collect_option(col, pos),
             _ => {
-                if let Some(c) = game.get_any_city(&pos) {
+                if let Some(c) = game.get_any_city(pos) {
                     return city_ui::city_click(state, game.get_player(c.player_index), c);
                 }
             }

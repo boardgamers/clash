@@ -33,9 +33,9 @@ pub fn add_influence_button(
             ) {
                 return StateUpdate::Execute(
                     Action::Playing(PlayingAction::InfluenceCultureAttempt {
-                        starting_city_position: *start_position,
+                        starting_city_position: start_position,
                         target_player_index: menu.city_owner_index,
-                        target_city_position: *menu.city_position,
+                        target_city_position: menu.city_position,
                         city_piece: building.clone(),
                     }),
                 );

@@ -186,15 +186,15 @@ impl CityMenu {
         }
     }
 
-    pub fn get_player(&self, game: &Game) -> &Player {
+    pub fn get_player<'a>(&self, game: &'a Game) -> &'a Player {
         game.get_player(self.player_index)
     }
 
-    pub fn get_city_owner(&self, game: &Game) -> &Player {
+    pub fn get_city_owner<'a>(&self, game: &'a Game) -> &'a Player {
         game.get_player(self.city_owner_index)
     }
 
-    pub fn get_city(&self, game: &Game) -> &City {
+    pub fn get_city<'a>(&self, game: &'a Game) -> &'a City {
         return game.get_city(self.city_owner_index, self.city_position);
     }
 

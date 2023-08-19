@@ -39,7 +39,7 @@ pub fn add_construct_button(
                 updates.add(StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
                     game,
                     menu.player_index,
-                    *menu.city_position,
+                    menu.city_position,
                     ConstructionProject::Building(building.clone(), pos),
                 ))));
             }
@@ -56,7 +56,7 @@ fn building_positions(building: &Building, city: &City, map: &Map) -> Vec<Option
     map.tiles
         .iter()
         .filter_map(|(p, t)| {
-            if *t == Terrain::Water && city.position.is_neighbor(p) {
+            if *t == Terrain::Water && city.position.is_neighbor(*p) {
                 Some(Some(*p))
             } else {
                 None
@@ -76,7 +76,7 @@ pub fn add_wonder_buttons(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpd
             updates.add(StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
                 game,
                 menu.player_index,
-                *menu.city_position,
+                menu.city_position,
                 ConstructionProject::Wonder(w.name.clone()),
             ))));
         }
@@ -98,7 +98,7 @@ pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> St
                     temple_bonus: None,
                 }),
                 vec![],
-                game.get_any_city(&cp.city_position).unwrap()
+                game.get_any_city(cp.city_position).unwrap()
             ),
             ConstructionProject::Wonder(w) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Custom(CustomAction::ConstructWonder {
@@ -107,7 +107,7 @@ pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> St
                     wonder: w.clone(),
                 })),
                 vec![],
-                game.get_any_city(&cp.city_position).unwrap(),
+                game.get_any_city(cp.city_position).unwrap(),
             ),
         },
         |ap, r| match r {
