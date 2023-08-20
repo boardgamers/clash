@@ -732,9 +732,8 @@ impl Player {
 
     pub fn take_unit(&mut self, id: u32) -> Option<Unit> {
         Some(
-            self.units.remove(
-                self.units.iter().position(|unit| unit.id == id)?
-            )
+            self.units
+                .remove(self.units.iter().position(|unit| unit.id == id)?),
         )
     }
 

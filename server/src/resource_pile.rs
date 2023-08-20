@@ -217,6 +217,22 @@ impl ResourcePile {
             || self.mood_tokens > 0 && other.mood_tokens > 0
             || self.culture_tokens > 0 && other.culture_tokens > 0
     }
+
+    #[must_use]
+    pub fn is_valid_payment(&self, payment: &Self) -> bool {
+        payment.can_afford(self) && self.resource_amount() == payment.resource_amount()
+    }
+
+    #[must_use]
+    pub fn resource_amount(&self) -> u32 {
+        self.food
+            + self.wood
+            + self.ore
+            + self.ideas
+            + self.gold as u32
+            + self.mood_tokens
+            + self.culture_tokens
+    }
 }
 
 impl AddAssign for ResourcePile {

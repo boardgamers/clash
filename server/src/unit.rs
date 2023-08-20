@@ -1,5 +1,6 @@
 use std::{
-    ops::{AddAssign, SubAssign}, fmt::Display,
+    fmt::Display,
+    ops::{AddAssign, SubAssign},
 };
 
 use serde::{Deserialize, Serialize};
@@ -19,6 +20,7 @@ pub struct Unit {
 }
 
 impl Unit {
+    #[must_use]
     pub fn new(player_index: usize, position: Position, unit_type: UnitType, id: u32) -> Self {
         Self {
             player_index,
@@ -42,6 +44,7 @@ pub enum UnitType {
 }
 
 impl UnitType {
+    #[must_use]
     pub fn cost(&self) -> ResourcePile {
         match self {
             Settler | Elephant => ResourcePile::food(2),
@@ -52,6 +55,7 @@ impl UnitType {
         }
     }
 
+    #[must_use]
     pub fn is_land_based(&self) -> bool {
         !matches!(self, Ship)
     }
@@ -155,14 +159,15 @@ impl Display for Units {
             unit_types.push(format!(
                 "{} {}",
                 self.settlers,
-                if self.settlers == 1 { "settler" } else { "settlers" }
+                if self.settlers == 1 {
+                    "settler"
+                } else {
+                    "settlers"
+                }
             ));
         }
         if self.infantry > 0 {
-            unit_types.push(format!(
-                "{} infantry",
-                self.infantry,
-            ));
+            unit_types.push(format!("{} infantry", self.infantry,));
         }
         if self.ships > 0 {
             unit_types.push(format!(
@@ -172,22 +177,25 @@ impl Display for Units {
             ));
         }
         if self.cavalry > 0 {
-            unit_types.push(format!(
-                "{} cavalry",
-                self.cavalry,
-            ));
+            unit_types.push(format!("{} cavalry", self.cavalry,));
         }
         if self.elephants > 0 {
             unit_types.push(format!(
                 "{} {}",
                 self.elephants,
-                if self.elephants == 1 { "elephant" } else { "elephants" }
+                if self.elephants == 1 {
+                    "elephant"
+                } else {
+                    "elephants"
+                }
             ));
         }
         if self.leaders > 0 {
-            unit_types.push(
-                if self.leaders == 1 { String::from("a leader") } else { format!("{} leaders", self.leaders) }
-            );
+            unit_types.push(if self.leaders == 1 {
+                String::from("a leader")
+            } else {
+                format!("{} leaders", self.leaders)
+            });
         }
         write!(f, "{}", utils::format_list(&unit_types, "no units"))
     }

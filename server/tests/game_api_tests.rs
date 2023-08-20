@@ -9,6 +9,7 @@ use server::{
     playing_actions::PlayingAction::*,
     position::Position,
     resource_pile::ResourcePile,
+    unit::UnitType::*,
 };
 
 #[test]
@@ -151,6 +152,25 @@ fn basic_actions() {
         .expect("player should have a city at this position")
         .is_activated());
     assert_eq!(0, game.actions_left);
+    let mut game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
+    let player = &mut game.players[0];
+    player.gain_resources(ResourcePile::food(2));
+    let recruit_action = Action::Playing(Recruit {
+        units: vec![Settler],
+        city_position,
+        payment: ResourcePile::food(2),
+        leader_index: None,
+        replaced_units: Vec::new(),
+    });
+    let game = game_api::execute_action(game, recruit_action, 0);
+    let player = &game.players[0];
+    assert_eq!(1, player.units.len());
+    assert_eq!(1, player.next_unit_id);
+    assert_eq!(ResourcePile::ore(1), player.resources);
+    assert!(player
+        .get_city(city_position)
+        .expect("player should have a city at this position")
+        .is_activated());
 }
 
 #[test]

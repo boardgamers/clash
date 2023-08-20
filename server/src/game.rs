@@ -17,7 +17,7 @@ use crate::{
     status_phase::StatusPhaseState::{self, *},
     unit::{
         Unit,
-        UnitType,
+        UnitType::{self, *},
     },
     utils,
     wonder::Wonder,
@@ -684,22 +684,29 @@ impl Game {
         let player = &mut self.players[player_index];
         let mut replaced_units_undo_context = Vec::new();
         for unit in replaced_units {
-            let unit = player.take_unit(unit).expect("the player should have the replaced units");
+            let unit = player
+                .take_unit(unit)
+                .expect("the player should have the replaced units");
             player.available_units += &unit.unit_type;
             replaced_units_undo_context.push(unit);
         }
-        self.replaced_units_undo_context = if replaced_leader.is_some() || !replaced_units_undo_context.is_empty() {
-            Some((replaced_units_undo_context, replaced_leader))
-        } else {
-            None
-        };
+        self.replaced_units_undo_context =
+            if replaced_leader.is_some() || !replaced_units_undo_context.is_empty() {
+                Some((replaced_units_undo_context, replaced_leader))
+            } else {
+                None
+            };
         for unit_type in units {
             player.available_units -= &unit_type;
-            let position = player
+            let city = player
                 .get_city(city_position)
-                .expect("player should have a city at the recruitment position")
-                .port_position
-                .expect("there should be a port in the city");
+                .expect("player should have a city at the recruitment position");
+            let position = match &unit_type {
+                Ship => city
+                    .port_position
+                    .expect("there should be a port in the city"),
+                _ => city_position,
+            };
             let unit = Unit::new(player_index, position, unit_type, player.next_unit_id);
             player.units.push(unit);
             player.next_unit_id += 1;
@@ -737,7 +744,10 @@ impl Game {
         }
         let player = &mut self.players[player_index];
         for _ in 0..units.len() {
-            let unit = player.units.pop().expect("the player should have the recruited units when undoing");
+            let unit = player
+                .units
+                .pop()
+                .expect("the player should have the recruited units when undoing");
             player.available_units += &unit.unit_type;
             player.next_unit_id -= 1;
         }
@@ -751,7 +761,9 @@ impl Game {
                 player.units.push(unit);
             }
             if let Some(replaced_leader) = replaced_leader {
-                let replaced_leader = civilizations::get_leader_by_name(&replaced_leader, &player.civilization.name).expect("there should be a replaced leader in context data");
+                let replaced_leader =
+                    civilizations::get_leader_by_name(&replaced_leader, &player.civilization.name)
+                        .expect("there should be a replaced leader in context data");
                 (replaced_leader.player_initializer)(self, player_index);
                 (replaced_leader.player_one_time_initializer)(self, player_index);
                 let player = &mut self.players[player_index];

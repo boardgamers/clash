@@ -14,7 +14,8 @@ use crate::{
         ChangeGovernmentType, CompleteObjectives, DetermineFirstPlayer, FreeAdvance, RaseSize1City,
         StatusPhaseAction,
     },
-    utils, unit::Units,
+    unit::Units,
+    utils,
 };
 
 #[derive(Serialize, Deserialize, Clone)]
