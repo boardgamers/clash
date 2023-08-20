@@ -207,6 +207,7 @@ impl ResourcePile {
         AdvancePaymentOptions::new(default, food_left, gold_left)
     }
 
+    #[must_use]
     pub fn has_common_resource(&self, other: &Self) -> bool {
         self.food > 0 && other.food > 0
             || self.wood > 0 && other.wood > 0

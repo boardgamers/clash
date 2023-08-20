@@ -1,7 +1,7 @@
 use server::{
     action::Action,
     city::{City, MoodState::*},
-    city_pieces::{AvailableBuildings, Building},
+    city_pieces::{AvailableCityPieces, Building},
     content::custom_actions::CustomAction::*,
     game::{Game, GameState::*},
     game_api,
@@ -64,7 +64,7 @@ fn basic_actions() {
     let player = &game.players[0];
 
     assert_eq!(
-        AvailableBuildings::new(5, 5, 5, 4, 5, 5, 5),
+        AvailableCityPieces::new(5, 5, 5, 4, 5, 5, 5),
         player.available_buildings
     );
 

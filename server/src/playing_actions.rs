@@ -9,7 +9,7 @@ use crate::{
     game::{Game, GameState::*},
     map::Terrain,
     position::Position,
-    resource_pile::ResourcePile,
+    resource_pile::ResourcePile, unit::UnitType,
 };
 
 pub const PORT_CHOICES: [ResourcePile; 3] = [
@@ -58,6 +58,13 @@ pub enum PlayingAction {
     Collect {
         city_position: Position,
         collections: Vec<(Position, ResourcePile)>,
+    },
+    Recruit {
+        units: Vec<UnitType>,
+        city_position: Position,
+        payment: ResourcePile,
+        leader_index: Option<usize>,
+        replaced_units: Vec<u32>,
     },
     IncreaseHappiness {
         happiness_increases: Vec<(Position, u32)>,
@@ -145,6 +152,13 @@ impl PlayingAction {
                 assert!(city.can_activate(), "Illegal action");
                 city.activate();
                 game.players[player_index].gain_resources(total_collect);
+            }
+            Recruit { units, city_position, payment, leader_index, replaced_units } => {
+                let cost = units.iter().map(UnitType::cost).sum();
+                let player = &mut game.players[player_index];
+                assert!(player.can_recruit(&units, city_position, leader_index, &replaced_units) && payment.can_afford(&cost));
+                player.loose_resources(payment);
+                game.recruit(player_index, units, city_position, leader_index, replaced_units);
             }
             IncreaseHappiness {
                 happiness_increases,
@@ -280,6 +294,10 @@ impl PlayingAction {
                     .undo_activate();
                 let total_collect = collections.into_iter().map(|(_, collect)| collect).sum();
                 game.players[player_index].loose_resources(total_collect);
+            }
+            Recruit { units, city_position, payment, leader_index, replaced_units: _ } => {
+                game.players[player_index].loose_resources(payment);
+                game.undo_recruit(player_index, &units, city_position, leader_index);
             }
             IncreaseHappiness {
                 happiness_increases,

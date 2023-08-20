@@ -8,7 +8,7 @@ use std::{
 use crate::{
     city::{City, CityData},
     city_pieces::{
-        AvailableBuildings,
+        AvailableCityPieces,
         Building::{self, *},
     },
     civilization::Civilization,
@@ -22,6 +22,7 @@ use crate::{
     unit::{
         MovementRestriction, Unit,
         UnitType::{self, *},
+        Units,
     },
     utils,
     wonder::Wonder,
@@ -36,7 +37,6 @@ pub const CONSTRUCT_COST: ResourcePile = ResourcePile {
     mood_tokens: 0,
     culture_tokens: 0,
 };
-
 const ADVANCE_COST: u32 = 2;
 const BUILDING_VICTORY_POINTS: f32 = 1.0;
 const ADVANCE_VICTORY_POINTS: f32 = 0.5;
@@ -44,6 +44,24 @@ const OBJECTIVE_VICTORY_POINTS: f32 = 2.0;
 const WONDER_VICTORY_POINTS: f32 = 4.0;
 const DEFEATED_LEADER_VICTORY_POINTS: f32 = 2.0;
 const STACK_LIMIT: usize = 4;
+const SETTLEMENT_LIMIT: u8 = 7;
+const CITY_PIECE_LIMIT: AvailableCityPieces = AvailableCityPieces {
+    academies: 5,
+    markets: 5,
+    obelisks: 5,
+    observatories: 5,
+    fortresses: 5,
+    ports: 5,
+    temples: 5,
+};
+const UNIT_LIMIT: Units = Units {
+    settlers: 4,
+    infantry: 16,
+    ships: 4,
+    cavalry: 4,
+    elephants: 4,
+    leaders: 1,
+};
 
 pub struct Player {
     name: Option<String>,
@@ -68,7 +86,9 @@ pub struct Player {
     pub event_victory_points: f32,
     pub custom_actions: HashSet<CustomActionType>,
     pub wonder_cards: Vec<Wonder>,
-    pub available_buildings: AvailableBuildings,
+    pub available_settlements: u8,
+    pub available_buildings: AvailableCityPieces,
+    pub available_units: Units,
     pub collect_options: HashMap<Terrain, Vec<ResourcePile>>,
     pub next_unit_id: u32,
 }
@@ -213,7 +233,9 @@ impl Player {
                         .expect("player data should have valid wonder cards")
                 })
                 .collect(),
+            available_settlements: data.available_settlements,
             available_buildings: data.available_buildings,
+            available_units: data.available_units,
             collect_options: data
                 .collect_options
                 .into_iter()
@@ -255,7 +277,9 @@ impl Player {
                 .into_iter()
                 .map(|wonder| wonder.name)
                 .collect(),
+            available_settlements: self.available_settlements,
             available_buildings: self.available_buildings,
+            available_units: self.available_units,
             collect_options: self
                 .collect_options
                 .into_iter()
@@ -298,7 +322,9 @@ impl Player {
                 .iter()
                 .map(|wonder| wonder.name.clone())
                 .collect(),
+            available_settlements: self.available_settlements,
             available_buildings: self.available_buildings.clone(),
+            available_units: self.available_units.clone(),
             collect_options: self
                 .collect_options
                 .iter()
@@ -333,7 +359,9 @@ impl Player {
             event_victory_points: 0.0,
             custom_actions: HashSet::new(),
             wonder_cards: Vec::new(),
-            available_buildings: AvailableBuildings::new(5, 5, 5, 5, 5, 5, 5),
+            available_settlements: SETTLEMENT_LIMIT,
+            available_buildings: CITY_PIECE_LIMIT,
+            available_units: UNIT_LIMIT,
             collect_options: HashMap::from([
                 (Mountain, vec![ResourcePile::ore(1)]),
                 (Fertile, vec![ResourcePile::food(1)]),
@@ -622,52 +650,28 @@ impl Player {
     /// # Panics
     ///
     /// Panics if city does not exist
-    pub fn recruit(&mut self, units: Vec<UnitType>, city_position: Position) {
-        for unit_type in units {
-            let unit = Unit::new(self.index, city_position, unit_type, self.next_unit_id);
-            self.units.push(unit);
-            self.next_unit_id += 1;
-        }
-        self.get_city_mut(city_position)
-            .expect("player should have a city at the recruitment position")
-            .activate();
-    }
-
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if city does not exist
-    pub fn undo_recruit(&mut self, units: &Vec<UnitType>, city_position: Position) {
-        for _ in 0..units.len() {
-            self.units.pop();
-            self.next_unit_id -= 1;
-        }
-        self.get_city_mut(city_position)
-            .expect("player should have a city a recruitment position")
-            .undo_activate();
-    }
-
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if city does not exist
     #[must_use]
-    pub fn can_recruit(&self, units: &[UnitType], city_position: Position) -> bool {
+    pub fn can_recruit(
+        &self,
+        units: &[UnitType],
+        city_position: Position,
+        leader_index: Option<usize>,
+        replaced_units: &[u32],
+    ) -> bool {
         let city = self
             .get_city(city_position)
             .expect("player should have a city at the recruitment position");
-        if city.angry_activation {
+        if !city.can_activate() {
             return false;
         }
         let cost = units.iter().map(UnitType::cost).sum();
         if !self.resources.can_afford(&cost) {
             return false;
         }
-        if units
-            .iter()
-            .any(|unit| matches!(unit, Cavalry) || matches!(unit, Elephant))
+        if units.len() > city.mood_modified_size() {
+            return false;
+        }
+        if units.iter().any(|unit| matches!(unit, Cavalry | Elephant))
             && city.city_pieces.market.is_none()
         {
             return false;
@@ -681,10 +685,61 @@ impl Player {
         {
             return false;
         }
+        if units.iter().any(|unit| matches!(unit, UnitType::Leader))
+            && (self.available_leaders.is_empty() || leader_index.is_none())
+        {
+            return false;
+        }
+        if units
+            .iter()
+            .filter(|unit| matches!(unit, UnitType::Leader))
+            .count()
+            > 1
+        {
+            return false;
+        }
+        if leader_index.is_some_and(|leader_index| leader_index >= self.available_leaders.len()) {
+            return false;
+        }
+        let mut units_left = self.available_units.clone();
+        let mut required_units = Units::empty();
+        for unit in units {
+            if !units_left.has_unit(unit) {
+                required_units += unit;
+                continue;
+            }
+            units_left -= unit;
+        }
+        let replaced_units = replaced_units
+            .iter()
+            .map(|id| {
+                self.get_unit(*id)
+                    .expect("player should have units to be replaced")
+                    .unit_type
+                    .clone()
+            })
+            .collect();
+        if required_units != replaced_units {
+            return false;
+        }
         true
     }
 
-    fn get_units(&self, position: Position) -> Vec<&Unit> {
+    #[must_use]
+    pub fn get_unit(&self, id: u32) -> Option<&Unit> {
+        self.units.iter().find(|unit| unit.id == id)
+    }
+
+    pub fn take_unit(&mut self, id: u32) -> Option<Unit> {
+        Some(
+            self.units.remove(
+                self.units.iter().position(|unit| unit.id == id)?
+            )
+        )
+    }
+
+    #[must_use]
+    pub fn get_units(&self, position: Position) -> Vec<&Unit> {
         self.units
             .iter()
             .filter(|unit| unit.position == position)
@@ -732,7 +787,9 @@ pub struct PlayerData {
     defeated_leaders: Vec<String>,
     event_victory_points: f32,
     wonder_cards: Vec<String>,
-    available_buildings: AvailableBuildings,
+    available_settlements: u8,
+    available_buildings: AvailableCityPieces,
+    available_units: Units,
     collect_options: Vec<(Terrain, Vec<ResourcePile>)>,
     next_unit_id: u32,
 }

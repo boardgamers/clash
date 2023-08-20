@@ -218,45 +218,17 @@ impl Building {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct AvailableBuildings {
-    academies: u8,
-    markets: u8,
-    obelisks: u8,
-    observatories: u8,
-    fortresses: u8,
-    ports: u8,
-    temples: u8,
+pub struct AvailableCityPieces {
+    pub academies: u8,
+    pub markets: u8,
+    pub obelisks: u8,
+    pub observatories: u8,
+    pub fortresses: u8,
+    pub ports: u8,
+    pub temples: u8,
 }
 
-impl AddAssign<&Building> for AvailableBuildings {
-    fn add_assign(&mut self, rhs: &Building) {
-        match *rhs {
-            Academy => self.academies += 1,
-            Market => self.markets += 1,
-            Obelisk => self.obelisks += 1,
-            Observatory => self.observatories += 1,
-            Fortress => self.fortresses += 1,
-            Port => self.ports += 1,
-            Temple => self.temples += 1,
-        };
-    }
-}
-
-impl SubAssign<&Building> for AvailableBuildings {
-    fn sub_assign(&mut self, rhs: &Building) {
-        match *rhs {
-            Academy => self.academies -= 1,
-            Market => self.markets -= 1,
-            Obelisk => self.obelisks -= 1,
-            Observatory => self.observatories -= 1,
-            Fortress => self.fortresses -= 1,
-            Port => self.ports -= 1,
-            Temple => self.temples -= 1,
-        };
-    }
-}
-
-impl AvailableBuildings {
+impl AvailableCityPieces {
     #[must_use]
     pub fn new(
         academies: u8,
@@ -289,5 +261,33 @@ impl AvailableBuildings {
             Port => self.ports > 0,
             Temple => self.temples > 0,
         }
+    }
+}
+
+impl AddAssign<&Building> for AvailableCityPieces {
+    fn add_assign(&mut self, rhs: &Building) {
+        match *rhs {
+            Academy => self.academies += 1,
+            Market => self.markets += 1,
+            Obelisk => self.obelisks += 1,
+            Observatory => self.observatories += 1,
+            Fortress => self.fortresses += 1,
+            Port => self.ports += 1,
+            Temple => self.temples += 1,
+        };
+    }
+}
+
+impl SubAssign<&Building> for AvailableCityPieces {
+    fn sub_assign(&mut self, rhs: &Building) {
+        match *rhs {
+            Academy => self.academies -= 1,
+            Market => self.markets -= 1,
+            Obelisk => self.obelisks -= 1,
+            Observatory => self.observatories -= 1,
+            Fortress => self.fortresses -= 1,
+            Port => self.ports -= 1,
+            Temple => self.temples -= 1,
+        };
     }
 }

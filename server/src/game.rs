@@ -15,6 +15,10 @@ use crate::{
     resource_pile::ResourcePile,
     special_advance::SpecialAdvance,
     status_phase::StatusPhaseState::{self, *},
+    unit::{
+        Unit,
+        UnitType,
+    },
     utils,
     wonder::Wonder,
 };
@@ -45,6 +49,7 @@ pub struct Game {
     pub dropped_players: Vec<usize>,
     pub wonders_left: Vec<Wonder>,
     pub wonder_amount_left: usize,
+    replaced_units_undo_context: Option<(Vec<Unit>, Option<String>)>,
 }
 
 impl Game {
@@ -112,6 +117,7 @@ impl Game {
             dropped_players: Vec::new(),
             wonders_left: wonders,
             wonder_amount_left: wonder_amount,
+            replaced_units_undo_context: None,
         }
     }
 
@@ -150,6 +156,7 @@ impl Game {
                 })
                 .collect(),
             wonder_amount_left: data.wonder_amount_left,
+            replaced_units_undo_context: data.replaced_units_undo_context,
         };
         let mut players = Vec::new();
         for player in data.players {
@@ -186,6 +193,7 @@ impl Game {
                 .map(|wonder| wonder.name)
                 .collect(),
             wonder_amount_left: self.wonder_amount_left,
+            replaced_units_undo_context: self.replaced_units_undo_context,
         }
     }
 
@@ -555,14 +563,7 @@ impl Game {
         self.lock_undo();
     }
 
-    pub fn kill_leader(&mut self, player_index: usize) {
-        if let Some(leader) = self.players[player_index].active_leader.take() {
-            (leader.player_deinitializer)(self, player_index);
-        }
-    }
-
     pub fn set_active_leader(&mut self, leader_index: usize, player_index: usize) {
-        self.kill_leader(player_index);
         let new_leader = self.players[player_index]
             .available_leaders
             .remove(leader_index);
@@ -657,6 +658,108 @@ impl Game {
         player.game_event_tokens += 1;
     }
 
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if city does not exist or if a ship is build without a port in the city
+    ///
+    /// this function assumes that the action is legal
+    pub fn recruit(
+        &mut self,
+        player_index: usize,
+        units: Vec<UnitType>,
+        city_position: Position,
+        leader_index: Option<usize>,
+        replaced_units: Vec<u32>,
+    ) {
+        let mut replaced_leader = None;
+        if let Some(leader_index) = leader_index {
+            if let Some(previous_leader) = self.players[player_index].active_leader.take() {
+                (previous_leader.player_deinitializer)(self, player_index);
+                replaced_leader = Some(previous_leader.name);
+            }
+            self.set_active_leader(leader_index, player_index);
+        }
+        let player = &mut self.players[player_index];
+        let mut replaced_units_undo_context = Vec::new();
+        for unit in replaced_units {
+            let unit = player.take_unit(unit).expect("the player should have the replaced units");
+            player.available_units += &unit.unit_type;
+            replaced_units_undo_context.push(unit);
+        }
+        self.replaced_units_undo_context = if replaced_leader.is_some() || !replaced_units_undo_context.is_empty() {
+            Some((replaced_units_undo_context, replaced_leader))
+        } else {
+            None
+        };
+        for unit_type in units {
+            player.available_units -= &unit_type;
+            let position = player
+                .get_city(city_position)
+                .expect("player should have a city at the recruitment position")
+                .port_position
+                .expect("there should be a port in the city");
+            let unit = Unit::new(player_index, position, unit_type, player.next_unit_id);
+            player.units.push(unit);
+            player.next_unit_id += 1;
+        }
+        let city = player
+            .get_city_mut(city_position)
+            .expect("player should have a city at the recruitment position");
+        city.activate();
+        //todo if there are enemy ships at the port and ships are being build a battle starts
+    }
+
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if city does not exist
+    pub fn undo_recruit(
+        &mut self,
+        player_index: usize,
+        units: &Vec<UnitType>,
+        city_position: Position,
+        leader_index: Option<usize>,
+    ) {
+        if let Some(leader_index) = leader_index {
+            let current_leader = self.players[player_index]
+                .active_leader
+                .take()
+                .expect("the player should have an active leader");
+            (current_leader.player_deinitializer)(self, player_index);
+            (current_leader.player_undo_deinitializer)(self, player_index);
+            self.players[player_index]
+                .available_leaders
+                .insert(leader_index, current_leader);
+            self.players[player_index].active_leader = None;
+        }
+        let player = &mut self.players[player_index];
+        for _ in 0..units.len() {
+            let unit = player.units.pop().expect("the player should have the recruited units when undoing");
+            player.available_units += &unit.unit_type;
+            player.next_unit_id -= 1;
+        }
+        player
+            .get_city_mut(city_position)
+            .expect("player should have a city a recruitment position")
+            .undo_activate();
+        if let Some((replaced_units, replaced_leader)) = self.replaced_units_undo_context.take() {
+            for unit in replaced_units {
+                player.available_units -= &unit.unit_type;
+                player.units.push(unit);
+            }
+            if let Some(replaced_leader) = replaced_leader {
+                let replaced_leader = civilizations::get_leader_by_name(&replaced_leader, &player.civilization.name).expect("there should be a replaced leader in context data");
+                (replaced_leader.player_initializer)(self, player_index);
+                (replaced_leader.player_one_time_initializer)(self, player_index);
+                let player = &mut self.players[player_index];
+                player.active_leader = Some(replaced_leader);
+            }
+        }
+    }
+
     fn trigger_game_event(&mut self, _player_index: usize) {
         self.lock_undo();
         //todo
@@ -698,7 +801,7 @@ impl Game {
     ///
     /// # Panics
     ///
-    /// Panics if city does not exist
+    /// Panics if the city does not exist
     pub fn conquer_city(
         &mut self,
         position: Position,
@@ -709,18 +812,21 @@ impl Game {
             .take_city(position)
             .expect("player should own city")
             .conquer(self, new_player_index, old_player_index);
+        self.players[old_player_index].available_settlements += 1;
+        self.players[new_player_index].available_settlements -= 1;
     }
 
     ///
     ///
     /// # Panics
     ///
-    /// Panics if city does not exist
+    /// Panics if the city does not exist
     pub fn raze_city(&mut self, position: Position, player_index: usize) {
         let city = self.players[player_index]
             .take_city(position)
             .expect("player should have this city");
         city.raze(self, player_index);
+        self.players[player_index].available_settlements += 1;
     }
 
     ///
@@ -885,6 +991,7 @@ pub struct GameData {
     dropped_players: Vec<usize>,
     wonders_left: Vec<String>,
     wonder_amount_left: usize,
+    replaced_units_undo_context: Option<(Vec<Unit>, Option<String>)>,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -958,6 +1065,7 @@ pub mod tests {
             dropped_players: Vec::new(),
             wonders_left: Vec::new(),
             wonder_amount_left: 0,
+            replaced_units_undo_context: None,
         }
     }
 
