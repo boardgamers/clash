@@ -68,7 +68,7 @@ fn increase_happiness_new_steps(
                 .expect("invalid steps");
         }
         new_total += new_cost;
-        if player.resources().can_afford(&new_total) {
+        if player.resources.can_afford(&new_total) {
             return Some((new_steps, new_total));
         }
     }

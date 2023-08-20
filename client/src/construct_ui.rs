@@ -180,7 +180,7 @@ impl ConstructionPayment {
                 .clone(),
         };
 
-        let payment_options = p.resources().get_payment_options(&cost);
+        let payment_options = p.resources.get_payment_options(&cost);
 
         let payment = ConstructionPayment::new_payment(&payment_options);
 
