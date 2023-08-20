@@ -132,8 +132,8 @@ pub fn draw_resource_collect_tile(state: &State, pos: Position) {
     if let ActiveDialog::CollectResources(collect) = &state.active_dialog {
         if let Some(possible) = collect.possible_collections.get(&pos) {
             draw_circle_lines(
-                hex_ui::center(pos).to_screen().x,
-                hex_ui::center(pos).to_screen().y,
+                hex_ui::center(pos).x,
+                hex_ui::center(pos).y,
                 18.0,
                 2.0,
                 WHITE,
@@ -141,7 +141,7 @@ pub fn draw_resource_collect_tile(state: &State, pos: Position) {
 
             let col = collect.get_collection(pos);
 
-            let c = hex_ui::center(pos).to_screen();
+            let c = hex_ui::center(pos);
             possible.iter().enumerate().for_each(|(i, res)| {
                 let p = hex_ui::rotate_around(c, 30.0, (90 * i) as i32);
                 let color = if col.is_some_and(|r| r == res) {
