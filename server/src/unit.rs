@@ -5,7 +5,7 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-use crate::{position::Position, resource_pile::ResourcePile, utils};
+use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
 
 use UnitType::*;
 
@@ -30,6 +30,38 @@ impl Unit {
             transporter_position: None,
             id,
         }
+    }
+
+    #[must_use]
+    pub fn can_found_city(&self, game: &Game) -> bool {
+        if !matches!(self.unit_type, Settler) {
+            println!("1");
+            return false;
+        }
+        if self.transporter_position.is_some() {
+            println!("2");
+            return false;
+        }
+        let player = &game.players[self.player_index];
+        if player.get_city(self.position).is_some() {
+            println!("3");
+            return false;
+        }
+        if matches!(
+            game.map
+                .tiles
+                .get(&self.position)
+                .expect("The unit should be at a valid position"),
+            Barren | Exhausted
+        ) {
+            println!("4");
+            return false;
+        }
+        if player.available_settlements == 0 {
+            println!("5");
+            return false;
+        }
+        true
     }
 }
 

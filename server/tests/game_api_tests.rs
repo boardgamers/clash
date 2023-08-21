@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use server::{
     action::Action,
     city::{City, MoodState::*},
@@ -14,7 +16,9 @@ use server::{
 
 #[test]
 fn basic_actions() {
-    let game = game_api::init(1, String::new());
+    let mut game = game_api::init(1, String::new());
+    let founded_city_position = Position::new(0, 1);
+    game.map.tiles = HashMap::from([(founded_city_position, Forest)]);
     let advance_action = Action::Playing(Advance {
         advance: String::from("Math"),
         payment: ResourcePile::food(2),
@@ -49,7 +53,7 @@ fn basic_actions() {
     game.players[0].cities.push(City::new(0, city_position));
     game.players[0]
         .cities
-        .push(City::new(0, Position::new(0, 1)));
+        .push(City::new(0, Position::new(0, 3)));
     game.players[0]
         .cities
         .push(City::new(0, Position::new(0, 2)));
@@ -74,7 +78,7 @@ fn basic_actions() {
         player
             .get_city(city_position)
             .expect("player should have a city at this position")
-            .city_pieces
+            .pieces
             .observatory
     );
     assert_eq!(
@@ -125,7 +129,7 @@ fn basic_actions() {
         player
             .get_city(city_position)
             .expect("player should have a city at this position")
-            .city_pieces
+            .pieces
             .wonders
             .len()
     );
@@ -162,15 +166,32 @@ fn basic_actions() {
         leader_index: None,
         replaced_units: Vec::new(),
     });
-    let game = game_api::execute_action(game, recruit_action, 0);
-    let player = &game.players[0];
+    let mut game = game_api::execute_action(game, recruit_action, 0);
+    let player = &mut game.players[0];
     assert_eq!(1, player.units.len());
     assert_eq!(1, player.next_unit_id);
     assert_eq!(ResourcePile::ore(1), player.resources);
     assert!(player
         .get_city(city_position)
-        .expect("player should have a city at this position")
+        .expect("The player should have a city at this position")
         .is_activated());
+
+    //todo use movement action here instead
+    player.units[0].position = founded_city_position;
+
+    let found_city_action = Action::Playing(FoundCity { settler: 0 });
+    let game = game_api::execute_action(game, found_city_action, 0);
+    let player = &game.players[0];
+    assert_eq!(0, player.units.len());
+    assert_eq!(1, player.next_unit_id);
+    assert_eq!(4, player.cities.len());
+    assert_eq!(
+        1,
+        player
+            .get_city(founded_city_position)
+            .expect("The player should have the founded city")
+            .size()
+    );
 }
 
 #[test]

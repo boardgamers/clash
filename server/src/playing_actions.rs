@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use PlayingAction::*;
 
 use crate::{
+    city::City,
     city_pieces::Building::{self, *},
     content::custom_actions::CustomAction,
     game::{Game, GameState::*},
@@ -48,6 +49,9 @@ pub enum PlayingAction {
     Advance {
         advance: String,
         payment: ResourcePile,
+    },
+    FoundCity {
+        settler: u32,
     },
     Construct {
         city_position: Position,
@@ -95,13 +99,25 @@ impl PlayingAction {
             Advance { advance, payment } => {
                 let player = &mut game.players[player_index];
                 let cost = player.advance_cost(&advance);
-                if !player.can_advance(&advance)
-                    || payment.food + payment.ideas + payment.gold as u32 != cost
-                {
-                    panic!("Illegal action");
-                }
+                assert!(
+                    player.can_advance(&advance)
+                        && payment.food + payment.ideas + payment.gold as u32 == cost,
+                    "Illegal action"
+                );
                 player.loose_resources(payment);
                 game.advance(&advance, player_index);
+            }
+            FoundCity { settler } => {
+                let settler = game.players[player_index]
+                    .take_unit(settler)
+                    .expect("Illegal action");
+                assert!(settler.can_found_city(game), "Illegal action");
+                let player = &mut game.players[player_index];
+                player.available_settlements -= 1;
+                player.available_units.settlers += 1;
+                let city = City::new(player_index, settler.position);
+                player.cities.push(city);
+                game.removed_units_undo_context = Some((vec![settler], None));
             }
             Construct {
                 city_position,
@@ -128,11 +144,11 @@ impl PlayingAction {
                 }
                 if matches!(&city_piece, Temple) {
                     let building_bonus = temple_bonus.expect("Illegal action");
-                    if building_bonus != ResourcePile::mood_tokens(1)
-                        && building_bonus != ResourcePile::culture_tokens(1)
-                    {
-                        panic!("Illegal action");
-                    }
+                    assert!(
+                        building_bonus == ResourcePile::mood_tokens(1)
+                            || building_bonus == ResourcePile::culture_tokens(1),
+                        "Illegal action"
+                    );
                     player.gain_resources(building_bonus);
                 } else if temple_bonus.is_some() {
                     panic!("Illegal action");
@@ -283,6 +299,22 @@ impl PlayingAction {
                 let player = &mut game.players[player_index];
                 player.gain_resources(payment);
                 game.undo_advance(&advance, player_index);
+            }
+            FoundCity { settler: _ } => {
+                let settler = game
+                    .removed_units_undo_context
+                    .take()
+                    .expect("Settler context should be stored in undo context")
+                    .0
+                    .remove(0);
+                let player = &mut game.players[player_index];
+                player.available_settlements += 1;
+                player.available_units.settlers -= 1;
+                player.units.push(settler);
+                player
+                    .cities
+                    .pop()
+                    .expect("The player should have a city after founding one");
             }
             Construct {
                 city_position,

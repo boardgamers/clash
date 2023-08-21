@@ -41,6 +41,6 @@ pub enum Terrain {
     Mountain,
     Fertile,
     Forest,
-    Unusable,
+    Exhausted,
     Water,
 }
