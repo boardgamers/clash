@@ -10,16 +10,19 @@ pub struct Map {
 }
 
 impl Map {
+    #[must_use]
     pub fn new(tiles: HashMap<Position, Terrain>) -> Self {
         Self { tiles }
     }
 
+    #[must_use]
     pub fn data(self) -> MapData {
         MapData {
             tiles: self.tiles.into_iter().collect(),
         }
     }
 
+    #[must_use]
     pub fn from_data(data: MapData) -> Self {
         Self {
             tiles: data.tiles.into_iter().collect(),

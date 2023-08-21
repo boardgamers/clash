@@ -27,7 +27,7 @@ impl Wonder {
             cost,
             required_advances
                 .into_iter()
-                .map(|name| name.to_string())
+                .map(ToString::to_string)
                 .collect(),
         )
     }
@@ -81,7 +81,7 @@ impl WonderBuilder {
             ability_initializer::join_ability_initializers(self.player_undo_deinitializers);
         Wonder {
             name: self.name,
-            description: String::from("● ") + &self.descriptions.join("\n● "),
+            description: String::from("✦ ") + &self.descriptions.join("\n✦ "),
             cost: self.cost,
             required_advances: self.required_advances,
             placement_requirement: self.placement_requirement,

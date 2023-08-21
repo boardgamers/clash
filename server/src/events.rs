@@ -30,9 +30,9 @@ impl<T> Event<T> {
         );
     }
 
-    pub fn trigger(&self, value: T) {
-        for (listener, _, _) in self.listeners.iter() {
-            listener(&value);
+    pub fn trigger(&self, value: &T) {
+        for (listener, _, _) in &self.listeners {
+            listener(value);
         }
     }
 }
@@ -116,14 +116,14 @@ where
 
     pub fn trigger(&self, value: &mut T, info: &U, details: &V) -> Vec<String> {
         let mut modifiers = Vec::new();
-        for (listener, _, _, key) in self.listeners_mut.iter() {
+        for (listener, _, _, key) in &self.listeners_mut {
             let previous_value = value.clone();
             listener(value, info, details);
             if *value != previous_value {
-                modifiers.push(key.clone())
+                modifiers.push(key.clone());
             }
         }
-        for (listener, _, _) in self.listeners.iter() {
+        for (listener, _, _) in &self.listeners {
             listener(value, info, details);
         }
         modifiers
@@ -172,7 +172,7 @@ impl StaticEvent {
     }
 
     pub fn trigger(&self) {
-        for (listener, _, _) in self.listeners.iter() {
+        for (listener, _, _) in &self.listeners {
             listener();
         }
     }
@@ -198,7 +198,7 @@ mod tests {
         event.add_listener_mut(
             |item, _, _| {
                 *item += 1;
-                *item -= 1
+                *item -= 1;
             },
             0,
             String::from("no change"),
@@ -227,6 +227,6 @@ mod tests {
     fn static_event() {
         let mut event = StaticEvent::default();
         event.add_listener(|| panic!(), 0);
-        event.trigger()
+        event.trigger();
     }
 }

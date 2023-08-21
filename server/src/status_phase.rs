@@ -37,9 +37,10 @@ impl StatusPhaseAction {
                 let advance = serde_json::from_str::<FreeAdvance>(&self.data)
                     .expect("data should be valid free advance json")
                     .advance;
-                if !game.players[player_index].can_advance_free(&advance) {
-                    panic!("Illegal action");
-                }
+                assert!(
+                    game.players[player_index].can_advance_free(&advance),
+                    "Illegal action"
+                );
                 game.advance(&advance, player_index);
             }
             StatusPhaseState::RaseSize1City => {
@@ -70,18 +71,17 @@ impl StatusPhaseAction {
                         .government()
                         .expect("player should have a government");
                     let player_government_advances =
-                        advances::get_government_advances(&current_player_government)
+                        advances::get_government(&current_player_government)
                             .into_iter()
                             .enumerate()
                             .filter(|(_, advance)| {
                                 game.players[player_index].has_advance(&advance.name)
                             })
                             .collect::<Vec<(usize, Advance)>>();
-                    let new_government_advances =
-                        advances::get_government_advances(&new_government);
-                    for (tier, advance) in player_government_advances.into_iter() {
+                    let new_government_advances = advances::get_government(&new_government);
+                    for (tier, advance) in player_government_advances {
                         game.remove_advance(&advance.name, player_index);
-                        game.advance(&new_government_advances[tier].name, player_index)
+                        game.advance(&new_government_advances[tier].name, player_index);
                     }
                 }
             }
@@ -136,13 +136,13 @@ fn skip_player(game: &Game, player_index: usize, state: &StatusPhaseState) -> bo
     let player = &game.players[player_index];
     match state {
         StatusPhaseState::CompleteObjectives => true, //todo only skip player if the does'nt have objective cards in his hand (don't skip if the can't complete them unless otherwise specified via setting)
-        StatusPhaseState::FreeAdvance => advances::get_all_advances()
+        StatusPhaseState::FreeAdvance => advances::get_all()
             .into_iter()
             .all(|advance| !player.can_advance_free(&advance.name)),
         StatusPhaseState::RaseSize1City => !player.cities.iter().any(|city| city.size() == 1),
         StatusPhaseState::ChangeGovernmentType => {
             player.government().is_some()
-                && !advances::get_all_advances().into_iter().any(|advance| {
+                && !advances::get_all().into_iter().any(|advance| {
                     !advance
                         .required_advance
                         .is_some_and(|required_advance| !player.has_advance(&required_advance))
@@ -211,7 +211,7 @@ pub fn player_that_chooses_next_first_player(
     dropped_players: &[usize],
 ) -> usize {
     fn score(player: &Player) -> u32 {
-        player.resources().mood_tokens + player.resources().culture_tokens
+        player.resources.mood_tokens + player.resources.culture_tokens
     }
 
     let best = players

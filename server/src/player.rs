@@ -8,7 +8,7 @@ use std::{
 use crate::{
     city::{City, CityData},
     city_pieces::{
-        AvailableBuildings,
+        AvailableCityPieces,
         Building::{self, *},
     },
     civilization::Civilization,
@@ -19,7 +19,11 @@ use crate::{
     player_events::PlayerEvents,
     position::Position,
     resource_pile::{AdvancePaymentOptions, ResourcePile},
-    unit::{MovementRestriction, Unit},
+    unit::{
+        MovementRestriction, Unit,
+        UnitType::{self, *},
+        Units,
+    },
     utils,
     wonder::Wonder,
 };
@@ -33,18 +37,36 @@ pub const CONSTRUCT_COST: ResourcePile = ResourcePile {
     mood_tokens: 0,
     culture_tokens: 0,
 };
-
 const ADVANCE_COST: u32 = 2;
 const BUILDING_VICTORY_POINTS: f32 = 1.0;
 const ADVANCE_VICTORY_POINTS: f32 = 0.5;
 const OBJECTIVE_VICTORY_POINTS: f32 = 2.0;
 const WONDER_VICTORY_POINTS: f32 = 4.0;
 const DEFEATED_LEADER_VICTORY_POINTS: f32 = 2.0;
+const STACK_LIMIT: usize = 4;
+const SETTLEMENT_LIMIT: u8 = 7;
+const CITY_PIECE_LIMIT: AvailableCityPieces = AvailableCityPieces {
+    academies: 5,
+    markets: 5,
+    obelisks: 5,
+    observatories: 5,
+    fortresses: 5,
+    ports: 5,
+    temples: 5,
+};
+const UNIT_LIMIT: Units = Units {
+    settlers: 4,
+    infantry: 16,
+    ships: 4,
+    cavalry: 4,
+    elephants: 4,
+    leaders: 1,
+};
 
 pub struct Player {
     name: Option<String>,
     pub index: usize,
-    resources: ResourcePile,
+    pub resources: ResourcePile,
     pub resource_limit: ResourcePile,
     pub events: Option<PlayerEvents>,
     pub cities: Vec<City>,
@@ -64,8 +86,11 @@ pub struct Player {
     pub event_victory_points: f32,
     pub custom_actions: HashSet<CustomActionType>,
     pub wonder_cards: Vec<Wonder>,
-    pub available_buildings: AvailableBuildings,
+    pub available_settlements: u8,
+    pub available_buildings: AvailableCityPieces,
+    pub available_units: Units,
     pub collect_options: HashMap<Terrain, Vec<ResourcePile>>,
+    pub next_unit_id: u32,
 }
 
 impl Clone for Player {
@@ -116,12 +141,17 @@ impl PartialEq for Player {
 }
 
 impl Player {
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if elements like wonders or advances don't exist
     pub fn from_data(data: PlayerData, game: &mut Game) -> Self {
         let player = Self::from_data_uninitialized(data);
         let player_index = player.index;
         game.players.push(player);
         let advances = mem::take(&mut game.players[player_index].advances);
-        for advance in advances.iter() {
+        for advance in &advances {
             let advance = advances::get_advance_by_name(advance).expect("advance should exist");
             (advance.player_initializer)(game, player_index);
             for i in 0..game.players[player_index]
@@ -150,8 +180,8 @@ impl Player {
             game.players[player_index].active_leader = Some(leader);
         }
         let mut cities = mem::take(&mut game.players[player_index].cities);
-        for city in cities.iter_mut() {
-            for wonder in city.city_pieces.wonders.iter() {
+        for city in &mut cities {
+            for wonder in &city.city_pieces.wonders {
                 (wonder.player_initializer)(game, player_index);
             }
         }
@@ -203,23 +233,27 @@ impl Player {
                         .expect("player data should have valid wonder cards")
                 })
                 .collect(),
+            available_settlements: data.available_settlements,
             available_buildings: data.available_buildings,
+            available_units: data.available_units,
             collect_options: data
                 .collect_options
                 .into_iter()
                 .map(|(terrain, options)| (terrain, options.into_iter().collect()))
                 .collect(),
+            next_unit_id: data.next_unit_id,
         };
         player
     }
 
+    #[must_use]
     pub fn data(self) -> PlayerData {
         PlayerData {
             name: self.name,
             id: self.index,
             resources: self.resources,
             resource_limit: self.resource_limit,
-            cities: self.cities.into_iter().map(|city| city.data()).collect(),
+            cities: self.cities.into_iter().map(City::data).collect(),
             units: self.units,
             civilization: self.civilization.name,
             active_leader: self.active_leader.map(|leader| leader.name),
@@ -243,12 +277,15 @@ impl Player {
                 .into_iter()
                 .map(|wonder| wonder.name)
                 .collect(),
+            available_settlements: self.available_settlements,
             available_buildings: self.available_buildings,
+            available_units: self.available_units,
             collect_options: self
                 .collect_options
                 .into_iter()
                 .map(|(terrain, options)| (terrain, options.into_iter().collect()))
                 .collect(),
+            next_unit_id: self.next_unit_id,
         }
     }
 
@@ -258,7 +295,7 @@ impl Player {
             id: self.index,
             resources: self.resources.clone(),
             resource_limit: self.resource_limit.clone(),
-            cities: self.cities.iter().map(|city| city.cloned_data()).collect(),
+            cities: self.cities.iter().map(City::cloned_data).collect(),
             units: self.units.clone(),
             civilization: self.civilization.name.clone(),
             active_leader: self
@@ -285,15 +322,19 @@ impl Player {
                 .iter()
                 .map(|wonder| wonder.name.clone())
                 .collect(),
+            available_settlements: self.available_settlements,
             available_buildings: self.available_buildings.clone(),
+            available_units: self.available_units.clone(),
             collect_options: self
                 .collect_options
                 .iter()
-                .map(|(terrain, options)| (terrain.clone(), options.to_vec()))
+                .map(|(terrain, options)| (terrain.clone(), options.clone()))
                 .collect(),
+            next_unit_id: self.next_unit_id,
         }
     }
 
+    #[must_use]
     pub fn new(civilization: Civilization, index: usize) -> Self {
         Self {
             name: None,
@@ -318,20 +359,23 @@ impl Player {
             event_victory_points: 0.0,
             custom_actions: HashSet::new(),
             wonder_cards: Vec::new(),
-            available_buildings: AvailableBuildings::new(5, 5, 5, 5, 5, 5, 5),
+            available_settlements: SETTLEMENT_LIMIT,
+            available_buildings: CITY_PIECE_LIMIT,
+            available_units: UNIT_LIMIT,
             collect_options: HashMap::from([
                 (Mountain, vec![ResourcePile::ore(1)]),
                 (Fertile, vec![ResourcePile::food(1)]),
                 (Forest, vec![ResourcePile::wood(1)]),
             ]),
+            next_unit_id: 0,
         }
     }
 
     pub fn end_turn(&mut self) {
-        for city in self.cities.iter_mut() {
+        for city in &mut self.cities {
             city.deactivate();
         }
-        for unit in self.units.iter_mut() {
+        for unit in &mut self.units {
             unit.movement_restriction = MovementRestriction::None;
         }
     }
@@ -340,21 +384,25 @@ impl Player {
         self.name = Some(name);
     }
 
+    #[must_use]
     pub fn get_name(&self) -> String {
         self.name
             .clone()
             .unwrap_or(format!("Player{}", self.index + 1))
     }
 
+    /// Returns the government of this [`Player`].
+    ///
+    /// # Panics
+    ///
+    /// Panics if the player has advances which don't exist
+    #[must_use]
     pub fn government(&self) -> Option<String> {
-        self.advances
-            .iter()
-            .filter_map(|advance| {
-                advances::get_advance_by_name(advance)
-                    .expect("all player owned advances should exist")
-                    .government
-            })
-            .next()
+        self.advances.iter().find_map(|advance| {
+            advances::get_advance_by_name(advance)
+                .expect("all player owned advances should exist")
+                .government
+        })
     }
 
     pub fn gain_resources(&mut self, resources: ResourcePile) {
@@ -366,10 +414,12 @@ impl Player {
         self.resources -= resources;
     }
 
-    pub fn resources(&self) -> &ResourcePile {
-        &self.resources
-    }
-
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if advance does not exist
+    #[must_use]
     pub fn can_advance_free(&self, advance: &str) -> bool {
         let advance = advances::get_advance_by_name(advance).expect("advance should exist");
         if self.has_advance(&advance.name) {
@@ -388,6 +438,7 @@ impl Player {
         true
     }
 
+    #[must_use]
     pub fn can_advance(&self, advance: &str) -> bool {
         if self.resources.food + self.resources.ideas + (self.resources.gold as u32)
             < self.advance_cost(advance)
@@ -397,13 +448,15 @@ impl Player {
         self.can_advance_free(advance)
     }
 
+    #[must_use]
     pub fn has_advance(&self, advance: &str) -> bool {
         self.advances.iter().any(|advances| advances == advance)
     }
 
+    #[must_use]
     pub fn victory_points(&self) -> f32 {
         let mut victory_points = 0.0;
-        for city in self.cities.iter() {
+        for city in &self.cities {
             victory_points += city.uninfluenced_buildings() as f32 * BUILDING_VICTORY_POINTS;
             victory_points += 1.0;
         }
@@ -422,6 +475,7 @@ impl Player {
         utils::remove_element(&mut self.wonders, &wonder.name);
     }
 
+    #[must_use]
     pub fn game_event_tokens(&self) -> u8 {
         self.game_event_tokens
     }
@@ -431,14 +485,15 @@ impl Player {
         //todo strip information about other hand cards
     }
 
+    #[must_use]
     pub fn compare_score(&self, other: &Self) -> Ordering {
         let mut building_score = 0;
-        for city in self.cities.iter() {
+        for city in &self.cities {
             building_score += city.uninfluenced_buildings();
         }
         building_score += self.influenced_buildings;
         let mut other_building_score = 0;
-        for city in self.cities.iter() {
+        for city in &self.cities {
             other_building_score += city.uninfluenced_buildings();
         }
         other_building_score += self.influenced_buildings;
@@ -474,6 +529,7 @@ impl Player {
             .total_cmp(&other.event_victory_points)
     }
 
+    #[must_use]
     pub fn construct_cost(&self, building: &Building, city: &City) -> ResourcePile {
         let mut cost = CONSTRUCT_COST;
         self.get_events()
@@ -482,6 +538,7 @@ impl Player {
         cost
     }
 
+    #[must_use]
     pub fn wonder_cost(&self, wonder: &Wonder, city: &City) -> ResourcePile {
         let mut cost = wonder.cost.clone();
         self.get_events()
@@ -490,6 +547,7 @@ impl Player {
         cost
     }
 
+    #[must_use]
     pub fn advance_cost(&self, advance: &str) -> u32 {
         let mut cost = ADVANCE_COST;
         self.get_events()
@@ -498,11 +556,13 @@ impl Player {
         cost
     }
 
+    #[must_use]
     pub fn get_advance_payment_options(&self, advance: &str) -> AdvancePaymentOptions {
-        self.resources()
+        self.resources
             .get_advance_payment_options(self.advance_cost(advance))
     }
 
+    #[must_use]
     pub fn get_city(&self, position: Position) -> Option<&City> {
         let position = self
             .cities
@@ -529,6 +589,11 @@ impl Player {
         )
     }
 
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if city does not exist
     pub fn construct(
         &mut self,
         building: &Building,
@@ -550,11 +615,16 @@ impl Player {
             city.port_position = Some(port_position);
         }
         if matches!(building, Academy) {
-            self.gain_resources(ResourcePile::ideas(2))
+            self.gain_resources(ResourcePile::ideas(2));
         }
         self.available_buildings -= building;
     }
 
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if city does not exist
     pub fn undo_construct(&mut self, building: &Building, city_position: Position) {
         self.take_events(|events, player| {
             events
@@ -570,15 +640,120 @@ impl Player {
             city.port_position = None;
         }
         if matches!(building, Academy) {
-            self.loose_resources(ResourcePile::ideas(2))
+            self.loose_resources(ResourcePile::ideas(2));
         }
         self.available_buildings += building;
+    }
+
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if city does not exist
+    #[must_use]
+    pub fn can_recruit(
+        &self,
+        units: &[UnitType],
+        city_position: Position,
+        leader_index: Option<usize>,
+        replaced_units: &[u32],
+    ) -> bool {
+        let city = self
+            .get_city(city_position)
+            .expect("player should have a city at the recruitment position");
+        if !city.can_activate() {
+            return false;
+        }
+        let cost = units.iter().map(UnitType::cost).sum();
+        if !self.resources.can_afford(&cost) {
+            return false;
+        }
+        if units.len() > city.mood_modified_size() {
+            return false;
+        }
+        if units.iter().any(|unit| matches!(unit, Cavalry | Elephant))
+            && city.city_pieces.market.is_none()
+        {
+            return false;
+        }
+        if units.iter().any(|unit| matches!(unit, Ship)) && city.city_pieces.port.is_none() {
+            return false;
+        }
+        if self.get_units(city_position).len()
+            + units.iter().filter(|unit| unit.is_land_based()).count()
+            > STACK_LIMIT
+        {
+            return false;
+        }
+        if units.iter().any(|unit| matches!(unit, UnitType::Leader))
+            && (self.available_leaders.is_empty() || leader_index.is_none())
+        {
+            return false;
+        }
+        if units
+            .iter()
+            .filter(|unit| matches!(unit, UnitType::Leader))
+            .count()
+            > 1
+        {
+            return false;
+        }
+        if leader_index.is_some_and(|leader_index| leader_index >= self.available_leaders.len()) {
+            return false;
+        }
+        let mut units_left = self.available_units.clone();
+        let mut required_units = Units::empty();
+        for unit in units {
+            if !units_left.has_unit(unit) {
+                required_units += unit;
+                continue;
+            }
+            units_left -= unit;
+        }
+        let replaced_units = replaced_units
+            .iter()
+            .map(|id| {
+                self.get_unit(*id)
+                    .expect("player should have units to be replaced")
+                    .unit_type
+                    .clone()
+            })
+            .collect();
+        if required_units != replaced_units {
+            return false;
+        }
+        true
+    }
+
+    #[must_use]
+    pub fn get_unit(&self, id: u32) -> Option<&Unit> {
+        self.units.iter().find(|unit| unit.id == id)
+    }
+
+    pub fn take_unit(&mut self, id: u32) -> Option<Unit> {
+        Some(
+            self.units
+                .remove(self.units.iter().position(|unit| unit.id == id)?),
+        )
+    }
+
+    #[must_use]
+    pub fn get_units(&self, position: Position) -> Vec<&Unit> {
+        self.units
+            .iter()
+            .filter(|unit| unit.position == position)
+            .collect()
     }
 
     fn get_events(&self) -> &PlayerEvents {
         self.events.as_ref().expect("events should be set")
     }
 
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if 'events' is set to None
     pub fn take_events<F>(&mut self, action: F)
     where
         F: FnOnce(&PlayerEvents, &mut Player),
@@ -611,6 +786,9 @@ pub struct PlayerData {
     defeated_leaders: Vec<String>,
     event_victory_points: f32,
     wonder_cards: Vec<String>,
-    available_buildings: AvailableBuildings,
+    available_settlements: u8,
+    available_buildings: AvailableCityPieces,
+    available_units: Units,
     collect_options: Vec<(Terrain, Vec<ResourcePile>)>,
+    next_unit_id: u32,
 }

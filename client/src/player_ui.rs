@@ -69,7 +69,7 @@ pub fn show_wonders(game: &Game, player_index: usize) {
 
 pub fn show_resources(game: &Game, player_index: usize) {
     let player = game.get_player(player_index);
-    let r: &ResourcePile = player.resources();
+    let r: &ResourcePile = &player.resources;
 
     let mut i: f32 = 0.;
     let mut res = |label: String| {

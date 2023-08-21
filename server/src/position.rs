@@ -10,14 +10,21 @@ pub struct Position {
 }
 
 impl Position {
+    #[must_use]
     pub fn new(q: i32, r: i32) -> Self {
         Self { q, r }
     }
 
-    // using Odd Q - https://www.redblobgames.com/grids/hexagons/#coordinates-offset
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if an invalid position format is given
+    /// using Odd Q - <https://www.redblobgames.com/grids/hexagons/#coordinates-offset>
+    #[must_use]
     pub fn from_offset(s: &str) -> Position {
         let mut chars = s.chars();
-        let col = chars.next().expect("string is emtpy") as i32 - 'A' as i32;
+        let col = chars.next().expect("string is empty") as i32 - 'A' as i32;
         let row = s
             .get(1..)
             .expect("string is too short")
@@ -29,20 +36,24 @@ impl Position {
         Position::new(q, r)
     }
 
+    #[must_use]
     pub fn coordinate(&self) -> Coordinate {
         // x == q
         // y == r
         Coordinate::new(self.q, self.r)
     }
 
+    #[must_use]
     pub fn from_coordinate(coordinate: Coordinate) -> Position {
         Position::new(coordinate.x, coordinate.y)
     }
 
+    #[must_use]
     pub fn distance(&self, other: Self) -> u32 {
         self.coordinate().distance(other.coordinate()) as u32
     }
 
+    #[must_use]
     pub fn is_neighbor(&self, other: Self) -> bool {
         self.coordinate().distance(other.coordinate()) == 1
     }

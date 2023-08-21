@@ -1,7 +1,7 @@
 use server::{
     action::Action,
     city::{City, MoodState::*},
-    city_pieces::{AvailableBuildings, Building},
+    city_pieces::{AvailableCityPieces, Building},
     content::custom_actions::CustomAction::*,
     game::{Game, GameState::*},
     game_api,
@@ -9,6 +9,7 @@ use server::{
     playing_actions::PlayingAction::*,
     position::Position,
     resource_pile::ResourcePile,
+    unit::UnitType::*,
 };
 
 #[test]
@@ -21,7 +22,7 @@ fn basic_actions() {
     let game = game_api::execute_action(game, advance_action, 0);
     let player = &game.players[0];
 
-    assert_eq!(&ResourcePile::culture_tokens(1), player.resources());
+    assert_eq!(ResourcePile::culture_tokens(1), player.resources);
     assert_eq!(2, game.actions_left);
 
     let advance_action = Action::Playing(Advance {
@@ -40,7 +41,7 @@ fn basic_actions() {
         ],
         player.advances
     );
-    assert_eq!(&ResourcePile::culture_tokens(1), player.resources());
+    assert_eq!(ResourcePile::culture_tokens(1), player.resources);
     assert_eq!(1, game.actions_left);
 
     game.players[0].gain_resources(ResourcePile::new(2, 4, 4, 0, 2, 2, 3));
@@ -64,7 +65,7 @@ fn basic_actions() {
     let player = &game.players[0];
 
     assert_eq!(
-        AvailableBuildings::new(5, 5, 5, 4, 5, 5, 5),
+        AvailableCityPieces::new(5, 5, 5, 4, 5, 5, 5),
         player.available_buildings
     );
 
@@ -83,7 +84,7 @@ fn basic_actions() {
             .expect("player should have a city at this position")
             .size()
     );
-    assert_eq!(&ResourcePile::new(1, 3, 3, 0, 2, 2, 4), player.resources());
+    assert_eq!(ResourcePile::new(1, 3, 3, 0, 2, 2, 4), player.resources);
     assert_eq!(0, game.actions_left);
 
     let game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
@@ -97,7 +98,7 @@ fn basic_actions() {
     let game = game_api::execute_action(game, increase_happiness_action, 0);
     let player = &game.players[0];
 
-    assert_eq!(&ResourcePile::new(1, 3, 3, 0, 2, 0, 4), player.resources());
+    assert_eq!(ResourcePile::new(1, 3, 3, 0, 2, 0, 4), player.resources);
     assert!(matches!(
         player
             .get_city(city_position)
@@ -116,7 +117,7 @@ fn basic_actions() {
     let player = &game.players[0];
 
     assert_eq!(10.0, player.victory_points());
-    assert_eq!(&ResourcePile::empty(), player.resources());
+    assert_eq!(ResourcePile::empty(), player.resources);
     assert_eq!(1, player.wonders_build);
     assert_eq!(vec![String::from("X")], player.wonders);
     assert_eq!(
@@ -145,12 +146,31 @@ fn basic_actions() {
     });
     let game = game_api::execute_action(game, collect_action, 0);
     let player = &game.players[0];
-    assert_eq!(&ResourcePile::ore(1), player.resources());
+    assert_eq!(ResourcePile::ore(1), player.resources);
     assert!(player
         .get_city(city_position)
         .expect("player should have a city at this position")
         .is_activated());
     assert_eq!(0, game.actions_left);
+    let mut game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
+    let player = &mut game.players[0];
+    player.gain_resources(ResourcePile::food(2));
+    let recruit_action = Action::Playing(Recruit {
+        units: vec![Settler],
+        city_position,
+        payment: ResourcePile::food(2),
+        leader_index: None,
+        replaced_units: Vec::new(),
+    });
+    let game = game_api::execute_action(game, recruit_action, 0);
+    let player = &game.players[0];
+    assert_eq!(1, player.units.len());
+    assert_eq!(1, player.next_unit_id);
+    assert_eq!(ResourcePile::ore(1), player.resources);
+    assert!(player
+        .get_city(city_position)
+        .expect("player should have a city at this position")
+        .is_activated());
 }
 
 #[test]

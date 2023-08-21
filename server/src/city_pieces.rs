@@ -17,7 +17,13 @@ pub struct CityPieces {
 }
 
 impl CityPieces {
-    pub fn from_data(data: CityPiecesData) -> Self {
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if any wonder does not exist
+    #[must_use]
+    pub fn from_data(data: &CityPiecesData) -> Self {
         Self {
             academy: data.academy,
             market: data.market,
@@ -37,6 +43,7 @@ impl CityPieces {
         }
     }
 
+    #[must_use]
     pub fn data(self) -> CityPiecesData {
         CityPiecesData {
             academy: self.academy,
@@ -50,6 +57,7 @@ impl CityPieces {
         }
     }
 
+    #[must_use]
     pub fn cloned_data(&self) -> CityPiecesData {
         CityPiecesData {
             academy: self.academy,
@@ -67,6 +75,7 @@ impl CityPieces {
         }
     }
 
+    #[must_use]
     pub fn can_add_building(&self, building: &Building) -> bool {
         match building {
             Academy => self.academy.is_none(),
@@ -103,10 +112,12 @@ impl CityPieces {
         }
     }
 
+    #[must_use]
     pub fn amount(&self) -> usize {
         self.buildings(None).len() + self.wonders.len()
     }
 
+    #[must_use]
     pub fn building_owner(&self, building: &Building) -> Option<usize> {
         match *building {
             Academy => self.academy,
@@ -119,6 +130,7 @@ impl CityPieces {
         }
     }
 
+    #[must_use]
     pub fn building_owners(&self) -> Vec<(Building, Option<usize>)> {
         vec![
             (Academy, self.academy),
@@ -131,6 +143,7 @@ impl CityPieces {
         ]
     }
 
+    #[must_use]
     pub fn buildings(&self, owned_by: Option<usize>) -> Vec<Building> {
         self.building_owners()
             .into_iter()
@@ -170,14 +183,27 @@ pub enum Building {
 }
 
 impl Building {
+    /// Returns the json of this [`Building`].
+    ///
+    /// # Panics
+    ///
+    /// Panics if `serde_json` produces invalid json
+    #[must_use]
     pub fn json(&self) -> String {
         serde_json::to_string(&self).expect("city piece data should be valid json")
     }
 
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if invalid json is given
+    #[must_use]
     pub fn from_json(json: &str) -> Self {
         serde_json::from_str(json).expect("API call should receive valid city piece data json")
     }
 
+    #[must_use]
     pub fn required_advance(&self) -> String {
         String::from(match self {
             Self::Academy => "Writing",
@@ -192,45 +218,18 @@ impl Building {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct AvailableBuildings {
-    academies: u8,
-    markets: u8,
-    obelisks: u8,
-    observatories: u8,
-    fortresses: u8,
-    ports: u8,
-    temples: u8,
+pub struct AvailableCityPieces {
+    pub academies: u8,
+    pub markets: u8,
+    pub obelisks: u8,
+    pub observatories: u8,
+    pub fortresses: u8,
+    pub ports: u8,
+    pub temples: u8,
 }
 
-impl AddAssign<&Building> for AvailableBuildings {
-    fn add_assign(&mut self, rhs: &Building) {
-        match *rhs {
-            Academy => self.academies += 1,
-            Market => self.markets += 1,
-            Obelisk => self.obelisks += 1,
-            Observatory => self.observatories += 1,
-            Fortress => self.fortresses += 1,
-            Port => self.ports += 1,
-            Temple => self.temples += 1,
-        };
-    }
-}
-
-impl SubAssign<&Building> for AvailableBuildings {
-    fn sub_assign(&mut self, rhs: &Building) {
-        match *rhs {
-            Academy => self.academies -= 1,
-            Market => self.markets -= 1,
-            Obelisk => self.obelisks -= 1,
-            Observatory => self.observatories -= 1,
-            Fortress => self.fortresses -= 1,
-            Port => self.ports -= 1,
-            Temple => self.temples -= 1,
-        };
-    }
-}
-
-impl AvailableBuildings {
+impl AvailableCityPieces {
+    #[must_use]
     pub fn new(
         academies: u8,
         markets: u8,
@@ -251,6 +250,7 @@ impl AvailableBuildings {
         }
     }
 
+    #[must_use]
     pub fn can_build(&self, building: &Building) -> bool {
         match *building {
             Academy => self.academies > 0,
@@ -261,5 +261,33 @@ impl AvailableBuildings {
             Port => self.ports > 0,
             Temple => self.temples > 0,
         }
+    }
+}
+
+impl AddAssign<&Building> for AvailableCityPieces {
+    fn add_assign(&mut self, rhs: &Building) {
+        match *rhs {
+            Academy => self.academies += 1,
+            Market => self.markets += 1,
+            Obelisk => self.obelisks += 1,
+            Observatory => self.observatories += 1,
+            Fortress => self.fortresses += 1,
+            Port => self.ports += 1,
+            Temple => self.temples += 1,
+        };
+    }
+}
+
+impl SubAssign<&Building> for AvailableCityPieces {
+    fn sub_assign(&mut self, rhs: &Building) {
+        match *rhs {
+            Academy => self.academies -= 1,
+            Market => self.markets -= 1,
+            Obelisk => self.obelisks -= 1,
+            Observatory => self.observatories -= 1,
+            Fortress => self.fortresses -= 1,
+            Port => self.ports -= 1,
+            Temple => self.temples -= 1,
+        };
     }
 }

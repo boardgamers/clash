@@ -78,7 +78,7 @@ impl SpecialAdvanceBuilder {
             ability_initializer::join_ability_initializers(self.player_undo_deinitializer);
         SpecialAdvance::new(
             self.name,
-            String::from("● ") + &self.descriptions.join("\n● "),
+            String::from("✦ ") + &self.descriptions.join("\n✦ "),
             self.required_advance,
             player_initializer,
             player_deinitializer,
