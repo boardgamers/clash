@@ -7,6 +7,19 @@ use server::unit::{Unit, UnitType};
 
 pub fn setup_local_game() -> Game {
     let mut game = Game::new(2, "a".repeat(32));
+
+    let mut unit_id = 0;
+
+    let mut add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {
+        unit_id += 1;
+        game.players[player_index].units.push(Unit::new(
+            player_index,
+            Position::from_offset(pos),
+            unit_type,
+            unit_id,
+        ));
+    };
+
     let player_index1 = 0;
     let player_index2 = 1;
     game.players[player_index1].gain_resources(ResourcePile::new(50, 50, 50, 50, 50, 50, 50));
@@ -51,12 +64,4 @@ fn add_city(game: &mut Game, player_index: usize, s: &str) {
 
 fn add_terrain(game: &mut Game, pos: &str, terrain: Terrain) {
     game.map.tiles.insert(Position::from_offset(pos), terrain);
-}
-
-fn add_unit(game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType) {
-    game.players[player_index].units.push(Unit::new(
-        player_index,
-        Position::from_offset(pos),
-        unit_type,
-    ));
 }
