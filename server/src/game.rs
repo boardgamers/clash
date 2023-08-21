@@ -49,7 +49,7 @@ pub struct Game {
     pub dropped_players: Vec<usize>,
     pub wonders_left: Vec<Wonder>,
     pub wonder_amount_left: usize,
-    replaced_units_undo_context: Option<(Vec<Unit>, Option<String>)>,
+    pub removed_units_undo_context: Option<(Vec<Unit>, Option<String>)>,
 }
 
 impl Game {
@@ -117,7 +117,7 @@ impl Game {
             dropped_players: Vec::new(),
             wonders_left: wonders,
             wonder_amount_left: wonder_amount,
-            replaced_units_undo_context: None,
+            removed_units_undo_context: None,
         }
     }
 
@@ -156,7 +156,7 @@ impl Game {
                 })
                 .collect(),
             wonder_amount_left: data.wonder_amount_left,
-            replaced_units_undo_context: data.replaced_units_undo_context,
+            removed_units_undo_context: data.removed_units_undo_context,
         };
         let mut players = Vec::new();
         for player in data.players {
@@ -193,7 +193,7 @@ impl Game {
                 .map(|wonder| wonder.name)
                 .collect(),
             wonder_amount_left: self.wonder_amount_left,
-            replaced_units_undo_context: self.replaced_units_undo_context,
+            removed_units_undo_context: self.removed_units_undo_context,
         }
     }
 
@@ -690,7 +690,7 @@ impl Game {
             player.available_units += &unit.unit_type;
             replaced_units_undo_context.push(unit);
         }
-        self.replaced_units_undo_context =
+        self.removed_units_undo_context =
             if replaced_leader.is_some() || !replaced_units_undo_context.is_empty() {
                 Some((replaced_units_undo_context, replaced_leader))
             } else {
@@ -755,7 +755,7 @@ impl Game {
             .get_city_mut(city_position)
             .expect("player should have a city a recruitment position")
             .undo_activate();
-        if let Some((replaced_units, replaced_leader)) = self.replaced_units_undo_context.take() {
+        if let Some((replaced_units, replaced_leader)) = self.removed_units_undo_context.take() {
             for unit in replaced_units {
                 player.available_units -= &unit.unit_type;
                 player.units.push(unit);
@@ -862,7 +862,7 @@ impl Game {
         player
             .get_city_mut(city_position)
             .expect("player should have city")
-            .city_pieces
+            .pieces
             .wonders
             .push(wonder);
     }
@@ -879,7 +879,7 @@ impl Game {
         let mut wonder = player
             .get_city_mut(city_position)
             .expect("player should have city")
-            .city_pieces
+            .pieces
             .wonders
             .pop()
             .expect("city should have a wonder");
@@ -912,7 +912,7 @@ impl Game {
         let self_influence = starting_city_position == target_city_position;
         let target_city = self.get_city(target_player_index, target_city_position);
         let target_city_owner = target_city.player_index;
-        let target_building_owner = target_city.city_pieces.building_owner(city_piece)?;
+        let target_building_owner = target_city.pieces.building_owner(city_piece)?;
         let player = &self.players[player_index];
         if matches!(&city_piece, Building::Obelisk)
             || starting_city.player_index != player_index
@@ -945,7 +945,7 @@ impl Game {
         self.players[influenced_player_index]
             .get_city_mut(city_position)
             .expect("influenced player should have influenced city")
-            .city_pieces
+            .pieces
             .set_building(building, influencer_index);
         self.players[influencer_index].influenced_buildings += 1;
         self.successful_cultural_influence = true;
@@ -968,7 +968,7 @@ impl Game {
         self.players[influenced_player_index]
             .get_city_mut(city_position)
             .expect("influenced player should have influenced city")
-            .city_pieces
+            .pieces
             .set_building(building, influenced_player_index);
         self.players[influencer_index].influenced_buildings -= 1;
         self.successful_cultural_influence = false;
@@ -1003,7 +1003,7 @@ pub struct GameData {
     dropped_players: Vec<usize>,
     wonders_left: Vec<String>,
     wonder_amount_left: usize,
-    replaced_units_undo_context: Option<(Vec<Unit>, Option<String>)>,
+    removed_units_undo_context: Option<(Vec<Unit>, Option<String>)>,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -1077,7 +1077,7 @@ pub mod tests {
             dropped_players: Vec::new(),
             wonders_left: Vec::new(),
             wonder_amount_left: 0,
-            replaced_units_undo_context: None,
+            removed_units_undo_context: None,
         }
     }
 

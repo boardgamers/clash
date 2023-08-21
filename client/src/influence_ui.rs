@@ -14,7 +14,7 @@ pub fn add_influence_button(
     building: &Building,
     building_name: &str,
 ) -> StateUpdate {
-    if !menu.get_city(game).city_pieces.can_add_building(building) {
+    if !menu.get_city(game).pieces.can_add_building(building) {
         let start_position = if menu.is_city_owner() {
             menu.city_position
         } else {

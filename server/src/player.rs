@@ -181,7 +181,7 @@ impl Player {
         }
         let mut cities = mem::take(&mut game.players[player_index].cities);
         for city in &mut cities {
-            for wonder in &city.city_pieces.wonders {
+            for wonder in &city.pieces.wonders {
                 (wonder.player_initializer)(game, player_index);
             }
         }
@@ -610,7 +610,7 @@ impl Player {
             .get_city_mut(city_position)
             .expect("player should be have the this city");
         city.activate();
-        city.city_pieces.set_building(building, index);
+        city.pieces.set_building(building, index);
         if let Some(port_position) = port_position {
             city.port_position = Some(port_position);
         }
@@ -635,7 +635,7 @@ impl Player {
             .get_city_mut(city_position)
             .expect("player should have city");
         city.undo_activate();
-        city.city_pieces.remove_building(building);
+        city.pieces.remove_building(building);
         if matches!(building, Port) {
             city.port_position = None;
         }
@@ -672,11 +672,11 @@ impl Player {
             return false;
         }
         if units.iter().any(|unit| matches!(unit, Cavalry | Elephant))
-            && city.city_pieces.market.is_none()
+            && city.pieces.market.is_none()
         {
             return false;
         }
-        if units.iter().any(|unit| matches!(unit, Ship)) && city.city_pieces.port.is_none() {
+        if units.iter().any(|unit| matches!(unit, Ship)) && city.pieces.port.is_none() {
             return false;
         }
         if self.get_units(city_position).len()

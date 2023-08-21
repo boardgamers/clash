@@ -16,7 +16,7 @@ use MoodState::*;
 const MAX_CITY_SIZE: usize = 4;
 
 pub struct City {
-    pub city_pieces: CityPieces,
+    pub pieces: CityPieces,
     pub mood_state: MoodState,
     pub activations: u32,
     pub angry_activation: bool,
@@ -29,7 +29,7 @@ impl City {
     #[must_use]
     pub fn from_data(data: CityData) -> Self {
         Self {
-            city_pieces: CityPieces::from_data(&data.city_pieces),
+            pieces: CityPieces::from_data(&data.city_pieces),
             mood_state: data.mood_state,
             activations: data.activations,
             angry_activation: data.angry_activation,
@@ -42,7 +42,7 @@ impl City {
     #[must_use]
     pub fn data(self) -> CityData {
         CityData::new(
-            self.city_pieces.data(),
+            self.pieces.data(),
             self.mood_state,
             self.activations,
             self.angry_activation,
@@ -55,7 +55,7 @@ impl City {
     #[must_use]
     pub fn cloned_data(&self) -> CityData {
         CityData::new(
-            self.city_pieces.cloned_data(),
+            self.pieces.cloned_data(),
             self.mood_state.clone(),
             self.activations,
             self.angry_activation,
@@ -68,7 +68,7 @@ impl City {
     #[must_use]
     pub fn new(player_index: usize, position: Position) -> Self {
         Self {
-            city_pieces: CityPieces::default(),
+            pieces: CityPieces::default(),
             mood_state: Neutral,
             activations: 0,
             angry_activation: false,
@@ -116,16 +116,16 @@ impl City {
         if self.player_index != player.index {
             return false;
         }
-        if self.city_pieces.amount() == MAX_CITY_SIZE {
+        if self.pieces.amount() == MAX_CITY_SIZE {
             return false;
         }
         if matches!(self.mood_state, Angry) {
             return false;
         }
-        if !self.city_pieces.can_add_building(building) {
+        if !self.pieces.can_add_building(building) {
             return false;
         }
-        if self.city_pieces.amount() >= player.cities.len() {
+        if self.pieces.amount() >= player.cities.len() {
             return false;
         }
         if !player.has_advance(&building.required_advance()) {
@@ -143,10 +143,10 @@ impl City {
         if self.player_index != player.index {
             return false;
         }
-        if self.city_pieces.amount() == MAX_CITY_SIZE {
+        if self.pieces.amount() == MAX_CITY_SIZE {
             return false;
         }
-        if self.city_pieces.amount() >= player.cities.len() {
+        if self.pieces.amount() >= player.cities.len() {
             return false;
         }
         if !matches!(self.mood_state, Happy) {
@@ -168,26 +168,26 @@ impl City {
     }
 
     pub fn conquer(mut self, game: &mut Game, new_player_index: usize, old_player_index: usize) {
-        for wonder in &self.city_pieces.wonders {
+        for wonder in &self.pieces.wonders {
             (wonder.player_deinitializer)(game, old_player_index);
             (wonder.player_initializer)(game, new_player_index);
         }
         self.player_index = new_player_index;
         self.mood_state = Angry;
-        for wonder in &self.city_pieces.wonders {
+        for wonder in &self.pieces.wonders {
             game.players[old_player_index].remove_wonder(wonder);
             game.players[new_player_index]
                 .wonders
                 .push(wonder.name.clone());
         }
-        if let Some(player) = &self.city_pieces.obelisk {
+        if let Some(player) = &self.pieces.obelisk {
             if player == &old_player_index {
                 game.players[old_player_index].influenced_buildings += 1;
             }
         }
         let previously_influenced_building =
-            self.city_pieces.buildings(Some(new_player_index)).len() as u32;
-        for (building, owner) in self.city_pieces.building_owners() {
+            self.pieces.buildings(Some(new_player_index)).len() as u32;
+        for (building, owner) in self.pieces.building_owners() {
             if matches!(building, Obelisk) {
                 continue;
             }
@@ -197,7 +197,7 @@ impl City {
             if owner != old_player_index {
                 continue;
             }
-            self.city_pieces.set_building(&building, new_player_index);
+            self.pieces.set_building(&building, new_player_index);
             game.players[old_player_index].available_buildings += &building;
             game.players[new_player_index].available_buildings -= &building;
         }
@@ -212,12 +212,12 @@ impl City {
     ///
     /// Panics if the city does not have a builder
     pub fn raze(self, game: &mut Game, player_index: usize) {
-        for (building, owner) in &self.city_pieces.building_owners() {
+        for (building, owner) in &self.pieces.building_owners() {
             if let Some(owner) = owner {
                 game.players[*owner].available_buildings += building;
             }
         }
-        for wonder in self.city_pieces.wonders {
+        for wonder in self.pieces.wonders {
             (wonder.player_deinitializer)(game, player_index);
             game.players[player_index].remove_wonder(&wonder);
             let builder = &mut game.players[wonder.builder.expect("Wonder should have a builder")];
@@ -227,7 +227,7 @@ impl City {
 
     #[must_use]
     pub fn size(&self) -> usize {
-        self.city_pieces.amount() + 1
+        self.pieces.amount() + 1
     }
 
     #[must_use]
@@ -256,12 +256,12 @@ impl City {
 
     #[must_use]
     pub fn uninfluenced_buildings(&self) -> u32 {
-        self.city_pieces.buildings(Some(self.player_index)).len() as u32
+        self.pieces.buildings(Some(self.player_index)).len() as u32
     }
 
     #[must_use]
     pub fn influenced(&self) -> bool {
-        self.uninfluenced_buildings() as usize != self.city_pieces.amount()
+        self.uninfluenced_buildings() as usize != self.pieces.amount()
     }
 
     #[must_use]

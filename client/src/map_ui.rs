@@ -11,7 +11,7 @@ fn terrain_color(t: &Terrain) -> (Color, bool) {
         Terrain::Mountain => (Color::from_hex(0x0057_5757), true),
         Terrain::Fertile => (Color::from_hex(0x005D_B521), false),
         Terrain::Forest => (Color::from_hex(0x0008_570D), true),
-        Terrain::Unusable => (RED, false),
+        Terrain::Exhausted => (RED, false),
         Terrain::Water => (Color::from_hex(0x001D_70F5), false),
     }
 }
