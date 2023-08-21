@@ -20,7 +20,8 @@ pub fn show_city_menu(game: &Game, menu: &CityMenu) -> StateUpdate {
     root_ui().window(hash!(), vec2(30., 700.), vec2(500., 200.), |ui| {
         ui.label(None, &menu.city_position.to_string());
 
-        let can_play = can_play_action(game) && menu.is_city_owner() && menu.get_city(game).can_activate();
+        let can_play =
+            can_play_action(game) && menu.is_city_owner() && menu.get_city(game).can_activate();
         if can_play && ui.button(None, "Collect Resources") {
             updates.add(StateUpdate::SetDialog(ActiveDialog::CollectResources(
                 CollectResources::new(

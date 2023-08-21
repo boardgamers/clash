@@ -1,14 +1,18 @@
-use macroquad::prelude::draw_text;
-use server::unit::{Unit, UnitType};
-use server::game::Game;
-use std::collections::HashMap;
-use server::position::Position;
-use macroquad::math::u32;
 use crate::{hex_ui, player_ui};
+use macroquad::math::u32;
+use macroquad::prelude::draw_text;
+use server::game::Game;
+use server::position::Position;
+use server::unit::{Unit, UnitType};
+use std::collections::HashMap;
 
 pub fn draw_unit(unit: &Unit, index: u32) {
     let c = hex_ui::center(unit.position);
-    let r =  if unit.unit_type == UnitType::Settler {25.} else { 40. };
+    let r = if unit.unit_type == UnitType::Settler {
+        25.
+    } else {
+        40.
+    };
     let p = hex_ui::rotate_around(c, r, (90 * index) as i32 + 45);
     draw_text(
         unit_symbol(unit),
@@ -35,7 +39,11 @@ pub fn draw_units(game: &Game) {
         let mut city_unit_index: HashMap<Position, u32> = HashMap::new();
         let mut settler_index: HashMap<Position, u32> = HashMap::new();
         for unit in &p.units {
-            let map = if unit.unit_type == UnitType::Settler { &mut settler_index } else { &mut city_unit_index };
+            let map = if unit.unit_type == UnitType::Settler {
+                &mut settler_index
+            } else {
+                &mut city_unit_index
+            };
             let e = map.entry(unit.position).or_default();
             *e += 1;
             draw_unit(unit, *e);

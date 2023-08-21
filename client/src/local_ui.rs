@@ -60,4 +60,3 @@ fn add_unit(game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType
         unit_type,
     ));
 }
-
