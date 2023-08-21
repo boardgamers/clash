@@ -88,7 +88,7 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
     }
 
     let mut i = 0;
-    city.city_pieces.wonders.iter().for_each(|w| {
+    city.pieces.wonders.iter().for_each(|w| {
         let p = hex_ui::rotate_around(c, 30.0, 90 * i);
         draw_text(
             &w.name,
@@ -101,7 +101,7 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
     });
 
     for player_index in 0..4 {
-        for b in &city.city_pieces.buildings(Some(player_index)) {
+        for b in &city.pieces.buildings(Some(player_index)) {
             let p = hex_ui::rotate_around(c, 30.0, 90 * i);
             draw_text(
                 building_symbol(b),
