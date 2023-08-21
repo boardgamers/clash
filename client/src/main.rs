@@ -27,6 +27,7 @@ mod payment_ui;
 mod player_ui;
 mod resource_ui;
 mod ui_state;
+mod unit_ui;
 
 #[macroquad::main("Clash")]
 async fn main() {

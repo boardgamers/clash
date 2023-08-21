@@ -11,11 +11,11 @@ const SPACING: Spacing = Spacing::FlatTop(SIZE);
 pub fn center(pos: Position) -> Point {
     let c = pos.coordinate();
     let p = c.to_pixel(SPACING);
-    Point { x: p.0, y: p.1 }
+    Point { x: p.0, y: p.1 }.to_screen()
 }
 
 pub fn draw_hex(p: Position, fill_color: Color, text_color: Color, selected: bool) {
-    let c = center(p).to_screen();
+    let c = center(p);
     let mut v = fill_color.to_vec();
     if selected {
         v.w = 0.5;
@@ -26,7 +26,7 @@ pub fn draw_hex(p: Position, fill_color: Color, text_color: Color, selected: boo
 }
 
 pub fn draw_hex_center_text(p: Position, text: &str) {
-    let c = center(p).to_screen();
+    let c = center(p);
     draw_text(text, c.x - 5., c.y + 6., 25.0, BLACK);
 }
 

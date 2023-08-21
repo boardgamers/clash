@@ -1,6 +1,6 @@
 use crate::city_ui::draw_city;
 use crate::ui_state::State;
-use crate::{collect_ui, hex_ui};
+use crate::{collect_ui, hex_ui, unit_ui};
 use macroquad::prelude::*;
 use server::game::Game;
 use server::map::Terrain;
@@ -30,5 +30,6 @@ pub fn draw_map(game: &Game, state: &State) {
                 draw_city(p, city, state);
             }
         }
+        unit_ui::draw_units(game);
     }
 }

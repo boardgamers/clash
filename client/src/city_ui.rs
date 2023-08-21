@@ -20,7 +20,8 @@ pub fn show_city_menu(game: &Game, menu: &CityMenu) -> StateUpdate {
     root_ui().window(hash!(), vec2(30., 700.), vec2(500., 200.), |ui| {
         ui.label(None, &menu.city_position.to_string());
 
-        let can_play = can_play_action(game) && menu.is_city_owner();
+        let can_play =
+            can_play_action(game) && menu.is_city_owner() && menu.get_city(game).can_activate();
         if can_play && ui.button(None, "Collect Resources") {
             updates.add(StateUpdate::SetDialog(ActiveDialog::CollectResources(
                 CollectResources::new(
@@ -64,7 +65,7 @@ fn add_building_actions(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpdat
 }
 
 pub fn draw_city(owner: &Player, city: &City, state: &State) {
-    let c = hex_ui::center(city.position).to_screen();
+    let c = hex_ui::center(city.position);
 
     if city.is_activated() {
         draw_circle(c.x, c.y, 18.0, WHITE);
@@ -91,9 +92,9 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
         let p = hex_ui::rotate_around(c, 30.0, 90 * i);
         draw_text(
             &w.name,
-            p.x - 12.0,
-            p.y + 12.0,
-            50.0,
+            p.x - 10.0,
+            p.y + 10.0,
+            40.0,
             player_ui::player_color(owner.index),
         );
         i += 1;
@@ -104,9 +105,9 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
             let p = hex_ui::rotate_around(c, 30.0, 90 * i);
             draw_text(
                 building_symbol(b),
-                p.x - 12.0,
-                p.y + 12.0,
-                50.0,
+                p.x - 10.0,
+                p.y + 10.0,
+                40.0,
                 player_ui::player_color(player_index),
             );
             i += 1;
