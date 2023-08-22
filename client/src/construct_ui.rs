@@ -10,8 +10,10 @@ use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::PaymentOptions;
 use std::cmp;
+use server::unit::UnitType;
 
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
+use crate::recruit_unit_ui::RecruitUnitSelection;
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::ui_state::{ActiveDialog, StateUpdate};
 use crate::ui_state::{CityMenu, StateUpdates};
@@ -113,6 +115,17 @@ pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> St
                 vec![],
                 game.get_any_city(cp.city_position).unwrap(),
             ),
+            ConstructionProject::Units(sel) => StateUpdate::execute_activation(
+                Action::Playing(PlayingAction::Recruit {
+                    city_position: cp.city_position,
+                    units: sel.units.clone(),
+                    payment: cp.payment.to_resource_pile(),
+                    replaced_units: sel.replaced_units.clone(),
+                    leader_index: None,
+                }),
+                vec![],
+                game.get_any_city(cp.city_position).unwrap(),
+            ),
         },
         |ap, r| match r {
             ResourceType::Gold => ap.payment_options.gold_left > 0,
@@ -148,6 +161,7 @@ pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> St
 pub enum ConstructionProject {
     Building(Building, Option<Position>),
     Wonder(String),
+    Units(RecruitUnitSelection),
 }
 
 #[derive(Clone)]
@@ -178,6 +192,7 @@ impl ConstructionPayment {
                 .unwrap()
                 .cost
                 .clone(),
+            ConstructionProject::Units(sel) => sel.units.iter().map(UnitType::cost).sum()
         };
 
         let payment_options = p.resources.get_payment_options(&cost);

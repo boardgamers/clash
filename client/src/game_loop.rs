@@ -1,5 +1,4 @@
 use crate::advance_ui::{pay_advance_dialog, show_advance_menu};
-use crate::city_ui;
 use crate::city_ui::show_city_menu;
 use crate::collect_ui::{click_collect_option, collect_resources_dialog};
 use crate::construct_ui::pay_construction_dialog;
@@ -10,6 +9,7 @@ use crate::log_ui::show_log;
 use crate::map_ui::draw_map;
 use crate::player_ui::{show_global_controls, show_globals, show_resources, show_wonders};
 use crate::ui_state::{ActiveDialog, CityMenu, State, StateUpdate, StateUpdates};
+use crate::{city_ui, recruit_unit_ui};
 use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
 use macroquad::prelude::{clear_background, next_frame, set_fullscreen, WHITE};
 use server::game::Game;
@@ -54,10 +54,11 @@ fn game_loop(game: &Game, state: &State) -> StateUpdate {
     }
 
     updates.add(match &state.active_dialog {
+        ActiveDialog::None => StateUpdate::None,
         ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p),
         ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p),
         ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c),
-        ActiveDialog::None => StateUpdate::None,
+        ActiveDialog::RecruitUnitSelection(s) => recruit_unit_ui::select_dialog(game, s),
     });
 
     updates.add(try_click(game, state));

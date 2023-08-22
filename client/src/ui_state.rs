@@ -2,6 +2,7 @@ use crate::advance_ui::AdvancePayment;
 use crate::construct_ui::ConstructionPayment;
 
 use crate::collect_ui::CollectResources;
+use crate::recruit_unit_ui::{RecruitUnitSelection};
 use macroquad::prelude::*;
 use server::action::Action;
 use server::city::{City, MoodState};
@@ -16,6 +17,7 @@ pub enum ActiveDialog {
     AdvancePayment(AdvancePayment),
     ConstructionPayment(ConstructionPayment),
     CollectResources(CollectResources),
+    RecruitUnitSelection(RecruitUnitSelection),
 }
 
 pub struct PendingUpdate {
@@ -63,7 +65,9 @@ impl StateUpdates {
         StateUpdates { updates: vec![] }
     }
     pub fn add(&mut self, update: StateUpdate) {
-        self.updates.push(update);
+        if !matches!(update, StateUpdate::None) {
+            self.updates.push(update);
+        }
     }
 
     #[must_use]
