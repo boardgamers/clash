@@ -6,6 +6,7 @@ use PlayingAction::*;
 use crate::{
     city::City,
     city_pieces::Building::{self, *},
+    consts::{MOVEMENT_ACTIONS, PORT_CHOICES},
     content::custom_actions::CustomAction,
     game::{
         Game,
@@ -15,7 +16,7 @@ use crate::{
     map::Terrain,
     position::Position,
     resource_pile::ResourcePile,
-    unit::UnitType, consts::{MOVEMENT_ACTIONS, PORT_CHOICES},
+    unit::UnitType,
 };
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
