@@ -1,6 +1,6 @@
 use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{collections::HashMap, mem};
 
 use crate::{
     action::Action,
@@ -8,7 +8,7 @@ use crate::{
     city_pieces::Building,
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     log::{self, ActionLogItem},
-    map::{Map, MapData},
+    map::{Map, MapData, Terrain::*},
     player::{Player, PlayerData},
     playing_actions::PlayingAction,
     position::Position,
@@ -16,17 +16,15 @@ use crate::{
     special_advance::SpecialAdvance,
     status_phase::StatusPhaseState::{self, *},
     unit::{
+        MovementAction::{self, *},
         Unit,
         UnitType::{self, *},
     },
     utils,
-    wonder::Wonder,
+    wonder::Wonder, consts::{DICE_ROLL_BUFFER, STACK_LIMIT, AGES, ARMY_MOVEMENT_REQUIRED_ADVANCE},
 };
 
 use GameState::*;
-
-const DICE_ROLL_BUFFER: u32 = 200;
-const AGES: u32 = 6;
 
 pub struct Game {
     pub state: GameState,
@@ -49,7 +47,7 @@ pub struct Game {
     pub dropped_players: Vec<usize>,
     pub wonders_left: Vec<Wonder>,
     pub wonder_amount_left: usize,
-    pub removed_units_undo_context: Option<(Vec<Unit>, Option<String>)>,
+    pub undo_context: UndoContext,
 }
 
 impl Game {
@@ -117,7 +115,7 @@ impl Game {
             dropped_players: Vec::new(),
             wonders_left: wonders,
             wonder_amount_left: wonder_amount,
-            removed_units_undo_context: None,
+            undo_context: UndoContext::None,
         }
     }
 
@@ -156,7 +154,7 @@ impl Game {
                 })
                 .collect(),
             wonder_amount_left: data.wonder_amount_left,
-            removed_units_undo_context: data.removed_units_undo_context,
+            undo_context: data.undo_context,
         };
         let mut players = Vec::new();
         for player in data.players {
@@ -193,7 +191,7 @@ impl Game {
                 .map(|wonder| wonder.name)
                 .collect(),
             wonder_amount_left: self.wonder_amount_left,
-            removed_units_undo_context: self.removed_units_undo_context,
+            undo_context: self.undo_context,
         }
     }
 
@@ -261,16 +259,52 @@ impl Game {
         }
         self.log.push(log::format_action_log_item(&action, self));
         match self.state.clone() {
+            Playing => {
+                let action = action.playing().expect("action should be a playing action");
+                if self.can_redo()
+                    && serde_json::from_str::<PlayingAction>(
+                        self.action_log[self.action_log_index]
+                            .as_playing_action()
+                            .expect("undone actions should be playing actions"),
+                    )
+                    .expect("action should be deserializable")
+                        == action
+                {
+                    self.redo(player_index);
+                    return;
+                }
+                self.add_action_log_item(ActionLogItem::Playing(
+                    serde_json::to_string(&action).expect("playing action should be serializable"),
+                ));
+                action.execute(self, player_index);
+            }
             StatusPhase(phase) => {
                 let action = action
                     .status_phase()
                     .expect("action should be a status phase action");
+                assert!(phase == action.phase, "Illegal action");
                 self.add_action_log_item(ActionLogItem::StatusPhase(
                     serde_json::to_string(&action)
                         .expect("status phase action should be serializable"),
                 ));
-                assert!(phase == action.phase, "Illegal action");
                 action.execute(self, player_index);
+            }
+            Movement {
+                movement_actions_left,
+                moved_units,
+            } => {
+                let action = action
+                    .movement()
+                    .expect("action should be a movement action");
+                self.add_action_log_item(ActionLogItem::Movement(
+                    serde_json::to_string(&action).expect("movement action should be serializable"),
+                ));
+                self.execute_movement_action(
+                    action,
+                    player_index,
+                    movement_actions_left,
+                    moved_units,
+                );
             }
             CulturalInfluenceResolution {
                 roll_boost_cost,
@@ -293,25 +327,6 @@ impl Game {
                     player_index,
                 );
             }
-            Playing => {
-                let action = action.playing().expect("action should be a playing action");
-                if self.can_redo()
-                    && serde_json::from_str::<PlayingAction>(
-                        self.action_log[self.action_log_index]
-                            .as_playing_action()
-                            .expect("undone actions should be playing actions"),
-                    )
-                    .expect("action should be deserializable")
-                        == action
-                {
-                    self.redo(player_index);
-                    return;
-                }
-                self.add_action_log_item(ActionLogItem::Playing(
-                    serde_json::to_string(&action).expect("playing action should be serializable"),
-                ));
-                action.execute(self, player_index);
-            }
             Finished => panic!("actions can't be executed when the game is finished"),
         }
     }
@@ -320,6 +335,7 @@ impl Game {
         match &self.action_log[self.action_log_index - 1] {
             ActionLogItem::Playing(action) => serde_json::from_str::<PlayingAction>(action).expect("log item variant of type playing action should contain a serialized playing action").undo(self, player_index),
             ActionLogItem::StatusPhase(_) => panic!("status phase actions can't be undone"),
+            ActionLogItem::Movement(action) => self.undo_movement_action(serde_json::from_str::<MovementAction>(action).expect("log item variant of type movement action should contain a serialized movement action"), player_index),
             ActionLogItem::CulturalInfluenceResolution(action) => self.undo_cultural_influence_resolution_action(serde_json::from_str::<bool>(action).expect("cultural influence resolution log item should contain a serialized boolean representing the confirmation action")),
         }
         self.action_log_index -= 1;
@@ -337,6 +353,19 @@ impl Game {
                 .expect("action should be deserializable")
                 .execute(self, player_index),
             ActionLogItem::StatusPhase(_) => panic!("status phase actions can't be redone"),
+            ActionLogItem::Movement(action) => {
+                let action = serde_json::from_str::<MovementAction>(action)
+                    .expect("movement action should be deserializable");
+                let Movement { movement_actions_left, moved_units } = &self.state else {
+                    panic!("movement actions can only be redone if the game is in a movement state")
+                };
+                self.execute_movement_action(
+                    action,
+                    player_index,
+                    *movement_actions_left,
+                    moved_units.clone(),
+                );
+            }
             ActionLogItem::CulturalInfluenceResolution(action) => {
                 let action = serde_json::from_str::<bool>(action).expect("action should be a serialized boolean representing the cultural influence resolution confirmation action");
                 let CulturalInfluenceResolution {
@@ -371,6 +400,96 @@ impl Game {
         self.action_log_index < self.action_log.len()
     }
 
+    fn execute_movement_action(
+        &mut self,
+        action: MovementAction,
+        player_index: usize,
+        movement_actions_left: u32,
+        mut moved_units: Vec<u32>,
+    ) {
+        let starting_position = match action {
+            Move { units, destination } => {
+                assert!(movement_actions_left > 0);
+                assert!(!units.iter().any(|unit| moved_units.contains(unit)));
+                let player = &self.players[player_index];
+                let starting_position = player
+                    .get_unit(*units.first().expect(
+                        "instead of providing no units to move a stop movement actions should be done",
+                    ))
+                    .expect("the player should have all units to move")
+                    .position;
+                let land_movement = !matches!(
+                    self.map
+                        .tiles
+                        .get(&destination)
+                        .expect("destination should exist"),
+                    Water
+                );
+                assert!(units.iter().all(|unit_id| {
+                    let unit = player
+                        .get_unit(*unit_id)
+                        .expect("the player should have all units to move");
+                    unit.position == starting_position
+                        && unit.can_move()
+                        && unit.unit_type.is_land_based() == land_movement
+                        && (!unit.unit_type.is_army_unit() || player.has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE))
+                }));
+                assert!(
+                    !land_movement
+                        || player.get_units(destination).len() + units.len()
+                            <= STACK_LIMIT
+                );
+                assert!(
+                    starting_position.is_neighbor(destination),
+                    "the destination should be adjacent to the starting position"
+                );
+                moved_units.extend(units.iter());
+                self.move_units(player_index, units, destination);
+                self.state = if movement_actions_left > 1 {
+                    Movement {
+                        movement_actions_left: movement_actions_left - 1,
+                        moved_units: moved_units.clone(),
+                    }
+                } else {
+                    Playing
+                };
+                Some(starting_position)
+            }
+            Stop => {
+                self.state = Playing;
+                None
+            }
+        };
+        self.undo_context = UndoContext::Movement {
+            starting_position,
+            movement_actions_left,
+            moved_units,
+        };
+    }
+
+    fn undo_movement_action(&mut self, action: MovementAction, player_index: usize) {
+        let UndoContext::Movement { starting_position, movement_actions_left, moved_units } = mem::take(&mut self.undo_context) else {
+            panic!("when undoing a movement action, the game should have stored movement context")
+        };
+        if let Move {
+            units,
+            destination: _,
+        } = action
+        {
+            self.undo_move_units(
+                player_index,
+                units,
+                starting_position.expect(
+                    "undo context should contain the starting position if units where moved",
+                ),
+            );
+        }
+        self.state = Movement {
+            movement_actions_left,
+            moved_units,
+        };
+    }
+
     fn execute_cultural_influence_resolution_action(
         &mut self,
         action: bool,
@@ -395,7 +514,6 @@ impl Game {
 
     fn undo_cultural_influence_resolution_action(&mut self, action: bool) {
         let cultural_influence_attempt_action = self.action_log[self.action_log_index - 2].as_playing_action().expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
-        println!("action: {cultural_influence_attempt_action}");
         let cultural_influence_attempt_action = serde_json::from_str::<PlayingAction>(cultural_influence_attempt_action).expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
         let PlayingAction::InfluenceCultureAttempt {
             starting_city_position: _,
@@ -690,12 +808,10 @@ impl Game {
             player.available_units += &unit.unit_type;
             replaced_units_undo_context.push(unit);
         }
-        self.removed_units_undo_context =
-            if replaced_leader.is_some() || !replaced_units_undo_context.is_empty() {
-                Some((replaced_units_undo_context, replaced_leader))
-            } else {
-                None
-            };
+        self.undo_context = UndoContext::Recruit {
+            replaced_units: replaced_units_undo_context,
+            replaced_leader,
+        };
         for unit_type in units {
             player.available_units -= &unit_type;
             let city = player
@@ -755,7 +871,11 @@ impl Game {
             .get_city_mut(city_position)
             .expect("player should have a city a recruitment position")
             .undo_activate();
-        if let Some((replaced_units, replaced_leader)) = self.removed_units_undo_context.take() {
+        if let UndoContext::Recruit {
+            replaced_units,
+            replaced_leader,
+        } = mem::take(&mut self.undo_context)
+        {
             for unit in replaced_units {
                 player.available_units -= &unit.unit_type;
                 player.units.push(unit);
@@ -979,6 +1099,58 @@ impl Game {
     pub fn draw_new_cards(&mut self) {
         //todo every player draws 1 action card and 1 objective card
     }
+
+    fn move_units(&mut self, player_index: usize, units: Vec<u32>, destination: Position) {
+        let terrain = self
+            .map
+            .tiles
+            .get(&destination)
+            .expect("the destination position should exist on the map")
+            .clone();
+        for unit_id in units {
+            let unit = self.players[player_index]
+                .get_unit_mut(unit_id)
+                .expect("the player should have all units to move");
+            unit.position = destination;
+            match terrain {
+                Mountain => unit.movement_restriction(),
+                Forest => unit.attack_restriction(),
+                _ => (),
+            };
+        }
+    }
+
+    fn undo_move_units(
+        &mut self,
+        player_index: usize,
+        units: Vec<u32>,
+        starting_position: Position,
+    ) {
+        let Some(unit) = units.first() else {
+            return;
+        };
+        let destination = self.players[player_index]
+            .get_unit(*unit)
+            .expect("there should be at least one moved unit")
+            .position;
+        let terrain = self
+            .map
+            .tiles
+            .get(&destination)
+            .expect("the destination position should exist on the map")
+            .clone();
+        for unit_id in units {
+            let unit = self.players[player_index]
+                .get_unit_mut(unit_id)
+                .expect("the player should have all units to move");
+            unit.position = starting_position;
+            match terrain {
+                Mountain => unit.undo_movement_restriction(),
+                Forest => unit.undo_attack_restriction(),
+                _ => (),
+            };
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -1003,13 +1175,17 @@ pub struct GameData {
     dropped_players: Vec<usize>,
     wonders_left: Vec<String>,
     wonder_amount_left: usize,
-    removed_units_undo_context: Option<(Vec<Unit>, Option<String>)>,
+    undo_context: UndoContext,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum GameState {
     Playing,
     StatusPhase(StatusPhaseState),
+    Movement {
+        movement_actions_left: u32,
+        moved_units: Vec<u32>,
+    },
     CulturalInfluenceResolution {
         roll_boost_cost: u32,
         target_player_index: usize,
@@ -1017,6 +1193,24 @@ pub enum GameState {
         city_piece: Building,
     },
     Finished,
+}
+
+#[derive(Serialize, Deserialize, Default)]
+pub enum UndoContext {
+    #[default]
+    None,
+    FoundCity {
+        settler: Unit,
+    },
+    Recruit {
+        replaced_units: Vec<Unit>,
+        replaced_leader: Option<String>,
+    },
+    Movement {
+        starting_position: Option<Position>,
+        movement_actions_left: u32,
+        moved_units: Vec<u32>,
+    },
 }
 
 #[derive(Serialize, Deserialize)]
@@ -1048,7 +1242,7 @@ pub mod tests {
         wonder::Wonder,
     };
 
-    use super::{Game, GameState::Playing};
+    use super::{Game, GameState::Playing, UndoContext};
 
     #[must_use]
     pub fn test_game() -> Game {
@@ -1077,7 +1271,7 @@ pub mod tests {
             dropped_players: Vec::new(),
             wonders_left: Vec::new(),
             wonder_amount_left: 0,
-            removed_units_undo_context: None,
+            undo_context: UndoContext::None,
         }
     }
 

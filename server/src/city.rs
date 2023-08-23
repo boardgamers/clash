@@ -3,6 +3,7 @@ use std::ops::{Add, Sub};
 use serde::{Deserialize, Serialize};
 
 use crate::city_pieces::Building::*;
+use crate::consts::MAX_CITY_SIZE;
 use crate::resource_pile::ResourcePile;
 use crate::{
     city_pieces::{Building, CityPieces, CityPiecesData},
@@ -12,8 +13,6 @@ use crate::{
     wonder::Wonder,
 };
 use MoodState::*;
-
-const MAX_CITY_SIZE: usize = 4;
 
 pub struct City {
     pub pieces: CityPieces,
