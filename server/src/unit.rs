@@ -177,13 +177,18 @@ impl Units {
 
     #[must_use]
     pub fn has_unit(&self, unit: &UnitType) -> bool {
+                                self.get(unit) > 0
+    }
+
+    #[must_use]
+    pub fn get(&self, unit: &UnitType) -> u8 {
         match *unit {
-            Settler => self.settlers > 0,
-            Infantry => self.infantry > 0,
-            Ship => self.ships > 0,
-            Cavalry => self.cavalry > 0,
-            Elephant => self.elephants > 0,
-            Leader => self.leaders > 0,
+            Settler => self.settlers ,
+            Infantry => self.infantry ,
+            Ship => self.ships ,
+            Cavalry => self.cavalry ,
+            Elephant => self.elephants ,
+            Leader => self.leaders ,
         }
     }
 }
@@ -221,6 +226,42 @@ impl FromIterator<UnitType> for Units {
             units += &unit;
         }
         units
+    }
+}
+
+impl IntoIterator for Units {
+    type Item = (&UnitType, u8);
+    type IntoIter = UnitsIntoIterator;
+
+    fn into_iter(self) -> Self::IntoIter {
+        UnitsIntoIterator {
+            units: self,
+            index: 0,
+        }
+    }
+}
+
+pub   struct UnitsIntoIterator {
+    units: Units,
+    index: u8,
+}
+
+impl Iterator for UnitsIntoIterator {
+    type Item = (&UnitType, u8);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let index = self.index;
+        self.index += 1;
+        let u = &self.units;
+        match index {
+            0 if u.settlers > 0 => Some((Settler, u.settlers)),
+            1 if u.infantry > 0 => Some((Infantry, u.settlers)),
+            2 if u.ships > 0 => Some((Ship, u.ships)),
+            3 if u.cavalry > 0 => Some((Cavalry, u.cavalry)),
+            4 if u.elephants > 0 => Some((Elephant, u.elephants)),
+            5 if u.leaders > 0 => Some((Leader, u.leaders)),
+            _ => None,
+        }
     }
 }
 

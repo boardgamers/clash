@@ -628,6 +628,40 @@ impl Player {
         leader_index: Option<usize>,
         replaced_units: &[u32],
     ) -> bool {
+        if !self.can_recruit_without_replaced(units, city_position, leader_index) {
+            return false;
+        }
+        let mut units_left = self.available_units.clone();
+        let mut required_units = Units::empty();
+        for unit in units {
+            if !units_left.has_unit(unit) {
+                required_units += unit;
+                continue;
+            }
+            units_left -= unit;
+        }
+        let replaced_units = replaced_units
+            .iter()
+            .map(|id| {
+                self.get_unit(*id)
+                    .expect("player should have units to be replaced")
+                    .unit_type
+                    .clone()
+            })
+            .collect();
+        if required_units != replaced_units {
+            return false;
+        }
+        true
+    }
+
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if city does not exist
+    #[must_use]
+    pub fn can_recruit_without_replaced(&self, units: &[UnitType], city_position: Position, leader_index: Option<usize>) -> bool {
         let city = self
             .get_city(city_position)
             .expect("player should have a city at the recruitment position");
@@ -670,27 +704,6 @@ impl Player {
             return false;
         }
         if leader_index.is_some_and(|leader_index| leader_index >= self.available_leaders.len()) {
-            return false;
-        }
-        let mut units_left = self.available_units.clone();
-        let mut required_units = Units::empty();
-        for unit in units {
-            if !units_left.has_unit(unit) {
-                required_units += unit;
-                continue;
-            }
-            units_left -= unit;
-        }
-        let replaced_units = replaced_units
-            .iter()
-            .map(|id| {
-                self.get_unit(*id)
-                    .expect("player should have units to be replaced")
-                    .unit_type
-                    .clone()
-            })
-            .collect();
-        if required_units != replaced_units {
             return false;
         }
         true

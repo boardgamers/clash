@@ -6,6 +6,7 @@ use server::city::{City, MoodState};
 use server::city_pieces::Building;
 use server::game::Game;
 use server::player::Player;
+use server::unit::Units;
 
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{add_construct_button, add_wonder_buttons};
@@ -38,13 +39,12 @@ pub fn show_city_menu(game: &Game, menu: &CityMenu) -> StateUpdate {
                 )));
             }
             if ui.button(None, "Recruit Units") {
-                updates.add(StateUpdate::SetDialog(ActiveDialog::RecruitUnitSelection(
-                    RecruitUnitSelection::new(
-                        menu.player_index,
-                        menu.city_position,
-                        game.get_player(menu.player_index).available_units.clone(),
-                    ),
-                )));
+                updates.add(RecruitUnitSelection::new(
+                    game,
+                    menu.player_index,
+                    menu.city_position,
+                    Units::empty(),
+                ));
             }
         }
 

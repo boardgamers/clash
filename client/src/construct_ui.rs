@@ -130,7 +130,7 @@ pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> St
         |ap, r| match r {
             ResourceType::Gold => ap.payment_options.gold_left > 0,
             ResourceType::Discount => ap.payment_options.discount > 0,
-            _ => ap.payment.get(r).max > 0,
+            _ => ap.payment.get(r).selectable.max > 0,
         },
         |cp, r| {
             let mut new = cp.clone();
@@ -138,9 +138,9 @@ pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> St
             if gold.current > 0 {
                 gold.current -= 1;
             } else {
-                new.payment.get_mut(ResourceType::Discount).current += 1;
+                new.payment.get_mut(ResourceType::Discount).selectable.current += 1;
             }
-            new.payment.get_mut(r).current += 1;
+            new.payment.get_mut(r).selectable.current += 1;
             StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(new))
         },
         |cp, r| {
@@ -149,9 +149,9 @@ pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> St
             if discount.current > 0 {
                 discount.current -= 1;
             } else {
-                new.payment.get_mut(ResourceType::Gold).current += 1;
+                new.payment.get_mut(ResourceType::Gold).selectable.current += 1;
             }
-            new.payment.get_mut(r).current -= 1;
+            new.payment.get_mut(r).selectable.current -= 1;
             StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(new))
         },
     )
