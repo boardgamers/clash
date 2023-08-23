@@ -26,6 +26,7 @@ pub mod map;
 pub mod player;
 mod player_events;
 pub mod playing_actions;
+mod consts;
 pub mod position;
 pub mod resource_pile;
 mod special_advance;

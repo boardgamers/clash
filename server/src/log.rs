@@ -12,9 +12,9 @@ use crate::{
     resource_pile::ResourcePile,
     status_phase::{
         ChangeGovernmentType, CompleteObjectives, DetermineFirstPlayer, FreeAdvance, RaseSize1City,
-        StatusPhaseAction,
+        StatusPhaseAction, StatusPhaseState,
     },
-    unit::Units,
+    unit::{MovementAction, Units},
     utils,
 };
 
@@ -22,6 +22,7 @@ use crate::{
 pub enum ActionLogItem {
     Playing(String),
     StatusPhase(String),
+    Movement(String),
     CulturalInfluenceResolution(String),
 }
 
@@ -45,6 +46,7 @@ impl ActionLogItem {
         match self {
             Self::Playing(action) => Action::Playing(serde_json::from_str::<PlayingAction>(action).expect("data should be a serialized playing action")),
             Self::StatusPhase(action) => Action::StatusPhase(serde_json::from_str::<StatusPhaseAction>(action).expect("data should be a serialized status phase action")),
+            Self::Movement(action) => Action::Movement(serde_json::from_str::<MovementAction>(action).expect("data should be a serialized movement action")),
             Self::CulturalInfluenceResolution(action) => Action::CulturalInfluenceResolution(serde_json::from_str::<bool>(action).expect("data should be a serialized boolean representing cultural influence resolution confirmation action")),
         }
     }
@@ -68,6 +70,7 @@ pub fn format_action_log_item(action: &Action, game: &Game) -> String {
     match action {
         Action::Playing(action) => format_playing_action_log_item(action, game),
         Action::StatusPhase(action) => format_status_phase_action_log_item(action, game),
+        Action::Movement(action) => format_movement_action_log_item(action, game),
         Action::CulturalInfluenceResolution(action) => format!("{} {}", game.players[game.current_player_index].get_name(), match action {
             true => format!("payed {} culture tokens to increased the dice roll and proceed with the cultural influence", game.dice_roll_log.last().expect("there should have been at least one dice roll before a cultural influence resolution action")),
             false => String::from("declined to increase the dice roll"),
@@ -96,6 +99,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         } else { String::new() }),
         PlayingAction::Collect { city_position, collections } => format!("{player_name} collects {}{} in the city at {city_position}{}", utils::format_list(&collections.iter().map(|(_, collection)| collection.to_string()).collect::<Vec<String>>(), "nothing"), if collections.len() > 1 && collections.iter().permutations(2).unique().any(|permutation| permutation[0].1.has_common_resource(&permutation[1].1)) { format!(" for a total of {}", collections.iter().map(|(_, collection)| collection.clone()).sum::<ResourcePile>()) } else { String::new() }, if player.get_city(*city_position).expect("there should be a city at the given position").is_activated() { format!("making it {:?}", player.get_city(*city_position).expect("there should be a city at the given position").mood_state.clone() - 1) } else { String::new() }),
         PlayingAction::Recruit { units, city_position, payment, leader_index, replaced_units } => format!("{player_name} payed {payment} to recruit {}{} in the city at {city_position}{}", units.iter().cloned().collect::<Units>(), leader_index.map_or(String::new(), |leader_index| format!(" {} {} as his leader", if player.available_leaders.len() > 1 { "choosing" } else { "getting" }, &player.available_leaders[leader_index].name)), format_args!("{}{}", match replaced_units.len() { 0 => "", 1 => " replacing the unit at ", _ => " replacing units at " }, utils::format_list(&replaced_units.iter().map(|unit_id| player.get_unit(*unit_id).expect("the player should have the replaced units").position.to_string()).unique().collect(), ""))),
+        PlayingAction::MoveUnits => format!("{player_name} uses a move units action"),
         PlayingAction::IncreaseHappiness { happiness_increases } => {
             let happiness_increases = happiness_increases.iter().filter_map(|(position, steps)| if *steps > 0 { Some(format!("the city at {position} by {steps} steps, making it {:?}", player.get_city(*position).expect("player should have a city at this position").mood_state.clone() + *steps)) } else { None }).collect::<Vec<String>>();
             format!("{player_name} increased happiness in {}", utils::format_list(&happiness_increases, "no city"))
@@ -112,7 +116,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
 fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) -> String {
     let player_name = game.players[game.current_player_index].get_name();
     match action.phase {
-        crate::status_phase::StatusPhaseState::CompleteObjectives => {
+        StatusPhaseState::CompleteObjectives => {
             let completed_objectives = serde_json::from_str::<CompleteObjectives>(&action.data)
                 .expect("status phase data should match with it's phase")
                 .objectives;
@@ -121,13 +125,13 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
                 utils::format_list(&completed_objectives, "no objectives")
             )
         }
-        crate::status_phase::StatusPhaseState::FreeAdvance => {
+        StatusPhaseState::FreeAdvance => {
             let advance = serde_json::from_str::<FreeAdvance>(&action.data)
                 .expect("status phase data should match with it's phase")
                 .advance;
             format!("{player_name} advanced {advance}")
         }
-        crate::status_phase::StatusPhaseState::RaseSize1City => {
+        StatusPhaseState::RaseSize1City => {
             let city = serde_json::from_str::<RaseSize1City>(&action.data)
                 .expect("status phase data should match with it's phase")
                 .city;
@@ -139,7 +143,7 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
                 }
             )
         }
-        crate::status_phase::StatusPhaseState::ChangeGovernmentType => {
+        StatusPhaseState::ChangeGovernmentType => {
             let new_government = serde_json::from_str::<ChangeGovernmentType>(&action.data)
                 .expect("status phase data should match with it's phase")
                 .new_government;
@@ -160,7 +164,7 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
                 }
             )
         }
-        crate::status_phase::StatusPhaseState::DetermineFirstPlayer => {
+        StatusPhaseState::DetermineFirstPlayer => {
             let player_index = serde_json::from_str::<DetermineFirstPlayer>(&action.data)
                 .expect("status phase data should match with it's phase")
                 .player_index;
@@ -187,5 +191,35 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
                 }
             )
         }
+    }
+}
+
+fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> String {
+    let player = &game.players[game.current_player_index];
+    let player_name = player.get_name();
+    match action {
+        MovementAction::Move {
+            units,
+            destination: _,
+        } if units.is_empty() => {
+            format!("\t{player_name} used a movement actions but moved no units")
+        }
+        MovementAction::Move { units, destination } => format!(
+            "\t{player_name} moved {} from {} to {}",
+            units
+                .iter()
+                .map(|unit| player
+                    .get_unit(*unit)
+                    .expect("the player should have moved units")
+                    .unit_type
+                    .clone())
+                .collect::<Units>(),
+            player
+                .get_unit(units[0])
+                .expect("the player should have moved units")
+                .position,
+            destination
+        ),
+        MovementAction::Stop => format!("\t{player_name} ended the movement action"),
     }
 }
