@@ -12,6 +12,11 @@ use crate::{
         Building::{self, *},
     },
     civilization::Civilization,
+    consts::{
+        ADVANCE_COST, ADVANCE_VICTORY_POINTS, BUILDING_VICTORY_POINTS, CITY_PIECE_LIMIT,
+        CONSTRUCT_COST, DEFEATED_LEADER_VICTORY_POINTS, OBJECTIVE_VICTORY_POINTS, SETTLEMENT_LIMIT,
+        STACK_LIMIT, UNIT_LIMIT, WONDER_VICTORY_POINTS,
+    },
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     game::Game,
     leader::Leader,
@@ -25,7 +30,7 @@ use crate::{
         Units,
     },
     utils,
-    wonder::Wonder, consts::{SETTLEMENT_LIMIT, CITY_PIECE_LIMIT, UNIT_LIMIT, BUILDING_VICTORY_POINTS, OBJECTIVE_VICTORY_POINTS, WONDER_VICTORY_POINTS, ADVANCE_VICTORY_POINTS, DEFEATED_LEADER_VICTORY_POINTS, CONSTRUCT_COST, ADVANCE_COST, STACK_LIMIT},
+    wonder::Wonder,
 };
 
 pub struct Player {

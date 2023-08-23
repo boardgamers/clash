@@ -1,4 +1,4 @@
-use crate::{resource_pile::ResourcePile, city_pieces::AvailableCityPieces, unit::Units};
+use crate::{city_pieces::AvailableCityPieces, resource_pile::ResourcePile, unit::Units};
 
 pub const MAX_CITY_SIZE: usize = 4;
 pub const DICE_ROLL_BUFFER: u32 = 200;

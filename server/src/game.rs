@@ -6,6 +6,7 @@ use crate::{
     action::Action,
     city::City,
     city_pieces::Building,
+    consts::{AGES, ARMY_MOVEMENT_REQUIRED_ADVANCE, DICE_ROLL_BUFFER, STACK_LIMIT},
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     log::{self, ActionLogItem},
     map::{Map, MapData, Terrain::*},
@@ -21,7 +22,7 @@ use crate::{
         UnitType::{self, *},
     },
     utils,
-    wonder::Wonder, consts::{DICE_ROLL_BUFFER, STACK_LIMIT, AGES, ARMY_MOVEMENT_REQUIRED_ADVANCE},
+    wonder::Wonder,
 };
 
 use GameState::*;
@@ -432,12 +433,12 @@ impl Game {
                     unit.position == starting_position
                         && unit.can_move()
                         && unit.unit_type.is_land_based() == land_movement
-                        && (!unit.unit_type.is_army_unit() || player.has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE))
+                        && (!unit.unit_type.is_army_unit()
+                            || player.has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE))
                 }));
                 assert!(
                     !land_movement
-                        || player.get_units(destination).len() + units.len()
-                            <= STACK_LIMIT
+                        || player.get_units(destination).len() + units.len() <= STACK_LIMIT
                 );
                 assert!(
                     starting_position.is_neighbor(destination),
