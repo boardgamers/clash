@@ -3,7 +3,7 @@ use macroquad::math::u32;
 use macroquad::prelude::draw_text;
 use server::game::Game;
 use server::position::Position;
-use server::unit::{MovementRestriction, Unit, UnitType};
+use server::unit::{Unit, UnitType};
 use std::collections::HashMap;
 
 pub fn draw_unit(unit: &Unit, index: u32) {
@@ -61,22 +61,24 @@ pub fn draw_units(game: &Game) {
     }
 }
 
-pub fn name(u: &UnitType) -> &str {
-    non_leader_names()
-        .into_iter()
-        .find(|(unit_type, _)| unit_type == u)
-        .unwrap()
-        .1
-}
+//todo(Gregor) use for selection
+//
+// pub fn name(u: &UnitType) -> &str {
+//     non_leader_names()
+//         .into_iter()
+//         .find(|(unit_type, _)| unit_type == u)
+//         .unwrap()
+//         .1
+// }
 
-pub fn label(unit: &Unit) -> String {
-    let pos = unit.position.to_string();
-    let name = name(&unit.unit_type);
-    let res = match unit.movement_restriction {
-        MovementRestriction::None => "",
-        MovementRestriction::Attack => " (can't attacked)",
-        MovementRestriction::AllMovement => " (can't move)",
-    };
-
-    format!("{pos}: {name}{res}")
-}
+// pub fn label(unit: &Unit) -> String {
+//     let pos = unit.position.to_string();
+//     let name = name(&unit.unit_type);
+//     let res = match unit.movement_restriction {
+//         MovementRestriction::None => "",
+//         MovementRestriction::Attack => " (can't attacked)",
+//         MovementRestriction::AllMovement => " (can't move)",
+//     };
+//
+//     format!("{pos}: {name}{res}")
+// }

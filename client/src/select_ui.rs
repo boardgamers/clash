@@ -16,6 +16,7 @@ pub trait HasSelectableObject {
     fn counter_mut(&mut self) -> &mut SelectableObject;
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn dialog<C, O: HasSelectableObject>(
     container: &C,
     get_objects: impl Fn(&C) -> Vec<O>,

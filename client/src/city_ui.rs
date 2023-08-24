@@ -12,7 +12,7 @@ use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{add_construct_button, add_wonder_buttons};
 use crate::happiness_ui::init_increase_happiness;
 use crate::hex_ui::draw_hex_center_text;
-use crate::recruit_unit_ui::RecruitUnitSelection;
+use crate::recruit_unit_ui::RecruitAmount;
 use crate::ui_state::{can_play_action, CityMenu, State, StateUpdate, StateUpdates};
 use crate::{hex_ui, influence_ui, player_ui, ActiveDialog};
 
@@ -39,12 +39,12 @@ pub fn show_city_menu(game: &Game, menu: &CityMenu) -> StateUpdate {
                 )));
             }
             if ui.button(None, "Recruit Units") {
-                updates.add(RecruitUnitSelection::new_selection(
+                updates.add(RecruitAmount::new_selection(
                     game,
                     menu.player_index,
                     menu.city_position,
                     Units::empty(),
-                    vec![],
+                    &[],
                 ));
             }
         }

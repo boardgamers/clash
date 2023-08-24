@@ -14,7 +14,7 @@ use server::resource_pile::PaymentOptions;
 use server::unit::UnitType;
 
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
-use crate::recruit_unit_ui::ReplaceUnits;
+use crate::recruit_unit_ui::RecruitSelection;
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::SelectableObject;
 use crate::ui_state::{ActiveDialog, StateUpdate};
@@ -166,7 +166,7 @@ pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> St
 pub enum ConstructionProject {
     Building(Building, Option<Position>),
     Wonder(String),
-    Units(ReplaceUnits),
+    Units(RecruitSelection),
 }
 
 #[derive(Clone)]

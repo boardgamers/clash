@@ -2,7 +2,7 @@ use crate::advance_ui::AdvancePayment;
 use crate::construct_ui::ConstructionPayment;
 
 use crate::collect_ui::CollectResources;
-use crate::recruit_unit_ui::{RecruitUnitSelection, ReplaceUnits};
+use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use macroquad::prelude::*;
 use server::action::Action;
 use server::city::{City, MoodState};
@@ -17,8 +17,9 @@ pub enum ActiveDialog {
     AdvancePayment(AdvancePayment),
     ConstructionPayment(ConstructionPayment),
     CollectResources(CollectResources),
-    RecruitUnitSelection(RecruitUnitSelection),
-    ReplaceUnits(ReplaceUnits),
+    RecruitUnitSelection(RecruitAmount),
+    #[allow(dead_code)] //todo(Gregor)
+    ReplaceUnits(RecruitSelection),
 }
 
 pub struct PendingUpdate {

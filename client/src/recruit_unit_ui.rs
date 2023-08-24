@@ -16,7 +16,7 @@ pub struct SelectableUnit {
 }
 
 #[derive(Clone)]
-pub struct RecruitUnitSelection {
+pub struct RecruitAmount {
     player_index: usize,
     city_position: Position,
     pub units: Units,
@@ -33,13 +33,13 @@ impl HasSelectableObject for SelectableUnit {
     }
 }
 
-impl RecruitUnitSelection {
+impl RecruitAmount {
     pub fn new_selection(
         game: &Game,
         player_index: usize,
         city_position: Position,
         units: Units,
-        must_show_units: Vec<SelectableUnit>,
+        must_show_units: &[SelectableUnit],
     ) -> StateUpdate {
         let player = game.get_player(player_index);
         let selectable: Vec<SelectableUnit> = unit_ui::non_leader_names()
@@ -74,7 +74,7 @@ impl RecruitUnitSelection {
             })
             .collect();
 
-        StateUpdate::SetDialog(ActiveDialog::RecruitUnitSelection(RecruitUnitSelection {
+        StateUpdate::SetDialog(ActiveDialog::RecruitUnitSelection(RecruitAmount {
             player_index,
             city_position,
             units,
@@ -85,15 +85,16 @@ impl RecruitUnitSelection {
 }
 
 #[derive(Clone)]
-pub struct ReplaceUnits {
-    pub selection: RecruitUnitSelection,
+#[allow(dead_code)] //todo(Gregor)
+pub struct RecruitSelection {
+    pub selection: RecruitAmount,
     available_units: Units,
     pub replaced_units: Vec<u32>,
 }
 
-impl ReplaceUnits {
-    pub fn new(selection: RecruitUnitSelection, available_units: Units) -> ReplaceUnits {
-        ReplaceUnits {
+impl RecruitSelection {
+    pub fn new(selection: RecruitAmount, available_units: Units) -> RecruitSelection {
+        RecruitSelection {
             selection,
             replaced_units: vec![],
             available_units,
@@ -101,14 +102,14 @@ impl ReplaceUnits {
     }
 }
 
-pub fn select_dialog(game: &Game, sel: &RecruitUnitSelection) -> StateUpdate {
+pub fn select_dialog(game: &Game, sel: &RecruitAmount) -> StateUpdate {
     select_ui::dialog(
         sel,
         |s| s.selectable.clone(),
         |s| s.name.clone(),
         |_s| true,
         |s| {
-            //todo check if replace is needed
+            //todo(Gregor) check if replace is needed
             // StateUpdate::SetDialog(ActiveDialog::ReplaceUnits(ReplaceUnits::new(
             //     s.clone(),
             //     game.get_player(s.player_index).available_units.clone(),
@@ -118,7 +119,7 @@ pub fn select_dialog(game: &Game, sel: &RecruitUnitSelection) -> StateUpdate {
                 game,
                 s.player_index,
                 s.city_position,
-                ConstructionProject::Units(ReplaceUnits::new(
+                ConstructionProject::Units(RecruitSelection::new(
                     s.clone(),
                     game.get_player(s.player_index).available_units.clone(),
                 )),
@@ -137,16 +138,16 @@ pub fn select_dialog(game: &Game, sel: &RecruitUnitSelection) -> StateUpdate {
         },
     )
 
-    //todo leader
+    //todo(Gregor) leader
 }
 
-fn update_selection(game: &Game, s: &RecruitUnitSelection, units: Units) -> StateUpdate {
-    RecruitUnitSelection::new_selection(
+fn update_selection(game: &Game, s: &RecruitAmount, units: Units) -> StateUpdate {
+    RecruitAmount::new_selection(
         game,
         s.player_index,
         s.city_position,
         units,
-        s.selectable.clone(),
+        s.selectable.as_slice(),
     )
 }
 
