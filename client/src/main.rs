@@ -29,6 +29,7 @@ mod recruit_unit_ui;
 mod resource_ui;
 mod ui_state;
 mod unit_ui;
+mod select_ui;
 
 #[macroquad::main("Clash")]
 async fn main() {

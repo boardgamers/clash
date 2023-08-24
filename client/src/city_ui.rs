@@ -39,11 +39,12 @@ pub fn show_city_menu(game: &Game, menu: &CityMenu) -> StateUpdate {
                 )));
             }
             if ui.button(None, "Recruit Units") {
-                updates.add(RecruitUnitSelection::new(
+                updates.add(RecruitUnitSelection::new_selection(
                     game,
                     menu.player_index,
                     menu.city_position,
                     Units::empty(),
+                    vec![],
                 ));
             }
         }

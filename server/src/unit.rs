@@ -9,7 +9,7 @@ use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::Reso
 
 use MovementRestriction::{AllMovement, Attack};
 use UnitType::*;
-
+use std::iter;
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct Unit {
     pub player_index: usize,
@@ -100,7 +100,7 @@ impl Unit {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum UnitType {
     Settler,
     Infantry,
@@ -191,6 +191,10 @@ impl Units {
             Leader => self.leaders,
         }
     }
+
+    pub fn to_vec(self) -> Vec<UnitType> {
+        self.into_iter().flat_map(|(u, c)| { iter::repeat(u).take(c as usize) }).collect()
+    }
 }
 
 impl AddAssign<&UnitType> for Units {
@@ -230,7 +234,7 @@ impl FromIterator<UnitType> for Units {
 }
 
 impl IntoIterator for Units {
-    type Item = (&UnitType, u8);
+    type Item = (UnitType, u8);
     type IntoIter = UnitsIntoIterator;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -247,19 +251,19 @@ pub struct UnitsIntoIterator {
 }
 
 impl Iterator for UnitsIntoIterator {
-    type Item = (&UnitType, u8);
+    type Item = (UnitType, u8);
 
     fn next(&mut self) -> Option<Self::Item> {
         let index = self.index;
         self.index += 1;
         let u = &self.units;
         match index {
-            0 if u.settlers > 0 => Some((Settler, u.settlers)),
-            1 if u.infantry > 0 => Some((Infantry, u.settlers)),
-            2 if u.ships > 0 => Some((Ship, u.ships)),
-            3 if u.cavalry > 0 => Some((Cavalry, u.cavalry)),
-            4 if u.elephants > 0 => Some((Elephant, u.elephants)),
-            5 if u.leaders > 0 => Some((Leader, u.leaders)),
+            0  => Some((Settler.clone(), u.settlers)),
+            1  => Some((Infantry.clone(), u.infantry)),
+            2 => Some((Ship.clone(), u.ships)),
+            3 => Some((Cavalry.clone(), u.cavalry)),
+            4 => Some((Elephant.clone(), u.elephants)),
+            5 => Some((Leader.clone(), u.leaders)),
             _ => None,
         }
     }
@@ -321,4 +325,28 @@ pub enum MovementAction {
         destination: Position,
     },
     Stop,
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::unit::{Units};
+    use crate::unit::UnitType::*;
+
+    #[test]
+    fn into_iter() {
+        let units = Units::new(0, 1, 0, 2, 1, 1);
+        assert_eq!(units.into_iter().collect::<Vec<_>>(), vec![
+            (Settler, 0),
+            (Infantry, 1),
+            (Ship, 0),
+            (Cavalry, 2),
+            (Elephant, 1),
+            (Leader, 1),
+        ]);
+        }
+    #[test]
+    fn to_vec() {
+        let units = Units::new(0, 1, 0, 2, 1, 1);
+        assert_eq!(units.to_vec(), vec![Infantry, Cavalry, Cavalry, Elephant, Leader])
+        }
 }

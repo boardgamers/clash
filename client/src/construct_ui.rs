@@ -1,3 +1,5 @@
+use std::cmp;
+
 use macroquad::math::{i32, u32};
 use macroquad::ui::Ui;
 use server::action::Action;
@@ -9,12 +11,12 @@ use server::map::{Map, Terrain};
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::PaymentOptions;
-use std::cmp;
 use server::unit::UnitType;
 
-use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
-use crate::recruit_unit_ui::RecruitUnitSelection;
+use crate::payment_ui::{HasPayment, Payment, payment_dialog, ResourcePayment};
+use crate::recruit_unit_ui::ReplaceUnits;
 use crate::resource_ui::{new_resource_map, ResourceType};
+use crate::select_ui::SelectableObject;
 use crate::ui_state::{ActiveDialog, StateUpdate};
 use crate::ui_state::{CityMenu, StateUpdates};
 
@@ -93,7 +95,7 @@ pub fn add_wonder_buttons(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpd
 pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> StateUpdate {
     payment_dialog(
         payment,
-        |cp| cp.payment.get(ResourceType::Discount).current == 0,
+        |cp| cp.payment.get(ResourceType::Discount).selectable.current == 0,
         |cp| match &cp.project {
             ConstructionProject::Building(b, pos) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Construct {
@@ -115,13 +117,13 @@ pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> St
                 vec![],
                 game.get_any_city(cp.city_position).unwrap(),
             ),
-            ConstructionProject::Units(sel) => StateUpdate::execute_activation(
+            ConstructionProject::Units(r) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Recruit {
                     city_position: cp.city_position,
-                    units: sel.units.clone(),
+                    units: r.selection.units.clone().to_vec(),
                     payment: cp.payment.to_resource_pile(),
-                    replaced_units: sel.replaced_units.clone(),
-                    leader_index: None,
+                    replaced_units: r.replaced_units.clone(),
+                    leader_index: r.selection.leader_index,
                 }),
                 vec![],
                 game.get_any_city(cp.city_position).unwrap(),
@@ -135,8 +137,8 @@ pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> St
         |cp, r| {
             let mut new = cp.clone();
             let gold = new.payment.get_mut(ResourceType::Gold);
-            if gold.current > 0 {
-                gold.current -= 1;
+            if gold.selectable.current > 0 {
+                gold.selectable.current -= 1;
             } else {
                 new.payment.get_mut(ResourceType::Discount).selectable.current += 1;
             }
@@ -146,8 +148,8 @@ pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> St
         |cp, r| {
             let mut new = cp.clone();
             let discount = new.payment.get_mut(ResourceType::Discount);
-            if discount.current > 0 {
-                discount.current -= 1;
+            if discount.selectable.current > 0 {
+                discount.selectable.current -= 1;
             } else {
                 new.payment.get_mut(ResourceType::Gold).selectable.current += 1;
             }
@@ -161,7 +163,7 @@ pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> St
 pub enum ConstructionProject {
     Building(Building, Option<Position>),
     Wonder(String),
-    Units(RecruitUnitSelection),
+    Units(ReplaceUnits),
 }
 
 #[derive(Clone)]
@@ -192,7 +194,7 @@ impl ConstructionPayment {
                 .unwrap()
                 .cost
                 .clone(),
-            ConstructionProject::Units(sel) => sel.units.iter().map(UnitType::cost).sum()
+            ConstructionProject::Units(sel) => sel.selection.units.clone().to_vec().iter().map(UnitType::cost).sum()
         };
 
         let payment_options = p.resources.get_payment_options(&cost);
@@ -214,16 +216,20 @@ impl ConstructionPayment {
             .map(|e| match e.0 {
                 ResourceType::Discount | ResourceType::Gold => ResourcePayment {
                     resource: e.0,
+                    selectable: SelectableObject {
                     current: e.1,
                     min: e.1,
                     max: e.1,
+
+                    }
                 },
                 _ => ResourcePayment {
                     resource: e.0,
-                    current: e.1,
-                    min: cmp::max(0, e.1 as i32 - a.discount as i32 - a.gold_left as i32) as u32,
-                    max: e.1,
-                },
+                    selectable: SelectableObject {
+                        current: e.1,
+                        min: cmp::max(0, e.1 as i32 - a.discount as i32 - a.gold_left as i32) as u32,
+                        max: e.1,
+                    }                },
             })
             .collect();
 

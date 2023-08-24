@@ -10,10 +10,11 @@ use server::game::Game;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::AdvancePaymentOptions;
 
-use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment, HasSelectableObject};
+use crate::payment_ui::{HasPayment, Payment, payment_dialog, ResourcePayment};
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::ui_state::{can_play_action, StateUpdate, StateUpdates};
 use crate::ActiveDialog;
+use crate::select_ui::HasSelectableObject;
 
 #[derive(Clone)]
 pub struct AdvancePayment {
@@ -110,7 +111,7 @@ fn add(ap: &AdvancePayment, r: ResourceType, i: i32) -> StateUpdate {
     let mut new = ap.clone();
     let p = new.payment.get_mut(r);
 
-    let c = p.counter();
+    let c = p.counter_mut();
     c.current = (c.current as i32 + i) as u32;
     StateUpdate::SetDialog(ActiveDialog::AdvancePayment(new))
 }
