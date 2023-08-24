@@ -10,7 +10,6 @@ use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::Reso
 use MovementRestriction::{AllMovement, Attack};
 use UnitType::*;
 use std::iter;
-use UnitType::*;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct Unit {
