@@ -661,7 +661,12 @@ impl Player {
     ///
     /// Panics if city does not exist
     #[must_use]
-    pub fn can_recruit_without_replaced(&self, units: &[UnitType], city_position: Position, leader_index: Option<usize>) -> bool {
+    pub fn can_recruit_without_replaced(
+        &self,
+        units: &[UnitType],
+        city_position: Position,
+        leader_index: Option<usize>,
+    ) -> bool {
         let city = self
             .get_city(city_position)
             .expect("player should have a city at the recruitment position");

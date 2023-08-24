@@ -177,18 +177,18 @@ impl Units {
 
     #[must_use]
     pub fn has_unit(&self, unit: &UnitType) -> bool {
-                                self.get(unit) > 0
+        self.get(unit) > 0
     }
 
     #[must_use]
     pub fn get(&self, unit: &UnitType) -> u8 {
         match *unit {
-            Settler => self.settlers ,
-            Infantry => self.infantry ,
-            Ship => self.ships ,
-            Cavalry => self.cavalry ,
-            Elephant => self.elephants ,
-            Leader => self.leaders ,
+            Settler => self.settlers,
+            Infantry => self.infantry,
+            Ship => self.ships,
+            Cavalry => self.cavalry,
+            Elephant => self.elephants,
+            Leader => self.leaders,
         }
     }
 }
@@ -241,7 +241,7 @@ impl IntoIterator for Units {
     }
 }
 
-pub   struct UnitsIntoIterator {
+pub struct UnitsIntoIterator {
     units: Units,
     index: u8,
 }
