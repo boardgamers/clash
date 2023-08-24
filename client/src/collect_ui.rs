@@ -5,11 +5,11 @@ use macroquad::color::RED;
 use macroquad::math::i32;
 use macroquad::prelude::{draw_circle_lines, draw_text, Vec2, WHITE};
 use server::action::Action;
+use server::consts::PORT_CHOICES;
 use server::game::Game;
 use server::playing_actions::{get_total_collection, PlayingAction};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-use server::consts::PORT_CHOICES;
 
 use crate::dialog_ui::active_dialog_window;
 use crate::hex_ui;
