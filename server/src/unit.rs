@@ -7,9 +7,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
 
+use std::iter;
 use MovementRestriction::{AllMovement, Attack};
 use UnitType::*;
-use std::iter;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct Unit {
