@@ -13,7 +13,7 @@ use server::position::Position;
 use server::resource_pile::PaymentOptions;
 use server::unit::UnitType;
 
-use crate::payment_ui::{HasPayment, Payment, payment_dialog, ResourcePayment};
+use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::recruit_unit_ui::ReplaceUnits;
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::SelectableObject;
@@ -140,7 +140,10 @@ pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> St
             if gold.selectable.current > 0 {
                 gold.selectable.current -= 1;
             } else {
-                new.payment.get_mut(ResourceType::Discount).selectable.current += 1;
+                new.payment
+                    .get_mut(ResourceType::Discount)
+                    .selectable
+                    .current += 1;
             }
             new.payment.get_mut(r).selectable.current += 1;
             StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(new))
@@ -194,7 +197,14 @@ impl ConstructionPayment {
                 .unwrap()
                 .cost
                 .clone(),
-            ConstructionProject::Units(sel) => sel.selection.units.clone().to_vec().iter().map(UnitType::cost).sum()
+            ConstructionProject::Units(sel) => sel
+                .selection
+                .units
+                .clone()
+                .to_vec()
+                .iter()
+                .map(UnitType::cost)
+                .sum(),
         };
 
         let payment_options = p.resources.get_payment_options(&cost);
@@ -217,19 +227,20 @@ impl ConstructionPayment {
                 ResourceType::Discount | ResourceType::Gold => ResourcePayment {
                     resource: e.0,
                     selectable: SelectableObject {
-                    current: e.1,
-                    min: e.1,
-                    max: e.1,
-
-                    }
+                        current: e.1,
+                        min: e.1,
+                        max: e.1,
+                    },
                 },
                 _ => ResourcePayment {
                     resource: e.0,
                     selectable: SelectableObject {
                         current: e.1,
-                        min: cmp::max(0, e.1 as i32 - a.discount as i32 - a.gold_left as i32) as u32,
+                        min: cmp::max(0, e.1 as i32 - a.discount as i32 - a.gold_left as i32)
+                            as u32,
                         max: e.1,
-                    }                },
+                    },
+                },
             })
             .collect();
 

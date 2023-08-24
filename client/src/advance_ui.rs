@@ -10,11 +10,11 @@ use server::game::Game;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::AdvancePaymentOptions;
 
-use crate::payment_ui::{HasPayment, Payment, payment_dialog, ResourcePayment};
+use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::resource_ui::{new_resource_map, ResourceType};
+use crate::select_ui::HasSelectableObject;
 use crate::ui_state::{can_play_action, StateUpdate, StateUpdates};
 use crate::ActiveDialog;
-use crate::select_ui::HasSelectableObject;
 
 #[derive(Clone)]
 pub struct AdvancePayment {
@@ -45,8 +45,14 @@ impl AdvancePayment {
 
         let mut resources: Vec<ResourcePayment> = new_resource_map(&a.default)
             .into_iter()
-            .map(|e| ResourcePayment::new(e.0, e.1, 0, min(cost, e.1 + left.get(&e.0).unwrap_or(&(0u32)))),
-            )
+            .map(|e| {
+                ResourcePayment::new(
+                    e.0,
+                    e.1,
+                    0,
+                    min(cost, e.1 + left.get(&e.0).unwrap_or(&(0u32))),
+                )
+            })
             .collect();
         resources.sort_by_key(|r| r.resource);
 

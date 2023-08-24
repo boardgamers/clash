@@ -10,6 +10,8 @@ use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::Reso
 use MovementRestriction::{AllMovement, Attack};
 use UnitType::*;
 use std::iter;
+use UnitType::*;
+
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct Unit {
     pub player_index: usize,
@@ -192,8 +194,11 @@ impl Units {
         }
     }
 
+    #[must_use]
     pub fn to_vec(self) -> Vec<UnitType> {
-        self.into_iter().flat_map(|(u, c)| { iter::repeat(u).take(c as usize) }).collect()
+        self.into_iter()
+            .flat_map(|(u, c)| iter::repeat(u).take(c as usize))
+            .collect()
     }
 }
 
@@ -258,8 +263,8 @@ impl Iterator for UnitsIntoIterator {
         self.index += 1;
         let u = &self.units;
         match index {
-            0  => Some((Settler.clone(), u.settlers)),
-            1  => Some((Infantry.clone(), u.infantry)),
+            0 => Some((Settler.clone(), u.settlers)),
+            1 => Some((Infantry.clone(), u.infantry)),
             2 => Some((Ship.clone(), u.ships)),
             3 => Some((Cavalry.clone(), u.cavalry)),
             4 => Some((Elephant.clone(), u.elephants)),
@@ -329,24 +334,31 @@ pub enum MovementAction {
 
 #[cfg(test)]
 mod tests {
-    use crate::unit::{Units};
     use crate::unit::UnitType::*;
+    use crate::unit::Units;
 
     #[test]
     fn into_iter() {
         let units = Units::new(0, 1, 0, 2, 1, 1);
-        assert_eq!(units.into_iter().collect::<Vec<_>>(), vec![
-            (Settler, 0),
-            (Infantry, 1),
-            (Ship, 0),
-            (Cavalry, 2),
-            (Elephant, 1),
-            (Leader, 1),
-        ]);
-        }
+        assert_eq!(
+            units.into_iter().collect::<Vec<_>>(),
+            vec![
+                (Settler, 0),
+                (Infantry, 1),
+                (Ship, 0),
+                (Cavalry, 2),
+                (Elephant, 1),
+                (Leader, 1),
+            ]
+        );
+    }
+
     #[test]
     fn to_vec() {
         let units = Units::new(0, 1, 0, 2, 1, 1);
-        assert_eq!(units.to_vec(), vec![Infantry, Cavalry, Cavalry, Elephant, Leader])
-        }
+        assert_eq!(
+            units.to_vec(),
+            vec![Infantry, Cavalry, Cavalry, Elephant, Leader]
+        );
+    }
 }

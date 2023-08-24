@@ -1,12 +1,12 @@
 use macroquad::prelude::*;
 use server::game::Game;
 use server::position::Position;
-use server::unit::{Units, UnitType};
+use server::unit::{UnitType, Units};
 
-use crate::{select_ui, unit_ui};
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::select_ui::{HasSelectableObject, SelectableObject};
 use crate::ui_state::{ActiveDialog, StateUpdate};
+use crate::{select_ui, unit_ui};
 
 #[derive(Clone)]
 pub struct SelectableUnit {
@@ -42,39 +42,45 @@ impl RecruitUnitSelection {
         must_show_units: Vec<SelectableUnit>,
     ) -> StateUpdate {
         let player = game.get_player(player_index);
-        let selectable: Vec<SelectableUnit> = unit_ui::non_leader_names().iter().filter_map(|(unit_type, name)| {
-            let mut all = units.clone();
-            all += unit_type;
+        let selectable: Vec<SelectableUnit> = unit_ui::non_leader_names()
+            .iter()
+            .filter_map(|(unit_type, name)| {
+                let mut all = units.clone();
+                all += unit_type;
 
-            let current = units.get(unit_type);
-            let max = if player.can_recruit_without_replaced(all.to_vec().as_slice(), city_position, None) {
-                u32::from(current + 1)
-            } else {
-                u32::from(current)
-            };
-            if max == 0 && !must_show_units.iter().any(|u| &u.unit_type == unit_type) {
-                None
-            } else {
-                Some(SelectableUnit {
-                    name: (*name).to_string(),
-                    unit_type: unit_type.clone(),
-                    selectable: SelectableObject {
-                        current: u32::from(current),
-                        min: 0,
-                        max,
-                    },
-                })
-            }
-        }).collect();
+                let current = units.get(unit_type);
+                let max = if player.can_recruit_without_replaced(
+                    all.to_vec().as_slice(),
+                    city_position,
+                    None,
+                ) {
+                    u32::from(current + 1)
+                } else {
+                    u32::from(current)
+                };
+                if max == 0 && !must_show_units.iter().any(|u| &u.unit_type == unit_type) {
+                    None
+                } else {
+                    Some(SelectableUnit {
+                        name: (*name).to_string(),
+                        unit_type: unit_type.clone(),
+                        selectable: SelectableObject {
+                            current: u32::from(current),
+                            min: 0,
+                            max,
+                        },
+                    })
+                }
+            })
+            .collect();
 
-        StateUpdate::SetDialog(ActiveDialog::RecruitUnitSelection(
-            RecruitUnitSelection {
-                player_index,
-                city_position,
-                units,
-                leader_index: None,
-                selectable,
-            }))
+        StateUpdate::SetDialog(ActiveDialog::RecruitUnitSelection(RecruitUnitSelection {
+            player_index,
+            city_position,
+            units,
+            leader_index: None,
+            selectable,
+        }))
     }
 }
 
@@ -86,10 +92,7 @@ pub struct ReplaceUnits {
 }
 
 impl ReplaceUnits {
-    pub fn new(
-        selection: RecruitUnitSelection,
-        available_units: Units,
-    ) -> ReplaceUnits {
+    pub fn new(selection: RecruitUnitSelection, available_units: Units) -> ReplaceUnits {
         ReplaceUnits {
             selection,
             replaced_units: vec![],
@@ -102,7 +105,7 @@ pub fn select_dialog(game: &Game, sel: &RecruitUnitSelection) -> StateUpdate {
     select_ui::dialog(
         sel,
         |s| s.selectable.clone(),
-        |s| { s.name.clone() },
+        |s| s.name.clone(),
         |_s| true,
         |s| {
             //todo check if replace is needed
@@ -111,17 +114,15 @@ pub fn select_dialog(game: &Game, sel: &RecruitUnitSelection) -> StateUpdate {
             //     game.get_player(s.player_index).available_units.clone(),
             // )))
 
-            StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(
-                ConstructionPayment::new(
-                    game,
-                    s.player_index,
-                    s.city_position,
-                    ConstructionProject::Units(ReplaceUnits::new(
-                        s.clone(),
-                        game.get_player(s.player_index).available_units.clone(),
-                    )),
-                )
-            ))
+            StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
+                game,
+                s.player_index,
+                s.city_position,
+                ConstructionProject::Units(ReplaceUnits::new(
+                    s.clone(),
+                    game.get_player(s.player_index).available_units.clone(),
+                )),
+            )))
         },
         |_s, _u| true,
         |s, u| {

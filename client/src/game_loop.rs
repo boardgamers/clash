@@ -59,7 +59,9 @@ fn game_loop(game: &Game, state: &State) -> StateUpdate {
         ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p),
         ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c),
         ActiveDialog::RecruitUnitSelection(s) => recruit_unit_ui::select_dialog(game, s),
-        ActiveDialog::ReplaceUnits(_) => {todo!("ReplaceUnits")}
+        ActiveDialog::ReplaceUnits(_) => {
+            todo!("ReplaceUnits")
+        }
     });
 
     updates.add(try_click(game, state));

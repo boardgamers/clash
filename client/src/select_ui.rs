@@ -1,8 +1,8 @@
-use macroquad::math::{bool, Vec2};
-use macroquad::ui::widgets::Group;
-use macroquad::hash;
 use crate::dialog_ui::active_dialog_window;
 use crate::ui_state::{StateUpdate, StateUpdates};
+use macroquad::hash;
+use macroquad::math::{bool, Vec2};
+use macroquad::ui::widgets::Group;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct SelectableObject {
@@ -32,7 +32,7 @@ pub fn dialog<C, O: HasSelectableObject>(
             if show(container, p) {
                 Group::new(hash!("res", i), Vec2::new(80., 200.)).ui(ui, |ui| {
                     let c = p.counter();
-                    ui.label(Vec2::new(0., 0.), &format!("{} {}", &label(p), c.current) );
+                    ui.label(Vec2::new(0., 0.), &format!("{} {}", &label(p), c.current));
                     if c.current > c.min && ui.button(Vec2::new(0., 20.), "-") {
                         updates.add(minus(container, p));
                     }
