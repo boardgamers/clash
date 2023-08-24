@@ -12,6 +12,11 @@ use crate::{
         Building::{self, *},
     },
     civilization::Civilization,
+    consts::{
+        ADVANCE_COST, ADVANCE_VICTORY_POINTS, BUILDING_VICTORY_POINTS, CITY_PIECE_LIMIT,
+        CONSTRUCT_COST, DEFEATED_LEADER_VICTORY_POINTS, OBJECTIVE_VICTORY_POINTS, SETTLEMENT_LIMIT,
+        STACK_LIMIT, UNIT_LIMIT, WONDER_VICTORY_POINTS,
+    },
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     game::Game,
     leader::Leader,
@@ -20,47 +25,12 @@ use crate::{
     position::Position,
     resource_pile::{AdvancePaymentOptions, ResourcePile},
     unit::{
-        MovementRestriction, Unit,
+        Unit,
         UnitType::{self, *},
         Units,
     },
     utils,
     wonder::Wonder,
-};
-
-pub const CONSTRUCT_COST: ResourcePile = ResourcePile {
-    food: 1,
-    wood: 1,
-    ore: 1,
-    ideas: 0,
-    gold: 0,
-    mood_tokens: 0,
-    culture_tokens: 0,
-};
-const ADVANCE_COST: u32 = 2;
-const BUILDING_VICTORY_POINTS: f32 = 1.0;
-const ADVANCE_VICTORY_POINTS: f32 = 0.5;
-const OBJECTIVE_VICTORY_POINTS: f32 = 2.0;
-const WONDER_VICTORY_POINTS: f32 = 4.0;
-const DEFEATED_LEADER_VICTORY_POINTS: f32 = 2.0;
-const STACK_LIMIT: usize = 4;
-const SETTLEMENT_LIMIT: u8 = 7;
-const CITY_PIECE_LIMIT: AvailableCityPieces = AvailableCityPieces {
-    academies: 5,
-    markets: 5,
-    obelisks: 5,
-    observatories: 5,
-    fortresses: 5,
-    ports: 5,
-    temples: 5,
-};
-const UNIT_LIMIT: Units = Units {
-    settlers: 4,
-    infantry: 16,
-    ships: 4,
-    cavalry: 4,
-    elephants: 4,
-    leaders: 1,
 };
 
 pub struct Player {
@@ -376,7 +346,7 @@ impl Player {
             city.deactivate();
         }
         for unit in &mut self.units {
-            unit.movement_restriction = MovementRestriction::None;
+            unit.reset_movement_restriction();
         }
     }
 
@@ -686,7 +656,8 @@ impl Player {
             return false;
         }
         if units.iter().any(|unit| matches!(unit, UnitType::Leader))
-            && (self.available_leaders.is_empty() || leader_index.is_none())
+            && (leader_index.is_none()
+                || leader_index.is_some_and(|index| index < self.available_leaders.len()))
         {
             return false;
         }
@@ -728,6 +699,11 @@ impl Player {
     #[must_use]
     pub fn get_unit(&self, id: u32) -> Option<&Unit> {
         self.units.iter().find(|unit| unit.id == id)
+    }
+
+    #[must_use]
+    pub fn get_unit_mut(&mut self, id: u32) -> Option<&mut Unit> {
+        self.units.iter_mut().find(|unit| unit.id == id)
     }
 
     pub fn take_unit(&mut self, id: u32) -> Option<Unit> {

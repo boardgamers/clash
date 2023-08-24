@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
 
+use MovementRestriction::{AllMovement, Attack};
 use UnitType::*;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
@@ -14,7 +15,7 @@ pub struct Unit {
     pub player_index: usize,
     pub position: Position,
     pub unit_type: UnitType,
-    pub movement_restriction: MovementRestriction,
+    movement_restriction: MovementRestriction,
     pub transporter_position: Option<Position>,
     pub id: u32,
 }
@@ -33,18 +34,20 @@ impl Unit {
     }
 
     #[must_use]
+    pub fn can_move(&self) -> bool {
+        !matches!(self.movement_restriction, AllMovement(_))
+    }
+
+    #[must_use]
     pub fn can_found_city(&self, game: &Game) -> bool {
         if !matches!(self.unit_type, Settler) {
-            println!("1");
             return false;
         }
         if self.transporter_position.is_some() {
-            println!("2");
             return false;
         }
         let player = &game.players[self.player_index];
         if player.get_city(self.position).is_some() {
-            println!("3");
             return false;
         }
         if matches!(
@@ -54,14 +57,46 @@ impl Unit {
                 .expect("The unit should be at a valid position"),
             Barren | Exhausted
         ) {
-            println!("4");
             return false;
         }
         if player.available_settlements == 0 {
-            println!("5");
             return false;
         }
         true
+    }
+
+    pub fn movement_restriction(&mut self) {
+        self.movement_restriction = match self.movement_restriction {
+            MovementRestriction::None => AllMovement(0),
+            AllMovement(x) | Attack(x) => AllMovement(x),
+        }
+    }
+
+    pub fn undo_movement_restriction(&mut self) {
+        self.movement_restriction = match self.movement_restriction {
+            MovementRestriction::None | AllMovement(0) => MovementRestriction::None,
+            AllMovement(x) | Attack(x) => Attack(x),
+        }
+    }
+
+    pub fn attack_restriction(&mut self) {
+        self.movement_restriction = match self.movement_restriction {
+            MovementRestriction::None => Attack(1),
+            AllMovement(x) => AllMovement(x),
+            Attack(x) => Attack(x + 1),
+        }
+    }
+
+    pub fn undo_attack_restriction(&mut self) {
+        self.movement_restriction = match self.movement_restriction {
+            AllMovement(x) => AllMovement(x),
+            Attack(1) | MovementRestriction::None => MovementRestriction::None,
+            Attack(x) => Attack(x - 1),
+        }
+    }
+
+    pub fn reset_movement_restriction(&mut self) {
+        self.movement_restriction = MovementRestriction::None;
     }
 }
 
@@ -91,13 +126,18 @@ impl UnitType {
     pub fn is_land_based(&self) -> bool {
         !matches!(self, Ship)
     }
+
+    #[must_use]
+    pub fn is_army_unit(&self) -> bool {
+        matches!(self, Infantry | Cavalry | Elephant | Leader)
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
-pub enum MovementRestriction {
+enum MovementRestriction {
     None,
-    Attack,
-    AllMovement,
+    AllMovement(u32),
+    Attack(u32),
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -231,4 +271,13 @@ impl Display for Units {
         }
         write!(f, "{}", utils::format_list(&unit_types, "no units"))
     }
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum MovementAction {
+    Move {
+        units: Vec<u32>,
+        destination: Position,
+    },
+    Stop,
 }

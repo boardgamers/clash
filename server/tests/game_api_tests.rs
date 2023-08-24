@@ -11,7 +11,7 @@ use server::{
     playing_actions::PlayingAction::*,
     position::Position,
     resource_pile::ResourcePile,
-    unit::UnitType::*,
+    unit::{MovementAction::*, UnitType::*},
 };
 
 #[test]
@@ -176,8 +176,15 @@ fn basic_actions() {
         .expect("The player should have a city at this position")
         .is_activated());
 
-    //todo use movement action here instead
-    player.units[0].position = founded_city_position;
+    let game = game_api::execute_action(game, Action::Playing(MoveUnits), 0);
+    let movement_action = Action::Movement(Move {
+        units: vec![0],
+        destination: founded_city_position,
+    });
+    let game = game_api::execute_action(game, movement_action, 0);
+    let game = game_api::execute_action(game, Action::Movement(Stop), 0);
+    let player = &game.players[0];
+    assert_eq!(founded_city_position, player.units[0].position);
 
     let found_city_action = Action::Playing(FoundCity { settler: 0 });
     let game = game_api::execute_action(game, found_city_action, 0);

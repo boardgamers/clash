@@ -82,6 +82,14 @@ pub fn get_all() -> Vec<Advance> {
         )
         .with_advance_bonus(MoodToken)
         .build(),
+        //Warfare
+        Advance::builder(
+            "Tactics",
+            "✦ May Move Army units\n✦ May use Tactics on Action Cards",
+        )
+        .with_advance_bonus(CultureToken)
+        .with_unlocked_building("Fortress")
+        .build(),
         //Science
         Advance::builder(
             "Math",

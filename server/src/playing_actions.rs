@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, mem};
 
 use serde::{Deserialize, Serialize};
 use PlayingAction::*;
@@ -6,43 +6,18 @@ use PlayingAction::*;
 use crate::{
     city::City,
     city_pieces::Building::{self, *},
+    consts::{MOVEMENT_ACTIONS, PORT_CHOICES},
     content::custom_actions::CustomAction,
-    game::{Game, GameState::*},
+    game::{
+        Game,
+        GameState::{self, *},
+        UndoContext,
+    },
     map::Terrain,
     position::Position,
     resource_pile::ResourcePile,
     unit::UnitType,
 };
-
-pub const PORT_CHOICES: [ResourcePile; 3] = [
-    ResourcePile {
-        food: 1,
-        wood: 0,
-        ore: 0,
-        ideas: 0,
-        gold: 0,
-        mood_tokens: 0,
-        culture_tokens: 0,
-    },
-    ResourcePile {
-        food: 0,
-        wood: 0,
-        ore: 0,
-        ideas: 0,
-        gold: 1,
-        mood_tokens: 0,
-        culture_tokens: 0,
-    },
-    ResourcePile {
-        food: 0,
-        wood: 0,
-        ore: 0,
-        ideas: 0,
-        gold: 0,
-        mood_tokens: 1,
-        culture_tokens: 0,
-    },
-];
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayingAction {
@@ -71,6 +46,7 @@ pub enum PlayingAction {
         leader_index: Option<usize>,
         replaced_units: Vec<u32>,
     },
+    MoveUnits,
     IncreaseHappiness {
         happiness_increases: Vec<(Position, u32)>,
     },
@@ -117,7 +93,7 @@ impl PlayingAction {
                 player.available_units.settlers += 1;
                 let city = City::new(player_index, settler.position);
                 player.cities.push(city);
-                game.removed_units_undo_context = Some((vec![settler], None));
+                game.undo_context = UndoContext::FoundCity { settler };
             }
             Construct {
                 city_position,
@@ -191,6 +167,12 @@ impl PlayingAction {
                     leader_index,
                     replaced_units,
                 );
+            }
+            MoveUnits => {
+                game.state = GameState::Movement {
+                    movement_actions_left: MOVEMENT_ACTIONS,
+                    moved_units: Vec::new(),
+                }
             }
             IncreaseHappiness {
                 happiness_increases,
@@ -301,12 +283,10 @@ impl PlayingAction {
                 game.undo_advance(&advance, player_index);
             }
             FoundCity { settler: _ } => {
-                let settler = game
-                    .removed_units_undo_context
-                    .take()
-                    .expect("Settler context should be stored in undo context")
-                    .0
-                    .remove(0);
+                let settler = mem::take(&mut game.undo_context);
+                let UndoContext::FoundCity{settler} = settler else {
+                    panic!("Settler context should be stored in undo context");
+                };
                 let player = &mut game.players[player_index];
                 player.available_settlements += 1;
                 player.available_units.settlers -= 1;
@@ -353,6 +333,7 @@ impl PlayingAction {
                 game.players[player_index].loose_resources(payment);
                 game.undo_recruit(player_index, &units, city_position, leader_index);
             }
+            MoveUnits => game.state = Playing,
             IncreaseHappiness {
                 happiness_increases,
             } => {
