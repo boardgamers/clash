@@ -12,7 +12,7 @@ use server::resource_pile::AdvancePaymentOptions;
 
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::resource_ui::{new_resource_map, ResourceType};
-use crate::select_ui::HasSelectableObject;
+use crate::select_ui::HasCountSelectableObject;
 use crate::ui_state::{can_play_action, StateUpdate, StateUpdates};
 use crate::ActiveDialog;
 

@@ -4,14 +4,14 @@ use server::position::Position;
 use server::unit::{UnitType, Units};
 
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
-use crate::select_ui::{HasSelectableObject, SelectableObject};
+use crate::select_ui::{HasCountSelectableObject, CountSelector};
 use crate::ui_state::{ActiveDialog, StateUpdate};
 use crate::{select_ui, unit_ui};
 
 #[derive(Clone)]
 pub struct SelectableUnit {
     pub unit_type: UnitType,
-    pub selectable: SelectableObject,
+    pub selectable: CountSelector,
     name: String,
 }
 
@@ -24,11 +24,11 @@ pub struct RecruitAmount {
     pub selectable: Vec<SelectableUnit>,
 }
 
-impl HasSelectableObject for SelectableUnit {
-    fn counter(&self) -> &SelectableObject {
+impl HasCountSelectableObject for SelectableUnit {
+    fn counter(&self) -> &CountSelector {
         &self.selectable
     }
-    fn counter_mut(&mut self) -> &mut SelectableObject {
+    fn counter_mut(&mut self) -> &mut CountSelector {
         &mut self.selectable
     }
 }
@@ -64,7 +64,7 @@ impl RecruitAmount {
                     Some(SelectableUnit {
                         name: (*name).to_string(),
                         unit_type: unit_type.clone(),
-                        selectable: SelectableObject {
+                        selectable: CountSelector {
                             current: u32::from(current),
                             min: 0,
                             max,
@@ -103,7 +103,7 @@ impl RecruitSelection {
 }
 
 pub fn select_dialog(game: &Game, sel: &RecruitAmount) -> StateUpdate {
-    select_ui::dialog(
+    select_ui::count_dialog(
         sel,
         |s| s.selectable.clone(),
         |s| s.name.clone(),

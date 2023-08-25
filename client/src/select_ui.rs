@@ -5,19 +5,19 @@ use macroquad::math::{bool, Vec2};
 use macroquad::ui::widgets::Group;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
-pub struct SelectableObject {
+pub struct CountSelector {
     pub current: u32,
     pub min: u32,
     pub max: u32,
 }
 
-pub trait HasSelectableObject {
-    fn counter(&self) -> &SelectableObject;
-    fn counter_mut(&mut self) -> &mut SelectableObject;
+pub trait HasCountSelectableObject {
+    fn counter(&self) -> &CountSelector;
+    fn counter_mut(&mut self) -> &mut CountSelector;
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn dialog<C, O: HasSelectableObject>(
+pub fn count_dialog<C, O: HasCountSelectableObject>(
     container: &C,
     get_objects: impl Fn(&C) -> Vec<O>,
     label: impl Fn(&O) -> String,
