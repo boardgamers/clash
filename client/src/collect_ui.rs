@@ -18,9 +18,9 @@ use crate::ui_state::{ActiveDialog, State, StateUpdate, StateUpdates};
 
 #[derive(Clone)]
 pub struct CollectResources {
-    pub player_index: usize,
-    pub city_position: Position,
-    pub possible_collections: HashMap<Position, Vec<ResourcePile>>,
+    player_index: usize,
+    city_position: Position,
+    possible_collections: HashMap<Position, Vec<ResourcePile>>,
     collections: Vec<(Position, ResourcePile)>,
 }
 

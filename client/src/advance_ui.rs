@@ -12,6 +12,7 @@ use server::resource_pile::AdvancePaymentOptions;
 
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::resource_ui::{new_resource_map, ResourceType};
+use crate::select_ui::HasSelectableObject;
 use crate::ui_state::{can_play_action, StateUpdate, StateUpdates};
 use crate::ActiveDialog;
 
@@ -44,11 +45,13 @@ impl AdvancePayment {
 
         let mut resources: Vec<ResourcePayment> = new_resource_map(&a.default)
             .into_iter()
-            .map(|e| ResourcePayment {
-                resource: e.0,
-                current: e.1,
-                min: 0,
-                max: min(cost, e.1 + left.get(&e.0).unwrap_or(&(0u32))),
+            .map(|e| {
+                ResourcePayment::new(
+                    e.0,
+                    e.1,
+                    0,
+                    min(cost, e.1 + left.get(&e.0).unwrap_or(&(0u32))),
+                )
             })
             .collect();
         resources.sort_by_key(|r| r.resource);
@@ -60,7 +63,7 @@ impl AdvancePayment {
         self.payment
             .resources
             .iter()
-            .map(|r| r.current)
+            .map(|r| r.selectable.current)
             .sum::<u32>()
             == self.cost
     }
@@ -104,7 +107,7 @@ pub fn pay_advance_dialog(ap: &AdvancePayment) -> StateUpdate {
                 payment: ap.payment.to_resource_pile(),
             }))
         },
-        |ap, r| ap.payment.get(r).max > 0,
+        |ap, r| ap.payment.get(r).selectable.max > 0,
         |ap, r| add(ap, r, 1),
         |ap, r| add(ap, r, -1),
     )
@@ -114,6 +117,7 @@ fn add(ap: &AdvancePayment, r: ResourceType, i: i32) -> StateUpdate {
     let mut new = ap.clone();
     let p = new.payment.get_mut(r);
 
-    p.current = (p.current as i32 + i) as u32;
+    let c = p.counter_mut();
+    c.current = (c.current as i32 + i) as u32;
     StateUpdate::SetDialog(ActiveDialog::AdvancePayment(new))
 }

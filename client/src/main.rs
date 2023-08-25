@@ -25,7 +25,9 @@ mod log_ui;
 mod map_ui;
 mod payment_ui;
 mod player_ui;
+mod recruit_unit_ui;
 mod resource_ui;
+mod select_ui;
 mod ui_state;
 mod unit_ui;
 

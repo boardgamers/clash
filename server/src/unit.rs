@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
 
+use std::iter;
 use MovementRestriction::{AllMovement, Attack};
 use UnitType::*;
 
@@ -100,7 +101,7 @@ impl Unit {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum UnitType {
     Settler,
     Infantry,
@@ -177,14 +178,26 @@ impl Units {
 
     #[must_use]
     pub fn has_unit(&self, unit: &UnitType) -> bool {
+        self.get(unit) > 0
+    }
+
+    #[must_use]
+    pub fn get(&self, unit: &UnitType) -> u8 {
         match *unit {
-            Settler => self.settlers > 0,
-            Infantry => self.infantry > 0,
-            Ship => self.ships > 0,
-            Cavalry => self.cavalry > 0,
-            Elephant => self.elephants > 0,
-            Leader => self.leaders > 0,
+            Settler => self.settlers,
+            Infantry => self.infantry,
+            Ship => self.ships,
+            Cavalry => self.cavalry,
+            Elephant => self.elephants,
+            Leader => self.leaders,
         }
+    }
+
+    #[must_use]
+    pub fn to_vec(self) -> Vec<UnitType> {
+        self.into_iter()
+            .flat_map(|(u, c)| iter::repeat(u).take(c as usize))
+            .collect()
     }
 }
 
@@ -221,6 +234,42 @@ impl FromIterator<UnitType> for Units {
             units += &unit;
         }
         units
+    }
+}
+
+impl IntoIterator for Units {
+    type Item = (UnitType, u8);
+    type IntoIter = UnitsIntoIterator;
+
+    fn into_iter(self) -> Self::IntoIter {
+        UnitsIntoIterator {
+            units: self,
+            index: 0,
+        }
+    }
+}
+
+pub struct UnitsIntoIterator {
+    units: Units,
+    index: u8,
+}
+
+impl Iterator for UnitsIntoIterator {
+    type Item = (UnitType, u8);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let index = self.index;
+        self.index += 1;
+        let u = &self.units;
+        match index {
+            0 => Some((Settler.clone(), u.settlers)),
+            1 => Some((Infantry.clone(), u.infantry)),
+            2 => Some((Ship.clone(), u.ships)),
+            3 => Some((Cavalry.clone(), u.cavalry)),
+            4 => Some((Elephant.clone(), u.elephants)),
+            5 => Some((Leader.clone(), u.leaders)),
+            _ => None,
+        }
     }
 }
 
@@ -280,4 +329,35 @@ pub enum MovementAction {
         destination: Position,
     },
     Stop,
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::unit::UnitType::*;
+    use crate::unit::Units;
+
+    #[test]
+    fn into_iter() {
+        let units = Units::new(0, 1, 0, 2, 1, 1);
+        assert_eq!(
+            units.into_iter().collect::<Vec<_>>(),
+            vec![
+                (Settler, 0),
+                (Infantry, 1),
+                (Ship, 0),
+                (Cavalry, 2),
+                (Elephant, 1),
+                (Leader, 1),
+            ]
+        );
+    }
+
+    #[test]
+    fn to_vec() {
+        let units = Units::new(0, 1, 0, 2, 1, 1);
+        assert_eq!(
+            units.to_vec(),
+            vec![Infantry, Cavalry, Cavalry, Elephant, Leader]
+        );
+    }
 }

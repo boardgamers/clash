@@ -3,21 +3,19 @@ use server::game::Game;
 use server::map::Terrain;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-use server::unit::{Unit, UnitType};
+use server::unit::UnitType;
 
 pub fn setup_local_game() -> Game {
     let mut game = Game::new(2, "a".repeat(32));
 
-    let mut unit_id = 0;
-
-    let mut add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {
-        unit_id += 1;
-        game.players[player_index].units.push(Unit::new(
+    let add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {
+        game.recruit(
             player_index,
+            vec![unit_type],
             Position::from_offset(pos),
-            unit_type,
-            unit_id,
-        ));
+            None,
+            vec![],
+        );
     };
 
     let player_index1 = 0;
@@ -46,9 +44,6 @@ pub fn setup_local_game() -> Game {
     add_unit(&mut game, "C2", player_index1, UnitType::Settler);
     add_unit(&mut game, "C2", player_index1, UnitType::Settler);
     add_unit(&mut game, "C2", player_index1, UnitType::Settler);
-    add_unit(&mut game, "C2", player_index1, UnitType::Settler);
-
-    add_unit(&mut game, "C3", player_index1, UnitType::Ship);
 
     add_unit(&mut game, "C1", player_index2, UnitType::Infantry);
     add_unit(&mut game, "C1", player_index2, UnitType::Infantry);

@@ -34,6 +34,16 @@ fn unit_symbol(unit: &Unit) -> &str {
     }
 }
 
+pub fn non_leader_names() -> [(UnitType, &'static str); 5] {
+    [
+        (UnitType::Settler, "Settler"),
+        (UnitType::Infantry, "Infantry"),
+        (UnitType::Ship, "Ship"),
+        (UnitType::Elephant, "Elephant"),
+        (UnitType::Cavalry, "Cavalry"),
+    ]
+}
+
 pub fn draw_units(game: &Game) {
     for p in &game.players {
         let mut city_unit_index: HashMap<Position, u32> = HashMap::new();
@@ -50,3 +60,25 @@ pub fn draw_units(game: &Game) {
         }
     }
 }
+
+//todo(Gregor) use for selection
+//
+// pub fn name(u: &UnitType) -> &str {
+//     non_leader_names()
+//         .into_iter()
+//         .find(|(unit_type, _)| unit_type == u)
+//         .unwrap()
+//         .1
+// }
+
+// pub fn label(unit: &Unit) -> String {
+//     let pos = unit.position.to_string();
+//     let name = name(&unit.unit_type);
+//     let res = match unit.movement_restriction {
+//         MovementRestriction::None => "",
+//         MovementRestriction::Attack => " (can't attacked)",
+//         MovementRestriction::AllMovement => " (can't move)",
+//     };
+//
+//     format!("{pos}: {name}{res}")
+// }
