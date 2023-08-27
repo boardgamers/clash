@@ -38,9 +38,6 @@ fn terrain_name(t: &Terrain) -> &'static str {
 pub fn draw_map(game: &Game, state: &State) {
     game.map.tiles.iter().for_each(|(pos, t)| {
         let c = terrain_color(t);
-        // let alpha = if state.focused_tile.iter().any(|f| *pos == f.position) {
-        //     0.5
-        // } else  {
         let alpha = match &state.active_dialog {
             ActiveDialog::MoveUnits(s) => {
                 if let Some(start) = s.start {
@@ -63,7 +60,6 @@ pub fn draw_map(game: &Game, state: &State) {
                 }
             }
         };
-        // };
 
         let text_color = if c.1 { WHITE } else { BLACK };
         hex_ui::draw_hex(*pos, c.0, text_color, alpha);

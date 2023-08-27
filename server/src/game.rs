@@ -419,7 +419,16 @@ impl Game {
                     ))
                     .expect("the player should have all units to move")
                     .position;
-                can_move_units(self, player, &units, starting_position, destination, movement_actions_left, &moved_units).unwrap();
+                can_move_units(
+                    self,
+                    player,
+                    &units,
+                    starting_position,
+                    destination,
+                    movement_actions_left,
+                    &moved_units,
+                )
+                .unwrap();
                 moved_units.extend(units.iter());
                 self.move_units(player_index, units, destination);
                 self.state = if movement_actions_left > 1 {
