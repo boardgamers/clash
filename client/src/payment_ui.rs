@@ -3,29 +3,29 @@ use server::resource_pile::ResourcePile;
 
 use crate::resource_ui::ResourceType;
 use crate::select_ui;
-use crate::select_ui::{HasSelectableObject, SelectableObject};
+use crate::select_ui::{CountSelector, HasCountSelectableObject};
 use crate::ui_state::StateUpdate;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct ResourcePayment {
     pub resource: ResourceType,
-    pub selectable: SelectableObject,
+    pub selectable: CountSelector,
 }
 
 impl ResourcePayment {
     pub fn new(resource: ResourceType, current: u32, min: u32, max: u32) -> ResourcePayment {
         ResourcePayment {
             resource,
-            selectable: SelectableObject { current, min, max },
+            selectable: CountSelector { current, min, max },
         }
     }
 }
 
-impl HasSelectableObject for ResourcePayment {
-    fn counter(&self) -> &SelectableObject {
+impl HasCountSelectableObject for ResourcePayment {
+    fn counter(&self) -> &CountSelector {
         &self.selectable
     }
-    fn counter_mut(&mut self) -> &mut SelectableObject {
+    fn counter_mut(&mut self) -> &mut CountSelector {
         &mut self.selectable
     }
 }
@@ -83,7 +83,7 @@ pub fn payment_dialog<T: HasPayment>(
     plus: impl Fn(&T, ResourceType) -> StateUpdate,
     minus: impl Fn(&T, ResourceType) -> StateUpdate,
 ) -> StateUpdate {
-    select_ui::dialog(
+    select_ui::count_dialog(
         has_payment,
         |p| p.payment().resources.clone(),
         |p| p.resource.to_string(),

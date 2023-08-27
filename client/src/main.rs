@@ -23,6 +23,7 @@ mod influence_ui;
 mod local_ui;
 mod log_ui;
 mod map_ui;
+mod move_ui;
 mod payment_ui;
 mod player_ui;
 mod recruit_unit_ui;

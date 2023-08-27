@@ -8,4 +8,5 @@ edition = "2021"
 [dependencies]
 macroquad = "0.4.2"
 hex2d = "1.1.0"
+itertools = "0.11.0"
 server = { path = "../server", version = "0.1.0" }

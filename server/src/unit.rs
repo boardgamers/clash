@@ -7,6 +7,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
 
+use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, STACK_LIMIT};
+use crate::player::Player;
 use std::iter;
 use MovementRestriction::{AllMovement, Attack};
 use UnitType::*;
@@ -16,7 +18,7 @@ pub struct Unit {
     pub player_index: usize,
     pub position: Position,
     pub unit_type: UnitType,
-    movement_restriction: MovementRestriction,
+    pub movement_restriction: MovementRestriction,
     pub transporter_position: Option<Position>,
     pub id: u32,
 }
@@ -135,7 +137,7 @@ impl UnitType {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
-enum MovementRestriction {
+pub enum MovementRestriction {
     None,
     AllMovement(u32),
     Attack(u32),
@@ -360,4 +362,59 @@ mod tests {
             vec![Infantry, Cavalry, Cavalry, Elephant, Leader]
         );
     }
+}
+
+/// # Errors
+///
+/// Will return `Err` if the unit cannot move to the destination.
+pub fn can_move_units(
+    game: &Game,
+    player: &Player,
+    units: &Vec<u32>,
+    starting: Position,
+    destination: Position,
+    movement_actions_left: u32,
+    moved_units: &[u32],
+) -> Result<(), String> {
+    if !starting.is_neighbor(destination) {
+        return Err("the destination should be adjacent to the starting position".to_string());
+    }
+    if movement_actions_left == 0 {
+        return Err("no movement actions left".to_string());
+    }
+
+    if units.iter().any(|unit| moved_units.contains(unit)) {
+        return Err("some units have already moved".to_string());
+    }
+
+    let land_movement = !matches!(
+        game.map
+            .tiles
+            .get(&destination)
+            .expect("destination should exist"),
+        Water
+    );
+
+    for unit_id in units {
+        let unit = player
+            .get_unit(*unit_id)
+            .ok_or("the player should have all units to move")?;
+
+        if unit.position != starting {
+            return Err("the unit should be at the starting position".to_string());
+        }
+        if !unit.can_move() {
+            return Err("the unit should be able to move".to_string());
+        }
+        if unit.unit_type.is_land_based() != land_movement {
+            return Err("the unit cannot move here".to_string());
+        }
+        if unit.unit_type.is_army_unit() && !player.has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE) {
+            return Err("army movement advance missing".to_string());
+        }
+        if land_movement && player.get_units(destination).len() + units.len() > STACK_LIMIT {
+            return Err("the destination stack limit would be exceeded".to_string());
+        }
+    }
+    Ok(())
 }
