@@ -71,13 +71,10 @@ pub fn click(pos: Position, s: &UnitsSelection) -> StateUpdate {
         StateUpdate::SetDialog(ActiveDialog::MoveUnits(new))
     } else if s.destinations.contains(&pos) {
         let units = s.units.clone();
-        StateUpdate::execute(
-            Action::Movement(MovementAction::Move {
-                units,
-                destination: pos,
-            }),
-            vec![],
-        )
+        StateUpdate::execute(Action::Movement(MovementAction::Move {
+            units,
+            destination: pos,
+        }))
     } else {
         StateUpdate::None
     }
