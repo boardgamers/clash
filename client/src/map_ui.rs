@@ -109,16 +109,6 @@ pub fn show_tile_menu(
             ui.label(None, suffix);
         }
 
-        // if let ActiveDialog::MoveUnits(s) = dialog {
-        //     if let Some(start) = s.start {
-        //         //todo try to move here
-        //     } else {
-        //         let mut new = s.clone();
-        //         new.start = Some(position);
-        //         updates.add(StateUpdate::SetDialog(ActiveDialog::MoveUnits(new)));
-        //     }
-        // }
-
         additional(ui, &mut updates);
     });
     updates.result()
