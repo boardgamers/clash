@@ -259,7 +259,7 @@ impl Player {
         }
     }
 
-    fn cloned_data(&self) -> PlayerData {
+    pub fn cloned_data(&self) -> PlayerData {
         PlayerData {
             name: self.name.clone(),
             id: self.index,
