@@ -7,8 +7,9 @@ use server::action::Action;
 use server::game::{Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
+use server::unit::MovementAction;
 
-use crate::ui_state::StateUpdate;
+use crate::ui_state::{can_play_action, State, StateUpdate};
 
 pub fn show_globals(game: &Game) {
     draw_text(&format!("Age {}", game.age), 600., 20., 20., BLACK);
@@ -87,7 +88,7 @@ pub fn show_resources(game: &Game, player_index: usize) {
     res(format!("Culture {}", r.culture_tokens));
 }
 
-pub fn show_global_controls(game: &Game) -> StateUpdate {
+pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
     let y = 540.;
     if game.can_undo() && root_ui().button(vec2(600., y), "Undo") {
         return StateUpdate::Execute(Action::Undo);
@@ -95,33 +96,55 @@ pub fn show_global_controls(game: &Game) -> StateUpdate {
     if game.can_redo() && root_ui().button(vec2(650., y), "Redo") {
         return StateUpdate::Execute(Action::Redo);
     }
-    if let GameState::CulturalInfluenceResolution {
-        roll_boost_cost,
-        city_piece: _,
-        target_player_index: _,
-        target_city_position: _,
-    } = game.state
-    {
-        if root_ui().button(
-            vec2(600., 480.),
-            format!("Cultural Influence Resolution for {roll_boost_cost}"),
-        ) {
-            return StateUpdate::Execute(Action::CulturalInfluenceResolution(true));
-        } else if root_ui().button(vec2(900., 480.), "Decline") {
-            return StateUpdate::Execute(Action::CulturalInfluenceResolution(false));
+    match game.state {
+        GameState::CulturalInfluenceResolution {
+            roll_boost_cost,
+            city_piece: _,
+            target_player_index: _,
+            target_city_position: _,
+        } => {
+            if root_ui().button(
+                vec2(600., 480.),
+                format!("Cultural Influence Resolution for {roll_boost_cost}"),
+            ) {
+                StateUpdate::Execute(Action::CulturalInfluenceResolution(true))
+            } else if root_ui().button(vec2(900., 480.), "Decline") {
+                return StateUpdate::Execute(Action::CulturalInfluenceResolution(false));
+            } else {
+                StateUpdate::None
+            }
         }
-    } else if game.state == GameState::Playing && root_ui().button(vec2(700., y), "End Turn") {
-        let left = game.actions_left;
-        return StateUpdate::execute(
-            Action::Playing(PlayingAction::EndTurn),
-            if left > 0 {
-                vec![(format!("{left} actions left"))]
+        GameState::Playing if root_ui().button(vec2(700., y), "End Turn") => {
+            let left = game.actions_left;
+            StateUpdate::execute(
+                Action::Playing(PlayingAction::EndTurn),
+                if left > 0 {
+                    vec![(format!("{left} actions left"))]
+                } else {
+                    vec![]
+                },
+            )
+        }
+        GameState::Playing
+            if !state.has_dialog()
+                && can_play_action(game)
+                && root_ui().button(vec2(600., 510.), "Move Units") =>
+        {
+            StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits), vec![])
+        }
+        GameState::Movement {
+            movement_actions_left,
+            moved_units: _,
+        } if root_ui().button(vec2(600., 510.), "End Move Units") => StateUpdate::execute(
+            Action::Movement(MovementAction::Stop),
+            if movement_actions_left > 0 {
+                vec![(format!("{movement_actions_left} movement actions left"))]
             } else {
                 vec![]
             },
-        );
-    };
-    StateUpdate::None
+        ),
+        _ => StateUpdate::None,
+    }
 }
 
 pub fn player_color(player_index: usize) -> Color {

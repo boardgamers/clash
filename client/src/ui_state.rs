@@ -1,9 +1,5 @@
-use crate::advance_ui::AdvancePayment;
-use crate::construct_ui::ConstructionPayment;
-
-use crate::collect_ui::CollectResources;
-use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use macroquad::prelude::*;
+
 use server::action::Action;
 use server::city::{City, MoodState};
 use server::game::{Game, GameState};
@@ -11,6 +7,12 @@ use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
+
+use crate::advance_ui::AdvancePayment;
+use crate::collect_ui::CollectResources;
+use crate::construct_ui::ConstructionPayment;
+use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
+use crate::unit_ui::UnitsSelection;
 
 pub enum ActiveDialog {
     None,
@@ -20,6 +22,7 @@ pub enum ActiveDialog {
     RecruitUnitSelection(RecruitAmount),
     #[allow(dead_code)] //todo(Gregor)
     ReplaceUnits(RecruitSelection),
+    MoveUnits(UnitsSelection),
 }
 
 pub struct PendingUpdate {
@@ -27,6 +30,7 @@ pub struct PendingUpdate {
     pub warning: Vec<String>,
 }
 
+#[must_use]
 pub enum StateUpdate {
     None,
     SetDialog(ActiveDialog),
@@ -35,7 +39,7 @@ pub enum StateUpdate {
     Execute(Action),
     ExecuteWithWarning(PendingUpdate),
     SetIncreaseHappiness(IncreaseHappiness),
-    FocusCity(usize, Position),
+    FocusTile(FocusedTile),
 }
 
 impl StateUpdate {
@@ -48,10 +52,20 @@ impl StateUpdate {
     }
 
     pub fn execute_activation(action: Action, warning: Vec<String>, city: &City) -> StateUpdate {
-        if city.is_activated() && city.mood_state != MoodState::Angry {
-            let mut warn = vec!["City will become angry".to_string()];
-            warn.extend(warning);
-            StateUpdate::execute(action, warn)
+        if city.is_activated() {
+            match city.mood_state {
+                MoodState::Happy => {
+                    let mut warn = vec!["City will become neutral".to_string()];
+                    warn.extend(warning);
+                    StateUpdate::execute(action, warn)
+                }
+                MoodState::Neutral => {
+                    let mut warn = vec!["City will become angry".to_string()];
+                    warn.extend(warning);
+                    StateUpdate::execute(action, warn)
+                }
+                MoodState::Angry => StateUpdate::execute(action, warning),
+            }
         } else {
             StateUpdate::execute(action, warning)
         }
@@ -66,13 +80,22 @@ impl StateUpdates {
     pub fn new() -> StateUpdates {
         StateUpdates { updates: vec![] }
     }
+    pub fn single(update: StateUpdate) -> StateUpdates {
+        let mut updates = StateUpdates::new();
+        updates.add(update);
+        updates
+    }
+
     pub fn add(&mut self, update: StateUpdate) {
         if !matches!(update, StateUpdate::None) {
             self.updates.push(update);
         }
     }
 
-    #[must_use]
+    pub fn add_all(&mut self, updates: StateUpdates) {
+        updates.updates.into_iter().for_each(|u| self.add(u));
+    }
+
     pub fn result(self) -> StateUpdate {
         self.updates
             .into_iter()
@@ -92,8 +115,22 @@ impl IncreaseHappiness {
     }
 }
 
+pub struct FocusedTile {
+    pub city_owner_index: Option<usize>,
+    pub position: Position,
+}
+
+impl FocusedTile {
+    pub fn new(city_owner_index: Option<usize>, position: Position) -> FocusedTile {
+        FocusedTile {
+            city_owner_index,
+            position,
+        }
+    }
+}
+
 pub struct State {
-    pub focused_city: Option<(usize, Position)>,
+    pub focused_tile: Option<FocusedTile>,
     pub active_dialog: ActiveDialog,
     pub pending_update: Option<PendingUpdate>,
     pub increase_happiness: Option<IncreaseHappiness>,
@@ -104,13 +141,13 @@ impl State {
         State {
             active_dialog: ActiveDialog::None,
             pending_update: None,
-            focused_city: None,
+            focused_tile: None,
             increase_happiness: None,
         }
     }
     pub fn clear(&mut self) {
         self.active_dialog = ActiveDialog::None;
-        self.focused_city = None;
+        self.focused_tile = None;
         self.increase_happiness = None;
         self.pending_update = None;
     }
@@ -122,12 +159,21 @@ impl State {
         false
     }
 
+    pub fn has_dialog(&self) -> bool {
+        !matches!(self.active_dialog, ActiveDialog::None) || self.increase_happiness.is_some()
+    }
+
     pub fn update(&mut self, game: &mut Game, update: StateUpdate) {
         match update {
             StateUpdate::None => {}
             StateUpdate::Execute(a) => {
-                self.execute(game, a);
                 self.clear();
+                let move_units = matches!(&a, Action::Playing(PlayingAction::MoveUnits));
+                self.execute(game, a);
+                if move_units {
+                    self.active_dialog =
+                        ActiveDialog::MoveUnits(UnitsSelection::new(game.current_player_index));
+                }
             }
             StateUpdate::ExecuteWithWarning(update) => {
                 self.pending_update = Some(update);
@@ -153,9 +199,9 @@ impl State {
                 self.clear();
                 self.increase_happiness = Some(h);
             }
-            StateUpdate::FocusCity(p, c) => {
+            StateUpdate::FocusTile(f) => {
                 self.clear();
-                self.focused_city = Some((p, c));
+                self.focused_tile = Some(f);
             }
         }
     }

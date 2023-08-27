@@ -1,10 +1,11 @@
 use std::{collections::HashMap, mem};
 
-use rand::{Rng, rngs::StdRng, SeedableRng, seq::SliceRandom};
+use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
 
 use GameState::*;
 
+use crate::unit::can_move_units;
 use crate::{
     action::Action,
     city::City,
@@ -420,7 +421,7 @@ impl Game {
                     ))
                     .expect("the player should have all units to move")
                     .position;
-                unit::can_move_units(&units, destination, player, starting_position);
+                can_move_units(self, player, &units, starting_position, destination).unwrap();
                 moved_units.extend(units.iter());
                 self.move_units(player_index, units, destination);
                 self.state = if movement_actions_left > 1 {

@@ -191,6 +191,7 @@ name = "client"
 version = "0.1.0"
 dependencies = [
  "hex2d",
+ "itertools",
  "macroquad",
  "server",
 ]

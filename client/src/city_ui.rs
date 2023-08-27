@@ -1,7 +1,6 @@
-use macroquad::hash;
-use macroquad::math::vec2;
 use macroquad::prelude::*;
-use macroquad::ui::{root_ui, Ui};
+use macroquad::ui::Ui;
+
 use server::city::{City, MoodState};
 use server::city_pieces::Building;
 use server::game::Game;
@@ -12,18 +11,27 @@ use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{add_construct_button, add_wonder_buttons};
 use crate::happiness_ui::init_increase_happiness;
 use crate::hex_ui::draw_hex_center_text;
+use crate::map_ui::show_tile_menu;
 use crate::recruit_unit_ui::RecruitAmount;
-use crate::ui_state::{can_play_action, CityMenu, State, StateUpdate, StateUpdates};
+use crate::ui_state::{can_play_action, CityMenu, FocusedTile, State, StateUpdate, StateUpdates};
 use crate::{hex_ui, influence_ui, player_ui, ActiveDialog};
 
 pub fn show_city_menu(game: &Game, menu: &CityMenu) -> StateUpdate {
-    let mut updates: StateUpdates = StateUpdates::new();
+    let position = menu.city_position;
+    let city = menu.get_city(game);
+    let suffix = format!(
+        "size: {} mood: {} activated: {}",
+        city.size(),
+        match city.mood_state {
+            MoodState::Happy => "Happy",
+            MoodState::Neutral => "Neutral",
+            MoodState::Angry => "Angry",
+        },
+        city.is_activated(),
+    );
 
-    root_ui().window(hash!(), vec2(30., 700.), vec2(500., 200.), |ui| {
-        ui.label(None, &menu.city_position.to_string());
-
-        let can_play =
-            can_play_action(game) && menu.is_city_owner() && menu.get_city(game).can_activate();
+    show_tile_menu(game, position, Some(&suffix), |ui, updates| {
+        let can_play = can_play_action(game) && menu.is_city_owner() && city.can_activate();
         if can_play {
             if ui.button(None, "Collect Resources") {
                 updates.add(StateUpdate::SetDialog(ActiveDialog::CollectResources(
@@ -55,8 +63,7 @@ pub fn show_city_menu(game: &Game, menu: &CityMenu) -> StateUpdate {
             let option = add_wonder_buttons(game, menu, ui);
             updates.add(option);
         }
-    });
-    updates.result()
+    })
 }
 
 fn add_building_actions(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpdate {
@@ -160,13 +167,17 @@ pub fn city_click(state: &State, player: &Player, city: &City) -> StateUpdate {
     let pos = city.position;
 
     if let Some(increase_happiness) = &state.increase_happiness {
-        StateUpdate::SetIncreaseHappiness(init_increase_happiness(
-            player,
-            city,
-            pos,
-            increase_happiness,
-        ))
+        if player.index == city.player_index {
+            StateUpdate::SetIncreaseHappiness(init_increase_happiness(
+                player,
+                city,
+                pos,
+                increase_happiness,
+            ))
+        } else {
+            StateUpdate::None
+        }
     } else {
-        StateUpdate::FocusCity(player.index, pos)
+        StateUpdate::FocusTile(FocusedTile::new(Some(city.player_index), pos))
     }
 }

@@ -4,7 +4,7 @@ use server::position::Position;
 use server::unit::{UnitType, Units};
 
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
-use crate::select_ui::{HasCountSelectableObject, CountSelector};
+use crate::select_ui::{CountSelector, HasCountSelectableObject};
 use crate::ui_state::{ActiveDialog, StateUpdate};
 use crate::{select_ui, unit_ui};
 

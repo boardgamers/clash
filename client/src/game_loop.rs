@@ -1,3 +1,7 @@
+use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
+use macroquad::prelude::{clear_background, next_frame, set_fullscreen, WHITE};
+use server::game::Game;
+use server::position::Position;
 use crate::advance_ui::{pay_advance_dialog, show_advance_menu};
 use crate::city_ui::show_city_menu;
 use crate::collect_ui::{click_collect_option, collect_resources_dialog};
@@ -6,14 +10,10 @@ use crate::dialog_ui::active_dialog_window;
 use crate::happiness_ui::show_increase_happiness;
 use crate::hex_ui::pixel_to_coordinate;
 use crate::log_ui::show_log;
-use crate::map_ui::draw_map;
+use crate::map_ui::{draw_map, show_tile_menu};
 use crate::player_ui::{show_global_controls, show_globals, show_resources, show_wonders};
-use crate::ui_state::{ActiveDialog, CityMenu, State, StateUpdate, StateUpdates};
-use crate::{city_ui, recruit_unit_ui};
-use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
-use macroquad::prelude::{clear_background, next_frame, set_fullscreen, WHITE};
-use server::game::Game;
-use server::position::Position;
+use crate::ui_state::{ActiveDialog, CityMenu, FocusedTile, State, StateUpdate, StateUpdates};
+use crate::{city_ui, move_ui, recruit_unit_ui};
 
 pub async fn run(game: &mut Game) {
     let mut state = State::new();
@@ -26,7 +26,7 @@ pub async fn run(game: &mut Game) {
     }
 }
 
-fn game_loop(game: &Game, state: &State) -> StateUpdate {
+fn game_loop(game: &Game, state: &State) -> StateUpdates {
     let player_index = game.current_player_index;
     clear_background(WHITE);
 
@@ -43,14 +43,19 @@ fn game_loop(game: &Game, state: &State) -> StateUpdate {
         return updates.result();
     }
 
-    updates.add(show_increase_happiness(game, player_index, state));
-    updates.add(show_global_controls(game));
+    if game.state == server::game::GameState::Playing {
+        updates.add(show_increase_happiness(game, player_index, state));
+    }
+    updates.add(show_global_controls(game, state));
 
-    if let Some((city_owner_index, city_position)) = state.focused_city {
-        updates.add(show_city_menu(
-            game,
-            &CityMenu::new(player_index, city_owner_index, city_position),
-        ));
+    if let Some(f) = &state.focused_tile {
+        if !matches!(state.active_dialog, ActiveDialog::MoveUnits(_)) {
+            updates.add(if let Some(p) = f.city_owner_index {
+                show_city_menu(game, &CityMenu::new(player_index, p, f.position))
+            } else {
+                show_tile_menu(game, f.position, None, |_, _| {})
+            });
+        }
     }
 
     updates.add(match &state.active_dialog {
@@ -62,14 +67,14 @@ fn game_loop(game: &Game, state: &State) -> StateUpdate {
         ActiveDialog::ReplaceUnits(_) => {
             todo!("ReplaceUnits")
         }
+        ActiveDialog::MoveUnits(s) => move_ui::move_units_dialog(game, s),
     });
 
-    updates.add(try_click(game, state));
+    updates.add_all(try_click(game, state, player_index));
 
     updates.result()
 }
 
-#[must_use]
 fn show_pending_update(state: &State) -> StateUpdate {
     let mut updates = StateUpdates::new();
     active_dialog_window(|ui| {
@@ -86,20 +91,26 @@ fn show_pending_update(state: &State) -> StateUpdate {
     updates.result()
 }
 
-pub fn try_click(game: &Game, state: &State) -> StateUpdate {
+pub fn try_click(game: &Game, state: &State, player_index: usize) -> StateUpdates {
     if is_mouse_button_pressed(MouseButton::Left) {
         let (x, y) = mouse_position();
 
         let pos = Position::from_coordinate(pixel_to_coordinate(x, y));
 
         match &state.active_dialog {
-            ActiveDialog::CollectResources(col) => return click_collect_option(col, pos),
+            ActiveDialog::MoveUnits(s) => move_ui::click(pos, s),
+            ActiveDialog::CollectResources(col) => StateUpdates::single(click_collect_option(col, pos)),
             _ => {
-                if let Some(c) = game.get_any_city(pos) {
-                    return city_ui::city_click(state, game.get_player(c.player_index), c);
-                }
+                StateUpdates::single(if let Some(c) = game.get_any_city(pos) {
+                    city_ui::city_click(state, game.get_player(player_index), c)
+                } else if matches!(state.active_dialog, ActiveDialog::None) {
+                    StateUpdate::FocusTile(FocusedTile::new(None, pos))
+                } else {
+                    StateUpdate::None
+                })
             }
         }
+    } else {
+        StateUpdates::single(StateUpdate::None)
     }
-    StateUpdate::None
 }
