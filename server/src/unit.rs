@@ -10,13 +10,15 @@ use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::Reso
 use std::iter;
 use MovementRestriction::{AllMovement, Attack};
 use UnitType::*;
+use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, STACK_LIMIT};
+use crate::player::Player;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct Unit {
     pub player_index: usize,
     pub position: Position,
     pub unit_type: UnitType,
-    movement_restriction: MovementRestriction,
+    pub movement_restriction: MovementRestriction,
     pub transporter_position: Option<Position>,
     pub id: u32,
 }
@@ -135,7 +137,7 @@ impl UnitType {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
-enum MovementRestriction {
+pub enum MovementRestriction {
     None,
     AllMovement(u32),
     Attack(u32),
@@ -360,4 +362,32 @@ mod tests {
             vec![Infantry, Cavalry, Cavalry, Elephant, Leader]
         );
     }
+}
+
+pub fn can_move_units(game: &Game, units: &Vec<u32>, destination: Position, player: &Player, starting_position: Position) {
+    let land_movement = !matches!(
+                game.map
+                    .tiles
+                    .get(&destination)
+                    .expect("destination should exist"),
+                Water
+            );
+    assert!(units.iter().all(|unit_id| {
+        let unit = player
+            .get_unit(*unit_id)
+            .expect("the player should have all units to move");
+        unit.position == starting_position
+            && unit.can_move()
+            && unit.unit_type.is_land_based() == land_movement
+            && (!unit.unit_type.is_army_unit()
+            || player.has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE))
+    }));
+    assert!(
+        !land_movement
+            || player.get_units(destination).len() + units.len() <= STACK_LIMIT
+    );
+    assert!(
+        starting_position.is_neighbor(destination),
+        "the destination should be adjacent to the starting position"
+    );
 }

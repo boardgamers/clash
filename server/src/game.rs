@@ -1,12 +1,15 @@
-use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
-use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, mem};
+
+use rand::{Rng, rngs::StdRng, SeedableRng, seq::SliceRandom};
+use serde::{Deserialize, Serialize};
+
+use GameState::*;
 
 use crate::{
     action::Action,
     city::City,
     city_pieces::Building,
-    consts::{AGES, ARMY_MOVEMENT_REQUIRED_ADVANCE, DICE_ROLL_BUFFER, STACK_LIMIT},
+    consts::{AGES, DICE_ROLL_BUFFER},
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     log::{self, ActionLogItem},
     map::{Map, MapData, Terrain::*},
@@ -24,8 +27,6 @@ use crate::{
     utils,
     wonder::Wonder,
 };
-
-use GameState::*;
 
 pub struct Game {
     pub state: GameState,
@@ -419,31 +420,7 @@ impl Game {
                     ))
                     .expect("the player should have all units to move")
                     .position;
-                let land_movement = !matches!(
-                    self.map
-                        .tiles
-                        .get(&destination)
-                        .expect("destination should exist"),
-                    Water
-                );
-                assert!(units.iter().all(|unit_id| {
-                    let unit = player
-                        .get_unit(*unit_id)
-                        .expect("the player should have all units to move");
-                    unit.position == starting_position
-                        && unit.can_move()
-                        && unit.unit_type.is_land_based() == land_movement
-                        && (!unit.unit_type.is_army_unit()
-                            || player.has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE))
-                }));
-                assert!(
-                    !land_movement
-                        || player.get_units(destination).len() + units.len() <= STACK_LIMIT
-                );
-                assert!(
-                    starting_position.is_neighbor(destination),
-                    "the destination should be adjacent to the starting position"
-                );
+                unit::can_move_units(&units, destination, player, starting_position);
                 moved_units.extend(units.iter());
                 self.move_units(player_index, units, destination);
                 self.state = if movement_actions_left > 1 {
