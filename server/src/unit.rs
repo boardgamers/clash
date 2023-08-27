@@ -230,7 +230,7 @@ impl SubAssign<&UnitType> for Units {
 }
 
 impl FromIterator<UnitType> for Units {
-    fn from_iter<T: IntoIterator<Item = UnitType>>(iter: T) -> Self {
+    fn from_iter<T: IntoIterator<Item=UnitType>>(iter: T) -> Self {
         let mut units = Self::empty();
         for unit in iter {
             units += &unit;
@@ -290,7 +290,7 @@ impl Display for Units {
             ));
         }
         if self.infantry > 0 {
-            unit_types.push(format!("{} infantry", self.infantry,));
+            unit_types.push(format!("{} infantry", self.infantry, ));
         }
         if self.ships > 0 {
             unit_types.push(format!(
@@ -300,7 +300,7 @@ impl Display for Units {
             ));
         }
         if self.cavalry > 0 {
-            unit_types.push(format!("{} cavalry", self.cavalry,));
+            unit_types.push(format!("{} cavalry", self.cavalry, ));
         }
         if self.elephants > 0 {
             unit_types.push(format!(
@@ -373,7 +373,20 @@ pub fn can_move_units(
     units: &Vec<u32>,
     starting: Position,
     destination: Position,
+    movement_actions_left: u32,
+    moved_units: &Vec<u32>,
 ) -> Result<(), String> {
+    if !starting.is_neighbor(destination) {
+        return Err("the destination should be adjacent to the starting position".to_string());
+    }
+    if movement_actions_left == 0 {
+        return Err("no movement actions left".to_string());
+    }
+
+    if units.iter().any(|unit| moved_units.contains(unit)) {
+        return Err("some units have already moved".to_string());
+    }
+
     let land_movement = !matches!(
         game.map
             .tiles
@@ -402,9 +415,6 @@ pub fn can_move_units(
         if land_movement && player.get_units(destination).len() + units.len() > STACK_LIMIT {
             return Err("the destination stack limit would be exceeded".to_string());
         }
-    }
-    if !starting.is_neighbor(destination) {
-        return Err("the destination should be adjacent to the starting position".to_string());
     }
     Ok(())
 }

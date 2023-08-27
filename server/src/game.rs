@@ -412,8 +412,6 @@ impl Game {
     ) {
         let starting_position = match action {
             Move { units, destination } => {
-                assert!(movement_actions_left > 0);
-                assert!(!units.iter().any(|unit| moved_units.contains(unit)));
                 let player = &self.players[player_index];
                 let starting_position = player
                     .get_unit(*units.first().expect(
@@ -421,7 +419,7 @@ impl Game {
                     ))
                     .expect("the player should have all units to move")
                     .position;
-                can_move_units(self, player, &units, starting_position, destination).unwrap();
+                can_move_units(self, player, &units, starting_position, destination, movement_actions_left, &moved_units).unwrap();
                 moved_units.extend(units.iter());
                 self.move_units(player_index, units, destination);
                 self.state = if movement_actions_left > 1 {

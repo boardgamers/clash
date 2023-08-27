@@ -72,6 +72,7 @@ impl StateUpdate {
     }
 }
 
+#[must_use]
 pub struct StateUpdates {
     updates: Vec<StateUpdate>,
 }
@@ -80,20 +81,10 @@ impl StateUpdates {
     pub fn new() -> StateUpdates {
         StateUpdates { updates: vec![] }
     }
-    pub fn single(update: StateUpdate) -> StateUpdates {
-        let mut updates = StateUpdates::new();
-        updates.add(update);
-        updates
-    }
-
     pub fn add(&mut self, update: StateUpdate) {
         if !matches!(update, StateUpdate::None) {
             self.updates.push(update);
         }
-    }
-
-    pub fn add_all(&mut self, updates: StateUpdates) {
-        updates.updates.into_iter().for_each(|u| self.add(u));
     }
 
     pub fn result(self) -> StateUpdate {
@@ -168,11 +159,16 @@ impl State {
             StateUpdate::None => {}
             StateUpdate::Execute(a) => {
                 self.clear();
-                let move_units = matches!(&a, Action::Playing(PlayingAction::MoveUnits));
                 self.execute(game, a);
-                if move_units {
-                    self.active_dialog =
-                        ActiveDialog::MoveUnits(UnitsSelection::new(game.current_player_index));
+                if let GameState::Movement {
+                    movement_actions_left,
+                    moved_units: _,
+                } = game.state
+                {
+                    if movement_actions_left > 0 {
+                        self.active_dialog =
+                            ActiveDialog::MoveUnits(UnitsSelection::new(game.current_player_index));
+                    }
                 }
             }
             StateUpdate::ExecuteWithWarning(update) => {

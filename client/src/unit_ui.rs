@@ -92,30 +92,34 @@ impl UnitsSelection {
 pub fn unit_selection_dialog(
     game: &Game,
     sel: &UnitsSelection,
+    can_select: impl Fn(&Unit) -> bool,
     on_change: impl FnOnce(UnitsSelection) -> StateUpdate,
     // on_ok: impl FnOnce(UnitsSelection) -> StateUpdate,
 ) -> StateUpdate {
     let mut updates = StateUpdates::new();
     active_dialog_window(|ui| {
         if let Some(start) = sel.start {
-            let units = units_on_tile(game, start);
-
-            for (p, unit_id) in units {
+            for (p, unit_id) in units_on_tile(game, start) {
                 let is_selected = sel.units.contains(&unit_id);
-                let mut l = label(game.get_player(p).get_unit(unit_id).unwrap());
+                let unit = game.get_player(p).get_unit(unit_id).unwrap();
+                let mut l = label(unit);
                 if is_selected {
                     l += " (selected)";
                 }
 
-                if ui.button(None, l) {
-                    let mut new = sel.clone();
-                    if is_selected {
-                        new.units.retain(|u| u != &unit_id);
-                    } else {
-                        new.units.push(unit_id);
+                if can_select(unit) {
+                    if ui.button(None, l) {
+                        let mut new = sel.clone();
+                        if is_selected {
+                            new.units.retain(|u| u != &unit_id);
+                        } else {
+                            new.units.push(unit_id);
+                        }
+                        updates.add(on_change(new));
+                        break;
                     }
-                    updates.add(on_change(new));
-                    break;
+                } else {
+                    ui.label(None, &l);
                 }
             }
         } else {
@@ -163,7 +167,7 @@ pub fn label(unit: &Unit) -> String {
     let res = match unit.movement_restriction {
         MovementRestriction::None => "",
         MovementRestriction::AllMovement(_) => " (can't move)",
-        MovementRestriction::Attack(_) => " (can't attacked)",
+        MovementRestriction::Attack(_) => " (can't attack)",
     };
 
     format!("{name}{res}")

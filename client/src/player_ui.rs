@@ -135,14 +135,20 @@ pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
         GameState::Movement {
             movement_actions_left,
             moved_units: _,
-        } if root_ui().button(vec2(600., 510.), "End Move Units") => StateUpdate::execute(
-            Action::Movement(MovementAction::Stop),
-            if movement_actions_left > 0 {
-                vec![(format!("{movement_actions_left} movement actions left"))]
-            } else {
-                vec![]
-            },
-        ),
+        } if root_ui().button(
+            vec2(600., 510.),
+            format!("End Move Units - {movement_actions_left} actions left"),
+        ) =>
+        {
+            StateUpdate::execute(
+                Action::Movement(MovementAction::Stop),
+                if movement_actions_left > 0 {
+                    vec![(format!("{movement_actions_left} movement actions left"))]
+                } else {
+                    vec![]
+                },
+            )
+        }
         _ => StateUpdate::None,
     }
 }
