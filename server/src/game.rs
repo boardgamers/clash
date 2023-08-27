@@ -199,6 +199,37 @@ impl Game {
     }
 
     #[must_use]
+    pub fn cloned_data(&self) -> GameData {
+        GameData {
+            state: self.state.clone(),
+            players: self.players.iter().map(Player::cloned_data).collect(),
+            map: self.map.cloned_data(),
+            starting_player_index: self.starting_player_index,
+            current_player_index: self.current_player_index,
+            action_log: self.action_log.clone(),
+            action_log_index: self.action_log_index,
+            log: self.log.clone(),
+            undo_limit: self.undo_limit,
+            played_once_per_turn_actions: self.played_once_per_turn_actions.clone(),
+            actions_left: self.actions_left,
+            successful_cultural_influence: self.successful_cultural_influence,
+            round: self.round,
+            age: self.age,
+            messages: self.messages.clone(),
+            dice_roll_outcomes: self.dice_roll_outcomes.clone(),
+            dice_roll_log: self.dice_roll_log.clone(),
+            dropped_players: self.dropped_players.clone(),
+            wonders_left: self
+                .wonders_left
+                .iter()
+                .map(|wonder| wonder.name.clone())
+                .collect(),
+            wonder_amount_left: self.wonder_amount_left,
+            undo_context: self.undo_context.clone(),
+        }
+    }
+
+    #[must_use]
     pub fn get_player(&self, player_index: usize) -> &Player {
         &self.players[player_index]
     }
@@ -1181,7 +1212,7 @@ pub enum GameState {
     Finished,
 }
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default, Clone)]
 pub enum UndoContext {
     #[default]
     None,

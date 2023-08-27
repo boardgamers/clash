@@ -193,6 +193,7 @@ dependencies = [
  "hex2d",
  "itertools",
  "macroquad",
+ "serde_json",
  "server",
 ]
 

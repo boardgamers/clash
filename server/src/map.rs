@@ -23,6 +23,13 @@ impl Map {
     }
 
     #[must_use]
+    pub fn cloned_data(&self) -> MapData {
+        MapData {
+            tiles: self.tiles.clone().into_iter().collect(),
+        }
+    }
+
+    #[must_use]
     pub fn from_data(data: MapData) -> Self {
         Self {
             tiles: data.tiles.into_iter().collect(),

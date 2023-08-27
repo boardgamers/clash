@@ -11,9 +11,14 @@ use crate::player_ui::{show_global_controls, show_globals, show_resources, show_
 use crate::ui_state::{ActiveDialog, CityMenu, FocusedTile, State, StateUpdate, StateUpdates};
 use crate::{city_ui, move_ui, recruit_unit_ui};
 use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
-use macroquad::prelude::{clear_background, next_frame, set_fullscreen, WHITE};
-use server::game::Game;
+use macroquad::prelude::{clear_background, next_frame, set_fullscreen, vec2, WHITE};
+use macroquad::ui::root_ui;
+use server::game::{Game, GameData};
 use server::position::Position;
+use std::fs::File;
+use std::io::BufReader;
+
+const EXPORT_FILE: &str = "game.json";
 
 pub async fn run(game: &mut Game) {
     let mut state = State::new();
@@ -26,7 +31,7 @@ pub async fn run(game: &mut Game) {
     }
 }
 
-fn game_loop(game: &Game, state: &State) -> StateUpdate {
+fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
     let player_index = game.current_player_index;
     clear_background(WHITE);
 
@@ -37,6 +42,15 @@ fn game_loop(game: &Game, state: &State) -> StateUpdate {
     show_log(game);
     show_resources(game, player_index);
     show_wonders(game, player_index);
+
+    if root_ui().button(vec2(600., 450.), "Import") {
+        import(game);
+        return StateUpdate::None;
+    };
+    if root_ui().button(vec2(650., 450.), "Export") {
+        export(game);
+        return StateUpdate::None;
+    };
 
     if state.pending_update.is_some() {
         updates.add(show_pending_update(state));
@@ -73,6 +87,21 @@ fn game_loop(game: &Game, state: &State) -> StateUpdate {
     updates.add(try_click(game, state, player_index));
 
     updates.result()
+}
+
+fn import(game: &mut Game) {
+    let file = File::open(EXPORT_FILE).expect("Failed to open export file");
+    let reader = BufReader::new(file);
+    let data: GameData = serde_json::from_reader(reader).expect("Failed to read export file");
+    *game = Game::from_data(data);
+}
+
+fn export(game: &Game) {
+    serde_json::to_writer_pretty(
+        std::fs::File::create(EXPORT_FILE).expect("Failed to create export file"),
+        &game.cloned_data(),
+    )
+    .expect("Failed to write export file");
 }
 
 fn show_pending_update(state: &State) -> StateUpdate {
