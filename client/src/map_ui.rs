@@ -3,10 +3,13 @@ use macroquad::hash;
 use macroquad::math::vec2;
 use macroquad::prelude::*;
 use macroquad::ui::{root_ui, Ui};
+use server::action::Action;
 
 use server::game::Game;
 use server::map::Terrain;
+use server::playing_actions::PlayingAction;
 use server::position::Position;
+use server::unit::{MovementRestriction, Unit};
 
 use crate::city_ui::draw_city;
 use crate::ui_state::{ActiveDialog, State, StateUpdate, StateUpdates};
@@ -95,14 +98,42 @@ pub fn show_tile_menu(
                     .map_or("outside the map", terrain_name),
             ),
         );
-        let units_str = unit_ui::units_on_tile(game, position)
-            .map(|(p, u)| unit_ui::label(game.get_player(p).get_unit(u).unwrap()))
-            .join(", ");
+        let units: Vec<(&Unit, String)> = unit_ui::units_on_tile(game, position)
+            .map(|(p, u)| {
+                let unit = game.get_player(p).get_unit(u).unwrap();
+                (unit, unit_ui::label(unit))
+            })
+            .collect();
+
+        let units_str = &units.iter().map(|(_, l)| l).join(", ");
         if !units_str.is_empty() {
-            ui.label(None, &units_str);
+            ui.label(None, units_str);
         }
         if let Some(suffix) = suffix {
             ui.label(None, suffix);
+        }
+
+        let settlers = &units
+            .iter()
+            .filter_map(|(unit, _)| {
+                if unit.can_found_city(game) {
+                    Some(unit)
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+
+        if !settlers.is_empty() && ui.button(None, "Settle") {
+            let settler = settlers
+                .iter()
+                .find(|u| u.movement_restriction != MovementRestriction::None)
+                .unwrap_or(&settlers[0]);
+            updates.add(StateUpdate::execute(Action::Playing(
+                PlayingAction::FoundCity {
+                    settler: settler.id,
+                },
+            )));
         }
 
         additional(ui, &mut updates);

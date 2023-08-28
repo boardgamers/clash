@@ -116,7 +116,7 @@ pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
         }
         GameState::Playing if root_ui().button(vec2(700., y), "End Turn") => {
             let left = game.actions_left;
-            StateUpdate::execute(
+            StateUpdate::execute_with_warning(
                 Action::Playing(PlayingAction::EndTurn),
                 if left > 0 {
                     vec![(format!("{left} actions left"))]
@@ -130,7 +130,7 @@ pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
                 && can_play_action(game)
                 && root_ui().button(vec2(600., 510.), "Move Units") =>
         {
-            StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits), vec![])
+            StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits))
         }
         GameState::Movement {
             movement_actions_left,
@@ -140,7 +140,7 @@ pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
             format!("End Move Units - {movement_actions_left} actions left"),
         ) =>
         {
-            StateUpdate::execute(
+            StateUpdate::execute_with_warning(
                 Action::Movement(MovementAction::Stop),
                 if movement_actions_left > 0 {
                     vec![(format!("{movement_actions_left} movement actions left"))]

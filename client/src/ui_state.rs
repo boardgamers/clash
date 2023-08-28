@@ -43,7 +43,11 @@ pub enum StateUpdate {
 }
 
 impl StateUpdate {
-    pub fn execute(action: Action, warning: Vec<String>) -> StateUpdate {
+    pub fn execute(action: Action) -> StateUpdate {
+        StateUpdate::Execute(action)
+    }
+
+    pub fn execute_with_warning(action: Action, warning: Vec<String>) -> StateUpdate {
         if warning.is_empty() {
             StateUpdate::Execute(action)
         } else {
@@ -57,17 +61,17 @@ impl StateUpdate {
                 MoodState::Happy => {
                     let mut warn = vec!["City will become neutral".to_string()];
                     warn.extend(warning);
-                    StateUpdate::execute(action, warn)
+                    StateUpdate::execute_with_warning(action, warn)
                 }
                 MoodState::Neutral => {
                     let mut warn = vec!["City will become angry".to_string()];
                     warn.extend(warning);
-                    StateUpdate::execute(action, warn)
+                    StateUpdate::execute_with_warning(action, warn)
                 }
-                MoodState::Angry => StateUpdate::execute(action, warning),
+                MoodState::Angry => StateUpdate::execute_with_warning(action, warning),
             }
         } else {
-            StateUpdate::execute(action, warning)
+            StateUpdate::execute_with_warning(action, warning)
         }
     }
 }
