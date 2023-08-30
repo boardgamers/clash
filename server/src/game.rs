@@ -50,7 +50,7 @@ pub struct Game {
     pub dropped_players: Vec<usize>,
     pub wonders_left: Vec<Wonder>,
     pub wonder_amount_left: usize,
-    pub undo_context: UndoContext,
+    pub undo_context_stack: Vec<UndoContext>,
 }
 
 impl Game {
@@ -118,7 +118,7 @@ impl Game {
             dropped_players: Vec::new(),
             wonders_left: wonders,
             wonder_amount_left: wonder_amount,
-            undo_context: UndoContext::None,
+            undo_context_stack: Vec::new(),
         }
     }
 
@@ -157,7 +157,7 @@ impl Game {
                 })
                 .collect(),
             wonder_amount_left: data.wonder_amount_left,
-            undo_context: data.undo_context,
+            undo_context_stack: data.undo_context_stack,
         };
         let mut players = Vec::new();
         for player in data.players {
@@ -194,7 +194,7 @@ impl Game {
                 .map(|wonder| wonder.name)
                 .collect(),
             wonder_amount_left: self.wonder_amount_left,
-            undo_context: self.undo_context,
+            undo_context_stack: self.undo_context_stack,
         }
     }
 
@@ -225,7 +225,7 @@ impl Game {
                 .map(|wonder| wonder.name.clone())
                 .collect(),
             wonder_amount_left: self.wonder_amount_left,
-            undo_context: self.undo_context.clone(),
+            undo_context_stack: self.undo_context_stack.clone(),
         }
     }
 
@@ -361,6 +361,9 @@ impl Game {
                     player_index,
                 );
             }
+            Combat { initiation, round, phase, defender_position, attacker_position } => {
+
+            }
             Finished => panic!("actions can't be executed when the game is finished"),
         }
     }
@@ -477,15 +480,15 @@ impl Game {
                 None
             }
         };
-        self.undo_context = UndoContext::Movement {
+        self.undo_context_stack.push(UndoContext::Movement {
             starting_position,
             movement_actions_left,
             moved_units,
-        };
+        });
     }
 
     fn undo_movement_action(&mut self, action: MovementAction, player_index: usize) {
-        let UndoContext::Movement { starting_position, movement_actions_left, moved_units } = mem::take(&mut self.undo_context) else {
+        let Some(UndoContext::Movement { starting_position, movement_actions_left, mut moved_units }) = self.undo_context_stack.pop() else {
             panic!("when undoing a movement action, the game should have stored movement context")
         };
         if let Move {
@@ -493,6 +496,9 @@ impl Game {
             destination: _,
         } = action
         {
+            if !units.is_empty() {
+                moved_units.drain(moved_units.len() - units.len()..);
+            }
             self.undo_move_units(
                 player_index,
                 units,
@@ -825,10 +831,10 @@ impl Game {
             player.available_units += &unit.unit_type;
             replaced_units_undo_context.push(unit);
         }
-        self.undo_context = UndoContext::Recruit {
+        self.undo_context_stack.push(UndoContext::Recruit {
             replaced_units: replaced_units_undo_context,
             replaced_leader,
-        };
+        });
         for unit_type in units {
             player.available_units -= &unit_type;
             let city = player
@@ -888,10 +894,10 @@ impl Game {
             .get_city_mut(city_position)
             .expect("player should have a city a recruitment position")
             .undo_activate();
-        if let UndoContext::Recruit {
+        if let Some(UndoContext::Recruit {
             replaced_units,
             replaced_leader,
-        } = mem::take(&mut self.undo_context)
+        }) = self.undo_context_stack.pop()
         {
             for unit in replaced_units {
                 player.available_units -= &unit.unit_type;
@@ -1168,6 +1174,10 @@ impl Game {
             };
         }
     }
+
+    fn initiate_combat(&mut self, defender_position: Position, attacker_position: Position) {
+        
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -1192,7 +1202,7 @@ pub struct GameData {
     dropped_players: Vec<usize>,
     wonders_left: Vec<String>,
     wonder_amount_left: usize,
-    undo_context: UndoContext,
+    undo_context_stack: Vec<UndoContext>,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -1209,13 +1219,24 @@ pub enum GameState {
         target_city_position: Position,
         city_piece: Building,
     },
+    Combat {
+        initiation: Box<GameState>,
+        round: u32, //starts with one,
+        phase: CombatPhase,
+        defender_position: Position,
+        attacker_position: Position,
+    },
     Finished,
 }
 
-#[derive(Serialize, Deserialize, Default, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub enum CombatPhase {
+    PlayActionCard,
+    Retreat,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
 pub enum UndoContext {
-    #[default]
-    None,
     FoundCity {
         settler: Unit,
     },
@@ -1259,7 +1280,7 @@ pub mod tests {
         wonder::Wonder,
     };
 
-    use super::{Game, GameState::Playing, UndoContext};
+    use super::{Game, GameState::Playing};
 
     #[must_use]
     pub fn test_game() -> Game {
@@ -1288,7 +1309,7 @@ pub mod tests {
             dropped_players: Vec::new(),
             wonders_left: Vec::new(),
             wonder_amount_left: 0,
-            undo_context: UndoContext::None,
+            undo_context_stack: Vec::new(),
         }
     }
 

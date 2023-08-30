@@ -42,6 +42,11 @@ impl Unit {
     }
 
     #[must_use]
+    pub fn can_attack(&self) -> bool {
+        matches!(self.movement_restriction, MovementRestriction::None)
+    }
+
+    #[must_use]
     pub fn can_found_city(&self, game: &Game) -> bool {
         if !matches!(self.unit_type, Settler) {
             return false;

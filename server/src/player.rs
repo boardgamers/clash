@@ -122,6 +122,9 @@ impl Player {
         game.players.push(player);
         let advances = mem::take(&mut game.players[player_index].advances);
         for advance in &advances {
+            if advance == "Farming" || advance == "Mining" {
+                continue;
+            }
             let advance = advances::get_advance_by_name(advance).expect("advance should exist");
             (advance.player_initializer)(game, player_index);
             for i in 0..game.players[player_index]

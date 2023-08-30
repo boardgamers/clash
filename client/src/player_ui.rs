@@ -25,9 +25,8 @@ pub fn show_globals(game: &Game) {
         GameState::Playing => String::from("Play Actions"),
         GameState::StatusPhase(_) => String::from("Status Phase"),
         GameState::Movement { .. } => String::from("Movement"),
-        GameState::CulturalInfluenceResolution { .. } => {
-            String::from("Cultural Influence Resolution")
-        }
+        GameState::CulturalInfluenceResolution { .. } => String::from("Cultural Influence Resolution"),
+        GameState::Combat { .. } => String::from("Combat"),
         GameState::Finished => String::from("Finished"),
     };
     draw_text(&status, 600., 110., 20., BLACK);

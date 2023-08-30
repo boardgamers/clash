@@ -1,9 +1,11 @@
 use crate::{civilization::Civilization, leader::Leader};
 
 #[must_use]
+#[rustfmt::skip]
 pub fn get_all() -> Vec<Civilization> {
     vec![
         Civilization::new("test0", vec![], vec![]),
+
         Civilization::new("test1", vec![], vec![]),
     ]
 }
