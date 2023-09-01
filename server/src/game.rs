@@ -470,7 +470,16 @@ impl Game {
                     )
                     .expect("Illegal action");
                 moved_units.extend(units.iter());
-                self.move_units(player_index, units, destination);
+                self.move_units(player_index, &units, destination);
+                if let Some(defender) = self.enemy_player(player_index, destination) {
+                    for unit_id in units {
+                        let unit = self.players[player_index]
+                        .get_unit_mut(unit_id)
+                        .expect("the player should have all units to move");
+                        unit.position = starting_position;
+                    }
+                    self.initiate_combat(defender, destination, player_index, starting_position, true);
+                }
                 self.state = if movement_actions_left > 1 {
                     Movement {
                         movement_actions_left: movement_actions_left - 1,
@@ -572,6 +581,10 @@ impl Game {
             target_city_position,
             &city_piece,
         );
+    }
+
+    fn enemy_player(&self, player_index: usize, position: Position) -> Option<usize> {
+        self.players.iter().position(|player| player.index != player_index && !player.get_units(position).is_empty())
     }
 
     pub fn add_to_last_log_item(&mut self, edit: &str) {
@@ -1129,7 +1142,7 @@ impl Game {
         //todo every player draws 1 action card and 1 objective card
     }
 
-    fn move_units(&mut self, player_index: usize, units: Vec<u32>, destination: Position) {
+    fn move_units(&mut self, player_index: usize, units: &[u32], destination: Position) {
         let terrain = self
             .map
             .tiles
@@ -1138,7 +1151,7 @@ impl Game {
             .clone();
         for unit_id in units {
             let unit = self.players[player_index]
-                .get_unit_mut(unit_id)
+                .get_unit_mut(*unit_id)
                 .expect("the player should have all units to move");
             unit.position = destination;
             match terrain {
@@ -1181,7 +1194,7 @@ impl Game {
         }
     }
 
-    fn _initiate_combat(
+    fn initiate_combat(
         &mut self,
         defender: usize,
         defender_position: Position,
