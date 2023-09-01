@@ -85,7 +85,7 @@ impl PlayingAction {
             }
             FoundCity { settler } => {
                 let settler = game.players[player_index]
-                    .take_unit(settler)
+                    .remove_unit(settler)
                     .expect("Illegal action");
                 assert!(settler.can_found_city(game), "Illegal action");
                 let player = &mut game.players[player_index];

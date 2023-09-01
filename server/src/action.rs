@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::game::CombatPhase;
 use crate::playing_actions::PlayingAction;
 use crate::status_phase::StatusPhaseAction;
 use crate::unit::MovementAction;
@@ -65,15 +64,7 @@ impl Action {
 
 #[derive(Serialize, Deserialize)]
 pub enum CombatAction {
-    PlayActionCard(String),
+    PlayActionCard(Option<String>),
+    RemoveCasualties(Vec<u32>),
     Retreat(bool)
-}
-
-impl CombatAction {
-    pub fn phase(&self) -> CombatPhase {
-        match self {
-            Self::PlayActionCard(_) => CombatPhase::PlayActionCard,
-            Self::Retreat(_) => CombatPhase::Retreat,
-        }
-    }
 }

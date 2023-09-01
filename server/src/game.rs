@@ -1,11 +1,7 @@
 use std::{collections::HashMap, mem};
-
 use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
 
-use GameState::*;
-
-use crate::unit::can_move_units;
 use crate::{
     action::Action,
     city::City,
@@ -28,6 +24,9 @@ use crate::{
     utils,
     wonder::Wonder,
 };
+
+use GameState::*;
+use CombatPhase::*;
 
 pub struct Game {
     pub state: GameState,
@@ -361,7 +360,7 @@ impl Game {
                     player_index,
                 );
             }
-            Combat { initiation, round, phase, defender_position, attacker_position } => {
+            Combat { initiation, round, phase, defender, defender_position, attacker, attacker_position, can_retreat } => {
 
             }
             Finished => panic!("actions can't be executed when the game is finished"),
@@ -453,16 +452,15 @@ impl Game {
                     ))
                     .expect("the player should have all units to move")
                     .position;
-                can_move_units(
+                player.can_move_units(
                     self,
-                    player,
                     &units,
                     starting_position,
                     destination,
                     movement_actions_left,
                     &moved_units,
                 )
-                .unwrap();
+                .expect("Illegal action");
                 moved_units.extend(units.iter());
                 self.move_units(player_index, units, destination);
                 self.state = if movement_actions_left > 1 {
@@ -826,7 +824,7 @@ impl Game {
         let mut replaced_units_undo_context = Vec::new();
         for unit in replaced_units {
             let unit = player
-                .take_unit(unit)
+                .remove_unit(unit)
                 .expect("the player should have the replaced units");
             player.available_units += &unit.unit_type;
             replaced_units_undo_context.push(unit);
@@ -1175,8 +1173,67 @@ impl Game {
         }
     }
 
-    fn initiate_combat(&mut self, defender_position: Position, attacker_position: Position) {
-        
+    fn initiate_combat(&mut self, defender: usize, defender_position: Position, attacker: usize, attacker_position: Position, can_retreat: bool) {
+        let mut round = 1;
+        loop {
+            //todo: go into tactics phase if either player has tactics card (also if they can not play it unless otherwise specified via setting)
+            let attacker_units = self.players[attacker].get_units(attacker_position).len();
+            let mut attacker_roll = 0;
+            for _ in 0..attacker_units {
+                attacker_roll += self.get_next_dice_roll();
+                //todo: use dice roll unit icon
+            }
+            let attacker_hits = attacker_roll / 5;
+            let mut defender_roll = 0;
+            let defender_units = self.players[defender].get_units(defender_position).len();
+            for _ in 0..defender_units {
+                defender_roll += self.get_next_dice_roll();
+                //todo: use dice roll unit icon
+            }
+            let defender_hits = defender_roll / 5;
+            //todo: log dice rolls
+            if attacker_hits < defender_units as u8 && attacker_hits > 0 {
+                let state = mem::replace(&mut self.state, Playing);
+                self.state = Combat { initiation: Box::new(state), round, phase: RemoveCasualties { player: defender, casualties: attacker_hits, counter_hits: Some(defender_hits) }, defender, defender_position, attacker, attacker_position, can_retreat };
+                return;
+            }
+            if attacker_hits >= defender_units as u8 {
+                let defender_units = self.players[defender].get_units(defender_position).iter().map(|unit| unit.id).collect::<Vec<u32>>();
+                for id in defender_units {
+                    self.players[defender].remove_unit(id);
+                    //todo if leader was killed, handle leader capture
+                }
+            }
+            if defender_hits < attacker_units as u8 && defender_hits > 0 {
+                let state = mem::replace(&mut self.state, Playing);
+                self.state = Combat { initiation: Box::new(state), round, phase: RemoveCasualties { player: attacker, casualties: defender_hits, counter_hits: None }, defender, defender_position, attacker, attacker_position, can_retreat };
+                return;
+            }
+            if defender_hits >= attacker_units as u8 {
+                let attacker_units = self.players[attacker].get_units(attacker_position).iter().map(|unit| unit.id).collect::<Vec<u32>>();
+                for id in attacker_units {
+                    self.players[attacker].remove_unit(id);
+                    //todo if leader was killed, handle leader capture
+                }
+            }
+            let attackers_left = self.players[attacker].get_units(attacker_position).len();
+            let defenders_left = self.players[defender].get_units(defender_position).len();
+            if attackers_left == 0 && defenders_left == 0 {
+                //todo if the defender has a fortress he wins
+                //todo otherwise: draw
+            }
+            if attackers_left == 0 {
+                //todo defender wins
+            }
+            if defenders_left == 0 {
+                //todo potentially capture city
+                for unit in self.players[attacker].get_units_mut(attacker_position) {
+                    unit.position = defender_position;
+                }
+                //todo attacker wins
+            }
+            round += 1;
+        }
     }
 }
 
@@ -1223,16 +1280,24 @@ pub enum GameState {
         initiation: Box<GameState>,
         round: u32, //starts with one,
         phase: CombatPhase,
+        defender: usize,
         defender_position: Position,
+        attacker: usize,
         attacker_position: Position,
+        can_retreat: bool,
     },
     Finished,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum CombatPhase {
-    PlayActionCard,
-    Retreat,
+    PlayActionCard(usize),
+    RemoveCasualties {
+        player: usize,
+        casualties: u8,
+        counter_hits: Option<u8>,
+    },
+    Retreat(usize),
 }
 
 #[derive(Serialize, Deserialize, Clone)]
