@@ -11,8 +11,8 @@ use server::resource_pile::ResourcePile;
 use crate::advance_ui::AdvancePayment;
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::ConstructionPayment;
+use crate::move_ui::MoveSelection;
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
-use crate::unit_ui::UnitsSelection;
 
 pub enum ActiveDialog {
     None,
@@ -20,9 +20,8 @@ pub enum ActiveDialog {
     ConstructionPayment(ConstructionPayment),
     CollectResources(CollectResources),
     RecruitUnitSelection(RecruitAmount),
-    #[allow(dead_code)] //todo(Gregor)
     ReplaceUnits(RecruitSelection),
-    MoveUnits(UnitsSelection),
+    MoveUnits(MoveSelection),
 }
 
 pub struct PendingUpdate {
@@ -171,7 +170,7 @@ impl State {
                 {
                     if movement_actions_left > 0 {
                         self.active_dialog =
-                            ActiveDialog::MoveUnits(UnitsSelection::new(game.current_player_index));
+                            ActiveDialog::MoveUnits(MoveSelection::new(game.current_player_index));
                     }
                 }
             }

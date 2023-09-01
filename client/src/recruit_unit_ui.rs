@@ -1,11 +1,13 @@
 use macroquad::prelude::*;
 use server::game::Game;
 use server::position::Position;
-use server::unit::{UnitType, Units};
+use server::unit::{UnitType, Units, Unit};
 
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::select_ui::{CountSelector, HasCountSelectableObject};
+
 use crate::ui_state::{ActiveDialog, StateUpdate};
+use crate::unit_ui::{UnitSelection, UnitSelectionConfirm};
 use crate::{select_ui, unit_ui};
 
 #[derive(Clone)]
@@ -85,45 +87,84 @@ impl RecruitAmount {
 }
 
 #[derive(Clone)]
-#[allow(dead_code)] //todo(Gregor)
 pub struct RecruitSelection {
-    pub selection: RecruitAmount,
-    available_units: Units,
+    pub amount: RecruitAmount,
+    pub available_units: Units,
+    pub need_replacement: Units,
     pub replaced_units: Vec<u32>,
+    pub current_city: Option<Position>,
 }
 
 impl RecruitSelection {
-    pub fn new(selection: RecruitAmount, available_units: Units) -> RecruitSelection {
+    pub fn new(game: &Game, amount: RecruitAmount, replaced_units: Vec<u32>) -> RecruitSelection {
+        let available_units = game.get_player(amount.player_index).available_units.clone();
+        let need_replacement = available_units.get_units_to_replace(&amount.units);
+
         RecruitSelection {
-            selection,
-            replaced_units: vec![],
+            amount,
             available_units,
+            need_replacement,
+            replaced_units,
+            current_city: None,
+        }
+    }
+
+    pub fn is_finished(&self) -> bool {
+        self.need_replacement.is_empty()
+    }
+}
+
+impl UnitSelection for RecruitSelection {
+    fn selected_units(&self) -> &[u32] {
+        &self.replaced_units
+    }
+
+    fn selected_units_mut(&mut self) -> &mut Vec<u32> {
+        &mut self.replaced_units
+    }
+
+    fn can_select(&self, _game: &Game, unit: &Unit) -> bool {
+        self.need_replacement.has_unit(&unit.unit_type)
+    }
+
+    fn current_tile(&self) -> Option<Position> {
+        self.current_city
+    }
+
+    fn confirm(&self, game: &Game) -> UnitSelectionConfirm {
+        if game.get_player(self.amount.player_index)
+            .can_recruit(
+                self.amount.units.clone().to_vec().as_slice(),
+                self.amount.city_position,
+                self.amount.leader_index,
+                self.replaced_units.as_slice(),
+            ) {
+            UnitSelectionConfirm::Valid
+        } else {
+            UnitSelectionConfirm::Invalid
         }
     }
 }
 
-pub fn select_dialog(game: &Game, sel: &RecruitAmount) -> StateUpdate {
+pub fn select_dialog(game: &Game, a: &RecruitAmount) -> StateUpdate {
     select_ui::count_dialog(
-        sel,
+        a,
         |s| s.selectable.clone(),
         |s| s.name.clone(),
         |_s| true,
-        |s| {
-            //todo(Gregor) check if replace is needed
-            // StateUpdate::SetDialog(ActiveDialog::ReplaceUnits(ReplaceUnits::new(
-            //     s.clone(),
-            //     game.get_player(s.player_index).available_units.clone(),
-            // )))
+        |amount| {
+            let sel = RecruitSelection::new(game, amount.clone(), vec![]);
 
-            StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
-                game,
-                s.player_index,
-                s.city_position,
-                ConstructionProject::Units(RecruitSelection::new(
-                    s.clone(),
-                    game.get_player(s.player_index).available_units.clone(),
-                )),
-            )))
+            if sel.is_finished() {
+                StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
+                    game,
+                    amount.player_index,
+                    amount.city_position,
+                    ConstructionProject::Units(sel),
+                )))
+            } else {
+                StateUpdate::SetDialog(ActiveDialog::ReplaceUnits(sel))
+            }
         },
         |_s, _u| true,
         |s, u| {
@@ -151,46 +192,27 @@ fn update_selection(game: &Game, s: &RecruitAmount, units: Units) -> StateUpdate
     )
 }
 
-// fn new_selections(game: &Game, sel: &RecruitUnitSelection, unit_type: &UnitType, name: &str) -> Vec<(String, RecruitUnitSelection)> {
-//     let mut res = vec![];
-//     if sel.available_units.has_unit(unit_type) {
-//         let mut new = sel.clone();
-//         new.units.push(unit_type.clone());
-//         new.available_units -= unit_type;
-//         res.push((format!("Add {name}"), new));
-//     } else {
-//         let p = game.get_player(sel.player_index);
-//         for rep in p.units.iter().filter(|u| &u.unit_type == unit_type).collect::<Vec<_>>() {
-//             let mut new = sel.clone();
-//             new.units.push(unit_type.clone());
-//             new.replaced_units.push(rep.id);
-//             res.push((format!("Add {} (Replace {})", name, unit_ui::label(rep)), new));
-//         }
-//     }
-//     res
-// }
-//
-// fn selection_label(sel: &RecruitUnitSelection, player: &Player) -> String {
-//     let names = sel
-//         .units
-//         .iter()
-//         .map(unit_ui::name)
-//         .collect::<Vec<&str>>()
-//         .join(", ");
-//
-//     let replaced = sel
-//         .replaced_units
-//         .iter()
-//         .map(|id| {
-//             unit_ui::label(player.get_unit(*id).unwrap())
-//         })
-//         .collect::<Vec<String>>()
-//         .join(", ");
-//     let replaced = if replaced.is_empty() {
-//         String::new()
-//     } else {
-//         format!(" Replaced: {replaced}")
-//     };
-//
-//     format!("Units: {names}{replaced}")
-// }
+pub fn replace_dialog(game: &Game, sel: &RecruitSelection) -> StateUpdate {
+    unit_ui::unit_selection_dialog::<RecruitSelection>(
+        game,
+        sel,
+        |new| {
+            StateUpdate::SetDialog(ActiveDialog::ReplaceUnits(new.clone()))
+        },
+        |new: RecruitSelection| {
+            StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
+                game,
+                new.amount.player_index,
+                new.amount.city_position,
+                ConstructionProject::Units(new),
+            )))
+        },
+    )
+}
+
+
+pub fn click_replace(pos: Position, s: &RecruitSelection) -> StateUpdate {
+    let mut new = s.clone();
+    new.current_city = Some(pos);
+    StateUpdate::SetDialog(ActiveDialog::ReplaceUnits(new))
+}

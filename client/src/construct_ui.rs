@@ -120,10 +120,10 @@ pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> St
             ConstructionProject::Units(r) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Recruit {
                     city_position: cp.city_position,
-                    units: r.selection.units.clone().to_vec(),
+                    units: r.amount.units.clone().to_vec(),
                     payment: cp.payment.to_resource_pile(),
                     replaced_units: r.replaced_units.clone(),
-                    leader_index: r.selection.leader_index,
+                    leader_index: r.amount.leader_index,
                 }),
                 vec![],
                 game.get_any_city(cp.city_position).unwrap(),
@@ -198,7 +198,7 @@ impl ConstructionPayment {
                 .cost
                 .clone(),
             ConstructionProject::Units(sel) => sel
-                .selection
+                .amount
                 .units
                 .clone()
                 .to_vec()

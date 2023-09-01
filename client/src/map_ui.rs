@@ -12,7 +12,7 @@ use server::position::Position;
 use server::unit::{MovementRestriction, Unit};
 
 use crate::city_ui::draw_city;
-use crate::ui_state::{ActiveDialog, State, StateUpdate, StateUpdates};
+use crate::ui_state::{ActiveDialog, can_play_action, State, StateUpdate, StateUpdates};
 
 use crate::{collect_ui, hex_ui, unit_ui};
 
@@ -55,8 +55,15 @@ pub fn draw_map(game: &Game, state: &State) {
                     1.0
                 }
             }
+            ActiveDialog::ReplaceUnits(s) => {
+                if s.current_city.is_some_and(|p| p == *pos) {
+                    0.5
+                } else {
+                    1.0
+                }
+            }
             _ => {
-                if state.focused_tile.iter().any(|f| *pos == f.position) {
+                if state.focused_tile.as_ref().is_some_and(|f| pos == &f.position) {
                     0.5
                 } else {
                     1.0
@@ -124,7 +131,7 @@ pub fn show_tile_menu(
             })
             .collect::<Vec<_>>();
 
-        if !settlers.is_empty() && ui.button(None, "Settle") {
+        if can_play_action(game) && !settlers.is_empty() && ui.button(None, "Settle") {
             let settler = settlers
                 .iter()
                 .find(|u| u.movement_restriction != MovementRestriction::None)

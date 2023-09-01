@@ -1,3 +1,5 @@
+use macroquad::math::u32;
+
 use server::action::Action;
 use server::game::{Game, GameState};
 use server::position::Position;
@@ -5,20 +7,18 @@ use server::unit::MovementAction;
 
 use crate::ui_state::{ActiveDialog, StateUpdate};
 use crate::unit_ui;
-use crate::unit_ui::UnitsSelection;
+use crate::unit_ui::{UnitSelection, UnitSelectionConfirm};
 
-pub fn move_units_dialog(game: &Game, sel: &UnitsSelection) -> StateUpdate {
-    unit_ui::unit_selection_dialog(
+pub fn move_units_dialog(game: &Game, sel: &MoveSelection) -> StateUpdate {
+    unit_ui::unit_selection_dialog::<MoveSelection>(
         game,
         sel,
-        |unit| {
-            !possible_destinations(game, unit.position, sel.player_index, &vec![unit.id]).is_empty()
-        },
-        |new| update_possible_destinations(game, new),
+        |new| update_possible_destinations(game, new.clone()),
+        |_new| StateUpdate::None,
     )
 }
 
-fn update_possible_destinations(game: &Game, mut sel: UnitsSelection) -> StateUpdate {
+fn update_possible_destinations(game: &Game, mut sel: MoveSelection) -> StateUpdate {
     if let Some(start) = sel.start {
         sel.destinations = possible_destinations(game, start, sel.player_index, &sel.units);
     } else {
@@ -64,7 +64,7 @@ fn possible_destinations(
     }
 }
 
-pub fn click(pos: Position, s: &UnitsSelection) -> StateUpdate {
+pub fn click(pos: Position, s: &MoveSelection) -> StateUpdate {
     let mut new = s.clone();
     if s.destinations.is_empty() {
         new.start = Some(pos);
@@ -77,5 +77,45 @@ pub fn click(pos: Position, s: &UnitsSelection) -> StateUpdate {
         }))
     } else {
         StateUpdate::None
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct MoveSelection {
+    pub player_index: usize,
+    pub units: Vec<u32>,
+    pub start: Option<Position>,
+    pub destinations: Vec<Position>,
+}
+
+impl MoveSelection {
+    pub fn new(player_index: usize) -> MoveSelection {
+        MoveSelection {
+            player_index,
+            units: vec![],
+            start: None,
+            destinations: vec![],
+        }
+    }
+}
+
+impl UnitSelection for MoveSelection {
+    fn selected_units(&self) -> &[u32] {
+        &self.units
+    }
+    fn selected_units_mut(&mut self) -> &mut Vec<u32> {
+        &mut self.units
+    }
+
+    fn can_select(&self, game: &Game, unit: &Unit) -> bool {
+        !possible_destinations(game, unit.position, self.player_index, &vec![unit.id]).is_empty()
+    }
+
+    fn current_tile(&self) -> Option<Position> {
+        self.start
+    }
+
+    fn confirm(&self, _game: &Game) -> UnitSelectionConfirm {
+        UnitSelectionConfirm::NoConfirm
     }
 }
