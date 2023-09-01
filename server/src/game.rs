@@ -1270,9 +1270,11 @@ impl Game {
             if attackers_left == 0 && defenders_left == 0 {
                 //todo if the defender has a fortress he wins
                 //todo otherwise: draw
+                return;
             }
             if attackers_left == 0 {
                 //todo defender wins
+                return;
             }
             if defenders_left == 0 {
                 //todo potentially capture city
@@ -1280,6 +1282,21 @@ impl Game {
                     unit.position = defender_position;
                 }
                 //todo attacker wins
+                return;
+            }
+            if can_retreat {
+                let state = mem::replace(&mut self.state, Playing);
+                self.state = Combat {
+                    initiation: Box::new(state),
+                    round,
+                    phase: Retreat,
+                    defender,
+                    defender_position,
+                    attacker,
+                    attacker_position,
+                    can_retreat: true,
+                };
+                return;
             }
             round += 1;
         }
@@ -1346,7 +1363,7 @@ pub enum CombatPhase {
         casualties: u8,
         counter_hits: Option<u8>,
     },
-    Retreat(usize),
+    Retreat,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
