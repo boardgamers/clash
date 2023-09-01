@@ -1,6 +1,6 @@
-use std::{collections::HashMap, mem};
 use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
+use std::{collections::HashMap, mem};
 
 use crate::{
     action::Action,
@@ -25,8 +25,8 @@ use crate::{
     wonder::Wonder,
 };
 
-use GameState::*;
 use CombatPhase::*;
+use GameState::*;
 
 pub struct Game {
     pub state: GameState,
@@ -360,9 +360,16 @@ impl Game {
                     player_index,
                 );
             }
-            Combat { initiation, round, phase, defender, defender_position, attacker, attacker_position, can_retreat } => {
-
-            }
+            Combat {
+                initiation: _,
+                round: _,
+                phase: _,
+                defender: _,
+                defender_position: _,
+                attacker: _,
+                attacker_position: _,
+                can_retreat: _,
+            } => {}
             Finished => panic!("actions can't be executed when the game is finished"),
         }
     }
@@ -452,15 +459,16 @@ impl Game {
                     ))
                     .expect("the player should have all units to move")
                     .position;
-                player.can_move_units(
-                    self,
-                    &units,
-                    starting_position,
-                    destination,
-                    movement_actions_left,
-                    &moved_units,
-                )
-                .expect("Illegal action");
+                player
+                    .can_move_units(
+                        self,
+                        &units,
+                        starting_position,
+                        destination,
+                        movement_actions_left,
+                        &moved_units,
+                    )
+                    .expect("Illegal action");
                 moved_units.extend(units.iter());
                 self.move_units(player_index, units, destination);
                 self.state = if movement_actions_left > 1 {
@@ -1173,7 +1181,14 @@ impl Game {
         }
     }
 
-    fn initiate_combat(&mut self, defender: usize, defender_position: Position, attacker: usize, attacker_position: Position, can_retreat: bool) {
+    fn _initiate_combat(
+        &mut self,
+        defender: usize,
+        defender_position: Position,
+        attacker: usize,
+        attacker_position: Position,
+        can_retreat: bool,
+    ) {
         let mut round = 1;
         loop {
             //todo: go into tactics phase if either player has tactics card (also if they can not play it unless otherwise specified via setting)
@@ -1194,11 +1209,28 @@ impl Game {
             //todo: log dice rolls
             if attacker_hits < defender_units as u8 && attacker_hits > 0 {
                 let state = mem::replace(&mut self.state, Playing);
-                self.state = Combat { initiation: Box::new(state), round, phase: RemoveCasualties { player: defender, casualties: attacker_hits, counter_hits: Some(defender_hits) }, defender, defender_position, attacker, attacker_position, can_retreat };
+                self.state = Combat {
+                    initiation: Box::new(state),
+                    round,
+                    phase: RemoveCasualties {
+                        player: defender,
+                        casualties: attacker_hits,
+                        counter_hits: Some(defender_hits),
+                    },
+                    defender,
+                    defender_position,
+                    attacker,
+                    attacker_position,
+                    can_retreat,
+                };
                 return;
             }
             if attacker_hits >= defender_units as u8 {
-                let defender_units = self.players[defender].get_units(defender_position).iter().map(|unit| unit.id).collect::<Vec<u32>>();
+                let defender_units = self.players[defender]
+                    .get_units(defender_position)
+                    .iter()
+                    .map(|unit| unit.id)
+                    .collect::<Vec<u32>>();
                 for id in defender_units {
                     self.players[defender].remove_unit(id);
                     //todo if leader was killed, handle leader capture
@@ -1206,11 +1238,28 @@ impl Game {
             }
             if defender_hits < attacker_units as u8 && defender_hits > 0 {
                 let state = mem::replace(&mut self.state, Playing);
-                self.state = Combat { initiation: Box::new(state), round, phase: RemoveCasualties { player: attacker, casualties: defender_hits, counter_hits: None }, defender, defender_position, attacker, attacker_position, can_retreat };
+                self.state = Combat {
+                    initiation: Box::new(state),
+                    round,
+                    phase: RemoveCasualties {
+                        player: attacker,
+                        casualties: defender_hits,
+                        counter_hits: None,
+                    },
+                    defender,
+                    defender_position,
+                    attacker,
+                    attacker_position,
+                    can_retreat,
+                };
                 return;
             }
             if defender_hits >= attacker_units as u8 {
-                let attacker_units = self.players[attacker].get_units(attacker_position).iter().map(|unit| unit.id).collect::<Vec<u32>>();
+                let attacker_units = self.players[attacker]
+                    .get_units(attacker_position)
+                    .iter()
+                    .map(|unit| unit.id)
+                    .collect::<Vec<u32>>();
                 for id in attacker_units {
                     self.players[attacker].remove_unit(id);
                     //todo if leader was killed, handle leader capture

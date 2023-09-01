@@ -1,4 +1,4 @@
-use std::{collections::HashMap, mem};
+use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 use PlayingAction::*;
@@ -93,7 +93,8 @@ impl PlayingAction {
                 player.available_units.settlers += 1;
                 let city = City::new(player_index, settler.position);
                 player.cities.push(city);
-                game.undo_context_stack.push(UndoContext::FoundCity { settler });
+                game.undo_context_stack
+                    .push(UndoContext::FoundCity { settler });
             }
             Construct {
                 city_position,

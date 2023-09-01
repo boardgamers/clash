@@ -7,8 +7,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
 
-use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, STACK_LIMIT};
-use crate::player::Player;
 use std::iter;
 use MovementRestriction::{AllMovement, Attack};
 use UnitType::*;
@@ -48,7 +46,7 @@ impl Unit {
 
     #[must_use]
     pub fn can_found_city(&self, game: &Game) -> bool {
-        if self.unit_type.is_settler() {
+        if !self.unit_type.is_settler() {
             return false;
         }
         if self.transporter_position.is_some() {

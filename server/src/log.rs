@@ -230,8 +230,31 @@ fn format_combat_action_log_item(action: &CombatAction, game: &Game) -> String {
     let player = &game.players[game.current_player_index];
     let player_name = player.get_name();
     match action {
-        CombatAction::PlayActionCard(card) => format!("{player_name} {}", card.as_ref().map_or(String::from("did not play a tactics card"), |card| format!("played the {card} tactics card"))),
-        CombatAction::RemoveCasualties(casualties) => format!("{player_name} removed {}", casualties.iter().map(|unit| player.get_unit(*unit).expect("the player should have units to be removed").unit_type.clone()).collect::<Units>()),
-        CombatAction::Retreat(action) => format!("{player_name} {}", if *action { "retreated ending the battle in a draw"} else { "decided not to retreat"}),
+        CombatAction::PlayActionCard(card) => format!(
+            "{player_name} {}",
+            card.as_ref()
+                .map_or(String::from("did not play a tactics card"), |card| format!(
+                    "played the {card} tactics card"
+                ))
+        ),
+        CombatAction::RemoveCasualties(casualties) => format!(
+            "{player_name} removed {}",
+            casualties
+                .iter()
+                .map(|unit| player
+                    .get_unit(*unit)
+                    .expect("the player should have units to be removed")
+                    .unit_type
+                    .clone())
+                .collect::<Units>()
+        ),
+        CombatAction::Retreat(action) => format!(
+            "{player_name} {}",
+            if *action {
+                "retreated ending the battle in a draw"
+            } else {
+                "decided not to retreat"
+            }
+        ),
     }
 }

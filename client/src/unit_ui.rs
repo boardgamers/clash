@@ -164,7 +164,13 @@ pub fn name(u: &UnitType) -> &str {
 
 pub fn label(unit: &Unit) -> String {
     let name = name(&unit.unit_type);
-    let res = if !unit.can_move() { " (can't move) "} else if !unit.can_attack() { " (can't attack) "} else { "" };
+    let res = if !unit.can_move() {
+        " (can't move) "
+    } else if !unit.can_attack() {
+        " (can't attack) "
+    } else {
+        ""
+    };
 
     format!("{name}{res}")
 }

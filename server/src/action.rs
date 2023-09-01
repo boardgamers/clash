@@ -66,5 +66,5 @@ impl Action {
 pub enum CombatAction {
     PlayActionCard(Option<String>),
     RemoveCasualties(Vec<u32>),
-    Retreat(bool)
+    Retreat(bool),
 }

@@ -13,9 +13,9 @@ use crate::{
     },
     civilization::Civilization,
     consts::{
-        ADVANCE_COST, ADVANCE_VICTORY_POINTS, BUILDING_VICTORY_POINTS, CITY_PIECE_LIMIT,
-        CONSTRUCT_COST, DEFEATED_LEADER_VICTORY_POINTS, OBJECTIVE_VICTORY_POINTS, SETTLEMENT_LIMIT,
-        STACK_LIMIT, UNIT_LIMIT, WONDER_VICTORY_POINTS, ARMY_MOVEMENT_REQUIRED_ADVANCE,
+        ADVANCE_COST, ADVANCE_VICTORY_POINTS, ARMY_MOVEMENT_REQUIRED_ADVANCE,
+        BUILDING_VICTORY_POINTS, CITY_PIECE_LIMIT, CONSTRUCT_COST, DEFEATED_LEADER_VICTORY_POINTS,
+        OBJECTIVE_VICTORY_POINTS, SETTLEMENT_LIMIT, STACK_LIMIT, UNIT_LIMIT, WONDER_VICTORY_POINTS,
     },
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     game::Game,
@@ -766,10 +766,20 @@ impl Player {
             if unit.unit_type.is_army_unit() && !self.has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE) {
                 return Err("army movement advance missing".to_string());
             }
-            
+            if unit.unit_type.is_army_unit() && !unit.unit_type.is_settler() {
+                stack_size += 1;
+            }
         }
 
-        if land_movement && self.get_units(destination).iter().filter(|unit| unit.unit_type.is_land_based() && !unit.unit_type.is_settler()).count() + stack_size > STACK_LIMIT {
+        if land_movement
+            && self
+                .get_units(destination)
+                .iter()
+                .filter(|unit| unit.unit_type.is_land_based() && !unit.unit_type.is_settler())
+                .count()
+                + stack_size
+                > STACK_LIMIT
+        {
             return Err("the destination stack limit would be exceeded".to_string());
         }
         Ok(())
