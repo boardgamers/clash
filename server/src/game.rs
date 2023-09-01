@@ -474,11 +474,17 @@ impl Game {
                 if let Some(defender) = self.enemy_player(player_index, destination) {
                     for unit_id in units {
                         let unit = self.players[player_index]
-                        .get_unit_mut(unit_id)
-                        .expect("the player should have all units to move");
+                            .get_unit_mut(unit_id)
+                            .expect("the player should have all units to move");
                         unit.position = starting_position;
                     }
-                    self.initiate_combat(defender, destination, player_index, starting_position, true);
+                    self.initiate_combat(
+                        defender,
+                        destination,
+                        player_index,
+                        starting_position,
+                        true,
+                    );
                 }
                 self.state = if movement_actions_left > 1 {
                     Movement {
@@ -584,7 +590,9 @@ impl Game {
     }
 
     fn enemy_player(&self, player_index: usize, position: Position) -> Option<usize> {
-        self.players.iter().position(|player| player.index != player_index && !player.get_units(position).is_empty())
+        self.players.iter().position(|player| {
+            player.index != player_index && !player.get_units(position).is_empty()
+        })
     }
 
     pub fn add_to_last_log_item(&mut self, edit: &str) {
