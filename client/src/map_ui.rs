@@ -12,7 +12,7 @@ use server::position::Position;
 use server::unit::{MovementRestriction, Unit};
 
 use crate::city_ui::draw_city;
-use crate::ui_state::{ActiveDialog, can_play_action, State, StateUpdate, StateUpdates};
+use crate::ui_state::{can_play_action, ActiveDialog, State, StateUpdate, StateUpdates};
 
 use crate::{collect_ui, hex_ui, unit_ui};
 
@@ -63,7 +63,11 @@ pub fn draw_map(game: &Game, state: &State) {
                 }
             }
             _ => {
-                if state.focused_tile.as_ref().is_some_and(|f| pos == &f.position) {
+                if state
+                    .focused_tile
+                    .as_ref()
+                    .is_some_and(|f| pos == &f.position)
+                {
                     0.5
                 } else {
                     1.0
