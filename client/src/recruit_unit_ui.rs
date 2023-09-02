@@ -230,7 +230,7 @@ pub fn select_dialog(game: &Game, a: &RecruitAmount) -> StateUpdate {
         |s, u| {
             let mut units = s.units.clone();
             units += &u.unit_type;
-            update_selection(game, s, units, u.leader_index)
+            update_selection(game, s, units, u.leader_index.or(s.leader_index))
         },
         |s, u| {
             let mut units = s.units.clone();
@@ -239,8 +239,11 @@ pub fn select_dialog(game: &Game, a: &RecruitAmount) -> StateUpdate {
                 game,
                 s,
                 units,
-                s.leader_index
-                    .filter(|_| !matches!(u.unit_type, UnitType::Leader)),
+                if matches!(u.unit_type, UnitType::Leader) {
+                    None
+                } else {
+                    s.leader_index
+                },
             )
         },
     )
