@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use macroquad::color::BLACK;
 use macroquad::math::vec2;
 use macroquad::prelude::*;
@@ -39,6 +40,12 @@ pub fn show_globals(game: &Game) {
         20.,
         BLACK,
     );
+    let rolls = game
+        .dice_roll_log
+        .iter()
+        .map(std::string::ToString::to_string)
+        .join(", ");
+    draw_text(&format!("Last Dice Rolls {rolls}"), 600., 600., 20., BLACK);
 }
 
 pub fn show_wonders(game: &Game, player_index: usize) {
