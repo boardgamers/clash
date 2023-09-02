@@ -1,3 +1,4 @@
+use std::iter;
 use std::{
     fmt::Display,
     ops::{AddAssign, SubAssign},
@@ -5,11 +6,10 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
-
-use std::iter;
 use MovementRestriction::{AllMovement, Attack};
 use UnitType::*;
+
+use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct Unit {
@@ -195,6 +195,11 @@ impl Units {
     }
 
     #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.clone().to_vec().is_empty()
+    }
+
+    #[must_use]
     pub fn get(&self, unit: &UnitType) -> u8 {
         match *unit {
             Settler => self.settlers,
@@ -207,10 +212,35 @@ impl Units {
     }
 
     #[must_use]
+    pub fn get_mut(&mut self, unit: &UnitType) -> &mut u8 {
+        match *unit {
+            Settler => &mut self.settlers,
+            Infantry => &mut self.infantry,
+            Ship => &mut self.ships,
+            Cavalry => &mut self.cavalry,
+            Elephant => &mut self.elephants,
+            Leader => &mut self.leaders,
+        }
+    }
+
+    #[must_use]
     pub fn to_vec(self) -> Vec<UnitType> {
         self.into_iter()
             .flat_map(|(u, c)| iter::repeat(u).take(c as usize))
             .collect()
+    }
+
+    #[must_use]
+    pub fn get_units_to_replace(&self, new_units: &Units) -> Units {
+        let mut units_to_replace = Units::empty();
+        for (unit_type, count) in self.clone() {
+            let new_count = new_units.get(&unit_type) as i8;
+            let replace = new_count - count as i8;
+            if replace > 0 {
+                *units_to_replace.get_mut(&unit_type) += replace as u8;
+            }
+        }
+        units_to_replace
     }
 }
 
@@ -371,6 +401,16 @@ mod tests {
         assert_eq!(
             units.to_vec(),
             vec![Infantry, Cavalry, Cavalry, Elephant, Leader]
+        );
+    }
+
+    #[test]
+    fn get_units_to_replace() {
+        let units = Units::new(0, 1, 0, 2, 1, 1);
+        let new_units = Units::new(0, 2, 0, 1, 1, 1);
+        assert_eq!(
+            units.get_units_to_replace(&new_units),
+            Units::new(0, 1, 0, 0, 0, 0)
         );
     }
 }

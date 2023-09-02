@@ -699,7 +699,7 @@ impl Player {
         }
         if units.iter().any(|unit| matches!(unit, UnitType::Leader))
             && (leader_index.is_none()
-                || leader_index.is_some_and(|index| index < self.available_leaders.len()))
+                || !leader_index.is_some_and(|index| index < self.available_leaders.len()))
         {
             return false;
         }

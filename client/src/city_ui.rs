@@ -52,6 +52,7 @@ pub fn show_city_menu(game: &Game, menu: &CityMenu) -> StateUpdate {
                     menu.player_index,
                     menu.city_position,
                     Units::empty(),
+                    None,
                     &[],
                 ));
             }

@@ -1,7 +1,8 @@
 use macroquad::math::bool;
+
 use server::resource_pile::ResourcePile;
 
-use crate::resource_ui::ResourceType;
+use crate::resource_ui::{resource_name, ResourceType};
 use crate::select_ui;
 use crate::select_ui::{CountSelector, HasCountSelectableObject};
 use crate::ui_state::StateUpdate;
@@ -86,7 +87,7 @@ pub fn payment_dialog<T: HasPayment>(
     select_ui::count_dialog(
         has_payment,
         |p| p.payment().resources.clone(),
-        |p| p.resource.to_string(),
+        |p| resource_name(p.resource),
         is_valid,
         execute_action,
         |c, o| show(c, o.resource),

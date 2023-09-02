@@ -78,9 +78,7 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
         ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p),
         ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c),
         ActiveDialog::RecruitUnitSelection(s) => recruit_unit_ui::select_dialog(game, s),
-        ActiveDialog::ReplaceUnits(_) => {
-            todo!("ReplaceUnits")
-        }
+        ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::replace_dialog(game, r),
         ActiveDialog::MoveUnits(s) => move_ui::move_units_dialog(game, s),
     });
 
@@ -128,6 +126,7 @@ pub fn try_click(game: &Game, state: &State, player_index: usize) -> StateUpdate
 
         match &state.active_dialog {
             ActiveDialog::MoveUnits(s) => move_ui::click(pos, s),
+            ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::click_replace(pos, r),
             ActiveDialog::CollectResources(col) => click_collect_option(col, pos),
             _ => {
                 if let Some(c) = game.get_any_city(pos) {

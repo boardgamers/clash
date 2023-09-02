@@ -37,20 +37,37 @@ fn add_resource(m: &mut HashMap<ResourceType, u32>, amount: u32, resource_type: 
     m.insert(resource_type, amount);
 }
 
-pub fn resource_symbol(p: &ResourcePile) -> String {
+pub fn resource_pile_string(p: &ResourcePile) -> String {
     new_resource_map(p)
         .into_iter()
         .filter(|(_, v)| *v > 0)
-        .map(|(t, _)| match t {
-            ResourceType::Food => "F",
-            ResourceType::Wood => "W",
-            ResourceType::Ore => "O",
-            ResourceType::Ideas => "I",
-            ResourceType::Gold => "G",
-            ResourceType::MoodTokens => "M",
-            ResourceType::CultureTokens => "C",
-            ResourceType::Discount => panic!("Discount is not a resource type"),
-        })
+        .map(|(t, _)| resource_symbol(t))
         .collect::<Vec<&str>>()
         .join(",")
+}
+
+pub fn resource_symbol(t: ResourceType) -> &'static str {
+    match t {
+        ResourceType::Food => "F",
+        ResourceType::Wood => "W",
+        ResourceType::Ore => "O",
+        ResourceType::Ideas => "I",
+        ResourceType::Gold => "G",
+        ResourceType::MoodTokens => "M",
+        ResourceType::CultureTokens => "C",
+        ResourceType::Discount => panic!("Discount is not a resource type"),
+    }
+}
+
+pub fn resource_name(t: ResourceType) -> &'static str {
+    match t {
+        ResourceType::Food => "Food",
+        ResourceType::Wood => "Wood",
+        ResourceType::Ore => "Ore",
+        ResourceType::Ideas => "Iron",
+        ResourceType::Gold => "Gold",
+        ResourceType::MoodTokens => "Mood",
+        ResourceType::CultureTokens => "Culture",
+        ResourceType::Discount => panic!("Discount is not a resource type"),
+    }
 }

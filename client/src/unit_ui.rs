@@ -1,7 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
 use macroquad::math::u32;
-
 use macroquad::prelude::draw_text;
 
 use server::game::Game;
@@ -70,70 +69,71 @@ pub fn draw_units(game: &Game) {
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct UnitsSelection {
-    pub player_index: usize,
-    pub units: Vec<u32>,
-    pub start: Option<Position>,
-    pub destinations: Vec<Position>,
+pub enum UnitSelectionConfirm {
+    NoConfirm,
+    Invalid,
+    Valid,
 }
 
-impl UnitsSelection {
-    pub fn new(player_index: usize) -> UnitsSelection {
-        UnitsSelection {
-            player_index,
-            units: vec![],
-            start: None,
-            destinations: vec![],
-        }
-    }
+pub trait UnitSelection: Clone {
+    fn selected_units(&self) -> &[u32];
+    fn selected_units_mut(&mut self) -> &mut Vec<u32>;
+    fn can_select(&self, game: &Game, unit: &Unit) -> bool;
+    fn current_tile(&self) -> Option<Position>;
+    fn confirm(&self, game: &Game) -> UnitSelectionConfirm;
 }
 
-pub fn unit_selection_dialog(
+pub fn unit_selection_dialog<T: UnitSelection>(
     game: &Game,
-    sel: &UnitsSelection,
-    can_select: impl Fn(&Unit) -> bool,
-    on_change: impl FnOnce(UnitsSelection) -> StateUpdate,
-    // on_ok: impl FnOnce(UnitsSelection) -> StateUpdate,
+    sel: &T,
+    on_change: impl Fn(T) -> StateUpdate,
+    on_ok: impl FnOnce(T) -> StateUpdate,
 ) -> StateUpdate {
     let mut updates = StateUpdates::new();
     active_dialog_window(|ui| {
-        if let Some(start) = sel.start {
-            for (p, unit_id) in units_on_tile(game, start) {
-                let is_selected = sel.units.contains(&unit_id);
+        if let Some(current_tile) = sel.current_tile() {
+            for (p, unit_id) in units_on_tile(game, current_tile) {
                 let unit = game.get_player(p).get_unit(unit_id).unwrap();
+                let can_sel = sel.can_select(game, unit);
+                let is_selected = sel.selected_units().contains(&unit_id);
                 let mut l = label(unit);
                 if is_selected {
                     l += " (selected)";
                 }
 
-                if can_select(unit) {
-                    if ui.button(None, l) {
-                        let mut new = sel.clone();
-                        if is_selected {
-                            new.units.retain(|u| u != &unit_id);
-                        } else {
-                            new.units.push(unit_id);
-                        }
-                        updates.add(on_change(new));
-                        break;
-                    }
-                } else {
+                if !can_sel {
                     ui.label(None, &l);
+                } else if ui.button(None, l) {
+                    let mut new = sel.clone();
+                    if is_selected {
+                        new.selected_units_mut().retain(|u| u != &unit_id);
+                    } else {
+                        new.selected_units_mut().push(unit_id);
+                    }
+                    updates.add(on_change(new));
+                }
+            }
+            let confirm = sel.confirm(game);
+            match confirm {
+                UnitSelectionConfirm::NoConfirm => {}
+                UnitSelectionConfirm::Invalid => {
+                    ui.label(None, "Invalid selection");
+                    if ui.button(None, "Cancel") {
+                        updates.add(StateUpdate::Cancel);
+                    };
+                }
+                UnitSelectionConfirm::Valid => {
+                    if ui.button(None, "OK") {
+                        updates.add(on_ok(sel.clone()));
+                    }
+                    if ui.button(None, "Cancel") {
+                        updates.add(StateUpdate::Cancel);
+                    };
                 }
             }
         } else {
             ui.label(None, "Select a starting tile");
         }
-
-        // let valid = true; // is_valid(container);
-        // let label = if valid { "OK" } else { "(OK)" };
-        // if ui.button(None, label) && valid {
-        //     updates.add(on_ok(sel.clone()));
-        // };
-        // if ui.button(None, "Cancel") {
-        //     updates.add(StateUpdate::Cancel);
-        // };
     });
 
     updates.result()

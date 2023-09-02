@@ -16,6 +16,7 @@ pub struct Leader {
 }
 
 impl Leader {
+    #[must_use]
     pub fn builder(
         name: &str,
         first_ability: &str,
@@ -66,6 +67,7 @@ impl LeaderBuilder {
         }
     }
 
+    #[must_use]
     pub fn build(self) -> Leader {
         let player_initializer =
             ability_initializer::join_ability_initializers(self.player_initializers);
