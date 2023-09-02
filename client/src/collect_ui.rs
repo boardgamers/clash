@@ -13,7 +13,7 @@ use server::resource_pile::ResourcePile;
 
 use crate::dialog_ui::active_dialog_window;
 use crate::hex_ui;
-use crate::resource_ui::resource_symbol;
+use crate::resource_ui::resource_pile_string;
 use crate::ui_state::{ActiveDialog, State, StateUpdate, StateUpdates};
 
 #[derive(Clone)]
@@ -150,7 +150,13 @@ pub fn draw_resource_collect_tile(state: &State, pos: Position) {
                 } else {
                     RED
                 };
-                draw_text(&resource_symbol(res), p.x - 12.0, p.y + 12.0, 50.0, color);
+                draw_text(
+                    &resource_pile_string(res),
+                    p.x - 12.0,
+                    p.y + 12.0,
+                    50.0,
+                    color,
+                );
             });
         }
     };

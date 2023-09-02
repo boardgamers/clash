@@ -3,7 +3,7 @@ use macroquad::math::u32;
 use server::action::Action;
 use server::game::{Game, GameState};
 use server::position::Position;
-use server::unit::MovementAction;
+use server::unit::{MovementAction, Unit};
 
 use crate::ui_state::{ActiveDialog, StateUpdate};
 use crate::unit_ui;

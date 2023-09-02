@@ -20,7 +20,7 @@ pub trait HasCountSelectableObject {
 pub fn count_dialog<C, O: HasCountSelectableObject>(
     container: &C,
     get_objects: impl Fn(&C) -> Vec<O>,
-    label: impl Fn(&O) -> String,
+    label: impl Fn(&O) -> &str,
     is_valid: impl FnOnce(&C) -> bool,
     execute_action: impl FnOnce(&C) -> StateUpdate,
     show: impl Fn(&C, &O) -> bool,
@@ -31,7 +31,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
     active_dialog_window(|ui| {
         for (i, p) in get_objects(container).iter().enumerate() {
             if show(container, p) {
-                Group::new(hash!("res", i), Vec2::new(80., 40.)).ui(ui, |ui| {
+                Group::new(hash!("res", i), Vec2::new(100., 40.)).ui(ui, |ui| {
                     let c = p.counter();
                     ui.label(Vec2::new(0., 0.), &format!("{} {}", &label(p), c.current));
                     if c.current > c.min && ui.button(Vec2::new(0., 20.), "-") {
@@ -46,10 +46,10 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
 
         let valid = is_valid(container);
         let label = if valid { "OK" } else { "(OK)" };
-        if ui.button(Vec2::new(0., 40.), label) && valid {
+        if ui.button(Vec2::new(20., 160.), label) && valid {
             updates.add(execute_action(container));
         };
-        if ui.button(Vec2::new(80., 40.), "Cancel") {
+        if ui.button(Vec2::new(80., 160.), "Cancel") {
             updates.add(StateUpdate::Cancel);
         };
     });

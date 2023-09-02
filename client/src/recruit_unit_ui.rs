@@ -210,7 +210,7 @@ pub fn select_dialog(game: &Game, a: &RecruitAmount) -> StateUpdate {
     select_ui::count_dialog(
         a,
         |s| s.selectable.clone(),
-        |s| s.name.clone(),
+        |s| s.name.as_ref(),
         |_s| true,
         |amount| {
             let sel = RecruitSelection::new(game, amount.clone(), vec![]);

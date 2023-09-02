@@ -11,10 +11,6 @@ use UnitType::*;
 
 use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
 
-use std::iter;
-use MovementRestriction::{AllMovement, Attack};
-use UnitType::*;
-
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct Unit {
     pub player_index: usize,
