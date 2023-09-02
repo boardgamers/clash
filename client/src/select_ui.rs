@@ -31,7 +31,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
     active_dialog_window(|ui| {
         for (i, p) in get_objects(container).iter().enumerate() {
             if show(container, p) {
-                Group::new(hash!("res", i), Vec2::new(80., 200.)).ui(ui, |ui| {
+                Group::new(hash!("res", i), Vec2::new(80., 40.)).ui(ui, |ui| {
                     let c = p.counter();
                     ui.label(Vec2::new(0., 0.), &format!("{} {}", &label(p), c.current));
                     if c.current > c.min && ui.button(Vec2::new(0., 20.), "-") {
