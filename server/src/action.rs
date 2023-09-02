@@ -10,6 +10,7 @@ pub enum Action {
     StatusPhase(StatusPhaseAction),
     Movement(MovementAction),
     CulturalInfluenceResolution(bool),
+    Combat(CombatAction),
     Undo,
     Redo,
 }
@@ -50,4 +51,20 @@ impl Action {
             None
         }
     }
+
+    #[must_use]
+    pub fn combat(self) -> Option<CombatAction> {
+        if let Self::Combat(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum CombatAction {
+    PlayActionCard(Option<String>),
+    RemoveCasualties(Vec<u32>),
+    Retreat(bool),
 }

@@ -1,4 +1,4 @@
-use std::{collections::HashMap, mem};
+use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 use PlayingAction::*;
@@ -85,7 +85,7 @@ impl PlayingAction {
             }
             FoundCity { settler } => {
                 let settler = game.players[player_index]
-                    .take_unit(settler)
+                    .remove_unit(settler)
                     .expect("Illegal action");
                 assert!(settler.can_found_city(game), "Illegal action");
                 let player = &mut game.players[player_index];
@@ -93,7 +93,8 @@ impl PlayingAction {
                 player.available_units.settlers += 1;
                 let city = City::new(player_index, settler.position);
                 player.cities.push(city);
-                game.undo_context = UndoContext::FoundCity { settler };
+                game.undo_context_stack
+                    .push(UndoContext::FoundCity { settler });
             }
             Construct {
                 city_position,
@@ -283,8 +284,8 @@ impl PlayingAction {
                 game.undo_advance(&advance, player_index);
             }
             FoundCity { settler: _ } => {
-                let settler = mem::take(&mut game.undo_context);
-                let UndoContext::FoundCity{settler} = settler else {
+                let settler = game.undo_context_stack.pop();
+                let Some(UndoContext::FoundCity{settler}) = settler else {
                     panic!("Settler context should be stored in undo context");
                 };
                 let player = &mut game.players[player_index];

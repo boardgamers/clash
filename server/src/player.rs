@@ -13,9 +13,9 @@ use crate::{
     },
     civilization::Civilization,
     consts::{
-        ADVANCE_COST, ADVANCE_VICTORY_POINTS, BUILDING_VICTORY_POINTS, CITY_PIECE_LIMIT,
-        CONSTRUCT_COST, DEFEATED_LEADER_VICTORY_POINTS, OBJECTIVE_VICTORY_POINTS, SETTLEMENT_LIMIT,
-        STACK_LIMIT, UNIT_LIMIT, WONDER_VICTORY_POINTS,
+        ADVANCE_COST, ADVANCE_VICTORY_POINTS, ARMY_MOVEMENT_REQUIRED_ADVANCE,
+        BUILDING_VICTORY_POINTS, CITY_PIECE_LIMIT, CONSTRUCT_COST, DEFEATED_LEADER_VICTORY_POINTS,
+        OBJECTIVE_VICTORY_POINTS, SETTLEMENT_LIMIT, STACK_LIMIT, UNIT_LIMIT, WONDER_VICTORY_POINTS,
     },
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     game::Game,
@@ -122,6 +122,9 @@ impl Player {
         game.players.push(player);
         let advances = mem::take(&mut game.players[player_index].advances);
         for advance in &advances {
+            if advance == "Farming" || advance == "Mining" {
+                continue;
+            }
             let advance = advances::get_advance_by_name(advance).expect("advance should exist");
             (advance.player_initializer)(game, player_index);
             for i in 0..game.players[player_index]
@@ -714,6 +717,74 @@ impl Player {
         true
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if the unit cannot move to the destination.
+    pub fn can_move_units(
+        &self,
+        game: &Game,
+        units: &Vec<u32>,
+        starting: Position,
+        destination: Position,
+        movement_actions_left: u32,
+        moved_units: &[u32],
+    ) -> Result<(), String> {
+        if !starting.is_neighbor(destination) {
+            return Err("the destination should be adjacent to the starting position".to_string());
+        }
+        if movement_actions_left == 0 {
+            return Err("no movement actions left".to_string());
+        }
+
+        if units.iter().any(|unit| moved_units.contains(unit)) {
+            return Err("some units have already moved".to_string());
+        }
+
+        let land_movement = !matches!(
+            game.map
+                .tiles
+                .get(&destination)
+                .expect("destination should exist"),
+            Water
+        );
+        let mut stack_size = 0;
+
+        for unit_id in units {
+            let unit = self
+                .get_unit(*unit_id)
+                .ok_or("the player should have all units to move")?;
+
+            if unit.position != starting {
+                return Err("the unit should be at the starting position".to_string());
+            }
+            if !unit.can_move() {
+                return Err("the unit should be able to move".to_string());
+            }
+            if unit.unit_type.is_land_based() != land_movement {
+                return Err("the unit cannot move here".to_string());
+            }
+            if unit.unit_type.is_army_unit() && !self.has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE) {
+                return Err("army movement advance missing".to_string());
+            }
+            if unit.unit_type.is_army_unit() && !unit.unit_type.is_settler() {
+                stack_size += 1;
+            }
+        }
+
+        if land_movement
+            && self
+                .get_units(destination)
+                .iter()
+                .filter(|unit| unit.unit_type.is_land_based() && !unit.unit_type.is_settler())
+                .count()
+                + stack_size
+                > STACK_LIMIT
+        {
+            return Err("the destination stack limit would be exceeded".to_string());
+        }
+        Ok(())
+    }
+
     #[must_use]
     pub fn get_unit(&self, id: u32) -> Option<&Unit> {
         self.units.iter().find(|unit| unit.id == id)
@@ -724,7 +795,7 @@ impl Player {
         self.units.iter_mut().find(|unit| unit.id == id)
     }
 
-    pub fn take_unit(&mut self, id: u32) -> Option<Unit> {
+    pub fn remove_unit(&mut self, id: u32) -> Option<Unit> {
         Some(
             self.units
                 .remove(self.units.iter().position(|unit| unit.id == id)?),
@@ -735,6 +806,14 @@ impl Player {
     pub fn get_units(&self, position: Position) -> Vec<&Unit> {
         self.units
             .iter()
+            .filter(|unit| unit.position == position)
+            .collect()
+    }
+
+    #[must_use]
+    pub fn get_units_mut(&mut self, position: Position) -> Vec<&mut Unit> {
+        self.units
+            .iter_mut()
             .filter(|unit| unit.position == position)
             .collect()
     }

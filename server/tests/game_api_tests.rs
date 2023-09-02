@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fs};
 
 use server::{
     action::Action,
@@ -352,4 +352,47 @@ fn undo() {
     });
     let game = game_api::execute_action(game, advance_action, 0);
     assert_undo(&game, false, false, 1, 1, 1);
+}
+
+fn _test_action(game_path: &str, action: Action, player_index: usize) {
+    let path = format!("test_games\\{game_path}.json");
+    let original_game =
+        fs::read_to_string(path).expect("game file should exist in the test games folder");
+    let game = Game::from_data(
+        serde_json::from_str(&original_game).expect("the game file should be deserializable"),
+    );
+    let game = game_api::execute_action(game, action, player_index);
+    let new_game =
+        serde_json::to_string(&game.cloned_data()).expect("game data should be serializable");
+    let expected_path = format!("test_games\\{game_path}.outcome.json");
+    let expected_game =
+        fs::read_to_string(expected_path).expect("outcome file should be deserializable");
+    assert_eq!(expected_game, new_game);
+    let game = game_api::execute_action(game, Action::Undo, player_index);
+    let json =
+        serde_json::to_string(&game.cloned_data()).expect("game data should be serializable");
+    assert_eq!(original_game, json);
+    let game = game_api::execute_action(game, Action::Redo, player_index);
+    let json =
+        serde_json::to_string(&game.cloned_data()).expect("game data should be serializable");
+    assert_eq!(new_game, json);
+}
+
+fn _test_irreversible_action(game_path: &str, action: Action, player_index: usize) {
+    let path = format!("test_games\\{game_path}.json");
+    let game = fs::read_to_string(path).expect("game file should exist in the test games folder");
+    let game = Game::from_data(
+        serde_json::from_str(&game).expect("the game file should be deserializable"),
+    );
+    let game = game_api::execute_action(game, action, player_index);
+    let game = serde_json::to_string(&game.data()).expect("game data should be serializable");
+    let expected_path = format!("test_games\\{game_path}.outcome.json");
+    let expected_game =
+        fs::read_to_string(expected_path).expect("outcome file should be deserializable");
+    assert_eq!(expected_game, game);
+}
+
+#[test]
+fn actions() {
+    //todo
 }

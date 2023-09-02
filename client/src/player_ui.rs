@@ -28,6 +28,7 @@ pub fn show_globals(game: &Game) {
         GameState::CulturalInfluenceResolution { .. } => {
             String::from("Cultural Influence Resolution")
         }
+        GameState::Combat { .. } => String::from("Combat"),
         GameState::Finished => String::from("Finished"),
     };
     draw_text(&status, 600., 110., 20., BLACK);

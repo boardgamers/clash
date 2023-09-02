@@ -1,11 +1,7 @@
-use std::{collections::HashMap, mem};
-
 use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
+use std::{collections::HashMap, mem};
 
-use GameState::*;
-
-use crate::unit::can_move_units;
 use crate::{
     action::Action,
     city::City,
@@ -29,6 +25,9 @@ use crate::{
     wonder::Wonder,
 };
 
+use CombatPhase::*;
+use GameState::*;
+
 pub struct Game {
     pub state: GameState,
     pub players: Vec<Player>,
@@ -50,7 +49,7 @@ pub struct Game {
     pub dropped_players: Vec<usize>,
     pub wonders_left: Vec<Wonder>,
     pub wonder_amount_left: usize,
-    pub undo_context: UndoContext,
+    pub undo_context_stack: Vec<UndoContext>,
 }
 
 impl Game {
@@ -118,7 +117,7 @@ impl Game {
             dropped_players: Vec::new(),
             wonders_left: wonders,
             wonder_amount_left: wonder_amount,
-            undo_context: UndoContext::None,
+            undo_context_stack: Vec::new(),
         }
     }
 
@@ -157,7 +156,7 @@ impl Game {
                 })
                 .collect(),
             wonder_amount_left: data.wonder_amount_left,
-            undo_context: data.undo_context,
+            undo_context_stack: data.undo_context_stack,
         };
         let mut players = Vec::new();
         for player in data.players {
@@ -194,7 +193,7 @@ impl Game {
                 .map(|wonder| wonder.name)
                 .collect(),
             wonder_amount_left: self.wonder_amount_left,
-            undo_context: self.undo_context,
+            undo_context_stack: self.undo_context_stack,
         }
     }
 
@@ -225,7 +224,7 @@ impl Game {
                 .map(|wonder| wonder.name.clone())
                 .collect(),
             wonder_amount_left: self.wonder_amount_left,
-            undo_context: self.undo_context.clone(),
+            undo_context_stack: self.undo_context_stack.clone(),
         }
     }
 
@@ -361,6 +360,16 @@ impl Game {
                     player_index,
                 );
             }
+            Combat {
+                initiation: _,
+                round: _,
+                phase: _,
+                defender: _,
+                defender_position: _,
+                attacker: _,
+                attacker_position: _,
+                can_retreat: _,
+            } => {}
             Finished => panic!("actions can't be executed when the game is finished"),
         }
     }
@@ -450,18 +459,33 @@ impl Game {
                     ))
                     .expect("the player should have all units to move")
                     .position;
-                can_move_units(
-                    self,
-                    player,
-                    &units,
-                    starting_position,
-                    destination,
-                    movement_actions_left,
-                    &moved_units,
-                )
-                .unwrap();
+                player
+                    .can_move_units(
+                        self,
+                        &units,
+                        starting_position,
+                        destination,
+                        movement_actions_left,
+                        &moved_units,
+                    )
+                    .expect("Illegal action");
                 moved_units.extend(units.iter());
-                self.move_units(player_index, units, destination);
+                self.move_units(player_index, &units, destination);
+                if let Some(defender) = self.enemy_player(player_index, destination) {
+                    for unit_id in units {
+                        let unit = self.players[player_index]
+                            .get_unit_mut(unit_id)
+                            .expect("the player should have all units to move");
+                        unit.position = starting_position;
+                    }
+                    self.initiate_combat(
+                        defender,
+                        destination,
+                        player_index,
+                        starting_position,
+                        true,
+                    );
+                }
                 self.state = if movement_actions_left > 1 {
                     Movement {
                         movement_actions_left: movement_actions_left - 1,
@@ -477,15 +501,15 @@ impl Game {
                 None
             }
         };
-        self.undo_context = UndoContext::Movement {
+        self.undo_context_stack.push(UndoContext::Movement {
             starting_position,
             movement_actions_left,
             moved_units,
-        };
+        });
     }
 
     fn undo_movement_action(&mut self, action: MovementAction, player_index: usize) {
-        let UndoContext::Movement { starting_position, movement_actions_left, moved_units } = mem::take(&mut self.undo_context) else {
+        let Some(UndoContext::Movement { starting_position, movement_actions_left, mut moved_units }) = self.undo_context_stack.pop() else {
             panic!("when undoing a movement action, the game should have stored movement context")
         };
         if let Move {
@@ -493,6 +517,9 @@ impl Game {
             destination: _,
         } = action
         {
+            if !units.is_empty() {
+                moved_units.drain(moved_units.len() - units.len()..);
+            }
             self.undo_move_units(
                 player_index,
                 units,
@@ -560,6 +587,12 @@ impl Game {
             target_city_position,
             &city_piece,
         );
+    }
+
+    fn enemy_player(&self, player_index: usize, position: Position) -> Option<usize> {
+        self.players.iter().position(|player| {
+            player.index != player_index && !player.get_units(position).is_empty()
+        })
     }
 
     pub fn add_to_last_log_item(&mut self, edit: &str) {
@@ -820,15 +853,15 @@ impl Game {
         let mut replaced_units_undo_context = Vec::new();
         for unit in replaced_units {
             let unit = player
-                .take_unit(unit)
+                .remove_unit(unit)
                 .expect("the player should have the replaced units");
             player.available_units += &unit.unit_type;
             replaced_units_undo_context.push(unit);
         }
-        self.undo_context = UndoContext::Recruit {
+        self.undo_context_stack.push(UndoContext::Recruit {
             replaced_units: replaced_units_undo_context,
             replaced_leader,
-        };
+        });
         for unit_type in units {
             player.available_units -= &unit_type;
             let city = player
@@ -888,10 +921,10 @@ impl Game {
             .get_city_mut(city_position)
             .expect("player should have a city a recruitment position")
             .undo_activate();
-        if let UndoContext::Recruit {
+        if let Some(UndoContext::Recruit {
             replaced_units,
             replaced_leader,
-        } = mem::take(&mut self.undo_context)
+        }) = self.undo_context_stack.pop()
         {
             for unit in replaced_units {
                 player.available_units -= &unit.unit_type;
@@ -1117,7 +1150,7 @@ impl Game {
         //todo every player draws 1 action card and 1 objective card
     }
 
-    fn move_units(&mut self, player_index: usize, units: Vec<u32>, destination: Position) {
+    fn move_units(&mut self, player_index: usize, units: &[u32], destination: Position) {
         let terrain = self
             .map
             .tiles
@@ -1126,7 +1159,7 @@ impl Game {
             .clone();
         for unit_id in units {
             let unit = self.players[player_index]
-                .get_unit_mut(unit_id)
+                .get_unit_mut(*unit_id)
                 .expect("the player should have all units to move");
             unit.position = destination;
             match terrain {
@@ -1168,6 +1201,127 @@ impl Game {
             };
         }
     }
+
+    fn initiate_combat(
+        &mut self,
+        defender: usize,
+        defender_position: Position,
+        attacker: usize,
+        attacker_position: Position,
+        can_retreat: bool,
+    ) {
+        let mut round = 1;
+        loop {
+            //todo: go into tactics phase if either player has tactics card (also if they can not play it unless otherwise specified via setting)
+            let attacker_units = self.players[attacker].get_units(attacker_position).len();
+            let mut attacker_roll = 0;
+            for _ in 0..attacker_units {
+                attacker_roll += self.get_next_dice_roll();
+                //todo: use dice roll unit icon
+            }
+            let attacker_hits = attacker_roll / 5;
+            let mut defender_roll = 0;
+            let defender_units = self.players[defender].get_units(defender_position).len();
+            for _ in 0..defender_units {
+                defender_roll += self.get_next_dice_roll();
+                //todo: use dice roll unit icon
+            }
+            let defender_hits = defender_roll / 5;
+            //todo: log dice rolls
+            if attacker_hits < defender_units as u8 && attacker_hits > 0 {
+                let state = mem::replace(&mut self.state, Playing);
+                self.state = Combat {
+                    initiation: Box::new(state),
+                    round,
+                    phase: RemoveCasualties {
+                        player: defender,
+                        casualties: attacker_hits,
+                        counter_hits: Some(defender_hits),
+                    },
+                    defender,
+                    defender_position,
+                    attacker,
+                    attacker_position,
+                    can_retreat,
+                };
+                return;
+            }
+            if attacker_hits >= defender_units as u8 {
+                let defender_units = self.players[defender]
+                    .get_units(defender_position)
+                    .iter()
+                    .map(|unit| unit.id)
+                    .collect::<Vec<u32>>();
+                for id in defender_units {
+                    self.players[defender].remove_unit(id);
+                    //todo if leader was killed, handle leader capture
+                }
+            }
+            if defender_hits < attacker_units as u8 && defender_hits > 0 {
+                let state = mem::replace(&mut self.state, Playing);
+                self.state = Combat {
+                    initiation: Box::new(state),
+                    round,
+                    phase: RemoveCasualties {
+                        player: attacker,
+                        casualties: defender_hits,
+                        counter_hits: None,
+                    },
+                    defender,
+                    defender_position,
+                    attacker,
+                    attacker_position,
+                    can_retreat,
+                };
+                return;
+            }
+            if defender_hits >= attacker_units as u8 {
+                let attacker_units = self.players[attacker]
+                    .get_units(attacker_position)
+                    .iter()
+                    .map(|unit| unit.id)
+                    .collect::<Vec<u32>>();
+                for id in attacker_units {
+                    self.players[attacker].remove_unit(id);
+                    //todo if leader was killed, handle leader capture
+                }
+            }
+            let attackers_left = self.players[attacker].get_units(attacker_position).len();
+            let defenders_left = self.players[defender].get_units(defender_position).len();
+            if attackers_left == 0 && defenders_left == 0 {
+                //todo if the defender has a fortress he wins
+                //todo otherwise: draw
+                return;
+            }
+            if attackers_left == 0 {
+                //todo defender wins
+                return;
+            }
+            if defenders_left == 0 {
+                //todo potentially capture city
+                for unit in self.players[attacker].get_units_mut(attacker_position) {
+                    unit.position = defender_position;
+                }
+                //todo attacker wins
+                return;
+            }
+            if can_retreat {
+                let state = mem::replace(&mut self.state, Playing);
+                self.state = Combat {
+                    initiation: Box::new(state),
+                    round,
+                    phase: Retreat,
+                    defender,
+                    defender_position,
+                    attacker,
+                    attacker_position,
+                    can_retreat: true,
+                };
+                return;
+            }
+            round += 1;
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -1192,7 +1346,7 @@ pub struct GameData {
     dropped_players: Vec<usize>,
     wonders_left: Vec<String>,
     wonder_amount_left: usize,
-    undo_context: UndoContext,
+    undo_context_stack: Vec<UndoContext>,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -1209,13 +1363,32 @@ pub enum GameState {
         target_city_position: Position,
         city_piece: Building,
     },
+    Combat {
+        initiation: Box<GameState>,
+        round: u32, //starts with one,
+        phase: CombatPhase,
+        defender: usize,
+        defender_position: Position,
+        attacker: usize,
+        attacker_position: Position,
+        can_retreat: bool,
+    },
     Finished,
 }
 
-#[derive(Serialize, Deserialize, Default, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub enum CombatPhase {
+    PlayActionCard(usize),
+    RemoveCasualties {
+        player: usize,
+        casualties: u8,
+        counter_hits: Option<u8>,
+    },
+    Retreat,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
 pub enum UndoContext {
-    #[default]
-    None,
     FoundCity {
         settler: Unit,
     },
@@ -1259,7 +1432,7 @@ pub mod tests {
         wonder::Wonder,
     };
 
-    use super::{Game, GameState::Playing, UndoContext};
+    use super::{Game, GameState::Playing};
 
     #[must_use]
     pub fn test_game() -> Game {
@@ -1288,7 +1461,7 @@ pub mod tests {
             dropped_players: Vec::new(),
             wonders_left: Vec::new(),
             wonder_amount_left: 0,
-            undo_context: UndoContext::None,
+            undo_context_stack: Vec::new(),
         }
     }
 

@@ -1,7 +1,7 @@
 use server::action::Action;
 use server::game::{Game, GameState};
 use server::position::Position;
-use server::unit::{can_move_units, MovementAction};
+use server::unit::MovementAction;
 
 use crate::ui_state::{ActiveDialog, StateUpdate};
 use crate::unit_ui;
@@ -47,16 +47,16 @@ fn possible_destinations(
             .copied()
             .filter(|dest| {
                 start != *dest
-                    && can_move_units(
-                        game,
-                        player,
-                        units,
-                        start,
-                        *dest,
-                        *movement_actions_left,
-                        moved_units,
-                    )
-                    .is_ok()
+                    && player
+                        .can_move_units(
+                            game,
+                            units,
+                            start,
+                            *dest,
+                            *movement_actions_left,
+                            moved_units,
+                        )
+                        .is_ok()
             })
             .collect::<Vec<_>>()
     } else {

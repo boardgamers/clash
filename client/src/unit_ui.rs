@@ -6,7 +6,7 @@ use macroquad::prelude::draw_text;
 
 use server::game::Game;
 use server::position::Position;
-use server::unit::{MovementRestriction, Unit, UnitType};
+use server::unit::{Unit, UnitType};
 
 use crate::dialog_ui::active_dialog_window;
 use crate::ui_state::{StateUpdate, StateUpdates};
@@ -164,10 +164,12 @@ pub fn name(u: &UnitType) -> &str {
 
 pub fn label(unit: &Unit) -> String {
     let name = name(&unit.unit_type);
-    let res = match unit.movement_restriction {
-        MovementRestriction::None => "",
-        MovementRestriction::AllMovement(_) => " (can't move)",
-        MovementRestriction::Attack(_) => " (can't attack)",
+    let res = if !unit.can_move() {
+        " (can't move) "
+    } else if !unit.can_attack() {
+        " (can't attack) "
+    } else {
+        ""
     };
 
     format!("{name}{res}")
