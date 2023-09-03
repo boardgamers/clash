@@ -8,6 +8,7 @@ use server::unit::UnitType;
 
 pub fn setup_local_game() -> Game {
     let mut game = Game::new(2, "a".repeat(32));
+    game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];
     let add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {
         game.recruit(
             player_index,
