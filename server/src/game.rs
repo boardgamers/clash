@@ -316,7 +316,7 @@ impl Game {
                 let action = action
                     .status_phase()
                     .expect("action should be a status phase action");
-                assert!(phase == action.phase, "Illegal action");
+                assert!(phase == action.phase(), "Illegal action");
                 self.add_action_log_item(ActionLogItem::StatusPhase(
                     serde_json::to_string(&action)
                         .expect("status phase action should be serializable"),

@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use StatusPhaseState::*;
 
 use crate::{
     advance::Advance,
@@ -11,54 +10,49 @@ use crate::{
 };
 
 #[derive(Serialize, Deserialize)]
-pub struct StatusPhaseAction {
-    pub data: String,
-    pub phase: StatusPhaseState,
+pub enum StatusPhaseAction {
+    CompleteObjectives(Vec<String>),
+    FreeAdvance(String),
+    RaseSize1City(Option<Position>),
+    ChangeGovernmentType(Option<String>),
+    DetermineFirstPlayer(usize),
 }
 
 impl StatusPhaseAction {
-    pub fn new(data: String, phase: StatusPhaseState) -> Self {
-        Self { data, phase }
+    pub fn phase(&self) -> StatusPhaseState {
+        match self {
+            StatusPhaseAction::CompleteObjectives(_) => StatusPhaseState::CompleteObjectives,
+            StatusPhaseAction::FreeAdvance(_) => StatusPhaseState::FreeAdvance,
+            StatusPhaseAction::RaseSize1City(_) => StatusPhaseState::RaseSize1City,
+            StatusPhaseAction::ChangeGovernmentType(_) => StatusPhaseState::ChangeGovernmentType,
+            StatusPhaseAction::DetermineFirstPlayer(_) => StatusPhaseState::DetermineFirstPlayer,
+        }
     }
 
     pub fn execute(self, game: &mut Game, player_index: usize) {
-        match self.phase {
-            StatusPhaseState::CompleteObjectives => {
-                let mut completed_objectives =
-                    serde_json::from_str::<CompleteObjectives>(&self.data)
-                        .expect("data should be valid complete objectives json")
-                        .objectives;
+        match self {
+            StatusPhaseAction::CompleteObjectives(ref completed_objectives) => {
                 //todo legality check
                 game.players[player_index]
                     .completed_objectives
-                    .append(&mut completed_objectives);
+                    .append(&mut completed_objectives.clone());
             }
-            StatusPhaseState::FreeAdvance => {
-                let advance = serde_json::from_str::<FreeAdvance>(&self.data)
-                    .expect("data should be valid free advance json")
-                    .advance;
+            StatusPhaseAction::FreeAdvance(ref advance) => {
                 assert!(
-                    game.players[player_index].can_advance_free(&advance),
+                    game.players[player_index].can_advance_free(advance),
                     "Illegal action"
                 );
-                game.advance(&advance, player_index);
+                game.advance(advance, player_index);
             }
-            StatusPhaseState::RaseSize1City => {
-                let city = serde_json::from_str::<RaseSize1City>(&self.data)
-                    .expect("data should be valid rase city json")
-                    .city;
-                if let Some(city) = city {
+            StatusPhaseAction::RaseSize1City(ref city) => {
+                if let Some(city) = *city {
                     game.raze_city(city, player_index);
                     game.players[player_index].gain_resources(ResourcePile::gold(1));
                 }
             }
-            StatusPhaseState::ChangeGovernmentType => {
-                let new_government_advance =
-                    serde_json::from_str::<ChangeGovernmentType>(&self.data)
-                        .expect("data should be valid change government type json")
-                        .new_government;
+            StatusPhaseAction::ChangeGovernmentType(ref new_government_advance) => {
                 if let Some(new_government) = new_government_advance {
-                    if !advances::get_leading_government_advance(&new_government)
+                    if !advances::get_leading_government_advance(new_government)
                         .expect("government should exist")
                         .required_advance
                         .is_some_and(|required_advance| {
@@ -78,28 +72,26 @@ impl StatusPhaseAction {
                                 game.players[player_index].has_advance(&advance.name)
                             })
                             .collect::<Vec<(usize, Advance)>>();
-                    let new_government_advances = advances::get_government(&new_government);
+                    let new_government_advances = advances::get_government(new_government);
                     for (tier, advance) in player_government_advances {
                         game.remove_advance(&advance.name, player_index);
                         game.advance(&new_government_advances[tier].name, player_index);
                     }
                 }
             }
-            StatusPhaseState::DetermineFirstPlayer => {
-                let player = serde_json::from_str::<DetermineFirstPlayer>(&self.data)
-                    .expect("data should be valid determine first player json")
-                    .player_index;
-                game.starting_player_index = player;
+            StatusPhaseAction::DetermineFirstPlayer(ref player) => {
+                game.starting_player_index = *player;
                 game.next_age();
                 return;
             }
         }
         game.next_player();
+        let phase = self.phase();
         if game.active_player() == game.starting_player_index {
-            next_phase(game, &self.phase);
+            next_phase(game, &phase);
             return;
         }
-        skip_status_phase_players(game, &self.phase);
+        skip_status_phase_players(game, &phase);
     }
 }
 
@@ -167,32 +159,8 @@ pub enum StatusPhaseState {
     DetermineFirstPlayer,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct CompleteObjectives {
-    pub objectives: Vec<String>,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct FreeAdvance {
-    pub advance: String,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct RaseSize1City {
-    pub city: Option<Position>,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct ChangeGovernmentType {
-    pub new_government: Option<String>,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct DetermineFirstPlayer {
-    pub player_index: usize,
-}
-
 pub fn next_status_phase(phase: &StatusPhaseState) -> StatusPhaseState {
+    use StatusPhaseState::*;
     match phase {
         CompleteObjectives => FreeAdvance,
         FreeAdvance => RaseSize1City,

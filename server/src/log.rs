@@ -11,10 +11,7 @@ use crate::{
     playing_actions::PlayingAction,
     position::Position,
     resource_pile::ResourcePile,
-    status_phase::{
-        ChangeGovernmentType, CompleteObjectives, DetermineFirstPlayer, FreeAdvance, RaseSize1City,
-        StatusPhaseAction, StatusPhaseState,
-    },
+    status_phase::StatusPhaseAction,
     unit::{MovementAction, Units},
     utils,
 };
@@ -153,26 +150,17 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
 
 fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) -> String {
     let player_name = game.players[game.active_player()].get_name();
-    match action.phase {
-        StatusPhaseState::CompleteObjectives => {
-            let completed_objectives = serde_json::from_str::<CompleteObjectives>(&action.data)
-                .expect("status phase data should match with it's phase")
-                .objectives;
+    match action {
+        StatusPhaseAction::CompleteObjectives(completed_objectives) => {
             format!(
                 "{player_name} completed {}",
-                utils::format_list(&completed_objectives, "no objectives")
+                utils::format_list(completed_objectives, "no objectives")
             )
         }
-        StatusPhaseState::FreeAdvance => {
-            let advance = serde_json::from_str::<FreeAdvance>(&action.data)
-                .expect("status phase data should match with it's phase")
-                .advance;
+        StatusPhaseAction::FreeAdvance(advance) => {
             format!("{player_name} advanced {advance}")
         }
-        StatusPhaseState::RaseSize1City => {
-            let city = serde_json::from_str::<RaseSize1City>(&action.data)
-                .expect("status phase data should match with it's phase")
-                .city;
+        StatusPhaseAction::RaseSize1City(city) => {
             format!(
                 "{player_name} {}",
                 match city {
@@ -181,10 +169,7 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
                 }
             )
         }
-        StatusPhaseState::ChangeGovernmentType => {
-            let new_government = serde_json::from_str::<ChangeGovernmentType>(&action.data)
-                .expect("status phase data should match with it's phase")
-                .new_government;
+        StatusPhaseAction::ChangeGovernmentType(new_government) => {
             format!(
                 "{player_name} {}",
                 match new_government {
@@ -193,7 +178,7 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
                         game.players[game.active_player()]
                             .government()
                             .expect("player should have a government before changing it"),
-                        advances::get_advance_by_name(&new_government_advance)
+                        advances::get_advance_by_name(new_government_advance)
                             .expect("new government advance should exist")
                             .government
                             .expect("advance should be a government advance")
@@ -202,17 +187,14 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
                 }
             )
         }
-        StatusPhaseState::DetermineFirstPlayer => {
-            let player_index = serde_json::from_str::<DetermineFirstPlayer>(&action.data)
-                .expect("status phase data should match with it's phase")
-                .player_index;
+        StatusPhaseAction::DetermineFirstPlayer(player_index) => {
             format!(
                 "{player_name} choose {}",
-                if player_index == game.starting_player_index {
+                if *player_index == game.starting_player_index {
                     format!(
                         "{} to remain the staring player",
-                        if player_index != game.active_player() {
-                            game.players[player_index].get_name()
+                        if *player_index != game.active_player() {
+                            game.players[*player_index].get_name()
                         } else {
                             String::new()
                         }
@@ -220,10 +202,10 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
                 } else {
                     format!(
                         "{} as the new starting player",
-                        if player_index == game.active_player() {
+                        if *player_index == game.active_player() {
                             String::from("himself")
                         } else {
-                            game.players[player_index].get_name()
+                            game.players[*player_index].get_name()
                         }
                     )
                 }
