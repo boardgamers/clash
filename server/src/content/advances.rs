@@ -137,6 +137,20 @@ pub fn get_all() -> Vec<Advance> {
         .with_required_advance("Math")
         .with_advance_bonus(CultureToken)
         .build(),
+
+        Advance::builder(
+            "TestGovernment - Democracy",
+            "TestGovernment1",
+        )
+        .leading_government_advance("Democracy")
+        .build(),
+
+        Advance::builder(
+            "TestGovernment - Theocracy",
+            "TestGovernment2",
+        )
+        .leading_government_advance("Theocracy")
+        .build(),
     ]
 }
 
