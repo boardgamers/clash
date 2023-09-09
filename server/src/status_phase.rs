@@ -19,6 +19,7 @@ pub enum StatusPhaseAction {
 }
 
 impl StatusPhaseAction {
+    #[must_use]
     pub fn phase(&self) -> StatusPhaseState {
         match self {
             StatusPhaseAction::CompleteObjectives(_) => StatusPhaseState::CompleteObjectives,
@@ -29,6 +30,8 @@ impl StatusPhaseAction {
         }
     }
 
+    /// # Panics
+    /// Panics if the action is not legal
     pub fn execute(self, game: &mut Game, player_index: usize) {
         match self {
             StatusPhaseAction::CompleteObjectives(ref completed_objectives) => {
@@ -86,17 +89,12 @@ impl StatusPhaseAction {
             }
         }
         game.next_player();
-        let phase = self.phase();
-        if game.active_player() == game.starting_player_index {
-            next_phase(game, &phase);
-            return;
-        }
-        skip_status_phase_players(game, &phase);
+        skip_status_phase_players(game);
     }
 }
 
-fn next_phase(game: &mut Game, phase: &StatusPhaseState) {
-    if let StatusPhaseState::FreeAdvance = phase {
+fn next_phase(game: &mut Game, phase: Option<StatusPhaseState>) -> StatusPhaseState {
+    if let Some(StatusPhaseState::FreeAdvance) = phase {
         //draw card phase
         game.draw_new_cards();
     }
@@ -109,18 +107,29 @@ fn next_phase(game: &mut Game, phase: &StatusPhaseState) {
         ));
     }
     game.state = StatusPhase(next_phase.clone());
-    skip_status_phase_players(game, &next_phase);
+    next_phase
 }
 
-fn skip_status_phase_players(game: &mut Game, phase: &StatusPhaseState) {
-    while game.active_player() != game.starting_player_index {
+/// # Panics
+/// Panics if the game state is not valid
+pub fn skip_status_phase_players(game: &mut Game) {
+    let mut phase = match game.state {
+        StatusPhase(ref phase) => Some(phase.clone()),
+        _ => None,
+    };
+
+    loop {
+        if game.active_player() == game.starting_player_index {
+            phase = Some(next_phase(game, phase));
+        }
+
         game.skip_dropped_players();
-        if !skip_player(game, game.active_player(), phase) {
+
+        if !skip_player(game, game.active_player(), phase.as_ref().unwrap()) {
             return;
         }
         game.increment_player_index();
     }
-    next_phase(game, phase);
 }
 
 fn skip_player(game: &Game, player_index: usize, state: &StatusPhaseState) -> bool {
@@ -159,16 +168,21 @@ pub enum StatusPhaseState {
     DetermineFirstPlayer,
 }
 
-pub fn next_status_phase(phase: &StatusPhaseState) -> StatusPhaseState {
+#[must_use]
+pub fn next_status_phase(phase: Option<StatusPhaseState>) -> StatusPhaseState {
     use StatusPhaseState::*;
-    match phase {
-        CompleteObjectives => FreeAdvance,
-        FreeAdvance => RaseSize1City,
-        RaseSize1City => ChangeGovernmentType,
-        ChangeGovernmentType => DetermineFirstPlayer,
-        DetermineFirstPlayer => {
-            unreachable!("function should return early with this action")
+    if let Some(phase) = phase {
+        match phase {
+            CompleteObjectives => FreeAdvance,
+            FreeAdvance => RaseSize1City,
+            RaseSize1City => ChangeGovernmentType,
+            ChangeGovernmentType => DetermineFirstPlayer,
+            DetermineFirstPlayer => {
+                unreachable!("function should return early with this action")
+            }
         }
+    } else {
+        CompleteObjectives
     }
 }
 

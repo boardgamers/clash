@@ -1,4 +1,4 @@
-use crate::advance_ui::{pay_advance_dialog, show_advance_menu};
+use crate::advance_ui::{pay_advance_dialog, show_advance_menu, show_free_advance_menu};
 use crate::city_ui::show_city_menu;
 use crate::collect_ui::{click_collect_option, collect_resources_dialog};
 use crate::construct_ui::pay_construction_dialog;
@@ -27,6 +27,8 @@ pub async fn run(game: &mut Game) {
     loop {
         let update = game_loop(game, &state);
         state.update(game, update);
+        state.active_dialog = state.update_after_execute(game);
+
         next_frame().await;
     }
 }
@@ -80,6 +82,7 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
         ActiveDialog::RecruitUnitSelection(s) => recruit_unit_ui::select_dialog(game, s),
         ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::replace_dialog(game, r),
         ActiveDialog::MoveUnits(s) => move_ui::move_units_dialog(game, s),
+        ActiveDialog::FreeAdvance => show_free_advance_menu(game, player_index),
     });
 
     updates.add(try_click(game, state, player_index));

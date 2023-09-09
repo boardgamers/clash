@@ -4,7 +4,10 @@ use crate::{civilization::Civilization, leader::Leader};
 #[rustfmt::skip]
 pub fn get_all() -> Vec<Civilization> {
     vec![
-        Civilization::new("test0", vec![], vec![]),
+        Civilization::new("test0", vec![], vec![
+            Leader::builder("Alexander", "", "", "", "").build(),
+            Leader::builder("Kleopatra", "", "", "", "").build(),
+        ]),
 
         Civilization::new("test1", vec![], vec![]),
     ]

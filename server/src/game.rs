@@ -1,7 +1,12 @@
-use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
-use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, mem};
 
+use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
+use serde::{Deserialize, Serialize};
+
+use CombatPhase::*;
+use GameState::*;
+
+use crate::status_phase::skip_status_phase_players;
 use crate::{
     action::Action,
     city::{City, MoodState::*},
@@ -15,7 +20,7 @@ use crate::{
     position::Position,
     resource_pile::ResourcePile,
     special_advance::SpecialAdvance,
-    status_phase::StatusPhaseState::{self, *},
+    status_phase::StatusPhaseState::{self},
     unit::{
         MovementAction::{self, *},
         Unit,
@@ -24,9 +29,6 @@ use crate::{
     utils,
     wonder::Wonder,
 };
-
-use CombatPhase::*;
-use GameState::*;
 
 pub struct Game {
     pub state: GameState,
@@ -158,11 +160,9 @@ impl Game {
             wonder_amount_left: data.wonder_amount_left,
             undo_context_stack: data.undo_context_stack,
         };
-        let mut players = Vec::new();
         for player in data.players {
-            players.push(Player::from_data(player, &mut game));
+            Player::initialize_player(player, &mut game);
         }
-        game.players = players;
         game
     }
 
@@ -765,11 +765,11 @@ impl Game {
         if self.players.iter().any(|player| player.cities.is_empty()) {
             self.end_game();
         }
-        self.state = StatusPhase(CompleteObjectives);
         self.add_info_log_item(format!(
             "The game has entered the {} status phase",
             utils::ordinal_number(self.age)
         ));
+        skip_status_phase_players(self);
     }
 
     pub fn next_age(&mut self) {

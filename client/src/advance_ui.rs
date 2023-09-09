@@ -15,6 +15,8 @@ use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::HasCountSelectableObject;
 use crate::ui_state::{can_play_action, StateUpdate, StateUpdates};
 use crate::ActiveDialog;
+use server::game::GameState;
+use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 #[derive(Clone)]
 pub struct AdvancePayment {
@@ -76,17 +78,40 @@ impl HasPayment for AdvancePayment {
 }
 
 pub fn show_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
+    show_generic_advance_menu(game, player_index, |name| {
+        StateUpdate::SetDialog(ActiveDialog::AdvancePayment(AdvancePayment::new(
+            game,
+            player_index,
+            &name,
+        )))
+    })
+}
+
+pub fn show_free_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
+    show_generic_advance_menu(game, player_index, |name| {
+        StateUpdate::Execute(Action::StatusPhase(StatusPhaseAction::FreeAdvance(name)))
+    })
+}
+
+pub fn show_generic_advance_menu(
+    game: &Game,
+    player_index: usize,
+    new_update: impl Fn(String) -> StateUpdate,
+) -> StateUpdate {
     let mut updates = StateUpdates::new();
 
     root_ui().window(hash!(), vec2(30., 910.), vec2(500., 200.), |ui| {
         for a in get_all() {
             let name = a.name;
             let p = game.get_player(player_index);
-            if can_play_action(game) && p.can_advance(&name) {
+            if can_play_action(game)
+                || matches!(
+                    game.state,
+                    GameState::StatusPhase(StatusPhaseState::FreeAdvance)
+                ) && p.can_advance(&name)
+            {
                 if ui.button(None, name.clone()) {
-                    return updates.add(StateUpdate::SetDialog(ActiveDialog::AdvancePayment(
-                        AdvancePayment::new(game, player_index, &name),
-                    )));
+                    updates.add(new_update(name));
                 }
             } else if p.advances.contains(&name) {
                 ui.label(None, &name);

@@ -12,6 +12,10 @@ use crate::{
 pub fn get_all() -> Vec<Advance> {
     vec![
         //Agriculture
+        Advance::builder(
+            "Farming",
+            "Your cities may Collect food from Grassland",
+        ).build(),
 
         Advance::builder(
             "Storage",
@@ -35,6 +39,10 @@ pub fn get_all() -> Vec<Advance> {
         .build(),
 
         //Construction
+        Advance::builder(
+            "Mining",
+            "Your cities may Collect ore from Mountain spaces",
+        ).build(),
 
         Advance::builder(
             "Engineering",
