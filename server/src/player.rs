@@ -66,7 +66,7 @@ pub struct Player {
 impl Clone for Player {
     fn clone(&self) -> Self {
         let data = self.cloned_data();
-        Self::from_data_uninitialized(data)
+        Self::from_data(data)
     }
 }
 
@@ -116,15 +116,12 @@ impl Player {
     /// # Panics
     ///
     /// Panics if elements like wonders or advances don't exist
-    pub fn from_data(data: PlayerData, game: &mut Game) -> Self {
-        let player = Self::from_data_uninitialized(data);
+    pub fn initialize_player(data: PlayerData, game: &mut Game) {
+        let player = Self::from_data(data);
         let player_index = player.index;
         game.players.push(player);
         let advances = mem::take(&mut game.players[player_index].advances);
         for advance in &advances {
-            if advance == "Farming" || advance == "Mining" {
-                continue;
-            }
             let advance = advances::get_advance_by_name(advance).expect("advance should exist");
             (advance.player_initializer)(game, player_index);
             for i in 0..game.players[player_index]
@@ -158,13 +155,11 @@ impl Player {
                 (wonder.player_initializer)(game, player_index);
             }
         }
-        let mut player = game.players.remove(player_index);
-        player.cities = cities;
-        player.advances = advances;
-        player
+        game.players[player_index].cities = cities;
+        game.players[player_index].advances = advances;
     }
 
-    fn from_data_uninitialized(data: PlayerData) -> Player {
+    fn from_data(data: PlayerData) -> Player {
         let player = Self {
             name: data.name,
             index: data.id,
@@ -560,6 +555,12 @@ impl Player {
                     .position(|city| city.position == position)?,
             ),
         )
+    }
+
+    #[must_use]
+    pub fn can_raze_city(&self, city_position: Position) -> bool {
+        self.get_city(city_position)
+            .is_some_and(|city| city.size() == 1)
     }
 
     ///

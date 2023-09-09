@@ -24,7 +24,7 @@ pub fn show_globals(game: &Game) {
     );
     let status = match game.state {
         GameState::Playing => String::from("Play Actions"),
-        GameState::StatusPhase(_) => String::from("Status Phase"),
+        GameState::StatusPhase(ref p) => format!("Status Phase: {p:?}"),
         GameState::Movement { .. } => String::from("Movement"),
         GameState::CulturalInfluenceResolution { .. } => {
             String::from("Cultural Influence Resolution")

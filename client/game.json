@@ -8,7 +8,7 @@
         "food": 2,
         "wood": 7,
         "ore": 7,
-        "ideas": 5,
+        "ideas": 7,
         "gold": 7,
         "mood_tokens": 7,
         "culture_tokens": 7
@@ -34,7 +34,7 @@
             "temple": null,
             "wonders": []
           },
-          "mood_state": "Neutral",
+          "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
@@ -55,9 +55,9 @@
             "temple": null,
             "wonders": []
           },
-          "mood_state": "Angry",
-          "activations": 7,
-          "angry_activation": true,
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
           "player_index": 0,
           "position": {
             "q": 2,
@@ -143,6 +143,17 @@
           "movement_restriction": "None",
           "transporter_position": null,
           "id": 6
+        },
+        {
+          "player_index": 0,
+          "position": {
+            "q": 2,
+            "r": 0
+          },
+          "unit_type": "Settler",
+          "movement_restriction": "None",
+          "transporter_position": null,
+          "id": 7
         }
       ],
       "civilization": "test0",
@@ -150,17 +161,16 @@
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Mining",
-        "Tactics"
+        "Mining"
       ],
       "unlocked_special_advance": [],
       "wonders": [],
       "wonders_build": 0,
       "leader_position": null,
-      "game_event_tokens": 2,
+      "game_event_tokens": 3,
       "influenced_buildings": 0,
       "completed_objectives": [],
-      "defeated_leaders": [],
+      "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
       "available_settlements": 7,
@@ -174,7 +184,7 @@
         "temples": 5
       },
       "available_units": {
-        "settlers": 1,
+        "settlers": 0,
         "infantry": 15,
         "ships": 4,
         "cavalry": 3,
@@ -183,12 +193,12 @@
       },
       "collect_options": [
         [
-          "Mountain",
+          "Fertile",
           [
             {
-              "food": 0,
+              "food": 1,
               "wood": 0,
-              "ore": 1,
+              "ore": 0,
               "ideas": 0,
               "gold": 0,
               "mood_tokens": 0,
@@ -211,12 +221,12 @@
           ]
         ],
         [
-          "Fertile",
+          "Mountain",
           [
             {
-              "food": 1,
+              "food": 0,
               "wood": 0,
-              "ore": 0,
+              "ore": 1,
               "ideas": 0,
               "gold": 0,
               "mood_tokens": 0,
@@ -225,7 +235,7 @@
           ]
         ]
       ],
-      "next_unit_id": 7
+      "next_unit_id": 8
     },
     {
       "name": null,
@@ -261,7 +271,7 @@
             "wonders": []
           },
           "mood_state": "Angry",
-          "activations": 2,
+          "activations": 0,
           "angry_activation": false,
           "player_index": 1,
           "position": {
@@ -309,7 +319,7 @@
       "game_event_tokens": 3,
       "influenced_buildings": 0,
       "completed_objectives": [],
-      "defeated_leaders": [],
+      "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
       "available_settlements": 7,
@@ -331,20 +341,6 @@
         "leaders": 1
       },
       "collect_options": [
-        [
-          "Fertile",
-          [
-            {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
         [
           "Forest",
           [
@@ -372,6 +368,20 @@
               "culture_tokens": 0
             }
           ]
+        ],
+        [
+          "Fertile",
+          [
+            {
+              "food": 1,
+              "wood": 0,
+              "ore": 0,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
+            }
+          ]
         ]
       ],
       "next_unit_id": 2
@@ -381,10 +391,17 @@
     "tiles": [
       [
         {
-          "q": 0,
+          "q": 3,
           "r": 0
         },
-        "Fertile"
+        "Water"
+      ],
+      [
+        {
+          "q": 2,
+          "r": -1
+        },
+        "Barren"
       ],
       [
         {
@@ -403,13 +420,6 @@
       [
         {
           "q": 1,
-          "r": 1
-        },
-        "Forest"
-      ],
-      [
-        {
-          "q": 1,
           "r": 2
         },
         "Fertile"
@@ -417,16 +427,16 @@
       [
         {
           "q": 2,
-          "r": 1
+          "r": 0
         },
-        "Water"
+        "Forest"
       ],
       [
         {
-          "q": 2,
-          "r": -1
+          "q": 0,
+          "r": 0
         },
-        "Barren"
+        "Fertile"
       ],
       [
         {
@@ -438,243 +448,76 @@
       [
         {
           "q": 2,
-          "r": 0
+          "r": 1
         },
-        "Forest"
+        "Water"
       ],
       [
         {
-          "q": 3,
-          "r": 0
+          "q": 1,
+          "r": 1
         },
-        "Water"
+        "Forest"
       ]
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 0,
+  "current_player_index": 1,
   "action_log": [
     {
-      "Playing": "{\"Advance\":{\"advance\":\"Tactics\",\"payment\":{\"food\":0,\"wood\":0,\"ore\":0,\"ideas\":2,\"gold\":0,\"mood_tokens\":0,\"culture_tokens\":0}}}"
+      "Playing": "\"EndTurn\""
+    },
+    {
+      "Playing": "\"EndTurn\""
+    },
+    {
+      "Playing": "\"EndTurn\""
+    },
+    {
+      "Playing": "\"EndTurn\""
+    },
+    {
+      "Playing": "\"EndTurn\""
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 5,
   "log": [
     "The game has started",
     "Age 1 has started",
     "Round 1/3",
-    "Player1 payed 2 ideas to get the Tactics advance"
+    "Player1 ended his turn with 3 actions left",
+    "It's Player2's turn",
+    "Player2 ended his turn with 3 actions left",
+    "It's Player1's turn",
+    "Round 2/3",
+    "Player1 ended his turn with 3 actions left",
+    "It's Player2's turn",
+    "Player2 ended his turn with 3 actions left",
+    "It's Player1's turn",
+    "Round 3/3",
+    "Player1 ended his turn with 3 actions left",
+    "It's Player2's turn"
   ],
-  "undo_limit": 0,
+  "undo_limit": 5,
   "played_once_per_turn_actions": [],
-  "actions_left": 2,
+  "actions_left": 3,
   "successful_cultural_influence": false,
-  "round": 1,
+  "round": 3,
   "age": 1,
   "messages": [
     "The game has started"
   ],
   "dice_roll_outcomes": [
-    11,
-    10,
-    9,
-    11,
-    4,
-    8,
-    5,
-    10,
-    2,
-    3,
-    10,
-    5,
-    5,
-    7,
-    8,
-    2,
-    3,
-    6,
-    4,
-    4,
-    5,
-    1,
-    2,
-    12,
-    4,
-    10,
-    7,
-    10,
-    4,
-    1,
-    7,
-    11,
-    6,
-    4,
-    3,
-    1,
-    11,
-    12,
-    2,
-    2,
-    2,
-    2,
-    11,
-    3,
     1,
     1,
     10,
     10,
-    6,
-    8,
-    1,
-    3,
-    3,
-    5,
-    3,
-    12,
-    6,
-    4,
-    9,
-    6,
-    3,
-    10,
-    9,
-    10,
-    8,
-    8,
-    2,
-    8,
-    9,
-    10,
-    12,
-    3,
-    12,
-    11,
-    11,
-    8,
-    12,
-    11,
-    4,
-    8,
-    9,
-    1,
-    12,
-    10,
-    9,
-    11,
-    4,
-    7,
-    3,
-    7,
-    11,
-    1,
-    10,
-    2,
-    10,
-    2,
-    3,
-    7,
-    5,
-    4,
-    1,
-    5,
-    11,
-    9,
-    11,
-    8,
-    4,
-    6,
-    9,
-    7,
-    11,
-    8,
-    4,
-    9,
-    3,
     10,
     10,
-    9,
-    6,
-    8,
-    3,
-    11,
-    12,
-    4,
-    2,
-    3,
-    8,
-    12,
-    8,
-    7,
-    12,
-    6,
-    1,
-    7,
-    10,
-    2,
-    6,
-    12,
-    3,
-    11,
-    4,
-    1,
-    10,
-    1,
-    8,
-    4,
-    3,
-    8,
-    10,
-    8,
-    7,
-    1,
-    10,
-    6,
-    10,
-    6,
     10,
     10,
-    5,
-    7,
-    3,
-    7,
-    11,
-    7,
-    5,
-    12,
-    1,
-    2,
-    3,
-    3,
-    3,
-    11,
-    7,
-    12,
-    11,
-    9,
-    9,
-    2,
-    2,
-    1,
     10,
-    6,
-    9,
-    8,
-    10,
-    10,
-    11,
-    6,
-    5,
-    10,
-    1,
-    12,
-    10,
-    8,
-    1,
-    11,
-    11,
-    8,
-    8,
-    2
+    10
   ],
   "dice_roll_log": [],
   "dropped_players": [],
@@ -682,10 +525,66 @@
     "X"
   ],
   "wonder_amount_left": 1,
-  "undo_context": {
-    "Recruit": {
-      "replaced_units": [],
-      "replaced_leader": null
+  "undo_context_stack": [
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
     }
-  }
+  ]
 }

@@ -7,6 +7,7 @@ use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
+use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 use crate::advance_ui::AdvancePayment;
 use crate::collect_ui::CollectResources;
@@ -22,6 +23,8 @@ pub enum ActiveDialog {
     RecruitUnitSelection(RecruitAmount),
     ReplaceUnits(RecruitSelection),
     MoveUnits(MoveSelection),
+    FreeAdvance,
+    RaseSize1City,
 }
 
 pub struct PendingUpdate {
@@ -72,6 +75,10 @@ impl StateUpdate {
         } else {
             StateUpdate::execute_with_warning(action, warning)
         }
+    }
+
+    pub fn status_phase(action: StatusPhaseAction) -> StateUpdate {
+        StateUpdate::Execute(Action::StatusPhase(action))
     }
 }
 
@@ -203,6 +210,34 @@ impl State {
                 self.focused_tile = Some(f);
             }
         }
+    }
+
+    pub fn update_after_execute(&mut self, game: &mut Game) -> ActiveDialog {
+        match &game.state {
+            GameState::Movement {
+                movement_actions_left: _,
+                moved_units: _,
+            } => ActiveDialog::MoveUnits(MoveSelection::new(game.active_player())),
+            GameState::StatusPhase(state) => {
+                match state {
+                    StatusPhaseState::CompleteObjectives => self
+                        .execute_status_phase(game, StatusPhaseAction::CompleteObjectives(vec![])),
+                    StatusPhaseState::FreeAdvance => ActiveDialog::FreeAdvance,
+                    StatusPhaseState::RaseSize1City => ActiveDialog::RaseSize1City,
+                    StatusPhaseState::ChangeGovernmentType => self
+                        .execute_status_phase(game, StatusPhaseAction::ChangeGovernmentType(None)), // todo(gregor)
+                    StatusPhaseState::DetermineFirstPlayer => {
+                        self.execute_status_phase(game, StatusPhaseAction::DetermineFirstPlayer(0))
+                    } // todo(gregor)
+                }
+            }
+            _ => ActiveDialog::None,
+        }
+    }
+
+    fn execute_status_phase(&mut self, game: &mut Game, action: StatusPhaseAction) -> ActiveDialog {
+        self.update(game, StateUpdate::status_phase(action));
+        ActiveDialog::None
     }
 
     pub fn execute(&mut self, game: &mut Game, a: Action) {

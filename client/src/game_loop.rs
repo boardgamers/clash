@@ -1,4 +1,4 @@
-use crate::advance_ui::{pay_advance_dialog, show_advance_menu};
+use crate::advance_ui::{pay_advance_dialog, show_advance_menu, show_free_advance_menu};
 use crate::city_ui::show_city_menu;
 use crate::collect_ui::{click_collect_option, collect_resources_dialog};
 use crate::construct_ui::pay_construction_dialog;
@@ -15,6 +15,7 @@ use macroquad::prelude::{clear_background, next_frame, set_fullscreen, vec2, WHI
 use macroquad::ui::root_ui;
 use server::game::{Game, GameData};
 use server::position::Position;
+use server::status_phase::StatusPhaseAction;
 use std::fs::File;
 use std::io::BufReader;
 
@@ -27,6 +28,8 @@ pub async fn run(game: &mut Game) {
     loop {
         let update = game_loop(game, &state);
         state.update(game, update);
+        state.active_dialog = state.update_after_execute(game);
+
         next_frame().await;
     }
 }
@@ -80,6 +83,8 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
         ActiveDialog::RecruitUnitSelection(s) => recruit_unit_ui::select_dialog(game, s),
         ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::replace_dialog(game, r),
         ActiveDialog::MoveUnits(s) => move_ui::move_units_dialog(game, s),
+        ActiveDialog::FreeAdvance => show_free_advance_menu(game, player_index),
+        ActiveDialog::RaseSize1City => city_ui::raze_city_dialog(),
     });
 
     updates.add(try_click(game, state, player_index));
@@ -128,6 +133,13 @@ pub fn try_click(game: &Game, state: &State, player_index: usize) -> StateUpdate
             ActiveDialog::MoveUnits(s) => move_ui::click(pos, s),
             ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::click_replace(pos, r),
             ActiveDialog::CollectResources(col) => click_collect_option(col, pos),
+            ActiveDialog::RaseSize1City => {
+                if game.players[player_index].can_raze_city(pos) {
+                    StateUpdate::status_phase(StatusPhaseAction::RaseSize1City(Some(pos)))
+                } else {
+                    StateUpdate::None
+                }
+            }
             _ => {
                 if let Some(c) = game.get_any_city(pos) {
                     city_ui::city_click(state, game.get_player(player_index), c)

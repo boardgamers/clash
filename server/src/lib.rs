@@ -30,7 +30,7 @@ pub mod playing_actions;
 pub mod position;
 pub mod resource_pile;
 mod special_advance;
-mod status_phase;
+pub mod status_phase;
 pub mod unit;
 mod utils;
 mod wonder;

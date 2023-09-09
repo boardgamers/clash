@@ -62,6 +62,13 @@ pub fn draw_map(game: &Game, state: &State) {
                     1.0
                 }
             }
+            ActiveDialog::RaseSize1City => {
+                if game.players[game.active_player()].can_raze_city(*pos) {
+                    0.5
+                } else {
+                    1.0
+                }
+            }
             _ => {
                 if state
                     .focused_tile
