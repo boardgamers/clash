@@ -49,6 +49,10 @@ impl StatusPhaseAction {
             }
             StatusPhaseAction::RaseSize1City(ref city) => {
                 if let Some(city) = *city {
+                    assert!(
+                        game.players[player_index].can_raze_city(city),
+                        "Illegal action"
+                    );
                     game.raze_city(city, player_index);
                     game.players[player_index].gain_resources(ResourcePile::gold(1));
                 }
