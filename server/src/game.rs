@@ -238,7 +238,7 @@ impl Game {
     /// # Panics
     ///
     /// Panics if the city does not exist
-    /// 
+    ///
     /// if you want to get an option instead, use `Player::get_city` function
     #[must_use]
     pub fn get_city(&self, player_index: usize, position: Position) -> &City {
@@ -379,9 +379,19 @@ impl Game {
                 movement_actions_left,
                 moved_units,
             } => {
-                let action = action.place_settler().expect("action should be place_settler action");
-                self.add_action_log_item(ActionLogItem::PlaceSettler(serde_json::to_string(&action).expect("place settler action should be serializable")));
-                self.execute_place_settler_action(action, player_index, movement_actions_left, moved_units);
+                let action = action
+                    .place_settler()
+                    .expect("action should be place_settler action");
+                self.add_action_log_item(ActionLogItem::PlaceSettler(
+                    serde_json::to_string(&action)
+                        .expect("place settler action should be serializable"),
+                ));
+                self.execute_place_settler_action(
+                    action,
+                    player_index,
+                    movement_actions_left,
+                    moved_units,
+                );
             }
             Finished => panic!("actions can't be executed when the game is finished"),
         }
@@ -641,14 +651,23 @@ impl Game {
         );
     }
 
-    fn execute_place_settler_action(&mut self, action: Position, player_index: usize, movement_actions_left: u32, moved_units: Vec<u32>) {
+    fn execute_place_settler_action(
+        &mut self,
+        action: Position,
+        player_index: usize,
+        movement_actions_left: u32,
+        moved_units: Vec<u32>,
+    ) {
         let player = &mut self.players[player_index];
         assert!(player.get_city(action).is_some(), "Illegal action");
         player.add_unit(action, Settler);
         self.state = if movement_actions_left == 0 {
             Playing
         } else {
-            Movement { movement_actions_left, moved_units }
+            Movement {
+                movement_actions_left,
+                moved_units,
+            }
         };
     }
 
@@ -967,13 +986,13 @@ impl Game {
         player.units.reserve_exact(units.len());
         for unit_type in units {
             let city = player
-            .get_city(city_position)
-            .expect("player should have a city at the recruitment position");
+                .get_city(city_position)
+                .expect("player should have a city at the recruitment position");
             let position = match &unit_type {
                 Ship => {
                     ships.push(player.next_unit_id);
                     city.port_position
-                    .expect("there should be a port in the city")
+                        .expect("there should be a port in the city")
                 }
                 _ => city_position,
             };
@@ -1177,10 +1196,23 @@ impl Game {
         } else {
             new_player.gain_resources(ResourcePile::gold(city.size() as i32));
         }
-        self.players[old_player_index].available_settlements += 1;
-        let state = mem::replace(&mut self.state, Playing);
-        let Movement { movement_actions_left, moved_units } = state else { panic!("conquering a city should only happen in a movement action") };
-        self.state = PlaceSettler { player_index: old_player_index, movement_actions_left: movement_actions_left - 1, moved_units };
+        let old_player = &mut self.players[old_player_index];
+        old_player.available_settlements += 1;
+        if old_player.available_units.settlers > 0 && !old_player.cities.is_empty() {
+            let state = mem::replace(&mut self.state, Playing);
+            let Movement {
+                movement_actions_left,
+                moved_units,
+            } = state
+            else {
+                panic!("conquering a city should only happen in a movement action")
+            };
+            self.state = PlaceSettler {
+                player_index: old_player_index,
+                movement_actions_left: movement_actions_left - 1,
+                moved_units,
+            };
+        }
     }
 
     ///
