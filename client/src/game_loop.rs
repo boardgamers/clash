@@ -32,7 +32,7 @@ pub async fn run(game: &mut Game) {
 }
 
 fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
-    let player_index = game.current_player_index;
+    let player_index = game.active_player();
     clear_background(WHITE);
 
     draw_map(game, state);

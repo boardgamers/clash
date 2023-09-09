@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::playing_actions::PlayingAction;
+use crate::position::Position;
 use crate::status_phase::StatusPhaseAction;
 use crate::unit::MovementAction;
 
@@ -11,6 +12,7 @@ pub enum Action {
     Movement(MovementAction),
     CulturalInfluenceResolution(bool),
     Combat(CombatAction),
+    PlaceSettler(Position),
     Undo,
     Redo,
 }

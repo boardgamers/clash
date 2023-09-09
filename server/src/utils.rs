@@ -1,5 +1,5 @@
-pub fn format_list(list: &Vec<String>, empty_message: &str) -> String {
-    match &list[..] {
+pub fn format_list(list: &[String], empty_message: &str) -> String {
+    match list {
         [] => empty_message.to_string(),
         [element] => element.clone(),
         _ => format!(

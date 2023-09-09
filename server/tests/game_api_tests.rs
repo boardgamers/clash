@@ -94,7 +94,7 @@ fn basic_actions() {
     let game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
 
     assert_eq!(3, game.actions_left);
-    assert_eq!(0, game.current_player_index);
+    assert_eq!(0, game.active_player());
 
     let increase_happiness_action = Action::Playing(IncreaseHappiness {
         happiness_increases: vec![(city_position, 1)],
@@ -204,8 +204,8 @@ fn basic_actions() {
 #[test]
 fn cultural_influence() {
     let mut game = game_api::init(2, String::new());
-    game.dice_roll_outcomes = vec![6, 4, 5, 3, 7];
-    game.current_player_index = 0;
+    game.dice_roll_outcomes = vec![10, 6, 8, 4];
+    game.set_player_index(0);
     game.players[0].gain_resources(ResourcePile::culture_tokens(4));
     game.players[1].gain_resources(ResourcePile::culture_tokens(1));
     let city0position = Position::new(0, 0);
@@ -214,15 +214,6 @@ fn cultural_influence() {
     game.players[0].cities.push(City::new(0, city0position));
     game.players[1].cities.push(City::new(1, city1position));
     game.players[1].construct(&Building::Academy, city1position, None);
-    let influence_action = Action::Playing(InfluenceCultureAttempt {
-        starting_city_position: city0position,
-        target_player_index: 1,
-        target_city_position: city1position,
-        city_piece: Building::Academy,
-    });
-    let game = game_api::execute_action(game, influence_action, 0);
-    assert!(!game.players[1].cities[0].influenced());
-    assert_eq!(game.state, Playing);
     let influence_action = Action::Playing(InfluenceCultureAttempt {
         starting_city_position: city0position,
         target_player_index: 1,
@@ -256,7 +247,7 @@ fn cultural_influence() {
     assert_eq!(game.state, Playing);
     assert!(game.successful_cultural_influence);
     let game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
-    assert_eq!(game.current_player_index, 1);
+    assert_eq!(game.active_player(), 1);
     let influence_action = Action::Playing(InfluenceCultureAttempt {
         starting_city_position: city1position,
         target_player_index: 1,

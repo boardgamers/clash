@@ -170,7 +170,7 @@ impl State {
                 {
                     if movement_actions_left > 0 {
                         self.active_dialog =
-                            ActiveDialog::MoveUnits(MoveSelection::new(game.current_player_index));
+                            ActiveDialog::MoveUnits(MoveSelection::new(game.active_player()));
                     }
                 }
             }
@@ -211,7 +211,7 @@ impl State {
                 self.clear();
             }
         }
-        game.execute_action(a, game.current_player_index);
+        game.execute_action(a, game.active_player());
         self.active_dialog = ActiveDialog::None;
     }
 }

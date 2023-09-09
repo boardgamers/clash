@@ -9,6 +9,7 @@ use crate::{
     game::Game,
     map::Terrain,
     playing_actions::PlayingAction,
+    position::Position,
     resource_pile::ResourcePile,
     status_phase::{
         ChangeGovernmentType, CompleteObjectives, DetermineFirstPlayer, FreeAdvance, RaseSize1City,
@@ -24,6 +25,8 @@ pub enum ActionLogItem {
     StatusPhase(String),
     Movement(String),
     CulturalInfluenceResolution(String),
+    Combat(String),
+    PlaceSettler(String),
 }
 
 impl ActionLogItem {
@@ -48,6 +51,8 @@ impl ActionLogItem {
             Self::StatusPhase(action) => Action::StatusPhase(serde_json::from_str::<StatusPhaseAction>(action).expect("data should be a serialized status phase action")),
             Self::Movement(action) => Action::Movement(serde_json::from_str::<MovementAction>(action).expect("data should be a serialized movement action")),
             Self::CulturalInfluenceResolution(action) => Action::CulturalInfluenceResolution(serde_json::from_str::<bool>(action).expect("data should be a serialized boolean representing cultural influence resolution confirmation action")),
+            Self::Combat(action) => Action::Combat(serde_json::from_str::<CombatAction>(action).expect("data should be a serialized combat action")),
+            Self::PlaceSettler(action) => Action::PlaceSettler(serde_json::from_str::<Position>(action).expect("data should be a serialized place settler action")),
         }
     }
 }
@@ -72,11 +77,12 @@ pub fn format_action_log_item(action: &Action, game: &Game) -> String {
         Action::Playing(action) => format_playing_action_log_item(action, game),
         Action::StatusPhase(action) => format_status_phase_action_log_item(action, game),
         Action::Movement(action) => format_movement_action_log_item(action, game),
-        Action::CulturalInfluenceResolution(action) => format!("{} {}", game.players[game.current_player_index].get_name(), match action {
-            true => format!("payed {} culture tokens to increased the dice roll and proceed with the cultural influence", game.dice_roll_log.last().expect("there should have been at least one dice roll before a cultural influence resolution action")),
+        Action::CulturalInfluenceResolution(action) => format!("{} {}", game.players[game.active_player()].get_name(), match action {
+            true => format!("payed {} culture tokens to increased the dice roll and proceed with the cultural influence", game.dice_roll_log.last().expect("there should have been at least one dice roll before a cultural influence resolution action") / 2 + 1),
             false => String::from("declined to increase the dice roll"),
         }),
         Action::Combat(action) => format_combat_action_log_item(action, game),
+        Action::PlaceSettler(position) => format!("{} placed a settler in the city at {position}", game.players[game.state.settler_placer().expect("the game should be in the place settler state")].get_name()),
         Action::Undo | Action::Redo => {
             panic!("undoing or redoing actions should not be written to the log")
         }
@@ -84,7 +90,7 @@ pub fn format_action_log_item(action: &Action, game: &Game) -> String {
 }
 
 fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String {
-    let player = &game.players[game.current_player_index];
+    let player = &game.players[game.active_player()];
     let player_name = player.get_name();
     match action {
         PlayingAction::Advance { advance, payment } => format!("{player_name} payed {payment} to get the {advance} advance"),
@@ -100,13 +106,13 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             format!(" and chooses to get {temple_bonus}")
         } else { String::new() }),
         PlayingAction::Collect { city_position, collections } => format!("{player_name} collects {}{} in the city at {city_position}{}", utils::format_list(&collections.iter().map(|(_, collection)| collection.to_string()).collect::<Vec<String>>(), "nothing"), if collections.len() > 1 && collections.iter().permutations(2).unique().any(|permutation| permutation[0].1.has_common_resource(&permutation[1].1)) { format!(" for a total of {}", collections.iter().map(|(_, collection)| collection.clone()).sum::<ResourcePile>()) } else { String::new() }, if player.get_city(*city_position).expect("there should be a city at the given position").is_activated() { format!(" making it {:?}", player.get_city(*city_position).expect("there should be a city at the given position").mood_state.clone() - 1) } else { String::new() }),
-        PlayingAction::Recruit { units, city_position, payment, leader_index, replaced_units } => format!("{player_name} payed {payment} to recruit {}{} in the city at {city_position}{}{}", units.iter().cloned().collect::<Units>(), leader_index.map_or(String::new(), |leader_index| format!(" {} {} as his leader", if player.available_leaders.len() > 1 { "choosing" } else { "getting" }, &player.available_leaders[leader_index].name)), if player.get_city(*city_position).expect("there should be a city at the given position").is_activated() { format!(" making it {:?}", player.get_city(*city_position).expect("there should be a city at the given position").mood_state.clone() - 1) } else { String::new() }, format_args!("{}{}", match replaced_units.len() { 0 => "", 1 => " and replaces the unit at ", _ => " and replaces units at " }, utils::format_list(&replaced_units.iter().map(|unit_id| player.get_unit(*unit_id).expect("the player should have the replaced units").position.to_string()).unique().collect(), ""))),
+        PlayingAction::Recruit { units, city_position, payment, leader_index, replaced_units } => format!("{player_name} payed {payment} to recruit {}{} in the city at {city_position}{}{}", units.iter().cloned().collect::<Units>(), leader_index.map_or(String::new(), |leader_index| format!(" {} {} as his leader", if player.available_leaders.len() > 1 { "choosing" } else { "getting" }, &player.available_leaders[leader_index].name)), if player.get_city(*city_position).expect("there should be a city at the given position").is_activated() { format!(" making it {:?}", player.get_city(*city_position).expect("there should be a city at the given position").mood_state.clone() - 1) } else { String::new() }, format_args!("{}{}", match replaced_units.len() { 0 => "", 1 => " and replaces the unit at ", _ => " and replaces units at " }, utils::format_list(&replaced_units.iter().map(|unit_id| player.get_unit(*unit_id).expect("the player should have the replaced units").position.to_string()).unique().collect::<Vec<String>>(), ""))),
         PlayingAction::MoveUnits => format!("{player_name} used a move units action"),
         PlayingAction::IncreaseHappiness { happiness_increases } => {
             let happiness_increases = happiness_increases.iter().filter_map(|(position, steps)| if *steps > 0 { Some(format!("the city at {position} by {steps} steps, making it {:?}", player.get_city(*position).expect("player should have a city at this position").mood_state.clone() + *steps)) } else { None }).collect::<Vec<String>>();
             format!("{player_name} increased happiness in {}", utils::format_list(&happiness_increases, "no city"))
         },
-        PlayingAction::InfluenceCultureAttempt { starting_city_position, target_player_index, target_city_position, city_piece } => format!("{player_name} tried to influence culture the {city_piece:?} in the city at {target_city_position} by {}{}", if target_player_index == &game.current_player_index { String::from("himself")} else { game.players[*target_player_index].get_name() }, if starting_city_position != target_city_position { format!(" with the city at {starting_city_position}")} else { String::new() }),
+        PlayingAction::InfluenceCultureAttempt { starting_city_position, target_player_index, target_city_position, city_piece } => format!("{player_name} tried to influence culture the {city_piece:?} in the city at {target_city_position} by {}{}", if target_player_index == &game.active_player() { String::from("himself")} else { game.players[*target_player_index].get_name() }, if starting_city_position != target_city_position { format!(" with the city at {starting_city_position}")} else { String::new() }),
         PlayingAction::Custom(action) => action.format_log_item(game, &player_name),
         PlayingAction::EndTurn => format!("{player_name} ended his turn{}", match game.actions_left {
             0 => String::new(),
@@ -116,7 +122,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
 }
 
 fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> String {
-    let player = &game.players[game.current_player_index];
+    let player = &game.players[game.active_player()];
     let player_name = player.get_name();
     match action {
         MovementAction::Move {
@@ -146,7 +152,7 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
 }
 
 fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) -> String {
-    let player_name = game.players[game.current_player_index].get_name();
+    let player_name = game.players[game.active_player()].get_name();
     match action.phase {
         StatusPhaseState::CompleteObjectives => {
             let completed_objectives = serde_json::from_str::<CompleteObjectives>(&action.data)
@@ -184,7 +190,7 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
                 match new_government {
                     Some(new_government_advance) => format!(
                         "changed his government from {} to {}",
-                        game.players[game.current_player_index]
+                        game.players[game.active_player()]
                             .government()
                             .expect("player should have a government before changing it"),
                         advances::get_advance_by_name(&new_government_advance)
@@ -205,7 +211,7 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
                 if player_index == game.starting_player_index {
                     format!(
                         "{} to remain the staring player",
-                        if player_index != game.current_player_index {
+                        if player_index != game.active_player() {
                             game.players[player_index].get_name()
                         } else {
                             String::new()
@@ -214,7 +220,7 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
                 } else {
                     format!(
                         "{} as the new starting player",
-                        if player_index == game.current_player_index {
+                        if player_index == game.active_player() {
                             String::from("himself")
                         } else {
                             game.players[player_index].get_name()
@@ -227,7 +233,7 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
 }
 
 fn format_combat_action_log_item(action: &CombatAction, game: &Game) -> String {
-    let player = &game.players[game.current_player_index];
+    let player = &game.players[game.active_player()];
     let player_name = player.get_name();
     match action {
         CombatAction::PlayActionCard(card) => format!(

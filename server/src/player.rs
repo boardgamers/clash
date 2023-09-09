@@ -14,7 +14,7 @@ use crate::{
     civilization::Civilization,
     consts::{
         ADVANCE_COST, ADVANCE_VICTORY_POINTS, ARMY_MOVEMENT_REQUIRED_ADVANCE,
-        BUILDING_VICTORY_POINTS, CITY_PIECE_LIMIT, CONSTRUCT_COST, DEFEATED_LEADER_VICTORY_POINTS,
+        BUILDING_VICTORY_POINTS, CAPTURED_LEADER_VICTORY_POINTS, CITY_PIECE_LIMIT, CONSTRUCT_COST,
         OBJECTIVE_VICTORY_POINTS, SETTLEMENT_LIMIT, STACK_LIMIT, UNIT_LIMIT, WONDER_VICTORY_POINTS,
     },
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
@@ -52,7 +52,7 @@ pub struct Player {
     pub influenced_buildings: u32,
     pub game_event_tokens: u8,
     pub completed_objectives: Vec<String>,
-    pub defeated_leaders: Vec<String>,
+    pub captured_leaders: Vec<String>,
     pub event_victory_points: f32,
     pub custom_actions: HashSet<CustomActionType>,
     pub wonder_cards: Vec<Wonder>,
@@ -98,7 +98,7 @@ impl PartialEq for Player {
             && self.game_event_tokens == other.game_event_tokens
             && self.influenced_buildings == other.influenced_buildings
             && self.completed_objectives == other.completed_objectives
-            && self.defeated_leaders == other.defeated_leaders
+            && self.captured_leaders == other.captured_leaders
             && self.event_victory_points == other.event_victory_points
             && self
                 .wonder_cards
@@ -195,7 +195,7 @@ impl Player {
             game_event_tokens: data.game_event_tokens,
             influenced_buildings: data.influenced_buildings,
             completed_objectives: data.completed_objectives,
-            defeated_leaders: data.defeated_leaders,
+            captured_leaders: data.captured_leaders,
             event_victory_points: data.event_victory_points,
             custom_actions: HashSet::new(),
             wonder_cards: data
@@ -243,7 +243,7 @@ impl Player {
             game_event_tokens: self.game_event_tokens,
             influenced_buildings: self.influenced_buildings,
             completed_objectives: self.completed_objectives,
-            defeated_leaders: self.defeated_leaders,
+            captured_leaders: self.captured_leaders,
             event_victory_points: self.event_victory_points,
             wonder_cards: self
                 .wonder_cards
@@ -288,7 +288,7 @@ impl Player {
             game_event_tokens: self.game_event_tokens,
             influenced_buildings: self.influenced_buildings,
             completed_objectives: self.completed_objectives.clone(),
-            defeated_leaders: self.defeated_leaders.clone(),
+            captured_leaders: self.captured_leaders.clone(),
             event_victory_points: self.event_victory_points,
             wonder_cards: self
                 .wonder_cards
@@ -328,7 +328,7 @@ impl Player {
             game_event_tokens: 3,
             influenced_buildings: 0,
             completed_objectives: Vec::new(),
-            defeated_leaders: Vec::new(),
+            captured_leaders: Vec::new(),
             event_victory_points: 0.0,
             custom_actions: HashSet::new(),
             wonder_cards: Vec::new(),
@@ -440,7 +440,7 @@ impl Player {
         victory_points += self.wonders.len() as f32 * WONDER_VICTORY_POINTS / 2.0;
         victory_points += self.wonders_build as f32 * WONDER_VICTORY_POINTS / 2.0;
         victory_points += self.event_victory_points;
-        victory_points += self.defeated_leaders.len() as f32 * DEFEATED_LEADER_VICTORY_POINTS;
+        victory_points += self.captured_leaders.len() as f32 * CAPTURED_LEADER_VICTORY_POINTS;
         victory_points
     }
 
@@ -720,6 +720,10 @@ impl Player {
     /// # Errors
     ///
     /// Will return `Err` if the unit cannot move to the destination.
+    ///
+    /// # Panics
+    ///
+    /// Panics if destination tile does not exist
     pub fn can_move_units(
         &self,
         game: &Game,
@@ -856,7 +860,7 @@ pub struct PlayerData {
     game_event_tokens: u8,
     influenced_buildings: u32,
     completed_objectives: Vec<String>,
-    defeated_leaders: Vec<String>,
+    captured_leaders: Vec<String>,
     event_victory_points: f32,
     wonder_cards: Vec<String>,
     available_settlements: u8,
