@@ -62,6 +62,15 @@ impl Action {
             None
         }
     }
+
+    #[must_use]
+    pub fn place_settler(self) -> Option<Position> {
+        if let Self::PlaceSettler(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize)]
