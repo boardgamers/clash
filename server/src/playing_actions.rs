@@ -212,7 +212,7 @@ impl PlayingAction {
                 let self_influence = starting_city_position == target_city_position;
 
                 game.players[player_index].loose_resources(range_boost_cost);
-                let roll = game.get_next_dice_roll();
+                let roll = game.get_next_dice_value();
                 let success = roll == 5 || roll == 6;
                 if success {
                     game.influence_culture(
@@ -285,7 +285,7 @@ impl PlayingAction {
             }
             FoundCity { settler: _ } => {
                 let settler = game.undo_context_stack.pop();
-                let Some(UndoContext::FoundCity{settler}) = settler else {
+                let Some(UndoContext::FoundCity { settler }) = settler else {
                     panic!("Settler context should be stored in undo context");
                 };
                 let player = &mut game.players[player_index];

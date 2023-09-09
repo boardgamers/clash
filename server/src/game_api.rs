@@ -43,7 +43,7 @@ pub fn drop_player(mut game: Game, player_index: usize) -> Game {
 pub fn current_player(game: &Game) -> Option<usize> {
     match game.state {
         Finished => None,
-        _ => Some(game.current_player_index),
+        _ => Some(game.active_player()),
     }
 }
 

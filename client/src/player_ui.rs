@@ -16,7 +16,7 @@ pub fn show_globals(game: &Game) {
     draw_text(&format!("Age {}", game.age), 600., 20., 20., BLACK);
     draw_text(&format!("Round {}", game.round), 600., 50., 20., BLACK);
     draw_text(
-        &format!("Player {}", game.current_player_index),
+        &format!("Player {}", game.active_player()),
         600.,
         80.,
         20.,
@@ -30,6 +30,7 @@ pub fn show_globals(game: &Game) {
             String::from("Cultural Influence Resolution")
         }
         GameState::Combat { .. } => String::from("Combat"),
+        GameState::PlaceSettler { .. } => String::from("Place Settler"),
         GameState::Finished => String::from("Finished"),
     };
     draw_text(&status, 600., 110., 20., BLACK);

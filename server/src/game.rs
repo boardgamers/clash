@@ -4,8 +4,8 @@ use std::{collections::HashMap, mem};
 
 use crate::{
     action::Action,
-    city::City,
-    city_pieces::Building,
+    city::{City, MoodState::*},
+    city_pieces::Building::{self, *},
     consts::{AGES, DICE_ROLL_BUFFER},
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     log::{self, ActionLogItem},
@@ -33,7 +33,7 @@ pub struct Game {
     pub players: Vec<Player>,
     pub map: Map,
     pub starting_player_index: usize,
-    pub current_player_index: usize,
+    current_player_index: usize,
     pub action_log: Vec<ActionLogItem>,
     pub action_log_index: usize,
     pub log: Vec<String>,
@@ -82,7 +82,7 @@ impl Game {
         let starting_player = rng.gen_range(0..players.len());
         let mut dice_roll_outcomes = Vec::new();
         for _ in 0..DICE_ROLL_BUFFER {
-            dice_roll_outcomes.push(rng.gen_range(1..=12));
+            dice_roll_outcomes.push(rng.gen_range(0..12));
         }
 
         let mut wonders = wonders::get_all();
@@ -368,8 +368,18 @@ impl Game {
                 defender_position: _,
                 attacker: _,
                 attacker_position: _,
+                attackers: _,
                 can_retreat: _,
-            } => {}
+            } => {
+                todo!()
+            }
+            PlaceSettler {
+                player_index: _,
+                movement_actions_left: _,
+                moved_units: _,
+            } => {
+                todo!()
+            }
             Finished => panic!("actions can't be executed when the game is finished"),
         }
     }
@@ -380,6 +390,8 @@ impl Game {
             ActionLogItem::StatusPhase(_) => panic!("status phase actions can't be undone"),
             ActionLogItem::Movement(action) => self.undo_movement_action(serde_json::from_str::<MovementAction>(action).expect("log item variant of type movement action should contain a serialized movement action"), player_index),
             ActionLogItem::CulturalInfluenceResolution(action) => self.undo_cultural_influence_resolution_action(serde_json::from_str::<bool>(action).expect("cultural influence resolution log item should contain a serialized boolean representing the confirmation action")),
+            ActionLogItem::Combat(_action) => unimplemented!("retreat can't yet be undone"),
+            ActionLogItem::PlaceSettler(_action) => panic!(""),
         }
         self.action_log_index -= 1;
         self.log.remove(self.log.len() - 1);
@@ -399,8 +411,14 @@ impl Game {
             ActionLogItem::Movement(action) => {
                 let action = serde_json::from_str::<MovementAction>(action)
                     .expect("movement action should be deserializable");
-                let Movement { movement_actions_left, moved_units } = &self.state else {
-                    panic!("movement actions can only be redone if the game is in a movement state")
+                let Movement {
+                    movement_actions_left,
+                    moved_units,
+                } = &self.state
+                else {
+                    panic!(
+                        "movement actions can only be redone if the game is in a movement state"
+                    );
                 };
                 self.execute_movement_action(
                     action,
@@ -429,6 +447,8 @@ impl Game {
                     player_index,
                 );
             }
+            ActionLogItem::Combat(_action) => (),
+            ActionLogItem::PlaceSettler(_action) => (),
         }
         self.action_log_index += 1;
     }
@@ -472,19 +492,42 @@ impl Game {
                 moved_units.extend(units.iter());
                 self.move_units(player_index, &units, destination);
                 if let Some(defender) = self.enemy_player(player_index, destination) {
-                    for unit_id in units {
-                        let unit = self.players[player_index]
-                            .get_unit_mut(unit_id)
-                            .expect("the player should have all units to move");
-                        unit.position = starting_position;
+                    if self.players[defender]
+                        .get_units(destination)
+                        .iter()
+                        .any(|unit| !unit.unit_type.is_settler())
+                    {
+                        for unit_id in &units {
+                            let unit = self.players[player_index]
+                                .get_unit_mut(*unit_id)
+                                .expect("the player should have all units to move");
+                            unit.position = starting_position;
+                        }
+                        self.initiate_combat(
+                            defender,
+                            destination,
+                            player_index,
+                            starting_position,
+                            units,
+                            true,
+                        );
                     }
-                    self.initiate_combat(
-                        defender,
-                        destination,
-                        player_index,
-                        starting_position,
-                        true,
-                    );
+                }
+                if !self.players[player_index].get_units(destination).is_empty() {
+                    for enemy in 0..self.players.len() {
+                        if enemy == player_index {
+                            continue;
+                        }
+                        let captured_settlers = self.players[enemy]
+                            .get_units(destination)
+                            .iter()
+                            .map(|unit| unit.id)
+                            .collect::<Vec<u32>>();
+                        for id in captured_settlers {
+                            self.players[enemy].remove_unit(id);
+                        }
+                        self.conquer_city(destination, player_index, enemy);
+                    }
                 }
                 self.state = if movement_actions_left > 1 {
                     Movement {
@@ -509,7 +552,12 @@ impl Game {
     }
 
     fn undo_movement_action(&mut self, action: MovementAction, player_index: usize) {
-        let Some(UndoContext::Movement { starting_position, movement_actions_left, mut moved_units }) = self.undo_context_stack.pop() else {
+        let Some(UndoContext::Movement {
+            starting_position,
+            movement_actions_left,
+            mut moved_units,
+        }) = self.undo_context_stack.pop()
+        else {
             panic!("when undoing a movement action, the game should have stored movement context")
         };
         if let Move {
@@ -568,12 +616,13 @@ impl Game {
         else {
             panic!("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
         };
-        let roll = self
-            .dice_roll_log
-            .last()
-            .expect("there should be a dice roll before a cultural influence resolution action");
+        let roll =
+            self.dice_roll_log.last().expect(
+                "there should be a dice roll before a cultural influence resolution action",
+            ) / 2
+                + 1;
         self.state = CulturalInfluenceResolution {
-            roll_boost_cost: 5 - *roll as u32,
+            roll_boost_cost: 5 - roll as u32,
             target_player_index,
             target_city_position,
             city_piece: city_piece.clone(),
@@ -601,8 +650,7 @@ impl Game {
     }
 
     pub fn next_player(&mut self) {
-        self.current_player_index += 1;
-        self.current_player_index %= self.players.len();
+        self.increment_player_index();
         self.add_info_log_item(format!(
             "It's {}'s turn",
             self.players[self.current_player_index].get_name()
@@ -617,8 +665,43 @@ impl Game {
         while self.dropped_players.contains(&self.current_player_index)
             && self.current_player_index != self.starting_player_index
         {
-            self.current_player_index += 1;
-            self.current_player_index %= self.players.len();
+            self.increment_player_index();
+        }
+    }
+
+    pub fn increment_player_index(&mut self) {
+        self.current_player_index += 1;
+        self.current_player_index %= self.players.len();
+    }
+
+    #[must_use]
+    pub fn active_player(&self) -> usize {
+        match &self.state {
+            Combat {
+                initiation: _,
+                round: _,
+                phase,
+                defender: _,
+                defender_position: _,
+                attacker,
+                attacker_position: _,
+                attackers: _,
+                can_retreat: _,
+            } => match phase {
+                RemoveCasualties {
+                    player,
+                    casualties: _,
+                    counter_hits: _,
+                }
+                | PlayActionCard(player) => *player,
+                Retreat => *attacker,
+            },
+            PlaceSettler {
+                player_index,
+                movement_actions_left: _,
+                moved_units: _,
+            } => *player_index,
+            _ => self.current_player_index,
         }
     }
 
@@ -686,10 +769,14 @@ impl Game {
         self.lock_undo();
         let dice_roll = self.dice_roll_outcomes.pop().unwrap_or_else(|| {
             println!("ran out of predetermined dice roll outcomes, unseeded rng is no being used");
-            rand::thread_rng().gen_range(1..=12)
+            rand::thread_rng().gen_range(0..12)
         });
         self.dice_roll_log.push(dice_roll);
         dice_roll
+    }
+
+    pub fn get_next_dice_value(&mut self) -> u8 {
+        self.get_next_dice_roll() / 2 + 1
     }
 
     fn add_message(&mut self, message: &str) {
@@ -862,15 +949,19 @@ impl Game {
             replaced_units: replaced_units_undo_context,
             replaced_leader,
         });
+        let mut ships = Vec::new();
+        player.units.reserve_exact(units.len());
         for unit_type in units {
             player.available_units -= &unit_type;
             let city = player
                 .get_city(city_position)
                 .expect("player should have a city at the recruitment position");
             let position = match &unit_type {
-                Ship => city
-                    .port_position
-                    .expect("there should be a port in the city"),
+                Ship => {
+                    ships.push(player.next_unit_id);
+                    city.port_position
+                        .expect("there should be a port in the city")
+                }
                 _ => city_position,
             };
             let unit = Unit::new(player_index, position, unit_type, player.next_unit_id);
@@ -881,7 +972,25 @@ impl Game {
             .get_city_mut(city_position)
             .expect("player should have a city at the recruitment position");
         city.activate();
-        //todo if there are enemy ships at the port and ships are being build a battle starts
+        if !ships.is_empty() {
+            let port_position = self.players[player_index]
+                .get_city(city_position)
+                .and_then(|city| city.port_position)
+                .expect("there should be a port");
+            if let Some(defender) = self.enemy_player(player_index, port_position) {
+                for ship in self.players[player_index].get_units_mut(port_position) {
+                    ship.position = city_position;
+                }
+                self.initiate_combat(
+                    defender,
+                    port_position,
+                    player_index,
+                    city_position,
+                    ships,
+                    false,
+                );
+            }
+        }
     }
 
     ///
@@ -990,12 +1099,74 @@ impl Game {
         new_player_index: usize,
         old_player_index: usize,
     ) {
-        self.players[old_player_index]
-            .take_city(position)
-            .expect("player should own city")
-            .conquer(self, new_player_index, old_player_index);
+        let Some(mut city) = self.players[old_player_index].take_city(position) else {
+            return;
+        };
+        self.players[new_player_index]
+            .gain_resources(ResourcePile::gold(city.mood_modified_size() as i32));
+        let settlements_left = self.players[new_player_index].available_settlements > 0;
+        if settlements_left {
+            for wonder in &city.pieces.wonders {
+                (wonder.player_deinitializer)(self, old_player_index);
+                (wonder.player_initializer)(self, new_player_index);
+            }
+        }
+        city.player_index = new_player_index;
+        city.mood_state = Angry;
+        for wonder in &city.pieces.wonders {
+            self.players[old_player_index].remove_wonder(wonder);
+            if settlements_left {
+                self.players[new_player_index]
+                    .wonders
+                    .push(wonder.name.clone());
+            }
+        }
+        if let Some(player) = &city.pieces.obelisk {
+            if player == &old_player_index {
+                self.players[old_player_index].influenced_buildings += 1;
+            }
+        }
+        let previously_influenced_building =
+            city.pieces.buildings(Some(new_player_index)).len() as u32;
+        for (building, owner) in city.pieces.building_owners() {
+            if matches!(building, Obelisk) {
+                if !settlements_left {
+                    self.players[old_player_index].available_buildings += &building;
+                    self.players[old_player_index].influenced_buildings -= 1;
+                }
+                continue;
+            }
+            let Some(owner) = owner else {
+                continue;
+            };
+            if owner != old_player_index {
+                if !settlements_left {
+                    self.players[owner].available_buildings += &building;
+                    self.players[owner].influenced_buildings -= 1;
+                }
+                continue;
+            }
+            city.pieces.set_building(&building, new_player_index);
+            self.players[old_player_index].available_buildings += &building;
+            if self.players[new_player_index]
+                .available_buildings
+                .can_build(&building)
+            {
+                self.players[new_player_index].available_buildings -= &building;
+            } else {
+                city.pieces.remove_building(&building);
+                self.players[new_player_index].gain_resources(ResourcePile::gold(1));
+            }
+        }
+        let new_player = &mut self.players[new_player_index];
+        new_player.influenced_buildings -= previously_influenced_building;
+        if settlements_left {
+            new_player.cities.push(city);
+            new_player.available_settlements -= 1;
+        } else {
+            new_player.gain_resources(ResourcePile::gold(city.size() as i32));
+        }
         self.players[old_player_index].available_settlements += 1;
-        self.players[new_player_index].available_settlements -= 1;
     }
 
     ///
@@ -1208,22 +1379,36 @@ impl Game {
         defender_position: Position,
         attacker: usize,
         attacker_position: Position,
+        mut attackers: Vec<u32>,
         can_retreat: bool,
     ) {
         let mut round = 1;
         loop {
+            self.add_info_log_item(format!("\nRound {round}"));
             //todo: go into tactics phase if either player has tactics card (also if they can not play it unless otherwise specified via setting)
-            let attacker_units = self.players[attacker].get_units(attacker_position).len();
             let mut attacker_roll = 0;
-            for _ in 0..attacker_units {
-                attacker_roll += self.get_next_dice_roll();
+            for unit in &attackers {
+                let unit = &self.players[attacker]
+                    .get_unit(*unit)
+                    .expect("attacker should have all attacking units")
+                    .unit_type;
+                if unit.is_settler() {
+                    continue;
+                }
+                let dice_roll = self.get_next_dice_roll();
+                attacker_roll += dice_roll / 2 + 1;
                 //todo: use dice roll unit icon
             }
             let attacker_hits = attacker_roll / 5;
             let mut defender_roll = 0;
             let defender_units = self.players[defender].get_units(defender_position).len();
-            for _ in 0..defender_units {
-                defender_roll += self.get_next_dice_roll();
+            for unit in 0..defender_units {
+                let unit = self.players[defender].get_units(defender_position)[unit];
+                if unit.unit_type.is_settler() {
+                    continue;
+                }
+                let dice_roll = self.get_next_dice_roll();
+                defender_roll += dice_roll / 2 + 1;
                 //todo: use dice roll unit icon
             }
             let defender_hits = defender_roll / 5;
@@ -1242,6 +1427,7 @@ impl Game {
                     defender_position,
                     attacker,
                     attacker_position,
+                    attackers,
                     can_retreat,
                 };
                 return;
@@ -1253,11 +1439,10 @@ impl Game {
                     .map(|unit| unit.id)
                     .collect::<Vec<u32>>();
                 for id in defender_units {
-                    self.players[defender].remove_unit(id);
-                    //todo if leader was killed, handle leader capture
+                    self.kill_unit(id, defender, attacker);
                 }
             }
-            if defender_hits < attacker_units as u8 && defender_hits > 0 {
+            if defender_hits < attackers.len() as u8 && defender_hits > 0 {
                 let state = mem::replace(&mut self.state, Playing);
                 self.state = Combat {
                     initiation: Box::new(state),
@@ -1271,35 +1456,32 @@ impl Game {
                     defender_position,
                     attacker,
                     attacker_position,
+                    attackers,
                     can_retreat,
                 };
                 return;
             }
-            if defender_hits >= attacker_units as u8 {
-                let attacker_units = self.players[attacker]
-                    .get_units(attacker_position)
-                    .iter()
-                    .map(|unit| unit.id)
-                    .collect::<Vec<u32>>();
-                for id in attacker_units {
-                    self.players[attacker].remove_unit(id);
-                    //todo if leader was killed, handle leader capture
+            if defender_hits >= attackers.len() as u8 {
+                for id in mem::take(&mut attackers) {
+                    self.kill_unit(id, attacker, defender);
                 }
             }
-            let attackers_left = self.players[attacker].get_units(attacker_position).len();
             let defenders_left = self.players[defender].get_units(defender_position).len();
-            if attackers_left == 0 && defenders_left == 0 {
+            if attackers.is_empty() && defenders_left == 0 {
                 //todo if the defender has a fortress he wins
                 //todo otherwise: draw
                 return;
             }
-            if attackers_left == 0 {
+            if attackers.is_empty() {
                 //todo defender wins
                 return;
             }
             if defenders_left == 0 {
                 //todo potentially capture city
-                for unit in self.players[attacker].get_units_mut(attacker_position) {
+                for unit in attackers {
+                    let unit = self.players[attacker]
+                        .get_unit_mut(unit)
+                        .expect("attacker should have all attacking units");
                     unit.position = defender_position;
                 }
                 //todo attacker wins
@@ -1315,12 +1497,30 @@ impl Game {
                     defender_position,
                     attacker,
                     attacker_position,
+                    attackers,
                     can_retreat: true,
                 };
                 return;
             }
             round += 1;
         }
+    }
+
+    fn kill_unit(&mut self, unit_id: u32, player_index: usize, killer: usize) {
+        if let Some(unit) = self.players[player_index].remove_unit(unit_id) {
+            if matches!(unit.unit_type, Leader) {
+                let leader = self.players[player_index]
+                    .active_leader
+                    .take()
+                    .expect("A player should have an active leader when having a leader unit");
+                (leader.player_deinitializer)(self, player_index);
+                self.players[killer].captured_leaders.push(leader.name);
+            }
+        }
+    }
+
+    pub fn set_player_index(&mut self, current_player_index: usize) {
+        self.current_player_index = current_player_index;
     }
 }
 
@@ -1371,9 +1571,29 @@ pub enum GameState {
         defender_position: Position,
         attacker: usize,
         attacker_position: Position,
+        attackers: Vec<u32>,
         can_retreat: bool,
     },
+    PlaceSettler {
+        player_index: usize,
+        movement_actions_left: u32,
+        moved_units: Vec<u32>,
+    },
     Finished,
+}
+
+impl GameState {
+    #[must_use]
+    pub fn settler_placer(&self) -> Option<usize> {
+        match self {
+            PlaceSettler {
+                player_index,
+                movement_actions_left: _,
+                moved_units: _,
+            } => Some(*player_index),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

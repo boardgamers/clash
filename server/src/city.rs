@@ -2,7 +2,6 @@ use std::ops::{Add, Sub};
 
 use serde::{Deserialize, Serialize};
 
-use crate::city_pieces::Building::*;
 use crate::consts::MAX_CITY_SIZE;
 use crate::resource_pile::ResourcePile;
 use crate::{
@@ -164,45 +163,6 @@ impl City {
             return placement_requirement(self.position, game);
         }
         true
-    }
-
-    pub fn conquer(mut self, game: &mut Game, new_player_index: usize, old_player_index: usize) {
-        for wonder in &self.pieces.wonders {
-            (wonder.player_deinitializer)(game, old_player_index);
-            (wonder.player_initializer)(game, new_player_index);
-        }
-        self.player_index = new_player_index;
-        self.mood_state = Angry;
-        for wonder in &self.pieces.wonders {
-            game.players[old_player_index].remove_wonder(wonder);
-            game.players[new_player_index]
-                .wonders
-                .push(wonder.name.clone());
-        }
-        if let Some(player) = &self.pieces.obelisk {
-            if player == &old_player_index {
-                game.players[old_player_index].influenced_buildings += 1;
-            }
-        }
-        let previously_influenced_building =
-            self.pieces.buildings(Some(new_player_index)).len() as u32;
-        for (building, owner) in self.pieces.building_owners() {
-            if matches!(building, Obelisk) {
-                continue;
-            }
-            let Some(owner) = owner else {
-                continue;
-            };
-            if owner != old_player_index {
-                continue;
-            }
-            self.pieces.set_building(&building, new_player_index);
-            game.players[old_player_index].available_buildings += &building;
-            game.players[new_player_index].available_buildings -= &building;
-        }
-        let new_player = &mut game.players[new_player_index];
-        new_player.influenced_buildings -= previously_influenced_building;
-        new_player.cities.push(self);
     }
 
     ///

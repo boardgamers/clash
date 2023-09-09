@@ -95,7 +95,7 @@ impl StatusPhaseAction {
             }
         }
         game.next_player();
-        if game.current_player_index == game.starting_player_index {
+        if game.active_player() == game.starting_player_index {
             next_phase(game, &self.phase);
             return;
         }
@@ -110,24 +110,23 @@ fn next_phase(game: &mut Game, phase: &StatusPhaseState) {
     }
     let next_phase = next_status_phase(phase);
     if let StatusPhaseState::DetermineFirstPlayer = next_phase {
-        game.current_player_index = player_that_chooses_next_first_player(
+        game.set_player_index(player_that_chooses_next_first_player(
             &game.players,
             game.starting_player_index,
             &game.dropped_players,
-        );
+        ));
     }
     game.state = StatusPhase(next_phase.clone());
     skip_status_phase_players(game, &next_phase);
 }
 
 fn skip_status_phase_players(game: &mut Game, phase: &StatusPhaseState) {
-    while game.current_player_index != game.starting_player_index {
+    while game.active_player() != game.starting_player_index {
         game.skip_dropped_players();
-        if !skip_player(game, game.current_player_index, phase) {
+        if !skip_player(game, game.active_player(), phase) {
             return;
         }
-        game.current_player_index += 1;
-        game.current_player_index %= game.players.len();
+        game.increment_player_index();
     }
     next_phase(game, phase);
 }
