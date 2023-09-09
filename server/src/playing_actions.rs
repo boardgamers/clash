@@ -224,7 +224,7 @@ impl PlayingAction {
                     game.add_to_last_log_item(&format!(" and succeeded (rolled {roll})"));
                     return;
                 }
-                if roll > 6 || self_influence {
+                if self_influence {
                     game.add_to_last_log_item(&format!(" and failed (rolled {roll})"));
                     return;
                 }
