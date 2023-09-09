@@ -186,6 +186,8 @@ pub fn next_status_phase(phase: Option<StatusPhaseState>) -> StatusPhaseState {
     }
 }
 
+/// # Panics
+/// Panics if the game state is not valid
 pub fn player_that_chooses_next_first_player(
     players: &Vec<Player>,
     current_start_player_index: usize,

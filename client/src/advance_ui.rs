@@ -89,7 +89,7 @@ pub fn show_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
 
 pub fn show_free_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
     show_generic_advance_menu(game, player_index, |name| {
-        StateUpdate::Execute(Action::StatusPhase(StatusPhaseAction::FreeAdvance(name)))
+        StateUpdate::status_phase(StatusPhaseAction::FreeAdvance(name))
     })
 }
 

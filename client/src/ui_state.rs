@@ -24,6 +24,7 @@ pub enum ActiveDialog {
     ReplaceUnits(RecruitSelection),
     MoveUnits(MoveSelection),
     FreeAdvance,
+    RaseSize1City,
 }
 
 pub struct PendingUpdate {
@@ -74,6 +75,10 @@ impl StateUpdate {
         } else {
             StateUpdate::execute_with_warning(action, warning)
         }
+    }
+
+    pub fn status_phase(action: StatusPhaseAction) -> StateUpdate {
+        StateUpdate::Execute(Action::StatusPhase(action))
     }
 }
 
@@ -218,9 +223,7 @@ impl State {
                     StatusPhaseState::CompleteObjectives => self
                         .execute_status_phase(game, StatusPhaseAction::CompleteObjectives(vec![])),
                     StatusPhaseState::FreeAdvance => ActiveDialog::FreeAdvance,
-                    StatusPhaseState::RaseSize1City => {
-                        self.execute_status_phase(game, StatusPhaseAction::RaseSize1City(None))
-                    } //todo(gregor)
+                    StatusPhaseState::RaseSize1City => ActiveDialog::RaseSize1City,
                     StatusPhaseState::ChangeGovernmentType => self
                         .execute_status_phase(game, StatusPhaseAction::ChangeGovernmentType(None)), // todo(gregor)
                     StatusPhaseState::DetermineFirstPlayer => {
@@ -228,13 +231,12 @@ impl State {
                     } // todo(gregor)
                 }
             }
-            // todo(gregor) also for cultural influence resolution
             _ => ActiveDialog::None,
         }
     }
 
     fn execute_status_phase(&mut self, game: &mut Game, action: StatusPhaseAction) -> ActiveDialog {
-        self.update(game, StateUpdate::Execute(Action::StatusPhase(action)));
+        self.update(game, StateUpdate::status_phase(action));
         ActiveDialog::None
     }
 
