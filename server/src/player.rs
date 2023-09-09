@@ -717,6 +717,13 @@ impl Player {
         true
     }
 
+    pub fn add_unit(&mut self, position: Position, unit_type: UnitType) {
+        self.available_units -= &unit_type;
+        let unit = Unit::new(self.index, position, unit_type, self.next_unit_id);
+        self.units.push(unit);
+        self.next_unit_id += 1;
+    }
+
     /// # Errors
     ///
     /// Will return `Err` if the unit cannot move to the destination.

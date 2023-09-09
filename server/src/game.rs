@@ -238,6 +238,7 @@ impl Game {
     /// # Panics
     ///
     /// Panics if the city does not exist
+    ///
     /// if you want to get an option instead, use `Player::get_city` function
     #[must_use]
     pub fn get_city(&self, player_index: usize, position: Position) -> &City {
@@ -276,7 +277,7 @@ impl Game {
     ///
     /// Panics if the action is illegal
     pub fn execute_action(&mut self, action: Action, player_index: usize) {
-        assert!(player_index == self.current_player_index, "Illegal action");
+        assert!(player_index == self.active_player(), "Illegal action");
         if let Action::Undo = action {
             assert!(
                 self.can_undo(),
@@ -374,11 +375,23 @@ impl Game {
                 todo!()
             }
             PlaceSettler {
-                player_index: _,
-                movement_actions_left: _,
-                moved_units: _,
+                player_index,
+                movement_actions_left,
+                moved_units,
             } => {
-                todo!()
+                let action = action
+                    .place_settler()
+                    .expect("action should be place_settler action");
+                self.add_action_log_item(ActionLogItem::PlaceSettler(
+                    serde_json::to_string(&action)
+                        .expect("place settler action should be serializable"),
+                ));
+                self.execute_place_settler_action(
+                    action,
+                    player_index,
+                    movement_actions_left,
+                    moved_units,
+                );
             }
             Finished => panic!("actions can't be executed when the game is finished"),
         }
@@ -391,7 +404,7 @@ impl Game {
             ActionLogItem::Movement(action) => self.undo_movement_action(serde_json::from_str::<MovementAction>(action).expect("log item variant of type movement action should contain a serialized movement action"), player_index),
             ActionLogItem::CulturalInfluenceResolution(action) => self.undo_cultural_influence_resolution_action(serde_json::from_str::<bool>(action).expect("cultural influence resolution log item should contain a serialized boolean representing the confirmation action")),
             ActionLogItem::Combat(_action) => unimplemented!("retreat can't yet be undone"),
-            ActionLogItem::PlaceSettler(_action) => panic!(""),
+            ActionLogItem::PlaceSettler(_action) => panic!("placing a settler can't be undone"),
         }
         self.action_log_index -= 1;
         self.log.remove(self.log.len() - 1);
@@ -447,8 +460,8 @@ impl Game {
                     player_index,
                 );
             }
-            ActionLogItem::Combat(_action) => (),
-            ActionLogItem::PlaceSettler(_action) => (),
+            ActionLogItem::Combat(_) => unimplemented!("retreat can't yet be redone"),
+            ActionLogItem::PlaceSettler(_) => panic!("place settler actions can't be redone"),
         }
         self.action_log_index += 1;
     }
@@ -636,6 +649,26 @@ impl Game {
             target_city_position,
             &city_piece,
         );
+    }
+
+    fn execute_place_settler_action(
+        &mut self,
+        action: Position,
+        player_index: usize,
+        movement_actions_left: u32,
+        moved_units: Vec<u32>,
+    ) {
+        let player = &mut self.players[player_index];
+        assert!(player.get_city(action).is_some(), "Illegal action");
+        player.add_unit(action, Settler);
+        self.state = if movement_actions_left == 0 {
+            Playing
+        } else {
+            Movement {
+                movement_actions_left,
+                moved_units,
+            }
+        };
     }
 
     fn enemy_player(&self, player_index: usize, position: Position) -> Option<usize> {
@@ -952,7 +985,6 @@ impl Game {
         let mut ships = Vec::new();
         player.units.reserve_exact(units.len());
         for unit_type in units {
-            player.available_units -= &unit_type;
             let city = player
                 .get_city(city_position)
                 .expect("player should have a city at the recruitment position");
@@ -964,9 +996,7 @@ impl Game {
                 }
                 _ => city_position,
             };
-            let unit = Unit::new(player_index, position, unit_type, player.next_unit_id);
-            player.units.push(unit);
-            player.next_unit_id += 1;
+            player.add_unit(position, unit_type);
         }
         let city = player
             .get_city_mut(city_position)
@@ -1092,7 +1122,7 @@ impl Game {
     ///
     /// # Panics
     ///
-    /// Panics if the city does not exist
+    /// Panics if the city does not exist or if the game is not in a movement state
     pub fn conquer_city(
         &mut self,
         position: Position,
@@ -1166,7 +1196,23 @@ impl Game {
         } else {
             new_player.gain_resources(ResourcePile::gold(city.size() as i32));
         }
-        self.players[old_player_index].available_settlements += 1;
+        let old_player = &mut self.players[old_player_index];
+        old_player.available_settlements += 1;
+        if old_player.available_units.settlers > 0 && !old_player.cities.is_empty() {
+            let state = mem::replace(&mut self.state, Playing);
+            let Movement {
+                movement_actions_left,
+                moved_units,
+            } = state
+            else {
+                panic!("conquering a city should only happen in a movement action")
+            };
+            self.state = PlaceSettler {
+                player_index: old_player_index,
+                movement_actions_left: movement_actions_left - 1,
+                moved_units,
+            };
+        }
     }
 
     ///
@@ -1477,7 +1523,6 @@ impl Game {
                 return;
             }
             if defenders_left == 0 {
-                //todo potentially capture city
                 for unit in attackers {
                     let unit = self.players[attacker]
                         .get_unit_mut(unit)
