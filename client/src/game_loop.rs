@@ -13,6 +13,7 @@ use crate::{city_ui, move_ui, recruit_unit_ui, status_phase_ui};
 use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
 use macroquad::prelude::{clear_background, next_frame, set_fullscreen, vec2, WHITE};
 use macroquad::ui::root_ui;
+use server::action::Action;
 use server::game::{Game, GameData};
 use server::position::Position;
 use server::status_phase::StatusPhaseAction;
@@ -28,7 +29,6 @@ pub async fn run(game: &mut Game) {
     loop {
         let update = game_loop(game, &state);
         state.update(game, update);
-        state.active_dialog = state.update_after_execute(game);
 
         next_frame().await;
     }
@@ -86,6 +86,7 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
         ActiveDialog::FreeAdvance => show_free_advance_menu(game, player_index),
         ActiveDialog::RaseSize1City => city_ui::raze_city_dialog(),
         ActiveDialog::DetermineFirstPlayer => status_phase_ui::determine_first_player_dialog(game),
+        ActiveDialog::PlaceSettler => recruit_unit_ui::place_settler_dialog(),
     });
 
     updates.add(try_click(game, state, player_index));
@@ -137,6 +138,13 @@ pub fn try_click(game: &Game, state: &State, player_index: usize) -> StateUpdate
             ActiveDialog::RaseSize1City => {
                 if game.players[player_index].can_raze_city(pos) {
                     StateUpdate::status_phase(StatusPhaseAction::RaseSize1City(Some(pos)))
+                } else {
+                    StateUpdate::None
+                }
+            }
+            ActiveDialog::PlaceSettler => {
+                if game.players[player_index].get_city(pos).is_some() {
+                    StateUpdate::Execute(Action::PlaceSettler(pos))
                 } else {
                     StateUpdate::None
                 }
