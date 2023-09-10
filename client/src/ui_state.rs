@@ -1,19 +1,21 @@
 use macroquad::prelude::*;
 
-use server::action::Action;
+use server::action::{Action, CombatAction};
 use server::city::{City, MoodState};
 use server::game::{CombatPhase, Game, GameState};
 use server::player::Player;
-use server::playing_actions::PlayingAction;
+
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 use crate::advance_ui::AdvancePayment;
 use crate::collect_ui::CollectResources;
+use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
 use crate::move_ui::MoveSelection;
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
+use crate::status_phase_ui::ChooseAdditionalAdvances;
 
 pub enum ActiveDialog {
     None,
@@ -28,10 +30,13 @@ pub enum ActiveDialog {
     FreeAdvance,
     RaseSize1City,
     DetermineFirstPlayer,
+    ChangeGovernmentType,
+    ChooseAdditionalAdvances(ChooseAdditionalAdvances),
 
     //combat
     PlaceSettler,
     Retreat,
+    RemoveCasualties(RemoveCasualtiesSelection),
 }
 
 pub struct PendingUpdate {
@@ -153,6 +158,7 @@ impl State {
             increase_happiness: None,
         }
     }
+
     pub fn clear(&mut self) {
         self.active_dialog = ActiveDialog::None;
         self.focused_tile = None;
@@ -175,14 +181,12 @@ impl State {
         match update {
             StateUpdate::None => {}
             StateUpdate::Execute(a) => {
-                self.clear();
                 self.execute(game, a);
-                self.active_dialog = self.update_after_execute(game);
             }
             StateUpdate::ExecuteWithWarning(update) => {
                 self.pending_update = Some(update);
             }
-            StateUpdate::Cancel => self.clear(),
+            StateUpdate::Cancel => self.update_from_game_state(game),
             StateUpdate::ResolvePendingUpdate(confirm) => {
                 if confirm {
                     let action = self
@@ -191,7 +195,6 @@ impl State {
                         .expect("no pending update")
                         .action;
                     self.execute(game, action);
-                    self.clear();
                 } else {
                     self.pending_update = None;
                 }
@@ -210,27 +213,40 @@ impl State {
         }
     }
 
-    pub fn update_after_execute(&mut self, game: &mut Game) -> ActiveDialog {
-        match &game.state {
+    pub fn update_from_game_state(&mut self, game: &mut Game) {
+        self.clear();
+
+        self.active_dialog = match &game.state {
             GameState::Movement { .. } => {
                 ActiveDialog::MoveUnits(MoveSelection::new(game.active_player()))
             }
-            GameState::StatusPhase(state) => {
-                match state {
-                    StatusPhaseState::CompleteObjectives => self
-                        .execute_status_phase(game, StatusPhaseAction::CompleteObjectives(vec![])),
-                    StatusPhaseState::FreeAdvance => ActiveDialog::FreeAdvance,
-                    StatusPhaseState::RaseSize1City => ActiveDialog::RaseSize1City,
-                    StatusPhaseState::ChangeGovernmentType => self
-                        .execute_status_phase(game, StatusPhaseAction::ChangeGovernmentType(None)), // todo(gregor)
-                    StatusPhaseState::DetermineFirstPlayer => ActiveDialog::DetermineFirstPlayer,
+            GameState::StatusPhase(state) => match state {
+                StatusPhaseState::CompleteObjectives => {
+                    self.execute_status_phase(game, StatusPhaseAction::CompleteObjectives(vec![]))
                 }
-            }
+                StatusPhaseState::FreeAdvance => ActiveDialog::FreeAdvance,
+                StatusPhaseState::RaseSize1City => ActiveDialog::RaseSize1City,
+                StatusPhaseState::ChangeGovernmentType => ActiveDialog::ChangeGovernmentType,
+                StatusPhaseState::DetermineFirstPlayer => ActiveDialog::DetermineFirstPlayer,
+            },
             GameState::PlaceSettler { .. } => ActiveDialog::PlaceSettler,
             GameState::Combat {
-                phase: CombatPhase::Retreat,
+                defender_position,
+                phase,
                 ..
-            } => ActiveDialog::Retreat,
+            } => match phase {
+                CombatPhase::PlayActionCard(_) => {
+                    self.update(
+                        game,
+                        StateUpdate::Execute(Action::Combat(CombatAction::PlayActionCard(None))),
+                    );
+                    ActiveDialog::None
+                } //todo(gregor)
+                CombatPhase::RemoveCasualties { casualties, .. } => ActiveDialog::RemoveCasualties(
+                    RemoveCasualtiesSelection::new(*defender_position, *casualties),
+                ),
+                CombatPhase::Retreat => ActiveDialog::Retreat,
+            },
             _ => ActiveDialog::None,
         }
     }
@@ -241,13 +257,8 @@ impl State {
     }
 
     pub fn execute(&mut self, game: &mut Game, a: Action) {
-        if let Action::Playing(p) = &a {
-            if p == &PlayingAction::EndTurn {
-                self.clear();
-            }
-        }
         game.execute_action(a, game.active_player());
-        self.active_dialog = ActiveDialog::None;
+        self.update_from_game_state(game);
     }
 }
 

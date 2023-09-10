@@ -3,6 +3,8 @@ use crate::ui_state::{StateUpdate, StateUpdates};
 use macroquad::hash;
 use macroquad::math::{bool, Vec2};
 use macroquad::ui::widgets::Group;
+use macroquad::ui::Ui;
+use server::game::Game;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct CountSelector {
@@ -54,4 +56,100 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
         };
     });
     updates.result()
+}
+
+pub trait ConfirmSelection: Clone {
+    fn cancel_name(&self) -> &str {
+        "Cancel"
+    }
+
+    fn cancel(&self) -> StateUpdate {
+        StateUpdate::Cancel
+    }
+
+    fn confirm(&self, game: &Game) -> SelectionConfirm;
+}
+
+pub trait Selection: ConfirmSelection {
+    fn all(&self) -> &[String];
+    fn selected(&self) -> &[String];
+    fn selected_mut(&mut self) -> &mut Vec<String>;
+    fn can_select(&self, game: &Game, name: &str) -> bool;
+}
+
+pub fn selection_dialog<T: Selection>(
+    game: &Game,
+    title: &str,
+    sel: &T,
+    on_change: impl Fn(T) -> StateUpdate,
+    on_ok: impl FnOnce(T) -> StateUpdate,
+) -> StateUpdate {
+    let mut updates = StateUpdates::new();
+    active_dialog_window(|ui| {
+        ui.label(None, title);
+        for name in sel.all() {
+            let can_sel = sel.can_select(game, name);
+            let is_selected = sel.selected().contains(name);
+            let mut l = name.to_string();
+            if is_selected {
+                l += " (selected)";
+            }
+
+            if !can_sel {
+                ui.label(None, &l);
+            } else if ui.button(None, l) {
+                let mut new = sel.clone();
+                if is_selected {
+                    new.selected_mut().retain(|n| n != name);
+                } else {
+                    new.selected_mut().push(name.to_string());
+                }
+                updates.add(on_change(new));
+            }
+        }
+        updates.add(confirm_update(
+            sel,
+            || on_ok(sel.clone()),
+            ui,
+            &sel.confirm(game),
+        ));
+    });
+
+    updates.result()
+}
+
+pub fn confirm_update<T: ConfirmSelection>(
+    sel: &T,
+    on_ok: impl FnOnce() -> StateUpdate,
+    ui: &mut Ui,
+    confirm: &SelectionConfirm,
+) -> StateUpdate {
+    match confirm {
+        SelectionConfirm::NoConfirm => StateUpdate::None,
+        SelectionConfirm::Invalid => {
+            ui.label(None, "Invalid selection");
+            may_cancel(sel, ui)
+        }
+        SelectionConfirm::Valid => {
+            if ui.button(None, "OK") {
+                on_ok()
+            } else {
+                may_cancel(sel, ui)
+            }
+        }
+    }
+}
+
+fn may_cancel(sel: &impl ConfirmSelection, ui: &mut Ui) -> StateUpdate {
+    if ui.button(None, sel.cancel_name()) {
+        sel.cancel()
+    } else {
+        StateUpdate::None
+    }
+}
+
+pub enum SelectionConfirm {
+    NoConfirm,
+    Invalid,
+    Valid,
 }

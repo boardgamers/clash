@@ -104,17 +104,17 @@ pub fn show_generic_advance_menu(
         for a in get_all() {
             let name = a.name;
             let p = game.get_player(player_index);
-            if can_play_action(game)
+            if p.has_advance(&name) {
+                ui.label(None, &name);
+            } else if (can_play_action(game)
                 || matches!(
                     game.state,
                     GameState::StatusPhase(StatusPhaseState::FreeAdvance)
-                ) && p.can_advance(&name)
+                ))
+                && p.can_advance(&name)
+                && ui.button(None, name.clone())
             {
-                if ui.button(None, name.clone()) {
-                    updates.add(new_update(name));
-                }
-            } else if p.advances.contains(&name) {
-                ui.label(None, &name);
+                updates.add(new_update(name));
             }
         }
     });

@@ -48,7 +48,7 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
 
     if root_ui().button(vec2(600., 450.), "Import") {
         import(game);
-        return StateUpdate::None;
+        return StateUpdate::Cancel;
     };
     if root_ui().button(vec2(650., 450.), "Export") {
         export(game);
@@ -88,10 +88,15 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
         ActiveDialog::FreeAdvance => show_free_advance_menu(game, player_index),
         ActiveDialog::RaseSize1City => status_phase_ui::raze_city_dialog(),
         ActiveDialog::DetermineFirstPlayer => status_phase_ui::determine_first_player_dialog(game),
+        ActiveDialog::ChangeGovernmentType => status_phase_ui::change_government_type_dialog(game),
+        ActiveDialog::ChooseAdditionalAdvances(a) => {
+            status_phase_ui::choose_additional_advances_dialog(game, a)
+        }
 
         //combat
         ActiveDialog::PlaceSettler => combat_ui::place_settler_dialog(),
         ActiveDialog::Retreat => combat_ui::retreat_dialog(),
+        ActiveDialog::RemoveCasualties(s) => combat_ui::remove_casualties_dialog(game, s),
     });
 
     updates.add(try_click(game, state, player_index));

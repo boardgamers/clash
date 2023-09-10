@@ -1,5 +1,6 @@
 use macroquad::math::u32;
 
+use crate::select_ui::{ConfirmSelection, SelectionConfirm};
 use server::action::Action;
 use server::game::{Game, GameState};
 use server::position::Position;
@@ -7,7 +8,7 @@ use server::unit::{MovementAction, Unit};
 
 use crate::ui_state::{ActiveDialog, StateUpdate};
 use crate::unit_ui;
-use crate::unit_ui::{UnitSelection, UnitSelectionConfirm};
+use crate::unit_ui::UnitSelection;
 
 pub fn move_units_dialog(game: &Game, sel: &MoveSelection) -> StateUpdate {
     unit_ui::unit_selection_dialog::<MoveSelection>(
@@ -114,8 +115,10 @@ impl UnitSelection for MoveSelection {
     fn current_tile(&self) -> Option<Position> {
         self.start
     }
+}
 
-    fn confirm(&self, _game: &Game) -> UnitSelectionConfirm {
-        UnitSelectionConfirm::NoConfirm
+impl ConfirmSelection for MoveSelection {
+    fn confirm(&self, _game: &Game) -> SelectionConfirm {
+        SelectionConfirm::NoConfirm
     }
 }
