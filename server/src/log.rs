@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     action::{Action, CombatAction},
-    content::advances,
     game::Game,
     map::Terrain,
     playing_actions::PlayingAction,
@@ -174,14 +173,12 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
                 "{player_name} {}",
                 match new_government {
                     Some(new_government_advance) => format!(
-                        "changed his government from {} to {}",
+                        "changed his government from {} to {} - additional advances: {}",
                         game.players[game.active_player()]
                             .government()
                             .expect("player should have a government before changing it"),
-                        advances::get_advance_by_name(new_government_advance)
-                            .expect("new government advance should exist")
-                            .government
-                            .expect("advance should be a government advance")
+                        new_government_advance.new_government,
+                        new_government_advance.additional_advances.join(", ")
                     ),
                     None => String::from("did not change his government"),
                 }

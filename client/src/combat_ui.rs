@@ -4,9 +4,10 @@ use server::position::Position;
 use server::unit::{Unit, UnitType};
 
 use crate::dialog_ui::active_dialog_window;
+use crate::select_ui::{ConfirmSelection, SelectionConfirm};
 use crate::ui_state::{ActiveDialog, StateUpdate, StateUpdates};
 use crate::unit_ui;
-use crate::unit_ui::{UnitSelection, UnitSelectionConfirm};
+use crate::unit_ui::UnitSelection;
 
 pub fn retreat_dialog() -> StateUpdate {
     let mut updates = StateUpdates::new();
@@ -66,12 +67,14 @@ impl UnitSelection for RemoveCasualtiesSelection {
     fn current_tile(&self) -> Option<Position> {
         Some(self.city_position)
     }
+}
 
-    fn confirm(&self, _game: &Game) -> UnitSelectionConfirm {
+impl ConfirmSelection for RemoveCasualtiesSelection {
+    fn confirm(&self, _game: &Game) -> SelectionConfirm {
         if self.needed == self.units.len() as u8 {
-            UnitSelectionConfirm::Valid
+            SelectionConfirm::Valid
         } else {
-            UnitSelectionConfirm::Invalid
+            SelectionConfirm::Invalid
         }
     }
 }

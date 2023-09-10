@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -10,11 +11,17 @@ use crate::{
 };
 
 #[derive(Serialize, Deserialize)]
+pub struct ChangeGovernmentType {
+    pub new_government: String,
+    pub additional_advances: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize)]
 pub enum StatusPhaseAction {
     CompleteObjectives(Vec<String>),
     FreeAdvance(String),
     RaseSize1City(Option<Position>),
-    ChangeGovernmentType(Option<String>),
+    ChangeGovernmentType(Option<ChangeGovernmentType>),
     DetermineFirstPlayer(usize),
 }
 
@@ -59,31 +66,7 @@ impl StatusPhaseAction {
             }
             StatusPhaseAction::ChangeGovernmentType(ref new_government_advance) => {
                 if let Some(new_government) = new_government_advance {
-                    if !advances::get_leading_government_advance(new_government)
-                        .expect("government should exist")
-                        .required_advance
-                        .is_some_and(|required_advance| {
-                            !game.players[player_index].has_advance(&required_advance)
-                        })
-                    {
-                        panic!("Illegal action");
-                    }
-                    let current_player_government = game.players[player_index]
-                        .government()
-                        .expect("player should have a government");
-                    let player_government_advances =
-                        advances::get_government(&current_player_government)
-                            .into_iter()
-                            .enumerate()
-                            .filter(|(_, advance)| {
-                                game.players[player_index].has_advance(&advance.name)
-                            })
-                            .collect::<Vec<(usize, Advance)>>();
-                    let new_government_advances = advances::get_government(new_government);
-                    for (tier, advance) in player_government_advances {
-                        game.remove_advance(&advance.name, player_index);
-                        game.advance(&new_government_advances[tier].name, player_index);
-                    }
+                    change_government_type(game, player_index, new_government);
                 }
             }
             StatusPhaseAction::DetermineFirstPlayer(ref player) => {
@@ -94,6 +77,52 @@ impl StatusPhaseAction {
         }
         game.next_player();
         skip_status_phase_players(game);
+    }
+}
+
+fn change_government_type(
+    game: &mut Game,
+    player_index: usize,
+    new_government: &ChangeGovernmentType,
+) {
+    let government = &new_government.new_government;
+    if advances::get_leading_government_advance(government)
+        .expect("government should exist")
+        .required_advance
+        .is_some_and(|required_advance| !game.players[player_index].has_advance(&required_advance))
+    {
+        panic!("Player doesn't have the required advance for the government");
+    }
+    let current_player_government = game.players[player_index]
+        .government()
+        .expect("player should have a government");
+    let player_government_advances = advances::get_government(&current_player_government)
+        .into_iter()
+        .filter(|advance| game.players[player_index].has_advance(&advance.name))
+        .collect::<Vec<Advance>>();
+
+    assert_eq!(
+        player_government_advances.len() - 1,
+        new_government.additional_advances.len(),
+        "Illegal number of additional advances"
+    );
+
+    for advance in player_government_advances {
+        game.remove_advance(&advance.name, player_index);
+    }
+
+    let new_government_advances = advances::get_government(government);
+    game.advance(&new_government_advances[0].name, player_index);
+    for advance in &new_government.additional_advances {
+        let (pos, advance) = new_government_advances
+            .iter()
+            .find_position(|a| a.name == *advance)
+            .expect("advance should exist");
+        assert!(
+            pos > 0,
+            "Additional advances should not include the leading government advance"
+        );
+        game.advance(&advance.name, player_index);
     }
 }
 
@@ -129,36 +158,27 @@ pub fn skip_status_phase_players(game: &mut Game) {
 
         game.skip_dropped_players();
 
-        if !skip_player(game, game.active_player(), phase.as_ref().unwrap()) {
+        if execute_phase(game, game.active_player(), phase.as_ref().unwrap()) {
             return;
         }
         game.increment_player_index();
     }
 }
 
-fn skip_player(game: &Game, player_index: usize, state: &StatusPhaseState) -> bool {
+fn execute_phase(game: &Game, player_index: usize, state: &StatusPhaseState) -> bool {
     let player = &game.players[player_index];
     match state {
-        StatusPhaseState::CompleteObjectives => true, //todo only skip player if the does'nt have objective cards in his hand (don't skip if the can't complete them unless otherwise specified via setting)
+        StatusPhaseState::CompleteObjectives => false, //todo only skip player if the does'nt have objective cards in his hand (don't skip if the can't complete them unless otherwise specified via setting)
         StatusPhaseState::FreeAdvance => advances::get_all()
             .into_iter()
-            .all(|advance| !player.can_advance_free(&advance.name)),
-        StatusPhaseState::RaseSize1City => !player.cities.iter().any(|city| city.size() == 1),
-        StatusPhaseState::ChangeGovernmentType => {
-            player.government().is_some()
-                && !advances::get_all().into_iter().any(|advance| {
-                    !advance
-                        .required_advance
-                        .is_some_and(|required_advance| !player.has_advance(&required_advance))
-                        && advance.government.is_some_and(|government| {
-                            government
-                                != player
-                                    .government()
-                                    .expect("player should have government due to previous check")
-                        })
-                })
-        }
-        StatusPhaseState::DetermineFirstPlayer => false,
+            .any(|advance| player.can_advance_free(&advance.name)),
+        StatusPhaseState::RaseSize1City => player.cities.iter().any(|city| city.size() == 1),
+        StatusPhaseState::ChangeGovernmentType => player.government().is_some_and(|government| {
+            advances::get_governments()
+                .iter()
+                .any(|(g, a)| g != &government && player.can_advance(a))
+        }),
+        StatusPhaseState::DetermineFirstPlayer => true,
     }
 }
 

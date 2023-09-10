@@ -6,9 +6,11 @@ use server::position::Position;
 use server::unit::{Unit, UnitType, Units};
 
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
-use crate::select_ui::{CountSelector, HasCountSelectableObject};
+use crate::select_ui::{
+    ConfirmSelection, CountSelector, HasCountSelectableObject, SelectionConfirm,
+};
 use crate::ui_state::{ActiveDialog, StateUpdate};
-use crate::unit_ui::{UnitSelection, UnitSelectionConfirm};
+use crate::unit_ui::UnitSelection;
 use crate::{select_ui, unit_ui};
 
 #[derive(Clone)]
@@ -191,17 +193,19 @@ impl UnitSelection for RecruitSelection {
     fn current_tile(&self) -> Option<Position> {
         self.current_city
     }
+}
 
-    fn confirm(&self, game: &Game) -> UnitSelectionConfirm {
+impl ConfirmSelection for RecruitSelection {
+    fn confirm(&self, game: &Game) -> SelectionConfirm {
         if game.get_player(self.amount.player_index).can_recruit(
             self.amount.units.clone().to_vec().as_slice(),
             self.amount.city_position,
             self.amount.leader_index,
             self.replaced_units.as_slice(),
         ) {
-            UnitSelectionConfirm::Valid
+            SelectionConfirm::Valid
         } else {
-            UnitSelectionConfirm::Invalid
+            SelectionConfirm::Invalid
         }
     }
 }

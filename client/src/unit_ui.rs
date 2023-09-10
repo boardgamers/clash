@@ -8,6 +8,7 @@ use server::position::Position;
 use server::unit::{Unit, UnitType};
 
 use crate::dialog_ui::active_dialog_window;
+use crate::select_ui::{confirm_update, ConfirmSelection};
 use crate::ui_state::{StateUpdate, StateUpdates};
 use crate::{hex_ui, player_ui};
 
@@ -69,18 +70,11 @@ pub fn draw_units(game: &Game) {
     }
 }
 
-pub enum UnitSelectionConfirm {
-    NoConfirm,
-    Invalid,
-    Valid,
-}
-
-pub trait UnitSelection: Clone {
+pub trait UnitSelection: ConfirmSelection {
     fn selected_units(&self) -> &[u32];
     fn selected_units_mut(&mut self) -> &mut Vec<u32>;
     fn can_select(&self, game: &Game, unit: &Unit) -> bool;
     fn current_tile(&self) -> Option<Position>;
-    fn confirm(&self, game: &Game) -> UnitSelectionConfirm;
 }
 
 pub fn unit_selection_dialog<T: UnitSelection>(
@@ -113,24 +107,12 @@ pub fn unit_selection_dialog<T: UnitSelection>(
                     updates.add(on_change(new));
                 }
             }
-            let confirm = sel.confirm(game);
-            match confirm {
-                UnitSelectionConfirm::NoConfirm => {}
-                UnitSelectionConfirm::Invalid => {
-                    ui.label(None, "Invalid selection");
-                    if ui.button(None, "Cancel") {
-                        updates.add(StateUpdate::Cancel);
-                    };
-                }
-                UnitSelectionConfirm::Valid => {
-                    if ui.button(None, "OK") {
-                        updates.add(on_ok(sel.clone()));
-                    }
-                    if ui.button(None, "Cancel") {
-                        updates.add(StateUpdate::Cancel);
-                    };
-                }
-            }
+            updates.add(confirm_update(
+                sel,
+                || on_ok(sel.clone()),
+                ui,
+                &sel.confirm(game),
+            ));
         } else {
             ui.label(None, "Select a starting tile");
         }

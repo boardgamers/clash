@@ -147,17 +147,29 @@ pub fn get_all() -> Vec<Advance> {
         .build(),
 
         Advance::builder(
-            "TestGovernment - Democracy",
+            "Democracy Advance",
             "TestGovernment1",
         )
         .leading_government_advance("Democracy")
         .build(),
+        Advance::builder(
+            "Democracy 2",
+            "TestGovernment1",
+        )
+        .with_required_advance("Democracy Advance")
+        .build(),
 
         Advance::builder(
-            "TestGovernment - Theocracy",
+            "Theocracy Advance",
             "TestGovernment2",
         )
         .leading_government_advance("Theocracy")
+        .build(),
+        Advance::builder(
+            "Theocracy 2",
+            "TestGovernment2",
+        )
+        .with_required_advance("Theocracy Advance")
         .build(),
     ]
 }
@@ -175,6 +187,18 @@ pub fn get_leading_government_advance(government: &str) -> Option<Advance> {
             .as_ref()
             .is_some_and(|value| value.as_str() == government)
     })
+}
+
+#[must_use]
+pub fn get_governments() -> Vec<(String, String)> {
+    get_all()
+        .into_iter()
+        .filter_map(|advance| {
+            advance
+                .government
+                .map(|g| (g.clone(), advance.name.clone()))
+        })
+        .collect()
 }
 
 ///
@@ -195,11 +219,6 @@ pub fn get_government(government: &str) -> Vec<Advance> {
                 .is_some_and(|required_advance| required_advance == &leading_government.name)
         })
         .collect::<Vec<Advance>>();
-    government_advances.sort_by_key(|advance| {
-        advance
-            .government_tier
-            .expect("advance should be a government advance")
-    });
     government_advances.push(leading_government);
     government_advances.reverse();
     government_advances
