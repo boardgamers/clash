@@ -14,6 +14,7 @@ use crate::ui_state::ActiveDialog;
 mod advance_ui;
 mod city_ui;
 mod collect_ui;
+mod combat_ui;
 mod construct_ui;
 mod dialog_ui;
 mod game_loop;
@@ -29,6 +30,7 @@ mod player_ui;
 mod recruit_unit_ui;
 mod resource_ui;
 mod select_ui;
+mod status_phase_ui;
 mod ui_state;
 mod unit_ui;
 

@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 
 use server::action::Action;
 use server::city::{City, MoodState};
-use server::game::{Game, GameState};
+use server::game::{CombatPhase, Game, GameState};
 use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
@@ -23,8 +23,15 @@ pub enum ActiveDialog {
     RecruitUnitSelection(RecruitAmount),
     ReplaceUnits(RecruitSelection),
     MoveUnits(MoveSelection),
+
+    //status phase
     FreeAdvance,
     RaseSize1City,
+    DetermineFirstPlayer,
+
+    //combat
+    PlaceSettler,
+    Retreat,
 }
 
 pub struct PendingUpdate {
@@ -170,16 +177,7 @@ impl State {
             StateUpdate::Execute(a) => {
                 self.clear();
                 self.execute(game, a);
-                if let GameState::Movement {
-                    movement_actions_left,
-                    moved_units: _,
-                } = game.state
-                {
-                    if movement_actions_left > 0 {
-                        self.active_dialog =
-                            ActiveDialog::MoveUnits(MoveSelection::new(game.active_player()));
-                    }
-                }
+                self.active_dialog = self.update_after_execute(game);
             }
             StateUpdate::ExecuteWithWarning(update) => {
                 self.pending_update = Some(update);
@@ -214,10 +212,9 @@ impl State {
 
     pub fn update_after_execute(&mut self, game: &mut Game) -> ActiveDialog {
         match &game.state {
-            GameState::Movement {
-                movement_actions_left: _,
-                moved_units: _,
-            } => ActiveDialog::MoveUnits(MoveSelection::new(game.active_player())),
+            GameState::Movement { .. } => {
+                ActiveDialog::MoveUnits(MoveSelection::new(game.active_player()))
+            }
             GameState::StatusPhase(state) => {
                 match state {
                     StatusPhaseState::CompleteObjectives => self
@@ -226,11 +223,14 @@ impl State {
                     StatusPhaseState::RaseSize1City => ActiveDialog::RaseSize1City,
                     StatusPhaseState::ChangeGovernmentType => self
                         .execute_status_phase(game, StatusPhaseAction::ChangeGovernmentType(None)), // todo(gregor)
-                    StatusPhaseState::DetermineFirstPlayer => {
-                        self.execute_status_phase(game, StatusPhaseAction::DetermineFirstPlayer(0))
-                    } // todo(gregor)
+                    StatusPhaseState::DetermineFirstPlayer => ActiveDialog::DetermineFirstPlayer,
                 }
             }
+            GameState::PlaceSettler { .. } => ActiveDialog::PlaceSettler,
+            GameState::Combat {
+                phase: CombatPhase::Retreat,
+                ..
+            } => ActiveDialog::Retreat,
             _ => ActiveDialog::None,
         }
     }

@@ -5,12 +5,10 @@ use server::city::{City, MoodState};
 use server::city_pieces::Building;
 use server::game::Game;
 use server::player::Player;
-use server::status_phase::StatusPhaseAction;
 use server::unit::Units;
 
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{add_construct_button, add_wonder_buttons};
-use crate::dialog_ui::active_dialog_window;
 use crate::happiness_ui::init_increase_happiness;
 use crate::hex_ui::draw_hex_center_text;
 use crate::map_ui::show_tile_menu;
@@ -183,17 +181,4 @@ pub fn city_click(state: &State, player: &Player, city: &City) -> StateUpdate {
     } else {
         StateUpdate::FocusTile(FocusedTile::new(Some(city.player_index), pos))
     }
-}
-
-pub fn raze_city_dialog() -> StateUpdate {
-    let mut updates = StateUpdates::new();
-    active_dialog_window(|ui| {
-        ui.label(None, "Select a city to raze - or decline.");
-        if ui.button(None, "Decline") {
-            updates.add(StateUpdate::status_phase(StatusPhaseAction::RaseSize1City(
-                None,
-            )));
-        }
-    });
-    updates.result()
 }

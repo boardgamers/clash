@@ -29,7 +29,11 @@ pub fn show_globals(game: &Game) {
         GameState::CulturalInfluenceResolution { .. } => {
             String::from("Cultural Influence Resolution")
         }
-        GameState::Combat { .. } => String::from("Combat"),
+        GameState::Combat {
+            round, ref phase, ..
+        } => {
+            format!("Combat Round {} Phase {:?}", round, *phase)
+        }
         GameState::PlaceSettler { .. } => String::from("Place Settler"),
         GameState::Finished => String::from("Finished"),
     };

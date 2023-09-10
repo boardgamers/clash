@@ -56,30 +56,20 @@ pub fn draw_map(game: &Game, state: &State) {
                 }
             }
             ActiveDialog::ReplaceUnits(s) => {
-                if s.current_city.is_some_and(|p| p == *pos) {
-                    0.5
-                } else {
-                    1.0
-                }
+                highlight_if(s.current_city.is_some_and(|p| p == *pos))
             }
             ActiveDialog::RaseSize1City => {
-                if game.players[game.active_player()].can_raze_city(*pos) {
-                    0.5
-                } else {
-                    1.0
-                }
+                highlight_if(game.players[game.active_player()].can_raze_city(*pos))
             }
-            _ => {
-                if state
+            ActiveDialog::PlaceSettler => {
+                highlight_if(game.players[game.active_player()].get_city(*pos).is_some())
+            }
+            _ => highlight_if(
+                state
                     .focused_tile
                     .as_ref()
-                    .is_some_and(|f| pos == &f.position)
-                {
-                    0.5
-                } else {
-                    1.0
-                }
-            }
+                    .is_some_and(|f| pos == &f.position),
+            ),
         };
 
         let text_color = if c.1 { WHITE } else { BLACK };
@@ -93,6 +83,14 @@ pub fn draw_map(game: &Game, state: &State) {
             }
         }
         unit_ui::draw_units(game);
+    }
+}
+
+fn highlight_if(b: bool) -> f32 {
+    if b {
+        0.5
+    } else {
+        1.0
     }
 }
 
