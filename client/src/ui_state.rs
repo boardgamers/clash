@@ -1,6 +1,6 @@
 use macroquad::prelude::*;
 
-use server::action::Action;
+use server::action::{Action, CombatAction};
 use server::city::{City, MoodState};
 use server::game::{CombatPhase, Game, GameState};
 use server::player::Player;
@@ -11,6 +11,7 @@ use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 use crate::advance_ui::AdvancePayment;
 use crate::collect_ui::CollectResources;
+use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
 use crate::move_ui::MoveSelection;
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
@@ -32,6 +33,7 @@ pub enum ActiveDialog {
     //combat
     PlaceSettler,
     Retreat,
+    RemoveCasualties(RemoveCasualtiesSelection),
 }
 
 pub struct PendingUpdate {
@@ -228,9 +230,22 @@ impl State {
             }
             GameState::PlaceSettler { .. } => ActiveDialog::PlaceSettler,
             GameState::Combat {
-                phase: CombatPhase::Retreat,
+                defender_position,
+                phase,
                 ..
-            } => ActiveDialog::Retreat,
+            } => match phase {
+                CombatPhase::PlayActionCard(_) => {
+                    self.update(
+                        game,
+                        StateUpdate::Execute(Action::Combat(CombatAction::PlayActionCard(None))),
+                    );
+                    ActiveDialog::None
+                } //todo(gregor)
+                CombatPhase::RemoveCasualties { casualties, .. } => ActiveDialog::RemoveCasualties(
+                    RemoveCasualtiesSelection::new(*defender_position, *casualties),
+                ),
+                CombatPhase::Retreat => ActiveDialog::Retreat,
+            },
             _ => ActiveDialog::None,
         }
     }

@@ -92,6 +92,7 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
         //combat
         ActiveDialog::PlaceSettler => combat_ui::place_settler_dialog(),
         ActiveDialog::Retreat => combat_ui::retreat_dialog(),
+        ActiveDialog::RemoveCasualties(s) => combat_ui::remove_casualties_dialog(game, s),
     });
 
     updates.add(try_click(game, state, player_index));
