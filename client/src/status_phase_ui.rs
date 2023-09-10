@@ -20,3 +20,16 @@ pub fn determine_first_player_dialog(game: &Game) -> StateUpdate {
     });
     updates.result()
 }
+
+pub fn raze_city_dialog() -> StateUpdate {
+    let mut updates = StateUpdates::new();
+    active_dialog_window(|ui| {
+        ui.label(None, "Select a city to raze - or decline.");
+        if ui.button(None, "Decline") {
+            updates.add(StateUpdate::status_phase(StatusPhaseAction::RaseSize1City(
+                None,
+            )));
+        }
+    });
+    updates.result()
+}

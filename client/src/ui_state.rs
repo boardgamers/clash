@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 
 use server::action::Action;
 use server::city::{City, MoodState};
-use server::game::{Game, GameState};
+use server::game::{CombatPhase, Game, GameState};
 use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
@@ -31,6 +31,7 @@ pub enum ActiveDialog {
 
     //combat
     PlaceSettler,
+    Retreat,
 }
 
 pub struct PendingUpdate {
@@ -226,6 +227,10 @@ impl State {
                 }
             }
             GameState::PlaceSettler { .. } => ActiveDialog::PlaceSettler,
+            GameState::Combat {
+                phase: CombatPhase::Retreat,
+                ..
+            } => ActiveDialog::Retreat,
             _ => ActiveDialog::None,
         }
     }

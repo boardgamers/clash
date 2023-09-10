@@ -6,7 +6,6 @@ use server::position::Position;
 use server::unit::{Unit, UnitType, Units};
 
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
-use crate::dialog_ui::active_dialog_window;
 use crate::select_ui::{CountSelector, HasCountSelectableObject};
 use crate::ui_state::{ActiveDialog, StateUpdate};
 use crate::unit_ui::{UnitSelection, UnitSelectionConfirm};
@@ -286,11 +285,4 @@ pub fn click_replace(pos: Position, s: &RecruitSelection) -> StateUpdate {
     let mut new = s.clone();
     new.current_city = Some(pos);
     StateUpdate::SetDialog(ActiveDialog::ReplaceUnits(new))
-}
-
-pub fn place_settler_dialog() -> StateUpdate {
-    active_dialog_window(|ui| {
-        ui.label(None, "Select a city to place a settler in.");
-    });
-    StateUpdate::None
 }

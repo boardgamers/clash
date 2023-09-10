@@ -14,6 +14,7 @@ use crate::ui_state::ActiveDialog;
 mod advance_ui;
 mod city_ui;
 mod collect_ui;
+mod combat_ui;
 mod construct_ui;
 mod dialog_ui;
 mod game_loop;
