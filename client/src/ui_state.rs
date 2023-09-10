@@ -25,6 +25,7 @@ pub enum ActiveDialog {
     MoveUnits(MoveSelection),
     FreeAdvance,
     RaseSize1City,
+    DetermineFirstPlayer,
 }
 
 pub struct PendingUpdate {
@@ -226,9 +227,7 @@ impl State {
                     StatusPhaseState::RaseSize1City => ActiveDialog::RaseSize1City,
                     StatusPhaseState::ChangeGovernmentType => self
                         .execute_status_phase(game, StatusPhaseAction::ChangeGovernmentType(None)), // todo(gregor)
-                    StatusPhaseState::DetermineFirstPlayer => {
-                        self.execute_status_phase(game, StatusPhaseAction::DetermineFirstPlayer(0))
-                    } // todo(gregor)
+                    StatusPhaseState::DetermineFirstPlayer => ActiveDialog::DetermineFirstPlayer,
                 }
             }
             _ => ActiveDialog::None,

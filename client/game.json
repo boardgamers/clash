@@ -207,12 +207,12 @@
           ]
         ],
         [
-          "Forest",
+          "Mountain",
           [
             {
               "food": 0,
-              "wood": 1,
-              "ore": 0,
+              "wood": 0,
+              "ore": 1,
               "ideas": 0,
               "gold": 0,
               "mood_tokens": 0,
@@ -221,12 +221,12 @@
           ]
         ],
         [
-          "Mountain",
+          "Forest",
           [
             {
               "food": 0,
-              "wood": 0,
-              "ore": 1,
+              "wood": 1,
+              "ore": 0,
               "ideas": 0,
               "gold": 0,
               "mood_tokens": 0,
@@ -342,20 +342,6 @@
       },
       "collect_options": [
         [
-          "Forest",
-          [
-            {
-              "food": 0,
-              "wood": 1,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
-        [
           "Mountain",
           [
             {
@@ -382,6 +368,20 @@
               "culture_tokens": 0
             }
           ]
+        ],
+        [
+          "Forest",
+          [
+            {
+              "food": 0,
+              "wood": 1,
+              "ore": 0,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
+            }
+          ]
         ]
       ],
       "next_unit_id": 2
@@ -391,8 +391,29 @@
     "tiles": [
       [
         {
+          "q": 1,
+          "r": 2
+        },
+        "Fertile"
+      ],
+      [
+        {
           "q": 3,
           "r": 0
+        },
+        "Water"
+      ],
+      [
+        {
+          "q": 0,
+          "r": 0
+        },
+        "Fertile"
+      ],
+      [
+        {
+          "q": 2,
+          "r": 1
         },
         "Water"
       ],
@@ -406,37 +427,9 @@
       [
         {
           "q": 0,
-          "r": 1
-        },
-        "Water"
-      ],
-      [
-        {
-          "q": 0,
           "r": 2
         },
         "Exhausted"
-      ],
-      [
-        {
-          "q": 1,
-          "r": 2
-        },
-        "Fertile"
-      ],
-      [
-        {
-          "q": 2,
-          "r": 0
-        },
-        "Forest"
-      ],
-      [
-        {
-          "q": 0,
-          "r": 0
-        },
-        "Fertile"
       ],
       [
         {
@@ -447,10 +440,17 @@
       ],
       [
         {
-          "q": 2,
+          "q": 0,
           "r": 1
         },
         "Water"
+      ],
+      [
+        {
+          "q": 2,
+          "r": 0
+        },
+        "Forest"
       ],
       [
         {
@@ -461,8 +461,8 @@
       ]
     ]
   },
-  "starting_player_index": 0,
-  "current_player_index": 1,
+  "starting_player_index": 1,
+  "current_player_index": 0,
   "action_log": [
     {
       "Playing": "\"EndTurn\""
@@ -478,9 +478,12 @@
     },
     {
       "Playing": "\"EndTurn\""
+    },
+    {
+      "Playing": "\"EndTurn\""
     }
   ],
-  "action_log_index": 5,
+  "action_log_index": 6,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -496,9 +499,11 @@
     "It's Player1's turn",
     "Round 3/3",
     "Player1 ended his turn with 3 actions left",
-    "It's Player2's turn"
+    "It's Player2's turn",
+    "Player2 ended his turn with 3 actions left",
+    "It's Player1's turn"
   ],
-  "undo_limit": 5,
+  "undo_limit": 6,
   "played_once_per_turn_actions": [],
   "actions_left": 3,
   "successful_cultural_influence": false,

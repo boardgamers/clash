@@ -9,7 +9,7 @@ use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
 use crate::player_ui::{show_global_controls, show_globals, show_resources, show_wonders};
 use crate::ui_state::{ActiveDialog, CityMenu, FocusedTile, State, StateUpdate, StateUpdates};
-use crate::{city_ui, move_ui, recruit_unit_ui};
+use crate::{city_ui, move_ui, recruit_unit_ui, status_phase_ui};
 use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
 use macroquad::prelude::{clear_background, next_frame, set_fullscreen, vec2, WHITE};
 use macroquad::ui::root_ui;
@@ -85,6 +85,7 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
         ActiveDialog::MoveUnits(s) => move_ui::move_units_dialog(game, s),
         ActiveDialog::FreeAdvance => show_free_advance_menu(game, player_index),
         ActiveDialog::RaseSize1City => city_ui::raze_city_dialog(),
+        ActiveDialog::DetermineFirstPlayer => status_phase_ui::determine_first_player_dialog(game),
     });
 
     updates.add(try_click(game, state, player_index));
