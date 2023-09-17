@@ -19,6 +19,7 @@ use crate::ui_state::{can_play_action, ActiveDialog, State, StateUpdate, StateUp
 use crate::{collect_ui, hex_ui, unit_ui};
 
 fn terrain_color(t: &Terrain) -> (Color, bool) {
+    //todo color not needed
     match t {
         Terrain::Barren => (Color::from_hex(0x00B2_6C19), true),
         Terrain::Mountain => (Color::from_hex(0x0057_5757), true),
@@ -49,12 +50,12 @@ pub fn draw_map(game: &Game, state: &State) {
                     if start == *pos {
                         0.5
                     } else if s.destinations.contains(pos) {
-                        0.2
+                        0.8
                     } else {
-                        1.0
+                        0.
                     }
                 } else {
-                    1.0
+                    0.
                 }
             }
             ActiveDialog::ReplaceUnits(s) => {
@@ -113,7 +114,7 @@ fn highlight_if(b: bool) -> f32 {
     if b {
         0.5
     } else {
-        1.0
+        0.
     }
 }
 

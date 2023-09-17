@@ -4,9 +4,9 @@ use hex2d::{Coordinate, Spacing};
 use macroquad::color::Color;
 use macroquad::math::{f32, i32, vec2};
 use macroquad::prelude::{
-    draw_text, draw_texture_ex, DrawTextureParams, Rect, Texture2D, BLACK, WHITE,
+    draw_text, draw_texture_ex, DrawTextureParams, Rect, Texture2D, BLACK, DARKGRAY, WHITE,
 };
-
+use macroquad::shapes::draw_hexagon;
 
 use server::position::Position;
 
@@ -24,7 +24,7 @@ pub fn center(pos: Position) -> Point {
 
 pub fn draw_hex(p: Position, fill_color: Color, text_color: Color, alpha: f32, t: &Texture2D) {
     let c = center(p);
-    let mut v = fill_color.to_vec();
+    let mut v = WHITE.to_vec();
     v.w = alpha;
     draw_texture_ex(
         t,
@@ -37,7 +37,7 @@ pub fn draw_hex(p: Position, fill_color: Color, text_color: Color, alpha: f32, t
             ..Default::default()
         },
     );
-    // draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, Color::from_vec(v));
+    draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, Color::from_vec(v));
     draw_text(&p.to_string(), c.x - 30.0, c.y - 35.0, 20.0, text_color);
 }
 
