@@ -1,13 +1,14 @@
+use std::f32::consts::PI;
+
 use hex2d::{Coordinate, Spacing};
-use macroquad::color::{Color, DARKGRAY};
+use macroquad::color::Color;
 use macroquad::math::{f32, i32, vec2};
 use macroquad::prelude::{
-    draw_hexagon, draw_text, draw_texture, draw_texture_ex, load_texture, DrawTextureParams, Rect,
-    Texture2D, BLACK, WHITE,
+    draw_text, draw_texture_ex, DrawTextureParams, Rect, Texture2D, BLACK, WHITE,
 };
-use server::map::Terrain;
+
+
 use server::position::Position;
-use std::f32::consts::PI;
 
 const SIZE: f32 = 60.0;
 
@@ -21,23 +22,12 @@ pub fn center(pos: Position) -> Point {
     Point { x: p.0, y: p.1 }.to_screen()
 }
 
-pub async fn draw_hex(p: Position, fill_color: Color, text_color: Color, alpha: f32, t: &Terrain) {
+pub fn draw_hex(p: Position, fill_color: Color, text_color: Color, alpha: f32, t: &Texture2D) {
     let c = center(p);
     let mut v = fill_color.to_vec();
     v.w = alpha;
-
-    let file = match t {
-        Terrain::Barren => "assets/barren.png",
-        Terrain::Mountain => "assets/mountain.png",
-        Terrain::Fertile => "assets/grassland.png",
-        Terrain::Forest => "assets/forest.png",
-        Terrain::Exhausted => "assets/grassland.png", //todo
-        Terrain::Water => "assets/water.png",
-    };
-
-    let texture: Texture2D = load_texture(file).await.unwrap();
     draw_texture_ex(
-        &texture,
+        t,
         c.x - SIZE,
         c.y - SHORT_SIZE,
         WHITE,

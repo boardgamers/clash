@@ -23,22 +23,22 @@ use std::io::BufReader;
 const EXPORT_FILE: &str = "game.json";
 
 pub async fn run(game: &mut Game) {
-    let mut state = State::new();
+    let mut state = State::new().await;
 
     set_fullscreen(true);
     loop {
-        let update = game_loop(game, &state).await;
+        let update = game_loop(game, &state);
         state.update(game, update);
 
         next_frame().await;
     }
 }
 
-async fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
+fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
     let player_index = game.active_player();
     clear_background(WHITE);
 
-    draw_map(game, state).await;
+    draw_map(game, state);
     let mut updates = StateUpdates::new();
     updates.add(show_advance_menu(game, player_index));
     show_globals(game);
