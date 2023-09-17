@@ -3,12 +3,8 @@ use std::{collections::HashMap, mem};
 use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
 
-use CombatPhase::*;
-use GameState::*;
-
-use crate::status_phase::skip_status_phase_players;
 use crate::{
-    action::Action,
+    action::{Action, CombatAction},
     city::{City, MoodState::*},
     city_pieces::Building::{self, *},
     consts::{AGES, DICE_ROLL_BUFFER},
@@ -20,7 +16,10 @@ use crate::{
     position::Position,
     resource_pile::ResourcePile,
     special_advance::SpecialAdvance,
-    status_phase::StatusPhaseState::{self},
+    status_phase::{
+        self,
+        StatusPhaseState::{self},
+    },
     unit::{
         MovementAction::{self, *},
         Unit,
@@ -29,6 +28,8 @@ use crate::{
     utils,
     wonder::Wonder,
 };
+
+use GameState::*;
 
 pub struct Game {
     pub state: GameState,
@@ -52,6 +53,12 @@ pub struct Game {
     pub wonders_left: Vec<Wonder>,
     pub wonder_amount_left: usize,
     pub undo_context_stack: Vec<UndoContext>,
+}
+
+impl Clone for Game {
+    fn clone(&self) -> Self {
+        Self::from_data(self.cloned_data())
+    }
 }
 
 impl Game {
@@ -134,7 +141,7 @@ impl Game {
             state: data.state,
             players: Vec::new(),
             map: Map::from_data(data.map),
-            starting_player_index: data.current_player_index,
+            starting_player_index: data.starting_player_index,
             current_player_index: data.current_player_index,
             actions_left: data.actions_left,
             successful_cultural_influence: data.successful_cultural_influence,
@@ -362,17 +369,32 @@ impl Game {
                 );
             }
             Combat {
-                initiation: _,
-                round: _,
-                phase: _,
-                defender: _,
-                defender_position: _,
-                attacker: _,
-                attacker_position: _,
-                attackers: _,
-                can_retreat: _,
+                initiation,
+                round,
+                phase,
+                defender,
+                defender_position,
+                attacker,
+                attacker_position,
+                attackers,
+                can_retreat,
             } => {
-                todo!()
+                let action = action.combat().expect("action should be a combat action");
+                self.add_action_log_item(ActionLogItem::Combat(
+                    serde_json::to_string(&action).expect("combat action should be serializable"),
+                ));
+                self.execute_combat_action(
+                    action,
+                    initiation,
+                    round,
+                    phase,
+                    defender,
+                    defender_position,
+                    attacker,
+                    attacker_position,
+                    attackers,
+                    can_retreat,
+                );
             }
             PlaceSettler {
                 player_index,
@@ -651,6 +673,27 @@ impl Game {
         );
     }
 
+    #[allow(unused)]
+    #[allow(clippy::needless_pass_by_value)]
+    #[allow(clippy::too_many_arguments)]
+    #[allow(clippy::boxed_local)]
+    #[allow(clippy::unused_self)]
+    fn execute_combat_action(
+        &mut self,
+        action: CombatAction,
+        initiation: Box<GameState>,
+        round: u32,
+        phase: CombatPhase,
+        defender: usize,
+        defender_position: Position,
+        attacker: usize,
+        attacker_position: Position,
+        attackers: Vec<u32>,
+        can_retreat: bool,
+    ) {
+        assert!(phase.is_compatible_action(&action), "Illegal action");
+    }
+
     fn execute_place_settler_action(
         &mut self,
         action: Position,
@@ -721,13 +764,13 @@ impl Game {
                 attackers: _,
                 can_retreat: _,
             } => match phase {
-                RemoveCasualties {
+                CombatPhase::RemoveCasualties {
                     player,
                     casualties: _,
                     counter_hits: _,
                 }
-                | PlayActionCard(player) => *player,
-                Retreat => *attacker,
+                | CombatPhase::PlayActionCard(player) => *player,
+                CombatPhase::Retreat => *attacker,
             },
             PlaceSettler {
                 player_index,
@@ -769,7 +812,7 @@ impl Game {
             "The game has entered the {} status phase",
             utils::ordinal_number(self.age)
         ));
-        skip_status_phase_players(self);
+        status_phase::skip_status_phase_players(self);
     }
 
     pub fn next_age(&mut self) {
@@ -782,6 +825,7 @@ impl Game {
             return;
         }
         self.add_info_log_item(format!("Age {} has started", self.age));
+        self.add_info_log_item(String::from("Round 1/3"));
     }
 
     fn end_game(&mut self) {
@@ -1464,7 +1508,7 @@ impl Game {
                 self.state = Combat {
                     initiation: Box::new(state),
                     round,
-                    phase: RemoveCasualties {
+                    phase: CombatPhase::RemoveCasualties {
                         player: defender,
                         casualties: attacker_hits,
                         counter_hits: Some(defender_hits),
@@ -1493,7 +1537,7 @@ impl Game {
                 self.state = Combat {
                     initiation: Box::new(state),
                     round,
-                    phase: RemoveCasualties {
+                    phase: CombatPhase::RemoveCasualties {
                         player: attacker,
                         casualties: defender_hits,
                         counter_hits: None,
@@ -1537,7 +1581,7 @@ impl Game {
                 self.state = Combat {
                     initiation: Box::new(state),
                     round,
-                    phase: Retreat,
+                    phase: CombatPhase::Retreat,
                     defender,
                     defender_position,
                     attacker,
@@ -1652,6 +1696,18 @@ pub enum CombatPhase {
     Retreat,
 }
 
+impl CombatPhase {
+    fn is_compatible_action(&self, action: &CombatAction) -> bool {
+        match self {
+            CombatPhase::PlayActionCard(_) => matches!(action, CombatAction::PlayActionCard(_)),
+            CombatPhase::RemoveCasualties { .. } => {
+                matches!(action, CombatAction::RemoveCasualties(_))
+            }
+            CombatPhase::Retreat => matches!(action, CombatAction::Retreat(_)),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub enum UndoContext {
     FoundCity {
@@ -1755,7 +1811,9 @@ pub mod tests {
 
         game.conquer_city(position, new, old);
 
-        let c = game.players[new].get_city_mut(position).unwrap();
+        let c = game.players[new]
+            .get_city_mut(position)
+            .expect("player new should the city");
         assert_eq!(1, c.player_index);
         assert_eq!(Angry, c.mood_state);
 

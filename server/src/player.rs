@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering::{self, *},
@@ -204,11 +205,7 @@ impl Player {
             available_settlements: data.available_settlements,
             available_buildings: data.available_buildings,
             available_units: data.available_units,
-            collect_options: data
-                .collect_options
-                .into_iter()
-                .map(|(terrain, options)| (terrain, options.into_iter().collect()))
-                .collect(),
+            collect_options: data.collect_options.into_iter().collect(),
             next_unit_id: data.next_unit_id,
         };
         player
@@ -251,7 +248,7 @@ impl Player {
             collect_options: self
                 .collect_options
                 .into_iter()
-                .map(|(terrain, options)| (terrain, options.into_iter().collect()))
+                .sorted_by_key(|(terrain, _)| terrain.clone())
                 .collect(),
             next_unit_id: self.next_unit_id,
         }
@@ -297,6 +294,7 @@ impl Player {
                 .collect_options
                 .iter()
                 .map(|(terrain, options)| (terrain.clone(), options.clone()))
+                .sorted_by_key(|(terrain, _)| terrain.clone())
                 .collect(),
             next_unit_id: self.next_unit_id,
         }

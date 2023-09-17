@@ -3,7 +3,7 @@ use std::fmt::{Debug, Display};
 use hex2d::Coordinate;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Copy, Clone, Hash)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Copy, Clone, Hash, PartialOrd, Ord)]
 pub struct Position {
     pub q: i32,
     pub r: i32,
@@ -78,7 +78,8 @@ impl Position {
 impl Display for Position {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let row = (self.r + (self.q - (self.q.rem_euclid(2))) / 2) + 1;
-        let col = char::from_u32(('A' as u32) + self.q as u32).unwrap();
+        let col = char::from_u32(('A' as u32) + self.q as u32)
+            .expect("Input should be a valid character");
         write!(f, "{col}{row}")
     }
 }

@@ -16,7 +16,7 @@
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -164,14 +164,13 @@
       "advances": [
         "Farming",
         "Mining",
-        "Tactics",
-        "Storage"
+        "Tactics"
       ],
       "unlocked_special_advance": [],
       "wonders": [],
       "wonders_build": 0,
       "leader_position": null,
-      "game_event_tokens": 1,
+      "game_event_tokens": 2,
       "influenced_buildings": 0,
       "completed_objectives": [],
       "captured_leaders": [],
@@ -412,7 +411,7 @@
           "q": 0,
           "r": 2
         },
-        "Exhausted"
+        "Mountain"
       ],
       [
         {
@@ -466,7 +465,7 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 1,
+  "current_player_index": 0,
   "action_log": [
     {
       "Playing": "{\"Advance\":{\"advance\":\"Tactics\",\"payment\":{\"food\":0,\"wood\":0,\"ore\":0,\"ideas\":2,\"gold\":0,\"mood_tokens\":0,\"culture_tokens\":0}}}"
@@ -494,12 +493,9 @@
     },
     {
       "Playing": "\"EndTurn\""
-    },
-    {
-      "StatusPhase": "{\"FreeAdvance\":\"Storage\"}"
     }
   ],
-  "action_log_index": 10,
+  "action_log_index": 9,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -521,11 +517,9 @@
     "It's Player2's turn",
     "Player2 ended his turn with 3 actions left",
     "It's Player1's turn",
-    "The game has entered the 1st status phase",
-    "Player1 advanced Storage for free",
-    "It's Player2's turn"
+    "The game has entered the 1st status phase"
   ],
-  "undo_limit": 10,
+  "undo_limit": 9,
   "played_once_per_turn_actions": [],
   "actions_left": 3,
   "successful_cultural_influence": false,

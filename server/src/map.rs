@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 use crate::position::Position;
@@ -18,14 +19,23 @@ impl Map {
     #[must_use]
     pub fn data(self) -> MapData {
         MapData {
-            tiles: self.tiles.into_iter().collect(),
+            tiles: self
+                .tiles
+                .into_iter()
+                .sorted_by_key(|(position, _)| *position)
+                .collect(),
         }
     }
 
     #[must_use]
     pub fn cloned_data(&self) -> MapData {
         MapData {
-            tiles: self.tiles.clone().into_iter().collect(),
+            tiles: self
+                .tiles
+                .clone()
+                .into_iter()
+                .sorted_by_key(|(position, _)| *position)
+                .collect(),
         }
     }
 
@@ -42,12 +52,12 @@ pub struct MapData {
     pub tiles: Vec<(Position, Terrain)>,
 }
 
-#[derive(Serialize, Deserialize, Hash, PartialEq, Eq, Clone)]
+#[derive(Serialize, Deserialize, Hash, PartialEq, Eq, Clone, PartialOrd, Ord)]
 pub enum Terrain {
     Barren,
     Mountain,
     Fertile,
     Forest,
-    Exhausted,
+    Exhausted(Box<Terrain>),
     Water,
 }

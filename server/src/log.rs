@@ -157,7 +157,7 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
             )
         }
         StatusPhaseAction::FreeAdvance(advance) => {
-            format!("{player_name} advanced {advance}")
+            format!("{player_name} advanced {advance} for free")
         }
         StatusPhaseAction::RaseSize1City(city) => {
             format!(
