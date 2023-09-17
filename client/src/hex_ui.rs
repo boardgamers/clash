@@ -1,11 +1,18 @@
 use hex2d::{Coordinate, Spacing};
 use macroquad::color::{Color, DARKGRAY};
-use macroquad::math::{f32, i32};
-use macroquad::prelude::{draw_hexagon, draw_text, BLACK};
+use macroquad::math::{f32, i32, vec2};
+use macroquad::prelude::{
+    draw_hexagon, draw_text, draw_texture, draw_texture_ex, load_texture, DrawTextureParams, Rect,
+    Texture2D, BLACK, WHITE,
+};
+use server::map::Terrain;
 use server::position::Position;
 use std::f32::consts::PI;
 
 const SIZE: f32 = 60.0;
+
+const SHORT_SIZE: f32 = SIZE * 0.866_025_4;
+
 const SPACING: Spacing = Spacing::FlatTop(SIZE);
 
 pub fn center(pos: Position) -> Point {
@@ -14,12 +21,33 @@ pub fn center(pos: Position) -> Point {
     Point { x: p.0, y: p.1 }.to_screen()
 }
 
-pub fn draw_hex(p: Position, fill_color: Color, text_color: Color, alpha: f32) {
+pub async fn draw_hex(p: Position, fill_color: Color, text_color: Color, alpha: f32, t: &Terrain) {
     let c = center(p);
     let mut v = fill_color.to_vec();
     v.w = alpha;
 
-    draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, Color::from_vec(v));
+    let file = match t {
+        Terrain::Barren => "assets/barren.png",
+        Terrain::Mountain => "assets/mountain.png",
+        Terrain::Fertile => "assets/grassland.png",
+        Terrain::Forest => "assets/forest.png",
+        Terrain::Exhausted => "assets/grassland.png", //todo
+        Terrain::Water => "assets/water.png",
+    };
+
+    let texture: Texture2D = load_texture(file).await.unwrap();
+    draw_texture_ex(
+        &texture,
+        c.x - SIZE,
+        c.y - SHORT_SIZE,
+        WHITE,
+        DrawTextureParams {
+            source: Some(Rect::new(0., 0., 298., 257.)),
+            dest_size: Some(vec2(SIZE * 2.0, SHORT_SIZE * 2.)),
+            ..Default::default()
+        },
+    );
+    // draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, Color::from_vec(v));
     draw_text(&p.to_string(), c.x - 30.0, c.y - 35.0, 20.0, text_color);
 }
 

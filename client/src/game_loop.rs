@@ -27,18 +27,18 @@ pub async fn run(game: &mut Game) {
 
     set_fullscreen(true);
     loop {
-        let update = game_loop(game, &state);
+        let update = game_loop(game, &state).await;
         state.update(game, update);
 
         next_frame().await;
     }
 }
 
-fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
+async fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
     let player_index = game.active_player();
     clear_background(WHITE);
 
-    draw_map(game, state);
+    draw_map(game, state).await;
     let mut updates = StateUpdates::new();
     updates.add(show_advance_menu(game, player_index));
     show_globals(game);
@@ -113,7 +113,7 @@ fn import(game: &mut Game) {
 
 fn export(game: &Game) {
     serde_json::to_writer_pretty(
-        std::fs::File::create(EXPORT_FILE).expect("Failed to create export file"),
+        File::create(EXPORT_FILE).expect("Failed to create export file"),
         &game.cloned_data(),
     )
     .expect("Failed to write export file");

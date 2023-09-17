@@ -40,8 +40,8 @@ fn terrain_name(t: &Terrain) -> &'static str {
     }
 }
 
-pub fn draw_map(game: &Game, state: &State) {
-    game.map.tiles.iter().for_each(|(pos, t)| {
+pub async fn draw_map(game: &Game, state: &State) {
+    for (pos, t) in &game.map.tiles {
         let c = terrain_color(t);
         let alpha = match &state.active_dialog {
             ActiveDialog::MoveUnits(s) => {
@@ -75,7 +75,7 @@ pub fn draw_map(game: &Game, state: &State) {
         };
 
         let text_color = if c.1 { WHITE } else { BLACK };
-        hex_ui::draw_hex(*pos, c.0, text_color, alpha);
+        hex_ui::draw_hex(*pos, c.0, text_color, alpha, t).await;
         collect_ui::draw_resource_collect_tile(state, *pos);
     });
     if let Combat(c) = &game.state {
