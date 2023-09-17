@@ -2,6 +2,7 @@ use std::{
     collections::HashMap,
     fs::{self, OpenOptions},
     io::Write,
+    path::MAIN_SEPARATOR as SEPARATOR,
 };
 
 use server::{
@@ -363,7 +364,7 @@ fn assert_eq_game_json(
     if expected == actual {
         return;
     }
-    let file_path = format!("tests\\test_games\\{test}.result.json");
+    let file_path = format!("tests{SEPARATOR}test_games{SEPARATOR}{test}.result.json");
     let mut file = OpenOptions::new()
         .write(true)
         .create(true)
@@ -371,7 +372,7 @@ fn assert_eq_game_json(
         .expect("Failed to create output file");
     file.write_all(actual.as_bytes())
         .expect("Failed to write output file");
-    let expected_path = format!("tests\\test_games\\{expected_path}.json");
+    let expected_path = format!("tests{SEPARATOR}test_games{SEPARATOR}{expected_path}.json");
     panic!("{test} test failed: {message}. Expected game was not equal to the actual game. See 'expected' at {expected_path} and 'actual' at {file_path}.");
 }
 
@@ -382,7 +383,7 @@ fn test_action(
     undoable: bool,
     illegal_action_test: bool,
 ) {
-    let path = format!("tests\\test_games\\{game_path}.json");
+    let path = format!("tests{SEPARATOR}test_games{SEPARATOR}{game_path}.json");
     let original_game =
         fs::read_to_string(path).expect("game file should exist in the test games folder");
     let game = Game::from_data(
@@ -394,7 +395,7 @@ fn test_action(
     }
     let json = serde_json::to_string_pretty(&game.cloned_data())
         .expect("game data should be serializable");
-    let expected_path = format!("tests\\test_games\\{game_path}.outcome.json");
+    let expected_path = format!("tests{SEPARATOR}test_games{SEPARATOR}{game_path}.outcome.json");
     let expected_game =
         fs::read_to_string(expected_path).expect("outcome file should be deserializable");
     assert_eq_game_json(
