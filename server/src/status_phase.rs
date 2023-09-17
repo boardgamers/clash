@@ -144,6 +144,7 @@ fn next_phase(game: &mut Game, phase: Option<StatusPhaseState>) -> StatusPhaseSt
 }
 
 /// # Panics
+///
 /// Panics if the game state is not valid
 pub fn skip_status_phase_players(game: &mut Game) {
     let mut phase = match game.state {
@@ -158,27 +159,34 @@ pub fn skip_status_phase_players(game: &mut Game) {
 
         game.skip_dropped_players();
 
-        if execute_phase(game, game.active_player(), phase.as_ref().unwrap()) {
+        if !skip_player(
+            game,
+            game.active_player(),
+            phase.as_ref().expect("phase should be set"),
+        ) {
             return;
         }
         game.increment_player_index();
     }
 }
 
-fn execute_phase(game: &Game, player_index: usize, state: &StatusPhaseState) -> bool {
+fn skip_player(game: &Game, player_index: usize, state: &StatusPhaseState) -> bool {
     let player = &game.players[player_index];
     match state {
-        StatusPhaseState::CompleteObjectives => false, //todo only skip player if the does'nt have objective cards in his hand (don't skip if the can't complete them unless otherwise specified via setting)
-        StatusPhaseState::FreeAdvance => advances::get_all()
+        StatusPhaseState::CompleteObjectives => true, //todo only skip player if the doesn't have objective cards in his hand (don't skip if the can't complete them unless otherwise specified via setting)
+        StatusPhaseState::FreeAdvance => !advances::get_all()
             .into_iter()
             .any(|advance| player.can_advance_free(&advance.name)),
-        StatusPhaseState::RaseSize1City => player.cities.iter().any(|city| city.size() == 1),
-        StatusPhaseState::ChangeGovernmentType => player.government().is_some_and(|government| {
-            advances::get_governments()
-                .iter()
-                .any(|(g, a)| g != &government && player.can_advance(a))
-        }),
-        StatusPhaseState::DetermineFirstPlayer => true,
+        StatusPhaseState::RaseSize1City => !player.cities.iter().any(|city| city.size() == 1),
+        StatusPhaseState::ChangeGovernmentType => {
+            player.government().is_none()
+                || player.government().is_some_and(|government| {
+                    !advances::get_governments()
+                        .iter()
+                        .any(|(g, a)| g != &government && player.can_advance(a))
+                })
+        }
+        StatusPhaseState::DetermineFirstPlayer => false,
     }
 }
 

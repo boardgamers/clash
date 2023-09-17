@@ -66,7 +66,7 @@ impl Unit {
                 .tiles
                 .get(&self.position)
                 .expect("The unit should be at a valid position"),
-            Barren | Exhausted
+            Barren | Exhausted(_)
         ) {
             return false;
         }

@@ -1,4 +1,5 @@
 #![warn(clippy::pedantic)]
+#![warn(clippy::unwrap_used)]
 #![allow(clippy::similar_names)]
 #![allow(clippy::enum_glob_use)]
 #![allow(clippy::too_many_lines)]

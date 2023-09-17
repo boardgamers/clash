@@ -1,9 +1,16 @@
-use std::{collections::HashMap, fs};
+use std::{
+    collections::HashMap,
+    fs::{self, OpenOptions},
+    io::Write,
+};
 
 use server::{
     action::Action,
     city::{City, MoodState::*},
-    city_pieces::{AvailableCityPieces, Building},
+    city_pieces::{
+        AvailableCityPieces,
+        Building::{self, *},
+    },
     content::custom_actions::CustomAction::*,
     game::{Game, GameState::*},
     game_api,
@@ -11,6 +18,7 @@ use server::{
     playing_actions::PlayingAction::*,
     position::Position,
     resource_pile::ResourcePile,
+    status_phase::StatusPhaseAction::*,
     unit::{MovementAction::*, UnitType::*},
 };
 
@@ -345,45 +353,134 @@ fn undo() {
     assert_undo(&game, false, false, 1, 1, 1);
 }
 
-fn _test_action(game_path: &str, action: Action, player_index: usize) {
-    let path = format!("test_games\\{game_path}.json");
+fn assert_eq_game_json(
+    expected: &str,
+    actual: &str,
+    test: &str,
+    expected_path: &str,
+    message: &str,
+) {
+    if expected == actual {
+        return;
+    }
+    let file_path = format!("tests\\test_games\\{test}.result.json");
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create(true)
+        .open(&file_path)
+        .expect("Failed to create output file");
+    file.write_all(actual.as_bytes())
+        .expect("Failed to write output file");
+    let expected_path = format!("tests\\test_games\\{expected_path}.json");
+    panic!("{test} test failed: {message}. Expected game was not equal to the actual game. See 'expected' at {expected_path} and 'actual' at {file_path}.");
+}
+
+fn test_action(
+    game_path: &str,
+    action: Action,
+    player_index: usize,
+    undoable: bool,
+    illegal_action_test: bool,
+) {
+    let path = format!("tests\\test_games\\{game_path}.json");
     let original_game =
         fs::read_to_string(path).expect("game file should exist in the test games folder");
     let game = Game::from_data(
         serde_json::from_str(&original_game).expect("the game file should be deserializable"),
     );
     let game = game_api::execute_action(game, action, player_index);
-    let new_game =
-        serde_json::to_string(&game.cloned_data()).expect("game data should be serializable");
-    let expected_path = format!("test_games\\{game_path}.outcome.json");
+    if illegal_action_test {
+        return;
+    }
+    let json = serde_json::to_string_pretty(&game.cloned_data())
+        .expect("game data should be serializable");
+    let expected_path = format!("tests\\test_games\\{game_path}.outcome.json");
     let expected_game =
         fs::read_to_string(expected_path).expect("outcome file should be deserializable");
-    assert_eq!(expected_game, new_game);
+    assert_eq_game_json(
+        &expected_game,
+        &json,
+        game_path,
+        &(game_path.to_string() + ".outcome"),
+        &format!("the game did not match the expectation after the initial {game_path} action"),
+    );
+    if !undoable {
+        assert!(!game.can_undo());
+        return;
+    }
     let game = game_api::execute_action(game, Action::Undo, player_index);
-    let json =
-        serde_json::to_string(&game.cloned_data()).expect("game data should be serializable");
-    assert_eq!(original_game, json);
+    let mut trimmed_game = game.clone();
+    trimmed_game.action_log.pop();
+    let json = serde_json::to_string_pretty(&trimmed_game.data())
+        .expect("game data should be serializable");
+    assert_eq_game_json(
+        &original_game,
+        &json,
+        game_path,
+        game_path,
+        &format!("the game did not match the expectation after undoing the {game_path} action"),
+    );
     let game = game_api::execute_action(game, Action::Redo, player_index);
     let json =
-        serde_json::to_string(&game.cloned_data()).expect("game data should be serializable");
-    assert_eq!(new_game, json);
-}
-
-fn _test_irreversible_action(game_path: &str, action: Action, player_index: usize) {
-    let path = format!("test_games\\{game_path}.json");
-    let game = fs::read_to_string(path).expect("game file should exist in the test games folder");
-    let game = Game::from_data(
-        serde_json::from_str(&game).expect("the game file should be deserializable"),
+        serde_json::to_string_pretty(&game.data()).expect("game data should be serializable");
+    assert_eq_game_json(
+        &expected_game,
+        &json,
+        game_path,
+        &(game_path.to_string() + ".outcome"),
+        &format!("the game did not match the expectation after redoing the {game_path} action"),
     );
-    let game = game_api::execute_action(game, action, player_index);
-    let game = serde_json::to_string(&game.data()).expect("game data should be serializable");
-    let expected_path = format!("test_games\\{game_path}.outcome.json");
-    let expected_game =
-        fs::read_to_string(expected_path).expect("outcome file should be deserializable");
-    assert_eq!(expected_game, game);
 }
 
 #[test]
-fn actions() {
-    //todo
+fn test_movement() {
+    test_action(
+        "movement",
+        Action::Movement(Move {
+            units: vec![4],
+            destination: Position::from_offset("B3"),
+        }),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
+fn test_cultural_influence_attempt() {
+    test_action(
+        "cultural_influence_attempt",
+        Action::Playing(InfluenceCultureAttempt {
+            starting_city_position: Position::from_offset("C1"),
+            target_player_index: 0,
+            target_city_position: Position::from_offset("C2"),
+            city_piece: Fortress,
+        }),
+        1,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_free_advance() {
+    test_action(
+        "free_advance",
+        Action::StatusPhase(FreeAdvance(String::from("Storage"))),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+#[should_panic]
+fn test_wrong_status_phase_action() {
+    test_action(
+        "illegal_free_advance",
+        Action::StatusPhase(RaseSize1City(None)),
+        0,
+        false,
+        true,
+    );
 }
