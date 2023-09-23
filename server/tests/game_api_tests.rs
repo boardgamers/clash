@@ -391,6 +391,9 @@ fn test_action(
     );
     let game = game_api::execute_action(game, action, player_index);
     if illegal_action_test {
+        println!(
+            "execute action was successful but should have panicked because the action is illegal"
+        );
         return;
     }
     let json = serde_json::to_string_pretty(&game.cloned_data())

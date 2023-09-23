@@ -673,25 +673,333 @@ impl Game {
         );
     }
 
-    #[allow(unused)]
     #[allow(clippy::needless_pass_by_value)]
-    #[allow(clippy::too_many_arguments)]
-    #[allow(clippy::boxed_local)]
-    #[allow(clippy::unused_self)]
+    //phase is consumed but it is not registered by clippy
     fn execute_combat_action(
         &mut self,
         action: CombatAction,
         initiation: Box<GameState>,
-        round: u32,
+        mut round: u32,
         phase: CombatPhase,
         defender: usize,
         defender_position: Position,
         attacker: usize,
         attacker_position: Position,
-        attackers: Vec<u32>,
+        mut attackers: Vec<u32>,
         can_retreat: bool,
     ) {
         assert!(phase.is_compatible_action(&action), "Illegal action");
+        match action {
+            CombatAction::PlayActionCard(card) => {
+                assert!(card.is_none());
+                //todo
+                let mut attacker_roll = 0;
+                for unit in &attackers {
+                    let unit = &self.players[attacker]
+                        .get_unit(*unit)
+                        .expect("attacker should have all attacking units")
+                        .unit_type;
+                    if unit.is_settler() {
+                        continue;
+                    }
+                    let dice_roll = self.get_next_dice_roll();
+                    attacker_roll += dice_roll / 2 + 1;
+                    //todo: use dice roll unit icon
+                }
+                let attacker_hits = attacker_roll / 5;
+                let mut defender_roll = 0;
+                let defender_units = self.players[defender].get_units(defender_position).len();
+                for unit in 0..defender_units {
+                    let unit = self.players[defender].get_units(defender_position)[unit];
+                    if unit.unit_type.is_settler() {
+                        continue;
+                    }
+                    let dice_roll = self.get_next_dice_roll();
+                    defender_roll += dice_roll / 2 + 1;
+                    //todo: use dice roll unit icon
+                }
+                let defender_hits = defender_roll / 5;
+                //todo: log dice rolls
+                if attacker_hits < defender_units as u8 && attacker_hits > 0 {
+                    self.state = Combat {
+                        initiation,
+                        round,
+                        phase: CombatPhase::RemoveCasualties {
+                            player: defender,
+                            casualties: attacker_hits,
+                            defender_hits: Some(defender_hits),
+                        },
+                        defender,
+                        defender_position,
+                        attacker,
+                        attacker_position,
+                        attackers,
+                        can_retreat,
+                    };
+                    return;
+                }
+                if attacker_hits >= defender_units as u8 {
+                    let defender_units = self.players[defender]
+                        .get_units(defender_position)
+                        .iter()
+                        .map(|unit| unit.id)
+                        .collect::<Vec<u32>>();
+                    for id in defender_units {
+                        self.kill_unit(id, defender, attacker);
+                    }
+                }
+                if defender_hits < attackers.len() as u8 && defender_hits > 0 {
+                    self.state = Combat {
+                        initiation,
+                        round,
+                        phase: CombatPhase::RemoveCasualties {
+                            player: attacker,
+                            casualties: defender_hits,
+                            defender_hits: None,
+                        },
+                        defender,
+                        defender_position,
+                        attacker,
+                        attacker_position,
+                        attackers,
+                        can_retreat,
+                    };
+                    return;
+                }
+                if defender_hits >= attackers.len() as u8 {
+                    for id in mem::take(&mut attackers) {
+                        self.kill_unit(id, attacker, defender);
+                    }
+                }
+                let defenders_left = self.players[defender].get_units(defender_position).len();
+                if attackers.is_empty() && defenders_left == 0 {
+                    //todo if the defender has a fortress he wins
+                    //todo otherwise: draw
+                    return;
+                }
+                if attackers.is_empty() {
+                    //todo defender wins
+                    return;
+                }
+                if defenders_left == 0 {
+                    for unit in attackers {
+                        let unit = self.players[attacker]
+                            .get_unit_mut(unit)
+                            .expect("attacker should have all attacking units");
+                        unit.position = defender_position;
+                    }
+                    //todo attacker wins
+                    return;
+                }
+                if can_retreat {
+                    self.state = Combat {
+                        initiation,
+                        round,
+                        phase: CombatPhase::Retreat,
+                        defender,
+                        defender_position,
+                        attacker,
+                        attacker_position,
+                        attackers,
+                        can_retreat: true,
+                    };
+                    return;
+                }
+                round += 1;
+            },
+            CombatAction::RemoveCasualties(units) => {
+                let CombatPhase::RemoveCasualties {
+                    player,
+                    casualties,
+                    defender_hits,
+                } = phase
+                else {
+                    unreachable!();
+                };
+                assert_eq!(casualties, units.len() as u8, "Illegal action");
+                let (fighting_units, opponent) = if player == defender {
+                    (self.players[player].get_units(defender_position).iter().map(|unit| unit.id).collect(), attacker)
+                } else if player == attacker {
+                    (attackers.clone(), defender)
+                } else {
+                    panic!("Illegal action")
+                };
+                assert!(units.iter().all(|unit| fighting_units.contains(unit)));
+                for unit in units {
+                    self.kill_unit(unit, player, opponent);
+                }
+                if let Some(defender_hits) = defender_hits {
+                    if defender_hits < attackers.len() as u8 && defender_hits > 0 {
+                        self.state = Combat { initiation, round, phase: CombatPhase::RemoveCasualties { player: defender, casualties: defender_hits, defender_hits: None }, defender, defender_position, attacker, attacker_position, attackers, can_retreat };
+                        return;
+                    }
+                    if defender_hits >= attackers.len() as u8 {
+                        for id in mem::take(&mut attackers) {
+                            self.kill_unit(id, attacker, defender);
+                        }
+                    }
+                }
+                let defenders_left = self.players[defender].get_units(defender_position).len();
+                if attackers.is_empty() && defenders_left == 0 {
+                    //todo if the defender has a fortress he wins
+                    //todo otherwise: draw
+                    return;
+                }
+                if attackers.is_empty() {
+                    //todo defender wins
+                    return;
+                }
+                if defenders_left == 0 {
+                    for unit in attackers {
+                        let unit = self.players[attacker]
+                            .get_unit_mut(unit)
+                            .expect("attacker should have all attacking units");
+                        unit.position = defender_position;
+                    }
+                    //todo attacker wins
+                    return;
+                }
+                if can_retreat {
+                    self.state = Combat {
+                        initiation,
+                        round,
+                        phase: CombatPhase::Retreat,
+                        defender,
+                        defender_position,
+                        attacker,
+                        attacker_position,
+                        attackers,
+                        can_retreat: true,
+                    };
+                    return;
+                }
+                round += 1;
+            }
+            CombatAction::Retreat(action) => {
+                if action {
+                    //todo draw
+                    return;
+                }
+                round += 1;
+            }
+        }
+        loop {
+            self.add_info_log_item(format!("\nRound {round}"));
+            //todo: go into tactics phase if either player has tactics card (also if they can not play it unless otherwise specified via setting)
+            let mut attacker_roll = 0;
+            for unit in &attackers {
+                let unit = &self.players[attacker]
+                    .get_unit(*unit)
+                    .expect("attacker should have all attacking units")
+                    .unit_type;
+                if unit.is_settler() {
+                    continue;
+                }
+                let dice_roll = self.get_next_dice_roll();
+                attacker_roll += dice_roll / 2 + 1;
+                //todo: use dice roll unit icon
+            }
+            let attacker_hits = attacker_roll / 5;
+            let mut defender_roll = 0;
+            let defender_units = self.players[defender].get_units(defender_position).len();
+            for unit in 0..defender_units {
+                let unit = self.players[defender].get_units(defender_position)[unit];
+                if unit.unit_type.is_settler() {
+                    continue;
+                }
+                let dice_roll = self.get_next_dice_roll();
+                defender_roll += dice_roll / 2 + 1;
+                //todo: use dice roll unit icon
+            }
+            let defender_hits = defender_roll / 5;
+            //todo: log dice rolls
+            if attacker_hits < defender_units as u8 && attacker_hits > 0 {
+                self.state = Combat {
+                    initiation,
+                    round,
+                    phase: CombatPhase::RemoveCasualties {
+                        player: defender,
+                        casualties: attacker_hits,
+                        defender_hits: Some(defender_hits),
+                    },
+                    defender,
+                    defender_position,
+                    attacker,
+                    attacker_position,
+                    attackers,
+                    can_retreat,
+                };
+                return;
+            }
+            if attacker_hits >= defender_units as u8 {
+                let defender_units = self.players[defender]
+                    .get_units(defender_position)
+                    .iter()
+                    .map(|unit| unit.id)
+                    .collect::<Vec<u32>>();
+                for id in defender_units {
+                    self.kill_unit(id, defender, attacker);
+                }
+            }
+            if defender_hits < attackers.len() as u8 && defender_hits > 0 {
+                self.state = Combat {
+                    initiation,
+                    round,
+                    phase: CombatPhase::RemoveCasualties {
+                        player: attacker,
+                        casualties: defender_hits,
+                        defender_hits: None,
+                    },
+                    defender,
+                    defender_position,
+                    attacker,
+                    attacker_position,
+                    attackers,
+                    can_retreat,
+                };
+                return;
+            }
+            if defender_hits >= attackers.len() as u8 {
+                for id in mem::take(&mut attackers) {
+                    self.kill_unit(id, attacker, defender);
+                }
+            }
+            let defenders_left = self.players[defender].get_units(defender_position).len();
+            if attackers.is_empty() && defenders_left == 0 {
+                //todo if the defender has a fortress he wins
+                //todo otherwise: draw
+                return;
+            }
+            if attackers.is_empty() {
+                //todo defender wins
+                return;
+            }
+            if defenders_left == 0 {
+                for unit in attackers {
+                    let unit = self.players[attacker]
+                        .get_unit_mut(unit)
+                        .expect("attacker should have all attacking units");
+                    unit.position = defender_position;
+                }
+                //todo attacker wins
+                return;
+            }
+            if can_retreat {
+                self.state = Combat {
+                    initiation,
+                    round,
+                    phase: CombatPhase::Retreat,
+                    defender,
+                    defender_position,
+                    attacker,
+                    attacker_position,
+                    attackers,
+                    can_retreat: true,
+                };
+                return;
+            }
+            round += 1;
+        }
     }
 
     fn execute_place_settler_action(
@@ -767,7 +1075,7 @@ impl Game {
                 CombatPhase::RemoveCasualties {
                     player,
                     casualties: _,
-                    counter_hits: _,
+                    defender_hits: _,
                 }
                 | CombatPhase::PlayActionCard(player) => *player,
                 CombatPhase::Retreat => *attacker,
@@ -1511,7 +1819,7 @@ impl Game {
                     phase: CombatPhase::RemoveCasualties {
                         player: defender,
                         casualties: attacker_hits,
-                        counter_hits: Some(defender_hits),
+                        defender_hits: Some(defender_hits),
                     },
                     defender,
                     defender_position,
@@ -1540,7 +1848,7 @@ impl Game {
                     phase: CombatPhase::RemoveCasualties {
                         player: attacker,
                         casualties: defender_hits,
-                        counter_hits: None,
+                        defender_hits: None,
                     },
                     defender,
                     defender_position,
@@ -1691,7 +1999,7 @@ pub enum CombatPhase {
     RemoveCasualties {
         player: usize,
         casualties: u8,
-        counter_hits: Option<u8>,
+        defender_hits: Option<u8>,
     },
     Retreat,
 }
