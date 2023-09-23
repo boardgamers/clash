@@ -501,6 +501,17 @@ fn test_free_advance() {
 }
 
 #[test]
+fn test_found_city() {
+    test_action(
+        "found_city",
+        Action::Playing(FoundCity { settler: 4 }),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
 #[should_panic(expected = "Illegal action")]
 fn test_wrong_status_phase_action() {
     test_action(

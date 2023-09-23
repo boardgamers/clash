@@ -219,7 +219,11 @@ impl Player {
             resources: self.resources,
             resource_limit: self.resource_limit,
             cities: self.cities.into_iter().map(City::data).collect(),
-            units: self.units,
+            units: self
+                .units
+                .into_iter()
+                .sorted_by_key(|unit| unit.id)
+                .collect(),
             civilization: self.civilization.name,
             active_leader: self.active_leader.map(|leader| leader.name),
             available_leaders: self
