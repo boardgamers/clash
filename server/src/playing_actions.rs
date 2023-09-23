@@ -331,7 +331,7 @@ impl PlayingAction {
                 leader_index,
                 replaced_units: _,
             } => {
-                game.players[player_index].loose_resources(payment);
+                game.players[player_index].gain_resources(payment);
                 game.undo_recruit(player_index, &units, city_position, leader_index);
             }
             MoveUnits => game.state = Playing,
