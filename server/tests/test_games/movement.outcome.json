@@ -45,10 +45,7 @@
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
-          "position": {
-            "q": 0,
-            "r": 0
-          },
+          "position": "A1",
           "port_position": null
         },
         {
@@ -66,20 +63,14 @@
           "activations": 8,
           "angry_activation": false,
           "player_index": 0,
-          "position": {
-            "q": 2,
-            "r": 0
-          },
+          "position": "C2",
           "port_position": null
         }
       ],
       "units": [
         {
           "player_index": 0,
-          "position": {
-            "q": 2,
-            "r": 0
-          },
+          "position": "C2",
           "unit_type": "Infantry",
           "movement_restriction": "None",
           "transporter_position": null,
@@ -87,10 +78,7 @@
         },
         {
           "player_index": 0,
-          "position": {
-            "q": 2,
-            "r": 0
-          },
+          "position": "C2",
           "unit_type": "Cavalry",
           "movement_restriction": "None",
           "transporter_position": null,
@@ -98,10 +86,7 @@
         },
         {
           "player_index": 0,
-          "position": {
-            "q": 2,
-            "r": 0
-          },
+          "position": "C2",
           "unit_type": "Leader",
           "movement_restriction": "None",
           "transporter_position": null,
@@ -109,10 +94,7 @@
         },
         {
           "player_index": 0,
-          "position": {
-            "q": 2,
-            "r": 0
-          },
+          "position": "C2",
           "unit_type": "Elephant",
           "movement_restriction": "None",
           "transporter_position": null,
@@ -120,10 +102,7 @@
         },
         {
           "player_index": 0,
-          "position": {
-            "q": 1,
-            "r": 2
-          },
+          "position": "B3",
           "unit_type": "Settler",
           "movement_restriction": {
             "Attack": 1
@@ -133,10 +112,7 @@
         },
         {
           "player_index": 0,
-          "position": {
-            "q": 2,
-            "r": 0
-          },
+          "position": "C2",
           "unit_type": "Settler",
           "movement_restriction": "None",
           "transporter_position": null,
@@ -144,10 +120,7 @@
         },
         {
           "player_index": 0,
-          "position": {
-            "q": 2,
-            "r": 0
-          },
+          "position": "C2",
           "unit_type": "Settler",
           "movement_restriction": "None",
           "transporter_position": null,
@@ -155,10 +128,7 @@
         },
         {
           "player_index": 0,
-          "position": {
-            "q": 2,
-            "r": 0
-          },
+          "position": "C2",
           "unit_type": "Settler",
           "movement_restriction": "None",
           "transporter_position": null,
@@ -283,20 +253,14 @@
           "activations": 2,
           "angry_activation": false,
           "player_index": 1,
-          "position": {
-            "q": 2,
-            "r": -1
-          },
+          "position": "C1",
           "port_position": null
         }
       ],
       "units": [
         {
           "player_index": 1,
-          "position": {
-            "q": 2,
-            "r": -1
-          },
+          "position": "C1",
           "unit_type": "Infantry",
           "movement_restriction": "None",
           "transporter_position": null,
@@ -304,10 +268,7 @@
         },
         {
           "player_index": 1,
-          "position": {
-            "q": 2,
-            "r": -1
-          },
+          "position": "C1",
           "unit_type": "Infantry",
           "movement_restriction": "None",
           "transporter_position": null,
@@ -399,73 +360,43 @@
   "map": {
     "tiles": [
       [
-        {
-          "q": 0,
-          "r": 0
-        },
+        "A1",
         "Fertile"
       ],
       [
-        {
-          "q": 0,
-          "r": 1
-        },
+        "A2",
         "Water"
       ],
       [
-        {
-          "q": 0,
-          "r": 2
-        },
+        "A3",
         "Mountain"
       ],
       [
-        {
-          "q": 1,
-          "r": 0
-        },
+        "B1",
         "Mountain"
       ],
       [
-        {
-          "q": 1,
-          "r": 1
-        },
+        "B2",
         "Forest"
       ],
       [
-        {
-          "q": 1,
-          "r": 2
-        },
+        "B3",
         "Fertile"
       ],
       [
-        {
-          "q": 2,
-          "r": -1
-        },
+        "C1",
         "Barren"
       ],
       [
-        {
-          "q": 2,
-          "r": 0
-        },
+        "C2",
         "Forest"
       ],
       [
-        {
-          "q": 2,
-          "r": 1
-        },
+        "C3",
         "Water"
       ],
       [
-        {
-          "q": 3,
-          "r": 0
-        },
+        "D2",
         "Water"
       ]
     ]
@@ -479,15 +410,12 @@
           "units": [
             4
           ],
-          "destination": {
-            "q": 1,
-            "r": 2
-          }
+          "destination": "B3"
         }
       }
     }
   ],
-  "action_log_index": 5,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -588,10 +516,7 @@
     },
     {
       "Movement": {
-        "starting_position": {
-          "q": 2,
-          "r": 0
-        },
+        "starting_position": "C2",
         "movement_actions_left": 3,
         "moved_units": [
           4
@@ -609,10 +534,7 @@
     },
     {
       "Movement": {
-        "starting_position": {
-          "q": 1,
-          "r": 1
-        },
+        "starting_position": "B2",
         "movement_actions_left": 3,
         "moved_units": [
           4

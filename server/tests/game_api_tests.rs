@@ -368,12 +368,24 @@ fn assert_eq_game_json(
     let mut file = OpenOptions::new()
         .write(true)
         .create(true)
+        .truncate(true)
         .open(&file_path)
         .expect("Failed to create output file");
     file.write_all(actual.as_bytes())
         .expect("Failed to write output file");
     let expected_path = format!("tests{SEPARATOR}test_games{SEPARATOR}{expected_path}.json");
-    panic!("{test} test failed: {message}. Expected game was not equal to the actual game. See 'expected' at {expected_path} and 'actual' at {file_path}.");
+
+    assert_eq!(
+        expected,
+        actual,
+        "{}",
+        format_args!(
+            "{test} test failed:\n\
+            {message}.\n\
+            Expected game was not equal to the actual game.\n\
+            See 'expected' at {expected_path} and 'actual' at {file_path}."
+        )
+    );
 }
 
 fn test_action(
