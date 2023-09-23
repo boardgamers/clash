@@ -512,6 +512,23 @@ fn test_found_city() {
 }
 
 #[test]
+fn test_collect() {
+    test_action(
+        "collect",
+        Action::Playing(Collect {
+            city_position: Position::from_offset("C2"),
+            collections: vec![
+                (Position::from_offset("B1"), ResourcePile::ore(1)),
+                (Position::from_offset("B2"), ResourcePile::wood(1)),
+            ],
+        }),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
 fn test_construct() {
     test_action(
         "construct",
