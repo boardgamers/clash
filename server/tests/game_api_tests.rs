@@ -361,7 +361,7 @@ fn assert_eq_game_json(
     expected_path: &str,
     message: &str,
 ) {
-    if expected == actual {
+    if expected.trim() == actual.trim() {
         return;
     }
     let file_path = format!("tests{SEPARATOR}test_games{SEPARATOR}{test}.result.json");

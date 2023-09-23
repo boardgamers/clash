@@ -73,7 +73,7 @@ impl Action {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub enum CombatAction {
     PlayActionCard(Option<String>),
     RemoveCasualties(Vec<u32>),

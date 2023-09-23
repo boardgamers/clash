@@ -370,7 +370,7 @@ impl Display for Units {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub enum MovementAction {
     Move {
         units: Vec<u32>,

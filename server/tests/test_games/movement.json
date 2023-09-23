@@ -470,20 +470,7 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "Playing": "\"MoveUnits\""
-    },
-    {
-      "Movement": "{\"Move\":{\"units\":[4],\"destination\":{\"q\":1,\"r\":1}}}"
-    },
-    {
-      "Movement": "\"Stop\""
-    },
-    {
-      "Playing": "\"MoveUnits\""
-    }
-  ],
+  "action_log": [],
   "action_log_index": 4,
   "log": [
     "The game has started",

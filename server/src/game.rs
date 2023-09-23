@@ -303,20 +303,15 @@ impl Game {
             Playing => {
                 let action = action.playing().expect("action should be a playing action");
                 if self.can_redo()
-                    && serde_json::from_str::<PlayingAction>(
-                        self.action_log[self.action_log_index]
-                            .as_playing_action()
-                            .expect("undone actions should be playing actions"),
-                    )
-                    .expect("action should be deserializable")
+                    && self.action_log[self.action_log_index]
+                        .as_playing_action()
+                        .expect("undone actions should be playing actions")
                         == action
                 {
                     self.redo(player_index);
                     return;
                 }
-                self.add_action_log_item(ActionLogItem::Playing(
-                    serde_json::to_string(&action).expect("playing action should be serializable"),
-                ));
+                self.add_action_log_item(ActionLogItem::Playing(action.clone()));
                 action.execute(self, player_index);
             }
             StatusPhase(phase) => {
@@ -324,10 +319,7 @@ impl Game {
                     .status_phase()
                     .expect("action should be a status phase action");
                 assert!(phase == action.phase(), "Illegal action");
-                self.add_action_log_item(ActionLogItem::StatusPhase(
-                    serde_json::to_string(&action)
-                        .expect("status phase action should be serializable"),
-                ));
+                self.add_action_log_item(ActionLogItem::StatusPhase(action.clone()));
                 action.execute(self, player_index);
             }
             Movement {
@@ -337,9 +329,7 @@ impl Game {
                 let action = action
                     .movement()
                     .expect("action should be a movement action");
-                self.add_action_log_item(ActionLogItem::Movement(
-                    serde_json::to_string(&action).expect("movement action should be serializable"),
-                ));
+                self.add_action_log_item(ActionLogItem::Movement(action.clone()));
                 self.execute_movement_action(
                     action,
                     player_index,
@@ -356,9 +346,7 @@ impl Game {
                 let action = action
                     .cultural_influence_resolution()
                     .expect("action should be a cultural influence resolution action");
-                self.add_action_log_item(ActionLogItem::CulturalInfluenceResolution(
-                    serde_json::to_string(&action).expect("playing action should be serializable"),
-                ));
+                self.add_action_log_item(ActionLogItem::CulturalInfluenceResolution(action));
                 self.execute_cultural_influence_resolution_action(
                     action,
                     roll_boost_cost,
@@ -380,9 +368,7 @@ impl Game {
                 can_retreat,
             } => {
                 let action = action.combat().expect("action should be a combat action");
-                self.add_action_log_item(ActionLogItem::Combat(
-                    serde_json::to_string(&action).expect("combat action should be serializable"),
-                ));
+                self.add_action_log_item(ActionLogItem::Combat(action.clone()));
                 self.execute_combat_action(
                     action,
                     initiation,
@@ -404,10 +390,7 @@ impl Game {
                 let action = action
                     .place_settler()
                     .expect("action should be place_settler action");
-                self.add_action_log_item(ActionLogItem::PlaceSettler(
-                    serde_json::to_string(&action)
-                        .expect("place settler action should be serializable"),
-                ));
+                self.add_action_log_item(ActionLogItem::PlaceSettler(action));
                 self.execute_place_settler_action(
                     action,
                     player_index,
@@ -421,10 +404,14 @@ impl Game {
 
     fn undo(&mut self, player_index: usize) {
         match &self.action_log[self.action_log_index - 1] {
-            ActionLogItem::Playing(action) => serde_json::from_str::<PlayingAction>(action).expect("log item variant of type playing action should contain a serialized playing action").undo(self, player_index),
+            ActionLogItem::Playing(action) => action.clone().undo(self, player_index),
             ActionLogItem::StatusPhase(_) => panic!("status phase actions can't be undone"),
-            ActionLogItem::Movement(action) => self.undo_movement_action(serde_json::from_str::<MovementAction>(action).expect("log item variant of type movement action should contain a serialized movement action"), player_index),
-            ActionLogItem::CulturalInfluenceResolution(action) => self.undo_cultural_influence_resolution_action(serde_json::from_str::<bool>(action).expect("cultural influence resolution log item should contain a serialized boolean representing the confirmation action")),
+            ActionLogItem::Movement(action) => {
+                self.undo_movement_action(action.clone(), player_index);
+            }
+            ActionLogItem::CulturalInfluenceResolution(action) => {
+                self.undo_cultural_influence_resolution_action(*action);
+            }
             ActionLogItem::Combat(_action) => unimplemented!("retreat can't yet be undone"),
             ActionLogItem::PlaceSettler(_action) => panic!("placing a settler can't be undone"),
         }
@@ -435,17 +422,13 @@ impl Game {
     fn redo(&mut self, player_index: usize) {
         let action_log_item = &self.action_log[self.action_log_index];
         self.log.push(log::format_action_log_item(
-            &action_log_item.as_action(),
+            &action_log_item.clone().as_action(),
             self,
         ));
         match action_log_item {
-            ActionLogItem::Playing(action) => serde_json::from_str::<PlayingAction>(action)
-                .expect("action should be deserializable")
-                .execute(self, player_index),
+            ActionLogItem::Playing(action) => action.clone().execute(self, player_index),
             ActionLogItem::StatusPhase(_) => panic!("status phase actions can't be redone"),
             ActionLogItem::Movement(action) => {
-                let action = serde_json::from_str::<MovementAction>(action)
-                    .expect("movement action should be deserializable");
                 let Movement {
                     movement_actions_left,
                     moved_units,
@@ -456,14 +439,13 @@ impl Game {
                     );
                 };
                 self.execute_movement_action(
-                    action,
+                    action.clone(),
                     player_index,
                     *movement_actions_left,
                     moved_units.clone(),
                 );
             }
             ActionLogItem::CulturalInfluenceResolution(action) => {
-                let action = serde_json::from_str::<bool>(action).expect("action should be a serialized boolean representing the cultural influence resolution confirmation action");
                 let CulturalInfluenceResolution {
                     roll_boost_cost,
                     target_player_index,
@@ -474,7 +456,7 @@ impl Game {
                     panic!("cultural influence resolution actions can only be redone if the game is in a cultural influence resolution state");
                 };
                 self.execute_cultural_influence_resolution_action(
-                    action,
+                    *action,
                     *roll_boost_cost,
                     *target_player_index,
                     *target_city_position,
@@ -641,7 +623,6 @@ impl Game {
 
     fn undo_cultural_influence_resolution_action(&mut self, action: bool) {
         let cultural_influence_attempt_action = self.action_log[self.action_log_index - 2].as_playing_action().expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
-        let cultural_influence_attempt_action = serde_json::from_str::<PlayingAction>(cultural_influence_attempt_action).expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
         let PlayingAction::InfluenceCultureAttempt {
             starting_city_position: _,
             target_player_index,
