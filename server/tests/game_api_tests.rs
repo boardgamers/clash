@@ -479,6 +479,17 @@ fn test_cultural_influence_attempt() {
 }
 
 #[test]
+fn test_cultural_influence_resolution() {
+    test_action(
+        "cultural_influence_resolution",
+        Action::CulturalInfluenceResolution(true),
+        1,
+        true,
+        false,
+    );
+}
+
+#[test]
 fn test_free_advance() {
     test_action(
         "free_advance",

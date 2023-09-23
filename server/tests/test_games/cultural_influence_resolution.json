@@ -1,5 +1,12 @@
 {
-  "state": "Playing",
+  "state": {
+    "CulturalInfluenceResolution": {
+      "roll_boost_cost": 4,
+      "target_player_index": 0,
+      "target_city_position": "C2",
+      "city_piece": "Fortress"
+    }
+  },
   "players": [
     {
       "name": null,
@@ -47,7 +54,7 @@
             "market": null,
             "obelisk": null,
             "observatory": null,
-            "fortress": 1,
+            "fortress": 0,
             "port": null,
             "temple": null,
             "wonders": []
@@ -150,7 +157,7 @@
         "markets": 5,
         "obelisks": 5,
         "observatories": 5,
-        "fortresses": 5,
+        "fortresses": 4,
         "ports": 5,
         "temples": 5
       },
@@ -218,7 +225,7 @@
         "ideas": 7,
         "gold": 7,
         "mood_tokens": 7,
-        "culture_tokens": 3
+        "culture_tokens": 7
       },
       "resource_limit": {
         "food": 2,
@@ -279,7 +286,7 @@
       "wonders_build": 0,
       "leader_position": null,
       "game_event_tokens": 3,
-      "influenced_buildings": 1,
+      "influenced_buildings": 0,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -290,7 +297,7 @@
         "markets": 5,
         "obelisks": 5,
         "observatories": 5,
-        "fortresses": 4,
+        "fortresses": 5,
         "ports": 5,
         "temples": 5
       },
@@ -405,12 +412,9 @@
           "city_piece": "Fortress"
         }
       }
-    },
-    {
-      "CulturalInfluenceResolution": true
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -419,13 +423,12 @@
     "Player1 payed 1 food, 1 wood and 1 ore to construct a Fortress in the city at C2 making it Angry",
     "Player1 ended his turn with 1 actions left",
     "It's Player2's turn",
-    "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1and rolled a 1. Player2 now has the option to pay 4 culture tokens to increase the dice roll and proceed with the cultural influence",
-    "Player2 payed 1 culture tokens to increased the dice roll and proceed with the cultural influence"
+    "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1and rolled a 1. Player2 now has the option to pay 4 culture tokens to increase the dice roll and proceed with the cultural influence"
   ],
   "undo_limit": 1,
   "played_once_per_turn_actions": [],
   "actions_left": 2,
-  "successful_cultural_influence": true,
+  "successful_cultural_influence": false,
   "round": 1,
   "age": 1,
   "messages": [

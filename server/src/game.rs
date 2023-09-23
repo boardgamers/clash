@@ -637,8 +637,9 @@ impl Game {
                 "there should be a dice roll before a cultural influence resolution action",
             ) / 2
                 + 1;
+        let roll_boost_cost = 5 - roll as u32;
         self.state = CulturalInfluenceResolution {
-            roll_boost_cost: 5 - roll as u32,
+            roll_boost_cost,
             target_player_index,
             target_city_position,
             city_piece: city_piece.clone(),
@@ -646,6 +647,8 @@ impl Game {
         if !action {
             return;
         }
+        self.players[self.current_player_index]
+            .gain_resources(ResourcePile::culture_tokens(roll_boost_cost));
         self.undo_influence_culture(
             self.current_player_index,
             target_player_index,
