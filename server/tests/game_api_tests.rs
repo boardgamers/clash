@@ -512,6 +512,23 @@ fn test_found_city() {
 }
 
 #[test]
+fn test_construct() {
+    test_action(
+        "construct",
+        Action::Playing(Construct {
+            city_position: Position::from_offset("C2"),
+            city_piece: Observatory,
+            payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
+            port_position: None,
+            temple_bonus: None,
+        }),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
 #[should_panic(expected = "Illegal action")]
 fn test_wrong_status_phase_action() {
     test_action(

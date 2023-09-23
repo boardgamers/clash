@@ -5,12 +5,12 @@
       "name": null,
       "id": 0,
       "resources": {
-        "food": 1,
-        "wood": 6,
-        "ore": 6,
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
         "ideas": 5,
         "gold": 7,
-        "mood_tokens": 7,
+        "mood_tokens": 6,
         "culture_tokens": 7
       },
       "resource_limit": {
@@ -47,13 +47,13 @@
             "market": null,
             "obelisk": null,
             "observatory": null,
-            "fortress": 1,
+            "fortress": null,
             "port": null,
             "temple": null,
             "wonders": []
           },
-          "mood_state": "Angry",
-          "activations": 0,
+          "mood_state": "Happy",
+          "activations": 8,
           "angry_activation": false,
           "player_index": 0,
           "position": "C2",
@@ -132,7 +132,7 @@
       "advances": [
         "Farming",
         "Mining",
-        "Tactics"
+        "Math"
       ],
       "unlocked_special_advance": [],
       "wonders": [],
@@ -218,7 +218,7 @@
         "ideas": 7,
         "gold": 7,
         "mood_tokens": 7,
-        "culture_tokens": 3
+        "culture_tokens": 7
       },
       "resource_limit": {
         "food": 2,
@@ -279,7 +279,7 @@
       "wonders_build": 0,
       "leader_position": null,
       "game_event_tokens": 3,
-      "influenced_buildings": 1,
+      "influenced_buildings": 0,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -290,7 +290,7 @@
         "markets": 5,
         "obelisks": 5,
         "observatories": 5,
-        "fortresses": 4,
+        "fortresses": 5,
         "ports": 5,
         "temples": 5
       },
@@ -361,7 +361,9 @@
       ],
       [
         "A3",
-        "Mountain"
+        {
+          "Exhausted": "Forest"
+        }
       ],
       [
         "B1",
@@ -394,20 +396,39 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 1,
+  "current_player_index": 0,
   "action_log": [
     {
       "Playing": {
-        "InfluenceCultureAttempt": {
-          "starting_city_position": "C1",
-          "target_player_index": 0,
-          "target_city_position": "C2",
-          "city_piece": "Fortress"
+        "IncreaseHappiness": {
+          "happiness_increases": [
+            [
+              "A1",
+              0
+            ],
+            [
+              "C2",
+              1
+            ]
+          ]
         }
       }
     },
     {
-      "CulturalInfluenceResolution": true
+      "Playing": {
+        "Advance": {
+          "advance": "Math",
+          "payment": {
+            "food": 0,
+            "wood": 0,
+            "ore": 0,
+            "ideas": 2,
+            "gold": 0,
+            "mood_tokens": 0,
+            "culture_tokens": 0
+          }
+        }
+      }
     }
   ],
   "action_log_index": 2,
@@ -415,26 +436,31 @@
     "The game has started",
     "Age 1 has started",
     "Round 1/3",
-    "Player1 payed 2 ideas to get the Tactics advance",
-    "Player1 payed 1 food, 1 wood and 1 ore to construct a Fortress in the city at C2 making it Angry",
-    "Player1 ended his turn with 1 actions left",
-    "It's Player2's turn",
-    "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1and rolled a 1. Player2 now has the option to pay 4 culture tokens to increase the dice roll and proceed with the cultural influence",
-    "Player2 payed 1 culture tokens to increased the dice roll and proceed with the cultural influence"
+    "Player1 increased happiness in the city at C2 by 1 steps, making it Happy",
+    "Player1 payed 2 ideas to get the Math advance"
   ],
-  "undo_limit": 1,
+  "undo_limit": 0,
   "played_once_per_turn_actions": [],
-  "actions_left": 2,
-  "successful_cultural_influence": true,
+  "actions_left": 1,
+  "successful_cultural_influence": false,
   "round": 1,
   "age": 1,
   "messages": [
     "The game has started"
   ],
-  "dice_roll_outcomes": [],
-  "dice_roll_log": [
-    1
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
   ],
+  "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [
     "X"
