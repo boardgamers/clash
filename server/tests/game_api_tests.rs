@@ -490,7 +490,7 @@ fn test_free_advance() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "Illegal action")]
 fn test_wrong_status_phase_action() {
     test_action(
         "illegal_free_advance",
