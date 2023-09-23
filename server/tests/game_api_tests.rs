@@ -512,6 +512,21 @@ fn test_found_city() {
 }
 
 #[test]
+fn test_wonder() {
+    test_action(
+        "wonder",
+        Action::Playing(Custom(ConstructWonder {
+            city_position: Position::from_offset("A1"),
+            wonder: String::from("X"),
+            payment: ResourcePile::new(2, 3, 3, 0, 0, 0, 4),
+        })),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
 fn test_recruit() {
     test_action(
         "recruit",
