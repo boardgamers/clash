@@ -806,7 +806,7 @@ impl Game {
                     return;
                 }
                 round += 1;
-            },
+            }
             CombatAction::RemoveCasualties(units) => {
                 let CombatPhase::RemoveCasualties {
                     player,
@@ -818,7 +818,14 @@ impl Game {
                 };
                 assert_eq!(casualties, units.len() as u8, "Illegal action");
                 let (fighting_units, opponent) = if player == defender {
-                    (self.players[player].get_units(defender_position).iter().map(|unit| unit.id).collect(), attacker)
+                    (
+                        self.players[player]
+                            .get_units(defender_position)
+                            .iter()
+                            .map(|unit| unit.id)
+                            .collect(),
+                        attacker,
+                    )
                 } else if player == attacker {
                     (attackers.clone(), defender)
                 } else {
@@ -830,7 +837,21 @@ impl Game {
                 }
                 if let Some(defender_hits) = defender_hits {
                     if defender_hits < attackers.len() as u8 && defender_hits > 0 {
-                        self.state = Combat { initiation, round, phase: CombatPhase::RemoveCasualties { player: defender, casualties: defender_hits, defender_hits: None }, defender, defender_position, attacker, attacker_position, attackers, can_retreat };
+                        self.state = Combat {
+                            initiation,
+                            round,
+                            phase: CombatPhase::RemoveCasualties {
+                                player: defender,
+                                casualties: defender_hits,
+                                defender_hits: None,
+                            },
+                            defender,
+                            defender_position,
+                            attacker,
+                            attacker_position,
+                            attackers,
+                            can_retreat,
+                        };
                         return;
                     }
                     if defender_hits >= attackers.len() as u8 {
