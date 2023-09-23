@@ -4,7 +4,7 @@ use crate::{
     game::Game, playing_actions::ActionType, position::Position, resource_pile::ResourcePile,
 };
 
-#[derive(Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub enum CustomAction {
     ConstructWonder {
         city_position: Position,

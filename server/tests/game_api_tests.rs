@@ -361,19 +361,31 @@ fn assert_eq_game_json(
     expected_path: &str,
     message: &str,
 ) {
-    if expected == actual {
+    if expected.trim() == actual.trim() {
         return;
     }
     let file_path = format!("tests{SEPARATOR}test_games{SEPARATOR}{test}.result.json");
     let mut file = OpenOptions::new()
         .write(true)
         .create(true)
+        .truncate(true)
         .open(&file_path)
         .expect("Failed to create output file");
     file.write_all(actual.as_bytes())
         .expect("Failed to write output file");
     let expected_path = format!("tests{SEPARATOR}test_games{SEPARATOR}{expected_path}.json");
-    panic!("{test} test failed: {message}. Expected game was not equal to the actual game. See 'expected' at {expected_path} and 'actual' at {file_path}.");
+
+    assert_eq!(
+        expected,
+        actual,
+        "{}",
+        format_args!(
+            "{test} test failed:\n\
+            {message}.\n\
+            Expected game was not equal to the actual game.\n\
+            See 'expected' at {expected_path} and 'actual' at {file_path}."
+        )
+    );
 }
 
 fn test_action(
@@ -467,6 +479,17 @@ fn test_cultural_influence_attempt() {
 }
 
 #[test]
+fn test_cultural_influence_resolution() {
+    test_action(
+        "cultural_influence_resolution",
+        Action::CulturalInfluenceResolution(true),
+        1,
+        true,
+        false,
+    );
+}
+
+#[test]
 fn test_free_advance() {
     test_action(
         "free_advance",
@@ -478,7 +501,7 @@ fn test_free_advance() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "Illegal action")]
 fn test_wrong_status_phase_action() {
     test_action(
         "illegal_free_advance",

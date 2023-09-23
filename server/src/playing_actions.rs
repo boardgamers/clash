@@ -19,7 +19,7 @@ use crate::{
     unit::UnitType,
 };
 
-#[derive(Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub enum PlayingAction {
     Advance {
         advance: String,

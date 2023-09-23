@@ -1,7 +1,5 @@
 {
-  "state": {
-    "StatusPhase": "FreeAdvance"
-  },
+  "state": "Playing",
   "players": [
     {
       "name": null,
@@ -220,7 +218,7 @@
         "ideas": 7,
         "gold": 7,
         "mood_tokens": 7,
-        "culture_tokens": 7
+        "culture_tokens": 3
       },
       "resource_limit": {
         "food": 2,
@@ -244,7 +242,7 @@
             "wonders": []
           },
           "mood_state": "Angry",
-          "activations": 0,
+          "activations": 2,
           "angry_activation": false,
           "player_index": 1,
           "position": "C1",
@@ -396,9 +394,23 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 0,
-  "action_log": [],
-  "action_log_index": 0,
+  "current_player_index": 1,
+  "action_log": [
+    {
+      "Playing": {
+        "InfluenceCultureAttempt": {
+          "starting_city_position": "C1",
+          "target_player_index": 0,
+          "target_city_position": "C2",
+          "city_piece": "Fortress"
+        }
+      }
+    },
+    {
+      "CulturalInfluenceResolution": true
+    }
+  ],
+  "action_log_index": 2,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -407,43 +419,21 @@
     "Player1 payed 1 food, 1 wood and 1 ore to construct a Fortress in the city at C2 making it Angry",
     "Player1 ended his turn with 1 actions left",
     "It's Player2's turn",
-    "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1 and succeeded (rolled 6)",
-    "Player2 ended his turn with 2 actions left",
-    "It's Player1's turn",
-    "Round 2/3",
-    "Player1 ended his turn with 3 actions left",
-    "It's Player2's turn",
-    "Player2 ended his turn with 3 actions left",
-    "It's Player1's turn",
-    "Round 3/3",
-    "Player1 ended his turn with 3 actions left",
-    "It's Player2's turn",
-    "Player2 ended his turn with 3 actions left",
-    "It's Player1's turn",
-    "The game has entered the 1st status phase"
+    "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1and rolled a 1. Player2 now has the option to pay 4 culture tokens to increase the dice roll and proceed with the cultural influence",
+    "Player2 payed 1 culture tokens to increased the dice roll and proceed with the cultural influence"
   ],
-  "undo_limit": 9,
+  "undo_limit": 1,
   "played_once_per_turn_actions": [],
-  "actions_left": 3,
-  "successful_cultural_influence": false,
+  "actions_left": 2,
+  "successful_cultural_influence": true,
   "round": 1,
   "age": 1,
   "messages": [
     "The game has started"
   ],
-  "dice_roll_outcomes": [
-    1,
-    1,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10
-  ],
+  "dice_roll_outcomes": [],
   "dice_roll_log": [
-    10
+    1
   ],
   "dropped_players": [],
   "wonders_left": [

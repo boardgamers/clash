@@ -10,13 +10,13 @@ use crate::{
     resource_pile::ResourcePile,
 };
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ChangeGovernmentType {
     pub new_government: String,
     pub additional_advances: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub enum StatusPhaseAction {
     CompleteObjectives(Vec<String>),
     FreeAdvance(String),

@@ -17,19 +17,19 @@ use crate::{
 
 #[derive(Serialize, Deserialize, Clone)]
 pub enum ActionLogItem {
-    Playing(String),
-    StatusPhase(String),
-    Movement(String),
-    CulturalInfluenceResolution(String),
-    Combat(String),
-    PlaceSettler(String),
+    Playing(PlayingAction),
+    StatusPhase(StatusPhaseAction),
+    Movement(MovementAction),
+    CulturalInfluenceResolution(bool),
+    Combat(CombatAction),
+    PlaceSettler(Position),
 }
 
 impl ActionLogItem {
     #[must_use]
-    pub fn as_playing_action(&self) -> Option<&str> {
+    pub fn as_playing_action(&self) -> Option<PlayingAction> {
         if let Self::Playing(v) = self {
-            Some(v)
+            Some(v.clone())
         } else {
             None
         }
@@ -41,14 +41,16 @@ impl ActionLogItem {
     ///
     /// Panics if variant does'nt match with it's contents
     #[must_use]
-    pub fn as_action(&self) -> Action {
+    pub fn as_action(self) -> Action {
         match self {
-            Self::Playing(action) => Action::Playing(serde_json::from_str::<PlayingAction>(action).expect("data should be a serialized playing action")),
-            Self::StatusPhase(action) => Action::StatusPhase(serde_json::from_str::<StatusPhaseAction>(action).expect("data should be a serialized status phase action")),
-            Self::Movement(action) => Action::Movement(serde_json::from_str::<MovementAction>(action).expect("data should be a serialized movement action")),
-            Self::CulturalInfluenceResolution(action) => Action::CulturalInfluenceResolution(serde_json::from_str::<bool>(action).expect("data should be a serialized boolean representing cultural influence resolution confirmation action")),
-            Self::Combat(action) => Action::Combat(serde_json::from_str::<CombatAction>(action).expect("data should be a serialized combat action")),
-            Self::PlaceSettler(action) => Action::PlaceSettler(serde_json::from_str::<Position>(action).expect("data should be a serialized place settler action")),
+            Self::Playing(action) => Action::Playing(action),
+            Self::StatusPhase(action) => Action::StatusPhase(action),
+            Self::Movement(action) => Action::Movement(action),
+            Self::CulturalInfluenceResolution(action) => {
+                Action::CulturalInfluenceResolution(action)
+            }
+            Self::Combat(action) => Action::Combat(action),
+            Self::PlaceSettler(action) => Action::PlaceSettler(action),
         }
     }
 }

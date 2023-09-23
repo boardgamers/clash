@@ -223,10 +223,10 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "foo")]
     fn static_event() {
         let mut event = StaticEvent::default();
-        event.add_listener(|| panic!(), 0);
+        event.add_listener(|| panic!("foo"), 0);
         event.trigger();
     }
 }
