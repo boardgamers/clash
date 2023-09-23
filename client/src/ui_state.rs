@@ -231,7 +231,7 @@ impl State {
             },
             GameState::PlaceSettler { .. } => ActiveDialog::PlaceSettler,
             GameState::Combat(Combat {
-                defender_position,
+                attacker_position,
                 phase,
                 ..
             }) => match phase {
@@ -243,7 +243,7 @@ impl State {
                     ActiveDialog::None
                 } //todo(gregor)
                 CombatPhase::RemoveCasualties { casualties, .. } => ActiveDialog::RemoveCasualties(
-                    RemoveCasualtiesSelection::new(*defender_position, *casualties),
+                    RemoveCasualtiesSelection::new(*attacker_position, *casualties),
                 ),
                 CombatPhase::Retreat => ActiveDialog::Retreat,
             },

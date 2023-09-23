@@ -144,6 +144,7 @@ pub fn try_click(game: &Game, state: &State, player_index: usize) -> StateUpdate
         match &state.active_dialog {
             ActiveDialog::MoveUnits(s) => move_ui::click(pos, s),
             ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::click_replace(pos, r),
+            ActiveDialog::RemoveCasualties(s) => StateUpdate::None,
             ActiveDialog::CollectResources(col) => click_collect_option(col, pos),
             ActiveDialog::RaseSize1City => {
                 if game.players[player_index].can_raze_city(pos) {
