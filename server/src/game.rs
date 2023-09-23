@@ -720,6 +720,9 @@ impl Game {
                 assert!(units.iter().all(|unit| fighting_units.contains(unit)));
                 for unit in units {
                     self.kill_unit(unit, player, opponent);
+                    if player == attacker {
+                        attackers.retain(|id| *id != unit);
+                    }
                 }
                 if let Some(defender_hits) = defender_hits {
                     if defender_hits < attackers.len() as u8 && defender_hits > 0 {
