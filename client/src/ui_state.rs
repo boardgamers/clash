@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 
 use server::action::{Action, CombatAction};
 use server::city::{City, MoodState};
-use server::game::{CombatPhase, Game, GameState};
+use server::game::{Combat, CombatPhase, Game, GameState};
 use server::player::Player;
 
 use server::position::Position;
@@ -230,11 +230,11 @@ impl State {
                 StatusPhaseState::DetermineFirstPlayer => ActiveDialog::DetermineFirstPlayer,
             },
             GameState::PlaceSettler { .. } => ActiveDialog::PlaceSettler,
-            GameState::Combat {
+            GameState::Combat(Combat {
                 defender_position,
                 phase,
                 ..
-            } => match phase {
+            }) => match phase {
                 CombatPhase::PlayActionCard(_) => {
                     self.update(
                         game,

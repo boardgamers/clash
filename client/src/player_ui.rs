@@ -5,7 +5,7 @@ use macroquad::prelude::*;
 use macroquad::text::draw_text;
 use macroquad::ui::root_ui;
 use server::action::Action;
-use server::game::{Game, GameState};
+use server::game::{Combat, Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
 use server::unit::MovementAction;
@@ -29,9 +29,9 @@ pub fn show_globals(game: &Game) {
         GameState::CulturalInfluenceResolution { .. } => {
             String::from("Cultural Influence Resolution")
         }
-        GameState::Combat {
+        GameState::Combat(Combat {
             round, ref phase, ..
-        } => {
+        }) => {
             format!("Combat Round {} Phase {:?}", round, *phase)
         }
         GameState::PlaceSettler { .. } => String::from("Place Settler"),
