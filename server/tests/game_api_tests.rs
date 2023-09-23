@@ -512,6 +512,23 @@ fn test_found_city() {
 }
 
 #[test]
+fn test_recruit() {
+    test_action(
+        "recruit",
+        Action::Playing(Recruit {
+            units: vec![Settler, Infantry],
+            city_position: Position::from_offset("A1"),
+            payment: ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2),
+            leader_index: None,
+            replaced_units: vec![4],
+        }),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
 fn test_collect() {
     test_action(
         "collect",
