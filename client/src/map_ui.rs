@@ -19,6 +19,7 @@ use crate::ui_state::{can_play_action, ActiveDialog, State, StateUpdate, StateUp
 use crate::{collect_ui, hex_ui, unit_ui};
 
 fn terrain_color(t: &Terrain) -> (Color, bool) {
+    //todo color not needed
     match t {
         Terrain::Barren => (Color::from_hex(0x00B2_6C19), true),
         Terrain::Mountain => (Color::from_hex(0x0057_5757), true),
@@ -41,43 +42,24 @@ fn terrain_name(t: &Terrain) -> &'static str {
 }
 
 pub fn draw_map(game: &Game, state: &State) {
-    game.map.tiles.iter().for_each(|(pos, t)| {
+    for (pos, t) in &game.map.tiles {
         let c = terrain_color(t);
-        let alpha = match &state.active_dialog {
-            ActiveDialog::MoveUnits(s) => {
-                if let Some(start) = s.start {
-                    if start == *pos {
-                        0.5
-                    } else if s.destinations.contains(pos) {
-                        0.2
-                    } else {
-                        1.0
-                    }
-                } else {
-                    1.0
-                }
-            }
-            ActiveDialog::ReplaceUnits(s) => {
-                highlight_if(s.current_city.is_some_and(|p| p == *pos))
-            }
-            ActiveDialog::RaseSize1City => {
-                highlight_if(game.players[game.active_player()].can_raze_city(*pos))
-            }
-            ActiveDialog::PlaceSettler => {
-                highlight_if(game.players[game.active_player()].get_city(*pos).is_some())
-            }
-            _ => highlight_if(
-                state
-                    .focused_tile
-                    .as_ref()
-                    .is_some_and(|f| pos == &f.position),
-            ),
+
+        let (base, exhausted) = match t {
+            Terrain::Exhausted(e) => (e.as_ref(), true),
+            _ => (t, false),
         };
 
         let text_color = if c.1 { WHITE } else { BLACK };
-        hex_ui::draw_hex(*pos, c.0, text_color, alpha);
+        hex_ui::draw_hex(
+            *pos,
+            text_color,
+            alpha(game, state, *pos),
+            state.assets.terrain.get(base).unwrap(),
+            exhausted,
+        );
         collect_ui::draw_resource_collect_tile(state, *pos);
-    });
+    }
     if let Combat(c) = &game.state {
         draw_combat_arrow(c);
     }
@@ -89,6 +71,38 @@ pub fn draw_map(game: &Game, state: &State) {
         }
         unit_ui::draw_units(game);
     }
+}
+
+fn alpha(game: &Game, state: &State, pos: Position) -> f32 {
+    let alpha = match &state.active_dialog {
+        ActiveDialog::MoveUnits(s) => {
+            if let Some(start) = s.start {
+                if start == pos {
+                    0.5
+                } else if s.destinations.contains(&pos) {
+                    0.8
+                } else {
+                    0.
+                }
+            } else {
+                0.
+            }
+        }
+        ActiveDialog::ReplaceUnits(s) => highlight_if(s.current_city.is_some_and(|p| p == pos)),
+        ActiveDialog::RaseSize1City => {
+            highlight_if(game.players[game.active_player()].can_raze_city(pos))
+        }
+        ActiveDialog::PlaceSettler => {
+            highlight_if(game.players[game.active_player()].get_city(pos).is_some())
+        }
+        _ => highlight_if(
+            state
+                .focused_tile
+                .as_ref()
+                .is_some_and(|f| pos == f.position),
+        ),
+    };
+    alpha
 }
 
 fn draw_combat_arrow(c: &game::Combat) {
@@ -107,7 +121,7 @@ fn highlight_if(b: bool) -> f32 {
     if b {
         0.5
     } else {
-        1.0
+        0.
     }
 }
 

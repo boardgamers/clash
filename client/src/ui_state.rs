@@ -10,6 +10,7 @@ use server::resource_pile::ResourcePile;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 use crate::advance_ui::AdvancePayment;
+use crate::assets::Assets;
 use crate::collect_ui::CollectResources;
 use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
@@ -143,6 +144,7 @@ impl FocusedTile {
 }
 
 pub struct State {
+    pub assets: Assets,
     pub focused_tile: Option<FocusedTile>,
     pub active_dialog: ActiveDialog,
     pub pending_update: Option<PendingUpdate>,
@@ -150,12 +152,13 @@ pub struct State {
 }
 
 impl State {
-    pub fn new() -> State {
+    pub async fn new() -> State {
         State {
             active_dialog: ActiveDialog::None,
             pending_update: None,
             focused_tile: None,
             increase_happiness: None,
+            assets: Assets::new().await,
         }
     }
 

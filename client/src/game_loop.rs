@@ -23,7 +23,7 @@ use std::io::BufReader;
 const EXPORT_FILE: &str = "game.json";
 
 pub async fn run(game: &mut Game) {
-    let mut state = State::new();
+    let mut state = State::new().await;
 
     set_fullscreen(true);
     loop {
@@ -113,7 +113,7 @@ fn import(game: &mut Game) {
 
 fn export(game: &Game) {
     serde_json::to_writer_pretty(
-        std::fs::File::create(EXPORT_FILE).expect("Failed to create export file"),
+        File::create(EXPORT_FILE).expect("Failed to create export file"),
         &game.cloned_data(),
     )
     .expect("Failed to write export file");
