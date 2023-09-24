@@ -44,47 +44,17 @@ fn terrain_name(t: &Terrain) -> &'static str {
 pub fn draw_map(game: &Game, state: &State) {
     for (pos, t) in &game.map.tiles {
         let c = terrain_color(t);
-        let alpha = match &state.active_dialog {
-            ActiveDialog::MoveUnits(s) => {
-                if let Some(start) = s.start {
-                    if start == *pos {
-                        0.5
-                    } else if s.destinations.contains(pos) {
-                        0.8
-                    } else {
-                        0.
-                    }
-                } else {
-                    0.
-                }
-            }
-            ActiveDialog::ReplaceUnits(s) => {
-                highlight_if(s.current_city.is_some_and(|p| p == *pos))
-            }
-            ActiveDialog::RaseSize1City => {
-                highlight_if(game.players[game.active_player()].can_raze_city(*pos))
-            }
-            ActiveDialog::PlaceSettler => {
-                highlight_if(game.players[game.active_player()].get_city(*pos).is_some())
-            }
-            _ => highlight_if(
-                state
-                    .focused_tile
-                    .as_ref()
-                    .is_some_and(|f| pos == &f.position),
-            ),
-        };
 
         let text_color = if c.1 { WHITE } else { BLACK };
         hex_ui::draw_hex(
             *pos,
             c.0,
             text_color,
-            alpha,
+            alpha(game, &state, pos),
             state.assets.terrain.get(t).unwrap(),
         );
         collect_ui::draw_resource_collect_tile(state, *pos);
-    });
+    }
     if let Combat(c) = &game.state {
         draw_combat_arrow(c);
     }
@@ -96,6 +66,38 @@ pub fn draw_map(game: &Game, state: &State) {
         }
         unit_ui::draw_units(game);
     }
+}
+
+fn alpha(game: &Game, state: &&State, pos: &Position) -> f32 {
+    let alpha = match &state.active_dialog {
+        ActiveDialog::MoveUnits(s) => {
+            if let Some(start) = s.start {
+                if start == *pos {
+                    0.5
+                } else if s.destinations.contains(pos) {
+                    0.8
+                } else {
+                    0.
+                }
+            } else {
+                0.
+            }
+        }
+        ActiveDialog::ReplaceUnits(s) => highlight_if(s.current_city.is_some_and(|p| p == *pos)),
+        ActiveDialog::RaseSize1City => {
+            highlight_if(game.players[game.active_player()].can_raze_city(*pos))
+        }
+        ActiveDialog::PlaceSettler => {
+            highlight_if(game.players[game.active_player()].get_city(*pos).is_some())
+        }
+        _ => highlight_if(
+            state
+                .focused_tile
+                .as_ref()
+                .is_some_and(|f| pos == &f.position),
+        ),
+    };
+    alpha
 }
 
 fn draw_combat_arrow(c: &game::Combat) {
