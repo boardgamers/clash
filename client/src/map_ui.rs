@@ -6,6 +6,7 @@ use macroquad::ui::{root_ui, Ui};
 use server::action::Action;
 
 use server::game::Game;
+use server::game::GameState::Combat;
 use server::map::Terrain;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
@@ -41,35 +42,54 @@ fn terrain_name(t: &Terrain) -> &'static str {
 pub fn draw_map(game: &Game, state: &State) {
     game.map.tiles.iter().for_each(|(pos, t)| {
         let c = terrain_color(t);
-        let alpha = match &state.active_dialog {
-            ActiveDialog::MoveUnits(s) => {
-                if let Some(start) = s.start {
-                    if start == *pos {
-                        0.5
-                    } else if s.destinations.contains(pos) {
-                        0.2
+        let alpha = if let Combat(c) = &game.state {
+            let from = hex_ui::center(c.attacker_position);
+            let to = hex_ui::center(c.defender_position);
+            draw_line(from.x, from.y, to.x, to.y, 10., BLACK);
+            draw_triangle(
+                vec2(to.x, to.y),
+                vec2(to.x + 30., to.y + 30.),
+                vec2(to.x - 30., to.y + 30.),
+                BLACK,
+            );
+            if c.defender_position == *pos {
+                0.3
+            } else if c.attacker_position == *pos {
+                0.7
+            } else {
+                1.0
+            }
+        } else {
+            match &state.active_dialog {
+                ActiveDialog::MoveUnits(s) => {
+                    if let Some(start) = s.start {
+                        if start == *pos {
+                            0.5
+                        } else if s.destinations.contains(pos) {
+                            0.2
+                        } else {
+                            1.0
+                        }
                     } else {
                         1.0
                     }
-                } else {
-                    1.0
                 }
+                ActiveDialog::ReplaceUnits(s) => {
+                    highlight_if(s.current_city.is_some_and(|p| p == *pos))
+                }
+                ActiveDialog::RaseSize1City => {
+                    highlight_if(game.players[game.active_player()].can_raze_city(*pos))
+                }
+                ActiveDialog::PlaceSettler => {
+                    highlight_if(game.players[game.active_player()].get_city(*pos).is_some())
+                }
+                _ => highlight_if(
+                    state
+                        .focused_tile
+                        .as_ref()
+                        .is_some_and(|f| pos == &f.position),
+                ),
             }
-            ActiveDialog::ReplaceUnits(s) => {
-                highlight_if(s.current_city.is_some_and(|p| p == *pos))
-            }
-            ActiveDialog::RaseSize1City => {
-                highlight_if(game.players[game.active_player()].can_raze_city(*pos))
-            }
-            ActiveDialog::PlaceSettler => {
-                highlight_if(game.players[game.active_player()].get_city(*pos).is_some())
-            }
-            _ => highlight_if(
-                state
-                    .focused_tile
-                    .as_ref()
-                    .is_some_and(|f| pos == &f.position),
-            ),
         };
 
         let text_color = if c.1 { WHITE } else { BLACK };
