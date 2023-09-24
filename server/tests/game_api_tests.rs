@@ -490,17 +490,6 @@ fn test_cultural_influence_resolution() {
 }
 
 #[test]
-fn test_free_advance() {
-    test_action(
-        "free_advance",
-        Action::StatusPhase(FreeAdvance(String::from("Storage"))),
-        0,
-        false,
-        false,
-    );
-}
-
-#[test]
 fn test_found_city() {
     test_action(
         "found_city",
@@ -586,5 +575,29 @@ fn test_wrong_status_phase_action() {
         0,
         false,
         true,
+    );
+}
+
+// status phase
+
+#[test]
+fn test_free_advance() {
+    test_action(
+        "free_advance",
+        Action::StatusPhase(FreeAdvance(String::from("Storage"))),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_raze_city() {
+    test_action(
+        "raze_city",
+        Action::StatusPhase(RaseSize1City(Some(Position::from_offset("A1")))),
+        0,
+        false,
+        false,
     );
 }
