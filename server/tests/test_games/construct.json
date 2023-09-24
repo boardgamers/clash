@@ -1,22 +1,20 @@
 {
-  "state": {
-    "StatusPhase": "FreeAdvance"
-  },
+  "state": "Playing",
   "players": [
     {
       "name": null,
       "id": 0,
       "resources": {
-        "food": 1,
-        "wood": 6,
-        "ore": 6,
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
         "ideas": 5,
         "gold": 7,
-        "mood_tokens": 7,
+        "mood_tokens": 6,
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -49,13 +47,13 @@
             "market": null,
             "obelisk": null,
             "observatory": null,
-            "fortress": 1,
+            "fortress": null,
             "port": null,
             "temple": null,
             "wonders": []
           },
-          "mood_state": "Angry",
-          "activations": 0,
+          "mood_state": "Happy",
+          "activations": 8,
           "angry_activation": false,
           "player_index": 0,
           "position": "C2",
@@ -133,15 +131,14 @@
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Mining",
-        "Storage",
-        "Tactics"
+        "Math",
+        "Mining"
       ],
       "unlocked_special_advance": [],
       "wonders": [],
       "wonders_build": 0,
       "leader_position": null,
-      "game_event_tokens": 1,
+      "game_event_tokens": 2,
       "influenced_buildings": 0,
       "completed_objectives": [],
       "captured_leaders": [],
@@ -245,7 +242,7 @@
             "wonders": []
           },
           "mood_state": "Angry",
-          "activations": 0,
+          "activations": 2,
           "angry_activation": false,
           "player_index": 1,
           "position": "C1",
@@ -282,7 +279,7 @@
       "wonders_build": 0,
       "leader_position": null,
       "game_event_tokens": 3,
-      "influenced_buildings": 1,
+      "influenced_buildings": 0,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -293,7 +290,7 @@
         "markets": 5,
         "obelisks": 5,
         "observatories": 5,
-        "fortresses": 4,
+        "fortresses": 5,
         "ports": 5,
         "temples": 5
       },
@@ -364,7 +361,9 @@
       ],
       [
         "A3",
-        "Mountain"
+        {
+          "Exhausted": "Forest"
+        }
       ],
       [
         "B1",
@@ -397,43 +396,52 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 1,
+  "current_player_index": 0,
   "action_log": [
     {
-      "StatusPhase": {
-        "FreeAdvance": "Storage"
+      "Playing": {
+        "IncreaseHappiness": {
+          "happiness_increases": [
+            [
+              "A1",
+              0
+            ],
+            [
+              "C2",
+              1
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "Playing": {
+        "Advance": {
+          "advance": "Math",
+          "payment": {
+            "food": 0,
+            "wood": 0,
+            "ore": 0,
+            "ideas": 2,
+            "gold": 0,
+            "mood_tokens": 0,
+            "culture_tokens": 0
+          }
+        }
       }
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     "The game has started",
     "Age 1 has started",
     "Round 1/3",
-    "Player1 payed 2 ideas to get the Tactics advance",
-    "Player1 payed 1 food, 1 wood and 1 ore to construct a Fortress in the city at C2 making it Angry",
-    "Player1 ended his turn with 1 actions left",
-    "It's Player2's turn",
-    "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1 and succeeded (rolled 6)",
-    "Player2 ended his turn with 2 actions left",
-    "It's Player1's turn",
-    "Round 2/3",
-    "Player1 ended his turn with 3 actions left",
-    "It's Player2's turn",
-    "Player2 ended his turn with 3 actions left",
-    "It's Player1's turn",
-    "Round 3/3",
-    "Player1 ended his turn with 3 actions left",
-    "It's Player2's turn",
-    "Player2 ended his turn with 3 actions left",
-    "It's Player1's turn",
-    "The game has entered the 1st status phase",
-    "Player1 advanced Storage for free",
-    "It's Player2's turn"
+    "Player1 increased happiness in the city at C2 by 1 steps, making it Happy",
+    "Player1 payed 2 ideas to get the Math advance"
   ],
-  "undo_limit": 1,
+  "undo_limit": 0,
   "played_once_per_turn_actions": [],
-  "actions_left": 3,
+  "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,
   "age": 1,
@@ -449,11 +457,10 @@
     10,
     10,
     10,
+    10,
     10
   ],
-  "dice_roll_log": [
-    10
-  ],
+  "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [
     "X"

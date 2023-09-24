@@ -1,6 +1,6 @@
 {
   "state": {
-    "StatusPhase": "FreeAdvance"
+    "StatusPhase": "DetermineFirstPlayer"
   },
   "players": [
     {
@@ -16,7 +16,7 @@
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -25,24 +25,6 @@
         "culture_tokens": 7
       },
       "cities": [
-        {
-          "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
-          },
-          "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
-          "player_index": 0,
-          "position": "A1",
-          "port_position": null
-        },
         {
           "city_pieces": {
             "academy": null,
@@ -133,8 +115,8 @@
       "available_leaders": [],
       "advances": [
         "Farming",
+        "Fishing",
         "Mining",
-        "Storage",
         "Tactics"
       ],
       "unlocked_special_advance": [],
@@ -147,7 +129,7 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "available_settlements": 7,
+      "available_settlements": 8,
       "available_buildings": {
         "academies": 5,
         "markets": 5,
@@ -200,6 +182,20 @@
             {
               "food": 0,
               "wood": 1,
+              "ore": 0,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
+            }
+          ]
+        ],
+        [
+          "Water",
+          [
+            {
+              "food": 1,
+              "wood": 0,
               "ore": 0,
               "ideas": 0,
               "gold": 0,
@@ -275,13 +271,14 @@
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Mining"
+        "Mining",
+        "Philosophy"
       ],
       "unlocked_special_advance": [],
       "wonders": [],
       "wonders_build": 0,
       "leader_position": null,
-      "game_event_tokens": 3,
+      "game_event_tokens": 2,
       "influenced_buildings": 1,
       "completed_objectives": [],
       "captured_leaders": [],
@@ -397,15 +394,30 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 1,
+  "current_player_index": 0,
   "action_log": [
     {
       "StatusPhase": {
-        "FreeAdvance": "Storage"
+        "FreeAdvance": "Fishing"
+      }
+    },
+    {
+      "StatusPhase": {
+        "FreeAdvance": "Philosophy"
+      }
+    },
+    {
+      "StatusPhase": {
+        "RaseSize1City": "A1"
+      }
+    },
+    {
+      "StatusPhase": {
+        "RaseSize1City": null
       }
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 4,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -428,10 +440,16 @@
     "Player2 ended his turn with 3 actions left",
     "It's Player1's turn",
     "The game has entered the 1st status phase",
-    "Player1 advanced Storage for free",
-    "It's Player2's turn"
+    "Player1 advanced Fishing for free",
+    "It's Player2's turn",
+    "Player2 advanced Philosophy for free",
+    "It's Player1's turn",
+    "Player1 rased the city at A1 and gained 1 gold",
+    "It's Player2's turn",
+    "Player2 did not rase a city",
+    "It's Player1's turn"
   ],
-  "undo_limit": 1,
+  "undo_limit": 4,
   "played_once_per_turn_actions": [],
   "actions_left": 3,
   "successful_cultural_influence": false,

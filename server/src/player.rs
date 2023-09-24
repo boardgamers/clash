@@ -219,7 +219,11 @@ impl Player {
             resources: self.resources,
             resource_limit: self.resource_limit,
             cities: self.cities.into_iter().map(City::data).collect(),
-            units: self.units,
+            units: self
+                .units
+                .into_iter()
+                .sorted_by_key(|unit| unit.id)
+                .collect(),
             civilization: self.civilization.name,
             active_leader: self.active_leader.map(|leader| leader.name),
             available_leaders: self
@@ -227,7 +231,7 @@ impl Player {
                 .into_iter()
                 .map(|leader| leader.name)
                 .collect(),
-            advances: self.advances,
+            advances: self.advances.into_iter().sorted().collect(),
             unlocked_special_advance: self.unlocked_special_advances,
             wonders: self.wonders,
             wonders_build: self.wonders_build,
@@ -261,7 +265,12 @@ impl Player {
             resources: self.resources.clone(),
             resource_limit: self.resource_limit.clone(),
             cities: self.cities.iter().map(City::cloned_data).collect(),
-            units: self.units.clone(),
+            units: self
+                .units
+                .iter()
+                .cloned()
+                .sorted_by_key(|unit| unit.id)
+                .collect(),
             civilization: self.civilization.name.clone(),
             active_leader: self
                 .active_leader
@@ -272,7 +281,7 @@ impl Player {
                 .iter()
                 .map(|leader| leader.name.clone())
                 .collect(),
-            advances: self.advances.clone(),
+            advances: self.advances.iter().cloned().sorted().collect(),
             unlocked_special_advance: self.unlocked_special_advances.clone(),
             wonders: self.wonders.clone(),
             wonders_build: self.wonders_build,

@@ -5,3 +5,4 @@ dist/
 .history/
 *.cmd/
 *.result.json
+game.json

@@ -5,6 +5,8 @@ use std::{
     path::MAIN_SEPARATOR as SEPARATOR,
 };
 
+use server::game::GameState;
+use server::status_phase::{ChangeGovernmentType, StatusPhaseAction};
 use server::{
     action::Action,
     city::{City, MoodState::*},
@@ -13,13 +15,12 @@ use server::{
         Building::{self, *},
     },
     content::custom_actions::CustomAction::*,
-    game::{Game, GameState::*},
+    game::Game,
     game_api,
     map::Terrain::*,
     playing_actions::PlayingAction::*,
     position::Position,
     resource_pile::ResourcePile,
-    status_phase::StatusPhaseAction::*,
     unit::{MovementAction::*, UnitType::*},
 };
 
@@ -233,7 +234,7 @@ fn cultural_influence() {
     assert!(!game.players[1].cities[0].influenced());
     assert_eq!(
         game.state,
-        CulturalInfluenceResolution {
+        GameState::CulturalInfluenceResolution {
             roll_boost_cost: 2,
             target_player_index: 1,
             target_city_position: city1position,
@@ -243,7 +244,7 @@ fn cultural_influence() {
     let influence_resolution_decline_action = Action::CulturalInfluenceResolution(false);
     let game = game_api::execute_action(game, influence_resolution_decline_action, 0);
     assert!(!game.players[1].cities[0].influenced());
-    assert_eq!(game.state, Playing);
+    assert_eq!(game.state, GameState::Playing);
     assert!(!game.successful_cultural_influence);
     let influence_action = Action::Playing(InfluenceCultureAttempt {
         starting_city_position: city0position,
@@ -253,7 +254,7 @@ fn cultural_influence() {
     });
     let game = game_api::execute_action(game, influence_action, 0);
     assert!(game.players[1].cities[0].influenced());
-    assert_eq!(game.state, Playing);
+    assert_eq!(game.state, GameState::Playing);
     assert!(game.successful_cultural_influence);
     let game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
     assert_eq!(game.active_player(), 1);
@@ -265,7 +266,7 @@ fn cultural_influence() {
     });
     let game = game_api::execute_action(game, influence_action, 1);
     assert!(game.players[1].cities[0].influenced());
-    assert_eq!(game.state, Playing);
+    assert_eq!(game.state, GameState::Playing);
     assert!(!game.successful_cultural_influence);
     let influence_action = Action::Playing(InfluenceCultureAttempt {
         starting_city_position: city1position,
@@ -275,7 +276,7 @@ fn cultural_influence() {
     });
     let game = game_api::execute_action(game, influence_action, 1);
     assert!(!game.players[1].cities[0].influenced());
-    assert_eq!(game.state, Playing);
+    assert_eq!(game.state, GameState::Playing);
     assert!(game.successful_cultural_influence);
 }
 
@@ -490,12 +491,95 @@ fn test_cultural_influence_resolution() {
 }
 
 #[test]
-fn test_free_advance() {
+fn test_found_city() {
     test_action(
-        "free_advance",
-        Action::StatusPhase(FreeAdvance(String::from("Storage"))),
+        "found_city",
+        Action::Playing(FoundCity { settler: 4 }),
         0,
+        true,
         false,
+    );
+}
+
+#[test]
+fn test_wonder() {
+    test_action(
+        "wonder",
+        Action::Playing(Custom(ConstructWonder {
+            city_position: Position::from_offset("A1"),
+            wonder: String::from("X"),
+            payment: ResourcePile::new(2, 3, 3, 0, 0, 0, 4),
+        })),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
+fn test_recruit() {
+    test_action(
+        "recruit",
+        Action::Playing(Recruit {
+            units: vec![Settler, Infantry],
+            city_position: Position::from_offset("A1"),
+            payment: ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2),
+            leader_index: None,
+            replaced_units: vec![4],
+        }),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
+fn test_collect() {
+    test_action(
+        "collect",
+        Action::Playing(Collect {
+            city_position: Position::from_offset("C2"),
+            collections: vec![
+                (Position::from_offset("B1"), ResourcePile::ore(1)),
+                (Position::from_offset("B2"), ResourcePile::wood(1)),
+            ],
+        }),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
+fn test_construct() {
+    test_action(
+        "construct",
+        Action::Playing(Construct {
+            city_position: Position::from_offset("C2"),
+            city_piece: Observatory,
+            payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
+            port_position: None,
+            temple_bonus: None,
+        }),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
+fn test_construct_port() {
+    test_action(
+        "construct_port",
+        Action::Playing(Construct {
+            city_position: Position::from_offset("A1"),
+            city_piece: Port,
+            payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
+            port_position: Some(Position::from_offset("A2")),
+            temple_bonus: None,
+        }),
+        0,
+        true,
         false,
     );
 }
@@ -505,9 +589,62 @@ fn test_free_advance() {
 fn test_wrong_status_phase_action() {
     test_action(
         "illegal_free_advance",
-        Action::StatusPhase(RaseSize1City(None)),
+        Action::StatusPhase(StatusPhaseAction::RaseSize1City(None)),
         0,
         false,
         true,
+    );
+}
+
+// status phase
+
+#[test]
+fn test_free_advance() {
+    test_action(
+        "free_advance",
+        Action::StatusPhase(StatusPhaseAction::FreeAdvance(String::from("Storage"))),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_raze_city() {
+    test_action(
+        "raze_city",
+        Action::StatusPhase(StatusPhaseAction::RaseSize1City(Some(
+            Position::from_offset("A1"),
+        ))),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_determine_first_player() {
+    test_action(
+        "determine_first_player",
+        Action::StatusPhase(StatusPhaseAction::DetermineFirstPlayer(1)),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_change_government() {
+    test_action(
+        "change_government",
+        Action::StatusPhase(StatusPhaseAction::ChangeGovernmentType(Some(
+            ChangeGovernmentType {
+                new_government: String::from("Theocracy"),
+                additional_advances: vec![String::from("Theocracy 2")],
+            },
+        ))),
+        0,
+        false,
+        false,
     );
 }
