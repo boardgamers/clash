@@ -568,6 +568,23 @@ fn test_construct() {
 }
 
 #[test]
+fn test_construct_port() {
+    test_action(
+        "construct_port",
+        Action::Playing(Construct {
+            city_position: Position::from_offset("A1"),
+            city_piece: Port,
+            payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
+            port_position: Some(Position::from_offset("A2")),
+            temple_bonus: None,
+        }),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
 #[should_panic(expected = "Illegal action")]
 fn test_wrong_status_phase_action() {
     test_action(
