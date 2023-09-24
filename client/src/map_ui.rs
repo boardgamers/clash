@@ -97,7 +97,7 @@ fn highlight_if(b: bool) -> f32 {
 pub fn show_tile_menu(
     game: &Game,
     position: Position,
-    suffix: Option<&str>,
+    suffix: Vec<String>,
     additional: impl FnOnce(&mut Ui, &mut StateUpdates),
 ) -> StateUpdate {
     let mut updates: StateUpdates = StateUpdates::new();
@@ -125,8 +125,8 @@ pub fn show_tile_menu(
         if !units_str.is_empty() {
             ui.label(None, units_str);
         }
-        if let Some(suffix) = suffix {
-            ui.label(None, suffix);
+        for s in suffix {
+            ui.label(None, &s);
         }
 
         let settlers = &units

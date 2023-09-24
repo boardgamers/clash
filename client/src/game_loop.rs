@@ -70,7 +70,7 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
             updates.add(if let Some(p) = f.city_owner_index {
                 show_city_menu(game, &CityMenu::new(player_index, p, f.position))
             } else {
-                show_tile_menu(game, f.position, None, |_, _| {})
+                show_tile_menu(game, f.position, vec![], |_, _| {})
             });
         }
     }
