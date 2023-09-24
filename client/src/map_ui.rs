@@ -4,8 +4,10 @@ use macroquad::math::vec2;
 use macroquad::prelude::*;
 use macroquad::ui::{root_ui, Ui};
 use server::action::Action;
+use server::game;
 
 use server::game::Game;
+use server::game::GameState::Combat;
 use server::map::Terrain;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
@@ -76,6 +78,9 @@ pub fn draw_map(game: &Game, state: &State) {
         hex_ui::draw_hex(*pos, c.0, text_color, alpha);
         collect_ui::draw_resource_collect_tile(state, *pos);
     });
+    if let Combat(c) = &game.state {
+        draw_combat_arrow(c);
+    }
     if !state.is_collect() {
         for p in &game.players {
             for city in &p.cities {
@@ -84,6 +89,18 @@ pub fn draw_map(game: &Game, state: &State) {
         }
         unit_ui::draw_units(game);
     }
+}
+
+fn draw_combat_arrow(c: &game::Combat) {
+    let from = hex_ui::center(c.attacker_position);
+    let to = hex_ui::center(c.defender_position);
+    draw_line(from.x, from.y, to.x, to.y, 10., BLACK);
+    draw_triangle(
+        vec2(to.x, to.y),
+        vec2(to.x + 30., to.y + 30.),
+        vec2(to.x - 30., to.y + 30.),
+        BLACK,
+    );
 }
 
 fn highlight_if(b: bool) -> f32 {
@@ -97,7 +114,7 @@ fn highlight_if(b: bool) -> f32 {
 pub fn show_tile_menu(
     game: &Game,
     position: Position,
-    suffix: Option<&str>,
+    suffix: Vec<String>,
     additional: impl FnOnce(&mut Ui, &mut StateUpdates),
 ) -> StateUpdate {
     let mut updates: StateUpdates = StateUpdates::new();
@@ -125,8 +142,8 @@ pub fn show_tile_menu(
         if !units_str.is_empty() {
             ui.label(None, units_str);
         }
-        if let Some(suffix) = suffix {
-            ui.label(None, suffix);
+        for s in suffix {
+            ui.label(None, &s);
         }
 
         let settlers = &units

@@ -19,18 +19,8 @@ use crate::{hex_ui, influence_ui, player_ui, ActiveDialog};
 pub fn show_city_menu(game: &Game, menu: &CityMenu) -> StateUpdate {
     let position = menu.city_position;
     let city = menu.get_city(game);
-    let suffix = format!(
-        "size: {} mood: {} activated: {}",
-        city.size(),
-        match city.mood_state {
-            MoodState::Happy => "Happy",
-            MoodState::Neutral => "Neutral",
-            MoodState::Angry => "Angry",
-        },
-        city.is_activated(),
-    );
 
-    show_tile_menu(game, position, Some(&suffix), |ui, updates| {
+    show_tile_menu(game, position, city_label(game, city), |ui, updates| {
         let can_play = can_play_action(game) && menu.is_city_owner() && city.can_activate();
         if can_play {
             if ui.button(None, "Collect Resources") {
@@ -65,6 +55,42 @@ pub fn show_city_menu(game: &Game, menu: &CityMenu) -> StateUpdate {
             updates.add(option);
         }
     })
+}
+
+fn city_label(game: &Game, city: &City) -> Vec<String> {
+    vec![
+        format!(
+            "size: {} mood: {} activated: {}",
+            city.size(),
+            match city.mood_state {
+                MoodState::Happy => "Happy",
+                MoodState::Neutral => "Neutral",
+                MoodState::Angry => "Angry",
+            },
+            city.is_activated()
+        ),
+        format!(
+            "Buildings: {}",
+            city.pieces
+                .building_owners()
+                .iter()
+                .filter_map(|(b, o)| {
+                    o.as_ref().map(|o| {
+                        if city.player_index == *o {
+                            building_name(b).to_string()
+                        } else {
+                            format!(
+                                "{} (owned by {})",
+                                building_name(b),
+                                game.get_player(*o).get_name()
+                            )
+                        }
+                    })
+                })
+                .collect::<Vec<_>>()
+                .join(", ")
+        ),
+    ]
 }
 
 fn add_building_actions(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpdate {
@@ -150,6 +176,13 @@ fn building_symbol(b: &Building) -> &str {
         Building::Port => "P",
         Building::Temple => "T",
     }
+}
+
+fn building_name(b: &Building) -> &str {
+    building_names()
+        .iter()
+        .find_map(|(b2, n)| if b == b2 { Some(n) } else { None })
+        .unwrap()
 }
 
 fn building_names() -> [(Building, &'static str); 7] {
