@@ -73,8 +73,8 @@ impl Selection for ChooseAdditionalAdvances {
 }
 
 impl ConfirmSelection for ChooseAdditionalAdvances {
-    fn cancel_name(&self) -> &str {
-        "Back to choose government type"
+    fn cancel_name(&self) -> Option<&str> {
+        Some("Back to choose government type")
     }
 
     fn cancel(&self) -> StateUpdate {

@@ -59,8 +59,8 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
 }
 
 pub trait ConfirmSelection: Clone {
-    fn cancel_name(&self) -> &str {
-        "Cancel"
+    fn cancel_name(&self) -> Option<&str> {
+        Some("Cancel")
     }
 
     fn cancel(&self) -> StateUpdate {
@@ -141,8 +141,12 @@ pub fn confirm_update<T: ConfirmSelection>(
 }
 
 fn may_cancel(sel: &impl ConfirmSelection, ui: &mut Ui) -> StateUpdate {
-    if ui.button(None, sel.cancel_name()) {
-        sel.cancel()
+    if let Some(cancel_name) = sel.cancel_name() {
+        if ui.button(None, cancel_name) {
+            sel.cancel()
+        } else {
+            StateUpdate::None
+        }
     } else {
         StateUpdate::None
     }

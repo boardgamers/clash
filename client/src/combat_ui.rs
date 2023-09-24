@@ -70,6 +70,10 @@ impl UnitSelection for RemoveCasualtiesSelection {
 }
 
 impl ConfirmSelection for RemoveCasualtiesSelection {
+    fn cancel_name(&self) -> Option<&str> {
+        None
+    }
+
     fn confirm(&self, _game: &Game) -> SelectionConfirm {
         if self.needed == self.units.len() as u8 {
             SelectionConfirm::Valid
