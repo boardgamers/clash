@@ -601,3 +601,14 @@ fn test_raze_city() {
         false,
     );
 }
+
+#[test]
+fn test_determine_first_player() {
+    test_action(
+        "determine_first_player",
+        Action::StatusPhase(DetermineFirstPlayer(1)),
+        0,
+        false,
+        false,
+    );
+}
