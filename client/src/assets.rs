@@ -28,7 +28,6 @@ impl Assets {
             (Terrain::Mountain, "assets/mountain.png"),
             (Terrain::Fertile, "assets/grassland.png"),
             (Terrain::Forest, "assets/forest.png"),
-            (Terrain::Exhausted, "assets/grassland.png"), //todo
             (Terrain::Water, "assets/water.png"),
         ] {
             map.insert(t, load_texture(f).await.unwrap());

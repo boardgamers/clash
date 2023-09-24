@@ -168,10 +168,10 @@ pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
 
 pub fn player_color(player_index: usize) -> Color {
     match player_index {
-        0 => RED,
-        1 => BLUE,
+        0 => BLACK,
+        1 => LIGHTGRAY,
         2 => YELLOW,
-        3 => BLACK,
+        3 => BLUE,
         _ => panic!("unexpected player index"),
     }
 }

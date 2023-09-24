@@ -22,7 +22,7 @@ pub fn center(pos: Position) -> Point {
     Point { x: p.0, y: p.1 }.to_screen()
 }
 
-pub fn draw_hex(p: Position, fill_color: Color, text_color: Color, alpha: f32, t: &Texture2D) {
+pub fn draw_hex(p: Position, text_color: Color, alpha: f32, t: &Texture2D, exhausted: bool) {
     let c = center(p);
     let mut v = WHITE.to_vec();
     v.w = alpha;
@@ -39,6 +39,9 @@ pub fn draw_hex(p: Position, fill_color: Color, text_color: Color, alpha: f32, t
     );
     draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, Color::from_vec(v));
     draw_text(&p.to_string(), c.x - 30.0, c.y - 35.0, 20.0, text_color);
+    if exhausted {
+        draw_text("Exhausted", c.x - 48.0, c.y, 25.0, WHITE);
+    }
 }
 
 pub fn draw_hex_center_text(p: Position, text: &str) {
