@@ -1,16 +1,18 @@
 {
-  "state": "Playing",
+  "state": {
+    "StatusPhase": "DetermineFirstPlayer"
+  },
   "players": [
     {
       "name": null,
       "id": 0,
       "resources": {
-        "food": 1,
-        "wood": 6,
-        "ore": 6,
-        "ideas": 5,
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 3,
         "gold": 7,
-        "mood_tokens": 6,
+        "mood_tokens": 7,
         "culture_tokens": 7
       },
       "resource_limit": {
@@ -46,7 +48,7 @@
             "academy": null,
             "market": null,
             "obelisk": null,
-            "observatory": 0,
+            "observatory": null,
             "fortress": null,
             "port": null,
             "temple": null,
@@ -131,14 +133,16 @@
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Math",
-        "Mining"
+        "Fishing",
+        "Mining",
+        "Theocracy Advance",
+        "Theocracy 2"
       ],
       "unlocked_special_advance": [],
       "wonders": [],
       "wonders_build": 0,
       "leader_position": null,
-      "game_event_tokens": 2,
+      "game_event_tokens": 1,
       "influenced_buildings": 0,
       "completed_objectives": [],
       "captured_leaders": [],
@@ -149,7 +153,7 @@
         "academies": 5,
         "markets": 5,
         "obelisks": 5,
-        "observatories": 4,
+        "observatories": 5,
         "fortresses": 5,
         "ports": 5,
         "temples": 5
@@ -197,6 +201,20 @@
             {
               "food": 0,
               "wood": 1,
+              "ore": 0,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
+            }
+          ]
+        ],
+        [
+          "Water",
+          [
+            {
+              "food": 1,
+              "wood": 0,
               "ore": 0,
               "ideas": 0,
               "gold": 0,
@@ -271,6 +289,7 @@
       "active_leader": null,
       "available_leaders": [],
       "advances": [
+        "Engineering",
         "Farming",
         "Mining"
       ],
@@ -278,12 +297,14 @@
       "wonders": [],
       "wonders_build": 0,
       "leader_position": null,
-      "game_event_tokens": 3,
+      "game_event_tokens": 2,
       "influenced_buildings": 0,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
-      "wonder_cards": [],
+      "wonder_cards": [
+        "X"
+      ],
       "available_settlements": 7,
       "available_buildings": {
         "academies": 5,
@@ -400,24 +421,8 @@
   "action_log": [
     {
       "Playing": {
-        "IncreaseHappiness": {
-          "happiness_increases": [
-            [
-              "A1",
-              0
-            ],
-            [
-              "C2",
-              1
-            ]
-          ]
-        }
-      }
-    },
-    {
-      "Playing": {
         "Advance": {
-          "advance": "Math",
+          "advance": "Democracy Advance",
           "payment": {
             "food": 0,
             "wood": 0,
@@ -432,20 +437,17 @@
     },
     {
       "Playing": {
-        "Construct": {
-          "city_position": "C2",
-          "city_piece": "Observatory",
+        "Advance": {
+          "advance": "Democracy 2",
           "payment": {
-            "food": 1,
-            "wood": 1,
-            "ore": 1,
-            "ideas": 0,
+            "food": 0,
+            "wood": 0,
+            "ore": 0,
+            "ideas": 2,
             "gold": 0,
             "mood_tokens": 0,
             "culture_tokens": 0
-          },
-          "port_position": null,
-          "temple_bonus": null
+          }
         }
       }
     },
@@ -454,27 +456,88 @@
     },
     {
       "Playing": "EndTurn"
+    },
+    {
+      "Playing": "EndTurn"
+    },
+    {
+      "Playing": "EndTurn"
+    },
+    {
+      "Playing": "EndTurn"
+    },
+    {
+      "Playing": "EndTurn"
+    },
+    {
+      "StatusPhase": {
+        "FreeAdvance": "Fishing"
+      }
+    },
+    {
+      "StatusPhase": {
+        "FreeAdvance": "Engineering"
+      }
+    },
+    {
+      "StatusPhase": {
+        "RaseSize1City": null
+      }
+    },
+    {
+      "StatusPhase": {
+        "RaseSize1City": null
+      }
+    },
+    {
+      "StatusPhase": {
+        "ChangeGovernmentType": {
+          "new_government": "Theocracy",
+          "additional_advances": [
+            "Theocracy 2"
+          ]
+        }
+      }
     }
   ],
-  "action_log_index": 5,
+  "action_log_index": 13,
   "log": [
     "The game has started",
     "Age 1 has started",
     "Round 1/3",
-    "Player1 increased happiness in the city at C2 by 1 steps, making it Happy",
-    "Player1 payed 2 ideas to get the Math advance",
-    "Player1 payed 1 food, 1 wood and 1 ore to construct a Observatory in the city at C2 making it Neutral",
-    "Player1 ended his turn",
+    "Player1 payed 2 ideas to get the Democracy Advance advance",
+    "Player1 payed 2 ideas to get the Democracy 2 advance",
+    "Player1 ended his turn with 1 actions left",
     "It's Player2's turn",
     "Player2 ended his turn with 3 actions left",
     "It's Player1's turn",
-    "Round 2/3"
+    "Round 2/3",
+    "Player1 ended his turn with 3 actions left",
+    "It's Player2's turn",
+    "Player2 ended his turn with 3 actions left",
+    "It's Player1's turn",
+    "Round 3/3",
+    "Player1 ended his turn with 3 actions left",
+    "It's Player2's turn",
+    "Player2 ended his turn with 3 actions left",
+    "It's Player1's turn",
+    "The game has entered the 1st status phase",
+    "Player1 advanced Fishing for free",
+    "It's Player2's turn",
+    "Player2 advanced Engineering for free",
+    "It's Player1's turn",
+    "Player1 did not rase a city",
+    "It's Player2's turn",
+    "Player2 did not rase a city",
+    "It's Player1's turn",
+    "Player1 changed his government from Democracy to Theocracy - additional advances: Theocracy 2",
+    "It's Player2's turn"
   ],
-  "undo_limit": 5,
+  "undo_limit": 13,
   "played_once_per_turn_actions": [],
   "actions_left": 3,
   "successful_cultural_influence": false,
-  "round": 2,
+  "round": 1,
   "age": 1,
   "messages": [
     "The game has started"
@@ -493,10 +556,8 @@
   ],
   "dice_roll_log": [],
   "dropped_players": [],
-  "wonders_left": [
-    "X"
-  ],
-  "wonder_amount_left": 1,
+  "wonders_left": [],
+  "wonder_amount_left": 0,
   "undo_context_stack": [
     {
       "Recruit": {

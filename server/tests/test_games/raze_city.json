@@ -133,9 +133,9 @@
       "available_leaders": [],
       "advances": [
         "Farming",
+        "Fishing",
         "Mining",
-        "Tactics",
-        "Fishing"
+        "Tactics"
       ],
       "unlocked_special_advance": [],
       "wonders": [],

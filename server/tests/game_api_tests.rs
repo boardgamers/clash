@@ -5,6 +5,8 @@ use std::{
     path::MAIN_SEPARATOR as SEPARATOR,
 };
 
+use server::game::GameState;
+use server::status_phase::{ChangeGovernmentType, StatusPhaseAction};
 use server::{
     action::Action,
     city::{City, MoodState::*},
@@ -13,13 +15,12 @@ use server::{
         Building::{self, *},
     },
     content::custom_actions::CustomAction::*,
-    game::{Game, GameState::*},
+    game::Game,
     game_api,
     map::Terrain::*,
     playing_actions::PlayingAction::*,
     position::Position,
     resource_pile::ResourcePile,
-    status_phase::StatusPhaseAction::*,
     unit::{MovementAction::*, UnitType::*},
 };
 
@@ -233,7 +234,7 @@ fn cultural_influence() {
     assert!(!game.players[1].cities[0].influenced());
     assert_eq!(
         game.state,
-        CulturalInfluenceResolution {
+        GameState::CulturalInfluenceResolution {
             roll_boost_cost: 2,
             target_player_index: 1,
             target_city_position: city1position,
@@ -243,7 +244,7 @@ fn cultural_influence() {
     let influence_resolution_decline_action = Action::CulturalInfluenceResolution(false);
     let game = game_api::execute_action(game, influence_resolution_decline_action, 0);
     assert!(!game.players[1].cities[0].influenced());
-    assert_eq!(game.state, Playing);
+    assert_eq!(game.state, GameState::Playing);
     assert!(!game.successful_cultural_influence);
     let influence_action = Action::Playing(InfluenceCultureAttempt {
         starting_city_position: city0position,
@@ -253,7 +254,7 @@ fn cultural_influence() {
     });
     let game = game_api::execute_action(game, influence_action, 0);
     assert!(game.players[1].cities[0].influenced());
-    assert_eq!(game.state, Playing);
+    assert_eq!(game.state, GameState::Playing);
     assert!(game.successful_cultural_influence);
     let game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
     assert_eq!(game.active_player(), 1);
@@ -265,7 +266,7 @@ fn cultural_influence() {
     });
     let game = game_api::execute_action(game, influence_action, 1);
     assert!(game.players[1].cities[0].influenced());
-    assert_eq!(game.state, Playing);
+    assert_eq!(game.state, GameState::Playing);
     assert!(!game.successful_cultural_influence);
     let influence_action = Action::Playing(InfluenceCultureAttempt {
         starting_city_position: city1position,
@@ -275,7 +276,7 @@ fn cultural_influence() {
     });
     let game = game_api::execute_action(game, influence_action, 1);
     assert!(!game.players[1].cities[0].influenced());
-    assert_eq!(game.state, Playing);
+    assert_eq!(game.state, GameState::Playing);
     assert!(game.successful_cultural_influence);
 }
 
@@ -571,7 +572,7 @@ fn test_construct() {
 fn test_wrong_status_phase_action() {
     test_action(
         "illegal_free_advance",
-        Action::StatusPhase(RaseSize1City(None)),
+        Action::StatusPhase(StatusPhaseAction::RaseSize1City(None)),
         0,
         false,
         true,
@@ -584,7 +585,7 @@ fn test_wrong_status_phase_action() {
 fn test_free_advance() {
     test_action(
         "free_advance",
-        Action::StatusPhase(FreeAdvance(String::from("Storage"))),
+        Action::StatusPhase(StatusPhaseAction::FreeAdvance(String::from("Storage"))),
         0,
         false,
         false,
@@ -595,7 +596,9 @@ fn test_free_advance() {
 fn test_raze_city() {
     test_action(
         "raze_city",
-        Action::StatusPhase(RaseSize1City(Some(Position::from_offset("A1")))),
+        Action::StatusPhase(StatusPhaseAction::RaseSize1City(Some(
+            Position::from_offset("A1"),
+        ))),
         0,
         false,
         false,
@@ -606,7 +609,23 @@ fn test_raze_city() {
 fn test_determine_first_player() {
     test_action(
         "determine_first_player",
-        Action::StatusPhase(DetermineFirstPlayer(1)),
+        Action::StatusPhase(StatusPhaseAction::DetermineFirstPlayer(1)),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_change_government() {
+    test_action(
+        "change_government",
+        Action::StatusPhase(StatusPhaseAction::ChangeGovernmentType(Some(
+            ChangeGovernmentType {
+                new_government: String::from("Theocracy"),
+                additional_advances: vec![String::from("Theocracy 2")],
+            },
+        ))),
         0,
         false,
         false,

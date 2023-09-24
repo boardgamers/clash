@@ -231,7 +231,7 @@ impl Player {
                 .into_iter()
                 .map(|leader| leader.name)
                 .collect(),
-            advances: self.advances,
+            advances: self.advances.into_iter().sorted().collect(),
             unlocked_special_advance: self.unlocked_special_advances,
             wonders: self.wonders,
             wonders_build: self.wonders_build,

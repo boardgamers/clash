@@ -132,9 +132,9 @@
       "active_leader": null,
       "available_leaders": [],
       "advances": [
+        "Engineering",
         "Farming",
-        "Mining",
-        "Engineering"
+        "Mining"
       ],
       "unlocked_special_advance": [],
       "wonders": [
