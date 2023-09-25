@@ -36,15 +36,15 @@ pub fn place_settler_dialog() -> StateUpdate {
 
 #[derive(Clone)]
 pub struct RemoveCasualtiesSelection {
-    pub city_position: Position,
+    pub position: Position,
     pub needed: u8,
     pub units: Vec<u32>,
 }
 
 impl RemoveCasualtiesSelection {
-    pub fn new(city_position: Position, needed: u8) -> Self {
+    pub fn new(position: Position, needed: u8) -> Self {
         RemoveCasualtiesSelection {
-            city_position,
+            position,
             needed,
             units: Vec::new(),
         }
@@ -65,7 +65,7 @@ impl UnitSelection for RemoveCasualtiesSelection {
     }
 
     fn current_tile(&self) -> Option<Position> {
-        Some(self.city_position)
+        Some(self.position)
     }
 }
 

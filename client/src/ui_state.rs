@@ -234,8 +234,11 @@ impl State {
             },
             GameState::PlaceSettler { .. } => ActiveDialog::PlaceSettler,
             GameState::Combat(Combat {
-                attacker_position,
                 phase,
+                defender,
+                defender_position,
+                attacker,
+                attacker_position,
                 ..
             }) => match phase {
                 CombatPhase::PlayActionCard(_) => {
@@ -245,9 +248,12 @@ impl State {
                     );
                     ActiveDialog::None
                 } //todo(gregor)
-                CombatPhase::RemoveCasualties { casualties, .. } => ActiveDialog::RemoveCasualties(
-                    RemoveCasualtiesSelection::new(*attacker_position, *casualties),
-                ),
+                CombatPhase::RemoveCasualties { player, casualties, .. } => {
+                    let position = if player == attacker { attacker_position } else if player == defender { defender_position } else { panic!("player should be either defender or attacker")};
+                    ActiveDialog::RemoveCasualties(
+                                    RemoveCasualtiesSelection::new(*position, *casualties),
+                                )
+                },
                 CombatPhase::Retreat => ActiveDialog::Retreat,
             },
             _ => ActiveDialog::None,
