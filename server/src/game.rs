@@ -513,16 +513,22 @@ impl Game {
                         .iter()
                         .any(|unit| !unit.unit_type.is_settler())
                     {
+                        let mut military = false;
                         for unit_id in &units {
                             let unit = self.players[player_index]
                                 .get_unit_mut(*unit_id)
                                 .expect("the player should have all units to move");
                             assert!(unit.can_attack());
+                            if !unit.unit_type.is_settler() {
+                                military = true;
+                            }
                             self.move_unit(player_index, *unit_id, destination);
                             self.players[player_index]
                                 .get_unit_mut(*unit_id)
-                                .expect("the player should have all units to move").position = starting_position;
+                                .expect("the player should have all units to move")
+                                .position = starting_position;
                         }
+                        assert!(military, "Illegal action");
                         self.initiate_combat(
                             defender,
                             destination,
@@ -715,7 +721,10 @@ impl Game {
                 } else {
                     panic!("Illegal action")
                 };
-                assert!(units.iter().all(|unit| fighting_units.contains(unit)));
+                assert!(
+                    units.iter().all(|unit| fighting_units.contains(unit)),
+                    "Illegal action"
+                );
                 for unit in units {
                     self.kill_unit(unit, player, opponent);
                     if player == attacker {
@@ -942,9 +951,17 @@ impl Game {
     }
 
     fn capture_position(&mut self, old_player: usize, position: Position, new_player: usize) {
-        let captured_settlers = self.players[old_player].get_units(position).iter().map(|unit| unit.id).collect::<Vec<u32>>();
+        let captured_settlers = self.players[old_player]
+            .get_units(position)
+            .iter()
+            .map(|unit| unit.id)
+            .collect::<Vec<u32>>();
         if !captured_settlers.is_empty() {
-            self.add_to_last_log_item(&format!(" and captured {} settlers of {}", captured_settlers.len(), self.players[old_player].get_name()));
+            self.add_to_last_log_item(&format!(
+                " and captured {} settlers of {}",
+                captured_settlers.len(),
+                self.players[old_player].get_name()
+            ));
         }
         for id in captured_settlers {
             self.players[old_player].remove_unit(id);
@@ -1440,7 +1457,10 @@ impl Game {
         new_player_index: usize,
         old_player_index: usize,
     ) {
-        self.add_to_last_log_item(&format!(" and captured {}'s city at {position}", self.players[old_player_index].get_name()));
+        self.add_to_last_log_item(&format!(
+            " and captured {}'s city at {position}",
+            self.players[old_player_index].get_name()
+        ));
         let Some(mut city) = self.players[old_player_index].take_city(position) else {
             return;
         };
@@ -1702,8 +1722,6 @@ impl Game {
             _ => (),
         };
     }
-
-    
 
     fn undo_move_units(
         &mut self,

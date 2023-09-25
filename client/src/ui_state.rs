@@ -248,12 +248,21 @@ impl State {
                     );
                     ActiveDialog::None
                 } //todo(gregor)
-                CombatPhase::RemoveCasualties { player, casualties, .. } => {
-                    let position = if player == attacker { attacker_position } else if player == defender { defender_position } else { panic!("player should be either defender or attacker")};
-                    ActiveDialog::RemoveCasualties(
-                                    RemoveCasualtiesSelection::new(*position, *casualties),
-                                )
-                },
+                CombatPhase::RemoveCasualties {
+                    player, casualties, ..
+                } => {
+                    let position = if player == attacker {
+                        attacker_position
+                    } else if player == defender {
+                        defender_position
+                    } else {
+                        panic!("player should be either defender or attacker")
+                    };
+                    ActiveDialog::RemoveCasualties(RemoveCasualtiesSelection::new(
+                        *position,
+                        *casualties,
+                    ))
+                }
                 CombatPhase::Retreat => ActiveDialog::Retreat,
             },
             _ => ActiveDialog::None,
