@@ -76,7 +76,7 @@ impl Unit {
         true
     }
 
-    pub fn movement_restriction(&mut self) {
+    pub fn restrict_movement(&mut self) {
         self.movement_restriction = match self.movement_restriction {
             MovementRestriction::None => AllMovement(0),
             AllMovement(x) | Attack(x) => AllMovement(x),
@@ -90,7 +90,7 @@ impl Unit {
         }
     }
 
-    pub fn attack_restriction(&mut self) {
+    pub fn restrict_attack(&mut self) {
         self.movement_restriction = match self.movement_restriction {
             MovementRestriction::None => Attack(1),
             AllMovement(x) => AllMovement(x),

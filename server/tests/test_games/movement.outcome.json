@@ -424,7 +424,7 @@
     "\tPlayer1 moved 1 settler from C2 to B2",
     "\tPlayer1 ended the movement action",
     "Player1 used a move units action",
-    "\tPlayer1 moved 1 settler from B2 to B3"
+    "\tPlayer1 moved 1 settler from B2 to B3 and captured Player2's city at B3"
   ],
   "undo_limit": 0,
   "played_once_per_turn_actions": [],
