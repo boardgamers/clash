@@ -362,7 +362,8 @@ fn assert_eq_game_json(
     expected_path: &str,
     message: &str,
 ) {
-    if expected.replace([' ', '\t', '\n', '\r'], "") == actual.replace([' ', '\t', '\n', '\r'], "") {
+    if expected.replace([' ', '\t', '\n', '\r'], "") == actual.replace([' ', '\t', '\n', '\r'], "")
+    {
         return;
     }
     let file_path = format!("tests{SEPARATOR}test_games{SEPARATOR}{test}.result.json");
