@@ -4,6 +4,7 @@ use std::{
     path::MAIN_SEPARATOR as SEPARATOR,
 };
 
+use server::action::CombatAction;
 use server::status_phase::{ChangeGovernmentType, StatusPhaseAction};
 use server::{
     action::Action,
@@ -315,13 +316,24 @@ fn test_change_government() {
 // combat
 
 #[test]
-fn test_remove_casualties_attacker() {
+fn test_until_remove_casualties_attacker() {
     test_action(
-        "remove_casualties_attacker",
+        "until_remove_casualties_attacker",
         Action::Movement(Move {
             units: vec![0, 1, 2, 3],
             destination: Position::from_offset("C1"),
         }),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_remove_casualties_attacker_and_capture_city() {
+    test_action(
+        "remove_casualties_attacker",
+        Action::Combat(CombatAction::RemoveCasualties(vec![0, 1])),
         0,
         false,
         false,
