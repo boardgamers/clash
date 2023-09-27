@@ -17,17 +17,6 @@ impl Map {
     }
 
     #[must_use]
-    pub fn data(self) -> MapData {
-        MapData {
-            tiles: self
-                .tiles
-                .into_iter()
-                .sorted_by_key(|(position, _)| *position)
-                .collect(),
-        }
-    }
-
-    #[must_use]
     pub fn cloned_data(&self) -> MapData {
         MapData {
             tiles: self

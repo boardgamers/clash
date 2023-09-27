@@ -113,5 +113,5 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
 #[must_use]
 pub fn messages(mut game: Game) -> Messages {
     let messages = mem::take(&mut game.messages);
-    Messages::new(messages, game.data())
+    Messages::new(messages, game.cloned_data())
 }

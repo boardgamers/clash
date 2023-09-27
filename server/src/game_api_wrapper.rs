@@ -15,7 +15,7 @@ fn get_game(data: JsValue) -> Game {
 }
 
 fn from_game(game: Game) -> JsValue {
-    serde_wasm_bindgen::to_value(&game.data()).expect("game should be serializable")
+    serde_wasm_bindgen::to_value(&game.cloned_data()).expect("game should be serializable")
 }
 
 #[wasm_bindgen]
