@@ -377,11 +377,16 @@ fn assert_eq_game_json(
         .expect("Failed to write output file");
     let expected_path = format!("tests{SEPARATOR}test_games{SEPARATOR}{expected_path}.json");
 
-    panic!(
-        "{test} test failed:\n\
+    assert_eq!(
+        actual,
+        expected,
+        "{}",
+        format_args!(
+            "{test} test failed:\n\
             {message}.\n\
             Expected game was not equal to the actual game.\n\
             See 'expected' at {expected_path} and 'actual' at {file_path}."
+        )
     );
 }
 
@@ -424,7 +429,7 @@ fn test_action(
     let game = game_api::execute_action(game, Action::Undo, player_index);
     let mut trimmed_game = game.clone();
     trimmed_game.action_log.pop();
-    let json = serde_json::to_string_pretty(&trimmed_game.data())
+    let json = serde_json::to_string_pretty(&trimmed_game.cloned_data())
         .expect("game data should be serializable");
     assert_eq_game_json(
         &original_game,
@@ -434,8 +439,8 @@ fn test_action(
         &format!("the game did not match the expectation after undoing the {game_path} action"),
     );
     let game = game_api::execute_action(game, Action::Redo, player_index);
-    let json =
-        serde_json::to_string_pretty(&game.data()).expect("game data should be serializable");
+    let json = serde_json::to_string_pretty(&game.cloned_data())
+        .expect("game data should be serializable");
     assert_eq_game_json(
         &expected_game,
         &json,
@@ -639,6 +644,22 @@ fn test_change_government() {
                 additional_advances: vec![String::from("Theocracy 2")],
             },
         ))),
+        0,
+        false,
+        false,
+    );
+}
+
+// combat
+
+#[test]
+fn test_remove_casualties_attacker() {
+    test_action(
+        "remove_casualties_attacker",
+        Action::Movement(Move {
+            units: vec![0, 1, 2, 3],
+            destination: Position::from_offset("C1"),
+        }),
         0,
         false,
         false,
