@@ -339,3 +339,17 @@ fn test_remove_casualties_attacker_and_capture_city() {
         false,
     );
 }
+
+#[test]
+fn test_direct_capture_city() {
+    test_action(
+        "direct_capture_city",
+        Action::Movement(Move {
+            units: vec![0, 1, 2, 3],
+            destination: Position::from_offset("C1"),
+        }),
+        0,
+        false,
+        false,
+    );
+}
