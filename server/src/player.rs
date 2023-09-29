@@ -211,6 +211,53 @@ impl Player {
         player
     }
 
+    #[must_use]
+    pub fn data(self) -> PlayerData {
+        PlayerData {
+            name: self.name,
+            id: self.index,
+            resources: self.resources,
+            resource_limit: self.resource_limit,
+            cities: self.cities.into_iter().map(City::data).collect(),
+            units: self
+                .units
+                .into_iter()
+                .sorted_by_key(|unit| unit.id)
+                .collect(),
+            civilization: self.civilization.name,
+            active_leader: self.active_leader.map(|leader| leader.name),
+            available_leaders: self
+                .available_leaders
+                .into_iter()
+                .map(|leader| leader.name)
+                .collect(),
+            advances: self.advances.into_iter().sorted().collect(),
+            unlocked_special_advance: self.unlocked_special_advances,
+            wonders: self.wonders,
+            wonders_build: self.wonders_build,
+            leader_position: self.leader_position,
+            game_event_tokens: self.game_event_tokens,
+            influenced_buildings: self.influenced_buildings,
+            completed_objectives: self.completed_objectives,
+            captured_leaders: self.captured_leaders,
+            event_victory_points: self.event_victory_points,
+            wonder_cards: self
+                .wonder_cards
+                .into_iter()
+                .map(|wonder| wonder.name)
+                .collect(),
+            available_settlements: self.available_settlements,
+            available_buildings: self.available_buildings,
+            available_units: self.available_units,
+            collect_options: self
+                .collect_options
+                .into_iter()
+                .sorted_by_key(|(terrain, _)| terrain.clone())
+                .collect(),
+            next_unit_id: self.next_unit_id,
+        }
+    }
+
     pub fn cloned_data(&self) -> PlayerData {
         PlayerData {
             name: self.name.clone(),
@@ -233,7 +280,6 @@ impl Player {
                 .available_leaders
                 .iter()
                 .map(|leader| leader.name.clone())
-                .sorted()
                 .collect(),
             advances: self.advances.iter().cloned().sorted().collect(),
             unlocked_special_advance: self.unlocked_special_advances.clone(),
@@ -249,7 +295,6 @@ impl Player {
                 .wonder_cards
                 .iter()
                 .map(|wonder| wonder.name.clone())
-                .sorted()
                 .collect(),
             available_settlements: self.available_settlements,
             available_buildings: self.available_buildings.clone(),

@@ -38,6 +38,19 @@ impl City {
     }
 
     #[must_use]
+    pub fn data(self) -> CityData {
+        CityData::new(
+            self.pieces.data(),
+            self.mood_state,
+            self.activations,
+            self.angry_activation,
+            self.player_index,
+            self.position,
+            self.port_position,
+        )
+    }
+
+    #[must_use]
     pub fn cloned_data(&self) -> CityData {
         CityData::new(
             self.pieces.cloned_data(),

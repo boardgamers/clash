@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use std::{collections::HashMap, mem};
 
 use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
@@ -175,6 +174,37 @@ impl Game {
     }
 
     #[must_use]
+    pub fn data(self) -> GameData {
+        GameData {
+            state: self.state,
+            players: self.players.into_iter().map(Player::data).collect(),
+            map: self.map.data(),
+            starting_player_index: self.starting_player_index,
+            current_player_index: self.current_player_index,
+            action_log: self.action_log,
+            action_log_index: self.action_log_index,
+            log: self.log,
+            undo_limit: self.undo_limit,
+            played_once_per_turn_actions: self.played_once_per_turn_actions,
+            actions_left: self.actions_left,
+            successful_cultural_influence: self.successful_cultural_influence,
+            round: self.round,
+            age: self.age,
+            messages: self.messages,
+            dice_roll_outcomes: self.dice_roll_outcomes,
+            dice_roll_log: self.dice_roll_log,
+            dropped_players: self.dropped_players,
+            wonders_left: self
+                .wonders_left
+                .into_iter()
+                .map(|wonder| wonder.name)
+                .collect(),
+            wonder_amount_left: self.wonder_amount_left,
+            undo_context_stack: self.undo_context_stack,
+        }
+    }
+
+    #[must_use]
     pub fn cloned_data(&self) -> GameData {
         GameData {
             state: self.state.clone(),
@@ -199,7 +229,6 @@ impl Game {
                 .wonders_left
                 .iter()
                 .map(|wonder| wonder.name.clone())
-                .sorted()
                 .collect(),
             wonder_amount_left: self.wonder_amount_left,
             undo_context_stack: self.undo_context_stack.clone(),

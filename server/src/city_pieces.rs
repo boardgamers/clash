@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::ops::{AddAssign, SubAssign};
 
@@ -45,6 +44,20 @@ impl CityPieces {
     }
 
     #[must_use]
+    pub fn data(self) -> CityPiecesData {
+        CityPiecesData {
+            academy: self.academy,
+            market: self.market,
+            obelisk: self.obelisk,
+            observatory: self.observatory,
+            fortress: self.fortress,
+            port: self.port,
+            temple: self.temple,
+            wonders: self.wonders.into_iter().map(|wonder| wonder.name).collect(),
+        }
+    }
+
+    #[must_use]
     pub fn cloned_data(&self) -> CityPiecesData {
         CityPiecesData {
             academy: self.academy,
@@ -58,7 +71,6 @@ impl CityPieces {
                 .wonders
                 .iter()
                 .map(|wonder| wonder.name.clone())
-                .sorted()
                 .collect(),
         }
     }
