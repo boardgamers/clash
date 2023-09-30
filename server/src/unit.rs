@@ -17,7 +17,6 @@ pub struct Unit {
     pub position: Position,
     pub unit_type: UnitType,
     pub movement_restriction: MovementRestriction,
-    pub transporter_position: Option<Position>,
     pub id: u32,
 }
 
@@ -29,7 +28,6 @@ impl Unit {
             position,
             unit_type,
             movement_restriction: MovementRestriction::None,
-            transporter_position: None,
             id,
         }
     }
@@ -54,7 +52,7 @@ impl Unit {
         if !self.unit_type.is_settler() {
             return false;
         }
-        if self.transporter_position.is_some() {
+        if self.is_transported(game) {
             return false;
         }
         let player = &game.players[self.player_index];
@@ -74,6 +72,11 @@ impl Unit {
             return false;
         }
         true
+    }
+
+    #[must_use]
+    pub fn is_transported(&self, game: &Game) -> bool {
+        self.unit_type.is_land_based() && game.map.tiles[&self.position] == Water
     }
 
     pub fn restrict_movement(&mut self) {

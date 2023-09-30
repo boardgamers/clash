@@ -93,7 +93,6 @@
           "position": "C2",
           "unit_type": "Infantry",
           "movement_restriction": "None",
-          "transporter_position": null,
           "id": 0
         },
         {
@@ -101,7 +100,6 @@
           "position": "C2",
           "unit_type": "Cavalry",
           "movement_restriction": "None",
-          "transporter_position": null,
           "id": 1
         },
         {
@@ -109,7 +107,6 @@
           "position": "C2",
           "unit_type": "Leader",
           "movement_restriction": "None",
-          "transporter_position": null,
           "id": 2
         },
         {
@@ -117,7 +114,6 @@
           "position": "C2",
           "unit_type": "Elephant",
           "movement_restriction": "None",
-          "transporter_position": null,
           "id": 3
         },
         {
@@ -125,7 +121,6 @@
           "position": "C2",
           "unit_type": "Settler",
           "movement_restriction": "None",
-          "transporter_position": null,
           "id": 4
         },
         {
@@ -133,7 +128,6 @@
           "position": "C2",
           "unit_type": "Settler",
           "movement_restriction": "None",
-          "transporter_position": null,
           "id": 5
         },
         {
@@ -141,7 +135,6 @@
           "position": "C2",
           "unit_type": "Settler",
           "movement_restriction": "None",
-          "transporter_position": null,
           "id": 6
         },
         {
@@ -149,7 +142,6 @@
           "position": "C2",
           "unit_type": "Settler",
           "movement_restriction": "None",
-          "transporter_position": null,
           "id": 7
         }
       ],
@@ -282,7 +274,6 @@
           "position": "C1",
           "unit_type": "Infantry",
           "movement_restriction": "None",
-          "transporter_position": null,
           "id": 0
         },
         {
@@ -290,7 +281,6 @@
           "position": "C1",
           "unit_type": "Infantry",
           "movement_restriction": "None",
-          "transporter_position": null,
           "id": 1
         }
       ],

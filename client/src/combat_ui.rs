@@ -1,7 +1,7 @@
 use server::action::{Action, CombatAction};
 use server::game::Game;
 use server::position::Position;
-use server::unit::{Unit, UnitType};
+use server::unit::Unit;
 
 use crate::dialog_ui::active_dialog_window;
 use crate::select_ui::{ConfirmSelection, SelectionConfirm};
@@ -38,15 +38,17 @@ pub fn place_settler_dialog() -> StateUpdate {
 pub struct RemoveCasualtiesSelection {
     pub position: Position,
     pub needed: u8,
+    pub selectable: Vec<u32>,
     pub units: Vec<u32>,
 }
 
 impl RemoveCasualtiesSelection {
-    pub fn new(position: Position, needed: u8) -> Self {
+    pub fn new(position: Position, needed: u8, selectable: Vec<u32>) -> Self {
         RemoveCasualtiesSelection {
             position,
             needed,
             units: Vec::new(),
+            selectable,
         }
     }
 }
@@ -61,7 +63,7 @@ impl UnitSelection for RemoveCasualtiesSelection {
     }
 
     fn can_select(&self, _game: &Game, unit: &Unit) -> bool {
-        unit.unit_type != UnitType::Settler
+        self.selectable.contains(&unit.id)
     }
 
     fn current_tile(&self) -> Option<Position> {

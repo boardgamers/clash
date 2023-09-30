@@ -702,9 +702,9 @@ impl Player {
         if self
             .get_units(city_position)
             .iter()
-            .filter(|unit| !unit.unit_type.is_settler())
+            .filter(|unit| unit.unit_type.is_army_unit())
             .count()
-            + units.iter().filter(|unit| unit.is_land_based()).count()
+            + units.iter().filter(|unit| unit.is_army_unit()).count()
             > STACK_LIMIT
         {
             return false;
@@ -798,7 +798,7 @@ impl Player {
             && self
                 .get_units(destination)
                 .iter()
-                .filter(|unit| unit.unit_type.is_land_based() && !unit.unit_type.is_settler())
+                .filter(|unit| unit.unit_type.is_army_unit())
                 .count()
                 + stack_size
                 > STACK_LIMIT
