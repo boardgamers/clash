@@ -679,6 +679,31 @@ fn test_remove_casualties_attacker_and_capture_city() {
 }
 
 #[test]
+fn test_until_remove_casualties_defender() {
+    test_action(
+        "until_remove_casualties_defender",
+        Action::Movement(Move {
+            units: vec![0],
+            destination: Position::from_offset("C1"),
+        }),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_remove_casualties_defender_and_defender_wins() {
+    test_action(
+        "remove_casualties_defender",
+        Action::Combat(CombatAction::RemoveCasualties(vec![0])),
+        1,
+        false,
+        false,
+    );
+}
+
+#[test]
 fn test_direct_capture_city() {
     test_action(
         "direct_capture_city",
@@ -686,6 +711,42 @@ fn test_direct_capture_city() {
             units: vec![0, 1, 2, 3],
             destination: Position::from_offset("C1"),
         }),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_first_combat_round_no_hits_attacker_may_retreat() {
+    test_action(
+        "first_combat_round_no_hits",
+        Action::Movement(Move {
+            units: vec![0],
+            destination: Position::from_offset("C1"),
+        }),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_retreat() {
+    test_action(
+        "retreat",
+        Action::Combat(CombatAction::Retreat(true)),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_dont_retreat_and_next_combat_round() {
+    test_action(
+        "dont_retreat",
+        Action::Combat(CombatAction::Retreat(false)),
         0,
         false,
         false,
