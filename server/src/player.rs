@@ -699,7 +699,11 @@ impl Player {
         if units.iter().any(|unit| matches!(unit, Ship)) && city.pieces.port.is_none() {
             return false;
         }
-        if self.get_units(city_position).len()
+        if self
+            .get_units(city_position)
+            .iter()
+            .filter(|unit| !unit.unit_type.is_settler())
+            .count()
             + units.iter().filter(|unit| unit.is_land_based()).count()
             > STACK_LIMIT
         {

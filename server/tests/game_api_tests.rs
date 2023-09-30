@@ -536,6 +536,23 @@ fn test_recruit() {
 }
 
 #[test]
+fn test_recruit_combat() {
+    test_action(
+        "recruit_combat",
+        Action::Playing(Recruit {
+            units: vec![Ship],
+            city_position: Position::from_offset("C2"),
+            payment: ResourcePile::wood(2),
+            leader_index: None,
+            replaced_units: vec![],
+        }),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
 fn test_collect() {
     test_action(
         "collect",
