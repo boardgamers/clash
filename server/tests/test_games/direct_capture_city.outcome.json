@@ -1,13 +1,23 @@
 {
-  "state": "Playing",
+  "state": {
+    "Movement": {
+      "movement_actions_left": 2,
+      "moved_units": [
+        0,
+        1,
+        2,
+        3
+      ]
+    }
+  },
   "players": [
     {
       "name": null,
       "id": 0,
       "resources": {
-        "food": 1,
-        "wood": 6,
-        "ore": 6,
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
         "ideas": 5,
         "gold": 7,
         "mood_tokens": 7,
@@ -47,44 +57,62 @@
             "market": null,
             "obelisk": null,
             "observatory": null,
-            "fortress": 0,
+            "fortress": null,
+            "port": null,
+            "temple": null,
+            "wonders": []
+          },
+          "mood_state": "Neutral",
+          "activations": 8,
+          "angry_activation": false,
+          "player_index": 0,
+          "position": "C2",
+          "port_position": null
+        },
+        {
+          "city_pieces": {
+            "academy": null,
+            "market": null,
+            "obelisk": null,
+            "observatory": null,
+            "fortress": null,
             "port": null,
             "temple": null,
             "wonders": []
           },
           "mood_state": "Angry",
-          "activations": 0,
+          "activations": 2,
           "angry_activation": false,
           "player_index": 0,
-          "position": "C2",
+          "position": "C1",
           "port_position": null
         }
       ],
       "units": [
         {
           "player_index": 0,
-          "position": "C2",
+          "position": "C1",
           "unit_type": "Infantry",
           "movement_restriction": "None",
           "id": 0
         },
         {
           "player_index": 0,
-          "position": "C2",
+          "position": "C1",
           "unit_type": "Cavalry",
           "movement_restriction": "None",
           "id": 1
         },
         {
           "player_index": 0,
-          "position": "C2",
+          "position": "C1",
           "unit_type": "Leader",
           "movement_restriction": "None",
           "id": 2
         },
         {
           "player_index": 0,
-          "position": "C2",
+          "position": "C1",
           "unit_type": "Elephant",
           "movement_restriction": "None",
           "id": 3
@@ -136,13 +164,13 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "available_settlements": 7,
+      "available_settlements": 6,
       "available_buildings": {
         "academies": 5,
         "markets": 5,
         "obelisks": 5,
         "observatories": 5,
-        "fortresses": 4,
+        "fortresses": 5,
         "ports": 5,
         "temples": 5
       },
@@ -221,42 +249,8 @@
         "mood_tokens": 7,
         "culture_tokens": 7
       },
-      "cities": [
-        {
-          "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
-          },
-          "mood_state": "Angry",
-          "activations": 2,
-          "angry_activation": false,
-          "player_index": 1,
-          "position": "C1",
-          "port_position": null
-        }
-      ],
-      "units": [
-        {
-          "player_index": 1,
-          "position": "C1",
-          "unit_type": "Infantry",
-          "movement_restriction": "None",
-          "id": 0
-        },
-        {
-          "player_index": 1,
-          "position": "C1",
-          "unit_type": "Infantry",
-          "movement_restriction": "None",
-          "id": 1
-        }
-      ],
+      "cities": [],
+      "units": [],
       "civilization": "test1",
       "active_leader": null,
       "available_leaders": [],
@@ -274,7 +268,7 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "available_settlements": 7,
+      "available_settlements": 8,
       "available_buildings": {
         "academies": 5,
         "markets": 5,
@@ -351,7 +345,9 @@
       ],
       [
         "A3",
-        "Mountain"
+        {
+          "Exhausted": "Forest"
+        }
       ],
       [
         "B1",
@@ -384,40 +380,71 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 1,
-  "action_log": [],
-  "action_log_index": 0,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "Playing": {
+        "Advance": {
+          "advance": "Tactics",
+          "payment": {
+            "food": 0,
+            "wood": 0,
+            "ore": 0,
+            "ideas": 2,
+            "gold": 0,
+            "mood_tokens": 0,
+            "culture_tokens": 0
+          }
+        }
+      }
+    },
+    {
+      "Playing": "MoveUnits"
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "destination": "C1"
+        }
+      }
+    }
+  ],
+  "action_log_index": 3,
   "log": [
     "The game has started",
     "Age 1 has started",
     "Round 1/3",
     "Player1 payed 2 ideas to get the Tactics advance",
-    "Player1 payed 1 food, 1 wood and 1 ore to construct a Fortress in the city at C2 making it Angry",
-    "Player1 ended his turn with 1 actions left",
-    "It's Player2's turn"
+    "Player1 used a move units action",
+    "\tPlayer1 moved 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1",
+    "\nCombat round 1",
+    "\tPlayer1 rolled a combined combat value of 24 and gets 4 hits against defending units. Player2 rolled a combined combat value of 2 and gets 0 hits against attacking units.",
+    "\tPlayer1 killed all defending units and captured Player2's city at C1 and captured Player2's city at C1"
   ],
   "undo_limit": 3,
   "played_once_per_turn_actions": [],
-  "actions_left": 3,
+  "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,
   "age": 1,
   "messages": [
     "The game has started"
   ],
-  "dice_roll_outcomes": [
+  "dice_roll_outcomes": [],
+  "dice_roll_log": [
+    10,
+    10,
+    10,
+    10,
     1,
-    1,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10
+    1
   ],
-  "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [
     "X"
@@ -482,6 +509,18 @@
       "Recruit": {
         "replaced_units": [],
         "replaced_leader": null
+      }
+    },
+    {
+      "Movement": {
+        "starting_position": "C2",
+        "movement_actions_left": 3,
+        "moved_units": [
+          0,
+          1,
+          2,
+          3
+        ]
       }
     }
   ]

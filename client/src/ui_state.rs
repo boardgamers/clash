@@ -3,11 +3,12 @@ use macroquad::prelude::*;
 use server::action::{Action, CombatAction};
 use server::city::{City, MoodState};
 use server::game::{Combat, CombatPhase, Game, GameState};
+use server::map::Terrain::Water;
 use server::player::Player;
-
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
+use server::unit::UnitType::Ship;
 
 use crate::advance_ui::AdvancePayment;
 use crate::assets::Assets;
@@ -233,14 +234,7 @@ impl State {
                 StatusPhaseState::DetermineFirstPlayer => ActiveDialog::DetermineFirstPlayer,
             },
             GameState::PlaceSettler { .. } => ActiveDialog::PlaceSettler,
-            GameState::Combat(Combat {
-                phase,
-                defender,
-                defender_position,
-                attacker,
-                attacker_position,
-                ..
-            }) => match phase {
+            GameState::Combat(c) => match c.phase {
                 CombatPhase::PlayActionCard(_) => {
                     self.update(
                         game,
@@ -251,16 +245,15 @@ impl State {
                 CombatPhase::RemoveCasualties {
                     player, casualties, ..
                 } => {
-                    let position = if player == attacker {
-                        attacker_position
-                    } else if player == defender {
-                        defender_position
+                    let (position, selectable) = if player == c.attacker {
+                        (c.attacker_position, c.attackers.clone())
+                    } else if player == c.defender {
+                        (c.defender_position, defenders(&game, c))
                     } else {
                         panic!("player should be either defender or attacker")
                     };
                     ActiveDialog::RemoveCasualties(RemoveCasualtiesSelection::new(
-                        *position,
-                        *casualties,
+                        position, casualties, selectable,
                     ))
                 }
                 CombatPhase::Retreat => ActiveDialog::Retreat,
@@ -278,6 +271,24 @@ impl State {
         game.execute_action(a, game.active_player());
         self.update_from_game_state(game);
     }
+}
+
+fn defenders(game: &&mut Game, c: &Combat) -> Vec<u32> {
+    let p = &game.players[c.defender];
+    let defenders = if game.map.tiles[&c.defender_position] == Water {
+        p.get_units(c.defender_position)
+            .iter()
+            .filter(|u| u.unit_type == Ship)
+            .map(|u| u.id)
+            .collect::<Vec<_>>()
+    } else {
+        p.get_units(c.defender_position)
+            .iter()
+            .filter(|u| u.unit_type.is_army_unit())
+            .map(|u| u.id)
+            .collect::<Vec<_>>()
+    };
+    defenders
 }
 
 pub fn can_play_action(game: &Game) -> bool {

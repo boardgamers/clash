@@ -1,13 +1,18 @@
 {
-  "state": "Playing",
+  "state": {
+    "Movement": {
+      "movement_actions_left": 3,
+      "moved_units": []
+    }
+  },
   "players": [
     {
       "name": null,
       "id": 0,
       "resources": {
-        "food": 1,
-        "wood": 6,
-        "ore": 6,
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
         "ideas": 5,
         "gold": 7,
         "mood_tokens": 7,
@@ -47,13 +52,13 @@
             "market": null,
             "obelisk": null,
             "observatory": null,
-            "fortress": 0,
+            "fortress": null,
             "port": null,
             "temple": null,
             "wonders": []
           },
-          "mood_state": "Angry",
-          "activations": 0,
+          "mood_state": "Neutral",
+          "activations": 8,
           "angry_activation": false,
           "player_index": 0,
           "position": "C2",
@@ -142,7 +147,7 @@
         "markets": 5,
         "obelisks": 5,
         "observatories": 5,
-        "fortresses": 4,
+        "fortresses": 5,
         "ports": 5,
         "temples": 5
       },
@@ -351,7 +356,9 @@
       ],
       [
         "A3",
-        "Mountain"
+        {
+          "Exhausted": "Forest"
+        }
       ],
       [
         "B1",
@@ -384,21 +391,39 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 1,
-  "action_log": [],
-  "action_log_index": 0,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "Playing": {
+        "Advance": {
+          "advance": "Tactics",
+          "payment": {
+            "food": 0,
+            "wood": 0,
+            "ore": 0,
+            "ideas": 2,
+            "gold": 0,
+            "mood_tokens": 0,
+            "culture_tokens": 0
+          }
+        }
+      }
+    },
+    {
+      "Playing": "MoveUnits"
+    }
+  ],
+  "action_log_index": 2,
   "log": [
     "The game has started",
     "Age 1 has started",
     "Round 1/3",
     "Player1 payed 2 ideas to get the Tactics advance",
-    "Player1 payed 1 food, 1 wood and 1 ore to construct a Fortress in the city at C2 making it Angry",
-    "Player1 ended his turn with 1 actions left",
-    "It's Player2's turn"
+    "Player1 used a move units action"
   ],
-  "undo_limit": 3,
+  "undo_limit": 0,
   "played_once_per_turn_actions": [],
-  "actions_left": 3,
+  "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,
   "age": 1,
@@ -408,10 +433,6 @@
   "dice_roll_outcomes": [
     1,
     1,
-    10,
-    10,
-    10,
-    10,
     10,
     10,
     10,

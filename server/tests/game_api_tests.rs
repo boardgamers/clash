@@ -5,6 +5,7 @@ use std::{
     path::MAIN_SEPARATOR as SEPARATOR,
 };
 
+use server::action::CombatAction;
 use server::game::GameState;
 use server::status_phase::{ChangeGovernmentType, StatusPhaseAction};
 use server::{
@@ -377,11 +378,16 @@ fn assert_eq_game_json(
         .expect("Failed to write output file");
     let expected_path = format!("tests{SEPARATOR}test_games{SEPARATOR}{expected_path}.json");
 
-    panic!(
-        "{test} test failed:\n\
+    assert_eq!(
+        actual,
+        expected,
+        "{}",
+        format_args!(
+            "{test} test failed:\n\
             {message}.\n\
             Expected game was not equal to the actual game.\n\
             See 'expected' at {expected_path} and 'actual' at {file_path}."
+        )
     );
 }
 
@@ -424,7 +430,7 @@ fn test_action(
     let game = game_api::execute_action(game, Action::Undo, player_index);
     let mut trimmed_game = game.clone();
     trimmed_game.action_log.pop();
-    let json = serde_json::to_string_pretty(&trimmed_game.data())
+    let json = serde_json::to_string_pretty(&trimmed_game.cloned_data())
         .expect("game data should be serializable");
     assert_eq_game_json(
         &original_game,
@@ -434,8 +440,8 @@ fn test_action(
         &format!("the game did not match the expectation after undoing the {game_path} action"),
     );
     let game = game_api::execute_action(game, Action::Redo, player_index);
-    let json =
-        serde_json::to_string_pretty(&game.data()).expect("game data should be serializable");
+    let json = serde_json::to_string_pretty(&game.cloned_data())
+        .expect("game data should be serializable");
     assert_eq_game_json(
         &expected_game,
         &json,
@@ -525,6 +531,23 @@ fn test_recruit() {
         }),
         0,
         true,
+        false,
+    );
+}
+
+#[test]
+fn test_recruit_combat() {
+    test_action(
+        "recruit_combat",
+        Action::Playing(Recruit {
+            units: vec![Ship],
+            city_position: Position::from_offset("C2"),
+            payment: ResourcePile::wood(2),
+            leader_index: None,
+            replaced_units: vec![],
+        }),
+        0,
+        false,
         false,
     );
 }
@@ -639,6 +662,108 @@ fn test_change_government() {
                 additional_advances: vec![String::from("Theocracy 2")],
             },
         ))),
+        0,
+        false,
+        false,
+    );
+}
+
+// combat
+
+#[test]
+fn test_until_remove_casualties_attacker() {
+    test_action(
+        "until_remove_casualties_attacker",
+        Action::Movement(Move {
+            units: vec![0, 1, 2, 3],
+            destination: Position::from_offset("C1"),
+        }),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_remove_casualties_attacker_and_capture_city() {
+    test_action(
+        "remove_casualties_attacker",
+        Action::Combat(CombatAction::RemoveCasualties(vec![0, 1])),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_until_remove_casualties_defender() {
+    test_action(
+        "until_remove_casualties_defender",
+        Action::Movement(Move {
+            units: vec![0],
+            destination: Position::from_offset("C1"),
+        }),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_remove_casualties_defender_and_defender_wins() {
+    test_action(
+        "remove_casualties_defender",
+        Action::Combat(CombatAction::RemoveCasualties(vec![0])),
+        1,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_direct_capture_city() {
+    test_action(
+        "direct_capture_city",
+        Action::Movement(Move {
+            units: vec![0, 1, 2, 3],
+            destination: Position::from_offset("C1"),
+        }),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_first_combat_round_no_hits_attacker_may_retreat() {
+    test_action(
+        "first_combat_round_no_hits",
+        Action::Movement(Move {
+            units: vec![0],
+            destination: Position::from_offset("C1"),
+        }),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_retreat() {
+    test_action(
+        "retreat",
+        Action::Combat(CombatAction::Retreat(true)),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_dont_retreat_and_next_combat_round() {
+    test_action(
+        "dont_retreat",
+        Action::Combat(CombatAction::Retreat(false)),
         0,
         false,
         false,

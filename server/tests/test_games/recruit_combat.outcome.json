@@ -6,7 +6,7 @@
       "id": 0,
       "resources": {
         "food": 1,
-        "wood": 6,
+        "wood": 4,
         "ore": 6,
         "ideas": 5,
         "gold": 7,
@@ -47,17 +47,17 @@
             "market": null,
             "obelisk": null,
             "observatory": null,
-            "fortress": 0,
-            "port": null,
+            "fortress": null,
+            "port": 0,
             "temple": null,
             "wonders": []
           },
           "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
+          "activations": 10,
+          "angry_activation": true,
           "player_index": 0,
           "position": "C2",
-          "port_position": null
+          "port_position": "C3"
         }
       ],
       "units": [
@@ -123,8 +123,8 @@
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Mining",
-        "Tactics"
+        "Fishing",
+        "Mining"
       ],
       "unlocked_special_advance": [],
       "wonders": [],
@@ -142,14 +142,14 @@
         "markets": 5,
         "obelisks": 5,
         "observatories": 5,
-        "fortresses": 4,
-        "ports": 5,
+        "fortresses": 5,
+        "ports": 4,
         "temples": 5
       },
       "available_units": {
         "settlers": 0,
         "infantry": 15,
-        "ships": 4,
+        "ships": 3,
         "cavalry": 3,
         "elephants": 3,
         "leaders": 0
@@ -196,9 +196,23 @@
               "culture_tokens": 0
             }
           ]
+        ],
+        [
+          "Water",
+          [
+            {
+              "food": 1,
+              "wood": 0,
+              "ore": 0,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
+            }
+          ]
         ]
       ],
-      "next_unit_id": 8
+      "next_unit_id": 9
     },
     {
       "name": null,
@@ -248,13 +262,6 @@
           "unit_type": "Infantry",
           "movement_restriction": "None",
           "id": 0
-        },
-        {
-          "player_index": 1,
-          "position": "C1",
-          "unit_type": "Infantry",
-          "movement_restriction": "None",
-          "id": 1
         }
       ],
       "civilization": "test1",
@@ -351,7 +358,9 @@
       ],
       [
         "A3",
-        "Mountain"
+        {
+          "Exhausted": "Forest"
+        }
       ],
       [
         "B1",
@@ -384,21 +393,80 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 1,
-  "action_log": [],
-  "action_log_index": 0,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "Playing": {
+        "Advance": {
+          "advance": "Fishing",
+          "payment": {
+            "food": 0,
+            "wood": 0,
+            "ore": 0,
+            "ideas": 2,
+            "gold": 0,
+            "mood_tokens": 0,
+            "culture_tokens": 0
+          }
+        }
+      }
+    },
+    {
+      "Playing": {
+        "Construct": {
+          "city_position": "C2",
+          "city_piece": "Port",
+          "payment": {
+            "food": 1,
+            "wood": 1,
+            "ore": 1,
+            "ideas": 0,
+            "gold": 0,
+            "mood_tokens": 0,
+            "culture_tokens": 0
+          },
+          "port_position": "C3",
+          "temple_bonus": null
+        }
+      }
+    },
+    {
+      "Playing": {
+        "Recruit": {
+          "units": [
+            "Ship"
+          ],
+          "city_position": "C2",
+          "payment": {
+            "food": 0,
+            "wood": 2,
+            "ore": 0,
+            "ideas": 0,
+            "gold": 0,
+            "mood_tokens": 0,
+            "culture_tokens": 0
+          },
+          "leader_index": null,
+          "replaced_units": []
+        }
+      }
+    }
+  ],
+  "action_log_index": 3,
   "log": [
     "The game has started",
     "Age 1 has started",
     "Round 1/3",
-    "Player1 payed 2 ideas to get the Tactics advance",
-    "Player1 payed 1 food, 1 wood and 1 ore to construct a Fortress in the city at C2 making it Angry",
-    "Player1 ended his turn with 1 actions left",
-    "It's Player2's turn"
+    "Player1 payed 2 ideas to get the Fishing advance",
+    "Player1 payed 1 food, 1 wood and 1 ore to construct a Port in the city at C2 at the water tile C3 making it Angry",
+    "Player1 payed 2 wood to recruit 1 ship in the city at C2 making it Angry",
+    "\nCombat round 1",
+    "\tPlayer1 rolled a combined combat value of 6 and gets 1 hits against defending units. Player2 rolled a combined combat value of 6 and gets 1 hits against attacking units.",
+    "\tAll attacking and defending units killed each other, ending the battle in a draw"
   ],
   "undo_limit": 3,
   "played_once_per_turn_actions": [],
-  "actions_left": 3,
+  "actions_left": 0,
   "successful_cultural_influence": false,
   "round": 1,
   "age": 1,
@@ -413,17 +481,24 @@
     10,
     10,
     10,
-    10,
+    10
+  ],
+  "dice_roll_log": [
     10,
     10
   ],
-  "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [
     "X"
   ],
   "wonder_amount_left": 1,
   "undo_context_stack": [
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
     {
       "Recruit": {
         "replaced_units": [],
