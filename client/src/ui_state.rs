@@ -24,6 +24,7 @@ pub enum ActiveDialog {
     None,
     AdvanceMenu,
     AdvancePayment(AdvancePayment),
+    TileMenu(Position),
     ConstructionPayment(ConstructionPayment),
     CollectResources(CollectResources),
     RecruitUnitSelection(RecruitAmount),
@@ -59,7 +60,6 @@ pub enum StateUpdate {
     Execute(Action),
     ExecuteWithWarning(PendingUpdate),
     SetIncreaseHappiness(IncreaseHappiness),
-    FocusTile(FocusedTile),
 }
 
 impl StateUpdate {
@@ -134,23 +134,8 @@ impl IncreaseHappiness {
     }
 }
 
-pub struct FocusedTile {
-    pub city_owner_index: Option<usize>,
-    pub position: Position,
-}
-
-impl FocusedTile {
-    pub fn new(city_owner_index: Option<usize>, position: Position) -> FocusedTile {
-        FocusedTile {
-            city_owner_index,
-            position,
-        }
-    }
-}
-
 pub struct State {
     pub assets: Assets,
-    pub focused_tile: Option<FocusedTile>,
     pub active_dialog: ActiveDialog,
     pub dialog_stack: Vec<ActiveDialog>,
     pub pending_update: Option<PendingUpdate>,
@@ -163,7 +148,6 @@ impl State {
             active_dialog: ActiveDialog::None,
             dialog_stack: vec![],
             pending_update: None,
-            focused_tile: None,
             increase_happiness: None,
             assets: Assets::new().await,
         }
@@ -172,7 +156,6 @@ impl State {
     pub fn clear(&mut self) {
         self.active_dialog = ActiveDialog::None;
         self.dialog_stack.clear();
-        self.focused_tile = None;
         self.increase_happiness = None;
         self.pending_update = None;
     }
@@ -230,10 +213,6 @@ impl State {
             StateUpdate::SetIncreaseHappiness(h) => {
                 self.clear();
                 self.increase_happiness = Some(h);
-            }
-            StateUpdate::FocusTile(f) => {
-                self.clear();
-                self.focused_tile = Some(f);
             }
         }
     }

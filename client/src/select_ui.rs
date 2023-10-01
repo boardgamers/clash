@@ -1,5 +1,5 @@
 use crate::dialog_ui::active_dialog_window;
-use crate::ui_state::{StateUpdate, StateUpdates};
+use crate::ui_state::StateUpdate;
 use macroquad::hash;
 use macroquad::math::{bool, Vec2};
 use macroquad::ui::widgets::Group;
@@ -29,8 +29,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
     plus: impl Fn(&C, &O) -> StateUpdate,
     minus: impl Fn(&C, &O) -> StateUpdate,
 ) -> StateUpdate {
-    let mut updates = StateUpdates::new();
-    active_dialog_window(|ui| {
+    active_dialog_window(|ui, updates| {
         for (i, p) in get_objects(container).iter().enumerate() {
             if show(container, p) {
                 Group::new(hash!("res", i), Vec2::new(100., 40.)).ui(ui, |ui| {
@@ -54,8 +53,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
         if ui.button(Vec2::new(80., 160.), "Cancel") {
             updates.add(StateUpdate::Cancel);
         };
-    });
-    updates.result()
+    })
 }
 
 pub trait ConfirmSelection: Clone {
@@ -84,8 +82,7 @@ pub fn selection_dialog<T: Selection>(
     on_change: impl Fn(T) -> StateUpdate,
     on_ok: impl FnOnce(T) -> StateUpdate,
 ) -> StateUpdate {
-    let mut updates = StateUpdates::new();
-    active_dialog_window(|ui| {
+    active_dialog_window(|ui, updates| {
         ui.label(None, title);
         for name in sel.all() {
             let can_sel = sel.can_select(game, name);
@@ -113,9 +110,7 @@ pub fn selection_dialog<T: Selection>(
             ui,
             &sel.confirm(game),
         ));
-    });
-
-    updates.result()
+    })
 }
 
 pub fn confirm_update<T: ConfirmSelection>(

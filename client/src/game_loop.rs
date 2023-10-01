@@ -1,5 +1,5 @@
 use crate::advance_ui::{pay_advance_dialog, show_advance_menu, show_free_advance_menu};
-use crate::city_ui::show_city_menu;
+
 use crate::collect_ui::{click_collect_option, collect_resources_dialog};
 use crate::construct_ui::pay_construction_dialog;
 use crate::dialog_ui::active_dialog_window;
@@ -8,7 +8,7 @@ use crate::hex_ui::pixel_to_coordinate;
 use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
 use crate::player_ui::{show_global_controls, show_globals, show_resources, show_wonders};
-use crate::ui_state::{ActiveDialog, CityMenu, FocusedTile, State, StateUpdate, StateUpdates};
+use crate::ui_state::{ActiveDialog, State, StateUpdate, StateUpdates};
 use crate::{city_ui, combat_ui, move_ui, recruit_unit_ui, status_phase_ui};
 use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
 use macroquad::prelude::{clear_background, next_frame, set_fullscreen, vec2, WHITE};
@@ -67,18 +67,9 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
     }
     updates.add(show_global_controls(game, state));
 
-    if let Some(f) = &state.focused_tile {
-        if !matches!(state.active_dialog, ActiveDialog::MoveUnits(_)) {
-            updates.add(if let Some(p) = f.city_owner_index {
-                show_city_menu(game, &CityMenu::new(player_index, p, f.position))
-            } else {
-                show_tile_menu(game, f.position, vec![], |_, _| {})
-            });
-        }
-    }
-
     updates.add(match &state.active_dialog {
         ActiveDialog::None => StateUpdate::None,
+        ActiveDialog::TileMenu(p) => show_tile_menu(game, *p),
         ActiveDialog::AdvanceMenu => show_advance_menu(game, player_index),
         ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p),
         ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p),
@@ -123,8 +114,7 @@ fn export(game: &Game) {
 }
 
 fn show_pending_update(state: &State) -> StateUpdate {
-    let mut updates = StateUpdates::new();
-    active_dialog_window(|ui| {
+    active_dialog_window(|ui, updates| {
         if let Some(update) = &state.pending_update {
             ui.label(None, &format!("Warning: {}", update.warning.join(", ")));
             if ui.button(None, "OK") {
@@ -134,8 +124,7 @@ fn show_pending_update(state: &State) -> StateUpdate {
                 updates.add(StateUpdate::ResolvePendingUpdate(false));
             }
         }
-    });
-    updates.result()
+    })
 }
 
 pub fn try_click(game: &Game, state: &State, player_index: usize) -> StateUpdate {
@@ -167,7 +156,7 @@ pub fn try_click(game: &Game, state: &State, player_index: usize) -> StateUpdate
                 if let Some(c) = game.get_any_city(pos) {
                     city_ui::city_click(state, game.get_player(player_index), c)
                 } else if matches!(state.active_dialog, ActiveDialog::None) {
-                    StateUpdate::FocusTile(FocusedTile::new(None, pos))
+                    StateUpdate::OpenDialog(ActiveDialog::TileMenu(pos))
                 } else {
                     StateUpdate::None
                 }

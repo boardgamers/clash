@@ -1,14 +1,13 @@
 use crate::dialog_ui::active_dialog_window;
 use crate::select_ui;
 use crate::select_ui::{ConfirmSelection, Selection, SelectionConfirm};
-use crate::ui_state::{ActiveDialog, StateUpdate, StateUpdates};
+use crate::ui_state::{ActiveDialog, StateUpdate};
 use server::content::advances;
 use server::game::Game;
 use server::status_phase::{ChangeGovernmentType, StatusPhaseAction};
 
 pub fn determine_first_player_dialog(game: &Game) -> StateUpdate {
-    let mut updates = StateUpdates::new();
-    active_dialog_window(|ui| {
+    active_dialog_window(|ui, updates| {
         ui.label(None, "Who should be the first player in the next age?");
         game.players.iter().for_each(|p| {
             if ui.button(
@@ -20,21 +19,18 @@ pub fn determine_first_player_dialog(game: &Game) -> StateUpdate {
                 ));
             }
         });
-    });
-    updates.result()
+    })
 }
 
 pub fn raze_city_dialog() -> StateUpdate {
-    let mut updates = StateUpdates::new();
-    active_dialog_window(|ui| {
+    active_dialog_window(|ui, updates| {
         ui.label(None, "Select a city to raze - or decline.");
         if ui.button(None, "Decline") {
             updates.add(StateUpdate::status_phase(StatusPhaseAction::RaseSize1City(
                 None,
             )));
         }
-    });
-    updates.result()
+    })
 }
 
 #[derive(Clone)]
@@ -91,9 +87,7 @@ impl ConfirmSelection for ChooseAdditionalAdvances {
 }
 
 pub fn change_government_type_dialog(game: &Game) -> StateUpdate {
-    let mut updates = StateUpdates::new();
-
-    active_dialog_window(|ui| {
+    active_dialog_window(|ui, updates| {
         ui.label(None, "Select additional advances:");
 
         let current = game
@@ -124,8 +118,7 @@ pub fn change_government_type_dialog(game: &Game) -> StateUpdate {
                 StatusPhaseAction::ChangeGovernmentType(None),
             ));
         }
-    });
-    updates.result()
+    })
 }
 
 pub fn choose_additional_advances_dialog(

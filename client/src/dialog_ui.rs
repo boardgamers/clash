@@ -1,28 +1,35 @@
-use crate::ui_state::StateUpdate;
+use crate::ui_state::{StateUpdate, StateUpdates};
 use macroquad::hash;
 use macroquad::math::vec2;
 use macroquad::ui::widgets::Window;
 use macroquad::ui::{root_ui, Ui};
 
-pub fn active_dialog_window<F>(f: F)
+pub fn active_dialog_window<F>(f: F) -> StateUpdate
 where
-    F: FnOnce(&mut Ui),
+    F: FnOnce(&mut Ui, &mut StateUpdates),
 {
-    let _ = dialog_window(false, f);
+    dialog_window(false, f)
 }
 
 pub fn dialog_window<F>(close_button: bool, f: F) -> StateUpdate
 where
-    F: FnOnce(&mut Ui),
+    F: FnOnce(&mut Ui, &mut StateUpdates),
 {
-    let open = Window::new(hash!(), vec2(100., 100.), vec2(500., 500.))
+    let mut updates = StateUpdates::new();
+    let window = Window::new(hash!(), vec2(100., 100.), vec2(500., 500.))
         .titlebar(true)
         .movable(true)
-        .close_button(close_button)
-        .ui(&mut root_ui(), f);
-    if open {
+        .close_button(close_button);
+
+    let ui = &mut root_ui();
+    let token = window.begin(ui);
+    f(ui, &mut updates);
+    let open = token.end(ui);
+    let update = if open {
         StateUpdate::None
     } else {
         StateUpdate::CloseDialog
-    }
+    };
+    updates.add(update);
+    updates.result()
 }

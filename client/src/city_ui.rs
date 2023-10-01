@@ -11,16 +11,16 @@ use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{add_construct_button, add_wonder_buttons};
 use crate::happiness_ui::init_increase_happiness;
 use crate::hex_ui::draw_hex_center_text;
-use crate::map_ui::show_tile_menu;
+use crate::map_ui::show_generic_tile_menu;
 use crate::recruit_unit_ui::RecruitAmount;
-use crate::ui_state::{can_play_action, CityMenu, FocusedTile, State, StateUpdate, StateUpdates};
+use crate::ui_state::{can_play_action, CityMenu, State, StateUpdate, StateUpdates};
 use crate::{hex_ui, influence_ui, player_ui, ActiveDialog};
 
 pub fn show_city_menu(game: &Game, menu: &CityMenu) -> StateUpdate {
     let position = menu.city_position;
     let city = menu.get_city(game);
 
-    show_tile_menu(game, position, city_label(game, city), |ui, updates| {
+    show_generic_tile_menu(game, position, city_label(game, city), |ui, updates| {
         let can_play = can_play_action(game) && menu.is_city_owner() && city.can_activate();
         if can_play {
             if ui.button(None, "Collect Resources") {
@@ -212,6 +212,6 @@ pub fn city_click(state: &State, player: &Player, city: &City) -> StateUpdate {
             StateUpdate::None
         }
     } else {
-        StateUpdate::FocusTile(FocusedTile::new(Some(city.player_index), pos))
+        StateUpdate::OpenDialog(ActiveDialog::TileMenu(pos))
     }
 }

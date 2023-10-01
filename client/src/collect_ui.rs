@@ -14,7 +14,7 @@ use server::resource_pile::ResourcePile;
 use crate::dialog_ui::active_dialog_window;
 use crate::hex_ui;
 use crate::resource_ui::resource_pile_string;
-use crate::ui_state::{ActiveDialog, State, StateUpdate, StateUpdates};
+use crate::ui_state::{ActiveDialog, State, StateUpdate};
 
 #[derive(Clone)]
 pub struct CollectResources {
@@ -47,8 +47,7 @@ impl CollectResources {
 }
 
 pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> StateUpdate {
-    let mut updates = StateUpdates::new();
-    active_dialog_window(|ui| {
+    active_dialog_window(|ui, updates| {
         let city = game.get_city(collect.player_index, collect.city_position);
         let valid = get_total_collection(
             game,
@@ -77,8 +76,7 @@ pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> Stat
         if ui.button(Vec2::new(80., 40.), "Cancel") {
             updates.add(StateUpdate::Cancel);
         };
-    });
-    updates.result()
+    })
 }
 
 pub fn possible_resource_collections(

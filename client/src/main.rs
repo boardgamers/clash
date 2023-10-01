@@ -38,9 +38,12 @@ mod unit_ui;
 
 #[macroquad::main("Clash")]
 async fn main() {
-    // let mut game = local_ui::setup_local_game();
     //todo add button to decide random or fixed game
-    let mut game = Game::new(2, "a".repeat(32));
+    let mut game = if true {
+        Game::new(2, "a".repeat(32))
+    } else {
+        local_ui::setup_local_game()
+    };
 
     game_loop::run(&mut game).await;
 }

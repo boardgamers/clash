@@ -9,7 +9,7 @@ use server::unit::{Unit, UnitType};
 
 use crate::dialog_ui::active_dialog_window;
 use crate::select_ui::{confirm_update, ConfirmSelection};
-use crate::ui_state::{StateUpdate, StateUpdates};
+use crate::ui_state::StateUpdate;
 use crate::{hex_ui, player_ui};
 
 pub fn draw_unit(unit: &Unit, index: u32) {
@@ -83,8 +83,7 @@ pub fn unit_selection_dialog<T: UnitSelection>(
     on_change: impl Fn(T) -> StateUpdate,
     on_ok: impl FnOnce(T) -> StateUpdate,
 ) -> StateUpdate {
-    let mut updates = StateUpdates::new();
-    active_dialog_window(|ui| {
+    active_dialog_window(|ui, updates| {
         if let Some(current_tile) = sel.current_tile() {
             for (p, unit_id) in units_on_tile(game, current_tile) {
                 let unit = game.get_player(p).get_unit(unit_id).unwrap();
@@ -116,9 +115,7 @@ pub fn unit_selection_dialog<T: UnitSelection>(
         } else {
             ui.label(None, "Select a starting tile");
         }
-    });
-
-    updates.result()
+    })
 }
 
 pub fn units_on_tile(game: &Game, pos: Position) -> impl Iterator<Item = (usize, u32)> + '_ {

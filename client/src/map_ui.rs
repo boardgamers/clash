@@ -1,8 +1,8 @@
 use itertools::Itertools;
-use macroquad::hash;
+
 use macroquad::math::vec2;
 use macroquad::prelude::*;
-use macroquad::ui::{root_ui, Ui};
+use macroquad::ui::Ui;
 use server::action::Action;
 use server::game;
 
@@ -13,8 +13,8 @@ use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::unit::{MovementRestriction, Unit};
 
-use crate::city_ui::draw_city;
-use crate::ui_state::{can_play_action, ActiveDialog, State, StateUpdate, StateUpdates};
+use crate::city_ui::{draw_city, show_city_menu};
+use crate::ui_state::{can_play_action, ActiveDialog, CityMenu, State, StateUpdate, StateUpdates};
 
 use crate::dialog_ui::dialog_window;
 use crate::{collect_ui, hex_ui, unit_ui};
@@ -88,12 +88,8 @@ fn alpha(game: &Game, state: &State, pos: Position) -> f32 {
         ActiveDialog::PlaceSettler => {
             highlight_if(game.players[game.active_player()].get_city(pos).is_some())
         }
-        _ => highlight_if(
-            state
-                .focused_tile
-                .as_ref()
-                .is_some_and(|f| pos == f.position),
-        ),
+        ActiveDialog::TileMenu(p) => highlight_if(*p == pos),
+        _ => 0.,
     };
     alpha
 }
@@ -118,15 +114,24 @@ fn highlight_if(b: bool) -> f32 {
     }
 }
 
-pub fn show_tile_menu(
+pub fn show_tile_menu(game: &Game, position: Position) -> StateUpdate {
+    if let Some(c) = game.get_any_city(position) {
+        show_city_menu(
+            game,
+            &CityMenu::new(game.active_player(), c.player_index, position),
+        )
+    } else {
+        show_generic_tile_menu(game, position, vec![], |_, _| {})
+    }
+}
+
+pub fn show_generic_tile_menu(
     game: &Game,
     position: Position,
     suffix: Vec<String>,
     additional: impl FnOnce(&mut Ui, &mut StateUpdates),
 ) -> StateUpdate {
-    let mut updates: StateUpdates = StateUpdates::new();
-
-    dialog_window(true, |ui| {
+    dialog_window(true, |ui, updates| {
         ui.label(
             None,
             &format!(
@@ -176,7 +181,6 @@ pub fn show_tile_menu(
             )));
         }
 
-        additional(ui, &mut updates);
-    });
-    updates.result()
+        additional(ui, updates);
+    })
 }
