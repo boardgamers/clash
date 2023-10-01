@@ -123,7 +123,8 @@ impl City {
         if !self.pieces.can_add_building(building) {
             return false;
         }
-        if self.pieces.amount() >= player.cities.len() {
+        let size = self.pieces.amount() + 1;
+        if size >= player.cities.len() {
             return false;
         }
         if !player.has_advance(&building.required_advance()) {
