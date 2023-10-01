@@ -102,11 +102,10 @@ pub fn show_resources(game: &Game, player_index: usize) {
 }
 
 pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
-    let y = 540.;
-    if game.can_undo() && root_ui().button(vec2(1200., y), "Undo") {
+    if game.can_undo() && root_ui().button(vec2(1200., 410.), "Undo") {
         return StateUpdate::Execute(Action::Undo);
     }
-    if game.can_redo() && root_ui().button(vec2(1250., y), "Redo") {
+    if game.can_redo() && root_ui().button(vec2(1250., 410.), "Redo") {
         return StateUpdate::Execute(Action::Redo);
     }
     match game.state {
@@ -127,7 +126,7 @@ pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
                 StateUpdate::None
             }
         }
-        GameState::Playing if root_ui().button(vec2(1200., y), "End Turn") => {
+        GameState::Playing if root_ui().button(vec2(1200., 540.), "End Turn") => {
             let left = game.actions_left;
             StateUpdate::execute_with_warning(
                 Action::Playing(PlayingAction::EndTurn),
