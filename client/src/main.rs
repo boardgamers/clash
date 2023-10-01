@@ -9,8 +9,9 @@
 
 extern crate core;
 
-use crate::ui_state::ActiveDialog;
 use server::game::Game;
+
+use crate::ui_state::ActiveDialog;
 
 mod advance_ui;
 mod assets;
@@ -40,7 +41,7 @@ mod unit_ui;
 async fn main() {
     //todo add button to decide random or fixed game
     let mut game = if true {
-        Game::new(2, "a".repeat(32))
+        Game::new(2, "a".repeat(32), true)
     } else {
         local_ui::setup_local_game()
     };

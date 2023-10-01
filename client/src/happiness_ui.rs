@@ -1,8 +1,6 @@
-use crate::ui_state::{can_play_action, IncreaseHappiness, State, StateUpdate};
-use macroquad::color::BLACK;
 use macroquad::math::vec2;
-use macroquad::prelude::draw_text;
 use macroquad::ui::root_ui;
+
 use server::action::Action;
 use server::city::City;
 use server::game::Game;
@@ -11,7 +9,10 @@ use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
-pub fn init_increase_happiness(
+use crate::dialog_ui::active_dialog_window;
+use crate::ui_state::{can_play_action, ActiveDialog, IncreaseHappiness, StateUpdate};
+
+pub fn add_increase_happiness(
     player: &Player,
     city: &City,
     pos: Position,
@@ -75,38 +76,33 @@ fn increase_happiness_new_steps(
     None
 }
 
-pub fn show_increase_happiness(game: &Game, player_index: usize, state: &State) -> StateUpdate {
-    let y = 480.;
-    if can_play_action(game)
-        && root_ui().button(vec2(1200., y), "Increase Happiness")
-        && state.increase_happiness.is_none()
-    {
-        return StateUpdate::SetIncreaseHappiness(IncreaseHappiness::new(
+pub fn increase_happiness_menu(h: &IncreaseHappiness) -> StateUpdate {
+    active_dialog_window(|ui, updates| {
+        if ui.button(None, "Cancel") {
+            updates.add(StateUpdate::Cancel);
+        }
+        if ui.button(None, "Confirm") {
+            updates.add(StateUpdate::Execute(Action::Playing(
+                PlayingAction::IncreaseHappiness {
+                    happiness_increases: h.steps.clone(),
+                },
+            )));
+        }
+        ui.label(None, &format!("Cost: {:?}", h.cost));
+    })
+}
+
+pub fn show_increase_happiness(game: &Game, player_index: usize) -> StateUpdate {
+    if can_play_action(game) && root_ui().button(vec2(1200., 480.), "Increase Happiness") {
+        return StateUpdate::SetDialog(ActiveDialog::IncreaseHappiness(IncreaseHappiness::new(
             game.get_player(player_index)
                 .cities
                 .iter()
                 .map(|c| (c.position, 0))
                 .collect(),
             ResourcePile::empty(),
-        ));
+        )));
     }
-    if let Some(increase_happiness) = &state.increase_happiness {
-        if root_ui().button(vec2(750., y), "Cancel") {
-            return StateUpdate::Cancel;
-        } else if increase_happiness.cost != ResourcePile::empty()
-            && root_ui().button(vec2(800., y), "Confirm")
-        {
-            return StateUpdate::Execute(Action::Playing(PlayingAction::IncreaseHappiness {
-                happiness_increases: increase_happiness.steps.clone(),
-            }));
-        }
-        draw_text(
-            &format!("Cost: {}", increase_happiness.cost),
-            600.,
-            520.,
-            20.,
-            BLACK,
-        );
-    }
+
     StateUpdate::None
 }

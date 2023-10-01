@@ -1,24 +1,28 @@
-use crate::advance_ui::{pay_advance_dialog, show_advance_menu, show_free_advance_menu};
+use std::fs::File;
+use std::io::BufReader;
 
+use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
+use macroquad::prelude::{clear_background, next_frame, set_fullscreen, vec2, WHITE};
+use macroquad::ui::root_ui;
+
+use server::action::Action;
+use server::game::{Game, GameData};
+use server::position::Position;
+use server::status_phase::StatusPhaseAction;
+
+use crate::advance_ui::{pay_advance_dialog, show_advance_menu, show_free_advance_menu};
 use crate::collect_ui::{click_collect_option, collect_resources_dialog};
 use crate::construct_ui::pay_construction_dialog;
 use crate::dialog_ui::active_dialog_window;
-use crate::happiness_ui::show_increase_happiness;
+use crate::happiness_ui::{
+    add_increase_happiness, increase_happiness_menu, show_increase_happiness,
+};
 use crate::hex_ui::pixel_to_coordinate;
 use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
 use crate::player_ui::{show_global_controls, show_globals, show_resources, show_wonders};
 use crate::ui_state::{ActiveDialog, State, StateUpdate, StateUpdates};
-use crate::{city_ui, combat_ui, move_ui, recruit_unit_ui, status_phase_ui};
-use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
-use macroquad::prelude::{clear_background, next_frame, set_fullscreen, vec2, WHITE};
-use macroquad::ui::root_ui;
-use server::action::Action;
-use server::game::{Game, GameData};
-use server::position::Position;
-use server::status_phase::StatusPhaseAction;
-use std::fs::File;
-use std::io::BufReader;
+use crate::{combat_ui, move_ui, recruit_unit_ui, status_phase_ui};
 
 const EXPORT_FILE: &str = "game.json";
 
@@ -63,12 +67,13 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
     }
 
     if game.state == server::game::GameState::Playing {
-        updates.add(show_increase_happiness(game, player_index, state));
+        updates.add(show_increase_happiness(game, player_index));
     }
     updates.add(show_global_controls(game, state));
 
     updates.add(match &state.active_dialog {
         ActiveDialog::None => StateUpdate::None,
+        ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(h),
         ActiveDialog::TileMenu(p) => show_tile_menu(game, *p),
         ActiveDialog::AdvanceMenu => show_advance_menu(game, player_index),
         ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p),
@@ -128,41 +133,47 @@ fn show_pending_update(state: &State) -> StateUpdate {
 }
 
 pub fn try_click(game: &Game, state: &State, player_index: usize) -> StateUpdate {
-    if is_mouse_button_pressed(MouseButton::Left) {
-        let (x, y) = mouse_position();
+    if !is_mouse_button_pressed(MouseButton::Left) {
+        return StateUpdate::None;
+    }
+    let (x, y) = mouse_position();
 
-        let pos = Position::from_coordinate(pixel_to_coordinate(x, y));
+    let pos = Position::from_coordinate(pixel_to_coordinate(x, y));
+    if game.map.tiles.get(&pos).is_none() {
+        return StateUpdate::None;
+    }
 
-        match &state.active_dialog {
-            ActiveDialog::MoveUnits(s) => move_ui::click(pos, s),
-            ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::click_replace(pos, r),
-            ActiveDialog::RemoveCasualties(_s) => StateUpdate::None,
-            ActiveDialog::CollectResources(col) => click_collect_option(col, pos),
-            ActiveDialog::RaseSize1City => {
-                if game.players[player_index].can_raze_city(pos) {
-                    StateUpdate::status_phase(StatusPhaseAction::RaseSize1City(Some(pos)))
-                } else {
-                    StateUpdate::None
-                }
-            }
-            ActiveDialog::PlaceSettler => {
-                if game.players[player_index].get_city(pos).is_some() {
-                    StateUpdate::Execute(Action::PlaceSettler(pos))
-                } else {
-                    StateUpdate::None
-                }
-            }
-            _ => {
-                if let Some(c) = game.get_any_city(pos) {
-                    city_ui::city_click(state, game.get_player(player_index), c)
-                } else if matches!(state.active_dialog, ActiveDialog::None) {
-                    StateUpdate::OpenDialog(ActiveDialog::TileMenu(pos))
-                } else {
-                    StateUpdate::None
-                }
+    match &state.active_dialog {
+        ActiveDialog::MoveUnits(s) => move_ui::click(pos, s),
+        ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::click_replace(pos, r),
+        ActiveDialog::RemoveCasualties(_s) => StateUpdate::None,
+        ActiveDialog::CollectResources(col) => click_collect_option(col, pos),
+        ActiveDialog::RaseSize1City => {
+            if game.players[player_index].can_raze_city(pos) {
+                StateUpdate::status_phase(StatusPhaseAction::RaseSize1City(Some(pos)))
+            } else {
+                StateUpdate::None
             }
         }
-    } else {
-        StateUpdate::None
+        ActiveDialog::PlaceSettler => {
+            if game.players[player_index].get_city(pos).is_some() {
+                StateUpdate::Execute(Action::PlaceSettler(pos))
+            } else {
+                StateUpdate::None
+            }
+        }
+        ActiveDialog::IncreaseHappiness(h) => {
+            if let Some(city) = game.players[player_index].get_city(pos) {
+                StateUpdate::SetDialog(ActiveDialog::IncreaseHappiness(add_increase_happiness(
+                    &game.players[player_index],
+                    city,
+                    pos,
+                    h,
+                )))
+            } else {
+                StateUpdate::None
+            }
+        }
+        _ => StateUpdate::OpenDialog(ActiveDialog::TileMenu(pos)),
     }
 }

@@ -22,6 +22,7 @@ use crate::status_phase_ui::ChooseAdditionalAdvances;
 #[derive(Clone)]
 pub enum ActiveDialog {
     None,
+    IncreaseHappiness(IncreaseHappiness),
     AdvanceMenu,
     AdvancePayment(AdvancePayment),
     TileMenu(Position),
@@ -59,7 +60,6 @@ pub enum StateUpdate {
     ResolvePendingUpdate(bool),
     Execute(Action),
     ExecuteWithWarning(PendingUpdate),
-    SetIncreaseHappiness(IncreaseHappiness),
 }
 
 impl StateUpdate {
@@ -123,6 +123,7 @@ impl StateUpdates {
     }
 }
 
+#[derive(Clone)]
 pub struct IncreaseHappiness {
     pub steps: Vec<(Position, u32)>,
     pub cost: ResourcePile,
@@ -139,7 +140,6 @@ pub struct State {
     pub active_dialog: ActiveDialog,
     pub dialog_stack: Vec<ActiveDialog>,
     pub pending_update: Option<PendingUpdate>,
-    pub increase_happiness: Option<IncreaseHappiness>,
 }
 
 impl State {
@@ -148,7 +148,6 @@ impl State {
             active_dialog: ActiveDialog::None,
             dialog_stack: vec![],
             pending_update: None,
-            increase_happiness: None,
             assets: Assets::new().await,
         }
     }
@@ -156,7 +155,6 @@ impl State {
     pub fn clear(&mut self) {
         self.active_dialog = ActiveDialog::None;
         self.dialog_stack.clear();
-        self.increase_happiness = None;
         self.pending_update = None;
     }
 
@@ -168,7 +166,7 @@ impl State {
     }
 
     pub fn has_dialog(&self) -> bool {
-        !matches!(self.active_dialog, ActiveDialog::None) || self.increase_happiness.is_some()
+        !matches!(self.active_dialog, ActiveDialog::None)
     }
 
     pub fn update(&mut self, game: &mut Game, update: StateUpdate) {
@@ -209,10 +207,6 @@ impl State {
                 } else {
                     self.active_dialog = ActiveDialog::None;
                 }
-            }
-            StateUpdate::SetIncreaseHappiness(h) => {
-                self.clear();
-                self.increase_happiness = Some(h);
             }
         }
     }

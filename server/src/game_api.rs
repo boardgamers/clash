@@ -10,7 +10,7 @@ use crate::{
 
 #[must_use]
 pub fn init(player_amount: usize, seed: String) -> Game {
-    Game::new(player_amount, seed)
+    Game::new(player_amount, seed, true)
 }
 
 #[must_use]

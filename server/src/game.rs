@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::mem;
 
 use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
@@ -69,7 +70,7 @@ impl Game {
     ///
     /// Panics if there is an internal bug
     #[must_use]
-    pub fn new(player_amount: usize, seed: String) -> Self {
+    pub fn new(player_amount: usize, seed: String, setup: bool) -> Self {
         let seed_length = seed.len();
         let seed = if seed_length < 32 {
             seed + &" ".repeat(32 - seed_length)
@@ -89,9 +90,10 @@ impl Game {
             players.push(Player::new(civilizations.remove(civilization), i));
         }
 
-        setup_home_city(&mut players, 0, "F1");
-        setup_home_city(&mut players, 1, "F8");
-
+        if setup {
+            setup_home_city(&mut players, 0, "F1");
+            setup_home_city(&mut players, 1, "F8");
+        }
         let starting_player = rng.gen_range(0..players.len());
         let mut dice_roll_outcomes = Vec::new();
         for _ in 0..DICE_ROLL_BUFFER {
@@ -102,10 +104,15 @@ impl Game {
         wonders.shuffle(&mut rng);
         let wonder_amount = wonders.len();
 
+        let map = if setup {
+            Map::new(maximum_size_2_player_random_map(&mut rng))
+        } else {
+            Map::new(HashMap::new())
+        };
         Self {
             state: Playing,
             players,
-            map: Map::new(maximum_size_2_player_random_map(&mut rng)),
+            map: map,
             starting_player_index: starting_player,
             current_player_index: starting_player,
             action_log: Vec::new(),

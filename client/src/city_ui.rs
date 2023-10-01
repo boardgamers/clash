@@ -9,7 +9,6 @@ use server::unit::Units;
 
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{add_construct_button, add_wonder_buttons};
-use crate::happiness_ui::init_increase_happiness;
 use crate::hex_ui::draw_hex_center_text;
 use crate::map_ui::show_generic_tile_menu;
 use crate::recruit_unit_ui::RecruitAmount;
@@ -123,7 +122,7 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
     }
     draw_circle(c.x, c.y, 15.0, player_ui::player_color(owner.index));
 
-    if let Some(increase) = &state.increase_happiness {
+    if let ActiveDialog::IncreaseHappiness(increase) = &state.active_dialog {
         let steps = increase
             .steps
             .iter()
@@ -195,23 +194,4 @@ fn building_names() -> [(Building, &'static str); 7] {
         (Building::Port, "Port"),
         (Building::Temple, "Temple"),
     ]
-}
-
-pub fn city_click(state: &State, player: &Player, city: &City) -> StateUpdate {
-    let pos = city.position;
-
-    if let Some(increase_happiness) = &state.increase_happiness {
-        if player.index == city.player_index {
-            StateUpdate::SetIncreaseHappiness(init_increase_happiness(
-                player,
-                city,
-                pos,
-                increase_happiness,
-            ))
-        } else {
-            StateUpdate::None
-        }
-    } else {
-        StateUpdate::OpenDialog(ActiveDialog::TileMenu(pos))
-    }
 }
