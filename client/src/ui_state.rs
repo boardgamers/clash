@@ -99,6 +99,13 @@ impl StateUpdate {
     pub fn status_phase(action: StatusPhaseAction) -> StateUpdate {
         StateUpdate::Execute(Action::StatusPhase(action))
     }
+
+    pub fn or(self, other: impl FnOnce() -> StateUpdate) -> StateUpdate {
+        match self {
+            StateUpdate::None => other(),
+            _ => self,
+        }
+    }
 }
 
 #[must_use]

@@ -4,11 +4,11 @@ use macroquad::math::vec2;
 use macroquad::prelude::*;
 use macroquad::text::draw_text;
 use macroquad::ui::root_ui;
+
 use server::action::Action;
 use server::game::{Combat, Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
-use server::unit::MovementAction;
 
 use crate::ui_state::{can_play_action, State, StateUpdate};
 
@@ -143,23 +143,6 @@ pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
                 && root_ui().button(vec2(1200., 510.), "Move Units") =>
         {
             StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits))
-        }
-        GameState::Movement {
-            movement_actions_left,
-            moved_units: _,
-        } if root_ui().button(
-            vec2(1200., 510.),
-            format!("End Move Units - {movement_actions_left} actions left"),
-        ) =>
-        {
-            StateUpdate::execute_with_warning(
-                Action::Movement(MovementAction::Stop),
-                if movement_actions_left > 0 {
-                    vec![(format!("{movement_actions_left} movement actions left"))]
-                } else {
-                    vec![]
-                },
-            )
         }
         _ => StateUpdate::None,
     }
