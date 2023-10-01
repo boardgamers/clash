@@ -6,7 +6,7 @@ use std::{
 };
 
 use server::action::CombatAction;
-use server::game::GameState;
+use server::game::{CulturalInfluenceResolution, GameState};
 use server::status_phase::{ChangeGovernmentType, StatusPhaseAction};
 use server::{
     action::Action,
@@ -236,12 +236,12 @@ fn cultural_influence() {
     assert!(!game.players[1].cities[0].influenced());
     assert_eq!(
         game.state,
-        GameState::CulturalInfluenceResolution {
+        GameState::CulturalInfluenceResolution(CulturalInfluenceResolution {
             roll_boost_cost: 2,
             target_player_index: 1,
             target_city_position: city1position,
             city_piece: Building::Academy
-        }
+        })
     );
     let influence_resolution_decline_action = Action::CulturalInfluenceResolution(false);
     let game = game_api::execute_action(game, influence_resolution_decline_action, 0);

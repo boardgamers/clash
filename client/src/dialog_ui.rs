@@ -16,7 +16,7 @@ pub fn dialog_window<F>(close_button: bool, f: F) -> StateUpdate
 where
     F: FnOnce(&mut Ui) -> StateUpdate,
 {
-    let window = Window::new(hash!(), vec2(100., 100.), vec2(500., 500.))
+    let window = Window::new(hash!(), vec2(100., 100.), vec2(1000., 1000.))
         .titlebar(true)
         .movable(true)
         .close_button(close_button);

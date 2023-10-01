@@ -1,8 +1,10 @@
+use crate::city_ui::building_name;
+use crate::dialog_ui::active_dialog_window;
 use crate::ui_state::{CityMenu, StateUpdate};
 use macroquad::ui::Ui;
 use server::action::Action;
 use server::city_pieces::Building;
-use server::game::Game;
+use server::game::{CulturalInfluenceResolution, Game};
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 
@@ -52,4 +54,24 @@ pub fn closest_city(game: &Game, menu: &CityMenu) -> Position {
         .min_by_key(|c| c.position.distance(menu.city_position))
         .unwrap()
         .position
+}
+
+pub fn cultural_influence_resolution_dialog(c: &CulturalInfluenceResolution) -> StateUpdate {
+    active_dialog_window(|ui| {
+        ui.label(None, "Cultural Influence Resolution");
+        if ui.button(
+            None,
+            format!(
+                "Pay {} culture tokens to influence {}",
+                c.roll_boost_cost,
+                building_name(&c.city_piece)
+            ),
+        ) {
+            StateUpdate::Execute(Action::CulturalInfluenceResolution(true))
+        } else if ui.button(None, "Decline") {
+            StateUpdate::Execute(Action::CulturalInfluenceResolution(false))
+        } else {
+            StateUpdate::None
+        }
+    })
 }

@@ -64,7 +64,7 @@ pub fn resource_name(t: ResourceType) -> &'static str {
         ResourceType::Food => "Food",
         ResourceType::Wood => "Wood",
         ResourceType::Ore => "Ore",
-        ResourceType::Ideas => "Iron",
+        ResourceType::Ideas => "Ideas",
         ResourceType::Gold => "Gold",
         ResourceType::MoodTokens => "Mood",
         ResourceType::CultureTokens => "Culture",

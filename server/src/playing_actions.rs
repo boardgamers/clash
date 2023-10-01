@@ -3,16 +3,13 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use PlayingAction::*;
 
+use crate::game::{CulturalInfluenceResolution, GameState};
 use crate::{
     city::City,
     city_pieces::Building::{self, *},
     consts::{MOVEMENT_ACTIONS, PORT_CHOICES},
     content::custom_actions::CustomAction,
-    game::{
-        Game,
-        GameState::{self, *},
-        UndoContext,
-    },
+    game::{Game, UndoContext},
     map::Terrain,
     position::Position,
     resource_pile::ResourcePile,
@@ -235,12 +232,12 @@ impl PlayingAction {
                     game.add_to_last_log_item(&format!(" but rolled a {roll} and has not enough culture tokens to increase the roll "));
                     return;
                 }
-                game.state = CulturalInfluenceResolution {
+                game.state = GameState::CulturalInfluenceResolution(CulturalInfluenceResolution {
                     roll_boost_cost: 5 - roll as u32,
                     target_player_index,
                     target_city_position,
                     city_piece,
-                };
+                });
                 game.add_to_last_log_item(&format!("and rolled a {roll}. {} now has the option to pay {} culture tokens to increase the dice roll and proceed with the cultural influence", game.players[player_index].get_name(), 5 - roll as u32));
             }
             Custom(custom_action) => {
@@ -334,7 +331,7 @@ impl PlayingAction {
                 game.players[player_index].gain_resources(payment);
                 game.undo_recruit(player_index, &units, city_position, leader_index);
             }
-            MoveUnits => game.state = Playing,
+            MoveUnits => game.state = GameState::Playing,
             IncreaseHappiness {
                 happiness_increases,
             } => {

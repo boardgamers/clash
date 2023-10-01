@@ -2,6 +2,7 @@ use macroquad::math::u32;
 
 use crate::select_ui::{ConfirmSelection, SelectionConfirm};
 use server::action::Action;
+use server::game::GameState::Movement;
 use server::game::{Game, GameState};
 use server::position::Position;
 use server::unit::{MovementAction, Unit};
@@ -16,6 +17,31 @@ pub fn move_units_dialog(game: &Game, sel: &MoveSelection) -> StateUpdate {
         sel,
         |new| update_possible_destinations(game, new.clone()),
         |_new| StateUpdate::None,
+        |ui| {
+            let Movement {
+                movement_actions_left,
+                moved_units: _,
+            } = game.state
+            else {
+                panic!("game is not in movement")
+            };
+
+            if ui.button(
+                None,
+                format!("End Move Units - {movement_actions_left} actions left"),
+            ) {
+                StateUpdate::execute_with_warning(
+                    Action::Movement(MovementAction::Stop),
+                    if movement_actions_left > 0 {
+                        vec![(format!("{movement_actions_left} movement actions left"))]
+                    } else {
+                        vec![]
+                    },
+                )
+            } else {
+                StateUpdate::None
+            }
+        },
     )
 }
 

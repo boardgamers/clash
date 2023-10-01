@@ -2,6 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use macroquad::math::u32;
 use macroquad::prelude::draw_text;
+use macroquad::ui::Ui;
 
 use server::game::Game;
 use server::position::Position;
@@ -82,6 +83,7 @@ pub fn unit_selection_dialog<T: UnitSelection>(
     sel: &T,
     on_change: impl Fn(T) -> StateUpdate,
     on_ok: impl FnOnce(T) -> StateUpdate,
+    additional: impl FnOnce(&mut Ui) -> StateUpdate,
 ) -> StateUpdate {
     active_dialog_window(|ui| {
         if let Some(current_tile) = sel.current_tile() {
@@ -106,10 +108,10 @@ pub fn unit_selection_dialog<T: UnitSelection>(
                     return on_change(new);
                 }
             }
-            confirm_update(sel, || on_ok(sel.clone()), ui, &sel.confirm(game))
+            confirm_update(sel, || on_ok(sel.clone()), ui, &sel.confirm(game)).or(|| additional(ui))
         } else {
             ui.label(None, "Select a starting tile");
-            StateUpdate::None
+            additional(ui)
         }
     })
 }

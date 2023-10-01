@@ -94,5 +94,6 @@ pub fn remove_casualties_dialog(game: &Game, sel: &RemoveCasualtiesSelection) ->
                 new.units.clone(),
             )))
         },
+        |_| StateUpdate::None,
     )
 }
