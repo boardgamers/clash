@@ -79,7 +79,7 @@ pub fn get_all() -> Vec<Advance> {
                     || advance == "Medicine"
                     || advance == "Metallurgy"
                 {
-                    player.gain_resources(ResourcePile::ideas(2));
+                    player.gain_resources(ResourcePile::ideas(1));
                 }
             },
             0,
@@ -92,7 +92,7 @@ pub fn get_all() -> Vec<Advance> {
                     || advance == "Medicine"
                     || advance == "Metallurgy"
                 {
-                    player.loose_resources(ResourcePile::ideas(2));
+                    player.loose_resources(ResourcePile::ideas(1));
                 }
             },
             0,
