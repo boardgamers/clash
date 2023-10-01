@@ -1,11 +1,10 @@
 use itertools::Itertools;
-
 use macroquad::math::vec2;
 use macroquad::prelude::*;
 use macroquad::ui::Ui;
+
 use server::action::Action;
 use server::game;
-
 use server::game::Game;
 use server::game::GameState::Combat;
 use server::map::Terrain;
@@ -14,9 +13,8 @@ use server::position::Position;
 use server::unit::{MovementRestriction, Unit};
 
 use crate::city_ui::{draw_city, show_city_menu};
-use crate::ui_state::{can_play_action, ActiveDialog, CityMenu, State, StateUpdate, StateUpdates};
-
 use crate::dialog_ui::dialog_window;
+use crate::ui_state::{can_play_action, ActiveDialog, CityMenu, State, StateUpdate};
 use crate::{collect_ui, hex_ui, unit_ui};
 
 fn terrain_font_color(t: &Terrain) -> Color {
@@ -121,7 +119,7 @@ pub fn show_tile_menu(game: &Game, position: Position) -> StateUpdate {
             &CityMenu::new(game.active_player(), c.player_index, position),
         )
     } else {
-        show_generic_tile_menu(game, position, vec![], |_, _| {})
+        show_generic_tile_menu(game, position, vec![], |_| StateUpdate::None)
     }
 }
 
@@ -129,9 +127,9 @@ pub fn show_generic_tile_menu(
     game: &Game,
     position: Position,
     suffix: Vec<String>,
-    additional: impl FnOnce(&mut Ui, &mut StateUpdates),
+    additional: impl FnOnce(&mut Ui) -> StateUpdate,
 ) -> StateUpdate {
-    dialog_window(true, |ui, updates| {
+    dialog_window(true, |ui| {
         ui.label(
             None,
             &format!(
@@ -174,13 +172,11 @@ pub fn show_generic_tile_menu(
                 .iter()
                 .find(|u| u.movement_restriction != MovementRestriction::None)
                 .unwrap_or(&settlers[0]);
-            updates.add(StateUpdate::execute(Action::Playing(
-                PlayingAction::FoundCity {
-                    settler: settler.id,
-                },
-            )));
+            return StateUpdate::execute(Action::Playing(PlayingAction::FoundCity {
+                settler: settler.id,
+            }));
         }
 
-        additional(ui, updates);
+        additional(ui)
     })
 }

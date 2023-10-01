@@ -83,7 +83,7 @@ pub fn unit_selection_dialog<T: UnitSelection>(
     on_change: impl Fn(T) -> StateUpdate,
     on_ok: impl FnOnce(T) -> StateUpdate,
 ) -> StateUpdate {
-    active_dialog_window(|ui, updates| {
+    active_dialog_window(|ui| {
         if let Some(current_tile) = sel.current_tile() {
             for (p, unit_id) in units_on_tile(game, current_tile) {
                 let unit = game.get_player(p).get_unit(unit_id).unwrap();
@@ -103,17 +103,13 @@ pub fn unit_selection_dialog<T: UnitSelection>(
                     } else {
                         new.selected_units_mut().push(unit_id);
                     }
-                    updates.add(on_change(new));
+                    return on_change(new);
                 }
             }
-            updates.add(confirm_update(
-                sel,
-                || on_ok(sel.clone()),
-                ui,
-                &sel.confirm(game),
-            ));
+            confirm_update(sel, || on_ok(sel.clone()), ui, &sel.confirm(game))
         } else {
             ui.label(None, "Select a starting tile");
+            StateUpdate::None
         }
     })
 }

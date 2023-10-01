@@ -19,11 +19,11 @@ pub fn show_city_menu(game: &Game, menu: &CityMenu) -> StateUpdate {
     let position = menu.city_position;
     let city = menu.get_city(game);
 
-    show_generic_tile_menu(game, position, city_label(game, city), |ui, updates| {
+    show_generic_tile_menu(game, position, city_label(game, city), |ui| {
         let can_play = can_play_action(game) && menu.is_city_owner() && city.can_activate();
         if can_play {
             if ui.button(None, "Collect Resources") {
-                updates.add(StateUpdate::SetDialog(ActiveDialog::CollectResources(
+                return StateUpdate::SetDialog(ActiveDialog::CollectResources(
                     CollectResources::new(
                         menu.player_index,
                         menu.city_position,
@@ -33,26 +33,27 @@ pub fn show_city_menu(game: &Game, menu: &CityMenu) -> StateUpdate {
                             menu.city_owner_index,
                         ),
                     ),
-                )));
+                ));
             }
             if ui.button(None, "Recruit Units") {
-                updates.add(RecruitAmount::new_selection(
+                return RecruitAmount::new_selection(
                     game,
                     menu.player_index,
                     menu.city_position,
                     Units::empty(),
                     None,
                     &[],
-                ));
+                );
             }
         }
 
+        let mut updates = StateUpdates::new();
         updates.add(add_building_actions(game, menu, ui));
 
         if can_play {
-            let option = add_wonder_buttons(game, menu, ui);
-            updates.add(option);
+            updates.add(add_wonder_buttons(game, menu, ui));
         }
+        updates.result()
     })
 }
 

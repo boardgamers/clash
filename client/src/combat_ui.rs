@@ -10,14 +10,15 @@ use crate::unit_ui;
 use crate::unit_ui::UnitSelection;
 
 pub fn retreat_dialog() -> StateUpdate {
-    active_dialog_window(|ui, updates| {
+    active_dialog_window(|ui| {
         ui.label(None, "Do you want to retreat?");
         if ui.button(None, "Retreat") {
-            updates.add(retreat(true));
+            return retreat(true);
         }
         if ui.button(None, "Decline") {
-            updates.add(retreat(false));
+            return retreat(false);
         }
+        StateUpdate::None
     })
 }
 
@@ -26,8 +27,9 @@ fn retreat(retreat: bool) -> StateUpdate {
 }
 
 pub fn place_settler_dialog() -> StateUpdate {
-    active_dialog_window(|ui, _| {
+    active_dialog_window(|ui| {
         ui.label(None, "Select a city to place a settler in.");
+        StateUpdate::None
     })
 }
 

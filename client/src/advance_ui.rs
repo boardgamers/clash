@@ -99,7 +99,7 @@ pub fn show_generic_advance_menu(
     close_button: bool,
     new_update: impl Fn(String) -> StateUpdate,
 ) -> StateUpdate {
-    dialog_window(close_button, |ui, updates| {
+    dialog_window(close_button, |ui| {
         for a in get_all() {
             let name = a.name;
             let p = game.get_player(player_index);
@@ -113,9 +113,10 @@ pub fn show_generic_advance_menu(
                 && p.can_advance(&name)
                 && ui.button(None, name.clone())
             {
-                updates.add(new_update(name));
+                return new_update(name);
             }
         }
+        StateUpdate::None
     })
 }
 

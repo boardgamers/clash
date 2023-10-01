@@ -119,16 +119,17 @@ fn export(game: &Game) {
 }
 
 fn show_pending_update(state: &State) -> StateUpdate {
-    active_dialog_window(|ui, updates| {
+    active_dialog_window(|ui| {
         if let Some(update) = &state.pending_update {
             ui.label(None, &format!("Warning: {}", update.warning.join(", ")));
             if ui.button(None, "OK") {
-                updates.add(StateUpdate::ResolvePendingUpdate(true));
+                return StateUpdate::ResolvePendingUpdate(true);
             }
             if ui.button(None, "Cancel") {
-                updates.add(StateUpdate::ResolvePendingUpdate(false));
+                return StateUpdate::ResolvePendingUpdate(false);
             }
         }
+        StateUpdate::None
     })
 }
 

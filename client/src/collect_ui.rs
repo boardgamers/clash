@@ -47,7 +47,7 @@ impl CollectResources {
 }
 
 pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> StateUpdate {
-    active_dialog_window(|ui, updates| {
+    active_dialog_window(|ui| {
         let city = game.get_city(collect.player_index, collect.city_position);
         let valid = get_total_collection(
             game,
@@ -60,7 +60,7 @@ pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> Stat
         if ui.button(Vec2::new(0., 40.), label) && valid {
             let extra = city.mood_modified_size() - collect.collections.len();
 
-            updates.add(StateUpdate::execute_activation(
+            return StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Collect {
                     city_position: collect.city_position,
                     collections: collect.collections.clone(),
@@ -71,11 +71,12 @@ pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> Stat
                     vec![]
                 },
                 city,
-            ));
+            );
         };
         if ui.button(Vec2::new(80., 40.), "Cancel") {
-            updates.add(StateUpdate::Cancel);
+            return StateUpdate::Cancel;
         };
+        StateUpdate::None
     })
 }
 

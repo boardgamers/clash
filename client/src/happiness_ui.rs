@@ -77,18 +77,17 @@ fn increase_happiness_new_steps(
 }
 
 pub fn increase_happiness_menu(h: &IncreaseHappiness) -> StateUpdate {
-    active_dialog_window(|ui, updates| {
+    active_dialog_window(|ui| {
         if ui.button(None, "Cancel") {
-            updates.add(StateUpdate::Cancel);
+            return StateUpdate::Cancel;
         }
         if ui.button(None, "Confirm") {
-            updates.add(StateUpdate::Execute(Action::Playing(
-                PlayingAction::IncreaseHappiness {
-                    happiness_increases: h.steps.clone(),
-                },
-            )));
+            return StateUpdate::Execute(Action::Playing(PlayingAction::IncreaseHappiness {
+                happiness_increases: h.steps.clone(),
+            }));
         }
         ui.label(None, &format!("Cost: {:?}", h.cost));
+        StateUpdate::None
     })
 }
 

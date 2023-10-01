@@ -1,5 +1,5 @@
 use crate::dialog_ui::active_dialog_window;
-use crate::ui_state::StateUpdate;
+use crate::ui_state::{StateUpdate, StateUpdates};
 use macroquad::hash;
 use macroquad::math::{bool, Vec2};
 use macroquad::ui::widgets::Group;
@@ -29,7 +29,8 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
     plus: impl Fn(&C, &O) -> StateUpdate,
     minus: impl Fn(&C, &O) -> StateUpdate,
 ) -> StateUpdate {
-    active_dialog_window(|ui, updates| {
+    active_dialog_window(|ui| {
+        let mut updates = StateUpdates::new();
         for (i, p) in get_objects(container).iter().enumerate() {
             if show(container, p) {
                 Group::new(hash!("res", i), Vec2::new(100., 40.)).ui(ui, |ui| {
@@ -48,11 +49,13 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
         let valid = is_valid(container);
         let label = if valid { "OK" } else { "(OK)" };
         if ui.button(Vec2::new(20., 160.), label) && valid {
-            updates.add(execute_action(container));
+            return execute_action(container);
         };
         if ui.button(Vec2::new(80., 160.), "Cancel") {
-            updates.add(StateUpdate::Cancel);
+            return StateUpdate::Cancel;
         };
+
+        updates.result()
     })
 }
 
@@ -82,7 +85,7 @@ pub fn selection_dialog<T: Selection>(
     on_change: impl Fn(T) -> StateUpdate,
     on_ok: impl FnOnce(T) -> StateUpdate,
 ) -> StateUpdate {
-    active_dialog_window(|ui, updates| {
+    active_dialog_window(|ui| {
         ui.label(None, title);
         for name in sel.all() {
             let can_sel = sel.can_select(game, name);
@@ -101,15 +104,10 @@ pub fn selection_dialog<T: Selection>(
                 } else {
                     new.selected_mut().push(name.to_string());
                 }
-                updates.add(on_change(new));
+                return on_change(new);
             }
         }
-        updates.add(confirm_update(
-            sel,
-            || on_ok(sel.clone()),
-            ui,
-            &sel.confirm(game),
-        ));
+        confirm_update(sel, || on_ok(sel.clone()), ui, &sel.confirm(game))
     })
 }
 
