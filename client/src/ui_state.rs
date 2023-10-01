@@ -196,18 +196,25 @@ impl State {
                 self.dialog_stack.clear();
             }
             StateUpdate::OpenDialog(dialog) => {
+                if matches!(self.active_dialog, ActiveDialog::TileMenu(_)) {
+                    self.close_dialog();
+                }
                 if !matches!(self.active_dialog, ActiveDialog::None) {
                     self.dialog_stack.push(self.active_dialog.clone());
                 }
                 self.active_dialog = dialog;
             }
             StateUpdate::CloseDialog => {
-                if let Some(dialog) = self.dialog_stack.pop() {
-                    self.active_dialog = dialog;
-                } else {
-                    self.active_dialog = ActiveDialog::None;
-                }
+                self.close_dialog();
             }
+        }
+    }
+
+    fn close_dialog(&mut self) {
+        if let Some(dialog) = self.dialog_stack.pop() {
+            self.active_dialog = dialog;
+        } else {
+            self.active_dialog = ActiveDialog::None;
         }
     }
 
