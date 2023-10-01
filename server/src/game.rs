@@ -997,9 +997,9 @@ impl Game {
                         .expect("attacker should have all attacking units");
                     unit.position = defender_position;
                 }
+                self.end_combat(initiation);
                 self.capture_position(defender, defender_position, attacker);
                 //todo attacker wins
-                self.end_combat(initiation);
                 return;
             }
             if can_retreat {
@@ -1174,6 +1174,10 @@ impl Game {
     }
 
     pub fn next_age(&mut self) {
+        if self.age == 6 {
+            self.state = Finished;
+            return;
+        }
         self.state = Playing;
         self.age += 1;
         self.current_player_index = self.starting_player_index;
