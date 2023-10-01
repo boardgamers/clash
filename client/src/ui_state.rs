@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 
 use server::action::{Action, CombatAction};
 use server::city::{City, MoodState};
-use server::game::{Combat, CombatPhase, Game, GameState};
+use server::game::{Combat, CombatPhase, CulturalInfluenceResolution, Game, GameState};
 use server::map::Terrain::Water;
 use server::player::Player;
 use server::position::Position;
@@ -32,6 +32,7 @@ pub enum ActiveDialog {
     RecruitUnitSelection(RecruitAmount),
     ReplaceUnits(RecruitSelection),
     MoveUnits(MoveSelection),
+    CulturalInfluenceResolution(CulturalInfluenceResolution),
 
     //status phase
     FreeAdvance,
@@ -232,6 +233,9 @@ impl State {
         self.active_dialog = match &game.state {
             GameState::Movement { .. } => {
                 ActiveDialog::MoveUnits(MoveSelection::new(game.active_player()))
+            }
+            GameState::CulturalInfluenceResolution(c) => {
+                ActiveDialog::CulturalInfluenceResolution(c.clone())
             }
             GameState::StatusPhase(state) => match state {
                 StatusPhaseState::CompleteObjectives => {

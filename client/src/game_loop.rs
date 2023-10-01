@@ -22,7 +22,7 @@ use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
 use crate::player_ui::{show_global_controls, show_globals, show_resources, show_wonders};
 use crate::ui_state::{ActiveDialog, State, StateUpdate, StateUpdates};
-use crate::{combat_ui, move_ui, recruit_unit_ui, status_phase_ui};
+use crate::{combat_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui};
 
 const EXPORT_FILE: &str = "game.json";
 
@@ -85,6 +85,9 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
         ActiveDialog::RecruitUnitSelection(s) => recruit_unit_ui::select_dialog(game, s),
         ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::replace_dialog(game, r),
         ActiveDialog::MoveUnits(s) => move_ui::move_units_dialog(game, s),
+        ActiveDialog::CulturalInfluenceResolution(c) => {
+            influence_ui::cultural_influence_resolution_dialog(c)
+        }
 
         //status phase
         ActiveDialog::FreeAdvance => show_free_advance_menu(game, player_index),

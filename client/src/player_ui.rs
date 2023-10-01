@@ -26,9 +26,7 @@ pub fn show_globals(game: &Game) {
         GameState::Playing => String::from("Play Actions"),
         GameState::StatusPhase(ref p) => format!("Status Phase: {p:?}"),
         GameState::Movement { .. } => String::from("Movement"),
-        GameState::CulturalInfluenceResolution { .. } => {
-            String::from("Cultural Influence Resolution")
-        }
+        GameState::CulturalInfluenceResolution(_) => String::from("Cultural Influence Resolution"),
         GameState::Combat(Combat {
             round, ref phase, ..
         }) => {
@@ -109,23 +107,6 @@ pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
         return StateUpdate::Execute(Action::Redo);
     }
     match game.state {
-        GameState::CulturalInfluenceResolution {
-            roll_boost_cost,
-            city_piece: _,
-            target_player_index: _,
-            target_city_position: _,
-        } => {
-            if root_ui().button(
-                vec2(1200., 480.),
-                format!("Cultural Influence Resolution for {roll_boost_cost}"),
-            ) {
-                StateUpdate::Execute(Action::CulturalInfluenceResolution(true))
-            } else if root_ui().button(vec2(1200., 480.), "Decline") {
-                return StateUpdate::Execute(Action::CulturalInfluenceResolution(false));
-            } else {
-                StateUpdate::None
-            }
-        }
         GameState::Playing if root_ui().button(vec2(1200., 540.), "End Turn") => {
             let left = game.actions_left;
             StateUpdate::execute_with_warning(
