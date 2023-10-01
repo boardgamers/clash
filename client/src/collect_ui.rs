@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 use std::iter;
 
-use macroquad::color::RED;
+use macroquad::color::BLACK;
 use macroquad::math::i32;
 use macroquad::prelude::{draw_circle_lines, draw_text, Vec2, WHITE};
+
 use server::action::Action;
 use server::consts::PORT_CHOICES;
 use server::game::Game;
@@ -145,9 +146,9 @@ pub fn draw_resource_collect_tile(state: &State, pos: Position) {
             possible.iter().enumerate().for_each(|(i, res)| {
                 let p = hex_ui::rotate_around(c, 30.0, (90 * i) as i32);
                 let color = if col.is_some_and(|r| r == res) {
-                    WHITE
+                    BLACK
                 } else {
-                    RED
+                    WHITE
                 };
                 draw_text(
                     &resource_pile_string(res),
