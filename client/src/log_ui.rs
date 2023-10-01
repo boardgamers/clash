@@ -1,9 +1,14 @@
-use macroquad::color::BLACK;
-use macroquad::text::draw_text;
 use server::game::Game;
 
-pub fn show_log(game: &Game) {
-    game.log.iter().enumerate().for_each(|(i, l)| {
-        draw_text(l, 1500., 150. + i as f32 * 20., 20., BLACK);
-    });
+use crate::dialog_ui::dialog_window;
+use crate::ui_state::StateUpdate;
+
+pub fn show_log(game: &Game) -> StateUpdate {
+    dialog_window(true, |ui| {
+        game.log.iter().for_each(|l| {
+            ui.label(None, l);
+        });
+
+        StateUpdate::None
+    })
 }

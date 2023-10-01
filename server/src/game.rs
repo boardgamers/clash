@@ -345,22 +345,17 @@ impl Game {
                     moved_units,
                 );
             }
-            CulturalInfluenceResolution {
-                roll_boost_cost,
-                target_player_index,
-                target_city_position,
-                city_piece,
-            } => {
+            CulturalInfluenceResolution(c) => {
                 let action = action
                     .cultural_influence_resolution()
                     .expect("action should be a cultural influence resolution action");
                 self.add_action_log_item(ActionLogItem::CulturalInfluenceResolution(action));
                 self.execute_cultural_influence_resolution_action(
                     action,
-                    roll_boost_cost,
-                    target_player_index,
-                    target_city_position,
-                    &city_piece,
+                    c.roll_boost_cost,
+                    c.target_player_index,
+                    c.target_city_position,
+                    &c.city_piece,
                     player_index,
                 );
             }
@@ -454,21 +449,15 @@ impl Game {
                 );
             }
             ActionLogItem::CulturalInfluenceResolution(action) => {
-                let CulturalInfluenceResolution {
-                    roll_boost_cost,
-                    target_player_index,
-                    target_city_position,
-                    city_piece,
-                } = &self.state
-                else {
+                let CulturalInfluenceResolution(c) = &self.state else {
                     panic!("cultural influence resolution actions can only be redone if the game is in a cultural influence resolution state");
                 };
                 self.execute_cultural_influence_resolution_action(
                     *action,
-                    *roll_boost_cost,
-                    *target_player_index,
-                    *target_city_position,
-                    &city_piece.clone(),
+                    c.roll_boost_cost,
+                    c.target_player_index,
+                    c.target_city_position,
+                    &c.city_piece.clone(),
                     player_index,
                 );
             }
@@ -662,12 +651,12 @@ impl Game {
             ) / 2
                 + 1;
         let roll_boost_cost = 5 - roll as u32;
-        self.state = CulturalInfluenceResolution {
+        self.state = GameState::CulturalInfluenceResolution(CulturalInfluenceResolution {
             roll_boost_cost,
             target_player_index,
             target_city_position,
             city_piece: city_piece.clone(),
-        };
+        });
         if !action {
             return;
         }
@@ -1925,6 +1914,14 @@ impl Combat {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct CulturalInfluenceResolution {
+    pub roll_boost_cost: u32,
+    pub target_player_index: usize,
+    pub target_city_position: Position,
+    pub city_piece: Building,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum GameState {
     Playing,
     StatusPhase(StatusPhaseState),
@@ -1932,12 +1929,7 @@ pub enum GameState {
         movement_actions_left: u32,
         moved_units: Vec<u32>,
     },
-    CulturalInfluenceResolution {
-        roll_boost_cost: u32,
-        target_player_index: usize,
-        target_city_position: Position,
-        city_piece: Building,
-    },
+    CulturalInfluenceResolution(CulturalInfluenceResolution),
     Combat(Combat),
     PlaceSettler {
         player_index: usize,

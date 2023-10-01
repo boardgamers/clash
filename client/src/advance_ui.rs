@@ -6,8 +6,10 @@ use macroquad::math::bool;
 use server::action::Action;
 use server::content::advances::get_all;
 use server::game::Game;
+use server::game::GameState;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::AdvancePaymentOptions;
+use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 use crate::dialog_ui::dialog_window;
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
@@ -15,8 +17,6 @@ use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::HasCountSelectableObject;
 use crate::ui_state::{can_play_action, StateUpdate};
 use crate::ActiveDialog;
-use server::game::GameState;
-use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 #[derive(Clone)]
 pub struct AdvancePayment {
@@ -105,15 +105,18 @@ pub fn show_generic_advance_menu(
             let p = game.get_player(player_index);
             if p.has_advance(&name) {
                 ui.label(None, &name);
-            } else if (can_play_action(game)
-                || matches!(
+            } else {
+                let can = if matches!(
                     game.state,
                     GameState::StatusPhase(StatusPhaseState::FreeAdvance)
-                ))
-                && p.can_advance(&name)
-                && ui.button(None, name.clone())
-            {
-                return new_update(name);
+                ) {
+                    p.can_advance_free(&name)
+                } else {
+                    can_play_action(game) && p.can_advance(&name)
+                };
+                if can && ui.button(None, name.clone()) {
+                    return new_update(name);
+                }
             }
         }
         StateUpdate::None

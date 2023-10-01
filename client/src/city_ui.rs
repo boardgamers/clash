@@ -178,7 +178,7 @@ fn building_symbol(b: &Building) -> &str {
     }
 }
 
-fn building_name(b: &Building) -> &str {
+pub fn building_name(b: &Building) -> &str {
     building_names()
         .iter()
         .find_map(|(b2, n)| if b == b2 { Some(n) } else { None })

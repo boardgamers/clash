@@ -282,6 +282,7 @@ pub fn replace_dialog(game: &Game, sel: &RecruitSelection) -> StateUpdate {
                 ConstructionProject::Units(new),
             )))
         },
+        |_| StateUpdate::None,
     )
 }
 

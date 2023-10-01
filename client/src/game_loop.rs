@@ -22,7 +22,7 @@ use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
 use crate::player_ui::{show_global_controls, show_globals, show_resources, show_wonders};
 use crate::ui_state::{ActiveDialog, State, StateUpdate, StateUpdates};
-use crate::{combat_ui, move_ui, recruit_unit_ui, status_phase_ui};
+use crate::{combat_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui};
 
 const EXPORT_FILE: &str = "game.json";
 
@@ -45,10 +45,12 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
     draw_map(game, state);
     let mut updates = StateUpdates::new();
     show_globals(game);
-    show_log(game);
     show_resources(game, player_index);
     show_wonders(game, player_index);
 
+    if root_ui().button(vec2(1200., 310.), "Log") {
+        return StateUpdate::OpenDialog(ActiveDialog::Log);
+    };
     if root_ui().button(vec2(1200., 350.), "Advances") {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     };
@@ -75,6 +77,7 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
         ActiveDialog::None => StateUpdate::None,
         ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(h),
         ActiveDialog::TileMenu(p) => show_tile_menu(game, *p),
+        ActiveDialog::Log => show_log(game),
         ActiveDialog::AdvanceMenu => show_advance_menu(game, player_index),
         ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p),
         ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p),
@@ -82,6 +85,9 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
         ActiveDialog::RecruitUnitSelection(s) => recruit_unit_ui::select_dialog(game, s),
         ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::replace_dialog(game, r),
         ActiveDialog::MoveUnits(s) => move_ui::move_units_dialog(game, s),
+        ActiveDialog::CulturalInfluenceResolution(c) => {
+            influence_ui::cultural_influence_resolution_dialog(c)
+        }
 
         //status phase
         ActiveDialog::FreeAdvance => show_free_advance_menu(game, player_index),
