@@ -1,14 +1,14 @@
 use std::collections::HashMap;
 
-use crate::city::City;
-use crate::player::Player;
 use itertools::Itertools;
 use rand::prelude::SliceRandom;
 use rand::prelude::StdRng;
 use serde::{Deserialize, Serialize};
 
+use crate::city::City;
+use crate::player::Player;
 use crate::position::Position;
-use crate::unit::{Unit, UnitType};
+use crate::unit::UnitType;
 
 #[derive(Clone)]
 pub struct Map {

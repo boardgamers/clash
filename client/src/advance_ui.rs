@@ -10,6 +10,7 @@ use server::game::Game;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::AdvancePaymentOptions;
 
+use crate::dialog_ui::dialog_window;
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::HasCountSelectableObject;
@@ -78,7 +79,7 @@ impl HasPayment for AdvancePayment {
 }
 
 pub fn show_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
-    show_generic_advance_menu(game, player_index, |name| {
+    show_generic_advance_menu(game, player_index, true, |name| {
         StateUpdate::SetDialog(ActiveDialog::AdvancePayment(AdvancePayment::new(
             game,
             player_index,
@@ -88,7 +89,7 @@ pub fn show_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
 }
 
 pub fn show_free_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
-    show_generic_advance_menu(game, player_index, |name| {
+    show_generic_advance_menu(game, player_index, false, |name| {
         StateUpdate::status_phase(StatusPhaseAction::FreeAdvance(name))
     })
 }
@@ -96,11 +97,12 @@ pub fn show_free_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
 pub fn show_generic_advance_menu(
     game: &Game,
     player_index: usize,
+    close_button: bool,
     new_update: impl Fn(String) -> StateUpdate,
 ) -> StateUpdate {
     let mut updates = StateUpdates::new();
 
-    root_ui().window(hash!(), vec2(1200., 910.), vec2(500., 200.), |ui| {
+    let update = dialog_window(close_button, |ui| {
         for a in get_all() {
             let name = a.name;
             let p = game.get_player(player_index);
@@ -118,6 +120,7 @@ pub fn show_generic_advance_menu(
             }
         }
     });
+    updates.add(update);
 
     updates.result()
 }

@@ -40,12 +40,14 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
 
     draw_map(game, state);
     let mut updates = StateUpdates::new();
-    updates.add(show_advance_menu(game, player_index));
     show_globals(game);
     show_log(game);
     show_resources(game, player_index);
     show_wonders(game, player_index);
 
+    if root_ui().button(vec2(1200., 350.), "Advances") {
+        return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
+    };
     if root_ui().button(vec2(1200., 450.), "Import") {
         import(game);
         return StateUpdate::Cancel;
@@ -77,6 +79,7 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
 
     updates.add(match &state.active_dialog {
         ActiveDialog::None => StateUpdate::None,
+        ActiveDialog::AdvanceMenu => show_advance_menu(game, player_index),
         ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p),
         ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p),
         ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c),

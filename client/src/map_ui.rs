@@ -16,6 +16,7 @@ use server::unit::{MovementRestriction, Unit};
 use crate::city_ui::draw_city;
 use crate::ui_state::{can_play_action, ActiveDialog, State, StateUpdate, StateUpdates};
 
+use crate::dialog_ui::dialog_window;
 use crate::{collect_ui, hex_ui, unit_ui};
 
 fn terrain_font_color(t: &Terrain) -> Color {
@@ -125,7 +126,7 @@ pub fn show_tile_menu(
 ) -> StateUpdate {
     let mut updates: StateUpdates = StateUpdates::new();
 
-    root_ui().window(hash!(), vec2(1200., 700.), vec2(500., 200.), |ui| {
+    dialog_window(true, |ui| {
         ui.label(
             None,
             &format!(
