@@ -112,7 +112,7 @@ impl Game {
         Self {
             state: Playing,
             players,
-            map: map,
+            map,
             starting_player_index: starting_player,
             current_player_index: starting_player,
             action_log: Vec::new(),

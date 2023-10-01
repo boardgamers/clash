@@ -117,7 +117,7 @@ pub fn maximum_size_2_player_random_map(r: &mut StdRng) -> HashMap<Position, Ter
     tiles
 }
 
-pub fn setup_home_city(players: &mut Vec<Player>, player_index: usize, pos: &str) {
+pub fn setup_home_city(players: &mut [Player], player_index: usize, pos: &str) {
     let p = Position::from_offset(pos);
     players[player_index]
         .cities
