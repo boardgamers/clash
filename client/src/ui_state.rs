@@ -23,6 +23,7 @@ use crate::status_phase_ui::ChooseAdditionalAdvances;
 pub enum ActiveDialog {
     None,
     IncreaseHappiness(IncreaseHappiness),
+    Log,
     AdvanceMenu,
     AdvancePayment(AdvancePayment),
     TileMenu(Position),

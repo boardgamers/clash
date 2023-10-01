@@ -6,8 +6,10 @@ use macroquad::math::bool;
 use server::action::Action;
 use server::content::advances::get_all;
 use server::game::Game;
+use server::game::GameState;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::AdvancePaymentOptions;
+use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 use crate::dialog_ui::dialog_window;
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
@@ -15,8 +17,6 @@ use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::HasCountSelectableObject;
 use crate::ui_state::{can_play_action, StateUpdate};
 use crate::ActiveDialog;
-use server::game::GameState;
-use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 #[derive(Clone)]
 pub struct AdvancePayment {
