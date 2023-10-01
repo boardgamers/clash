@@ -19,9 +19,13 @@ use crate::move_ui::MoveSelection;
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use crate::status_phase_ui::ChooseAdditionalAdvances;
 
+#[derive(Clone)]
 pub enum ActiveDialog {
     None,
+    IncreaseHappiness(IncreaseHappiness),
+    AdvanceMenu,
     AdvancePayment(AdvancePayment),
+    TileMenu(Position),
     ConstructionPayment(ConstructionPayment),
     CollectResources(CollectResources),
     RecruitUnitSelection(RecruitAmount),
@@ -50,12 +54,12 @@ pub struct PendingUpdate {
 pub enum StateUpdate {
     None,
     SetDialog(ActiveDialog),
+    OpenDialog(ActiveDialog),
+    CloseDialog,
     Cancel,
     ResolvePendingUpdate(bool),
     Execute(Action),
     ExecuteWithWarning(PendingUpdate),
-    SetIncreaseHappiness(IncreaseHappiness),
-    FocusTile(FocusedTile),
 }
 
 impl StateUpdate {
@@ -119,6 +123,7 @@ impl StateUpdates {
     }
 }
 
+#[derive(Clone)]
 pub struct IncreaseHappiness {
     pub steps: Vec<(Position, u32)>,
     pub cost: ResourcePile,
@@ -130,43 +135,26 @@ impl IncreaseHappiness {
     }
 }
 
-pub struct FocusedTile {
-    pub city_owner_index: Option<usize>,
-    pub position: Position,
-}
-
-impl FocusedTile {
-    pub fn new(city_owner_index: Option<usize>, position: Position) -> FocusedTile {
-        FocusedTile {
-            city_owner_index,
-            position,
-        }
-    }
-}
-
 pub struct State {
     pub assets: Assets,
-    pub focused_tile: Option<FocusedTile>,
     pub active_dialog: ActiveDialog,
+    pub dialog_stack: Vec<ActiveDialog>,
     pub pending_update: Option<PendingUpdate>,
-    pub increase_happiness: Option<IncreaseHappiness>,
 }
 
 impl State {
     pub async fn new() -> State {
         State {
             active_dialog: ActiveDialog::None,
+            dialog_stack: vec![],
             pending_update: None,
-            focused_tile: None,
-            increase_happiness: None,
             assets: Assets::new().await,
         }
     }
 
     pub fn clear(&mut self) {
         self.active_dialog = ActiveDialog::None;
-        self.focused_tile = None;
-        self.increase_happiness = None;
+        self.dialog_stack.clear();
         self.pending_update = None;
     }
 
@@ -178,7 +166,7 @@ impl State {
     }
 
     pub fn has_dialog(&self) -> bool {
-        !matches!(self.active_dialog, ActiveDialog::None) || self.increase_happiness.is_some()
+        !matches!(self.active_dialog, ActiveDialog::None)
     }
 
     pub fn update(&mut self, game: &mut Game, update: StateUpdate) {
@@ -205,15 +193,28 @@ impl State {
             }
             StateUpdate::SetDialog(dialog) => {
                 self.active_dialog = dialog;
+                self.dialog_stack.clear();
             }
-            StateUpdate::SetIncreaseHappiness(h) => {
-                self.clear();
-                self.increase_happiness = Some(h);
+            StateUpdate::OpenDialog(dialog) => {
+                if matches!(self.active_dialog, ActiveDialog::TileMenu(_)) {
+                    self.close_dialog();
+                }
+                if !matches!(self.active_dialog, ActiveDialog::None) {
+                    self.dialog_stack.push(self.active_dialog.clone());
+                }
+                self.active_dialog = dialog;
             }
-            StateUpdate::FocusTile(f) => {
-                self.clear();
-                self.focused_tile = Some(f);
+            StateUpdate::CloseDialog => {
+                self.close_dialog();
             }
+        }
+    }
+
+    fn close_dialog(&mut self) {
+        if let Some(dialog) = self.dialog_stack.pop() {
+            self.active_dialog = dialog;
+        } else {
+            self.active_dialog = ActiveDialog::None;
         }
     }
 
