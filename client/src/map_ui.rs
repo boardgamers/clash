@@ -18,15 +18,10 @@ use crate::ui_state::{can_play_action, ActiveDialog, State, StateUpdate, StateUp
 
 use crate::{collect_ui, hex_ui, unit_ui};
 
-fn terrain_color(t: &Terrain) -> (Color, bool) {
-    //todo color not needed
+fn terrain_font_color(t: &Terrain) -> Color {
     match t {
-        Terrain::Barren => (Color::from_hex(0x00B2_6C19), true),
-        Terrain::Mountain => (Color::from_hex(0x0057_5757), true),
-        Terrain::Fertile => (Color::from_hex(0x005D_B521), false),
-        Terrain::Forest => (Color::from_hex(0x0008_570D), true),
-        Terrain::Exhausted(_) => (RED, false),
-        Terrain::Water => (Color::from_hex(0x001D_70F5), false),
+        Terrain::Forest | Terrain::Water | Terrain::Fertile => WHITE,
+        _ => BLACK,
     }
 }
 
@@ -43,17 +38,14 @@ fn terrain_name(t: &Terrain) -> &'static str {
 
 pub fn draw_map(game: &Game, state: &State) {
     for (pos, t) in &game.map.tiles {
-        let c = terrain_color(t);
-
         let (base, exhausted) = match t {
             Terrain::Exhausted(e) => (e.as_ref(), true),
             _ => (t, false),
         };
 
-        let text_color = if c.1 { WHITE } else { BLACK };
         hex_ui::draw_hex(
             *pos,
-            text_color,
+            terrain_font_color(t),
             alpha(game, state, *pos),
             state.assets.terrain.get(base).unwrap(),
             exhausted,
@@ -133,7 +125,7 @@ pub fn show_tile_menu(
 ) -> StateUpdate {
     let mut updates: StateUpdates = StateUpdates::new();
 
-    root_ui().window(hash!(), vec2(30., 700.), vec2(500., 200.), |ui| {
+    root_ui().window(hash!(), vec2(1200., 700.), vec2(500., 200.), |ui| {
         ui.label(
             None,
             &format!(

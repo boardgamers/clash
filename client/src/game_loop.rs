@@ -46,11 +46,11 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
     show_resources(game, player_index);
     show_wonders(game, player_index);
 
-    if root_ui().button(vec2(600., 450.), "Import") {
+    if root_ui().button(vec2(1200., 450.), "Import") {
         import(game);
         return StateUpdate::Cancel;
     };
-    if root_ui().button(vec2(650., 450.), "Export") {
+    if root_ui().button(vec2(1250., 450.), "Export") {
         export(game);
         return StateUpdate::None;
     };

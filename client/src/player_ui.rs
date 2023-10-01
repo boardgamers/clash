@@ -13,11 +13,11 @@ use server::unit::MovementAction;
 use crate::ui_state::{can_play_action, State, StateUpdate};
 
 pub fn show_globals(game: &Game) {
-    draw_text(&format!("Age {}", game.age), 600., 20., 20., BLACK);
-    draw_text(&format!("Round {}", game.round), 600., 50., 20., BLACK);
+    draw_text(&format!("Age {}", game.age), 1200., 20., 20., BLACK);
+    draw_text(&format!("Round {}", game.round), 1200., 50., 20., BLACK);
     draw_text(
         &format!("Player {}", game.active_player()),
-        600.,
+        1200.,
         80.,
         20.,
         BLACK,
@@ -37,10 +37,10 @@ pub fn show_globals(game: &Game) {
         GameState::PlaceSettler { .. } => String::from("Place Settler"),
         GameState::Finished => String::from("Finished"),
     };
-    draw_text(&status, 600., 110., 20., BLACK);
+    draw_text(&status, 1200., 110., 20., BLACK);
     draw_text(
         &format!("Actions Left {}", game.actions_left),
-        600.,
+        1200.,
         140.,
         20.,
         BLACK,
@@ -50,7 +50,7 @@ pub fn show_globals(game: &Game) {
         .iter()
         .map(std::string::ToString::to_string)
         .join(", ");
-    draw_text(&format!("Last Dice Rolls {rolls}"), 600., 600., 20., BLACK);
+    draw_text(&format!("Last Dice Rolls {rolls}"), 1200., 600., 20., BLACK);
 }
 
 pub fn show_wonders(game: &Game, player_index: usize) {
@@ -58,7 +58,7 @@ pub fn show_wonders(game: &Game, player_index: usize) {
     for (i, name) in player.wonders.iter().enumerate() {
         draw_text(
             &format!("Wonder {name}"),
-            600.,
+            1200.,
             600. + i as f32 * 30.0,
             20.,
             BLACK,
@@ -74,7 +74,7 @@ pub fn show_wonders(game: &Game, player_index: usize) {
                 "Wonder Card {} cost {} requires {}",
                 &card.name, card.cost, req
             ),
-            600.,
+            1200.,
             800. + i as f32 * 30.0,
             20.,
             BLACK,
@@ -88,7 +88,7 @@ pub fn show_resources(game: &Game, player_index: usize) {
 
     let mut i: f32 = 0.;
     let mut res = |label: String| {
-        draw_text(&label, 600., 200. + i, 20., BLACK);
+        draw_text(&label, 1200., 200. + i, 20., BLACK);
         i += 30.;
     };
 
@@ -103,10 +103,10 @@ pub fn show_resources(game: &Game, player_index: usize) {
 
 pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
     let y = 540.;
-    if game.can_undo() && root_ui().button(vec2(600., y), "Undo") {
+    if game.can_undo() && root_ui().button(vec2(1200., y), "Undo") {
         return StateUpdate::Execute(Action::Undo);
     }
-    if game.can_redo() && root_ui().button(vec2(650., y), "Redo") {
+    if game.can_redo() && root_ui().button(vec2(1250., y), "Redo") {
         return StateUpdate::Execute(Action::Redo);
     }
     match game.state {
@@ -117,17 +117,17 @@ pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
             target_city_position: _,
         } => {
             if root_ui().button(
-                vec2(600., 480.),
+                vec2(1200., 480.),
                 format!("Cultural Influence Resolution for {roll_boost_cost}"),
             ) {
                 StateUpdate::Execute(Action::CulturalInfluenceResolution(true))
-            } else if root_ui().button(vec2(900., 480.), "Decline") {
+            } else if root_ui().button(vec2(1200., 480.), "Decline") {
                 return StateUpdate::Execute(Action::CulturalInfluenceResolution(false));
             } else {
                 StateUpdate::None
             }
         }
-        GameState::Playing if root_ui().button(vec2(700., y), "End Turn") => {
+        GameState::Playing if root_ui().button(vec2(1200., y), "End Turn") => {
             let left = game.actions_left;
             StateUpdate::execute_with_warning(
                 Action::Playing(PlayingAction::EndTurn),
@@ -141,7 +141,7 @@ pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
         GameState::Playing
             if !state.has_dialog()
                 && can_play_action(game)
-                && root_ui().button(vec2(600., 510.), "Move Units") =>
+                && root_ui().button(vec2(1200., 510.), "Move Units") =>
         {
             StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits))
         }
@@ -149,7 +149,7 @@ pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
             movement_actions_left,
             moved_units: _,
         } if root_ui().button(
-            vec2(600., 510.),
+            vec2(1200., 510.),
             format!("End Move Units - {movement_actions_left} actions left"),
         ) =>
         {
@@ -168,10 +168,8 @@ pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
 
 pub fn player_color(player_index: usize) -> Color {
     match player_index {
-        0 => BLACK,
-        1 => LIGHTGRAY,
-        2 => YELLOW,
-        3 => BLUE,
+        0 => YELLOW,
+        1 => PINK,
         _ => panic!("unexpected player index"),
     }
 }

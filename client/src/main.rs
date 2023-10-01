@@ -10,6 +10,7 @@
 extern crate core;
 
 use crate::ui_state::ActiveDialog;
+use server::game::Game;
 
 mod advance_ui;
 mod assets;
@@ -37,7 +38,9 @@ mod unit_ui;
 
 #[macroquad::main("Clash")]
 async fn main() {
-    let mut game = local_ui::setup_local_game();
+    // let mut game = local_ui::setup_local_game();
+    //todo add button to decide random or fixed game
+    let mut game = Game::new(2, "a".repeat(32));
 
     game_loop::run(&mut game).await;
 }
