@@ -1,19 +1,19 @@
 use std::cmp::min;
 use std::collections::HashMap;
 
-use macroquad::hash;
-use macroquad::math::{bool, vec2};
-use macroquad::ui::root_ui;
+use macroquad::math::bool;
+
 use server::action::Action;
 use server::content::advances::get_all;
 use server::game::Game;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::AdvancePaymentOptions;
 
+use crate::dialog_ui::dialog_window;
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::HasCountSelectableObject;
-use crate::ui_state::{can_play_action, StateUpdate, StateUpdates};
+use crate::ui_state::{can_play_action, StateUpdate};
 use crate::ActiveDialog;
 use server::game::GameState;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
@@ -78,7 +78,7 @@ impl HasPayment for AdvancePayment {
 }
 
 pub fn show_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
-    show_generic_advance_menu(game, player_index, |name| {
+    show_generic_advance_menu(game, player_index, true, |name| {
         StateUpdate::SetDialog(ActiveDialog::AdvancePayment(AdvancePayment::new(
             game,
             player_index,
@@ -88,7 +88,7 @@ pub fn show_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
 }
 
 pub fn show_free_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
-    show_generic_advance_menu(game, player_index, |name| {
+    show_generic_advance_menu(game, player_index, false, |name| {
         StateUpdate::status_phase(StatusPhaseAction::FreeAdvance(name))
     })
 }
@@ -96,11 +96,10 @@ pub fn show_free_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
 pub fn show_generic_advance_menu(
     game: &Game,
     player_index: usize,
+    close_button: bool,
     new_update: impl Fn(String) -> StateUpdate,
 ) -> StateUpdate {
-    let mut updates = StateUpdates::new();
-
-    root_ui().window(hash!(), vec2(30., 910.), vec2(500., 200.), |ui| {
+    dialog_window(close_button, |ui| {
         for a in get_all() {
             let name = a.name;
             let p = game.get_player(player_index);
@@ -114,12 +113,11 @@ pub fn show_generic_advance_menu(
                 && p.can_advance(&name)
                 && ui.button(None, name.clone())
             {
-                updates.add(new_update(name));
+                return new_update(name);
             }
         }
-    });
-
-    updates.result()
+        StateUpdate::None
+    })
 }
 
 pub fn pay_advance_dialog(ap: &AdvancePayment) -> StateUpdate {

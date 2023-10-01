@@ -27,7 +27,8 @@ use server::{
 
 #[test]
 fn basic_actions() {
-    let mut game = game_api::init(1, String::new());
+    let seed = String::new();
+    let mut game = Game::new(1, seed, false);
     let founded_city_position = Position::new(0, 1);
     game.map.tiles = HashMap::from([(founded_city_position, Forest)]);
     let advance_action = Action::Playing(Advance {
@@ -214,7 +215,7 @@ fn basic_actions() {
 
 #[test]
 fn cultural_influence() {
-    let mut game = game_api::init(2, String::new());
+    let mut game = Game::new(2, String::new(), false);
     game.dice_roll_outcomes = vec![10, 6, 8, 4];
     game.set_player_index(0);
     game.players[0].gain_resources(ResourcePile::culture_tokens(4));
@@ -305,7 +306,7 @@ fn increase_happiness(game: Game) -> Game {
 
 #[test]
 fn undo() {
-    let mut game = game_api::init(1, String::new());
+    let mut game = Game::new(1, String::new(), false);
     game.players[0]
         .cities
         .push(City::new(0, Position::new(0, 0)));

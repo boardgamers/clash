@@ -400,20 +400,13 @@ pub fn get_total_collection(
         return None;
     }
     let mut available_terrain = HashMap::new();
+    add_collect_terrain(game, &mut available_terrain, city_position);
     for adjacent_tile in city.position.neighbors() {
         if game.get_any_city(adjacent_tile).is_some() {
             continue;
         }
 
-        let Some(terrain) = game.map.tiles.get(&adjacent_tile) else {
-            continue;
-        };
-        let terrain_left = available_terrain.entry(terrain.clone()).or_insert(0);
-        if terrain == &Terrain::Water {
-            *terrain_left = 1;
-            continue;
-        }
-        *terrain_left += 1;
+        add_collect_terrain(game, &mut available_terrain, adjacent_tile);
     }
     let mut total_collect = ResourcePile::empty();
     for (position, collect) in collections {
@@ -439,4 +432,19 @@ pub fn get_total_collection(
         }
     }
     Some(total_collect)
+}
+
+fn add_collect_terrain(
+    game: &Game,
+    available_terrain: &mut HashMap<Terrain, i32>,
+    adjacent_tile: Position,
+) {
+    if let Some(terrain) = game.map.tiles.get(&adjacent_tile) {
+        let terrain_left = available_terrain.entry(terrain.clone()).or_insert(0);
+        if terrain == &Terrain::Water {
+            *terrain_left = 1;
+            return;
+        }
+        *terrain_left += 1;
+    }
 }

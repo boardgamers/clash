@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 use std::iter;
 
-use macroquad::color::RED;
+use macroquad::color::BLACK;
 use macroquad::math::i32;
 use macroquad::prelude::{draw_circle_lines, draw_text, Vec2, WHITE};
+
 use server::action::Action;
 use server::consts::PORT_CHOICES;
 use server::game::Game;
@@ -14,7 +15,7 @@ use server::resource_pile::ResourcePile;
 use crate::dialog_ui::active_dialog_window;
 use crate::hex_ui;
 use crate::resource_ui::resource_pile_string;
-use crate::ui_state::{ActiveDialog, State, StateUpdate, StateUpdates};
+use crate::ui_state::{ActiveDialog, State, StateUpdate};
 
 #[derive(Clone)]
 pub struct CollectResources {
@@ -47,7 +48,6 @@ impl CollectResources {
 }
 
 pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> StateUpdate {
-    let mut updates = StateUpdates::new();
     active_dialog_window(|ui| {
         let city = game.get_city(collect.player_index, collect.city_position);
         let valid = get_total_collection(
@@ -61,7 +61,7 @@ pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> Stat
         if ui.button(Vec2::new(0., 40.), label) && valid {
             let extra = city.mood_modified_size() - collect.collections.len();
 
-            updates.add(StateUpdate::execute_activation(
+            return StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Collect {
                     city_position: collect.city_position,
                     collections: collect.collections.clone(),
@@ -72,13 +72,13 @@ pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> Stat
                     vec![]
                 },
                 city,
-            ));
+            );
         };
         if ui.button(Vec2::new(80., 40.), "Cancel") {
-            updates.add(StateUpdate::Cancel);
+            return StateUpdate::Cancel;
         };
-    });
-    updates.result()
+        StateUpdate::None
+    })
 }
 
 pub fn possible_resource_collections(
@@ -146,9 +146,9 @@ pub fn draw_resource_collect_tile(state: &State, pos: Position) {
             possible.iter().enumerate().for_each(|(i, res)| {
                 let p = hex_ui::rotate_around(c, 30.0, (90 * i) as i32);
                 let color = if col.is_some_and(|r| r == res) {
-                    WHITE
+                    BLACK
                 } else {
-                    RED
+                    WHITE
                 };
                 draw_text(
                     &resource_pile_string(res),
