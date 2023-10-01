@@ -105,15 +105,18 @@ pub fn show_generic_advance_menu(
             let p = game.get_player(player_index);
             if p.has_advance(&name) {
                 ui.label(None, &name);
-            } else if (can_play_action(game)
-                || matches!(
+            } else {
+                let can = if matches!(
                     game.state,
                     GameState::StatusPhase(StatusPhaseState::FreeAdvance)
-                ))
-                && p.can_advance(&name)
-                && ui.button(None, name.clone())
-            {
-                return new_update(name);
+                ) {
+                    p.can_advance_free(&name)
+                } else {
+                    can_play_action(game) && p.can_advance(&name)
+                };
+                if can && ui.button(None, name.clone()) {
+                    return new_update(name);
+                }
             }
         }
         StateUpdate::None
