@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use PlayingAction::*;
 
-use crate::game::{CulturalInfluenceResolution, GameState};
+use crate::game::{CulturalInfluenceResolution, GameState, self};
 use crate::{
     city::City,
     city_pieces::Building::{self, *},
@@ -209,7 +209,7 @@ impl PlayingAction {
                 let self_influence = starting_city_position == target_city_position;
 
                 game.players[player_index].loose_resources(range_boost_cost);
-                let roll = game.get_next_dice_value();
+                let roll = game::dice_value(game.get_next_dice_roll());
                 let success = roll == 5 || roll == 6;
                 if success {
                     game.influence_culture(
