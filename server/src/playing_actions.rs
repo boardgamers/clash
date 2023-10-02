@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use PlayingAction::*;
 
-use crate::game::{CulturalInfluenceResolution, GameState, self};
+use crate::game::{self, CulturalInfluenceResolution, GameState};
 use crate::{
     city::City,
     city_pieces::Building::{self, *},

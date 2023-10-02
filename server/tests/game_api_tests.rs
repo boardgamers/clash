@@ -364,11 +364,12 @@ fn assert_eq_game_json(
     expected_path: &str,
     message: &str,
 ) {
+    let file_path = format!("tests{SEPARATOR}test_games{SEPARATOR}{test}.result.json");
     if expected.replace([' ', '\t', '\n', '\r'], "") == actual.replace([' ', '\t', '\n', '\r'], "")
     {
+        fs::remove_file(&file_path).unwrap_or(());
         return;
     }
-    let file_path = format!("tests{SEPARATOR}test_games{SEPARATOR}{test}.result.json");
     let mut file = OpenOptions::new()
         .write(true)
         .create(true)
@@ -379,16 +380,11 @@ fn assert_eq_game_json(
         .expect("Failed to write output file");
     let expected_path = format!("tests{SEPARATOR}test_games{SEPARATOR}{expected_path}.json");
 
-    assert_eq!(
-        actual,
-        expected,
-        "{}",
-        format_args!(
-            "{test} test failed:\n\
-            {message}.\n\
-            Expected game was not equal to the actual game.\n\
-            See 'expected' at {expected_path} and 'actual' at {file_path}."
-        )
+    panic!(
+        "{test} test failed:\n\
+        {message}.\n\
+        Expected game was not equal to the actual game.\n\
+        See 'expected' at {expected_path} and 'actual' at {file_path}."
     );
 }
 

@@ -69,7 +69,7 @@ impl Game {
     ///
     /// # Panics
     ///
-    /// Panics if there is an internal bug
+    /// Panics only if there is an internal bug
     #[must_use]
     pub fn new(player_amount: usize, seed: String, setup: bool) -> Self {
         let seed_length = seed.len();
@@ -876,7 +876,9 @@ impl Game {
         attackers: &mut Vec<u32>,
         can_retreat: bool,
     ) {
-        let defender_fortress = self.players[defender].get_city(defender_position).is_some_and(|city| city.pieces.fortress.is_some());
+        let defender_fortress = self.players[defender]
+            .get_city(defender_position)
+            .is_some_and(|city| city.pieces.fortress.is_some());
         loop {
             self.add_info_log_item(format!("\nCombat round {round}"));
             //todo: go into tactics phase if either player has tactics card (also if they can not play it unless otherwise specified via setting)
@@ -1288,7 +1290,7 @@ impl Game {
     pub fn get_next_dice_roll(&mut self) -> u8 {
         self.lock_undo();
         let dice_roll = self.dice_roll_outcomes.pop().unwrap_or_else(|| {
-            println!("ran out of predetermined dice roll outcomes, unseeded rng is no being used");
+            println!("ran out of predetermined dice roll outcomes, unseeded rng is now being used");
             rand::thread_rng().gen_range(0..12)
         });
         self.dice_roll_log.push(dice_roll);
