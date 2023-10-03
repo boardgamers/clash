@@ -3,7 +3,7 @@ use crate::game::GameState::Playing;
 use crate::game::{Game, GameState};
 use crate::map::Terrain::Water;
 use crate::position::Position;
-use crate::unit::UnitType::{Cavalry, Elephant, Infantry, Leader, Ship};
+use crate::unit::UnitType::{Cavalry, Elephant, Infantry, Leader, Settler, Ship};
 use crate::unit::Units;
 use serde::{Deserialize, Serialize};
 use std::mem;
@@ -286,7 +286,8 @@ fn combat_loop(
         game.add_info_log_item(format!("\nCombat round {round}"));
         //todo: go into tactics phase if either player has tactics card (also if they can not play it unless otherwise specified via setting)
 
-        let attacker_rolls = roll(game, attacker, attackers);
+        let attacker_units = crate::combat::attackers(game, attacker, attackers);
+        let attacker_rolls = roll(game, attacker, &attacker_units);
         let defender_units = defenders(game, defender, defender_position);
         let defender_rolls = roll(game, defender, &defender_units);
         let attacker_combat_value = attacker_rolls.combat_value;
@@ -332,7 +333,7 @@ fn combat_loop(
                 game.kill_unit(id, defender, attacker);
             }
         }
-        if defender_hits < attackers.len() as u8 && defender_hits > 0 {
+        if defender_hits < attacker_units.len() as u8 && defender_hits > 0 {
             game.add_info_log_item(format!(
                 "\t{} has to remove {} of his attacking units",
                 game.players[attacker].get_name(),
@@ -355,13 +356,13 @@ fn combat_loop(
             ));
             return;
         }
-        if defender_hits >= attackers.len() as u8 {
+        if defender_hits >= attacker_units.len() as u8 {
             for id in mem::take(attackers) {
                 game.kill_unit(id, attacker, defender);
             }
         }
         let defenders_left = game.players[defender].get_units(defender_position);
-        if attackers.is_empty() && defenders_left.is_empty() {
+        if attacker_units.is_empty() && defenders_left.is_empty() {
             if defender_fortress && *round == 1 {
                 game.add_info_log_item(format!("\tAll attacking and defending units where eliminated. {} wins the battle because he has a defending fortress", game.players[defender].get_name()));
                 //todo defender wins
@@ -375,7 +376,7 @@ fn combat_loop(
             end_combat(game, initiation);
             return;
         }
-        if attackers.is_empty() {
+        if attacker_units.is_empty() {
             game.add_info_log_item(format!(
                 "\t{} killed all attacking units",
                 game.players[defender].get_name()
@@ -542,6 +543,18 @@ fn dice_roll_with_leader_reroll(game: &mut Game, unit_types: &mut Units) -> u8 {
 #[must_use]
 pub(crate) fn dice_value(roll: u8) -> u8 {
     roll / 2 + 1
+}
+
+/// # Panics
+/// if the player does not have the unit
+#[must_use]
+pub fn attackers(game: &Game, attacker: usize, attackers: &[u32]) -> Vec<u32> {
+    let p = &game.players[attacker];
+    attackers
+        .iter()
+        .copied()
+        .filter(|u| p.get_unit(*u).expect("player should have unit").unit_type != Settler)
+        .collect::<Vec<_>>()
 }
 
 #[must_use]

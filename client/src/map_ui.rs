@@ -4,9 +4,8 @@ use macroquad::prelude::*;
 use macroquad::ui::Ui;
 
 use server::action::Action;
-use server::game;
-use server::game::Game;
-use server::game::GameState::Combat;
+use server::combat::Combat;
+use server::game::{Game, GameState};
 use server::map::Terrain;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
@@ -51,7 +50,7 @@ pub fn draw_map(game: &Game, state: &State) {
         );
         collect_ui::draw_resource_collect_tile(state, *pos);
     }
-    if let Combat(c) = &game.state {
+    if let GameState::Combat(c) = &game.state {
         draw_combat_arrow(c);
     }
     if !state.is_collect() {
@@ -92,7 +91,7 @@ fn alpha(game: &Game, state: &State, pos: Position) -> f32 {
     alpha
 }
 
-fn draw_combat_arrow(c: &game::Combat) {
+fn draw_combat_arrow(c: &Combat) {
     let from = hex_ui::center(c.attacker_position);
     let to = hex_ui::center(c.defender_position);
     draw_line(from.x, from.y, to.x, to.y, 10., BLACK);

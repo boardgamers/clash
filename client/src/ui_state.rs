@@ -2,14 +2,12 @@ use macroquad::prelude::*;
 
 use server::action::{Action, CombatAction};
 use server::city::{City, MoodState};
-use server::combat::defenders;
-use server::game::{Combat, CombatPhase, CulturalInfluenceResolution, Game, GameState};
-use server::map::Terrain::Water;
+use server::combat::{attackers, defenders, CombatPhase};
+use server::game::{CulturalInfluenceResolution, Game, GameState};
 use server::player::Player;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
-use server::unit::UnitType::Ship;
 
 use crate::advance_ui::AdvancePayment;
 use crate::assets::Assets;
@@ -260,7 +258,10 @@ impl State {
                     player, casualties, ..
                 } => {
                     let (position, selectable) = if player == c.attacker {
-                        (c.attacker_position, c.attackers.clone())
+                        (
+                            c.attacker_position,
+                            attackers(game, c.attacker, &c.attackers),
+                        )
                     } else if player == c.defender {
                         (
                             c.defender_position,
