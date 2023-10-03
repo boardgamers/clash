@@ -286,7 +286,7 @@ fn combat_loop(
         game.add_info_log_item(format!("\nCombat round {round}"));
         //todo: go into tactics phase if either player has tactics card (also if they can not play it unless otherwise specified via setting)
 
-        let attacker_units = crate::combat::attackers(game, attacker, attackers);
+        let mut attacker_units = crate::combat::attackers(game, attacker, attackers);
         let attacker_rolls = roll(game, attacker, &attacker_units);
         let defender_units = defenders(game, defender, defender_position);
         let defender_rolls = roll(game, defender, &defender_units);
@@ -357,9 +357,10 @@ fn combat_loop(
             return;
         }
         if defender_hits >= attacker_units.len() as u8 {
-            for id in mem::take(attackers) {
+            for id in attacker_units {
                 game.kill_unit(id, attacker, defender);
             }
+            attacker_units = vec![];
         }
         let defenders_left = game.players[defender].get_units(defender_position);
         if attacker_units.is_empty() && defenders_left.is_empty() {
