@@ -1,5 +1,6 @@
 use std::{
     collections::HashMap,
+    env,
     fs::{self, OpenOptions},
     io::Write,
     path::MAIN_SEPARATOR as SEPARATOR,
@@ -360,42 +361,61 @@ fn undo() {
 fn assert_eq_game_json(
     expected: &str,
     actual: &str,
-    test: &str,
-    expected_path: &str,
+    name: &str,
+    expected_name: &str,
     message: &str,
 ) {
-    let file_path = format!("tests{SEPARATOR}test_games{SEPARATOR}{test}.result.json");
-    if expected.replace([' ', '\t', '\n', '\r'], "") == actual.replace([' ', '\t', '\n', '\r'], "")
-    {
-        fs::remove_file(&file_path).unwrap_or(());
+    let result_path = game_path(&format!("{name}.result"));
+    if clean_json(expected) == clean_json(actual) {
+        fs::remove_file(&result_path).unwrap_or(());
         return;
     }
+    let expected_path = game_path(expected_name);
+    if env::var("UPDATE_EXPECTED")
+        .ok()
+        .is_some_and(|s| s == "true")
+    {
+        write_result(actual, &expected_path);
+        return;
+    } else {
+        write_result(actual, &result_path);
+    }
+
+    panic!(
+        "{name} test failed:\n\
+        {message}.\n\
+        Expected game was not equal to the actual game.\n\
+        See 'expected' at {expected_path} and 'actual' at {result_path}."
+    );
+}
+
+fn clean_json(expected: &str) -> String {
+    expected.replace([' ', '\t', '\n', '\r'], "")
+}
+
+fn write_result(actual: &str, result_path: &String) {
     let mut file = OpenOptions::new()
         .write(true)
         .create(true)
         .truncate(true)
-        .open(&file_path)
+        .open(&result_path)
         .expect("Failed to create output file");
     file.write_all(actual.as_bytes())
         .expect("Failed to write output file");
-    let expected_path = format!("tests{SEPARATOR}test_games{SEPARATOR}{expected_path}.json");
+}
 
-    panic!(
-        "{test} test failed:\n\
-        {message}.\n\
-        Expected game was not equal to the actual game.\n\
-        See 'expected' at {expected_path} and 'actual' at {file_path}."
-    );
+fn game_path(name: &str) -> String {
+    format!("tests{SEPARATOR}test_games{SEPARATOR}{name}.json")
 }
 
 fn test_action(
-    game_path: &str,
+    name: &str,
     action: Action,
     player_index: usize,
     undoable: bool,
     illegal_action_test: bool,
 ) {
-    let path = format!("tests{SEPARATOR}test_games{SEPARATOR}{game_path}.json");
+    let path = game_path(name);
     let original_game =
         fs::read_to_string(path).expect("game file should exist in the test games folder");
     let game = Game::from_data(
@@ -410,15 +430,15 @@ fn test_action(
     }
     let json = serde_json::to_string_pretty(&game.cloned_data())
         .expect("game data should be serializable");
-    let expected_path = format!("tests{SEPARATOR}test_games{SEPARATOR}{game_path}.outcome.json");
+    let outcome = format!("{name}.outcome");
     let expected_game =
-        fs::read_to_string(expected_path).expect("outcome file should be deserializable");
+        fs::read_to_string(game_path(&outcome)).expect("outcome file should be deserializable");
     assert_eq_game_json(
         &expected_game,
         &json,
-        game_path,
-        &(game_path.to_string() + ".outcome"),
-        &format!("the game did not match the expectation after the initial {game_path} action"),
+        name,
+        &outcome,
+        &format!("the game did not match the expectation after the initial {name} action"),
     );
     if !undoable {
         assert!(!game.can_undo());
@@ -432,9 +452,9 @@ fn test_action(
     assert_eq_game_json(
         &original_game,
         &json,
-        game_path,
-        game_path,
-        &format!("the game did not match the expectation after undoing the {game_path} action"),
+        name,
+        name,
+        &format!("the game did not match the expectation after undoing the {name} action"),
     );
     let game = game_api::execute_action(game, Action::Redo, player_index);
     let json = serde_json::to_string_pretty(&game.cloned_data())
@@ -442,9 +462,9 @@ fn test_action(
     assert_eq_game_json(
         &expected_game,
         &json,
-        game_path,
-        &(game_path.to_string() + ".outcome"),
-        &format!("the game did not match the expectation after redoing the {game_path} action"),
+        name,
+        &outcome,
+        &format!("the game did not match the expectation after redoing the {name} action"),
     );
 }
 
