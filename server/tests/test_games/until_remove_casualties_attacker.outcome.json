@@ -448,7 +448,7 @@
     "Player1 used a move units action",
     "\tPlayer1 moved 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1",
     "\nCombat round 1",
-    "\tPlayer1 rolled a combined combat value of 24 and gets 4 hits against defending units. Player2 rolled a combined combat value of 12 and gets 2 hits against attacking units.",
+    "\tPlayer1 rolled a combined combat value of 25 and gets 5 hits against defending units. Player2 rolled a combined combat value of 14 and gets 2 hits against attacking units.",
     "\tPlayer1 has to remove 2 of his attacking units"
   ],
   "undo_limit": 3,

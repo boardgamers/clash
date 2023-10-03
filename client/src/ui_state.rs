@@ -2,13 +2,12 @@ use macroquad::prelude::*;
 
 use server::action::{Action, CombatAction};
 use server::city::{City, MoodState};
-use server::game::{Combat, CombatPhase, CulturalInfluenceResolution, Game, GameState};
-use server::map::Terrain::Water;
+use server::combat::{attackers, defenders, CombatPhase};
+use server::game::{CulturalInfluenceResolution, Game, GameState};
 use server::player::Player;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
-use server::unit::UnitType::Ship;
 
 use crate::advance_ui::AdvancePayment;
 use crate::assets::Assets;
@@ -259,9 +258,15 @@ impl State {
                     player, casualties, ..
                 } => {
                     let (position, selectable) = if player == c.attacker {
-                        (c.attacker_position, c.attackers.clone())
+                        (
+                            c.attacker_position,
+                            attackers(game, c.attacker, &c.attackers),
+                        )
                     } else if player == c.defender {
-                        (c.defender_position, defenders(&game, c))
+                        (
+                            c.defender_position,
+                            defenders(game, c.defender, c.defender_position),
+                        )
                     } else {
                         panic!("player should be either defender or attacker")
                     };
@@ -284,24 +289,6 @@ impl State {
         game.execute_action(a, game.active_player());
         self.update_from_game_state(game);
     }
-}
-
-fn defenders(game: &&mut Game, c: &Combat) -> Vec<u32> {
-    let p = &game.players[c.defender];
-    let defenders = if game.map.tiles[&c.defender_position] == Water {
-        p.get_units(c.defender_position)
-            .iter()
-            .filter(|u| u.unit_type == Ship)
-            .map(|u| u.id)
-            .collect::<Vec<_>>()
-    } else {
-        p.get_units(c.defender_position)
-            .iter()
-            .filter(|u| u.unit_type.is_army_unit())
-            .map(|u| u.id)
-            .collect::<Vec<_>>()
-    };
-    defenders
 }
 
 pub fn can_play_action(game: &Game) -> bool {

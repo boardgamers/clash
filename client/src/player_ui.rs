@@ -6,7 +6,8 @@ use macroquad::text::draw_text;
 use macroquad::ui::root_ui;
 
 use server::action::Action;
-use server::game::{Combat, Game, GameState};
+use server::combat::Combat;
+use server::game::{Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
 

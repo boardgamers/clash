@@ -424,7 +424,7 @@
     "Player1 used a move units action",
     "\tPlayer1 moved 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1",
     "\nCombat round 1",
-    "\tPlayer1 rolled a combined combat value of 24 and gets 4 hits against defending units. Player2 rolled a combined combat value of 2 and gets 0 hits against attacking units.",
+    "\tPlayer1 rolled a combined combat value of 25 and gets 5 hits against defending units. Player2 rolled a combined combat value of 2 and gets 0 hits against attacking units.",
     "\tPlayer1 killed all defending units and captured Player2's city at C1 and captured Player2's city at C1"
   ],
   "undo_limit": 3,
@@ -436,12 +436,16 @@
   "messages": [
     "The game has started"
   ],
-  "dice_roll_outcomes": [],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    1
+  ],
   "dice_roll_log": [
-    10,
-    10,
-    10,
-    10,
+    11,
+    11,
+    11,
+    11,
     1,
     1
   ],
