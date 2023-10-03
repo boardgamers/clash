@@ -23,10 +23,6 @@ jobs:
       with:
         packages: pkg-config libx11-dev libxi-dev libgl1-mesa-dev libasound2-dev
         version: 1.0
-    - name: Install Cargo Audit
-      run: | 
-        cargo --version
-        cargo install cargo-audit
     - name: Build server
       working-directory: ./server
       run: cargo build
