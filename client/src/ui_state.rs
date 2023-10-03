@@ -265,7 +265,7 @@ impl State {
                     } else if player == c.defender {
                         (
                             c.defender_position,
-                            defenders(&game, c.defender, c.defender_position),
+                            defenders(game, c.defender, c.defender_position),
                         )
                     } else {
                         panic!("player should be either defender or attacker")
