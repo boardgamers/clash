@@ -49,7 +49,15 @@ impl CollectResources {
 
 pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> StateUpdate {
     active_dialog_window(|ui| {
+        let r: ResourcePile = collect
+            .collections
+            .clone()
+            .into_iter()
+            .map(|(_p, r)| r)
+            .sum();
         let city = game.get_city(collect.player_index, collect.city_position);
+        let extra: i8 = city.mood_modified_size() as i8 - collect.collections.len() as i8;
+        ui.label(None, &format!("{r}: {extra} left"));
         let valid = get_total_collection(
             game,
             collect.player_index,
@@ -59,8 +67,6 @@ pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> Stat
         .is_some();
         let label = if valid { "OK" } else { "(OK)" };
         if ui.button(Vec2::new(0., 40.), label) && valid {
-            let extra = city.mood_modified_size() - collect.collections.len();
-
             return StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Collect {
                     city_position: collect.city_position,
