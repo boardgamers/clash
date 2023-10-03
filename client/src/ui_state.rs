@@ -2,6 +2,7 @@ use macroquad::prelude::*;
 
 use server::action::{Action, CombatAction};
 use server::city::{City, MoodState};
+use server::combat::defenders;
 use server::game::{Combat, CombatPhase, CulturalInfluenceResolution, Game, GameState};
 use server::map::Terrain::Water;
 use server::player::Player;
@@ -261,7 +262,10 @@ impl State {
                     let (position, selectable) = if player == c.attacker {
                         (c.attacker_position, c.attackers.clone())
                     } else if player == c.defender {
-                        (c.defender_position, defenders(&game, c))
+                        (
+                            c.defender_position,
+                            defenders(&game, c.defender, c.defender_position),
+                        )
                     } else {
                         panic!("player should be either defender or attacker")
                     };
@@ -284,24 +288,6 @@ impl State {
         game.execute_action(a, game.active_player());
         self.update_from_game_state(game);
     }
-}
-
-fn defenders(game: &&mut Game, c: &Combat) -> Vec<u32> {
-    let p = &game.players[c.defender];
-    let defenders = if game.map.tiles[&c.defender_position] == Water {
-        p.get_units(c.defender_position)
-            .iter()
-            .filter(|u| u.unit_type == Ship)
-            .map(|u| u.id)
-            .collect::<Vec<_>>()
-    } else {
-        p.get_units(c.defender_position)
-            .iter()
-            .filter(|u| u.unit_type.is_army_unit())
-            .map(|u| u.id)
-            .collect::<Vec<_>>()
-    };
-    defenders
 }
 
 pub fn can_play_action(game: &Game) -> bool {

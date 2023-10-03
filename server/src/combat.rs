@@ -1,8 +1,9 @@
 use crate::action::CombatAction;
 use crate::game::GameState::Playing;
 use crate::game::{Game, GameState};
+use crate::map::Terrain::Water;
 use crate::position::Position;
-use crate::unit::UnitType::{Cavalry, Elephant, Infantry, Leader};
+use crate::unit::UnitType::{Cavalry, Elephant, Infantry, Leader, Ship};
 use crate::unit::Units;
 use serde::{Deserialize, Serialize};
 use std::mem;
@@ -286,11 +287,7 @@ fn combat_loop(
         //todo: go into tactics phase if either player has tactics card (also if they can not play it unless otherwise specified via setting)
 
         let attacker_rolls = roll(game, attacker, attackers);
-        let defender_units = game.players[defender]
-            .get_units(defender_position)
-            .iter()
-            .map(|unit| unit.id)
-            .collect::<Vec<u32>>();
+        let defender_units = defenders(game, defender, defender_position);
         let defender_rolls = roll(game, defender, &defender_units);
         let attacker_combat_value = attacker_rolls.combat_value;
         let attacker_hit_cancels = attacker_rolls.hit_cancels;
@@ -485,9 +482,6 @@ pub(crate) fn roll(game: &mut Game, player_index: usize, units: &Vec<u32>) -> Co
             .get_unit(*unit)
             .expect("player should have all units")
             .unit_type;
-        if unit.is_settler() {
-            continue;
-        }
         dice_rolls += 1;
         unit_types += unit;
     }
@@ -529,17 +523,42 @@ pub(crate) fn roll(game: &mut Game, player_index: usize, units: &Vec<u32>) -> Co
 }
 
 fn dice_roll_with_leader_reroll(game: &mut Game, unit_types: &mut Units) -> u8 {
+    // if used, the leader grants unlimited rerolls of 1s and 2s
+    let can_reroll = unit_types.has_unit(&Leader);
+    let mut leader_used = false;
     loop {
         let roll = game.get_next_dice_roll();
 
-        if roll > 2 || !unit_types.has_unit(&Leader) {
+        if roll > 2 || !can_reroll {
             return roll;
         }
-        *unit_types -= &Leader;
+        if !leader_used {
+            leader_used = true;
+            *unit_types -= &Leader;
+        }
     }
 }
 
 #[must_use]
 pub(crate) fn dice_value(roll: u8) -> u8 {
     roll / 2 + 1
+}
+
+#[must_use]
+pub fn defenders(game: &Game, defender: usize, defender_position: Position) -> Vec<u32> {
+    let p = &game.players[defender];
+    let defenders = if game.map.tiles[&defender_position] == Water {
+        p.get_units(defender_position)
+            .iter()
+            .filter(|u| u.unit_type == Ship)
+            .map(|u| u.id)
+            .collect::<Vec<_>>()
+    } else {
+        p.get_units(defender_position)
+            .iter()
+            .filter(|u| u.unit_type.is_army_unit())
+            .map(|u| u.id)
+            .collect::<Vec<_>>()
+    };
+    defenders
 }

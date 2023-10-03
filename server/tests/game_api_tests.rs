@@ -398,7 +398,7 @@ fn write_result(actual: &str, result_path: &String) {
         .write(true)
         .create(true)
         .truncate(true)
-        .open(&result_path)
+        .open(result_path)
         .expect("Failed to create output file");
     file.write_all(actual.as_bytes())
         .expect("Failed to write output file");
