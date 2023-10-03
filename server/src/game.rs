@@ -364,19 +364,7 @@ impl Game {
             Combat(c) => {
                 let action = action.combat().expect("action should be a combat action");
                 self.add_action_log_item(ActionLogItem::Combat(action.clone()));
-                execute_combat_action(
-                    self,
-                    action,
-                    c.initiation,
-                    c.round,
-                    c.phase,
-                    c.defender,
-                    c.defender_position,
-                    c.attacker,
-                    c.attacker_position,
-                    c.attackers,
-                    c.can_retreat,
-                );
+                execute_combat_action(self, action, c);
             }
             PlaceSettler {
                 player_index,
@@ -527,6 +515,7 @@ impl Game {
                         } else {
                             Playing
                         };
+
                         initiate_combat(
                             self,
                             defender,
