@@ -131,63 +131,7 @@ pub fn execute_combat_action(game: &mut Game, action: CombatAction, mut c: Comba
             return;
         }
         CombatAction::RemoveCasualties(units) => {
-            let CombatPhase::RemoveCasualties {
-                player,
-                casualties,
-                defender_hits,
-            } = c.phase
-            else {
-                panic!("Illegal action");
-            };
-            assert_eq!(casualties, units.len() as u8, "Illegal action");
-            let (fighting_units, opponent) = if player == c.defender {
-                (
-                    game.players[player]
-                        .get_units(c.defender_position)
-                        .iter()
-                        .map(|unit| unit.id)
-                        .collect(),
-                    c.attacker,
-                )
-            } else if player == c.attacker {
-                (c.attackers.clone(), c.defender)
-            } else {
-                panic!("Illegal action")
-            };
-            assert!(
-                units.iter().all(|unit| fighting_units.contains(unit)),
-                "Illegal action"
-            );
-            for unit in units {
-                game.kill_unit(unit, player, opponent);
-                if player == c.attacker {
-                    c.attackers.retain(|id| *id != unit);
-                }
-            }
-            if let Some(defender_hits) = defender_hits {
-                if defender_hits < c.attackers.len() as u8 && defender_hits > 0 {
-                    game.add_info_log_item(format!(
-                        "\t{} has to remove {} of his attacking units",
-                        game.players[c.attacker].get_name(),
-                        defender_hits
-                    ));
-                    game.state = GameState::Combat(Combat {
-                        phase: CombatPhase::RemoveCasualties {
-                            player: c.defender,
-                            casualties: defender_hits,
-                            defender_hits: None,
-                        },
-                        ..c
-                    });
-                    return;
-                }
-                if defender_hits >= c.attackers.len() as u8 {
-                    for id in mem::take(&mut c.attackers) {
-                        game.kill_unit(id, c.attacker, c.defender);
-                    }
-                }
-            }
-            if resolve_combat(game, &mut c) {
+            if remove_casualties(game, &mut c, units) {
                 return;
             }
         }
@@ -200,6 +144,66 @@ pub fn execute_combat_action(game: &mut Game, action: CombatAction, mut c: Comba
         }
     }
     combat_loop(game, c);
+}
+
+fn remove_casualties(game: &mut Game, c: &mut Combat, units: Vec<u32>) -> bool {
+    let CombatPhase::RemoveCasualties {
+        player,
+        casualties,
+        defender_hits,
+    } = c.phase
+    else {
+        panic!("Illegal action");
+    };
+    assert_eq!(casualties, units.len() as u8, "Illegal action");
+    let (fighting_units, opponent) = if player == c.defender {
+        (
+            game.players[player]
+                .get_units(c.defender_position)
+                .iter()
+                .map(|unit| unit.id)
+                .collect(),
+            c.attacker,
+        )
+    } else if player == c.attacker {
+        (c.attackers.clone(), c.defender)
+    } else {
+        panic!("Illegal action")
+    };
+    assert!(
+        units.iter().all(|unit| fighting_units.contains(unit)),
+        "Illegal action"
+    );
+    for unit in units {
+        game.kill_unit(unit, player, opponent);
+        if player == c.attacker {
+            c.attackers.retain(|id| *id != unit);
+        }
+    }
+    if let Some(defender_hits) = defender_hits {
+        if defender_hits < c.attackers.len() as u8 && defender_hits > 0 {
+            game.add_info_log_item(format!(
+                "\t{} has to remove {} of his attacking units",
+                game.players[c.attacker].get_name(),
+                defender_hits
+            ));
+            game.state = GameState::Combat(Combat {
+                phase: CombatPhase::RemoveCasualties {
+                    player: c.defender,
+                    casualties: defender_hits,
+                    defender_hits: None,
+                },
+                ..c.clone()
+            });
+            return true;
+        }
+        if defender_hits >= c.attackers.len() as u8 {
+            for id in mem::take(&mut c.attackers) {
+                game.kill_unit(id, c.attacker, c.defender);
+            }
+        }
+    }
+    resolve_combat(game, c)
 }
 
 fn combat_loop(game: &mut Game, mut c: Combat) {
