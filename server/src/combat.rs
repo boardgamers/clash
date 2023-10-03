@@ -203,9 +203,6 @@ pub fn execute_combat_action(game: &mut Game, action: CombatAction, mut c: Comba
 }
 
 fn combat_loop(game: &mut Game, mut c: Combat) {
-    let defender_fortress = game.players[c.defender]
-        .get_city(c.defender_position)
-        .is_some_and(|city| city.pieces.fortress.is_some());
     loop {
         game.add_info_log_item(format!("\nCombat round {}", c.round));
         //todo: go into tactics phase if either player has tactics card (also if they can not play it unless otherwise specified via setting)
@@ -218,7 +215,7 @@ fn combat_loop(game: &mut Game, mut c: Combat) {
         let attacker_hit_cancels = attacker_rolls.hit_cancels;
         let defender_combat_value = defender_rolls.combat_value;
         let mut defender_hit_cancels = defender_rolls.hit_cancels;
-        if defender_fortress && c.round == 1 {
+        if c.defender_fortress(game) && c.round == 1 {
             defender_hit_cancels += 1;
         }
         let attacker_hits = (attacker_combat_value / 5).saturating_sub(defender_hit_cancels);
