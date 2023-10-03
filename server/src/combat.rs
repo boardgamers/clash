@@ -3,8 +3,8 @@ use crate::game::GameState::Playing;
 use crate::game::{Game, GameState};
 use crate::map::Terrain::Water;
 use crate::position::Position;
-use crate::unit::UnitType::{Cavalry, Elephant, Infantry, Leader, Settler, Ship};
-use crate::unit::Units;
+use crate::unit::UnitType::{Cavalry, Elephant, Infantry, Leader, Ship};
+use crate::unit::{UnitType, Units};
 use serde::{Deserialize, Serialize};
 use std::mem;
 
@@ -21,7 +21,7 @@ pub enum CombatPhase {
 
 impl CombatPhase {
     #[must_use]
-    pub(crate) fn is_compatible_action(&self, action: &CombatAction) -> bool {
+    pub fn is_compatible_action(&self, action: &CombatAction) -> bool {
         match self {
             CombatPhase::PlayActionCard(_) => matches!(action, CombatAction::PlayActionCard(_)),
             CombatPhase::RemoveCasualties { .. } => {
@@ -71,7 +71,7 @@ impl Combat {
     }
 }
 
-pub(crate) fn initiate_combat(
+pub fn initiate_combat(
     game: &mut Game,
     defender: usize,
     defender_position: Position,
@@ -98,7 +98,11 @@ pub(crate) fn initiate_combat(
 
 #[allow(clippy::needless_pass_by_value)]
 //phase is consumed but it is not registered by clippy
-pub(crate) fn execute_combat_action(
+///
+/// # Panics
+///
+/// Panics if the action is not compatible with the phase
+pub fn execute_combat_action(
     game: &mut Game,
     action: CombatAction,
     initiation: Box<GameState>,
@@ -286,10 +290,10 @@ fn combat_loop(
         game.add_info_log_item(format!("\nCombat round {round}"));
         //todo: go into tactics phase if either player has tactics card (also if they can not play it unless otherwise specified via setting)
 
-        let mut attacker_units = crate::combat::attackers(game, attacker, attackers);
-        let attacker_rolls = roll(game, attacker, &attacker_units);
-        let defender_units = defenders(game, defender, defender_position);
-        let defender_rolls = roll(game, defender, &defender_units);
+        let mut active_attackers = active_attackers(game, attacker, attackers, defender_position);
+        let attacker_rolls = roll(game, attacker, &active_attackers);
+        let active_defenders = active_defenders(game, defender, defender_position);
+        let defender_rolls = roll(game, defender, &active_defenders);
         let attacker_combat_value = attacker_rolls.combat_value;
         let attacker_hit_cancels = attacker_rolls.hit_cancels;
         let defender_combat_value = defender_rolls.combat_value;
@@ -300,7 +304,8 @@ fn combat_loop(
         let attacker_hits = (attacker_combat_value / 5).saturating_sub(defender_hit_cancels);
         let defender_hits = (defender_combat_value / 5).saturating_sub(attacker_hit_cancels);
         game.add_info_log_item(format!("\t{} rolled a combined combat value of {attacker_combat_value} and gets {attacker_hits} hits against defending units. {} rolled a combined combat value of {defender_combat_value} and gets {defender_hits} hits against attacking units.", game.players[attacker].get_name(), game.players[defender].get_name()));
-        if attacker_hits < defender_units.len() as u8 && attacker_hits > 0 {
+        if attacker_hits < active_defenders.len() as u8 && attacker_hits > 0 {
+            // attacker kills some defending units, but not all
             game.add_info_log_item(format!(
                 "\t{} has to remove {} of his defending units",
                 game.players[defender].get_name(),
@@ -323,7 +328,8 @@ fn combat_loop(
             ));
             return;
         }
-        if attacker_hits >= defender_units.len() as u8 {
+        if attacker_hits >= active_defenders.len() as u8 {
+            // attacker kills all defending units
             let defender_units = game.players[defender]
                 .get_units(defender_position)
                 .iter()
@@ -333,7 +339,8 @@ fn combat_loop(
                 game.kill_unit(id, defender, attacker);
             }
         }
-        if defender_hits < attacker_units.len() as u8 && defender_hits > 0 {
+        if defender_hits < active_attackers.len() as u8 && defender_hits > 0 {
+            // defender kills some attacking units, but not all
             game.add_info_log_item(format!(
                 "\t{} has to remove {} of his attacking units",
                 game.players[attacker].get_name(),
@@ -356,14 +363,15 @@ fn combat_loop(
             ));
             return;
         }
-        if defender_hits >= attacker_units.len() as u8 {
-            for id in attacker_units {
+        if defender_hits >= active_attackers.len() as u8 {
+            // defender kills all attacking unuts
+            for id in active_attackers {
                 game.kill_unit(id, attacker, defender);
             }
-            attacker_units = vec![];
+            active_attackers = vec![];
         }
         let defenders_left = game.players[defender].get_units(defender_position);
-        if attacker_units.is_empty() && defenders_left.is_empty() {
+        if active_attackers.is_empty() && defenders_left.is_empty() {
             if defender_fortress && *round == 1 {
                 game.add_info_log_item(format!("\tAll attacking and defending units where eliminated. {} wins the battle because he has a defending fortress", game.players[defender].get_name()));
                 //todo defender wins
@@ -377,7 +385,7 @@ fn combat_loop(
             end_combat(game, initiation);
             return;
         }
-        if attacker_units.is_empty() {
+        if active_attackers.is_empty() {
             game.add_info_log_item(format!(
                 "\t{} killed all attacking units",
                 game.players[defender].get_name()
@@ -424,12 +432,7 @@ fn combat_loop(
     }
 }
 
-pub(crate) fn capture_position(
-    game: &mut Game,
-    old_player: usize,
-    position: Position,
-    new_player: usize,
-) {
+pub fn capture_position(game: &mut Game, old_player: usize, position: Position, new_player: usize) {
     let captured_settlers = game.players[old_player]
         .get_units(position)
         .iter()
@@ -476,7 +479,11 @@ pub struct CombatRolls {
 // 10= 6 infantry
 // 11= 6 infantry
 
-pub(crate) fn roll(game: &mut Game, player_index: usize, units: &Vec<u32>) -> CombatRolls {
+///
+/// # Panics
+///
+/// Panics if the player does not have all units
+pub fn roll(game: &mut Game, player_index: usize, units: &Vec<u32>) -> CombatRolls {
     let mut dice_rolls = 0;
     let mut unit_types = Units::empty();
     for unit in units {
@@ -525,54 +532,72 @@ pub(crate) fn roll(game: &mut Game, player_index: usize, units: &Vec<u32>) -> Co
 }
 
 fn dice_roll_with_leader_reroll(game: &mut Game, unit_types: &mut Units) -> u8 {
+    let roll = game.get_next_dice_roll();
+
+    if roll > 2 || !unit_types.has_unit(&Leader) {
+        return roll;
+    }
+
+    *unit_types -= &Leader;
+
     // if used, the leader grants unlimited rerolls of 1s and 2s
-    let can_reroll = unit_types.has_unit(&Leader);
-    let mut leader_used = false;
     loop {
         let roll = game.get_next_dice_roll();
 
-        if roll > 2 || !can_reroll {
+        if roll > 2 {
             return roll;
-        }
-        if !leader_used {
-            leader_used = true;
-            *unit_types -= &Leader;
         }
     }
 }
 
 #[must_use]
-pub(crate) fn dice_value(roll: u8) -> u8 {
+pub fn dice_value(roll: u8) -> u8 {
     roll / 2 + 1
 }
 
 /// # Panics
 /// if the player does not have the unit
 #[must_use]
-pub fn attackers(game: &Game, attacker: usize, attackers: &[u32]) -> Vec<u32> {
-    let p = &game.players[attacker];
+pub fn active_attackers(
+    game: &Game,
+    attacker: usize,
+    attackers: &[u32],
+    defender_position: Position,
+) -> Vec<u32> {
+    let player = &game.players[attacker];
+
+    let on_water = game.map.tiles[&defender_position] == Water;
     attackers
         .iter()
         .copied()
-        .filter(|u| p.get_unit(*u).expect("player should have unit").unit_type != Settler)
+        .filter(|u| {
+            can_fight(
+                on_water,
+                &player
+                    .get_unit(*u)
+                    .expect("player should have unit")
+                    .unit_type,
+            )
+        })
         .collect::<Vec<_>>()
 }
 
 #[must_use]
-pub fn defenders(game: &Game, defender: usize, defender_position: Position) -> Vec<u32> {
+pub fn active_defenders(game: &Game, defender: usize, defender_position: Position) -> Vec<u32> {
     let p = &game.players[defender];
-    let defenders = if game.map.tiles[&defender_position] == Water {
-        p.get_units(defender_position)
-            .iter()
-            .filter(|u| u.unit_type == Ship)
-            .map(|u| u.id)
-            .collect::<Vec<_>>()
+    let on_water = game.map.tiles[&defender_position] == Water;
+    p.get_units(defender_position)
+        .iter()
+        .filter(|u| can_fight(on_water, &u.unit_type))
+        .map(|u| u.id)
+        .collect::<Vec<_>>()
+}
+
+#[must_use]
+pub fn can_fight(on_water: bool, unit_type: &UnitType) -> bool {
+    if on_water {
+        matches!(unit_type, Ship)
     } else {
-        p.get_units(defender_position)
-            .iter()
-            .filter(|u| u.unit_type.is_army_unit())
-            .map(|u| u.id)
-            .collect::<Vec<_>>()
-    };
-    defenders
+        unit_type.is_army_unit()
+    }
 }

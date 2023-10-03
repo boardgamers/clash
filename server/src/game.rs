@@ -279,12 +279,12 @@ impl Game {
         self.action_log_index += 1;
     }
 
-    pub(crate) fn add_info_log_item(&mut self, info: String) {
+    pub fn add_info_log_item(&mut self, info: String) {
         self.log.push(info);
         self.lock_undo();
     }
 
-    pub(crate) fn lock_undo(&mut self) {
+    pub fn lock_undo(&mut self) {
         self.undo_limit = self.action_log_index;
     }
 
@@ -1453,7 +1453,11 @@ impl Game {
         }
     }
 
-    pub(crate) fn kill_unit(&mut self, unit_id: u32, player_index: usize, killer: usize) {
+    ///
+    /// # Panics
+    ///
+    /// Panics if the player does not have the unit
+    pub fn kill_unit(&mut self, unit_id: u32, player_index: usize, killer: usize) {
         if let Some(unit) = self.players[player_index].remove_unit(unit_id) {
             if matches!(unit.unit_type, Leader) {
                 let leader = self.players[player_index]

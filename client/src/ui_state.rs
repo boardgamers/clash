@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 
 use server::action::{Action, CombatAction};
 use server::city::{City, MoodState};
-use server::combat::{attackers, defenders, CombatPhase};
+use server::combat::{active_attackers, active_defenders, CombatPhase};
 use server::game::{CulturalInfluenceResolution, Game, GameState};
 use server::player::Player;
 use server::position::Position;
@@ -260,12 +260,12 @@ impl State {
                     let (position, selectable) = if player == c.attacker {
                         (
                             c.attacker_position,
-                            attackers(game, c.attacker, &c.attackers),
+                            active_attackers(game, c.attacker, &c.attackers, c.defender_position),
                         )
                     } else if player == c.defender {
                         (
                             c.defender_position,
-                            defenders(game, c.defender, c.defender_position),
+                            active_defenders(game, c.defender, c.defender_position),
                         )
                     } else {
                         panic!("player should be either defender or attacker")
