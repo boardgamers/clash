@@ -85,7 +85,8 @@ pub fn payment_dialog<T: HasPayment>(
     plus: impl Fn(&T, ResourceType) -> StateUpdate,
     minus: impl Fn(&T, ResourceType) -> StateUpdate,
 ) -> StateUpdate {
-    select_ui::count_dialog(title,
+    select_ui::count_dialog(
+        title,
         has_payment,
         |p| p.payment().resources.clone(),
         |p| resource_name(p.resource),

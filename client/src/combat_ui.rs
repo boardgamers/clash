@@ -26,7 +26,7 @@ fn retreat(retreat: bool) -> StateUpdate {
 }
 
 pub fn place_settler_dialog() -> StateUpdate {
-    active_dialog_window("Select a city to place a settler in.", |ui| {
+    active_dialog_window("Select a city to place a settler in.", |_| {
         StateUpdate::None
     })
 }

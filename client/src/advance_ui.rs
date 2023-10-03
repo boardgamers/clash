@@ -1,6 +1,5 @@
 use std::cmp::min;
 use std::collections::HashMap;
-use std::fmt::format;
 
 use macroquad::math::bool;
 

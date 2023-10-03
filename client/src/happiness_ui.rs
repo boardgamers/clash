@@ -92,7 +92,7 @@ pub fn increase_happiness_menu(h: &IncreaseHappiness) -> StateUpdate {
 }
 
 pub fn show_increase_happiness(game: &Game, player_index: usize) -> StateUpdate {
-    if can_play_action(game) && root_ui().button(vec2(1200., 480.), "Increase Happiness") {
+    if can_play_action(game) && root_ui().button(vec2(1200., 60.), "Increase Happiness") {
         return StateUpdate::SetDialog(ActiveDialog::IncreaseHappiness(IncreaseHappiness::new(
             game.get_player(player_index)
                 .cities

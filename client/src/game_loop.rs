@@ -48,17 +48,17 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
     show_resources(game, player_index);
     show_wonders(game, player_index);
 
-    if root_ui().button(vec2(1200., 310.), "Log") {
+    if root_ui().button(vec2(1200., 130.), "Log") {
         return StateUpdate::OpenDialog(ActiveDialog::Log);
     };
-    if root_ui().button(vec2(1200., 350.), "Advances") {
+    if root_ui().button(vec2(1200., 100.), "Advances") {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     };
-    if root_ui().button(vec2(1200., 450.), "Import") {
+    if root_ui().button(vec2(1200., 290.), "Import") {
         import(game);
         return StateUpdate::Cancel;
     };
-    if root_ui().button(vec2(1250., 450.), "Export") {
+    if root_ui().button(vec2(1250., 290.), "Export") {
         export(game);
         return StateUpdate::None;
     };
