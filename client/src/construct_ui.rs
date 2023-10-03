@@ -43,6 +43,7 @@ pub fn add_construct_button(
                 return StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(
                     ConstructionPayment::new(
                         game,
+                        name,
                         menu.player_index,
                         menu.city_position,
                         ConstructionProject::Building(building.clone(), pos),
@@ -81,6 +82,7 @@ pub fn add_wonder_buttons(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpd
             return StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(
                 ConstructionPayment::new(
                     game,
+                    &w.name,
                     menu.player_index,
                     menu.city_position,
                     ConstructionProject::Wonder(w.name.clone()),
@@ -93,6 +95,7 @@ pub fn add_wonder_buttons(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpd
 
 pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> StateUpdate {
     payment_dialog(
+        &format!("Pay for {}", payment.name),
         payment,
         |cp| cp.payment.get(ResourceType::Discount).selectable.current == 0,
         |cp| match &cp.project {
@@ -170,6 +173,7 @@ pub enum ConstructionProject {
 
 #[derive(Clone)]
 pub struct ConstructionPayment {
+    pub name: String,
     pub player_index: usize,
     pub city_position: Position,
     pub project: ConstructionProject,
@@ -180,6 +184,7 @@ pub struct ConstructionPayment {
 impl ConstructionPayment {
     pub fn new(
         game: &Game,
+        name: &str,
         player_index: usize,
         city_position: Position,
         project: ConstructionProject,
@@ -211,6 +216,7 @@ impl ConstructionPayment {
         let payment = ConstructionPayment::new_payment(&payment_options);
 
         ConstructionPayment {
+            name: name.to_string(),
             player_index,
             city_position,
             project,

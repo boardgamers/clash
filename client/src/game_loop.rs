@@ -21,7 +21,7 @@ use crate::hex_ui::pixel_to_coordinate;
 use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
 use crate::player_ui::{show_global_controls, show_globals, show_resources, show_wonders};
-use crate::ui_state::{ActiveDialog, State, StateUpdate, StateUpdates};
+use crate::ui_state::{ActiveDialog, PendingUpdate, State, StateUpdate, StateUpdates};
 use crate::{combat_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui};
 
 const EXPORT_FILE: &str = "game.json";
@@ -63,8 +63,8 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
         return StateUpdate::None;
     };
 
-    if state.pending_update.is_some() {
-        updates.add(show_pending_update(state));
+    if let Some(u) = &state.pending_update {
+        updates.add(show_pending_update(u));
         return updates.result();
     }
 
@@ -124,16 +124,14 @@ fn export(game: &Game) {
     .expect("Failed to write export file");
 }
 
-fn show_pending_update(state: &State) -> StateUpdate {
-    active_dialog_window(|ui| {
-        if let Some(update) = &state.pending_update {
-            ui.label(None, &format!("Warning: {}", update.warning.join(", ")));
-            if ui.button(None, "OK") {
-                return StateUpdate::ResolvePendingUpdate(true);
-            }
-            if ui.button(None, "Cancel") {
-                return StateUpdate::ResolvePendingUpdate(false);
-            }
+fn show_pending_update(update: &PendingUpdate) -> StateUpdate {
+    active_dialog_window("Are you sure?", |ui| {
+        ui.label(None, &format!("Warning: {}", update.warning.join(", ")));
+        if ui.button(None, "OK") {
+            return StateUpdate::ResolvePendingUpdate(true);
+        }
+        if ui.button(None, "Cancel") {
+            return StateUpdate::ResolvePendingUpdate(false);
         }
         StateUpdate::None
     })

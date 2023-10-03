@@ -12,7 +12,7 @@ use server::position::Position;
 use server::unit::{MovementRestriction, Unit};
 
 use crate::city_ui::{draw_city, show_city_menu};
-use crate::dialog_ui::dialog_window;
+use crate::dialog_ui::closeable_dialog_window;
 use crate::ui_state::{can_play_action, ActiveDialog, CityMenu, State, StateUpdate};
 use crate::{collect_ui, hex_ui, unit_ui};
 
@@ -128,54 +128,53 @@ pub fn show_generic_tile_menu(
     suffix: Vec<String>,
     additional: impl FnOnce(&mut Ui) -> StateUpdate,
 ) -> StateUpdate {
-    dialog_window(true, |ui| {
-        ui.label(
-            None,
-            &format!(
-                "{}/{}",
-                position,
-                game.map
-                    .tiles
-                    .get(&position)
-                    .map_or("outside the map", terrain_name),
-            ),
-        );
-        let units: Vec<(&Unit, String)> = unit_ui::units_on_tile(game, position)
-            .map(|(p, u)| {
-                let unit = game.get_player(p).get_unit(u).unwrap();
-                (unit, unit_ui::label(unit))
-            })
-            .collect();
+    closeable_dialog_window(
+        &format!(
+            "{}/{}",
+            position,
+            game.map
+                .tiles
+                .get(&position)
+                .map_or("outside the map", terrain_name),
+        ),
+        |ui| {
+            let units: Vec<(&Unit, String)> = unit_ui::units_on_tile(game, position)
+                .map(|(p, u)| {
+                    let unit = game.get_player(p).get_unit(u).unwrap();
+                    (unit, unit_ui::label(unit))
+                })
+                .collect();
 
-        let units_str = &units.iter().map(|(_, l)| l).join(", ");
-        if !units_str.is_empty() {
-            ui.label(None, units_str);
-        }
-        for s in suffix {
-            ui.label(None, &s);
-        }
+            let units_str = &units.iter().map(|(_, l)| l).join(", ");
+            if !units_str.is_empty() {
+                ui.label(None, units_str);
+            }
+            for s in suffix {
+                ui.label(None, &s);
+            }
 
-        let settlers = &units
-            .iter()
-            .filter_map(|(unit, _)| {
-                if unit.can_found_city(game) {
-                    Some(unit)
-                } else {
-                    None
-                }
-            })
-            .collect::<Vec<_>>();
-
-        if can_play_action(game) && !settlers.is_empty() && ui.button(None, "Settle") {
-            let settler = settlers
+            let settlers = &units
                 .iter()
-                .find(|u| u.movement_restriction != MovementRestriction::None)
-                .unwrap_or(&settlers[0]);
-            return StateUpdate::execute(Action::Playing(PlayingAction::FoundCity {
-                settler: settler.id,
-            }));
-        }
+                .filter_map(|(unit, _)| {
+                    if unit.can_found_city(game) {
+                        Some(unit)
+                    } else {
+                        None
+                    }
+                })
+                .collect::<Vec<_>>();
 
-        additional(ui)
-    })
+            if can_play_action(game) && !settlers.is_empty() && ui.button(None, "Settle") {
+                let settler = settlers
+                    .iter()
+                    .find(|u| u.movement_restriction != MovementRestriction::None)
+                    .unwrap_or(&settlers[0]);
+                return StateUpdate::execute(Action::Playing(PlayingAction::FoundCity {
+                    settler: settler.id,
+                }));
+            }
+
+            additional(ui)
+        },
+    )
 }

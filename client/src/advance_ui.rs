@@ -1,5 +1,6 @@
 use std::cmp::min;
 use std::collections::HashMap;
+use std::fmt::format;
 
 use macroquad::math::bool;
 
@@ -78,7 +79,7 @@ impl HasPayment for AdvancePayment {
 }
 
 pub fn show_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
-    show_generic_advance_menu(game, player_index, true, |name| {
+    show_generic_advance_menu("Advances", game, player_index, true, |name| {
         StateUpdate::SetDialog(ActiveDialog::AdvancePayment(AdvancePayment::new(
             game,
             player_index,
@@ -88,18 +89,19 @@ pub fn show_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
 }
 
 pub fn show_free_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
-    show_generic_advance_menu(game, player_index, false, |name| {
+    show_generic_advance_menu("Select a free advance", game, player_index, false, |name| {
         StateUpdate::status_phase(StatusPhaseAction::FreeAdvance(name))
     })
 }
 
 pub fn show_generic_advance_menu(
+    title: &str,
     game: &Game,
     player_index: usize,
     close_button: bool,
     new_update: impl Fn(String) -> StateUpdate,
 ) -> StateUpdate {
-    dialog_window(close_button, |ui| {
+    dialog_window(title, close_button, |ui| {
         for a in get_all() {
             let name = a.name;
             let p = game.get_player(player_index);
@@ -125,6 +127,7 @@ pub fn show_generic_advance_menu(
 
 pub fn pay_advance_dialog(ap: &AdvancePayment) -> StateUpdate {
     payment_dialog(
+        &format!("Pay for advance {}", ap.name),
         ap,
         AdvancePayment::valid,
         |ap| {

@@ -7,8 +7,7 @@ use server::game::Game;
 use server::status_phase::{ChangeGovernmentType, StatusPhaseAction};
 
 pub fn determine_first_player_dialog(game: &Game) -> StateUpdate {
-    active_dialog_window(|ui| {
-        ui.label(None, "Who should be the first player in the next age?");
+    active_dialog_window("Who should be the first player in the next age?", |ui| {
         for p in &game.players {
             if ui.button(
                 None,
@@ -22,8 +21,7 @@ pub fn determine_first_player_dialog(game: &Game) -> StateUpdate {
 }
 
 pub fn raze_city_dialog() -> StateUpdate {
-    active_dialog_window(|ui| {
-        ui.label(None, "Select a city to raze - or decline.");
+    active_dialog_window("Select a city to raze - or decline.", |ui| {
         if ui.button(None, "Decline") {
             return StateUpdate::status_phase(StatusPhaseAction::RaseSize1City(None));
         }
@@ -85,9 +83,7 @@ impl ConfirmSelection for ChooseAdditionalAdvances {
 }
 
 pub fn change_government_type_dialog(game: &Game) -> StateUpdate {
-    active_dialog_window(|ui| {
-        ui.label(None, "Select additional advances:");
-
+    active_dialog_window("Select additional advances", |ui| {
         let current = game
             .get_player(game.active_player())
             .government()

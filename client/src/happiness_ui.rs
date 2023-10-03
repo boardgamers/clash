@@ -77,7 +77,8 @@ fn increase_happiness_new_steps(
 }
 
 pub fn increase_happiness_menu(h: &IncreaseHappiness) -> StateUpdate {
-    active_dialog_window(|ui| {
+    active_dialog_window("Increase Happiness", |ui| {
+        ui.label(None, &format!("Cost: {:?}", h.cost));
         if ui.button(None, "Cancel") {
             return StateUpdate::Cancel;
         }
@@ -86,7 +87,6 @@ pub fn increase_happiness_menu(h: &IncreaseHappiness) -> StateUpdate {
                 happiness_increases: h.steps.clone(),
             }));
         }
-        ui.label(None, &format!("Cost: {:?}", h.cost));
         StateUpdate::None
     })
 }
