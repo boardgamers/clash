@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use GameState::*;
 
+use crate::combat::roll;
 use crate::map::{maximum_size_2_player_random_map, setup_home_city};
-use crate::unit::Units;
 use crate::{
     action::{Action, CombatAction},
     city::{City, MoodState::*},
@@ -882,111 +882,25 @@ impl Game {
         loop {
             self.add_info_log_item(format!("\nCombat round {round}"));
             //todo: go into tactics phase if either player has tactics card (also if they can not play it unless otherwise specified via setting)
-            let mut attacker_dice_rolls = 0;
-            let mut attacker_unit_types = Units::empty();
-            for unit in &*attackers {
-                let unit = &self.players[attacker]
-                    .get_unit(*unit)
-                    .expect("attacker should have all attacking units")
-                    .unit_type;
-                if unit.is_settler() {
-                    continue;
-                }
-                attacker_dice_rolls += 1;
-                attacker_unit_types += unit;
-            }
-            let mut attacker_combat_value = 0;
-            let mut attacker_hit_cancels = 0;
-            for _ in 0..attacker_dice_rolls {
-                let mut dice_roll = self.get_next_dice_roll();
-                if dice_roll > 1 && attacker_unit_types.has_unit(&Leader) {
-                    loop {
-                        let new_roll = self.get_next_dice_roll();
-                        if new_roll < 2 {
-                            dice_roll = new_roll;
-                            break;
-                        }
-                    }
-                    attacker_unit_types -= &Leader;
-                }
-                attacker_combat_value += dice_value(dice_roll);
-                match dice_roll {
-                    4 | 8 | 10 | 11 => {
-                        if attacker_unit_types.has_unit(&Infantry) {
-                            attacker_combat_value += 1;
-                            attacker_unit_types -= &Infantry;
-                        }
-                    }
-                    2 | 6 | 9 => {
-                        if attacker_unit_types.has_unit(&Cavalry) {
-                            attacker_combat_value += 2;
-                            attacker_unit_types -= &Cavalry;
-                        }
-                    }
-                    3 | 5 | 7 => {
-                        if attacker_unit_types.has_unit(&Elephant) {
-                            attacker_hit_cancels += 1;
-                            attacker_combat_value -= dice_value(dice_roll);
-                            attacker_unit_types -= &Elephant;
-                        }
-                    }
-                    _ => (),
-                }
-            }
-            let mut defender_dice_rolls = 0;
-            let mut defender_unit_types = Units::empty();
-            let defender_units = self.players[defender].get_units(defender_position).len();
-            for unit in 0..defender_units {
-                let unit = &self.players[defender].get_units(defender_position)[unit].unit_type;
-                if unit.is_settler() {
-                    continue;
-                }
-                defender_dice_rolls += 1;
-                defender_unit_types += unit;
-            }
-            if defender_fortress && *round == 1 {
-                defender_dice_rolls += 1;
-            }
-            let mut defender_combat_value = 0;
-            let mut defender_hit_cancels = 0;
-            for _ in 0..defender_dice_rolls {
-                let dice_roll = loop {
-                    let roll = self.get_next_dice_roll();
-                    if roll < 2 || !defender_unit_types.has_unit(&Leader) {
-                        break roll;
-                    }
-                };
-                defender_combat_value += dice_value(dice_roll);
-                match dice_roll {
-                    4 | 8 | 10 | 11 => {
-                        if defender_unit_types.has_unit(&Infantry) {
-                            defender_combat_value += 1;
-                            defender_unit_types -= &Infantry;
-                        }
-                    }
-                    2 | 6 | 9 => {
-                        if defender_unit_types.has_unit(&Cavalry) {
-                            defender_combat_value += 2;
-                            defender_unit_types -= &Cavalry;
-                        }
-                    }
-                    3 | 5 | 7 => {
-                        if defender_unit_types.has_unit(&Elephant) {
-                            defender_hit_cancels += 1;
-                            defender_combat_value -= dice_value(dice_roll);
-                            defender_unit_types -= &Elephant;
-                        }
-                    }
-                    _ => (),
-                }
-            }
+
+            let attacker_rolls = roll(self, attacker, attackers);
+            let defender_units = self.players[defender]
+                .get_units(defender_position)
+                .iter()
+                .map(|unit| unit.id)
+                .collect::<Vec<u32>>();
+            let defender_rolls = roll(self, defender, &defender_units);
+            let attacker_combat_value = attacker_rolls.combat_value;
+            let attacker_hit_cancels = attacker_rolls.hit_cancels;
+            let defender_combat_value = defender_rolls.combat_value;
+            let mut defender_hit_cancels = defender_rolls.hit_cancels;
             if defender_fortress && *round == 1 {
                 defender_hit_cancels += 1;
             }
             let attacker_hits = (attacker_combat_value / 5).saturating_sub(defender_hit_cancels);
             let defender_hits = (defender_combat_value / 5).saturating_sub(attacker_hit_cancels);
             self.add_info_log_item(format!("\t{} rolled a combined combat value of {attacker_combat_value} and gets {attacker_hits} hits against defending units. {} rolled a combined combat value of {defender_combat_value} and gets {defender_hits} hits against attacking units.", self.players[attacker].get_name(), self.players[defender].get_name()));
-            if attacker_hits < defender_units as u8 && attacker_hits > 0 {
+            if attacker_hits < defender_units.len() as u8 && attacker_hits > 0 {
                 self.add_info_log_item(format!(
                     "\t{} has to remove {} of his defending units",
                     self.players[defender].get_name(),
@@ -1009,7 +923,7 @@ impl Game {
                 ));
                 return;
             }
-            if attacker_hits >= defender_units as u8 {
+            if attacker_hits >= defender_units.len() as u8 {
                 let defender_units = self.players[defender]
                     .get_units(defender_position)
                     .iter()
@@ -1929,11 +1843,6 @@ impl Game {
     pub fn set_player_index(&mut self, current_player_index: usize) {
         self.current_player_index = current_player_index;
     }
-}
-
-#[must_use]
-pub fn dice_value(roll: u8) -> u8 {
-    roll / 2 + 1
 }
 
 #[derive(Serialize, Deserialize)]
