@@ -226,56 +226,18 @@ fn combat_loop(game: &mut Game, mut c: Combat) {
         let defender_hits = (defender_combat_value / 5).saturating_sub(attacker_hit_cancels);
         game.add_info_log_item(format!("\t{} rolled a combined combat value of {attacker_combat_value} and gets {attacker_hits} hits against defending units. {} rolled a combined combat value of {defender_combat_value} and gets {defender_hits} hits against attacking units.", game.players[c.attacker].get_name(), game.players[c.defender].get_name()));
         if attacker_hits < active_defenders.len() as u8 && attacker_hits > 0 {
-            // attacker kills some defending units, but not all
-            game.add_info_log_item(format!(
-                "\t{} has to remove {} of his defending units",
-                game.players[c.defender].get_name(),
-                attacker_hits
-            ));
-            game.state = GameState::Combat(Combat {
-                phase: CombatPhase::RemoveCasualties {
-                    player: c.defender,
-                    casualties: attacker_hits,
-                    defender_hits: Some(defender_hits),
-                },
-                ..c
-            });
+            kill_some_defenders(game, c, attacker_hits, defender_hits);
             return;
         }
         if attacker_hits >= active_defenders.len() as u8 {
-            // attacker kills all defending units
-            let defender_units = game.players[c.defender]
-                .get_units(c.defender_position)
-                .iter()
-                .map(|unit| unit.id)
-                .collect::<Vec<u32>>();
-            for id in defender_units {
-                game.kill_unit(id, c.defender, c.attacker);
-            }
+            kill_all_defenders(game, &mut c);
         }
         if defender_hits < active_attackers.len() as u8 && defender_hits > 0 {
-            // defender kills some attacking units, but not all
-            game.add_info_log_item(format!(
-                "\t{} has to remove {} of his attacking units",
-                game.players[c.attacker].get_name(),
-                defender_hits
-            ));
-            game.state = GameState::Combat(Combat {
-                phase: CombatPhase::RemoveCasualties {
-                    player: c.attacker,
-                    casualties: defender_hits,
-                    defender_hits: None,
-                },
-                ..c
-            });
+            kill_some_attackers(game, c, defender_hits);
             return;
         }
         if defender_hits >= active_attackers.len() as u8 {
-            // defender kills all attacking unuts
-            for id in &c.attackers {
-                game.kill_unit(*id, c.attacker, c.defender);
-            }
-            c.attackers = vec![];
+            kill_all_attackers(game, &mut c);
         }
 
         if resolve_combat(game, &mut c) {
@@ -284,61 +246,121 @@ fn combat_loop(game: &mut Game, mut c: Combat) {
     }
 }
 
+fn kill_all_attackers(game: &mut Game, c: &mut Combat) {
+    for id in &c.attackers {
+        game.kill_unit(*id, c.attacker, c.defender);
+    }
+    c.attackers = vec![];
+}
+
+fn kill_some_attackers(game: &mut Game, c: Combat, defender_hits: u8) {
+    game.add_info_log_item(format!(
+        "\t{} has to remove {} of his attacking units",
+        game.players[c.attacker].get_name(),
+        defender_hits
+    ));
+    game.state = GameState::Combat(Combat {
+        phase: CombatPhase::RemoveCasualties {
+            player: c.attacker,
+            casualties: defender_hits,
+            defender_hits: None,
+        },
+        ..c
+    });
+}
+
+fn kill_all_defenders(game: &mut Game, c: &mut Combat) {
+    let defender_units = game.players[c.defender]
+        .get_units(c.defender_position)
+        .iter()
+        .map(|unit| unit.id)
+        .collect::<Vec<u32>>();
+    for id in defender_units {
+        game.kill_unit(id, c.defender, c.attacker);
+    }
+}
+
+fn kill_some_defenders(game: &mut Game, c: Combat, attacker_hits: u8, defender_hits: u8) {
+    game.add_info_log_item(format!(
+        "\t{} has to remove {} of his defending units",
+        game.players[c.defender].get_name(),
+        attacker_hits
+    ));
+    game.state = GameState::Combat(Combat {
+        phase: CombatPhase::RemoveCasualties {
+            player: c.defender,
+            casualties: attacker_hits,
+            defender_hits: Some(defender_hits),
+        },
+        ..c
+    });
+}
+
 fn resolve_combat(game: &mut Game, c: &mut Combat) -> bool {
     let active_attackers = c.active_attackers(game);
     let defenders_left = game.players[c.defender].get_units(c.defender_position);
     if active_attackers.is_empty() && defenders_left.is_empty() {
-        if c.defender_fortress(game) && c.round == 1 {
-            game.add_info_log_item(format!("\tAll attacking and defending units where eliminated. {} wins the battle because he has a defending fortress", game.players[c.defender].get_name()));
-            //todo defender wins
-            end_combat(game, c);
-            return true;
-        }
-        game.add_info_log_item(String::from(
-            "\tAll attacking and defending units where eliminated, ending the battle in a draw",
-        ));
-        //todo draw
-        end_combat(game, c);
-        return true;
+        draw(game, c)
+    } else if active_attackers.is_empty() {
+        defender_wins(game, c)
+    } else if defenders_left.is_empty() {
+        attacker_wins(game, c)
+    } else if c.can_retreat {
+        offer_retreat(game, c)
+    } else {
+        c.round += 1;
+        false
     }
-    if active_attackers.is_empty() {
-        game.add_info_log_item(format!(
-            "\t{} killed all attacking units",
-            game.players[c.defender].get_name()
-        ));
+}
+
+fn offer_retreat(game: &mut Game, c: &mut Combat) -> bool {
+    game.add_info_log_item(format!(
+        "\t{} may retreat",
+        game.players[c.attacker].get_name()
+    ));
+    game.state = GameState::Combat(Combat {
+        phase: CombatPhase::Retreat,
+        ..c.clone()
+    });
+    true
+}
+
+fn attacker_wins(game: &mut Game, c: &mut Combat) -> bool {
+    game.add_info_log_item(format!(
+        "\t{} killed all defending units",
+        game.players[c.attacker].get_name()
+    ));
+    for unit in &c.attackers {
+        let unit = game.players[c.attacker]
+            .get_unit_mut(*unit)
+            .expect("attacker should have all attacking units");
+        unit.position = c.defender_position;
+    }
+    capture_position(game, c.defender, c.defender_position, c.attacker);
+    //todo attacker wins
+    end_combat(game, c)
+}
+
+fn defender_wins(game: &mut Game, c: &mut Combat) -> bool {
+    game.add_info_log_item(format!(
+        "\t{} killed all attacking units",
+        game.players[c.defender].get_name()
+    ));
+    //todo defender wins
+    end_combat(game, c)
+}
+
+fn draw(game: &mut Game, c: &mut Combat) -> bool {
+    if c.defender_fortress(game) && c.round == 1 {
+        game.add_info_log_item(format!("\tAll attacking and defending units where eliminated. {} wins the battle because he has a defending fortress", game.players[c.defender].get_name()));
         //todo defender wins
-        end_combat(game, c);
-        return true;
+        return end_combat(game, c);
     }
-    if defenders_left.is_empty() {
-        game.add_info_log_item(format!(
-            "\t{} killed all defending units",
-            game.players[c.attacker].get_name()
-        ));
-        for unit in &c.attackers {
-            let unit = game.players[c.attacker]
-                .get_unit_mut(*unit)
-                .expect("attacker should have all attacking units");
-            unit.position = c.defender_position;
-        }
-        capture_position(game, c.defender, c.defender_position, c.attacker);
-        end_combat(game, c);
-        //todo attacker wins
-        return true;
-    }
-    if c.can_retreat {
-        game.add_info_log_item(format!(
-            "\t{} may retreat",
-            game.players[c.attacker].get_name()
-        ));
-        game.state = GameState::Combat(Combat {
-            phase: CombatPhase::Retreat,
-            ..c.clone()
-        });
-        return true;
-    }
-    c.round += 1;
-    false
+    game.add_info_log_item(String::from(
+        "\tAll attacking and defending units where eliminated, ending the battle in a draw",
+    ));
+    //todo draw
+    end_combat(game, c)
 }
 
 pub fn capture_position(game: &mut Game, old_player: usize, position: Position, new_player: usize) {
@@ -360,8 +382,9 @@ pub fn capture_position(game: &mut Game, old_player: usize, position: Position, 
     game.conquer_city(position, new_player, old_player);
 }
 
-fn end_combat(game: &mut Game, c: &Combat) {
+fn end_combat(game: &mut Game, c: &Combat) -> bool {
     game.state = *c.initiation.clone();
+    true
 }
 
 pub struct CombatRolls {
