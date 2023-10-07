@@ -77,6 +77,7 @@ pub trait HasPayment {
 }
 
 pub fn payment_dialog<T: HasPayment>(
+    title: &str,
     has_payment: &T,
     is_valid: impl FnOnce(&T) -> bool,
     execute_action: impl FnOnce(&T) -> StateUpdate,
@@ -85,6 +86,7 @@ pub fn payment_dialog<T: HasPayment>(
     minus: impl Fn(&T, ResourceType) -> StateUpdate,
 ) -> StateUpdate {
     select_ui::count_dialog(
+        title,
         has_payment,
         |p| p.payment().resources.clone(),
         |p| resource_name(p.resource),

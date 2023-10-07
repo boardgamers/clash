@@ -212,6 +212,7 @@ impl ConfirmSelection for RecruitSelection {
 
 pub fn select_dialog(game: &Game, a: &RecruitAmount) -> StateUpdate {
     select_ui::count_dialog(
+        "Recruit units",
         a,
         |s| s.selectable.clone(),
         |s| s.name.as_ref(),
@@ -222,6 +223,7 @@ pub fn select_dialog(game: &Game, a: &RecruitAmount) -> StateUpdate {
             if sel.is_finished() {
                 StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
                     game,
+                    "units",
                     amount.player_index,
                     amount.city_position,
                     ConstructionProject::Units(sel),
@@ -272,11 +274,13 @@ fn update_selection(
 pub fn replace_dialog(game: &Game, sel: &RecruitSelection) -> StateUpdate {
     unit_ui::unit_selection_dialog::<RecruitSelection>(
         game,
+        "Replace units",
         sel,
         |new| StateUpdate::SetDialog(ActiveDialog::ReplaceUnits(new.clone())),
         |new: RecruitSelection| {
             StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
                 game,
+                "units",
                 new.amount.player_index,
                 new.amount.city_position,
                 ConstructionProject::Units(new),

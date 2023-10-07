@@ -57,8 +57,7 @@ pub fn closest_city(game: &Game, menu: &CityMenu) -> Position {
 }
 
 pub fn cultural_influence_resolution_dialog(c: &CulturalInfluenceResolution) -> StateUpdate {
-    active_dialog_window(|ui| {
-        ui.label(None, "Cultural Influence Resolution");
+    active_dialog_window("Cultural Influence Resolution", |ui| {
         if ui.button(
             None,
             format!(

@@ -361,32 +361,10 @@ impl Game {
                     player_index,
                 );
             }
-            Combat(Combat {
-                initiation,
-                round,
-                phase,
-                defender,
-                defender_position,
-                attacker,
-                attacker_position,
-                attackers,
-                can_retreat,
-            }) => {
+            Combat(c) => {
                 let action = action.combat().expect("action should be a combat action");
                 self.add_action_log_item(ActionLogItem::Combat(action.clone()));
-                execute_combat_action(
-                    self,
-                    action,
-                    initiation,
-                    round,
-                    phase,
-                    defender,
-                    defender_position,
-                    attacker,
-                    attacker_position,
-                    attackers,
-                    can_retreat,
-                );
+                execute_combat_action(self, action, c);
             }
             PlaceSettler {
                 player_index,
@@ -537,6 +515,7 @@ impl Game {
                         } else {
                             Playing
                         };
+
                         initiate_combat(
                             self,
                             defender,
@@ -733,24 +712,14 @@ impl Game {
     #[must_use]
     pub fn active_player(&self) -> usize {
         match &self.state {
-            Combat(Combat {
-                initiation: _,
-                round: _,
-                phase,
-                defender: _,
-                defender_position: _,
-                attacker,
-                attacker_position: _,
-                attackers: _,
-                can_retreat: _,
-            }) => match phase {
+            Combat(c) => match c.phase {
                 CombatPhase::RemoveCasualties {
                     player,
                     casualties: _,
                     defender_hits: _,
                 }
-                | CombatPhase::PlayActionCard(player) => *player,
-                CombatPhase::Retreat => *attacker,
+                | CombatPhase::PlayActionCard(player) => player,
+                CombatPhase::Retreat => c.attacker,
             },
             PlaceSettler {
                 player_index,

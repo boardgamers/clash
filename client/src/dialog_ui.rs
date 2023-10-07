@@ -5,20 +5,28 @@ use macroquad::ui::{root_ui, Ui};
 
 use crate::ui_state::StateUpdate;
 
-pub fn active_dialog_window<F>(f: F) -> StateUpdate
+pub fn active_dialog_window<F>(title: &str, f: F) -> StateUpdate
 where
     F: FnOnce(&mut Ui) -> StateUpdate,
 {
-    dialog_window(false, f)
+    dialog_window(title, false, f)
 }
 
-pub fn dialog_window<F>(close_button: bool, f: F) -> StateUpdate
+pub fn closeable_dialog_window<F>(title: &str, f: F) -> StateUpdate
 where
     F: FnOnce(&mut Ui) -> StateUpdate,
 {
-    let window = Window::new(hash!(), vec2(100., 100.), vec2(1000., 1000.))
+    dialog_window(title, true, f)
+}
+
+pub fn dialog_window<F>(title: &str, close_button: bool, f: F) -> StateUpdate
+where
+    F: FnOnce(&mut Ui) -> StateUpdate,
+{
+    let window = Window::new(hash!(), vec2(1100., 400.), vec2(800., 350.))
         .titlebar(true)
-        .movable(true)
+        .movable(false)
+        .label(title)
         .close_button(close_button);
 
     let ui = &mut root_ui();

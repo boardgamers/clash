@@ -77,7 +77,8 @@ fn increase_happiness_new_steps(
 }
 
 pub fn increase_happiness_menu(h: &IncreaseHappiness) -> StateUpdate {
-    active_dialog_window(|ui| {
+    active_dialog_window("Increase Happiness", |ui| {
+        ui.label(None, &format!("Cost: {:?}", h.cost));
         if ui.button(None, "Cancel") {
             return StateUpdate::Cancel;
         }
@@ -86,13 +87,12 @@ pub fn increase_happiness_menu(h: &IncreaseHappiness) -> StateUpdate {
                 happiness_increases: h.steps.clone(),
             }));
         }
-        ui.label(None, &format!("Cost: {:?}", h.cost));
         StateUpdate::None
     })
 }
 
 pub fn show_increase_happiness(game: &Game, player_index: usize) -> StateUpdate {
-    if can_play_action(game) && root_ui().button(vec2(1200., 480.), "Increase Happiness") {
+    if can_play_action(game) && root_ui().button(vec2(1200., 60.), "Increase Happiness") {
         return StateUpdate::SetDialog(ActiveDialog::IncreaseHappiness(IncreaseHappiness::new(
             game.get_player(player_index)
                 .cities

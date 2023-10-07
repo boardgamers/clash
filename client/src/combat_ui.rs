@@ -10,8 +10,7 @@ use crate::unit_ui;
 use crate::unit_ui::UnitSelection;
 
 pub fn retreat_dialog() -> StateUpdate {
-    active_dialog_window(|ui| {
-        ui.label(None, "Do you want to retreat?");
+    active_dialog_window("Do you want to retreat?", |ui| {
         if ui.button(None, "Retreat") {
             return retreat(true);
         }
@@ -27,8 +26,7 @@ fn retreat(retreat: bool) -> StateUpdate {
 }
 
 pub fn place_settler_dialog() -> StateUpdate {
-    active_dialog_window(|ui| {
-        ui.label(None, "Select a city to place a settler in.");
+    active_dialog_window("Select a city to place a settler in.", |_| {
         StateUpdate::None
     })
 }
@@ -87,6 +85,7 @@ impl ConfirmSelection for RemoveCasualtiesSelection {
 pub fn remove_casualties_dialog(game: &Game, sel: &RemoveCasualtiesSelection) -> StateUpdate {
     unit_ui::unit_selection_dialog::<RemoveCasualtiesSelection>(
         game,
+        "Remove casualties",
         sel,
         |new| StateUpdate::SetDialog(ActiveDialog::RemoveCasualties(new.clone())),
         |new: RemoveCasualtiesSelection| {

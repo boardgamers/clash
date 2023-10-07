@@ -14,6 +14,7 @@ use crate::unit_ui::UnitSelection;
 pub fn move_units_dialog(game: &Game, sel: &MoveSelection) -> StateUpdate {
     unit_ui::unit_selection_dialog::<MoveSelection>(
         game,
+        "Move Units",
         sel,
         |new| update_possible_destinations(game, new.clone()),
         |_new| StateUpdate::None,

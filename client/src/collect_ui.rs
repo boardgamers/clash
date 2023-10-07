@@ -48,7 +48,7 @@ impl CollectResources {
 }
 
 pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> StateUpdate {
-    active_dialog_window(|ui| {
+    active_dialog_window("Collect Resources", |ui| {
         let r: ResourcePile = collect
             .collections
             .clone()
