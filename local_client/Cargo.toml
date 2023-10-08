@@ -1,0 +1,11 @@
+[package]
+name = "local_client"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+client = { path = "../client", version = "0.1.0" }
+server = { path = "../server", version = "0.1.0" }
+macroquad = "0.4.2"
+serde_json = "1.0.91"
+

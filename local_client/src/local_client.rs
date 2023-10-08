@@ -1,6 +1,8 @@
 use std::fs::File;
 use std::io::BufReader;
 
+use client::client;
+use client::game_sync::{ClientFeatures, GameSyncRequest, GameSyncResult};
 use macroquad::prelude::next_frame;
 
 use server::city::City;
@@ -10,18 +12,15 @@ use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::UnitType;
 
-use crate::game_loop;
-use crate::game_sync::{ClientFeatures, GameSyncRequest, GameSyncResult};
-
 pub async fn run(mut game: Game) {
-    let mut state = game_loop::init().await;
+    let mut state = client::init().await;
     let features = ClientFeatures {
         import_export: true,
     };
 
     let mut sync_result = GameSyncResult::None;
     loop {
-        let message = game_loop::render_and_update(&game, &mut state, &sync_result, &features);
+        let message = client::render_and_update(&game, &mut state, &sync_result, &features);
         sync_result = GameSyncResult::None;
         match message {
             GameSyncRequest::None => {}

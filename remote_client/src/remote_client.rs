@@ -3,6 +3,7 @@ use crate::game_sync::{ClientFeatures, GameSyncRequest, GameSyncResult};
 use macroquad::prelude::next_frame;
 use server::game::Game;
 use std::sync::{Arc, Mutex};
+use wasm_bindgen::prelude::*;
 
 use wasm_bindgen::prelude::*;
 
@@ -12,12 +13,12 @@ extern "C" {
     fn log(s: &str);
 }
 
-static mut state: Option<Arc<Mutex<RemoteClientState>>> = None;
+static mut global_state: Option<Arc<Mutex<RemoteClientState>>> = None;
 
 pub struct RemoteClientState {
     game: Option<Game>,
     sync_result: GameSyncResult,
-    control: Box<dyn RemoteClientControl>,
+    control: Option<Box<dyn RemoteClientControl>>,
 }
 
 //todo js object
@@ -36,10 +37,10 @@ pub async unsafe fn start() {
 }
 
 pub unsafe fn launch(control: Box<dyn RemoteClientControl>) -> RemoteClient {
-    let arc = &state.expect("state not initialized");
+    let arc = &global_state.expect("state not initialized");
     let mut s: RemoteClientState = *arc.lock().expect("state lock failed");
 
-    s.control = control;
+    s.control = Some(control);
     return RemoteClient {
         state: Arc::clone(arc),
     };
@@ -50,11 +51,12 @@ impl RemoteClient {
     pub async unsafe fn start() {
         let client = RemoteClient {
             state: Arc::new(Mutex::new(RemoteClientState {
-                // game: Game::new(2, "a".repeat(32), false),
                 sync_result: GameSyncResult::None,
+                game: None,
+                control: None,
             })),
         };
-        remote_client = Some(client);
+        global_state = Some(Arc::clone(&client.state));
         client.run().await;
     }
 
@@ -63,27 +65,35 @@ impl RemoteClient {
     }
 
     pub async fn run(&self) {
-        let mut state = game_loop::init().await;
+        let mut client_state = game_loop::init().await;
         let features = ClientFeatures {
             import_export: false,
         };
 
         loop {
             {
-                let mut sync = self.state.lock().unwrap();
-                let game = &sync.game;
-                let message =
-                    game_loop::render_and_update(game, &mut state, &sync.sync_result, &features);
-                if matches!(sync.sync_result, GameSyncResult::Update) {
-                    // only notify once to reset active dialog
-                    sync.sync_result = GameSyncResult::None;
-                }
+                let mut state = self.state.lock().unwrap();
+                if let Some(game) = &state.game {
+                    let message = game_loop::render_and_update(
+                        game,
+                        &mut client_state,
+                        &state.sync_result,
+                        &features,
+                    );
+                    if matches!(state.sync_result, GameSyncResult::Update) {
+                        // only notify once to reset active dialog
+                        state.sync_result = GameSyncResult::None;
+                    }
 
-                if let GameSyncRequest::ExecuteAction(a) = message {
-                    self.control
-                        .execute(serde_json::to_string(&a).unwrap().as_str());
-                    sync.sync_result = GameSyncResult::WaitingForUpdate;
-                };
+                    if let GameSyncRequest::ExecuteAction(a) = message {
+                        state
+                            .control
+                            .as_ref()
+                            .expect("control not initialized")
+                            .execute(serde_json::to_string(&a).unwrap().as_str());
+                        state.sync_result = GameSyncResult::WaitingForUpdate;
+                    };
+                }
             }
             next_frame().await;
         }
