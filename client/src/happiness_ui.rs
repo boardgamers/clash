@@ -9,8 +9,20 @@ use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
+use crate::client_state::{can_play_action, ActiveDialog, StateUpdate};
 use crate::dialog_ui::active_dialog_window;
-use crate::ui_state::{can_play_action, ActiveDialog, IncreaseHappiness, StateUpdate};
+
+#[derive(Clone)]
+pub struct IncreaseHappiness {
+    pub steps: Vec<(Position, u32)>,
+    pub cost: ResourcePile,
+}
+
+impl IncreaseHappiness {
+    pub fn new(steps: Vec<(Position, u32)>, cost: ResourcePile) -> IncreaseHappiness {
+        IncreaseHappiness { steps, cost }
+    }
+}
 
 pub fn add_increase_happiness(
     player: &Player,

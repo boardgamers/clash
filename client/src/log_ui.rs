@@ -1,7 +1,7 @@
 use server::game::Game;
 
+use crate::client_state::StateUpdate;
 use crate::dialog_ui::closeable_dialog_window;
-use crate::ui_state::StateUpdate;
 
 pub fn show_log(game: &Game) -> StateUpdate {
     closeable_dialog_window("Log", |ui| {

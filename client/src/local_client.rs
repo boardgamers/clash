@@ -1,10 +1,45 @@
-use server::city::City;
-use server::game::Game;
+use std::fs::File;
+use std::io::BufReader;
 
+use macroquad::prelude::next_frame;
+
+use server::city::City;
+use server::game::{Game, GameData};
 use server::map::Terrain;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::UnitType;
+
+use crate::game_loop;
+use crate::game_sync::{ClientFeatures, GameSyncRequest, GameSyncResult};
+
+pub async fn run(mut game: Game) {
+    let mut state = game_loop::init().await;
+    let features = ClientFeatures {
+        import_export: true,
+    };
+
+    let mut sync_result = GameSyncResult::None;
+    loop {
+        let message = game_loop::render_and_update(&game, &mut state, &sync_result, &features);
+        sync_result = GameSyncResult::None;
+        match message {
+            GameSyncRequest::None => {}
+            GameSyncRequest::ExecuteAction(a) => {
+                game.execute_action(a, game.active_player());
+                sync_result = GameSyncResult::Update;
+            }
+            GameSyncRequest::Import => {
+                game = import();
+                sync_result = GameSyncResult::Update;
+            }
+            GameSyncRequest::Export => {
+                export(&game);
+            }
+        };
+        next_frame().await;
+    }
+}
 
 pub fn setup_local_game() -> Game {
     let mut game = Game::new(2, "a".repeat(32), false);
@@ -74,4 +109,21 @@ fn add_city(game: &mut Game, player_index: usize, s: &str) {
 
 fn add_terrain(game: &mut Game, pos: &str, terrain: Terrain) {
     game.map.tiles.insert(Position::from_offset(pos), terrain);
+}
+
+const EXPORT_FILE: &str = "game.json";
+
+fn import() -> Game {
+    let file = File::open(EXPORT_FILE).expect("Failed to open export file");
+    let reader = BufReader::new(file);
+    let data: GameData = serde_json::from_reader(reader).expect("Failed to read export file");
+    Game::from_data(data)
+}
+
+fn export(game: &Game) {
+    serde_json::to_writer_pretty(
+        File::create(EXPORT_FILE).expect("Failed to create export file"),
+        &game.cloned_data(),
+    )
+    .expect("Failed to write export file");
 }

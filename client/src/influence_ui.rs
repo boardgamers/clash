@@ -1,6 +1,6 @@
-use crate::city_ui::building_name;
+use crate::city_ui::{building_name, CityMenu};
+use crate::client_state::StateUpdate;
 use crate::dialog_ui::active_dialog_window;
-use crate::ui_state::{CityMenu, StateUpdate};
 use macroquad::ui::Ui;
 use server::action::Action;
 use server::city_pieces::Building;

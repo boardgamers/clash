@@ -196,6 +196,7 @@ dependencies = [
  "macroquad",
  "serde_json",
  "server",
+ "wasm-bindgen",
 ]
 
 [[package]]

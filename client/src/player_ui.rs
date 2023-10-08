@@ -9,7 +9,7 @@ use server::game::{Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
 
-use crate::ui_state::{can_play_action, State, StateUpdate};
+use crate::client_state::{can_play_action, State, StateUpdate};
 
 pub fn show_globals(game: &Game) {
     draw_text(&format!("Age {}", game.age), 30., 30., 20., BLACK);

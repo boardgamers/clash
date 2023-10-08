@@ -5,11 +5,11 @@ use server::player::Player;
 use server::position::Position;
 use server::unit::{Unit, UnitType, Units};
 
+use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::select_ui::{
     ConfirmSelection, CountSelector, HasCountSelectableObject, SelectionConfirm,
 };
-use crate::ui_state::{ActiveDialog, StateUpdate};
 use crate::unit_ui::UnitSelection;
 use crate::{select_ui, unit_ui};
 

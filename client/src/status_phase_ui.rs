@@ -1,7 +1,7 @@
+use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::active_dialog_window;
 use crate::select_ui;
 use crate::select_ui::{ConfirmSelection, Selection, SelectionConfirm};
-use crate::ui_state::{ActiveDialog, StateUpdate};
 use server::content::advances;
 use server::game::Game;
 use server::status_phase::{ChangeGovernmentType, StatusPhaseAction};

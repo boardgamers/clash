@@ -2,10 +2,10 @@ use macroquad::math::bool;
 
 use server::resource_pile::ResourcePile;
 
+use crate::client_state::StateUpdate;
 use crate::resource_ui::{resource_name, ResourceType};
 use crate::select_ui;
 use crate::select_ui::{CountSelector, HasCountSelectableObject};
-use crate::ui_state::StateUpdate;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct ResourcePayment {

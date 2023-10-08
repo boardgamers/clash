@@ -1,19 +1,18 @@
-use std::fs::File;
-use std::io::BufReader;
-
 use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
-use macroquad::prelude::{clear_background, next_frame, set_fullscreen, vec2, WHITE};
+use macroquad::prelude::{clear_background, set_fullscreen, vec2, WHITE};
 use macroquad::ui::root_ui;
 
 use server::action::Action;
-use server::game::{Game, GameData};
+use server::game::Game;
 use server::position::Position;
 use server::status_phase::StatusPhaseAction;
 
 use crate::advance_ui::{pay_advance_dialog, show_advance_menu, show_free_advance_menu};
+use crate::client_state::{ActiveDialog, PendingUpdate, State, StateUpdate, StateUpdates};
 use crate::collect_ui::{click_collect_option, collect_resources_dialog};
 use crate::construct_ui::pay_construction_dialog;
 use crate::dialog_ui::active_dialog_window;
+use crate::game_sync::{ClientFeatures, GameSyncRequest, GameSyncResult};
 use crate::happiness_ui::{
     add_increase_happiness, increase_happiness_menu, show_increase_happiness,
 };
@@ -21,24 +20,36 @@ use crate::hex_ui::pixel_to_coordinate;
 use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
 use crate::player_ui::{show_global_controls, show_globals, show_resources, show_wonders};
-use crate::ui_state::{ActiveDialog, PendingUpdate, State, StateUpdate, StateUpdates};
 use crate::{combat_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui};
 
-const EXPORT_FILE: &str = "game.json";
-
-pub async fn run(game: &mut Game) {
-    let mut state = State::new().await;
+pub async fn init() -> State {
+    let state = State::new().await;
 
     set_fullscreen(true);
-    loop {
-        let update = game_loop(game, &state);
-        state.update(game, update);
-
-        next_frame().await;
-    }
+    state
 }
 
-fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
+pub fn render_and_update(
+    game: &Game,
+    state: &mut State,
+    sync_result: &GameSyncResult,
+    features: &ClientFeatures,
+) -> GameSyncRequest {
+    match sync_result {
+        GameSyncResult::None => {}
+        GameSyncResult::Update => {
+            state.update_from_game(game);
+        }
+        GameSyncResult::WaitingForUpdate => {
+            state.set_dialog(ActiveDialog::WaitingForUpdate);
+        }
+    }
+
+    let update = render(game, state, features);
+    state.update(game, update)
+}
+
+fn render(game: &Game, state: &State, features: &ClientFeatures) -> StateUpdate {
     let player_index = game.active_player();
     clear_background(WHITE);
 
@@ -54,14 +65,14 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
     if root_ui().button(vec2(1200., 100.), "Advances") {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     };
-    if root_ui().button(vec2(1200., 290.), "Import") {
-        import(game);
-        return StateUpdate::Cancel;
-    };
-    if root_ui().button(vec2(1250., 290.), "Export") {
-        export(game);
-        return StateUpdate::None;
-    };
+    if features.import_export {
+        if root_ui().button(vec2(1200., 290.), "Import") {
+            return StateUpdate::Import;
+        };
+        if root_ui().button(vec2(1250., 290.), "Export") {
+            return StateUpdate::Export;
+        };
+    }
 
     if let Some(u) = &state.pending_update {
         updates.add(show_pending_update(u));
@@ -75,9 +86,12 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
 
     updates.add(match &state.active_dialog {
         ActiveDialog::None => StateUpdate::None,
-        ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(h),
-        ActiveDialog::TileMenu(p) => show_tile_menu(game, *p),
         ActiveDialog::Log => show_log(game),
+        ActiveDialog::TileMenu(p) => show_tile_menu(game, *p),
+        ActiveDialog::WaitingForUpdate => StateUpdate::None, //todo show spinner
+
+        // playing actions
+        ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(h),
         ActiveDialog::AdvanceMenu => show_advance_menu(game, player_index),
         ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p),
         ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p),
@@ -107,21 +121,6 @@ fn game_loop(game: &mut Game, state: &State) -> StateUpdate {
     updates.add(try_click(game, state, player_index));
 
     updates.result()
-}
-
-fn import(game: &mut Game) {
-    let file = File::open(EXPORT_FILE).expect("Failed to open export file");
-    let reader = BufReader::new(file);
-    let data: GameData = serde_json::from_reader(reader).expect("Failed to read export file");
-    *game = Game::from_data(data);
-}
-
-fn export(game: &Game) {
-    serde_json::to_writer_pretty(
-        File::create(EXPORT_FILE).expect("Failed to create export file"),
-        &game.cloned_data(),
-    )
-    .expect("Failed to write export file");
 }
 
 fn show_pending_update(update: &PendingUpdate) -> StateUpdate {

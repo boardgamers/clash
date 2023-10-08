@@ -11,11 +11,11 @@ use server::playing_actions::PlayingAction;
 use server::resource_pile::AdvancePaymentOptions;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
+use crate::client_state::{can_play_action, StateUpdate};
 use crate::dialog_ui::dialog_window;
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::HasCountSelectableObject;
-use crate::ui_state::{can_play_action, StateUpdate};
 use crate::ActiveDialog;
 
 #[derive(Clone)]

@@ -8,9 +8,9 @@ use server::game::Game;
 use server::position::Position;
 use server::unit::{Unit, UnitType};
 
+use crate::client_state::StateUpdate;
 use crate::dialog_ui::active_dialog_window;
 use crate::select_ui::{confirm_update, ConfirmSelection};
-use crate::ui_state::StateUpdate;
 use crate::{hex_ui, player_ui};
 
 pub fn draw_unit(unit: &Unit, index: u32) {

@@ -3,7 +3,7 @@ use macroquad::math::vec2;
 use macroquad::ui::widgets::Window;
 use macroquad::ui::{root_ui, Ui};
 
-use crate::ui_state::StateUpdate;
+use crate::client_state::StateUpdate;
 
 pub fn active_dialog_window<F>(title: &str, f: F) -> StateUpdate
 where
