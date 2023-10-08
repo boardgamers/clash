@@ -1,10 +1,12 @@
+#![allow(clippy::missing_panics_doc)]
+
 use std::fs::File;
 use std::io::BufReader;
 
-use client::client;
-use client::game_sync::{ClientFeatures, GameSyncRequest, GameSyncResult};
+use crate::client;
 use macroquad::prelude::next_frame;
 
+use crate::client::{Features, GameSyncRequest, GameSyncResult};
 use server::city::City;
 use server::game::{Game, GameData};
 use server::map::Terrain;
@@ -14,7 +16,7 @@ use server::unit::UnitType;
 
 pub async fn run(mut game: Game) {
     let mut state = client::init().await;
-    let features = ClientFeatures {
+    let features = Features {
         import_export: true,
     };
 
@@ -40,6 +42,7 @@ pub async fn run(mut game: Game) {
     }
 }
 
+#[must_use]
 pub fn setup_local_game() -> Game {
     let mut game = Game::new(2, "a".repeat(32), false);
     game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];

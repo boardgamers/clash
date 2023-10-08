@@ -12,7 +12,6 @@ use crate::client_state::{ActiveDialog, PendingUpdate, State, StateUpdate, State
 use crate::collect_ui::{click_collect_option, collect_resources_dialog};
 use crate::construct_ui::pay_construction_dialog;
 use crate::dialog_ui::active_dialog_window;
-use crate::game_sync::{ClientFeatures, GameSyncRequest, GameSyncResult};
 use crate::happiness_ui::{
     add_increase_happiness, increase_happiness_menu, show_increase_happiness,
 };
@@ -33,7 +32,7 @@ pub fn render_and_update(
     game: &Game,
     state: &mut State,
     sync_result: &GameSyncResult,
-    features: &ClientFeatures,
+    features: &Features,
 ) -> GameSyncRequest {
     match sync_result {
         GameSyncResult::None => {}
@@ -49,7 +48,7 @@ pub fn render_and_update(
     state.update(game, update)
 }
 
-fn render(game: &Game, state: &State, features: &ClientFeatures) -> StateUpdate {
+fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
     let player_index = game.active_player();
     clear_background(WHITE);
 
@@ -88,7 +87,9 @@ fn render(game: &Game, state: &State, features: &ClientFeatures) -> StateUpdate 
         ActiveDialog::None => StateUpdate::None,
         ActiveDialog::Log => show_log(game),
         ActiveDialog::TileMenu(p) => show_tile_menu(game, *p),
-        ActiveDialog::WaitingForUpdate => StateUpdate::None, //todo show spinner
+        ActiveDialog::WaitingForUpdate => {
+            active_dialog_window("Waiting for update", |_ui| StateUpdate::None)
+        }
 
         // playing actions
         ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(h),
@@ -180,4 +181,21 @@ pub fn try_click(game: &Game, state: &State, player_index: usize) -> StateUpdate
         }
         _ => StateUpdate::OpenDialog(ActiveDialog::TileMenu(pos)),
     }
+}
+
+pub struct Features {
+    pub import_export: bool,
+}
+
+pub enum GameSyncRequest {
+    None,
+    ExecuteAction(Action),
+    Import,
+    Export,
+}
+
+pub enum GameSyncResult {
+    None,
+    Update,
+    WaitingForUpdate,
 }

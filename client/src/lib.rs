@@ -18,17 +18,21 @@ mod collect_ui;
 mod combat_ui;
 mod construct_ui;
 mod dialog_ui;
-pub mod game_sync;
 mod happiness_ui;
 mod hex_ui;
 mod influence_ui;
+pub mod local_client;
 mod log_ui;
 mod map_ui;
 mod move_ui;
 mod payment_ui;
 mod player_ui;
 mod recruit_unit_ui;
+pub mod remote_client;
 mod resource_ui;
 mod select_ui;
 mod status_phase_ui;
 mod unit_ui;
+
+#[macro_use]
+extern crate lazy_static;

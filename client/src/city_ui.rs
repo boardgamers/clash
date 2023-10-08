@@ -8,13 +8,13 @@ use server::player::Player;
 use server::position::Position;
 use server::unit::Units;
 
-use crate::client_state::{can_play_action, State, StateUpdate, StateUpdates};
+use crate::client_state::{can_play_action, ActiveDialog, State, StateUpdate, StateUpdates};
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{add_construct_button, add_wonder_buttons};
 use crate::hex_ui::draw_hex_center_text;
 use crate::map_ui::show_generic_tile_menu;
 use crate::recruit_unit_ui::RecruitAmount;
-use crate::{hex_ui, influence_ui, player_ui, ActiveDialog};
+use crate::{hex_ui, influence_ui, player_ui};
 
 pub struct CityMenu {
     pub player_index: usize,

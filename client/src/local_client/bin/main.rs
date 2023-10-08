@@ -1,6 +1,6 @@
 use server::game::Game;
 
-mod local_client;
+use client::local_client;
 
 #[macroquad::main("Clash")]
 async fn main() {

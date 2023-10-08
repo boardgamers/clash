@@ -13,3 +13,15 @@ hex2d = "1.1.0"
 itertools = "0.11.0"
 serde_json = "1.0.91"
 server = { path = "../server", version = "0.1.0" }
+wasm-bindgen = "0.2.83"
+wasm-bindgen-futures = "0.4.33"
+lazy_static = "1.4.0"
+log = "0.4.20"
+
+[[bin]]
+name = "local_client"
+path = "src/local_client/bin/main.rs"
+
+[[bin]]
+name = "remote_client"
+path = "src/remote_client/bin/main.rs"
