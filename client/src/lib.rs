@@ -7,8 +7,6 @@
     clippy::cast_possible_truncation
 )]
 
-extern crate core;
-
 mod advance_ui;
 mod assets;
 mod city_ui;

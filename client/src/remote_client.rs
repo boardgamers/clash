@@ -42,12 +42,12 @@ pub struct Client {
 }
 
 #[wasm_bindgen(start)]
-pub async unsafe fn start() {
+pub async fn start() {
     Client::start().await;
 }
 
 #[must_use]
-pub unsafe fn launch(emitter: Box<dyn Emitter>) -> Control {
+pub fn launch(emitter: Box<dyn Emitter>) -> Control {
     EMITTER
         .lock()
         .expect("emitter lock failed")
@@ -64,7 +64,7 @@ impl Control {
 
 #[wasm_bindgen]
 impl Client {
-    pub async unsafe fn start() {
+    pub async fn start() {
         let mut client = Client { game: None };
         client.run().await;
     }

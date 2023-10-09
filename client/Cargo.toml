@@ -21,7 +21,3 @@ log = "0.4.20"
 [[bin]]
 name = "local_client"
 path = "src/local_client/bin/main.rs"
-
-[[bin]]
-name = "remote_client"
-path = "src/remote_client/bin/main.rs"
