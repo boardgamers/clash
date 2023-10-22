@@ -110,7 +110,7 @@ pub fn rankings(game: JsValue) -> JsValue {
 }
 
 #[wasm_bindgen]
-pub fn round(game: JsValue) -> JsValue {
+pub fn round_number(game: JsValue) -> JsValue {
     let game = get_game(game);
     let round = game_api::round(&game);
     match round {
