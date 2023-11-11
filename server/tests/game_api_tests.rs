@@ -371,15 +371,15 @@ fn assert_eq_game_json(
         return;
     }
     let expected_path = game_path(expected_name);
-    if env::var("UPDATE_EXPECTED")
-        .ok()
-        .is_some_and(|s| s == "true")
-    {
-        write_result(actual, &expected_path);
-        return;
-    } else {
-        write_result(actual, &result_path);
-    }
+    // if env::var("UPDATE_EXPECTED")
+    //     .ok()
+    //     .is_some_and(|s| s == "true")
+    // {
+    //     write_result(actual, &expected_path);
+    //     return;
+    // } else {
+    write_result(actual, &result_path);
+    // }
 
     panic!(
         "{name} test failed:\n\

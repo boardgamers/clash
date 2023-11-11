@@ -41,18 +41,20 @@ pub struct Client {
     game: Option<Game>,
 }
 
-#[wasm_bindgen(start)]
+// #[wasm_bindgen(start)]
+#[wasm_bindgen]
 pub async fn start() {
     Client::start().await;
 }
 
 #[must_use]
-pub fn launch(emitter: Box<dyn Emitter>) -> Control {
+// #[wasm_bindgen]
+pub fn launch(emitter: Box<dyn Emitter>) -> Box<Control> {
     EMITTER
         .lock()
         .expect("emitter lock failed")
         .replace(emitter);
-    Control {}
+    Box::new(Control {})
 }
 
 impl Control {

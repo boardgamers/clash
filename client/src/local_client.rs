@@ -116,16 +116,18 @@ fn add_terrain(game: &mut Game, pos: &str, terrain: Terrain) {
 const EXPORT_FILE: &str = "game.json";
 
 fn import() -> Game {
-    let file = File::open(EXPORT_FILE).expect("Failed to open export file");
-    let reader = BufReader::new(file);
-    let data: GameData = serde_json::from_reader(reader).expect("Failed to read export file");
-    Game::from_data(data)
+    // let file = File::open(EXPORT_FILE).expect("Failed to open export file");
+    // let reader = BufReader::new(file);
+    // let data: GameData = serde_json::from_reader(reader).expect("Failed to read export file");
+    // Game::from_data(data)
+    panic!()
 }
 
 fn export(game: &Game) {
-    serde_json::to_writer_pretty(
-        File::create(EXPORT_FILE).expect("Failed to create export file"),
-        &game.cloned_data(),
-    )
-    .expect("Failed to write export file");
+    // serde_json::to_writer_pretty(
+    //     File::create(EXPORT_FILE).expect("Failed to create export file"),
+    //     &game.cloned_data(),
+    // )
+    // .expect("Failed to write export file");
+    panic!()
 }
