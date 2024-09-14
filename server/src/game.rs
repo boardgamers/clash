@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::mem;
 
 use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
-use serde::{Deserialize, Serialize};
 
 use GameState::*;
 
@@ -1444,7 +1443,6 @@ impl Game {
     }
 }
 
-#[derive(Serialize, Deserialize)]
 pub struct GameData {
     state: GameState,
     players: Vec<PlayerData>,
@@ -1469,7 +1467,7 @@ pub struct GameData {
     undo_context_stack: Vec<UndoContext>,
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub struct CulturalInfluenceResolution {
     pub roll_boost_cost: u32,
     pub target_player_index: usize,
@@ -1477,7 +1475,7 @@ pub struct CulturalInfluenceResolution {
     pub city_piece: Building,
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub enum GameState {
     Playing,
     StatusPhase(StatusPhaseState),
@@ -1509,7 +1507,7 @@ impl GameState {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Clone)]
 pub enum UndoContext {
     FoundCity {
         settler: Unit,
@@ -1525,7 +1523,6 @@ pub enum UndoContext {
     },
 }
 
-#[derive(Serialize, Deserialize)]
 pub struct Messages {
     messages: Vec<String>,
     data: GameData,

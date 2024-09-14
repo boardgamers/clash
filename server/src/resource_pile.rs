@@ -5,11 +5,9 @@ use std::{
     ops::{Add, AddAssign, Mul, SubAssign},
 };
 
-use serde::{Deserialize, Serialize};
-
 use crate::utils;
 
-#[derive(Default, Clone, Serialize, Deserialize, PartialEq, Eq, Debug, Hash)]
+#[derive(Default, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct ResourcePile {
     pub food: u32,
     pub wood: u32,

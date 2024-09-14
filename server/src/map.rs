@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use itertools::Itertools;
 use rand::prelude::SliceRandom;
 use rand::prelude::StdRng;
-use serde::{Deserialize, Serialize};
 
 use crate::city::City;
 use crate::player::Player;
@@ -52,12 +51,11 @@ impl Map {
     }
 }
 
-#[derive(Serialize, Deserialize)]
 pub struct MapData {
     pub tiles: Vec<(Position, Terrain)>,
 }
 
-#[derive(Serialize, Deserialize, Hash, PartialEq, Eq, Clone, PartialOrd, Ord)]
+#[derive(Hash, PartialEq, Eq, Clone, PartialOrd, Ord)]
 pub enum Terrain {
     Barren,
     Mountain,

@@ -1,5 +1,4 @@
 use itertools::Itertools;
-use serde::{Deserialize, Serialize};
 
 use crate::{
     advance::Advance,
@@ -10,13 +9,13 @@ use crate::{
     resource_pile::ResourcePile,
 };
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Clone)]
 pub struct ChangeGovernmentType {
     pub new_government: String,
     pub additional_advances: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Clone)]
 pub enum StatusPhaseAction {
     CompleteObjectives(Vec<String>),
     FreeAdvance(String),
@@ -190,7 +189,7 @@ fn skip_player(game: &Game, player_index: usize, state: &StatusPhaseState) -> bo
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub enum StatusPhaseState {
     CompleteObjectives,
     FreeAdvance,

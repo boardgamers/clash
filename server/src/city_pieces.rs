@@ -1,4 +1,3 @@
-use serde::{Deserialize, Serialize};
 use std::ops::{AddAssign, SubAssign};
 
 use crate::{content::wonders, wonder::Wonder};
@@ -159,7 +158,7 @@ impl CityPieces {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct CityPiecesData {
     academy: Option<usize>,
     market: Option<usize>,
@@ -171,7 +170,7 @@ pub struct CityPiecesData {
     wonders: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize, Eq, PartialEq, Hash, Clone, Debug)]
+#[derive(Eq, PartialEq, Hash, Clone, Debug)]
 pub enum Building {
     Academy,
     Market,
@@ -183,26 +182,6 @@ pub enum Building {
 }
 
 impl Building {
-    /// Returns the json of this [`Building`].
-    ///
-    /// # Panics
-    ///
-    /// Panics if `serde_json` produces invalid json
-    #[must_use]
-    pub fn json(&self) -> String {
-        serde_json::to_string(&self).expect("city piece data should be valid json")
-    }
-
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if invalid json is given
-    #[must_use]
-    pub fn from_json(json: &str) -> Self {
-        serde_json::from_str(json).expect("API call should receive valid city piece data json")
-    }
-
     #[must_use]
     pub fn required_advance(&self) -> String {
         String::from(match self {
@@ -217,7 +196,7 @@ impl Building {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub struct AvailableCityPieces {
     pub academies: u8,
     pub markets: u8,

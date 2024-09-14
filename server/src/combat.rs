@@ -5,10 +5,9 @@ use crate::map::Terrain::Water;
 use crate::position::Position;
 use crate::unit::UnitType::{Cavalry, Elephant, Infantry, Leader, Ship};
 use crate::unit::{UnitType, Units};
-use serde::{Deserialize, Serialize};
 use std::mem;
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub enum CombatPhase {
     PlayActionCard(usize),
     RemoveCasualties {
@@ -32,7 +31,7 @@ impl CombatPhase {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Combat {
     pub initiation: Box<GameState>,
     pub round: u32, //starts with one,

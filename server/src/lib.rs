@@ -23,7 +23,6 @@ pub mod content;
 mod events;
 pub mod game;
 pub mod game_api;
-pub mod game_api_wrapper;
 pub mod leader;
 pub mod log;
 pub mod map;
