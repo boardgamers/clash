@@ -10,7 +10,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 macroquad = "0.4.2"
 hex2d = "1.1.0"
-itertools = "0.11.0"
+itertools = "0.13.0"
 serde_json = "1.0.91"
 server = { path = "../server", version = "0.1.0" }
 wasm-bindgen = "0.2.83"
