@@ -1,5 +1,3 @@
-use itertools::Itertools;
-
 use crate::{
     advance::Advance,
     content::advances,
@@ -112,17 +110,6 @@ fn change_government_type(
 
     let new_government_advances = advances::get_government(government);
     game.advance(&new_government_advances[0].name, player_index);
-    for advance in &new_government.additional_advances {
-        let (pos, advance) = new_government_advances
-            .iter()
-            .find_position(|a| a.name == *advance)
-            .expect("advance should exist");
-        assert!(
-            pos > 0,
-            "Additional advances should not include the leading government advance"
-        );
-        game.advance(&advance.name, player_index);
-    }
 }
 
 fn next_phase(game: &mut Game, phase: Option<StatusPhaseState>) -> StatusPhaseState {

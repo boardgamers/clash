@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use itertools::Itertools;
 use rand::prelude::SliceRandom;
 use rand::prelude::StdRng;
 
@@ -23,23 +22,14 @@ impl Map {
     #[must_use]
     pub fn data(self) -> MapData {
         MapData {
-            tiles: self
-                .tiles
-                .into_iter()
-                .sorted_by_key(|(position, _)| *position)
-                .collect(),
+            tiles: self.tiles.into_iter().collect(),
         }
     }
 
     #[must_use]
     pub fn cloned_data(&self) -> MapData {
         MapData {
-            tiles: self
-                .tiles
-                .clone()
-                .into_iter()
-                .sorted_by_key(|(position, _)| *position)
-                .collect(),
+            tiles: self.tiles.clone().into_iter().collect(),
         }
     }
 
