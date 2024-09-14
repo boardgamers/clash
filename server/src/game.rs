@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 use std::mem;
 
-use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
-
 use GameState::*;
 
 use crate::combat::Combat;
@@ -78,39 +76,26 @@ impl Game {
         } else {
             String::from(&seed[..32])
         };
-        let seed = seed
-            .as_bytes()
-            .try_into()
-            .expect("seed should be of length 32");
-        let mut rng = StdRng::from_seed(seed);
 
         let mut players = Vec::new();
         let mut civilizations = civilizations::get_all();
-        for i in 0..player_amount {
-            let civilization = rng.gen_range(0..civilizations.len());
-            players.push(Player::new(civilizations.remove(civilization), i));
-        }
 
         if setup {
             setup_home_city(&mut players, 0, "F1");
             setup_home_city(&mut players, 1, "F8");
         }
-        let starting_player = rng.gen_range(0..players.len());
         let mut dice_roll_outcomes = Vec::new();
-        for _ in 0..DICE_ROLL_BUFFER {
-            dice_roll_outcomes.push(rng.gen_range(0..12));
-        }
 
         let mut wonders = wonders::get_all();
-        wonders.shuffle(&mut rng);
         let wonder_amount = wonders.len();
 
         let map = if setup {
-            Map::new(maximum_size_2_player_random_map(&mut rng))
+            Map::new(maximum_size_2_player_random_map())
         } else {
             Map::new(HashMap::new())
         };
-        Self {
+        let starting_player = 0;
+        let game = Self {
             state: Playing,
             players,
             map,
@@ -136,7 +121,8 @@ impl Game {
             wonders_left: wonders,
             wonder_amount_left: wonder_amount,
             undo_context_stack: Vec::new(),
-        }
+        };
+        game
     }
 
     ///
@@ -796,12 +782,7 @@ impl Game {
 
     pub fn get_next_dice_roll(&mut self) -> u8 {
         self.lock_undo();
-        let dice_roll = self.dice_roll_outcomes.pop().unwrap_or_else(|| {
-            println!("ran out of predetermined dice roll outcomes, unseeded rng is now being used");
-            rand::thread_rng().gen_range(0..12)
-        });
-        self.dice_roll_log.push(dice_roll);
-        dice_roll
+        0
     }
 
     fn add_message(&mut self, message: &str) {
