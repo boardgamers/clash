@@ -1,8 +1,11 @@
+use serde::{Deserialize, Serialize};
+
 use crate::playing_actions::PlayingAction;
 use crate::position::Position;
 use crate::status_phase::StatusPhaseAction;
 use crate::unit::MovementAction;
 
+#[derive(Serialize, Deserialize)]
 pub enum Action {
     Playing(PlayingAction),
     StatusPhase(StatusPhaseAction),
@@ -70,7 +73,7 @@ impl Action {
     }
 }
 
-#[derive(Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 pub enum CombatAction {
     PlayActionCard(Option<String>),
     RemoveCasualties(Vec<u32>),

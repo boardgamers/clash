@@ -4,12 +4,14 @@ use std::{
     ops::{AddAssign, SubAssign},
 };
 
+use serde::{Deserialize, Serialize};
+
 use MovementRestriction::{AllMovement, Attack};
 use UnitType::*;
 
 use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
 
-#[derive(Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct Unit {
     pub player_index: usize,
     pub position: Position,
@@ -112,7 +114,7 @@ impl Unit {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum UnitType {
     Settler,
     Infantry,
@@ -153,14 +155,14 @@ impl UnitType {
     }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum MovementRestriction {
     None,
     AllMovement(u32),
     Attack(u32),
 }
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct Units {
     pub settlers: u8,
     pub infantry: u8,
@@ -371,7 +373,7 @@ impl Display for Units {
     }
 }
 
-#[derive(Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 pub enum MovementAction {
     Move {
         units: Vec<u32>,

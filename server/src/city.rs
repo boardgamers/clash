@@ -1,5 +1,7 @@
 use std::ops::{Add, Sub};
 
+use serde::{Deserialize, Serialize};
+
 use crate::consts::MAX_CITY_SIZE;
 use crate::resource_pile::ResourcePile;
 use crate::{
@@ -233,7 +235,7 @@ impl City {
     }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct CityData {
     city_pieces: CityPiecesData,
     mood_state: MoodState,
@@ -267,7 +269,7 @@ impl CityData {
     }
 }
 
-#[derive(PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub enum MoodState {
     Happy = 2,
     Neutral = 1,

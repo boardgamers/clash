@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use serde::{Deserialize, Serialize};
+
 use PlayingAction::*;
 
 use crate::game::{CulturalInfluenceResolution, GameState};
@@ -16,7 +18,7 @@ use crate::{
     unit::UnitType,
 };
 
-#[derive(PartialEq, Eq, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub enum PlayingAction {
     Advance {
         advance: String,

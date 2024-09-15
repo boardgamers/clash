@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering::{self, *},
     collections::{HashMap, HashSet},
@@ -859,7 +860,7 @@ impl Player {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(Serialize, Deserialize, PartialEq)]
 pub struct PlayerData {
     name: Option<String>,
     id: usize,
