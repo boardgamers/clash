@@ -4,12 +4,12 @@
 
 ## Client
 
-`cargo build --target wasm32-unknown-unknown`
+`./wasm-bindgen-macroquad.sh local_client`
 In the `client` directory, run `basic-http-server .` in `dist/` and open `http://localhost:4000` in a browser.
 
-For random, use https://github.com/not-fl3/quad-rand
+# Notes
 
-https://gist.github.com/tgolsson/d78f7887a8542f3fd6f125070e5e22d6
+- For random, use https://github.com/not-fl3/quad-rand
 
-~/source/clash/client  ./wasm-bindgen-macroquad.sh local_client --release
+
   

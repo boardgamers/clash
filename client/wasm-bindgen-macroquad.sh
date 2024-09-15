@@ -2,6 +2,8 @@
 
 set -e
 
+# from https://gist.github.com/nicolas-sabbatini/8af10dddc96be76d2bf24fc671131add
+
 HELP_STRING=$(
 	cat <<-END
 		usage: build_wasm.sh PROJECT_NAME [--release]
