@@ -144,7 +144,7 @@ pub fn try_click(game: &Game, state: &State, player_index: usize) -> StateUpdate
     let (x, y) = mouse_position();
 
     let pos = Position::from_coordinate(pixel_to_coordinate(x, y));
-    if game.map.tiles.get(&pos).is_none() {
+    if !game.map.tiles.contains_key(&pos) {
         return StateUpdate::None;
     }
 
