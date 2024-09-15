@@ -1,7 +1,7 @@
 use super::custom_actions::CustomActionType::*;
 use crate::{
     ability_initializer::AbilityInitializerSetup,
-    advance::{Advance, AdvanceBonus::*},
+    advance::{Advance, Bonus::*},
     game::Game,
     map::Terrain::*,
     resource_pile::ResourcePile,
@@ -73,7 +73,7 @@ pub fn get_all() -> Vec<Advance> {
         })
         .add_player_event_listener(
             |event| &mut event.on_advance,
-            |player, advance, _| {
+            |player, advance, ()| {
                 if advance == "Math"
                     || advance == "Astronomy"
                     || advance == "Medicine"
@@ -86,7 +86,7 @@ pub fn get_all() -> Vec<Advance> {
         )
         .add_player_event_listener(
             |event| &mut event.on_undo_advance,
-            |player, advance, _| {
+            |player, advance, ()| {
                 if advance == "Math"
                     || advance == "Astronomy"
                     || advance == "Medicine"
@@ -118,7 +118,7 @@ pub fn get_all() -> Vec<Advance> {
         )
         .add_player_event_listener(
             |event| &mut event.advance_cost,
-            |cost, advance, _| {
+            |cost, advance, ()| {
                 if advance == "Engineering" || advance == "Roads" {
                     *cost = 0;
                 }
@@ -135,7 +135,7 @@ pub fn get_all() -> Vec<Advance> {
         )
         .add_player_event_listener(
             |event| &mut event.advance_cost,
-            |cost, advance, _| {
+            |cost, advance, ()| {
                 if advance == "Navigation" || advance == "Cartography" {
                     *cost = 0;
                 }
@@ -214,7 +214,7 @@ pub fn get_government(government: &str) -> Vec<Advance> {
         .into_iter()
         .filter(|advance| {
             advance
-                .required_advance
+                .required
                 .as_ref()
                 .is_some_and(|required_advance| required_advance == &leading_government.name)
         })

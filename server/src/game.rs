@@ -886,7 +886,7 @@ impl Game {
             }
         }
         let player = &mut self.players[player_index];
-        if let Some(advance_bonus) = &advance.advance_bonus {
+        if let Some(advance_bonus) = &advance.bonus {
             player.gain_resources(advance_bonus.resources());
         }
         player.advances.push(advance.name);
@@ -932,7 +932,7 @@ impl Game {
             }
         }
         let player = &mut self.players[player_index];
-        if let Some(advance_bonus) = &advance.advance_bonus {
+        if let Some(advance_bonus) = &advance.bonus {
             player.loose_resources(advance_bonus.resources());
         }
         player.advances.pop();

@@ -10,8 +10,6 @@
 #![allow(clippy::cast_precision_loss)]
 #![allow(clippy::cast_possible_wrap)]
 #![allow(clippy::too_many_arguments)]
-#![allow(clippy::struct_field_names)]
-#![allow(clippy::ignored_unit_patterns)]
 
 mod ability_initializer;
 pub mod action;

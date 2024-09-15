@@ -400,12 +400,12 @@ impl Player {
         if self.has_advance(&advance.name) {
             return false;
         }
-        if let Some(required_advance) = &advance.required_advance {
+        if let Some(required_advance) = &advance.required {
             if !self.has_advance(required_advance) {
                 return false;
             }
         }
-        if let Some(contradicting_advance) = &advance.contradicting_advance {
+        if let Some(contradicting_advance) = &advance.contradicting {
             if self.has_advance(contradicting_advance) {
                 return false;
             }
