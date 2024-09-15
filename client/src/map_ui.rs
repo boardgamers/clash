@@ -45,6 +45,7 @@ pub fn draw_map(game: &Game, state: &State) {
             *pos,
             terrain_font_color(t),
             alpha(game, state, *pos),
+            state.assets.terrain.get(base).unwrap(),
             exhausted,
         );
         collect_ui::draw_resource_collect_tile(state, *pos);
