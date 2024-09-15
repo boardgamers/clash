@@ -1,5 +1,9 @@
 use std::collections::HashMap;
 
+use itertools::Itertools;
+use rand::prelude::SliceRandom;
+use rand::prelude::StdRng;
+
 use crate::city::City;
 use crate::player::Player;
 use crate::position::Position;
@@ -19,14 +23,23 @@ impl Map {
     #[must_use]
     pub fn data(self) -> MapData {
         MapData {
-            tiles: self.tiles.into_iter().collect(),
+            tiles: self
+                .tiles
+                .into_iter()
+                .sorted_by_key(|(position, _)| *position)
+                .collect(),
         }
     }
 
     #[must_use]
     pub fn cloned_data(&self) -> MapData {
         MapData {
-            tiles: self.tiles.clone().into_iter().collect(),
+            tiles: self
+                .tiles
+                .clone()
+                .into_iter()
+                .sorted_by_key(|(position, _)| *position)
+                .collect(),
         }
     }
 

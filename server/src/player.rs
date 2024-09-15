@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use std::{
     cmp::Ordering::{self, *},
     collections::{HashMap, HashSet},
@@ -217,7 +218,11 @@ impl Player {
             resources: self.resources,
             resource_limit: self.resource_limit,
             cities: self.cities.into_iter().map(City::data).collect(),
-            units: self.units.into_iter().collect(),
+            units: self
+                .units
+                .into_iter()
+                .sorted_by_key(|unit| unit.id)
+                .collect(),
             civilization: self.civilization.name,
             active_leader: self.active_leader.map(|leader| leader.name),
             available_leaders: self
@@ -225,7 +230,7 @@ impl Player {
                 .into_iter()
                 .map(|leader| leader.name)
                 .collect(),
-            advances: self.advances.into_iter().collect(),
+            advances: self.advances.into_iter().sorted().collect(),
             unlocked_special_advance: self.unlocked_special_advances,
             wonders: self.wonders,
             wonders_build: self.wonders_build,
@@ -243,7 +248,11 @@ impl Player {
             available_settlements: self.available_settlements,
             available_buildings: self.available_buildings,
             available_units: self.available_units,
-            collect_options: self.collect_options.into_iter().collect(),
+            collect_options: self
+                .collect_options
+                .into_iter()
+                .sorted_by_key(|(terrain, _)| terrain.clone())
+                .collect(),
             next_unit_id: self.next_unit_id,
         }
     }
@@ -255,7 +264,12 @@ impl Player {
             resources: self.resources.clone(),
             resource_limit: self.resource_limit.clone(),
             cities: self.cities.iter().map(City::cloned_data).collect(),
-            units: self.units.iter().cloned().collect(),
+            units: self
+                .units
+                .iter()
+                .cloned()
+                .sorted_by_key(|unit| unit.id)
+                .collect(),
             civilization: self.civilization.name.clone(),
             active_leader: self
                 .active_leader
@@ -266,7 +280,7 @@ impl Player {
                 .iter()
                 .map(|leader| leader.name.clone())
                 .collect(),
-            advances: self.advances.iter().cloned().collect(),
+            advances: self.advances.iter().cloned().sorted().collect(),
             unlocked_special_advance: self.unlocked_special_advances.clone(),
             wonders: self.wonders.clone(),
             wonders_build: self.wonders_build,
@@ -288,6 +302,7 @@ impl Player {
                 .collect_options
                 .iter()
                 .map(|(terrain, options)| (terrain.clone(), options.clone()))
+                .sorted_by_key(|(terrain, _)| terrain.clone())
                 .collect(),
             next_unit_id: self.next_unit_id,
         }

@@ -12,4 +12,6 @@ crate-type = ["lib"]
 [dependencies]
 hex2d = "1.1.0"
 wasm-bindgen = "0.2.83"
+async-std = "1.12.0"
 wasm-bindgen-futures = "0.4.33"
+itertools = "0.13.0"
