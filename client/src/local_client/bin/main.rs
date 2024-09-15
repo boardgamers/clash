@@ -1,5 +1,4 @@
 use client::local_client;
-use macroquad::prelude::*;
 use server::game::Game;
 
 #[macroquad::main("Clash")]

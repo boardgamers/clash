@@ -96,6 +96,7 @@ const FIXED_TERRAIN_2_PLAYER: [(&str, Terrain); 8] = [
     ("E8", Terrain::Mountain),
 ];
 
+#[must_use]
 pub fn maximum_size_2_player_random_map() -> HashMap<Position, Terrain> {
     let mut tiles = HashMap::new();
 

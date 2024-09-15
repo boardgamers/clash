@@ -1026,7 +1026,7 @@ impl Game {
     pub fn undo_recruit(
         &mut self,
         player_index: usize,
-        units: &Vec<UnitType>,
+        units: &[UnitType],
         city_position: Position,
         leader_index: Option<usize>,
     ) {

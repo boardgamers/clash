@@ -1,14 +1,11 @@
 #![allow(clippy::missing_panics_doc)]
 
-use std::fs::File;
-use std::io::BufReader;
-
 use crate::client;
 use macroquad::prelude::next_frame;
 
 use crate::client::{Features, GameSyncRequest, GameSyncResult};
 use server::city::City;
-use server::game::{Game, GameData};
+use server::game::Game;
 use server::map::Terrain;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
@@ -113,7 +110,7 @@ fn add_terrain(game: &mut Game, pos: &str, terrain: Terrain) {
     game.map.tiles.insert(Position::from_offset(pos), terrain);
 }
 
-const EXPORT_FILE: &str = "game.json";
+// const EXPORT_FILE: &str = "game.json";
 
 fn import() -> Game {
     // todo only works with native client
@@ -124,7 +121,7 @@ fn import() -> Game {
     panic!()
 }
 
-fn export(game: &Game) {
+fn export(_game: &Game) {
     // todo only works with native client
     // serde_json::to_writer_pretty(
     //     File::create(EXPORT_FILE).expect("Failed to create export file"),
