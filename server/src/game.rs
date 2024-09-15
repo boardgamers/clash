@@ -81,6 +81,10 @@ impl Game {
 
         let mut players = Vec::new();
         let mut civilizations = civilizations::get_all();
+        for i in 0..player_amount {
+            let civilization = 0;
+            players.push(Player::new(civilizations.remove(civilization), i));
+        }
 
         // if setup {
         //     setup_home_city(&mut players, 0, "F1");
