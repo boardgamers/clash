@@ -78,10 +78,7 @@ impl Game {
         } else {
             String::from(&seed[..32])
         };
-        let s: &[u8] = seed
-            .as_bytes()
-            .try_into()
-            .expect("seed should be of length 32");
+        let s: &[u8] = seed.as_bytes();
         let mut buf = [0u8; 8];
         let len = 8.min(s.len());
         buf[..len].copy_from_slice(&s[..len]);
