@@ -3,9 +3,9 @@ use server::game::Game;
 use server::position::Position;
 use server::unit::Unit;
 
+use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::active_dialog_window;
 use crate::select_ui::{ConfirmSelection, SelectionConfirm};
-use crate::ui_state::{ActiveDialog, StateUpdate};
 use crate::unit_ui;
 use crate::unit_ui::UnitSelection;
 

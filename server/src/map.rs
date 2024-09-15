@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 
 use itertools::Itertools;
-use rand::prelude::SliceRandom;
-use rand::prelude::StdRng;
 use serde::{Deserialize, Serialize};
 
 use crate::city::City;
@@ -98,7 +96,8 @@ const FIXED_TERRAIN_2_PLAYER: [(&str, Terrain); 8] = [
     ("E8", Terrain::Mountain),
 ];
 
-pub fn maximum_size_2_player_random_map(r: &mut StdRng) -> HashMap<Position, Terrain> {
+#[must_use]
+pub fn maximum_size_2_player_random_map() -> HashMap<Position, Terrain> {
     let mut tiles = HashMap::new();
 
     for pos in MAP_4_PLAYER {
@@ -111,7 +110,10 @@ pub fn maximum_size_2_player_random_map(r: &mut StdRng) -> HashMap<Position, Ter
                 }
                 None
             })
-            .or_else(|| RANDOM_TERRAIN.choose(r))
+            .or_else(|| {
+                let r = quad_rand::gen_range(0, RANDOM_TERRAIN.len());
+                Some(&RANDOM_TERRAIN[r])
+            })
             .map(|t| tiles.insert(position, t.clone()));
     }
     tiles

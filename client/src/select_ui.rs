@@ -1,5 +1,5 @@
+use crate::client_state::{StateUpdate, StateUpdates};
 use crate::dialog_ui::active_dialog_window;
-use crate::ui_state::{StateUpdate, StateUpdates};
 use macroquad::hash;
 use macroquad::math::{bool, Vec2};
 use macroquad::ui::widgets::Group;

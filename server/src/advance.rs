@@ -4,14 +4,14 @@ use crate::{
     resource_pile::ResourcePile,
 };
 
-use AdvanceBonus::*;
+use Bonus::*;
 
 pub struct Advance {
     pub name: String,
     pub description: String,
-    pub advance_bonus: Option<AdvanceBonus>,
-    pub required_advance: Option<String>,
-    pub contradicting_advance: Option<String>,
+    pub bonus: Option<Bonus>,
+    pub required: Option<String>,
+    pub contradicting: Option<String>,
     pub unlocked_building: Option<String>,
     pub government: Option<String>,
     pub player_initializer: AbilityInitializer,
@@ -35,7 +35,7 @@ impl PartialEq for Advance {
 pub struct AdvanceBuilder {
     name: String,
     description: String,
-    advance_bonus: Option<AdvanceBonus>,
+    advance_bonus: Option<Bonus>,
     required_advance: Option<String>,
     contradicting_advance: Option<String>,
     unlocked_building: Option<String>,
@@ -63,7 +63,7 @@ impl AdvanceBuilder {
         }
     }
 
-    pub fn with_advance_bonus(mut self, advance_bonus: AdvanceBonus) -> Self {
+    pub fn with_advance_bonus(mut self, advance_bonus: Bonus) -> Self {
         self.advance_bonus = Some(advance_bonus);
         self
     }
@@ -100,9 +100,9 @@ impl AdvanceBuilder {
         Advance {
             name: self.name,
             description: self.description,
-            advance_bonus: self.advance_bonus,
-            required_advance: self.required_advance,
-            contradicting_advance: self.contradicting_advance,
+            bonus: self.advance_bonus,
+            required: self.required_advance,
+            contradicting: self.contradicting_advance,
             unlocked_building: self.unlocked_building,
             government: self.government,
             player_initializer,
@@ -153,12 +153,12 @@ impl AbilityInitializerSetup for AdvanceBuilder {
     }
 }
 
-pub enum AdvanceBonus {
+pub enum Bonus {
     MoodToken,
     CultureToken,
 }
 
-impl AdvanceBonus {
+impl Bonus {
     pub fn resources(&self) -> ResourcePile {
         match self {
             MoodToken => ResourcePile::mood_tokens(1),

@@ -5,15 +5,48 @@ use server::city::{City, MoodState};
 use server::city_pieces::Building;
 use server::game::Game;
 use server::player::Player;
+use server::position::Position;
 use server::unit::Units;
 
+use crate::client_state::{can_play_action, ActiveDialog, State, StateUpdate, StateUpdates};
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{add_construct_button, add_wonder_buttons};
 use crate::hex_ui::draw_hex_center_text;
 use crate::map_ui::show_generic_tile_menu;
 use crate::recruit_unit_ui::RecruitAmount;
-use crate::ui_state::{can_play_action, CityMenu, State, StateUpdate, StateUpdates};
-use crate::{hex_ui, influence_ui, player_ui, ActiveDialog};
+use crate::{hex_ui, influence_ui, player_ui};
+
+pub struct CityMenu {
+    pub player_index: usize,
+    pub city_owner_index: usize,
+    pub city_position: Position,
+}
+
+impl CityMenu {
+    pub fn new(player_index: usize, city_owner_index: usize, city_position: Position) -> Self {
+        CityMenu {
+            player_index,
+            city_owner_index,
+            city_position,
+        }
+    }
+
+    pub fn get_player<'a>(&self, game: &'a Game) -> &'a Player {
+        game.get_player(self.player_index)
+    }
+
+    pub fn get_city_owner<'a>(&self, game: &'a Game) -> &'a Player {
+        game.get_player(self.city_owner_index)
+    }
+
+    pub fn get_city<'a>(&self, game: &'a Game) -> &'a City {
+        return game.get_city(self.city_owner_index, self.city_position);
+    }
+
+    pub fn is_city_owner(&self) -> bool {
+        self.player_index == self.city_owner_index
+    }
+}
 
 pub fn show_city_menu(game: &Game, menu: &CityMenu) -> StateUpdate {
     let position = menu.city_position;

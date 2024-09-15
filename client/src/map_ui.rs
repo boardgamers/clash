@@ -11,9 +11,9 @@ use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::unit::{MovementRestriction, Unit};
 
-use crate::city_ui::{draw_city, show_city_menu};
+use crate::city_ui::{draw_city, show_city_menu, CityMenu};
+use crate::client_state::{can_play_action, ActiveDialog, State, StateUpdate};
 use crate::dialog_ui::closeable_dialog_window;
-use crate::ui_state::{can_play_action, ActiveDialog, CityMenu, State, StateUpdate};
 use crate::{collect_ui, hex_ui, unit_ui};
 
 fn terrain_font_color(t: &Terrain) -> Color {

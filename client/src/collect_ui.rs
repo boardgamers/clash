@@ -12,10 +12,10 @@ use server::playing_actions::{get_total_collection, PlayingAction};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
+use crate::client_state::{ActiveDialog, State, StateUpdate};
 use crate::dialog_ui::active_dialog_window;
 use crate::hex_ui;
 use crate::resource_ui::resource_pile_string;
-use crate::ui_state::{ActiveDialog, State, StateUpdate};
 
 #[derive(Clone)]
 pub struct CollectResources {

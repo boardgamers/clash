@@ -1,14 +1,12 @@
 use std::collections::HashMap;
 use std::mem;
 
-use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
-
-use GameState::*;
 
 use crate::combat::Combat;
 use crate::combat::{capture_position, execute_combat_action, initiate_combat, CombatPhase};
 use crate::map::{maximum_size_2_player_random_map, setup_home_city};
+use crate::utils::shuffle;
 use crate::{
     action::Action,
     city::{City, MoodState::*},
@@ -34,6 +32,7 @@ use crate::{
     utils,
     wonder::Wonder,
 };
+use GameState::*;
 
 pub struct Game {
     pub state: GameState,
@@ -79,16 +78,17 @@ impl Game {
         } else {
             String::from(&seed[..32])
         };
-        let seed = seed
-            .as_bytes()
-            .try_into()
-            .expect("seed should be of length 32");
-        let mut rng = StdRng::from_seed(seed);
+        let s: &[u8] = seed.as_bytes();
+        let mut buf = [0u8; 8];
+        let len = 8.min(s.len());
+        buf[..len].copy_from_slice(&s[..len]);
+        let seed = u64::from_be_bytes(buf);
+        quad_rand::srand(seed);
 
         let mut players = Vec::new();
         let mut civilizations = civilizations::get_all();
         for i in 0..player_amount {
-            let civilization = rng.gen_range(0..civilizations.len());
+            let civilization = quad_rand::gen_range(0, civilizations.len());
             players.push(Player::new(civilizations.remove(civilization), i));
         }
 
@@ -96,18 +96,17 @@ impl Game {
             setup_home_city(&mut players, 0, "F1");
             setup_home_city(&mut players, 1, "F8");
         }
-        let starting_player = rng.gen_range(0..players.len());
+        let starting_player = quad_rand::gen_range(0, players.len());
         let mut dice_roll_outcomes = Vec::new();
         for _ in 0..DICE_ROLL_BUFFER {
-            dice_roll_outcomes.push(rng.gen_range(0..12));
+            dice_roll_outcomes.push(quad_rand::gen_range(0, 12));
         }
 
-        let mut wonders = wonders::get_all();
-        wonders.shuffle(&mut rng);
+        let wonders = shuffle(&mut wonders::get_all());
         let wonder_amount = wonders.len();
 
         let map = if setup {
-            Map::new(maximum_size_2_player_random_map(&mut rng))
+            Map::new(maximum_size_2_player_random_map())
         } else {
             Map::new(HashMap::new())
         };
@@ -799,7 +798,8 @@ impl Game {
         self.lock_undo();
         let dice_roll = self.dice_roll_outcomes.pop().unwrap_or_else(|| {
             println!("ran out of predetermined dice roll outcomes, unseeded rng is now being used");
-            rand::thread_rng().gen_range(0..12)
+
+            quad_rand::gen_range(0, 12)
         });
         self.dice_roll_log.push(dice_roll);
         dice_roll
@@ -886,7 +886,7 @@ impl Game {
             }
         }
         let player = &mut self.players[player_index];
-        if let Some(advance_bonus) = &advance.advance_bonus {
+        if let Some(advance_bonus) = &advance.bonus {
             player.gain_resources(advance_bonus.resources());
         }
         player.advances.push(advance.name);
@@ -932,7 +932,7 @@ impl Game {
             }
         }
         let player = &mut self.players[player_index];
-        if let Some(advance_bonus) = &advance.advance_bonus {
+        if let Some(advance_bonus) = &advance.bonus {
             player.loose_resources(advance_bonus.resources());
         }
         player.advances.pop();
@@ -1026,7 +1026,7 @@ impl Game {
     pub fn undo_recruit(
         &mut self,
         player_index: usize,
-        units: &Vec<UnitType>,
+        units: &[UnitType],
         city_position: Position,
         leader_index: Option<usize>,
     ) {

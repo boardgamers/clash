@@ -4,16 +4,16 @@ use server::action::{Action, CombatAction};
 use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
 use server::game::{CulturalInfluenceResolution, Game, GameState};
-use server::player::Player;
 use server::position::Position;
-use server::resource_pile::ResourcePile;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 use crate::advance_ui::AdvancePayment;
 use crate::assets::Assets;
+use crate::client::GameSyncRequest;
 use crate::collect_ui::CollectResources;
 use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
+use crate::happiness_ui::IncreaseHappiness;
 use crate::move_ui::MoveSelection;
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use crate::status_phase_ui::ChooseAdditionalAdvances;
@@ -21,11 +21,14 @@ use crate::status_phase_ui::ChooseAdditionalAdvances;
 #[derive(Clone)]
 pub enum ActiveDialog {
     None,
-    IncreaseHappiness(IncreaseHappiness),
+    TileMenu(Position),
     Log,
+    WaitingForUpdate,
+
+    // playing actions
+    IncreaseHappiness(IncreaseHappiness),
     AdvanceMenu,
     AdvancePayment(AdvancePayment),
-    TileMenu(Position),
     ConstructionPayment(ConstructionPayment),
     CollectResources(CollectResources),
     RecruitUnitSelection(RecruitAmount),
@@ -33,14 +36,14 @@ pub enum ActiveDialog {
     MoveUnits(MoveSelection),
     CulturalInfluenceResolution(CulturalInfluenceResolution),
 
-    //status phase
+    // status phase
     FreeAdvance,
     RaseSize1City,
     DetermineFirstPlayer,
     ChangeGovernmentType,
     ChooseAdditionalAdvances(ChooseAdditionalAdvances),
 
-    //combat
+    // combat
     PlaceSettler,
     Retreat,
     RemoveCasualties(RemoveCasualtiesSelection),
@@ -61,6 +64,8 @@ pub enum StateUpdate {
     ResolvePendingUpdate(bool),
     Execute(Action),
     ExecuteWithWarning(PendingUpdate),
+    Import,
+    Export,
 }
 
 impl StateUpdate {
@@ -131,22 +136,10 @@ impl StateUpdates {
     }
 }
 
-#[derive(Clone)]
-pub struct IncreaseHappiness {
-    pub steps: Vec<(Position, u32)>,
-    pub cost: ResourcePile,
-}
-
-impl IncreaseHappiness {
-    pub fn new(steps: Vec<(Position, u32)>, cost: ResourcePile) -> IncreaseHappiness {
-        IncreaseHappiness { steps, cost }
-    }
-}
-
 pub struct State {
     pub assets: Assets,
     pub active_dialog: ActiveDialog,
-    pub dialog_stack: Vec<ActiveDialog>,
+    dialog_stack: Vec<ActiveDialog>,
     pub pending_update: Option<PendingUpdate>,
 }
 
@@ -177,16 +170,15 @@ impl State {
         !matches!(self.active_dialog, ActiveDialog::None)
     }
 
-    pub fn update(&mut self, game: &mut Game, update: StateUpdate) {
+    pub fn update(&mut self, game: &Game, update: StateUpdate) -> GameSyncRequest {
         match update {
-            StateUpdate::None => {}
-            StateUpdate::Execute(a) => {
-                self.execute(game, a);
-            }
+            StateUpdate::None => GameSyncRequest::None,
+            StateUpdate::Execute(a) => GameSyncRequest::ExecuteAction(a),
             StateUpdate::ExecuteWithWarning(update) => {
                 self.pending_update = Some(update);
+                GameSyncRequest::None
             }
-            StateUpdate::Cancel => self.update_from_game_state(game),
+            StateUpdate::Cancel => self.update_from_game(game),
             StateUpdate::ResolvePendingUpdate(confirm) => {
                 if confirm {
                     let action = self
@@ -194,28 +186,42 @@ impl State {
                         .take()
                         .expect("no pending update")
                         .action;
-                    self.execute(game, action);
+                    GameSyncRequest::ExecuteAction(action)
                 } else {
                     self.pending_update = None;
+                    GameSyncRequest::None
                 }
             }
             StateUpdate::SetDialog(dialog) => {
-                self.active_dialog = dialog;
-                self.dialog_stack.clear();
+                self.set_dialog(dialog);
+                GameSyncRequest::None
             }
             StateUpdate::OpenDialog(dialog) => {
-                if matches!(self.active_dialog, ActiveDialog::TileMenu(_)) {
-                    self.close_dialog();
-                }
-                if !matches!(self.active_dialog, ActiveDialog::None) {
-                    self.dialog_stack.push(self.active_dialog.clone());
-                }
-                self.active_dialog = dialog;
+                self.open_dialog(dialog);
+                GameSyncRequest::None
             }
             StateUpdate::CloseDialog => {
                 self.close_dialog();
+                GameSyncRequest::None
             }
+            StateUpdate::Import => GameSyncRequest::Import,
+            StateUpdate::Export => GameSyncRequest::Export,
         }
+    }
+
+    fn open_dialog(&mut self, dialog: ActiveDialog) {
+        if matches!(self.active_dialog, ActiveDialog::TileMenu(_)) {
+            self.close_dialog();
+        }
+        if !matches!(self.active_dialog, ActiveDialog::None) {
+            self.dialog_stack.push(self.active_dialog.clone());
+        }
+        self.active_dialog = dialog;
+    }
+
+    pub fn set_dialog(&mut self, dialog: ActiveDialog) {
+        self.active_dialog = dialog;
+        self.dialog_stack.clear();
     }
 
     fn close_dialog(&mut self) {
@@ -226,7 +232,7 @@ impl State {
         }
     }
 
-    pub fn update_from_game_state(&mut self, game: &mut Game) {
+    pub fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {
         self.clear();
 
         self.active_dialog = match &game.state {
@@ -277,52 +283,16 @@ impl State {
                 CombatPhase::Retreat => ActiveDialog::Retreat,
             },
             _ => ActiveDialog::None,
-        }
+        };
+        GameSyncRequest::None
     }
 
-    fn execute_status_phase(&mut self, game: &mut Game, action: StatusPhaseAction) -> ActiveDialog {
+    fn execute_status_phase(&mut self, game: &Game, action: StatusPhaseAction) -> ActiveDialog {
         self.update(game, StateUpdate::status_phase(action));
         ActiveDialog::None
-    }
-
-    pub fn execute(&mut self, game: &mut Game, a: Action) {
-        game.execute_action(a, game.active_player());
-        self.update_from_game_state(game);
     }
 }
 
 pub fn can_play_action(game: &Game) -> bool {
     game.state == GameState::Playing && game.actions_left > 0
-}
-
-pub struct CityMenu {
-    pub player_index: usize,
-    pub city_owner_index: usize,
-    pub city_position: Position,
-}
-
-impl CityMenu {
-    pub fn new(player_index: usize, city_owner_index: usize, city_position: Position) -> Self {
-        CityMenu {
-            player_index,
-            city_owner_index,
-            city_position,
-        }
-    }
-
-    pub fn get_player<'a>(&self, game: &'a Game) -> &'a Player {
-        game.get_player(self.player_index)
-    }
-
-    pub fn get_city_owner<'a>(&self, game: &'a Game) -> &'a Player {
-        game.get_player(self.city_owner_index)
-    }
-
-    pub fn get_city<'a>(&self, game: &'a Game) -> &'a City {
-        return game.get_city(self.city_owner_index, self.city_position);
-    }
-
-    pub fn is_city_owner(&self) -> bool {
-        self.player_index == self.city_owner_index
-    }
 }

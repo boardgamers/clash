@@ -1,13 +1,47 @@
+#![allow(clippy::missing_panics_doc)]
+
+use crate::client;
+use macroquad::prelude::next_frame;
+
+use crate::client::{Features, GameSyncRequest, GameSyncResult};
 use server::city::City;
 use server::game::Game;
-
 use server::map::Terrain;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::UnitType;
 
+pub async fn run(mut game: Game) {
+    let mut state = client::init().await;
+    let features = Features {
+        import_export: true,
+    };
+
+    let mut sync_result = GameSyncResult::None;
+    loop {
+        let message = client::render_and_update(&game, &mut state, &sync_result, &features);
+        sync_result = GameSyncResult::None;
+        match message {
+            GameSyncRequest::None => {}
+            GameSyncRequest::ExecuteAction(a) => {
+                game.execute_action(a, game.active_player());
+                sync_result = GameSyncResult::Update;
+            }
+            GameSyncRequest::Import => {
+                game = import();
+                sync_result = GameSyncResult::Update;
+            }
+            GameSyncRequest::Export => {
+                export(&game);
+            }
+        };
+        next_frame().await;
+    }
+}
+
+#[must_use]
 pub fn setup_local_game() -> Game {
-    let mut game = Game::new(2, "a".repeat(32), false);
+    let mut game = Game::new(2, "0".to_string(), false);
     game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];
     let add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {
         game.recruit(
@@ -74,4 +108,25 @@ fn add_city(game: &mut Game, player_index: usize, s: &str) {
 
 fn add_terrain(game: &mut Game, pos: &str, terrain: Terrain) {
     game.map.tiles.insert(Position::from_offset(pos), terrain);
+}
+
+// const EXPORT_FILE: &str = "game.json";
+
+fn import() -> Game {
+    // todo only works with native client
+    // let file = File::open(EXPORT_FILE).expect("Failed to open export file");
+    // let reader = BufReader::new(file);
+    // let data: GameData = serde_json::from_reader(reader).expect("Failed to read export file");
+    // Game::from_data(data)
+    panic!()
+}
+
+fn export(_game: &Game) {
+    // todo only works with native client
+    // serde_json::to_writer_pretty(
+    //     File::create(EXPORT_FILE).expect("Failed to create export file"),
+    //     &game.cloned_data(),
+    // )
+    // .expect("Failed to write export file");
+    panic!()
 }

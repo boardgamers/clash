@@ -3,6 +3,7 @@ use std::cmp;
 use macroquad::math::{i32, u32};
 use macroquad::ui::Ui;
 
+use crate::city_ui::CityMenu;
 use server::action::Action;
 use server::city::City;
 use server::city_pieces::Building;
@@ -14,12 +15,11 @@ use server::position::Position;
 use server::resource_pile::PaymentOptions;
 use server::unit::UnitType;
 
+use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::recruit_unit_ui::RecruitSelection;
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::CountSelector;
-use crate::ui_state::CityMenu;
-use crate::ui_state::{ActiveDialog, StateUpdate};
 
 pub fn add_construct_button(
     game: &Game,

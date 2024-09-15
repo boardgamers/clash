@@ -7,7 +7,7 @@ use server::game::{Game, GameState};
 use server::position::Position;
 use server::unit::{MovementAction, Unit};
 
-use crate::ui_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::unit_ui;
 use crate::unit_ui::UnitSelection;
 

@@ -88,7 +88,7 @@ fn change_government_type(
     let government = &new_government.new_government;
     if advances::get_leading_government_advance(government)
         .expect("government should exist")
-        .required_advance
+        .required
         .is_some_and(|required_advance| !game.players[player_index].has_advance(&required_advance))
     {
         panic!("Player doesn't have the required advance for the government");
@@ -221,7 +221,7 @@ pub fn next_status_phase(phase: Option<StatusPhaseState>) -> StatusPhaseState {
 /// # Panics
 /// Panics if the game state is not valid
 pub fn player_that_chooses_next_first_player(
-    players: &Vec<Player>,
+    players: &[Player],
     current_start_player_index: usize,
     dropped_players: &[usize],
 ) -> usize {
