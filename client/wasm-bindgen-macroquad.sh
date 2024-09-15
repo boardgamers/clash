@@ -125,6 +125,7 @@ fi
 echo "Running wasm-bindgen..."
 
 mkdir -p dist
+cp -r assets dist/
 wasm-bindgen $TARGET_DIR/"$PROJECT_NAME".wasm --out-dir dist --target web --no-typescript
 
 echo "Patching wasm-bindgen output..."
