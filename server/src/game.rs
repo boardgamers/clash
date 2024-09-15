@@ -82,10 +82,10 @@ impl Game {
         let mut players = Vec::new();
         let mut civilizations = civilizations::get_all();
 
-        if setup {
-            setup_home_city(&mut players, 0, "F1");
-            setup_home_city(&mut players, 1, "F8");
-        }
+        // if setup {
+        //     setup_home_city(&mut players, 0, "F1");
+        //     setup_home_city(&mut players, 1, "F8");
+        // }
         let mut dice_roll_outcomes = Vec::new();
 
         let mut wonders = wonders::get_all();
