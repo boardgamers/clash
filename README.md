@@ -5,7 +5,7 @@
 ## Client
 
 `cargo build --target wasm32-unknown-unknown`
-In the `client` directory, run `basic-http-server .` and open `http://localhost:4000` in a browser.
+In the `client` directory, run `basic-http-server .` in `dist/` and open `http://localhost:4000` in a browser.
 
 For random, use https://github.com/not-fl3/quad-rand
 
