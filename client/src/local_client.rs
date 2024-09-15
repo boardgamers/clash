@@ -116,6 +116,7 @@ fn add_terrain(game: &mut Game, pos: &str, terrain: Terrain) {
 const EXPORT_FILE: &str = "game.json";
 
 fn import() -> Game {
+    // todo only works with native client
     // let file = File::open(EXPORT_FILE).expect("Failed to open export file");
     // let reader = BufReader::new(file);
     // let data: GameData = serde_json::from_reader(reader).expect("Failed to read export file");
@@ -124,6 +125,7 @@ fn import() -> Game {
 }
 
 fn export(game: &Game) {
+    // todo only works with native client
     // serde_json::to_writer_pretty(
     //     File::create(EXPORT_FILE).expect("Failed to create export file"),
     //     &game.cloned_data(),

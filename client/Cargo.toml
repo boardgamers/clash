@@ -3,6 +3,7 @@ name = "client"
 version = "0.1.0"
 edition = "2021"
 
+# may be needed for remote client
 #[lib]
 #name = "client"
 #crate-type = ["cdylib", "rlib"]

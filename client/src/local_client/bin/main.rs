@@ -6,7 +6,7 @@ use server::game::Game;
 async fn main() {
     //todo add button to decide random or fixed game
     let game = if false {
-        Game::new(2, "0".to_string(), true)
+        Game::new(2, "a".repeat(32), true)
     } else {
         local_client::setup_local_game()
     };

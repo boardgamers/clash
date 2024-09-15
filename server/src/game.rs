@@ -72,9 +72,21 @@ impl Game {
     /// Panics only if there is an internal bug
     #[must_use]
     pub fn new(player_amount: usize, seed: String, setup: bool) -> Self {
-        let seed = u64::from_str_radix(&seed, 16).expect("seed should be of length 32");
+        let seed_length = seed.len();
+        let seed = if seed_length < 32 {
+            seed + &" ".repeat(32 - seed_length)
+        } else {
+            String::from(&seed[..32])
+        };
+        let s: &[u8] = seed
+            .as_bytes()
+            .try_into()
+            .expect("seed should be of length 32");
+        let mut buf = [0u8; 8];
+        let len = 8.min(s.len());
+        buf[..len].copy_from_slice(&s[..len]);
+        let seed = u64::from_be_bytes(buf);
         quad_rand::srand(seed);
-        // quad_rand::srand(2);
 
         let mut players = Vec::new();
         let mut civilizations = civilizations::get_all();

@@ -10,6 +10,8 @@ use server::action::Action;
 use server::game::Game;
 use wasm_bindgen::prelude::*;
 
+// todo not tested yet
+
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(js_namespace = console)]

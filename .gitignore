@@ -1,6 +1,7 @@
 .idea/
 target/
 dist/
+wbindgen/
 .vscode/
 .history/
 *.cmd/
