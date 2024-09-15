@@ -478,6 +478,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "quad-rand"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b76f1009795ca44bb5aaae8fd3f18953e209259c33d9b059b1f53d58ab7511db"
+
+[[package]]
 name = "quote"
 version = "1.0.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -555,6 +561,7 @@ dependencies = [
  "async-std",
  "hex2d",
  "itertools",
+ "quad-rand",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",

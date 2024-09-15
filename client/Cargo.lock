@@ -785,6 +785,7 @@ dependencies = [
  "async-std",
  "hex2d",
  "itertools",
+ "quad-rand",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",

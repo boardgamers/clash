@@ -3,11 +3,10 @@ use std::mem;
 
 use serde::{Deserialize, Serialize};
 
-use GameState::*;
-
 use crate::combat::Combat;
 use crate::combat::{capture_position, execute_combat_action, initiate_combat, CombatPhase};
 use crate::map::{maximum_size_2_player_random_map, setup_home_city};
+use crate::utils::shuffle;
 use crate::{
     action::Action,
     city::{City, MoodState::*},
@@ -33,6 +32,7 @@ use crate::{
     utils,
     wonder::Wonder,
 };
+use GameState::*;
 
 pub struct Game {
     pub state: GameState,
@@ -72,27 +72,28 @@ impl Game {
     /// Panics only if there is an internal bug
     #[must_use]
     pub fn new(player_amount: usize, seed: String, setup: bool) -> Self {
-        let seed_length = seed.len();
-        let seed = if seed_length < 32 {
-            seed + &" ".repeat(32 - seed_length)
-        } else {
-            String::from(&seed[..32])
-        };
+        let seed = u64::from_str_radix(&seed, 16).expect("seed should be of length 32");
+        quad_rand::srand(seed);
+        // quad_rand::srand(2);
 
         let mut players = Vec::new();
         let mut civilizations = civilizations::get_all();
         for i in 0..player_amount {
-            let civilization = 0;
+            let civilization = quad_rand::gen_range(0, civilizations.len());
             players.push(Player::new(civilizations.remove(civilization), i));
         }
 
-        // if setup {
-        //     setup_home_city(&mut players, 0, "F1");
-        //     setup_home_city(&mut players, 1, "F8");
-        // }
+        if setup {
+            setup_home_city(&mut players, 0, "F1");
+            setup_home_city(&mut players, 1, "F8");
+        }
+        let starting_player = quad_rand::gen_range(0, players.len());
         let mut dice_roll_outcomes = Vec::new();
+        for _ in 0..DICE_ROLL_BUFFER {
+            dice_roll_outcomes.push(quad_rand::gen_range(0, 12));
+        }
 
-        let mut wonders = wonders::get_all();
+        let wonders = shuffle(&mut wonders::get_all());
         let wonder_amount = wonders.len();
 
         let map = if setup {
@@ -100,8 +101,7 @@ impl Game {
         } else {
             Map::new(HashMap::new())
         };
-        let starting_player = 0;
-        let game = Self {
+        Self {
             state: Playing,
             players,
             map,
@@ -127,8 +127,7 @@ impl Game {
             wonders_left: wonders,
             wonder_amount_left: wonder_amount,
             undo_context_stack: Vec::new(),
-        };
-        game
+        }
     }
 
     ///
@@ -788,7 +787,13 @@ impl Game {
 
     pub fn get_next_dice_roll(&mut self) -> u8 {
         self.lock_undo();
-        0
+        let dice_roll = self.dice_roll_outcomes.pop().unwrap_or_else(|| {
+            println!("ran out of predetermined dice roll outcomes, unseeded rng is now being used");
+
+            quad_rand::gen_range(0, 12)
+        });
+        self.dice_roll_log.push(dice_roll);
+        dice_roll
     }
 
     fn add_message(&mut self, message: &str) {

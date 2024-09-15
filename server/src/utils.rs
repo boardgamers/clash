@@ -24,6 +24,15 @@ where
     None
 }
 
+pub fn shuffle<T>(list: &mut Vec<T>) -> Vec<T> {
+    let mut dest = Vec::with_capacity(list.len());
+    while !list.is_empty() {
+        let index = quad_rand::gen_range(0, list.len());
+        dest.push(list.remove(index));
+    }
+    dest
+}
+
 pub fn ordinal_number(value: u32) -> String {
     format!(
         "{value}{}",
