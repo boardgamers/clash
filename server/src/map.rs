@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 
 use itertools::Itertools;
-use rand::prelude::SliceRandom;
-use rand::prelude::StdRng;
 use serde::{Deserialize, Serialize};
 
 use crate::city::City;
