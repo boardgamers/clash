@@ -114,10 +114,10 @@ TARGET_DIR="target/wasm32-unknown-unknown"
 # Build
 echo "Building $PROJECT_NAME..."
 if [ -n "$RELEASE" ]; then
-	cargo build --release --target wasm32-unknown-unknown
+	cargo build --release --target wasm32-unknown-unknown --features "wasm"
 	TARGET_DIR="$TARGET_DIR/release"
 else
-	cargo build --target wasm32-unknown-unknown
+	cargo build --target wasm32-unknown-unknown --features "wasm"
 	TARGET_DIR="$TARGET_DIR/debug"
 fi
 

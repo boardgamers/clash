@@ -3,6 +3,10 @@ name = "client"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+# disable file import and export
+wasm = []
+
 # may be needed for remote client
 #[lib]
 #name = "client"
