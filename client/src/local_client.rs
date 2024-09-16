@@ -18,7 +18,7 @@ pub async fn run(mut game: Game, features: &Features) {
 
     let mut sync_result = GameSyncResult::None;
     loop {
-        let message = client::render_and_update(&game, &mut state, &sync_result, &features);
+        let message = client::render_and_update(&game, &mut state, &sync_result, features);
         sync_result = GameSyncResult::None;
         match message {
             GameSyncRequest::None => {}
