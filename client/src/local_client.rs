@@ -2,24 +2,23 @@
 
 use crate::client;
 use macroquad::prelude::next_frame;
+use std::fs::File;
+use std::io::BufReader;
 
 use crate::client::{Features, GameSyncRequest, GameSyncResult};
 use server::city::City;
-use server::game::Game;
+use server::game::{Game, GameData};
 use server::map::Terrain;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::UnitType;
 
-pub async fn run(mut game: Game) {
+pub async fn run(mut game: Game, features: &Features) {
     let mut state = client::init().await;
-    let features = Features {
-        import_export: true,
-    };
 
     let mut sync_result = GameSyncResult::None;
     loop {
-        let message = client::render_and_update(&game, &mut state, &sync_result, &features);
+        let message = client::render_and_update(&game, &mut state, &sync_result, features);
         sync_result = GameSyncResult::None;
         match message {
             GameSyncRequest::None => {}
@@ -110,23 +109,19 @@ fn add_terrain(game: &mut Game, pos: &str, terrain: Terrain) {
     game.map.tiles.insert(Position::from_offset(pos), terrain);
 }
 
-// const EXPORT_FILE: &str = "game.json";
+const EXPORT_FILE: &str = "game.json";
 
 fn import() -> Game {
-    // todo only works with native client
-    // let file = File::open(EXPORT_FILE).expect("Failed to open export file");
-    // let reader = BufReader::new(file);
-    // let data: GameData = serde_json::from_reader(reader).expect("Failed to read export file");
-    // Game::from_data(data)
-    panic!()
+    let file = File::open(EXPORT_FILE).expect("Failed to open export file");
+    let reader = BufReader::new(file);
+    let data: GameData = serde_json::from_reader(reader).expect("Failed to read export file");
+    Game::from_data(data)
 }
 
-fn export(_game: &Game) {
-    // todo only works with native client
-    // serde_json::to_writer_pretty(
-    //     File::create(EXPORT_FILE).expect("Failed to create export file"),
-    //     &game.cloned_data(),
-    // )
-    // .expect("Failed to write export file");
-    panic!()
+fn export(game: &Game) {
+    serde_json::to_writer_pretty(
+        File::create(EXPORT_FILE).expect("Failed to create export file"),
+        &game.cloned_data(),
+    )
+    .expect("Failed to write export file");
 }
