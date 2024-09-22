@@ -21,7 +21,7 @@
 
 - `cd client`
 - `./build-remote.sh`
-- `cd dist`
+- `cd remote_client/dist`
 - `basic-http-server .`
 - `google-chrome --disable-web-security --user-data-dir=/tmp http://localhost:8612/game/Pleasant-surface-4392` (or what
   your game is called)

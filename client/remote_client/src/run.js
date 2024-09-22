@@ -1,4 +1,4 @@
-import init, {set_wasm} from "./remote_client.js";
+import init, {set_wasm} from "../../dist/remote_client";
 
 async function impl_run() {
     let wbg = await init();

@@ -1,5 +1,5 @@
-import {Control} from "./control.js";
-import {run} from "./run.js";
+import {Control} from "./control";
+import {run} from "./run";
 
 function launch(selector) {
     const control = new Control();

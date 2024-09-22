@@ -1,3 +1,5 @@
+import {EventEmitter} from "events";
+
 export class Control extends EventEmitter {
     constructor() {
         super();
