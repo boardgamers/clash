@@ -2,6 +2,7 @@
 name = "client"
 version = "0.1.0"
 edition = "2021"
+default-run = "local_client"
 
 [features]
 # disable file import and export
@@ -26,3 +27,7 @@ log = "0.4.20"
 [[bin]]
 name = "local_client"
 path = "src/local_client/bin/main.rs"
+
+[[bin]]
+name = "remote_client"
+path = "src/remote_client/bin/main.rs"

@@ -26,11 +26,7 @@ mod move_ui;
 mod payment_ui;
 mod player_ui;
 mod recruit_unit_ui;
-pub mod remote_client;
 mod resource_ui;
 mod select_ui;
 mod status_phase_ui;
 mod unit_ui;
-
-#[macro_use]
-extern crate lazy_static;
