@@ -1,5 +1,3 @@
-import {run} from "./run";
-
 export class Control extends EventEmitter {
     constructor() {
         super();

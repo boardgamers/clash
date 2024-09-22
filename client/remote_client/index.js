@@ -1,5 +1,5 @@
-import {Control} from "./control";
-import {run} from "./run";
+import {Control} from "./control.js";
+import {run} from "./run.js";
 
 function launch(selector) {
     const control = new Control();
@@ -8,7 +8,7 @@ function launch(selector) {
 
     window.clash = {
         launch(selector) {
-            run(selector);
+            run();
 
             return control;
         },
@@ -17,6 +17,7 @@ function launch(selector) {
     return control;
 }
 
+console.log("set clash");
 window.clash = {launch};
 
 export default launch;

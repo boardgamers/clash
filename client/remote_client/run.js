@@ -11,10 +11,7 @@ async function impl_run() {
     load("./remote_client_bg.wasm");
 }
 
-export async function run(selector) {
-    // const canvasElement = document.createElement("canvas");
-    // canvasElement.id = "glcanvas";
-    // document.querySelector(selector).appendChild(canvasElement);
+export async function run() {
     document.getElementById("glcanvas").removeAttribute("hidden");
     document.getElementById("glcanvas").focus();
     await impl_run();
