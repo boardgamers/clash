@@ -11,7 +11,7 @@ mod advance_ui;
 mod assets;
 mod city_ui;
 pub mod client;
-mod client_state;
+pub mod client_state;
 mod collect_ui;
 mod combat_ui;
 mod construct_ui;

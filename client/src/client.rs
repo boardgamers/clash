@@ -8,7 +8,9 @@ use server::position::Position;
 use server::status_phase::StatusPhaseAction;
 
 use crate::advance_ui::{pay_advance_dialog, show_advance_menu, show_free_advance_menu};
-use crate::client_state::{ActiveDialog, PendingUpdate, State, StateUpdate, StateUpdates};
+use crate::client_state::{
+    ActiveDialog, ControlPlayers, PendingUpdate, State, StateUpdate, StateUpdates,
+};
 use crate::collect_ui::{click_collect_option, collect_resources_dialog};
 use crate::construct_ui::pay_construction_dialog;
 use crate::dialog_ui::active_dialog_window;
@@ -33,6 +35,20 @@ pub fn render_and_update(
     sync_result: &GameSyncResult,
     features: &Features,
 ) -> GameSyncRequest {
+    match state.control_players {
+        ControlPlayers::None => {
+            // todo add spectator mode
+            return GameSyncRequest::None;
+        }
+        ControlPlayers::All => {}
+        ControlPlayers::Own(p) => {
+            if game.active_player() != p {
+                // todo add spectator mode
+                return GameSyncRequest::None;
+            }
+        }
+    }
+
     match sync_result {
         GameSyncResult::None => {}
         GameSyncResult::Update => {

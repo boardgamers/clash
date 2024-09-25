@@ -136,8 +136,15 @@ impl StateUpdates {
     }
 }
 
+pub enum ControlPlayers {
+    None,
+    All,
+    Own(usize),
+}
+
 pub struct State {
     pub assets: Assets,
+    pub control_players: ControlPlayers,
     pub active_dialog: ActiveDialog,
     dialog_stack: Vec<ActiveDialog>,
     pub pending_update: Option<PendingUpdate>,
@@ -150,6 +157,7 @@ impl State {
             dialog_stack: vec![],
             pending_update: None,
             assets: Assets::new(features).await,
+            control_players: ControlPlayers::None,
         }
     }
 
