@@ -1,5 +1,5 @@
 use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
-use macroquad::prelude::{clear_background, set_fullscreen, vec2, WHITE};
+use macroquad::prelude::{clear_background, vec2, WHITE};
 use macroquad::ui::root_ui;
 
 use server::action::Action;

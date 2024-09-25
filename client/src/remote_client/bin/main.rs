@@ -34,32 +34,30 @@ extern "C" {
     fn ready(this: &Control);
 }
 
-// todo remove
-#[derive(Debug)]
-pub enum JsState {
-    None,
+enum RemoteClientState {
+    New,
     WaitingForUpdate,
-    GameUpdated(JsValue),
+    Playing,
 }
 
 #[wasm_bindgen]
-pub struct Client {
+struct RemoteClient {
     control: Control,
-    state: JsState,
+    state: RemoteClientState,
     game: Option<Game>,
 }
 
 #[macroquad::main("Clash")]
 async fn main() {
-    Client::start().await;
+    RemoteClient::start().await;
 }
 
 #[wasm_bindgen]
-impl Client {
+impl RemoteClient {
     pub async fn start() {
-        let mut client = Client {
+        let mut client = RemoteClient {
             control: get_control(),
-            state: JsState::WaitingForUpdate,
+            state: RemoteClientState::New,
             game: None,
         };
         client.run().await;
@@ -79,51 +77,62 @@ impl Client {
                 log(format!("received player: {}", p).as_str());
                 client_state.control_players = ControlPlayers::Own(p as usize);
             }
-            let sync_result = &mut self.update_game();
+
+            let sync_result = self.update_state();
+
+            //todo
+            // self.game = Some(Self::g());
 
             if let Some(game) = &self.game {
-                let message = render_and_update(game, &mut client_state, sync_result, &features);
+                let message = render_and_update(game, &mut client_state, &sync_result, &features);
 
                 if let GameSyncRequest::ExecuteAction(a) = message {
                     let _ = &mut self.execute_action(&a);
                 };
             }
+            // async_std::task::sleep(std::time::Duration::from_millis(100)).await;
+
             next_frame().await;
         }
     }
 
-    fn execute_action(&mut self, a: &Action) {
-        if !matches!(self.state, JsState::None) {
-            log(format!("cannot execute action - state is {:?}", self.state).as_str());
-            return;
-        }
-
-        self.control
-            .send_move(serde_json::to_string(&a).unwrap().as_str());
-        self.state = JsState::WaitingForUpdate;
-    }
-
-    fn update_game(&mut self) -> GameSyncResult {
+    fn update_state(&mut self) -> GameSyncResult {
         let s = self.control.receive_state();
         if s.is_object() {
             log("received state");
-            self.state = JsState::GameUpdated(s);
-            self.control.ready();
-        }
-
-        let sync_result = match &self.state {
-            JsState::None => GameSyncResult::None,
-            JsState::WaitingForUpdate => GameSyncResult::WaitingForUpdate,
-            JsState::GameUpdated(_) => GameSyncResult::Update,
-        };
-
-        if let JsState::GameUpdated(s) = &self.state {
-            let game = Game::from_data(
+            let game1 = Game::from_data(
                 serde_wasm_bindgen::from_value(s.into()).expect("game should be of type game data"),
             );
-            self.game = Some(game);
-            self.state = JsState::None;
+            self.game = Some(game1);
+            self.state = RemoteClientState::Playing;
+            self.control.ready();
+            return GameSyncResult::Update;
         }
-        sync_result
+        match &self.state {
+            RemoteClientState::New => GameSyncResult::None,
+            RemoteClientState::WaitingForUpdate => GameSyncResult::WaitingForUpdate,
+            RemoteClientState::Playing => GameSyncResult::None,
+        }
     }
+
+    fn g() -> Game {
+        let mut game = Game::new(2, "a".repeat(32), true);
+        add_terrain(&mut game, "A1", Terrain::Fertile);
+        add_terrain(&mut game, "A2", Terrain::Water);
+        game
+    }
+
+    fn execute_action(&mut self, a: &Action) {
+        if let RemoteClientState::Playing = &self.state {
+            self.control
+                .send_move(serde_json::to_string(&a).unwrap().as_str());
+            self.state = RemoteClientState::WaitingForUpdate;
+        } else {
+            log("cannot execute action");
+        }
+    }
+}
+
+fn add_terrain(game: &mut Game, pos: &str, terrain: Terrain) {
+    game.map.tiles.insert(Position::from_offset(pos), terrain);
 }
