@@ -59,8 +59,7 @@ fi
 echo "Running wasm-bindgen..."
 
 mkdir -p dist
-# todo assets should be part of webpack
-cp -r assets dist/
+
 #cp remote_client/*.js dist/
 
 wasm-bindgen $TARGET_DIR/"$PROJECT_NAME".wasm --out-dir dist --target web --no-typescript
@@ -76,7 +75,13 @@ sed -i "s/const imports = __wbg_get_imports();/return __wbg_get_imports();/" dis
 #rm -rf dist/snippets
 
 pushd remote_client
+mkdir -p dist
+rm -rf dist/*
 npm run build
+cp -r ../assets dist/
+pushd dist
+mv *.wasm client.wasm
+popd
 popd
 
 echo "Done!"

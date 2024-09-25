@@ -8,6 +8,7 @@ async fn main() {
 
     let features = Features {
         import_export: !wasm,
+        local_assets: !wasm,
     };
 
     //todo add button to decide random or fixed game

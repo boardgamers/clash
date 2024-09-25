@@ -4,6 +4,8 @@ use macroquad::prelude::next_frame;
 
 use client::client::{init, render_and_update, Features, GameSyncRequest, GameSyncResult};
 use server::action::Action;
+use server::map::Terrain;
+use server::position::Position;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -19,23 +21,30 @@ extern "C" {
     fn get_control() -> Control;
 
     #[wasm_bindgen(method)]
-    fn get_and_reset_state(this: &Control) -> JsValue;
+    fn receive_state(this: &Control) -> JsValue;
 
     #[wasm_bindgen(method)]
-    fn execute_action(this: &Control, action: &str);
+    fn receive_player(this: &Control) -> JsValue;
+
+    #[wasm_bindgen(method)]
+    fn send_move(this: &Control, action: &str);
+
+    #[wasm_bindgen(method)]
+    fn ready(this: &Control);
 }
 
 #[derive(Debug)]
 pub enum State {
     None,
     WaitingForUpdate,
-    GameUpdated(String),
+    GameUpdated(JsValue),
 }
 
 #[wasm_bindgen]
 pub struct Client {
     control: Control,
     state: State,
+    player: Option<usize>,
     game: Option<Game>,
 }
 
@@ -50,16 +59,19 @@ impl Client {
         let mut client = Client {
             control: get_control(),
             state: State::WaitingForUpdate,
+            player: None,
             game: None,
         };
         client.run().await;
     }
 
     pub async fn run(&mut self) {
-        let mut client_state = init().await;
         let features = Features {
             import_export: false,
+            local_assets: false,
         };
+
+        let mut client_state = init(&features).await;
 
         loop {
             let sync_result = &mut self.update_game();
@@ -82,11 +94,23 @@ impl Client {
         }
 
         self.control
-            .execute_action(serde_json::to_string(&a).unwrap().as_str());
+            .send_move(serde_json::to_string(&a).unwrap().as_str());
         self.state = State::WaitingForUpdate;
     }
 
     fn update_game(&mut self) -> GameSyncResult {
+        let p = self.control.receive_player().as_f64();
+        if let Some(p) = p {
+            log(format!("received player: {}", p).as_str());
+            self.player = Some(p as usize);
+        }
+        let s = self.control.receive_state();
+        if s.is_object() {
+            log("received state");
+            self.state = State::GameUpdated(s);
+            self.control.ready();
+        }
+
         let sync_result = match &self.state {
             State::None => GameSyncResult::None,
             State::WaitingForUpdate => GameSyncResult::WaitingForUpdate,
@@ -94,7 +118,9 @@ impl Client {
         };
 
         if let State::GameUpdated(s) = &self.state {
-            let game = Game::from_data(serde_json::from_str(&s).unwrap());
+            let game = Game::from_data(
+                serde_wasm_bindgen::from_value(s.into()).expect("game should be of type game data"),
+            );
             self.game = Some(game);
             self.state = State::None;
         }

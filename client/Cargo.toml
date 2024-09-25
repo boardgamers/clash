@@ -4,6 +4,12 @@ version = "0.1.0"
 edition = "2021"
 default-run = "local_client"
 
+[profile.dev]
+debug = true
+
+[profile.release]
+debug = true
+
 [features]
 # disable file import and export
 wasm = []
@@ -23,6 +29,8 @@ wasm-bindgen = "0.2.83"
 wasm-bindgen-futures = "0.4.33"
 lazy_static = "1.4.0"
 log = "0.4.20"
+async-std = "1.13.0"
+serde-wasm-bindgen = "0.6.5"
 
 [[bin]]
 name = "local_client"

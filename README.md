@@ -35,6 +35,7 @@
 # Notes
 
 - https://stackoverflow.com/questions/40102686/how-to-install-package-with-local-path-by-yarn-it-couldnt-find-package
+- class:d-none={!stateSent}
 
 # Todo
 

@@ -14,7 +14,7 @@ use server::resource_pile::ResourcePile;
 use server::unit::UnitType;
 
 pub async fn run(mut game: Game, features: &Features) {
-    let mut state = client::init().await;
+    let mut state = client::init(features).await;
 
     let mut sync_result = GameSyncResult::None;
     loop {

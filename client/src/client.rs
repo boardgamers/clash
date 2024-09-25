@@ -21,10 +21,9 @@ use crate::map_ui::{draw_map, show_tile_menu};
 use crate::player_ui::{show_global_controls, show_globals, show_resources, show_wonders};
 use crate::{combat_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui};
 
-pub async fn init() -> State {
-    let state = State::new().await;
+pub async fn init(features: &Features) -> State {
+    let state = State::new(features).await;
 
-    set_fullscreen(true);
     state
 }
 
@@ -185,6 +184,7 @@ pub fn try_click(game: &Game, state: &State, player_index: usize) -> StateUpdate
 
 pub struct Features {
     pub import_export: bool,
+    pub local_assets: bool,
 }
 
 pub enum GameSyncRequest {

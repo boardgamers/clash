@@ -9,7 +9,7 @@ use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 use crate::advance_ui::AdvancePayment;
 use crate::assets::Assets;
-use crate::client::GameSyncRequest;
+use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
 use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
@@ -144,12 +144,12 @@ pub struct State {
 }
 
 impl State {
-    pub async fn new() -> State {
+    pub async fn new(features: &Features) -> State {
         State {
             active_dialog: ActiveDialog::None,
             dialog_stack: vec![],
             pending_update: None,
-            assets: Assets::new().await,
+            assets: Assets::new(features).await,
         }
     }
 
