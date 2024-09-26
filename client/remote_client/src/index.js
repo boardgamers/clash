@@ -6,7 +6,7 @@ window.clash = {
         const control = new Control();
         window.clash_control = control;
 
-        run();
+        run(selector);
 
         return control;
     },
