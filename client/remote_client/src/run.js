@@ -1,6 +1,6 @@
 import init, {set_wasm} from "../../dist/remote_client";
 
-async function impl_run() {
+export async function run() {
     let wbg = await init();
     miniquad_add_plugin({
         register_plugin: (a) => (a.wbg = wbg),
@@ -8,9 +8,7 @@ async function impl_run() {
         version: "0.0.1",
         name: "wbg",
     });
-    load("http://localhost:4000/client.wasm"); //todo
-}
-
-export async function run() {
-    await impl_run();
+    const url = document.head.getElementsByTagName("script")[0].src.replace("client.js", "client.wasm");
+    console.log("Loading wasm from", url);
+    await load(url);
 }
