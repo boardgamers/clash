@@ -5,8 +5,6 @@ use macroquad::prelude::next_frame;
 use client::client::{init, render_and_update, Features, GameSyncRequest, GameSyncResult};
 use client::client_state::ControlPlayers;
 use server::action::Action;
-use server::map::Terrain;
-use server::position::Position;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -25,13 +23,13 @@ extern "C" {
     fn receive_state(this: &Control) -> JsValue;
 
     #[wasm_bindgen(method)]
-    fn receive_player(this: &Control) -> JsValue;
+    fn receive_player_index(this: &Control) -> JsValue;
 
     #[wasm_bindgen(method)]
     fn send_move(this: &Control, action: &str);
 
     #[wasm_bindgen(method)]
-    fn ready(this: &Control);
+    fn send_ready(this: &Control);
 }
 
 enum RemoteClientState {
@@ -72,16 +70,12 @@ impl RemoteClient {
         let mut client_state = init(&features).await;
 
         loop {
-            let p = self.control.receive_player().as_f64();
+            let p = self.control.receive_player_index().as_f64();
             if let Some(p) = p {
-                log(format!("received player: {}", p).as_str());
                 client_state.control_players = ControlPlayers::Own(p as usize);
             }
 
             let sync_result = self.update_state();
-
-            //todo
-            // self.game = Some(Self::g());
 
             if let Some(game) = &self.game {
                 let message = render_and_update(game, &mut client_state, &sync_result, &features);
@@ -105,7 +99,7 @@ impl RemoteClient {
             );
             self.game = Some(game1);
             self.state = RemoteClientState::Playing;
-            self.control.ready();
+            self.control.send_ready();
             return GameSyncResult::Update;
         }
         match &self.state {
@@ -113,13 +107,6 @@ impl RemoteClient {
             RemoteClientState::WaitingForUpdate => GameSyncResult::WaitingForUpdate,
             RemoteClientState::Playing => GameSyncResult::None,
         }
-    }
-
-    fn g() -> Game {
-        let mut game = Game::new(2, "a".repeat(32), true);
-        add_terrain(&mut game, "A1", Terrain::Fertile);
-        add_terrain(&mut game, "A2", Terrain::Water);
-        game
     }
 
     fn execute_action(&mut self, a: &Action) {
@@ -131,8 +118,4 @@ impl RemoteClient {
             log("cannot execute action");
         }
     }
-}
-
-fn add_terrain(game: &mut Game, pos: &str, terrain: Terrain) {
-    game.map.tiles.insert(Position::from_offset(pos), terrain);
 }

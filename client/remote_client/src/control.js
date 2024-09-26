@@ -4,7 +4,7 @@ export class Control extends EventEmitter {
     constructor() {
         super();
         this.state = null;
-        this.player = null;
+        this.player_index = null;
 
         this.addListener("state", (data) => {
             this.state = data;
@@ -12,8 +12,8 @@ export class Control extends EventEmitter {
         this.addListener("state:updated", () => {
             this.emit("fetchState");
         });
-        this.addListener("player", (index) => {
-            this.player = index;
+        this.addListener("player", (player) => {
+            this.player_index = player.index;
         });
     }
 
@@ -23,15 +23,17 @@ export class Control extends EventEmitter {
         return state;
     }
 
-    receive_player() {
-        return this.player;
+    receive_player_index() {
+        const index = this.player_index;
+        this.player_index = null;
+        return index;
     }
 
     send_move(move) {
         this.emit("move", move);
     }
 
-    ready() {
+    send_ready() {
         this.emit("ready");
     }
 }

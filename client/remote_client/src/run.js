@@ -8,11 +8,9 @@ async function impl_run() {
         version: "0.0.1",
         name: "wbg",
     });
-    load("./remote_client_bg.wasm");
+    load("http://localhost:4000/client.wasm"); //todo
 }
 
 export async function run() {
-    document.getElementById("glcanvas").removeAttribute("hidden");
-    document.getElementById("glcanvas").focus();
     await impl_run();
 }
