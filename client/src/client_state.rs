@@ -118,6 +118,12 @@ pub struct StateUpdates {
     updates: Vec<StateUpdate>,
 }
 
+impl Default for StateUpdates {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl StateUpdates {
     pub fn new() -> StateUpdates {
         StateUpdates { updates: vec![] }
@@ -167,6 +173,7 @@ impl State {
         self.pending_update = None;
     }
 
+    #[must_use]
     pub fn is_collect(&self) -> bool {
         if let ActiveDialog::CollectResources(_c) = &self.active_dialog {
             return true;
@@ -174,6 +181,7 @@ impl State {
         false
     }
 
+    #[must_use]
     pub fn has_dialog(&self) -> bool {
         !matches!(self.active_dialog, ActiveDialog::None)
     }
@@ -301,6 +309,7 @@ impl State {
     }
 }
 
+#[must_use]
 pub fn can_play_action(game: &Game) -> bool {
     game.state == GameState::Playing && game.actions_left > 0
 }

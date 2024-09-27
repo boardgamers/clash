@@ -95,7 +95,7 @@ impl RemoteClient {
         if s.is_object() {
             log("received state");
             let game1 = Game::from_data(
-                serde_wasm_bindgen::from_value(s.into()).expect("game should be of type game data"),
+                serde_wasm_bindgen::from_value(s).expect("game should be of type game data"),
             );
             self.game = Some(game1);
             self.state = RemoteClientState::Playing;

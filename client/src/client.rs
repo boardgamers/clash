@@ -24,9 +24,7 @@ use crate::player_ui::{show_global_controls, show_globals, show_resources, show_
 use crate::{combat_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui};
 
 pub async fn init(features: &Features) -> State {
-    let state = State::new(features).await;
-
-    state
+    State::new(features).await
 }
 
 pub fn render_and_update(
