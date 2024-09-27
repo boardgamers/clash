@@ -1,0 +1,35 @@
+name: Server - Release
+
+on:
+  push:
+    branches:
+      - remote_client
+#on:
+#  push:
+#    tags:
+#      - "v*.*.*"
+
+env:
+  node_version: 14
+
+defaults:
+  run:
+    working-directory: server
+
+jobs:
+  version_and_release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ env.node_version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.node_version }}
+          # setting a registry enables the NODE_AUTH_TOKEN env variable where we can set an npm token.  REQUIRED
+          registry-url: "https://registry.npmjs.org"
+      - uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: 'latest'
+      - run: ./scripts/publish-server.sh 0.0.1 # pass the version as an argument ${{ github.event.release.tag_name }} https://stackoverflow.com/questions/58177786/get-the-current-pushed-tag-in-github-actions
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

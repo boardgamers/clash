@@ -3,6 +3,10 @@ name = "client"
 version = "0.1.0"
 edition = "2021"
 default-run = "local_client"
+license = "MIT"
+repository = "git@github.com:boardgamers/clash.git"
+homepage = "https://www.boardgamers.space/"
+description = "A client for Clash of Cultures"
 
 [profile.dev]
 debug = true

@@ -2,6 +2,11 @@
 name = "server"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+repository = "git@github.com:boardgamers/clash.git"
+homepage = "https://www.boardgamers.space/"
+description = "A server for Clash of Cultures"
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
