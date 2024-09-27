@@ -34,7 +34,7 @@ pub async fn init(
     from_game(game)
 }
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = move)]
 pub fn execute_move(game: JsValue, move_data: JsValue, player: JsValue) -> JsValue {
     let game = get_game(game);
     let action = serde_wasm_bindgen::from_value(move_data).expect("move should be of type action");
@@ -56,7 +56,7 @@ pub fn scores(game: JsValue) -> JsValue {
     serde_wasm_bindgen::to_value(&scores).expect("scores should be serializable")
 }
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = "dropPlayer")]
 pub async fn drop_player(game: JsValue, player: JsValue) -> JsValue {
     let game = get_game(game);
     let player_index = player.as_f64().expect("player index should be a number") as usize;
@@ -64,8 +64,8 @@ pub async fn drop_player(game: JsValue, player: JsValue) -> JsValue {
     from_game(game)
 }
 
-#[wasm_bindgen]
-pub async fn current_player(game: JsValue) -> JsValue {
+#[wasm_bindgen(js_name = "currentPlayer")]
+pub fn current_player(game: JsValue) -> JsValue {
     let game = get_game(game);
     let player_index = game_api::current_player(&game);
     match player_index {
@@ -74,22 +74,22 @@ pub async fn current_player(game: JsValue) -> JsValue {
     }
 }
 
-#[wasm_bindgen]
-pub async fn log_length(game: JsValue) -> JsValue {
+#[wasm_bindgen(js_name = "logLength")]
+pub fn log_length(game: JsValue) -> JsValue {
     let game = get_game(game);
     let log_length = game_api::log_length(&game);
     JsValue::from_f64(log_length as f64)
 }
 
-#[wasm_bindgen]
-pub async fn log_slice(game: JsValue, options: JsValue) -> JsValue {
+#[wasm_bindgen(js_name = "logSlice")]
+pub fn log_slice(game: JsValue, options: JsValue) -> JsValue {
     let game = get_game(game);
     let options = serde_wasm_bindgen::from_value(options).expect("options should be serializable");
     let log = game_api::log_slice(&game, &options);
     serde_wasm_bindgen::to_value(&log).expect("log should be serializable")
 }
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = "setPlayerMetaData")]
 pub fn set_player_meta_data(game: JsValue, player_index: JsValue, meta_data: JsValue) -> JsValue {
     let game = get_game(game);
     let player_index = player_index
@@ -109,7 +109,7 @@ pub fn rankings(game: JsValue) -> JsValue {
     serde_wasm_bindgen::to_value(&rankings).expect("rankings should be serializable")
 }
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = "roundNumber")]
 pub fn round_number(game: JsValue) -> JsValue {
     let game = get_game(game);
     let round = game_api::round(&game);
@@ -126,7 +126,7 @@ pub fn factions(game: JsValue) -> JsValue {
     serde_wasm_bindgen::to_value(&factions).expect("faction list should be serializable")
 }
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = "stripSecret")]
 pub fn strip_secret(game: JsValue, player: JsValue) -> JsValue {
     let game = get_game(game);
     let player_index = player.as_f64().map(|player_index| player_index as usize);
