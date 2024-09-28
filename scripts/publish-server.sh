@@ -12,9 +12,9 @@ echo "Building server..."
 ./scripts/build-wasm-server.sh
 
 echo "Publishing server..."
+pushd server
 sed -i 's#"name": "server"#"name": "@bgs/clash-server"#' pkg/package.json
 sed -i "s#\"version\": \"0.1.0\"#\"version\": \"$VERSION\"#" pkg/package.json
-pushd server
 wasm-pack publish --access public
 popd
 
