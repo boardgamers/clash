@@ -80,7 +80,7 @@ HTML=$(
 		        }
 		    </style>
 		</head>
-		<body style="margin: 0; padding: 0; height: 100vh; width: 100vw;">
+		<body >
 		    <canvas id="glcanvas" tabindex='1' hidden></canvas>
 		    <script src="https://not-fl3.github.io/miniquad-samples/mq_js_bundle.js"></script>
 		    <script type="module">
@@ -106,6 +106,16 @@ HTML=$(
 		        <button onclick="run()">Run Game</button>
 		    </div>
 		</body>
+		</html>
+	END
+)
+
+OUTER=$(
+	cat <<-END
+		<html lang="en">
+  		<body><iframe src="iframe.html">
+
+		</iframe></body>
 		</html>
 	END
 )
@@ -137,6 +147,7 @@ sed -i "s/imports\['env'\] = __wbg_star0;/return imports.wbg\;/" dist/"$PROJECT_
 sed -i "s/const imports = __wbg_get_imports();/return __wbg_get_imports();/" dist/"$PROJECT_NAME".js
 
 # Create index from the HTML variable
-echo "$HTML" >dist/index.html
+echo "$HTML" >dist/iframe.html
+echo "$OUTER" >dist/index.html
 
 echo "Done!"

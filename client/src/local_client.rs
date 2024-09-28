@@ -6,6 +6,7 @@ use std::fs::File;
 use std::io::BufReader;
 
 use crate::client::{Features, GameSyncRequest, GameSyncResult};
+use crate::client_state::ControlPlayers;
 use server::city::City;
 use server::game::{Game, GameData};
 use server::map::Terrain;
@@ -14,7 +15,8 @@ use server::resource_pile::ResourcePile;
 use server::unit::UnitType;
 
 pub async fn run(mut game: Game, features: &Features) {
-    let mut state = client::init().await;
+    let mut state = client::init(features).await;
+    state.control_players = ControlPlayers::All;
 
     let mut sync_result = GameSyncResult::None;
     loop {

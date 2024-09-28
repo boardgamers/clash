@@ -1,5 +1,5 @@
 use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
-use macroquad::prelude::{clear_background, set_fullscreen, vec2, WHITE};
+use macroquad::prelude::{clear_background, vec2, WHITE};
 use macroquad::ui::root_ui;
 
 use server::action::Action;
@@ -8,7 +8,9 @@ use server::position::Position;
 use server::status_phase::StatusPhaseAction;
 
 use crate::advance_ui::{pay_advance_dialog, show_advance_menu, show_free_advance_menu};
-use crate::client_state::{ActiveDialog, PendingUpdate, State, StateUpdate, StateUpdates};
+use crate::client_state::{
+    ActiveDialog, ControlPlayers, PendingUpdate, State, StateUpdate, StateUpdates,
+};
 use crate::collect_ui::{click_collect_option, collect_resources_dialog};
 use crate::construct_ui::pay_construction_dialog;
 use crate::dialog_ui::active_dialog_window;
@@ -21,11 +23,8 @@ use crate::map_ui::{draw_map, show_tile_menu};
 use crate::player_ui::{show_global_controls, show_globals, show_resources, show_wonders};
 use crate::{combat_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui};
 
-pub async fn init() -> State {
-    let state = State::new().await;
-
-    set_fullscreen(true);
-    state
+pub async fn init(features: &Features) -> State {
+    State::new(features).await
 }
 
 pub fn render_and_update(
@@ -34,6 +33,20 @@ pub fn render_and_update(
     sync_result: &GameSyncResult,
     features: &Features,
 ) -> GameSyncRequest {
+    match state.control_players {
+        ControlPlayers::None => {
+            // todo add spectator mode
+            return GameSyncRequest::None;
+        }
+        ControlPlayers::All => {}
+        ControlPlayers::Own(p) => {
+            if game.active_player() != p {
+                // todo add spectator mode
+                return GameSyncRequest::None;
+            }
+        }
+    }
+
     match sync_result {
         GameSyncResult::None => {}
         GameSyncResult::Update => {
@@ -185,6 +198,7 @@ pub fn try_click(game: &Game, state: &State, player_index: usize) -> StateUpdate
 
 pub struct Features {
     pub import_export: bool,
+    pub local_assets: bool,
 }
 
 pub enum GameSyncRequest {

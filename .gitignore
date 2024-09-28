@@ -7,3 +7,4 @@ wbindgen/
 *.cmd/
 *.result.json
 game.json
+node_modules/

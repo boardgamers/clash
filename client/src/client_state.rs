@@ -9,7 +9,7 @@ use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 use crate::advance_ui::AdvancePayment;
 use crate::assets::Assets;
-use crate::client::GameSyncRequest;
+use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
 use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
@@ -118,6 +118,12 @@ pub struct StateUpdates {
     updates: Vec<StateUpdate>,
 }
 
+impl Default for StateUpdates {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl StateUpdates {
     pub fn new() -> StateUpdates {
         StateUpdates { updates: vec![] }
@@ -136,20 +142,28 @@ impl StateUpdates {
     }
 }
 
+pub enum ControlPlayers {
+    None,
+    All,
+    Own(usize),
+}
+
 pub struct State {
     pub assets: Assets,
+    pub control_players: ControlPlayers,
     pub active_dialog: ActiveDialog,
     dialog_stack: Vec<ActiveDialog>,
     pub pending_update: Option<PendingUpdate>,
 }
 
 impl State {
-    pub async fn new() -> State {
+    pub async fn new(features: &Features) -> State {
         State {
             active_dialog: ActiveDialog::None,
             dialog_stack: vec![],
             pending_update: None,
-            assets: Assets::new().await,
+            assets: Assets::new(features).await,
+            control_players: ControlPlayers::None,
         }
     }
 
@@ -159,6 +173,7 @@ impl State {
         self.pending_update = None;
     }
 
+    #[must_use]
     pub fn is_collect(&self) -> bool {
         if let ActiveDialog::CollectResources(_c) = &self.active_dialog {
             return true;
@@ -166,6 +181,7 @@ impl State {
         false
     }
 
+    #[must_use]
     pub fn has_dialog(&self) -> bool {
         !matches!(self.active_dialog, ActiveDialog::None)
     }
@@ -293,6 +309,7 @@ impl State {
     }
 }
 
+#[must_use]
 pub fn can_play_action(game: &Game) -> bool {
     game.state == GameState::Playing && game.actions_left > 0
 }
