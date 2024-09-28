@@ -2,8 +2,9 @@ name: Server - Release
 
 on:
   push:
-    branches:
-      - remote_client
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 #on:
 #  push:
 #    tags:
