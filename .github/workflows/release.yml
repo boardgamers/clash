@@ -13,12 +13,8 @@ on:
 env:
   node_version: 14
 
-defaults:
-  run:
-    working-directory: server
-
 jobs:
-  version_and_release:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
