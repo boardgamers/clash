@@ -2,6 +2,8 @@ use server::game::Game;
 
 use macroquad::prelude::next_frame;
 
+extern crate console_error_panic_hook;
+use std::panic;
 use client::client::{init, render_and_update, Features, GameSyncRequest, GameSyncResult};
 use client::client_state::State;
 use server::action::Action;
@@ -55,6 +57,7 @@ async fn main() {
 #[wasm_bindgen]
 impl RemoteClient {
     pub async fn start() {
+        panic::set_hook(Box::new(console_error_panic_hook::hook));
         let features = Features {
             import_export: false,
             local_assets: false,
