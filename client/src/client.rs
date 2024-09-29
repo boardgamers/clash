@@ -65,7 +65,7 @@ fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
     if root_ui().button(vec2(1200., 100.), "Advances") {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     };
-    if features.import_export && state.can_control(game) {
+    if features.import_export && player.can_control {
         if root_ui().button(vec2(1200., 290.), "Import") {
             return StateUpdate::Import;
         };
@@ -81,7 +81,7 @@ fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
         }
     }
 
-    if state.can_play_action(game) {
+    if player.can_play_action {
         updates.add(show_increase_happiness(game, player_index));
     }
     updates.add(show_global_controls(game, state));

@@ -23,8 +23,7 @@ pub fn show_globals(game: &Game, shown_player: &ShownPlayer) -> StateUpdate {
     let mut players: Vec<_> = game.players.iter().map(|p| p.index).collect();
     players.rotate_left(i);
 
-    for i in 0..game.players.len() {
-        let p = players[i];
+    for (i, &p) in players.iter().enumerate() {
         let player = game.get_player(p);
         let shown = shown_player.index == p;
         let prefix = if shown { "* " } else { "" };

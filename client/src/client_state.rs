@@ -181,28 +181,13 @@ impl State {
 
     #[must_use]
     pub fn shown_player(&self, game: &Game) -> ShownPlayer {
-        let control = self.can_control(game);
+        let a = game.active_player();
+        let control = self.control_player == Some(a) && self.show_player == a;
         ShownPlayer {
             index: self.show_player,
             can_control: control,
             can_play_action: control && game.state == GameState::Playing && game.actions_left > 0,
         }
-    }
-
-    #[must_use]
-    pub fn can_control(&self, game: &Game) -> bool {
-        let a = game.active_player();
-        self.control_player == Some(a) && self.show_player == a
-    }
-
-    #[must_use]
-    pub fn can_play(&self, game: &Game) -> bool {
-        self.can_control(game) && game.state == GameState::Playing
-    }
-
-    #[must_use]
-    pub fn can_play_action(&self, game: &Game) -> bool {
-        self.can_play(game) && game.actions_left > 0
     }
 
     pub fn clear(&mut self) {
