@@ -8,7 +8,7 @@ use server::game::Game;
 use server::position::Position;
 use server::unit::{Unit, UnitType};
 
-use crate::client_state::StateUpdate;
+use crate::client_state::{ShownPlayer, StateUpdate};
 use crate::dialog_ui::active_dialog_window;
 use crate::select_ui::{confirm_update, ConfirmSelection};
 use crate::{hex_ui, player_ui};
@@ -80,13 +80,14 @@ pub trait UnitSelection: ConfirmSelection {
 
 pub fn unit_selection_dialog<T: UnitSelection>(
     game: &Game,
+    player: &ShownPlayer,
     title: &str,
     sel: &T,
     on_change: impl Fn(T) -> StateUpdate,
     on_ok: impl FnOnce(T) -> StateUpdate,
     additional: impl FnOnce(&mut Ui) -> StateUpdate,
 ) -> StateUpdate {
-    active_dialog_window(title, |ui| {
+    active_dialog_window(player, title, |ui| {
         if let Some(current_tile) = sel.current_tile() {
             for (p, unit_id) in units_on_tile(game, current_tile) {
                 let unit = game.get_player(p).get_unit(unit_id).unwrap();

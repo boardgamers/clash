@@ -3,24 +3,53 @@ use macroquad::math::vec2;
 use macroquad::prelude::*;
 use macroquad::text::draw_text;
 use macroquad::ui::root_ui;
-
+use macroquad::ui::widgets::Button;
 use server::action::Action;
 use server::game::{Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
 
-use crate::client_state::{can_play_action, State, StateUpdate};
+use crate::client_state::{ShownPlayer, State, StateUpdate};
 
-pub fn show_globals(game: &Game) {
-    draw_text(&format!("Age {}", game.age), 30., 30., 20., BLACK);
-    draw_text(&format!("Round {}", game.round), 30., 60., 20., BLACK);
-    draw_text(
-        &format!("Player {}", game.players[game.active_player()].get_name()),
-        1400.,
-        60.,
-        20.,
-        BLACK,
-    );
+pub fn show_globals(game: &Game, shown_player: &ShownPlayer) -> StateUpdate {
+    draw_text(&format!("Age {}", game.age), 1400., 60., 20., BLACK);
+    draw_text(&format!("Round {}", game.round), 1400., 90., 20., BLACK);
+
+    let i = game
+        .players
+        .iter()
+        .position(|p| p.index == game.starting_player_index)
+        .unwrap();
+    let mut players: Vec<_> = game.players.iter().map(|p| p.index).collect();
+    players.rotate_left(i);
+
+    for i in 0..game.players.len() {
+        let p = players[i];
+        let player = game.get_player(p);
+        let shown = shown_player.index == p;
+        let prefix = if shown { "* " } else { "" };
+        let suffix = if p == game.active_player() {
+            &active_player_status(game)
+        } else {
+            ""
+        };
+        let name = player.get_name();
+        let y = 180. + i as f32 * 50.;
+        let x = 1400.;
+        let label = format!("{prefix}{name}{suffix}");
+        if shown {
+            draw_text(&label, x, y, 20., BLACK);
+        } else if Button::new(label)
+            .position(vec2(x, y - 10.))
+            .ui(&mut root_ui())
+        {
+            return StateUpdate::SetShownPlayer(p);
+        }
+    }
+    StateUpdate::None
+}
+
+fn active_player_status(game: &Game) -> String {
     let status = match &game.state {
         GameState::Playing => String::from("Play Actions"),
         GameState::StatusPhase(ref p) => format!("Status Phase: {p:?}"),
@@ -32,14 +61,8 @@ pub fn show_globals(game: &Game) {
         GameState::PlaceSettler { .. } => String::from("Place Settler"),
         GameState::Finished => String::from("Finished"),
     };
-    draw_text(&status, 30., 90., 20., BLACK);
-    draw_text(
-        &format!("Actions Left {}", game.actions_left),
-        1400.,
-        30.,
-        20.,
-        BLACK,
-    );
+
+    format!(" ({status}, {} actions Left)", game.actions_left)
 }
 
 pub fn show_wonders(game: &Game, player_index: usize) {
@@ -91,6 +114,7 @@ pub fn show_resources(game: &Game, player_index: usize) {
 }
 
 pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
+    let player = state.shown_player(game);
     if game.can_undo() && root_ui().button(vec2(1200., 320.), "Undo") {
         return StateUpdate::Execute(Action::Undo);
     }
@@ -103,7 +127,7 @@ pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
             StateUpdate::execute_with_warning(
                 Action::Playing(PlayingAction::EndTurn),
                 if left > 0 {
-                    vec![(format!("{left} actions left"))]
+                    vec![format!("{left} actions left")]
                 } else {
                     vec![]
                 },
@@ -111,7 +135,7 @@ pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
         }
         GameState::Playing
             if !state.has_dialog()
-                && can_play_action(game)
+                && player.can_play_action
                 && root_ui().button(vec2(1200., 30.), "Move Units") =>
         {
             StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits))

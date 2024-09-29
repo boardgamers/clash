@@ -12,7 +12,7 @@ use server::position::Position;
 use server::unit::{MovementRestriction, Unit};
 
 use crate::city_ui::{draw_city, show_city_menu, CityMenu};
-use crate::client_state::{can_play_action, ActiveDialog, State, StateUpdate};
+use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::dialog_ui::closeable_dialog_window;
 use crate::{collect_ui, hex_ui, unit_ui};
 
@@ -111,20 +111,18 @@ fn highlight_if(b: bool) -> f32 {
     }
 }
 
-pub fn show_tile_menu(game: &Game, position: Position) -> StateUpdate {
+pub fn show_tile_menu(game: &Game, position: Position, player: &ShownPlayer) -> StateUpdate {
     if let Some(c) = game.get_any_city(position) {
-        show_city_menu(
-            game,
-            &CityMenu::new(game.active_player(), c.player_index, position),
-        )
+        show_city_menu(game, &CityMenu::new(player, c.player_index, position))
     } else {
-        show_generic_tile_menu(game, position, vec![], |_| StateUpdate::None)
+        show_generic_tile_menu(game, position, player, vec![], |_| StateUpdate::None)
     }
 }
 
 pub fn show_generic_tile_menu(
     game: &Game,
     position: Position,
+    player: &ShownPlayer,
     suffix: Vec<String>,
     additional: impl FnOnce(&mut Ui) -> StateUpdate,
 ) -> StateUpdate {
@@ -164,7 +162,7 @@ pub fn show_generic_tile_menu(
                 })
                 .collect::<Vec<_>>();
 
-            if can_play_action(game) && !settlers.is_empty() && ui.button(None, "Settle") {
+            if player.can_play_action && !settlers.is_empty() && ui.button(None, "Settle") {
                 let settler = settlers
                     .iter()
                     .find(|u| u.movement_restriction != MovementRestriction::None)

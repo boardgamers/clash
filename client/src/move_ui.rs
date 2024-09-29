@@ -7,13 +7,14 @@ use server::game::{Game, GameState};
 use server::position::Position;
 use server::unit::{MovementAction, Unit};
 
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
 use crate::unit_ui;
 use crate::unit_ui::UnitSelection;
 
-pub fn move_units_dialog(game: &Game, sel: &MoveSelection) -> StateUpdate {
+pub fn move_units_dialog(game: &Game, sel: &MoveSelection, player: &ShownPlayer) -> StateUpdate {
     unit_ui::unit_selection_dialog::<MoveSelection>(
         game,
+        player,
         "Move Units",
         sel,
         |new| update_possible_destinations(game, new.clone()),

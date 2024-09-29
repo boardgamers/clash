@@ -9,7 +9,7 @@ use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
-use crate::client_state::{can_play_action, ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
 use crate::dialog_ui::active_dialog_window;
 
 #[derive(Clone)]
@@ -88,8 +88,8 @@ fn increase_happiness_new_steps(
     None
 }
 
-pub fn increase_happiness_menu(h: &IncreaseHappiness) -> StateUpdate {
-    active_dialog_window("Increase Happiness", |ui| {
+pub fn increase_happiness_menu(h: &IncreaseHappiness, player: &ShownPlayer) -> StateUpdate {
+    active_dialog_window(player, "Increase Happiness", |ui| {
         ui.label(None, &format!("Cost: {:?}", h.cost));
         if ui.button(None, "Cancel") {
             return StateUpdate::Cancel;
@@ -104,7 +104,7 @@ pub fn increase_happiness_menu(h: &IncreaseHappiness) -> StateUpdate {
 }
 
 pub fn show_increase_happiness(game: &Game, player_index: usize) -> StateUpdate {
-    if can_play_action(game) && root_ui().button(vec2(1200., 60.), "Increase Happiness") {
+    if root_ui().button(vec2(1200., 60.), "Increase Happiness") {
         return StateUpdate::SetDialog(ActiveDialog::IncreaseHappiness(IncreaseHappiness::new(
             game.get_player(player_index)
                 .cities

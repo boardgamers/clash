@@ -1,5 +1,5 @@
 use crate::city_ui::{building_name, CityMenu};
-use crate::client_state::StateUpdate;
+use crate::client_state::{ShownPlayer, StateUpdate};
 use crate::dialog_ui::active_dialog_window;
 use macroquad::ui::Ui;
 use server::action::Action;
@@ -23,7 +23,7 @@ pub fn add_influence_button(
             closest_city_pos
         };
         if let Some(cost) = game.influence_culture_boost_cost(
-            menu.player_index,
+            menu.player.index,
             start_position,
             menu.city_owner_index,
             menu.city_position,
@@ -48,7 +48,8 @@ pub fn add_influence_button(
 }
 
 pub fn closest_city(game: &Game, menu: &CityMenu) -> Position {
-    menu.get_player(game)
+    menu.player
+        .get(game)
         .cities
         .iter()
         .min_by_key(|c| c.position.distance(menu.city_position))
@@ -56,8 +57,11 @@ pub fn closest_city(game: &Game, menu: &CityMenu) -> Position {
         .position
 }
 
-pub fn cultural_influence_resolution_dialog(c: &CulturalInfluenceResolution) -> StateUpdate {
-    active_dialog_window("Cultural Influence Resolution", |ui| {
+pub fn cultural_influence_resolution_dialog(
+    c: &CulturalInfluenceResolution,
+    player: &ShownPlayer,
+) -> StateUpdate {
+    active_dialog_window(player, "Cultural Influence Resolution", |ui| {
         if ui.button(
             None,
             format!(

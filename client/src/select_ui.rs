@@ -1,4 +1,4 @@
-use crate::client_state::{StateUpdate, StateUpdates};
+use crate::client_state::{ShownPlayer, StateUpdate, StateUpdates};
 use crate::dialog_ui::active_dialog_window;
 use macroquad::hash;
 use macroquad::math::{bool, Vec2};
@@ -20,6 +20,7 @@ pub trait HasCountSelectableObject {
 
 #[allow(clippy::too_many_arguments)]
 pub fn count_dialog<C, O: HasCountSelectableObject>(
+    player: &ShownPlayer,
     title: &str,
     container: &C,
     get_objects: impl Fn(&C) -> Vec<O>,
@@ -30,7 +31,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
     plus: impl Fn(&C, &O) -> StateUpdate,
     minus: impl Fn(&C, &O) -> StateUpdate,
 ) -> StateUpdate {
-    active_dialog_window(title, |ui| {
+    active_dialog_window(player, title, |ui| {
         let mut updates = StateUpdates::new();
         for (i, p) in get_objects(container).iter().enumerate() {
             if show(container, p) {
@@ -81,12 +82,13 @@ pub trait Selection: ConfirmSelection {
 
 pub fn selection_dialog<T: Selection>(
     game: &Game,
+    player: &ShownPlayer,
     title: &str,
     sel: &T,
     on_change: impl Fn(T) -> StateUpdate,
     on_ok: impl FnOnce(T) -> StateUpdate,
 ) -> StateUpdate {
-    active_dialog_window(title, |ui| {
+    active_dialog_window(player, title, |ui| {
         for name in sel.all() {
             let can_sel = sel.can_select(game, name);
             let is_selected = sel.selected().contains(name);

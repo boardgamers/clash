@@ -15,7 +15,7 @@ use server::position::Position;
 use server::resource_pile::PaymentOptions;
 use server::unit::UnitType;
 
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::recruit_unit_ui::RecruitSelection;
 use crate::resource_ui::{new_resource_map, ResourceType};
@@ -30,7 +30,7 @@ pub fn add_construct_button(
 ) -> StateUpdate {
     let owner = menu.get_city_owner(game);
     let city = menu.get_city(game);
-    if (menu.is_city_owner()) && city.can_construct(building, owner) {
+    if menu.is_city_owner() && menu.player.can_play_action && city.can_construct(building, owner) {
         for pos in building_positions(building, city, &game.map) {
             if ui.button(
                 None,
@@ -44,7 +44,7 @@ pub fn add_construct_button(
                     ConstructionPayment::new(
                         game,
                         name,
-                        menu.player_index,
+                        menu.player.index,
                         menu.city_position,
                         ConstructionProject::Building(building.clone(), pos),
                     ),
@@ -83,7 +83,7 @@ pub fn add_wonder_buttons(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpd
                 ConstructionPayment::new(
                     game,
                     &w.name,
-                    menu.player_index,
+                    menu.player.index,
                     menu.city_position,
                     ConstructionProject::Wonder(w.name.clone()),
                 ),
@@ -93,8 +93,13 @@ pub fn add_wonder_buttons(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpd
     StateUpdate::None
 }
 
-pub fn pay_construction_dialog(game: &Game, payment: &ConstructionPayment) -> StateUpdate {
+pub fn pay_construction_dialog(
+    game: &Game,
+    payment: &ConstructionPayment,
+    player: &ShownPlayer,
+) -> StateUpdate {
     payment_dialog(
+        player,
         &format!("Pay for {}", payment.name),
         payment,
         |cp| cp.payment.get(ResourceType::Discount).selectable.current == 0,

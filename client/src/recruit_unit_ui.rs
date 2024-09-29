@@ -5,7 +5,7 @@ use server::player::Player;
 use server::position::Position;
 use server::unit::{Unit, UnitType, Units};
 
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::select_ui::{
     ConfirmSelection, CountSelector, HasCountSelectableObject, SelectionConfirm,
@@ -210,8 +210,9 @@ impl ConfirmSelection for RecruitSelection {
     }
 }
 
-pub fn select_dialog(game: &Game, a: &RecruitAmount) -> StateUpdate {
+pub fn select_dialog(game: &Game, a: &RecruitAmount, player: &ShownPlayer) -> StateUpdate {
     select_ui::count_dialog(
+        player,
         "Recruit units",
         a,
         |s| s.selectable.clone(),
@@ -271,9 +272,10 @@ fn update_selection(
     )
 }
 
-pub fn replace_dialog(game: &Game, sel: &RecruitSelection) -> StateUpdate {
+pub fn replace_dialog(game: &Game, sel: &RecruitSelection, player: &ShownPlayer) -> StateUpdate {
     unit_ui::unit_selection_dialog::<RecruitSelection>(
         game,
+        player,
         "Replace units",
         sel,
         |new| StateUpdate::SetDialog(ActiveDialog::ReplaceUnits(new.clone())),

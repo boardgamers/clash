@@ -8,7 +8,7 @@ use server::player::Player;
 use server::position::Position;
 use server::unit::Units;
 
-use crate::client_state::{can_play_action, ActiveDialog, State, StateUpdate, StateUpdates};
+use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, StateUpdates};
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{add_construct_button, add_wonder_buttons};
 use crate::hex_ui::draw_hex_center_text;
@@ -17,22 +17,18 @@ use crate::recruit_unit_ui::RecruitAmount;
 use crate::{hex_ui, influence_ui, player_ui};
 
 pub struct CityMenu {
-    pub player_index: usize,
+    pub player: ShownPlayer,
     pub city_owner_index: usize,
     pub city_position: Position,
 }
 
 impl CityMenu {
-    pub fn new(player_index: usize, city_owner_index: usize, city_position: Position) -> Self {
+    pub fn new(player: &ShownPlayer, city_owner_index: usize, city_position: Position) -> Self {
         CityMenu {
-            player_index,
+            player: player.clone(),
             city_owner_index,
             city_position,
         }
-    }
-
-    pub fn get_player<'a>(&self, game: &'a Game) -> &'a Player {
-        game.get_player(self.player_index)
     }
 
     pub fn get_city_owner<'a>(&self, game: &'a Game) -> &'a Player {
@@ -40,11 +36,11 @@ impl CityMenu {
     }
 
     pub fn get_city<'a>(&self, game: &'a Game) -> &'a City {
-        return game.get_city(self.city_owner_index, self.city_position);
+        game.get_city(self.city_owner_index, self.city_position)
     }
 
     pub fn is_city_owner(&self) -> bool {
-        self.player_index == self.city_owner_index
+        self.player.index == self.city_owner_index
     }
 }
 
@@ -52,13 +48,13 @@ pub fn show_city_menu(game: &Game, menu: &CityMenu) -> StateUpdate {
     let position = menu.city_position;
     let city = menu.get_city(game);
 
-    show_generic_tile_menu(game, position, city_label(game, city), |ui| {
-        let can_play = can_play_action(game) && menu.is_city_owner() && city.can_activate();
+    show_generic_tile_menu(game, position, &menu.player, city_label(game, city), |ui| {
+        let can_play = menu.player.can_play_action && menu.is_city_owner() && city.can_activate();
         if can_play {
             if ui.button(None, "Collect Resources") {
                 return StateUpdate::SetDialog(ActiveDialog::CollectResources(
                     CollectResources::new(
-                        menu.player_index,
+                        menu.player.index,
                         menu.city_position,
                         possible_resource_collections(
                             game,
@@ -71,7 +67,7 @@ pub fn show_city_menu(game: &Game, menu: &CityMenu) -> StateUpdate {
             if ui.button(None, "Recruit Units") {
                 return RecruitAmount::new_selection(
                     game,
-                    menu.player_index,
+                    menu.player.index,
                     menu.city_position,
                     Units::empty(),
                     None,
@@ -127,11 +123,10 @@ fn city_label(game: &Game, city: &City) -> Vec<String> {
 }
 
 fn add_building_actions(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpdate {
-    let closest_city_pos = influence_ui::closest_city(game, menu);
-
-    if !can_play_action(game) {
+    if !menu.player.can_play_action {
         return StateUpdate::None;
     }
+    let closest_city_pos = influence_ui::closest_city(game, menu);
 
     let mut updates = StateUpdates::new();
     for (building, name) in building_names() {

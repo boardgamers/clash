@@ -11,7 +11,7 @@ use server::playing_actions::PlayingAction;
 use server::resource_pile::AdvancePaymentOptions;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
-use crate::client_state::{can_play_action, ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
 use crate::dialog_ui::dialog_window;
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::resource_ui::{new_resource_map, ResourceType};
@@ -76,18 +76,18 @@ impl HasPayment for AdvancePayment {
     }
 }
 
-pub fn show_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
-    show_generic_advance_menu("Advances", game, player_index, true, |name| {
+pub fn show_advance_menu(game: &Game, player: &ShownPlayer) -> StateUpdate {
+    show_generic_advance_menu("Advances", game, player, true, |name| {
         StateUpdate::SetDialog(ActiveDialog::AdvancePayment(AdvancePayment::new(
             game,
-            player_index,
+            player.index,
             &name,
         )))
     })
 }
 
-pub fn show_free_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
-    show_generic_advance_menu("Select a free advance", game, player_index, false, |name| {
+pub fn show_free_advance_menu(game: &Game, player: &ShownPlayer) -> StateUpdate {
+    show_generic_advance_menu("Select a free advance", game, player, false, |name| {
         StateUpdate::status_phase(StatusPhaseAction::FreeAdvance(name))
     })
 }
@@ -95,14 +95,14 @@ pub fn show_free_advance_menu(game: &Game, player_index: usize) -> StateUpdate {
 pub fn show_generic_advance_menu(
     title: &str,
     game: &Game,
-    player_index: usize,
+    player: &ShownPlayer,
     close_button: bool,
     new_update: impl Fn(String) -> StateUpdate,
 ) -> StateUpdate {
-    dialog_window(title, close_button, |ui| {
+    dialog_window(player, title, close_button, |ui| {
         for a in get_all() {
             let name = a.name;
-            let p = game.get_player(player_index);
+            let p = player.get(game);
             if p.has_advance(&name) {
                 ui.label(None, &name);
             } else {
@@ -112,7 +112,7 @@ pub fn show_generic_advance_menu(
                 ) {
                     p.can_advance_free(&name)
                 } else {
-                    can_play_action(game) && p.can_advance(&name)
+                    player.can_control && p.can_advance(&name)
                 };
                 if can && ui.button(None, name.clone()) {
                     return new_update(name);
@@ -123,8 +123,9 @@ pub fn show_generic_advance_menu(
     })
 }
 
-pub fn pay_advance_dialog(ap: &AdvancePayment) -> StateUpdate {
+pub fn pay_advance_dialog(ap: &AdvancePayment, player: &ShownPlayer) -> StateUpdate {
     payment_dialog(
+        player,
         &format!("Pay for advance {}", ap.name),
         ap,
         AdvancePayment::valid,

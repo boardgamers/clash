@@ -4,6 +4,7 @@ use server::action::{Action, CombatAction};
 use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
 use server::game::{CulturalInfluenceResolution, Game, GameState};
+use server::player::Player;
 use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
@@ -66,6 +67,7 @@ pub enum StateUpdate {
     ExecuteWithWarning(PendingUpdate),
     Import,
     Export,
+    SetShownPlayer(usize),
 }
 
 impl StateUpdate {
@@ -142,15 +144,24 @@ impl StateUpdates {
     }
 }
 
-pub enum ControlPlayers {
-    None,
-    All,
-    Own(usize),
+#[derive(Clone)]
+pub struct ShownPlayer {
+    pub index: usize,
+    pub can_control: bool,
+    pub can_play_action: bool,
+}
+
+impl ShownPlayer {
+    #[must_use]
+    pub fn get<'a>(&self, game: &'a Game) -> &'a Player {
+        game.get_player(self.index)
+    }
 }
 
 pub struct State {
     pub assets: Assets,
-    pub control_players: ControlPlayers,
+    pub control_player: Option<usize>,
+    pub show_player: usize,
     pub active_dialog: ActiveDialog,
     dialog_stack: Vec<ActiveDialog>,
     pub pending_update: Option<PendingUpdate>,
@@ -163,8 +174,35 @@ impl State {
             dialog_stack: vec![],
             pending_update: None,
             assets: Assets::new(features).await,
-            control_players: ControlPlayers::None,
+            control_player: None,
+            show_player: 0,
         }
+    }
+
+    #[must_use]
+    pub fn shown_player(&self, game: &Game) -> ShownPlayer {
+        let control = self.can_control(game);
+        ShownPlayer {
+            index: self.show_player,
+            can_control: control,
+            can_play_action: control && game.state == GameState::Playing && game.actions_left > 0,
+        }
+    }
+
+    #[must_use]
+    pub fn can_control(&self, game: &Game) -> bool {
+        let a = game.active_player();
+        self.control_player == Some(a) && self.show_player == a
+    }
+
+    #[must_use]
+    pub fn can_play(&self, game: &Game) -> bool {
+        self.can_control(game) && game.state == GameState::Playing
+    }
+
+    #[must_use]
+    pub fn can_play_action(&self, game: &Game) -> bool {
+        self.can_play(game) && game.actions_left > 0
     }
 
     pub fn clear(&mut self) {
@@ -222,6 +260,10 @@ impl State {
             }
             StateUpdate::Import => GameSyncRequest::Import,
             StateUpdate::Export => GameSyncRequest::Export,
+            StateUpdate::SetShownPlayer(p) => {
+                self.show_player = p;
+                GameSyncRequest::None
+            }
         }
     }
 
@@ -307,9 +349,4 @@ impl State {
         self.update(game, StateUpdate::status_phase(action));
         ActiveDialog::None
     }
-}
-
-#[must_use]
-pub fn can_play_action(game: &Game) -> bool {
-    game.state == GameState::Playing && game.actions_left > 0
 }

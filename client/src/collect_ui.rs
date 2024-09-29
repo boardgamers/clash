@@ -12,7 +12,7 @@ use server::playing_actions::{get_total_collection, PlayingAction};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
-use crate::client_state::{ActiveDialog, State, StateUpdate};
+use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::dialog_ui::active_dialog_window;
 use crate::hex_ui;
 use crate::resource_ui::resource_pile_string;
@@ -47,8 +47,12 @@ impl CollectResources {
     }
 }
 
-pub fn collect_resources_dialog(game: &Game, collect: &CollectResources) -> StateUpdate {
-    active_dialog_window("Collect Resources", |ui| {
+pub fn collect_resources_dialog(
+    game: &Game,
+    collect: &CollectResources,
+    player: &ShownPlayer,
+) -> StateUpdate {
+    active_dialog_window(player, "Collect Resources", |ui| {
         let r: ResourcePile = collect
             .collections
             .clone()
