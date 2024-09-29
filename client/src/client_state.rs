@@ -205,8 +205,13 @@ impl State {
     }
 
     #[must_use]
-    pub fn has_dialog(&self) -> bool {
-        !matches!(self.active_dialog, ActiveDialog::None)
+    pub fn has_modal_dialog(&self) -> bool {
+        !matches!(
+            self.active_dialog,
+            ActiveDialog::None |
+            ActiveDialog::TileMenu(_) |
+            ActiveDialog::Log 
+        )
     }
 
     pub fn update(&mut self, game: &Game, update: StateUpdate) -> GameSyncRequest {
@@ -276,11 +281,16 @@ impl State {
     }
 
     pub fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {
+        let last_dialog = self.active_dialog.clone();
         self.clear();
 
         self.active_dialog = match &game.state {
             GameState::Movement { .. } => {
-                ActiveDialog::MoveUnits(MoveSelection::new(game.active_player()))
+                if let ActiveDialog::TileMenu(p) = last_dialog {
+                    ActiveDialog::MoveUnits(MoveSelection::new(game.active_player(),Some(p)))
+                } else {
+                    ActiveDialog::MoveUnits(MoveSelection::new(game.active_player(), None))
+                }
             }
             GameState::CulturalInfluenceResolution(c) => {
                 ActiveDialog::CulturalInfluenceResolution(c.clone())

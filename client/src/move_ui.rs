@@ -63,7 +63,7 @@ fn possible_destinations(
     player_index: usize,
     units: &Vec<u32>,
 ) -> Vec<Position> {
-    if let GameState::Movement {
+    if let Movement {
         movement_actions_left,
         moved_units,
     } = &game.state
@@ -118,11 +118,11 @@ pub struct MoveSelection {
 }
 
 impl MoveSelection {
-    pub fn new(player_index: usize) -> MoveSelection {
+    pub fn new(player_index: usize, start: Option<Position>) -> MoveSelection {
         MoveSelection {
             player_index,
             units: vec![],
-            start: None,
+            start,
             destinations: vec![],
         }
     }

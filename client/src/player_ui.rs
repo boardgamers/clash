@@ -6,6 +6,7 @@ use macroquad::ui::root_ui;
 use macroquad::ui::widgets::Button;
 use server::action::Action;
 use server::game::{Game, GameState};
+use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
 
@@ -28,7 +29,7 @@ pub fn show_globals(game: &Game, shown_player: &ShownPlayer) -> StateUpdate {
         let shown = shown_player.index == p;
         let prefix = if shown { "* " } else { "" };
         let suffix = if p == game.active_player() {
-            &active_player_status(game)
+            &player_suffix(game, player)
         } else {
             ""
         };
@@ -48,20 +49,40 @@ pub fn show_globals(game: &Game, shown_player: &ShownPlayer) -> StateUpdate {
     StateUpdate::None
 }
 
-fn active_player_status(game: &Game) -> String {
-    let status = match &game.state {
-        GameState::Playing => String::from("Play Actions"),
-        GameState::StatusPhase(ref p) => format!("Status Phase: {p:?}"),
-        GameState::Movement { .. } => String::from("Movement"),
-        GameState::CulturalInfluenceResolution(_) => String::from("Cultural Influence Resolution"),
-        GameState::Combat(c) => {
-            format!("Combat Round {} Phase {:?}", c.round, c.phase)
+fn player_suffix(game: &Game, player: &Player) -> String {
+    let actions_left = if game.current_player_index == player.index {
+        match &game.state {
+            GameState::StatusPhase(_) | GameState::Finished => "",
+            _ => &format!(", {} actions Left", game.actions_left),
         }
-        GameState::PlaceSettler { .. } => String::from("Place Settler"),
-        GameState::Finished => String::from("Finished"),
+    } else {
+        ""
     };
+    // todo moves left
 
-    format!(" ({status}, {} actions Left)", game.actions_left)
+    let active_player = if player.index == game.active_player() {
+        match &game.state {
+            GameState::Playing => String::from("Play Actions"),
+            GameState::StatusPhase(ref p) => format!("Status Phase: {p:?}"),
+            GameState::Movement { .. } => String::from("Movement"),
+            GameState::CulturalInfluenceResolution(_) => {
+                String::from("Cultural Influence Resolution")
+            }
+            GameState::Combat(c) => {
+                format!("Combat Round {} Phase {:?}", c.round, c.phase)
+            }
+            GameState::PlaceSettler { .. } => String::from("Place Settler"),
+            GameState::Finished => String::from("Finished"),
+        }
+    } else {
+        String::new()
+    };
+    
+    if actions_left.is_empty() && active_player.is_empty() {
+        String::new()
+    } else {
+        format!(" ({active_player}{actions_left})")
+    }
 }
 
 pub fn show_wonders(game: &Game, player_index: usize) {
@@ -133,7 +154,7 @@ pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
             )
         }
         GameState::Playing
-            if !state.has_dialog()
+            if !state.has_modal_dialog()
                 && player.can_play_action
                 && root_ui().button(vec2(1200., 30.), "Move Units") =>
         {
