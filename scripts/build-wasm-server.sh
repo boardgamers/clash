@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
+pushd server
 wasm-pack build --target nodejs
+popd
 
 echo "Done!"

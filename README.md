@@ -116,6 +116,51 @@ diff --git a/apps/api/app/resources.ts b/apps/api/app/resources.ts
            console.log('received message from controller', event.data.type, JSON.parse(JSON.stringify(event.data)));
            switch (event.data.type) {
 ```
+     
+GameInfo.json (for now)
+
+```json
+  {
+    "_id": {
+      "game": "clash",
+      "version": 1
+    },
+    "description": "Clash of Cultures",
+    "engine": {
+      "package": {
+        "name": "@boardgamers/clash-server",
+        "version": "*"
+      },
+      "entryPoint": "server.js"
+    },
+    "expansions": [],
+    "label": "Clash of Cultures",
+    "meta": {
+      "public": true,
+      "needOwnership": true
+    },
+    "options": [],
+    "players": [
+      2,
+      3,
+      4
+    ],
+    "preferences": [],
+    "rules": "",
+    "viewer": {
+      "url": "http://localhost:4000/client.js",
+      "topLevelVariable": "clash",
+      "dependencies": {
+        "scripts": [],
+        "stylesheets": []
+      },
+      "replayable": true,
+      "alternate": null,
+      "settings": []
+    }
+  }
+```
+
 
 ## Docs
 
