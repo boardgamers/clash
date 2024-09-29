@@ -54,24 +54,26 @@ fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
 
     draw_map(game, state);
     let mut updates = StateUpdates::new();
-    let update = show_globals(game, player);
+    let update = show_globals(game, player, state);
     updates.add(update);
     show_resources(game, player_index);
     show_wonders(game, player_index);
 
-    if root_ui().button(vec2(1200., 130.), "Log") {
-        return StateUpdate::OpenDialog(ActiveDialog::Log);
-    };
-    if root_ui().button(vec2(1200., 100.), "Advances") {
-        return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
-    };
-    if features.import_export && player.can_control {
-        if root_ui().button(vec2(1200., 290.), "Import") {
-            return StateUpdate::Import;
+    if !state.has_modal_dialog() {
+        if root_ui().button(vec2(1200., 130.), "Log") {
+            return StateUpdate::OpenDialog(ActiveDialog::Log);
         };
-        if root_ui().button(vec2(1250., 290.), "Export") {
-            return StateUpdate::Export;
+        if root_ui().button(vec2(1200., 100.), "Advances") {
+            return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
         };
+        if features.import_export && player.can_control {
+            if root_ui().button(vec2(1200., 290.), "Import") {
+                return StateUpdate::Import;
+            };
+            if root_ui().button(vec2(1250., 290.), "Export") {
+                return StateUpdate::Export;
+            };
+        }
     }
 
     if player.can_control {

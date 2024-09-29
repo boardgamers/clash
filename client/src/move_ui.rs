@@ -2,8 +2,8 @@ use macroquad::math::u32;
 
 use crate::select_ui::{ConfirmSelection, SelectionConfirm};
 use server::action::Action;
+use server::game::Game;
 use server::game::GameState::Movement;
-use server::game::{Game, GameState};
 use server::position::Position;
 use server::unit::{MovementAction, Unit};
 
@@ -28,10 +28,7 @@ pub fn move_units_dialog(game: &Game, sel: &MoveSelection, player: &ShownPlayer)
                 panic!("game is not in movement")
             };
 
-            if ui.button(
-                None,
-                "End Move Units",
-            ) {
+            if ui.button(None, "End Move Units") {
                 StateUpdate::execute_with_warning(
                     Action::Movement(MovementAction::Stop),
                     if movement_actions_left > 0 {

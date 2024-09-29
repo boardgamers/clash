@@ -12,7 +12,7 @@ use server::resource_pile::ResourcePile;
 
 use crate::client_state::{ShownPlayer, State, StateUpdate};
 
-pub fn show_globals(game: &Game, shown_player: &ShownPlayer) -> StateUpdate {
+pub fn show_globals(game: &Game, shown_player: &ShownPlayer, state: &State) -> StateUpdate {
     draw_text(&format!("Age {}", game.age), 1400., 60., 20., BLACK);
     draw_text(&format!("Round {}", game.round), 1400., 90., 20., BLACK);
 
@@ -28,16 +28,12 @@ pub fn show_globals(game: &Game, shown_player: &ShownPlayer) -> StateUpdate {
         let player = game.get_player(p);
         let shown = shown_player.index == p;
         let prefix = if shown { "* " } else { "" };
-        let suffix = if p == game.active_player() {
-            &player_suffix(game, player)
-        } else {
-            ""
-        };
+        let suffix = &player_suffix(game, player);
         let name = player.get_name();
         let y = 180. + i as f32 * 50.;
         let x = 1400.;
         let label = format!("{prefix}{name}{suffix}");
-        if shown {
+        if shown || state.has_modal_dialog() {
             draw_text(&label, x, y, 20., BLACK);
         } else if Button::new(label)
             .position(vec2(x, y - 10.))
@@ -53,17 +49,16 @@ fn player_suffix(game: &Game, player: &Player) -> String {
     let actions_left = if game.current_player_index == player.index {
         match &game.state {
             GameState::StatusPhase(_) | GameState::Finished => "",
-            _ => &format!(", {} actions Left", game.actions_left),
+            _ => &format!("{} actions Left", game.actions_left),
         }
     } else {
         ""
     };
+
     let moves_left = if game.current_player_index == player.index {
-        match &game.state {
-            GameState::Movement { movement_actions_left, .. } => {
-                &format!(", {movement_actions_left} moves left")
-            }
-            _ => "",
+        match moves_left(&game.state) {
+            None => "",
+            Some(m) => &format!("{m} moves left"),
         }
     } else {
         ""
@@ -71,26 +66,44 @@ fn player_suffix(game: &Game, player: &Player) -> String {
 
     let active_player = if player.index == game.active_player() {
         match &game.state {
-            GameState::Playing => String::from("Play Actions"),
-            GameState::StatusPhase(ref p) => format!("Status Phase: {p:?}"),
-            GameState::Movement { .. } => String::from("Movement"),
-            GameState::CulturalInfluenceResolution(_) => {
-                String::from("Cultural Influence Resolution")
-            }
-            GameState::Combat(c) => {
-                format!("Combat Round {} Phase {:?}", c.round, c.phase)
-            }
-            GameState::PlaceSettler { .. } => String::from("Place Settler"),
-            GameState::Finished => String::from("Finished"),
+            GameState::Playing => "Play Actions",
+            GameState::StatusPhase(ref p) => &format!("Status Phase: {p:?}"),
+            GameState::Movement { .. } => "Movement",
+            GameState::CulturalInfluenceResolution(_) => "Cultural Influence Resolution",
+            GameState::Combat(c) => &format!("Combat Round {} Phase {:?}", c.round, c.phase),
+            GameState::PlaceSettler { .. } => "Place Settler",
+            GameState::Finished => "Finished",
         }
     } else {
-        String::new()
+        ""
     };
-    
-    if actions_left.is_empty() && active_player.is_empty() {
+
+    let status = vec![active_player, actions_left, moves_left]
+        .into_iter()
+        .filter(|s| !s.is_empty())
+        .collect::<Vec<_>>()
+        .join(", ");
+
+    if status.is_empty() {
         String::new()
     } else {
-        format!(" ({active_player}{actions_left}{moves_left})")
+        format!(" ({status})")
+    }
+}
+
+fn moves_left(state: &GameState) -> Option<u32> {
+    match state {
+        GameState::Combat(c) => moves_left(&c.initiation),
+        GameState::Movement {
+            movement_actions_left,
+            ..
+        } => Some(*movement_actions_left),
+        GameState::PlaceSettler {
+            player_index: _player_index,
+            movement_actions_left,
+            ..
+        } => Some(*movement_actions_left),
+        _ => None,
     }
 }
 

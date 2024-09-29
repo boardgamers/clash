@@ -1,4 +1,3 @@
-use macroquad::input::KeyCode::N;
 use macroquad::prelude::*;
 
 use server::action::{Action, CombatAction};
@@ -209,9 +208,7 @@ impl State {
     pub fn has_modal_dialog(&self) -> bool {
         !matches!(
             self.active_dialog,
-            ActiveDialog::None |
-            ActiveDialog::TileMenu(_) |
-            ActiveDialog::Log 
+            ActiveDialog::None | ActiveDialog::TileMenu(_) | ActiveDialog::Log
         )
     }
 

@@ -8,6 +8,7 @@ use std::io::BufReader;
 use crate::client::{Features, GameSyncRequest, GameSyncResult};
 use server::city::City;
 use server::game::{Game, GameData};
+use server::leader::Leader;
 use server::map::Terrain;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
@@ -88,6 +89,8 @@ pub fn setup_local_game() -> Game {
     add_unit(&mut game, "C2", player_index1, UnitType::Settler);
     add_unit(&mut game, "C2", player_index1, UnitType::Settler);
     add_unit(&mut game, "C2", player_index1, UnitType::Settler);
+    game.players[player_index1].active_leader =
+        Some(Leader::builder("Alexander", "", "", "", "").build());
 
     add_unit(&mut game, "C1", player_index2, UnitType::Infantry);
     add_unit(&mut game, "C1", player_index2, UnitType::Infantry);
