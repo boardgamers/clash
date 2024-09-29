@@ -672,10 +672,11 @@ impl Game {
         };
     }
 
-    #[must_use] pub fn enemy_player(&self, player_index: usize, position: Position) -> Option<usize> {
+    #[must_use]
+    pub fn enemy_player(&self, player_index: usize, position: Position) -> Option<usize> {
         self.players.iter().position(|player| {
-            player.index != player_index && 
-                (!player.get_units(position).is_empty() || player.get_city(position).is_some())
+            player.index != player_index
+                && (!player.get_units(position).is_empty() || player.get_city(position).is_some())
         })
     }
 
