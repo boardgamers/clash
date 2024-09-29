@@ -39,7 +39,7 @@ pub struct Game {
     pub players: Vec<Player>,
     pub map: Map,
     pub starting_player_index: usize,
-    current_player_index: usize,
+    pub current_player_index: usize,
     pub action_log: Vec<ActionLogItem>,
     pub action_log_index: usize,
     pub log: Vec<String>,
@@ -672,9 +672,10 @@ impl Game {
         };
     }
 
-    fn enemy_player(&self, player_index: usize, position: Position) -> Option<usize> {
+    #[must_use] pub fn enemy_player(&self, player_index: usize, position: Position) -> Option<usize> {
         self.players.iter().position(|player| {
-            player.index != player_index && !player.get_units(position).is_empty()
+            player.index != player_index && 
+                (!player.get_units(position).is_empty() || player.get_city(position).is_some())
         })
     }
 
