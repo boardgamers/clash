@@ -1,6 +1,6 @@
 use macroquad::prelude::*;
 
-use server::action::{Action, CombatAction};
+use server::action::Action;
 use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
 use server::game::{CulturalInfluenceResolution, Game, GameState};
@@ -39,7 +39,7 @@ pub enum ActiveDialog {
 
     // status phase
     FreeAdvance,
-    RaseSize1City,
+    RazeSize1City,
     DetermineFirstPlayer,
     ChangeGovernmentType,
     ChooseAdditionalAdvances(ChooseAdditionalAdvances),
@@ -48,6 +48,35 @@ pub enum ActiveDialog {
     PlaceSettler,
     Retreat,
     RemoveCasualties(RemoveCasualtiesSelection),
+}
+
+impl ActiveDialog {
+    #[must_use]
+    pub fn title(&self) -> &str {
+        match self {
+            ActiveDialog::None => "none",
+            ActiveDialog::TileMenu(_) => "tile menu",
+            ActiveDialog::Log => "log",
+            ActiveDialog::WaitingForUpdate => "waiting for update",
+            ActiveDialog::IncreaseHappiness(_) => "increase happiness",
+            ActiveDialog::AdvanceMenu => "advance menu",
+            ActiveDialog::AdvancePayment(_) => "advance payment",
+            ActiveDialog::ConstructionPayment(_) => "construction payment",
+            ActiveDialog::CollectResources(_) => "collect resources",
+            ActiveDialog::RecruitUnitSelection(_) => "recruit unit selection",
+            ActiveDialog::ReplaceUnits(_) => "replace units",
+            ActiveDialog::MoveUnits(_) => "move units",
+            ActiveDialog::CulturalInfluenceResolution(_) => "cultural influence resolution",
+            ActiveDialog::FreeAdvance => "free advance",
+            ActiveDialog::RazeSize1City => "raze size 1 city",
+            ActiveDialog::DetermineFirstPlayer => "determine first player",
+            ActiveDialog::ChangeGovernmentType => "change government type",
+            ActiveDialog::ChooseAdditionalAdvances(_) => "choose additional advances",
+            ActiveDialog::PlaceSettler => "place settler",
+            ActiveDialog::Retreat => "retreat",
+            ActiveDialog::RemoveCasualties(_) => "remove casualties",
+        }
+    }
 }
 
 pub struct PendingUpdate {
@@ -282,10 +311,16 @@ impl State {
         let last_dialog = self.active_dialog.clone();
         self.clear();
 
-        self.active_dialog = match &game.state {
+        self.active_dialog = self.game_state_dialog(game, &last_dialog);
+        GameSyncRequest::None
+    }
+
+    #[must_use]
+    pub fn game_state_dialog(&self, game: &Game, last_dialog: &ActiveDialog) -> ActiveDialog {
+        match &game.state {
             GameState::Movement { .. } => {
                 let start = if let ActiveDialog::TileMenu(p) = last_dialog {
-                    Some(p)
+                    Some(*p)
                 } else {
                     None
                 };
@@ -296,22 +331,24 @@ impl State {
             }
             GameState::StatusPhase(state) => match state {
                 StatusPhaseState::CompleteObjectives => {
-                    self.execute_status_phase(game, StatusPhaseAction::CompleteObjectives(vec![]))
+                    // todo implement
+                    // self.execute_status_phase(game, StatusPhaseAction::CompleteObjectives(vec![]))
+                    ActiveDialog::None
                 }
                 StatusPhaseState::FreeAdvance => ActiveDialog::FreeAdvance,
-                StatusPhaseState::RaseSize1City => ActiveDialog::RaseSize1City,
+                StatusPhaseState::RaseSize1City => ActiveDialog::RazeSize1City,
                 StatusPhaseState::ChangeGovernmentType => ActiveDialog::ChangeGovernmentType,
                 StatusPhaseState::DetermineFirstPlayer => ActiveDialog::DetermineFirstPlayer,
             },
             GameState::PlaceSettler { .. } => ActiveDialog::PlaceSettler,
             GameState::Combat(c) => match c.phase {
                 CombatPhase::PlayActionCard(_) => {
-                    self.update(
-                        game,
-                        StateUpdate::Execute(Action::Combat(CombatAction::PlayActionCard(None))),
-                    );
+                    // self.update(
+                    //     game,
+                    //     StateUpdate::Execute(Action::Combat(CombatAction::PlayActionCard(None))),
+                    // );
                     ActiveDialog::None
-                } //todo(gregor)
+                } //todo implement
                 CombatPhase::RemoveCasualties {
                     player, casualties, ..
                 } => {
@@ -335,12 +372,11 @@ impl State {
                 CombatPhase::Retreat => ActiveDialog::Retreat,
             },
             _ => ActiveDialog::None,
-        };
-        GameSyncRequest::None
+        }
     }
 
-    fn execute_status_phase(&mut self, game: &Game, action: StatusPhaseAction) -> ActiveDialog {
-        self.update(game, StateUpdate::status_phase(action));
-        ActiveDialog::None
-    }
+    // fn execute_status_phase(&mut self, game: &Game, action: StatusPhaseAction) -> ActiveDialog {
+    //     self.update(game, StateUpdate::status_phase(action));
+    //     ActiveDialog::None
+    // }
 }

@@ -12,7 +12,7 @@ use server::resource_pile::ResourcePile;
 
 use crate::client_state::{ShownPlayer, State, StateUpdate};
 
-pub fn show_globals(game: &Game, shown_player: &ShownPlayer, state: &State) -> StateUpdate {
+pub fn show_globals(game: &Game, shown_player: &ShownPlayer) -> StateUpdate {
     draw_text(&format!("Age {}", game.age), 1400., 60., 20., BLACK);
     draw_text(&format!("Round {}", game.round), 1400., 90., 20., BLACK);
 
@@ -33,7 +33,7 @@ pub fn show_globals(game: &Game, shown_player: &ShownPlayer, state: &State) -> S
         let y = 180. + i as f32 * 50.;
         let x = 1400.;
         let label = format!("{prefix}{name}{suffix}");
-        if shown || state.has_modal_dialog() {
+        if shown {
             draw_text(&label, x, y, 20., BLACK);
         } else if Button::new(label)
             .position(vec2(x, y - 10.))

@@ -54,28 +54,33 @@ fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
 
     draw_map(game, state);
     let mut updates = StateUpdates::new();
-    let update = show_globals(game, player, state);
+    let update = show_globals(game, player);
     updates.add(update);
     show_resources(game, player_index);
     show_wonders(game, player_index);
 
-    if !state.has_modal_dialog() {
-        if root_ui().button(vec2(1200., 130.), "Log") {
-            return StateUpdate::OpenDialog(ActiveDialog::Log);
-        };
-        if root_ui().button(vec2(1200., 100.), "Advances") {
-            return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
-        };
-        if features.import_export && player.can_control {
-            if root_ui().button(vec2(1200., 290.), "Import") {
-                return StateUpdate::Import;
-            };
-            if root_ui().button(vec2(1250., 290.), "Export") {
-                return StateUpdate::Export;
-            };
-        }
+    if root_ui().button(vec2(1200., 100.), "Advances") {
+        return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
+    };
+    if root_ui().button(vec2(1200., 130.), "Log") {
+        return StateUpdate::OpenDialog(ActiveDialog::Log);
+    };
+    let d = state.game_state_dialog(game, &ActiveDialog::None);
+    if !matches!(d, ActiveDialog::None)
+        && d.title() != state.active_dialog.title()
+        && root_ui().button(vec2(1200., 160.), format!("Back to {}", d.title()))
+    {
+        return StateUpdate::OpenDialog(d);
     }
 
+    if features.import_export && player.can_control {
+        if root_ui().button(vec2(1200., 290.), "Import") {
+            return StateUpdate::Import;
+        };
+        if root_ui().button(vec2(1250., 290.), "Export") {
+            return StateUpdate::Export;
+        };
+    }
     if player.can_control {
         if let Some(u) = &state.pending_update {
             updates.add(show_pending_update(u, player));
@@ -111,7 +116,7 @@ fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
 
         //status phase
         ActiveDialog::FreeAdvance => show_free_advance_menu(game, player),
-        ActiveDialog::RaseSize1City => status_phase_ui::raze_city_dialog(player),
+        ActiveDialog::RazeSize1City => status_phase_ui::raze_city_dialog(player),
         ActiveDialog::DetermineFirstPlayer => {
             status_phase_ui::determine_first_player_dialog(game, player)
         }
@@ -163,7 +168,7 @@ pub fn try_click(game: &Game, state: &State, player: &ShownPlayer) -> StateUpdat
             ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::click_replace(pos, r),
             ActiveDialog::RemoveCasualties(_s) => StateUpdate::None,
             ActiveDialog::CollectResources(col) => click_collect_option(col, pos),
-            ActiveDialog::RaseSize1City => {
+            ActiveDialog::RazeSize1City => {
                 if player.get(game).can_raze_city(pos) {
                     StateUpdate::status_phase(StatusPhaseAction::RaseSize1City(Some(pos)))
                 } else {
