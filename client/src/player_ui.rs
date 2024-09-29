@@ -58,7 +58,16 @@ fn player_suffix(game: &Game, player: &Player) -> String {
     } else {
         ""
     };
-    // todo moves left
+    let moves_left = if game.current_player_index == player.index {
+        match &game.state {
+            GameState::Movement { movement_actions_left, .. } => {
+                &format!(", {movement_actions_left} moves left")
+            }
+            _ => "",
+        }
+    } else {
+        ""
+    };
 
     let active_player = if player.index == game.active_player() {
         match &game.state {
@@ -81,7 +90,7 @@ fn player_suffix(game: &Game, player: &Player) -> String {
     if actions_left.is_empty() && active_player.is_empty() {
         String::new()
     } else {
-        format!(" ({active_player}{actions_left})")
+        format!(" ({active_player}{actions_left}{moves_left})")
     }
 }
 

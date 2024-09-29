@@ -1,3 +1,4 @@
+use macroquad::input::KeyCode::N;
 use macroquad::prelude::*;
 
 use server::action::{Action, CombatAction};
@@ -286,11 +287,12 @@ impl State {
 
         self.active_dialog = match &game.state {
             GameState::Movement { .. } => {
-                if let ActiveDialog::TileMenu(p) = last_dialog {
-                    ActiveDialog::MoveUnits(MoveSelection::new(game.active_player(),Some(p)))
+                let start = if let ActiveDialog::TileMenu(p) = last_dialog {
+                    Some(p)
                 } else {
-                    ActiveDialog::MoveUnits(MoveSelection::new(game.active_player(), None))
-                }
+                    None
+                };
+                ActiveDialog::MoveUnits(MoveSelection::new(game.active_player(), start))
             }
             GameState::CulturalInfluenceResolution(c) => {
                 ActiveDialog::CulturalInfluenceResolution(c.clone())

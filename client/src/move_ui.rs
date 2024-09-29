@@ -30,7 +30,7 @@ pub fn move_units_dialog(game: &Game, sel: &MoveSelection, player: &ShownPlayer)
 
             if ui.button(
                 None,
-                format!("End Move Units - {movement_actions_left} actions left"),
+                "End Move Units",
             ) {
                 StateUpdate::execute_with_warning(
                     Action::Movement(MovementAction::Stop),
