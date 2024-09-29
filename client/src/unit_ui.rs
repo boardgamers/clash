@@ -8,7 +8,7 @@ use server::game::Game;
 use server::position::Position;
 use server::unit::{Unit, UnitType};
 
-use crate::client_state::StateUpdate;
+use crate::client_state::{ShownPlayer, StateUpdate};
 use crate::dialog_ui::active_dialog_window;
 use crate::select_ui::{confirm_update, ConfirmSelection};
 use crate::{hex_ui, player_ui};
@@ -74,19 +74,20 @@ pub fn draw_units(game: &Game) {
 pub trait UnitSelection: ConfirmSelection {
     fn selected_units(&self) -> &[u32];
     fn selected_units_mut(&mut self) -> &mut Vec<u32>;
-    fn can_select(&self, game: &Game, unit: &Unit) -> bool;
+    fn can_select(&self, game: &Game, unit: &Unit) -> bool; // todo return Option<String> for why not
     fn current_tile(&self) -> Option<Position>;
 }
 
 pub fn unit_selection_dialog<T: UnitSelection>(
     game: &Game,
+    player: &ShownPlayer,
     title: &str,
     sel: &T,
     on_change: impl Fn(T) -> StateUpdate,
     on_ok: impl FnOnce(T) -> StateUpdate,
     additional: impl FnOnce(&mut Ui) -> StateUpdate,
 ) -> StateUpdate {
-    active_dialog_window(title, |ui| {
+    active_dialog_window(player, title, |ui| {
         if let Some(current_tile) = sel.current_tile() {
             for (p, unit_id) in units_on_tile(game, current_tile) {
                 let unit = game.get_player(p).get_unit(unit_id).unwrap();
@@ -142,7 +143,7 @@ pub fn name(u: &UnitType) -> &str {
 
 pub fn label(unit: &Unit) -> String {
     let name = name(&unit.unit_type);
-    let res = if !unit.can_move() {
+    let res = if !unit.can_move() || (unit.unit_type == UnitType::Settler && !unit.can_attack()) {
         " (can't move) "
     } else if !unit.can_attack() {
         " (can't attack) "

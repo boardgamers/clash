@@ -794,6 +794,10 @@ impl Player {
             }
         }
 
+        if stack_size == 0 && game.enemy_player(self.index, destination).is_some() {
+            return Err("the stack should contain at least one army unit".to_string());
+        }
+
         if land_movement
             && self
                 .get_units(destination)

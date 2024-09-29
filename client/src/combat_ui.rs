@@ -3,14 +3,14 @@ use server::game::Game;
 use server::position::Position;
 use server::unit::Unit;
 
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
 use crate::dialog_ui::active_dialog_window;
 use crate::select_ui::{ConfirmSelection, SelectionConfirm};
 use crate::unit_ui;
 use crate::unit_ui::UnitSelection;
 
-pub fn retreat_dialog() -> StateUpdate {
-    active_dialog_window("Do you want to retreat?", |ui| {
+pub fn retreat_dialog(player: &ShownPlayer) -> StateUpdate {
+    active_dialog_window(player, "Do you want to retreat?", |ui| {
         if ui.button(None, "Retreat") {
             return retreat(true);
         }
@@ -25,8 +25,8 @@ fn retreat(retreat: bool) -> StateUpdate {
     StateUpdate::Execute(Action::Combat(CombatAction::Retreat(retreat)))
 }
 
-pub fn place_settler_dialog() -> StateUpdate {
-    active_dialog_window("Select a city to place a settler in.", |_| {
+pub fn place_settler_dialog(player: &ShownPlayer) -> StateUpdate {
+    active_dialog_window(player, "Select a city to place a settler in.", |_| {
         StateUpdate::None
     })
 }
@@ -82,9 +82,14 @@ impl ConfirmSelection for RemoveCasualtiesSelection {
     }
 }
 
-pub fn remove_casualties_dialog(game: &Game, sel: &RemoveCasualtiesSelection) -> StateUpdate {
+pub fn remove_casualties_dialog(
+    game: &Game,
+    sel: &RemoveCasualtiesSelection,
+    player: &ShownPlayer,
+) -> StateUpdate {
     unit_ui::unit_selection_dialog::<RemoveCasualtiesSelection>(
         game,
+        player,
         "Remove casualties",
         sel,
         |new| StateUpdate::SetDialog(ActiveDialog::RemoveCasualties(new.clone())),

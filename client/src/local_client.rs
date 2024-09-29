@@ -6,9 +6,9 @@ use std::fs::File;
 use std::io::BufReader;
 
 use crate::client::{Features, GameSyncRequest, GameSyncResult};
-use crate::client_state::ControlPlayers;
 use server::city::City;
 use server::game::{Game, GameData};
+use server::leader::Leader;
 use server::map::Terrain;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
@@ -16,20 +16,24 @@ use server::unit::UnitType;
 
 pub async fn run(mut game: Game, features: &Features) {
     let mut state = client::init(features).await;
-    state.control_players = ControlPlayers::All;
 
     let mut sync_result = GameSyncResult::None;
+    state.show_player = game.active_player();
     loop {
+        state.control_player = Some(game.active_player());
+
         let message = client::render_and_update(&game, &mut state, &sync_result, features);
         sync_result = GameSyncResult::None;
         match message {
             GameSyncRequest::None => {}
             GameSyncRequest::ExecuteAction(a) => {
                 game.execute_action(a, game.active_player());
+                state.show_player = game.active_player();
                 sync_result = GameSyncResult::Update;
             }
             GameSyncRequest::Import => {
                 game = import();
+                state.show_player = game.active_player();
                 sync_result = GameSyncResult::Update;
             }
             GameSyncRequest::Export => {
@@ -85,6 +89,8 @@ pub fn setup_local_game() -> Game {
     add_unit(&mut game, "C2", player_index1, UnitType::Settler);
     add_unit(&mut game, "C2", player_index1, UnitType::Settler);
     add_unit(&mut game, "C2", player_index1, UnitType::Settler);
+    game.players[player_index1].active_leader =
+        Some(Leader::builder("Alexander", "", "", "", "").build());
 
     add_unit(&mut game, "C1", player_index2, UnitType::Infantry);
     add_unit(&mut game, "C1", player_index2, UnitType::Infantry);

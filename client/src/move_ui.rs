@@ -2,18 +2,19 @@ use macroquad::math::u32;
 
 use crate::select_ui::{ConfirmSelection, SelectionConfirm};
 use server::action::Action;
+use server::game::Game;
 use server::game::GameState::Movement;
-use server::game::{Game, GameState};
 use server::position::Position;
 use server::unit::{MovementAction, Unit};
 
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
 use crate::unit_ui;
 use crate::unit_ui::UnitSelection;
 
-pub fn move_units_dialog(game: &Game, sel: &MoveSelection) -> StateUpdate {
+pub fn move_units_dialog(game: &Game, sel: &MoveSelection, player: &ShownPlayer) -> StateUpdate {
     unit_ui::unit_selection_dialog::<MoveSelection>(
         game,
+        player,
         "Move Units",
         sel,
         |new| update_possible_destinations(game, new.clone()),
@@ -27,10 +28,7 @@ pub fn move_units_dialog(game: &Game, sel: &MoveSelection) -> StateUpdate {
                 panic!("game is not in movement")
             };
 
-            if ui.button(
-                None,
-                format!("End Move Units - {movement_actions_left} actions left"),
-            ) {
+            if ui.button(None, "End Move Units") {
                 StateUpdate::execute_with_warning(
                     Action::Movement(MovementAction::Stop),
                     if movement_actions_left > 0 {
@@ -62,7 +60,7 @@ fn possible_destinations(
     player_index: usize,
     units: &Vec<u32>,
 ) -> Vec<Position> {
-    if let GameState::Movement {
+    if let Movement {
         movement_actions_left,
         moved_units,
     } = &game.state
@@ -117,11 +115,11 @@ pub struct MoveSelection {
 }
 
 impl MoveSelection {
-    pub fn new(player_index: usize) -> MoveSelection {
+    pub fn new(player_index: usize, start: Option<Position>) -> MoveSelection {
         MoveSelection {
             player_index,
             units: vec![],
-            start: None,
+            start,
             destinations: vec![],
         }
     }

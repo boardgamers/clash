@@ -3,7 +3,7 @@ use server::game::Game;
 use macroquad::prelude::next_frame;
 
 use client::client::{init, render_and_update, Features, GameSyncRequest, GameSyncResult};
-use client::client_state::ControlPlayers;
+use client::client_state::State;
 use server::action::Action;
 use wasm_bindgen::prelude::*;
 
@@ -32,7 +32,7 @@ extern "C" {
     fn send_ready(this: &Control);
 }
 
-enum RemoteClientState {
+enum SyncState {
     New,
     WaitingForUpdate,
     Playing,
@@ -41,8 +41,10 @@ enum RemoteClientState {
 #[wasm_bindgen]
 struct RemoteClient {
     control: Control,
-    state: RemoteClientState,
+    state: State,
+    sync_state: SyncState,
     game: Option<Game>,
+    features: Features,
 }
 
 #[macroquad::main("Clash")]
@@ -53,32 +55,35 @@ async fn main() {
 #[wasm_bindgen]
 impl RemoteClient {
     pub async fn start() {
+        let features = Features {
+            import_export: false,
+            local_assets: false,
+        };
+        let state = init(&features).await;
+
         let mut client = RemoteClient {
             control: get_control(),
-            state: RemoteClientState::New,
+            state,
+            sync_state: SyncState::New,
             game: None,
+            features,
         };
         client.run().await;
     }
 
     pub async fn run(&mut self) {
-        let features = Features {
-            import_export: false,
-            local_assets: false,
-        };
-
-        let mut client_state = init(&features).await;
-
         loop {
             let p = self.control.receive_player_index().as_f64();
             if let Some(p) = p {
-                client_state.control_players = ControlPlayers::Own(p as usize);
+                self.state.control_player = Some(p as usize);
+                self.state.show_player = p as usize;
             }
 
             let sync_result = self.update_state();
 
             if let Some(game) = &self.game {
-                let message = render_and_update(game, &mut client_state, &sync_result, &features);
+                let message =
+                    render_and_update(game, &mut self.state, &sync_result, &self.features);
 
                 if let GameSyncRequest::ExecuteAction(a) = message {
                     let _ = &mut self.execute_action(&a);
@@ -94,26 +99,27 @@ impl RemoteClient {
         let s = self.control.receive_state();
         if s.is_object() {
             log("received state");
-            let game1 = Game::from_data(
+            let g = Game::from_data(
                 serde_wasm_bindgen::from_value(s).expect("game should be of type game data"),
             );
-            self.game = Some(game1);
-            self.state = RemoteClientState::Playing;
+            self.state.show_player = g.active_player();
+            self.game = Some(g);
+            self.sync_state = SyncState::Playing;
             self.control.send_ready();
             return GameSyncResult::Update;
         }
-        match &self.state {
-            RemoteClientState::New => GameSyncResult::None,
-            RemoteClientState::WaitingForUpdate => GameSyncResult::WaitingForUpdate,
-            RemoteClientState::Playing => GameSyncResult::None,
+        match &self.sync_state {
+            SyncState::New => GameSyncResult::None,
+            SyncState::WaitingForUpdate => GameSyncResult::WaitingForUpdate,
+            SyncState::Playing => GameSyncResult::None,
         }
     }
 
     fn execute_action(&mut self, a: &Action) {
-        if let RemoteClientState::Playing = &self.state {
+        if let SyncState::Playing = &self.sync_state {
             self.control
                 .send_move(serde_json::to_string(&a).unwrap().as_str());
-            self.state = RemoteClientState::WaitingForUpdate;
+            self.sync_state = SyncState::WaitingForUpdate;
         } else {
             log("cannot execute action");
         }

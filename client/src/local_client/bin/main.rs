@@ -1,9 +1,11 @@
 use client::client::Features;
 use client::local_client;
+use macroquad::window::set_fullscreen;
 use server::game::Game;
 
 #[macroquad::main("Clash")]
 async fn main() {
+    set_fullscreen(true);
     let wasm = cfg!(feature = "wasm");
 
     let features = Features {

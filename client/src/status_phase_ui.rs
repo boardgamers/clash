@@ -1,4 +1,4 @@
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
 use crate::dialog_ui::active_dialog_window;
 use crate::select_ui;
 use crate::select_ui::{ConfirmSelection, Selection, SelectionConfirm};
@@ -6,22 +6,28 @@ use server::content::advances;
 use server::game::Game;
 use server::status_phase::{ChangeGovernmentType, StatusPhaseAction};
 
-pub fn determine_first_player_dialog(game: &Game) -> StateUpdate {
-    active_dialog_window("Who should be the first player in the next age?", |ui| {
-        for p in &game.players {
-            if ui.button(
-                None,
-                format!("Player {} - {}", p.index, p.civilization.name),
-            ) {
-                return StateUpdate::status_phase(StatusPhaseAction::DetermineFirstPlayer(p.index));
+pub fn determine_first_player_dialog(game: &Game, player: &ShownPlayer) -> StateUpdate {
+    active_dialog_window(
+        player,
+        "Who should be the first player in the next age?",
+        |ui| {
+            for p in &game.players {
+                if ui.button(
+                    None,
+                    format!("Player {} - {}", p.index, p.civilization.name),
+                ) {
+                    return StateUpdate::status_phase(StatusPhaseAction::DetermineFirstPlayer(
+                        p.index,
+                    ));
+                }
             }
-        }
-        StateUpdate::None
-    })
+            StateUpdate::None
+        },
+    )
 }
 
-pub fn raze_city_dialog() -> StateUpdate {
-    active_dialog_window("Select a city to raze - or decline.", |ui| {
+pub fn raze_city_dialog(player: &ShownPlayer) -> StateUpdate {
+    active_dialog_window(player, "Select a city to raze - or decline.", |ui| {
         if ui.button(None, "Decline") {
             return StateUpdate::status_phase(StatusPhaseAction::RaseSize1City(None));
         }
@@ -82,10 +88,10 @@ impl ConfirmSelection for ChooseAdditionalAdvances {
     }
 }
 
-pub fn change_government_type_dialog(game: &Game) -> StateUpdate {
-    active_dialog_window("Select additional advances", |ui| {
-        let current = game
-            .get_player(game.active_player())
+pub fn change_government_type_dialog(game: &Game, player: &ShownPlayer) -> StateUpdate {
+    active_dialog_window(player, "Select additional advances", |ui| {
+        let current = player
+            .get(game)
             .government()
             .expect("should have government");
         for (g, _) in advances::get_governments()
@@ -114,9 +120,11 @@ pub fn change_government_type_dialog(game: &Game) -> StateUpdate {
 pub fn choose_additional_advances_dialog(
     game: &Game,
     additional_advances: &ChooseAdditionalAdvances,
+    player: &ShownPlayer,
 ) -> StateUpdate {
     select_ui::selection_dialog(
         game,
+        player,
         "Select additional advances:",
         additional_advances,
         |a| StateUpdate::SetDialog(ActiveDialog::ChooseAdditionalAdvances(a)),
