@@ -5,7 +5,6 @@ use wasm_bindgen::prelude::*;
 
 use crate::{game::Game, game_api};
 extern crate console_error_panic_hook;
-use std::panic;
 
 #[derive(Serialize, Deserialize)]
 pub struct PlayerMetaData {
@@ -13,7 +12,7 @@ pub struct PlayerMetaData {
 }
 
 fn get_game(data: JsValue) -> Game {
-    panic::set_hook(Box::new(console_error_panic_hook::hook));
+    console_error_panic_hook::set_once();
     Game::from_data(serde_wasm_bindgen::from_value(data).expect("game should be of type game data"))
 }
 

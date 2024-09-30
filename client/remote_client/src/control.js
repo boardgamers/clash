@@ -9,6 +9,11 @@ export class Control extends EventEmitter {
         this.addListener("state", (data) => {
             this.state = data;
         });
+        // When we receive log slices, when executing a move
+        this.addListener("gamelog", (logData) => {
+            // Ignore the log data and tell the backend we want the new state
+            this.emit("fetchState");
+        });
         this.addListener("state:updated", () => {
             this.emit("fetchState");
         });

@@ -28,7 +28,7 @@ extern "C" {
     fn receive_player_index(this: &Control) -> JsValue;
 
     #[wasm_bindgen(method)]
-    fn send_move(this: &Control, action: &str);
+    fn send_move(this: &Control, action: JsValue);
 
     #[wasm_bindgen(method)]
     fn send_ready(this: &Control);
@@ -121,7 +121,7 @@ impl RemoteClient {
     fn execute_action(&mut self, a: &Action) {
         if let SyncState::Playing = &self.sync_state {
             self.control
-                .send_move(serde_json::to_string(&a).unwrap().as_str());
+                .send_move(serde_wasm_bindgen::to_value(&a).unwrap());
             self.sync_state = SyncState::WaitingForUpdate;
         } else {
             log("cannot execute action");
