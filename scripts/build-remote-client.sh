@@ -72,15 +72,16 @@ sed -i "s/let wasm;/let wasm; export const set_wasm = (w) => wasm = w;/" dist/"$
 sed -i "s/imports\['env'\] = __wbg_star0;/return imports.wbg\;/" dist/"$PROJECT_NAME".js
 sed -i "s/const imports = __wbg_get_imports();/return __wbg_get_imports();/" dist/"$PROJECT_NAME".js
 
-pushd remote_client
+pushd js
 mkdir -p dist
 rm -rf dist/*
 npm run build
 cp -r ../assets dist/
+cp package.json dist/
 pushd dist
 mv *.wasm client.wasm
 popd
-popd # remote_client
+popd # js
 
 popd # client
 

@@ -15,7 +15,7 @@ extern "C" {
     fn log(s: &str);
 }
 
-#[wasm_bindgen(module = "/remote_client/src/control.js")]
+#[wasm_bindgen(module = "/js/src/control.js")]
 extern "C" {
     type Control;
 

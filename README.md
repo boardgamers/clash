@@ -19,7 +19,7 @@
 ### Run remote web client locally
 
 - `./build-remote-client.sh`
-- `cd client/remote_client/dist`
+- `cd client/js/dist`
 - `basic-http-server .`
 - `google-chrome --disable-web-security --user-data-dir=/tmp http://localhost:8612`
 
@@ -100,7 +100,7 @@ diff --git a/apps/api/app/resources.ts b/apps/api/app/resources.ts
    const viewer: ViewerInfo =
      gameInfo?.viewer?.alternate?.url && ctx.query.alternate === "1" ? gameInfo?.viewer.alternate : gameInfo.viewer;
 -  const viewerUrl = ctx.query.customViewerUrl || viewer.url;
-+  const viewerUrl = "/home/gregor/source/clash/client/remote_client/index.js";
++  const viewerUrl = "/home/gregor/source/clash/client/js/index.js";
  
    ctx.body = `
      <html>

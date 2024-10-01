@@ -1,9 +1,14 @@
 name: Server - Release
 
+#on:
+#  push:
+#    tags:
+#      - "v*.*.*"
 on:
   push:
-    tags:
-      - "v*.*.*"
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 env:
   node_version: 14
@@ -23,6 +28,8 @@ jobs:
         with:
           version: 'latest'
       # see https://stackoverflow.com/questions/58177786/get-the-current-pushed-tag-in-github-actions
-      - run: ./scripts/publish-server.sh ${{ github.event.release.tag_name }}
+      - run: |
+          # ./scripts/publish-server.sh ${{ github.event.release.tag_name }}
+          ./scripts/publish-client.sh 0.0.1
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

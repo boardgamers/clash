@@ -1,0 +1,27 @@
+{
+  "name": "@boardgamers/clash-client",
+  "description": "A client for Clash of Cultures",
+  "version": "0.1.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:boardgamers/clash.git"
+  },
+  "files": [
+    "assets/",
+    "client.js",
+    "client.wasm"
+  ],
+  "main": "index.js",
+  "homepage": "https://www.boardgamers.space/",
+  "scripts": {
+    "build": "webpack"
+  },
+  "devDependencies": {
+    "webpack": "^5.94.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "events": "^3.3.0"
+  }
+}
