@@ -42,6 +42,8 @@ done
 set -- "${POSITIONAL[@]}"
 [ $# -ne 0 ] && die "too many arguments provided"
 
+pushd client
+
 PROJECT_NAME=remote_client
 
 TARGET_DIR="target/wasm32-unknown-unknown"
@@ -60,8 +62,6 @@ echo "Running wasm-bindgen..."
 
 mkdir -p dist
 
-#cp remote_client/*.js dist/
-
 wasm-bindgen $TARGET_DIR/"$PROJECT_NAME".wasm --out-dir dist --target web --no-typescript
 
 echo "Patching wasm-bindgen output..."
@@ -71,8 +71,6 @@ sed -i "s/import \* as __wbg_star0 from 'env';//" dist/"$PROJECT_NAME".js
 sed -i "s/let wasm;/let wasm; export const set_wasm = (w) => wasm = w;/" dist/"$PROJECT_NAME".js
 sed -i "s/imports\['env'\] = __wbg_star0;/return imports.wbg\;/" dist/"$PROJECT_NAME".js
 sed -i "s/const imports = __wbg_get_imports();/return __wbg_get_imports();/" dist/"$PROJECT_NAME".js
-#sed -i "s#import { get_control }.*#import { get_control } from './control.js'#" dist/"$PROJECT_NAME".js
-#rm -rf dist/snippets
 
 pushd remote_client
 mkdir -p dist
@@ -82,6 +80,8 @@ cp -r ../assets dist/
 pushd dist
 mv *.wasm client.wasm
 popd
-popd
+popd # remote_client
+
+popd # client
 
 echo "Done!"

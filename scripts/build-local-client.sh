@@ -120,6 +120,8 @@ OUTER=$(
 	END
 )
 
+pushd client
+
 TARGET_DIR="target/wasm32-unknown-unknown"
 # Build
 echo "Building $PROJECT_NAME..."
@@ -149,5 +151,7 @@ sed -i "s/const imports = __wbg_get_imports();/return __wbg_get_imports();/" dis
 # Create index from the HTML variable
 echo "$HTML" >dist/iframe.html
 echo "$OUTER" >dist/index.html
+
+popd # client
 
 echo "Done!"
