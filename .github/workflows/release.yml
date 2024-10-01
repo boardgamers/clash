@@ -30,6 +30,7 @@ jobs:
       # see https://stackoverflow.com/questions/58177786/get-the-current-pushed-tag-in-github-actions
       - run: |
           # ./scripts/publish-server.sh ${{ github.event.release.tag_name }}
+          rustup target add wasm32-unknown-unknown # automatically done by wasm-pack
           ./scripts/publish-client.sh 0.0.1
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
