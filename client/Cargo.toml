@@ -14,15 +14,6 @@ debug = true
 [profile.release]
 debug = true
 
-[features]
-# disable file import and export
-wasm = []
-
-# may be needed for remote client
-#[lib]
-#name = "client"
-#crate-type = ["cdylib", "rlib"]
-
 [dependencies]
 macroquad = "0.4.2"
 hex2d = "1.1.0"
@@ -35,6 +26,7 @@ lazy_static = "1.4.0"
 log = "0.4.20"
 async-std = "1.13.0"
 serde-wasm-bindgen = "0.6.5"
+console_error_panic_hook = "0.1.7"
 
 [[bin]]
 name = "local_client"

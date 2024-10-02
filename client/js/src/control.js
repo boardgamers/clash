@@ -5,9 +5,15 @@ export class Control extends EventEmitter {
         super();
         this.state = null;
         this.player_index = null;
+        this._assets_url = null;
 
         this.addListener("state", (data) => {
             this.state = data;
+        });
+        // When we receive log slices, when executing a move
+        this.addListener("gamelog", (logData) => {
+            // Ignore the log data and tell the backend we want the new state
+            this.emit("fetchState");
         });
         this.addListener("state:updated", () => {
             this.emit("fetchState");
@@ -35,6 +41,14 @@ export class Control extends EventEmitter {
 
     send_ready() {
         this.emit("ready");
+    }
+
+    get assets_url() {
+        return this._assets_url;
+    }
+
+    set assets_url(value) {
+        this._assets_url = value;
     }
 }
 

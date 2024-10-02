@@ -2,9 +2,11 @@ use server::game::Game;
 
 use macroquad::prelude::next_frame;
 
+extern crate console_error_panic_hook;
 use client::client::{init, render_and_update, Features, GameSyncRequest, GameSyncResult};
 use client::client_state::State;
 use server::action::Action;
+use std::panic;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -13,7 +15,7 @@ extern "C" {
     fn log(s: &str);
 }
 
-#[wasm_bindgen(module = "/remote_client/src/control.js")]
+#[wasm_bindgen(module = "/js/src/control.js")]
 extern "C" {
     type Control;
 
@@ -26,10 +28,13 @@ extern "C" {
     fn receive_player_index(this: &Control) -> JsValue;
 
     #[wasm_bindgen(method)]
-    fn send_move(this: &Control, action: &str);
+    fn send_move(this: &Control, action: JsValue);
 
     #[wasm_bindgen(method)]
     fn send_ready(this: &Control);
+
+    #[wasm_bindgen(method, getter)]
+    fn assets_url(this: &Control) -> String;
 }
 
 enum SyncState {
@@ -55,14 +60,16 @@ async fn main() {
 #[wasm_bindgen]
 impl RemoteClient {
     pub async fn start() {
+        panic::set_hook(Box::new(console_error_panic_hook::hook));
+        let control = get_control();
         let features = Features {
             import_export: false,
-            local_assets: false,
+            assets_url: control.assets_url(),
         };
         let state = init(&features).await;
 
         let mut client = RemoteClient {
-            control: get_control(),
+            control,
             state,
             sync_state: SyncState::New,
             game: None,
@@ -118,7 +125,7 @@ impl RemoteClient {
     fn execute_action(&mut self, a: &Action) {
         if let SyncState::Playing = &self.sync_state {
             self.control
-                .send_move(serde_json::to_string(&a).unwrap().as_str());
+                .send_move(serde_wasm_bindgen::to_value(&a).unwrap());
             self.sync_state = SyncState::WaitingForUpdate;
         } else {
             log("cannot execute action");

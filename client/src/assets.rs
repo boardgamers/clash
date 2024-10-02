@@ -25,21 +25,15 @@ impl Assets {
         let mut map: HashMap<Terrain, Texture2D> = HashMap::new();
 
         for (t, f) in [
-            (Terrain::Barren, "assets/barren.png"),
-            (Terrain::Mountain, "assets/mountain.png"),
-            (Terrain::Fertile, "assets/grassland.png"),
-            (Terrain::Forest, "assets/forest.png"),
-            (Terrain::Water, "assets/water.png"),
+            (Terrain::Barren, "barren.png"),
+            (Terrain::Mountain, "mountain.png"),
+            (Terrain::Fertile, "grassland.png"),
+            (Terrain::Forest, "forest.png"),
+            (Terrain::Water, "water.png"),
         ] {
-            let p = if features.local_assets {
-                f
-            } else {
-                // todo use asset prefix feature
-                &format!("http://localhost:4000/{f}")
-            };
-            map.insert(t, load_texture(p).await.unwrap());
+            let url = &features.assets_url;
+            map.insert(t, load_texture(&format!("{url}{f}")).await.unwrap());
         }
-
         map
     }
 }

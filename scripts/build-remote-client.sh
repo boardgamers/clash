@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 # from https://gist.github.com/nicolas-sabbatini/8af10dddc96be76d2bf24fc671131add
 
@@ -17,6 +17,7 @@ die() {
 	exit 1
 }
 
+RELEASE=no
 # Parse primary commands
 while [[ $# -gt 0 ]]; do
 	key="$1"
@@ -42,16 +43,18 @@ done
 set -- "${POSITIONAL[@]}"
 [ $# -ne 0 ] && die "too many arguments provided"
 
+pushd client
+
 PROJECT_NAME=remote_client
 
 TARGET_DIR="target/wasm32-unknown-unknown"
 # Build
 echo "Building $PROJECT_NAME..."
-if [ -n "$RELEASE" ]; then
-	cargo build --release --target wasm32-unknown-unknown --features "wasm"
+if [ "$RELEASE" == "yes" ]; then
+	cargo build --release --target wasm32-unknown-unknown
 	TARGET_DIR="$TARGET_DIR/release"
 else
-	cargo build --target wasm32-unknown-unknown --features "wasm"
+	cargo build --target wasm32-unknown-unknown
 	TARGET_DIR="$TARGET_DIR/debug"
 fi
 
@@ -59,8 +62,6 @@ fi
 echo "Running wasm-bindgen..."
 
 mkdir -p dist
-
-#cp remote_client/*.js dist/
 
 wasm-bindgen $TARGET_DIR/"$PROJECT_NAME".wasm --out-dir dist --target web --no-typescript
 
@@ -71,17 +72,19 @@ sed -i "s/import \* as __wbg_star0 from 'env';//" dist/"$PROJECT_NAME".js
 sed -i "s/let wasm;/let wasm; export const set_wasm = (w) => wasm = w;/" dist/"$PROJECT_NAME".js
 sed -i "s/imports\['env'\] = __wbg_star0;/return imports.wbg\;/" dist/"$PROJECT_NAME".js
 sed -i "s/const imports = __wbg_get_imports();/return __wbg_get_imports();/" dist/"$PROJECT_NAME".js
-#sed -i "s#import { get_control }.*#import { get_control } from './control.js'#" dist/"$PROJECT_NAME".js
-#rm -rf dist/snippets
 
-pushd remote_client
+pushd js
 mkdir -p dist
 rm -rf dist/*
+npm install
 npm run build
 cp -r ../assets dist/
+cp package.json dist/
 pushd dist
 mv *.wasm client.wasm
 popd
-popd
+popd # js
+
+popd # client
 
 echo "Done!"

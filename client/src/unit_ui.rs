@@ -143,9 +143,9 @@ pub fn name(u: &UnitType) -> &str {
 
 pub fn label(unit: &Unit) -> String {
     let name = name(&unit.unit_type);
-    let res = if !unit.can_move() || (unit.unit_type == UnitType::Settler && !unit.can_attack()) {
+    let res = if !unit.can_move() {
         " (can't move) "
-    } else if !unit.can_attack() {
+    } else if !unit.can_attack() && !unit.unit_type.is_settler() {
         " (can't attack) "
     } else {
         ""
