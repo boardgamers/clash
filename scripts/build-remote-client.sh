@@ -17,6 +17,7 @@ die() {
 	exit 1
 }
 
+RELEASE=no
 # Parse primary commands
 while [[ $# -gt 0 ]]; do
 	key="$1"
@@ -49,7 +50,7 @@ PROJECT_NAME=remote_client
 TARGET_DIR="target/wasm32-unknown-unknown"
 # Build
 echo "Building $PROJECT_NAME..."
-if [ -n "$RELEASE" ]; then
+if [ "$RELEASE" == "yes" ]; then
 	cargo build --release --target wasm32-unknown-unknown --features "wasm"
 	TARGET_DIR="$TARGET_DIR/release"
 else

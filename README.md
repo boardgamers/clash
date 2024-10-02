@@ -11,14 +11,14 @@
 
 ### Run local web client
 
-- `./scripts/build-local-client.sh local_client`
+- `./scripts/build-local-client.sh`
 - `cd client/dist`
 - `basic-http-server .`
 - open `http://localhost:4000` in a browser.
 
 ### Run remote web client locally
 
-- `./build-remote-client.sh`
+- `./scripts/build-remote-client.sh`
 - `cd client/js/dist`
 - `basic-http-server .`
 - `google-chrome --disable-web-security --user-data-dir=/tmp http://localhost:8612`

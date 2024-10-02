@@ -33,6 +33,7 @@ die() {
 	exit 1
 }
 
+RELEASE=no
 # Parse primary commands
 while [[ $# -gt 0 ]]; do
 	key="$1"
@@ -56,9 +57,9 @@ done
 
 # Restore positionals
 set -- "${POSITIONAL[@]}"
-[ $# -ne 1 ] && die "too many arguments provided"
+[ $# -ne 0 ] && die "too many arguments provided"
 
-PROJECT_NAME=$1
+PROJECT_NAME=local_client
 
 HTML=$(
 	cat <<-END
@@ -125,7 +126,7 @@ pushd client
 TARGET_DIR="target/wasm32-unknown-unknown"
 # Build
 echo "Building $PROJECT_NAME..."
-if [ -n "$RELEASE" ]; then
+if [ "$RELEASE" == "yes" ]; then
 	cargo build --release --target wasm32-unknown-unknown --features "wasm"
 	TARGET_DIR="$TARGET_DIR/release"
 else
