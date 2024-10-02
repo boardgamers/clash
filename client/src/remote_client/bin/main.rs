@@ -32,7 +32,7 @@ extern "C" {
 
     #[wasm_bindgen(method)]
     fn send_ready(this: &Control);
-    
+
     #[wasm_bindgen(method, getter)]
     fn assets_url(this: &Control) -> String;
 }
