@@ -76,6 +76,7 @@ sed -i "s/const imports = __wbg_get_imports();/return __wbg_get_imports();/" dis
 pushd js
 mkdir -p dist
 rm -rf dist/*
+npn install
 npm run build
 cp -r ../assets dist/
 cp package.json dist/
