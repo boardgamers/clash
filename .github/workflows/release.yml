@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ env.node_version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.node_version }}
           # setting a registry enables the NODE_AUTH_TOKEN env variable where we can set an npm token.  REQUIRED
