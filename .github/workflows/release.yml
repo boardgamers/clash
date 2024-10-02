@@ -1,14 +1,9 @@
 name: Server - Release
 
-#on:
-#  push:
-#    tags:
-#      - "v*.*.*"
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    tags:
+      - "v*.*.*"
 
 env:
   node_version: 14
@@ -30,11 +25,15 @@ jobs:
       - uses: jetli/wasm-bindgen-action@v0.2.0
         with:
           version: 'latest'
-      # see https://stackoverflow.com/questions/58177786/get-the-current-pushed-tag-in-github-actions
-      - run: |
-          export VERSION=0.0.5 # ${{ github.event.release.tag_name }}
-          ./scripts/publish-server.sh $VERSION
-          # rustup target add wasm32-unknown-unknown # automatically done by wasm-pack
-          ./scripts/publish-client.sh $VERSION
+      - name: Publish Server
+        # see https://stackoverflow.com/questions/58177786/get-the-current-pushed-tag-in-github-actions
+        run: |
+          ./scripts/publish-server.sh ${{ github.event.release.tag_name }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish Client
+        # rustup target add wasm32-unknown-unknown # automatically done by wasm-pack
+        run: |
+          ./scripts/publish-client.sh ${{ github.event.release.tag_name }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

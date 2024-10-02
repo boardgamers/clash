@@ -8,7 +8,7 @@ function dynamicallyLoadScript(url, onload) {
     document.head.appendChild(script);
 }
 
-export async function run(selector) {
+export async function run(selector, control) {
     const root = document.querySelector(selector);
     const canvas = document.createElement("canvas");
     canvas.setAttribute("id", "glcanvas");
@@ -31,7 +31,9 @@ export async function run(selector) {
             version: "0.0.1",
             name: "wbg",
         });
-        const url = document.head.getElementsByTagName("script")[0].src.replace("client.js", "client.wasm");
+        const src = document.head.getElementsByTagName("script")[0].src;
+        control.assets_url = src.replace("client.js", "assets/");
+        const url = src.replace("client.js", "client.wasm");
         console.log("Loading wasm from", url);
         await load(url);
     });

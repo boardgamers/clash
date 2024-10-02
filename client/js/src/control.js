@@ -5,6 +5,7 @@ export class Control extends EventEmitter {
         super();
         this.state = null;
         this.player_index = null;
+        this._assets_url = null;
 
         this.addListener("state", (data) => {
             this.state = data;
@@ -40,6 +41,14 @@ export class Control extends EventEmitter {
 
     send_ready() {
         this.emit("ready");
+    }
+
+    get assets_url() {
+        return this._assets_url;
+    }
+
+    set assets_url(value) {
+        this._assets_url = value;
     }
 }
 

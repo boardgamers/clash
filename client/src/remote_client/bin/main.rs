@@ -32,6 +32,9 @@ extern "C" {
 
     #[wasm_bindgen(method)]
     fn send_ready(this: &Control);
+    
+    #[wasm_bindgen(method, getter)]
+    fn assets_url(this: &Control) -> String;
 }
 
 enum SyncState {
@@ -58,14 +61,15 @@ async fn main() {
 impl RemoteClient {
     pub async fn start() {
         panic::set_hook(Box::new(console_error_panic_hook::hook));
+        let control = get_control();
         let features = Features {
             import_export: false,
-            local_assets: false,
+            assets_url: control.assets_url(),
         };
         let state = init(&features).await;
 
         let mut client = RemoteClient {
-            control: get_control(),
+            control,
             state,
             sync_state: SyncState::New,
             game: None,

@@ -14,15 +14,6 @@ debug = true
 [profile.release]
 debug = true
 
-[features]
-# disable file import and export
-wasm = []
-
-# may be needed for remote client
-#[lib]
-#name = "client"
-#crate-type = ["cdylib", "rlib"]
-
 [dependencies]
 macroquad = "0.4.2"
 hex2d = "1.1.0"

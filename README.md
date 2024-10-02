@@ -9,18 +9,10 @@
 - `cd client`
 - `cargo run`.
 
-### Run local web client
-
-- `./scripts/build-local-client.sh`
-- `cd client/dist`
-- `basic-http-server .`
-- open `http://localhost:4000` in a browser.
-
-### Run remote web client locally
+### Run remote with boardgamers-mono web client locally
 
 - `./scripts/build-remote-client.sh`
-- `cd client/js/dist`
-- `basic-http-server .`
+- `cd client/js/dist && basic-http-server .`
 - `google-chrome --disable-web-security --user-data-dir=/tmp http://localhost:8612`
 
 ### Server wrapper
@@ -43,8 +35,8 @@
 - `docker run -d -p 27017:27017 mongo:4.4`
 - `cd apps/api && pnpm seed && echo cron=1 > .env`
 - `pnpm dev --filter @bgs/api --filter @bgs/game-server --filter @bgs/web --filter @bgs/admin`
-- admin: http://localhost:3000 (admin@test.com/password)
-- user: http://localhost:8612/ (user@test.com/password)
+- admin: http://localhost:3000 (admin@test.com / password)
+- user: http://localhost:8612/ (user@test.com / password)
 
 old
 
@@ -100,7 +92,7 @@ diff --git a/apps/api/app/resources.ts b/apps/api/app/resources.ts
    const viewer: ViewerInfo =
      gameInfo?.viewer?.alternate?.url && ctx.query.alternate === "1" ? gameInfo?.viewer.alternate : gameInfo.viewer;
 -  const viewerUrl = ctx.query.customViewerUrl || viewer.url;
-+  const viewerUrl = "/home/gregor/source/clash/client/js/index.js";
++  const viewerUrl = "http://127.0.0.1:4000/client.js";
  
    ctx.body = `
      <html>
@@ -146,7 +138,7 @@ GameInfo.json (for now)
     "preferences": [],
     "rules": "",
     "viewer": {
-      "url": "http://localhost:4000/client.js",
+      "url": "//cdn.jsdelivr.net/npm/@boardgamers/clash-client@0.0.5/client.js",
       "topLevelVariable": "clash",
       "dependencies": {
         "scripts": [],
