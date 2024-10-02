@@ -40,6 +40,7 @@ export class Control extends EventEmitter {
     }
 
     send_ready() {
+        console.log("Sending ready");
         this.emit("ready");
     }
 

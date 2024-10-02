@@ -5,7 +5,9 @@ updates:
     schedule:
       interval: weekly
   - package-ecosystem: cargo
-    directory: "/"
+    directories:
+      - client
+      - server
     schedule:
       interval: daily
 
