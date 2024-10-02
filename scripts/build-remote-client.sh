@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 # from https://gist.github.com/nicolas-sabbatini/8af10dddc96be76d2bf24fc671131add
 

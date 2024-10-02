@@ -27,10 +27,14 @@ jobs:
       - uses: jetli/wasm-pack-action@v0.4.0
         with:
           version: 'latest'
+      - uses: jetli/wasm-bindgen-action@v0.2.0
+        with:
+          version: 'latest'
       # see https://stackoverflow.com/questions/58177786/get-the-current-pushed-tag-in-github-actions
       - run: |
-          # ./scripts/publish-server.sh ${{ github.event.release.tag_name }}
-          rustup target add wasm32-unknown-unknown # automatically done by wasm-pack
-          ./scripts/publish-client.sh 0.0.1
+          export VERSION=0.0.2 # ${{ github.event.release.tag_name }}
+          ./scripts/publish-server.sh $VERSION
+          # rustup target add wasm32-unknown-unknown # automatically done by wasm-pack
+          ./scripts/publish-client.sh $VERSION
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
