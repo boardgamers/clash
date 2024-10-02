@@ -32,7 +32,7 @@ jobs:
           version: 'latest'
       # see https://stackoverflow.com/questions/58177786/get-the-current-pushed-tag-in-github-actions
       - run: |
-          export VERSION=0.0.4 # ${{ github.event.release.tag_name }}
+          export VERSION=0.0.5 # ${{ github.event.release.tag_name }}
           ./scripts/publish-server.sh $VERSION
           # rustup target add wasm32-unknown-unknown # automatically done by wasm-pack
           ./scripts/publish-client.sh $VERSION
