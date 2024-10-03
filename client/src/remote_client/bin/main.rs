@@ -60,6 +60,7 @@ async fn main() {
 #[wasm_bindgen]
 impl RemoteClient {
     pub async fn start() {
+        log("starting client");
         panic::set_hook(Box::new(console_error_panic_hook::hook));
         let control = get_control();
         let features = Features {
@@ -79,9 +80,11 @@ impl RemoteClient {
     }
 
     pub async fn run(&mut self) {
+        log("running client");
         loop {
             let p = self.control.receive_player_index().as_f64();
             if let Some(p) = p {
+                log(&format!("received player index: {}", p));
                 self.state.control_player = Some(p as usize);
                 self.state.show_player = p as usize;
             }
