@@ -2,6 +2,7 @@ use itertools::Itertools;
 use macroquad::math::vec2;
 use macroquad::prelude::*;
 use macroquad::ui::Ui;
+use std::ops::{Add, Mul, Sub};
 
 use server::action::Action;
 use server::combat::Combat;
@@ -94,11 +95,15 @@ fn alpha(game: &Game, state: &State, pos: Position) -> f32 {
 fn draw_combat_arrow(c: &Combat) {
     let from = hex_ui::center(c.attacker_position);
     let to = hex_ui::center(c.defender_position);
-    draw_line(from.x, from.y, to.x, to.y, 10., BLACK);
+    let t = vec2(to.x, to.y);
+    let f = vec2(from.x, from.y);
+    let e = f.add(t.sub(f).mul(0.7));
+    draw_line(from.x, from.y, e.x, e.y, 10., BLACK);
+    let d = f.sub(t).normalize();
     draw_triangle(
-        vec2(to.x, to.y),
-        vec2(to.x + 30., to.y + 30.),
-        vec2(to.x - 30., to.y + 30.),
+        t.add(d.rotate(vec2(10., 0.))),
+        t.add(d.rotate(vec2(30., 30.))),
+        t.add(d.rotate(vec2(30., -30.))),
         BLACK,
     );
 }
