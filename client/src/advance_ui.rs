@@ -12,7 +12,7 @@ use server::resource_pile::AdvancePaymentOptions;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
-use crate::dialog_ui::{ dialog};
+use crate::dialog_ui::dialog;
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::HasCountSelectableObject;
@@ -119,7 +119,7 @@ pub fn show_generic_advance_menu(
                         return new_update(name);
                     }
                 }
-            } else  if p.has_advance(&name) { 
+            } else if p.has_advance(&name) {
                 ui.label(None, &name);
             }
         }

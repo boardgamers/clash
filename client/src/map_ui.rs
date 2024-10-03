@@ -95,15 +95,15 @@ fn alpha(game: &Game, state: &State, pos: Position) -> f32 {
 fn draw_combat_arrow(c: &Combat) {
     let from = hex_ui::center(c.attacker_position);
     let to = hex_ui::center(c.defender_position);
-    let t = vec2(to.x, to.y);
-    let f = vec2(from.x, from.y);
-    let e = f.add(t.sub(f).mul(0.7));
-    draw_line(from.x, from.y, e.x, e.y, 10., BLACK);
-    let d = f.sub(t).normalize();
+    let to_vec = vec2(to.x, to.y);
+    let from_vec = vec2(from.x, from.y);
+    let end = from_vec.add(to_vec.sub(from_vec).mul(0.7));
+    draw_line(from.x, from.y, end.x, end.y, 10., BLACK);
+    let angle = from_vec.sub(to_vec).normalize();
     draw_triangle(
-        t.add(d.rotate(vec2(10., 0.))),
-        t.add(d.rotate(vec2(30., 30.))),
-        t.add(d.rotate(vec2(30., -30.))),
+        to_vec.add(angle.rotate(vec2(10., 0.))),
+        to_vec.add(angle.rotate(vec2(30., 30.))),
+        to_vec.add(angle.rotate(vec2(30., -30.))),
         BLACK,
     );
 }
