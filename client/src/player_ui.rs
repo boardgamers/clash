@@ -163,27 +163,25 @@ pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
     if game.can_redo() && root_ui().button(vec2(1250., 320.), "Redo") {
         return StateUpdate::Execute(Action::Redo);
     }
-    match game.state {
-        GameState::Playing if root_ui().button(vec2(1200., 350.), "End Turn") => {
-            let left = game.actions_left;
-            StateUpdate::execute_with_warning(
-                Action::Playing(PlayingAction::EndTurn),
-                if left > 0 {
-                    vec![format!("{left} actions left")]
-                } else {
-                    vec![]
-                },
-            )
-        }
-        GameState::Playing
-            if !state.has_modal_dialog()
-                && player.can_play_action
-                && root_ui().button(vec2(1200., 30.), "Move Units") =>
-        {
-            StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits))
-        }
-        _ => StateUpdate::None,
+    if player.can_control
+        && matches!(game.state, GameState::Playing)
+        && root_ui().button(vec2(1200., 350.), "End Turn")
+    {
+        let left = game.actions_left;
+        return StateUpdate::execute_with_warning(
+            Action::Playing(PlayingAction::EndTurn),
+            if left > 0 {
+                vec![format!("{left} actions left")]
+            } else {
+                vec![]
+            },
+        );
     }
+
+    if player.can_play_action && root_ui().button(vec2(1200., 30.), "Move Units") {
+        return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
+    }
+    StateUpdate::None
 }
 
 pub fn player_color(player_index: usize) -> Color {

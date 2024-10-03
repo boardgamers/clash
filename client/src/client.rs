@@ -203,7 +203,7 @@ pub fn try_click(game: &Game, state: &State, player: &ShownPlayer) -> StateUpdat
 
 pub struct Features {
     pub import_export: bool,
-    pub local_assets: bool,
+    pub assets_url: String,
 }
 
 pub enum GameSyncRequest {

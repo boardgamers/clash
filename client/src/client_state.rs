@@ -233,14 +233,6 @@ impl State {
         false
     }
 
-    #[must_use]
-    pub fn has_modal_dialog(&self) -> bool {
-        !matches!(
-            self.active_dialog,
-            ActiveDialog::None | ActiveDialog::TileMenu(_) | ActiveDialog::Log
-        )
-    }
-
     pub fn update(&mut self, game: &Game, update: StateUpdate) -> GameSyncRequest {
         match update {
             StateUpdate::None => GameSyncRequest::None,

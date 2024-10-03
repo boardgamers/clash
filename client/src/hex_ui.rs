@@ -55,7 +55,10 @@ pub fn pixel_to_coordinate(x: f32, y: f32) -> Coordinate {
 }
 
 pub fn rotate_around(center: Point, radius: f32, angle_deg: i32) -> Point {
-    let angle_rad = PI / 180.0 * (angle_deg as f32);
+    rotate_around_rad(center, radius, PI / 180.0 * (angle_deg as f32))
+}
+
+pub fn rotate_around_rad(center: Point, radius: f32, angle_rad: f32) -> Point {
     Point {
         x: center.x + radius * f32::cos(angle_rad),
         y: center.y + radius * f32::sin(angle_rad),

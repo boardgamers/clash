@@ -6,11 +6,10 @@ use server::game::Game;
 #[macroquad::main("Clash")]
 async fn main() {
     set_fullscreen(true);
-    let wasm = cfg!(feature = "wasm");
 
     let features = Features {
-        import_export: !wasm,
-        local_assets: !wasm,
+        import_export: false,
+        assets_url: "assets/".to_string(),
     };
 
     //todo add button to decide random or fixed game

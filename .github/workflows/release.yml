@@ -1,9 +1,8 @@
 name: Server - Release
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  release:
+    types: [ published ]
 
 env:
   node_version: 14
@@ -12,9 +11,9 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ env.node_version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.node_version }}
           # setting a registry enables the NODE_AUTH_TOKEN env variable where we can set an npm token.  REQUIRED
@@ -22,7 +21,20 @@ jobs:
       - uses: jetli/wasm-pack-action@v0.4.0
         with:
           version: 'latest'
-      # see https://stackoverflow.com/questions/58177786/get-the-current-pushed-tag-in-github-actions
-      - run: ./scripts/publish-server.sh ${{ github.event.release.tag_name }}
+      - uses: jetli/wasm-bindgen-action@v0.2.0
+        with:
+          version: 'latest'
+      - name: Set Release Version from Tag
+        run: echo "RELEASE_VERSION=$(echo ${{github.ref_name}} | sed s/v//g)" >> $GITHUB_ENV
+      - name: Publish Server
+        # see https://stackoverflow.com/questions/58177786/get-the-current-pushed-tag-in-github-actions
+        run: |
+          ./scripts/publish-server.sh ${{ env.RELEASE_VERSION }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish Client
+        # rustup target add wasm32-unknown-unknown # automatically done by wasm-pack
+        run: |
+          ./scripts/publish-client.sh ${{ env.RELEASE_VERSION }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
