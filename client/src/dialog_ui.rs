@@ -9,7 +9,13 @@ pub fn active_dialog_window<F>(player: &ShownPlayer, title: &str, f: F) -> State
 where
     F: FnOnce(&mut Ui) -> StateUpdate,
 {
-    dialog_window(player, title, false, f)
+    dialog(title, false, |ui| {
+        if player.can_control {
+            f(ui)
+        } else {
+            StateUpdate::None
+        }
+    })
 }
 
 pub fn closeable_dialog_window<F>(title: &str, f: F) -> StateUpdate
@@ -19,20 +25,7 @@ where
     dialog(title, true, f)
 }
 
-pub fn dialog_window<F>(player: &ShownPlayer, title: &str, close_button: bool, f: F) -> StateUpdate
-where
-    F: FnOnce(&mut Ui) -> StateUpdate,
-{
-    dialog(title, close_button, |ui| {
-        if player.can_control {
-            f(ui)
-        } else {
-            StateUpdate::None
-        }
-    })
-}
-
-fn dialog<F>(title: &str, close_button: bool, f: F) -> StateUpdate
+pub fn dialog<F>(title: &str, close_button: bool, f: F) -> StateUpdate
 where
     F: FnOnce(&mut Ui) -> StateUpdate,
 {
