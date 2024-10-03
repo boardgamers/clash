@@ -103,7 +103,16 @@ pub fn setup_local_game() -> Game {
         .get_city_mut(Position::from_offset("C2"))
         .unwrap()
         .pieces
-        .academy = Some(1);    
+        .academy = Some(1);
+    game.players[player_index1]
+        .get_city_mut(Position::from_offset("C2"))
+        .unwrap()
+        .pieces
+        .port = Some(1);
+    game.players[player_index1]
+        .get_city_mut(Position::from_offset("C2"))
+        .unwrap()
+        .port_position = Some(Position::from_offset("D2"));
     game.players[player_index1]
         .get_city_mut(Position::from_offset("C2"))
         .unwrap()
