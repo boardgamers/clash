@@ -45,7 +45,9 @@ pub fn move_units_dialog(game: &Game, sel: &MoveSelection, player: &ShownPlayer)
 }
 
 fn update_possible_destinations(game: &Game, mut sel: MoveSelection) -> StateUpdate {
-    if let Some(start) = sel.start {
+    if sel.units.is_empty() { 
+        sel.destinations.clear();
+    } else if let Some(start) = sel.start {
         sel.destinations = possible_destinations(game, start, sel.player_index, &sel.units);
     } else {
         sel.destinations.clear();
