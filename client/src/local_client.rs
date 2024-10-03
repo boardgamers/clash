@@ -102,6 +102,16 @@ pub fn setup_local_game() -> Game {
     game.players[player_index1]
         .get_city_mut(Position::from_offset("C2"))
         .unwrap()
+        .pieces
+        .academy = Some(1);    
+    game.players[player_index1]
+        .get_city_mut(Position::from_offset("C2"))
+        .unwrap()
+        .pieces
+        .wonders = vec![game.wonders_left.pop().unwrap()];
+    game.players[player_index1]
+        .get_city_mut(Position::from_offset("C2"))
+        .unwrap()
         .increase_mood_state();
 
     game
