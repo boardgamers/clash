@@ -8,7 +8,7 @@ function dynamicallyLoadScript(url, onload) {
     document.head.appendChild(script);
 }
 
-export async function run(selector, control) {
+export async function run({selector, control}) {
     const root = document.querySelector(selector);
     const canvas = document.createElement("canvas");
     canvas.setAttribute("id", "glcanvas");
