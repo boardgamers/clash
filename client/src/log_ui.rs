@@ -20,6 +20,9 @@ fn multiline(ui: &mut Ui, text: &str) {
             ui.label(None, &line);
             line = String::new();
         }
+        if !line.is_empty() {
+            line.push(' ');
+        }
         line.push_str(s);
     });
     if !line.is_empty() {
