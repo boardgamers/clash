@@ -33,6 +33,7 @@ where
         .titlebar(true)
         .movable(false)
         .label(title)
+        .movable(true)
         .close_button(close_button);
 
     let ui = &mut root_ui();

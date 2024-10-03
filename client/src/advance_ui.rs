@@ -103,7 +103,7 @@ pub fn show_generic_advance_menu(
         let p = player.get(game);
         for a in get_all() {
             let name = a.name;
-            if player.can_control {
+            if player.can_play_action {
                 if p.has_advance(&name) {
                     ui.label(None, &name);
                 } else {
