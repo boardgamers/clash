@@ -229,7 +229,7 @@ fn move_action(units: Vec<u32>, destination: Position) -> Action {
 #[test]
 fn cultural_influence() {
     let mut game = Game::new(2, String::new(), false);
-    game.dice_roll_outcomes = vec![10, 6, 8, 4];
+    // game.dice_roll_outcomes = vec![10, 6, 8, 4];
     game.set_player_index(0);
     game.players[0].gain_resources(ResourcePile::culture_tokens(4));
     game.players[1].gain_resources(ResourcePile::culture_tokens(1));
@@ -439,8 +439,8 @@ fn test_action(
     let a = serde_json::to_string(&action).expect("action should be serializable");
     let a2 = serde_json::from_str(&a).expect("action should be deserializable");
     let path = game_path(name);
-    let original_game =
-        fs::read_to_string(path).expect("game file should exist in the test games folder");
+    let original_game = fs::read_to_string(&path)
+        .unwrap_or_else(|_| panic!("game file {path} should exist in the test games folder"));
     let game = Game::from_data(
         serde_json::from_str(&original_game).expect("the game file should be deserializable"),
     );
@@ -845,7 +845,7 @@ fn test_retreat() {
 }
 
 #[test]
-fn test_dont_retreat_and_next_combat_round() {
+fn test_do_not_retreat_and_next_combat_round() {
     test_action(
         "dont_retreat",
         Action::Combat(CombatAction::Retreat(false)),

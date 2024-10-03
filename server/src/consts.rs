@@ -1,7 +1,6 @@
 use crate::{city_pieces::AvailableCityPieces, resource_pile::ResourcePile, unit::Units};
 
 pub const MAX_CITY_SIZE: usize = 4;
-pub const DICE_ROLL_BUFFER: u32 = 200;
 pub const AGES: u32 = 6;
 pub const ADVANCE_COST: u32 = 2;
 pub const BUILDING_VICTORY_POINTS: f32 = 1.0;
