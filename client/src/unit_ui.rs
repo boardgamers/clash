@@ -19,6 +19,7 @@ pub fn draw_unit(unit: &Unit, index: u32) {
     let c = hex_ui::center(unit.position);
     let r = 40.0;
     let p = hex_ui::rotate_around(c, r, (40 * index) as i32 + 45);
+    draw_circle(p.x, p.y, 11.0, BLACK);
     draw_circle(p.x, p.y, 9.0, player_ui::player_color(unit.player_index));
     draw_text(unit_symbol(unit), p.x - 5.0, p.y + 5.0, 20.0, BLACK);
 }
