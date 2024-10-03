@@ -1,7 +1,7 @@
-use std::collections::{HashMap, HashSet};
-
+use macroquad::color::BLACK;
 use macroquad::math::u32;
 use macroquad::prelude::draw_text;
+use macroquad::shapes::draw_circle;
 use macroquad::ui::Ui;
 
 use server::game::Game;
@@ -13,21 +13,14 @@ use crate::dialog_ui::active_dialog_window;
 use crate::select_ui::{confirm_update, ConfirmSelection};
 use crate::{hex_ui, player_ui};
 
+use itertools::Itertools;
+
 pub fn draw_unit(unit: &Unit, index: u32) {
     let c = hex_ui::center(unit.position);
-    let r = if unit.unit_type == UnitType::Settler {
-        25.
-    } else {
-        40.
-    };
-    let p = hex_ui::rotate_around(c, r, (90 * index) as i32 + 45);
-    draw_text(
-        unit_symbol(unit),
-        p.x - 7.0,
-        p.y + 7.0,
-        25.0,
-        player_ui::player_color(unit.player_index),
-    );
+    let r = 40.0;
+    let p = hex_ui::rotate_around(c, r, (40 * index) as i32 + 45);
+    draw_circle(p.x, p.y, 9.0, player_ui::player_color(unit.player_index));
+    draw_text(unit_symbol(unit), p.x - 5.0, p.y + 5.0, 20.0, BLACK);
 }
 
 fn unit_symbol(unit: &Unit) -> &str {
@@ -52,22 +45,17 @@ pub fn non_leader_names() -> [(UnitType, &'static str); 5] {
 }
 
 pub fn draw_units(game: &Game) {
-    for p in &game.players {
-        let mut positions: HashSet<&Position> = HashSet::new();
-        let mut city_unit_index: HashMap<Position, u32> = HashMap::new();
-        let mut settler_index: HashMap<Position, u32> = HashMap::new();
-        for unit in &p.units {
-            let map = if unit.unit_type == UnitType::Settler {
-                &mut settler_index
-            } else {
-                &mut city_unit_index
-            };
-            let e = map.entry(unit.position).or_default();
-            *e += 1;
-            draw_unit(unit, *e);
-
-            if positions.insert(&unit.position) {}
-        }
+    for (_pos, units) in &game
+        .players
+        .iter()
+        .flat_map(|p| &p.units)
+        .sorted_by_key(|u| u.position)
+        .chunk_by(|a| a.position)
+    {
+        let vec = units.collect::<Vec<_>>();
+        vec.iter().enumerate().for_each(|(i, u)| {
+            draw_unit(u, i.try_into().unwrap());
+        });
     }
 }
 
