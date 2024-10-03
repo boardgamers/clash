@@ -7,6 +7,7 @@ use crate::city::City;
 use crate::player::Player;
 use crate::position::Position;
 use crate::unit::UnitType;
+use crate::utils::Rng;
 
 #[derive(Clone)]
 pub struct Map {
@@ -97,7 +98,7 @@ const FIXED_TERRAIN_2_PLAYER: [(&str, Terrain); 8] = [
 ];
 
 #[must_use]
-pub fn maximum_size_2_player_random_map() -> HashMap<Position, Terrain> {
+pub fn maximum_size_2_player_random_map(rng: &mut Rng) -> HashMap<Position, Terrain> {
     let mut tiles = HashMap::new();
 
     for pos in MAP_4_PLAYER {
@@ -111,7 +112,7 @@ pub fn maximum_size_2_player_random_map() -> HashMap<Position, Terrain> {
                 None
             })
             .or_else(|| {
-                let r = quad_rand::gen_range(0, RANDOM_TERRAIN.len());
+                let r = rng.range(0, RANDOM_TERRAIN.len());
                 Some(&RANDOM_TERRAIN[r])
             })
             .map(|t| tiles.insert(position, t.clone()));

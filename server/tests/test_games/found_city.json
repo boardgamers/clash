@@ -424,18 +424,9 @@
   "messages": [
     "The game has started"
   ],
-  "dice_roll_outcomes": [
-    1,
-    1,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10
-  ],
+  "rng": {
+    "seed": 1234567890
+  },
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [
@@ -509,7 +500,9 @@
         "movement_actions_left": 3,
         "moved_units": [
           4
-        ]
+        ],
+        "captured_city": null,
+        "captured_settlers": null
       }
     },
     {
@@ -518,7 +511,9 @@
         "movement_actions_left": 2,
         "moved_units": [
           4
-        ]
+        ],
+        "captured_city": null,
+        "captured_settlers": null
       }
     }
   ]

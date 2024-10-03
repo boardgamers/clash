@@ -1,17 +1,21 @@
 use std::collections::HashMap;
 use std::mem;
 
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-use crate::combat::Combat;
-use crate::combat::{capture_position, execute_combat_action, initiate_combat, CombatPhase};
-use crate::map::{maximum_size_2_player_random_map, setup_home_city};
-use crate::utils::shuffle;
+use GameState::*;
+
+use crate::city::CityData;
+use crate::combat::{self, Combat, CombatPhase};
+use crate::map;
+use crate::utils::Rng;
+use crate::utils::Shuffle;
 use crate::{
     action::Action,
     city::{City, MoodState::*},
     city_pieces::Building::{self, *},
-    consts::{AGES, DICE_ROLL_BUFFER},
+    consts::AGES,
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     log::{self, ActionLogItem},
     map::{Map, MapData, Terrain::*},
@@ -32,7 +36,6 @@ use crate::{
     utils,
     wonder::Wonder,
 };
-use GameState::*;
 
 pub struct Game {
     pub state: GameState,
@@ -47,10 +50,10 @@ pub struct Game {
     pub played_once_per_turn_actions: Vec<CustomActionType>,
     pub actions_left: u32,
     pub successful_cultural_influence: bool,
-    pub round: u32, // starts with 1
-    pub age: u32,   // starts with 1
+    pub round: u32, // starts at 1
+    pub age: u32,   // starts at 1
     pub messages: Vec<String>,
-    pub dice_roll_outcomes: Vec<u8>,
+    pub rng: Rng,
     pub dice_roll_log: Vec<u8>,
     pub dropped_players: Vec<usize>,
     pub wonders_left: Vec<Wonder>,
@@ -78,35 +81,35 @@ impl Game {
         } else {
             String::from(&seed[..32])
         };
-        let s: &[u8] = seed.as_bytes();
-        let mut buf = [0u8; 8];
-        let len = 8.min(s.len());
-        buf[..len].copy_from_slice(&s[..len]);
-        let seed = u64::from_be_bytes(buf);
-        quad_rand::srand(seed);
+        let seed: &[u8] = seed.as_bytes();
+        let mut buffer = [0u8; 16];
+        buffer[..].copy_from_slice(&seed[..16]);
+        let seed1 = u128::from_be_bytes(buffer);
+        let mut buffer = [0u8; 16];
+        buffer[..].copy_from_slice(&seed[16..]);
+        let seed2 = u128::from_be_bytes(buffer);
+        let seed = seed1 ^ seed2;
+        let mut rng = Rng::from_seed(seed);
 
         let mut players = Vec::new();
         let mut civilizations = civilizations::get_all();
         for i in 0..player_amount {
-            let civilization = quad_rand::gen_range(0, civilizations.len());
+            let civilization = rng.range(0, civilizations.len());
             players.push(Player::new(civilizations.remove(civilization), i));
         }
 
         if setup {
-            setup_home_city(&mut players, 0, "F1");
-            setup_home_city(&mut players, 1, "F8");
+            map::setup_home_city(&mut players, 0, "F1");
+            map::setup_home_city(&mut players, 1, "F8");
         }
-        let starting_player = quad_rand::gen_range(0, players.len());
-        let mut dice_roll_outcomes = Vec::new();
-        for _ in 0..DICE_ROLL_BUFFER {
-            dice_roll_outcomes.push(quad_rand::gen_range(0, 12));
-        }
+        let starting_player = rng.range(0, players.len());
 
-        let wonders = shuffle(&mut wonders::get_all());
+        let mut wonders = wonders::get_all();
+        wonders.shuffle(&mut rng);
         let wonder_amount = wonders.len();
 
         let map = if setup {
-            Map::new(maximum_size_2_player_random_map())
+            Map::new(map::maximum_size_2_player_random_map(&mut rng))
         } else {
             Map::new(HashMap::new())
         };
@@ -130,7 +133,7 @@ impl Game {
             round: 1,
             age: 1,
             messages: vec![String::from("The game has started")],
-            dice_roll_outcomes,
+            rng,
             dice_roll_log: Vec::new(),
             dropped_players: Vec::new(),
             wonders_left: wonders,
@@ -162,7 +165,7 @@ impl Game {
             round: data.round,
             age: data.age,
             messages: data.messages,
-            dice_roll_outcomes: data.dice_roll_outcomes,
+            rng: data.rng,
             dice_roll_log: data.dice_roll_log,
             dropped_players: data.dropped_players,
             wonders_left: data
@@ -200,7 +203,7 @@ impl Game {
             round: self.round,
             age: self.age,
             messages: self.messages,
-            dice_roll_outcomes: self.dice_roll_outcomes,
+            rng: self.rng,
             dice_roll_log: self.dice_roll_log,
             dropped_players: self.dropped_players,
             wonders_left: self
@@ -231,7 +234,7 @@ impl Game {
             round: self.round,
             age: self.age,
             messages: self.messages.clone(),
-            dice_roll_outcomes: self.dice_roll_outcomes.clone(),
+            rng: self.rng.clone(),
             dice_roll_log: self.dice_roll_log.clone(),
             dropped_players: self.dropped_players.clone(),
             wonders_left: self
@@ -363,7 +366,7 @@ impl Game {
             Combat(c) => {
                 let action = action.combat().expect("action should be a combat action");
                 self.add_action_log_item(ActionLogItem::Combat(action.clone()));
-                execute_combat_action(self, action, c);
+                combat::execute_combat_action(self, action, c);
             }
             PlaceSettler {
                 player_index,
@@ -464,6 +467,8 @@ impl Game {
         movement_actions_left: u32,
         mut moved_units: Vec<u32>,
     ) {
+        let mut captured_city = None;
+        let mut captured_settlers = None;
         let starting_position = match action {
             Move { units, destination } => {
                 let player = &self.players[player_index];
@@ -515,7 +520,7 @@ impl Game {
                             Playing
                         };
 
-                        initiate_combat(
+                        combat::initiate_combat(
                             self,
                             defender,
                             destination,
@@ -538,7 +543,15 @@ impl Game {
                         if enemy == player_index {
                             continue;
                         }
-                        capture_position(self, enemy, destination, player_index);
+                        let settlers = self.players[enemy]
+                            .get_units(destination)
+                            .iter()
+                            .map(|unit| unit.id)
+                            .collect_vec();
+                        if !settlers.is_empty() {
+                            captured_settlers = Some((settlers, enemy));
+                        }
+                        captured_city = self.capture_position(enemy, destination, player_index);
                     }
                 }
                 self.state = if movement_actions_left > 1 {
@@ -560,6 +573,8 @@ impl Game {
             starting_position,
             movement_actions_left,
             moved_units,
+            captured_city,
+            captured_settlers,
         });
     }
 
@@ -568,15 +583,13 @@ impl Game {
             starting_position,
             movement_actions_left,
             mut moved_units,
+            captured_city,
+            captured_settlers,
         }) = self.undo_context_stack.pop()
         else {
             panic!("when undoing a movement action, the game should have stored movement context")
         };
-        if let Move {
-            units,
-            destination: _,
-        } = action
-        {
+        if let Move { units, destination } = action {
             if !units.is_empty() {
                 moved_units.drain(moved_units.len() - units.len()..);
             }
@@ -587,6 +600,17 @@ impl Game {
                     "undo context should contain the starting position if units where moved",
                 ),
             );
+            if let Some(captured_city) = captured_city {
+                let city = City::from_data(captured_city);
+                self.undo_conquer_city(city, player_index);
+            }
+            if let Some((settlers, player)) = captured_settlers {
+                for id in settlers {
+                    let settler = Unit::new(player, destination, Settler, id);
+                    self.players[player].units.push(settler);
+                    self.players[player].available_units.settlers -= 1;
+                }
+            }
         }
         self.state = Movement {
             movement_actions_left,
@@ -798,11 +822,7 @@ impl Game {
 
     pub fn get_next_dice_roll(&mut self) -> u8 {
         self.lock_undo();
-        let dice_roll = self.dice_roll_outcomes.pop().unwrap_or_else(|| {
-            println!("ran out of predetermined dice roll outcomes, unseeded rng is now being used");
-
-            quad_rand::gen_range(0, 12)
-        });
+        let dice_roll = self.rng.range(0, 12) as u8;
         self.dice_roll_log.push(dice_roll);
         dice_roll
     }
@@ -1006,7 +1026,7 @@ impl Game {
                 for ship in self.players[player_index].get_units_mut(port_position) {
                     ship.position = city_position;
                 }
-                initiate_combat(
+                combat::initiate_combat(
                     self,
                     defender,
                     port_position,
@@ -1125,14 +1145,13 @@ impl Game {
         position: Position,
         new_player_index: usize,
         old_player_index: usize,
-    ) {
+    ) -> Option<CityData> {
+        let mut city = self.players[old_player_index].take_city(position)?;
         self.add_to_last_log_item(&format!(
             " and captured {}'s city at {position}",
             self.players[old_player_index].get_name()
         ));
-        let Some(mut city) = self.players[old_player_index].take_city(position) else {
-            return;
-        };
+        let city_data = city.cloned_data();
         self.players[new_player_index]
             .gain_resources(ResourcePile::gold(city.mood_modified_size() as i32));
         let settlements_left = self.players[new_player_index].available_settlements > 0;
@@ -1214,6 +1233,126 @@ impl Game {
                 moved_units,
             };
         }
+        Some(city_data)
+    }
+
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if the city does not exist or if the game is not in a movement state
+    pub fn undo_conquer_city(
+        &mut self,
+        mut city: City,
+        old_player_index: usize,
+    ) -> Option<CityData> {
+        let new_player_index = city.player_index;
+        self.players[new_player_index]
+            .loose_resources(ResourcePile::gold(city.mood_modified_size() as i32));
+        let settlements_left = self.players[new_player_index].available_settlements > 0;
+        if settlements_left {
+            for wonder in &city.pieces.wonders {
+                (wonder.player_deinitializer)(self, old_player_index);
+                (wonder.player_initializer)(self, new_player_index);
+            }
+        }
+        for wonder in &city.pieces.wonders {
+            self.players[old_player_index].remove_wonder(wonder);
+            if settlements_left {
+                self.players[new_player_index]
+                    .wonders
+                    .push(wonder.name.clone());
+            }
+        }
+        if let Some(player) = &city.pieces.obelisk {
+            if player == &old_player_index {
+                self.players[old_player_index].influenced_buildings += 1;
+            }
+        }
+        let previously_influenced_building =
+            city.pieces.buildings(Some(new_player_index)).len() as u32;
+        for (building, owner) in city.pieces.building_owners() {
+            if matches!(building, Obelisk) {
+                if !settlements_left {
+                    self.players[old_player_index].available_buildings += &building;
+                    self.players[old_player_index].influenced_buildings -= 1;
+                }
+                continue;
+            }
+            let Some(owner) = owner else {
+                continue;
+            };
+            if owner != old_player_index {
+                if !settlements_left {
+                    self.players[owner].available_buildings += &building;
+                    self.players[owner].influenced_buildings -= 1;
+                }
+                continue;
+            }
+            city.pieces.set_building(&building, new_player_index);
+            self.players[old_player_index].available_buildings += &building;
+            if self.players[new_player_index]
+                .available_buildings
+                .can_build(&building)
+            {
+                self.players[new_player_index].available_buildings -= &building;
+            } else {
+                city.pieces.remove_building(&building);
+                self.players[new_player_index].gain_resources(ResourcePile::gold(1));
+            }
+        }
+        let new_player = &mut self.players[new_player_index];
+        new_player.influenced_buildings -= previously_influenced_building;
+        let city_data = city.cloned_data();
+        if settlements_left {
+            new_player.cities.push(city);
+            new_player.available_settlements -= 1;
+        } else {
+            new_player.gain_resources(ResourcePile::gold(city.size() as i32));
+        }
+        let old_player = &mut self.players[old_player_index];
+        old_player.available_settlements += 1;
+        if old_player.available_units.settlers > 0 && !old_player.cities.is_empty() {
+            let state = mem::replace(&mut self.state, Playing);
+            let Movement {
+                movement_actions_left,
+                moved_units,
+            } = state
+            else {
+                panic!("conquering a city should only happen in a movement action")
+            };
+            self.state = PlaceSettler {
+                player_index: old_player_index,
+                movement_actions_left: movement_actions_left - 1,
+                moved_units,
+            };
+        }
+        Some(city_data)
+    }
+
+    pub fn capture_position(
+        &mut self,
+        old_player: usize,
+        position: Position,
+        new_player: usize,
+    ) -> Option<CityData> {
+        let captured_settlers = self.players[old_player]
+            .get_units(position)
+            .iter()
+            .map(|unit| unit.id)
+            .collect_vec();
+        if !captured_settlers.is_empty() {
+            self.add_to_last_log_item(&format!(
+                " and captured {} settlers of {}",
+                captured_settlers.len(),
+                self.players[old_player].get_name()
+            ));
+        }
+        for id in captured_settlers {
+            self.players[old_player].remove_unit(id);
+            self.players[old_player].available_units.settlers += 1;
+        }
+        self.conquer_city(position, new_player, old_player)
     }
 
     ///
@@ -1463,7 +1602,7 @@ pub struct GameData {
     round: u32,
     age: u32,
     messages: Vec<String>,
-    dice_roll_outcomes: Vec<u8>,
+    rng: Rng,
     dice_roll_log: Vec<u8>,
     dropped_players: Vec<usize>,
     wonders_left: Vec<String>,
@@ -1524,6 +1663,8 @@ pub enum UndoContext {
         starting_position: Option<Position>,
         movement_actions_left: u32,
         moved_units: Vec<u32>,
+        captured_city: Option<CityData>,
+        captured_settlers: Option<(Vec<u32>, usize)>,
     },
 }
 
@@ -1552,7 +1693,7 @@ pub mod tests {
         player::Player,
         position::Position,
         resource_pile::ResourcePile,
-        utils,
+        utils::{tests::FloatEq, Rng},
         wonder::Wonder,
     };
 
@@ -1580,7 +1721,7 @@ pub mod tests {
             round: 1,
             age: 1,
             messages: vec![String::from("Game has started")],
-            dice_roll_outcomes: vec![12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+            rng: Rng::from_seed(1234567890),
             dice_roll_log: Vec::new(),
             dropped_players: Vec::new(),
             wonders_left: Vec::new(),
@@ -1607,10 +1748,7 @@ pub mod tests {
         game.players[old].construct(&Academy, position, None);
         game.players[old].construct(&Obelisk, position, None);
 
-        assert!(utils::tests::eq_f32(
-            8.0,
-            game.players[old].victory_points()
-        ));
+        game.players[old].victory_points().assert_eq(8.0);
 
         game.conquer_city(position, new, old);
 
@@ -1622,8 +1760,8 @@ pub mod tests {
 
         let old = &game.players[old];
         let new = &game.players[new];
-        assert!(utils::tests::eq_f32(4.0, old.victory_points()));
-        assert!(utils::tests::eq_f32(5.0, new.victory_points()));
+        old.victory_points().assert_eq(4.0);
+        new.victory_points().assert_eq(5.0);
         assert_eq!(0, old.wonders.len());
         assert_eq!(1, new.wonders.len());
         assert_eq!(1, old.influenced_buildings);

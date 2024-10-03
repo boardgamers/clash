@@ -2,7 +2,6 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    advance::Advance,
     content::advances,
     game::{Game, GameState::*},
     player::Player,
@@ -99,7 +98,7 @@ fn change_government_type(
     let player_government_advances = advances::get_government(&current_player_government)
         .into_iter()
         .filter(|advance| game.players[player_index].has_advance(&advance.name))
-        .collect::<Vec<Advance>>();
+        .collect_vec();
 
     assert_eq!(
         player_government_advances.len() - 1,

@@ -5,6 +5,7 @@ use crate::map::Terrain::Water;
 use crate::position::Position;
 use crate::unit::UnitType::{Cavalry, Elephant, Infantry, Leader, Ship};
 use crate::unit::{UnitType, Units};
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::mem;
 
@@ -279,7 +280,7 @@ fn kill_all_defenders(game: &mut Game, c: &mut Combat) {
         .get_units(c.defender_position)
         .iter()
         .map(|unit| unit.id)
-        .collect::<Vec<u32>>();
+        .collect_vec();
     for id in defender_units {
         game.kill_unit(id, c.defender, c.attacker);
     }
@@ -341,7 +342,7 @@ fn attacker_wins(game: &mut Game, c: &mut Combat) -> CombatControl {
             .expect("attacker should have all attacking units");
         unit.position = c.defender_position;
     }
-    capture_position(game, c.defender, c.defender_position, c.attacker);
+    game.capture_position(c.defender, c.defender_position, c.attacker);
     //todo attacker wins
     end_combat(game, c)
 }
@@ -366,25 +367,6 @@ fn draw(game: &mut Game, c: &mut Combat) -> CombatControl {
     ));
     //todo draw
     end_combat(game, c)
-}
-
-pub fn capture_position(game: &mut Game, old_player: usize, position: Position, new_player: usize) {
-    let captured_settlers = game.players[old_player]
-        .get_units(position)
-        .iter()
-        .map(|unit| unit.id)
-        .collect::<Vec<u32>>();
-    if !captured_settlers.is_empty() {
-        game.add_to_last_log_item(&format!(
-            " and captured {} settlers of {}",
-            captured_settlers.len(),
-            game.players[old_player].get_name()
-        ));
-    }
-    for id in captured_settlers {
-        game.players[old_player].remove_unit(id);
-    }
-    game.conquer_city(position, new_player, old_player);
 }
 
 fn end_combat(game: &mut Game, c: &Combat) -> CombatControl {
@@ -511,7 +493,7 @@ pub fn active_attackers(
                     .unit_type,
             )
         })
-        .collect::<Vec<_>>()
+        .collect_vec()
 }
 
 #[must_use]
@@ -522,7 +504,7 @@ pub fn active_defenders(game: &Game, defender: usize, defender_position: Positio
         .iter()
         .filter(|u| can_fight(on_water, &u.unit_type))
         .map(|u| u.id)
-        .collect::<Vec<_>>()
+        .collect_vec()
 }
 
 #[must_use]

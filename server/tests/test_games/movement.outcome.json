@@ -414,7 +414,7 @@
     "\tPlayer1 moved 1 settler from C2 to B2",
     "\tPlayer1 ended the movement action",
     "Player1 used a move units action",
-    "\tPlayer1 moved 1 settler from B2 to B3 and captured Player2's city at B3"
+    "\tPlayer1 moved 1 settler from B2 to B3"
   ],
   "undo_limit": 0,
   "played_once_per_turn_actions": [],
@@ -425,18 +425,9 @@
   "messages": [
     "The game has started"
   ],
-  "dice_roll_outcomes": [
-    1,
-    1,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10
-  ],
+  "rng": {
+    "seed": 1234567890
+  },
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [
@@ -510,7 +501,9 @@
         "movement_actions_left": 3,
         "moved_units": [
           4
-        ]
+        ],
+        "captured_city": null,
+        "captured_settlers": null
       }
     },
     {
@@ -519,7 +512,9 @@
         "movement_actions_left": 2,
         "moved_units": [
           4
-        ]
+        ],
+        "captured_city": null,
+        "captured_settlers": null
       }
     },
     {
@@ -528,7 +523,9 @@
         "movement_actions_left": 3,
         "moved_units": [
           4
-        ]
+        ],
+        "captured_city": null,
+        "captured_settlers": null
       }
     }
   ]
