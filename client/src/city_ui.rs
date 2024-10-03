@@ -168,27 +168,28 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
 
     let mut i = 0;
     city.pieces.wonders.iter().for_each(|w| {
-        let p = hex_ui::rotate_around(c, 30.0, 90 * i);
-        draw_text(
-            &w.name,
-            p.x - 10.0,
-            p.y + 10.0,
-            40.0,
-            player_ui::player_color(owner.index),
-        );
+        let p = hex_ui::rotate_around(c, 20.0, 90 * i);
+        draw_circle(p.x, p.y, 18.0, player_ui::player_color(owner.index));
+        draw_text(&w.name, p.x - 10.0, p.y + 10.0, 40.0, BLACK);
         i += 1;
     });
 
     for player_index in 0..4 {
         for b in &city.pieces.buildings(Some(player_index)) {
-            let p = hex_ui::rotate_around(c, 30.0, 90 * i);
-            draw_text(
-                building_symbol(b),
-                p.x - 10.0,
-                p.y + 10.0,
-                40.0,
-                player_ui::player_color(player_index),
-            );
+            let p = if matches!(b, Building::Port) {
+                hex_ui::rotate_around_rad(
+                    c,
+                    60.0,
+                    city.position
+                        .coordinate()
+                        .directions_to(city.port_position.unwrap().coordinate())[0]
+                        .to_radians_pointy(),
+                )
+            } else {
+                hex_ui::rotate_around(c, 20.0, 90 * i)
+            };
+            draw_circle(p.x, p.y, 12.0, player_ui::player_color(player_index));
+            draw_text(building_symbol(b), p.x - 7.0, p.y + 8.0, 30.0, BLACK);
             i += 1;
         }
     }
