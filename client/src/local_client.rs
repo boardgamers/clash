@@ -134,7 +134,7 @@ pub fn setup_local_game() -> Game {
         .unwrap()
         .port_position = Some(Position::from_offset("C3"));
     add_unit(&mut game, "B2", player_index2, UnitType::Ship);
-    
+
     game
 }
 
