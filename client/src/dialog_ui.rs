@@ -3,7 +3,7 @@ use macroquad::math::{vec2, Vec2};
 use macroquad::ui::widgets::Window;
 use macroquad::ui::{root_ui, Ui};
 
-use crate::client_state::{ShownPlayer, StateUpdate};
+use crate::client_state::{PendingUpdate, ShownPlayer, StateUpdate};
 
 pub fn active_dialog_window<F>(player: &ShownPlayer, title: &str, f: F) -> StateUpdate
 where
@@ -55,4 +55,17 @@ where
     } else {
         update
     }
+}
+
+pub fn show_pending_update(update: &PendingUpdate, player: &ShownPlayer) -> StateUpdate {
+    active_dialog_window(player, "Are you sure?", |ui| {
+        ui.label(None, &format!("Warning: {}", update.warning.join(", ")));
+        if ui.button(None, "OK") {
+            return StateUpdate::ResolvePendingUpdate(true);
+        }
+        if ui.button(None, "Cancel") {
+            return StateUpdate::ResolvePendingUpdate(false);
+        }
+        StateUpdate::None
+    })
 }

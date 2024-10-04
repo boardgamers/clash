@@ -9,7 +9,7 @@ use server::status_phase::StatusPhaseAction;
 
 use crate::advance_ui::{pay_advance_dialog, show_advance_menu, show_free_advance_menu};
 use crate::client_state::{
-    ActiveDialog, PendingUpdate, ShownPlayer, State, StateUpdate, StateUpdates,
+    ActiveDialog, ShownPlayer, State, StateUpdate, StateUpdates,
 };
 use crate::collect_ui::{click_collect_option, collect_resources_dialog};
 use crate::construct_ui::pay_construction_dialog;
@@ -21,7 +21,7 @@ use crate::hex_ui::pixel_to_coordinate;
 use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
 use crate::player_ui::{show_global_controls, show_globals, show_player_status, show_wonders};
-use crate::{combat_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui};
+use crate::{combat_ui, dialog_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui};
 
 pub async fn init(features: &Features) -> State {
     State::new(features).await
@@ -83,7 +83,7 @@ fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
     }
     if player.can_control {
         if let Some(u) = &state.pending_update {
-            updates.add(show_pending_update(u, player));
+            updates.add(dialog_ui::show_pending_update(u, player));
             return updates.result();
         }
     }
@@ -136,19 +136,6 @@ fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
     updates.add(try_click(game, state, player));
 
     updates.result()
-}
-
-fn show_pending_update(update: &PendingUpdate, player: &ShownPlayer) -> StateUpdate {
-    active_dialog_window(player, "Are you sure?", |ui| {
-        ui.label(None, &format!("Warning: {}", update.warning.join(", ")));
-        if ui.button(None, "OK") {
-            return StateUpdate::ResolvePendingUpdate(true);
-        }
-        if ui.button(None, "Cancel") {
-            return StateUpdate::ResolvePendingUpdate(false);
-        }
-        StateUpdate::None
-    })
 }
 
 pub fn try_click(game: &Game, state: &State, player: &ShownPlayer) -> StateUpdate {
