@@ -39,8 +39,7 @@ pub async fn init(
 #[wasm_bindgen(js_name = move)]
 pub fn execute_move(game: JsValue, move_data: JsValue, player: JsValue) -> JsValue {
     let game = get_game(game);
-    // let action = serde_wasm_bindgen::from_value(move_data).expect("move should be of type action");
-    let action = serde_json::from_str(&move_data.as_string().unwrap()).unwrap();
+    let action = serde_wasm_bindgen::from_value(move_data).expect("move should be of type action");
 
     let player_index = player.as_f64().expect("player index should be a number") as usize;
     let game = game_api::execute_action(game, action, player_index);

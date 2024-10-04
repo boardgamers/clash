@@ -47,7 +47,7 @@ pub async fn run(mut game: Game, features: &Features) {
 #[must_use]
 pub fn setup_local_game() -> Game {
     let mut game = Game::new(2, "1234567890".to_string(), false);
-    game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];
+    // game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];
     let add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {
         game.recruit(
             player_index,
