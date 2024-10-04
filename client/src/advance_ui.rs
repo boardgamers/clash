@@ -14,7 +14,7 @@ use server::resource_pile::AdvancePaymentOptions;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
-use crate::dialog_ui::dialog;
+use crate::dialog_ui::full_dialog;
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::HasCountSelectableObject;
@@ -100,7 +100,7 @@ pub fn show_generic_advance_menu(
     player: &ShownPlayer,
     new_update: impl Fn(&str) -> StateUpdate,
 ) -> StateUpdate {
-    dialog(title, |ui| {
+    full_dialog(title, |ui| {
         let p = player.get(game);
         for a in get_all() {
             let name = &a.name;
@@ -137,13 +137,13 @@ fn description(p: &Player, a: &Advance) -> String {
     let desc = &a.description;
 
     let mut parts = vec![];
-    parts.push(if p.has_advance(&name) {
+    parts.push(if p.has_advance(name) {
         format!("+ {name}")
     } else {
         format!("  {name}")
     });
     parts.push(desc.clone());
-    parts.push(format!("Cost: {}", p.advance_cost(&name)));
+    parts.push(format!("Cost: {}", p.advance_cost(name)));
     if let Some(r) = &a.required {
         parts.push(format!("Required: {r}"));
     }
@@ -151,10 +151,13 @@ fn description(p: &Player, a: &Advance) -> String {
         parts.push(format!("Contradicts: {c}"));
     }
     if let Some(b) = &a.bonus {
-        parts.push(format!("Bonus: {}", match b {
-            Bonus::MoodToken => "Mood Token",
-            Bonus::CultureToken => "Culture Token",
-        }));
+        parts.push(format!(
+            "Bonus: {}",
+            match b {
+                Bonus::MoodToken => "Mood Token",
+                Bonus::CultureToken => "Culture Token",
+            }
+        ));
     }
     if let Some(g) = &a.government {
         parts.push(format!("Government: {g}"));
@@ -163,8 +166,7 @@ fn description(p: &Player, a: &Advance) -> String {
         parts.push(format!("Unlocks: {u}"));
     }
 
-    let desc = parts.join(", ");
-    desc
+    parts.join(", ")
 }
 
 pub fn pay_advance_dialog(ap: &AdvancePayment, player: &ShownPlayer) -> StateUpdate {
