@@ -1,15 +1,15 @@
 use macroquad::hash;
-use macroquad::math::vec2;
+use macroquad::math::{vec2, Vec2};
 use macroquad::ui::widgets::Window;
 use macroquad::ui::{root_ui, Ui};
 
-use crate::client_state::{ShownPlayer, StateUpdate};
+use crate::client_state::{PendingUpdate, ShownPlayer, StateUpdate};
 
 pub fn active_dialog_window<F>(player: &ShownPlayer, title: &str, f: F) -> StateUpdate
 where
     F: FnOnce(&mut Ui) -> StateUpdate,
 {
-    dialog(title, false, |ui| {
+    dialog(title, |ui| {
         if player.can_control {
             f(ui)
         } else {
@@ -18,23 +18,29 @@ where
     })
 }
 
-pub fn closeable_dialog_window<F>(title: &str, f: F) -> StateUpdate
+pub fn dialog<F>(title: &str, f: F) -> StateUpdate
 where
     F: FnOnce(&mut Ui) -> StateUpdate,
 {
-    dialog(title, true, f)
+    custom_dialog(title, vec2(1100., 400.), vec2(800., 350.), f)
 }
 
-pub fn dialog<F>(title: &str, close_button: bool, f: F) -> StateUpdate
+pub fn full_dialog<F>(title: &str, f: F) -> StateUpdate
 where
     F: FnOnce(&mut Ui) -> StateUpdate,
 {
-    let window = Window::new(hash!(), vec2(1100., 400.), vec2(800., 350.))
+    custom_dialog(title, vec2(100., 100.), vec2(1600., 800.), f)
+}
+
+pub fn custom_dialog<F>(title: &str, position: Vec2, size: Vec2, f: F) -> StateUpdate
+where
+    F: FnOnce(&mut Ui) -> StateUpdate,
+{
+    let window = Window::new(hash!(), position, size)
         .titlebar(true)
         .movable(false)
         .label(title)
-        .movable(true)
-        .close_button(close_button);
+        .close_button(true);
 
     let ui = &mut root_ui();
     let token = window.begin(ui);
@@ -49,4 +55,17 @@ where
     } else {
         update
     }
+}
+
+pub fn show_pending_update(update: &PendingUpdate, player: &ShownPlayer) -> StateUpdate {
+    active_dialog_window(player, "Are you sure?", |ui| {
+        ui.label(None, &format!("Warning: {}", update.warning.join(", ")));
+        if ui.button(None, "OK") {
+            return StateUpdate::ResolvePendingUpdate(true);
+        }
+        if ui.button(None, "Cancel") {
+            return StateUpdate::ResolvePendingUpdate(false);
+        }
+        StateUpdate::None
+    })
 }

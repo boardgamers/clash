@@ -101,3 +101,12 @@ pub fn remove_casualties_dialog(
         |_| StateUpdate::None,
     )
 }
+
+pub fn play_action_card_dialog(player: &ShownPlayer) -> StateUpdate {
+    active_dialog_window(player, "Play action card", |ui| {
+        if ui.button(None, "None") {
+            return StateUpdate::Execute(Action::Combat(CombatAction::PlayActionCard(None)));
+        }
+        StateUpdate::None
+    })
+}

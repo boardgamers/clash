@@ -63,7 +63,7 @@ pub fn draw_units(game: &Game) {
 pub trait UnitSelection: ConfirmSelection {
     fn selected_units(&self) -> &[u32];
     fn selected_units_mut(&mut self) -> &mut Vec<u32>;
-    fn can_select(&self, game: &Game, unit: &Unit) -> bool; // todo return Option<String> for why not
+    fn can_select(&self, game: &Game, unit: &Unit) -> bool;
     fn current_tile(&self) -> Option<Position>;
 }
 

@@ -177,14 +177,12 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
     for player_index in 0..4 {
         for b in &city.pieces.buildings(Some(player_index)) {
             let p = if matches!(b, Building::Port) {
-                hex_ui::rotate_around_rad(
-                    c,
-                    60.0,
-                    city.position
-                        .coordinate()
-                        .directions_to(city.port_position.unwrap().coordinate())[0]
-                        .to_radians_pointy(),
-                )
+                let r: f32 = city
+                    .position
+                    .coordinate()
+                    .directions_to(city.port_position.unwrap().coordinate())[0]
+                    .to_radians_pointy();
+                hex_ui::rotate_around_rad(c, 60.0, r * -1.0 + std::f32::consts::PI / 3.0)
             } else {
                 hex_ui::rotate_around(c, 20.0, 90 * i)
             };
