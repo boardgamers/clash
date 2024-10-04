@@ -117,6 +117,7 @@ fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
         //status phase
         ActiveDialog::FreeAdvance => show_free_advance_menu(game, player),
         ActiveDialog::RazeSize1City => status_phase_ui::raze_city_dialog(player),
+        ActiveDialog::CompleteObjectives => status_phase_ui::complete_objectives_dialog(game, player),
         ActiveDialog::DetermineFirstPlayer => {
             status_phase_ui::determine_first_player_dialog(game, player)
         }

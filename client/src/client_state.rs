@@ -1,5 +1,4 @@
 use macroquad::prelude::*;
-
 use server::action::Action;
 use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
@@ -40,6 +39,7 @@ pub enum ActiveDialog {
     // status phase
     FreeAdvance,
     RazeSize1City,
+    CompleteObjectives,
     DetermineFirstPlayer,
     ChangeGovernmentType,
     ChooseAdditionalAdvances(ChooseAdditionalAdvances),
@@ -69,6 +69,7 @@ impl ActiveDialog {
             ActiveDialog::CulturalInfluenceResolution(_) => "cultural influence resolution",
             ActiveDialog::FreeAdvance => "free advance",
             ActiveDialog::RazeSize1City => "raze size 1 city",
+            ActiveDialog::CompleteObjectives => "complete objectives",
             ActiveDialog::DetermineFirstPlayer => "determine first player",
             ActiveDialog::ChangeGovernmentType => "change government type",
             ActiveDialog::ChooseAdditionalAdvances(_) => "choose additional advances",
@@ -322,12 +323,8 @@ impl State {
                 ActiveDialog::CulturalInfluenceResolution(c.clone())
             }
             GameState::StatusPhase(state) => match state {
-                StatusPhaseState::CompleteObjectives => {
-                    // todo implement
-                    // self.execute_status_phase(game, StatusPhaseAction::CompleteObjectives(vec![]))
-                    ActiveDialog::None
-                }
-                StatusPhaseState::FreeAdvance => ActiveDialog::FreeAdvance,
+                StatusPhaseState::CompleteObjectives => ActiveDialog::CompleteObjectives,
+                    StatusPhaseState::FreeAdvance => ActiveDialog::FreeAdvance,
                 StatusPhaseState::RaseSize1City => ActiveDialog::RazeSize1City,
                 StatusPhaseState::ChangeGovernmentType => ActiveDialog::ChangeGovernmentType,
                 StatusPhaseState::DetermineFirstPlayer => ActiveDialog::DetermineFirstPlayer,
