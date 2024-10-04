@@ -8,9 +8,7 @@ use server::position::Position;
 use server::status_phase::StatusPhaseAction;
 
 use crate::advance_ui::{pay_advance_dialog, show_advance_menu, show_free_advance_menu};
-use crate::client_state::{
-    ActiveDialog, PendingUpdate, ShownPlayer, State, StateUpdate, StateUpdates,
-};
+use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, StateUpdates};
 use crate::collect_ui::{click_collect_option, collect_resources_dialog};
 use crate::construct_ui::pay_construction_dialog;
 use crate::dialog_ui::active_dialog_window;
@@ -20,8 +18,8 @@ use crate::happiness_ui::{
 use crate::hex_ui::pixel_to_coordinate;
 use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
-use crate::player_ui::{show_global_controls, show_globals, show_resources, show_wonders};
-use crate::{combat_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui};
+use crate::player_ui::{show_global_controls, show_globals, show_player_status, show_wonders};
+use crate::{combat_ui, dialog_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui};
 
 pub async fn init(features: &Features) -> State {
     State::new(features).await
@@ -56,7 +54,7 @@ fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
     let mut updates = StateUpdates::new();
     let update = show_globals(game, player);
     updates.add(update);
-    show_resources(game, player_index);
+    show_player_status(game, player_index);
     show_wonders(game, player_index);
 
     if root_ui().button(vec2(1200., 100.), "Advances") {
@@ -83,7 +81,7 @@ fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
     }
     if player.can_control {
         if let Some(u) = &state.pending_update {
-            updates.add(show_pending_update(u, player));
+            updates.add(dialog_ui::show_pending_update(u, player));
             return updates.result();
         }
     }
@@ -117,6 +115,7 @@ fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
         //status phase
         ActiveDialog::FreeAdvance => show_free_advance_menu(game, player),
         ActiveDialog::RazeSize1City => status_phase_ui::raze_city_dialog(player),
+        ActiveDialog::CompleteObjectives => status_phase_ui::complete_objectives_dialog(player),
         ActiveDialog::DetermineFirstPlayer => {
             status_phase_ui::determine_first_player_dialog(game, player)
         }
@@ -128,6 +127,7 @@ fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
         }
 
         //combat
+        ActiveDialog::PlayActionCard => combat_ui::play_action_card_dialog(player),
         ActiveDialog::PlaceSettler => combat_ui::place_settler_dialog(player),
         ActiveDialog::Retreat => combat_ui::retreat_dialog(player),
         ActiveDialog::RemoveCasualties(s) => combat_ui::remove_casualties_dialog(game, s, player),
@@ -136,19 +136,6 @@ fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
     updates.add(try_click(game, state, player));
 
     updates.result()
-}
-
-fn show_pending_update(update: &PendingUpdate, player: &ShownPlayer) -> StateUpdate {
-    active_dialog_window(player, "Are you sure?", |ui| {
-        ui.label(None, &format!("Warning: {}", update.warning.join(", ")));
-        if ui.button(None, "OK") {
-            return StateUpdate::ResolvePendingUpdate(true);
-        }
-        if ui.button(None, "Cancel") {
-            return StateUpdate::ResolvePendingUpdate(false);
-        }
-        StateUpdate::None
-    })
 }
 
 pub fn try_click(game: &Game, state: &State, player: &ShownPlayer) -> StateUpdate {

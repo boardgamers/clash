@@ -65,6 +65,7 @@ pub fn setup_local_game() -> Game {
     add_city(&mut game, player_index1, "A1");
     add_city(&mut game, player_index1, "C2");
     add_city(&mut game, player_index2, "C1");
+    add_city(&mut game, player_index2, "B2");
 
     add_terrain(&mut game, "A1", Terrain::Fertile);
     add_terrain(&mut game, "A2", Terrain::Water);
@@ -112,7 +113,7 @@ pub fn setup_local_game() -> Game {
     game.players[player_index1]
         .get_city_mut(Position::from_offset("C2"))
         .unwrap()
-        .port_position = Some(Position::from_offset("D2"));
+        .port_position = Some(Position::from_offset("C3"));
     game.players[player_index1]
         .get_city_mut(Position::from_offset("C2"))
         .unwrap()
@@ -122,6 +123,17 @@ pub fn setup_local_game() -> Game {
         .get_city_mut(Position::from_offset("C2"))
         .unwrap()
         .increase_mood_state();
+
+    game.players[player_index2]
+        .get_city_mut(Position::from_offset("B2"))
+        .unwrap()
+        .pieces
+        .port = Some(1);
+    game.players[player_index2]
+        .get_city_mut(Position::from_offset("B2"))
+        .unwrap()
+        .port_position = Some(Position::from_offset("C3"));
+    add_unit(&mut game, "B2", player_index2, UnitType::Ship);
 
     game
 }

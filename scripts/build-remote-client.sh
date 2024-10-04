@@ -63,7 +63,11 @@ echo "Running wasm-bindgen..."
 
 mkdir -p dist
 
-wasm-bindgen $TARGET_DIR/"$PROJECT_NAME".wasm --out-dir dist --target web --no-typescript
+DEBUG_ARG=""
+if [ "$RELEASE" != "yes" ]; then
+  DEBUG_ARG="--keep-debug --debug"
+fi
+wasm-bindgen $TARGET_DIR/"$PROJECT_NAME".wasm --out-dir dist $DEBUG_ARG --target web --no-typescript
 
 echo "Patching wasm-bindgen output..."
 

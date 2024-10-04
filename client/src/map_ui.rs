@@ -14,7 +14,7 @@ use server::unit::{MovementRestriction, Unit};
 
 use crate::city_ui::{draw_city, show_city_menu, CityMenu};
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
-use crate::dialog_ui::closeable_dialog_window;
+use crate::dialog_ui::dialog;
 use crate::{collect_ui, hex_ui, unit_ui};
 
 fn terrain_font_color(t: &Terrain) -> Color {
@@ -131,7 +131,7 @@ pub fn show_generic_tile_menu(
     suffix: Vec<String>,
     additional: impl FnOnce(&mut Ui) -> StateUpdate,
 ) -> StateUpdate {
-    closeable_dialog_window(
+    dialog(
         &format!(
             "{}/{}",
             position,

@@ -28,6 +28,7 @@ pub fn get_all() -> Vec<Advance> {
             game.players[player_index].resource_limit.food = 2;
         })
         .with_advance_bonus(MoodToken)
+        .with_required_advance("Farming")
         .build(),
 
         Advance::builder(
@@ -36,6 +37,7 @@ pub fn get_all() -> Vec<Advance> {
         )
         .add_collect_option(Barren, ResourcePile::food(1))
         .with_advance_bonus(MoodToken)
+        .with_required_advance("Farming")
         .build(),
 
         //Construction
@@ -50,6 +52,7 @@ pub fn get_all() -> Vec<Advance> {
         )
         .add_one_time_ability_initializer(Game::draw_wonder_card)
         .add_custom_action(ConstructWonder)
+        .with_required_advance("Mining")
         .build(),
 
         //Maritime

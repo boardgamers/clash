@@ -103,13 +103,16 @@ pub fn possible_resource_collections(
         .into_iter()
         .chain(iter::once(city_pos))
         .filter_map(|pos| {
-            if city.port_position.is_some_and(|p| p == pos) {
+            if city
+                .port_position
+                .is_some_and(|p| p == pos && !is_blocked(game, player_index, p))
+            {
                 return Some((pos, PORT_CHOICES.to_vec()));
             }
             if let Some(t) = game.map.tiles.get(&pos) {
                 if let Some(option) = collect_options
                     .get(t)
-                    .filter(|_| pos == city_pos || !is_blocked(game, pos))
+                    .filter(|_| pos == city_pos || !is_blocked(game, player_index, pos))
                 {
                     return Some((pos, option.clone()));
                 }
@@ -172,10 +175,6 @@ pub fn draw_resource_collect_tile(state: &State, pos: Position) {
     };
 }
 
-fn is_blocked(game: &Game, pos: Position) -> bool {
-    //todo also look for enemy units
-    if game.get_any_city(pos).is_some() {
-        return true;
-    }
-    false
+fn is_blocked(game: &Game, player_index: usize, pos: Position) -> bool {
+    game.get_any_city(pos).is_some() || game.enemy_player(player_index, pos).is_some()
 }

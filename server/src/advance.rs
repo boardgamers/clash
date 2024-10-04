@@ -21,6 +21,7 @@ pub struct Advance {
 }
 
 impl Advance {
+    #[must_use]
     pub fn builder(name: &str, description: &str) -> AdvanceBuilder {
         AdvanceBuilder::new(name.to_string(), description.to_string())
     }
@@ -63,31 +64,37 @@ impl AdvanceBuilder {
         }
     }
 
+    #[must_use]
     pub fn with_advance_bonus(mut self, advance_bonus: Bonus) -> Self {
         self.advance_bonus = Some(advance_bonus);
         self
     }
 
+    #[must_use]
     pub fn with_required_advance(mut self, required_advance: &str) -> Self {
         self.required_advance = Some(required_advance.to_string());
         self
     }
 
+    #[must_use]
     pub fn with_contradicting_advance(mut self, contradicting_advance: &str) -> Self {
         self.contradicting_advance = Some(contradicting_advance.to_string());
         self
     }
 
+    #[must_use]
     pub fn with_unlocked_building(mut self, unlocked_building: &str) -> Self {
         self.unlocked_building = Some(unlocked_building.to_string());
         self
     }
 
+    #[must_use]
     pub fn leading_government_advance(mut self, government: &str) -> Self {
         self.government = Some(government.to_string());
         self
     }
 
+    #[must_use]
     pub fn build(self) -> Advance {
         let player_initializer =
             ability_initializer::join_ability_initializers(self.player_initializers);
@@ -159,6 +166,7 @@ pub enum Bonus {
 }
 
 impl Bonus {
+    #[must_use]
     pub fn resources(&self) -> ResourcePile {
         match self {
             MoodToken => ResourcePile::mood_tokens(1),
