@@ -117,6 +117,7 @@ pub fn show_generic_advance_menu(
                 false
             };
 
+            // todo add groupings
             let desc = description(p, &a);
             if p.has_advance(name) {
                 ui.label(None, &desc);
