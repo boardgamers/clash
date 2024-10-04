@@ -1,11 +1,12 @@
+use itertools::Itertools;
+use macroquad::hash;
+use macroquad::math::{bool, vec2};
 use std::cmp::min;
 use std::collections::HashMap;
 
-use macroquad::math::bool;
-
 use server::action::Action;
 use server::advance::{Advance, Bonus};
-use server::content::advances::get_all;
+use server::content::advances;
 use server::game::Game;
 use server::game::GameState;
 use server::player::Player;
@@ -102,34 +103,47 @@ pub fn show_generic_advance_menu(
 ) -> StateUpdate {
     full_dialog(title, |ui| {
         let p = player.get(game);
-        for a in get_all() {
-            let name = &a.name;
-            let can_advance = if player.can_play_action {
-                p.can_advance(name)
-            } else if player.can_control
-                && matches!(
-                    game.state,
-                    GameState::StatusPhase(StatusPhaseState::FreeAdvance)
-                )
-            {
-                p.can_advance_free(name)
+        let mut update = StateUpdate::None;
+        let mut current_group = None;
+        for (_a, list) in &advances::get_all().iter().chunk_by(|a| {
+            if a.required.is_none() {
+                current_group = Some(&a.name);
+                &a.name
             } else {
-                false
-            };
+                current_group.unwrap()
+            }
+        }) {
+            let advances = list.collect::<Vec<_>>();
+            ui.group(hash!(&advances[0].name), vec2(1500., 90.), |ui| {
+                for a in advances {
+                    let name = &a.name;
+                    let can_advance = if player.can_play_action {
+                        p.can_advance(name)
+                    } else if player.can_control
+                        && matches!(
+                            game.state,
+                            GameState::StatusPhase(StatusPhaseState::FreeAdvance)
+                        )
+                    {
+                        p.can_advance_free(name)
+                    } else {
+                        false
+                    };
 
-            // todo add groupings
-            let desc = description(p, &a);
-            if p.has_advance(name) {
-                ui.label(None, &desc);
-            } else if can_advance {
-                if ui.button(None, desc) {
-                    return new_update(name);
+                    let desc = description(p, a);
+                    if p.has_advance(name) {
+                        ui.label(None, &desc);
+                    } else if can_advance {
+                        if ui.button(None, desc) {
+                            update = new_update(name);
+                        }
+                    } else {
+                        ui.label(None, &desc);
+                    };
                 }
-            } else {
-                ui.label(None, &desc);
-            };
+            });
         }
-        StateUpdate::None
+        update
     })
 }
 
