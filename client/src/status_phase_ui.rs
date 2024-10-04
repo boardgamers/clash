@@ -139,7 +139,7 @@ pub fn choose_additional_advances_dialog(
     )
 }
 
-pub fn complete_objectives_dialog(game: &Game, player: &ShownPlayer) -> StateUpdate {
+pub fn complete_objectives_dialog(player: &ShownPlayer) -> StateUpdate {
     active_dialog_window(player, "Complete Objectives", |ui| {
         if ui.button(None, "None") {
             return StateUpdate::status_phase(StatusPhaseAction::CompleteObjectives(vec![]));

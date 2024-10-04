@@ -8,9 +8,7 @@ use server::position::Position;
 use server::status_phase::StatusPhaseAction;
 
 use crate::advance_ui::{pay_advance_dialog, show_advance_menu, show_free_advance_menu};
-use crate::client_state::{
-    ActiveDialog, ShownPlayer, State, StateUpdate, StateUpdates,
-};
+use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, StateUpdates};
 use crate::collect_ui::{click_collect_option, collect_resources_dialog};
 use crate::construct_ui::pay_construction_dialog;
 use crate::dialog_ui::active_dialog_window;
@@ -117,7 +115,7 @@ fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
         //status phase
         ActiveDialog::FreeAdvance => show_free_advance_menu(game, player),
         ActiveDialog::RazeSize1City => status_phase_ui::raze_city_dialog(player),
-        ActiveDialog::CompleteObjectives => status_phase_ui::complete_objectives_dialog(game, player),
+        ActiveDialog::CompleteObjectives => status_phase_ui::complete_objectives_dialog(player),
         ActiveDialog::DetermineFirstPlayer => {
             status_phase_ui::determine_first_player_dialog(game, player)
         }
@@ -129,6 +127,7 @@ fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
         }
 
         //combat
+        ActiveDialog::PlayActionCard => combat_ui::play_action_card_dialog(player),
         ActiveDialog::PlaceSettler => combat_ui::place_settler_dialog(player),
         ActiveDialog::Retreat => combat_ui::retreat_dialog(player),
         ActiveDialog::RemoveCasualties(s) => combat_ui::remove_casualties_dialog(game, s, player),

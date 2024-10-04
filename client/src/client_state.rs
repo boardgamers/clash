@@ -45,6 +45,7 @@ pub enum ActiveDialog {
     ChooseAdditionalAdvances(ChooseAdditionalAdvances),
 
     // combat
+    PlayActionCard,
     PlaceSettler,
     Retreat,
     RemoveCasualties(RemoveCasualtiesSelection),
@@ -73,6 +74,7 @@ impl ActiveDialog {
             ActiveDialog::DetermineFirstPlayer => "determine first player",
             ActiveDialog::ChangeGovernmentType => "change government type",
             ActiveDialog::ChooseAdditionalAdvances(_) => "choose additional advances",
+            ActiveDialog::PlayActionCard => "play action card",
             ActiveDialog::PlaceSettler => "place settler",
             ActiveDialog::Retreat => "retreat",
             ActiveDialog::RemoveCasualties(_) => "remove casualties",
@@ -324,20 +326,14 @@ impl State {
             }
             GameState::StatusPhase(state) => match state {
                 StatusPhaseState::CompleteObjectives => ActiveDialog::CompleteObjectives,
-                    StatusPhaseState::FreeAdvance => ActiveDialog::FreeAdvance,
+                StatusPhaseState::FreeAdvance => ActiveDialog::FreeAdvance,
                 StatusPhaseState::RaseSize1City => ActiveDialog::RazeSize1City,
                 StatusPhaseState::ChangeGovernmentType => ActiveDialog::ChangeGovernmentType,
                 StatusPhaseState::DetermineFirstPlayer => ActiveDialog::DetermineFirstPlayer,
             },
             GameState::PlaceSettler { .. } => ActiveDialog::PlaceSettler,
             GameState::Combat(c) => match c.phase {
-                CombatPhase::PlayActionCard(_) => {
-                    // self.update(
-                    //     game,
-                    //     StateUpdate::Execute(Action::Combat(CombatAction::PlayActionCard(None))),
-                    // );
-                    ActiveDialog::None
-                } //todo implement
+                CombatPhase::PlayActionCard(_) => ActiveDialog::PlayActionCard,
                 CombatPhase::RemoveCasualties {
                     player, casualties, ..
                 } => {
