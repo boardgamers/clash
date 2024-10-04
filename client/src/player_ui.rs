@@ -136,23 +136,37 @@ pub fn show_wonders(game: &Game, player_index: usize) {
     }
 }
 
-pub fn show_resources(game: &Game, player_index: usize) {
+pub fn show_player_status(game: &Game, player_index: usize) {
     let player = game.get_player(player_index);
-    let r: &ResourcePile = &player.resources;
-
     let mut i: f32 = 0.;
     let mut res = |label: String| {
-        draw_text(&label, 1100., 30. + i, 20., BLACK);
+        draw_text(&label, 1000., 30. + i, 20., BLACK);
         i += 30.;
     };
 
-    res(format!("Food {}", r.food));
-    res(format!("Wood {}", r.wood));
-    res(format!("Ore {}", r.ore));
-    res(format!("Ideas {}", r.ideas));
-    res(format!("Gold {}", r.gold));
-    res(format!("Mood {}", r.mood_tokens));
-    res(format!("Culture {}", r.culture_tokens));
+    res(format!("Civ {}", player.civilization.name));
+    res(format!("VP {}", player.victory_points()));
+    res(format!(
+        "Leader {}",
+        if let Some(l) = &player.active_leader {
+            &l.name
+        } else {
+            "-"
+        }
+    ));
+    res(resource_ui(player, "Food", |r| r.food));
+    res(resource_ui(player, "Wood", |r| r.wood));
+    res(resource_ui(player, "Ore", |r| r.ore));
+    res(resource_ui(player, "Ideas", |r| r.ideas));
+    res(resource_ui(player, "Gold", |r| r.gold as u32));
+    res(resource_ui(player, "Mood", |r| r.mood_tokens));
+    res(resource_ui(player, "Culture", |r| r.culture_tokens));
+}
+
+fn resource_ui(player: &Player, name: &str, f: impl Fn(&ResourcePile) -> u32) -> String {
+    let r: &ResourcePile = &player.resources;
+    let l: &ResourcePile = &player.resource_limit;
+    format!("{name} {}/{}", f(r), f(l))
 }
 
 pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {

@@ -20,7 +20,7 @@ use crate::happiness_ui::{
 use crate::hex_ui::pixel_to_coordinate;
 use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
-use crate::player_ui::{show_global_controls, show_globals, show_resources, show_wonders};
+use crate::player_ui::{show_global_controls, show_globals, show_player_status, show_wonders};
 use crate::{combat_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui};
 
 pub async fn init(features: &Features) -> State {
@@ -56,7 +56,7 @@ fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
     let mut updates = StateUpdates::new();
     let update = show_globals(game, player);
     updates.add(update);
-    show_resources(game, player_index);
+    show_player_status(game, player_index);
     show_wonders(game, player_index);
 
     if root_ui().button(vec2(1200., 100.), "Advances") {
