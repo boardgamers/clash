@@ -13,7 +13,7 @@
 
 mod ability_initializer;
 pub mod action;
-mod advance;
+pub mod advance;
 pub mod city;
 pub mod city_pieces;
 mod civilization;

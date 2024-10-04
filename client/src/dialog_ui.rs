@@ -1,5 +1,5 @@
 use macroquad::hash;
-use macroquad::math::vec2;
+use macroquad::math::{vec2, Vec2};
 use macroquad::ui::widgets::Window;
 use macroquad::ui::{root_ui, Ui};
 
@@ -9,32 +9,31 @@ pub fn active_dialog_window<F>(player: &ShownPlayer, title: &str, f: F) -> State
 where
     F: FnOnce(&mut Ui) -> StateUpdate,
 {
-    dialog(title, false, |ui| {
-        if player.can_control {
-            f(ui)
-        } else {
-            StateUpdate::None
-        }
-    })
+    dialog(title, |ui| {
+            if player.can_control {
+                f(ui)
+            } else {
+                StateUpdate::None
+            }
+        })
 }
 
-pub fn closeable_dialog_window<F>(title: &str, f: F) -> StateUpdate
+pub fn dialog<F>(title: &str, f: F) -> StateUpdate
 where
     F: FnOnce(&mut Ui) -> StateUpdate,
 {
-    dialog(title, true, f)
+    custom_dialog(title, vec2(1100., 400.), vec2(800., 350.), f)
 }
 
-pub fn dialog<F>(title: &str, close_button: bool, f: F) -> StateUpdate
+pub fn custom_dialog<F>(title: &str, position: Vec2, size: Vec2, f: F) -> StateUpdate
 where
     F: FnOnce(&mut Ui) -> StateUpdate,
 {
-    let window = Window::new(hash!(), vec2(1100., 400.), vec2(800., 350.))
+    let window = Window::new(hash!(), position, size)
         .titlebar(true)
         .movable(false)
         .label(title)
-        .movable(true)
-        .close_button(close_button);
+        .close_button(true);
 
     let ui = &mut root_ui();
     let token = window.begin(ui);

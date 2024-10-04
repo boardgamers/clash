@@ -2,10 +2,10 @@ use macroquad::ui::Ui;
 use server::game::Game;
 
 use crate::client_state::StateUpdate;
-use crate::dialog_ui::closeable_dialog_window;
+use crate::dialog_ui::dialog;
 
 pub fn show_log(game: &Game) -> StateUpdate {
-    closeable_dialog_window("Log", |ui| {
+    dialog("Log", |ui| {
         game.log.iter().for_each(|l| {
             multiline(ui, l);
         });
