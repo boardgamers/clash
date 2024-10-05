@@ -1,5 +1,7 @@
 use crate::client::Features;
-use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
+use crate::client_state::{
+    ActiveDialog, ShownPlayer, State, StateUpdate, StateUpdates, OFFSET, ZOOM,
+};
 use crate::dialog_ui::show_window;
 use crate::happiness_ui::start_increase_happiness;
 use macroquad::hash;
@@ -20,13 +22,22 @@ pub fn show_globals(game: &Game, player: &ShownPlayer) -> StateUpdate {
         .movable(false)
         .close_button(false);
 
+    let mut updates = StateUpdates::new();
     let (update, _open) = show_window(window, |ui| {
         ui.label(vec2(10., y), &format!("Age {}", game.age));
         ui.label(vec2(40., y), &format!("Round {}", game.round));
 
         show_player_status(game, player, ui);
         show_wonders(game, player, ui);
-
+        StateUpdate::None
+    });
+    
+    updates.add(update);
+    let window = Window::new(hash!(), vec2(10., 50.), vec2(1200., 20.))
+        .titlebar(false)
+        .movable(false)
+        .close_button(false);
+    let (update, _open) = show_window(window, |ui| {
         let i = game
             .players
             .iter()
@@ -36,23 +47,24 @@ pub fn show_globals(game: &Game, player: &ShownPlayer) -> StateUpdate {
         players.rotate_left(i);
 
         for (i, &p) in players.iter().enumerate() {
-            let player = game.get_player(p);
-            let shown = player.index == p;
+            let p = game.get_player(p);
+            let shown = player.index == p.index;
             let prefix = if shown { "* " } else { "" };
-            let suffix = &player_suffix(game, player);
-            let name = player.get_name();
-            let y = 180. + i as f32 * 50.;
-            let x = 1400.;
+            let suffix = &player_suffix(game, p);
+            let name = p.get_name();
+            let y = 0.;
+            let x = i as f32 * 500.;
             let label = format!("{prefix}{name}{suffix}");
             if shown {
                 ui.label(vec2(x, y), &label);
             } else if ui.button(vec2(x, y), label) {
-                return StateUpdate::SetShownPlayer(p);
+                return StateUpdate::SetShownPlayer(p.index);
             }
         }
         StateUpdate::None
     });
-    update
+    updates.add(update);
+    updates.result()
 }
 
 fn player_suffix(game: &Game, player: &Player) -> String {

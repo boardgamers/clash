@@ -22,14 +22,7 @@ pub fn dialog<F>(title: &str, f: F) -> StateUpdate
 where
     F: FnOnce(&mut Ui) -> StateUpdate,
 {
-    custom_dialog(title, vec2(1100., 400.), vec2(800., 350.), f)
-}
-
-pub fn full_dialog<F>(title: &str, f: F) -> StateUpdate
-where
-    F: FnOnce(&mut Ui) -> StateUpdate,
-{
-    custom_dialog(title, vec2(100., 100.), vec2(1600., 800.), f)
+    custom_dialog(title, vec2(10., 100.), vec2(1000., 800.), f)
 }
 
 pub fn custom_dialog<F>(title: &str, position: Vec2, size: Vec2, f: F) -> StateUpdate
