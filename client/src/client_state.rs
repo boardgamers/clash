@@ -197,7 +197,13 @@ pub struct State {
     pub active_dialog: ActiveDialog,
     dialog_stack: Vec<ActiveDialog>,
     pub pending_update: Option<PendingUpdate>,
+    pub camera: Camera2D,
+    pub zoom: f32,
+    pub offset: Vec2,
 }
+
+pub const ZOOM: f32 = 0.001;
+pub const OFFSET: Vec2 = vec2(-0.8, 0.8);
 
 impl State {
     pub async fn new(features: &Features) -> State {
@@ -208,6 +214,11 @@ impl State {
             assets: Assets::new(features).await,
             control_player: None,
             show_player: 0,
+            camera: Camera2D {
+                ..Default::default()
+            },
+            zoom: ZOOM,
+            offset: OFFSET,
         }
     }
 

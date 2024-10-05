@@ -10,7 +10,7 @@ use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
 
-use crate::client_state::{ShownPlayer, State, StateUpdate};
+use crate::client_state::{ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 
 pub fn show_globals(game: &Game, shown_player: &ShownPlayer) -> StateUpdate {
     draw_text(&format!("Age {}", game.age), 1400., 60., 20., BLACK);
@@ -169,8 +169,38 @@ fn resource_ui(player: &Player, name: &str, f: impl Fn(&ResourcePile) -> u32) ->
     format!("{name} {}/{}", f(r), f(l))
 }
 
-pub fn show_global_controls(game: &Game, state: &State) -> StateUpdate {
+pub fn show_global_controls(game: &Game, state: &mut State) -> StateUpdate {
     let player = state.shown_player(game);
+    if root_ui().button(vec2(10., 10.), "+") {
+        state.zoom *= 1.1;
+        return StateUpdate::None;
+    }
+    if root_ui().button(vec2(25., 10.), "-") {
+        state.zoom /= 1.1;
+        return StateUpdate::None;
+    }
+    if root_ui().button(vec2(40., 10.), "Reset") {
+        state.zoom = ZOOM;
+        state.offset = OFFSET;
+        return StateUpdate::None;
+    }
+    if root_ui().button(vec2(100., 10.), "L") {
+        state.offset += vec2(-0.1, 0.);
+        return StateUpdate::None;
+    }
+    if root_ui().button(vec2(120., 10.), "R") {
+        state.offset += vec2(0.1, 0.);
+        return StateUpdate::None;
+    }
+    if root_ui().button(vec2(140., 10.), "U") {
+        state.offset += vec2(0., 0.1);
+        return StateUpdate::None;
+    }
+    if root_ui().button(vec2(160., 10.), "D") {
+        state.offset += vec2(0., -0.1);
+        return StateUpdate::None;
+    }
+
     if game.can_undo() && root_ui().button(vec2(1200., 320.), "Undo") {
         return StateUpdate::Execute(Action::Undo);
     }

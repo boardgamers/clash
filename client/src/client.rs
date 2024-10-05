@@ -1,5 +1,5 @@
 use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
-use macroquad::prelude::{clear_background, vec2, WHITE};
+use macroquad::prelude::*;
 use macroquad::ui::root_ui;
 
 use server::action::Action;
@@ -45,10 +45,17 @@ pub fn render_and_update(
     state.update(game, update)
 }
 
-fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
+fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     let player_index = game.active_player();
     let player = &state.shown_player(game);
     clear_background(WHITE);
+
+    state.camera = Camera2D {
+        zoom: vec2(state.zoom, state.zoom * screen_width() / screen_height()),
+        offset: state.offset,
+        ..Default::default()
+    };
+    set_camera(&state.camera);
 
     draw_map(game, state);
     let mut updates = StateUpdates::new();
@@ -143,8 +150,9 @@ pub fn try_click(game: &Game, state: &State, player: &ShownPlayer) -> StateUpdat
         return StateUpdate::None;
     }
     let (x, y) = mouse_position();
-
-    let pos = Position::from_coordinate(pixel_to_coordinate(x, y));
+    let pos = Position::from_coordinate(pixel_to_coordinate(
+        state.camera.screen_to_world(vec2(x, y)),
+    ));
     if !game.map.tiles.contains_key(&pos) {
         return StateUpdate::None;
     }
