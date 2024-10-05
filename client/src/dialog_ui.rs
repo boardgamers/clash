@@ -42,10 +42,7 @@ where
         .label(title)
         .close_button(true);
 
-    let ui = &mut root_ui();
-    let token = window.begin(ui);
-    let update = f(ui);
-    let open = token.end(ui);
+    let (update, open) = show_window(window, f);
     if matches!(update, StateUpdate::None) {
         if open {
             StateUpdate::None
@@ -55,6 +52,17 @@ where
     } else {
         update
     }
+}
+
+pub fn show_window<F, R>(window: Window, f: F) -> (R, bool)
+where
+    F: FnOnce(&mut Ui) -> R,
+{
+    let ui = &mut root_ui();
+    let token = window.begin(ui);
+    let update = f(ui);
+    let open = token.end(ui);
+    (update, open)
 }
 
 pub fn show_pending_update(update: &PendingUpdate, player: &ShownPlayer) -> StateUpdate {

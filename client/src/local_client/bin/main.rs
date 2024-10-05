@@ -7,7 +7,7 @@ async fn main() {
     // set_fullscreen(true);
 
     let features = Features {
-        import_export: false,
+        import_export: true,
         assets_url: "assets/".to_string(),
     };
 

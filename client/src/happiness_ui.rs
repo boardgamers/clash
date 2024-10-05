@@ -1,6 +1,3 @@
-use macroquad::math::vec2;
-use macroquad::ui::root_ui;
-
 use server::action::Action;
 use server::city::City;
 use server::game::Game;
@@ -103,17 +100,13 @@ pub fn increase_happiness_menu(h: &IncreaseHappiness, player: &ShownPlayer) -> S
     })
 }
 
-pub fn show_increase_happiness(game: &Game, player_index: usize) -> StateUpdate {
-    if root_ui().button(vec2(1200., 60.), "Increase Happiness") {
-        return StateUpdate::SetDialog(ActiveDialog::IncreaseHappiness(IncreaseHappiness::new(
-            game.get_player(player_index)
-                .cities
-                .iter()
-                .map(|c| (c.position, 0))
-                .collect(),
-            ResourcePile::empty(),
-        )));
-    }
-
-    StateUpdate::None
+pub fn start_increase_happiness(game: &Game, player: &ShownPlayer) -> StateUpdate {
+    StateUpdate::SetDialog(ActiveDialog::IncreaseHappiness(IncreaseHappiness::new(
+        game.get_player(player.index)
+            .cities
+            .iter()
+            .map(|c| (c.position, 0))
+            .collect(),
+        ResourcePile::empty(),
+    )))
 }
