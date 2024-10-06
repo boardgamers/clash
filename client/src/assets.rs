@@ -134,6 +134,7 @@ impl Assets {
             editbox_style,
             window_style,
             button_style,
+            window_titlebar_style: label_style.clone(),
             label_style,
             // checkbox_style,
             title_height: 30.,
