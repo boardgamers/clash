@@ -1,7 +1,5 @@
 use crate::client::Features;
-use crate::client_state::{
-    ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM,
-};
+use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
 use macroquad::math::vec2;
 use macroquad::prelude::*;

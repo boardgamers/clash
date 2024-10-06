@@ -54,7 +54,7 @@ where
     }
 }
 
-pub fn show_window<F, R>(window: Window, f: F) -> (R, bool)
+fn show_window<F, R>(window: Window, f: F) -> (R, bool)
 where
     F: FnOnce(&mut Ui) -> R,
 {
