@@ -67,6 +67,9 @@ where
 
 pub fn show_pending_update(update: &PendingUpdate, player: &ShownPlayer) -> StateUpdate {
     active_dialog_window(player, "Are you sure?", |ui| {
+        if let Some(ref message) = update.info {
+            ui.label(None, message);
+        }
         if !update.warning.is_empty() {
             ui.label(None, &format!("Warning: {}", update.warning.join(", ")));
         }

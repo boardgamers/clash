@@ -4,18 +4,18 @@ use macroquad::prelude::*;
 use server::action::Action;
 use server::game::Game;
 use server::position::Position;
-use server::status_phase::StatusPhaseAction;
 
 use crate::advance_ui::{pay_advance_dialog, show_advance_menu, show_free_advance_menu};
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, StateUpdates};
 use crate::collect_ui::{click_collect_option, collect_resources_dialog};
 use crate::construct_ui::pay_construction_dialog;
 use crate::dialog_ui::active_dialog_window;
-use crate::happiness_ui::{add_increase_happiness, increase_happiness_menu};
+use crate::happiness_ui::{increase_happiness_dialog, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
 use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
 use crate::player_ui::{show_global_controls, show_globals};
+use crate::status_phase_ui::raze_city_confirm_dialog;
 use crate::{combat_ui, dialog_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui};
 
 pub async fn init(features: &Features) -> State {
@@ -134,13 +134,7 @@ pub fn try_click(game: &Game, state: &State, player: &ShownPlayer) -> StateUpdat
             ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::click_replace(pos, r),
             ActiveDialog::RemoveCasualties(_s) => StateUpdate::None,
             ActiveDialog::CollectResources(col) => click_collect_option(col, pos),
-            ActiveDialog::RazeSize1City => {
-                if player.get(game).can_raze_city(pos) {
-                    StateUpdate::execute_with_warning(Action::StatusPhase(StatusPhaseAction::RaseSize1City(Some(pos))), vec![])
-                } else {
-                    StateUpdate::None
-                }
-            }
+            ActiveDialog::RazeSize1City => raze_city_confirm_dialog(game, player, pos),
             ActiveDialog::PlaceSettler => {
                 if player.get(game).get_city(pos).is_some() {
                     StateUpdate::Execute(Action::PlaceSettler(pos))
@@ -148,18 +142,7 @@ pub fn try_click(game: &Game, state: &State, player: &ShownPlayer) -> StateUpdat
                     StateUpdate::None
                 }
             }
-            ActiveDialog::IncreaseHappiness(h) => {
-                if let Some(city) = player.get(game).get_city(pos) {
-                    StateUpdate::SetDialog(ActiveDialog::IncreaseHappiness(add_increase_happiness(
-                        player.get(game),
-                        city,
-                        pos,
-                        h,
-                    )))
-                } else {
-                    StateUpdate::None
-                }
-            }
+            ActiveDialog::IncreaseHappiness(h) => increase_happiness_dialog(game, player, pos, h),
             _ => StateUpdate::OpenDialog(ActiveDialog::TileMenu(pos)),
         }
     } else {

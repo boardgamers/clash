@@ -21,6 +21,24 @@ impl IncreaseHappiness {
     }
 }
 
+pub fn increase_happiness_dialog(
+    game: &Game,
+    player: &ShownPlayer,
+    pos: Position,
+    h: &IncreaseHappiness,
+) -> StateUpdate {
+    if let Some(city) = player.get(game).get_city(pos) {
+        StateUpdate::SetDialog(ActiveDialog::IncreaseHappiness(add_increase_happiness(
+            player.get(game),
+            city,
+            pos,
+            h,
+        )))
+    } else {
+        StateUpdate::None
+    }
+}
+
 pub fn add_increase_happiness(
     player: &Player,
     city: &City,

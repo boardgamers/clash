@@ -13,7 +13,6 @@ use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::UnitType;
 
-
 #[macroquad::main("Clash")]
 async fn main() {
     // set_fullscreen(true);
@@ -32,7 +31,6 @@ async fn main() {
 
     run(game, &features).await;
 }
-
 
 pub async fn run(mut game: Game, features: &Features) {
     let mut state = init(features).await;
@@ -67,6 +65,7 @@ pub async fn run(mut game: Game, features: &Features) {
 #[must_use]
 pub fn setup_local_game() -> Game {
     let mut game = Game::new(2, "0".to_string(), false);
+    game.round = 6;
     game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];
     let add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {
         game.recruit(
@@ -184,4 +183,3 @@ fn export(game: &Game) {
     )
     .expect("Failed to write export file");
 }
-

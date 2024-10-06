@@ -98,6 +98,7 @@ impl ActiveDialog {
 pub struct PendingUpdate {
     pub action: Action,
     pub warning: Vec<String>,
+    pub info: Option<String>,
 }
 
 #[must_use]
@@ -124,7 +125,11 @@ impl StateUpdate {
         if warning.is_empty() {
             StateUpdate::Execute(action)
         } else {
-            StateUpdate::ExecuteWithWarning(PendingUpdate { action, warning })
+            StateUpdate::ExecuteWithWarning(PendingUpdate {
+                action,
+                warning,
+                info: None,
+            })
         }
     }
 
