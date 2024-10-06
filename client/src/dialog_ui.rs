@@ -1,4 +1,5 @@
 use crate::client_state::{PendingUpdate, ShownPlayer, StateUpdate};
+use crate::layout_ui::{cancel_pos, ok_pos};
 use macroquad::hash;
 use macroquad::math::{vec2, Vec2};
 use macroquad::prelude::screen_height;
@@ -73,10 +74,10 @@ pub fn show_pending_update(update: &PendingUpdate, player: &ShownPlayer) -> Stat
         if !update.warning.is_empty() {
             ui.label(None, &format!("Warning: {}", update.warning.join(", ")));
         }
-        if ui.button(None, "OK") {
+        if ui.button(ok_pos(player), "OK") {
             return StateUpdate::ResolvePendingUpdate(true);
         }
-        if ui.button(None, "Cancel") {
+        if ui.button(cancel_pos(player), "Cancel") {
             return StateUpdate::ResolvePendingUpdate(false);
         }
         StateUpdate::None

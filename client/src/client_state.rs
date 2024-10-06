@@ -200,6 +200,7 @@ pub struct ShownPlayer {
     pub can_control: bool,
     pub can_play_action: bool,
     pub active_dialog: ActiveDialog,
+    pub pending_update: bool,
 }
 
 impl ShownPlayer {
@@ -248,6 +249,7 @@ impl State {
             can_control: control,
             can_play_action: control && game.state == GameState::Playing && game.actions_left > 0,
             active_dialog: self.active_dialog.clone(),
+            pending_update: self.pending_update.is_some(),
         }
     }
 

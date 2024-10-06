@@ -1,5 +1,6 @@
 use crate::client_state::{ShownPlayer, StateUpdate, StateUpdates};
 use crate::dialog_ui::active_dialog_window;
+use crate::layout_ui::{cancel_pos, ok_pos};
 use macroquad::hash;
 use macroquad::math::{bool, Vec2};
 use macroquad::ui::widgets::Group;
@@ -35,13 +36,13 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
         let mut updates = StateUpdates::new();
         for (i, p) in get_objects(container).iter().enumerate() {
             if show(container, p) {
-                Group::new(hash!("res", i), Vec2::new(100., 40.)).ui(ui, |ui| {
+                Group::new(hash!("res", i), Vec2::new(120., 150.)).ui(ui, |ui| {
                     let c = p.counter();
                     ui.label(Vec2::new(0., 0.), &format!("{} {}", &label(p), c.current));
-                    if c.current > c.min && ui.button(Vec2::new(0., 20.), "-") {
+                    if c.current > c.min && ui.button(Vec2::new(0., 80.), "-") {
                         updates.add(minus(container, p));
                     }
-                    if c.current < c.max && ui.button(Vec2::new(20., 20.), "+") {
+                    if c.current < c.max && ui.button(Vec2::new(0., 40.), "+") {
                         updates.add(plus(container, p));
                     };
                 });
@@ -50,10 +51,10 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
 
         let valid = is_valid(container);
         let label = if valid { "OK" } else { "(OK)" };
-        if ui.button(Vec2::new(20., 160.), label) && valid {
+        if ui.button(ok_pos(player), label) && valid {
             return execute_action(container);
         };
-        if ui.button(Vec2::new(80., 160.), "Cancel") {
+        if ui.button(cancel_pos(player), "Cancel") {
             return StateUpdate::Cancel;
         };
 

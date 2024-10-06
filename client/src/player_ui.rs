@@ -1,7 +1,10 @@
 use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
-use crate::layout_ui::{bottom_left_button, bottom_right_button, right_center_button, right_center_label, top_center_label, top_left_label};
+use crate::layout_ui::{
+    bottom_left_button, bottom_right_button, right_center_button, right_center_label,
+    top_center_label, top_left_label,
+};
 use macroquad::math::vec2;
 use macroquad::prelude::*;
 use macroquad::ui::{root_ui, Ui};
@@ -16,7 +19,7 @@ pub fn show_globals(game: &Game, player: &ShownPlayer) -> StateUpdate {
     show_top_center(game, player);
 
     let mut y = -100.;
-    
+
     let i = game
         .players
         .iter()
@@ -24,8 +27,8 @@ pub fn show_globals(game: &Game, player: &ShownPlayer) -> StateUpdate {
         .unwrap();
     let mut players: Vec<_> = game.players.iter().map(|p| p.index).collect();
     players.rotate_left(i);
-    
-    for (i, &p) in players.iter().enumerate() {
+
+    for p in players {
         let p = game.get_player(p);
         let shown = player.index == p.index;
         let prefix = if shown { "* " } else { "" };

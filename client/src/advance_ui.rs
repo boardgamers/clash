@@ -1,9 +1,7 @@
 use itertools::Itertools;
 use macroquad::hash;
 use macroquad::math::{bool, vec2};
-use std::cmp::min;
-use std::collections::HashMap;
-
+use macroquad::prelude::screen_width;
 use server::action::Action;
 use server::advance::{Advance, Bonus};
 use server::content::advances;
@@ -13,6 +11,8 @@ use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::AdvancePaymentOptions;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
+use std::cmp::min;
+use std::collections::HashMap;
 
 use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
 use crate::dialog_ui::dialog;
@@ -114,34 +114,38 @@ pub fn show_generic_advance_menu(
             }
         }) {
             let advances = list.collect::<Vec<_>>();
-            ui.group(hash!(&advances[0].name), vec2(1500., 90.), |ui| {
-                for a in advances {
-                    let name = &a.name;
-                    let can_advance = if player.can_play_action {
-                        p.can_advance(name)
-                    } else if player.can_control
-                        && matches!(
-                            game.state,
-                            GameState::StatusPhase(StatusPhaseState::FreeAdvance)
-                        )
-                    {
-                        p.can_advance_free(name)
-                    } else {
-                        false
-                    };
+            ui.group(
+                hash!(&advances[0].name),
+                vec2(screen_width() - 30., 150.),
+                |ui| {
+                    for a in advances {
+                        let name = &a.name;
+                        let can_advance = if player.can_play_action {
+                            p.can_advance(name)
+                        } else if player.can_control
+                            && matches!(
+                                game.state,
+                                GameState::StatusPhase(StatusPhaseState::FreeAdvance)
+                            )
+                        {
+                            p.can_advance_free(name)
+                        } else {
+                            false
+                        };
 
-                    let desc = description(p, a);
-                    if p.has_advance(name) {
-                        ui.label(None, &desc);
-                    } else if can_advance {
-                        if ui.button(None, desc) {
-                            update = new_update(name);
-                        }
-                    } else {
-                        ui.label(None, &desc);
-                    };
-                }
-            });
+                        let desc = description(p, a);
+                        if p.has_advance(name) {
+                            ui.label(None, &desc);
+                        } else if can_advance {
+                            if ui.button(None, desc) {
+                                update = new_update(name);
+                            }
+                        } else {
+                            ui.label(None, &desc);
+                        };
+                    }
+                },
+            );
         }
         update
     })
