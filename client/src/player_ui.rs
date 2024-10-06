@@ -17,7 +17,8 @@ use server::resource_pile::ResourcePile;
 
 pub fn show_globals(game: &Game, player: &ShownPlayer) -> StateUpdate {
     let y = 0.;
-    let window = Window::new(hash!(), vec2(10., 5.), vec2(1200., 20.))
+    let width = screen_width() - 20.;
+    let window = Window::new(hash!(), vec2(10., 5.), vec2(width, 20.))
         .titlebar(false)
         .movable(false)
         .close_button(false);
@@ -31,9 +32,9 @@ pub fn show_globals(game: &Game, player: &ShownPlayer) -> StateUpdate {
         show_wonders(game, player, ui);
         StateUpdate::None
     });
-    
+
     updates.add(update);
-    let window = Window::new(hash!(), vec2(10., 50.), vec2(1200., 20.))
+    let window = Window::new(hash!(), vec2(10., 50.), vec2(width, 20.))
         .titlebar(false)
         .movable(false)
         .close_button(false);
@@ -186,7 +187,8 @@ fn resource_ui(player: &Player, name: &str, f: impl Fn(&ResourcePile) -> u32) ->
 pub fn show_global_controls(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     let player = state.shown_player(game);
     let y = 0.;
-    let window = Window::new(hash!(), vec2(10., 30.), vec2(1200., 20.))
+    let width = screen_width() - 20.;
+    let window = Window::new(hash!(), vec2(10., 30.), vec2(width, 20.))
         .titlebar(false)
         .movable(false)
         .close_button(false);

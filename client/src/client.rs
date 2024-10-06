@@ -53,7 +53,9 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     };
     set_camera(&state.camera);
 
-    draw_map(game, state);
+    if matches!(state.active_dialog, ActiveDialog::None) || state.active_dialog.is_map_dialog() {
+        draw_map(game, state);
+    }
     let mut updates = StateUpdates::new();
     let update = show_globals(game, player);
     updates.add(update);
@@ -69,7 +71,7 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
 
     updates.add(match &state.active_dialog {
         ActiveDialog::None => StateUpdate::None,
-        ActiveDialog::Log => show_log(game),
+        ActiveDialog::Log => show_log(game, player),
         ActiveDialog::TileMenu(p) => show_tile_menu(game, *p, player),
         ActiveDialog::WaitingForUpdate => {
             active_dialog_window(player, "Waiting for update", |_ui| StateUpdate::None)

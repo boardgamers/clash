@@ -101,7 +101,7 @@ pub fn increase_happiness_menu(h: &IncreaseHappiness, player: &ShownPlayer) -> S
 }
 
 pub fn start_increase_happiness(game: &Game, player: &ShownPlayer) -> StateUpdate {
-    StateUpdate::SetDialog(ActiveDialog::IncreaseHappiness(IncreaseHappiness::new(
+    StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(IncreaseHappiness::new(
         game.get_player(player.index)
             .cities
             .iter()

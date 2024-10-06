@@ -80,6 +80,19 @@ impl ActiveDialog {
             ActiveDialog::RemoveCasualties(_) => "remove casualties",
         }
     }
+
+    #[must_use]
+    pub fn is_map_dialog(&self) -> bool {
+        matches!(
+            self,
+            ActiveDialog::TileMenu(_)
+                | ActiveDialog::IncreaseHappiness(_)
+                | ActiveDialog::CollectResources(_)
+                | ActiveDialog::MoveUnits(_)
+                | ActiveDialog::PlaceSettler
+                | ActiveDialog::RazeSize1City
+        )
+    }
 }
 
 pub struct PendingUpdate {
@@ -181,6 +194,7 @@ pub struct ShownPlayer {
     pub index: usize,
     pub can_control: bool,
     pub can_play_action: bool,
+    pub active_dialog: ActiveDialog,
 }
 
 impl ShownPlayer {
@@ -195,7 +209,6 @@ pub struct State {
     pub control_player: Option<usize>,
     pub show_player: usize,
     pub active_dialog: ActiveDialog,
-    dialog_stack: Vec<ActiveDialog>,
     pub pending_update: Option<PendingUpdate>,
     pub camera: Camera2D,
     pub zoom: f32,
@@ -203,13 +216,12 @@ pub struct State {
 }
 
 pub const ZOOM: f32 = 0.001;
-pub const OFFSET: Vec2 = vec2(-0.8, 0.65);
+pub const OFFSET: Vec2 = vec2(-0.8, 0.45);
 
 impl State {
     pub async fn new(features: &Features) -> State {
         State {
             active_dialog: ActiveDialog::None,
-            dialog_stack: vec![],
             pending_update: None,
             assets: Assets::new(features).await,
             control_player: None,
@@ -230,12 +242,12 @@ impl State {
             index: self.show_player,
             can_control: control,
             can_play_action: control && game.state == GameState::Playing && game.actions_left > 0,
+            active_dialog: self.active_dialog.clone(),
         }
     }
 
     pub fn clear(&mut self) {
         self.active_dialog = ActiveDialog::None;
-        self.dialog_stack.clear();
         self.pending_update = None;
     }
 
@@ -291,26 +303,22 @@ impl State {
     }
 
     fn open_dialog(&mut self, dialog: ActiveDialog) {
+        if self.active_dialog.title() == dialog.title() {
+            self.close_dialog();
+            return;
+        }
         if matches!(self.active_dialog, ActiveDialog::TileMenu(_)) {
             self.close_dialog();
-        }
-        if !matches!(self.active_dialog, ActiveDialog::None) {
-            self.dialog_stack.push(self.active_dialog.clone());
         }
         self.active_dialog = dialog;
     }
 
     pub fn set_dialog(&mut self, dialog: ActiveDialog) {
         self.active_dialog = dialog;
-        self.dialog_stack.clear();
     }
 
     fn close_dialog(&mut self) {
-        if let Some(dialog) = self.dialog_stack.pop() {
-            self.active_dialog = dialog;
-        } else {
-            self.active_dialog = ActiveDialog::None;
-        }
+        self.active_dialog = ActiveDialog::None;
     }
 
     pub fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {
