@@ -23,7 +23,7 @@ pub fn dialog<F>(player: &ShownPlayer, title: &str, f: F) -> StateUpdate
 where
     F: FnOnce(&mut Ui) -> StateUpdate,
 {
-    let width = screen_width() - 20.;
+    let width = screen_width() - 40.;
     let size = if player.active_dialog.is_map_dialog() {
         vec2(width / 2.0, 100.)
     } else {
