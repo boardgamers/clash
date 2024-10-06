@@ -177,19 +177,19 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
         state.offset = OFFSET;
         return StateUpdate::None;
     }
-    if bottom_left_button(vec2(210., -80.), "L") {
+    if bottom_left_button(vec2(210., -80.), "") {
         state.offset += vec2(-0.1, 0.);
         return StateUpdate::None;
     }
-    if bottom_left_button(vec2(310., -80.), "R") {
+    if bottom_left_button(vec2(310., -80.), "") {
         state.offset += vec2(0.1, 0.);
         return StateUpdate::None;
     }
-    if bottom_left_button(vec2(260., -110.), "U") {
+    if bottom_left_button(vec2(260., -110.), "") {
         state.offset += vec2(0., 0.1);
         return StateUpdate::None;
     }
-    if bottom_left_button(vec2(260., -50.), "D") {
+    if bottom_left_button(vec2(260., -50.), "") {
         state.offset += vec2(0., -0.1);
         return StateUpdate::None;
     }

@@ -105,11 +105,37 @@ impl Assets {
             .font_size(50)
             .build();
 
+        // let checkbox_style = root_ui()
+        //     .style_builder()
+        //     .background(
+        //         Image::from_file_with_format(
+        //             include_bytes!("../examples/ui_assets/checkbox_background.png"),
+        //             None,
+        //         )
+        //         .unwrap(),
+        //     )
+        //     .background_hovered(
+        //         Image::from_file_with_format(
+        //             include_bytes!("../examples/ui_assets/checkbox_hovered_background.png"),
+        //             None,
+        //         )
+        //         .unwrap(),
+        //     )
+        //     .background_clicked(
+        //         Image::from_file_with_format(
+        //             include_bytes!("../examples/ui_assets/checkbox_clicked_background.png"),
+        //             None,
+        //         )
+        //         .unwrap(),
+        //     )
+        //     .build();
+
         Skin {
             editbox_style,
             window_style,
             button_style,
             label_style,
+            // checkbox_style,
             title_height: 30.,
             ..root_ui().default_skin()
         }

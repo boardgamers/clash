@@ -1,7 +1,12 @@
+use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
+use crate::dialog_ui::dialog;
+use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
+use crate::resource_ui::{new_resource_map, ResourceType};
+use crate::select_ui::HasCountSelectableObject;
 use itertools::Itertools;
 use macroquad::hash;
-use macroquad::math::{bool, vec2};
-use macroquad::prelude::screen_width;
+use macroquad::math::{bool, vec2, Vec2};
+use macroquad::ui::widgets::Checkbox;
 use server::action::Action;
 use server::advance::{Advance, Bonus};
 use server::content::advances;
@@ -13,12 +18,6 @@ use server::resource_pile::AdvancePaymentOptions;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 use std::cmp::min;
 use std::collections::HashMap;
-
-use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
-use crate::dialog_ui::dialog;
-use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
-use crate::resource_ui::{new_resource_map, ResourceType};
-use crate::select_ui::HasCountSelectableObject;
 
 #[derive(Clone)]
 pub struct AdvancePayment {
@@ -103,52 +102,72 @@ pub fn show_generic_advance_menu(
 ) -> StateUpdate {
     dialog(player, title, |ui| {
         let p = player.get(game);
-        let mut update = StateUpdate::None;
-        let mut current_group = None;
-        for (_a, list) in &advances::get_all().iter().chunk_by(|a| {
-            if a.required.is_none() {
-                current_group = Some(&a.name);
-                &a.name
-            } else {
-                current_group.unwrap()
-            }
-        }) {
-            let advances = list.collect::<Vec<_>>();
-            ui.group(
-                hash!(&advances[0].name),
-                vec2(screen_width() - 30., 150.),
-                |ui| {
-                    for a in advances {
-                        let name = &a.name;
-                        let can_advance = if player.can_play_action {
-                            p.can_advance(name)
-                        } else if player.can_control
-                            && matches!(
-                                game.state,
-                                GameState::StatusPhase(StatusPhaseState::FreeAdvance)
-                            )
-                        {
-                            p.can_advance_free(name)
-                        } else {
-                            false
-                        };
 
-                        let desc = description(p, a);
-                        if p.has_advance(name) {
-                            ui.label(None, &desc);
-                        } else if can_advance {
-                            if ui.button(None, desc) {
-                                update = new_update(name);
-                            }
-                        } else {
-                            ui.label(None, &desc);
-                        };
+        for advances in groups() {
+            let pos = group_pos(&advances[0]);
+            for (i, a) in advances.into_iter().enumerate() {
+                let pos = pos * vec2(140., 210.) + vec2(0., i as f32 * 35.);
+                let name = &a.name;
+                let can_advance = if player.can_play_action {
+                    p.can_advance(name)
+                } else if player.can_control
+                    && matches!(
+                        game.state,
+                        GameState::StatusPhase(StatusPhaseState::FreeAdvance)
+                    )
+                {
+                    p.can_advance_free(name)
+                } else {
+                    false
+                };
+
+                if can_advance || p.has_advance(name) {
+                    let mut data = p.has_advance(name);
+                    Checkbox::new(hash!(name))
+                        // .label(name)
+                        .pos(pos + vec2(60., 50.))
+                        .size(vec2(0., 0.))
+                        .ui(ui, &mut data);
+                    if data && data != p.has_advance(name) {
+                        return new_update(name);
                     }
-                },
-            );
+                }
+                ui.label(pos + vec2(0., 0.), name);
+            }
         }
-        update
+        StateUpdate::None
     })
+}
+
+fn groups() -> Vec<Vec<Advance>> {
+    let mut current_group = None;
+    advances::get_all()
+        .into_iter()
+        .chunk_by(|a| {
+            if a.required.is_none() {
+                current_group = Some(a.name.clone());
+                a.name.clone()
+            } else {
+                current_group.as_ref().unwrap().clone()
+            }
+        })
+        .into_iter()
+        .map(|(_k, a)| a.collect::<Vec<_>>())
+        .collect::<Vec<_>>()
+}
+
+fn group_pos(advance: &Advance) -> Vec2 {
+    match advance.name.as_str() {
+        "Farming" => vec2(0., 0.),
+        "Mining" => vec2(1., 0.),
+        "Fishing" => vec2(2., 0.),
+        "Philosophy" => vec2(3., 0.),
+        "Tactics" => vec2(4., 0.),
+        "Math" => vec2(2., 1.),
+        "Voting" => vec2(3., 1.),
+        "Dogma" => vec2(5., 1.),
+        _ => panic!("Unknown advance: {}", advance.name),
+    }
 }
 
 fn description(p: &Player, a: &Advance) -> String {
