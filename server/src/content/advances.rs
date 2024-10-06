@@ -159,7 +159,7 @@ pub fn get_all() -> Vec<Advance> {
             "Democracy 2",
             "TestGovernment1",
         )
-        .with_required_advance("Democracy Advance")
+        .with_required_advance("Voting")
         .build(),
 
         Advance::builder(
@@ -172,7 +172,7 @@ pub fn get_all() -> Vec<Advance> {
             "Theocracy 2",
             "TestGovernment2",
         )
-        .with_required_advance("Theocracy Advance")
+        .with_required_advance("Dogma")
         .build(),
     ]
 }
