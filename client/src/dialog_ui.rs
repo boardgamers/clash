@@ -67,7 +67,9 @@ where
 
 pub fn show_pending_update(update: &PendingUpdate, player: &ShownPlayer) -> StateUpdate {
     active_dialog_window(player, "Are you sure?", |ui| {
-        ui.label(None, &format!("Warning: {}", update.warning.join(", ")));
+        if !update.warning.is_empty() {
+            ui.label(None, &format!("Warning: {}", update.warning.join(", ")));
+        }
         if ui.button(None, "OK") {
             return StateUpdate::ResolvePendingUpdate(true);
         }

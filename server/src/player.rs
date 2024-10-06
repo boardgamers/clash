@@ -566,7 +566,7 @@ impl Player {
 
     #[must_use]
     pub fn can_raze_city(&self, city_position: Position) -> bool {
-        self.get_city(city_position)
+        self.cities.len() > 1 && self.get_city(city_position)
             .is_some_and(|city| city.size() == 1)
     }
 

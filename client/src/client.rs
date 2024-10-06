@@ -136,7 +136,7 @@ pub fn try_click(game: &Game, state: &State, player: &ShownPlayer) -> StateUpdat
             ActiveDialog::CollectResources(col) => click_collect_option(col, pos),
             ActiveDialog::RazeSize1City => {
                 if player.get(game).can_raze_city(pos) {
-                    StateUpdate::status_phase(StatusPhaseAction::RaseSize1City(Some(pos)))
+                    StateUpdate::execute_with_warning(Action::StatusPhase(StatusPhaseAction::RaseSize1City(Some(pos))), vec![])
                 } else {
                     StateUpdate::None
                 }
