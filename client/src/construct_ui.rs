@@ -101,6 +101,7 @@ pub fn pay_construction_dialog(
     payment_dialog(
         player,
         &format!("Pay for {}", payment.name),
+        vec![],
         payment,
         |cp| cp.payment.get(ResourceType::Discount).selectable.current == 0,
         |cp| match &cp.project {

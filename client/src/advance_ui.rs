@@ -1,9 +1,12 @@
+use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
+use crate::dialog_ui::dialog;
+use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
+use crate::resource_ui::{new_resource_map, ResourceType};
+use crate::select_ui::HasCountSelectableObject;
 use itertools::Itertools;
 use macroquad::hash;
-use macroquad::math::{bool, vec2};
-use std::cmp::min;
-use std::collections::HashMap;
-
+use macroquad::math::{bool, vec2, Vec2};
+use macroquad::ui::widgets::Checkbox;
 use server::action::Action;
 use server::advance::{Advance, Bonus};
 use server::content::advances;
@@ -13,12 +16,8 @@ use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::AdvancePaymentOptions;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
-
-use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
-use crate::dialog_ui::dialog;
-use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
-use crate::resource_ui::{new_resource_map, ResourceType};
-use crate::select_ui::HasCountSelectableObject;
+use std::cmp::min;
+use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct AdvancePayment {
@@ -80,83 +79,120 @@ impl HasPayment for AdvancePayment {
 }
 
 pub fn show_advance_menu(game: &Game, player: &ShownPlayer) -> StateUpdate {
-    show_generic_advance_menu("Advances", game, player, |name| {
+    show_generic_advance_menu("Advances", game, player, |a| {
         StateUpdate::SetDialog(ActiveDialog::AdvancePayment(AdvancePayment::new(
             game,
             player.index,
-            name,
+            a.name.as_str(),
         )))
     })
 }
 
 pub fn show_free_advance_menu(game: &Game, player: &ShownPlayer) -> StateUpdate {
-    show_generic_advance_menu("Select a free advance", game, player, |name| {
-        StateUpdate::status_phase(StatusPhaseAction::FreeAdvance(name.to_string()))
+    show_generic_advance_menu("Select a free advance", game, player, |a| {
+        if can_advance(game, player, a) {
+            return StateUpdate::execute_with_confirm(
+                description(game.get_player(player.index), a),
+                Action::StatusPhase(StatusPhaseAction::FreeAdvance(a.name.clone())),
+            );
+        }
+        advance_info(game, player, a)
     })
+}
+
+fn advance_info(game: &Game, player: &ShownPlayer, a: &Advance) -> StateUpdate {
+    StateUpdate::execute_with_cancel(description(game.get_player(player.index), a))
 }
 
 pub fn show_generic_advance_menu(
     title: &str,
     game: &Game,
     player: &ShownPlayer,
-    new_update: impl Fn(&str) -> StateUpdate,
+    new_update: impl Fn(&Advance) -> StateUpdate,
 ) -> StateUpdate {
     dialog(player, title, |ui| {
         let p = player.get(game);
-        let mut update = StateUpdate::None;
-        let mut current_group = None;
-        for (_a, list) in &advances::get_all().iter().chunk_by(|a| {
-            if a.required.is_none() {
-                current_group = Some(&a.name);
-                &a.name
-            } else {
-                current_group.unwrap()
-            }
-        }) {
-            let advances = list.collect::<Vec<_>>();
-            ui.group(hash!(&advances[0].name), vec2(1500., 90.), |ui| {
-                for a in advances {
-                    let name = &a.name;
-                    let can_advance = if player.can_play_action {
-                        p.can_advance(name)
-                    } else if player.can_control
-                        && matches!(
-                            game.state,
-                            GameState::StatusPhase(StatusPhaseState::FreeAdvance)
-                        )
-                    {
-                        p.can_advance_free(name)
-                    } else {
-                        false
-                    };
 
-                    let desc = description(p, a);
-                    if p.has_advance(name) {
-                        ui.label(None, &desc);
-                    } else if can_advance {
-                        if ui.button(None, desc) {
-                            update = new_update(name);
-                        }
-                    } else {
-                        ui.label(None, &desc);
-                    };
+        for advances in groups() {
+            let pos = group_pos(&advances[0]);
+            for (i, a) in advances.into_iter().enumerate() {
+                let pos = pos * vec2(140., 210.) + vec2(0., i as f32 * 35.);
+                let name = &a.name;
+                let can_advance = can_advance(game, player, &a);
+
+                if can_advance || p.has_advance(name) {
+                    let mut data = p.has_advance(name);
+                    Checkbox::new(hash!(name))
+                        // .label(name)
+                        .pos(pos + vec2(60., 50.))
+                        .size(vec2(0., 0.))
+                        .ui(ui, &mut data);
+                    if data != p.has_advance(name) {
+                        return new_update(&a);
+                    }
                 }
-            });
+                // Button::new(name.clone()).position(pos + vec2(0., 0.)).ui(ui);
+                ui.label(pos + vec2(0., 0.), name);
+            }
         }
-        update
+        StateUpdate::None
     })
 }
 
-fn description(p: &Player, a: &Advance) -> String {
+fn can_advance(game: &Game, player: &ShownPlayer, a: &Advance) -> bool {
+    let name = &a.name;
+    let p = player.get(game);
+    if player.can_play_action {
+        p.can_advance(name)
+    } else if player.can_control
+        && matches!(
+            game.state,
+            GameState::StatusPhase(StatusPhaseState::FreeAdvance)
+        )
+    {
+        p.can_advance_free(name)
+    } else {
+        false
+    }
+}
+
+fn groups() -> Vec<Vec<Advance>> {
+    let mut current_group = None;
+    advances::get_all()
+        .into_iter()
+        .chunk_by(|a| {
+            if a.required.is_none() {
+                current_group = Some(a.name.clone());
+                a.name.clone()
+            } else {
+                current_group.as_ref().unwrap().clone()
+            }
+        })
+        .into_iter()
+        .map(|(_k, a)| a.collect::<Vec<_>>())
+        .collect::<Vec<_>>()
+}
+
+fn group_pos(advance: &Advance) -> Vec2 {
+    match advance.name.as_str() {
+        "Farming" => vec2(0., 0.),
+        "Mining" => vec2(1., 0.),
+        "Fishing" => vec2(2., 0.),
+        "Philosophy" => vec2(3., 0.),
+        "Tactics" => vec2(4., 0.),
+        "Math" => vec2(2., 1.),
+        "Voting" => vec2(3., 1.),
+        "Dogma" => vec2(5., 1.),
+        _ => panic!("Unknown advance: {}", advance.name),
+    }
+}
+
+fn description(p: &Player, a: &Advance) -> Vec<String> {
     let name = &a.name;
     let desc = &a.description;
 
-    let mut parts = vec![];
-    parts.push(if p.has_advance(name) {
-        format!("+ {name}")
-    } else {
-        format!("  {name}")
-    });
+    let mut parts: Vec<String> = vec![];
+    parts.push(name.clone());
     parts.push(desc.clone());
     parts.push(format!("Cost: {}", p.advance_cost(name)));
     if let Some(r) = &a.required {
@@ -181,25 +217,32 @@ fn description(p: &Player, a: &Advance) -> String {
         parts.push(format!("Unlocks: {u}"));
     }
 
-    parts.join(", ")
+    parts
 }
 
-pub fn pay_advance_dialog(ap: &AdvancePayment, player: &ShownPlayer) -> StateUpdate {
-    payment_dialog(
-        player,
-        &format!("Pay for advance {}", ap.name),
-        ap,
-        AdvancePayment::valid,
-        |ap| {
-            StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
-                advance: ap.name.to_string(),
-                payment: ap.payment.to_resource_pile(),
-            }))
-        },
-        |ap, r| ap.payment.get(r).selectable.max > 0,
-        |ap, r| add(ap, r, 1),
-        |ap, r| add(ap, r, -1),
-    )
+pub fn pay_advance_dialog(ap: &AdvancePayment, player: &ShownPlayer, game: &Game) -> StateUpdate {
+    let a = advances::get_advance_by_name(ap.name.as_str()).unwrap();
+
+    if can_advance(game, player, &a) {
+        payment_dialog(
+            player,
+            &format!("Pay for advance {}", ap.name),
+            description(game.get_player(player.index), &a),
+            ap,
+            AdvancePayment::valid,
+            |ap| {
+                StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
+                    advance: ap.name.to_string(),
+                    payment: ap.payment.to_resource_pile(),
+                }))
+            },
+            |ap, r| ap.payment.get(r).selectable.max > 0,
+            |ap, r| add(ap, r, 1),
+            |ap, r| add(ap, r, -1),
+        )
+    } else {
+        advance_info(game, player, &a)
+    }
 }
 
 fn add(ap: &AdvancePayment, r: ResourceType, i: i32) -> StateUpdate {

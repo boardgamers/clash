@@ -2,8 +2,10 @@ use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
 use crate::dialog_ui::active_dialog_window;
 use crate::select_ui;
 use crate::select_ui::{ConfirmSelection, Selection, SelectionConfirm};
+use server::action::Action;
 use server::content::advances;
 use server::game::Game;
+use server::position::Position;
 use server::status_phase::{ChangeGovernmentType, StatusPhaseAction};
 
 pub fn determine_first_player_dialog(game: &Game, player: &ShownPlayer) -> StateUpdate {
@@ -24,6 +26,17 @@ pub fn determine_first_player_dialog(game: &Game, player: &ShownPlayer) -> State
             StateUpdate::None
         },
     )
+}
+
+pub fn raze_city_confirm_dialog(game: &Game, player: &ShownPlayer, pos: Position) -> StateUpdate {
+    if player.get(game).can_raze_city(pos) {
+        StateUpdate::execute_with_confirm(
+            vec![format!("Raze {pos} to get 1 gold")],
+            Action::StatusPhase(StatusPhaseAction::RaseSize1City(Some(pos))),
+        )
+    } else {
+        StateUpdate::None
+    }
 }
 
 pub fn raze_city_dialog(player: &ShownPlayer) -> StateUpdate {

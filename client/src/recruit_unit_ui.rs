@@ -214,6 +214,7 @@ pub fn select_dialog(game: &Game, a: &RecruitAmount, player: &ShownPlayer) -> St
     select_ui::count_dialog(
         player,
         "Recruit units",
+        vec![],
         a,
         |s| s.selectable.clone(),
         |s| s.name.as_ref(),

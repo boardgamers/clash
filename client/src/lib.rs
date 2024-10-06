@@ -20,7 +20,7 @@ mod dialog_ui;
 mod happiness_ui;
 mod hex_ui;
 mod influence_ui;
-pub mod local_client;
+mod layout_ui;
 mod log_ui;
 mod map_ui;
 mod move_ui;

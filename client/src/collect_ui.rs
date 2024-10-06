@@ -3,7 +3,7 @@ use std::iter;
 
 use macroquad::color::BLACK;
 use macroquad::math::i32;
-use macroquad::prelude::{draw_circle_lines, draw_text, Vec2, WHITE};
+use macroquad::prelude::{draw_circle_lines, draw_text, WHITE};
 
 use server::action::Action;
 use server::consts::PORT_CHOICES;
@@ -15,6 +15,7 @@ use server::resource_pile::ResourcePile;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::dialog_ui::active_dialog_window;
 use crate::hex_ui;
+use crate::layout_ui::{cancel_pos, ok_pos};
 use crate::resource_ui::resource_pile_string;
 
 #[derive(Clone)]
@@ -70,7 +71,7 @@ pub fn collect_resources_dialog(
         )
         .is_some();
         let label = if valid { "OK" } else { "(OK)" };
-        if ui.button(Vec2::new(0., 40.), label) && valid {
+        if ui.button(ok_pos(player), label) && valid {
             return StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Collect {
                     city_position: collect.city_position,
@@ -84,7 +85,7 @@ pub fn collect_resources_dialog(
                 city,
             );
         };
-        if ui.button(Vec2::new(80., 40.), "Cancel") {
+        if ui.button(cancel_pos(player), "Cancel") {
             return StateUpdate::Cancel;
         };
         StateUpdate::None

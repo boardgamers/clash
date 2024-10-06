@@ -1,4 +1,5 @@
 use crate::client_state::{PendingUpdate, ShownPlayer, StateUpdate};
+use crate::layout_ui::{cancel_pos, ok_only_pos, ok_pos};
 use macroquad::hash;
 use macroquad::math::{vec2, Vec2};
 use macroquad::prelude::screen_height;
@@ -25,11 +26,11 @@ where
 {
     let width = screen_width() - 20.;
     let size = if player.active_dialog.is_map_dialog() {
-        vec2(width / 2.0, 100.)
+        vec2(width / 2.0, 270.)
     } else {
-        vec2(width, screen_height() - 100.)
+        vec2(width, screen_height() - 40.)
     };
-    custom_dialog(title, vec2(10., 70.), size, f)
+    custom_dialog(title, vec2(10., 10.), size, f)
 }
 
 pub fn custom_dialog<F>(title: &str, position: Vec2, size: Vec2, f: F) -> StateUpdate
@@ -67,11 +68,21 @@ where
 
 pub fn show_pending_update(update: &PendingUpdate, player: &ShownPlayer) -> StateUpdate {
     active_dialog_window(player, "Are you sure?", |ui| {
-        ui.label(None, &format!("Warning: {}", update.warning.join(", ")));
-        if ui.button(None, "OK") {
+        for i in &update.info {
+            ui.label(None, i);
+        }
+        if !update.warning.is_empty() {
+            ui.label(None, &format!("Warning: {}", update.warning.join(", ")));
+        }
+        if update.can_confirm && ui.button(ok_pos(player), "OK") {
             return StateUpdate::ResolvePendingUpdate(true);
         }
-        if ui.button(None, "Cancel") {
+        let p = if update.can_confirm {
+            cancel_pos(player)
+        } else {
+            ok_only_pos(player)
+        };
+        if ui.button(p, "Cancel") {
             return StateUpdate::ResolvePendingUpdate(false);
         }
         StateUpdate::None

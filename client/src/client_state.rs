@@ -98,6 +98,8 @@ impl ActiveDialog {
 pub struct PendingUpdate {
     pub action: Action,
     pub warning: Vec<String>,
+    pub info: Vec<String>,
+    pub can_confirm: bool,
 }
 
 #[must_use]
@@ -124,8 +126,31 @@ impl StateUpdate {
         if warning.is_empty() {
             StateUpdate::Execute(action)
         } else {
-            StateUpdate::ExecuteWithWarning(PendingUpdate { action, warning })
+            StateUpdate::ExecuteWithWarning(PendingUpdate {
+                action,
+                warning,
+                info: vec![],
+                can_confirm: true,
+            })
         }
+    }
+
+    pub fn execute_with_confirm(info: Vec<String>, action: Action) -> StateUpdate {
+        StateUpdate::ExecuteWithWarning(PendingUpdate {
+            action,
+            warning: vec![],
+            info,
+            can_confirm: true,
+        })
+    }
+
+    pub fn execute_with_cancel(info: Vec<String>) -> StateUpdate {
+        StateUpdate::ExecuteWithWarning(PendingUpdate {
+            action: Action::Undo, // never used
+            warning: vec![],
+            info,
+            can_confirm: false,
+        })
     }
 
     pub fn execute_activation(action: Action, warning: Vec<String>, city: &City) -> StateUpdate {
@@ -195,6 +220,7 @@ pub struct ShownPlayer {
     pub can_control: bool,
     pub can_play_action: bool,
     pub active_dialog: ActiveDialog,
+    pub pending_update: bool,
 }
 
 impl ShownPlayer {
@@ -216,7 +242,7 @@ pub struct State {
 }
 
 pub const ZOOM: f32 = 0.001;
-pub const OFFSET: Vec2 = vec2(-0.8, 0.45);
+pub const OFFSET: Vec2 = vec2(0., 0.45);
 
 impl State {
     pub async fn new(features: &Features) -> State {
@@ -243,6 +269,7 @@ impl State {
             can_control: control,
             can_play_action: control && game.state == GameState::Playing && game.actions_left > 0,
             active_dialog: self.active_dialog.clone(),
+            pending_update: self.pending_update.is_some(),
         }
     }
 
@@ -278,6 +305,7 @@ impl State {
                     GameSyncRequest::ExecuteAction(action)
                 } else {
                     self.pending_update = None;
+                    self.close_dialog();
                     GameSyncRequest::None
                 }
             }

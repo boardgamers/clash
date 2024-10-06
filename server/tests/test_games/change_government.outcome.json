@@ -124,11 +124,11 @@
       "active_leader": null,
       "available_leaders": [],
       "advances": [
+        "Dogma",
         "Farming",
         "Fishing",
         "Mining",
-        "Theocracy 2",
-        "Theocracy Advance"
+        "Theocracy 2"
       ],
       "unlocked_special_advance": [],
       "wonders": [],
@@ -412,7 +412,7 @@
     {
       "Playing": {
         "Advance": {
-          "advance": "Democracy Advance",
+          "advance": "Voting",
           "payment": {
             "food": 0,
             "wood": 0,
@@ -495,7 +495,7 @@
     "The game has started",
     "Age 1 has started",
     "Round 1/3",
-    "Player1 payed 2 ideas to get the Democracy Advance advance",
+    "Player1 payed 2 ideas to get the Voting advance",
     "Player1 payed 2 ideas to get the Democracy 2 advance",
     "Player1 ended his turn with 1 actions left",
     "It's Player2's turn",

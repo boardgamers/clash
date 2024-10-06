@@ -8,6 +8,7 @@ use server::resource_pile::ResourcePile;
 
 use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
 use crate::dialog_ui::active_dialog_window;
+use crate::layout_ui::{cancel_pos, ok_pos};
 
 #[derive(Clone)]
 pub struct IncreaseHappiness {
@@ -18,6 +19,24 @@ pub struct IncreaseHappiness {
 impl IncreaseHappiness {
     pub fn new(steps: Vec<(Position, u32)>, cost: ResourcePile) -> IncreaseHappiness {
         IncreaseHappiness { steps, cost }
+    }
+}
+
+pub fn increase_happiness_dialog(
+    game: &Game,
+    player: &ShownPlayer,
+    pos: Position,
+    h: &IncreaseHappiness,
+) -> StateUpdate {
+    if let Some(city) = player.get(game).get_city(pos) {
+        StateUpdate::SetDialog(ActiveDialog::IncreaseHappiness(add_increase_happiness(
+            player.get(game),
+            city,
+            pos,
+            h,
+        )))
+    } else {
+        StateUpdate::None
     }
 }
 
@@ -88,10 +107,10 @@ fn increase_happiness_new_steps(
 pub fn increase_happiness_menu(h: &IncreaseHappiness, player: &ShownPlayer) -> StateUpdate {
     active_dialog_window(player, "Increase Happiness", |ui| {
         ui.label(None, &format!("Cost: {:?}", h.cost));
-        if ui.button(None, "Cancel") {
+        if ui.button(cancel_pos(player), "Cancel") {
             return StateUpdate::Cancel;
         }
-        if ui.button(None, "Confirm") {
+        if ui.button(ok_pos(player), "Confirm") {
             return StateUpdate::Execute(Action::Playing(PlayingAction::IncreaseHappiness {
                 happiness_increases: h.steps.clone(),
             }));

@@ -1,5 +1,5 @@
 use macroquad::color::BLACK;
-use macroquad::math::u32;
+use macroquad::math::{u32, vec2};
 use macroquad::prelude::draw_text;
 use macroquad::shapes::draw_circle;
 use macroquad::ui::Ui;
@@ -78,7 +78,7 @@ pub fn unit_selection_dialog<T: UnitSelection>(
 ) -> StateUpdate {
     active_dialog_window(player, title, |ui| {
         if let Some(current_tile) = sel.current_tile() {
-            for (p, unit_id) in units_on_tile(game, current_tile) {
+            for (i, (p, unit_id)) in units_on_tile(game, current_tile).enumerate() {
                 let unit = game.get_player(p).get_unit(unit_id).unwrap();
                 let can_sel = sel.can_select(game, unit);
                 let is_selected = sel.selected_units().contains(&unit_id);
@@ -87,9 +87,10 @@ pub fn unit_selection_dialog<T: UnitSelection>(
                     l += " (selected)";
                 }
 
+                let pos = vec2(((i / 4) as f32) * 200., i.rem_euclid(4) as f32 * 35.);
                 if !can_sel {
-                    ui.label(None, &l);
-                } else if ui.button(None, l) {
+                    ui.label(pos, &l);
+                } else if ui.button(pos, l) {
                     let mut new = sel.clone();
                     if is_selected {
                         new.selected_units_mut().retain(|u| u != &unit_id);
