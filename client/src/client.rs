@@ -1,5 +1,7 @@
 use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
 use macroquad::prelude::*;
+use macroquad::prelude::{clear_background, vec2};
+use macroquad::ui::root_ui;
 
 use server::action::Action;
 use server::game::Game;
@@ -43,8 +45,10 @@ pub fn render_and_update(
 }
 
 fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
+    root_ui().push_skin(&state.assets.skin);
+    clear_background(BLACK);
+
     let player = &state.shown_player(game);
-    clear_background(WHITE);
 
     state.camera = Camera2D {
         zoom: vec2(state.zoom, state.zoom * screen_width() / screen_height()),
@@ -57,8 +61,8 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         draw_map(game, state);
     }
     let mut updates = StateUpdates::new();
-    let update = show_globals(game, player);
-    updates.add(update);
+    updates.add(show_globals(game, player));
+    updates.add(show_global_controls(game, state, features));
 
     if player.can_control {
         if let Some(u) = &state.pending_update {
@@ -66,8 +70,6 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
             return updates.result();
         }
     }
-
-    updates.add(show_global_controls(game, state, features));
 
     updates.add(match &state.active_dialog {
         ActiveDialog::None => StateUpdate::None,
@@ -153,6 +155,13 @@ pub fn try_click(game: &Game, state: &State, player: &ShownPlayer) -> StateUpdat
 pub struct Features {
     pub import_export: bool,
     pub assets_url: String,
+}
+
+impl Features {
+    #[must_use]
+    pub fn get_asset(&self, asset: &str) -> String {
+        format!("{}{}", self.assets_url, asset)
+    }
 }
 
 pub enum GameSyncRequest {

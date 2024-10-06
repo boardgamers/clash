@@ -1,10 +1,8 @@
 #![allow(clippy::missing_panics_doc)]
 
-use macroquad::prelude::next_frame;
-use std::fs::File;
-use std::io::BufReader;
-
 use client::client::{init, render_and_update, Features, GameSyncRequest, GameSyncResult};
+use macroquad::miniquad::window::set_window_size;
+use macroquad::prelude::next_frame;
 use server::city::City;
 use server::game::{Game, GameData};
 use server::leader::Leader;
@@ -12,10 +10,12 @@ use server::map::Terrain;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::UnitType;
+use std::fs::File;
+use std::io::BufReader;
 
 #[macroquad::main("Clash")]
 async fn main() {
-    // set_fullscreen(true);
+    set_window_size(900, 400);
 
     let features = Features {
         import_export: true,

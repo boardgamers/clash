@@ -1,6 +1,7 @@
 use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
+use crate::layout_ui::{bottom_left_button, bottom_right_button, top_center_label, top_left_label};
 use macroquad::math::vec2;
 use macroquad::prelude::*;
 use macroquad::ui::{root_ui, Ui};
@@ -11,85 +12,105 @@ use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
 
 pub fn show_globals(game: &Game, player: &ShownPlayer) -> StateUpdate {
-    let y = 5.;
+    show_top_left(game);
+    show_top_center(game, player);
 
-    let ui = &mut root_ui();
-    ui.label(vec2(10., y), &format!("Age {}", game.age));
-    ui.label(vec2(45., y), &format!("Round {}", game.round));
+    // let y = 400.;
+    //
+    // let i = game
+    //     .players
+    //     .iter()
+    //     .position(|p| p.index == game.starting_player_index)
+    //     .unwrap();
+    // let mut players: Vec<_> = game.players.iter().map(|p| p.index).collect();
+    // players.rotate_left(i);
+    //
+    // for (i, &p) in players.iter().enumerate() {
+    //     let p = game.get_player(p);
+    //     let shown = player.index == p.index;
+    //     let prefix = if shown { "* " } else { "" };
+    //     let suffix = &player_suffix(game, p);
+    //     let name = p.get_name();
+    //     let x = i as f32 * 500.;
+    //     let label = format!("{prefix}{name}{suffix}");
+    //     if shown {
+    //         (&mut root_ui()).label(vec2(x, y), &label);
+    //     } else if (&mut root_ui()).button(vec2(x, y), label) {
+    //         return StateUpdate::SetShownPlayer(p.index);
+    //     }
+    // }
 
-    show_player_status(game, player, ui);
-    show_wonders(game, player, ui);
-
-    let y = 50.;
-
-    let i = game
-        .players
-        .iter()
-        .position(|p| p.index == game.starting_player_index)
-        .unwrap();
-    let mut players: Vec<_> = game.players.iter().map(|p| p.index).collect();
-    players.rotate_left(i);
-
-    for (i, &p) in players.iter().enumerate() {
-        let p = game.get_player(p);
-        let shown = player.index == p.index;
-        let prefix = if shown { "* " } else { "" };
-        let suffix = &player_suffix(game, p);
-        let name = p.get_name();
-        let x = i as f32 * 500.;
-        let label = format!("{prefix}{name}{suffix}");
-        if shown {
-            ui.label(vec2(x, y), &label);
-        } else if ui.button(vec2(x, y), label) {
-            return StateUpdate::SetShownPlayer(p.index);
-        }
-    }
     StateUpdate::None
 }
 
-fn player_suffix(game: &Game, player: &Player) -> String {
-    let actions_left = if game.current_player_index == player.index {
-        match &game.state {
-            GameState::StatusPhase(_) | GameState::Finished => "",
-            _ => &format!("{} actions Left", game.actions_left),
-        }
-    } else {
-        ""
+fn show_top_center(game: &Game, player: &ShownPlayer) {
+    let p = game.get_player(player.index);
+
+    top_center_label(vec2(-400., 0.), &resource_ui(p, "Fd", |r| r.food));
+    top_center_label(vec2(-320., 0.), &resource_ui(p, "Wd", |r| r.wood));
+    top_center_label(vec2(-240., 0.), &resource_ui(p, "Ore", |r| r.ore));
+    top_center_label(vec2(-160., 0.), &resource_ui(p, "Id", |r| r.ideas));
+    top_center_label(vec2(-80., 0.), &resource_ui(p, "Gld", |r| r.gold as u32));
+    top_center_label(vec2(0., 0.), &resource_ui(p, "Md", |r| r.mood_tokens));
+    top_center_label(vec2(80., 0.), &resource_ui(p, "Cul", |r| r.culture_tokens));
+
+    top_center_label(vec2(170., 0.), &format!("Civ {}", p.civilization.name));
+    top_center_label(vec2(250., 0.), &format!("VP {}", p.victory_points()));
+    top_center_label(
+        vec2(300., 0.),
+        &format!(
+            "Ldr {}",
+            if let Some(l) = &p.active_leader {
+                &l.name
+            } else {
+                "-"
+            }
+        ),
+    );
+    show_wonders(game, player, &mut root_ui());
+}
+
+fn show_top_left(game: &Game) {
+    let mut y = 0.;
+    let mut label = |label: String| {
+        top_left_label(vec2(0., y), &label);
+        y += 30.;
     };
 
-    let moves_left = if game.current_player_index == player.index {
-        match moves_left(&game.state) {
-            None => "",
-            Some(m) => &format!("{m} moves left"),
+    match &game.state {
+        GameState::Finished => label("Finished".to_string()),
+        _ => label(format!("Age {}", game.age)),
+    }
+    match &game.state {
+        GameState::StatusPhase(ref p) => label(format!("Status Phase: {p:?}")),
+        _ => label(format!("Round {}", game.round)),
+    }
+
+    let current = game.current_player_index;
+    label(format!("Playing {}", &game.get_player(current).get_name()));
+
+    match &game.state {
+        GameState::StatusPhase(_) | GameState::Finished => {}
+        _ => label(format!("Actions {}", game.actions_left)),
+    }
+
+    match &game.state {
+        GameState::Movement { .. } => label("Movement".to_string()),
+        GameState::CulturalInfluenceResolution(_) => {
+            label("Cultural Influence Resolution".to_string());
         }
-    } else {
-        ""
-    };
+        GameState::Combat(c) => label(format!("Combat Round {} Phase {:?}", c.round, c.phase)),
+        GameState::PlaceSettler { .. } => label("Place Settler".to_string()),
+        _ => {}
+    }
 
-    let active_player = if player.index == game.active_player() {
-        match &game.state {
-            GameState::Playing => "Play Actions",
-            GameState::StatusPhase(ref p) => &format!("Status Phase: {p:?}"),
-            GameState::Movement { .. } => "Movement",
-            GameState::CulturalInfluenceResolution(_) => "Cultural Influence Resolution",
-            GameState::Combat(c) => &format!("Combat Round {} Phase {:?}", c.round, c.phase),
-            GameState::PlaceSettler { .. } => "Place Settler",
-            GameState::Finished => "Finished",
-        }
-    } else {
-        ""
-    };
+    if let Some(m) = moves_left(&game.state) {
+        label(format!("Moves left {m}"));
+    }
 
-    let status = vec![active_player, actions_left, moves_left]
-        .into_iter()
-        .filter(|s| !s.is_empty())
-        .collect::<Vec<_>>()
-        .join(", ");
-
-    if status.is_empty() {
-        String::new()
-    } else {
-        format!(" ({status})")
+    let active = game.active_player();
+    if active != current {
+        label(format!("Active {}", game.get_player(active).get_name()));
     }
 }
 
@@ -110,6 +131,7 @@ fn moves_left(state: &GameState) -> Option<u32> {
 }
 
 pub fn show_wonders(game: &Game, player: &ShownPlayer, ui: &mut Ui) {
+    //todo move to cards ui
     let player = game.get_player(player.index);
     let y = 5.;
     for (i, name) in player.wonders.iter().enumerate() {
@@ -130,34 +152,6 @@ pub fn show_wonders(game: &Game, player: &ShownPlayer, ui: &mut Ui) {
     }
 }
 
-pub fn show_player_status(game: &Game, player: &ShownPlayer, ui: &mut Ui) {
-    let player = game.get_player(player.index);
-    let mut i: f32 = 0.;
-    let mut res = |label: String| {
-        ui.label(vec2(110. + i, 5.), &label);
-        i += 70.;
-    };
-
-    res(resource_ui(player, "Food", |r| r.food));
-    res(resource_ui(player, "Wood", |r| r.wood));
-    res(resource_ui(player, "Ore", |r| r.ore));
-    res(resource_ui(player, "Ideas", |r| r.ideas));
-    res(resource_ui(player, "Gold", |r| r.gold as u32));
-    res(resource_ui(player, "Mood", |r| r.mood_tokens));
-    res(resource_ui(player, "Culture", |r| r.culture_tokens));
-
-    res(format!("Civ {}", player.civilization.name));
-    res(format!("VP {}", player.victory_points()));
-    res(format!(
-        "Leader {}",
-        if let Some(l) = &player.active_leader {
-            &l.name
-        } else {
-            "-"
-        }
-    ));
-}
-
 fn resource_ui(player: &Player, name: &str, f: impl Fn(&ResourcePile) -> u32) -> String {
     let r: &ResourcePile = &player.resources;
     let l: &ResourcePile = &player.resource_limit;
@@ -166,48 +160,46 @@ fn resource_ui(player: &Player, name: &str, f: impl Fn(&ResourcePile) -> u32) ->
 
 pub fn show_global_controls(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     let player = state.shown_player(game);
-    let y = 30.;
 
-    let ui = &mut root_ui();
-    if ui.button(vec2(10., y), "+") {
+    if bottom_left_button(vec2(0., -50.), "+") {
         state.zoom *= 1.1;
         return StateUpdate::None;
     }
-    if ui.button(vec2(25., y), "-") {
+    if bottom_left_button(vec2(70., -50.), "-") {
         state.zoom /= 1.1;
         return StateUpdate::None;
     }
-    if ui.button(vec2(40., y), "Reset") {
+    if bottom_left_button(vec2(140., -50.), "0") {
         state.zoom = ZOOM;
         state.offset = OFFSET;
         return StateUpdate::None;
     }
-    if ui.button(vec2(100., y), "L") {
+    if bottom_left_button(vec2(210., -50.), "L") {
         state.offset += vec2(-0.1, 0.);
         return StateUpdate::None;
     }
-    if ui.button(vec2(120., y), "R") {
+    if bottom_left_button(vec2(280., -50.), "R") {
         state.offset += vec2(0.1, 0.);
         return StateUpdate::None;
     }
-    if ui.button(vec2(140., y), "U") {
+    if bottom_left_button(vec2(350., -50.), "U") {
         state.offset += vec2(0., 0.1);
         return StateUpdate::None;
     }
-    if ui.button(vec2(160., y), "D") {
+    if bottom_left_button(vec2(420., -50.), "D") {
         state.offset += vec2(0., -0.1);
         return StateUpdate::None;
     }
 
-    if game.can_undo() && ui.button(vec2(180., y), "Undo") {
+    if game.can_undo() && bottom_right_button(vec2(-400., -50.), "Undo") {
         return StateUpdate::Execute(Action::Undo);
     }
-    if game.can_redo() && ui.button(vec2(220., y), "Redo") {
+    if game.can_redo() && bottom_right_button(vec2(-300., -50.), "Redo") {
         return StateUpdate::Execute(Action::Redo);
     }
     if player.can_control
         && matches!(game.state, GameState::Playing)
-        && ui.button(vec2(270., y), "End Turn")
+        && bottom_right_button(vec2(-180., -50.), "End Turn")
     {
         let left = game.actions_left;
         return StateUpdate::execute_with_warning(
@@ -220,31 +212,31 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
         );
     }
 
-    if player.can_play_action && ui.button(vec2(340., y), "Move") {
+    if player.can_play_action && bottom_left_button(vec2(0., -170.), "Move") {
         return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
     }
-    if player.can_play_action && ui.button(vec2(390., y), "Happiness") {
+    if player.can_play_action && bottom_left_button(vec2(0., -140.), "Ind. Hap.") {
         return start_increase_happiness(game, &player);
     }
-    if ui.button(vec2(490., y), "Advances") {
+    if bottom_left_button(vec2(0., -110.), "Advances") {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     };
-    if ui.button(vec2(560., y), "Log") {
+    if bottom_left_button(vec2(0., -80.), "Log") {
         return StateUpdate::OpenDialog(ActiveDialog::Log);
     };
     let d = state.game_state_dialog(game, &ActiveDialog::None);
     if !matches!(d, ActiveDialog::None)
         && d.title() != state.active_dialog.title()
-        && ui.button(vec2(600., y), format!("Back to {}", d.title()))
+        && bottom_left_button(vec2(0., -50.), &format!("Back to {}", d.title()))
     {
         return StateUpdate::OpenDialog(d);
     }
 
     if features.import_export {
-        if ui.button(vec2(1000., y), "Import") {
+        if bottom_right_button(vec2(-300., -100.), "Import") {
             return StateUpdate::Import;
         };
-        if ui.button(vec2(1100., y), "Export") {
+        if bottom_right_button(vec2(-150., -100.), "Export") {
             return StateUpdate::Export;
         };
     }
