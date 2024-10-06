@@ -1,4 +1,4 @@
-use crate::client_state::{ActiveDialog, PendingUpdate, ShownPlayer, StateUpdate};
+use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
 use crate::dialog_ui::active_dialog_window;
 use crate::select_ui;
 use crate::select_ui::{ConfirmSelection, Selection, SelectionConfirm};
@@ -30,12 +30,10 @@ pub fn determine_first_player_dialog(game: &Game, player: &ShownPlayer) -> State
 
 pub fn raze_city_confirm_dialog(game: &Game, player: &ShownPlayer, pos: Position) -> StateUpdate {
     if player.get(game).can_raze_city(pos) {
-        let action = Action::StatusPhase(StatusPhaseAction::RaseSize1City(Some(pos)));
-        StateUpdate::ExecuteWithWarning(PendingUpdate {
-            action,
-            warning: vec![],
-            info: Some(format!("Raze {pos} to get 1 gold")),
-        })
+        StateUpdate::execute_with_confirm(
+            vec![format!("Raze {pos} to get 1 gold")],
+            Action::StatusPhase(StatusPhaseAction::RaseSize1City(Some(pos))),
+        )
     } else {
         StateUpdate::None
     }

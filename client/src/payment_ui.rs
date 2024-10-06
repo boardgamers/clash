@@ -80,6 +80,7 @@ pub trait HasPayment {
 pub fn payment_dialog<T: HasPayment>(
     player: &ShownPlayer,
     title: &str,
+    info: Vec<String>,
     has_payment: &T,
     is_valid: impl FnOnce(&T) -> bool,
     execute_action: impl FnOnce(&T) -> StateUpdate,
@@ -90,6 +91,7 @@ pub fn payment_dialog<T: HasPayment>(
     select_ui::count_dialog(
         player,
         title,
+        info,
         has_payment,
         |p| p.payment().resources.clone(),
         |p| resource_name(p.resource),

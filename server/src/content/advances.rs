@@ -33,7 +33,7 @@ pub fn get_all() -> Vec<Advance> {
 
         Advance::builder(
             "Irrigation",
-            "✦ Your cities may Collect food from Barren spaces\n✦ Ignore Famine events",
+            "Your cities may Collect food from Barren spaces, Ignore Famine events",
         )
         .add_collect_option(Barren, ResourcePile::food(1))
         .with_advance_bonus(MoodToken)
@@ -48,7 +48,7 @@ pub fn get_all() -> Vec<Advance> {
 
         Advance::builder(
             "Engineering",
-            "✦ Immediately draw 1 wonder\n✦ May Construct wonder happy cities",
+            "Immediately draw 1 wonder, May Construct wonder happy cities",
         )
         .add_one_time_ability_initializer(Game::draw_wonder_card)
         .add_custom_action(ConstructWonder)
@@ -66,7 +66,7 @@ pub fn get_all() -> Vec<Advance> {
 
         Advance::builder(
             "Philosophy",
-            "✦ Immediately gain 1 idea\n✦ Gain 1 idea after getting a Science advance",
+            "Immediately gain 1 idea, Gain 1 idea after getting a Science advance",
         )
         .add_one_time_ability_initializer(|game, player_index| {
             game.players[player_index].gain_resources(ResourcePile::ideas(1));
@@ -107,7 +107,7 @@ pub fn get_all() -> Vec<Advance> {
 
         Advance::builder(
             "Tactics",
-            "✦ May Move Army units\n✦ May use Tactics on Action Cards",
+            "May Move Army units, May use Tactics on Action Cards",
         )
         .with_advance_bonus(CultureToken)
         .with_unlocked_building("Fortress")

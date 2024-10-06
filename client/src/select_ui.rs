@@ -23,6 +23,7 @@ pub trait HasCountSelectableObject {
 pub fn count_dialog<C, O: HasCountSelectableObject>(
     player: &ShownPlayer,
     title: &str,
+    info: Vec<String>,
     container: &C,
     get_objects: impl Fn(&C) -> Vec<O>,
     label: impl Fn(&O) -> &str,
@@ -33,6 +34,9 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
     minus: impl Fn(&C, &O) -> StateUpdate,
 ) -> StateUpdate {
     active_dialog_window(player, title, |ui| {
+        for i in info {
+            ui.label(None, &i);
+        }
         let mut updates = StateUpdates::new();
         for (i, p) in get_objects(container).iter().enumerate() {
             if show(container, p) {

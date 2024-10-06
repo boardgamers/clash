@@ -40,6 +40,12 @@ pub fn ok_pos(player: &ShownPlayer) -> Vec2 {
         .unwrap_or_else(|| Vec2::new(screen_width() / 2. - 150., screen_height() - 130.))
 }
 
+pub fn ok_only_pos(player: &ShownPlayer) -> Vec2 {
+    small_dialog(player)
+        .then(|| Vec2::new(screen_width() / 4.0 - 75., 190.))
+        .unwrap_or_else(|| Vec2::new(screen_width() / 2. - 75., screen_height() - 130.))
+}
+
 fn small_dialog(player: &ShownPlayer) -> bool {
     player.active_dialog.is_map_dialog() || player.pending_update
 }

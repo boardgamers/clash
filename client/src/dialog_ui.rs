@@ -1,5 +1,5 @@
 use crate::client_state::{PendingUpdate, ShownPlayer, StateUpdate};
-use crate::layout_ui::{cancel_pos, ok_pos};
+use crate::layout_ui::{cancel_pos, ok_only_pos, ok_pos};
 use macroquad::hash;
 use macroquad::math::{vec2, Vec2};
 use macroquad::prelude::screen_height;
@@ -68,16 +68,21 @@ where
 
 pub fn show_pending_update(update: &PendingUpdate, player: &ShownPlayer) -> StateUpdate {
     active_dialog_window(player, "Are you sure?", |ui| {
-        if let Some(ref message) = update.info {
-            ui.label(None, message);
+        for i in &update.info {
+            ui.label(None, i);
         }
         if !update.warning.is_empty() {
             ui.label(None, &format!("Warning: {}", update.warning.join(", ")));
         }
-        if ui.button(ok_pos(player), "OK") {
+        if update.can_confirm && ui.button(ok_pos(player), "OK") {
             return StateUpdate::ResolvePendingUpdate(true);
         }
-        if ui.button(cancel_pos(player), "Cancel") {
+        let p = if update.can_confirm {
+            cancel_pos(player)
+        } else {
+            ok_only_pos(player)
+        };
+        if ui.button(p, "Cancel") {
             return StateUpdate::ResolvePendingUpdate(false);
         }
         StateUpdate::None

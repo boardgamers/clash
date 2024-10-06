@@ -98,7 +98,8 @@ impl ActiveDialog {
 pub struct PendingUpdate {
     pub action: Action,
     pub warning: Vec<String>,
-    pub info: Option<String>,
+    pub info: Vec<String>,
+    pub can_confirm: bool,
 }
 
 #[must_use]
@@ -128,9 +129,28 @@ impl StateUpdate {
             StateUpdate::ExecuteWithWarning(PendingUpdate {
                 action,
                 warning,
-                info: None,
+                info: vec![],
+                can_confirm: true,
             })
         }
+    }
+
+    pub fn execute_with_confirm(info: Vec<String>, action: Action) -> StateUpdate {
+        StateUpdate::ExecuteWithWarning(PendingUpdate {
+            action,
+            warning: vec![],
+            info,
+            can_confirm: true,
+        })
+    }
+
+    pub fn execute_with_cancel(info: Vec<String>) -> StateUpdate {
+        StateUpdate::ExecuteWithWarning(PendingUpdate {
+            action: Action::Undo, // never used
+            warning: vec![],
+            info,
+            can_confirm: false,
+        })
     }
 
     pub fn execute_activation(action: Action, warning: Vec<String>, city: &City) -> StateUpdate {
@@ -285,6 +305,7 @@ impl State {
                     GameSyncRequest::ExecuteAction(action)
                 } else {
                     self.pending_update = None;
+                    self.close_dialog();
                     GameSyncRequest::None
                 }
             }

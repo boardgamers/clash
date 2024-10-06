@@ -8,6 +8,7 @@ use server::position::Position;
 use server::unit::{MovementAction, Unit};
 
 use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
+use crate::layout_ui::ok_pos;
 use crate::unit_ui;
 use crate::unit_ui::UnitSelection;
 
@@ -28,7 +29,7 @@ pub fn move_units_dialog(game: &Game, sel: &MoveSelection, player: &ShownPlayer)
                 panic!("game is not in movement")
             };
 
-            if ui.button(None, "End Move Units") {
+            if ui.button(ok_pos(player), "End Move Units") {
                 StateUpdate::execute_with_warning(
                     Action::Movement(MovementAction::Stop),
                     if movement_actions_left > 0 {

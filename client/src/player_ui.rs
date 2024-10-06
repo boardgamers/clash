@@ -230,7 +230,7 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
     let d = state.game_state_dialog(game, &ActiveDialog::None);
     if !matches!(d, ActiveDialog::None)
         && d.title() != state.active_dialog.title()
-        && bottom_left_button(vec2(0., -50.), &format!("Back to {}", d.title()))
+        && bottom_left_button(vec2(0., -200.), &format!("Back to {}", d.title()))
     {
         return StateUpdate::OpenDialog(d);
     }
