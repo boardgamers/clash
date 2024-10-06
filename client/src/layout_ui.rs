@@ -11,6 +11,14 @@ pub fn top_center_label(p: Vec2, label: &str) {
     root_ui().label(vec2(screen_width() / 2.0, 0.) + p, label);
 }
 
+pub fn right_center_label(p: Vec2, label: &str) {
+    root_ui().label(vec2(screen_width(), screen_height() / 2.0) + p, label);
+}
+
+pub fn right_center_button(p: Vec2, label: &str) -> bool {
+    root_ui().button(vec2(screen_width(), screen_height() / 2.0) + p, label)
+}
+
 pub fn bottom_left_button(p: Vec2, label: &str) -> bool {
     root_ui().button(vec2(0., screen_height()) + p, label)
 }

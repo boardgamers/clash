@@ -23,13 +23,13 @@ pub fn dialog<F>(player: &ShownPlayer, title: &str, f: F) -> StateUpdate
 where
     F: FnOnce(&mut Ui) -> StateUpdate,
 {
-    let width = screen_width() - 40.;
+    let width = screen_width() - 20.;
     let size = if player.active_dialog.is_map_dialog() {
-        vec2(width / 2.0, 100.)
+        vec2(width / 2.0, 270.)
     } else {
-        vec2(width, screen_height() - 100.)
+        vec2(width, screen_height() - 40.)
     };
-    custom_dialog(title, vec2(10., 70.), size, f)
+    custom_dialog(title, vec2(10., 10.), size, f)
 }
 
 pub fn custom_dialog<F>(title: &str, position: Vec2, size: Vec2, f: F) -> StateUpdate

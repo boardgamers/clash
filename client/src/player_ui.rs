@@ -1,7 +1,7 @@
 use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
-use crate::layout_ui::{bottom_left_button, bottom_right_button, top_center_label, top_left_label};
+use crate::layout_ui::{bottom_left_button, bottom_right_button, right_center_button, right_center_label, top_center_label, top_left_label};
 use macroquad::math::vec2;
 use macroquad::prelude::*;
 use macroquad::ui::{root_ui, Ui};
@@ -15,30 +15,30 @@ pub fn show_globals(game: &Game, player: &ShownPlayer) -> StateUpdate {
     show_top_left(game);
     show_top_center(game, player);
 
-    // let y = 400.;
-    //
-    // let i = game
-    //     .players
-    //     .iter()
-    //     .position(|p| p.index == game.starting_player_index)
-    //     .unwrap();
-    // let mut players: Vec<_> = game.players.iter().map(|p| p.index).collect();
-    // players.rotate_left(i);
-    //
-    // for (i, &p) in players.iter().enumerate() {
-    //     let p = game.get_player(p);
-    //     let shown = player.index == p.index;
-    //     let prefix = if shown { "* " } else { "" };
-    //     let suffix = &player_suffix(game, p);
-    //     let name = p.get_name();
-    //     let x = i as f32 * 500.;
-    //     let label = format!("{prefix}{name}{suffix}");
-    //     if shown {
-    //         (&mut root_ui()).label(vec2(x, y), &label);
-    //     } else if (&mut root_ui()).button(vec2(x, y), label) {
-    //         return StateUpdate::SetShownPlayer(p.index);
-    //     }
-    // }
+    let mut y = -100.;
+    
+    let i = game
+        .players
+        .iter()
+        .position(|p| p.index == game.starting_player_index)
+        .unwrap();
+    let mut players: Vec<_> = game.players.iter().map(|p| p.index).collect();
+    players.rotate_left(i);
+    
+    for (i, &p) in players.iter().enumerate() {
+        let p = game.get_player(p);
+        let shown = player.index == p.index;
+        let prefix = if shown { "* " } else { "" };
+        let name = p.get_name();
+        let x = -200.;
+        let label = format!("{prefix}{name}");
+        if shown {
+            right_center_label(vec2(x, y), &label);
+        } else if right_center_button(vec2(x, y), &label) {
+            return StateUpdate::SetShownPlayer(p.index);
+        }
+        y += 40.;
+    }
 
     StateUpdate::None
 }
@@ -174,19 +174,19 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
         state.offset = OFFSET;
         return StateUpdate::None;
     }
-    if bottom_left_button(vec2(210., -50.), "L") {
+    if bottom_left_button(vec2(210., -80.), "L") {
         state.offset += vec2(-0.1, 0.);
         return StateUpdate::None;
     }
-    if bottom_left_button(vec2(280., -50.), "R") {
+    if bottom_left_button(vec2(310., -80.), "R") {
         state.offset += vec2(0.1, 0.);
         return StateUpdate::None;
     }
-    if bottom_left_button(vec2(350., -50.), "U") {
+    if bottom_left_button(vec2(260., -110.), "U") {
         state.offset += vec2(0., 0.1);
         return StateUpdate::None;
     }
-    if bottom_left_button(vec2(420., -50.), "D") {
+    if bottom_left_button(vec2(260., -50.), "D") {
         state.offset += vec2(0., -0.1);
         return StateUpdate::None;
     }
@@ -215,7 +215,7 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
     if player.can_play_action && bottom_left_button(vec2(0., -170.), "Move") {
         return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
     }
-    if player.can_play_action && bottom_left_button(vec2(0., -140.), "Ind. Hap.") {
+    if player.can_play_action && bottom_left_button(vec2(0., -140.), "Inc. Hap.") {
         return start_increase_happiness(game, &player);
     }
     if bottom_left_button(vec2(0., -110.), "Advances") {
