@@ -132,6 +132,7 @@ pub fn show_generic_tile_menu(
     additional: impl FnOnce(&mut Ui) -> StateUpdate,
 ) -> StateUpdate {
     dialog(
+        player,
         &format!(
             "{}/{}",
             position,

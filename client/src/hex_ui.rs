@@ -2,7 +2,7 @@ use std::f32::consts::PI;
 
 use hex2d::{Coordinate, Spacing};
 use macroquad::color::Color;
-use macroquad::math::{f32, i32, vec2};
+use macroquad::math::{f32, i32, vec2, Vec2};
 use macroquad::prelude::{
     draw_text, draw_texture_ex, DrawTextureParams, Rect, Texture2D, BLACK, DARKGRAY, WHITE,
 };
@@ -49,8 +49,8 @@ pub fn draw_hex_center_text(p: Position, text: &str) {
     draw_text(text, c.x - 5., c.y + 6., 25.0, BLACK);
 }
 
-pub fn pixel_to_coordinate(x: f32, y: f32) -> Coordinate {
-    let p = Point::new(x, y).to_game();
+pub fn pixel_to_coordinate(p: Vec2) -> Coordinate {
+    let p = Point::new(p.x, p.y).to_game();
     Coordinate::from_pixel(p.x, p.y, SPACING)
 }
 
@@ -89,5 +89,5 @@ impl Point {
     }
 }
 
-const TOP_BORDER: f32 = 130.0;
-const LEFT_BORDER: f32 = 90.0;
+const TOP_BORDER: f32 = 0.0;
+const LEFT_BORDER: f32 = 0.0;

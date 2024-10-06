@@ -1,15 +1,16 @@
+use crate::client_state::{PendingUpdate, ShownPlayer, StateUpdate};
 use macroquad::hash;
 use macroquad::math::{vec2, Vec2};
+use macroquad::prelude::screen_height;
 use macroquad::ui::widgets::Window;
 use macroquad::ui::{root_ui, Ui};
-
-use crate::client_state::{PendingUpdate, ShownPlayer, StateUpdate};
+use macroquad::window::screen_width;
 
 pub fn active_dialog_window<F>(player: &ShownPlayer, title: &str, f: F) -> StateUpdate
 where
     F: FnOnce(&mut Ui) -> StateUpdate,
 {
-    dialog(title, |ui| {
+    dialog(player, title, |ui| {
         if player.can_control {
             f(ui)
         } else {
@@ -18,18 +19,17 @@ where
     })
 }
 
-pub fn dialog<F>(title: &str, f: F) -> StateUpdate
+pub fn dialog<F>(player: &ShownPlayer, title: &str, f: F) -> StateUpdate
 where
     F: FnOnce(&mut Ui) -> StateUpdate,
 {
-    custom_dialog(title, vec2(1100., 400.), vec2(800., 350.), f)
-}
-
-pub fn full_dialog<F>(title: &str, f: F) -> StateUpdate
-where
-    F: FnOnce(&mut Ui) -> StateUpdate,
-{
-    custom_dialog(title, vec2(100., 100.), vec2(1600., 800.), f)
+    let width = screen_width() - 20.;
+    let size = if player.active_dialog.is_map_dialog() {
+        vec2(width / 2.0, 100.)
+    } else {
+        vec2(width, screen_height() - 100.)
+    };
+    custom_dialog(title, vec2(10., 70.), size, f)
 }
 
 pub fn custom_dialog<F>(title: &str, position: Vec2, size: Vec2, f: F) -> StateUpdate
@@ -42,10 +42,7 @@ where
         .label(title)
         .close_button(true);
 
-    let ui = &mut root_ui();
-    let token = window.begin(ui);
-    let update = f(ui);
-    let open = token.end(ui);
+    let (update, open) = show_window(window, f);
     if matches!(update, StateUpdate::None) {
         if open {
             StateUpdate::None
@@ -55,6 +52,17 @@ where
     } else {
         update
     }
+}
+
+fn show_window<F, R>(window: Window, f: F) -> (R, bool)
+where
+    F: FnOnce(&mut Ui) -> R,
+{
+    let ui = &mut root_ui();
+    let token = window.begin(ui);
+    let update = f(ui);
+    let open = token.end(ui);
+    (update, open)
 }
 
 pub fn show_pending_update(update: &PendingUpdate, player: &ShownPlayer) -> StateUpdate {

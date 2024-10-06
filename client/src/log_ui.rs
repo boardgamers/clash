@@ -1,11 +1,11 @@
 use macroquad::ui::Ui;
 use server::game::Game;
 
-use crate::client_state::StateUpdate;
+use crate::client_state::{ShownPlayer, StateUpdate};
 use crate::dialog_ui::dialog;
 
-pub fn show_log(game: &Game) -> StateUpdate {
-    dialog("Log", |ui| {
+pub fn show_log(game: &Game, player: &ShownPlayer) -> StateUpdate {
+    dialog(player, "Log", |ui| {
         game.log.iter().for_each(|l| {
             multiline(ui, l);
         });

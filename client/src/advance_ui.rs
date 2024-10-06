@@ -15,7 +15,7 @@ use server::resource_pile::AdvancePaymentOptions;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
-use crate::dialog_ui::full_dialog;
+use crate::dialog_ui::dialog;
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::HasCountSelectableObject;
@@ -101,7 +101,7 @@ pub fn show_generic_advance_menu(
     player: &ShownPlayer,
     new_update: impl Fn(&str) -> StateUpdate,
 ) -> StateUpdate {
-    full_dialog(title, |ui| {
+    dialog(player, title, |ui| {
         let p = player.get(game);
         let mut update = StateUpdate::None;
         let mut current_group = None;

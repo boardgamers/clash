@@ -1,6 +1,5 @@
 use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
-use macroquad::prelude::{clear_background, vec2, WHITE};
-use macroquad::ui::root_ui;
+use macroquad::prelude::*;
 
 use server::action::Action;
 use server::game::Game;
@@ -12,13 +11,11 @@ use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, StateUp
 use crate::collect_ui::{click_collect_option, collect_resources_dialog};
 use crate::construct_ui::pay_construction_dialog;
 use crate::dialog_ui::active_dialog_window;
-use crate::happiness_ui::{
-    add_increase_happiness, increase_happiness_menu, show_increase_happiness,
-};
+use crate::happiness_ui::{add_increase_happiness, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
 use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
-use crate::player_ui::{show_global_controls, show_globals, show_player_status, show_wonders};
+use crate::player_ui::{show_global_controls, show_globals};
 use crate::{combat_ui, dialog_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui};
 
 pub async fn init(features: &Features) -> State {
@@ -45,40 +42,24 @@ pub fn render_and_update(
     state.update(game, update)
 }
 
-fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
-    let player_index = game.active_player();
+fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     let player = &state.shown_player(game);
     clear_background(WHITE);
 
-    draw_map(game, state);
+    state.camera = Camera2D {
+        zoom: vec2(state.zoom, state.zoom * screen_width() / screen_height()),
+        offset: state.offset,
+        ..Default::default()
+    };
+    set_camera(&state.camera);
+
+    if matches!(state.active_dialog, ActiveDialog::None) || state.active_dialog.is_map_dialog() {
+        draw_map(game, state);
+    }
     let mut updates = StateUpdates::new();
     let update = show_globals(game, player);
     updates.add(update);
-    show_player_status(game, player_index);
-    show_wonders(game, player_index);
 
-    if root_ui().button(vec2(1200., 100.), "Advances") {
-        return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
-    };
-    if root_ui().button(vec2(1200., 130.), "Log") {
-        return StateUpdate::OpenDialog(ActiveDialog::Log);
-    };
-    let d = state.game_state_dialog(game, &ActiveDialog::None);
-    if !matches!(d, ActiveDialog::None)
-        && d.title() != state.active_dialog.title()
-        && root_ui().button(vec2(1200., 160.), format!("Back to {}", d.title()))
-    {
-        return StateUpdate::OpenDialog(d);
-    }
-
-    if features.import_export && player.can_control {
-        if root_ui().button(vec2(1200., 290.), "Import") {
-            return StateUpdate::Import;
-        };
-        if root_ui().button(vec2(1250., 290.), "Export") {
-            return StateUpdate::Export;
-        };
-    }
     if player.can_control {
         if let Some(u) = &state.pending_update {
             updates.add(dialog_ui::show_pending_update(u, player));
@@ -86,14 +67,11 @@ fn render(game: &Game, state: &State, features: &Features) -> StateUpdate {
         }
     }
 
-    if player.can_play_action {
-        updates.add(show_increase_happiness(game, player_index));
-    }
-    updates.add(show_global_controls(game, state));
+    updates.add(show_global_controls(game, state, features));
 
     updates.add(match &state.active_dialog {
         ActiveDialog::None => StateUpdate::None,
-        ActiveDialog::Log => show_log(game),
+        ActiveDialog::Log => show_log(game, player),
         ActiveDialog::TileMenu(p) => show_tile_menu(game, *p, player),
         ActiveDialog::WaitingForUpdate => {
             active_dialog_window(player, "Waiting for update", |_ui| StateUpdate::None)
@@ -143,8 +121,9 @@ pub fn try_click(game: &Game, state: &State, player: &ShownPlayer) -> StateUpdat
         return StateUpdate::None;
     }
     let (x, y) = mouse_position();
-
-    let pos = Position::from_coordinate(pixel_to_coordinate(x, y));
+    let pos = Position::from_coordinate(pixel_to_coordinate(
+        state.camera.screen_to_world(vec2(x, y)),
+    ));
     if !game.map.tiles.contains_key(&pos) {
         return StateUpdate::None;
     }
