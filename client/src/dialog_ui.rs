@@ -1,4 +1,4 @@
-use crate::client_state::{PendingUpdate, ShownPlayer, State, StateUpdate};
+use crate::client_state::{PendingUpdate, ShownPlayer, StateUpdate};
 use macroquad::hash;
 use macroquad::math::{vec2, Vec2};
 use macroquad::prelude::screen_height;
