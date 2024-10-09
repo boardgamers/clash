@@ -6,7 +6,7 @@ module.exports = {
     }, resolve: {
         fallback: {"events": require.resolve("events/")}
     }, optimization: {
-        minimize: true
+        minimize: false
     },
 };
 
