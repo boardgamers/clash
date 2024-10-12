@@ -8,6 +8,7 @@ use client::client_state::State;
 use server::action::Action;
 use std::panic;
 use wasm_bindgen::prelude::*;
+use web_sys;
 
 #[wasm_bindgen]
 extern "C" {
@@ -15,11 +16,9 @@ extern "C" {
     fn log(s: &str);
 }
 
-#[wasm_bindgen(module = "/js/src/control.js")]
+#[wasm_bindgen]
 extern "C" {
     type Control;
-
-    fn get_control() -> Control;
 
     #[wasm_bindgen(method)]
     fn receive_state(this: &Control) -> JsValue;
@@ -62,7 +61,7 @@ impl RemoteClient {
     pub async fn start() {
         log("starting client");
         panic::set_hook(Box::new(console_error_panic_hook::hook));
-        let control = get_control();
+        let control = web_sys::window().unwrap().get("clash_control").unwrap().unchecked_into::<Control>();
         let features = Features {
             import_export: false,
             assets_url: control.assets_url(),
