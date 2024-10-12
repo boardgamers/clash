@@ -53,9 +53,6 @@ export class Control extends EventEmitter {
     }
 }
 
-export function get_control() {
-    return window.clash_control;
-}
 
 
 
