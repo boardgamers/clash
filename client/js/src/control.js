@@ -45,7 +45,7 @@ export class Control extends EventEmitter {
     }
 
     get canvas_size() {
-        return document.getElementById("canvas").getBoundingClientRect();
+        return document.getElementById("glcanvas").getBoundingClientRect();
     }
 
     get assets_url() {
