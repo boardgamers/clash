@@ -2,7 +2,8 @@
 
 use client::client::{init, render_and_update, Features, GameSyncRequest, GameSyncResult};
 use macroquad::miniquad::window::set_window_size;
-use macroquad::prelude::next_frame;
+use macroquad::prelude::{next_frame, screen_width, vec2};
+use macroquad::window::screen_height;
 use server::city::City;
 use server::game::{Game, GameData};
 use server::leader::Leader;
@@ -39,6 +40,7 @@ pub async fn run(mut game: Game, features: &Features) {
     state.show_player = game.active_player();
     loop {
         state.control_player = Some(game.active_player());
+        state.screen_size = vec2(screen_width(), screen_height());
 
         let message = render_and_update(&game, &mut state, &sync_result, features);
         sync_result = GameSyncResult::None;
