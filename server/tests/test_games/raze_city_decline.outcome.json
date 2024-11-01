@@ -1,5 +1,7 @@
 {
-  "state": "Playing",
+  "state": {
+    "StatusPhase": "RaseSize1City"
+  },
   "players": [
     {
       "name": null,
@@ -9,7 +11,7 @@
         "wood": 6,
         "ore": 6,
         "ideas": 5,
-        "gold": 7,
+        "gold": 6,
         "mood_tokens": 7,
         "culture_tokens": 7
       },
@@ -23,6 +25,24 @@
         "culture_tokens": 7
       },
       "cities": [
+        {
+          "city_pieces": {
+            "academy": null,
+            "market": null,
+            "obelisk": null,
+            "observatory": null,
+            "fortress": null,
+            "port": null,
+            "temple": null,
+            "wonders": []
+          },
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "player_index": 0,
+          "position": "A1",
+          "port_position": null
+        },
         {
           "city_pieces": {
             "academy": null,
@@ -119,7 +139,7 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "available_settlements": 8,
+      "available_settlements": 7,
       "available_buildings": {
         "academies": 5,
         "markets": 5,
@@ -381,7 +401,7 @@
       ]
     ]
   },
-  "starting_player_index": 1,
+  "starting_player_index": 0,
   "current_player_index": 1,
   "action_log": [
     {
@@ -396,21 +416,11 @@
     },
     {
       "StatusPhase": {
-        "RaseSize1City": "A1"
-      }
-    },
-    {
-      "StatusPhase": {
         "RaseSize1City": null
-      }
-    },
-    {
-      "StatusPhase": {
-        "DetermineFirstPlayer": 1
       }
     }
   ],
-  "action_log_index": 5,
+  "action_log_index": 3,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -437,20 +447,15 @@
     "It's Player2's turn",
     "Player2 advanced Philosophy for free",
     "It's Player1's turn",
-    "Player1 razed the city at A1 and gained 1 gold",
-    "It's Player2's turn",
-    "Player2 did not rase a city",
-    "It's Player1's turn",
-    "Player1 choose Player2 as the new starting player",
-    "Age 2 has started",
-    "Round 1/3"
+    "Player1 did not rase a city",
+    "It's Player2's turn"
   ],
-  "undo_limit": 5,
+  "undo_limit": 3,
   "played_once_per_turn_actions": [],
   "actions_left": 3,
   "successful_cultural_influence": false,
   "round": 1,
-  "age": 2,
+  "age": 1,
   "messages": [
     "The game has started"
   ],

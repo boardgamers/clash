@@ -165,7 +165,7 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
             format!(
                 "{player_name} {}",
                 match city {
-                    Some(city) => format!("rased the city at {city} and gained 1 gold"),
+                    Some(city) => format!("razed the city at {city} and gained 1 gold"),
                     None => String::from("did not rase a city"),
                 }
             )
