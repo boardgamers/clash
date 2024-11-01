@@ -44,6 +44,10 @@ export class Control extends EventEmitter {
         this.emit("ready");
     }
 
+    get canvas_size() {
+        return document.getElementById("canvas").getBoundingClientRect();
+    }
+
     get assets_url() {
         return this._assets_url;
     }

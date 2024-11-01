@@ -5,15 +5,26 @@ use macroquad::prelude::next_frame;
 extern crate console_error_panic_hook;
 use client::client::{init, render_and_update, Features, GameSyncRequest, GameSyncResult};
 use client::client_state::State;
+use macroquad::math::vec2;
 use server::action::Action;
 use std::panic;
 use wasm_bindgen::prelude::*;
-use web_sys;
 
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(js_namespace = console)]
     fn log(s: &str);
+}
+
+#[wasm_bindgen]
+extern "C" {
+    type Rect;
+    
+    #[wasm_bindgen(method, getter)]
+    fn width(this: &Rect) -> f32;
+    
+    #[wasm_bindgen(method, getter)]
+    fn height(this: &Rect) -> f32;
 }
 
 #[wasm_bindgen]
@@ -34,6 +45,9 @@ extern "C" {
 
     #[wasm_bindgen(method, getter)]
     fn assets_url(this: &Control) -> String;
+
+    #[wasm_bindgen(method, getter)]
+    fn canvas_size(this: &Control) -> Rect;
 }
 
 enum SyncState {
@@ -61,7 +75,11 @@ impl RemoteClient {
     pub async fn start() {
         log("starting client");
         panic::set_hook(Box::new(console_error_panic_hook::hook));
-        let control = web_sys::window().unwrap().get("clash_control").unwrap().unchecked_into::<Control>();
+        let control = web_sys::window()
+            .unwrap()
+            .get("clash_control")
+            .unwrap()
+            .unchecked_into::<Control>();
         let features = Features {
             import_export: false,
             assets_url: control.assets_url(),
@@ -87,6 +105,12 @@ impl RemoteClient {
                 self.state.control_player = Some(p as usize);
                 self.state.show_player = p as usize;
             }
+
+            let s = self.control.canvas_size();
+            self.state.screen_size = vec2(
+                s.width(),
+                s.height(),
+            );
 
             let sync_result = self.update_state();
 

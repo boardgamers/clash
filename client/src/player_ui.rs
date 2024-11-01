@@ -36,8 +36,8 @@ pub fn show_globals(game: &Game, player: &ShownPlayer) -> StateUpdate {
         let x = -200.;
         let label = format!("{prefix}{name}");
         if shown {
-            right_center_label(vec2(x, y), &label);
-        } else if right_center_button(vec2(x, y), &label) {
+            right_center_label(player, vec2(x, y), &label);
+        } else if right_center_button(player, vec2(x, y), &label) {
             return StateUpdate::SetShownPlayer(p.index);
         }
         y += 40.;
@@ -49,17 +49,38 @@ pub fn show_globals(game: &Game, player: &ShownPlayer) -> StateUpdate {
 fn show_top_center(game: &Game, player: &ShownPlayer) {
     let p = game.get_player(player.index);
 
-    top_center_label(vec2(-400., 0.), &resource_ui(p, "Fd", |r| r.food));
-    top_center_label(vec2(-320., 0.), &resource_ui(p, "Wd", |r| r.wood));
-    top_center_label(vec2(-240., 0.), &resource_ui(p, "Ore", |r| r.ore));
-    top_center_label(vec2(-160., 0.), &resource_ui(p, "Id", |r| r.ideas));
-    top_center_label(vec2(-80., 0.), &resource_ui(p, "Gld", |r| r.gold as u32));
-    top_center_label(vec2(0., 0.), &resource_ui(p, "Md", |r| r.mood_tokens));
-    top_center_label(vec2(80., 0.), &resource_ui(p, "Cul", |r| r.culture_tokens));
-
-    top_center_label(vec2(170., 0.), &format!("Civ {}", p.civilization.name));
-    top_center_label(vec2(250., 0.), &format!("VP {}", p.victory_points()));
+    top_center_label(player, vec2(-400., 0.), &resource_ui(p, "Fd", |r| r.food));
+    top_center_label(player, vec2(-320., 0.), &resource_ui(p, "Wd", |r| r.wood));
+    top_center_label(player, vec2(-240., 0.), &resource_ui(p, "Ore", |r| r.ore));
+    top_center_label(player, vec2(-160., 0.), &resource_ui(p, "Id", |r| r.ideas));
     top_center_label(
+        player,
+        vec2(-80., 0.),
+        &resource_ui(p, "Gld", |r| r.gold as u32),
+    );
+    top_center_label(
+        player,
+        vec2(0., 0.),
+        &resource_ui(p, "Md", |r| r.mood_tokens),
+    );
+    top_center_label(
+        player,
+        vec2(80., 0.),
+        &resource_ui(p, "Cul", |r| r.culture_tokens),
+    );
+
+    top_center_label(
+        player,
+        vec2(170., 0.),
+        &format!("Civ {}", p.civilization.name),
+    );
+    top_center_label(
+        player,
+        vec2(250., 0.),
+        &format!("VP {}", p.victory_points()),
+    );
+    top_center_label(
+        player,
         vec2(300., 0.),
         &format!(
             "Ldr {}",
@@ -162,47 +183,47 @@ fn resource_ui(player: &Player, name: &str, f: impl Fn(&ResourcePile) -> u32) ->
 }
 
 pub fn show_global_controls(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
-    let player = state.shown_player(game);
+    let player = &state.shown_player(game);
 
-    if bottom_left_button(vec2(0., -50.), "+") {
+    if bottom_left_button(player, vec2(0., -50.), "+") {
         state.zoom *= 1.1;
         return StateUpdate::None;
     }
-    if bottom_left_button(vec2(70., -50.), "-") {
+    if bottom_left_button(player, vec2(70., -50.), "-") {
         state.zoom /= 1.1;
         return StateUpdate::None;
     }
-    if bottom_left_button(vec2(140., -50.), "0") {
+    if bottom_left_button(player, vec2(140., -50.), "0") {
         state.zoom = ZOOM;
         state.offset = OFFSET;
         return StateUpdate::None;
     }
-    if bottom_left_button(vec2(210., -80.), "") {
+    if bottom_left_button(player, vec2(210., -80.), "") {
         state.offset += vec2(-0.1, 0.);
         return StateUpdate::None;
     }
-    if bottom_left_button(vec2(310., -80.), "") {
+    if bottom_left_button(player, vec2(310., -80.), "") {
         state.offset += vec2(0.1, 0.);
         return StateUpdate::None;
     }
-    if bottom_left_button(vec2(260., -110.), "") {
+    if bottom_left_button(player, vec2(260., -110.), "") {
         state.offset += vec2(0., 0.1);
         return StateUpdate::None;
     }
-    if bottom_left_button(vec2(260., -50.), "") {
+    if bottom_left_button(player, vec2(260., -50.), "") {
         state.offset += vec2(0., -0.1);
         return StateUpdate::None;
     }
 
-    if game.can_undo() && bottom_right_button(vec2(-400., -50.), "Undo") {
+    if game.can_undo() && bottom_right_button(player, vec2(-400., -50.), "Undo") {
         return StateUpdate::Execute(Action::Undo);
     }
-    if game.can_redo() && bottom_right_button(vec2(-300., -50.), "Redo") {
+    if game.can_redo() && bottom_right_button(player, vec2(-300., -50.), "Redo") {
         return StateUpdate::Execute(Action::Redo);
     }
     if player.can_control
         && matches!(game.state, GameState::Playing)
-        && bottom_right_button(vec2(-180., -50.), "End Turn")
+        && bottom_right_button(player, vec2(-180., -50.), "End Turn")
     {
         let left = game.actions_left;
         return StateUpdate::execute_with_warning(
@@ -215,31 +236,31 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
         );
     }
 
-    if player.can_play_action && bottom_left_button(vec2(0., -170.), "Move") {
+    if player.can_play_action && bottom_left_button(player, vec2(0., -170.), "Move") {
         return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
     }
-    if player.can_play_action && bottom_left_button(vec2(0., -140.), "Inc. Hap.") {
-        return start_increase_happiness(game, &player);
+    if player.can_play_action && bottom_left_button(player, vec2(0., -140.), "Inc. Hap.") {
+        return start_increase_happiness(game, player);
     }
-    if bottom_left_button(vec2(0., -110.), "Advances") {
+    if bottom_left_button(player, vec2(0., -110.), "Advances") {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     };
-    if bottom_left_button(vec2(0., -80.), "Log") {
+    if bottom_left_button(player, vec2(0., -80.), "Log") {
         return StateUpdate::OpenDialog(ActiveDialog::Log);
     };
     let d = state.game_state_dialog(game, &ActiveDialog::None);
     if !matches!(d, ActiveDialog::None)
         && d.title() != state.active_dialog.title()
-        && bottom_left_button(vec2(0., -200.), &format!("Back to {}", d.title()))
+        && bottom_left_button(player, vec2(0., -200.), &format!("Back to {}", d.title()))
     {
         return StateUpdate::OpenDialog(d);
     }
 
     if features.import_export {
-        if bottom_right_button(vec2(-300., -100.), "Import") {
+        if bottom_right_button(player, vec2(-300., -100.), "Import") {
             return StateUpdate::Import;
         };
-        if bottom_right_button(vec2(-150., -100.), "Export") {
+        if bottom_right_button(player, vec2(-150., -100.), "Export") {
             return StateUpdate::Export;
         };
     }
