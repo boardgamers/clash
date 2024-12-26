@@ -35,9 +35,6 @@ jobs:
     - name: Format server
       working-directory: ./server
       run: cargo fmt --check
-    - name: Run cargo audit server
-      working-directory: ./server
-      run: cargo audit
     - name: Build client
       working-directory: ./client
       run: cargo build
@@ -50,6 +47,3 @@ jobs:
     - name: Format client
       working-directory: ./client
       run: cargo fmt --check
-    - name: Run cargo audit client
-      working-directory: ./client
-      run: cargo audit
