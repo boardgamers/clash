@@ -9,7 +9,7 @@ if [ -z "$VERSION" ]; then
 fi
 
 echo "Building server..."
-./scripts/build-wasm-server.sh --release
+./scripts/build-remote-server.sh --release
 
 echo "Publishing server..."
 pushd server
