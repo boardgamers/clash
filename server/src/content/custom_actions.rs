@@ -78,7 +78,7 @@ impl CustomAction {
     #[must_use]
     pub fn format_log_item(&self, _game: &Game, player_name: &str) -> String {
         match self {
-            CustomAction::ConstructWonder { city_position, wonder, payment } => format!("{player_name} payed {payment} to construct the {wonder} wonder in the city at {city_position}"),
+            CustomAction::ConstructWonder { city_position, wonder, payment } => format!("{player_name} paid {payment} to construct the {wonder} wonder in the city at {city_position}"),
         }
     }
 }

@@ -9,22 +9,10 @@ use std::{
 use server::action::CombatAction;
 use server::game::{CulturalInfluenceResolution, GameState};
 use server::status_phase::{ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction};
-use server::{
-    action::Action,
-    city::{City, MoodState::*},
-    city_pieces::{
-        AvailableCityPieces,
-        Building::{self, *},
-    },
-    content::custom_actions::CustomAction::*,
-    game::Game,
-    game_api,
-    map::Terrain::*,
-    playing_actions::PlayingAction::*,
-    position::Position,
-    resource_pile::ResourcePile,
-    unit::{MovementAction::*, UnitType::*},
-};
+use server::{action::Action, city::{City, MoodState::*}, city_pieces::{
+    AvailableCityPieces,
+    Building::{self, *},
+}, content::custom_actions::CustomAction::*, game::Game, game_api, map::Terrain::*, playing_actions, playing_actions::PlayingAction::*, position::Position, resource_pile::ResourcePile, unit::{MovementAction::*, UnitType::*}};
 
 #[test]
 fn basic_actions() {
@@ -71,13 +59,13 @@ fn basic_actions() {
         .cities
         .push(City::new(0, Position::new(0, 2)));
 
-    let construct_action = Action::Playing(Construct {
+    let construct_action = Action::Playing(Construct(playing_actions::Construct{
         city_position,
         city_piece: Building::Observatory,
         payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
         port_position: None,
         temple_bonus: None,
-    });
+    }));
     let game = game_api::execute_action(game, construct_action, 0);
     let player = &game.players[0];
 
@@ -592,13 +580,13 @@ fn test_collect() {
 fn test_construct() {
     test_action(
         "construct",
-        Action::Playing(Construct {
+        Action::Playing(Construct(playing_actions::Construct{
             city_position: Position::from_offset("C2"),
             city_piece: Observatory,
             payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
             port_position: None,
             temple_bonus: None,
-        }),
+        })),
         0,
         true,
         false,
@@ -609,13 +597,13 @@ fn test_construct() {
 fn test_construct_port() {
     test_action(
         "construct_port",
-        Action::Playing(Construct {
+        Action::Playing(Construct(playing_actions::Construct{
             city_position: Position::from_offset("A1"),
             city_piece: Port,
             payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
             port_position: Some(Position::from_offset("A2")),
             temple_bonus: None,
-        }),
+        })),
         0,
         true,
         false,
