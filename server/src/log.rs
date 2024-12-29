@@ -144,23 +144,7 @@ fn format_collect_log_item(
     } else {
         String::new()
     };
-    let mood = if player
-        .get_city(city_position)
-        .expect("there should be a city at the given position")
-        .is_activated()
-    {
-        format!(
-            " making it {:?}",
-            player
-                .get_city(city_position)
-                .expect("there should be a city at the given position")
-                .mood_state
-                .clone()
-                - 1
-        )
-    } else {
-        String::new()
-    };
+    let mood = format_mood_change(player, city_position);
     format!("{player_name} collects {res}{total} in the city at {city_position}{mood}")
 }
 
@@ -195,15 +179,25 @@ fn format_construct_log_item(
     let payment = &c.payment;
     let city_position = &c.city_position;
 
+    let mood = format_mood_change(player, *city_position);
+    let temple = if let Some(temple_bonus) = &c.temple_bonus {
+        format!(" and chooses to get {temple_bonus}")
+    } else {
+        String::new()
+    };
+    format!("{player_name} paid {payment} to construct a {city_piece:?} in the city at {city_position}{port_pos}{mood}{temple}")
+}
+
+fn format_mood_change(player: &Player, city_position: Position) -> String {
     let mood = if player
-        .get_city(*city_position)
+        .get_city(city_position)
         .expect("there should be a city at the given position")
         .is_activated()
     {
         format!(
             " making it {:?}",
             player
-                .get_city(*city_position)
+                .get_city(city_position)
                 .expect("there should be a city at the given position")
                 .mood_state
                 .clone()
@@ -212,12 +206,7 @@ fn format_construct_log_item(
     } else {
         String::new()
     };
-    let temple = if let Some(temple_bonus) = &c.temple_bonus {
-        format!(" and chooses to get {temple_bonus}")
-    } else {
-        String::new()
-    };
-    format!("{player_name} paid {payment} to construct a {city_piece:?} in the city at {city_position}{port_pos}{mood}{temple}")
+    mood
 }
 
 fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> String {
