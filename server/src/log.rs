@@ -118,7 +118,7 @@ fn format_collect_log_item(
     player: &Player,
     player_name: &String,
     city_position: Position,
-    collections: &Vec<(Position, ResourcePile)>,
+    collections: &[(Position, ResourcePile)],
 ) -> String {
     let res = utils::format_list(
         &collections
@@ -161,10 +161,7 @@ fn format_collect_log_item(
     } else {
         String::new()
     };
-    format!(
-        "{player_name} collects {}{} in the city at {city_position}{}",
-        res, total, mood
-    )
+    format!("{player_name} collects {res}{total} in the city at {city_position}{mood}")
 }
 
 fn format_construct_log_item(
