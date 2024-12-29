@@ -1,9 +1,8 @@
 #![allow(clippy::pedantic)]
 
+use crate::{game::Game, game_api};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
-
-use crate::{game::Game, game_api};
 extern crate console_error_panic_hook;
 
 #[derive(Serialize, Deserialize)]
@@ -22,25 +21,20 @@ fn from_game(game: Game) -> JsValue {
 
 #[wasm_bindgen]
 pub async fn init(
-    players: JsValue,
+    player_amount: usize,
     _expansions: JsValue,
     _options: JsValue,
-    seed: JsValue,
+    seed: String,
     _creator: JsValue,
 ) -> JsValue {
-    let player_amount = players
-        .as_f64()
-        .expect("number of players should be a number") as usize;
-    let seed = seed.as_string().expect("seed should be a string");
     let game = game_api::init(player_amount, seed);
     from_game(game)
 }
 
 #[wasm_bindgen(js_name = move)]
-pub fn execute_move(game: JsValue, move_data: JsValue, player: JsValue) -> JsValue {
+pub fn execute_move(game: JsValue, move_data: JsValue, player_index: usize) -> JsValue {
     let game = get_game(game);
     let action = serde_wasm_bindgen::from_value(move_data).expect("move should be of type action");
-    let player_index = player.as_f64().expect("player index should be a number") as usize;
     let game = game_api::execute_action(game, action, player_index);
     from_game(game)
 }
@@ -59,9 +53,8 @@ pub fn scores(game: JsValue) -> JsValue {
 }
 
 #[wasm_bindgen(js_name = "dropPlayer")]
-pub async fn drop_player(game: JsValue, player: JsValue) -> JsValue {
+pub async fn drop_player(game: JsValue, player_index: usize) -> JsValue {
     let game = get_game(game);
-    let player_index = player.as_f64().expect("player index should be a number") as usize;
     let game = game_api::drop_player(game, player_index);
     from_game(game)
 }
@@ -92,11 +85,8 @@ pub fn log_slice(game: JsValue, options: JsValue) -> JsValue {
 }
 
 #[wasm_bindgen(js_name = "setPlayerMetaData")]
-pub fn set_player_meta_data(game: JsValue, player_index: JsValue, meta_data: JsValue) -> JsValue {
+pub fn set_player_meta_data(game: JsValue, player_index: usize, meta_data: JsValue) -> JsValue {
     let game = get_game(game);
-    let player_index = player_index
-        .as_f64()
-        .expect("player index should be a number") as usize;
     let name = serde_wasm_bindgen::from_value::<PlayerMetaData>(meta_data)
         .expect("meta data should be of type player meta data")
         .name;
@@ -129,9 +119,8 @@ pub fn factions(game: JsValue) -> JsValue {
 }
 
 #[wasm_bindgen(js_name = "stripSecret")]
-pub fn strip_secret(game: JsValue, player: JsValue) -> JsValue {
+pub fn strip_secret(game: JsValue, player_index: Option<usize>) -> JsValue {
     let game = get_game(game);
-    let player_index = player.as_f64().map(|player_index| player_index as usize);
     let game = game_api::strip_secret(game, player_index);
     from_game(game)
 }

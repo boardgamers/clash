@@ -221,6 +221,7 @@ pub struct ShownPlayer {
     pub can_play_action: bool,
     pub active_dialog: ActiveDialog,
     pub pending_update: bool,
+    pub screen_size: Vec2,
 }
 
 impl ShownPlayer {
@@ -239,6 +240,7 @@ pub struct State {
     pub camera: Camera2D,
     pub zoom: f32,
     pub offset: Vec2,
+    pub screen_size: Vec2,
 }
 
 pub const ZOOM: f32 = 0.001;
@@ -257,6 +259,7 @@ impl State {
             },
             zoom: ZOOM,
             offset: OFFSET,
+            screen_size: vec2(0., 0.),
         }
     }
 
@@ -270,6 +273,7 @@ impl State {
             can_play_action: control && game.state == GameState::Playing && game.actions_left > 0,
             active_dialog: self.active_dialog.clone(),
             pending_update: self.pending_update.is_some(),
+            screen_size: self.screen_size,
         }
     }
 
@@ -374,7 +378,7 @@ impl State {
             GameState::StatusPhase(state) => match state {
                 StatusPhaseState::CompleteObjectives => ActiveDialog::CompleteObjectives,
                 StatusPhaseState::FreeAdvance => ActiveDialog::FreeAdvance,
-                StatusPhaseState::RaseSize1City => ActiveDialog::RazeSize1City,
+                StatusPhaseState::RazeSize1City => ActiveDialog::RazeSize1City,
                 StatusPhaseState::ChangeGovernmentType => ActiveDialog::ChangeGovernmentType,
                 StatusPhaseState::DetermineFirstPlayer => ActiveDialog::DetermineFirstPlayer,
             },

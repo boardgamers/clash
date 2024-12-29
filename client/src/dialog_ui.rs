@@ -2,10 +2,8 @@ use crate::client_state::{PendingUpdate, ShownPlayer, StateUpdate};
 use crate::layout_ui::{cancel_pos, ok_only_pos, ok_pos};
 use macroquad::hash;
 use macroquad::math::{vec2, Vec2};
-use macroquad::prelude::screen_height;
 use macroquad::ui::widgets::Window;
 use macroquad::ui::{root_ui, Ui};
-use macroquad::window::screen_width;
 
 pub fn active_dialog_window<F>(player: &ShownPlayer, title: &str, f: F) -> StateUpdate
 where
@@ -24,11 +22,12 @@ pub fn dialog<F>(player: &ShownPlayer, title: &str, f: F) -> StateUpdate
 where
     F: FnOnce(&mut Ui) -> StateUpdate,
 {
-    let width = screen_width() - 20.;
+    let size = player.screen_size;
+    let width = size.x - 20.;
     let size = if player.active_dialog.is_map_dialog() {
         vec2(width / 2.0, 270.)
     } else {
-        vec2(width, screen_height() - 40.)
+        vec2(width, size.y - 40.)
     };
     custom_dialog(title, vec2(10., 10.), size, f)
 }

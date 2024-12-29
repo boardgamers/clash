@@ -398,12 +398,14 @@
     },
     {
       "StatusPhase": {
-        "RaseSize1City": "A1"
+        "RazeSize1City": {
+          "Position": "A1"
+        }
       }
     },
     {
       "StatusPhase": {
-        "RaseSize1City": null
+        "RazeSize1City": "None"
       }
     }
   ],
@@ -412,8 +414,8 @@
     "The game has started",
     "Age 1 has started",
     "Round 1/3",
-    "Player1 payed 2 ideas to get the Tactics advance",
-    "Player1 payed 1 food, 1 wood and 1 ore to construct a Fortress in the city at C2 making it Angry",
+    "Player1 paid 2 ideas to get the Tactics advance",
+    "Player1 paid 1 food, 1 wood and 1 ore to construct a Fortress in the city at C2 making it Angry",
     "Player1 ended his turn with 1 actions left",
     "It's Player2's turn",
     "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1 and succeeded (rolled 6)",
@@ -434,7 +436,7 @@
     "It's Player2's turn",
     "Player2 advanced Philosophy for free",
     "It's Player1's turn",
-    "Player1 rased the city at A1 and gained 1 gold",
+    "Player1 razed the city at A1 and gained 1 gold",
     "It's Player2's turn",
     "Player2 did not rase a city",
     "It's Player1's turn"

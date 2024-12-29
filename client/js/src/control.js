@@ -44,6 +44,10 @@ export class Control extends EventEmitter {
         this.emit("ready");
     }
 
+    get canvas_size() {
+        return document.getElementById("glcanvas").getBoundingClientRect();
+    }
+
     get assets_url() {
         return this._assets_url;
     }
@@ -53,9 +57,6 @@ export class Control extends EventEmitter {
     }
 }
 
-export function get_control() {
-    return window.clash_control;
-}
 
 
 

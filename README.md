@@ -19,7 +19,7 @@
 
 - `cd server`
 - `cargo install wasm-pack` (if you haven't already)
-- `./build-wasm.sh`
+- `./build-remote-server.sh`
 
 # Notes
 

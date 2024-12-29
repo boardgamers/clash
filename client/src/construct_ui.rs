@@ -10,7 +10,7 @@ use server::city_pieces::Building;
 use server::content::custom_actions::CustomAction;
 use server::game::Game;
 use server::map::{Map, Terrain};
-use server::playing_actions::PlayingAction;
+use server::playing_actions::{Construct, PlayingAction};
 use server::position::Position;
 use server::resource_pile::PaymentOptions;
 use server::unit::UnitType;
@@ -106,13 +106,13 @@ pub fn pay_construction_dialog(
         |cp| cp.payment.get(ResourceType::Discount).selectable.current == 0,
         |cp| match &cp.project {
             ConstructionProject::Building(b, pos) => StateUpdate::execute_activation(
-                Action::Playing(PlayingAction::Construct {
+                Action::Playing(PlayingAction::Construct(Construct {
                     city_position: cp.city_position,
                     city_piece: b.clone(),
                     payment: cp.payment.to_resource_pile(),
                     port_position: *pos,
                     temple_bonus: None,
-                }),
+                })),
                 vec![],
                 game.get_any_city(cp.city_position).unwrap(),
             ),

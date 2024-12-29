@@ -8,7 +8,9 @@ use std::{
 
 use server::action::CombatAction;
 use server::game::{CulturalInfluenceResolution, GameState};
-use server::status_phase::{ChangeGovernmentType, StatusPhaseAction};
+use server::status_phase::{
+    ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction,
+};
 use server::{
     action::Action,
     city::{City, MoodState::*},
@@ -20,6 +22,7 @@ use server::{
     game::Game,
     game_api,
     map::Terrain::*,
+    playing_actions,
     playing_actions::PlayingAction::*,
     position::Position,
     resource_pile::ResourcePile,
@@ -71,13 +74,13 @@ fn basic_actions() {
         .cities
         .push(City::new(0, Position::new(0, 2)));
 
-    let construct_action = Action::Playing(Construct {
+    let construct_action = Action::Playing(Construct(playing_actions::Construct {
         city_position,
         city_piece: Building::Observatory,
         payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
         port_position: None,
         temple_bonus: None,
-    });
+    }));
     let game = game_api::execute_action(game, construct_action, 0);
     let player = &game.players[0];
 
@@ -415,13 +418,15 @@ fn test_action(
     undoable: bool,
     illegal_action_test: bool,
 ) {
+    let a = serde_json::to_string(&action).expect("action should be serializable");
+    let a2 = serde_json::from_str(&a).expect("action should be deserializable");
     let path = game_path(name);
     let original_game =
         fs::read_to_string(path).expect("game file should exist in the test games folder");
     let game = Game::from_data(
         serde_json::from_str(&original_game).expect("the game file should be deserializable"),
     );
-    let game = game_api::execute_action(game, action, player_index);
+    let game = game_api::execute_action(game, a2, player_index);
     if illegal_action_test {
         println!(
             "execute action was successful but should have panicked because the action is illegal"
@@ -590,13 +595,13 @@ fn test_collect() {
 fn test_construct() {
     test_action(
         "construct",
-        Action::Playing(Construct {
+        Action::Playing(Construct(playing_actions::Construct {
             city_position: Position::from_offset("C2"),
             city_piece: Observatory,
             payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
             port_position: None,
             temple_bonus: None,
-        }),
+        })),
         0,
         true,
         false,
@@ -607,13 +612,13 @@ fn test_construct() {
 fn test_construct_port() {
     test_action(
         "construct_port",
-        Action::Playing(Construct {
+        Action::Playing(Construct(playing_actions::Construct {
             city_position: Position::from_offset("A1"),
             city_piece: Port,
             payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
             port_position: Some(Position::from_offset("A2")),
             temple_bonus: None,
-        }),
+        })),
         0,
         true,
         false,
@@ -625,7 +630,7 @@ fn test_construct_port() {
 fn test_wrong_status_phase_action() {
     test_action(
         "illegal_free_advance",
-        Action::StatusPhase(StatusPhaseAction::RaseSize1City(None)),
+        Action::StatusPhase(StatusPhaseAction::RazeSize1City(RazeSize1City::None)),
         0,
         false,
         true,
@@ -649,9 +654,20 @@ fn test_free_advance() {
 fn test_raze_city() {
     test_action(
         "raze_city",
-        Action::StatusPhase(StatusPhaseAction::RaseSize1City(Some(
+        Action::StatusPhase(StatusPhaseAction::RazeSize1City(RazeSize1City::Position(
             Position::from_offset("A1"),
         ))),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_raze_city_decline() {
+    test_action(
+        "raze_city_decline",
+        Action::StatusPhase(StatusPhaseAction::RazeSize1City(RazeSize1City::None)),
         0,
         false,
         false,
@@ -673,12 +689,12 @@ fn test_determine_first_player() {
 fn test_change_government() {
     test_action(
         "change_government",
-        Action::StatusPhase(StatusPhaseAction::ChangeGovernmentType(Some(
-            ChangeGovernmentType {
+        Action::StatusPhase(StatusPhaseAction::ChangeGovernmentType(
+            ChangeGovernmentType::ChangeGovernment(ChangeGovernment {
                 new_government: String::from("Theocracy"),
                 additional_advances: vec![String::from("Theocracy 2")],
-            },
-        ))),
+            }),
+        )),
         0,
         false,
         false,

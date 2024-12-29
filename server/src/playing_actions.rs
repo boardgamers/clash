@@ -19,6 +19,15 @@ use crate::{
 };
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
+pub struct Construct {
+    pub city_position: Position,
+    pub city_piece: Building,
+    pub payment: ResourcePile,
+    pub port_position: Option<Position>,
+    pub temple_bonus: Option<ResourcePile>,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub enum PlayingAction {
     Advance {
         advance: String,
@@ -27,13 +36,7 @@ pub enum PlayingAction {
     FoundCity {
         settler: u32,
     },
-    Construct {
-        city_position: Position,
-        city_piece: Building,
-        payment: ResourcePile,
-        port_position: Option<Position>,
-        temple_bonus: Option<ResourcePile>,
-    },
+    Construct(Construct),
     Collect {
         city_position: Position,
         collections: Vec<(Position, ResourcePile)>,
@@ -95,42 +98,36 @@ impl PlayingAction {
                 game.undo_context_stack
                     .push(UndoContext::FoundCity { settler });
             }
-            Construct {
-                city_position,
-                city_piece,
-                payment,
-                port_position,
-                temple_bonus,
-            } => {
+            Construct(c) => {
                 let player = &mut game.players[player_index];
-                let city = player.get_city(city_position).expect("Illegal action");
-                let cost = player.construct_cost(&city_piece, city);
+                let city = player.get_city(c.city_position).expect("Illegal action");
+                let cost = player.construct_cost(&c.city_piece, city);
                 assert!(
-                    city.can_construct(&city_piece, player) && cost.is_valid_payment(&payment),
+                    city.can_construct(&c.city_piece, player) && cost.is_valid_payment(&c.payment),
                     "Illegal action"
                 );
-                if matches!(&city_piece, Port) {
-                    let port_position = port_position.as_ref().expect("Illegal action");
+                if matches!(&c.city_piece, Port) {
+                    let port_position = c.port_position.as_ref().expect("Illegal action");
                     assert!(
                         city.position.neighbors().contains(port_position),
                         "Illegal action"
                     );
-                } else if port_position.is_some() {
+                } else if c.port_position.is_some() {
                     panic!("Illegal action");
                 }
-                if matches!(&city_piece, Temple) {
-                    let building_bonus = temple_bonus.expect("Illegal action");
+                if matches!(&c.city_piece, Temple) {
+                    let building_bonus = c.temple_bonus.expect("Illegal action");
                     assert!(
                         building_bonus == ResourcePile::mood_tokens(1)
                             || building_bonus == ResourcePile::culture_tokens(1),
                         "Illegal action"
                     );
                     player.gain_resources(building_bonus);
-                } else if temple_bonus.is_some() {
+                } else if c.temple_bonus.is_some() {
                     panic!("Illegal action");
                 }
-                player.loose_resources(payment);
-                player.construct(&city_piece, city_position, port_position);
+                player.loose_resources(c.payment);
+                player.construct(&c.city_piece, c.city_position, c.port_position);
             }
             Collect {
                 city_position,
@@ -296,19 +293,14 @@ impl PlayingAction {
                     .pop()
                     .expect("The player should have a city after founding one");
             }
-            Construct {
-                city_position,
-                city_piece,
-                payment,
-                port_position: _,
-                temple_bonus,
-            } => {
+            Construct(c) => {
                 let player = &mut game.players[player_index];
-                player.undo_construct(&city_piece, city_position);
-                player.gain_resources(payment);
-                if matches!(&city_piece, Temple) {
+                player.undo_construct(&c.city_piece, c.city_position);
+                player.gain_resources(c.payment);
+                if matches!(&c.city_piece, Temple) {
                     player.loose_resources(
-                        temple_bonus.expect("build data should contain temple bonus"),
+                        c.temple_bonus
+                            .expect("build data should contain temple bonus"),
                     );
                 }
             }

@@ -202,6 +202,7 @@ dependencies = [
  "console_error_panic_hook",
  "hex2d",
  "itertools",
+ "js-sys",
  "lazy_static",
  "log",
  "macroquad",
@@ -210,6 +211,7 @@ dependencies = [
  "server",
  "wasm-bindgen",
  "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]

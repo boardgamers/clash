@@ -21,7 +21,9 @@ use crate::status_phase_ui::raze_city_confirm_dialog;
 use crate::{combat_ui, dialog_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui};
 
 pub async fn init(features: &Features) -> State {
-    State::new(features).await
+    let state = State::new(features).await;
+    root_ui().push_skin(&state.assets.skin);
+    state
 }
 
 pub fn render_and_update(
@@ -45,13 +47,14 @@ pub fn render_and_update(
 }
 
 fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
-    root_ui().push_skin(&state.assets.skin);
     clear_background(BLACK);
 
     let player = &state.shown_player(game);
 
+    let s = state.screen_size;
+
     state.camera = Camera2D {
-        zoom: vec2(state.zoom, state.zoom * screen_width() / screen_height()),
+        zoom: vec2(state.zoom, state.zoom * s.x / s.y),
         offset: state.offset,
         ..Default::default()
     };

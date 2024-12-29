@@ -1,4 +1,4 @@
-use crate::action::CombatAction;
+use crate::action::{CombatAction, PlayActionCard};
 use crate::game::GameState::Playing;
 use crate::game::{Game, GameState};
 use crate::map::Terrain::Water;
@@ -130,7 +130,7 @@ pub fn execute_combat_action(game: &mut Game, action: CombatAction, mut c: Comba
     game.lock_undo();
     match action {
         CombatAction::PlayActionCard(card) => {
-            assert!(card.is_none());
+            assert!(matches!(card, PlayActionCard::None));
             //todo use card
             combat_loop(game, c);
             return;

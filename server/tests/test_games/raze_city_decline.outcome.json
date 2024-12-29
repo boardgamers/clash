@@ -1,5 +1,7 @@
 {
-  "state": "Playing",
+  "state": {
+    "StatusPhase": "RazeSize1City"
+  },
   "players": [
     {
       "name": null,
@@ -9,8 +11,8 @@
         "wood": 6,
         "ore": 6,
         "ideas": 5,
-        "gold": 7,
-        "mood_tokens": 6,
+        "gold": 6,
+        "mood_tokens": 7,
         "culture_tokens": 7
       },
       "resource_limit": {
@@ -46,13 +48,13 @@
             "academy": null,
             "market": null,
             "obelisk": null,
-            "observatory": 0,
-            "fortress": null,
+            "observatory": null,
+            "fortress": 1,
             "port": null,
             "temple": null,
             "wonders": []
           },
-          "mood_state": "Neutral",
+          "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
@@ -123,14 +125,15 @@
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Math",
-        "Mining"
+        "Fishing",
+        "Mining",
+        "Tactics"
       ],
       "unlocked_special_advance": [],
       "wonders": [],
       "wonders_build": 0,
       "leader_position": null,
-      "game_event_tokens": 2,
+      "game_event_tokens": 1,
       "influenced_buildings": 0,
       "completed_objectives": [],
       "captured_leaders": [],
@@ -141,7 +144,7 @@
         "academies": 5,
         "markets": 5,
         "obelisks": 5,
-        "observatories": 4,
+        "observatories": 5,
         "fortresses": 5,
         "ports": 5,
         "temples": 5
@@ -189,6 +192,20 @@
             {
               "food": 0,
               "wood": 1,
+              "ore": 0,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
+            }
+          ]
+        ],
+        [
+          "Water",
+          [
+            {
+              "food": 1,
+              "wood": 0,
               "ore": 0,
               "ideas": 0,
               "gold": 0,
@@ -262,14 +279,15 @@
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Mining"
+        "Mining",
+        "Philosophy"
       ],
       "unlocked_special_advance": [],
       "wonders": [],
       "wonders_build": 0,
       "leader_position": null,
-      "game_event_tokens": 3,
-      "influenced_buildings": 0,
+      "game_event_tokens": 2,
+      "influenced_buildings": 1,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -280,7 +298,7 @@
         "markets": 5,
         "obelisks": 5,
         "observatories": 5,
-        "fortresses": 5,
+        "fortresses": 4,
         "ports": 5,
         "temples": 5
       },
@@ -351,9 +369,7 @@
       ],
       [
         "A3",
-        {
-          "Exhausted": "Forest"
-        }
+        "Mountain"
       ],
       [
         "B1",
@@ -386,85 +402,59 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 0,
+  "current_player_index": 1,
   "action_log": [
     {
-      "Playing": {
-        "IncreaseHappiness": {
-          "happiness_increases": [
-            [
-              "A1",
-              0
-            ],
-            [
-              "C2",
-              1
-            ]
-          ]
-        }
+      "StatusPhase": {
+        "FreeAdvance": "Fishing"
       }
     },
     {
-      "Playing": {
-        "Advance": {
-          "advance": "Math",
-          "payment": {
-            "food": 0,
-            "wood": 0,
-            "ore": 0,
-            "ideas": 2,
-            "gold": 0,
-            "mood_tokens": 0,
-            "culture_tokens": 0
-          }
-        }
+      "StatusPhase": {
+        "FreeAdvance": "Philosophy"
       }
     },
     {
-      "Playing": {
-        "Construct": {
-          "city_position": "C2",
-          "city_piece": "Observatory",
-          "payment": {
-            "food": 1,
-            "wood": 1,
-            "ore": 1,
-            "ideas": 0,
-            "gold": 0,
-            "mood_tokens": 0,
-            "culture_tokens": 0
-          },
-          "port_position": null,
-          "temple_bonus": null
-        }
+      "StatusPhase": {
+        "RazeSize1City": "None"
       }
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
     }
   ],
-  "action_log_index": 5,
+  "action_log_index": 3,
   "log": [
     "The game has started",
     "Age 1 has started",
     "Round 1/3",
-    "Player1 increased happiness in the city at C2 by 1 steps, making it Happy",
-    "Player1 paid 2 ideas to get the Math advance",
-    "Player1 paid 1 food, 1 wood and 1 ore to construct a Observatory in the city at C2 making it Neutral",
-    "Player1 ended his turn",
+    "Player1 paid 2 ideas to get the Tactics advance",
+    "Player1 paid 1 food, 1 wood and 1 ore to construct a Fortress in the city at C2 making it Angry",
+    "Player1 ended his turn with 1 actions left",
+    "It's Player2's turn",
+    "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1 and succeeded (rolled 6)",
+    "Player2 ended his turn with 2 actions left",
+    "It's Player1's turn",
+    "Round 2/3",
+    "Player1 ended his turn with 3 actions left",
     "It's Player2's turn",
     "Player2 ended his turn with 3 actions left",
     "It's Player1's turn",
-    "Round 2/3"
+    "Round 3/3",
+    "Player1 ended his turn with 3 actions left",
+    "It's Player2's turn",
+    "Player2 ended his turn with 3 actions left",
+    "It's Player1's turn",
+    "The game has entered the 1st status phase",
+    "Player1 advanced Fishing for free",
+    "It's Player2's turn",
+    "Player2 advanced Philosophy for free",
+    "It's Player1's turn",
+    "Player1 did not rase a city",
+    "It's Player2's turn"
   ],
-  "undo_limit": 5,
+  "undo_limit": 3,
   "played_once_per_turn_actions": [],
   "actions_left": 3,
   "successful_cultural_influence": false,
-  "round": 2,
+  "round": 1,
   "age": 1,
   "messages": [
     "The game has started"
@@ -478,10 +468,11 @@
     10,
     10,
     10,
-    10,
     10
   ],
-  "dice_roll_log": [],
+  "dice_roll_log": [
+    10
+  ],
   "dropped_players": [],
   "wonders_left": [
     "X"
