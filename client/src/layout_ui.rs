@@ -25,23 +25,34 @@ pub fn top_center_label(player: &ShownPlayer, p: Vec2, label: &str) {
 }
 
 pub fn top_right_texture(state: &State, texture: &Texture2D, p: Vec2) -> bool {
-    relative_texture(state, texture, vec2(state.screen_size.x - MARGIN, MARGIN), p)
+    relative_texture(
+        state,
+        texture,
+        vec2(state.screen_size.x - MARGIN, MARGIN),
+        p,
+    )
 }
 
 pub fn bottom_left_texture(state: &State, texture: &Texture2D, p: Vec2) -> bool {
-    relative_texture(state, texture, vec2(MARGIN, state.screen_size.y - MARGIN), p)
+    relative_texture(
+        state,
+        texture,
+        vec2(MARGIN, state.screen_size.y - MARGIN),
+        p,
+    )
 }
 
 pub fn bottom_left_button(player: &ShownPlayer, p: Vec2, label: &str) -> bool {
     root_ui().button(vec2(MARGIN, player.screen_size.y - MARGIN) + p, label)
 }
 
-pub fn bottom_right_button(player: &ShownPlayer, p: Vec2, label: &str) -> bool {
-    root_ui().button(vec2(player.screen_size.x - MARGIN, player.screen_size.y - MARGIN) + p, label)
-}
-
 pub fn bottom_right_texture(state: &State, texture: &Texture2D, p: Vec2) -> bool {
-    relative_texture(state, texture, vec2(state.screen_size.x - MARGIN, state.screen_size.y - MARGIN), p)
+    relative_texture(
+        state,
+        texture,
+        vec2(state.screen_size.x - MARGIN, state.screen_size.y - MARGIN),
+        p,
+    )
 }
 
 fn relative_texture(state: &State, texture: &Texture2D, anchor: Vec2, offset: Vec2) -> bool {

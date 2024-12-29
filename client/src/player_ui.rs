@@ -1,7 +1,10 @@
 use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
-use crate::layout_ui::{bottom_left_button, bottom_left_texture, bottom_right_button, bottom_right_texture, icon_pos, right_center_button, right_center_label, top_center_label, top_left_label, top_right_texture};
+use crate::layout_ui::{
+    bottom_left_button, bottom_left_texture, bottom_right_texture, icon_pos, right_center_button,
+    right_center_label, top_center_label, top_left_label, top_right_texture,
+};
 use macroquad::math::vec2;
 use macroquad::prelude::*;
 use macroquad::ui::{root_ui, Ui};
@@ -10,7 +13,6 @@ use server::game::{Game, GameState};
 use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
-
 pub fn show_globals(game: &Game, player: &ShownPlayer) -> StateUpdate {
     show_top_left(game);
     show_top_center(game, player);
@@ -238,7 +240,7 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
     if player.can_play_action && bottom_left_texture(state, &assets.movement, icon_pos(0, -3)) {
         return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
     }
-    if player.can_play_action && bottom_left_texture(state, &assets., icon_pos(0, -2)) {
+    if player.can_play_action && bottom_left_texture(state, &assets.happy, icon_pos(0, -2)) {
         return start_increase_happiness(game, player);
     }
     if top_right_texture(state, &assets.advances, icon_pos(-2, 0)) {
@@ -257,10 +259,10 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
     }
 
     if features.import_export {
-        if bottom_right_button(player, vec2(-300., -100.), "Import") {
+        if bottom_right_texture(state, &assets.import, icon_pos(-2, -3)) {
             return StateUpdate::Import;
         };
-        if bottom_right_button(player, vec2(-150., -100.), "Export") {
+        if bottom_right_texture(state, &assets.export, icon_pos(-1, -3)) {
             return StateUpdate::Export;
         };
     }
