@@ -50,37 +50,37 @@ impl Assets {
 
             // mood icons
             angry: load_png(include_bytes!("../assets/angry-face-svgrepo-com.png")),
-            neutral: load_png(include_bytes!("../assets/neutral.png")),
+            neutral: load_png(include_bytes!("../assets/neutral-face-svgrepo-com.png")),
 
             // resource icons
             resources: [
                 (
                     ResourceType::Food,
-                    load_png(include_bytes!("../assets/food.png")),
+                    load_png(include_bytes!("../assets/wheat-grain-svgrepo-com.png")),
                 ),
                 (
                     ResourceType::Wood,
-                    load_png(include_bytes!("../assets/wood.png")),
+                    load_png(include_bytes!("../assets/wood-nature-svgrepo-com.png")),
                 ),
                 (
                     ResourceType::Ore,
-                    load_png(include_bytes!("../assets/rock.png")),
+                    load_png(include_bytes!("../assets/rock-svgrepo-com.png")),
                 ),
                 (
                     ResourceType::Ideas,
-                    load_png(include_bytes!("../assets/idea.png")),
+                    load_png(include_bytes!("../assets/light-bulb-idea-svgrepo-com.png")),
                 ),
                 (
                     ResourceType::Gold,
-                    load_png(include_bytes!("../assets/gold.png")),
+                    load_png(include_bytes!("../assets/gold-ingots-gold-svgrepo-com.png")),
                 ),
                 (
                     ResourceType::MoodTokens,
-                    load_png(include_bytes!("../assets/happy.png")),
+                    load_png(include_bytes!("../assets/happy-emoji-svgrepo-com.png")),
                 ),
                 (
                     ResourceType::CultureTokens,
-                    load_png(include_bytes!("../assets/culture.png")),
+                    load_png(include_bytes!("../assets/theater-drama-svgrepo-com.png")),
                 ),
             ]
             .iter()
@@ -88,25 +88,25 @@ impl Assets {
             .collect(),
 
             // action icons
-            advances: load_png(include_bytes!("../assets/lab.png")),
-            hour_glass: load_png(include_bytes!("../assets/hour-glass.png")),
-            log: load_png(include_bytes!("../assets/scroll.png")),
-            movement: load_png(include_bytes!("../assets/move.png")),
-            redo: load_png(include_bytes!("../assets/redo.png")),
-            reset: load_png(include_bytes!("../assets/reset.png")),
-            undo: load_png(include_bytes!("../assets/undo.png")),
+            advances: load_png(include_bytes!("../assets/lab-science-svgrepo-com.png")),
+            hour_glass: load_png(include_bytes!("../assets/hour-glass-svgrepo-com.png")),
+            log: load_png(include_bytes!("../assets/scroll-svgrepo-com.png")),
+            movement: load_png(include_bytes!("../assets/walk-svgrepo-com.png")),
+            redo: load_png(include_bytes!("../assets/redo-svgrepo-com.png")),
+            reset: load_png(include_bytes!("../assets/reset-svgrepo-com.png")),
+            undo: load_png(include_bytes!("../assets/undo-svgrepo-com.png.png")),
 
             // UI
-            zoom_in: load_png(include_bytes!("../assets/zoom-in.png")),
-            zoom_out: load_png(include_bytes!("../assets/zoom-out.png")),
-            up: load_png(include_bytes!("../assets/up-arrow.png")),
-            down: load_png(include_bytes!("../assets/down-arrow.png")),
-            left: load_png(include_bytes!("../assets/left-arrow.png")),
-            right: load_png(include_bytes!("../assets/right-arrow.png")),
+            zoom_in: load_png(include_bytes!("../assets/zoom-in-1462-svgrepo-com.png")),
+            zoom_out: load_png(include_bytes!("../assets/zoom-out-1460-svgrepo-com.png")),
+            up: load_png(include_bytes!("../assets/up-arrow-circle-svgrepo-com.png")),
+            down: load_png(include_bytes!("../assets/down-arrow-circle-svgrepo-com.png")),
+            left: load_png(include_bytes!("../assets/left-arrow-circle-svgrepo-com.png")),
+            right: load_png(include_bytes!("../assets/right-arrow-circle-svgrepo-com.png")),
 
             // Admin
-            import: load_png(include_bytes!("../assets/import.png")),
-            export: load_png(include_bytes!("../assets/export.png")),
+            import: load_png(include_bytes!("../assets/import-3-svgrepo-com.png")),
+            export: load_png(include_bytes!("../assets/export-2-svgrepo-com.png")),
             // cities: HashMap::new(),
         }
     }
