@@ -47,7 +47,7 @@ pub fn render_and_update(
 }
 
 fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
-    clear_background(BLACK);
+    clear_background(WHITE);
 
     let player = &state.shown_player(game);
 

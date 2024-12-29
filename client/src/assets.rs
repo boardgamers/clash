@@ -32,6 +32,7 @@ pub struct Assets {
     pub down: Texture2D,
     pub left: Texture2D,
     pub right: Texture2D,
+    pub end_turn: Texture2D,
 
     // Admin
     pub import: Texture2D,
@@ -103,6 +104,7 @@ impl Assets {
             down: load_png(include_bytes!("../assets/down-arrow-circle-svgrepo-com.png")),
             left: load_png(include_bytes!("../assets/left-arrow-circle-svgrepo-com.png")),
             right: load_png(include_bytes!("../assets/right-arrow-circle-svgrepo-com.png")),
+            end_turn: load_png(include_bytes!("../assets/enter-svgrepo-com.png")),
 
             // Admin
             import: load_png(include_bytes!("../assets/import-3-svgrepo-com.png")),

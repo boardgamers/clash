@@ -1,10 +1,7 @@
 use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
-use crate::layout_ui::{
-    bottom_left_button, bottom_left_texture, bottom_right_button, right_center_button,
-    right_center_label, top_center_label, top_left_label, top_right_texture,
-};
+use crate::layout_ui::{bottom_left_button, bottom_left_texture, bottom_right_button, bottom_right_texture, icon_pos, right_center_button, right_center_label, top_center_label, top_left_label, top_right_texture};
 use macroquad::math::vec2;
 use macroquad::prelude::*;
 use macroquad::ui::{root_ui, Ui};
@@ -186,46 +183,46 @@ fn resource_ui(player: &Player, name: &str, f: impl Fn(&ResourcePile) -> u32) ->
 pub fn show_global_controls(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     let player = &state.shown_player(game);
 
-    let y1 = -10.;
-    if bottom_left_texture(state, &state.assets.zoom_in, vec2(7., y1)) {
+    let assets = &state.assets;
+    if bottom_left_texture(state, &assets.zoom_in, icon_pos(1, -1)) {
         state.zoom *= 1.1;
         return StateUpdate::None;
     }
-    if bottom_left_texture(state, &state.assets.zoom_out, vec2(2., y1)) {
+    if bottom_left_texture(state, &assets.zoom_out, icon_pos(0, -1)) {
         state.zoom /= 1.1;
         return StateUpdate::None;
     }
-    if bottom_left_button(player, vec2(140., -50.), "0") {
+    if bottom_left_texture(state, &assets.reset, icon_pos(2, -1)) {
         state.zoom = ZOOM;
         state.offset = OFFSET;
         return StateUpdate::None;
     }
-    if bottom_left_button(player, vec2(210., -80.), "") {
-        state.offset += vec2(-0.1, 0.);
-        return StateUpdate::None;
-    }
-    if bottom_left_button(player, vec2(310., -80.), "") {
-        state.offset += vec2(0.1, 0.);
-        return StateUpdate::None;
-    }
-    if bottom_left_button(player, vec2(260., -110.), "") {
+    if bottom_left_texture(state, &assets.up, icon_pos(4, -2)) {
         state.offset += vec2(0., 0.1);
         return StateUpdate::None;
     }
-    if bottom_left_button(player, vec2(260., -50.), "") {
+    if bottom_left_texture(state, &assets.down, icon_pos(4, -1)) {
         state.offset += vec2(0., -0.1);
         return StateUpdate::None;
     }
+    if bottom_left_texture(state, &assets.left, icon_pos(3, -1)) {
+        state.offset += vec2(-0.1, 0.);
+        return StateUpdate::None;
+    }
+    if bottom_left_texture(state, &assets.right, icon_pos(5, -1)) {
+        state.offset += vec2(0.1, 0.);
+        return StateUpdate::None;
+    }
 
-    if game.can_undo() && bottom_right_button(player, vec2(-400., -50.), "Undo") {
+    if game.can_undo() && bottom_right_texture(state, &assets.undo, icon_pos(-6, -1)) {
         return StateUpdate::Execute(Action::Undo);
     }
-    if game.can_redo() && bottom_right_button(player, vec2(-300., -50.), "Redo") {
+    if game.can_redo() && bottom_right_texture(state, &assets.redo, icon_pos(-5, -1)) {
         return StateUpdate::Execute(Action::Redo);
     }
     if player.can_control
         && matches!(game.state, GameState::Playing)
-        && bottom_right_button(player, vec2(-180., -50.), "End Turn")
+        && bottom_right_texture(state, &assets.end_turn, icon_pos(-4, -1))
     {
         let left = game.actions_left;
         return StateUpdate::execute_with_warning(
@@ -238,18 +235,17 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
         );
     }
 
-    if player.can_play_action && bottom_left_button(player, vec2(0., -170.), "Move") {
+    if player.can_play_action && bottom_left_texture(state, &assets.movement, icon_pos(0, -3)) {
         return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
     }
-    if player.can_play_action && bottom_left_button(player, vec2(0., -140.), "Inc. Hap.") {
+    if player.can_play_action && bottom_left_texture(state, &assets., icon_pos(0, -2)) {
         return start_increase_happiness(game, player);
     }
-    let y = 10.;
-    if top_right_texture(state, &state.assets.advances, vec2(-60., y)) {
+    if top_right_texture(state, &assets.advances, icon_pos(-2, 0)) {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     };
 
-    if top_right_texture(state, &state.assets.log, vec2(-30., y)) {
+    if top_right_texture(state, &assets.log, icon_pos(-1, 0)) {
         return StateUpdate::OpenDialog(ActiveDialog::Log);
     };
     let d = state.game_state_dialog(game, &ActiveDialog::None);
