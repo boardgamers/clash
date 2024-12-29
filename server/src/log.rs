@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::action::PlayActionCard;
 use crate::player::Player;
-use crate::playing_actions::Construct;
+use crate::playing_actions::{Construct, InfluenceCultureAttempt, Recruit};
 use crate::status_phase::{ChangeGovernmentType, RazeSize1City};
 use crate::{
     action::{Action, CombatAction},
@@ -79,39 +79,168 @@ pub fn format_action_log_item(action: &Action, game: &Game) -> String {
         Action::Playing(action) => format_playing_action_log_item(action, game),
         Action::StatusPhase(action) => format_status_phase_action_log_item(action, game),
         Action::Movement(action) => format_movement_action_log_item(action, game),
-        Action::CulturalInfluenceResolution(action) => format!("{} {}", game.players[game.active_player()].get_name(), match action {
-            true => format!("paid {} culture tokens to increased the dice roll and proceed with the cultural influence", game.dice_roll_log.last().expect("there should have been at least one dice roll before a cultural influence resolution action") / 2 + 1),
-            false => String::from("declined to increase the dice roll"),
-        }),
+        Action::CulturalInfluenceResolution(action) => {
+            format_cultural_influence_resolution_log_item(game, *action)
+        }
         Action::Combat(action) => format_combat_action_log_item(action, game),
-        Action::PlaceSettler(position) => format!("{} placed a settler in the city at {position}", game.players[game.state.settler_placer().expect("the game should be in the place settler state")].get_name()),
+        Action::PlaceSettler(position) => format_place_settler_log_item(game, *position),
         Action::Undo | Action::Redo => {
             panic!("undoing or redoing actions should not be written to the log")
         }
     }
 }
 
+fn format_place_settler_log_item(game: &Game, position: Position) -> String {
+    let player = game.players[game
+        .state
+        .settler_placer()
+        .expect("the game should be in the place settler state")]
+    .get_name();
+    format!("{player} placed a settler in the city at {position}")
+}
+
+fn format_cultural_influence_resolution_log_item(game: &Game, success: bool) -> String {
+    let player = game.players[game.active_player()].get_name();
+    let outcome = if success {
+        let price = game.dice_roll_log.last()
+            .expect("there should have been at least one dice roll before a cultural influence resolution action");
+        format!("paid {} culture tokens to increase the dice roll and proceed with the cultural influence", price / 2 + 1)
+    } else {
+        String::from("declined to increase the dice roll")
+    };
+    format!("{player} {outcome}")
+}
+
 fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String {
     let player = &game.players[game.active_player()];
     let player_name = player.get_name();
     match action {
-        PlayingAction::Advance { advance, payment } => format!("{player_name} paid {payment} to get the {advance} advance"),
-        PlayingAction::FoundCity { settler } => format!("{player_name} founded a city at {}", player.get_unit(*settler).expect("The player should have the settler").position),
+        PlayingAction::Advance { advance, payment } => {
+            format!("{player_name} paid {payment} to get the {advance} advance")
+        }
+        PlayingAction::FoundCity { settler } => format!(
+            "{player_name} founded a city at {}",
+            player
+                .get_unit(*settler)
+                .expect("The player should have the settler")
+                .position
+        ),
         PlayingAction::Construct(c) => format_construct_log_item(game, player, &player_name, c),
-        PlayingAction::Collect { city_position, collections } => format_collect_log_item(player, &player_name, *city_position, collections),
-        PlayingAction::Recruit { units, city_position, payment, leader_index, replaced_units } => format!("{player_name} paid {payment} to recruit {}{} in the city at {city_position}{}{}", units.iter().cloned().collect::<Units>(), leader_index.map_or(String::new(), |leader_index| format!(" {} {} as his leader", if player.available_leaders.len() > 1 { "choosing" } else { "getting" }, &player.available_leaders[leader_index].name)), if player.get_city(*city_position).expect("there should be a city at the given position").is_activated() { format!(" making it {:?}", player.get_city(*city_position).expect("there should be a city at the given position").mood_state.clone() - 1) } else { String::new() }, format_args!("{}{}", match replaced_units.len() { 0 => "", 1 => " and replaces the unit at ", _ => " and replaces units at " }, utils::format_list(&replaced_units.iter().map(|unit_id| player.get_unit(*unit_id).expect("the player should have the replaced units").position.to_string()).unique().collect::<Vec<String>>(), ""))),
+        PlayingAction::Collect {
+            city_position,
+            collections,
+        } => format_collect_log_item(player, &player_name, *city_position, collections),
+        PlayingAction::Recruit(r) => format_recruit_log_item(player, &player_name, r),
         PlayingAction::MoveUnits => format!("{player_name} used a move units action"),
-        PlayingAction::IncreaseHappiness { happiness_increases } => {
-            let happiness_increases = happiness_increases.iter().filter_map(|(position, steps)| if *steps > 0 { Some(format!("the city at {position} by {steps} steps, making it {:?}", player.get_city(*position).expect("player should have a city at this position").mood_state.clone() + *steps)) } else { None }).collect::<Vec<String>>();
-            format!("{player_name} increased happiness in {}", utils::format_list(&happiness_increases, "no city"))
-        },
-        PlayingAction::InfluenceCultureAttempt { starting_city_position, target_player_index, target_city_position, city_piece } => format!("{player_name} tried to influence culture the {city_piece:?} in the city at {target_city_position} by {}{}", if target_player_index == &game.active_player() { String::from("himself")} else { game.players[*target_player_index].get_name() }, if starting_city_position != target_city_position { format!(" with the city at {starting_city_position}")} else { String::new() }),
+        PlayingAction::IncreaseHappiness {
+            happiness_increases,
+        } => format_happiness_increase(player, &player_name, happiness_increases),
+        PlayingAction::InfluenceCultureAttempt(c) => {
+            format_cultural_influence_attempt_log_item(game, &player_name, c)
+        }
         PlayingAction::Custom(action) => action.format_log_item(game, &player_name),
-        PlayingAction::EndTurn => format!("{player_name} ended his turn{}", match game.actions_left {
-            0 => String::new(),
-            actions_left => format!(" with {actions_left} actions left"),
-        }),
+        PlayingAction::EndTurn => format!(
+            "{player_name} ended his turn{}",
+            match game.actions_left {
+                0 => String::new(),
+                actions_left => format!(" with {actions_left} actions left"),
+            }
+        ),
     }
+}
+
+fn format_cultural_influence_attempt_log_item(
+    game: &Game,
+    player_name: &String,
+    c: &InfluenceCultureAttempt,
+) -> String {
+    let target_player_index = c.target_player_index;
+    let target_city_position = c.target_city_position;
+    let starting_city_position = c.starting_city_position;
+    let city_piece = &c.city_piece;
+    let player = if target_player_index == game.active_player() {
+        String::from("himself")
+    } else {
+        game.players[target_player_index].get_name()
+    };
+    let city = if starting_city_position != target_city_position {
+        format!(" with the city at {starting_city_position}")
+    } else {
+        String::new()
+    };
+    format!("{player_name} tried to influence culture the {city_piece:?} in the city at {target_city_position} by {player}{city}")
+}
+
+fn format_happiness_increase(
+    player: &Player,
+    player_name: &String,
+    happiness_increases: &[(Position, u32)],
+) -> String {
+    let happiness_increases = happiness_increases
+        .iter()
+        .filter_map(|(position, steps)| {
+            if *steps > 0 {
+                Some(format!(
+                    "the city at {position} by {steps} steps, making it {:?}",
+                    player
+                        .get_city(*position)
+                        .expect("player should have a city at this position")
+                        .mood_state
+                        .clone()
+                        + *steps
+                ))
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<String>>();
+    format!(
+        "{player_name} increased happiness in {}",
+        utils::format_list(&happiness_increases, "no city")
+    )
+}
+
+fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -> String {
+    let leader_index = r.leader_index;
+    let city_position = &r.city_position;
+    let units = &r.units;
+    let payment = &r.payment;
+    let replaced_units = &r.replaced_units;
+    let units_str = units.iter().cloned().collect::<Units>();
+    let leader_str = leader_index.map_or(String::new(), |leader_index| {
+        format!(
+            " {} {} as his leader",
+            if player.available_leaders.len() > 1 {
+                "choosing"
+            } else {
+                "getting"
+            },
+            &player.available_leaders[leader_index].name
+        )
+    });
+    let mood = format_mood_change(player, *city_position);
+    let replace_str = match replaced_units.len() {
+        0 => "",
+        1 => " and replaces the unit at ",
+        _ => " and replaces units at ",
+    };
+    let replace_pos = utils::format_list(
+        &replaced_units
+            .iter()
+            .map(|unit_id| {
+                player
+                    .get_unit(*unit_id)
+                    .expect("the player should have the replaced units")
+                    .position
+                    .to_string()
+            })
+            .unique()
+            .collect::<Vec<String>>(),
+        "",
+    );
+    format!(
+        "{player_name} paid {payment} to recruit {units_str}{leader_str} in the city at {city_position}{mood}{replace_str}{replace_pos}"
+    )
 }
 
 fn format_collect_log_item(
@@ -144,23 +273,7 @@ fn format_collect_log_item(
     } else {
         String::new()
     };
-    let mood = if player
-        .get_city(city_position)
-        .expect("there should be a city at the given position")
-        .is_activated()
-    {
-        format!(
-            " making it {:?}",
-            player
-                .get_city(city_position)
-                .expect("there should be a city at the given position")
-                .mood_state
-                .clone()
-                - 1
-        )
-    } else {
-        String::new()
-    };
+    let mood = format_mood_change(player, city_position);
     format!("{player_name} collects {res}{total} in the city at {city_position}{mood}")
 }
 
@@ -195,15 +308,25 @@ fn format_construct_log_item(
     let payment = &c.payment;
     let city_position = &c.city_position;
 
-    let mood = if player
-        .get_city(*city_position)
+    let mood = format_mood_change(player, *city_position);
+    let temple = if let Some(temple_bonus) = &c.temple_bonus {
+        format!(" and chooses to get {temple_bonus}")
+    } else {
+        String::new()
+    };
+    format!("{player_name} paid {payment} to construct a {city_piece:?} in the city at {city_position}{port_pos}{mood}{temple}")
+}
+
+fn format_mood_change(player: &Player, city_position: Position) -> String {
+    if player
+        .get_city(city_position)
         .expect("there should be a city at the given position")
         .is_activated()
     {
         format!(
             " making it {:?}",
             player
-                .get_city(*city_position)
+                .get_city(city_position)
                 .expect("there should be a city at the given position")
                 .mood_state
                 .clone()
@@ -211,13 +334,7 @@ fn format_construct_log_item(
         )
     } else {
         String::new()
-    };
-    let temple = if let Some(temple_bonus) = &c.temple_bonus {
-        format!(" and chooses to get {temple_bonus}")
-    } else {
-        String::new()
-    };
-    format!("{player_name} paid {payment} to construct a {city_piece:?} in the city at {city_position}{port_pos}{mood}{temple}")
+    }
 }
 
 fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> String {

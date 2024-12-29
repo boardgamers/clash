@@ -618,13 +618,7 @@ impl Game {
 
     fn undo_cultural_influence_resolution_action(&mut self, action: bool) {
         let cultural_influence_attempt_action = self.action_log[self.action_log_index - 2].as_playing_action().expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
-        let PlayingAction::InfluenceCultureAttempt {
-            starting_city_position: _,
-            target_player_index,
-            target_city_position,
-            city_piece,
-        } = cultural_influence_attempt_action
-        else {
+        let PlayingAction::InfluenceCultureAttempt(c) = cultural_influence_attempt_action else {
             panic!("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
         };
         let roll =
@@ -633,6 +627,9 @@ impl Game {
             ) / 2
                 + 1;
         let roll_boost_cost = 5 - roll as u32;
+        let city_piece = c.city_piece;
+        let target_player_index = c.target_player_index;
+        let target_city_position = c.target_city_position;
         self.state = GameState::CulturalInfluenceResolution(CulturalInfluenceResolution {
             roll_boost_cost,
             target_player_index,

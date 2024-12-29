@@ -5,7 +5,7 @@ use macroquad::ui::Ui;
 use server::action::Action;
 use server::city_pieces::Building;
 use server::game::{CulturalInfluenceResolution, Game};
-use server::playing_actions::PlayingAction;
+use server::playing_actions::{InfluenceCultureAttempt, PlayingAction};
 use server::position::Position;
 
 pub fn add_influence_button(
@@ -34,12 +34,12 @@ pub fn add_influence_button(
                 format!("Attempt Influence {building_name} for {cost}"),
             ) {
                 return StateUpdate::Execute(Action::Playing(
-                    PlayingAction::InfluenceCultureAttempt {
+                    PlayingAction::InfluenceCultureAttempt(InfluenceCultureAttempt {
                         starting_city_position: start_position,
                         target_player_index: menu.city_owner_index,
                         target_city_position: menu.city_position,
                         city_piece: building.clone(),
-                    },
+                    }),
                 ));
             }
         }

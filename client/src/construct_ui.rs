@@ -10,7 +10,7 @@ use server::city_pieces::Building;
 use server::content::custom_actions::CustomAction;
 use server::game::Game;
 use server::map::{Map, Terrain};
-use server::playing_actions::{Construct, PlayingAction};
+use server::playing_actions::{Construct, PlayingAction, Recruit};
 use server::position::Position;
 use server::resource_pile::PaymentOptions;
 use server::unit::UnitType;
@@ -126,13 +126,13 @@ pub fn pay_construction_dialog(
                 game.get_any_city(cp.city_position).unwrap(),
             ),
             ConstructionProject::Units(r) => StateUpdate::execute_activation(
-                Action::Playing(PlayingAction::Recruit {
+                Action::Playing(PlayingAction::Recruit(Recruit {
                     city_position: cp.city_position,
                     units: r.amount.units.clone().to_vec(),
                     payment: cp.payment.to_resource_pile(),
                     replaced_units: r.replaced_units.clone(),
                     leader_index: r.amount.leader_index,
-                }),
+                })),
                 vec![],
                 game.get_any_city(cp.city_position).unwrap(),
             ),

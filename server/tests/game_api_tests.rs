@@ -8,6 +8,7 @@ use std::{
 
 use server::action::CombatAction;
 use server::game::{CulturalInfluenceResolution, GameState};
+use server::playing_actions::PlayingAction;
 use server::status_phase::{
     ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction,
 };
@@ -175,13 +176,14 @@ fn basic_actions() {
     let mut game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
     let player = &mut game.players[0];
     player.gain_resources(ResourcePile::food(2));
-    let recruit_action = Action::Playing(Recruit {
-        units: vec![Settler],
-        city_position,
-        payment: ResourcePile::food(2),
-        leader_index: None,
-        replaced_units: Vec::new(),
-    });
+    let recruit_action =
+        Action::Playing(PlayingAction::Recruit(server::playing_actions::Recruit {
+            units: vec![Settler],
+            city_position,
+            payment: ResourcePile::food(2),
+            leader_index: None,
+            replaced_units: Vec::new(),
+        }));
     let mut game = game_api::execute_action(game, recruit_action, 0);
     let player = &mut game.players[0];
     assert_eq!(1, player.units.len());
@@ -229,13 +231,15 @@ fn cultural_influence() {
     assert_eq!(city0position.distance(city1position), 2);
     game.players[0].cities.push(City::new(0, city0position));
     game.players[1].cities.push(City::new(1, city1position));
-    game.players[1].construct(&Building::Academy, city1position, None);
-    let influence_action = Action::Playing(InfluenceCultureAttempt {
-        starting_city_position: city0position,
-        target_player_index: 1,
-        target_city_position: city1position,
-        city_piece: Building::Academy,
-    });
+    game.players[1].construct(&Academy, city1position, None);
+    let influence_action = Action::Playing(InfluenceCultureAttempt(
+        playing_actions::InfluenceCultureAttempt {
+            starting_city_position: city0position,
+            target_player_index: 1,
+            target_city_position: city1position,
+            city_piece: Academy,
+        },
+    ));
     let game = game_api::execute_action(game, influence_action, 0);
     assert!(!game.players[1].cities[0].influenced());
     assert_eq!(
@@ -244,7 +248,7 @@ fn cultural_influence() {
             roll_boost_cost: 2,
             target_player_index: 1,
             target_city_position: city1position,
-            city_piece: Building::Academy
+            city_piece: Academy
         })
     );
     let influence_resolution_decline_action = Action::CulturalInfluenceResolution(false);
@@ -252,34 +256,40 @@ fn cultural_influence() {
     assert!(!game.players[1].cities[0].influenced());
     assert_eq!(game.state, GameState::Playing);
     assert!(!game.successful_cultural_influence);
-    let influence_action = Action::Playing(InfluenceCultureAttempt {
-        starting_city_position: city0position,
-        target_player_index: 1,
-        target_city_position: city1position,
-        city_piece: Building::Academy,
-    });
+    let influence_action = Action::Playing(InfluenceCultureAttempt(
+        playing_actions::InfluenceCultureAttempt {
+            starting_city_position: city0position,
+            target_player_index: 1,
+            target_city_position: city1position,
+            city_piece: Academy,
+        },
+    ));
     let game = game_api::execute_action(game, influence_action, 0);
     assert!(game.players[1].cities[0].influenced());
     assert_eq!(game.state, GameState::Playing);
     assert!(game.successful_cultural_influence);
     let game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
     assert_eq!(game.active_player(), 1);
-    let influence_action = Action::Playing(InfluenceCultureAttempt {
-        starting_city_position: city1position,
-        target_player_index: 1,
-        target_city_position: city1position,
-        city_piece: Building::Academy,
-    });
+    let influence_action = Action::Playing(InfluenceCultureAttempt(
+        playing_actions::InfluenceCultureAttempt {
+            starting_city_position: city1position,
+            target_player_index: 1,
+            target_city_position: city1position,
+            city_piece: Academy,
+        },
+    ));
     let game = game_api::execute_action(game, influence_action, 1);
     assert!(game.players[1].cities[0].influenced());
     assert_eq!(game.state, GameState::Playing);
     assert!(!game.successful_cultural_influence);
-    let influence_action = Action::Playing(InfluenceCultureAttempt {
-        starting_city_position: city1position,
-        target_player_index: 1,
-        target_city_position: city1position,
-        city_piece: Building::Academy,
-    });
+    let influence_action = Action::Playing(InfluenceCultureAttempt(
+        playing_actions::InfluenceCultureAttempt {
+            starting_city_position: city1position,
+            target_player_index: 1,
+            target_city_position: city1position,
+            city_piece: Academy,
+        },
+    ));
     let game = game_api::execute_action(game, influence_action, 1);
     assert!(!game.players[1].cities[0].influenced());
     assert_eq!(game.state, GameState::Playing);
@@ -491,12 +501,14 @@ fn test_movement() {
 fn test_cultural_influence_attempt() {
     test_action(
         "cultural_influence_attempt",
-        Action::Playing(InfluenceCultureAttempt {
-            starting_city_position: Position::from_offset("C1"),
-            target_player_index: 0,
-            target_city_position: Position::from_offset("C2"),
-            city_piece: Fortress,
-        }),
+        Action::Playing(InfluenceCultureAttempt(
+            playing_actions::InfluenceCultureAttempt {
+                starting_city_position: Position::from_offset("C1"),
+                target_player_index: 0,
+                target_city_position: Position::from_offset("C2"),
+                city_piece: Fortress,
+            },
+        )),
         1,
         false,
         false,
@@ -544,13 +556,13 @@ fn test_wonder() {
 fn test_recruit() {
     test_action(
         "recruit",
-        Action::Playing(Recruit {
+        Action::Playing(Recruit(server::playing_actions::Recruit {
             units: vec![Settler, Infantry],
             city_position: Position::from_offset("A1"),
             payment: ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2),
             leader_index: None,
             replaced_units: vec![4],
-        }),
+        })),
         0,
         true,
         false,
@@ -561,13 +573,13 @@ fn test_recruit() {
 fn test_recruit_combat() {
     test_action(
         "recruit_combat",
-        Action::Playing(Recruit {
+        Action::Playing(Recruit(server::playing_actions::Recruit {
             units: vec![Ship],
             city_position: Position::from_offset("C2"),
             payment: ResourcePile::wood(2),
             leader_index: None,
             replaced_units: vec![],
-        }),
+        })),
         0,
         false,
         false,
