@@ -37,6 +37,13 @@ pub struct Recruit {
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
+pub struct InfluenceCultureAttempt {
+    pub starting_city_position: Position,
+    pub target_player_index: usize,
+    pub target_city_position: Position,
+    pub city_piece: Building,
+}
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub enum PlayingAction {
     Advance {
         advance: String,
@@ -55,12 +62,7 @@ pub enum PlayingAction {
     IncreaseHappiness {
         happiness_increases: Vec<(Position, u32)>,
     },
-    InfluenceCultureAttempt {
-        starting_city_position: Position,
-        target_player_index: usize,
-        target_city_position: Position,
-        city_piece: Building,
-    },
+    InfluenceCultureAttempt(InfluenceCultureAttempt),
     Custom(CustomAction),
     EndTurn,
 }
@@ -190,12 +192,11 @@ impl PlayingAction {
                     }
                 }
             }
-            InfluenceCultureAttempt {
-                starting_city_position,
-                target_player_index,
-                target_city_position,
-                city_piece,
-            } => {
+            InfluenceCultureAttempt(c) => {
+                let starting_city_position = c.starting_city_position;
+                let target_player_index = c.target_player_index;
+                let target_city_position = c.target_city_position;
+                let city_piece = c.city_piece;
                 let range_boost_cost = game
                     .influence_culture_boost_cost(
                         player_index,
@@ -337,7 +338,7 @@ impl PlayingAction {
                 player.gain_resources(ResourcePile::mood_tokens(cost));
             }
             Custom(custom_action) => custom_action.undo(game, player_index),
-            InfluenceCultureAttempt { .. } | EndTurn => panic!("Action can't be undone"),
+            InfluenceCultureAttempt(_) | EndTurn => panic!("Action can't be undone"),
         }
     }
 }

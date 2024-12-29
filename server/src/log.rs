@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::action::PlayActionCard;
 use crate::player::Player;
-use crate::playing_actions::{Construct, Recruit};
+use crate::playing_actions::{Construct, InfluenceCultureAttempt, Recruit};
 use crate::status_phase::{ChangeGovernmentType, RazeSize1City};
 use crate::{
     action::{Action, CombatAction},
@@ -95,22 +95,60 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
     let player = &game.players[game.active_player()];
     let player_name = player.get_name();
     match action {
-        PlayingAction::Advance { advance, payment } => format!("{player_name} paid {payment} to get the {advance} advance"),
-        PlayingAction::FoundCity { settler } => format!("{player_name} founded a city at {}", player.get_unit(*settler).expect("The player should have the settler").position),
+        PlayingAction::Advance { advance, payment } => {
+            format!("{player_name} paid {payment} to get the {advance} advance")
+        }
+        PlayingAction::FoundCity { settler } => format!(
+            "{player_name} founded a city at {}",
+            player
+                .get_unit(*settler)
+                .expect("The player should have the settler")
+                .position
+        ),
         PlayingAction::Construct(c) => format_construct_log_item(game, player, &player_name, c),
-        PlayingAction::Collect { city_position, collections } => format_collect_log_item(player, &player_name, *city_position, collections),
+        PlayingAction::Collect {
+            city_position,
+            collections,
+        } => format_collect_log_item(player, &player_name, *city_position, collections),
         PlayingAction::Recruit(r) => format_recruit_log_item(player, &player_name, r),
         PlayingAction::MoveUnits => format!("{player_name} used a move units action"),
-        PlayingAction::IncreaseHappiness { happiness_increases } => {
-            format_happiness_increase(player, &player_name, happiness_increases)
-        },
-        PlayingAction::InfluenceCultureAttempt { starting_city_position, target_player_index, target_city_position, city_piece } => format!("{player_name} tried to influence culture the {city_piece:?} in the city at {target_city_position} by {}{}", if target_player_index == &game.active_player() { String::from("himself")} else { game.players[*target_player_index].get_name() }, if starting_city_position != target_city_position { format!(" with the city at {starting_city_position}")} else { String::new() }),
+        PlayingAction::IncreaseHappiness {
+            happiness_increases,
+        } => format_happiness_increase(player, &player_name, happiness_increases),
+        PlayingAction::InfluenceCultureAttempt(c) => {
+            format_cultural_influence_attempt_log_item(game, &player_name, c)
+        }
         PlayingAction::Custom(action) => action.format_log_item(game, &player_name),
-        PlayingAction::EndTurn => format!("{player_name} ended his turn{}", match game.actions_left {
-            0 => String::new(),
-            actions_left => format!(" with {actions_left} actions left"),
-        }),
+        PlayingAction::EndTurn => format!(
+            "{player_name} ended his turn{}",
+            match game.actions_left {
+                0 => String::new(),
+                actions_left => format!(" with {actions_left} actions left"),
+            }
+        ),
     }
+}
+
+fn format_cultural_influence_attempt_log_item(
+    game: &Game,
+    player_name: &String,
+    c: &InfluenceCultureAttempt,
+) -> String {
+    let target_player_index = c.target_player_index;
+    let target_city_position = c.target_city_position;
+    let starting_city_position = c.starting_city_position;
+    let city_piece = &c.city_piece;
+    let player = if target_player_index == game.active_player() {
+        String::from("himself")
+    } else {
+        game.players[target_player_index].get_name()
+    };
+    let city = if starting_city_position != target_city_position {
+        format!(" with the city at {starting_city_position}")
+    } else {
+        String::new()
+    };
+    format!("{player_name} tried to influence culture the {city_piece:?} in the city at {target_city_position} by {player}{city}")
 }
 
 fn format_happiness_increase(
