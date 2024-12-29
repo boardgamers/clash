@@ -98,7 +98,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         PlayingAction::Advance { advance, payment } => format!("{player_name} paid {payment} to get the {advance} advance"),
         PlayingAction::FoundCity { settler } => format!("{player_name} founded a city at {}", player.get_unit(*settler).expect("The player should have the settler").position),
         PlayingAction::Construct(c) => format_construct_log_item(game, player, &player_name, c),
-        PlayingAction::Collect { city_position, collections } => format!("{player_name} collects {}{} in the city at {city_position}{}", utils::format_list(&collections.iter().map(|(_, collection)| collection.to_string()).collect::<Vec<String>>(), "nothing"), if collections.len() > 1 && collections.iter().permutations(2).unique().any(|permutation| permutation[0].1.has_common_resource(&permutation[1].1)) { format!(" for a total of {}", collections.iter().map(|(_, collection)| collection.clone()).sum::<ResourcePile>()) } else { String::new() }, if player.get_city(*city_position).expect("there should be a city at the given position").is_activated() { format!(" making it {:?}", player.get_city(*city_position).expect("there should be a city at the given position").mood_state.clone() - 1) } else { String::new() }),
+        PlayingAction::Collect { city_position, collections } => format_collect_log_item(player, &player_name, *city_position, collections),
         PlayingAction::Recruit { units, city_position, payment, leader_index, replaced_units } => format!("{player_name} paid {payment} to recruit {}{} in the city at {city_position}{}{}", units.iter().cloned().collect::<Units>(), leader_index.map_or(String::new(), |leader_index| format!(" {} {} as his leader", if player.available_leaders.len() > 1 { "choosing" } else { "getting" }, &player.available_leaders[leader_index].name)), if player.get_city(*city_position).expect("there should be a city at the given position").is_activated() { format!(" making it {:?}", player.get_city(*city_position).expect("there should be a city at the given position").mood_state.clone() - 1) } else { String::new() }, format_args!("{}{}", match replaced_units.len() { 0 => "", 1 => " and replaces the unit at ", _ => " and replaces units at " }, utils::format_list(&replaced_units.iter().map(|unit_id| player.get_unit(*unit_id).expect("the player should have the replaced units").position.to_string()).unique().collect::<Vec<String>>(), ""))),
         PlayingAction::MoveUnits => format!("{player_name} used a move units action"),
         PlayingAction::IncreaseHappiness { happiness_increases } => {
@@ -112,6 +112,59 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             actions_left => format!(" with {actions_left} actions left"),
         }),
     }
+}
+
+fn format_collect_log_item(
+    player: &Player,
+    player_name: &String,
+    city_position: Position,
+    collections: &Vec<(Position, ResourcePile)>,
+) -> String {
+    let res = utils::format_list(
+        &collections
+            .iter()
+            .map(|(_, collection)| collection.to_string())
+            .collect::<Vec<String>>(),
+        "nothing",
+    );
+    let total = if collections.len() > 1
+        && collections
+            .iter()
+            .permutations(2)
+            .unique()
+            .any(|permutation| permutation[0].1.has_common_resource(&permutation[1].1))
+    {
+        format!(
+            " for a total of {}",
+            collections
+                .iter()
+                .map(|(_, collection)| collection.clone())
+                .sum::<ResourcePile>()
+        )
+    } else {
+        String::new()
+    };
+    let mood = if player
+        .get_city(city_position)
+        .expect("there should be a city at the given position")
+        .is_activated()
+    {
+        format!(
+            " making it {:?}",
+            player
+                .get_city(city_position)
+                .expect("there should be a city at the given position")
+                .mood_state
+                .clone()
+                - 1
+        )
+    } else {
+        String::new()
+    };
+    format!(
+        "{player_name} collects {}{} in the city at {city_position}{}",
+        res, total, mood
+    )
 }
 
 fn format_construct_log_item(
