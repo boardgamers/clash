@@ -3,9 +3,10 @@ use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET,
 use crate::happiness_ui::start_increase_happiness;
 use crate::layout_ui::{
     bottom_left_button, bottom_left_texture, bottom_right_texture, icon_pos, right_center_button,
-    right_center_label, top_center_label, top_left_label, top_right_texture,
+    right_center_label, top_center_label, top_center_texture, top_left_label, top_right_texture,
 };
-use macroquad::math::vec2;
+use crate::resource_ui::ResourceType;
+use macroquad::math::{u32, vec2};
 use macroquad::prelude::*;
 use macroquad::ui::{root_ui, Ui};
 use server::action::Action;
@@ -13,9 +14,10 @@ use server::game::{Game, GameState};
 use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
-pub fn show_globals(game: &Game, player: &ShownPlayer) -> StateUpdate {
-    show_top_left(game);
-    show_top_center(game, player);
+
+pub fn show_globals(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
+    show_top_left(game, player);
+    show_top_center(game, player, state);
 
     let mut y = -100.;
 
@@ -45,44 +47,109 @@ pub fn show_globals(game: &Game, player: &ShownPlayer) -> StateUpdate {
     StateUpdate::None
 }
 
-fn show_top_center(game: &Game, player: &ShownPlayer) {
+pub fn resource_label(
+    player: &ShownPlayer,
+    state: &State,
+    label: &str,
+    resource_type: ResourceType,
+    p: Vec2,
+) {
+    top_icon_with_label(player, state, label, &state.assets.resources[&resource_type], p);
+}
+
+pub fn top_icon_with_label(
+    player: &ShownPlayer,
+    state: &State,
+    label: &str,
+    texture: &Texture2D,
+    p: Vec2,
+) {
+    top_center_texture(state, texture, p);
+    top_center_label(player, p + vec2(-30. - label.len() as f32 * 5., 40.), label);
+}
+
+fn show_top_center(game: &Game, player: &ShownPlayer, state: &State) {
     let p = game.get_player(player.index);
 
-    top_center_label(player, vec2(-400., 0.), &resource_ui(p, "Fd", |r| r.food));
-    top_center_label(player, vec2(-320., 0.), &resource_ui(p, "Wd", |r| r.wood));
-    top_center_label(player, vec2(-240., 0.), &resource_ui(p, "Ore", |r| r.ore));
-    top_center_label(player, vec2(-160., 0.), &resource_ui(p, "Id", |r| r.ideas));
-    top_center_label(
+    resource_label(
         player,
-        vec2(-80., 0.),
-        &resource_ui(p, "Gld", |r| r.gold as u32),
+        &state,
+        &resource_ui(p, |r| r.food),
+        ResourceType::Food,
+        icon_pos(-4, 0),
     );
-    top_center_label(
+    resource_label(
         player,
-        vec2(0., 0.),
-        &resource_ui(p, "Md", |r| r.mood_tokens),
+        &state,
+        &resource_ui(p, |r| r.wood),
+        ResourceType::Wood,
+        icon_pos(-3, 0),
     );
-    top_center_label(
+    resource_label(
         player,
-        vec2(80., 0.),
-        &resource_ui(p, "Cul", |r| r.culture_tokens),
+        &state,
+        &resource_ui(p, |r| r.ore),
+        ResourceType::Ore,
+        icon_pos(-2, 0),
+    );
+    resource_label(
+        player,
+        &state,
+        &resource_ui(p, |r| r.ideas),
+        ResourceType::Ideas,
+        icon_pos(-1, 0),
+    );
+    resource_label(
+        player,
+        &state,
+        &resource_ui(p, |r| r.gold as u32),
+        ResourceType::Gold,
+        icon_pos(0, 0),
+    );
+    resource_label(
+        player,
+        &state,
+        &resource_ui(p, |r| r.mood_tokens),
+        ResourceType::MoodTokens,
+        icon_pos(1, 0),
+    );
+    resource_label(
+        player,
+        &state,
+        &resource_ui(p, |r| r.culture_tokens),
+        ResourceType::CultureTokens,
+        icon_pos(2, 0),
     );
 
-    top_center_label(
+    top_icon_with_label(
         player,
-        vec2(170., 0.),
+        &state,
+        &format!("{}", &p.victory_points()),
+        &state.assets.victory_points,
+        icon_pos(3, 0),
+    );
+
+    show_wonders(game, player, &mut root_ui());
+}
+
+fn show_top_left(game: &Game, player: &ShownPlayer) {
+    let mut y = 0.;
+    let mut label = |label: String| {
+        top_left_label(vec2(0., y), &label);
+        y += 30.;
+    };
+
+    let p = game.get_player(player.index);
+
+    top_left_label(
+        icon_pos(0, 0),
         &format!("Civ {}", p.civilization.name),
     );
-    top_center_label(
-        player,
-        vec2(250., 0.),
-        &format!("VP {}", p.victory_points()),
-    );
-    top_center_label(
-        player,
-        vec2(300., 0.),
+
+    top_left_label(
+        icon_pos(0, 1),
         &format!(
-            "Ldr {}",
+            "Leader {}",
             if let Some(l) = &p.active_leader {
                 &l.name
             } else {
@@ -90,16 +157,6 @@ fn show_top_center(game: &Game, player: &ShownPlayer) {
             }
         ),
     );
-
-    show_wonders(game, player, &mut root_ui());
-}
-
-fn show_top_left(game: &Game) {
-    let mut y = 0.;
-    let mut label = |label: String| {
-        top_left_label(vec2(0., y), &label);
-        y += 30.;
-    };
 
     match &game.state {
         GameState::Finished => label("Finished".to_string()),
@@ -176,10 +233,10 @@ pub fn show_wonders(game: &Game, player: &ShownPlayer, ui: &mut Ui) {
     }
 }
 
-fn resource_ui(player: &Player, name: &str, f: impl Fn(&ResourcePile) -> u32) -> String {
+fn resource_ui(player: &Player, f: impl Fn(&ResourcePile) -> u32) -> String {
     let r: &ResourcePile = &player.resources;
     let l: &ResourcePile = &player.resource_limit;
-    format!("{name} {}/{}", f(r), f(l))
+    format!("{}/{}", f(r), f(l))
 }
 
 pub fn show_global_controls(game: &Game, state: &mut State, features: &Features) -> StateUpdate {

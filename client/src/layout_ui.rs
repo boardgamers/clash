@@ -24,6 +24,10 @@ pub fn top_center_label(player: &ShownPlayer, p: Vec2, label: &str) {
     root_ui().label(vec2(player.screen_size.x / 2.0, 0.) + p, label);
 }
 
+pub fn top_center_texture(state: &State, texture: &Texture2D, p: Vec2) -> bool {
+    relative_texture(state, texture, vec2(state.screen_size.x / 2., MARGIN), p)
+}
+
 pub fn top_right_texture(state: &State, texture: &Texture2D, p: Vec2) -> bool {
     relative_texture(
         state,
