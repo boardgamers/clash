@@ -102,8 +102,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         PlayingAction::Recruit(r) => format_recruit_log_item(player, &player_name, r),
         PlayingAction::MoveUnits => format!("{player_name} used a move units action"),
         PlayingAction::IncreaseHappiness { happiness_increases } => {
-            let happiness_increases = happiness_increases.iter().filter_map(|(position, steps)| if *steps > 0 { Some(format!("the city at {position} by {steps} steps, making it {:?}", player.get_city(*position).expect("player should have a city at this position").mood_state.clone() + *steps)) } else { None }).collect::<Vec<String>>();
-            format!("{player_name} increased happiness in {}", utils::format_list(&happiness_increases, "no city"))
+            format_happiness_increase(player, &player_name, happiness_increases)
         },
         PlayingAction::InfluenceCultureAttempt { starting_city_position, target_player_index, target_city_position, city_piece } => format!("{player_name} tried to influence culture the {city_piece:?} in the city at {target_city_position} by {}{}", if target_player_index == &game.active_player() { String::from("himself")} else { game.players[*target_player_index].get_name() }, if starting_city_position != target_city_position { format!(" with the city at {starting_city_position}")} else { String::new() }),
         PlayingAction::Custom(action) => action.format_log_item(game, &player_name),
@@ -112,6 +111,35 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             actions_left => format!(" with {actions_left} actions left"),
         }),
     }
+}
+
+fn format_happiness_increase(
+    player: &Player,
+    player_name: &String,
+    happiness_increases: &[(Position, u32)],
+) -> String {
+    let happiness_increases = happiness_increases
+        .iter()
+        .filter_map(|(position, steps)| {
+            if *steps > 0 {
+                Some(format!(
+                    "the city at {position} by {steps} steps, making it {:?}",
+                    player
+                        .get_city(*position)
+                        .expect("player should have a city at this position")
+                        .mood_state
+                        .clone()
+                        + *steps
+                ))
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<String>>();
+    format!(
+        "{player_name} increased happiness in {}",
+        utils::format_list(&happiness_increases, "no city")
+    )
 }
 
 fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -> String {
