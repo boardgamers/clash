@@ -66,6 +66,9 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     let mut updates = StateUpdates::new();
     updates.add(show_globals(game, player));
     updates.add(show_global_controls(game, state, features));
+    if !matches!(state.active_dialog, ActiveDialog::None) || state.active_dialog.is_map_dialog() {
+        updates.clear();
+    }
 
     if player.can_control {
         if let Some(u) = &state.pending_update {

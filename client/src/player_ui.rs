@@ -2,8 +2,8 @@ use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
 use crate::layout_ui::{
-    bottom_left_button, bottom_right_button, right_center_button, right_center_label,
-    top_center_label, top_left_label,
+    bottom_left_button, bottom_left_texture, bottom_right_button, right_center_button,
+    right_center_label, top_center_label, top_left_label, top_right_texture,
 };
 use macroquad::math::vec2;
 use macroquad::prelude::*;
@@ -91,6 +91,7 @@ fn show_top_center(game: &Game, player: &ShownPlayer) {
             }
         ),
     );
+
     show_wonders(game, player, &mut root_ui());
 }
 
@@ -185,11 +186,12 @@ fn resource_ui(player: &Player, name: &str, f: impl Fn(&ResourcePile) -> u32) ->
 pub fn show_global_controls(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     let player = &state.shown_player(game);
 
-    if bottom_left_button(player, vec2(0., -50.), "+") {
+    let y1 = -10.;
+    if bottom_left_texture(state, &state.assets.zoom_in, vec2(7., y1)) {
         state.zoom *= 1.1;
         return StateUpdate::None;
     }
-    if bottom_left_button(player, vec2(70., -50.), "-") {
+    if bottom_left_texture(state, &state.assets.zoom_out, vec2(2., y1)) {
         state.zoom /= 1.1;
         return StateUpdate::None;
     }
@@ -242,10 +244,12 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
     if player.can_play_action && bottom_left_button(player, vec2(0., -140.), "Inc. Hap.") {
         return start_increase_happiness(game, player);
     }
-    if bottom_left_button(player, vec2(0., -110.), "Advances") {
+    let y = 10.;
+    if top_right_texture(state, &state.assets.advances, vec2(-60., y)) {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     };
-    if bottom_left_button(player, vec2(0., -80.), "Log") {
+
+    if top_right_texture(state, &state.assets.log, vec2(-30., y)) {
         return StateUpdate::OpenDialog(ActiveDialog::Log);
     };
     let d = state.game_state_dialog(game, &ActiveDialog::None);

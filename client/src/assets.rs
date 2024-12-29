@@ -1,5 +1,8 @@
 use crate::client::Features;
-use macroquad::prelude::{load_texture, load_ttf_font, Color, Image, RectOffset, Texture2D};
+use crate::resource_ui::ResourceType;
+use crate::svg;
+use macroquad::prelude::{load_texture, load_ttf_font, Color, Image, RectOffset};
+use macroquad::texture::Texture2D;
 use macroquad::ui::{root_ui, Skin};
 use server::map::Terrain;
 use server::unit::UnitType;
@@ -9,8 +12,34 @@ pub struct Assets {
     pub terrain: HashMap<Terrain, Texture2D>,
     pub units: HashMap<UnitType, Texture2D>,
     pub skin: Skin,
+
+    // mood icons
+    pub angry: Texture2D,
+    pub neutral: Texture2D,
+
+    // action icons
+    pub movement: Texture2D,
+    pub log: Texture2D,
+    pub hour_glass: Texture2D,
+    pub advances: Texture2D,
+    pub redo: Texture2D,
+    pub reset: Texture2D,
+    pub undo: Texture2D,
+
+    // UI
+    pub zoom_in: Texture2D,
+    pub zoom_out: Texture2D,
+    pub up: Texture2D,
+    pub down: Texture2D,
+    pub left: Texture2D,
+    pub right: Texture2D,
+
+    // Admin
+    pub import: Texture2D,
+    pub export: Texture2D,
+
     // pub cities: HashMap<CityType, Texture2D>,
-    // pub resources: HashMap<Resource, Texture2D>,
+    pub resources: HashMap<ResourceType, Texture2D>,
 }
 
 impl Assets {
@@ -19,8 +48,67 @@ impl Assets {
             terrain: Self::terrain(features).await,
             units: HashMap::new(),
             skin: Self::skin(features).await,
+
+            // mood icons
+            angry: svg::icon(include_str!("../assets/angry.svg")),
+            neutral: svg::icon(include_str!("../assets/neutral.svg")),
+
+            // resource icons
+            resources: [
+                (
+                    ResourceType::Food,
+                    svg::icon(include_str!("../assets/food.svg")),
+                ),
+                (
+                    ResourceType::Wood,
+                    svg::icon(include_str!("../assets/wood.svg")),
+                ),
+                (
+                    ResourceType::Ore,
+                    svg::icon(include_str!("../assets/rock.svg")),
+                ),
+                (
+                    ResourceType::Ideas,
+                    svg::icon(include_str!("../assets/idea.svg")),
+                ),
+                (
+                    ResourceType::Gold,
+                    svg::icon(include_str!("../assets/gold.svg")),
+                ),
+                (
+                    ResourceType::MoodTokens,
+                    svg::icon(include_str!("../assets/happy.svg")),
+                ),
+                (
+                    ResourceType::CultureTokens,
+                    svg::icon(include_str!("../assets/culture.svg")),
+                ),
+            ]
+            .iter()
+            .cloned()
+            .collect(),
+
+            // action icons
+            advances: svg::icon(include_str!("../assets/lab.svg")),
+            hour_glass: svg::icon(include_str!("../assets/hour-glass.svg")),
+            log: svg::icon(include_str!("../assets/scroll.svg")),
+            movement: svg::icon(include_str!("../assets/move.svg")),
+            redo: svg::icon(include_str!("../assets/redo.svg")),
+            reset: svg::icon(include_str!("../assets/reset.svg")),
+            undo: svg::icon(include_str!("../assets/undo.svg")),
+
+            // UI
+            zoom_in: svg::icon(include_str!("../assets/zoom-in.svg")),
+            zoom_out: svg::icon(include_str!("../assets/zoom-out.svg")),
+            up: svg::icon(include_str!("../assets/up-arrow.svg")),
+            down: svg::icon(include_str!("../assets/down-arrow.svg")),
+            left: svg::icon(include_str!("../assets/left-arrow.svg")),
+            right: svg::icon(include_str!("../assets/right-arrow.svg")),
+
+            // Admin
+            import: svg::icon(include_str!("../assets/import.svg")),
+            export: svg::icon(include_str!("../assets/export.svg")),
             // cities: HashMap::new(),
-            // resources: HashMap::new(),
         }
     }
 

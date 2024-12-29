@@ -30,4 +30,5 @@ mod recruit_unit_ui;
 mod resource_ui;
 mod select_ui;
 mod status_phase_ui;
+mod svg;
 mod unit_ui;
