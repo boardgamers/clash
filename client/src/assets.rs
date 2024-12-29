@@ -94,7 +94,7 @@ impl Assets {
             movement: load_png(include_bytes!("../assets/walk-svgrepo-com.png")),
             redo: load_png(include_bytes!("../assets/redo-svgrepo-com.png")),
             reset: load_png(include_bytes!("../assets/reset-svgrepo-com.png")),
-            undo: load_png(include_bytes!("../assets/undo-svgrepo-com.png.png")),
+            undo: load_png(include_bytes!("../assets/undo-svgrepo-com.png")),
 
             // UI
             zoom_in: load_png(include_bytes!("../assets/zoom-in-1462-svgrepo-com.png")),
