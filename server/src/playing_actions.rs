@@ -28,6 +28,15 @@ pub struct Construct {
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
+pub struct Recruit {
+    pub units: Vec<UnitType>,
+    pub city_position: Position,
+    pub payment: ResourcePile,
+    pub leader_index: Option<usize>,
+    pub replaced_units: Vec<u32>,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub enum PlayingAction {
     Advance {
         advance: String,
@@ -41,13 +50,7 @@ pub enum PlayingAction {
         city_position: Position,
         collections: Vec<(Position, ResourcePile)>,
     },
-    Recruit {
-        units: Vec<UnitType>,
-        city_position: Position,
-        payment: ResourcePile,
-        leader_index: Option<usize>,
-        replaced_units: Vec<u32>,
-    },
+    Recruit(Recruit),
     MoveUnits,
     IncreaseHappiness {
         happiness_increases: Vec<(Position, u32)>,
@@ -143,26 +146,20 @@ impl PlayingAction {
                 city.activate();
                 game.players[player_index].gain_resources(total_collect);
             }
-            Recruit {
-                units,
-                city_position,
-                payment,
-                leader_index,
-                replaced_units,
-            } => {
-                let cost = units.iter().map(UnitType::cost).sum::<ResourcePile>();
+            Recruit(r) => {
+                let cost = r.units.iter().map(UnitType::cost).sum::<ResourcePile>();
                 let player = &mut game.players[player_index];
                 assert!(
-                    player.can_recruit(&units, city_position, leader_index, &replaced_units)
-                        && cost.is_valid_payment(&payment)
+                    player.can_recruit(&r.units, r.city_position, r.leader_index, &r.replaced_units)
+                        && cost.is_valid_payment(&r.payment)
                 );
-                player.loose_resources(payment);
+                player.loose_resources(r.payment);
                 game.recruit(
                     player_index,
-                    units,
-                    city_position,
-                    leader_index,
-                    replaced_units,
+                    r.units,
+                    r.city_position,
+                    r.leader_index,
+                    r.replaced_units,
                 );
             }
             MoveUnits => {
@@ -315,15 +312,9 @@ impl PlayingAction {
                 let total_collect = collections.into_iter().map(|(_, collect)| collect).sum();
                 game.players[player_index].loose_resources(total_collect);
             }
-            Recruit {
-                units,
-                city_position,
-                payment,
-                leader_index,
-                replaced_units: _,
-            } => {
-                game.players[player_index].gain_resources(payment);
-                game.undo_recruit(player_index, &units, city_position, leader_index);
+            Recruit(r) => {
+                game.players[player_index].gain_resources(r.payment);
+                game.undo_recruit(player_index, &r.units, r.city_position, r.leader_index);
             }
             MoveUnits => game.state = GameState::Playing,
             IncreaseHappiness {

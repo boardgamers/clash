@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::action::PlayActionCard;
 use crate::player::Player;
-use crate::playing_actions::Construct;
+use crate::playing_actions::{Construct, Recruit};
 use crate::status_phase::{ChangeGovernmentType, RazeSize1City};
 use crate::{
     action::{Action, CombatAction},
@@ -99,7 +99,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         PlayingAction::FoundCity { settler } => format!("{player_name} founded a city at {}", player.get_unit(*settler).expect("The player should have the settler").position),
         PlayingAction::Construct(c) => format_construct_log_item(game, player, &player_name, c),
         PlayingAction::Collect { city_position, collections } => format_collect_log_item(player, &player_name, *city_position, collections),
-        PlayingAction::Recruit { units, city_position, payment, leader_index, replaced_units } => format!("{player_name} paid {payment} to recruit {}{} in the city at {city_position}{}{}", units.iter().cloned().collect::<Units>(), leader_index.map_or(String::new(), |leader_index| format!(" {} {} as his leader", if player.available_leaders.len() > 1 { "choosing" } else { "getting" }, &player.available_leaders[leader_index].name)), if player.get_city(*city_position).expect("there should be a city at the given position").is_activated() { format!(" making it {:?}", player.get_city(*city_position).expect("there should be a city at the given position").mood_state.clone() - 1) } else { String::new() }, format_args!("{}{}", match replaced_units.len() { 0 => "", 1 => " and replaces the unit at ", _ => " and replaces units at " }, utils::format_list(&replaced_units.iter().map(|unit_id| player.get_unit(*unit_id).expect("the player should have the replaced units").position.to_string()).unique().collect::<Vec<String>>(), ""))),
+        PlayingAction::Recruit(r) => format_recruit_log_item(&player, &player_name, r),
         PlayingAction::MoveUnits => format!("{player_name} used a move units action"),
         PlayingAction::IncreaseHappiness { happiness_increases } => {
             let happiness_increases = happiness_increases.iter().filter_map(|(position, steps)| if *steps > 0 { Some(format!("the city at {position} by {steps} steps, making it {:?}", player.get_city(*position).expect("player should have a city at this position").mood_state.clone() + *steps)) } else { None }).collect::<Vec<String>>();
@@ -112,6 +112,53 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             actions_left => format!(" with {actions_left} actions left"),
         }),
     }
+}
+
+fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -> String {
+    let leader_index = r.leader_index;
+    let city_position = &r.city_position;
+    let units = &r.units;
+    let payment = &r.payment;
+    let replaced_units = &r.replaced_units;
+    let units_str = units.iter().cloned().collect::<Units>();
+    let leader_str = leader_index.map_or(String::new(), |leader_index| {
+        format!(
+            " {} {} as his leader",
+            if player.available_leaders.len() > 1 {
+                "choosing"
+            } else {
+                "getting"
+            },
+            &player.available_leaders[leader_index].name
+        )
+    });
+    let mood = format_mood_change(player, *city_position);
+    let replace_str = match replaced_units.len() {
+        0 => "",
+        1 => " and replaces the unit at ",
+        _ => " and replaces units at ",
+    };
+    let replace_pos = utils::format_list(
+        &replaced_units
+            .iter()
+            .map(|unit_id| {
+                player
+                    .get_unit(*unit_id)
+                    .expect("the player should have the replaced units")
+                    .position
+                    .to_string()
+            })
+            .unique()
+            .collect::<Vec<String>>(),
+        "",
+    );
+    format!(
+        "{player_name} paid {payment} to recruit {}{} in the city at {city_position}{}{}",
+        units_str,
+        leader_str,
+        mood,
+        format_args!("{}{}", replace_str, replace_pos)
+    )
 }
 
 fn format_collect_log_item(

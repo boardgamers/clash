@@ -28,6 +28,7 @@ use server::{
     resource_pile::ResourcePile,
     unit::{MovementAction::*, UnitType::*},
 };
+use server::playing_actions::PlayingAction;
 
 #[test]
 fn basic_actions() {
@@ -175,13 +176,13 @@ fn basic_actions() {
     let mut game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
     let player = &mut game.players[0];
     player.gain_resources(ResourcePile::food(2));
-    let recruit_action = Action::Playing(Recruit {
+    let recruit_action = Action::Playing(PlayingAction::Recruit(server::playing_actions::Recruit {
         units: vec![Settler],
         city_position,
         payment: ResourcePile::food(2),
         leader_index: None,
         replaced_units: Vec::new(),
-    });
+    }));
     let mut game = game_api::execute_action(game, recruit_action, 0);
     let player = &mut game.players[0];
     assert_eq!(1, player.units.len());
@@ -544,13 +545,13 @@ fn test_wonder() {
 fn test_recruit() {
     test_action(
         "recruit",
-        Action::Playing(Recruit {
+        Action::Playing(Recruit(server::playing_actions::Recruit {
             units: vec![Settler, Infantry],
             city_position: Position::from_offset("A1"),
             payment: ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2),
             leader_index: None,
             replaced_units: vec![4],
-        }),
+        })),
         0,
         true,
         false,
@@ -561,13 +562,13 @@ fn test_recruit() {
 fn test_recruit_combat() {
     test_action(
         "recruit_combat",
-        Action::Playing(Recruit {
+        Action::Playing(Recruit(server::playing_actions::Recruit {
             units: vec![Ship],
             city_position: Position::from_offset("C2"),
             payment: ResourcePile::wood(2),
             leader_index: None,
             replaced_units: vec![],
-        }),
+        })),
         0,
         false,
         false,
