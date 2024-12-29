@@ -150,8 +150,12 @@ impl PlayingAction {
                 let cost = r.units.iter().map(UnitType::cost).sum::<ResourcePile>();
                 let player = &mut game.players[player_index];
                 assert!(
-                    player.can_recruit(&r.units, r.city_position, r.leader_index, &r.replaced_units)
-                        && cost.is_valid_payment(&r.payment)
+                    player.can_recruit(
+                        &r.units,
+                        r.city_position,
+                        r.leader_index,
+                        &r.replaced_units
+                    ) && cost.is_valid_payment(&r.payment)
                 );
                 player.loose_resources(r.payment);
                 game.recruit(

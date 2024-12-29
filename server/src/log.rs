@@ -99,7 +99,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         PlayingAction::FoundCity { settler } => format!("{player_name} founded a city at {}", player.get_unit(*settler).expect("The player should have the settler").position),
         PlayingAction::Construct(c) => format_construct_log_item(game, player, &player_name, c),
         PlayingAction::Collect { city_position, collections } => format_collect_log_item(player, &player_name, *city_position, collections),
-        PlayingAction::Recruit(r) => format_recruit_log_item(&player, &player_name, r),
+        PlayingAction::Recruit(r) => format_recruit_log_item(player, &player_name, r),
         PlayingAction::MoveUnits => format!("{player_name} used a move units action"),
         PlayingAction::IncreaseHappiness { happiness_increases } => {
             let happiness_increases = happiness_increases.iter().filter_map(|(position, steps)| if *steps > 0 { Some(format!("the city at {position} by {steps} steps, making it {:?}", player.get_city(*position).expect("player should have a city at this position").mood_state.clone() + *steps)) } else { None }).collect::<Vec<String>>();
@@ -153,11 +153,7 @@ fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -
         "",
     );
     format!(
-        "{player_name} paid {payment} to recruit {}{} in the city at {city_position}{}{}",
-        units_str,
-        leader_str,
-        mood,
-        format_args!("{}{}", replace_str, replace_pos)
+        "{player_name} paid {payment} to recruit {units_str}{leader_str} in the city at {city_position}{mood}{replace_str}{replace_pos}"
     )
 }
 
@@ -236,7 +232,7 @@ fn format_construct_log_item(
 }
 
 fn format_mood_change(player: &Player, city_position: Position) -> String {
-    let mood = if player
+    if player
         .get_city(city_position)
         .expect("there should be a city at the given position")
         .is_activated()
@@ -252,8 +248,7 @@ fn format_mood_change(player: &Player, city_position: Position) -> String {
         )
     } else {
         String::new()
-    };
-    mood
+    }
 }
 
 fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> String {

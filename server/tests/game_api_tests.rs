@@ -8,6 +8,7 @@ use std::{
 
 use server::action::CombatAction;
 use server::game::{CulturalInfluenceResolution, GameState};
+use server::playing_actions::PlayingAction;
 use server::status_phase::{
     ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction,
 };
@@ -28,7 +29,6 @@ use server::{
     resource_pile::ResourcePile,
     unit::{MovementAction::*, UnitType::*},
 };
-use server::playing_actions::PlayingAction;
 
 #[test]
 fn basic_actions() {
@@ -176,13 +176,14 @@ fn basic_actions() {
     let mut game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
     let player = &mut game.players[0];
     player.gain_resources(ResourcePile::food(2));
-    let recruit_action = Action::Playing(PlayingAction::Recruit(server::playing_actions::Recruit {
-        units: vec![Settler],
-        city_position,
-        payment: ResourcePile::food(2),
-        leader_index: None,
-        replaced_units: Vec::new(),
-    }));
+    let recruit_action =
+        Action::Playing(PlayingAction::Recruit(server::playing_actions::Recruit {
+            units: vec![Settler],
+            city_position,
+            payment: ResourcePile::food(2),
+            leader_index: None,
+            replaced_units: Vec::new(),
+        }));
     let mut game = game_api::execute_action(game, recruit_action, 0);
     let player = &mut game.players[0];
     assert_eq!(1, player.units.len());
