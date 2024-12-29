@@ -9,7 +9,7 @@ pub const ICON_SIZE: f32 = 30.;
 pub const MARGIN: f32 = 10.;
 
 pub fn icon_offset(i: i8) -> f32 {
-    i as f32 * 1.4 * ICON_SIZE
+    f32::from(i) * 1.4 * ICON_SIZE
 }
 
 pub fn icon_pos(x: i8, y: i8) -> Vec2 {
