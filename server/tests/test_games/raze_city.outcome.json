@@ -1,6 +1,6 @@
 {
   "state": {
-    "StatusPhase": "RaseSize1City"
+    "StatusPhase": "RazeSize1City"
   },
   "players": [
     {
@@ -398,7 +398,9 @@
     },
     {
       "StatusPhase": {
-        "RaseSize1City": "A1"
+        "RazeSize1City": {
+          "Position": "A1"
+        }
       }
     }
   ],

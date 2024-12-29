@@ -1,8 +1,8 @@
 #![allow(clippy::pedantic)]
 
+use crate::{game::Game, game_api};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
-use crate::{game::Game, game_api};
 extern crate console_error_panic_hook;
 
 #[derive(Serialize, Deserialize)]

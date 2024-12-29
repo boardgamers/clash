@@ -396,12 +396,14 @@
     },
     {
       "StatusPhase": {
-        "RaseSize1City": "A1"
+        "RazeSize1City": {
+          "Position": "A1"
+        }
       }
     },
     {
       "StatusPhase": {
-        "RaseSize1City": null
+        "RazeSize1City": "None"
       }
     },
     {

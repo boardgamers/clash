@@ -8,7 +8,7 @@ use std::{
 
 use server::action::CombatAction;
 use server::game::{CulturalInfluenceResolution, GameState};
-use server::status_phase::{ChangeGovernmentType, StatusPhaseAction};
+use server::status_phase::{ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction};
 use server::{
     action::Action,
     city::{City, MoodState::*},
@@ -627,7 +627,7 @@ fn test_construct_port() {
 fn test_wrong_status_phase_action() {
     test_action(
         "illegal_free_advance",
-        Action::StatusPhase(StatusPhaseAction::RaseSize1City(None)),
+        Action::StatusPhase(StatusPhaseAction::RazeSize1City(RazeSize1City::None)),
         0,
         false,
         true,
@@ -651,7 +651,7 @@ fn test_free_advance() {
 fn test_raze_city() {
     test_action(
         "raze_city",
-        Action::StatusPhase(StatusPhaseAction::RaseSize1City(Some(
+        Action::StatusPhase(StatusPhaseAction::RazeSize1City(RazeSize1City::Position(
             Position::from_offset("A1"),
         ))),
         0,
@@ -664,7 +664,7 @@ fn test_raze_city() {
 fn test_raze_city_decline() {
     test_action(
         "raze_city_decline",
-        Action::StatusPhase(StatusPhaseAction::RaseSize1City(None)),
+        Action::StatusPhase(StatusPhaseAction::RazeSize1City(RazeSize1City::None)),
         0,
         false,
         false,
@@ -686,8 +686,8 @@ fn test_determine_first_player() {
 fn test_change_government() {
     test_action(
         "change_government",
-        Action::StatusPhase(StatusPhaseAction::ChangeGovernmentType(Some(
-            ChangeGovernmentType {
+        Action::StatusPhase(StatusPhaseAction::ChangeGovernmentType(ChangeGovernmentType::ChangeGovernment(
+            ChangeGovernment {
                 new_government: String::from("Theocracy"),
                 additional_advances: vec![String::from("Theocracy 2")],
             },

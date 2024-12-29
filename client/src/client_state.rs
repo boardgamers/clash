@@ -378,7 +378,7 @@ impl State {
             GameState::StatusPhase(state) => match state {
                 StatusPhaseState::CompleteObjectives => ActiveDialog::CompleteObjectives,
                 StatusPhaseState::FreeAdvance => ActiveDialog::FreeAdvance,
-                StatusPhaseState::RaseSize1City => ActiveDialog::RazeSize1City,
+                StatusPhaseState::RazeSize1City => ActiveDialog::RazeSize1City,
                 StatusPhaseState::ChangeGovernmentType => ActiveDialog::ChangeGovernmentType,
                 StatusPhaseState::DetermineFirstPlayer => ActiveDialog::DetermineFirstPlayer,
             },

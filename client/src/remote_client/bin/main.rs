@@ -19,10 +19,10 @@ extern "C" {
 #[wasm_bindgen]
 extern "C" {
     type Rect;
-    
+
     #[wasm_bindgen(method, getter)]
     fn width(this: &Rect) -> f32;
-    
+
     #[wasm_bindgen(method, getter)]
     fn height(this: &Rect) -> f32;
 }
@@ -107,10 +107,7 @@ impl RemoteClient {
             }
 
             let s = self.control.canvas_size();
-            self.state.screen_size = vec2(
-                s.width(),
-                s.height(),
-            );
+            self.state.screen_size = vec2(s.width(), s.height());
 
             let sync_result = self.update_state();
 

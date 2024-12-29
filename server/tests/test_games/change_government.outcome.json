@@ -471,21 +471,23 @@
     },
     {
       "StatusPhase": {
-        "RaseSize1City": null
+        "RazeSize1City": "None"
       }
     },
     {
       "StatusPhase": {
-        "RaseSize1City": null
+        "RazeSize1City": "None"
       }
     },
     {
       "StatusPhase": {
         "ChangeGovernmentType": {
-          "new_government": "Theocracy",
-          "additional_advances": [
-            "Theocracy 2"
-          ]
+          "ChangeGovernment": {
+            "new_government": "Theocracy",
+            "additional_advances": [
+              "Theocracy 2"
+            ]
+          }
         }
       }
     }

@@ -6,7 +6,9 @@ use server::action::Action;
 use server::content::advances;
 use server::game::Game;
 use server::position::Position;
-use server::status_phase::{ChangeGovernmentType, StatusPhaseAction};
+use server::status_phase::{
+    ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction,
+};
 
 pub fn determine_first_player_dialog(game: &Game, player: &ShownPlayer) -> StateUpdate {
     active_dialog_window(
@@ -32,7 +34,9 @@ pub fn raze_city_confirm_dialog(game: &Game, player: &ShownPlayer, pos: Position
     if player.get(game).can_raze_city(pos) {
         StateUpdate::execute_with_confirm(
             vec![format!("Raze {pos} to get 1 gold")],
-            Action::StatusPhase(StatusPhaseAction::RaseSize1City(Some(pos))),
+            Action::StatusPhase(StatusPhaseAction::RazeSize1City(RazeSize1City::Position(
+                pos,
+            ))),
         )
     } else {
         StateUpdate::None
@@ -42,7 +46,9 @@ pub fn raze_city_confirm_dialog(game: &Game, player: &ShownPlayer, pos: Position
 pub fn raze_city_dialog(player: &ShownPlayer) -> StateUpdate {
     active_dialog_window(player, "Select a city to raze - or decline.", |ui| {
         if ui.button(None, "Decline") {
-            return StateUpdate::status_phase(StatusPhaseAction::RaseSize1City(None));
+            return StateUpdate::status_phase(StatusPhaseAction::RazeSize1City(
+                RazeSize1City::None,
+            ));
         }
         StateUpdate::None
     })
@@ -124,7 +130,9 @@ pub fn change_government_type_dialog(game: &Game, player: &ShownPlayer) -> State
         }
 
         if ui.button(None, "Decline") {
-            return StateUpdate::status_phase(StatusPhaseAction::ChangeGovernmentType(None));
+            return StateUpdate::status_phase(StatusPhaseAction::ChangeGovernmentType(
+                ChangeGovernmentType::KeepGovernment,
+            ));
         }
         StateUpdate::None
     })
@@ -142,12 +150,12 @@ pub fn choose_additional_advances_dialog(
         additional_advances,
         |a| StateUpdate::SetDialog(ActiveDialog::ChooseAdditionalAdvances(a)),
         |a| {
-            StateUpdate::status_phase(StatusPhaseAction::ChangeGovernmentType(Some(
-                ChangeGovernmentType {
+            StateUpdate::status_phase(StatusPhaseAction::ChangeGovernmentType(
+                ChangeGovernmentType::ChangeGovernment(ChangeGovernment {
                     new_government: a.government.clone(),
                     additional_advances: a.selected.clone(),
-                },
-            )))
+                }),
+            ))
         },
     )
 }

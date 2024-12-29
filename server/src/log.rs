@@ -3,6 +3,8 @@
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
+use crate::action::PlayActionCard;
+use crate::status_phase::{ChangeGovernmentType, RazeSize1City};
 use crate::{
     action::{Action, CombatAction},
     game::Game,
@@ -161,12 +163,13 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
         StatusPhaseAction::FreeAdvance(advance) => {
             format!("{player_name} advanced {advance} for free")
         }
-        StatusPhaseAction::RaseSize1City(city) => {
+        StatusPhaseAction::RazeSize1City(city) => {
             format!(
                 "{player_name} {}",
                 match city {
-                    Some(city) => format!("razed the city at {city} and gained 1 gold"),
-                    None => String::from("did not rase a city"),
+                    RazeSize1City::Position(city) =>
+                        format!("razed the city at {city} and gained 1 gold"),
+                    RazeSize1City::None => String::from("did not rase a city"),
                 }
             )
         }
@@ -174,7 +177,7 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
             format!(
                 "{player_name} {}",
                 match new_government {
-                    Some(new_government_advance) => format!(
+                    ChangeGovernmentType::ChangeGovernment(new_government_advance) => format!(
                         "changed his government from {} to {} - additional advances: {}",
                         game.players[game.active_player()]
                             .government()
@@ -182,7 +185,8 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
                         new_government_advance.new_government,
                         new_government_advance.additional_advances.join(", ")
                     ),
-                    None => String::from("did not change his government"),
+                    ChangeGovernmentType::KeepGovernment =>
+                        String::from("did not change his government"),
                 }
             )
         }
@@ -219,10 +223,10 @@ fn format_combat_action_log_item(action: &CombatAction, game: &Game) -> String {
     match action {
         CombatAction::PlayActionCard(card) => format!(
             "{player_name} {}",
-            card.as_ref()
-                .map_or(String::from("did not play a tactics card"), |card| format!(
-                    "played the {card} tactics card"
-                ))
+            match card {
+                PlayActionCard::Card(card) => format!("played the {card} tactics card"),
+                PlayActionCard::None => String::from("did not play a tactics card"),
+            }
         ),
         CombatAction::RemoveCasualties(casualties) => format!(
             "{player_name} removed {}",

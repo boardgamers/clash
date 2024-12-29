@@ -11,17 +11,31 @@ use crate::{
 };
 
 #[derive(Serialize, Deserialize, Clone)]
-pub struct ChangeGovernmentType {
+pub struct ChangeGovernment {
     pub new_government: String,
     pub additional_advances: Vec<String>,
+}
+
+// Can't use Option<String> because of mongo stips null values
+#[derive(Serialize, Deserialize, Clone)]
+pub enum ChangeGovernmentType {
+    ChangeGovernment(ChangeGovernment),
+    KeepGovernment,
+}
+
+// Can't use Option<String> because of mongo stips null values
+#[derive(Serialize, Deserialize, Clone)]
+pub enum RazeSize1City {
+    None,
+    Position(Position),
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 pub enum StatusPhaseAction {
     CompleteObjectives(Vec<String>),
     FreeAdvance(String),
-    RaseSize1City(Option<Position>),
-    ChangeGovernmentType(Option<ChangeGovernmentType>),
+    RazeSize1City(RazeSize1City),
+    ChangeGovernmentType(ChangeGovernmentType),
     DetermineFirstPlayer(usize),
 }
 
@@ -31,7 +45,7 @@ impl StatusPhaseAction {
         match self {
             StatusPhaseAction::CompleteObjectives(_) => StatusPhaseState::CompleteObjectives,
             StatusPhaseAction::FreeAdvance(_) => StatusPhaseState::FreeAdvance,
-            StatusPhaseAction::RaseSize1City(_) => StatusPhaseState::RaseSize1City,
+            StatusPhaseAction::RazeSize1City(_) => StatusPhaseState::RazeSize1City,
             StatusPhaseAction::ChangeGovernmentType(_) => StatusPhaseState::ChangeGovernmentType,
             StatusPhaseAction::DetermineFirstPlayer(_) => StatusPhaseState::DetermineFirstPlayer,
         }
@@ -54,8 +68,8 @@ impl StatusPhaseAction {
                 );
                 game.advance(advance, player_index);
             }
-            StatusPhaseAction::RaseSize1City(ref city) => {
-                if let Some(city) = *city {
+            StatusPhaseAction::RazeSize1City(ref city) => {
+                if let RazeSize1City::Position(city) = *city {
                     assert!(
                         game.players[player_index].can_raze_city(city),
                         "Illegal action"
@@ -65,7 +79,9 @@ impl StatusPhaseAction {
                 }
             }
             StatusPhaseAction::ChangeGovernmentType(ref new_government_advance) => {
-                if let Some(new_government) = new_government_advance {
+                if let ChangeGovernmentType::ChangeGovernment(new_government) =
+                    new_government_advance
+                {
                     change_government_type(game, player_index, new_government);
                 }
             }
@@ -80,11 +96,7 @@ impl StatusPhaseAction {
     }
 }
 
-fn change_government_type(
-    game: &mut Game,
-    player_index: usize,
-    new_government: &ChangeGovernmentType,
-) {
+fn change_government_type(game: &mut Game, player_index: usize, new_government: &ChangeGovernment) {
     let government = &new_government.new_government;
     if advances::get_leading_government_advance(government)
         .expect("government should exist")
@@ -177,7 +189,7 @@ fn skip_player(game: &Game, player_index: usize, state: &StatusPhaseState) -> bo
         StatusPhaseState::FreeAdvance => !advances::get_all()
             .into_iter()
             .any(|advance| player.can_advance_free(&advance.name)),
-        StatusPhaseState::RaseSize1City => !player.cities.iter().any(|city| city.size() == 1),
+        StatusPhaseState::RazeSize1City => !player.cities.iter().any(|city| city.size() == 1),
         StatusPhaseState::ChangeGovernmentType => {
             player.government().is_none()
                 || player.government().is_some_and(|government| {
@@ -195,7 +207,7 @@ pub enum StatusPhaseState {
     CompleteObjectives,
     FreeAdvance,
     //draw new cards (after free advance)
-    RaseSize1City,
+    RazeSize1City,
     ChangeGovernmentType,
     DetermineFirstPlayer,
 }
@@ -206,8 +218,8 @@ pub fn next_status_phase(phase: Option<StatusPhaseState>) -> StatusPhaseState {
     if let Some(phase) = phase {
         match phase {
             CompleteObjectives => FreeAdvance,
-            FreeAdvance => RaseSize1City,
-            RaseSize1City => ChangeGovernmentType,
+            FreeAdvance => RazeSize1City,
+            RazeSize1City => ChangeGovernmentType,
             ChangeGovernmentType => DetermineFirstPlayer,
             DetermineFirstPlayer => {
                 unreachable!("function should return early with this action")

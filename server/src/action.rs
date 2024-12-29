@@ -75,7 +75,14 @@ impl Action {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub enum CombatAction {
-    PlayActionCard(Option<String>),
+    PlayActionCard(PlayActionCard),
     RemoveCasualties(Vec<u32>),
     Retreat(bool),
+}
+
+// Can't use Option<String> because of mongo stips null values
+#[derive(Serialize, Deserialize, Clone)]
+pub enum PlayActionCard {
+    None,
+    Card(String),
 }
