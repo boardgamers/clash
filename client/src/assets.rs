@@ -1,7 +1,6 @@
 use crate::client::Features;
 use crate::resource_ui::ResourceType;
-use crate::svg;
-use macroquad::prelude::{load_texture, load_ttf_font, Color, Image, RectOffset};
+use macroquad::prelude::{load_texture, load_ttf_font, Color, Image, ImageFormat, RectOffset};
 use macroquad::texture::Texture2D;
 use macroquad::ui::{root_ui, Skin};
 use server::map::Terrain;
@@ -50,38 +49,38 @@ impl Assets {
             skin: Self::skin(features).await,
 
             // mood icons
-            angry: svg::icon(include_str!("../assets/angry.svg")),
-            neutral: svg::icon(include_str!("../assets/neutral.svg")),
+            angry: load_png(include_bytes!("../assets/angry-face-svgrepo-com.png")),
+            neutral: load_png(include_bytes!("../assets/neutral.png")),
 
             // resource icons
             resources: [
                 (
                     ResourceType::Food,
-                    svg::icon(include_str!("../assets/food.svg")),
+                    load_png(include_bytes!("../assets/food.png")),
                 ),
                 (
                     ResourceType::Wood,
-                    svg::icon(include_str!("../assets/wood.svg")),
+                    load_png(include_bytes!("../assets/wood.png")),
                 ),
                 (
                     ResourceType::Ore,
-                    svg::icon(include_str!("../assets/rock.svg")),
+                    load_png(include_bytes!("../assets/rock.png")),
                 ),
                 (
                     ResourceType::Ideas,
-                    svg::icon(include_str!("../assets/idea.svg")),
+                    load_png(include_bytes!("../assets/idea.png")),
                 ),
                 (
                     ResourceType::Gold,
-                    svg::icon(include_str!("../assets/gold.svg")),
+                    load_png(include_bytes!("../assets/gold.png")),
                 ),
                 (
                     ResourceType::MoodTokens,
-                    svg::icon(include_str!("../assets/happy.svg")),
+                    load_png(include_bytes!("../assets/happy.png")),
                 ),
                 (
                     ResourceType::CultureTokens,
-                    svg::icon(include_str!("../assets/culture.svg")),
+                    load_png(include_bytes!("../assets/culture.png")),
                 ),
             ]
             .iter()
@@ -89,25 +88,25 @@ impl Assets {
             .collect(),
 
             // action icons
-            advances: svg::icon(include_str!("../assets/lab.svg")),
-            hour_glass: svg::icon(include_str!("../assets/hour-glass.svg")),
-            log: svg::icon(include_str!("../assets/scroll.svg")),
-            movement: svg::icon(include_str!("../assets/move.svg")),
-            redo: svg::icon(include_str!("../assets/redo.svg")),
-            reset: svg::icon(include_str!("../assets/reset.svg")),
-            undo: svg::icon(include_str!("../assets/undo.svg")),
+            advances: load_png(include_bytes!("../assets/lab.png")),
+            hour_glass: load_png(include_bytes!("../assets/hour-glass.png")),
+            log: load_png(include_bytes!("../assets/scroll.png")),
+            movement: load_png(include_bytes!("../assets/move.png")),
+            redo: load_png(include_bytes!("../assets/redo.png")),
+            reset: load_png(include_bytes!("../assets/reset.png")),
+            undo: load_png(include_bytes!("../assets/undo.png")),
 
             // UI
-            zoom_in: svg::icon(include_str!("../assets/zoom-in.svg")),
-            zoom_out: svg::icon(include_str!("../assets/zoom-out.svg")),
-            up: svg::icon(include_str!("../assets/up-arrow.svg")),
-            down: svg::icon(include_str!("../assets/down-arrow.svg")),
-            left: svg::icon(include_str!("../assets/left-arrow.svg")),
-            right: svg::icon(include_str!("../assets/right-arrow.svg")),
+            zoom_in: load_png(include_bytes!("../assets/zoom-in.png")),
+            zoom_out: load_png(include_bytes!("../assets/zoom-out.png")),
+            up: load_png(include_bytes!("../assets/up-arrow.png")),
+            down: load_png(include_bytes!("../assets/down-arrow.png")),
+            left: load_png(include_bytes!("../assets/left-arrow.png")),
+            right: load_png(include_bytes!("../assets/right-arrow.png")),
 
             // Admin
-            import: svg::icon(include_str!("../assets/import.svg")),
-            export: svg::icon(include_str!("../assets/export.svg")),
+            import: load_png(include_bytes!("../assets/import.png")),
+            export: load_png(include_bytes!("../assets/export.png")),
             // cities: HashMap::new(),
         }
     }
@@ -229,4 +228,8 @@ impl Assets {
             ..root_ui().default_skin()
         }
     }
+}
+
+fn load_png(bytes: &[u8]) -> Texture2D {
+    Texture2D::from_file_with_format(bytes, Some(ImageFormat::Png))
 }
