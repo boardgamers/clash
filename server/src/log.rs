@@ -164,9 +164,10 @@ fn format_construct_log_item(
     };
     let temple = if let Some(temple_bonus) = &c.temple_bonus {
         format!(" and chooses to get {temple_bonus}")
-    } else { String::new() };
-    format!("{player_name} paid {payment} to construct a {city_piece:?} in the city at {city_position}{}{}{}",
-            port_pos, mood, temple)
+    } else {
+        String::new()
+    };
+    format!("{player_name} paid {payment} to construct a {city_piece:?} in the city at {city_position}{port_pos}{mood}{temple}")
 }
 
 fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> String {

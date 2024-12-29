@@ -299,7 +299,8 @@ impl PlayingAction {
                 player.gain_resources(c.payment);
                 if matches!(&c.city_piece, Temple) {
                     player.loose_resources(
-                        c.temple_bonus.expect("build data should contain temple bonus"),
+                        c.temple_bonus
+                            .expect("build data should contain temple bonus"),
                     );
                 }
             }

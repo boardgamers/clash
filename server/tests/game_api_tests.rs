@@ -8,11 +8,26 @@ use std::{
 
 use server::action::CombatAction;
 use server::game::{CulturalInfluenceResolution, GameState};
-use server::status_phase::{ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction};
-use server::{action::Action, city::{City, MoodState::*}, city_pieces::{
-    AvailableCityPieces,
-    Building::{self, *},
-}, content::custom_actions::CustomAction::*, game::Game, game_api, map::Terrain::*, playing_actions, playing_actions::PlayingAction::*, position::Position, resource_pile::ResourcePile, unit::{MovementAction::*, UnitType::*}};
+use server::status_phase::{
+    ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction,
+};
+use server::{
+    action::Action,
+    city::{City, MoodState::*},
+    city_pieces::{
+        AvailableCityPieces,
+        Building::{self, *},
+    },
+    content::custom_actions::CustomAction::*,
+    game::Game,
+    game_api,
+    map::Terrain::*,
+    playing_actions,
+    playing_actions::PlayingAction::*,
+    position::Position,
+    resource_pile::ResourcePile,
+    unit::{MovementAction::*, UnitType::*},
+};
 
 #[test]
 fn basic_actions() {
@@ -59,7 +74,7 @@ fn basic_actions() {
         .cities
         .push(City::new(0, Position::new(0, 2)));
 
-    let construct_action = Action::Playing(Construct(playing_actions::Construct{
+    let construct_action = Action::Playing(Construct(playing_actions::Construct {
         city_position,
         city_piece: Building::Observatory,
         payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
@@ -580,7 +595,7 @@ fn test_collect() {
 fn test_construct() {
     test_action(
         "construct",
-        Action::Playing(Construct(playing_actions::Construct{
+        Action::Playing(Construct(playing_actions::Construct {
             city_position: Position::from_offset("C2"),
             city_piece: Observatory,
             payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
@@ -597,7 +612,7 @@ fn test_construct() {
 fn test_construct_port() {
     test_action(
         "construct_port",
-        Action::Playing(Construct(playing_actions::Construct{
+        Action::Playing(Construct(playing_actions::Construct {
             city_position: Position::from_offset("A1"),
             city_piece: Port,
             payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
@@ -674,12 +689,12 @@ fn test_determine_first_player() {
 fn test_change_government() {
     test_action(
         "change_government",
-        Action::StatusPhase(StatusPhaseAction::ChangeGovernmentType(ChangeGovernmentType::ChangeGovernment(
-            ChangeGovernment {
+        Action::StatusPhase(StatusPhaseAction::ChangeGovernmentType(
+            ChangeGovernmentType::ChangeGovernment(ChangeGovernment {
                 new_government: String::from("Theocracy"),
                 additional_advances: vec![String::from("Theocracy 2")],
-            },
-        ))),
+            }),
+        )),
         0,
         false,
         false,
