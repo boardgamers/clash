@@ -410,7 +410,7 @@
     "Player1 ended his turn with 1 actions left",
     "It's Player2's turn",
     "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1and rolled a 1. Player2 now has the option to pay 4 culture tokens to increase the dice roll and proceed with the cultural influence",
-    "Player2 paid 1 culture tokens to increased the dice roll and proceed with the cultural influence"
+    "Player2 paid 1 culture tokens to increase the dice roll and proceed with the cultural influence"
   ],
   "undo_limit": 1,
   "played_once_per_turn_actions": [],

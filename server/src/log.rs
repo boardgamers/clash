@@ -79,16 +79,36 @@ pub fn format_action_log_item(action: &Action, game: &Game) -> String {
         Action::Playing(action) => format_playing_action_log_item(action, game),
         Action::StatusPhase(action) => format_status_phase_action_log_item(action, game),
         Action::Movement(action) => format_movement_action_log_item(action, game),
-        Action::CulturalInfluenceResolution(action) => format!("{} {}", game.players[game.active_player()].get_name(), match action {
-            true => format!("paid {} culture tokens to increased the dice roll and proceed with the cultural influence", game.dice_roll_log.last().expect("there should have been at least one dice roll before a cultural influence resolution action") / 2 + 1),
-            false => String::from("declined to increase the dice roll"),
-        }),
+        Action::CulturalInfluenceResolution(action) => {
+            format_cultural_influence_resolution_log_item(game, *action)
+        }
         Action::Combat(action) => format_combat_action_log_item(action, game),
-        Action::PlaceSettler(position) => format!("{} placed a settler in the city at {position}", game.players[game.state.settler_placer().expect("the game should be in the place settler state")].get_name()),
+        Action::PlaceSettler(position) => format_place_settler_log_item(game, *position),
         Action::Undo | Action::Redo => {
             panic!("undoing or redoing actions should not be written to the log")
         }
     }
+}
+
+fn format_place_settler_log_item(game: &Game, position: Position) -> String {
+    let player = game.players[game
+        .state
+        .settler_placer()
+        .expect("the game should be in the place settler state")]
+    .get_name();
+    format!("{player} placed a settler in the city at {position}")
+}
+
+fn format_cultural_influence_resolution_log_item(game: &Game, success: bool) -> String {
+    let player = game.players[game.active_player()].get_name();
+    let outcome = if success {
+        let price = game.dice_roll_log.last()
+            .expect("there should have been at least one dice roll before a cultural influence resolution action");
+        format!("paid {} culture tokens to increase the dice roll and proceed with the cultural influence", price / 2 + 1)
+    } else {
+        String::from("declined to increase the dice roll")
+    };
+    format!("{player} {outcome}")
 }
 
 fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String {
