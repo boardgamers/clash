@@ -20,6 +20,10 @@ pub fn top_left_label(p: Vec2, label: &str) {
     root_ui().label(p + vec2(-40.,0.), label);
 }
 
+pub fn top_left_button(p: Vec2, label: &str) -> bool {
+    root_ui().button(vec2(MARGIN, MARGIN) + p, label)
+}
+
 pub fn top_center_label(player: &ShownPlayer, p: Vec2, label: &str) {
     root_ui().label(vec2(player.screen_size.x / 2.0, 0.) + p, label);
 }

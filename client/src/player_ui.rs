@@ -2,8 +2,8 @@ use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
 use crate::layout_ui::{
-    bottom_left_button, bottom_left_texture, bottom_right_texture, icon_pos, right_center_button,
-    right_center_label, top_center_label, top_center_texture, top_left_label, top_right_texture,
+    bottom_left_button, bottom_left_texture, bottom_right_texture, icon_pos, top_center_label,
+    top_center_texture, top_left_button, top_left_label, top_right_texture,
 };
 use crate::resource_ui::ResourceType;
 use macroquad::math::{u32, vec2};
@@ -16,35 +16,9 @@ use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
 
 pub fn show_globals(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
-    show_top_left(game, player);
+    let update = show_top_left(game, player);
     show_top_center(game, player, state);
-
-    let mut y = -100.;
-
-    let i = game
-        .players
-        .iter()
-        .position(|p| p.index == game.starting_player_index)
-        .unwrap();
-    let mut players: Vec<_> = game.players.iter().map(|p| p.index).collect();
-    players.rotate_left(i);
-
-    for p in players {
-        let p = game.get_player(p);
-        let shown = player.index == p.index;
-        let prefix = if shown { "* " } else { "" };
-        let name = p.get_name();
-        let x = -200.;
-        let label = format!("{prefix}{name}");
-        if shown {
-            right_center_label(player, vec2(x, y), &label);
-        } else if right_center_button(player, vec2(x, y), &label) {
-            return StateUpdate::SetShownPlayer(p.index);
-        }
-        y += 40.;
-    }
-
-    StateUpdate::None
+    update
 }
 
 pub fn resource_label(
@@ -54,7 +28,13 @@ pub fn resource_label(
     resource_type: ResourceType,
     p: Vec2,
 ) {
-    top_icon_with_label(player, state, label, &state.assets.resources[&resource_type], p);
+    top_icon_with_label(
+        player,
+        state,
+        label,
+        &state.assets.resources[&resource_type],
+        p,
+    );
 }
 
 pub fn top_icon_with_label(
@@ -132,12 +112,24 @@ fn show_top_center(game: &Game, player: &ShownPlayer, state: &State) {
     show_wonders(game, player, &mut root_ui());
 }
 
-fn show_top_left(game: &Game, player: &ShownPlayer) {
+fn show_top_left(game: &Game, player: &ShownPlayer) -> StateUpdate {
     let mut y = 0.;
-    let mut label = |label: String| {
-        top_left_label(vec2(0., y * 25.), &label);
+    let mut show = |label: String, button: bool| -> bool {
+        let p = vec2(0., y * 25.);
         y += 1.;
+        if button {
+            top_left_button(p, &label)
+        } else {
+            top_left_label(p, &label);
+            false
+        }
     };
+    let mut label = |label: String| {
+       show(label, false);
+    };
+    // let mut button = |label: String| -> bool {
+    //     show(label, true)
+    // };
 
     match &game.state {
         GameState::Finished => label("Finished".to_string()),
@@ -148,22 +140,39 @@ fn show_top_left(game: &Game, player: &ShownPlayer) {
         _ => label(format!("Round {}", game.round)),
     }
 
+    let i = game
+        .players
+        .iter()
+        .position(|p| p.index == game.starting_player_index)
+        .unwrap();
+    let mut players: Vec<_> = game.players.iter().map(|p| p.index).collect();
+    players.rotate_left(i);
+
+    for p in players {
+        let p = game.get_player(p);
+        let shown = player.index == p.index;
+        let prefix = if shown { "* " } else { "" };
+        let name = p.get_name();
+        let l = format!("{prefix}{name}");
+        // if shown {
+            label(l);
+        // } else if button(l) {
+        //     return StateUpdate::SetShownPlayer(p.index);
+        // }
+    }
+
     let p = game.get_player(player.index);
 
-    label(
-        format!("Civ {}", p.civilization.name)
-    );
+    label(format!("Civ {}", p.civilization.name));
 
-    label(
-        format!(
-            "Leader {}",
-            if let Some(l) = &p.active_leader {
-                &l.name
-            } else {
-                "-"
-            }
-        ),
-    );
+    label(format!(
+        "Leader {}",
+        if let Some(l) = &p.active_leader {
+            &l.name
+        } else {
+            "-"
+        }
+    ));
 
     let current = game.current_player_index;
     label(format!("Playing {}", &game.get_player(current).get_name()));
@@ -191,6 +200,7 @@ fn show_top_left(game: &Game, player: &ShownPlayer) {
     if active != current {
         label(format!("Active {}", game.get_player(active).get_name()));
     }
+    StateUpdate::None
 }
 
 fn moves_left(state: &GameState) -> Option<u32> {
