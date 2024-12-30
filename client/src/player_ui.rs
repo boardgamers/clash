@@ -135,28 +135,9 @@ fn show_top_center(game: &Game, player: &ShownPlayer, state: &State) {
 fn show_top_left(game: &Game, player: &ShownPlayer) {
     let mut y = 0.;
     let mut label = |label: String| {
-        top_left_label(vec2(0., y), &label);
-        y += 30.;
+        top_left_label(vec2(0., y * 25.), &label);
+        y += 1.;
     };
-
-    let p = game.get_player(player.index);
-
-    top_left_label(
-        icon_pos(0, 0),
-        &format!("Civ {}", p.civilization.name),
-    );
-
-    top_left_label(
-        icon_pos(0, 1),
-        &format!(
-            "Leader {}",
-            if let Some(l) = &p.active_leader {
-                &l.name
-            } else {
-                "-"
-            }
-        ),
-    );
 
     match &game.state {
         GameState::Finished => label("Finished".to_string()),
@@ -166,6 +147,23 @@ fn show_top_left(game: &Game, player: &ShownPlayer) {
         GameState::StatusPhase(ref p) => label(format!("Status Phase: {p:?}")),
         _ => label(format!("Round {}", game.round)),
     }
+
+    let p = game.get_player(player.index);
+
+    label(
+        format!("Civ {}", p.civilization.name)
+    );
+
+    label(
+        format!(
+            "Leader {}",
+            if let Some(l) = &p.active_leader {
+                &l.name
+            } else {
+                "-"
+            }
+        ),
+    );
 
     let current = game.current_player_index;
     label(format!("Playing {}", &game.get_player(current).get_name()));
