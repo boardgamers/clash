@@ -17,7 +17,7 @@ pub fn icon_pos(x: i8, y: i8) -> Vec2 {
 }
 
 pub fn top_left_label(p: Vec2, label: &str) {
-    root_ui().label(p, label);
+    root_ui().label(p + vec2(-40.,0.), label);
 }
 
 pub fn top_center_label(player: &ShownPlayer, p: Vec2, label: &str) {
