@@ -159,23 +159,24 @@ pub fn show_tooltip(state: &State, tooltip: &str, rect: Rect) {
             rect.size().y,
             Color::new(0.0, 0.0, 0.0, 0.5),
         );
-        let dimensions = draw_tooltip_text(tooltip, origin);
+        let dimensions = draw_tooltip_text(tooltip, origin, BLANK);
         let tooltip_rect = Rect::new(origin.x, origin.y, dimensions.width, dimensions.height);
         let w = tooltip_rect.size().x + 10.;
         let sx = state.screen_size.x;
         let x = tooltip_rect.left().min(sx - w);
+        let y = (tooltip_rect.top() - 10.).max(40.);
         draw_rectangle(
             x,
-            tooltip_rect.top() - 10.,
+            y,
             w,
             tooltip_rect.size().y + 10.,
             GREEN,
         );
-        draw_tooltip_text(tooltip, vec2(x, origin.y));
+        draw_tooltip_text(tooltip, vec2(x, y + 10.), BLACK);
     }
 }
 
-fn draw_tooltip_text(tooltip: &str, origin: Vec2) -> TextDimensions {
+fn draw_tooltip_text(tooltip: &str, origin: Vec2, color: Color) -> TextDimensions {
     draw_text_ex(
         tooltip,
         origin.x + 5.,
@@ -184,7 +185,7 @@ fn draw_tooltip_text(tooltip: &str, origin: Vec2) -> TextDimensions {
             font_size: 20,
             font_scale: 1.,
             font: None,
-            color: BLACK,
+            color,
             ..Default::default()
         },
     )
