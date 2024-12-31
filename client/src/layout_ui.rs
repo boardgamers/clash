@@ -17,7 +17,7 @@ pub fn icon_pos(x: i8, y: i8) -> Vec2 {
 }
 
 pub fn top_left_label(p: Vec2, label: &str) {
-    root_ui().label(p + vec2(-40.,0.), label);
+    root_ui().label(p + vec2(-40., 0.), label);
 }
 
 pub fn top_center_label(player: &ShownPlayer, p: Vec2, label: &str) {
@@ -79,13 +79,13 @@ fn relative_texture(state: &State, texture: &Texture2D, anchor: Vec2, offset: Ve
 }
 
 pub fn left_mouse_button(rect: Rect) -> bool {
-    let pressed = if is_mouse_button_pressed(MouseButton::Left) {
+    
+    if is_mouse_button_pressed(MouseButton::Left) {
         let (x, y) = mouse_position();
         rect.contains(vec2(x, y))
     } else {
         false
-    };
-    pressed
+    }
 }
 
 pub fn cancel_pos(player: &ShownPlayer) -> Vec2 {

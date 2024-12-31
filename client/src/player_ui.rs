@@ -1,7 +1,10 @@
 use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
-use crate::layout_ui::{bottom_left_button, bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button, top_center_label, top_center_texture, top_left_label, top_right_texture, ICON_SIZE};
+use crate::layout_ui::{
+    bottom_left_button, bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button,
+    top_center_label, top_center_texture, top_left_label, top_right_texture, ICON_SIZE,
+};
 use crate::resource_ui::ResourceType;
 use macroquad::math::{u32, vec2};
 use macroquad::prelude::*;
@@ -26,8 +29,6 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
     for p in players {
         let pl = game.get_player(p);
         let shown = player.index == pl.index;
-        let prefix = if shown { "* " } else { "" };
-        let name = pl.get_name();
         let pos = vec2(player.screen_size.x, player.screen_size.y / 2.0) + vec2(-20., y);
 
         let color = player_color(pl.index);
@@ -43,10 +44,16 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
 
         let active = game.active_player();
         if active == pl.index {
-            draw_texture_ex(&state.assets.active_player, x - 25., pos.y + 5., WHITE, DrawTextureParams {
-                dest_size: Some(vec2(20., 20.)),
-                ..Default::default()
-            });
+            draw_texture_ex(
+                &state.assets.active_player,
+                x - 25.,
+                pos.y + 5.,
+                WHITE,
+                DrawTextureParams {
+                    dest_size: Some(vec2(20., 20.)),
+                    ..Default::default()
+                },
+            );
         }
 
         set_camera(&state.camera);
@@ -93,49 +100,49 @@ pub fn show_top_center(game: &Game, player: &ShownPlayer, state: &State) {
 
     resource_label(
         player,
-        &state,
+        state,
         &resource_ui(p, |r| r.food),
         ResourceType::Food,
         icon_pos(-4, 0),
     );
     resource_label(
         player,
-        &state,
+        state,
         &resource_ui(p, |r| r.wood),
         ResourceType::Wood,
         icon_pos(-3, 0),
     );
     resource_label(
         player,
-        &state,
+        state,
         &resource_ui(p, |r| r.ore),
         ResourceType::Ore,
         icon_pos(-2, 0),
     );
     resource_label(
         player,
-        &state,
+        state,
         &resource_ui(p, |r| r.ideas),
         ResourceType::Ideas,
         icon_pos(-1, 0),
     );
     resource_label(
         player,
-        &state,
+        state,
         &resource_ui(p, |r| r.gold as u32),
         ResourceType::Gold,
         icon_pos(0, 0),
     );
     resource_label(
         player,
-        &state,
+        state,
         &resource_ui(p, |r| r.mood_tokens),
         ResourceType::MoodTokens,
         icon_pos(1, 0),
     );
     resource_label(
         player,
-        &state,
+        state,
         &resource_ui(p, |r| r.culture_tokens),
         ResourceType::CultureTokens,
         icon_pos(2, 0),
@@ -143,7 +150,7 @@ pub fn show_top_center(game: &Game, player: &ShownPlayer, state: &State) {
 
     top_icon_with_label(
         player,
-        &state,
+        state,
         &format!("{}", &p.victory_points()),
         &state.assets.victory_points,
         icon_pos(3, 0),
