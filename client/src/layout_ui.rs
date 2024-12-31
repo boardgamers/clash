@@ -3,6 +3,7 @@ use macroquad::color::WHITE;
 use macroquad::math::{vec2, Vec2};
 use macroquad::prelude::*;
 use macroquad::ui::root_ui;
+use std::cmp::min;
 
 pub const ICON_SIZE: f32 = 30.;
 
@@ -160,14 +161,17 @@ pub fn show_tooltip(state: &State, tooltip: &str, rect: Rect) {
         );
         let dimensions = draw_tooltip_text(tooltip, origin);
         let tooltip_rect = Rect::new(origin.x, origin.y, dimensions.width, dimensions.height);
+        let w = tooltip_rect.size().x + 10.;
+        let sx = state.screen_size.x;
+        let x = tooltip_rect.left().min(sx - w);
         draw_rectangle(
-            tooltip_rect.left(),
+            x,
             tooltip_rect.top() - 10.,
-            tooltip_rect.size().x + 10.,
+            w,
             tooltip_rect.size().y + 10.,
             GREEN,
         );
-        draw_tooltip_text(tooltip, origin);
+        draw_tooltip_text(tooltip, vec2(x, origin.y));
     }
 }
 
