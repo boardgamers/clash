@@ -1,6 +1,8 @@
 use crate::client::Features;
 use crate::resource_ui::ResourceType;
-use macroquad::prelude::{load_texture, load_ttf_font, Color, Image, ImageFormat, RectOffset};
+use macroquad::prelude::{
+    load_texture, load_ttf_font, Color, Font, Image, ImageFormat, RectOffset,
+};
 use macroquad::texture::Texture2D;
 use macroquad::ui::{root_ui, Skin};
 use server::map::Terrain;
@@ -11,6 +13,7 @@ pub struct Assets {
     pub terrain: HashMap<Terrain, Texture2D>,
     pub units: HashMap<UnitType, Texture2D>,
     pub skin: Skin,
+    pub font: Font,
 
     // mood icons
     pub angry: Texture2D,
@@ -48,10 +51,12 @@ pub struct Assets {
 impl Assets {
     pub async fn new(features: &Features) -> Self {
         let happy = load_png(include_bytes!("../assets/happy-emoji-svgrepo-com.png"));
+        let font_name = features.get_asset("HTOWERT.TTF");
         Self {
+            font: load_ttf_font(&font_name).await.unwrap(), // can't share font - causes panic
             terrain: Self::terrain(features).await,
             units: HashMap::new(),
-            skin: Self::skin(features).await,
+            skin: Self::skin(&load_ttf_font(&font_name).await.unwrap()).await,
 
             // mood icons
             angry: load_png(include_bytes!("../assets/angry-face-svgrepo-com.png")),
@@ -138,10 +143,7 @@ impl Assets {
         map
     }
 
-    async fn skin(features: &Features) -> Skin {
-        let font = load_ttf_font(&features.get_asset("HTOWERT.TTF"))
-            .await
-            .unwrap();
+    async fn skin(font: &Font) -> Skin {
         let image =
             Image::from_file_with_format(include_bytes!("../assets/button_background.png"), None)
                 .unwrap();
@@ -150,7 +152,7 @@ impl Assets {
             .background(image.clone())
             .background_margin(RectOffset::new(37.0, 37.0, 5.0, 5.0))
             .margin(RectOffset::new(10.0, 10.0, 0.0, 0.0))
-            .with_font(&font)
+            .with_font(font)
             .unwrap()
             .text_color(Color::from_rgba(180, 180, 120, 255))
             .font_size(20)

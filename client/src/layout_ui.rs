@@ -10,6 +10,12 @@ pub const MARGIN: f32 = 10.;
 
 pub const TOOLTIP_DELAY: f64 = 0.5;
 
+pub const FONT_SIZE: u16 = 20;
+
+pub fn text_dimensions(text: &str, state: &State) -> TextDimensions {
+    measure_text(text, Some(&state.assets.font), FONT_SIZE, 1.0)
+}
+
 pub fn icon_offset(i: i8) -> f32 {
     f32::from(i) * 1.4 * ICON_SIZE
 }
@@ -152,7 +158,7 @@ pub fn show_tooltip(state: &State, tooltip: &str, rect: Rect) {
             rect.size().y,
             Color::new(0.0, 0.0, 0.0, 0.5),
         );
-        let dimensions = draw_tooltip_text(tooltip, origin, BLANK);
+        let dimensions = text_dimensions(tooltip, state);
         let tooltip_rect = Rect::new(origin.x, origin.y, dimensions.width, dimensions.height);
         let w = tooltip_rect.size().x + 10.;
         let sx = state.screen_size.x;
@@ -165,16 +171,12 @@ pub fn show_tooltip(state: &State, tooltip: &str, rect: Rect) {
             tooltip_rect.size().y + 10.,
             GREEN,
         );
-        draw_tooltip_text(tooltip, vec2(x, y + 10.), BLACK);
+        draw_text(
+            tooltip,
+            x + 5.,
+            y + 15.,
+            20.,
+            BLACK,
+        );
     }
-}
-
-fn draw_tooltip_text(tooltip: &str, origin: Vec2, color: Color) -> TextDimensions {
-    draw_text(
-        tooltip,
-        origin.x + 5.,
-        origin.y + 5.,
-        20.,
-        color,
-    )
 }
