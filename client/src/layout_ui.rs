@@ -1,4 +1,4 @@
-use crate::client_state::{ShownPlayer, State};
+use crate::client_state::{MousePosition, ShownPlayer, State};
 use macroquad::color::WHITE;
 use macroquad::math::{vec2, Vec2};
 use macroquad::prelude::*;
@@ -7,6 +7,8 @@ use macroquad::ui::root_ui;
 pub const ICON_SIZE: f32 = 30.;
 
 pub const MARGIN: f32 = 10.;
+
+pub const TOOLTIP_DELAY: f64 = 0.5;
 
 pub fn icon_offset(i: i8) -> f32 {
     f32::from(i) * 1.4 * ICON_SIZE
@@ -24,38 +26,53 @@ pub fn top_center_label(player: &ShownPlayer, p: Vec2, label: &str) {
     root_ui().label(vec2(player.screen_size.x / 2.0, 0.) + p, label);
 }
 
-pub fn top_center_texture(state: &State, texture: &Texture2D, p: Vec2) -> bool {
-    relative_texture(state, texture, vec2(state.screen_size.x / 2., MARGIN), p)
+pub fn top_center_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
+    relative_texture(
+        state,
+        texture,
+        vec2(state.screen_size.x / 2., MARGIN),
+        p,
+        tooltip,
+    )
 }
 
-pub fn top_right_texture(state: &State, texture: &Texture2D, p: Vec2) -> bool {
+pub fn top_right_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
     relative_texture(
         state,
         texture,
         vec2(state.screen_size.x - MARGIN, MARGIN),
         p,
+        tooltip,
     )
 }
 
-pub fn bottom_left_texture(state: &State, texture: &Texture2D, p: Vec2) -> bool {
+pub fn bottom_left_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
     relative_texture(
         state,
         texture,
         vec2(MARGIN, state.screen_size.y - MARGIN),
         p,
+        tooltip,
     )
 }
 
-pub fn bottom_right_texture(state: &State, texture: &Texture2D, p: Vec2) -> bool {
+pub fn bottom_right_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
     relative_texture(
         state,
         texture,
         vec2(state.screen_size.x - MARGIN, state.screen_size.y - MARGIN),
         p,
+        tooltip,
     )
 }
 
-fn relative_texture(state: &State, texture: &Texture2D, anchor: Vec2, offset: Vec2) -> bool {
+fn relative_texture(
+    state: &State,
+    texture: &Texture2D,
+    anchor: Vec2,
+    offset: Vec2,
+    tooltip: &str,
+) -> bool {
     let origin = anchor + offset;
     set_default_camera();
     draw_texture_ex(
@@ -69,7 +86,9 @@ fn relative_texture(state: &State, texture: &Texture2D, anchor: Vec2, offset: Ve
         },
     );
 
-    let pressed = left_mouse_button(Rect::new(origin.x, origin.y, ICON_SIZE, ICON_SIZE));
+    let rect = Rect::new(origin.x, origin.y, ICON_SIZE, ICON_SIZE);
+    show_tooltip(state, tooltip, rect);
+    let pressed = left_mouse_button(rect);
     set_camera(&state.camera);
     pressed
 }
@@ -108,4 +127,61 @@ pub fn ok_only_pos(player: &ShownPlayer) -> Vec2 {
 
 fn small_dialog(player: &ShownPlayer) -> bool {
     player.active_dialog.is_map_dialog() || player.pending_update
+}
+
+pub fn update_tooltip(state: &mut State) {
+    let (x, y) = mouse_position();
+    let now = get_time();
+    state
+        .mouse_positions
+        .retain(|mp| now - mp.time < TOOLTIP_DELAY);
+    state.mouse_positions.push(MousePosition {
+        position: vec2(x, y),
+        time: now,
+    });
+}
+
+fn is_active_tooltip(state: &State, rect: Rect) -> bool {
+    state
+        .mouse_positions
+        .iter()
+        .all(|mp| rect.contains(mp.position))
+}
+
+pub fn show_tooltip(state: &State, tooltip: &str, rect: Rect) {
+    let origin = rect.point();
+    if is_active_tooltip(state, rect) {
+        draw_rectangle(
+            origin.x,
+            origin.y,
+            rect.size().x,
+            rect.size().y,
+            Color::new(0.0, 0.0, 0.0, 0.5),
+        );
+        let dimensions = draw_tooltip_text(tooltip, origin);
+        let tooltip_rect = Rect::new(origin.x, origin.y, dimensions.width, dimensions.height);
+        draw_rectangle(
+            tooltip_rect.left(),
+            tooltip_rect.top() - 10.,
+            tooltip_rect.size().x + 10.,
+            tooltip_rect.size().y + 10.,
+            GREEN,
+        );
+        draw_tooltip_text(tooltip, origin);
+    }
+}
+
+fn draw_tooltip_text(tooltip: &str, origin: Vec2) -> TextDimensions {
+    draw_text_ex(
+        tooltip,
+        origin.x + 5.,
+        origin.y + 5.,
+        TextParams {
+            font_size: 20,
+            font_scale: 1.,
+            font: None,
+            color: BLACK,
+            ..Default::default()
+        },
+    )
 }

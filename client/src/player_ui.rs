@@ -5,7 +5,7 @@ use crate::layout_ui::{
     bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button, top_center_label,
     top_center_texture, top_left_label, top_right_texture, ICON_SIZE,
 };
-use crate::resource_ui::ResourceType;
+use crate::resource_ui::{resource_name, ResourceType};
 use macroquad::math::{u32, vec2};
 use macroquad::prelude::*;
 use macroquad::ui::{root_ui, Ui};
@@ -81,6 +81,7 @@ pub fn resource_label(
         label,
         &state.assets.resources[&resource_type],
         p,
+        resource_name(resource_type),
     );
 }
 
@@ -90,8 +91,9 @@ pub fn top_icon_with_label(
     label: &str,
     texture: &Texture2D,
     p: Vec2,
+    tooltip: &str,
 ) {
-    top_center_texture(state, texture, p);
+    top_center_texture(state, texture, p, tooltip);
     top_center_label(player, p + vec2(-30. - label.len() as f32 * 5., 40.), label);
 }
 
@@ -154,6 +156,7 @@ pub fn show_top_center(game: &Game, player: &ShownPlayer, state: &State) {
         &format!("{}", &p.victory_points()),
         &state.assets.victory_points,
         icon_pos(3, 0),
+        "Victory Points",
     );
 
     show_wonders(game, player, &mut root_ui());
@@ -271,45 +274,45 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
     let player = &state.shown_player(game);
 
     let assets = &state.assets;
-    if bottom_left_texture(state, &assets.zoom_in, icon_pos(1, -1)) {
+    if bottom_left_texture(state, &assets.zoom_in, icon_pos(1, -1), "Zoom in") {
         state.zoom *= 1.1;
         return StateUpdate::None;
     }
-    if bottom_left_texture(state, &assets.zoom_out, icon_pos(0, -1)) {
+    if bottom_left_texture(state, &assets.zoom_out, icon_pos(0, -1), "Zoom out") {
         state.zoom /= 1.1;
         return StateUpdate::None;
     }
-    if bottom_left_texture(state, &assets.reset, icon_pos(2, -1)) {
+    if bottom_left_texture(state, &assets.reset, icon_pos(2, -1), "Reset zoom and offset") {
         state.zoom = ZOOM;
         state.offset = OFFSET;
         return StateUpdate::None;
     }
-    if bottom_left_texture(state, &assets.up, icon_pos(4, -2)) {
+    if bottom_left_texture(state, &assets.up, icon_pos(4, -2), "Move up") {
         state.offset += vec2(0., -0.1);
         return StateUpdate::None;
     }
-    if bottom_left_texture(state, &assets.down, icon_pos(4, -1)) {
+    if bottom_left_texture(state, &assets.down, icon_pos(4, -1), "Move down") {
         state.offset += vec2(0., 0.1);
         return StateUpdate::None;
     }
-    if bottom_left_texture(state, &assets.left, icon_pos(3, -1)) {
+    if bottom_left_texture(state, &assets.left, icon_pos(3, -1), "Move left") {
         state.offset += vec2(0.1, 0.);
         return StateUpdate::None;
     }
-    if bottom_left_texture(state, &assets.right, icon_pos(5, -1)) {
+    if bottom_left_texture(state, &assets.right, icon_pos(5, -1), "Move right") {
         state.offset += vec2(-0.1, 0.);
         return StateUpdate::None;
     }
 
-    if game.can_undo() && bottom_right_texture(state, &assets.undo, icon_pos(-6, -1)) {
+    if game.can_undo() && bottom_right_texture(state, &assets.undo, icon_pos(-6, -1), "Undo") {
         return StateUpdate::Execute(Action::Undo);
     }
-    if game.can_redo() && bottom_right_texture(state, &assets.redo, icon_pos(-5, -1)) {
+    if game.can_redo() && bottom_right_texture(state, &assets.redo, icon_pos(-5, -1), "Redo") {
         return StateUpdate::Execute(Action::Redo);
     }
     if player.can_control
         && matches!(game.state, GameState::Playing)
-        && bottom_right_texture(state, &assets.end_turn, icon_pos(-4, -1))
+        && bottom_right_texture(state, &assets.end_turn, icon_pos(-4, -1), "End turn")
     {
         let left = game.actions_left;
         return StateUpdate::execute_with_warning(
@@ -322,33 +325,32 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
         );
     }
 
-    if player.can_play_action && bottom_left_texture(state, &assets.movement, icon_pos(0, -3)) {
+    if player.can_play_action && bottom_left_texture(state, &assets.movement, icon_pos(0, -3), "Move units") {
         return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
     }
-    if player.can_play_action && bottom_left_texture(state, &assets.happy, icon_pos(0, -2)) {
+    if player.can_play_action && bottom_left_texture(state, &assets.happy, icon_pos(0, -2), "Increase happiness") {
         return start_increase_happiness(game, player);
     }
-    if top_right_texture(state, &assets.advances, icon_pos(-2, 0)) {
+    if top_right_texture(state, &assets.advances, icon_pos(-2, 0), "Choose or show advances") {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     };
 
-    if top_right_texture(state, &assets.log, icon_pos(-1, 0)) {
+    if top_right_texture(state, &assets.log, icon_pos(-1, 0), "Show log") {
         return StateUpdate::OpenDialog(ActiveDialog::Log);
     };
     let d = state.game_state_dialog(game, &ActiveDialog::None);
-    // todo d.title() as tooltip
     if !matches!(d, ActiveDialog::None)
         && d.title() != state.active_dialog.title()
-        && bottom_right_texture(state, &assets.restore_menu, icon_pos(-7, -1))
+        && bottom_right_texture(state, &assets.restore_menu, icon_pos(-7, -1), format!("Restore {}", d.title()).as_str())
     {
         return StateUpdate::OpenDialog(d);
     }
 
     if features.import_export {
-        if bottom_right_texture(state, &assets.import, icon_pos(-2, -3)) {
+        if bottom_right_texture(state, &assets.import, icon_pos(-2, -3), "Import") {
             return StateUpdate::Import;
         };
-        if bottom_right_texture(state, &assets.export, icon_pos(-1, -3)) {
+        if bottom_right_texture(state, &assets.export, icon_pos(-1, -3), "Export") {
             return StateUpdate::Export;
         };
     }

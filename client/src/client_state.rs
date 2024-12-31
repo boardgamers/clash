@@ -235,6 +235,11 @@ impl ShownPlayer {
     }
 }
 
+pub struct MousePosition {
+    pub position: Vec2,
+    pub time: f64,
+}
+
 pub struct State {
     pub assets: Assets,
     pub control_player: Option<usize>,
@@ -245,6 +250,7 @@ pub struct State {
     pub zoom: f32,
     pub offset: Vec2,
     pub screen_size: Vec2,
+    pub mouse_positions: Vec<MousePosition>,
 }
 
 pub const ZOOM: f32 = 0.001;
@@ -264,6 +270,7 @@ impl State {
             zoom: ZOOM,
             offset: OFFSET,
             screen_size: vec2(0., 0.),
+            mouse_positions: vec![],
         }
     }
 

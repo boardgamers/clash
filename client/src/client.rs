@@ -14,6 +14,7 @@ use crate::construct_ui::pay_construction_dialog;
 use crate::dialog_ui::active_dialog_window;
 use crate::happiness_ui::{increase_happiness_dialog, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
+use crate::layout_ui::update_tooltip;
 use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
 use crate::player_ui::{player_select, show_global_controls, show_top_center, show_top_left};
@@ -47,6 +48,8 @@ pub fn render_and_update(
 }
 
 fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
+    update_tooltip(state);
+
     clear_background(WHITE);
 
     let player = &state.shown_player(game);
