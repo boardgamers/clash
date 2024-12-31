@@ -2,8 +2,8 @@ use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
 use crate::layout_ui::{
-    bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button,
-    top_center_texture, top_left_label, top_right_texture, ICON_SIZE,
+    bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button, top_center_texture,
+    top_left_label, top_right_texture, ICON_SIZE,
 };
 use crate::resource_ui::{resource_name, ResourceType};
 use macroquad::math::{u32, vec2};
@@ -90,30 +90,14 @@ pub fn top_icon_with_label(
     p: Vec2,
     tooltip: &str,
 ) {
-    let dimensions = draw_text_ex(
-        label,
-        0.,
-        0.,
-        TextParams {
-            font_size: 20,
-            font_scale: 1.0,
-            font: None,
-            color: BLANK,
-            ..Default::default()
-        },
-    );
+    let dimensions = draw_text(label, 0., 0., 20.0, BLANK);
     let x = (ICON_SIZE - dimensions.width) / 2.0;
-    draw_text_ex(
+    draw_text(
         label,
         player.screen_size.x / 2.0 + p.x + x,
         p.y + ICON_SIZE + 30.,
-        TextParams {
-            font_size: 20,
-            font_scale: 1.0,
-            font: None,
-            color: BLACK,
-            ..Default::default()
-        },
+        20.0,
+        BLACK,
     );
     top_center_texture(state, texture, p, tooltip);
 }

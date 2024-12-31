@@ -170,16 +170,11 @@ pub fn show_tooltip(state: &State, tooltip: &str, rect: Rect) {
 }
 
 fn draw_tooltip_text(tooltip: &str, origin: Vec2, color: Color) -> TextDimensions {
-    draw_text_ex(
+    draw_text(
         tooltip,
         origin.x + 5.,
         origin.y + 5.,
-        TextParams {
-            font_size: 20,
-            font_scale: 1.,
-            font: None,
-            color,
-            ..Default::default()
-        },
+        20.,
+        color,
     )
 }
