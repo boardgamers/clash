@@ -3,7 +3,6 @@ use macroquad::color::WHITE;
 use macroquad::math::{vec2, Vec2};
 use macroquad::prelude::*;
 use macroquad::ui::root_ui;
-use std::cmp::min;
 
 pub const ICON_SIZE: f32 = 30.;
 
