@@ -192,25 +192,33 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer) {
     ));
 
     if game.current_player_index == p.index {
-        label("Your turn".to_string());
-
         match &game.state {
             GameState::StatusPhase(_) | GameState::Finished => {}
-            _ => label(format!("Actions {}", game.actions_left)),
+            _ => label(format!("{} actions left", game.actions_left)),
         }
 
         match &game.state {
-            GameState::Movement { .. } => label("Movement".to_string()),
+            GameState::Movement {
+                movement_actions_left,
+                ..
+            } => label(format!("Move units: {movement_actions_left} moves left")),
             GameState::CulturalInfluenceResolution(_) => {
                 label("Cultural Influence Resolution".to_string());
             }
-            GameState::Combat(c) => label(format!("Combat Round {} Phase {:?}", c.round, c.phase)),
-            GameState::PlaceSettler { .. } => label("Place Settler".to_string()),
+            GameState::Combat(c) => label(format!(
+                "Combat Round {} Phase {:?}{}",
+                c.round,
+                c.phase,
+                moves_left(&game.state)
+                    .map(|m| format!(", {} moves left", m))
+                    .unwrap_or_default()
+            )),
+            GameState::PlaceSettler {
+                player_index: _,
+                movement_actions_left,
+                ..
+            } => label(format!("Place Settler: {movement_actions_left} moves left").to_string()),
             _ => {}
-        }
-
-        if let Some(m) = moves_left(&game.state) {
-            label(format!("Moves left {m}"));
         }
     }
 }
@@ -223,7 +231,7 @@ fn moves_left(state: &GameState) -> Option<u32> {
             ..
         } => Some(*movement_actions_left),
         GameState::PlaceSettler {
-            player_index: _player_index,
+            player_index: _,
             movement_actions_left,
             ..
         } => Some(*movement_actions_left),
