@@ -206,6 +206,10 @@ impl StateUpdates {
         }
     }
 
+    pub fn clear(&mut self) {
+        self.updates.clear();
+    }
+
     pub fn result(self) -> StateUpdate {
         self.updates
             .into_iter()
