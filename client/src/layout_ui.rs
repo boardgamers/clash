@@ -73,13 +73,18 @@ fn relative_texture(state: &State, texture: &Texture2D, anchor: Vec2, offset: Ve
         },
     );
 
+    let pressed = left_mouse_button(Rect::new(origin.x, origin.y, ICON_SIZE, ICON_SIZE));
+    set_camera(&state.camera);
+    pressed
+}
+
+pub fn left_mouse_button(rect: Rect) -> bool {
     let pressed = if is_mouse_button_pressed(MouseButton::Left) {
         let (x, y) = mouse_position();
-        Rect::new(origin.x, origin.y, ICON_SIZE, ICON_SIZE).contains(vec2(x, y))
+        rect.contains(vec2(x, y))
     } else {
         false
     };
-    set_camera(&state.camera);
     pressed
 }
 

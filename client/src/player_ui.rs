@@ -1,10 +1,7 @@
 use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
-use crate::layout_ui::{
-    bottom_left_button, bottom_left_texture, bottom_right_texture, icon_pos, top_center_label,
-    top_center_texture, top_left_label, top_right_texture, ICON_SIZE,
-};
+use crate::layout_ui::{bottom_left_button, bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button, top_center_label, top_center_texture, top_left_label, top_right_texture, ICON_SIZE};
 use crate::resource_ui::ResourceType;
 use macroquad::math::{u32, vec2};
 use macroquad::prelude::*;
@@ -44,18 +41,20 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
 
         draw_text(&text, pos.x + 5., pos.y + 20., 20.0, BLACK);
 
-
+        let active = game.active_player();
+        if active == pl.index {
+            draw_texture_ex(&state.assets.active_player, x - 25., pos.y + 5., WHITE, DrawTextureParams {
+                dest_size: Some(vec2(20., 20.)),
+                ..Default::default()
+            });
+        }
 
         set_camera(&state.camera);
 
-        /*    if shown {
-            Label::new(&label).position(pos).size(vec2(200., 40.)).ui(&mut root_ui())
-        } else if root_ui().button(
-            pos,
-            label,
-        ) {
+        if !shown && left_mouse_button(Rect::new(x, pos.y, w, ICON_SIZE)) {
             return StateUpdate::SetShownPlayer(pl.index);
-        }*/
+        }
+
         y += ICON_SIZE;
     }
 
