@@ -76,8 +76,8 @@ pub fn unit_selection_dialog<T: UnitSelection>(
     on_ok: impl FnOnce(T) -> StateUpdate,
     additional: impl FnOnce(&mut Ui) -> StateUpdate,
 ) -> StateUpdate {
-    active_dialog_window(player, title, |ui| {
-        if let Some(current_tile) = sel.current_tile() {
+    if let Some(current_tile) = sel.current_tile() {
+        active_dialog_window(player, title, |ui| {
             for (i, (p, unit_id)) in units_on_tile(game, current_tile).enumerate() {
                 let unit = game.get_player(p).get_unit(unit_id).unwrap();
                 let can_sel = sel.can_select(game, unit);
@@ -101,11 +101,10 @@ pub fn unit_selection_dialog<T: UnitSelection>(
                 }
             }
             confirm_update(sel, || on_ok(sel.clone()), ui, &sel.confirm(game)).or(|| additional(ui))
-        } else {
-            ui.label(None, "Select a starting tile");
-            additional(ui)
-        }
-    })
+        })
+    } else {
+        StateUpdate::None
+    }
 }
 
 pub fn units_on_tile(game: &Game, pos: Position) -> impl Iterator<Item = (usize, u32)> + '_ {

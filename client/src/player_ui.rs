@@ -1,7 +1,10 @@
 use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
-use crate::layout_ui::{bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button,  top_center_texture,  top_right_texture, ICON_SIZE};
+use crate::layout_ui::{
+    bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button, top_center_texture,
+    top_right_texture, ICON_SIZE,
+};
 use crate::resource_ui::{resource_name, ResourceType};
 use macroquad::math::{u32, vec2};
 use macroquad::prelude::*;
@@ -11,6 +14,7 @@ use server::game::{Game, GameState};
 use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
+use server::unit::MovementAction;
 
 pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
     let i = game
@@ -89,8 +93,7 @@ pub fn top_icon_with_label(
 ) {
     let dimensions = state.measure_text(label);
     let x = (ICON_SIZE - dimensions.width) / 2.0;
-    state.
-    draw_text(
+    state.draw_text(
         label,
         player.screen_size.x / 2.0 + p.x + x,
         p.y + ICON_SIZE + 30.,
@@ -164,28 +167,28 @@ pub fn show_top_center(game: &Game, player: &ShownPlayer, state: &State) {
 
 pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
     let mut y = 0.;
-    let mut label = |label: String| {
+    let mut label = |label: &str| {
         let p = vec2(10., y * 25. + 20.);
         y += 1.;
-        state.draw_text(&label, p.x, p.y);
+        state.draw_text(label, p.x, p.y);
     };
 
     match &game.state {
-        GameState::Finished => label("Finished".to_string()),
-        _ => label(format!("Age {}", game.age)),
+        GameState::Finished => label("Finished"),
+        _ => label(&format!("Age {}", game.age)),
     }
     match &game.state {
-        GameState::StatusPhase(ref p) => label(format!("Status Phase: {p:?}")),
-        _ => label(format!("Round {}", game.round)),
+        GameState::StatusPhase(ref p) => label(&format!("Status Phase: {p:?}")),
+        _ => label(&format!("Round {}", game.round)),
     }
 
     let p = game.get_player(player.index);
 
-    label(p.get_name());
+    label(&p.get_name());
 
-    label(format!("Civ {}", p.civilization.name));
+    label(&format!("Civ {}", p.civilization.name));
 
-    label(format!(
+    label(&format!(
         "Leader {}",
         if let Some(l) = &p.active_leader {
             &l.name
@@ -197,18 +200,18 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
     if game.current_player_index == p.index {
         match &game.state {
             GameState::StatusPhase(_) | GameState::Finished => {}
-            _ => label(format!("{} actions left", game.actions_left)),
+            _ => label(&format!("{} actions left", game.actions_left)),
         }
 
         match &game.state {
             GameState::Movement {
                 movement_actions_left,
                 ..
-            } => label(format!("Move units: {movement_actions_left} moves left")),
+            } => label(&format!("Move units: {movement_actions_left} moves left")),
             GameState::CulturalInfluenceResolution(_) => {
-                label("Cultural Influence Resolution".to_string());
+                label("Cultural Influence Resolution");
             }
-            GameState::Combat(c) => label(format!(
+            GameState::Combat(c) => label(&format!(
                 "Combat Round {} Phase {:?}{}",
                 c.round,
                 c.phase,
@@ -220,9 +223,10 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
                 player_index: _,
                 movement_actions_left,
                 ..
-            } => label(format!("Place Settler: {movement_actions_left} moves left").to_string()),
+            } => label(&format!("Place Settler: {movement_actions_left} moves left")),
             _ => {}
         }
+        state.active_dialog.help_message().map(|m| label(m));
     }
 }
 
@@ -276,18 +280,10 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
     let assets = &state.assets;
 
     if player.can_control
-        && matches!(game.state, GameState::Playing)
+        && can_end_move(game)
         && bottom_right_texture(state, &assets.end_turn, icon_pos(-4, -1), "End turn")
     {
-        let left = game.actions_left;
-        return StateUpdate::execute_with_warning(
-            Action::Playing(PlayingAction::EndTurn),
-            if left > 0 {
-                vec![format!("{left} actions left")]
-            } else {
-                vec![]
-            },
-        );
+        return end_move(game);
     }
     if game.can_redo() && bottom_right_texture(state, &assets.redo, icon_pos(-5, -1), "Redo") {
         return StateUpdate::Execute(Action::Redo);
@@ -296,7 +292,7 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
         return StateUpdate::Execute(Action::Undo);
     }
     let d = state.game_state_dialog(game, &ActiveDialog::None);
-    if !matches!(d, ActiveDialog::None)
+    if d.can_restore()
         && d.title() != state.active_dialog.title()
         && bottom_right_texture(
             state,
@@ -378,6 +374,37 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
     }
 
     StateUpdate::None
+}
+
+fn can_end_move(game: &Game) -> bool {
+    matches!(game.state, GameState::Playing) || matches!(game.state, GameState::Movement { .. })
+}
+
+fn end_move(game: &Game) -> StateUpdate {
+    if let GameState::Movement {
+        movement_actions_left,
+        ..
+    } = &game.state
+    {
+        return StateUpdate::execute_with_warning(
+            Action::Movement(MovementAction::Stop),
+            if *movement_actions_left > 0 {
+                vec![(format!("{movement_actions_left} movement actions left"))]
+            } else {
+                vec![]
+            },
+        );
+    }
+
+    let left = game.actions_left;
+    StateUpdate::execute_with_warning(
+        Action::Playing(PlayingAction::EndTurn),
+        if left > 0 {
+            vec![format!("{left} actions left")]
+        } else {
+            vec![]
+        },
+    )
 }
 
 pub fn player_color(player_index: usize) -> Color {

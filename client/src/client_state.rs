@@ -82,6 +82,34 @@ impl ActiveDialog {
         }
     }
 
+    pub fn help_message(&self) -> Option<&str> {
+        match self {
+            ActiveDialog::None => None,
+            ActiveDialog::TileMenu(_) => Some("Click on a tile to see options"),
+            ActiveDialog::Log => Some("Click on a log entry to see details"),
+            ActiveDialog::IncreaseHappiness(_) => Some("Click on a city to increase happiness"),
+            ActiveDialog::AdvanceMenu => Some("Click on an advance to see options"),
+            ActiveDialog::AdvancePayment(_) => Some("Click on an advance to pay"),
+            ActiveDialog::ConstructionPayment(_) => Some("Click on a city to pay for construction"),
+            ActiveDialog::CollectResources(_) => Some("Click on a city to collect resources"),
+            ActiveDialog::RecruitUnitSelection(_) => Some("Click on a unit to recruit"),
+            ActiveDialog::ReplaceUnits(_) => Some("Click on a unit to replace"),
+            ActiveDialog::MoveUnits(_) => Some("Click on a unit to move"),
+            ActiveDialog::CulturalInfluenceResolution(_) => Some("Click on a city to resolve cultural influence"),
+            ActiveDialog::FreeAdvance => Some("Click on an advance to take it for free"),
+            ActiveDialog::RazeSize1City => Some("Click on a city to raze it"),
+            ActiveDialog::CompleteObjectives => Some("Click on an objective to complete it"),
+            ActiveDialog::DetermineFirstPlayer => Some("Click on a player to determine first player"),
+            ActiveDialog::ChangeGovernmentType => Some("Click on a government type to change"),
+            ActiveDialog::ChooseAdditionalAdvances(_) => Some("Click on an advance to choose it"),
+            ActiveDialog::PlayActionCard => Some("Click on an action card to play it"),
+            ActiveDialog::PlaceSettler => Some("Click on a tile to place a settler"),
+            ActiveDialog::Retreat => Some("Click on a unit to retreat"),
+            ActiveDialog::RemoveCasualties(_) => Some("Click on a unit to remove it"),
+            _ => panic!("no help message for dialog"),
+        }
+    }
+
     #[must_use]
     pub fn is_map_dialog(&self) -> bool {
         matches!(
@@ -92,6 +120,14 @@ impl ActiveDialog {
                 | ActiveDialog::MoveUnits(_)
                 | ActiveDialog::PlaceSettler
                 | ActiveDialog::RazeSize1City
+        )
+    }
+
+    #[must_use]
+    pub fn can_restore(&self) -> bool {
+        !matches!(
+            self,
+            ActiveDialog::MoveUnits(_) | ActiveDialog::ReplaceUnits(_) | ActiveDialog::RemoveCasualties(_) | ActiveDialog::None
         )
     }
 }
@@ -362,7 +398,9 @@ impl State {
     }
 
     fn close_dialog(&mut self) {
-        self.active_dialog = ActiveDialog::None;
+        if self.active_dialog.can_restore() {
+            self.active_dialog = ActiveDialog::None;
+        }
     }
 
     pub fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {
