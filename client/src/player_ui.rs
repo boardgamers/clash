@@ -2,8 +2,8 @@ use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
 use crate::layout_ui::{
-    bottom_left_button, bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button,
-    top_center_label, top_center_texture, top_left_label, top_right_texture, ICON_SIZE,
+    bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button, top_center_label,
+    top_center_texture, top_left_label, top_right_texture, ICON_SIZE,
 };
 use crate::resource_ui::ResourceType;
 use macroquad::math::{u32, vec2};
@@ -328,9 +328,10 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
         return StateUpdate::OpenDialog(ActiveDialog::Log);
     };
     let d = state.game_state_dialog(game, &ActiveDialog::None);
+    // todo d.title() as tooltip
     if !matches!(d, ActiveDialog::None)
         && d.title() != state.active_dialog.title()
-        && bottom_left_button(player, vec2(0., -200.), &format!("Back to {}", d.title()))
+        && bottom_right_texture(state, &assets.restore_menu, icon_pos(-7, -1))
     {
         return StateUpdate::OpenDialog(d);
     }

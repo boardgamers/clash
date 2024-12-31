@@ -35,6 +35,7 @@ pub struct Assets {
     pub right: Texture2D,
     pub victory_points: Texture2D,
     pub active_player: Texture2D,
+    pub restore_menu: Texture2D,
 
     // Admin
     pub import: Texture2D,
@@ -113,6 +114,7 @@ impl Assets {
             )),
             victory_points: load_png(include_bytes!("../assets/trophy-cup-svgrepo-com.png")),
             active_player: load_png(include_bytes!("../assets/triangle-svgrepo-com.png")),
+            restore_menu: load_png(include_bytes!("../assets/restore-svgrepo-com.png")),
 
             // Admin
             import: load_png(include_bytes!("../assets/import-3-svgrepo-com.png")),

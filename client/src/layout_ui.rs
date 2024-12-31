@@ -46,10 +46,6 @@ pub fn bottom_left_texture(state: &State, texture: &Texture2D, p: Vec2) -> bool 
     )
 }
 
-pub fn bottom_left_button(player: &ShownPlayer, p: Vec2, label: &str) -> bool {
-    root_ui().button(vec2(MARGIN, player.screen_size.y - MARGIN) + p, label)
-}
-
 pub fn bottom_right_texture(state: &State, texture: &Texture2D, p: Vec2) -> bool {
     relative_texture(
         state,
