@@ -216,7 +216,7 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
                 c.round,
                 c.phase,
                 moves_left(&game.state)
-                    .map(|m| format!(", {} moves left", m))
+                    .map(|m| format!(", {m} moves left"))
                     .unwrap_or_default()
             )),
             GameState::PlaceSettler {
@@ -228,7 +228,7 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
             )),
             _ => {}
         }
-        state.active_dialog.help_message().map(|m| label(m));
+        state.active_dialog.help_message().map(label);
     }
 }
 
@@ -238,8 +238,8 @@ fn moves_left(state: &GameState) -> Option<u32> {
         GameState::Movement {
             movement_actions_left,
             ..
-        } => Some(*movement_actions_left),
-        GameState::PlaceSettler {
+        }
+        | GameState::PlaceSettler {
             player_index: _,
             movement_actions_left,
             ..

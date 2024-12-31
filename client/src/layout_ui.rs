@@ -155,17 +155,7 @@ pub fn show_tooltip(state: &State, tooltip: &str, rect: Rect) {
         let sx = state.screen_size.x;
         let x = tooltip_rect.left().min(sx - w);
         let y = (tooltip_rect.top() - 10.).max(40.);
-        draw_rectangle(
-            x,
-            y,
-            w,
-            tooltip_rect.size().y + 10.,
-            GRAY,
-        );
-        state.draw_text(
-            tooltip,
-            x + 5.,
-            y + 20.,
-        );
+        draw_rectangle(x, y, w, tooltip_rect.size().y + 10., GRAY);
+        state.draw_text(tooltip, x + 5., y + 20.);
     }
 }

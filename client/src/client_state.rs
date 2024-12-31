@@ -82,6 +82,7 @@ impl ActiveDialog {
         }
     }
 
+    #[must_use]
     pub fn help_message(&self) -> Option<&str> {
         match self {
             ActiveDialog::None => None,
@@ -95,18 +96,22 @@ impl ActiveDialog {
             ActiveDialog::RecruitUnitSelection(_) => Some("Click on a unit to recruit"),
             ActiveDialog::ReplaceUnits(_) => Some("Click on a unit to replace"),
             ActiveDialog::MoveUnits(_) => Some("Click on a unit to move"),
-            ActiveDialog::CulturalInfluenceResolution(_) => Some("Click on a city to resolve cultural influence"),
+            ActiveDialog::CulturalInfluenceResolution(_) => {
+                Some("Click on a city to resolve cultural influence")
+            }
             ActiveDialog::FreeAdvance => Some("Click on an advance to take it for free"),
             ActiveDialog::RazeSize1City => Some("Click on a city to raze it"),
             ActiveDialog::CompleteObjectives => Some("Click on an objective to complete it"),
-            ActiveDialog::DetermineFirstPlayer => Some("Click on a player to determine first player"),
+            ActiveDialog::DetermineFirstPlayer => {
+                Some("Click on a player to determine first player")
+            }
             ActiveDialog::ChangeGovernmentType => Some("Click on a government type to change"),
             ActiveDialog::ChooseAdditionalAdvances(_) => Some("Click on an advance to choose it"),
             ActiveDialog::PlayActionCard => Some("Click on an action card to play it"),
             ActiveDialog::PlaceSettler => Some("Click on a tile to place a settler"),
             ActiveDialog::Retreat => Some("Click on a unit to retreat"),
             ActiveDialog::RemoveCasualties(_) => Some("Click on a unit to remove it"),
-            _ => panic!("no help message for dialog"),
+            ActiveDialog::WaitingForUpdate => panic!("no help message for dialog"),
         }
     }
 
@@ -467,6 +472,7 @@ impl State {
         }
     }
 
+    #[must_use]
     pub fn measure_text(&self, text: &str) -> TextDimensions {
         measure_text(text, Some(&self.assets.font), FONT_SIZE, 1.0)
     }

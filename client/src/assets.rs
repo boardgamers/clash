@@ -56,7 +56,7 @@ impl Assets {
             font: load_ttf_font(&font_name).await.unwrap(), // can't share font - causes panic
             terrain: Self::terrain(features).await,
             units: HashMap::new(),
-            skin: Self::skin(&load_ttf_font(&font_name).await.unwrap()).await,
+            skin: Self::skin(&load_ttf_font(&font_name).await.unwrap()),
 
             // mood icons
             angry: load_png(include_bytes!("../assets/angry-face-svgrepo-com.png")),
@@ -143,7 +143,7 @@ impl Assets {
         map
     }
 
-    async fn skin(font: &Font) -> Skin {
+    fn skin(font: &Font) -> Skin {
         let image =
             Image::from_file_with_format(include_bytes!("../assets/button_background.png"), None)
                 .unwrap();
@@ -190,7 +190,7 @@ impl Assets {
                 )
                 .unwrap(),
             )
-            .with_font(&font)
+            .with_font(font)
             .unwrap()
             .text_color(Color::from_rgba(180, 180, 100, 255))
             .font_size(20)
@@ -199,7 +199,7 @@ impl Assets {
         let editbox_style = root_ui()
             .style_builder()
             .background_margin(RectOffset::new(0., 0., 0., 0.))
-            .with_font(&font)
+            .with_font(font)
             .unwrap()
             .text_color(Color::from_rgba(120, 120, 120, 255))
             .color_selected(Color::from_rgba(190, 190, 190, 255))
