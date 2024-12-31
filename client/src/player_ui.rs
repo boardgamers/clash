@@ -277,19 +277,19 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
         return StateUpdate::None;
     }
     if bottom_left_texture(state, &assets.up, icon_pos(4, -2)) {
-        state.offset += vec2(0., 0.1);
-        return StateUpdate::None;
-    }
-    if bottom_left_texture(state, &assets.down, icon_pos(4, -1)) {
         state.offset += vec2(0., -0.1);
         return StateUpdate::None;
     }
+    if bottom_left_texture(state, &assets.down, icon_pos(4, -1)) {
+        state.offset += vec2(0., 0.1);
+        return StateUpdate::None;
+    }
     if bottom_left_texture(state, &assets.left, icon_pos(3, -1)) {
-        state.offset += vec2(-0.1, 0.);
+        state.offset += vec2(0.1, 0.);
         return StateUpdate::None;
     }
     if bottom_left_texture(state, &assets.right, icon_pos(5, -1)) {
-        state.offset += vec2(0.1, 0.);
+        state.offset += vec2(-0.1, 0.);
         return StateUpdate::None;
     }
 
