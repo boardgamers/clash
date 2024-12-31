@@ -223,7 +223,9 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
                 player_index: _,
                 movement_actions_left,
                 ..
-            } => label(&format!("Place Settler: {movement_actions_left} moves left")),
+            } => label(&format!(
+                "Place Settler: {movement_actions_left} moves left"
+            )),
             _ => {}
         }
         state.active_dialog.help_message().map(|m| label(m));
@@ -279,9 +281,9 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
 
     let assets = &state.assets;
 
-    if player.can_control
-        && can_end_move(game)
-        && bottom_right_texture(state, &assets.end_turn, icon_pos(-4, -1), "End turn")
+    if let Some(tooltip) = can_end_move(game)
+        && player.can_control
+        && bottom_right_texture(state, &assets.end_turn, icon_pos(-4, -1), tooltip)
     {
         return end_move(game);
     }
@@ -376,8 +378,12 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
     StateUpdate::None
 }
 
-fn can_end_move(game: &Game) -> bool {
-    matches!(game.state, GameState::Playing) || matches!(game.state, GameState::Movement { .. })
+fn can_end_move(game: &Game) -> Option<&str> {
+    match game.state {
+        GameState::Movement { .. } => Some("End movement"),
+        GameState::Playing => Some("End turn"),
+        _ => None,
+    }
 }
 
 fn end_move(game: &Game) -> StateUpdate {
