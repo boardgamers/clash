@@ -127,7 +127,7 @@ impl ActiveDialog {
     pub fn can_restore(&self) -> bool {
         !matches!(
             self,
-            ActiveDialog::MoveUnits(_) | ActiveDialog::ReplaceUnits(_) | ActiveDialog::RemoveCasualties(_) | ActiveDialog::None
+            ActiveDialog::MoveUnits(_) | ActiveDialog::ReplaceUnits(_) | ActiveDialog::None
         )
     }
 }
@@ -400,6 +400,16 @@ impl State {
     fn close_dialog(&mut self) {
         if self.active_dialog.can_restore() {
             self.active_dialog = ActiveDialog::None;
+        } else {
+            match &mut self.active_dialog {
+                ActiveDialog::ReplaceUnits(r) => {
+                    r.clear();
+                }
+                ActiveDialog::MoveUnits(m) => {
+                    m.clear();
+                }
+                _ => {}
+            }
         }
     }
 

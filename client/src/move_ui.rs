@@ -126,6 +126,12 @@ impl MoveSelection {
             destinations: vec![],
         }
     }
+
+    pub fn clear(&mut self) {
+        self.units.clear();
+        self.start = None;
+        self.destinations.clear();
+    }
 }
 
 impl UnitSelection for MoveSelection {
