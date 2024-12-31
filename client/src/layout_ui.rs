@@ -22,10 +22,6 @@ pub fn top_left_label(p: Vec2, label: &str) {
     root_ui().label(p + vec2(-40., 0.), label);
 }
 
-pub fn top_center_label(player: &ShownPlayer, p: Vec2, label: &str) {
-    root_ui().label(vec2(player.screen_size.x / 2.0, 0.) + p, label);
-}
-
 pub fn top_center_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
     relative_texture(
         state,
@@ -74,7 +70,7 @@ fn relative_texture(
     tooltip: &str,
 ) -> bool {
     let origin = anchor + offset;
-    set_default_camera();
+
     draw_texture_ex(
         texture,
         origin.x,
@@ -88,9 +84,7 @@ fn relative_texture(
 
     let rect = Rect::new(origin.x, origin.y, ICON_SIZE, ICON_SIZE);
     show_tooltip(state, tooltip, rect);
-    let pressed = left_mouse_button(rect);
-    set_camera(&state.camera);
-    pressed
+    left_mouse_button(rect)
 }
 
 pub fn left_mouse_button(rect: Rect) -> bool {

@@ -61,7 +61,6 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         offset: state.offset,
         ..Default::default()
     };
-    set_camera(&state.camera);
 
     if matches!(state.active_dialog, ActiveDialog::None) || state.active_dialog.is_map_dialog() {
         draw_map(game, state);

@@ -2,7 +2,7 @@ use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
 use crate::layout_ui::{
-    bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button, top_center_label,
+    bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button,
     top_center_texture, top_left_label, top_right_texture, ICON_SIZE,
 };
 use crate::resource_ui::{resource_name, ResourceType};
@@ -32,7 +32,6 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
         let pos = vec2(player.screen_size.x, player.screen_size.y / 2.0) + vec2(-20., y);
 
         let color = player_color(pl.index);
-        set_default_camera();
 
         let w = if shown { ICON_SIZE + 10. } else { ICON_SIZE };
         let x = pos.x - w + ICON_SIZE;
@@ -55,8 +54,6 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
                 },
             );
         }
-
-        set_camera(&state.camera);
 
         if !shown && left_mouse_button(Rect::new(x, pos.y, w, ICON_SIZE)) {
             return StateUpdate::SetShownPlayer(pl.index);
@@ -93,7 +90,31 @@ pub fn top_icon_with_label(
     p: Vec2,
     tooltip: &str,
 ) {
-    top_center_label(player, p + vec2(-30. - label.len() as f32 * 5., 40.), label);
+    let dimensions = draw_text_ex(
+        label,
+        0.,
+        0.,
+        TextParams {
+            font_size: 20,
+            font_scale: 1.0,
+            font: None,
+            color: BLANK,
+            ..Default::default()
+        },
+    );
+    let x = (ICON_SIZE - dimensions.width) / 2.0;
+    draw_text_ex(
+        label,
+        player.screen_size.x / 2.0 + p.x + x,
+        p.y + ICON_SIZE + 30.,
+        TextParams {
+            font_size: 20,
+            font_scale: 1.0,
+            font: None,
+            color: BLACK,
+            ..Default::default()
+        },
+    );
     top_center_texture(state, texture, p, tooltip);
 }
 

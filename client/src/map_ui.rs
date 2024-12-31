@@ -36,6 +36,7 @@ fn terrain_name(t: &Terrain) -> &'static str {
 }
 
 pub fn draw_map(game: &Game, state: &State) {
+    set_camera(&state.camera);
     for (pos, t) in &game.map.tiles {
         let (base, exhausted) = match t {
             Terrain::Exhausted(e) => (e.as_ref(), true),
@@ -62,6 +63,7 @@ pub fn draw_map(game: &Game, state: &State) {
         }
         unit_ui::draw_units(game);
     }
+    set_default_camera();
 }
 
 fn alpha(game: &Game, state: &State, pos: Position) -> f32 {
