@@ -14,6 +14,7 @@ use crate::collect_ui::CollectResources;
 use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
 use crate::happiness_ui::IncreaseHappiness;
+use crate::layout_ui::FONT_SIZE;
 use crate::move_ui::MoveSelection;
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use crate::status_phase_ui::ChooseAdditionalAdvances;
@@ -420,6 +421,24 @@ impl State {
             },
             _ => ActiveDialog::None,
         }
+    }
+
+    pub fn measure_text(&self, text: &str) -> TextDimensions {
+        measure_text(text, Some(&self.assets.font), FONT_SIZE, 1.0)
+    }
+
+    pub fn draw_text(&self, text: &str, x: f32, y: f32) {
+        draw_text_ex(
+            text,
+            x,
+            y,
+            TextParams {
+                font: Some(&self.assets.font),
+                font_size: FONT_SIZE,
+                color: BLACK,
+                ..Default::default()
+            },
+        );
     }
 
     // fn execute_status_phase(&mut self, game: &Game, action: StatusPhaseAction) -> ActiveDialog {

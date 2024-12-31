@@ -2,7 +2,6 @@ use crate::client_state::{MousePosition, ShownPlayer, State};
 use macroquad::color::WHITE;
 use macroquad::math::{vec2, Vec2};
 use macroquad::prelude::*;
-use macroquad::ui::root_ui;
 
 pub const ICON_SIZE: f32 = 30.;
 
@@ -12,20 +11,12 @@ pub const TOOLTIP_DELAY: f64 = 0.5;
 
 pub const FONT_SIZE: u16 = 20;
 
-pub fn text_dimensions(text: &str, state: &State) -> TextDimensions {
-    measure_text(text, Some(&state.assets.font), FONT_SIZE, 1.0)
-}
-
 pub fn icon_offset(i: i8) -> f32 {
     f32::from(i) * 1.4 * ICON_SIZE
 }
 
 pub fn icon_pos(x: i8, y: i8) -> Vec2 {
     vec2(icon_offset(x), icon_offset(y))
-}
-
-pub fn top_left_label(p: Vec2, label: &str) {
-    root_ui().label(p + vec2(-40., 0.), label);
 }
 
 pub fn top_center_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
@@ -158,7 +149,7 @@ pub fn show_tooltip(state: &State, tooltip: &str, rect: Rect) {
             rect.size().y,
             Color::new(0.0, 0.0, 0.0, 0.5),
         );
-        let dimensions = text_dimensions(tooltip, state);
+        let dimensions = state.measure_text(tooltip);
         let tooltip_rect = Rect::new(origin.x, origin.y, dimensions.width, dimensions.height);
         let w = tooltip_rect.size().x + 10.;
         let sx = state.screen_size.x;
@@ -169,14 +160,12 @@ pub fn show_tooltip(state: &State, tooltip: &str, rect: Rect) {
             y,
             w,
             tooltip_rect.size().y + 10.,
-            GREEN,
+            GRAY,
         );
-        draw_text(
+        state.draw_text(
             tooltip,
             x + 5.,
-            y + 15.,
-            20.,
-            BLACK,
+            y + 20.,
         );
     }
 }

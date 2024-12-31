@@ -1,7 +1,7 @@
 use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
-use crate::layout_ui::{bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button, text_dimensions, top_center_texture, top_left_label, top_right_texture, ICON_SIZE};
+use crate::layout_ui::{bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button,  top_center_texture,  top_right_texture, ICON_SIZE};
 use crate::resource_ui::{resource_name, ResourceType};
 use macroquad::math::{u32, vec2};
 use macroquad::prelude::*;
@@ -36,7 +36,7 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
         draw_rectangle_lines(x, pos.y, w, ICON_SIZE, 2.0, BLACK);
         let text = format!("{}", pl.victory_points());
 
-        draw_text(&text, pos.x + 5., pos.y + 20., 20.0, BLACK);
+        state.draw_text(&text, pos.x + 5., pos.y + 20.);
 
         let active = game.active_player();
         if active == pl.index {
@@ -87,14 +87,13 @@ pub fn top_icon_with_label(
     p: Vec2,
     tooltip: &str,
 ) {
-    let dimensions = text_dimensions(label, state);
+    let dimensions = state.measure_text(label);
     let x = (ICON_SIZE - dimensions.width) / 2.0;
+    state.
     draw_text(
         label,
         player.screen_size.x / 2.0 + p.x + x,
         p.y + ICON_SIZE + 30.,
-        20.0,
-        BLACK,
     );
     top_center_texture(state, texture, p, tooltip);
 }
@@ -163,12 +162,12 @@ pub fn show_top_center(game: &Game, player: &ShownPlayer, state: &State) {
     show_wonders(game, player, &mut root_ui());
 }
 
-pub fn show_top_left(game: &Game, player: &ShownPlayer) {
+pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
     let mut y = 0.;
     let mut label = |label: String| {
-        let p = vec2(0., y * 25.);
+        let p = vec2(10., y * 25. + 20.);
         y += 1.;
-        top_left_label(p, &label);
+        state.draw_text(&label, p.x, p.y);
     };
 
     match &game.state {

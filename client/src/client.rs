@@ -66,7 +66,7 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         draw_map(game, state);
     }
     let mut updates = StateUpdates::new();
-    show_top_left(game, player);
+    show_top_left(game, player, state);
     show_top_center(game, player, state);
     updates.add(player_select(game, player, state));
     updates.add(show_global_controls(game, state, features));
