@@ -3,7 +3,7 @@ use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET,
 use crate::happiness_ui::start_increase_happiness;
 use crate::layout_ui::{
     bottom_left_button, bottom_left_texture, bottom_right_texture, icon_pos, top_center_label,
-    top_center_texture, top_left_button, top_left_label, top_right_texture,
+    top_center_texture, top_left_label, top_right_texture, ICON_SIZE,
 };
 use crate::resource_ui::ResourceType;
 use macroquad::math::{u32, vec2};
@@ -15,10 +15,51 @@ use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
 
-pub fn show_globals(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
-    let update = show_top_left(game, player);
-    show_top_center(game, player, state);
-    update
+pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
+    let i = game
+        .players
+        .iter()
+        .position(|p| p.index == game.starting_player_index)
+        .unwrap();
+    let mut players: Vec<_> = game.players.iter().map(|p| p.index).collect();
+    players.rotate_left(i);
+
+    let mut y = (players.len() as f32 * -ICON_SIZE) / 2.;
+
+    for p in players {
+        let pl = game.get_player(p);
+        let shown = player.index == pl.index;
+        let prefix = if shown { "* " } else { "" };
+        let name = pl.get_name();
+        let pos = vec2(player.screen_size.x, player.screen_size.y / 2.0) + vec2(-20., y);
+
+        let color = player_color(pl.index);
+        set_default_camera();
+
+        let w = if shown { ICON_SIZE + 10. } else { ICON_SIZE };
+        let x = pos.x - w + ICON_SIZE;
+        draw_rectangle(x, pos.y, w, ICON_SIZE, color);
+        draw_rectangle_lines(x, pos.y, w, ICON_SIZE, 2.0, BLACK);
+        let text = format!("{}", pl.victory_points());
+
+        draw_text(&text, pos.x + 5., pos.y + 20., 20.0, BLACK);
+
+
+
+        set_camera(&state.camera);
+
+        /*    if shown {
+            Label::new(&label).position(pos).size(vec2(200., 40.)).ui(&mut root_ui())
+        } else if root_ui().button(
+            pos,
+            label,
+        ) {
+            return StateUpdate::SetShownPlayer(pl.index);
+        }*/
+        y += ICON_SIZE;
+    }
+
+    StateUpdate::None
 }
 
 pub fn resource_label(
@@ -48,7 +89,7 @@ pub fn top_icon_with_label(
     top_center_label(player, p + vec2(-30. - label.len() as f32 * 5., 40.), label);
 }
 
-fn show_top_center(game: &Game, player: &ShownPlayer, state: &State) {
+pub fn show_top_center(game: &Game, player: &ShownPlayer, state: &State) {
     let p = game.get_player(player.index);
 
     resource_label(
@@ -112,24 +153,13 @@ fn show_top_center(game: &Game, player: &ShownPlayer, state: &State) {
     show_wonders(game, player, &mut root_ui());
 }
 
-fn show_top_left(game: &Game, player: &ShownPlayer) -> StateUpdate {
+pub fn show_top_left(game: &Game, player: &ShownPlayer) {
     let mut y = 0.;
-    let mut show = |label: String, button: bool| -> bool {
+    let mut label = |label: String| {
         let p = vec2(0., y * 25.);
         y += 1.;
-        if button {
-            top_left_button(p, &label)
-        } else {
-            top_left_label(p, &label);
-            false
-        }
+        top_left_label(p, &label);
     };
-    let mut label = |label: String| {
-       show(label, false);
-    };
-    // let mut button = |label: String| -> bool {
-    //     show(label, true)
-    // };
 
     match &game.state {
         GameState::Finished => label("Finished".to_string()),
@@ -140,28 +170,9 @@ fn show_top_left(game: &Game, player: &ShownPlayer) -> StateUpdate {
         _ => label(format!("Round {}", game.round)),
     }
 
-    let i = game
-        .players
-        .iter()
-        .position(|p| p.index == game.starting_player_index)
-        .unwrap();
-    let mut players: Vec<_> = game.players.iter().map(|p| p.index).collect();
-    players.rotate_left(i);
-
-    for p in players {
-        let p = game.get_player(p);
-        let shown = player.index == p.index;
-        let prefix = if shown { "* " } else { "" };
-        let name = p.get_name();
-        let l = format!("{prefix}{name}");
-        // if shown {
-            label(l);
-        // } else if button(l) {
-        //     return StateUpdate::SetShownPlayer(p.index);
-        // }
-    }
-
     let p = game.get_player(player.index);
+
+    label(p.get_name());
 
     label(format!("Civ {}", p.civilization.name));
 
@@ -174,33 +185,28 @@ fn show_top_left(game: &Game, player: &ShownPlayer) -> StateUpdate {
         }
     ));
 
-    let current = game.current_player_index;
-    label(format!("Playing {}", &game.get_player(current).get_name()));
+    if game.current_player_index == p.index {
+        label("Your turn".to_string());
 
-    match &game.state {
-        GameState::StatusPhase(_) | GameState::Finished => {}
-        _ => label(format!("Actions {}", game.actions_left)),
-    }
-
-    match &game.state {
-        GameState::Movement { .. } => label("Movement".to_string()),
-        GameState::CulturalInfluenceResolution(_) => {
-            label("Cultural Influence Resolution".to_string());
+        match &game.state {
+            GameState::StatusPhase(_) | GameState::Finished => {}
+            _ => label(format!("Actions {}", game.actions_left)),
         }
-        GameState::Combat(c) => label(format!("Combat Round {} Phase {:?}", c.round, c.phase)),
-        GameState::PlaceSettler { .. } => label("Place Settler".to_string()),
-        _ => {}
-    }
 
-    if let Some(m) = moves_left(&game.state) {
-        label(format!("Moves left {m}"));
-    }
+        match &game.state {
+            GameState::Movement { .. } => label("Movement".to_string()),
+            GameState::CulturalInfluenceResolution(_) => {
+                label("Cultural Influence Resolution".to_string());
+            }
+            GameState::Combat(c) => label(format!("Combat Round {} Phase {:?}", c.round, c.phase)),
+            GameState::PlaceSettler { .. } => label("Place Settler".to_string()),
+            _ => {}
+        }
 
-    let active = game.active_player();
-    if active != current {
-        label(format!("Active {}", game.get_player(active).get_name()));
+        if let Some(m) = moves_left(&game.state) {
+            label(format!("Moves left {m}"));
+        }
     }
-    StateUpdate::None
 }
 
 fn moves_left(state: &GameState) -> Option<u32> {

@@ -20,10 +20,6 @@ pub fn top_left_label(p: Vec2, label: &str) {
     root_ui().label(p + vec2(-40.,0.), label);
 }
 
-pub fn top_left_button(p: Vec2, label: &str) -> bool {
-    root_ui().button(vec2(MARGIN, MARGIN) + p, label)
-}
-
 pub fn top_center_label(player: &ShownPlayer, p: Vec2, label: &str) {
     root_ui().label(vec2(player.screen_size.x / 2.0, 0.) + p, label);
 }
@@ -85,20 +81,6 @@ fn relative_texture(state: &State, texture: &Texture2D, anchor: Vec2, offset: Ve
     };
     set_camera(&state.camera);
     pressed
-}
-
-pub fn right_center_label(player: &ShownPlayer, p: Vec2, label: &str) {
-    root_ui().label(
-        vec2(player.screen_size.x, player.screen_size.y / 2.0) + p,
-        label,
-    );
-}
-
-pub fn right_center_button(player: &ShownPlayer, p: Vec2, label: &str) -> bool {
-    root_ui().button(
-        vec2(player.screen_size.x, player.screen_size.y / 2.0) + p,
-        label,
-    )
 }
 
 pub fn cancel_pos(player: &ShownPlayer) -> Vec2 {

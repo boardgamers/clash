@@ -16,7 +16,7 @@ use crate::happiness_ui::{increase_happiness_dialog, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
 use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
-use crate::player_ui::{show_global_controls, show_globals};
+use crate::player_ui::{player_select, show_global_controls, show_top_center, show_top_left};
 use crate::status_phase_ui::raze_city_confirm_dialog;
 use crate::{combat_ui, dialog_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui};
 
@@ -64,7 +64,9 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         draw_map(game, state);
     }
     let mut updates = StateUpdates::new();
-    updates.add(show_globals(game, player, state));
+    show_top_left(game, player);
+    show_top_center(game, player, state);
+    updates.add(player_select(game, player, state));
     updates.add(show_global_controls(game, state, features));
     if !matches!(state.active_dialog, ActiveDialog::None) || state.active_dialog.is_map_dialog() {
         updates.clear();
