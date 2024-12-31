@@ -79,7 +79,6 @@ fn relative_texture(state: &State, texture: &Texture2D, anchor: Vec2, offset: Ve
 }
 
 pub fn left_mouse_button(rect: Rect) -> bool {
-    
     if is_mouse_button_pressed(MouseButton::Left) {
         let (x, y) = mouse_position();
         rect.contains(vec2(x, y))
