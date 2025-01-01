@@ -99,7 +99,7 @@ impl Assets {
             advances: load_png(include_bytes!("../assets/lab-svgrepo-com.png")),
             end_turn: load_png(include_bytes!("../assets/hour-glass-svgrepo-com.png")),
             log: load_png(include_bytes!("../assets/scroll-svgrepo-com.png")),
-            movement: load_png(include_bytes!("../assets/walk-svgrepo-com.png")),
+            movement: load_png(include_bytes!("../assets/route-start-svgrepo-com.png")),
             redo: load_png(include_bytes!("../assets/redo-svgrepo-com.png")),
             reset: load_png(include_bytes!("../assets/reset-svgrepo-com.png")),
             undo: load_png(include_bytes!("../assets/undo-svgrepo-com.png")),
