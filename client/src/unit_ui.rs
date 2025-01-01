@@ -14,7 +14,7 @@ use crate::select_ui::{confirm_update, ConfirmSelection};
 use crate::{hex_ui, player_ui};
 
 use crate::hex_ui::Point;
-use crate::layout_ui::show_tooltip_for_circle;
+use crate::layout_ui::show_tooltip_for_world_circle;
 use itertools::Itertools;
 use server::player::Player;
 
@@ -89,8 +89,8 @@ pub fn draw_units(game: &Game, state: &State, tooltip: bool) {
         vec.iter().enumerate().for_each(|(i, (p, u))| {
             if tooltip {
                 let point = unit_center(i.try_into().unwrap(), u.position);
-                let center = state.camera.world_to_screen(vec2(point.x, point.y));
-                show_tooltip_for_circle(state, &label(u), center, UNIT_RADIUS);
+                let center = vec2(point.x, point.y);
+                show_tooltip_for_world_circle(state, &label(u), center, UNIT_RADIUS);
             } else {
                 let selected = *p == game.active_player() && selected_units.contains(&u.id);
                 draw_unit(u, i.try_into().unwrap(), selected);
