@@ -14,31 +14,34 @@ use crate::select_ui::{confirm_update, ConfirmSelection};
 use crate::{hex_ui, player_ui};
 
 use crate::hex_ui::Point;
+use crate::layout_ui::show_tooltip_for_circle;
 use itertools::Itertools;
 use server::player::Player;
 
+const UNIT_RADIUS: f32 = 11.0;
+
 pub fn draw_unit(unit: &Unit, index: u32, selected: bool) {
-    let p = unit_circle(index, unit.position);
-    draw_circle(p.x, p.y, 11.0, if selected { WHITE } else { BLACK });
+    let p = unit_center(index, unit.position);
+    draw_circle(p.x, p.y, UNIT_RADIUS, if selected { WHITE } else { BLACK });
     draw_circle(p.x, p.y, 9.0, player_ui::player_color(unit.player_index));
     draw_text(unit_symbol(unit), p.x - 5.0, p.y + 5.0, 20.0, BLACK);
 }
 
-fn unit_circle(index: u32, position: Position) -> Point {
+fn unit_center(index: u32, position: Position) -> Point {
     let r = 40.0;
     hex_ui::rotate_around(hex_ui::center(position), r, (40 * index) as i32 + 45)
 }
 
-pub fn clicked_unit(pos: Position, mouse_pos: Vec2, player: &Player) -> Option<u32> {
+pub fn unit_at_pos(pos: Position, mouse_pos: Vec2, player: &Player) -> Option<u32> {
     player
         .units
         .iter()
         .filter(|u| u.position == pos)
         .enumerate()
         .find_map(|(i, u)| {
-            let p = unit_circle(i.try_into().unwrap(), pos);
+            let p = unit_center(i.try_into().unwrap(), pos);
             let d = vec2(p.x - mouse_pos.x, p.y - mouse_pos.y);
-            if d.length() <= 11.0 {
+            if d.length() <= UNIT_RADIUS {
                 Some(u.id)
             } else {
                 None
@@ -67,13 +70,14 @@ pub fn non_leader_names() -> [(UnitType, &'static str); 5] {
     ]
 }
 
-pub fn draw_units(game: &Game, state: &State) {
+pub fn draw_units(game: &Game, state: &State, tooltip: bool) {
     let selected_units = match state.active_dialog {
         ActiveDialog::MoveUnits(ref s) => s.units.clone(),
         ActiveDialog::ReplaceUnits(ref s) => s.replaced_units.clone(),
         ActiveDialog::RemoveCasualties(ref s) => s.units.clone(),
         _ => vec![],
     };
+
     for (_pos, units) in &game
         .players
         .iter()
@@ -83,8 +87,14 @@ pub fn draw_units(game: &Game, state: &State) {
     {
         let vec = units.collect::<Vec<_>>();
         vec.iter().enumerate().for_each(|(i, (p, u))| {
-            let selected = *p == game.active_player() && selected_units.contains(&u.id);
-            draw_unit(u, i.try_into().unwrap(), selected);
+            if tooltip {
+                let point = unit_center(i.try_into().unwrap(), u.position);
+                let center = state.camera.world_to_screen(vec2(point.x, point.y));
+                show_tooltip_for_circle(state, &label(u), center, UNIT_RADIUS);
+            } else {
+                let selected = *p == game.active_player() && selected_units.contains(&u.id);
+                draw_unit(u, i.try_into().unwrap(), selected);
+            }
         });
     }
 }

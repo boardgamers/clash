@@ -61,7 +61,10 @@ pub fn draw_map(game: &Game, state: &State) {
                 draw_city(p, city, state);
             }
         }
-        unit_ui::draw_units(game, state);
+        unit_ui::draw_units(game, state, false);
+        set_default_camera();
+        unit_ui::draw_units(game, state, true);
+        set_camera(&state.camera);
     }
     set_default_camera();
 }

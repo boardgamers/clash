@@ -1,6 +1,6 @@
 use crate::client_state::{MousePosition, ShownPlayer, State};
 use macroquad::color::WHITE;
-use macroquad::math::{vec2, Vec2};
+use macroquad::math::{f32, vec2, Vec2};
 use macroquad::prelude::*;
 
 pub const ICON_SIZE: f32 = 30.;
@@ -80,7 +80,7 @@ fn relative_texture(
     );
 
     let rect = Rect::new(origin.x, origin.y, ICON_SIZE, ICON_SIZE);
-    show_tooltip(state, tooltip, rect);
+    show_tooltip_for_rect(state, tooltip, rect);
     left_mouse_button(rect)
 }
 
@@ -139,7 +139,7 @@ fn is_active_tooltip(state: &State, rect: Rect) -> bool {
         .all(|mp| rect.contains(mp.position))
 }
 
-pub fn show_tooltip(state: &State, tooltip: &str, rect: Rect) {
+pub fn show_tooltip_for_rect(state: &State, tooltip: &str, rect: Rect) {
     let origin = rect.point();
     if is_active_tooltip(state, rect) {
         draw_rectangle(
@@ -158,4 +158,16 @@ pub fn show_tooltip(state: &State, tooltip: &str, rect: Rect) {
         draw_rectangle(x, y, w, tooltip_rect.size().y + 10., GRAY);
         state.draw_text(tooltip, x + 5., y + 20.);
     }
+}
+
+pub fn show_tooltip_for_circle(state: &State, tooltip: &str, center: Vec2, radius: f32) {
+    let rect = Rect::new(
+        center.x - radius,
+        center.y - radius,
+        2. * radius,
+        2. * radius,
+    );
+
+    // todo - highlight circle
+    show_tooltip_for_rect(state, tooltip, rect);
 }
