@@ -16,6 +16,7 @@ use crate::{hex_ui, player_ui};
 use crate::hex_ui::Point;
 use crate::layout_ui::show_tooltip_for_world_circle;
 use itertools::Itertools;
+use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::player::Player;
 
 const UNIT_RADIUS: f32 = 11.0;
@@ -88,9 +89,17 @@ pub fn draw_units(game: &Game, state: &State, tooltip: bool) {
         let vec = units.collect::<Vec<_>>();
         vec.iter().enumerate().for_each(|(i, (p, u))| {
             if tooltip {
+                let army_move = game
+                    .get_player(*p)
+                    .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
                 let point = unit_center(i.try_into().unwrap(), u.position);
                 let center = vec2(point.x, point.y);
-                show_tooltip_for_world_circle(state, &label(u), center, UNIT_RADIUS);
+                show_tooltip_for_world_circle(
+                    state,
+                    &unit_label(u, army_move),
+                    center,
+                    UNIT_RADIUS,
+                );
             } else {
                 let selected = *p == game.active_player() && selected_units.contains(&u.id);
                 draw_unit(u, i.try_into().unwrap(), selected);
@@ -121,7 +130,10 @@ pub fn unit_selection_dialog<T: UnitSelection>(
                 let unit = game.get_player(p).get_unit(unit_id).unwrap();
                 let can_sel = sel.can_select(game, unit);
                 let is_selected = sel.selected_units().contains(&unit_id);
-                let mut l = label(unit);
+                let army_move = game
+                    .get_player(p)
+                    .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
+                let mut l = unit_label(unit, army_move);
                 if is_selected {
                     l += " (selected)";
                 }
@@ -170,12 +182,15 @@ pub fn name(u: &UnitType) -> &str {
         .1
 }
 
-pub fn label(unit: &Unit) -> String {
+pub fn unit_label(unit: &Unit, army_move: bool) -> String {
     let name = name(&unit.unit_type);
-    let res = if !unit.can_move() {
-        " (can't move) "
+
+    let res = if unit.unit_type.is_army_unit() && !army_move {
+        " (research Tactics to move the unit) "
+    } else if !unit.can_move() {
+        " (can't move out of a Mountain this turn) "
     } else if !unit.can_attack() && !unit.unit_type.is_settler() {
-        " (can't attack) "
+        " (can't attack again this turn) "
     } else {
         ""
     };

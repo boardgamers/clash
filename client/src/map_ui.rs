@@ -6,6 +6,7 @@ use std::ops::{Add, Mul, Sub};
 
 use server::action::Action;
 use server::combat::Combat;
+use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::game::{Game, GameState};
 use server::map::Terrain;
 use server::playing_actions::PlayingAction;
@@ -147,8 +148,11 @@ pub fn show_generic_tile_menu(
         |ui| {
             let units: Vec<(&Unit, String)> = unit_ui::units_on_tile(game, position)
                 .map(|(p, u)| {
+                    let army_move = game
+                        .get_player(p)
+                        .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
                     let unit = game.get_player(p).get_unit(u).unwrap();
-                    (unit, unit_ui::label(unit))
+                    (unit, unit_ui::unit_label(unit, army_move))
                 })
                 .collect();
 
