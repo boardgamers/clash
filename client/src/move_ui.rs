@@ -1,4 +1,4 @@
-use macroquad::math::u32;
+use macroquad::math::{u32, Vec2};
 
 use crate::select_ui::{ConfirmSelection, SelectionConfirm};
 use server::action::Action;
@@ -7,54 +7,16 @@ use server::game::GameState::Movement;
 use server::position::Position;
 use server::unit::{MovementAction, Unit};
 
-use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
-use crate::layout_ui::ok_pos;
-use crate::unit_ui;
-use crate::unit_ui::UnitSelection;
+use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::unit_ui::{clicked_unit, UnitSelection};
 
-pub fn move_units_dialog(game: &Game, sel: &MoveSelection, player: &ShownPlayer) -> StateUpdate {
-    unit_ui::unit_selection_dialog::<MoveSelection>(
-        game,
-        player,
-        "Move Units",
-        sel,
-        |new| update_possible_destinations(game, new.clone()),
-        |_new| StateUpdate::None,
-        |ui| {
-            let Movement {
-                movement_actions_left,
-                moved_units: _,
-            } = game.state
-            else {
-                panic!("game is not in movement")
-            };
-
-            if ui.button(ok_pos(player), "End Move Units") {
-                StateUpdate::execute_with_warning(
-                    Action::Movement(MovementAction::Stop),
-                    if movement_actions_left > 0 {
-                        vec![(format!("{movement_actions_left} movement actions left"))]
-                    } else {
-                        vec![]
-                    },
-                )
-            } else {
-                StateUpdate::None
-            }
-        },
-    )
-}
-
-fn update_possible_destinations(game: &Game, mut sel: MoveSelection) -> StateUpdate {
-    if sel.units.is_empty() {
-        sel.destinations.clear();
-    } else if let Some(start) = sel.start {
-        sel.destinations = possible_destinations(game, start, sel.player_index, &sel.units);
+fn update_possible_destinations(game: &Game, s: &mut MoveSelection) {
+    if s.units.is_empty() {
+        s.destinations.clear();
+        s.start = None;
     } else {
-        sel.destinations.clear();
+        s.destinations = possible_destinations(game, s.start.unwrap(), s.player_index, &s.units);
     }
-
-    StateUpdate::SetDialog(ActiveDialog::MoveUnits(sel))
 }
 
 fn possible_destinations(
@@ -93,19 +55,31 @@ fn possible_destinations(
     }
 }
 
-pub fn click(pos: Position, s: &MoveSelection) -> StateUpdate {
-    let mut new = s.clone();
-    if s.destinations.is_empty() {
-        new.start = Some(pos);
-        StateUpdate::SetDialog(ActiveDialog::MoveUnits(new))
-    } else if s.destinations.contains(&pos) {
+pub fn click(pos: Position, s: &MoveSelection, mouse_pos: Vec2, game: &Game) -> StateUpdate {
+    if s.destinations.contains(&pos) {
         let units = s.units.clone();
         StateUpdate::execute(Action::Movement(MovementAction::Move {
             units,
             destination: pos,
         }))
-    } else {
+    } else if s.start.is_some_and(|p| p != pos) {
+        // first need to deselect units
         StateUpdate::None
+    } else {
+        let mut new = s.clone();
+        let p = game.get_player(s.player_index);
+        let unit = clicked_unit(pos, mouse_pos, p);
+        unit.map_or(StateUpdate::None, |unit_id| {
+            new.start = Some(pos);
+            if new.units.contains(&unit_id) {
+                // deselect unit
+                new.units.retain(|&id| id != unit_id);
+            } else {
+                new.units.push(unit_id);
+            }
+            update_possible_destinations(game, &mut new);
+            StateUpdate::SetDialog(ActiveDialog::MoveUnits(new))
+        })
     }
 }
 
@@ -125,12 +99,6 @@ impl MoveSelection {
             start,
             destinations: vec![],
         }
-    }
-
-    pub fn clear(&mut self) {
-        self.units.clear();
-        self.start = None;
-        self.destinations.clear();
     }
 }
 

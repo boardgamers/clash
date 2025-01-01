@@ -401,16 +401,8 @@ impl State {
     fn close_dialog(&mut self) {
         if self.active_dialog.can_restore() {
             self.active_dialog = ActiveDialog::None;
-        } else {
-            match &mut self.active_dialog {
-                ActiveDialog::ReplaceUnits(r) => {
-                    r.clear();
-                }
-                ActiveDialog::MoveUnits(m) => {
-                    m.clear();
-                }
-                _ => {}
-            }
+        } else if let ActiveDialog::ReplaceUnits(r) = &mut self.active_dialog {
+            r.clear();
         }
     }
 

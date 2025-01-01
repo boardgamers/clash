@@ -94,7 +94,7 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c, player),
         ActiveDialog::RecruitUnitSelection(s) => recruit_unit_ui::select_dialog(game, s, player),
         ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::replace_dialog(game, r, player),
-        ActiveDialog::MoveUnits(s) => move_ui::move_units_dialog(game, s, player),
+        ActiveDialog::MoveUnits(s) => StateUpdate::None,
         ActiveDialog::CulturalInfluenceResolution(c) => {
             influence_ui::cultural_influence_resolution_dialog(c, player)
         }
@@ -130,16 +130,15 @@ pub fn try_click(game: &Game, state: &State, player: &ShownPlayer) -> StateUpdat
         return StateUpdate::None;
     }
     let (x, y) = mouse_position();
-    let pos = Position::from_coordinate(pixel_to_coordinate(
-        state.camera.screen_to_world(vec2(x, y)),
-    ));
+    let mouse_pos = state.camera.screen_to_world(vec2(x, y));
+    let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));
     if !game.map.tiles.contains_key(&pos) {
         return StateUpdate::None;
     }
 
     if player.can_control {
         match &state.active_dialog {
-            ActiveDialog::MoveUnits(s) => move_ui::click(pos, s),
+            ActiveDialog::MoveUnits(s) => move_ui::click(pos, s, mouse_pos, game),
             ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::click_replace(pos, r),
             ActiveDialog::RemoveCasualties(_s) => StateUpdate::None,
             ActiveDialog::CollectResources(col) => click_collect_option(col, pos),
