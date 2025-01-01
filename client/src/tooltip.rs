@@ -7,7 +7,7 @@ use macroquad::prelude::{draw_circle, draw_rectangle, get_time};
 
 const TOOLTIP_DELAY: f64 = 0.5;
 
-pub fn update_tooltip(state: &mut State) {
+pub fn update(state: &mut State) {
     let (x, y) = mouse_position();
     let now = get_time();
     state
