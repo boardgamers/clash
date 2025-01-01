@@ -19,13 +19,16 @@ use itertools::Itertools;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::player::Player;
 
-const UNIT_RADIUS: f32 = 11.0;
+pub const UNIT_RADIUS: f32 = 11.0;
 
 pub fn draw_unit(unit: &Unit, index: u32, selected: bool) {
-    let p = unit_center(index, unit.position);
-    draw_circle(p.x, p.y, UNIT_RADIUS, if selected { WHITE } else { BLACK });
-    draw_circle(p.x, p.y, 9.0, player_ui::player_color(unit.player_index));
-    draw_text(unit_symbol(unit), p.x - 5.0, p.y + 5.0, 20.0, BLACK);
+    draw_unit_type(selected, unit_center(index, unit.position), &unit.unit_type, unit.player_index);
+}
+
+pub fn draw_unit_type(selected: bool, center: Point, unit_type: &UnitType, player_index: usize) {
+    draw_circle(center.x, center.y, UNIT_RADIUS, if selected { WHITE } else { BLACK });
+    draw_circle(center.x, center.y, 9.0, player_ui::player_color(player_index));
+    draw_text(unit_symbol(unit_type), center.x - 5.0, center.y + 5.0, 20.0, BLACK);
 }
 
 fn unit_center(index: u32, position: Position) -> Point {
@@ -50,8 +53,8 @@ pub fn unit_at_pos(pos: Position, mouse_pos: Vec2, player: &Player) -> Option<u3
         })
 }
 
-fn unit_symbol(unit: &Unit) -> &str {
-    match unit.unit_type {
+fn unit_symbol(unit_type: &UnitType) -> &str {
+    match unit_type {
         UnitType::Infantry => "I",
         UnitType::Cavalry => "C",
         UnitType::Elephant => "E",

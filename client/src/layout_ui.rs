@@ -48,6 +48,20 @@ pub fn bottom_left_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip:
     )
 }
 
+pub fn bottom_center_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
+    relative_texture(
+        state,
+        texture,
+        bottom_center_anchor(state),
+        p,
+        tooltip,
+    )
+}
+
+pub fn bottom_center_anchor(state: &State) -> Vec2 {
+    vec2(state.screen_size.x / 2., state.screen_size.y - MARGIN)
+}
+
 pub fn bottom_right_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
     relative_texture(
         state,

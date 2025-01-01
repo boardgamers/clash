@@ -57,6 +57,20 @@ pub fn show_tooltip_for_world_circle(state: &State, tooltip: &str, center: Vec2,
     }
 }
 
+fn is_circle_tooltip_active(state: &State, center: Vec2, radius: f32) -> bool {
+    state
+        .mouse_positions
+        .iter()
+        .all(|mp| (center - mp.position).length() < radius)
+}
+
+pub fn show_tooltip_for_circle(state: &State, tooltip: &str, center: Vec2, radius: f32) {
+    if is_circle_tooltip_active(state, center, radius) {
+        draw_circle(center.x, center.y, radius, Color::new(0.0, 0.0, 0.0, 0.5));
+        show_tooltip_text(state, tooltip, center + vec2(radius, radius));
+    }
+}
+
 fn show_tooltip_text(state: &State, tooltip: &str, origin: Vec2) {
     let dimensions = state.measure_text(tooltip);
     let tooltip_rect = Rect::new(origin.x, origin.y, dimensions.width, dimensions.height);

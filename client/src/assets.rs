@@ -28,6 +28,13 @@ pub struct Assets {
     pub redo: Texture2D,
     pub reset: Texture2D,
     pub undo: Texture2D,
+    pub plus: Texture2D,
+    pub minus: Texture2D,
+
+    pub ok_blocked: Texture2D,
+    pub ok: Texture2D,
+    pub cancel: Texture2D,
+    pub restore_menu: Texture2D,
 
     // UI
     pub zoom_in: Texture2D,
@@ -38,7 +45,6 @@ pub struct Assets {
     pub right: Texture2D,
     pub victory_points: Texture2D,
     pub active_player: Texture2D,
-    pub restore_menu: Texture2D,
 
     // Admin
     pub import: Texture2D,
@@ -91,9 +97,9 @@ impl Assets {
                     load_png(include_bytes!("../assets/theater-drama-svgrepo-com.png")),
                 ),
             ]
-            .iter()
-            .cloned()
-            .collect(),
+                .iter()
+                .cloned()
+                .collect(),
 
             // action icons
             advances: load_png(include_bytes!("../assets/lab-svgrepo-com.png")),
@@ -103,6 +109,13 @@ impl Assets {
             redo: load_png(include_bytes!("../assets/redo-svgrepo-com.png")),
             reset: load_png(include_bytes!("../assets/reset-svgrepo-com.png")),
             undo: load_png(include_bytes!("../assets/undo-svgrepo-com.png")),
+
+            plus: load_png(include_bytes!("../assets/plus-circle-svgrepo-com.png")),
+            minus: load_png(include_bytes!("../assets/minus-circle-svgrepo-com.png")),
+            ok: load_png(include_bytes!("../assets/ok-circle-svgrepo-com.png")),
+            ok_blocked: load_png(include_bytes!("../assets/in-progress-svgrepo-com.png")),
+            cancel: load_png(include_bytes!("../assets/cancel-svgrepo-com.png")),
+            restore_menu: load_png(include_bytes!("../assets/restore-svgrepo-com.png")),
 
             // UI
             zoom_in: load_png(include_bytes!("../assets/zoom-in-1462-svgrepo-com.png")),
@@ -119,7 +132,6 @@ impl Assets {
             )),
             victory_points: load_png(include_bytes!("../assets/trophy-cup-svgrepo-com.png")),
             active_player: load_png(include_bytes!("../assets/triangle-svgrepo-com.png")),
-            restore_menu: load_png(include_bytes!("../assets/restore-svgrepo-com.png")),
 
             // Admin
             import: load_png(include_bytes!("../assets/import-3-svgrepo-com.png")),
