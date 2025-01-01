@@ -62,9 +62,7 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         ..Default::default()
     };
 
-    if matches!(state.active_dialog, ActiveDialog::None) || state.active_dialog.is_map_dialog() {
-        draw_map(game, state);
-    }
+    draw_map(game, state);
     let mut updates = StateUpdates::new();
     show_top_left(game, player, state);
     show_top_center(game, player, state);

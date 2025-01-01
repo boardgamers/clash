@@ -5,10 +5,10 @@ use server::action::Action;
 use server::game::Game;
 use server::game::GameState::Movement;
 use server::position::Position;
-use server::unit::{MovementAction, Unit};
+use server::unit::MovementAction;
 
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::unit_ui::{clicked_unit, UnitSelection};
+use crate::unit_ui::clicked_unit;
 
 fn possible_destinations(
     game: &Game,
@@ -95,23 +95,6 @@ impl MoveSelection {
             start,
             destinations: vec![],
         }
-    }
-}
-
-impl UnitSelection for MoveSelection {
-    fn selected_units(&self) -> &[u32] {
-        &self.units
-    }
-    fn selected_units_mut(&mut self) -> &mut Vec<u32> {
-        &mut self.units
-    }
-
-    fn can_select(&self, game: &Game, unit: &Unit) -> bool {
-        !possible_destinations(game, unit.position, self.player_index, &vec![unit.id]).is_empty()
-    }
-
-    fn current_tile(&self) -> Option<Position> {
-        self.start
     }
 }
 

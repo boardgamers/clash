@@ -95,7 +95,13 @@ impl ActiveDialog {
             ActiveDialog::CollectResources(_) => Some("Click on a city to collect resources"),
             ActiveDialog::RecruitUnitSelection(_) => Some("Click on a unit to recruit"),
             ActiveDialog::ReplaceUnits(_) => Some("Click on a unit to replace"),
-            ActiveDialog::MoveUnits(_) => Some("Click on a unit to move"),
+            ActiveDialog::MoveUnits(m) => {
+                if m.start.is_some() {
+                    Some("Click on a highlighted tile to move units")
+                } else {
+                    Some("Click on a unit to move")
+                }
+            }
             ActiveDialog::CulturalInfluenceResolution(_) => {
                 Some("Click on a city to resolve cultural influence")
             }
