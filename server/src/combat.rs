@@ -341,9 +341,10 @@ fn attacker_wins(game: &mut Game, c: &mut Combat) -> CombatControl {
             .expect("attacker should have all attacking units");
         unit.position = c.defender_position;
     }
+    let control = end_combat(game, c);
     capture_position(game, c.defender, c.defender_position, c.attacker);
     //todo attacker wins
-    end_combat(game, c)
+    control
 }
 
 fn defender_wins(game: &mut Game, c: &mut Combat) -> CombatControl {

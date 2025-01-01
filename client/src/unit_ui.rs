@@ -100,7 +100,7 @@ pub fn unit_selection_dialog<T: UnitSelection>(
                     return on_change(new);
                 }
             }
-            confirm_update(sel, || on_ok(sel.clone()), ui, &sel.confirm(game)).or(|| additional(ui))
+            confirm_update(sel, player,|| on_ok(sel.clone()), ui, &sel.confirm(game)).or(|| additional(ui))
         })
     } else {
         StateUpdate::None
