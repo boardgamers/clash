@@ -1,6 +1,8 @@
 use crate::client::Features;
 use crate::resource_ui::ResourceType;
-use macroquad::prelude::{load_texture, load_ttf_font, Color, Image, ImageFormat, RectOffset};
+use macroquad::prelude::{
+    load_texture, load_ttf_font, Color, Font, Image, ImageFormat, RectOffset,
+};
 use macroquad::texture::Texture2D;
 use macroquad::ui::{root_ui, Skin};
 use server::map::Terrain;
@@ -11,6 +13,7 @@ pub struct Assets {
     pub terrain: HashMap<Terrain, Texture2D>,
     pub units: HashMap<UnitType, Texture2D>,
     pub skin: Skin,
+    pub font: Font,
 
     // mood icons
     pub angry: Texture2D,
@@ -35,6 +38,7 @@ pub struct Assets {
     pub right: Texture2D,
     pub victory_points: Texture2D,
     pub active_player: Texture2D,
+    pub restore_menu: Texture2D,
 
     // Admin
     pub import: Texture2D,
@@ -47,10 +51,12 @@ pub struct Assets {
 impl Assets {
     pub async fn new(features: &Features) -> Self {
         let happy = load_png(include_bytes!("../assets/happy-emoji-svgrepo-com.png"));
+        let font_name = features.get_asset("HTOWERT.TTF");
         Self {
+            font: load_ttf_font(&font_name).await.unwrap(), // can't share font - causes panic
             terrain: Self::terrain(features).await,
             units: HashMap::new(),
-            skin: Self::skin(features).await,
+            skin: Self::skin(&load_ttf_font(&font_name).await.unwrap()),
 
             // mood icons
             angry: load_png(include_bytes!("../assets/angry-face-svgrepo-com.png")),
@@ -93,7 +99,7 @@ impl Assets {
             advances: load_png(include_bytes!("../assets/lab-svgrepo-com.png")),
             end_turn: load_png(include_bytes!("../assets/hour-glass-svgrepo-com.png")),
             log: load_png(include_bytes!("../assets/scroll-svgrepo-com.png")),
-            movement: load_png(include_bytes!("../assets/walk-svgrepo-com.png")),
+            movement: load_png(include_bytes!("../assets/route-start-svgrepo-com.png")),
             redo: load_png(include_bytes!("../assets/redo-svgrepo-com.png")),
             reset: load_png(include_bytes!("../assets/reset-svgrepo-com.png")),
             undo: load_png(include_bytes!("../assets/undo-svgrepo-com.png")),
@@ -113,6 +119,7 @@ impl Assets {
             )),
             victory_points: load_png(include_bytes!("../assets/trophy-cup-svgrepo-com.png")),
             active_player: load_png(include_bytes!("../assets/triangle-svgrepo-com.png")),
+            restore_menu: load_png(include_bytes!("../assets/restore-svgrepo-com.png")),
 
             // Admin
             import: load_png(include_bytes!("../assets/import-3-svgrepo-com.png")),
@@ -136,10 +143,7 @@ impl Assets {
         map
     }
 
-    async fn skin(features: &Features) -> Skin {
-        let font = load_ttf_font(&features.get_asset("HTOWERT.TTF"))
-            .await
-            .unwrap();
+    fn skin(font: &Font) -> Skin {
         let image =
             Image::from_file_with_format(include_bytes!("../assets/button_background.png"), None)
                 .unwrap();
@@ -148,7 +152,7 @@ impl Assets {
             .background(image.clone())
             .background_margin(RectOffset::new(37.0, 37.0, 5.0, 5.0))
             .margin(RectOffset::new(10.0, 10.0, 0.0, 0.0))
-            .with_font(&font)
+            .with_font(font)
             .unwrap()
             .text_color(Color::from_rgba(180, 180, 120, 255))
             .font_size(20)
@@ -186,7 +190,7 @@ impl Assets {
                 )
                 .unwrap(),
             )
-            .with_font(&font)
+            .with_font(font)
             .unwrap()
             .text_color(Color::from_rgba(180, 180, 100, 255))
             .font_size(20)
@@ -195,7 +199,7 @@ impl Assets {
         let editbox_style = root_ui()
             .style_builder()
             .background_margin(RectOffset::new(0., 0., 0., 0.))
-            .with_font(&font)
+            .with_font(font)
             .unwrap()
             .text_color(Color::from_rgba(120, 120, 120, 255))
             .color_selected(Color::from_rgba(190, 190, 190, 255))

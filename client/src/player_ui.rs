@@ -2,10 +2,10 @@ use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
 use crate::layout_ui::{
-    bottom_left_button, bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button,
-    top_center_label, top_center_texture, top_left_label, top_right_texture, ICON_SIZE,
+    bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button, top_center_texture,
+    top_right_texture, ICON_SIZE,
 };
-use crate::resource_ui::ResourceType;
+use crate::resource_ui::{resource_name, ResourceType};
 use macroquad::math::{u32, vec2};
 use macroquad::prelude::*;
 use macroquad::ui::{root_ui, Ui};
@@ -14,6 +14,7 @@ use server::game::{Game, GameState};
 use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::ResourcePile;
+use server::unit::MovementAction;
 
 pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
     let i = game
@@ -32,7 +33,6 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
         let pos = vec2(player.screen_size.x, player.screen_size.y / 2.0) + vec2(-20., y);
 
         let color = player_color(pl.index);
-        set_default_camera();
 
         let w = if shown { ICON_SIZE + 10. } else { ICON_SIZE };
         let x = pos.x - w + ICON_SIZE;
@@ -40,7 +40,7 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
         draw_rectangle_lines(x, pos.y, w, ICON_SIZE, 2.0, BLACK);
         let text = format!("{}", pl.victory_points());
 
-        draw_text(&text, pos.x + 5., pos.y + 20., 20.0, BLACK);
+        state.draw_text(&text, pos.x + 5., pos.y + 20.);
 
         let active = game.active_player();
         if active == pl.index {
@@ -55,8 +55,6 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
                 },
             );
         }
-
-        set_camera(&state.camera);
 
         if !shown && left_mouse_button(Rect::new(x, pos.y, w, ICON_SIZE)) {
             return StateUpdate::SetShownPlayer(pl.index);
@@ -81,6 +79,7 @@ pub fn resource_label(
         label,
         &state.assets.resources[&resource_type],
         p,
+        resource_name(resource_type),
     );
 }
 
@@ -90,48 +89,35 @@ pub fn top_icon_with_label(
     label: &str,
     texture: &Texture2D,
     p: Vec2,
+    tooltip: &str,
 ) {
-    top_center_texture(state, texture, p);
-    top_center_label(player, p + vec2(-30. - label.len() as f32 * 5., 40.), label);
+    let dimensions = state.measure_text(label);
+    let x = (ICON_SIZE - dimensions.width) / 2.0;
+    state.draw_text(
+        label,
+        player.screen_size.x / 2.0 + p.x + x,
+        p.y + ICON_SIZE + 30.,
+    );
+    top_center_texture(state, texture, p, tooltip);
 }
 
 pub fn show_top_center(game: &Game, player: &ShownPlayer, state: &State) {
     let p = game.get_player(player.index);
 
-    resource_label(
+    top_icon_with_label(
         player,
         state,
-        &resource_ui(p, |r| r.food),
-        ResourceType::Food,
-        icon_pos(-4, 0),
+        &format!("{}", &p.victory_points()),
+        &state.assets.victory_points,
+        icon_pos(3, 0),
+        "Victory Points",
     );
     resource_label(
         player,
         state,
-        &resource_ui(p, |r| r.wood),
-        ResourceType::Wood,
-        icon_pos(-3, 0),
-    );
-    resource_label(
-        player,
-        state,
-        &resource_ui(p, |r| r.ore),
-        ResourceType::Ore,
-        icon_pos(-2, 0),
-    );
-    resource_label(
-        player,
-        state,
-        &resource_ui(p, |r| r.ideas),
-        ResourceType::Ideas,
-        icon_pos(-1, 0),
-    );
-    resource_label(
-        player,
-        state,
-        &resource_ui(p, |r| r.gold as u32),
-        ResourceType::Gold,
-        icon_pos(0, 0),
+        &resource_ui(p, |r| r.culture_tokens),
+        ResourceType::CultureTokens,
+        icon_pos(2, 0),
     );
     resource_label(
         player,
@@ -143,46 +129,66 @@ pub fn show_top_center(game: &Game, player: &ShownPlayer, state: &State) {
     resource_label(
         player,
         state,
-        &resource_ui(p, |r| r.culture_tokens),
-        ResourceType::CultureTokens,
-        icon_pos(2, 0),
+        &resource_ui(p, |r| r.gold as u32),
+        ResourceType::Gold,
+        icon_pos(0, 0),
     );
-
-    top_icon_with_label(
+    resource_label(
         player,
         state,
-        &format!("{}", &p.victory_points()),
-        &state.assets.victory_points,
-        icon_pos(3, 0),
+        &resource_ui(p, |r| r.ideas),
+        ResourceType::Ideas,
+        icon_pos(-1, 0),
+    );
+    resource_label(
+        player,
+        state,
+        &resource_ui(p, |r| r.ore),
+        ResourceType::Ore,
+        icon_pos(-2, 0),
+    );
+    resource_label(
+        player,
+        state,
+        &resource_ui(p, |r| r.wood),
+        ResourceType::Wood,
+        icon_pos(-3, 0),
+    );
+    resource_label(
+        player,
+        state,
+        &resource_ui(p, |r| r.food),
+        ResourceType::Food,
+        icon_pos(-4, 0),
     );
 
     show_wonders(game, player, &mut root_ui());
 }
 
-pub fn show_top_left(game: &Game, player: &ShownPlayer) {
+pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
     let mut y = 0.;
-    let mut label = |label: String| {
-        let p = vec2(0., y * 25.);
+    let mut label = |label: &str| {
+        let p = vec2(10., y * 25. + 20.);
         y += 1.;
-        top_left_label(p, &label);
+        state.draw_text(label, p.x, p.y);
     };
 
     match &game.state {
-        GameState::Finished => label("Finished".to_string()),
-        _ => label(format!("Age {}", game.age)),
+        GameState::Finished => label("Finished"),
+        _ => label(&format!("Age {}", game.age)),
     }
     match &game.state {
-        GameState::StatusPhase(ref p) => label(format!("Status Phase: {p:?}")),
-        _ => label(format!("Round {}", game.round)),
+        GameState::StatusPhase(ref p) => label(&format!("Status Phase: {p:?}")),
+        _ => label(&format!("Round {}", game.round)),
     }
 
     let p = game.get_player(player.index);
 
-    label(p.get_name());
+    label(&p.get_name());
 
-    label(format!("Civ {}", p.civilization.name));
+    label(&format!("Civ {}", p.civilization.name));
 
-    label(format!(
+    label(&format!(
         "Leader {}",
         if let Some(l) = &p.active_leader {
             &l.name
@@ -192,26 +198,37 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer) {
     ));
 
     if game.current_player_index == p.index {
-        label("Your turn".to_string());
-
         match &game.state {
             GameState::StatusPhase(_) | GameState::Finished => {}
-            _ => label(format!("Actions {}", game.actions_left)),
+            _ => label(&format!("{} actions left", game.actions_left)),
         }
 
         match &game.state {
-            GameState::Movement { .. } => label("Movement".to_string()),
+            GameState::Movement {
+                movement_actions_left,
+                ..
+            } => label(&format!("Move units: {movement_actions_left} moves left")),
             GameState::CulturalInfluenceResolution(_) => {
-                label("Cultural Influence Resolution".to_string());
+                label("Cultural Influence Resolution");
             }
-            GameState::Combat(c) => label(format!("Combat Round {} Phase {:?}", c.round, c.phase)),
-            GameState::PlaceSettler { .. } => label("Place Settler".to_string()),
+            GameState::Combat(c) => label(&format!(
+                "Combat Round {} Phase {:?}{}",
+                c.round,
+                c.phase,
+                moves_left(&game.state)
+                    .map(|m| format!(", {m} moves left"))
+                    .unwrap_or_default()
+            )),
+            GameState::PlaceSettler {
+                player_index: _,
+                movement_actions_left,
+                ..
+            } => label(&format!(
+                "Place Settler: {movement_actions_left} moves left"
+            )),
             _ => {}
         }
-
-        if let Some(m) = moves_left(&game.state) {
-            label(format!("Moves left {m}"));
-        }
+        state.active_dialog.help_message().map(label);
     }
 }
 
@@ -221,9 +238,9 @@ fn moves_left(state: &GameState) -> Option<u32> {
         GameState::Movement {
             movement_actions_left,
             ..
-        } => Some(*movement_actions_left),
-        GameState::PlaceSettler {
-            player_index: _player_index,
+        }
+        | GameState::PlaceSettler {
+            player_index: _,
             movement_actions_left,
             ..
         } => Some(*movement_actions_left),
@@ -263,87 +280,138 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
     let player = &state.shown_player(game);
 
     let assets = &state.assets;
-    if bottom_left_texture(state, &assets.zoom_in, icon_pos(1, -1)) {
-        state.zoom *= 1.1;
-        return StateUpdate::None;
+
+    if let Some(tooltip) = can_end_move(game) {
+        if player.can_control
+            && bottom_right_texture(state, &assets.end_turn, icon_pos(-4, -1), tooltip)
+        {
+            return end_move(game);
+        }
     }
-    if bottom_left_texture(state, &assets.zoom_out, icon_pos(0, -1)) {
-        state.zoom /= 1.1;
-        return StateUpdate::None;
+    if game.can_redo() && bottom_right_texture(state, &assets.redo, icon_pos(-5, -1), "Redo") {
+        return StateUpdate::Execute(Action::Redo);
     }
-    if bottom_left_texture(state, &assets.reset, icon_pos(2, -1)) {
-        state.zoom = ZOOM;
-        state.offset = OFFSET;
-        return StateUpdate::None;
+    if game.can_undo() && bottom_right_texture(state, &assets.undo, icon_pos(-6, -1), "Undo") {
+        return StateUpdate::Execute(Action::Undo);
     }
-    if bottom_left_texture(state, &assets.up, icon_pos(4, -2)) {
-        state.offset += vec2(0., 0.1);
-        return StateUpdate::None;
+    let d = state.game_state_dialog(game, &ActiveDialog::None);
+    if d.can_restore()
+        && d.title() != state.active_dialog.title()
+        && bottom_right_texture(
+            state,
+            &assets.restore_menu,
+            icon_pos(-7, -1),
+            format!("Restore {}", d.title()).as_str(),
+        )
+    {
+        return StateUpdate::OpenDialog(d);
     }
-    if bottom_left_texture(state, &assets.down, icon_pos(4, -1)) {
+
+    if player.can_play_action
+        && bottom_left_texture(state, &assets.movement, icon_pos(0, -3), "Move units")
+    {
+        return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
+    }
+    if player.can_play_action
+        && bottom_left_texture(state, &assets.happy, icon_pos(0, -2), "Increase happiness")
+    {
+        return start_increase_happiness(game, player);
+    }
+
+    if top_right_texture(state, &assets.log, icon_pos(-1, 0), "Show log") {
+        return StateUpdate::OpenDialog(ActiveDialog::Log);
+    };
+    if top_right_texture(
+        state,
+        &assets.advances,
+        icon_pos(-2, 0),
+        "Choose or show advances",
+    ) {
+        return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
+    };
+
+    if features.import_export {
+        if bottom_right_texture(state, &assets.export, icon_pos(-1, -3), "Export") {
+            return StateUpdate::Export;
+        };
+        if bottom_right_texture(state, &assets.import, icon_pos(-2, -3), "Import") {
+            return StateUpdate::Import;
+        };
+    }
+
+    if bottom_left_texture(state, &assets.up, icon_pos(4, -2), "Move up") {
         state.offset += vec2(0., -0.1);
         return StateUpdate::None;
     }
-    if bottom_left_texture(state, &assets.left, icon_pos(3, -1)) {
+    if bottom_left_texture(state, &assets.right, icon_pos(5, -1), "Move right") {
         state.offset += vec2(-0.1, 0.);
         return StateUpdate::None;
     }
-    if bottom_left_texture(state, &assets.right, icon_pos(5, -1)) {
+    if bottom_left_texture(state, &assets.down, icon_pos(4, -1), "Move down") {
+        state.offset += vec2(0., 0.1);
+        return StateUpdate::None;
+    }
+    if bottom_left_texture(state, &assets.left, icon_pos(3, -1), "Move left") {
         state.offset += vec2(0.1, 0.);
         return StateUpdate::None;
     }
 
-    if game.can_undo() && bottom_right_texture(state, &assets.undo, icon_pos(-6, -1)) {
-        return StateUpdate::Execute(Action::Undo);
+    if bottom_left_texture(
+        state,
+        &assets.reset,
+        icon_pos(2, -1),
+        "Reset zoom and offset",
+    ) {
+        state.zoom = ZOOM;
+        state.offset = OFFSET;
+        return StateUpdate::None;
     }
-    if game.can_redo() && bottom_right_texture(state, &assets.redo, icon_pos(-5, -1)) {
-        return StateUpdate::Execute(Action::Redo);
+
+    if bottom_left_texture(state, &assets.zoom_in, icon_pos(1, -1), "Zoom in") {
+        state.zoom *= 1.1;
+        return StateUpdate::None;
     }
-    if player.can_control
-        && matches!(game.state, GameState::Playing)
-        && bottom_right_texture(state, &assets.end_turn, icon_pos(-4, -1))
+    if bottom_left_texture(state, &assets.zoom_out, icon_pos(0, -1), "Zoom out") {
+        state.zoom /= 1.1;
+        return StateUpdate::None;
+    }
+
+    StateUpdate::None
+}
+
+fn can_end_move(game: &Game) -> Option<&str> {
+    match game.state {
+        GameState::Movement { .. } => Some("End movement"),
+        GameState::Playing => Some("End turn"),
+        _ => None,
+    }
+}
+
+fn end_move(game: &Game) -> StateUpdate {
+    if let GameState::Movement {
+        movement_actions_left,
+        ..
+    } = &game.state
     {
-        let left = game.actions_left;
         return StateUpdate::execute_with_warning(
-            Action::Playing(PlayingAction::EndTurn),
-            if left > 0 {
-                vec![format!("{left} actions left")]
+            Action::Movement(MovementAction::Stop),
+            if *movement_actions_left > 0 {
+                vec![(format!("{movement_actions_left} movement actions left"))]
             } else {
                 vec![]
             },
         );
     }
 
-    if player.can_play_action && bottom_left_texture(state, &assets.movement, icon_pos(0, -3)) {
-        return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
-    }
-    if player.can_play_action && bottom_left_texture(state, &assets.happy, icon_pos(0, -2)) {
-        return start_increase_happiness(game, player);
-    }
-    if top_right_texture(state, &assets.advances, icon_pos(-2, 0)) {
-        return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
-    };
-
-    if top_right_texture(state, &assets.log, icon_pos(-1, 0)) {
-        return StateUpdate::OpenDialog(ActiveDialog::Log);
-    };
-    let d = state.game_state_dialog(game, &ActiveDialog::None);
-    if !matches!(d, ActiveDialog::None)
-        && d.title() != state.active_dialog.title()
-        && bottom_left_button(player, vec2(0., -200.), &format!("Back to {}", d.title()))
-    {
-        return StateUpdate::OpenDialog(d);
-    }
-
-    if features.import_export {
-        if bottom_right_texture(state, &assets.import, icon_pos(-2, -3)) {
-            return StateUpdate::Import;
-        };
-        if bottom_right_texture(state, &assets.export, icon_pos(-1, -3)) {
-            return StateUpdate::Export;
-        };
-    }
-    StateUpdate::None
+    let left = game.actions_left;
+    StateUpdate::execute_with_warning(
+        Action::Playing(PlayingAction::EndTurn),
+        if left > 0 {
+            vec![format!("{left} actions left")]
+        } else {
+            vec![]
+        },
+    )
 }
 
 pub fn player_color(player_index: usize) -> Color {

@@ -114,12 +114,13 @@ pub fn selection_dialog<T: Selection>(
                 return on_change(new);
             }
         }
-        confirm_update(sel, || on_ok(sel.clone()), ui, &sel.confirm(game))
+        confirm_update(sel, player, || on_ok(sel.clone()), ui, &sel.confirm(game))
     })
 }
 
 pub fn confirm_update<T: ConfirmSelection>(
     sel: &T,
+    player: &ShownPlayer,
     on_ok: impl FnOnce() -> StateUpdate,
     ui: &mut Ui,
     confirm: &SelectionConfirm,
@@ -127,11 +128,11 @@ pub fn confirm_update<T: ConfirmSelection>(
     match confirm {
         SelectionConfirm::NoConfirm => StateUpdate::None,
         SelectionConfirm::Invalid => {
-            ui.label(None, "Invalid selection");
+            ui.label(ok_pos(player), "Invalid selection");
             may_cancel(sel, ui)
         }
         SelectionConfirm::Valid => {
-            if ui.button(None, "OK") {
+            if ui.button(ok_pos(player), "OK") {
                 on_ok()
             } else {
                 may_cancel(sel, ui)

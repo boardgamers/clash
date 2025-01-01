@@ -18,7 +18,9 @@ use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
 use crate::player_ui::{player_select, show_global_controls, show_top_center, show_top_left};
 use crate::status_phase_ui::raze_city_confirm_dialog;
-use crate::{combat_ui, dialog_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui};
+use crate::{
+    combat_ui, dialog_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui, tooltip,
+};
 
 pub async fn init(features: &Features) -> State {
     let state = State::new(features).await;
@@ -47,6 +49,8 @@ pub fn render_and_update(
 }
 
 fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
+    tooltip::update(state);
+
     clear_background(WHITE);
 
     let player = &state.shown_player(game);
@@ -58,19 +62,13 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         offset: state.offset,
         ..Default::default()
     };
-    set_camera(&state.camera);
 
-    if matches!(state.active_dialog, ActiveDialog::None) || state.active_dialog.is_map_dialog() {
-        draw_map(game, state);
-    }
+    draw_map(game, state);
     let mut updates = StateUpdates::new();
-    show_top_left(game, player);
+    show_top_left(game, player, state);
     show_top_center(game, player, state);
     updates.add(player_select(game, player, state));
     updates.add(show_global_controls(game, state, features));
-    if !matches!(state.active_dialog, ActiveDialog::None) || state.active_dialog.is_map_dialog() {
-        updates.clear();
-    }
 
     if player.can_control {
         if let Some(u) = &state.pending_update {
@@ -80,7 +78,7 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     }
 
     updates.add(match &state.active_dialog {
-        ActiveDialog::None => StateUpdate::None,
+        ActiveDialog::None | ActiveDialog::MoveUnits(_) => StateUpdate::None,
         ActiveDialog::Log => show_log(game, player),
         ActiveDialog::TileMenu(p) => show_tile_menu(game, *p, player),
         ActiveDialog::WaitingForUpdate => {
@@ -95,7 +93,6 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c, player),
         ActiveDialog::RecruitUnitSelection(s) => recruit_unit_ui::select_dialog(game, s, player),
         ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::replace_dialog(game, r, player),
-        ActiveDialog::MoveUnits(s) => move_ui::move_units_dialog(game, s, player),
         ActiveDialog::CulturalInfluenceResolution(c) => {
             influence_ui::cultural_influence_resolution_dialog(c, player)
         }
@@ -131,16 +128,15 @@ pub fn try_click(game: &Game, state: &State, player: &ShownPlayer) -> StateUpdat
         return StateUpdate::None;
     }
     let (x, y) = mouse_position();
-    let pos = Position::from_coordinate(pixel_to_coordinate(
-        state.camera.screen_to_world(vec2(x, y)),
-    ));
+    let mouse_pos = state.camera.screen_to_world(vec2(x, y));
+    let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));
     if !game.map.tiles.contains_key(&pos) {
         return StateUpdate::None;
     }
 
     if player.can_control {
         match &state.active_dialog {
-            ActiveDialog::MoveUnits(s) => move_ui::click(pos, s),
+            ActiveDialog::MoveUnits(s) => move_ui::click(pos, s, mouse_pos, game),
             ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::click_replace(pos, r),
             ActiveDialog::RemoveCasualties(_s) => StateUpdate::None,
             ActiveDialog::CollectResources(col) => click_collect_option(col, pos),

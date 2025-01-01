@@ -172,6 +172,10 @@ impl RecruitSelection {
         }
     }
 
+    pub fn clear(&mut self) {
+        self.current_city = None;
+    }
+
     pub fn is_finished(&self) -> bool {
         self.need_replacement.is_empty()
     }

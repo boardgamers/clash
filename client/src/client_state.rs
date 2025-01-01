@@ -14,6 +14,7 @@ use crate::collect_ui::CollectResources;
 use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
 use crate::happiness_ui::IncreaseHappiness;
+use crate::layout_ui::FONT_SIZE;
 use crate::move_ui::MoveSelection;
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use crate::status_phase_ui::ChooseAdditionalAdvances;
@@ -82,6 +83,45 @@ impl ActiveDialog {
     }
 
     #[must_use]
+    pub fn help_message(&self) -> Option<&str> {
+        match self {
+            ActiveDialog::None => None,
+            ActiveDialog::TileMenu(_) => Some("Click on a tile to see options"),
+            ActiveDialog::Log => Some("Click on a log entry to see details"),
+            ActiveDialog::IncreaseHappiness(_) => Some("Click on a city to increase happiness"),
+            ActiveDialog::AdvanceMenu => Some("Click on an advance to see options"),
+            ActiveDialog::AdvancePayment(_) => Some("Click on an advance to pay"),
+            ActiveDialog::ConstructionPayment(_) => Some("Click on a city to pay for construction"),
+            ActiveDialog::CollectResources(_) => Some("Click on a city to collect resources"),
+            ActiveDialog::RecruitUnitSelection(_) => Some("Click on a unit to recruit"),
+            ActiveDialog::ReplaceUnits(_) => Some("Click on a unit to replace"),
+            ActiveDialog::MoveUnits(m) => {
+                if m.start.is_some() {
+                    Some("Click on a highlighted tile to move units")
+                } else {
+                    Some("Click on a unit to move")
+                }
+            }
+            ActiveDialog::CulturalInfluenceResolution(_) => {
+                Some("Click on a city to resolve cultural influence")
+            }
+            ActiveDialog::FreeAdvance => Some("Click on an advance to take it for free"),
+            ActiveDialog::RazeSize1City => Some("Click on a city to raze it"),
+            ActiveDialog::CompleteObjectives => Some("Click on an objective to complete it"),
+            ActiveDialog::DetermineFirstPlayer => {
+                Some("Click on a player to determine first player")
+            }
+            ActiveDialog::ChangeGovernmentType => Some("Click on a government type to change"),
+            ActiveDialog::ChooseAdditionalAdvances(_) => Some("Click on an advance to choose it"),
+            ActiveDialog::PlayActionCard => Some("Click on an action card to play it"),
+            ActiveDialog::PlaceSettler => Some("Click on a tile to place a settler"),
+            ActiveDialog::Retreat => Some("Click on a unit to retreat"),
+            ActiveDialog::RemoveCasualties(_) => Some("Click on a unit to remove it"),
+            ActiveDialog::WaitingForUpdate => panic!("no help message for dialog"),
+        }
+    }
+
+    #[must_use]
     pub fn is_map_dialog(&self) -> bool {
         matches!(
             self,
@@ -91,6 +131,14 @@ impl ActiveDialog {
                 | ActiveDialog::MoveUnits(_)
                 | ActiveDialog::PlaceSettler
                 | ActiveDialog::RazeSize1City
+        )
+    }
+
+    #[must_use]
+    pub fn can_restore(&self) -> bool {
+        !matches!(
+            self,
+            ActiveDialog::MoveUnits(_) | ActiveDialog::ReplaceUnits(_) | ActiveDialog::None
         )
     }
 }
@@ -206,10 +254,6 @@ impl StateUpdates {
         }
     }
 
-    pub fn clear(&mut self) {
-        self.updates.clear();
-    }
-
     pub fn result(self) -> StateUpdate {
         self.updates
             .into_iter()
@@ -235,6 +279,11 @@ impl ShownPlayer {
     }
 }
 
+pub struct MousePosition {
+    pub position: Vec2,
+    pub time: f64,
+}
+
 pub struct State {
     pub assets: Assets,
     pub control_player: Option<usize>,
@@ -245,6 +294,7 @@ pub struct State {
     pub zoom: f32,
     pub offset: Vec2,
     pub screen_size: Vec2,
+    pub mouse_positions: Vec<MousePosition>,
 }
 
 pub const ZOOM: f32 = 0.001;
@@ -264,6 +314,7 @@ impl State {
             zoom: ZOOM,
             offset: OFFSET,
             screen_size: vec2(0., 0.),
+            mouse_positions: vec![],
         }
     }
 
@@ -354,7 +405,11 @@ impl State {
     }
 
     fn close_dialog(&mut self) {
-        self.active_dialog = ActiveDialog::None;
+        if self.active_dialog.can_restore() {
+            self.active_dialog = ActiveDialog::None;
+        } else if let ActiveDialog::ReplaceUnits(r) = &mut self.active_dialog {
+            r.clear();
+        }
     }
 
     pub fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {
@@ -413,6 +468,25 @@ impl State {
             },
             _ => ActiveDialog::None,
         }
+    }
+
+    #[must_use]
+    pub fn measure_text(&self, text: &str) -> TextDimensions {
+        measure_text(text, Some(&self.assets.font), FONT_SIZE, 1.0)
+    }
+
+    pub fn draw_text(&self, text: &str, x: f32, y: f32) {
+        draw_text_ex(
+            text,
+            x,
+            y,
+            TextParams {
+                font: Some(&self.assets.font),
+                font_size: FONT_SIZE,
+                color: BLACK,
+                ..Default::default()
+            },
+        );
     }
 
     // fn execute_status_phase(&mut self, game: &Game, action: StatusPhaseAction) -> ActiveDialog {
