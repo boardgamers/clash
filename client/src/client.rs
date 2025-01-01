@@ -14,11 +14,11 @@ use crate::construct_ui::pay_construction_dialog;
 use crate::dialog_ui::active_dialog_window;
 use crate::happiness_ui::{increase_happiness_dialog, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
-use crate::layout_ui::update_tooltip;
 use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
 use crate::player_ui::{player_select, show_global_controls, show_top_center, show_top_left};
 use crate::status_phase_ui::raze_city_confirm_dialog;
+use crate::tooltip::update_tooltip;
 use crate::{combat_ui, dialog_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui};
 
 pub async fn init(features: &Features) -> State {

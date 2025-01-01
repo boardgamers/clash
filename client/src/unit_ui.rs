@@ -14,7 +14,7 @@ use crate::select_ui::{confirm_update, ConfirmSelection};
 use crate::{hex_ui, player_ui};
 
 use crate::hex_ui::Point;
-use crate::layout_ui::show_tooltip_for_world_circle;
+use crate::tooltip::show_tooltip_for_world_circle;
 use itertools::Itertools;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::player::Player;

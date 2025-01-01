@@ -1,4 +1,5 @@
-use crate::client_state::{MousePosition, ShownPlayer, State};
+use crate::client_state::{ShownPlayer, State};
+use crate::tooltip;
 use macroquad::color::WHITE;
 use macroquad::math::{f32, vec2, Vec2};
 use macroquad::prelude::*;
@@ -6,8 +7,6 @@ use macroquad::prelude::*;
 pub const ICON_SIZE: f32 = 30.;
 
 pub const MARGIN: f32 = 10.;
-
-pub const TOOLTIP_DELAY: f64 = 0.5;
 
 pub const FONT_SIZE: u16 = 20;
 
@@ -80,7 +79,7 @@ fn relative_texture(
     );
 
     let rect = Rect::new(origin.x, origin.y, ICON_SIZE, ICON_SIZE);
-    show_tooltip_for_rect(state, tooltip, rect);
+    tooltip::show_tooltip_for_rect(state, tooltip, rect);
     left_mouse_button(rect)
 }
 
@@ -118,65 +117,4 @@ pub fn ok_only_pos(player: &ShownPlayer) -> Vec2 {
 
 fn small_dialog(player: &ShownPlayer) -> bool {
     player.active_dialog.is_map_dialog() || player.pending_update
-}
-
-pub fn update_tooltip(state: &mut State) {
-    let (x, y) = mouse_position();
-    let now = get_time();
-    state
-        .mouse_positions
-        .retain(|mp| now - mp.time < TOOLTIP_DELAY);
-    state.mouse_positions.push(MousePosition {
-        position: vec2(x, y),
-        time: now,
-    });
-}
-
-fn is_rect_tooltip_active(state: &State, rect: Rect) -> bool {
-    state
-        .mouse_positions
-        .iter()
-        .all(|mp| rect.contains(mp.position))
-}
-
-pub fn show_tooltip_for_rect(state: &State, tooltip: &str, rect: Rect) {
-    let origin = rect.point();
-    if is_rect_tooltip_active(state, rect) {
-        draw_rectangle(
-            origin.x,
-            origin.y,
-            rect.size().x,
-            rect.size().y,
-            Color::new(0.0, 0.0, 0.0, 0.5),
-        );
-        show_tooltip_text(state, tooltip, origin);
-    }
-}
-
-fn is_world_circle_tooltip_active(state: &State, center: Vec2, radius: f32) -> bool {
-    state
-        .mouse_positions
-        .iter()
-        .all(|mp| (center - state.camera.screen_to_world(mp.position)).length() < radius)
-}
-
-pub fn show_tooltip_for_world_circle(state: &State, tooltip: &str, center: Vec2, radius: f32) {
-    let screen_center = state.camera.world_to_screen(center);
-    if is_world_circle_tooltip_active(state, center, radius) {
-        draw_circle(center.x, center.y, radius, Color::new(0.0, 0.0, 0.0, 0.5));
-        set_default_camera();
-        show_tooltip_text(state, tooltip, screen_center + vec2(radius, radius));
-        set_camera(&state.camera);
-    }
-}
-
-fn show_tooltip_text(state: &State, tooltip: &str, origin: Vec2) {
-    let dimensions = state.measure_text(tooltip);
-    let tooltip_rect = Rect::new(origin.x, origin.y, dimensions.width, dimensions.height);
-    let w = tooltip_rect.size().x + 10.;
-    let sx = state.screen_size.x;
-    let x = tooltip_rect.left().min(sx - w);
-    let y = (tooltip_rect.top() - 10.).max(40.);
-    draw_rectangle(x, y, w, tooltip_rect.size().y + 10., GRAY);
-    state.draw_text(tooltip, x + 5., y + 20.);
 }
