@@ -281,11 +281,12 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
 
     let assets = &state.assets;
 
-    if let Some(tooltip) = can_end_move(game)
-        && player.can_control
-        && bottom_right_texture(state, &assets.end_turn, icon_pos(-4, -1), tooltip)
-    {
-        return end_move(game);
+    if let Some(tooltip) = can_end_move(game) {
+        if player.can_control
+            && bottom_right_texture(state, &assets.end_turn, icon_pos(-4, -1), tooltip)
+        {
+            return end_move(game);
+        }
     }
     if game.can_redo() && bottom_right_texture(state, &assets.redo, icon_pos(-5, -1), "Redo") {
         return StateUpdate::Execute(Action::Redo);

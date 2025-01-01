@@ -1,4 +1,3 @@
-#![feature(let_chains)]
 #![deny(clippy::all, clippy::pedantic)]
 #![allow(
     clippy::similar_names,
