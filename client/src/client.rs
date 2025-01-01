@@ -79,7 +79,7 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     }
 
     updates.add(match &state.active_dialog {
-        ActiveDialog::None => StateUpdate::None,
+        ActiveDialog::None | ActiveDialog::MoveUnits(_) => StateUpdate::None,
         ActiveDialog::Log => show_log(game, player),
         ActiveDialog::TileMenu(p) => show_tile_menu(game, *p, player),
         ActiveDialog::WaitingForUpdate => {
@@ -94,7 +94,6 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c, player),
         ActiveDialog::RecruitUnitSelection(s) => recruit_unit_ui::select_dialog(game, s, player),
         ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::replace_dialog(game, r, player),
-        ActiveDialog::MoveUnits(s) => StateUpdate::None,
         ActiveDialog::CulturalInfluenceResolution(c) => {
             influence_ui::cultural_influence_resolution_dialog(c, player)
         }

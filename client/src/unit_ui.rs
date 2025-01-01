@@ -69,9 +69,9 @@ pub fn non_leader_names() -> [(UnitType, &'static str); 5] {
 
 pub fn draw_units(game: &Game, state: &State) {
     let selected_units = match state.active_dialog {
-        ActiveDialog::MoveUnits(ref s) => s.units.to_vec(),
-        ActiveDialog::ReplaceUnits(ref s) => s.replaced_units.to_vec(),
-        ActiveDialog::RemoveCasualties(ref s) => s.units.to_vec(),
+        ActiveDialog::MoveUnits(ref s) => s.units.clone(),
+        ActiveDialog::ReplaceUnits(ref s) => s.replaced_units.clone(),
+        ActiveDialog::RemoveCasualties(ref s) => s.units.clone(),
         _ => vec![],
     };
     for (_pos, units) in &game

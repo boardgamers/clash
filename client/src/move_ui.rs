@@ -10,15 +10,6 @@ use server::unit::{MovementAction, Unit};
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::unit_ui::{clicked_unit, UnitSelection};
 
-fn update_possible_destinations(game: &Game, s: &mut MoveSelection) {
-    if s.units.is_empty() {
-        s.destinations.clear();
-        s.start = None;
-    } else {
-        s.destinations = possible_destinations(game, s.start.unwrap(), s.player_index, &s.units);
-    }
-}
-
 fn possible_destinations(
     game: &Game,
     start: Position,
@@ -77,7 +68,12 @@ pub fn click(pos: Position, s: &MoveSelection, mouse_pos: Vec2, game: &Game) -> 
             } else {
                 new.units.push(unit_id);
             }
-            update_possible_destinations(game, &mut new);
+            if new.units.is_empty() {
+                new.destinations.clear();
+                new.start = None;
+            } else {
+                new.destinations = possible_destinations(game, pos, new.player_index, &new.units);
+            }
             StateUpdate::SetDialog(ActiveDialog::MoveUnits(new))
         })
     }
