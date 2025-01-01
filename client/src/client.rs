@@ -18,7 +18,9 @@ use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
 use crate::player_ui::{player_select, show_global_controls, show_top_center, show_top_left};
 use crate::status_phase_ui::raze_city_confirm_dialog;
-use crate::{combat_ui, dialog_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui, tooltip};
+use crate::{
+    combat_ui, dialog_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui, tooltip,
+};
 
 pub async fn init(features: &Features) -> State {
     let state = State::new(features).await;
