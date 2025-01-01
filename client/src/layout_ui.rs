@@ -132,7 +132,7 @@ pub fn update_tooltip(state: &mut State) {
     });
 }
 
-fn is_active_tooltip(state: &State, rect: Rect) -> bool {
+fn is_rect_tooltip_active(state: &State, rect: Rect) -> bool {
     state
         .mouse_positions
         .iter()
@@ -141,7 +141,7 @@ fn is_active_tooltip(state: &State, rect: Rect) -> bool {
 
 pub fn show_tooltip_for_rect(state: &State, tooltip: &str, rect: Rect) {
     let origin = rect.point();
-    if is_active_tooltip(state, rect) {
+    if is_rect_tooltip_active(state, rect) {
         draw_rectangle(
             origin.x,
             origin.y,
@@ -149,25 +149,31 @@ pub fn show_tooltip_for_rect(state: &State, tooltip: &str, rect: Rect) {
             rect.size().y,
             Color::new(0.0, 0.0, 0.0, 0.5),
         );
-        let dimensions = state.measure_text(tooltip);
-        let tooltip_rect = Rect::new(origin.x, origin.y, dimensions.width, dimensions.height);
-        let w = tooltip_rect.size().x + 10.;
-        let sx = state.screen_size.x;
-        let x = tooltip_rect.left().min(sx - w);
-        let y = (tooltip_rect.top() - 10.).max(40.);
-        draw_rectangle(x, y, w, tooltip_rect.size().y + 10., GRAY);
-        state.draw_text(tooltip, x + 5., y + 20.);
+        show_tooltip_text(state, tooltip, origin);
     }
 }
 
-pub fn show_tooltip_for_circle(state: &State, tooltip: &str, center: Vec2, radius: f32) {
-    let rect = Rect::new(
-        center.x - radius,
-        center.y - radius,
-        2. * radius,
-        2. * radius,
-    );
+fn is_circle_tooltip_active(state: &State, center: Vec2, radius: f32) -> bool {
+    state
+        .mouse_positions
+        .iter()
+        .all(|mp| (center - mp.position).length() < radius)
+}
 
-    // todo - highlight circle
-    show_tooltip_for_rect(state, tooltip, rect);
+pub fn show_tooltip_for_circle(state: &State, tooltip: &str, center: Vec2, radius: f32) {
+    if is_circle_tooltip_active(state, center, radius) {
+        draw_circle(center.x, center.y, radius, Color::new(0.0, 0.0, 0.0, 0.5));
+        show_tooltip_text(state, tooltip, center - vec2(radius, radius));
+    }
+}
+
+fn show_tooltip_text(state: &State, tooltip: &str, origin: Vec2) {
+    let dimensions = state.measure_text(tooltip);
+    let tooltip_rect = Rect::new(origin.x, origin.y, dimensions.width, dimensions.height);
+    let w = tooltip_rect.size().x + 10.;
+    let sx = state.screen_size.x;
+    let x = tooltip_rect.left().min(sx - w);
+    let y = (tooltip_rect.top() - 10.).max(40.);
+    draw_rectangle(x, y, w, tooltip_rect.size().y + 10., GRAY);
+    state.draw_text(tooltip, x + 5., y + 20.);
 }
