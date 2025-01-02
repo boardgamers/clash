@@ -10,7 +10,6 @@ use server::unit::Units;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{building_positions, ConstructionPayment, ConstructionProject};
-use crate::hex_ui::draw_hex_center_text;
 use crate::layout_ui::{bottom_center_texture, draw_icon, draw_scaled_icon, icon_pos, ICON_SIZE};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::resource_ui::ResourceType;
@@ -186,7 +185,7 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
             .iter()
             .find(|(p, _)| p == &city.position)
             .map_or(String::new(), |(_, s)| format!("{s}"));
-        draw_hex_center_text(city.position, &steps);
+        state.draw_text(&steps, c.x - 5., c.y + 6.);
     } else {
         let t = match city.mood_state {
             MoodState::Happy => &state.assets.happy,

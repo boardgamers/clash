@@ -45,11 +45,6 @@ pub fn draw_hex(p: Position, text_color: Color, alpha: f32, t: &Texture2D, exhau
     }
 }
 
-pub fn draw_hex_center_text(p: Position, text: &str) {
-    let c = center(p);
-    draw_text(text, c.x - 5., c.y + 6., 25.0, BLACK);
-}
-
 pub fn pixel_to_coordinate(p: Vec2) -> Coordinate {
     let p = Point::new(p.x, p.y).to_game();
     Coordinate::from_pixel(p.x, p.y, SPACING)
