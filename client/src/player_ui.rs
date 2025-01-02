@@ -349,7 +349,12 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
         ) {
             return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
         }
-        if bottom_left_texture(state, &assets.resources[&ResourceType::MoodTokens], icon_pos(0, -2), "Increase happiness") {
+        if bottom_left_texture(
+            state,
+            &assets.resources[&ResourceType::MoodTokens],
+            icon_pos(0, -2),
+            "Increase happiness",
+        ) {
             return start_increase_happiness(game, player);
         }
     }

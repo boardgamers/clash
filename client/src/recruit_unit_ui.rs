@@ -11,10 +11,8 @@ use crate::hex_ui::Point;
 use crate::select_ui::{
     ConfirmSelection, CountSelector, HasCountSelectableObject, SelectionConfirm,
 };
-use crate::tooltip::show_tooltip_for_circle;
-use crate::unit_ui::{draw_unit_type, UnitSelection, UNIT_RADIUS};
+use crate::unit_ui::{draw_unit_type, UnitSelection};
 use crate::{select_ui, unit_ui};
-use crate::layout_ui::ICON_SIZE;
 
 #[derive(Clone)]
 pub struct SelectableUnit {

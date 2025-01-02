@@ -1,5 +1,5 @@
 use crate::client_state::{MousePosition, State};
-use macroquad::camera::{set_camera, set_default_camera};
+use macroquad::camera::set_default_camera;
 use macroquad::color::{Color, GRAY};
 use macroquad::input::mouse_position;
 use macroquad::math::{bool, f32, f64, vec2, Rect, Vec2};

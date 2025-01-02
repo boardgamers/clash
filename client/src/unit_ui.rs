@@ -1,6 +1,6 @@
 use macroquad::color::BLACK;
 use macroquad::math::{u32, vec2, Vec2};
-use macroquad::prelude::{draw_text, WHITE};
+use macroquad::prelude::WHITE;
 use macroquad::shapes::draw_circle;
 use macroquad::ui::Ui;
 
@@ -14,15 +14,23 @@ use crate::select_ui::{confirm_update, ConfirmSelection};
 use crate::{hex_ui, player_ui};
 
 use crate::hex_ui::Point;
+use crate::layout_ui::draw_scaled_icon;
+use crate::tooltip::show_tooltip_for_circle;
 use itertools::Itertools;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::player::Player;
-use crate::layout_ui::draw_scaled_icon;
-use crate::tooltip::show_tooltip_for_circle;
 
 pub const UNIT_RADIUS: f32 = 11.0;
 
-pub fn draw_unit_type(selected: bool, center: Point, unit_type: &UnitType, player_index: usize, state: &State, tooltip: &str, size: f32) {
+pub fn draw_unit_type(
+    selected: bool,
+    center: Point,
+    unit_type: &UnitType,
+    player_index: usize,
+    state: &State,
+    tooltip: &str,
+    size: f32,
+) {
     draw_circle(
         center.x,
         center.y,
@@ -36,7 +44,13 @@ pub fn draw_unit_type(selected: bool, center: Point, unit_type: &UnitType, playe
         player_ui::player_color(player_index),
     );
     let icon_size = size * 1.1;
-    draw_scaled_icon(state, &state.assets.units[unit_type], tooltip, vec2(center.x - icon_size/2., center.y - icon_size/2.), icon_size);
+    draw_scaled_icon(
+        state,
+        &state.assets.units[unit_type],
+        tooltip,
+        vec2(center.x - icon_size / 2., center.y - icon_size / 2.),
+        icon_size,
+    );
 }
 
 fn unit_center(index: u32, position: Position) -> Point {
@@ -94,12 +108,7 @@ pub fn draw_units(game: &Game, state: &State, tooltip: bool) {
                     .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
                 let point = unit_center(i.try_into().unwrap(), u.position);
                 let center = vec2(point.x, point.y);
-                show_tooltip_for_circle(
-                    state,
-                    &unit_label(u, army_move),
-                    center,
-                    UNIT_RADIUS,
-                );
+                show_tooltip_for_circle(state, &unit_label(u, army_move), center, UNIT_RADIUS);
             } else {
                 let selected = *p == game.active_player() && selected_units.contains(&u.id);
                 draw_unit_type(

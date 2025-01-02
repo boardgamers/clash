@@ -10,7 +10,7 @@ use server::unit::{UnitType, Units};
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{building_positions, ConstructionPayment, ConstructionProject};
-use crate::layout_ui::{bottom_center_texture, draw_icon, draw_scaled_icon, icon_pos, ICON_SIZE};
+use crate::layout_ui::{bottom_center_texture, draw_scaled_icon, icon_pos};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::resource_ui::ResourceType;
 use crate::{hex_ui, player_ui};

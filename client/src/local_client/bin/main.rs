@@ -178,7 +178,7 @@ pub fn setup_local_game() -> Game {
         .pieces
         .fortress = Some(1);
 
-  game.players[player_index1]
+    game.players[player_index1]
         .get_city_mut(Position::from_offset("A1"))
         .unwrap()
         .pieces
