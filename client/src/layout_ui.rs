@@ -1,4 +1,5 @@
 use crate::client_state::{ShownPlayer, State};
+use crate::hex_ui::Point;
 use crate::tooltip;
 use macroquad::color::WHITE;
 use macroquad::math::{f32, vec2, Vec2};
@@ -19,67 +20,60 @@ pub fn icon_pos(x: i8, y: i8) -> Vec2 {
 }
 
 pub fn top_center_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
-    relative_texture(
-        state,
-        texture,
-        vec2(state.screen_size.x / 2., MARGIN),
-        p,
-        tooltip,
-    )
+    let anchor = vec2(state.screen_size.x / 2., MARGIN);
+    draw_icon(state, texture, tooltip, anchor + p)
 }
 
 pub fn top_right_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
-    relative_texture(
-        state,
-        texture,
-        vec2(state.screen_size.x - MARGIN, MARGIN),
-        p,
-        tooltip,
-    )
+    let anchor = vec2(state.screen_size.x - MARGIN, MARGIN);
+    draw_icon(state, texture, tooltip, anchor + p)
 }
 
 pub fn bottom_left_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
-    relative_texture(
-        state,
-        texture,
-        vec2(MARGIN, state.screen_size.y - MARGIN),
-        p,
-        tooltip,
-    )
+    let anchor = vec2(MARGIN, state.screen_size.y - MARGIN);
+    draw_icon(state, texture, tooltip, anchor + p)
+}
+
+pub fn bottom_center_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
+    let anchor = bottom_center_anchor(state);
+    draw_icon(state, texture, tooltip, anchor + p)
+}
+
+pub fn bottom_center_anchor(state: &State) -> Vec2 {
+    vec2(state.screen_size.x / 2., state.screen_size.y - MARGIN)
 }
 
 pub fn bottom_right_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
-    relative_texture(
-        state,
-        texture,
-        vec2(state.screen_size.x - MARGIN, state.screen_size.y - MARGIN),
-        p,
-        tooltip,
-    )
+    let anchor = vec2(state.screen_size.x - MARGIN, state.screen_size.y - MARGIN);
+    draw_icon(state, texture, tooltip, anchor + p)
 }
 
-fn relative_texture(
+pub fn draw_icon(state: &State, texture: &Texture2D, tooltip: &str, origin: Vec2) -> bool {
+    draw_scaled_icon(state, texture, tooltip, origin, ICON_SIZE)
+}
+
+pub fn draw_scaled_icon(
     state: &State,
     texture: &Texture2D,
-    anchor: Vec2,
-    offset: Vec2,
     tooltip: &str,
+    origin: Vec2,
+    size: f32,
 ) -> bool {
-    let origin = anchor + offset;
-
     draw_texture_ex(
         texture,
         origin.x,
         origin.y,
         WHITE,
         DrawTextureParams {
-            dest_size: Some(vec2(ICON_SIZE, ICON_SIZE)),
+            dest_size: Some(vec2(size, size)),
             ..Default::default()
         },
     );
 
-    let rect = Rect::new(origin.x, origin.y, ICON_SIZE, ICON_SIZE);
-    tooltip::show_tooltip_for_rect(state, tooltip, rect);
+    let rect = Rect::new(origin.x, origin.y, size, size);
+    if !tooltip.is_empty() {
+        tooltip::show_tooltip_for_rect(state, tooltip, rect);
+    }
     left_mouse_button(rect)
 }
 
@@ -117,4 +111,9 @@ pub fn ok_only_pos(player: &ShownPlayer) -> Vec2 {
 
 fn small_dialog(player: &ShownPlayer) -> bool {
     player.active_dialog.is_map_dialog() || player.pending_update
+}
+
+pub fn is_in_circle(mouse_pos: Vec2, p: Point, radius: f32) -> bool {
+    let d = vec2(p.x - mouse_pos.x, p.y - mouse_pos.y);
+    d.length() <= radius
 }

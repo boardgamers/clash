@@ -10,6 +10,7 @@
 
 mod advance_ui;
 mod assets;
+mod cards_ui;
 mod city_ui;
 pub mod client;
 pub mod client_state;

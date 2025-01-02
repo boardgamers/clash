@@ -1,9 +1,7 @@
 use std::cmp;
 
 use macroquad::math::{i32, u32};
-use macroquad::ui::Ui;
 
-use crate::city_ui::CityMenu;
 use server::action::Action;
 use server::city::City;
 use server::city_pieces::Building;
@@ -21,42 +19,8 @@ use crate::recruit_unit_ui::RecruitSelection;
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::CountSelector;
 
-pub fn add_construct_button(
-    game: &Game,
-    menu: &CityMenu,
-    ui: &mut Ui,
-    building: &Building,
-    name: &str,
-) -> StateUpdate {
-    let owner = menu.get_city_owner(game);
-    let city = menu.get_city(game);
-    if menu.is_city_owner() && menu.player.can_play_action && city.can_construct(building, owner) {
-        for pos in building_positions(building, city, &game.map) {
-            if ui.button(
-                None,
-                format!(
-                    "Build {}{}",
-                    name,
-                    pos.map_or(String::new(), |p| format!(" at {p}"))
-                ),
-            ) {
-                return StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(
-                    ConstructionPayment::new(
-                        game,
-                        name,
-                        menu.player.index,
-                        menu.city_position,
-                        ConstructionProject::Building(building.clone(), pos),
-                    ),
-                ));
-            }
-        }
-    }
-    StateUpdate::None
-}
-
-fn building_positions(building: &Building, city: &City, map: &Map) -> Vec<Option<Position>> {
-    if building != &Building::Port {
+pub fn building_positions(building: Building, city: &City, map: &Map) -> Vec<Option<Position>> {
+    if building != Building::Port {
         return vec![None];
     }
 
@@ -70,27 +34,6 @@ fn building_positions(building: &Building, city: &City, map: &Map) -> Vec<Option
             }
         })
         .collect()
-}
-
-pub fn add_wonder_buttons(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpdate {
-    let city = menu.get_city(game);
-    let owner = menu.get_city_owner(game);
-    for w in &owner.wonder_cards {
-        if city.can_build_wonder(w, owner, game)
-            && ui.button(None, format!("Build Wonder {}", w.name))
-        {
-            return StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(
-                ConstructionPayment::new(
-                    game,
-                    &w.name,
-                    menu.player.index,
-                    menu.city_position,
-                    ConstructionProject::Wonder(w.name.clone()),
-                ),
-            ));
-        }
-    }
-    StateUpdate::None
 }
 
 pub fn pay_construction_dialog(
@@ -108,7 +51,7 @@ pub fn pay_construction_dialog(
             ConstructionProject::Building(b, pos) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Construct(Construct {
                     city_position: cp.city_position,
-                    city_piece: b.clone(),
+                    city_piece: *b,
                     payment: cp.payment.to_resource_pile(),
                     port_position: *pos,
                     temple_bonus: None,
@@ -198,7 +141,7 @@ impl ConstructionPayment {
         let p = game.get_player(player_index);
         let cost = match &project {
             ConstructionProject::Building(b, _) => {
-                p.construct_cost(b, p.get_city(city_position).unwrap())
+                p.construct_cost(*b, p.get_city(city_position).unwrap())
             }
             ConstructionProject::Wonder(name) => p
                 .wonder_cards

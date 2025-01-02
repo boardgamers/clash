@@ -11,7 +11,6 @@ use crate::advance_ui::{pay_advance_dialog, show_advance_menu, show_free_advance
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, StateUpdates};
 use crate::collect_ui::{click_collect_option, collect_resources_dialog};
 use crate::construct_ui::pay_construction_dialog;
-use crate::dialog_ui::active_dialog_window;
 use crate::happiness_ui::{increase_happiness_dialog, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
 use crate::log_ui::show_log;
@@ -78,12 +77,12 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     }
 
     updates.add(match &state.active_dialog {
-        ActiveDialog::None | ActiveDialog::MoveUnits(_) => StateUpdate::None,
+        ActiveDialog::None
+        | ActiveDialog::MoveUnits(_)
+        | ActiveDialog::WaitingForUpdate
+        | ActiveDialog::CulturalInfluence => StateUpdate::None,
         ActiveDialog::Log => show_log(game, player),
-        ActiveDialog::TileMenu(p) => show_tile_menu(game, *p, player),
-        ActiveDialog::WaitingForUpdate => {
-            active_dialog_window(player, "Waiting for update", |_ui| StateUpdate::None)
-        }
+        ActiveDialog::TileMenu(p) => show_tile_menu(game, *p, player, state),
 
         // playing actions
         ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(h, player),
@@ -91,7 +90,9 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, player, game),
         ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p, player),
         ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c, player),
-        ActiveDialog::RecruitUnitSelection(s) => recruit_unit_ui::select_dialog(game, s, player),
+        ActiveDialog::RecruitUnitSelection(s) => {
+            recruit_unit_ui::select_dialog(game, s, player, state)
+        }
         ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::replace_dialog(game, r, player),
         ActiveDialog::CulturalInfluenceResolution(c) => {
             influence_ui::cultural_influence_resolution_dialog(c, player)
@@ -123,14 +124,21 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     updates.result()
 }
 
-pub fn try_click(game: &Game, state: &State, player: &ShownPlayer) -> StateUpdate {
-    if !is_mouse_button_pressed(MouseButton::Left) {
-        return StateUpdate::None;
-    }
+pub fn try_click(game: &Game, state: &mut State, player: &ShownPlayer) -> StateUpdate {
     let (x, y) = mouse_position();
     let mouse_pos = state.camera.screen_to_world(vec2(x, y));
     let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));
     if !game.map.tiles.contains_key(&pos) {
+        return StateUpdate::None;
+    }
+
+    if player.can_control {
+        if let ActiveDialog::CulturalInfluence = state.active_dialog {
+            return influence_ui::hover(pos, game, player, mouse_pos, state);
+        }
+    }
+
+    if !is_mouse_button_pressed(MouseButton::Left) {
         return StateUpdate::None;
     }
 

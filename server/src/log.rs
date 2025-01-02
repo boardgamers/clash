@@ -157,7 +157,7 @@ fn format_cultural_influence_attempt_log_item(
     let target_player_index = c.target_player_index;
     let target_city_position = c.target_city_position;
     let starting_city_position = c.starting_city_position;
-    let city_piece = &c.city_piece;
+    let city_piece = c.city_piece;
     let player = if target_player_index == game.active_player() {
         String::from("himself")
     } else {
@@ -304,11 +304,11 @@ fn format_construct_log_item(
         String::new()
     };
 
-    let city_piece = &c.city_piece;
+    let city_piece = c.city_piece;
     let payment = &c.payment;
-    let city_position = &c.city_position;
+    let city_position = c.city_position;
 
-    let mood = format_mood_change(player, *city_position);
+    let mood = format_mood_change(player, city_position);
     let temple = if let Some(temple_bonus) = &c.temple_bonus {
         format!(" and chooses to get {temple_bonus}")
     } else {

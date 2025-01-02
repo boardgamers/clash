@@ -1,21 +1,18 @@
-use itertools::Itertools;
 use macroquad::math::vec2;
 use macroquad::prelude::*;
-use macroquad::ui::Ui;
 use std::ops::{Add, Mul, Sub};
 
 use server::action::Action;
 use server::combat::Combat;
-use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::game::{Game, GameState};
 use server::map::Terrain;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
-use server::unit::{MovementRestriction, Unit};
+use server::unit::MovementRestriction;
 
 use crate::city_ui::{draw_city, show_city_menu, CityMenu};
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
-use crate::dialog_ui::dialog;
+use crate::layout_ui::{bottom_center_texture, icon_pos};
 use crate::{collect_ui, hex_ui, unit_ui};
 
 fn terrain_font_color(t: &Terrain) -> Color {
@@ -25,7 +22,7 @@ fn terrain_font_color(t: &Terrain) -> Color {
     }
 }
 
-fn terrain_name(t: &Terrain) -> &'static str {
+pub fn terrain_name(t: &Terrain) -> &'static str {
     match t {
         Terrain::Barren => "Barren",
         Terrain::Mountain => "Mountain",
@@ -36,8 +33,8 @@ fn terrain_name(t: &Terrain) -> &'static str {
     }
 }
 
-pub fn draw_map(game: &Game, state: &State) {
-    set_camera(&state.camera);
+pub fn draw_map(game: &Game, state: &mut State) {
+    state.set_world_camera();
     for (pos, t) in &game.map.tiles {
         let (base, exhausted) = match t {
             Terrain::Exhausted(e) => (e.as_ref(), true),
@@ -50,6 +47,7 @@ pub fn draw_map(game: &Game, state: &State) {
             alpha(game, state, *pos),
             state.assets.terrain.get(base).unwrap(),
             exhausted,
+            state,
         );
         collect_ui::draw_resource_collect_tile(state, *pos);
     }
@@ -65,7 +63,7 @@ pub fn draw_map(game: &Game, state: &State) {
         unit_ui::draw_units(game, state, false);
         unit_ui::draw_units(game, state, true);
     }
-    set_default_camera();
+    state.set_screen_camera();
 }
 
 fn alpha(game: &Game, state: &State, pos: Position) -> f32 {
@@ -120,53 +118,23 @@ fn highlight_if(b: bool) -> f32 {
     }
 }
 
-pub fn show_tile_menu(game: &Game, position: Position, player: &ShownPlayer) -> StateUpdate {
-    if let Some(c) = game.get_any_city(position) {
-        show_city_menu(game, &CityMenu::new(player, c.player_index, position))
-    } else {
-        show_generic_tile_menu(game, position, player, vec![], |_| StateUpdate::None)
-    }
-}
-
-pub fn show_generic_tile_menu(
+pub fn show_tile_menu(
     game: &Game,
     position: Position,
     player: &ShownPlayer,
-    suffix: Vec<String>,
-    additional: impl FnOnce(&mut Ui) -> StateUpdate,
+    state: &State,
 ) -> StateUpdate {
-    dialog(
-        player,
-        &format!(
-            "{}/{}",
-            position,
-            game.map
-                .tiles
-                .get(&position)
-                .map_or("outside the map", terrain_name),
-        ),
-        |ui| {
-            let units: Vec<(&Unit, String)> = unit_ui::units_on_tile(game, position)
-                .map(|(p, u)| {
-                    let army_move = game
-                        .get_player(p)
-                        .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
-                    let unit = game.get_player(p).get_unit(u).unwrap();
-                    (unit, unit_ui::unit_label(unit, army_move))
-                })
-                .collect();
-
-            let units_str = &units.iter().map(|(_, l)| l).join(", ");
-            if !units_str.is_empty() {
-                ui.label(None, units_str);
-            }
-            for s in suffix {
-                ui.label(None, &s);
-            }
-
-            let settlers = &units
-                .iter()
-                .filter_map(|(unit, _)| {
+    if player.can_play_action {
+        if let Some(c) = game.get_any_city(position) {
+            show_city_menu(
+                game,
+                &CityMenu::new(player, c.player_index, position),
+                state,
+            )
+        } else {
+            let units = unit_ui::units_on_tile(game, position);
+            let settlers = units
+                .filter_map(|(_, unit)| {
                     if unit.can_found_city(game) {
                         Some(unit)
                     } else {
@@ -174,18 +142,21 @@ pub fn show_generic_tile_menu(
                     }
                 })
                 .collect::<Vec<_>>();
-
-            if player.can_play_action && !settlers.is_empty() && ui.button(None, "Settle") {
+            if !settlers.is_empty()
+                && bottom_center_texture(state, &state.assets.settle, icon_pos(0, -1), "Settle")
+            {
                 let settler = settlers
                     .iter()
                     .find(|u| u.movement_restriction != MovementRestriction::None)
                     .unwrap_or(&settlers[0]);
-                return StateUpdate::execute(Action::Playing(PlayingAction::FoundCity {
+                StateUpdate::execute(Action::Playing(PlayingAction::FoundCity {
                     settler: settler.id,
-                }));
+                }))
+            } else {
+                StateUpdate::None
             }
-
-            additional(ui)
-        },
-    )
+        }
+    } else {
+        StateUpdate::None
+    }
 }

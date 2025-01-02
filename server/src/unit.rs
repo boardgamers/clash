@@ -114,7 +114,7 @@ impl Unit {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, Debug)]
 pub enum UnitType {
     Settler,
     Infantry,

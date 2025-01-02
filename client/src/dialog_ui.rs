@@ -32,7 +32,7 @@ where
     custom_dialog(title, vec2(10., 10.), size, f)
 }
 
-pub fn custom_dialog<F>(title: &str, position: Vec2, size: Vec2, f: F) -> StateUpdate
+fn custom_dialog<F>(title: &str, position: Vec2, size: Vec2, f: F) -> StateUpdate
 where
     F: FnOnce(&mut Ui) -> StateUpdate,
 {

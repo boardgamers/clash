@@ -4,7 +4,7 @@ use crate::{resource_pile::ResourcePile, wonder::Wonder};
 #[rustfmt::skip]
 pub fn get_all() -> Vec<Wonder> {
     vec![
-        Wonder::builder("X", ResourcePile::new(3, 3, 3, 0, -1, 0, 4), vec![]).build()
+        Wonder::builder("Pyramids", ResourcePile::new(3, 3, 3, 0, -1, 0, 4), vec![]).build()
     ]
 }
 

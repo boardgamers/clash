@@ -5,12 +5,13 @@ use server::player::Player;
 use server::position::Position;
 use server::unit::{Unit, UnitType, Units};
 
-use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
+use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
+use crate::hex_ui::Point;
 use crate::select_ui::{
     ConfirmSelection, CountSelector, HasCountSelectableObject, SelectionConfirm,
 };
-use crate::unit_ui::UnitSelection;
+use crate::unit_ui::{draw_unit_type, UnitSelection};
 use crate::{select_ui, unit_ui};
 
 #[derive(Clone)]
@@ -214,14 +215,31 @@ impl ConfirmSelection for RecruitSelection {
     }
 }
 
-pub fn select_dialog(game: &Game, a: &RecruitAmount, player: &ShownPlayer) -> StateUpdate {
-    select_ui::count_dialog(
+pub fn select_dialog(
+    game: &Game,
+    a: &RecruitAmount,
+    player: &ShownPlayer,
+    state: &State,
+) -> StateUpdate {
+    select_ui::count_dialog_icon(
         player,
-        "Recruit units",
-        vec![],
+        state,
         a,
         |s| s.selectable.clone(),
-        |s| s.name.as_ref(),
+        |s, p| {
+            draw_unit_type(
+                false,
+                Point::from_vec2(p),
+                &s.unit_type,
+                player.index,
+                state,
+                &format!(
+                    "{} ({} available with current resources)",
+                    s.name, s.selectable.max
+                ),
+                20.,
+            );
+        },
         |_s| true,
         |amount| {
             let sel = RecruitSelection::new(game, amount.clone(), vec![]);

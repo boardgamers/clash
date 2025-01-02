@@ -1,3 +1,5 @@
+use crate::assets::Assets;
+use crate::city_ui::city_labels;
 use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
@@ -5,11 +7,13 @@ use crate::layout_ui::{
     bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button, top_center_texture,
     top_right_texture, ICON_SIZE,
 };
+use crate::map_ui::terrain_name;
 use crate::resource_ui::{resource_name, ResourceType};
+use crate::unit_ui;
 use macroquad::math::{u32, vec2};
 use macroquad::prelude::*;
-use macroquad::ui::{root_ui, Ui};
 use server::action::Action;
+use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::game::{Game, GameState};
 use server::player::Player;
 use server::playing_actions::PlayingAction;
@@ -161,8 +165,6 @@ pub fn show_top_center(game: &Game, player: &ShownPlayer, state: &State) {
         ResourceType::Food,
         icon_pos(-4, 0),
     );
-
-    show_wonders(game, player, &mut root_ui());
 }
 
 pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
@@ -228,7 +230,33 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
             )),
             _ => {}
         }
-        state.active_dialog.help_message().map(label);
+        if let Some(m) = state.active_dialog.help_message() {
+            label(&m);
+        }
+    }
+
+    if let ActiveDialog::TileMenu(position) = state.active_dialog {
+        label(&format!(
+            "{}/{}",
+            position,
+            game.map
+                .tiles
+                .get(&position)
+                .map_or("outside the map", terrain_name),
+        ));
+
+        if let Some(c) = game.get_any_city(position) {
+            for l in city_labels(game, c) {
+                label(&l);
+            }
+        }
+
+        for (p, unit) in unit_ui::units_on_tile(game, position) {
+            let army_move = game
+                .get_player(p)
+                .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
+            label(&unit_ui::unit_label(&unit, army_move));
+        }
     }
 }
 
@@ -245,28 +273,6 @@ fn moves_left(state: &GameState) -> Option<u32> {
             ..
         } => Some(*movement_actions_left),
         _ => None,
-    }
-}
-
-pub fn show_wonders(game: &Game, player: &ShownPlayer, ui: &mut Ui) {
-    //todo move to cards ui
-    let player = game.get_player(player.index);
-    let y = 5.;
-    for (i, name) in player.wonders.iter().enumerate() {
-        ui.label(vec2(500. + i as f32 * 30.0, y), &format!("Wonder {name}"));
-    }
-    for (i, card) in player.wonder_cards.iter().enumerate() {
-        let req = match card.required_advances[..] {
-            [] => String::from("no advances"),
-            _ => card.required_advances.join(", "),
-        };
-        ui.label(
-            vec2(900. + i as f32 * 30.0, y),
-            &format!(
-                "Wonder Card {} cost {} requires {}",
-                &card.name, card.cost, req
-            ),
-        );
     }
 }
 
@@ -307,26 +313,17 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
         return StateUpdate::OpenDialog(d);
     }
 
-    if player.can_play_action
-        && bottom_left_texture(state, &assets.movement, icon_pos(0, -3), "Move units")
-    {
-        return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
-    }
-    if player.can_play_action
-        && bottom_left_texture(state, &assets.happy, icon_pos(0, -2), "Increase happiness")
-    {
-        return start_increase_happiness(game, player);
+    if player.can_play_action {
+        let update = action_buttons(game, state, player, assets);
+        if !matches!(update, StateUpdate::None) {
+            return update;
+        }
     }
 
     if top_right_texture(state, &assets.log, icon_pos(-1, 0), "Show log") {
         return StateUpdate::OpenDialog(ActiveDialog::Log);
     };
-    if top_right_texture(
-        state,
-        &assets.advances,
-        icon_pos(-2, 0),
-        "Choose or show advances",
-    ) {
+    if top_right_texture(state, &assets.advances, icon_pos(-2, 0), "Show advances") {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     };
 
@@ -379,6 +376,42 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
     StateUpdate::None
 }
 
+fn action_buttons(
+    game: &Game,
+    state: &State,
+    player: &ShownPlayer,
+    assets: &Assets,
+) -> StateUpdate {
+    if bottom_left_texture(state, &assets.movement, icon_pos(0, -3), "Move units") {
+        return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
+    }
+    if bottom_left_texture(
+        state,
+        &assets.advances,
+        icon_pos(1, -3),
+        "Research advances",
+    ) {
+        return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
+    }
+    if bottom_left_texture(
+        state,
+        &assets.resources[&ResourceType::MoodTokens],
+        icon_pos(0, -2),
+        "Increase happiness",
+    ) {
+        return start_increase_happiness(game, player);
+    }
+    if bottom_left_texture(
+        state,
+        &assets.resources[&ResourceType::CultureTokens],
+        icon_pos(1, -2),
+        "Cultural Influence",
+    ) {
+        return StateUpdate::OpenDialog(ActiveDialog::CulturalInfluence);
+    }
+    StateUpdate::None
+}
+
 fn can_end_move(game: &Game) -> Option<&str> {
     match game.state {
         GameState::Movement { .. } => Some("End movement"),
@@ -396,7 +429,7 @@ fn end_move(game: &Game) -> StateUpdate {
         return StateUpdate::execute_with_warning(
             Action::Movement(MovementAction::Stop),
             if *movement_actions_left > 0 {
-                vec![(format!("{movement_actions_left} movement actions left"))]
+                vec![format!("{movement_actions_left} movement actions left")]
             } else {
                 vec![]
             },

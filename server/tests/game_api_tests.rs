@@ -131,7 +131,7 @@ fn basic_actions() {
 
     let construct_wonder_action = Action::Playing(Custom(ConstructWonder {
         city_position,
-        wonder: String::from("X"),
+        wonder: String::from("Pyramids"),
         payment: ResourcePile::new(1, 3, 3, 0, 2, 0, 4),
     }));
     let mut game = game_api::execute_action(game, construct_wonder_action, 0);
@@ -140,7 +140,7 @@ fn basic_actions() {
     assert_eq!(10.0, player.victory_points());
     assert_eq!(ResourcePile::empty(), player.resources);
     assert_eq!(1, player.wonders_build);
-    assert_eq!(vec![String::from("X")], player.wonders);
+    assert_eq!(vec![String::from("Pyramids")], player.wonders);
     assert_eq!(
         1,
         player
@@ -231,7 +231,7 @@ fn cultural_influence() {
     assert_eq!(city0position.distance(city1position), 2);
     game.players[0].cities.push(City::new(0, city0position));
     game.players[1].cities.push(City::new(1, city1position));
-    game.players[1].construct(&Academy, city1position, None);
+    game.players[1].construct(Academy, city1position, None);
     let influence_action = Action::Playing(InfluenceCultureAttempt(
         playing_actions::InfluenceCultureAttempt {
             starting_city_position: city0position,
@@ -543,7 +543,7 @@ fn test_wonder() {
         "wonder",
         Action::Playing(Custom(ConstructWonder {
             city_position: Position::from_offset("A1"),
-            wonder: String::from("X"),
+            wonder: String::from("Pyramids"),
             payment: ResourcePile::new(2, 3, 3, 0, 0, 0, 4),
         })),
         0,

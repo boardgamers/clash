@@ -35,6 +35,7 @@ pub enum ActiveDialog {
     RecruitUnitSelection(RecruitAmount),
     ReplaceUnits(RecruitSelection),
     MoveUnits(MoveSelection),
+    CulturalInfluence,
     CulturalInfluenceResolution(CulturalInfluenceResolution),
 
     // status phase
@@ -68,6 +69,7 @@ impl ActiveDialog {
             ActiveDialog::RecruitUnitSelection(_) => "recruit unit selection",
             ActiveDialog::ReplaceUnits(_) => "replace units",
             ActiveDialog::MoveUnits(_) => "move units",
+            ActiveDialog::CulturalInfluence => "cultural influence",
             ActiveDialog::CulturalInfluenceResolution(_) => "cultural influence resolution",
             ActiveDialog::FreeAdvance => "free advance",
             ActiveDialog::RazeSize1City => "raze size 1 city",
@@ -83,41 +85,60 @@ impl ActiveDialog {
     }
 
     #[must_use]
-    pub fn help_message(&self) -> Option<&str> {
+    pub fn help_message(&self) -> Option<String> {
         match self {
-            ActiveDialog::None => None,
-            ActiveDialog::TileMenu(_) => Some("Click on a tile to see options"),
-            ActiveDialog::Log => Some("Click on a log entry to see details"),
-            ActiveDialog::IncreaseHappiness(_) => Some("Click on a city to increase happiness"),
-            ActiveDialog::AdvanceMenu => Some("Click on an advance to see options"),
-            ActiveDialog::AdvancePayment(_) => Some("Click on an advance to pay"),
-            ActiveDialog::ConstructionPayment(_) => Some("Click on a city to pay for construction"),
-            ActiveDialog::CollectResources(_) => Some("Click on a city to collect resources"),
-            ActiveDialog::RecruitUnitSelection(_) => Some("Click on a unit to recruit"),
-            ActiveDialog::ReplaceUnits(_) => Some("Click on a unit to replace"),
+            ActiveDialog::None
+            | ActiveDialog::TileMenu(_)
+            | ActiveDialog::Log
+            | ActiveDialog::AdvanceMenu => None,
+            ActiveDialog::IncreaseHappiness(_) => {
+                Some("Click on a city to increase happiness".to_string())
+            }
+            ActiveDialog::AdvancePayment(a) => {
+                Some(format!("Click on resources to pay for {}", a.name))
+            }
+            ActiveDialog::ConstructionPayment(c) => {
+                Some(format!("Click on resources to pay for {}", c.name))
+            }
+            ActiveDialog::CollectResources(_) => {
+                Some("Click on a tile to collect resources".to_string())
+            }
+            ActiveDialog::RecruitUnitSelection(_) => Some("Click on a unit to recruit".to_string()),
+            ActiveDialog::ReplaceUnits(_) => Some("Click on a unit to replace".to_string()),
             ActiveDialog::MoveUnits(m) => {
                 if m.start.is_some() {
-                    Some("Click on a highlighted tile to move units")
+                    Some("Click on a highlighted tile to move units".to_string())
                 } else {
-                    Some("Click on a unit to move")
+                    Some("Click on a unit to move".to_string())
                 }
             }
-            ActiveDialog::CulturalInfluenceResolution(_) => {
-                Some("Click on a city to resolve cultural influence")
+            ActiveDialog::CulturalInfluence => {
+                Some("Click on a building to influence its culture".to_string())
             }
-            ActiveDialog::FreeAdvance => Some("Click on an advance to take it for free"),
-            ActiveDialog::RazeSize1City => Some("Click on a city to raze it"),
-            ActiveDialog::CompleteObjectives => Some("Click on an objective to complete it"),
+            ActiveDialog::CulturalInfluenceResolution(_) => Some("todo".to_string()),
+            ActiveDialog::FreeAdvance => {
+                Some("Click on an advance to take it for free".to_string())
+            }
+            ActiveDialog::RazeSize1City => {
+                Some("Click on a city to raze it - or click cancel".to_string())
+            }
+            ActiveDialog::CompleteObjectives => {
+                Some("Click on an objective to complete it".to_string())
+            }
             ActiveDialog::DetermineFirstPlayer => {
-                Some("Click on a player to determine first player")
+                Some("Click on a player to determine first player".to_string())
             }
-            ActiveDialog::ChangeGovernmentType => Some("Click on a government type to change"),
-            ActiveDialog::ChooseAdditionalAdvances(_) => Some("Click on an advance to choose it"),
-            ActiveDialog::PlayActionCard => Some("Click on an action card to play it"),
-            ActiveDialog::PlaceSettler => Some("Click on a tile to place a settler"),
-            ActiveDialog::Retreat => Some("Click on a unit to retreat"),
-            ActiveDialog::RemoveCasualties(_) => Some("Click on a unit to remove it"),
-            ActiveDialog::WaitingForUpdate => panic!("no help message for dialog"),
+            ActiveDialog::ChangeGovernmentType => {
+                Some("Click on a government type to change - or click cancel".to_string())
+            }
+            ActiveDialog::ChooseAdditionalAdvances(_) => {
+                Some("Click on an advance to choose it".to_string())
+            }
+            ActiveDialog::PlayActionCard => Some("Click on an action card to play it".to_string()),
+            ActiveDialog::PlaceSettler => Some("Click on a tile to place a settler".to_string()),
+            ActiveDialog::Retreat => Some("Click on a unit to retreat".to_string()),
+            ActiveDialog::RemoveCasualties(_) => Some("Click on a unit to remove it".to_string()),
+            ActiveDialog::WaitingForUpdate => Some("Waiting for server update".to_string()),
         }
     }
 
@@ -284,6 +305,11 @@ pub struct MousePosition {
     pub time: f64,
 }
 
+pub enum CameraMode {
+    Screen,
+    World,
+}
+
 pub struct State {
     pub assets: Assets,
     pub control_player: Option<usize>,
@@ -291,6 +317,7 @@ pub struct State {
     pub active_dialog: ActiveDialog,
     pub pending_update: Option<PendingUpdate>,
     pub camera: Camera2D,
+    pub camera_mode: CameraMode,
     pub zoom: f32,
     pub offset: Vec2,
     pub screen_size: Vec2,
@@ -311,6 +338,7 @@ impl State {
             camera: Camera2D {
                 ..Default::default()
             },
+            camera_mode: CameraMode::Screen,
             zoom: ZOOM,
             offset: OFFSET,
             screen_size: vec2(0., 0.),
@@ -476,6 +504,10 @@ impl State {
     }
 
     pub fn draw_text(&self, text: &str, x: f32, y: f32) {
+        self.draw_text_with_color(text, x, y, BLACK);
+    }
+
+    pub fn draw_text_with_color(&self, text: &str, x: f32, y: f32, color: Color) {
         draw_text_ex(
             text,
             x,
@@ -483,14 +515,42 @@ impl State {
             TextParams {
                 font: Some(&self.assets.font),
                 font_size: FONT_SIZE,
-                color: BLACK,
+                color,
                 ..Default::default()
             },
         );
     }
 
-    // fn execute_status_phase(&mut self, game: &Game, action: StatusPhaseAction) -> ActiveDialog {
-    //     self.update(game, StateUpdate::status_phase(action));
-    //     ActiveDialog::None
-    // }
+    pub fn set_screen_camera(&mut self) {
+        set_default_camera();
+        self.camera_mode = CameraMode::Screen;
+    }
+
+    pub fn set_world_camera(&mut self) {
+        set_camera(&self.camera);
+        self.camera_mode = CameraMode::World;
+    }
+
+    pub fn set_camera(&self) {
+        match self.camera_mode {
+            CameraMode::Screen => set_default_camera(),
+            CameraMode::World => set_camera(&self.camera),
+        };
+    }
+
+    #[must_use]
+    pub fn world_to_screen(&self, point: Vec2) -> Vec2 {
+        match self.camera_mode {
+            CameraMode::Screen => point,
+            CameraMode::World => self.camera.world_to_screen(point),
+        }
+    }
+
+    #[must_use]
+    pub fn screen_to_world(&self, point: Vec2) -> Vec2 {
+        match self.camera_mode {
+            CameraMode::Screen => point,
+            CameraMode::World => self.camera.screen_to_world(point),
+        }
+    }
 }

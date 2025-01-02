@@ -6,7 +6,6 @@ use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
 use server::city::City;
 use server::game::{Game, GameData};
-use server::leader::Leader;
 use server::map::Terrain;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
@@ -85,6 +84,8 @@ pub fn setup_local_game() -> Game {
     game.players[player_index2].gain_resources(ResourcePile::new(50, 50, 50, 50, 50, 50, 50));
     add_city(&mut game, player_index1, "A1");
     add_city(&mut game, player_index1, "C2");
+    add_city(&mut game, player_index1, "B1");
+    add_city(&mut game, player_index1, "B3");
     add_city(&mut game, player_index2, "C1");
     add_city(&mut game, player_index2, "B2");
 
@@ -105,14 +106,14 @@ pub fn setup_local_game() -> Game {
 
     add_unit(&mut game, "C2", player_index1, UnitType::Infantry);
     add_unit(&mut game, "C2", player_index1, UnitType::Cavalry);
-    add_unit(&mut game, "C2", player_index1, UnitType::Leader);
+    // add_unit(&mut game, "C2", player_index1, UnitType::Leader);
     add_unit(&mut game, "C2", player_index1, UnitType::Elephant);
     add_unit(&mut game, "C2", player_index1, UnitType::Settler);
     add_unit(&mut game, "C2", player_index1, UnitType::Settler);
     add_unit(&mut game, "C2", player_index1, UnitType::Settler);
     add_unit(&mut game, "C2", player_index1, UnitType::Settler);
-    game.players[player_index1].active_leader =
-        Some(Leader::builder("Alexander", "", "", "", "").build());
+    // game.players[player_index1].active_leader =
+    //     Some(Leader::builder("Alexander", "", "", "", "").build());
 
     add_unit(&mut game, "C1", player_index2, UnitType::Infantry);
     add_unit(&mut game, "C1", player_index2, UnitType::Infantry);
@@ -135,11 +136,14 @@ pub fn setup_local_game() -> Game {
         .get_city_mut(Position::from_offset("C2"))
         .unwrap()
         .port_position = Some(Position::from_offset("C3"));
+    // game.players[player_index1]
+    //     .get_city_mut(Position::from_offset("C2"))
+    //     .unwrap()
+    //     .pieces
+    //     .wonders = vec![game.wonders_left.pop().unwrap()];
     game.players[player_index1]
-        .get_city_mut(Position::from_offset("C2"))
-        .unwrap()
-        .pieces
-        .wonders = vec![game.wonders_left.pop().unwrap()];
+        .wonder_cards
+        .push(game.wonders_left.pop().unwrap());
     game.players[player_index1]
         .get_city_mut(Position::from_offset("C2"))
         .unwrap()
@@ -155,6 +159,33 @@ pub fn setup_local_game() -> Game {
         .unwrap()
         .port_position = Some(Position::from_offset("C3"));
     add_unit(&mut game, "B2", player_index2, UnitType::Ship);
+
+    game.players[player_index1]
+        .get_city_mut(Position::from_offset("B1"))
+        .unwrap()
+        .pieces
+        .obelisk = Some(1);
+    game.players[player_index1]
+        .get_city_mut(Position::from_offset("B1"))
+        .unwrap()
+        .pieces
+        .observatory = Some(1);
+    game.players[player_index1]
+        .get_city_mut(Position::from_offset("B1"))
+        .unwrap()
+        .pieces
+        .temple = Some(1);
+    game.players[player_index1]
+        .get_city_mut(Position::from_offset("B1"))
+        .unwrap()
+        .pieces
+        .fortress = Some(1);
+
+    game.players[player_index1]
+        .get_city_mut(Position::from_offset("A1"))
+        .unwrap()
+        .pieces
+        .market = Some(1);
 
     game
 }

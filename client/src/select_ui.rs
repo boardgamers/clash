@@ -1,8 +1,14 @@
-use crate::client_state::{ShownPlayer, StateUpdate, StateUpdates};
+use crate::client_state::{ShownPlayer, State, StateUpdate, StateUpdates};
 use crate::dialog_ui::active_dialog_window;
-use crate::layout_ui::{cancel_pos, ok_pos};
+use crate::layout_ui::{
+    bottom_center_anchor, bottom_center_texture, bottom_right_texture, cancel_pos, icon_pos,
+    ok_pos, ICON_SIZE,
+};
+use macroquad::color::BLACK;
 use macroquad::hash;
-use macroquad::math::{bool, Vec2};
+use macroquad::math::{bool, vec2, Vec2};
+use macroquad::prelude::TextParams;
+use macroquad::text::draw_text_ex;
 use macroquad::ui::widgets::Group;
 use macroquad::ui::Ui;
 use server::game::Game;
@@ -19,6 +25,7 @@ pub trait HasCountSelectableObject {
     fn counter_mut(&mut self) -> &mut CountSelector;
 }
 
+// old code - use count_dialog_icon instead
 #[allow(clippy::too_many_arguments)]
 pub fn count_dialog<C, O: HasCountSelectableObject>(
     player: &ShownPlayer,
@@ -64,6 +71,86 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
 
         updates.result()
     })
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn count_dialog_icon<C, O: HasCountSelectableObject>(
+    player: &ShownPlayer,
+    state: &State,
+    container: &C,
+    get_objects: impl Fn(&C) -> Vec<O>,
+    draw: impl Fn(&O, Vec2),
+    is_valid: impl FnOnce(&C) -> bool,
+    execute_action: impl FnOnce(&C) -> StateUpdate,
+    show: impl Fn(&C, &O) -> bool,
+    plus: impl Fn(&C, &O) -> StateUpdate,
+    minus: impl Fn(&C, &O) -> StateUpdate,
+) -> StateUpdate {
+    if !player.can_control {
+        return StateUpdate::None;
+    }
+
+    let mut updates = StateUpdates::new();
+    let objects = get_objects(container)
+        .into_iter()
+        .filter(|o| show(container, o))
+        .collect::<Vec<_>>();
+    let start_x = objects.len() as f32 * -1. / 2.;
+    let anchor = bottom_center_anchor(state);
+    for (i, o) in objects.iter().enumerate() {
+        let x = (start_x + i as f32) * ICON_SIZE * 2.;
+        let c = o.counter();
+
+        draw(o, vec2(x + 15., -60.) + anchor);
+        draw_text_ex(
+            &format!("{}", c.current),
+            anchor.x + x + 15.,
+            anchor.y - ICON_SIZE,
+            TextParams {
+                font_size: 20,
+                font_scale: 1.,
+                font: Some(&state.assets.font),
+                color: BLACK,
+                ..Default::default()
+            },
+        );
+        if c.current > c.min
+            && bottom_center_texture(
+                state,
+                &state.assets.minus,
+                vec2(x - 15., -ICON_SIZE),
+                "Remove one",
+            )
+        {
+            updates.add(minus(container, o));
+        }
+        if c.current < c.max
+            && bottom_center_texture(
+                state,
+                &state.assets.plus,
+                vec2(x + 15., -ICON_SIZE),
+                "Add one",
+            )
+        {
+            updates.add(plus(container, o));
+        };
+    }
+
+    let valid = is_valid(container);
+    let ok = if valid {
+        &state.assets.ok
+    } else {
+        &state.assets.ok_blocked
+    };
+    let ok_tooltip = if valid { "OK" } else { "Invalid selection" };
+    if bottom_right_texture(state, ok, icon_pos(-8, -1), ok_tooltip) && valid {
+        return execute_action(container);
+    };
+    if bottom_right_texture(state, &state.assets.cancel, icon_pos(-7, -1), "Cancel") {
+        return StateUpdate::Cancel;
+    };
+
+    updates.result()
 }
 
 pub trait ConfirmSelection: Clone {
