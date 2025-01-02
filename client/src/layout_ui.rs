@@ -1,9 +1,9 @@
 use crate::client_state::{ShownPlayer, State};
+use crate::hex_ui::Point;
 use crate::tooltip;
 use macroquad::color::WHITE;
 use macroquad::math::{f32, vec2, Vec2};
 use macroquad::prelude::*;
-use crate::hex_ui::Point;
 
 pub const ICON_SIZE: f32 = 30.;
 

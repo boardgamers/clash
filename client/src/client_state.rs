@@ -87,13 +87,22 @@ impl ActiveDialog {
     #[must_use]
     pub fn help_message(&self) -> Option<String> {
         match self {
-            ActiveDialog::None | ActiveDialog::TileMenu(_) => None,
-            ActiveDialog::Log => None,
-            ActiveDialog::IncreaseHappiness(_) => Some("Click on a city to increase happiness".to_string()),
-            ActiveDialog::AdvanceMenu => None,
-            ActiveDialog::AdvancePayment(a) => Some(format!("Click on resources to pay for {}", a.name)),
-            ActiveDialog::ConstructionPayment(c) => Some(format!("Click on resources to pay for {}", c.name)),
-            ActiveDialog::CollectResources(_) => Some("Click on a tile to collect resources".to_string()),
+            ActiveDialog::None
+            | ActiveDialog::TileMenu(_)
+            | ActiveDialog::Log
+            | ActiveDialog::AdvanceMenu => None,
+            ActiveDialog::IncreaseHappiness(_) => {
+                Some("Click on a city to increase happiness".to_string())
+            }
+            ActiveDialog::AdvancePayment(a) => {
+                Some(format!("Click on resources to pay for {}", a.name))
+            }
+            ActiveDialog::ConstructionPayment(c) => {
+                Some(format!("Click on resources to pay for {}", c.name))
+            }
+            ActiveDialog::CollectResources(_) => {
+                Some("Click on a tile to collect resources".to_string())
+            }
             ActiveDialog::RecruitUnitSelection(_) => Some("Click on a unit to recruit".to_string()),
             ActiveDialog::ReplaceUnits(_) => Some("Click on a unit to replace".to_string()),
             ActiveDialog::MoveUnits(m) => {
@@ -103,18 +112,28 @@ impl ActiveDialog {
                     Some("Click on a unit to move".to_string())
                 }
             }
-            ActiveDialog::CulturalInfluence => Some("Click on a building to influence its culture".to_string()),
-            ActiveDialog::CulturalInfluenceResolution(_) => {
-                Some("todo".to_string())
+            ActiveDialog::CulturalInfluence => {
+                Some("Click on a building to influence its culture".to_string())
             }
-            ActiveDialog::FreeAdvance => Some("Click on an advance to take it for free".to_string()),
-            ActiveDialog::RazeSize1City => Some("Click on a city to raze it - or click cancel".to_string()),
-            ActiveDialog::CompleteObjectives => Some("Click on an objective to complete it".to_string()),
+            ActiveDialog::CulturalInfluenceResolution(_) => Some("todo".to_string()),
+            ActiveDialog::FreeAdvance => {
+                Some("Click on an advance to take it for free".to_string())
+            }
+            ActiveDialog::RazeSize1City => {
+                Some("Click on a city to raze it - or click cancel".to_string())
+            }
+            ActiveDialog::CompleteObjectives => {
+                Some("Click on an objective to complete it".to_string())
+            }
             ActiveDialog::DetermineFirstPlayer => {
                 Some("Click on a player to determine first player".to_string())
             }
-            ActiveDialog::ChangeGovernmentType => Some("Click on a government type to change - or click cancel".to_string()),
-            ActiveDialog::ChooseAdditionalAdvances(_) => Some("Click on an advance to choose it".to_string()),
+            ActiveDialog::ChangeGovernmentType => {
+                Some("Click on a government type to change - or click cancel".to_string())
+            }
+            ActiveDialog::ChooseAdditionalAdvances(_) => {
+                Some("Click on an advance to choose it".to_string())
+            }
             ActiveDialog::PlayActionCard => Some("Click on an action card to play it".to_string()),
             ActiveDialog::PlaceSettler => Some("Click on a tile to place a settler".to_string()),
             ActiveDialog::Retreat => Some("Click on a unit to retreat".to_string()),

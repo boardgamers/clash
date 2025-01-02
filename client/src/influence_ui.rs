@@ -1,6 +1,5 @@
-use crate::city_ui::{building_name, building_position, CityMenu, BUILDING_SIZE};
+use crate::city_ui::{building_name, building_position, BUILDING_SIZE};
 use crate::client_state::{ShownPlayer, State, StateUpdate};
-use crate::construct_ui::building_positions;
 use crate::dialog_ui::active_dialog_window;
 use crate::hex_ui;
 use crate::layout_ui::is_in_circle;
@@ -8,8 +7,6 @@ use crate::tooltip::show_tooltip_for_circle;
 use macroquad::input::{is_mouse_button_pressed, MouseButton};
 use macroquad::math::Vec2;
 use server::action::Action;
-use server::city::City;
-use server::city_pieces::Building;
 use server::game::{CulturalInfluenceResolution, Game};
 use server::player::Player;
 use server::playing_actions::{InfluenceCultureAttempt, PlayingAction};
@@ -59,7 +56,7 @@ pub fn hover(
         let mut i = city.pieces.wonders.len() as i32;
         for player_index in 0..4 {
             for b in &city.pieces.buildings(Some(player_index)) {
-                let center = building_position(city, c, i, b);
+                let center = building_position(city, c, i, *b);
 
                 if is_in_circle(mouse_pos, center, BUILDING_SIZE) {
                     let closest_city_pos = closest_city(player, position);
@@ -89,17 +86,16 @@ pub fn hover(
                                         },
                                     ),
                                 ));
-                            } else {
-                                let name = building_name(b);
-                                state.set_world_camera();
-                                show_tooltip_for_circle(
-                                    state,
-                                    &format!("Attempt Influence {name} for {cost}"),
-                                    center.to_vec2(),
-                                    BUILDING_SIZE,
-                                );
-                                state.set_screen_camera();
                             }
+                            let name = building_name(b);
+                            state.set_world_camera();
+                            show_tooltip_for_circle(
+                                state,
+                                &format!("Attempt Influence {name} for {cost}"),
+                                center.to_vec2(),
+                                BUILDING_SIZE,
+                            );
+                            state.set_screen_camera();
                         }
                     }
                 }

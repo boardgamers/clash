@@ -10,11 +10,11 @@ use server::unit::{UnitType, Units};
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{building_positions, ConstructionPayment, ConstructionProject};
+use crate::hex_ui::Point;
 use crate::layout_ui::{bottom_center_texture, draw_scaled_icon, icon_pos};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::resource_ui::ResourceType;
 use crate::{hex_ui, player_ui};
-use crate::hex_ui::Point;
 
 pub struct CityMenu {
     pub player: ShownPlayer,
@@ -232,9 +232,18 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
 
     for player_index in 0..4 {
         for b in &city.pieces.buildings(Some(player_index)) {
-            let p = building_position(city, c, i, b);
-            draw_circle(p.x, p.y, BUILDING_SIZE, player_ui::player_color(player_index));
-            let tooltip = if matches!(state.active_dialog, ActiveDialog::CulturalInfluence) { "" } else { building_name(b)};
+            let p = building_position(city, c, i, *b);
+            draw_circle(
+                p.x,
+                p.y,
+                BUILDING_SIZE,
+                player_ui::player_color(player_index),
+            );
+            let tooltip = if matches!(state.active_dialog, ActiveDialog::CulturalInfluence) {
+                ""
+            } else {
+                building_name(b)
+            };
             draw_scaled_icon(
                 state,
                 &state.assets.buildings[b],
@@ -247,8 +256,8 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
     }
 }
 
-pub fn building_position(city: &City, center: Point, i: i32, building: &Building) -> Point {
-    let p = if matches!(building, Building::Port) {
+pub fn building_position(city: &City, center: Point, i: i32, building: Building) -> Point {
+    if matches!(building, Building::Port) {
         let r: f32 = city
             .position
             .coordinate()
@@ -257,8 +266,7 @@ pub fn building_position(city: &City, center: Point, i: i32, building: &Building
         hex_ui::rotate_around_rad(center, 60.0, r * -1.0 + std::f32::consts::PI / 3.0)
     } else {
         hex_ui::rotate_around(center, 25.0, 90 * i)
-    };
-    p
+    }
 }
 
 pub fn building_name(b: &Building) -> &str {

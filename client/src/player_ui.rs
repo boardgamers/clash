@@ -1,3 +1,4 @@
+use crate::assets::Assets;
 use crate::city_ui::city_labels;
 use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
@@ -11,7 +12,6 @@ use crate::resource_ui::{resource_name, ResourceType};
 use crate::unit_ui;
 use macroquad::math::{u32, vec2};
 use macroquad::prelude::*;
-use macroquad::ui::{root_ui, Ui};
 use server::action::Action;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::game::{Game, GameState};
@@ -314,32 +314,9 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
     }
 
     if player.can_play_action {
-        if bottom_left_texture(state, &assets.movement, icon_pos(0, -3), "Move units") {
-            return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
-        }
-        if bottom_left_texture(
-            state,
-            &assets.advances,
-            icon_pos(1, -3),
-            "Research advances",
-        ) {
-            return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
-        }
-        if bottom_left_texture(
-            state,
-            &assets.resources[&ResourceType::MoodTokens],
-            icon_pos(0, -2),
-            "Increase happiness",
-        ) {
-            return start_increase_happiness(game, player);
-        }
-        if bottom_left_texture(
-            state,
-            &assets.resources[&ResourceType::CultureTokens],
-            icon_pos(1, -2),
-            "Cultural Influence",
-        ) {
-            return StateUpdate::OpenDialog(ActiveDialog::CulturalInfluence);
+        let update = action_buttons(game, state, player, assets);
+        if !matches!(update, StateUpdate::None) {
+            return update;
         }
     }
 
@@ -399,6 +376,42 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
     StateUpdate::None
 }
 
+fn action_buttons(
+    game: &Game,
+    state: &State,
+    player: &ShownPlayer,
+    assets: &Assets,
+) -> StateUpdate {
+    if bottom_left_texture(state, &assets.movement, icon_pos(0, -3), "Move units") {
+        return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
+    }
+    if bottom_left_texture(
+        state,
+        &assets.advances,
+        icon_pos(1, -3),
+        "Research advances",
+    ) {
+        return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
+    }
+    if bottom_left_texture(
+        state,
+        &assets.resources[&ResourceType::MoodTokens],
+        icon_pos(0, -2),
+        "Increase happiness",
+    ) {
+        return start_increase_happiness(game, player);
+    }
+    if bottom_left_texture(
+        state,
+        &assets.resources[&ResourceType::CultureTokens],
+        icon_pos(1, -2),
+        "Cultural Influence",
+    ) {
+        return StateUpdate::OpenDialog(ActiveDialog::CulturalInfluence);
+    }
+    StateUpdate::None
+}
+
 fn can_end_move(game: &Game) -> Option<&str> {
     match game.state {
         GameState::Movement { .. } => Some("End movement"),
@@ -416,7 +429,7 @@ fn end_move(game: &Game) -> StateUpdate {
         return StateUpdate::execute_with_warning(
             Action::Movement(MovementAction::Stop),
             if *movement_actions_left > 0 {
-                vec![(format!("{movement_actions_left} movement actions left"))]
+                vec![format!("{movement_actions_left} movement actions left")]
             } else {
                 vec![]
             },
