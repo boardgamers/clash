@@ -14,6 +14,7 @@ use crate::layout_ui::{bottom_center_texture, draw_scaled_icon, icon_pos};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::resource_ui::ResourceType;
 use crate::{hex_ui, player_ui};
+use crate::hex_ui::Point;
 
 pub struct CityMenu {
     pub player: ShownPlayer,
@@ -81,7 +82,6 @@ pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) 
 
     let owner = menu.get_city_owner(game);
     let city = menu.get_city(game);
-    // let closest_city_pos = influence_ui::closest_city(game, menu);
 
     for (building, name) in building_names() {
         if menu.is_city_owner()
@@ -112,15 +112,6 @@ pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) 
                 ));
             }
         }
-        // todo should not be in city menu
-        // updates.add(influence_ui::add_influence_button(
-        //     game,
-        //     menu,
-        //     ui,
-        //     closest_city_pos,
-        //     &building,
-        //     name,
-        // ));
     }
 
     for w in &owner.wonder_cards {
@@ -189,6 +180,8 @@ pub fn city_labels(game: &Game, city: &City) -> Vec<String> {
     .concat()
 }
 
+pub const BUILDING_SIZE: f32 = 12.0;
+
 pub fn draw_city(owner: &Player, city: &City, state: &State) {
     let c = hex_ui::center(city.position);
 
@@ -239,17 +232,8 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
 
     for player_index in 0..4 {
         for b in &city.pieces.buildings(Some(player_index)) {
-            let p = if matches!(b, Building::Port) {
-                let r: f32 = city
-                    .position
-                    .coordinate()
-                    .directions_to(city.port_position.unwrap().coordinate())[0]
-                    .to_radians_pointy();
-                hex_ui::rotate_around_rad(c, 60.0, r * -1.0 + std::f32::consts::PI / 3.0)
-            } else {
-                hex_ui::rotate_around(c, 25.0, 90 * i)
-            };
-            draw_circle(p.x, p.y, 12.0, player_ui::player_color(player_index));
+            let p = building_position(city, c, i, b);
+            draw_circle(p.x, p.y, BUILDING_SIZE, player_ui::player_color(player_index));
             draw_scaled_icon(
                 state,
                 &state.assets.buildings[b],
@@ -260,6 +244,20 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
             i += 1;
         }
     }
+}
+
+pub fn building_position(city: &City, center: Point, i: i32, building: &Building) -> Point {
+    let p = if matches!(building, Building::Port) {
+        let r: f32 = city
+            .position
+            .coordinate()
+            .directions_to(city.port_position.unwrap().coordinate())[0]
+            .to_radians_pointy();
+        hex_ui::rotate_around_rad(center, 60.0, r * -1.0 + std::f32::consts::PI / 3.0)
+    } else {
+        hex_ui::rotate_around(center, 25.0, 90 * i)
+    };
+    p
 }
 
 pub fn building_name(b: &Building) -> &str {

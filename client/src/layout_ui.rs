@@ -3,6 +3,7 @@ use crate::tooltip;
 use macroquad::color::WHITE;
 use macroquad::math::{f32, vec2, Vec2};
 use macroquad::prelude::*;
+use crate::hex_ui::Point;
 
 pub const ICON_SIZE: f32 = 30.;
 
@@ -110,4 +111,9 @@ pub fn ok_only_pos(player: &ShownPlayer) -> Vec2 {
 
 fn small_dialog(player: &ShownPlayer) -> bool {
     player.active_dialog.is_map_dialog() || player.pending_update
+}
+
+pub fn is_in_circle(mouse_pos: Vec2, p: Point, radius: f32) -> bool {
+    let d = vec2(p.x - mouse_pos.x, p.y - mouse_pos.y);
+    d.length() <= radius
 }

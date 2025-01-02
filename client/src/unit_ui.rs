@@ -14,7 +14,7 @@ use crate::select_ui::{confirm_update, ConfirmSelection};
 use crate::{hex_ui, player_ui};
 
 use crate::hex_ui::Point;
-use crate::layout_ui::draw_scaled_icon;
+use crate::layout_ui::{draw_scaled_icon, is_in_circle};
 use crate::tooltip::show_tooltip_for_circle;
 use itertools::Itertools;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
@@ -66,8 +66,7 @@ pub fn unit_at_pos(pos: Position, mouse_pos: Vec2, player: &Player) -> Option<u3
         .enumerate()
         .find_map(|(i, u)| {
             let p = unit_center(i.try_into().unwrap(), pos);
-            let d = vec2(p.x - mouse_pos.x, p.y - mouse_pos.y);
-            if d.length() <= UNIT_RADIUS {
+            if is_in_circle(mouse_pos, p, UNIT_RADIUS) {
                 Some(u.id)
             } else {
                 None

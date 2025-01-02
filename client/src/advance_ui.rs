@@ -21,7 +21,7 @@ use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct AdvancePayment {
-    name: String,
+    pub name: String,
     payment: Payment,
     cost: u32,
 }

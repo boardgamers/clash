@@ -35,6 +35,7 @@ pub enum ActiveDialog {
     RecruitUnitSelection(RecruitAmount),
     ReplaceUnits(RecruitSelection),
     MoveUnits(MoveSelection),
+    CulturalInfluence,
     CulturalInfluenceResolution(CulturalInfluenceResolution),
 
     // status phase
@@ -86,12 +87,12 @@ impl ActiveDialog {
     pub fn help_message(&self) -> Option<&str> {
         match self {
             ActiveDialog::None | ActiveDialog::TileMenu(_) => None,
-            ActiveDialog::Log => Some("Click on a log entry to see details"),
+            ActiveDialog::Log => None,
             ActiveDialog::IncreaseHappiness(_) => Some("Click on a city to increase happiness"),
-            ActiveDialog::AdvanceMenu => Some("Click on an advance to see options"),
-            ActiveDialog::AdvancePayment(_) => Some("Click on an advance to pay"),
-            ActiveDialog::ConstructionPayment(_) => Some("Click on a city to pay for construction"),
-            ActiveDialog::CollectResources(_) => Some("Click on a city to collect resources"),
+            ActiveDialog::AdvanceMenu => None,
+            ActiveDialog::AdvancePayment(a) => Some(format!("Click on resources to pay for {}", a.name).as_str()),
+            ActiveDialog::ConstructionPayment(c) => Some(format!("Click on resources to pay for {}", c.name).as_str()),
+            ActiveDialog::CollectResources(_) => Some("Click on a tile to collect resources"),
             ActiveDialog::RecruitUnitSelection(_) => Some("Click on a unit to recruit"),
             ActiveDialog::ReplaceUnits(_) => Some("Click on a unit to replace"),
             ActiveDialog::MoveUnits(m) => {
@@ -101,16 +102,17 @@ impl ActiveDialog {
                     Some("Click on a unit to move")
                 }
             }
+            ActiveDialog::CulturalInfluence => Some("Click on a building to influence its culture"),
             ActiveDialog::CulturalInfluenceResolution(_) => {
-                Some("Click on a city to resolve cultural influence")
+                Some("todo")
             }
             ActiveDialog::FreeAdvance => Some("Click on an advance to take it for free"),
-            ActiveDialog::RazeSize1City => Some("Click on a city to raze it"),
+            ActiveDialog::RazeSize1City => Some("Click on a city to raze it - or click cancel"),
             ActiveDialog::CompleteObjectives => Some("Click on an objective to complete it"),
             ActiveDialog::DetermineFirstPlayer => {
                 Some("Click on a player to determine first player")
             }
-            ActiveDialog::ChangeGovernmentType => Some("Click on a government type to change"),
+            ActiveDialog::ChangeGovernmentType => Some("Click on a government type to change - or click cancel"),
             ActiveDialog::ChooseAdditionalAdvances(_) => Some("Click on an advance to choose it"),
             ActiveDialog::PlayActionCard => Some("Click on an action card to play it"),
             ActiveDialog::PlaceSettler => Some("Click on a tile to place a settler"),

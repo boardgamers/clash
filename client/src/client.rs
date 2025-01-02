@@ -77,9 +77,10 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     }
 
     updates.add(match &state.active_dialog {
-        ActiveDialog::None | ActiveDialog::MoveUnits(_) | ActiveDialog::WaitingForUpdate => {
-            StateUpdate::None
-        }
+        ActiveDialog::None
+        | ActiveDialog::MoveUnits(_)
+        | ActiveDialog::WaitingForUpdate
+        | ActiveDialog::CulturalInfluence => StateUpdate::None,
         ActiveDialog::Log => show_log(game, player),
         ActiveDialog::TileMenu(p) => show_tile_menu(game, *p, player, state),
 
@@ -124,13 +125,20 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
 }
 
 pub fn try_click(game: &Game, state: &State, player: &ShownPlayer) -> StateUpdate {
-    if !is_mouse_button_pressed(MouseButton::Left) {
-        return StateUpdate::None;
-    }
     let (x, y) = mouse_position();
     let mouse_pos = state.camera.screen_to_world(vec2(x, y));
     let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));
     if !game.map.tiles.contains_key(&pos) {
+        return StateUpdate::None;
+    }
+
+    if player.can_control {
+        if let ActiveDialog::CulturalInfluence = state.active_dialog {
+            return influence_ui::hover(pos, game, player, mouse_pos, state);
+        }
+    }
+
+    if !is_mouse_button_pressed(MouseButton::Left) {
         return StateUpdate::None;
     }
 
