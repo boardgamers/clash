@@ -12,6 +12,7 @@ use std::collections::HashMap;
 
 pub struct Assets {
     pub terrain: HashMap<Terrain, Texture2D>,
+    pub exhausted: Texture2D,
     pub units: HashMap<UnitType, Texture2D>,
     pub skin: Skin,
     pub font: Font,
@@ -67,6 +68,7 @@ impl Assets {
         Self {
             font: load_ttf_font(&font_name).await.unwrap(), // can't share font - causes panic
             terrain: Self::terrain(features).await,
+            exhausted: load_png(include_bytes!("../assets/poison-svgrepo-com.png")),
             units: HashMap::new(),
             skin: Self::skin(&load_ttf_font(&font_name).await.unwrap()),
 
