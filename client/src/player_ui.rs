@@ -1,3 +1,4 @@
+use crate::city_ui::city_label;
 use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
@@ -5,11 +6,15 @@ use crate::layout_ui::{
     bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button, top_center_texture,
     top_right_texture, ICON_SIZE,
 };
+use crate::map_ui::terrain_name;
 use crate::resource_ui::{resource_name, ResourceType};
+use crate::unit_ui;
+use itertools::Itertools;
 use macroquad::math::{u32, vec2};
 use macroquad::prelude::*;
 use macroquad::ui::{root_ui, Ui};
 use server::action::Action;
+use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::game::{Game, GameState};
 use server::player::Player;
 use server::playing_actions::PlayingAction;
@@ -228,7 +233,41 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
             )),
             _ => {}
         }
-        state.active_dialog.help_message().map(label);
+        if let Some(m) = state.active_dialog.help_message() {
+            label(m);
+        }
+    }
+
+    if let ActiveDialog::TileMenu(position) = state.active_dialog {
+        label(&format!(
+            "{}/{}",
+            position,
+            game.map
+                .tiles
+                .get(&position)
+                .map_or("outside the map", terrain_name),
+        ));
+
+        let suffix = if let Some(c) = game.get_any_city(position) {
+            city_label(game, c)
+        } else {
+            vec![]
+        };
+
+        let units_str = &unit_ui::units_on_tile(game, position)
+            .map(|(p, unit)| {
+                let army_move = game
+                    .get_player(p)
+                    .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
+                unit_ui::unit_label(&unit, army_move)
+            })
+            .join(", ");
+        if !units_str.is_empty() {
+            label(units_str);
+        }
+        for s in suffix {
+            label(&s);
+        }
     }
 }
 
@@ -310,6 +349,9 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
     if player.can_play_action {
         if bottom_left_texture(state, &assets.movement, icon_pos(0, -3), "Move units") {
             return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
+        }
+        if bottom_left_texture(state, &assets.log, icon_pos(1, -3), "Show log") {
+            return StateUpdate::OpenDialog(ActiveDialog::Log);
         }
         if bottom_left_texture(state, &assets.happy, icon_pos(0, -2), "Increase happiness") {
             return start_increase_happiness(game, player);

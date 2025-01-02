@@ -8,6 +8,7 @@ use macroquad::ui::{root_ui, Skin};
 use server::map::Terrain;
 use server::unit::UnitType;
 use std::collections::HashMap;
+use crate::collect_ui::CollectResources;
 
 pub struct Assets {
     pub terrain: HashMap<Terrain, Texture2D>,
@@ -25,18 +26,19 @@ pub struct Assets {
     pub log: Texture2D,
     pub end_turn: Texture2D,
     pub advances: Texture2D,
+    pub settle: Texture2D,
+
+    // UI
     pub redo: Texture2D,
     pub reset: Texture2D,
     pub undo: Texture2D,
     pub plus: Texture2D,
     pub minus: Texture2D,
-
     pub ok_blocked: Texture2D,
     pub ok: Texture2D,
     pub cancel: Texture2D,
     pub restore_menu: Texture2D,
 
-    // UI
     pub zoom_in: Texture2D,
     pub zoom_out: Texture2D,
     pub up: Texture2D,
@@ -100,19 +102,21 @@ impl Assets {
                     load_png(include_bytes!("../assets/theater-drama-svgrepo-com.png")),
                 ),
             ]
-                .iter()
-                .cloned()
-                .collect(),
+            .iter()
+            .cloned()
+            .collect(),
 
             // action icons
             advances: load_png(include_bytes!("../assets/lab-svgrepo-com.png")),
             end_turn: load_png(include_bytes!("../assets/hour-glass-svgrepo-com.png")),
             log: load_png(include_bytes!("../assets/scroll-svgrepo-com.png")),
             movement: load_png(include_bytes!("../assets/route-start-svgrepo-com.png")),
+            settle: load_png(include_bytes!("../assets/castle-manor-14-svgrepo-com.png")),
+
+            // UI
             redo: load_png(include_bytes!("../assets/redo-svgrepo-com.png")),
             reset: load_png(include_bytes!("../assets/reset-svgrepo-com.png")),
             undo: load_png(include_bytes!("../assets/undo-svgrepo-com.png")),
-
             plus: load_png(include_bytes!("../assets/plus-circle-svgrepo-com.png")),
             minus: load_png(include_bytes!("../assets/minus-circle-svgrepo-com.png")),
             ok: load_png(include_bytes!("../assets/ok-circle-svgrepo-com.png")),
@@ -120,7 +124,6 @@ impl Assets {
             cancel: load_png(include_bytes!("../assets/cancel-svgrepo-com.png")),
             restore_menu: load_png(include_bytes!("../assets/restore-svgrepo-com.png")),
 
-            // UI
             zoom_in: load_png(include_bytes!("../assets/zoom-in-1462-svgrepo-com.png")),
             zoom_out: load_png(include_bytes!("../assets/zoom-out-1460-svgrepo-com.png")),
             up: load_png(include_bytes!("../assets/up-arrow-circle-svgrepo-com.png")),
@@ -140,7 +143,6 @@ impl Assets {
             import: load_png(include_bytes!("../assets/import-3-svgrepo-com.png")),
             export: load_png(include_bytes!("../assets/export-2-svgrepo-com.png")),
             // cities: HashMap::new(),
-
             warrior: load_png(include_bytes!("../assets/warrior-svgrepo-com.png")),
         }
     }

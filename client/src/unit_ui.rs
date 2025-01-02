@@ -22,13 +22,34 @@ use server::player::Player;
 pub const UNIT_RADIUS: f32 = 11.0;
 
 pub fn draw_unit(unit: &Unit, index: u32, selected: bool) {
-    draw_unit_type(selected, unit_center(index, unit.position), &unit.unit_type, unit.player_index);
+    draw_unit_type(
+        selected,
+        unit_center(index, unit.position),
+        &unit.unit_type,
+        unit.player_index,
+    );
 }
 
 pub fn draw_unit_type(selected: bool, center: Point, unit_type: &UnitType, player_index: usize) {
-    draw_circle(center.x, center.y, UNIT_RADIUS, if selected { WHITE } else { BLACK });
-    draw_circle(center.x, center.y, 9.0, player_ui::player_color(player_index));
-    draw_text(unit_symbol(unit_type), center.x - 5.0, center.y + 5.0, 20.0, BLACK);
+    draw_circle(
+        center.x,
+        center.y,
+        UNIT_RADIUS,
+        if selected { WHITE } else { BLACK },
+    );
+    draw_circle(
+        center.x,
+        center.y,
+        9.0,
+        player_ui::player_color(player_index),
+    );
+    draw_text(
+        unit_symbol(unit_type),
+        center.x - 5.0,
+        center.y + 5.0,
+        20.0,
+        BLACK,
+    );
 }
 
 fn unit_center(index: u32, position: Position) -> Point {
@@ -129,14 +150,13 @@ pub fn unit_selection_dialog<T: UnitSelection>(
 ) -> StateUpdate {
     if let Some(current_tile) = sel.current_tile() {
         active_dialog_window(player, title, |ui| {
-            for (i, (p, unit_id)) in units_on_tile(game, current_tile).enumerate() {
-                let unit = game.get_player(p).get_unit(unit_id).unwrap();
-                let can_sel = sel.can_select(game, unit);
-                let is_selected = sel.selected_units().contains(&unit_id);
+            for (i, (p, unit)) in units_on_tile(game, current_tile).enumerate() {
+                let can_sel = sel.can_select(game, &unit);
+                let is_selected = sel.selected_units().contains(&unit.id);
                 let army_move = game
                     .get_player(p)
                     .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
-                let mut l = unit_label(unit, army_move);
+                let mut l = unit_label(&unit, army_move);
                 if is_selected {
                     l += " (selected)";
                 }
@@ -147,9 +167,9 @@ pub fn unit_selection_dialog<T: UnitSelection>(
                 } else if ui.button(pos, l) {
                     let mut new = sel.clone();
                     if is_selected {
-                        new.selected_units_mut().retain(|u| u != &unit_id);
+                        new.selected_units_mut().retain(|u| u != &unit.id);
                     } else {
-                        new.selected_units_mut().push(unit_id);
+                        new.selected_units_mut().push(unit.id);
                     }
                     return on_change(new);
                 }
@@ -162,11 +182,11 @@ pub fn unit_selection_dialog<T: UnitSelection>(
     }
 }
 
-pub fn units_on_tile(game: &Game, pos: Position) -> impl Iterator<Item = (usize, u32)> + '_ {
+pub fn units_on_tile(game: &Game, pos: Position) -> impl Iterator<Item = (usize, Unit)> + '_ {
     game.players.iter().flat_map(move |p| {
         p.units.iter().filter_map(move |unit| {
             if unit.position == pos {
-                Some((p.index, unit.id))
+                Some((p.index, unit.clone()))
             } else {
                 None
             }

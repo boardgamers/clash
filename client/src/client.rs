@@ -80,7 +80,7 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     updates.add(match &state.active_dialog {
         ActiveDialog::None | ActiveDialog::MoveUnits(_) => StateUpdate::None,
         ActiveDialog::Log => show_log(game, player),
-        ActiveDialog::TileMenu(p) => show_tile_menu(game, *p, player),
+        ActiveDialog::TileMenu(p) => show_tile_menu(game, *p, player, state),
         ActiveDialog::WaitingForUpdate => {
             active_dialog_window(player, "Waiting for update", |_ui| StateUpdate::None)
         }
@@ -91,7 +91,9 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, player, game),
         ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p, player),
         ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c, player),
-        ActiveDialog::RecruitUnitSelection(s) => recruit_unit_ui::select_dialog(game, s, player, state),
+        ActiveDialog::RecruitUnitSelection(s) => {
+            recruit_unit_ui::select_dialog(game, s, player, state)
+        }
         ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::replace_dialog(game, r, player),
         ActiveDialog::CulturalInfluenceResolution(c) => {
             influence_ui::cultural_influence_resolution_dialog(c, player)

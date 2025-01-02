@@ -77,7 +77,10 @@ impl Point {
     }
 
     pub fn from_vec2(vec2: Vec2) -> Point {
-        Point { x: vec2.x, y: vec2.y }
+        Point {
+            x: vec2.x,
+            y: vec2.y,
+        }
     }
 
     pub fn to_screen(self) -> Point {

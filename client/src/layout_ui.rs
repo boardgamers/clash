@@ -49,13 +49,7 @@ pub fn bottom_left_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip:
 }
 
 pub fn bottom_center_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
-    relative_texture(
-        state,
-        texture,
-        bottom_center_anchor(state),
-        p,
-        tooltip,
-    )
+    relative_texture(state, texture, bottom_center_anchor(state), p, tooltip)
 }
 
 pub fn bottom_center_anchor(state: &State) -> Vec2 {

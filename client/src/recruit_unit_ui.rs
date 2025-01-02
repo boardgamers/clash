@@ -216,7 +216,12 @@ impl ConfirmSelection for RecruitSelection {
     }
 }
 
-pub fn select_dialog(game: &Game, a: &RecruitAmount, player: &ShownPlayer, state: &State) -> StateUpdate {
+pub fn select_dialog(
+    game: &Game,
+    a: &RecruitAmount,
+    player: &ShownPlayer,
+    state: &State,
+) -> StateUpdate {
     select_ui::count_dialog_icon(
         player,
         state,
@@ -226,7 +231,10 @@ pub fn select_dialog(game: &Game, a: &RecruitAmount, player: &ShownPlayer, state
             draw_unit_type(false, Point::from_vec2(p), &s.unit_type, player.index);
             show_tooltip_for_circle(
                 state,
-                &format!("{} ({} available with current resources)", s.name, s.selectable.max),
+                &format!(
+                    "{} ({} available with current resources)",
+                    s.name, s.selectable.max
+                ),
                 p,
                 UNIT_RADIUS,
             );

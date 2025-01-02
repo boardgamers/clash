@@ -12,9 +12,10 @@ use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, StateUp
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{add_construct_button, add_wonder_buttons};
 use crate::hex_ui::draw_hex_center_text;
-use crate::map_ui::show_generic_tile_menu;
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::{hex_ui, influence_ui, player_ui};
+use crate::layout_ui::{bottom_center_texture, icon_pos};
+use crate::resource_ui::ResourceType;
 
 pub struct CityMenu {
     pub player: ShownPlayer,
@@ -44,49 +45,49 @@ impl CityMenu {
     }
 }
 
-pub fn show_city_menu(game: &Game, menu: &CityMenu) -> StateUpdate {
+pub fn show_city_menu(game: &Game, menu: &CityMenu, state: &State) -> StateUpdate {
     let position = menu.city_position;
     let city = menu.get_city(game);
 
-    show_generic_tile_menu(game, position, &menu.player, city_label(game, city), |ui| {
-        let can_play = menu.player.can_play_action && menu.is_city_owner() && city.can_activate();
-        if can_play {
-            if ui.button(None, "Collect Resources") {
-                return StateUpdate::SetDialog(ActiveDialog::CollectResources(
-                    CollectResources::new(
-                        menu.player.index,
-                        menu.city_position,
-                        possible_resource_collections(
-                            game,
-                            menu.city_position,
-                            menu.city_owner_index,
-                        ),
-                    ),
-                ));
-            }
-            if ui.button(None, "Recruit Units") {
-                return RecruitAmount::new_selection(
-                    game,
-                    menu.player.index,
-                    menu.city_position,
-                    Units::empty(),
-                    None,
-                    &[],
-                );
-            }
-        }
 
-        let mut updates = StateUpdates::new();
-        updates.add(add_building_actions(game, menu, ui));
+    let updates = StateUpdates::new();
+    let can_play = menu.player.can_play_action && menu.is_city_owner() && city.can_activate();
+    let mut icons: Vec<(&Texture2D, Box<dyn Fn() -> StateUpdate>)> = vec![];
+    if can_play {
+        icons.push((
+            &state.assets.resources[&ResourceType::Food],
+            Box::new(|| StateUpdate::SetDialog(ActiveDialog::CollectResources(CollectResources::new(
+                menu.player.index,
+                position,
+                possible_resource_collections(game, position, menu.city_owner_index),
+            )))),
+        ));
+        // if bottom_center_texture(state, state.assets.resources[ResourceType::Food], icon_pos())ui.button(None, "Collect Resources") {
+        //     return StateUpdate::SetDialog(ActiveDialog::CollectResources(CollectResources::new(
+        //         menu.player.index,
+        //         menu.city_position,
+        //         possible_resource_collections(game, menu.city_position, menu.city_owner_index),
+        //     )));
+        // }
+        // if ui.button(None, "Recruit Units") {
+        //     return RecruitAmount::new_selection(
+        //         game,
+        //         menu.player.index,
+        //         menu.city_position,
+        //         Units::empty(),
+        //         None,
+        //         &[],
+        //     );
+        // }
+        //
+        // updates.add(add_building_actions(game, menu, ui));
+        // updates.add(add_wonder_buttons(game, menu, ui));
+    }
 
-        if can_play {
-            updates.add(add_wonder_buttons(game, menu, ui));
-        }
-        updates.result()
-    })
+    updates.result()
 }
 
-fn city_label(game: &Game, city: &City) -> Vec<String> {
+pub fn city_label(game: &Game, city: &City) -> Vec<String> {
     vec![
         format!(
             "size: {} mood: {} activated: {}",
@@ -123,9 +124,6 @@ fn city_label(game: &Game, city: &City) -> Vec<String> {
 }
 
 fn add_building_actions(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpdate {
-    if !menu.player.can_play_action {
-        return StateUpdate::None;
-    }
     let closest_city_pos = influence_ui::closest_city(game, menu);
 
     let mut updates = StateUpdates::new();
