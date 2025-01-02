@@ -78,12 +78,9 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     }
 
     updates.add(match &state.active_dialog {
-        ActiveDialog::None | ActiveDialog::MoveUnits(_) => StateUpdate::None,
+        ActiveDialog::None | ActiveDialog::MoveUnits(_) | ActiveDialog::WaitingForUpdate => StateUpdate::None,
         ActiveDialog::Log => show_log(game, player),
         ActiveDialog::TileMenu(p) => show_tile_menu(game, *p, player, state),
-        ActiveDialog::WaitingForUpdate => {
-            active_dialog_window(player, "Waiting for update", |_ui| StateUpdate::None)
-        }
 
         // playing actions
         ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(h, player),

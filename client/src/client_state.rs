@@ -116,7 +116,7 @@ impl ActiveDialog {
             ActiveDialog::PlaceSettler => Some("Click on a tile to place a settler"),
             ActiveDialog::Retreat => Some("Click on a unit to retreat"),
             ActiveDialog::RemoveCasualties(_) => Some("Click on a unit to remove it"),
-            ActiveDialog::WaitingForUpdate => panic!("no help message for dialog"),
+            ActiveDialog::WaitingForUpdate => Some("Waiting for server update"),
         }
     }
 

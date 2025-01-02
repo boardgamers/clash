@@ -282,9 +282,7 @@ pub fn show_wonders(game: &Game, player: &ShownPlayer, ui: &mut Ui) {
     //todo move to cards ui
     let player = game.get_player(player.index);
     let y = 5.;
-    for (i, name) in player.wonders.iter().enumerate() {
-        ui.label(vec2(500. + i as f32 * 30.0, y), &format!("Wonder {name}"));
-    }
+
     for (i, card) in player.wonder_cards.iter().enumerate() {
         let req = match card.required_advances[..] {
             [] => String::from("no advances"),
