@@ -48,18 +48,28 @@ pub fn bottom_right_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip
 }
 
 pub fn draw_icon(state: &State, texture: &Texture2D, tooltip: &str, origin: Vec2) -> bool {
+    draw_scaled_icon(state, texture, tooltip, origin, ICON_SIZE)
+}
+
+pub fn draw_scaled_icon(
+    state: &State,
+    texture: &Texture2D,
+    tooltip: &str,
+    origin: Vec2,
+    size: f32,
+) -> bool {
     draw_texture_ex(
         texture,
         origin.x,
         origin.y,
         WHITE,
         DrawTextureParams {
-            dest_size: Some(vec2(ICON_SIZE, ICON_SIZE)),
+            dest_size: Some(vec2(size, size)),
             ..Default::default()
         },
     );
 
-    let rect = Rect::new(origin.x, origin.y, ICON_SIZE, ICON_SIZE);
+    let rect = Rect::new(origin.x, origin.y, size, size);
     tooltip::show_tooltip_for_rect(state, tooltip, rect);
     left_mouse_button(rect)
 }

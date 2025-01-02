@@ -482,6 +482,10 @@ impl State {
     }
 
     pub fn draw_text(&self, text: &str, x: f32, y: f32) {
+        self.draw_text_with_color(text, x, y, BLACK);
+    }
+
+    pub fn draw_text_with_color(&self, text: &str, x: f32, y: f32, color: Color) {
         draw_text_ex(
             text,
             x,
@@ -489,7 +493,7 @@ impl State {
             TextParams {
                 font: Some(&self.assets.font),
                 font_size: FONT_SIZE,
-                color: BLACK,
+                color,
                 ..Default::default()
             },
         );

@@ -122,11 +122,11 @@ pub fn setup_local_game() -> Game {
         .get_city_mut(Position::from_offset("A1"))
         .unwrap()
         .increase_mood_state();
-    // game.players[player_index1]
-    //     .get_city_mut(Position::from_offset("C2"))
-    //     .unwrap()
-    //     .pieces
-    //     .academy = Some(1);
+    game.players[player_index1]
+        .get_city_mut(Position::from_offset("C2"))
+        .unwrap()
+        .pieces
+        .academy = Some(1);
     game.players[player_index1]
         .get_city_mut(Position::from_offset("C2"))
         .unwrap()

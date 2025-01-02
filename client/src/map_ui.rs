@@ -47,6 +47,7 @@ pub fn draw_map(game: &Game, state: &mut State) {
             alpha(game, state, *pos),
             state.assets.terrain.get(base).unwrap(),
             exhausted,
+            state,
         );
         collect_ui::draw_resource_collect_tile(state, *pos);
     }

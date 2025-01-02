@@ -1,5 +1,6 @@
 use std::f32::consts::PI;
 
+use crate::client_state::State;
 use hex2d::{Coordinate, Spacing};
 use macroquad::color::Color;
 use macroquad::math::{f32, i32, vec2, Vec2};
@@ -7,7 +8,6 @@ use macroquad::prelude::{
     draw_text, draw_texture_ex, DrawTextureParams, Rect, Texture2D, BLACK, DARKGRAY, WHITE,
 };
 use macroquad::shapes::draw_hexagon;
-
 use server::position::Position;
 
 const SIZE: f32 = 60.0;
@@ -22,7 +22,7 @@ pub fn center(pos: Position) -> Point {
     Point { x: p.0, y: p.1 }.to_screen()
 }
 
-pub fn draw_hex(p: Position, text_color: Color, alpha: f32, t: &Texture2D, exhausted: bool) {
+pub fn draw_hex(p: Position, text_color: Color, alpha: f32, t: &Texture2D, exhausted: bool, state: &State) {
     let c = center(p);
     let mut v = WHITE.to_vec();
     v.w = alpha;
@@ -38,7 +38,7 @@ pub fn draw_hex(p: Position, text_color: Color, alpha: f32, t: &Texture2D, exhau
         },
     );
     draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, Color::from_vec(v));
-    draw_text(&p.to_string(), c.x - 30.0, c.y - 35.0, 20.0, text_color);
+    state.draw_text_with_color(&p.to_string(), c.x - 30.0, c.y - 35.0, text_color);
     if exhausted {
         draw_text("Exhausted", c.x - 48.0, c.y, 25.0, WHITE);
     }

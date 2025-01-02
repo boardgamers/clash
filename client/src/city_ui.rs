@@ -11,7 +11,7 @@ use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{building_positions, ConstructionPayment, ConstructionProject};
 use crate::hex_ui::draw_hex_center_text;
-use crate::layout_ui::{bottom_center_texture, draw_icon, icon_pos, ICON_SIZE};
+use crate::layout_ui::{bottom_center_texture, draw_icon, draw_scaled_icon, icon_pos, ICON_SIZE};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::resource_ui::ResourceType;
 use crate::{hex_ui, player_ui};
@@ -222,21 +222,9 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
                 hex_ui::rotate_around(c, 20.0, 90 * i)
             };
             draw_circle(p.x, p.y, 12.0, player_ui::player_color(player_index));
-            draw_text(building_symbol(b), p.x - 7.0, p.y + 8.0, 30.0, BLACK);
+            draw_scaled_icon(state, &state.assets.buildings[b], building_name(b), p.to_vec2() + vec2(-8.,-8.), 16.);
             i += 1;
         }
-    }
-}
-
-fn building_symbol(b: &Building) -> &str {
-    match b {
-        Building::Academy => "A",
-        Building::Market => "M",
-        Building::Obelisk => "K",
-        Building::Observatory => "V",
-        Building::Fortress => "F",
-        Building::Port => "P",
-        Building::Temple => "T",
     }
 }
 
