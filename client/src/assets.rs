@@ -19,7 +19,6 @@ pub struct Assets {
 
     // mood icons
     pub angry: Texture2D,
-    pub neutral: Texture2D,
 
     // action icons
     pub movement: Texture2D,
@@ -63,13 +62,12 @@ impl Assets {
         Self {
             font: load_ttf_font(&font_name).await.unwrap(), // can't share font - causes panic
             terrain: Self::terrain(features).await,
-            exhausted: load_png(include_bytes!("../assets/poison-svgrepo-com.png")),
+            exhausted: load_png(include_bytes!("../assets/cross-svgrepo-com.png")),
             units: Self::units(),
             skin: Self::skin(&load_ttf_font(&font_name).await.unwrap()),
 
             // mood icons
             angry: load_png(include_bytes!("../assets/angry-face-svgrepo-com.png")),
-            neutral: load_png(include_bytes!("../assets/neutral-face-svgrepo-com.png")),
 
             // resource icons
             resources: Self::resources(),

@@ -157,6 +157,33 @@ pub fn setup_local_game() -> Game {
         .port_position = Some(Position::from_offset("C3"));
     add_unit(&mut game, "B2", player_index2, UnitType::Ship);
 
+    game.players[player_index1]
+        .get_city_mut(Position::from_offset("B1"))
+        .unwrap()
+        .pieces
+        .obelisk = Some(1);
+    game.players[player_index1]
+        .get_city_mut(Position::from_offset("B1"))
+        .unwrap()
+        .pieces
+        .observatory = Some(1);
+    game.players[player_index1]
+        .get_city_mut(Position::from_offset("B1"))
+        .unwrap()
+        .pieces
+        .temple = Some(1);
+    game.players[player_index1]
+        .get_city_mut(Position::from_offset("B1"))
+        .unwrap()
+        .pieces
+        .fortress = Some(1);
+
+  game.players[player_index1]
+        .get_city_mut(Position::from_offset("A1"))
+        .unwrap()
+        .pieces
+        .market = Some(1);
+
     game
 }
 

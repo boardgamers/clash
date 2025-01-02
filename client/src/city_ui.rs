@@ -188,18 +188,20 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
         state.draw_text(&steps, c.x - 5., c.y + 6.);
     } else {
         let t = match city.mood_state {
-            MoodState::Happy => &state.assets.resources[&ResourceType::MoodTokens],
-            MoodState::Neutral => &state.assets.neutral,
-            MoodState::Angry => &state.assets.angry,
+            MoodState::Happy => Some(&state.assets.resources[&ResourceType::MoodTokens]),
+            MoodState::Neutral => None,
+            MoodState::Angry => Some(&state.assets.angry),
         };
-        let size = 15.;
-        draw_scaled_icon(
-            state,
-            t,
-            &format!("Happiness: {:?}", city.mood_state),
-            c.to_vec2() + vec2(-size / 2., -size / 2.),
-            size,
-        );
+        if let Some(t) = t {
+            let size = 15.;
+            draw_scaled_icon(
+                state,
+                t,
+                &format!("Happiness: {:?}", city.mood_state),
+                c.to_vec2() + vec2(-size / 2., -size / 2.),
+                size,
+            );
+        }
     }
 
     let mut i = 0;
@@ -223,7 +225,13 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
                 hex_ui::rotate_around(c, 25.0, 90 * i)
             };
             draw_circle(p.x, p.y, 12.0, player_ui::player_color(player_index));
-            draw_scaled_icon(state, &state.assets.buildings[b], building_name(b), p.to_vec2() + vec2(-8.,-8.), 16.);
+            draw_scaled_icon(
+                state,
+                &state.assets.buildings[b],
+                building_name(b),
+                p.to_vec2() + vec2(-8., -8.),
+                16.,
+            );
             i += 1;
         }
     }
