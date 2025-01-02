@@ -17,39 +17,26 @@ use crate::hex_ui::Point;
 use itertools::Itertools;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::player::Player;
+use crate::layout_ui::draw_scaled_icon;
 use crate::tooltip::show_tooltip_for_circle;
 
 pub const UNIT_RADIUS: f32 = 11.0;
 
-pub fn draw_unit(unit: &Unit, index: u32, selected: bool) {
-    draw_unit_type(
-        selected,
-        unit_center(index, unit.position),
-        &unit.unit_type,
-        unit.player_index,
-    );
-}
-
-pub fn draw_unit_type(selected: bool, center: Point, unit_type: &UnitType, player_index: usize) {
+pub fn draw_unit_type(selected: bool, center: Point, unit_type: &UnitType, player_index: usize, state: &State, tooltip: &str, size: f32) {
     draw_circle(
         center.x,
         center.y,
-        UNIT_RADIUS,
+        size,
         if selected { WHITE } else { BLACK },
     );
     draw_circle(
         center.x,
         center.y,
-        9.0,
+        size - 2.,
         player_ui::player_color(player_index),
     );
-    draw_text(
-        unit_symbol(unit_type),
-        center.x - 5.0,
-        center.y + 5.0,
-        20.0,
-        BLACK,
-    );
+    let icon_size = size * 1.1;
+    draw_scaled_icon(state, &state.assets.units[unit_type], tooltip, vec2(center.x - icon_size/2., center.y - icon_size/2.), icon_size);
 }
 
 fn unit_center(index: u32, position: Position) -> Point {
@@ -72,17 +59,6 @@ pub fn unit_at_pos(pos: Position, mouse_pos: Vec2, player: &Player) -> Option<u3
                 None
             }
         })
-}
-
-fn unit_symbol(unit_type: &UnitType) -> &str {
-    match unit_type {
-        UnitType::Infantry => "I",
-        UnitType::Cavalry => "C",
-        UnitType::Elephant => "E",
-        UnitType::Leader => "L",
-        UnitType::Ship => "P",
-        UnitType::Settler => "S",
-    }
 }
 
 pub fn non_leader_names() -> [(UnitType, &'static str); 5] {
@@ -126,7 +102,15 @@ pub fn draw_units(game: &Game, state: &State, tooltip: bool) {
                 );
             } else {
                 let selected = *p == game.active_player() && selected_units.contains(&u.id);
-                draw_unit(u, i.try_into().unwrap(), selected);
+                draw_unit_type(
+                    selected,
+                    unit_center(i.try_into().unwrap(), u.position),
+                    &u.unit_type,
+                    u.player_index,
+                    state,
+                    "",
+                    UNIT_RADIUS,
+                );
             }
         });
     }

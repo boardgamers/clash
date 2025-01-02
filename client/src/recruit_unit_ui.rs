@@ -14,6 +14,7 @@ use crate::select_ui::{
 use crate::tooltip::show_tooltip_for_circle;
 use crate::unit_ui::{draw_unit_type, UnitSelection, UNIT_RADIUS};
 use crate::{select_ui, unit_ui};
+use crate::layout_ui::ICON_SIZE;
 
 #[derive(Clone)]
 pub struct SelectableUnit {
@@ -228,15 +229,17 @@ pub fn select_dialog(
         a,
         |s| s.selectable.clone(),
         |s, p| {
-            draw_unit_type(false, Point::from_vec2(p), &s.unit_type, player.index);
-            show_tooltip_for_circle(
+            draw_unit_type(
+                false,
+                Point::from_vec2(p),
+                &s.unit_type,
+                player.index,
                 state,
                 &format!(
                     "{} ({} available with current resources)",
                     s.name, s.selectable.max
                 ),
-                p,
-                UNIT_RADIUS,
+                20.,
             );
         },
         |_s| true,

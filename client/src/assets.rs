@@ -20,7 +20,6 @@ pub struct Assets {
     // mood icons
     pub angry: Texture2D,
     pub neutral: Texture2D,
-    pub happy: Texture2D,
 
     // action icons
     pub movement: Texture2D,
@@ -56,29 +55,24 @@ pub struct Assets {
     // pub cities: HashMap<CityType, Texture2D>,
     pub resources: HashMap<ResourceType, Texture2D>,
     pub buildings: HashMap<Building, Texture2D>,
-
-    // units
-    pub warrior: Texture2D,
 }
 
 impl Assets {
     pub async fn new(features: &Features) -> Self {
-        let happy = load_png(include_bytes!("../assets/happy-emoji-svgrepo-com.png"));
         let font_name = features.get_asset("HTOWERT.TTF");
         Self {
             font: load_ttf_font(&font_name).await.unwrap(), // can't share font - causes panic
             terrain: Self::terrain(features).await,
             exhausted: load_png(include_bytes!("../assets/poison-svgrepo-com.png")),
-            units: HashMap::new(),
+            units: Self::units(),
             skin: Self::skin(&load_ttf_font(&font_name).await.unwrap()),
 
             // mood icons
             angry: load_png(include_bytes!("../assets/angry-face-svgrepo-com.png")),
             neutral: load_png(include_bytes!("../assets/neutral-face-svgrepo-com.png")),
-            happy: happy.clone(),
 
             // resource icons
-            resources: Self::resources(&happy),
+            resources: Self::resources(),
 
             // buildings
             buildings: Self::buildings(),
@@ -119,12 +113,42 @@ impl Assets {
             // Admin
             import: load_png(include_bytes!("../assets/import-3-svgrepo-com.png")),
             export: load_png(include_bytes!("../assets/export-2-svgrepo-com.png")),
-            // cities: HashMap::new(),
-            warrior: load_png(include_bytes!("../assets/warrior-svgrepo-com.png")),
         }
     }
 
-    fn resources(happy: &Texture2D) -> HashMap<ResourceType, Texture2D> {
+    fn units() -> HashMap<UnitType, Texture2D> {
+        [
+            (
+                UnitType::Infantry,
+                load_png(include_bytes!("../assets/warrior-svgrepo-com.png")),
+            ),
+            (
+                UnitType::Settler,
+                load_png(include_bytes!("../assets/wagon-svgrepo-com.png")),
+            ),
+            (
+                UnitType::Cavalry,
+                load_png(include_bytes!("../assets/horse-head-svgrepo-com.png")),
+            ),
+            (
+                UnitType::Elephant,
+                load_png(include_bytes!("../assets/elephant-svgrepo-com.png")),
+            ),
+            (
+                UnitType::Ship,
+                load_png(include_bytes!("../assets/ship-svgrepo-com.png")),
+            ),
+            (
+                UnitType::Leader,
+                load_png(include_bytes!("../assets/flag-svgrepo-com.png")),
+            ),
+        ]
+        .iter()
+        .cloned()
+        .collect()
+    }
+
+    fn resources() -> HashMap<ResourceType, Texture2D> {
         [
             (
                 ResourceType::Food,
@@ -146,7 +170,10 @@ impl Assets {
                 ResourceType::Gold,
                 load_png(include_bytes!("../assets/gold-ingots-gold-svgrepo-com.png")),
             ),
-            (ResourceType::MoodTokens, happy.clone()),
+            (
+                ResourceType::MoodTokens,
+                load_png(include_bytes!("../assets/happy-emoji-svgrepo-com.png")),
+            ),
             (
                 ResourceType::CultureTokens,
                 load_png(include_bytes!("../assets/theater-drama-svgrepo-com.png")),

@@ -5,7 +5,7 @@ use server::city_pieces::Building;
 use server::game::Game;
 use server::player::Player;
 use server::position::Position;
-use server::unit::Units;
+use server::unit::{UnitType, Units};
 
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::collect_ui::{possible_resource_collections, CollectResources};
@@ -65,7 +65,7 @@ pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) 
         }),
     ));
     icons.push((
-        &state.assets.warrior,
+        &state.assets.units[&UnitType::Infantry],
         "Recruit Units".to_string(),
         Box::new(|| {
             RecruitAmount::new_selection(
@@ -188,15 +188,17 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
         state.draw_text(&steps, c.x - 5., c.y + 6.);
     } else {
         let t = match city.mood_state {
-            MoodState::Happy => &state.assets.happy,
+            MoodState::Happy => &state.assets.resources[&ResourceType::MoodTokens],
             MoodState::Neutral => &state.assets.neutral,
             MoodState::Angry => &state.assets.angry,
         };
-        draw_icon(
+        let size = 15.;
+        draw_scaled_icon(
             state,
             t,
             &format!("Happiness: {:?}", city.mood_state),
-            c.to_vec2() + vec2(-ICON_SIZE / 2., -ICON_SIZE / 2.),
+            c.to_vec2() + vec2(-size / 2., -size / 2.),
+            size,
         );
     }
 
@@ -218,7 +220,7 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
                     .to_radians_pointy();
                 hex_ui::rotate_around_rad(c, 60.0, r * -1.0 + std::f32::consts::PI / 3.0)
             } else {
-                hex_ui::rotate_around(c, 20.0, 90 * i)
+                hex_ui::rotate_around(c, 25.0, 90 * i)
             };
             draw_circle(p.x, p.y, 12.0, player_ui::player_color(player_index));
             draw_scaled_icon(state, &state.assets.buildings[b], building_name(b), p.to_vec2() + vec2(-8.,-8.), 16.);
