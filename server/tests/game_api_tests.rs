@@ -231,7 +231,7 @@ fn cultural_influence() {
     assert_eq!(city0position.distance(city1position), 2);
     game.players[0].cities.push(City::new(0, city0position));
     game.players[1].cities.push(City::new(1, city1position));
-    game.players[1].construct(&Academy, city1position, None);
+    game.players[1].construct(Academy, city1position, None);
     let influence_action = Action::Playing(InfluenceCultureAttempt(
         playing_actions::InfluenceCultureAttempt {
             starting_city_position: city0position,

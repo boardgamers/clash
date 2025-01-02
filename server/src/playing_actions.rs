@@ -106,12 +106,12 @@ impl PlayingAction {
             Construct(c) => {
                 let player = &mut game.players[player_index];
                 let city = player.get_city(c.city_position).expect("Illegal action");
-                let cost = player.construct_cost(&c.city_piece, city);
+                let cost = player.construct_cost(c.city_piece, city);
                 assert!(
-                    city.can_construct(&c.city_piece, player) && cost.is_valid_payment(&c.payment),
+                    city.can_construct(c.city_piece, player) && cost.is_valid_payment(&c.payment),
                     "Illegal action"
                 );
-                if matches!(&c.city_piece, Port) {
+                if matches!(c.city_piece, Port) {
                     let port_position = c.port_position.as_ref().expect("Illegal action");
                     assert!(
                         city.position.neighbors().contains(port_position),
@@ -120,7 +120,7 @@ impl PlayingAction {
                 } else if c.port_position.is_some() {
                     panic!("Illegal action");
                 }
-                if matches!(&c.city_piece, Temple) {
+                if matches!(c.city_piece, Temple) {
                     let building_bonus = c.temple_bonus.expect("Illegal action");
                     assert!(
                         building_bonus == ResourcePile::mood_tokens(1)
@@ -132,7 +132,7 @@ impl PlayingAction {
                     panic!("Illegal action");
                 }
                 player.loose_resources(c.payment);
-                player.construct(&c.city_piece, c.city_position, c.port_position);
+                player.construct(c.city_piece, c.city_position, c.port_position);
             }
             Collect {
                 city_position,
@@ -203,7 +203,7 @@ impl PlayingAction {
                         starting_city_position,
                         target_player_index,
                         target_city_position,
-                        &city_piece,
+                        city_piece,
                     )
                     .expect("Illegal action");
 
@@ -217,7 +217,7 @@ impl PlayingAction {
                         player_index,
                         target_player_index,
                         target_city_position,
-                        &city_piece,
+                        city_piece,
                     );
                     game.add_to_last_log_item(&format!(" and succeeded (rolled {roll})"));
                     return;
@@ -297,9 +297,9 @@ impl PlayingAction {
             }
             Construct(c) => {
                 let player = &mut game.players[player_index];
-                player.undo_construct(&c.city_piece, c.city_position);
+                player.undo_construct(c.city_piece, c.city_position);
                 player.gain_resources(c.payment);
-                if matches!(&c.city_piece, Temple) {
+                if matches!(c.city_piece, Temple) {
                     player.loose_resources(
                         c.temple_bonus
                             .expect("build data should contain temple bonus"),

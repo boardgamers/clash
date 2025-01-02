@@ -356,7 +356,7 @@ impl Game {
                     c.roll_boost_cost,
                     c.target_player_index,
                     c.target_city_position,
-                    &c.city_piece,
+                    c.city_piece,
                     player_index,
                 );
             }
@@ -437,7 +437,7 @@ impl Game {
                     c.roll_boost_cost,
                     c.target_player_index,
                     c.target_city_position,
-                    &c.city_piece.clone(),
+                    c.city_piece,
                     player_index,
                 );
             }
@@ -600,7 +600,7 @@ impl Game {
         roll_boost_cost: u32,
         target_player_index: usize,
         target_city_position: Position,
-        city_piece: &Building,
+        city_piece: Building,
         player_index: usize,
     ) {
         self.state = Playing;
@@ -634,7 +634,7 @@ impl Game {
             roll_boost_cost,
             target_player_index,
             target_city_position,
-            city_piece: city_piece.clone(),
+            city_piece,
         });
         if !action {
             return;
@@ -645,7 +645,7 @@ impl Game {
             self.current_player_index,
             target_player_index,
             target_city_position,
-            &city_piece,
+            city_piece,
         );
     }
 
@@ -1159,7 +1159,7 @@ impl Game {
         for (building, owner) in city.pieces.building_owners() {
             if matches!(building, Obelisk) {
                 if !settlements_left {
-                    self.players[old_player_index].available_buildings += &building;
+                    self.players[old_player_index].available_buildings += building;
                     self.players[old_player_index].influenced_buildings -= 1;
                 }
                 continue;
@@ -1169,20 +1169,20 @@ impl Game {
             };
             if owner != old_player_index {
                 if !settlements_left {
-                    self.players[owner].available_buildings += &building;
+                    self.players[owner].available_buildings += building;
                     self.players[owner].influenced_buildings -= 1;
                 }
                 continue;
             }
-            city.pieces.set_building(&building, new_player_index);
-            self.players[old_player_index].available_buildings += &building;
+            city.pieces.set_building(building, new_player_index);
+            self.players[old_player_index].available_buildings += building;
             if self.players[new_player_index]
                 .available_buildings
-                .can_build(&building)
+                .can_build(building)
             {
-                self.players[new_player_index].available_buildings -= &building;
+                self.players[new_player_index].available_buildings -= building;
             } else {
-                city.pieces.remove_building(&building);
+                city.pieces.remove_building(building);
                 self.players[new_player_index].gain_resources(ResourcePile::gold(1));
             }
         }
@@ -1286,7 +1286,7 @@ impl Game {
         starting_city_position: Position,
         target_player_index: usize,
         target_city_position: Position,
-        city_piece: &Building,
+        city_piece: Building,
     ) -> Option<ResourcePile> {
         //todo allow cultural influence of barbarians
         let starting_city = self.get_city(player_index, starting_city_position);
@@ -1299,7 +1299,7 @@ impl Game {
         let target_city_owner = target_city.player_index;
         let target_building_owner = target_city.pieces.building_owner(city_piece)?;
         let player = &self.players[player_index];
-        if matches!(&city_piece, Building::Obelisk)
+        if matches!(city_piece, Building::Obelisk)
             || starting_city.player_index != player_index
             || !player.resources.can_afford(&range_boost_cost)
             || (starting_city.influenced() && !self_influence)
@@ -1325,7 +1325,7 @@ impl Game {
         influencer_index: usize,
         influenced_player_index: usize,
         city_position: Position,
-        building: &Building,
+        building: Building,
     ) {
         self.players[influenced_player_index]
             .get_city_mut(city_position)
@@ -1348,7 +1348,7 @@ impl Game {
         influencer_index: usize,
         influenced_player_index: usize,
         city_position: Position,
-        building: &Building,
+        building: Building,
     ) {
         self.players[influenced_player_index]
             .get_city_mut(city_position)
@@ -1601,8 +1601,8 @@ pub mod tests {
         let position = Position::new(0, 0);
         game.players[old].cities.push(City::new(old, position));
         game.build_wonder(wonder, position, old);
-        game.players[old].construct(&Academy, position, None);
-        game.players[old].construct(&Obelisk, position, None);
+        game.players[old].construct(Academy, position, None);
+        game.players[old].construct(Obelisk, position, None);
 
         assert!(utils::tests::eq_f32(
             8.0,

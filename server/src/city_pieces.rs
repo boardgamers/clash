@@ -76,7 +76,7 @@ impl CityPieces {
     }
 
     #[must_use]
-    pub fn can_add_building(&self, building: &Building) -> bool {
+    pub fn can_add_building(&self, building: Building) -> bool {
         match building {
             Academy => self.academy.is_none(),
             Market => self.market.is_none(),
@@ -88,7 +88,7 @@ impl CityPieces {
         }
     }
 
-    pub fn set_building(&mut self, building: &Building, player_index: usize) {
+    pub fn set_building(&mut self, building: Building, player_index: usize) {
         match building {
             Academy => self.academy = Some(player_index),
             Market => self.market = Some(player_index),
@@ -100,7 +100,7 @@ impl CityPieces {
         }
     }
 
-    pub fn remove_building(&mut self, building: &Building) {
+    pub fn remove_building(&mut self, building: Building) {
         match building {
             Academy => self.academy = None,
             Market => self.market = None,
@@ -118,8 +118,8 @@ impl CityPieces {
     }
 
     #[must_use]
-    pub fn building_owner(&self, building: &Building) -> Option<usize> {
-        match *building {
+    pub fn building_owner(&self, building: Building) -> Option<usize> {
+        match building {
             Academy => self.academy,
             Market => self.market,
             Obelisk => self.obelisk,
@@ -251,8 +251,8 @@ impl AvailableCityPieces {
     }
 
     #[must_use]
-    pub fn can_build(&self, building: &Building) -> bool {
-        match *building {
+    pub fn can_build(&self, building: Building) -> bool {
+        match building {
             Academy => self.academies > 0,
             Market => self.markets > 0,
             Obelisk => self.obelisks > 0,
@@ -264,9 +264,9 @@ impl AvailableCityPieces {
     }
 }
 
-impl AddAssign<&Building> for AvailableCityPieces {
-    fn add_assign(&mut self, rhs: &Building) {
-        match *rhs {
+impl AddAssign<Building> for AvailableCityPieces {
+    fn add_assign(&mut self, rhs: Building) {
+        match rhs {
             Academy => self.academies += 1,
             Market => self.markets += 1,
             Obelisk => self.obelisks += 1,
@@ -278,9 +278,9 @@ impl AddAssign<&Building> for AvailableCityPieces {
     }
 }
 
-impl SubAssign<&Building> for AvailableCityPieces {
-    fn sub_assign(&mut self, rhs: &Building) {
-        match *rhs {
+impl SubAssign<Building> for AvailableCityPieces {
+    fn sub_assign(&mut self, rhs: Building) {
+        match rhs {
             Academy => self.academies -= 1,
             Market => self.markets -= 1,
             Obelisk => self.obelisks -= 1,

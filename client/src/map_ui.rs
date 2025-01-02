@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use macroquad::math::vec2;
 use macroquad::prelude::*;
 use std::ops::{Add, Mul, Sub};
@@ -126,7 +125,11 @@ pub fn show_tile_menu(
 ) -> StateUpdate {
     if player.can_play_action {
         if let Some(c) = game.get_any_city(position) {
-            show_city_menu(game, &CityMenu::new(player, c.player_index, position), state)
+            show_city_menu(
+                game,
+                &CityMenu::new(player, c.player_index, position),
+                state,
+            )
         } else {
             let units = unit_ui::units_on_tile(game, position);
             let settlers = units

@@ -110,7 +110,7 @@ impl City {
     }
 
     #[must_use]
-    pub fn can_construct(&self, building: &Building, player: &Player) -> bool {
+    pub fn can_construct(&self, building: Building, player: &Player) -> bool {
         if self.player_index != player.index {
             return false;
         }
@@ -174,7 +174,7 @@ impl City {
     pub fn raze(self, game: &mut Game, player_index: usize) {
         for (building, owner) in &self.pieces.building_owners() {
             if let Some(owner) = owner {
-                game.players[*owner].available_buildings += building;
+                game.players[*owner].available_buildings += *building;
             }
         }
         for wonder in self.pieces.wonders {

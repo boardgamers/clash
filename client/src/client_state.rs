@@ -85,7 +85,7 @@ impl ActiveDialog {
     #[must_use]
     pub fn help_message(&self) -> Option<&str> {
         match self {
-            ActiveDialog::None| ActiveDialog::TileMenu(_) => None,
+            ActiveDialog::None | ActiveDialog::TileMenu(_) => None,
             ActiveDialog::Log => Some("Click on a log entry to see details"),
             ActiveDialog::IncreaseHappiness(_) => Some("Click on a city to increase happiness"),
             ActiveDialog::AdvanceMenu => Some("Click on an advance to see options"),

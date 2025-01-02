@@ -1,5 +1,4 @@
 use crate::client::Features;
-use crate::collect_ui::CollectResources;
 use crate::resource_ui::ResourceType;
 use macroquad::prelude::{
     load_texture, load_ttf_font, Color, Font, Image, ImageFormat, RectOffset,
@@ -77,71 +76,10 @@ impl Assets {
             happy: happy.clone(),
 
             // resource icons
-            resources: [
-                (
-                    ResourceType::Food,
-                    load_png(include_bytes!("../assets/wheat-grain-svgrepo-com.png")),
-                ),
-                (
-                    ResourceType::Wood,
-                    load_png(include_bytes!("../assets/wood-nature-svgrepo-com.png")),
-                ),
-                (
-                    ResourceType::Ore,
-                    load_png(include_bytes!("../assets/rock-svgrepo-com.png")),
-                ),
-                (
-                    ResourceType::Ideas,
-                    load_png(include_bytes!("../assets/light-bulb-idea-svgrepo-com.png")),
-                ),
-                (
-                    ResourceType::Gold,
-                    load_png(include_bytes!("../assets/gold-ingots-gold-svgrepo-com.png")),
-                ),
-                (ResourceType::MoodTokens, happy.clone()),
-                (
-                    ResourceType::CultureTokens,
-                    load_png(include_bytes!("../assets/theater-drama-svgrepo-com.png")),
-                ),
-            ]
-            .iter()
-            .cloned()
-            .collect(),
+            resources: Self::resources(&happy),
 
             // buildings
-            buildings: [
-                (
-                    Building::Academy,
-                    load_png(include_bytes!("../assets/academy-cap-svgrepo-com.png")),
-                ),
-                (
-                    Building::Market,
-                    load_png(include_bytes!("../assets/market-place-svgrepo-com.png")),
-                    )      ,
-                (
-                    Building::Obelisk,
-                    load_png(include_bytes!("../assets/obelisk-svgrepo-com.png")),
-                ),
-                (
-                    Building::Observatory,
-                    load_png(include_bytes!("../assets/observatory-exploration-svgrepo-com.png")),
-                ),
-                (
-                    Building::Fortress,
-                    load_png(include_bytes!("../assets/castle-fortress-14-svgrepo-com.png")),
-                ),
-                (
-                    Building::Port,
-                    load_png(include_bytes!("../assets/port-location-svgrepo-com.png")),
-                ),
-                (
-                    Building::Temple,
-                    load_png(include_bytes!("../assets/temple-building-with-columns-svgrepo-com.png")),
-                ),
-            ]
-            .iter()
-            .cloned()
-            .collect(),
+            buildings: Self::buildings(),
 
             // action icons
             advances: load_png(include_bytes!("../assets/lab-svgrepo-com.png")),
@@ -182,6 +120,81 @@ impl Assets {
             // cities: HashMap::new(),
             warrior: load_png(include_bytes!("../assets/warrior-svgrepo-com.png")),
         }
+    }
+
+    fn resources(happy: &Texture2D) -> HashMap<ResourceType, Texture2D> {
+        [
+            (
+                ResourceType::Food,
+                load_png(include_bytes!("../assets/wheat-grain-svgrepo-com.png")),
+            ),
+            (
+                ResourceType::Wood,
+                load_png(include_bytes!("../assets/wood-nature-svgrepo-com.png")),
+            ),
+            (
+                ResourceType::Ore,
+                load_png(include_bytes!("../assets/rock-svgrepo-com.png")),
+            ),
+            (
+                ResourceType::Ideas,
+                load_png(include_bytes!("../assets/light-bulb-idea-svgrepo-com.png")),
+            ),
+            (
+                ResourceType::Gold,
+                load_png(include_bytes!("../assets/gold-ingots-gold-svgrepo-com.png")),
+            ),
+            (ResourceType::MoodTokens, happy.clone()),
+            (
+                ResourceType::CultureTokens,
+                load_png(include_bytes!("../assets/theater-drama-svgrepo-com.png")),
+            ),
+        ]
+        .iter()
+        .cloned()
+        .collect()
+    }
+
+    fn buildings() -> HashMap<Building, Texture2D> {
+        [
+            (
+                Building::Academy,
+                load_png(include_bytes!("../assets/academy-cap-svgrepo-com.png")),
+            ),
+            (
+                Building::Market,
+                load_png(include_bytes!("../assets/market-place-svgrepo-com.png")),
+            ),
+            (
+                Building::Obelisk,
+                load_png(include_bytes!("../assets/obelisk-svgrepo-com.png")),
+            ),
+            (
+                Building::Observatory,
+                load_png(include_bytes!(
+                    "../assets/observatory-exploration-svgrepo-com.png"
+                )),
+            ),
+            (
+                Building::Fortress,
+                load_png(include_bytes!(
+                    "../assets/castle-fortress-14-svgrepo-com.png"
+                )),
+            ),
+            (
+                Building::Port,
+                load_png(include_bytes!("../assets/port-location-svgrepo-com.png")),
+            ),
+            (
+                Building::Temple,
+                load_png(include_bytes!(
+                    "../assets/temple-building-with-columns-svgrepo-com.png"
+                )),
+            ),
+        ]
+        .iter()
+        .cloned()
+        .collect()
     }
 
     async fn terrain(features: &Features) -> HashMap<Terrain, Texture2D> {

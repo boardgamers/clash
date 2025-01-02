@@ -505,11 +505,11 @@ impl Player {
     }
 
     #[must_use]
-    pub fn construct_cost(&self, building: &Building, city: &City) -> ResourcePile {
+    pub fn construct_cost(&self, building: Building, city: &City) -> ResourcePile {
         let mut cost = CONSTRUCT_COST;
         self.get_events()
             .construct_cost
-            .trigger(&mut cost, city, building);
+            .trigger(&mut cost, city, &building);
         cost
     }
 
@@ -579,14 +579,14 @@ impl Player {
     /// Panics if city does not exist
     pub fn construct(
         &mut self,
-        building: &Building,
+        building: Building,
         city_position: Position,
         port_position: Option<Position>,
     ) {
         self.take_events(|events, player| {
             events
                 .on_construct
-                .trigger(player, &city_position, building);
+                .trigger(player, &city_position, &building);
         });
         let index = self.index;
         let city = self
@@ -608,11 +608,11 @@ impl Player {
     /// # Panics
     ///
     /// Panics if city does not exist
-    pub fn undo_construct(&mut self, building: &Building, city_position: Position) {
+    pub fn undo_construct(&mut self, building: Building, city_position: Position) {
         self.take_events(|events, player| {
             events
                 .on_undo_construct
-                .trigger(player, &city_position, building);
+                .trigger(player, &city_position, &building);
         });
         let city = self
             .get_city_mut(city_position)

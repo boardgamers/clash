@@ -9,7 +9,6 @@ use crate::layout_ui::{
 use crate::map_ui::terrain_name;
 use crate::resource_ui::{resource_name, ResourceType};
 use crate::unit_ui;
-use itertools::Itertools;
 use macroquad::math::{u32, vec2};
 use macroquad::prelude::*;
 use macroquad::ui::{root_ui, Ui};
@@ -342,7 +341,12 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
         if bottom_left_texture(state, &assets.movement, icon_pos(0, -3), "Move units") {
             return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
         }
-        if bottom_left_texture(state, &assets.advances, icon_pos(1, -3), "Research advances") {
+        if bottom_left_texture(
+            state,
+            &assets.advances,
+            icon_pos(1, -3),
+            "Research advances",
+        ) {
             return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
         }
         if bottom_left_texture(state, &assets.happy, icon_pos(0, -2), "Increase happiness") {
@@ -353,12 +357,7 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
     if top_right_texture(state, &assets.log, icon_pos(-1, 0), "Show log") {
         return StateUpdate::OpenDialog(ActiveDialog::Log);
     };
-    if top_right_texture(
-        state,
-        &assets.advances,
-        icon_pos(-2, 0),
-        "Show advances",
-    ) {
+    if top_right_texture(state, &assets.advances, icon_pos(-2, 0), "Show advances") {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     };
 

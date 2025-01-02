@@ -6,7 +6,6 @@ use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
 use server::city::City;
 use server::game::{Game, GameData};
-use server::leader::Leader;
 use server::map::Terrain;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
