@@ -23,11 +23,12 @@ fn is_rect_tooltip_active(state: &State, rect: Rect) -> bool {
     state
         .mouse_positions
         .iter()
-        .all(|mp| rect.contains(mp.position))
+        .all(|mp| rect.contains(state.screen_to_world(mp.position)))
 }
 
 pub fn show_tooltip_for_rect(state: &State, tooltip: &str, rect: Rect) {
     let origin = rect.point();
+    let screen_origin = state.world_to_screen(rect.point());
     if is_rect_tooltip_active(state, rect) {
         draw_rectangle(
             origin.x,
@@ -36,24 +37,9 @@ pub fn show_tooltip_for_rect(state: &State, tooltip: &str, rect: Rect) {
             rect.size().y,
             Color::new(0.0, 0.0, 0.0, 0.5),
         );
-        show_tooltip_text(state, tooltip, origin);
-    }
-}
-
-fn is_world_circle_tooltip_active(state: &State, center: Vec2, radius: f32) -> bool {
-    state
-        .mouse_positions
-        .iter()
-        .all(|mp| (center - state.camera.screen_to_world(mp.position)).length() < radius)
-}
-
-pub fn show_tooltip_for_world_circle(state: &State, tooltip: &str, center: Vec2, radius: f32) {
-    let screen_center = state.camera.world_to_screen(center);
-    if is_world_circle_tooltip_active(state, center, radius) {
-        draw_circle(center.x, center.y, radius, Color::new(0.0, 0.0, 0.0, 0.5));
         set_default_camera();
-        show_tooltip_text(state, tooltip, screen_center + vec2(radius, radius));
-        set_camera(&state.camera);
+        show_tooltip_text(state, tooltip, screen_origin);
+        state.set_camera();
     }
 }
 
@@ -61,13 +47,16 @@ fn is_circle_tooltip_active(state: &State, center: Vec2, radius: f32) -> bool {
     state
         .mouse_positions
         .iter()
-        .all(|mp| (center - mp.position).length() < radius)
+        .all(|mp| (center - state.screen_to_world(mp.position)).length() < radius)
 }
 
 pub fn show_tooltip_for_circle(state: &State, tooltip: &str, center: Vec2, radius: f32) {
+    let screen_center = state.world_to_screen(center);
     if is_circle_tooltip_active(state, center, radius) {
         draw_circle(center.x, center.y, radius, Color::new(0.0, 0.0, 0.0, 0.5));
-        show_tooltip_text(state, tooltip, center + vec2(radius, radius));
+        set_default_camera();
+        show_tooltip_text(state, tooltip, screen_center + vec2(radius, radius));
+        state.set_camera();
     }
 }
 

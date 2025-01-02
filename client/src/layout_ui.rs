@@ -19,37 +19,23 @@ pub fn icon_pos(x: i8, y: i8) -> Vec2 {
 }
 
 pub fn top_center_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
-    relative_texture(
-        state,
-        texture,
-        vec2(state.screen_size.x / 2., MARGIN),
-        p,
-        tooltip,
-    )
+    let anchor = vec2(state.screen_size.x / 2., MARGIN);
+    draw_icon(state, texture, tooltip, anchor + p)
 }
 
 pub fn top_right_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
-    relative_texture(
-        state,
-        texture,
-        vec2(state.screen_size.x - MARGIN, MARGIN),
-        p,
-        tooltip,
-    )
+    let anchor = vec2(state.screen_size.x - MARGIN, MARGIN);
+    draw_icon(state, texture, tooltip, anchor + p)
 }
 
 pub fn bottom_left_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
-    relative_texture(
-        state,
-        texture,
-        vec2(MARGIN, state.screen_size.y - MARGIN),
-        p,
-        tooltip,
-    )
+    let anchor = vec2(MARGIN, state.screen_size.y - MARGIN);
+    draw_icon(state, texture, tooltip, anchor + p)
 }
 
 pub fn bottom_center_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
-    relative_texture(state, texture, bottom_center_anchor(state), p, tooltip)
+    let anchor = bottom_center_anchor(state);
+    draw_icon(state, texture, tooltip, anchor + p)
 }
 
 pub fn bottom_center_anchor(state: &State) -> Vec2 {
@@ -57,24 +43,11 @@ pub fn bottom_center_anchor(state: &State) -> Vec2 {
 }
 
 pub fn bottom_right_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
-    relative_texture(
-        state,
-        texture,
-        vec2(state.screen_size.x - MARGIN, state.screen_size.y - MARGIN),
-        p,
-        tooltip,
-    )
+    let anchor = vec2(state.screen_size.x - MARGIN, state.screen_size.y - MARGIN);
+    draw_icon(state, texture, tooltip, anchor + p)
 }
 
-fn relative_texture(
-    state: &State,
-    texture: &Texture2D,
-    anchor: Vec2,
-    offset: Vec2,
-    tooltip: &str,
-) -> bool {
-    let origin = anchor + offset;
-
+pub fn draw_icon(state: &State, texture: &Texture2D, tooltip: &str, origin: Vec2) -> bool {
     draw_texture_ex(
         texture,
         origin.x,

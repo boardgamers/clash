@@ -283,6 +283,11 @@ pub struct MousePosition {
     pub time: f64,
 }
 
+pub enum CameraMode {
+    Screen,
+    World,
+}
+
 pub struct State {
     pub assets: Assets,
     pub control_player: Option<usize>,
@@ -290,6 +295,7 @@ pub struct State {
     pub active_dialog: ActiveDialog,
     pub pending_update: Option<PendingUpdate>,
     pub camera: Camera2D,
+    pub camera_mode: CameraMode,
     pub zoom: f32,
     pub offset: Vec2,
     pub screen_size: Vec2,
@@ -310,6 +316,7 @@ impl State {
             camera: Camera2D {
                 ..Default::default()
             },
+            camera_mode: CameraMode::Screen,
             zoom: ZOOM,
             offset: OFFSET,
             screen_size: vec2(0., 0.),
@@ -488,8 +495,34 @@ impl State {
         );
     }
 
-    // fn execute_status_phase(&mut self, game: &Game, action: StatusPhaseAction) -> ActiveDialog {
-    //     self.update(game, StateUpdate::status_phase(action));
-    //     ActiveDialog::None
-    // }
+    pub fn set_screen_camera(&mut self) {
+        set_default_camera();
+        self.camera_mode = CameraMode::Screen;
+    }
+
+    pub fn set_world_camera(&mut self) {
+        set_camera(&self.camera);
+        self.camera_mode = CameraMode::World;
+    }
+
+    pub fn set_camera(&self) {
+        match self.camera_mode {
+            CameraMode::Screen => set_default_camera(),
+            CameraMode::World => set_camera(&self.camera),
+        };
+    }
+
+    pub fn world_to_screen(&self, point: Vec2) -> Vec2 {
+        match self.camera_mode {
+            CameraMode::Screen => point,
+            CameraMode::World => self.camera.world_to_screen(point),
+        }
+    }
+
+    pub fn screen_to_world(&self, point: Vec2) -> Vec2 {
+        match self.camera_mode {
+            CameraMode::Screen => point,
+            CameraMode::World => self.camera.screen_to_world(point),
+        }
+    }
 }

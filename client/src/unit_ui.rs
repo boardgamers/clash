@@ -14,10 +14,10 @@ use crate::select_ui::{confirm_update, ConfirmSelection};
 use crate::{hex_ui, player_ui};
 
 use crate::hex_ui::Point;
-use crate::tooltip::show_tooltip_for_world_circle;
 use itertools::Itertools;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::player::Player;
+use crate::tooltip::show_tooltip_for_circle;
 
 pub const UNIT_RADIUS: f32 = 11.0;
 
@@ -118,7 +118,7 @@ pub fn draw_units(game: &Game, state: &State, tooltip: bool) {
                     .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
                 let point = unit_center(i.try_into().unwrap(), u.position);
                 let center = vec2(point.x, point.y);
-                show_tooltip_for_world_circle(
+                show_tooltip_for_circle(
                     state,
                     &unit_label(u, army_move),
                     center,

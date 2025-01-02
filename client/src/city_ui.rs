@@ -11,7 +11,7 @@ use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{building_positions, ConstructionPayment, ConstructionProject};
 use crate::hex_ui::draw_hex_center_text;
-use crate::layout_ui::{bottom_center_texture, icon_pos};
+use crate::layout_ui::{bottom_center_texture, draw_icon, icon_pos, ICON_SIZE};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::resource_ui::ResourceType;
 use crate::{hex_ui, player_ui};
@@ -188,11 +188,17 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
             .map_or(String::new(), |(_, s)| format!("{s}"));
         draw_hex_center_text(city.position, &steps);
     } else {
-        match city.mood_state {
-            MoodState::Happy => draw_hex_center_text(city.position, "+"),
-            MoodState::Neutral => {}
-            MoodState::Angry => draw_hex_center_text(city.position, "-"),
-        }
+        let t = match city.mood_state {
+            MoodState::Happy => &state.assets.happy,
+            MoodState::Neutral => &state.assets.neutral,
+            MoodState::Angry => &state.assets.angry,
+        };
+        draw_icon(
+            state,
+            t,
+            &format!("Happiness: {:?}", city.mood_state),
+            c.to_vec2() + vec2(-ICON_SIZE / 2., -ICON_SIZE / 2.),
+        );
     }
 
     let mut i = 0;

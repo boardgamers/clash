@@ -83,6 +83,10 @@ impl Point {
         }
     }
 
+    pub fn to_vec2(self) -> Vec2 {
+        Vec2 { x: self.x, y: self.y }
+    }
+
     pub fn to_screen(self) -> Point {
         let x = self.x + LEFT_BORDER;
         let y = TOP_BORDER - self.y;
