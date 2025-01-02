@@ -516,14 +516,16 @@ impl State {
         };
     }
 
-    #[must_use] pub fn world_to_screen(&self, point: Vec2) -> Vec2 {
+    #[must_use]
+    pub fn world_to_screen(&self, point: Vec2) -> Vec2 {
         match self.camera_mode {
             CameraMode::Screen => point,
             CameraMode::World => self.camera.world_to_screen(point),
         }
     }
 
-    #[must_use] pub fn screen_to_world(&self, point: Vec2) -> Vec2 {
+    #[must_use]
+    pub fn screen_to_world(&self, point: Vec2) -> Vec2 {
         match self.camera_mode {
             CameraMode::Screen => point,
             CameraMode::World => self.camera.screen_to_world(point),

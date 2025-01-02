@@ -115,9 +115,9 @@ impl Assets {
             "Pyramids".to_string(),
             load_png(include_bytes!("../assets/pyramid-svgrepo-com.png")),
         )]
-            .iter()
-            .cloned()
-            .collect()
+        .iter()
+        .cloned()
+        .collect()
     }
 
     fn units() -> HashMap<UnitType, Texture2D> {

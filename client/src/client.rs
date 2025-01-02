@@ -11,7 +11,6 @@ use crate::advance_ui::{pay_advance_dialog, show_advance_menu, show_free_advance
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, StateUpdates};
 use crate::collect_ui::{click_collect_option, collect_resources_dialog};
 use crate::construct_ui::pay_construction_dialog;
-use crate::dialog_ui::active_dialog_window;
 use crate::happiness_ui::{increase_happiness_dialog, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
 use crate::log_ui::show_log;
@@ -78,7 +77,9 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     }
 
     updates.add(match &state.active_dialog {
-        ActiveDialog::None | ActiveDialog::MoveUnits(_) | ActiveDialog::WaitingForUpdate => StateUpdate::None,
+        ActiveDialog::None | ActiveDialog::MoveUnits(_) | ActiveDialog::WaitingForUpdate => {
+            StateUpdate::None
+        }
         ActiveDialog::Log => show_log(game, player),
         ActiveDialog::TileMenu(p) => show_tile_menu(game, *p, player, state),
 

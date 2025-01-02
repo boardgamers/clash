@@ -141,7 +141,9 @@ pub fn setup_local_game() -> Game {
     //     .unwrap()
     //     .pieces
     //     .wonders = vec![game.wonders_left.pop().unwrap()];
-    game.players[player_index1].wonder_cards.push(game.wonders_left.pop().unwrap());
+    game.players[player_index1]
+        .wonder_cards
+        .push(game.wonders_left.pop().unwrap());
     game.players[player_index1]
         .get_city_mut(Position::from_offset("C2"))
         .unwrap()
