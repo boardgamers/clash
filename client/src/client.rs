@@ -124,7 +124,7 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     updates.result()
 }
 
-pub fn try_click(game: &Game, state: &State, player: &ShownPlayer) -> StateUpdate {
+pub fn try_click(game: &Game, state: &mut State, player: &ShownPlayer) -> StateUpdate {
     let (x, y) = mouse_position();
     let mouse_pos = state.camera.screen_to_world(vec2(x, y));
     let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));

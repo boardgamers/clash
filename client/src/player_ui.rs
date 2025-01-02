@@ -165,8 +165,6 @@ pub fn show_top_center(game: &Game, player: &ShownPlayer, state: &State) {
         ResourceType::Food,
         icon_pos(-4, 0),
     );
-
-    show_wonders(game, player, &mut root_ui());
 }
 
 pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
@@ -233,7 +231,7 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
             _ => {}
         }
         if let Some(m) = state.active_dialog.help_message() {
-            label(m);
+            label(&m);
         }
     }
 
@@ -275,26 +273,6 @@ fn moves_left(state: &GameState) -> Option<u32> {
             ..
         } => Some(*movement_actions_left),
         _ => None,
-    }
-}
-
-pub fn show_wonders(game: &Game, player: &ShownPlayer, ui: &mut Ui) {
-    //todo move to cards ui
-    let player = game.get_player(player.index);
-    let y = 5.;
-
-    for (i, card) in player.wonder_cards.iter().enumerate() {
-        let req = match card.required_advances[..] {
-            [] => String::from("no advances"),
-            _ => card.required_advances.join(", "),
-        };
-        ui.label(
-            vec2(900. + i as f32 * 30.0, y),
-            &format!(
-                "Wonder Card {} cost {} requires {}",
-                &card.name, card.cost, req
-            ),
-        );
     }
 }
 
@@ -354,6 +332,14 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
             "Increase happiness",
         ) {
             return start_increase_happiness(game, player);
+        }
+        if bottom_left_texture(
+            state,
+            &assets.resources[&ResourceType::CultureTokens],
+            icon_pos(1, -2),
+            "Cultural Influence",
+        ) {
+            return StateUpdate::OpenDialog(ActiveDialog::CulturalInfluence);
         }
     }
 

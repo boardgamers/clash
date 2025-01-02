@@ -4,6 +4,7 @@ use crate::construct_ui::building_positions;
 use crate::dialog_ui::active_dialog_window;
 use crate::hex_ui;
 use crate::layout_ui::is_in_circle;
+use crate::tooltip::show_tooltip_for_circle;
 use macroquad::input::{is_mouse_button_pressed, MouseButton};
 use macroquad::math::Vec2;
 use server::action::Action;
@@ -13,42 +14,6 @@ use server::game::{CulturalInfluenceResolution, Game};
 use server::player::Player;
 use server::playing_actions::{InfluenceCultureAttempt, PlayingAction};
 use server::position::Position;
-use crate::tooltip::show_tooltip_for_circle;
-
-pub fn attempt_influence_click(
-    game: &Game,
-    city: &City,
-    shown_player: &ShownPlayer,
-    closest_city_pos: Position,
-    building: Building,
-    building_name: &str,
-) -> StateUpdate {
-        let start_position = if city.player_index {
-            city.position
-        } else {
-            closest_city_pos
-        };
-        if let Some(cost) = game.influence_culture_boost_cost(
-            shown_player.index,
-            start_position,
-            city.player_index,
-            city.position,
-            building,
-        ) {
-            let player = game.get_player(shown_player.index);
-            if player.resources.can_afford(&cost) {
-                return StateUpdate::Execute(Action::Playing(
-                    PlayingAction::InfluenceCultureAttempt(InfluenceCultureAttempt {
-                        starting_city_position: start_position,
-                        target_player_index: city.player_index,
-                        target_city_position: city.position,
-                        city_piece: building,
-                    }),
-                ));
-            }
-        }
-    StateUpdate::None
-}
 
 fn closest_city(player: &Player, position: Position) -> Position {
     player
@@ -86,7 +51,7 @@ pub fn hover(
     game: &Game,
     shown_player: &ShownPlayer,
     mouse_pos: Vec2,
-    state: &State,
+    state: &mut State,
 ) -> StateUpdate {
     let player = game.get_player(shown_player.index);
     if let Some(city) = game.get_any_city(position) {
@@ -99,18 +64,43 @@ pub fn hover(
                 if is_in_circle(mouse_pos, center, BUILDING_SIZE) {
                     let closest_city_pos = closest_city(player, position);
 
-                    if is_mouse_button_pressed(MouseButton::Left) {
-                        return attempt_influence_click(
-                            game,
-                            city,
-                            shown_player,
-                            closest_city_pos,
-                            *b,
-                            building_name(b),
-                        );
+                    let start_position = if city.player_index == shown_player.index {
+                        city.position
                     } else {
-                        let tooltip = format!("Attempt Influence {building_name} for {cost}");
-                        show_tooltip_for_circle(state, &tooltip, center.to_vec2(), BUILDING_SIZE);
+                        closest_city_pos
+                    };
+                    if let Some(cost) = game.influence_culture_boost_cost(
+                        shown_player.index,
+                        start_position,
+                        city.player_index,
+                        city.position,
+                        *b,
+                    ) {
+                        let player = game.get_player(shown_player.index);
+                        if player.resources.can_afford(&cost) {
+                            if is_mouse_button_pressed(MouseButton::Left) {
+                                return StateUpdate::Execute(Action::Playing(
+                                    PlayingAction::InfluenceCultureAttempt(
+                                        InfluenceCultureAttempt {
+                                            starting_city_position: start_position,
+                                            target_player_index: city.player_index,
+                                            target_city_position: city.position,
+                                            city_piece: *b,
+                                        },
+                                    ),
+                                ));
+                            } else {
+                                let name = building_name(b);
+                                state.set_world_camera();
+                                show_tooltip_for_circle(
+                                    state,
+                                    &format!("Attempt Influence {name} for {cost}"),
+                                    center.to_vec2(),
+                                    BUILDING_SIZE,
+                                );
+                                state.set_screen_camera();
+                            }
+                        }
                     }
                 }
 

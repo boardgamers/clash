@@ -234,10 +234,11 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
         for b in &city.pieces.buildings(Some(player_index)) {
             let p = building_position(city, c, i, b);
             draw_circle(p.x, p.y, BUILDING_SIZE, player_ui::player_color(player_index));
+            let tooltip = if matches!(state.active_dialog, ActiveDialog::CulturalInfluence) { "" } else { building_name(b)};
             draw_scaled_icon(
                 state,
                 &state.assets.buildings[b],
-                building_name(b),
+                tooltip,
                 p.to_vec2() + vec2(-8., -8.),
                 16.,
             );

@@ -69,6 +69,7 @@ impl ActiveDialog {
             ActiveDialog::RecruitUnitSelection(_) => "recruit unit selection",
             ActiveDialog::ReplaceUnits(_) => "replace units",
             ActiveDialog::MoveUnits(_) => "move units",
+            ActiveDialog::CulturalInfluence => "cultural influence",
             ActiveDialog::CulturalInfluenceResolution(_) => "cultural influence resolution",
             ActiveDialog::FreeAdvance => "free advance",
             ActiveDialog::RazeSize1City => "raze size 1 city",
@@ -84,41 +85,41 @@ impl ActiveDialog {
     }
 
     #[must_use]
-    pub fn help_message(&self) -> Option<&str> {
+    pub fn help_message(&self) -> Option<String> {
         match self {
             ActiveDialog::None | ActiveDialog::TileMenu(_) => None,
             ActiveDialog::Log => None,
-            ActiveDialog::IncreaseHappiness(_) => Some("Click on a city to increase happiness"),
+            ActiveDialog::IncreaseHappiness(_) => Some("Click on a city to increase happiness".to_string()),
             ActiveDialog::AdvanceMenu => None,
-            ActiveDialog::AdvancePayment(a) => Some(format!("Click on resources to pay for {}", a.name).as_str()),
-            ActiveDialog::ConstructionPayment(c) => Some(format!("Click on resources to pay for {}", c.name).as_str()),
-            ActiveDialog::CollectResources(_) => Some("Click on a tile to collect resources"),
-            ActiveDialog::RecruitUnitSelection(_) => Some("Click on a unit to recruit"),
-            ActiveDialog::ReplaceUnits(_) => Some("Click on a unit to replace"),
+            ActiveDialog::AdvancePayment(a) => Some(format!("Click on resources to pay for {}", a.name)),
+            ActiveDialog::ConstructionPayment(c) => Some(format!("Click on resources to pay for {}", c.name)),
+            ActiveDialog::CollectResources(_) => Some("Click on a tile to collect resources".to_string()),
+            ActiveDialog::RecruitUnitSelection(_) => Some("Click on a unit to recruit".to_string()),
+            ActiveDialog::ReplaceUnits(_) => Some("Click on a unit to replace".to_string()),
             ActiveDialog::MoveUnits(m) => {
                 if m.start.is_some() {
-                    Some("Click on a highlighted tile to move units")
+                    Some("Click on a highlighted tile to move units".to_string())
                 } else {
-                    Some("Click on a unit to move")
+                    Some("Click on a unit to move".to_string())
                 }
             }
-            ActiveDialog::CulturalInfluence => Some("Click on a building to influence its culture"),
+            ActiveDialog::CulturalInfluence => Some("Click on a building to influence its culture".to_string()),
             ActiveDialog::CulturalInfluenceResolution(_) => {
-                Some("todo")
+                Some("todo".to_string())
             }
-            ActiveDialog::FreeAdvance => Some("Click on an advance to take it for free"),
-            ActiveDialog::RazeSize1City => Some("Click on a city to raze it - or click cancel"),
-            ActiveDialog::CompleteObjectives => Some("Click on an objective to complete it"),
+            ActiveDialog::FreeAdvance => Some("Click on an advance to take it for free".to_string()),
+            ActiveDialog::RazeSize1City => Some("Click on a city to raze it - or click cancel".to_string()),
+            ActiveDialog::CompleteObjectives => Some("Click on an objective to complete it".to_string()),
             ActiveDialog::DetermineFirstPlayer => {
-                Some("Click on a player to determine first player")
+                Some("Click on a player to determine first player".to_string())
             }
-            ActiveDialog::ChangeGovernmentType => Some("Click on a government type to change - or click cancel"),
-            ActiveDialog::ChooseAdditionalAdvances(_) => Some("Click on an advance to choose it"),
-            ActiveDialog::PlayActionCard => Some("Click on an action card to play it"),
-            ActiveDialog::PlaceSettler => Some("Click on a tile to place a settler"),
-            ActiveDialog::Retreat => Some("Click on a unit to retreat"),
-            ActiveDialog::RemoveCasualties(_) => Some("Click on a unit to remove it"),
-            ActiveDialog::WaitingForUpdate => Some("Waiting for server update"),
+            ActiveDialog::ChangeGovernmentType => Some("Click on a government type to change - or click cancel".to_string()),
+            ActiveDialog::ChooseAdditionalAdvances(_) => Some("Click on an advance to choose it".to_string()),
+            ActiveDialog::PlayActionCard => Some("Click on an action card to play it".to_string()),
+            ActiveDialog::PlaceSettler => Some("Click on a tile to place a settler".to_string()),
+            ActiveDialog::Retreat => Some("Click on a unit to retreat".to_string()),
+            ActiveDialog::RemoveCasualties(_) => Some("Click on a unit to remove it".to_string()),
+            ActiveDialog::WaitingForUpdate => Some("Waiting for server update".to_string()),
         }
     }
 
