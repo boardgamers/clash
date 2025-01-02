@@ -52,6 +52,9 @@ pub struct Assets {
 
     // pub cities: HashMap<CityType, Texture2D>,
     pub resources: HashMap<ResourceType, Texture2D>,
+
+    // units
+    pub warrior: Texture2D,
 }
 
 impl Assets {
@@ -137,6 +140,8 @@ impl Assets {
             import: load_png(include_bytes!("../assets/import-3-svgrepo-com.png")),
             export: load_png(include_bytes!("../assets/export-2-svgrepo-com.png")),
             // cities: HashMap::new(),
+
+            warrior: load_png(include_bytes!("../assets/warrior-svgrepo-com.png")),
         }
     }
 

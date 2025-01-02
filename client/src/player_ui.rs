@@ -307,15 +307,13 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
         return StateUpdate::OpenDialog(d);
     }
 
-    if player.can_play_action
-        && bottom_left_texture(state, &assets.movement, icon_pos(0, -3), "Move units")
-    {
-        return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
-    }
-    if player.can_play_action
-        && bottom_left_texture(state, &assets.happy, icon_pos(0, -2), "Increase happiness")
-    {
-        return start_increase_happiness(game, player);
+    if player.can_play_action {
+        if bottom_left_texture(state, &assets.movement, icon_pos(0, -3), "Move units") {
+            return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
+        }
+        if bottom_left_texture(state, &assets.happy, icon_pos(0, -2), "Increase happiness") {
+            return start_increase_happiness(game, player);
+        }
     }
 
     if top_right_texture(state, &assets.log, icon_pos(-1, 0), "Show log") {
