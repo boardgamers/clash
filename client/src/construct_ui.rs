@@ -3,7 +3,7 @@ use std::cmp;
 use macroquad::math::{i32, u32};
 use macroquad::ui::Ui;
 
-use crate::city_ui::CityMenu;
+use crate::city_ui::{CityMenu, IconActionVec};
 use server::action::Action;
 use server::city::City;
 use server::city_pieces::Building;
@@ -15,44 +15,45 @@ use server::position::Position;
 use server::resource_pile::PaymentOptions;
 use server::unit::UnitType;
 
-use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
+use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::recruit_unit_ui::RecruitSelection;
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::CountSelector;
 
-pub fn add_construct_button(
-    game: &Game,
-    menu: &CityMenu,
-    ui: &mut Ui,
+pub fn add_construct_button<'a>(
+    game: &'a Game,
+    state: &'a State,
+    menu: &'a CityMenu,
+    icons: &'a mut IconActionVec,
     building: &Building,
     name: &str,
-) -> StateUpdate {
+) {
     let owner = menu.get_city_owner(game);
     let city = menu.get_city(game);
     if menu.is_city_owner() && menu.player.can_play_action && city.can_construct(building, owner) {
         for pos in building_positions(building, city, &game.map) {
-            if ui.button(
-                None,
-                format!(
-                    "Build {}{}",
-                    name,
-                    pos.map_or(String::new(), |p| format!(" at {p}"))
-                ),
-            ) {
-                return StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(
-                    ConstructionPayment::new(
+            let tooltip = format!(
+                "Built {}{} for {}",
+                name,
+                pos.map_or(String::new(), |p| format!(" at {}", p)),
+                owner.construct_cost(building, city).to_string(),
+            );
+            icons.push((
+                &state.assets.buildings[&building],
+                &tooltip,
+                Box::new(move || {
+                    StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
                         game,
                         name,
                         menu.player.index,
                         menu.city_position,
                         ConstructionProject::Building(building.clone(), pos),
-                    ),
-                ));
-            }
+                    )))
+                }),
+            ));
         }
     }
-    StateUpdate::None
 }
 
 fn building_positions(building: &Building, city: &City, map: &Map) -> Vec<Option<Position>> {
@@ -72,25 +73,25 @@ fn building_positions(building: &Building, city: &City, map: &Map) -> Vec<Option
         .collect()
 }
 
-pub fn add_wonder_buttons(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpdate {
-    let city = menu.get_city(game);
-    let owner = menu.get_city_owner(game);
-    for w in &owner.wonder_cards {
-        if city.can_build_wonder(w, owner, game)
-            && ui.button(None, format!("Build Wonder {}", w.name))
-        {
-            return StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(
-                ConstructionPayment::new(
-                    game,
-                    &w.name,
-                    menu.player.index,
-                    menu.city_position,
-                    ConstructionProject::Wonder(w.name.clone()),
-                ),
-            ));
-        }
-    }
-    StateUpdate::None
+pub fn add_wonder_buttons(game: &Game, menu: &CityMenu, icons: &mut IconActionVec) {
+    // todo
+    // let city = menu.get_city(game);
+    // let owner = menu.get_city_owner(game);
+    // for w in &owner.wonder_cards {
+    //     if city.can_build_wonder(w, owner, game)
+    //         && ui.button(None, format!("Build Wonder {}", w.name))
+    //     {
+    //         return StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(
+    //             ConstructionPayment::new(
+    //                 game,
+    //                 &w.name,
+    //                 menu.player.index,
+    //                 menu.city_position,
+    //                 ConstructionProject::Wonder(w.name.clone()),
+    //             ),
+    //         ));
+    //     }
+    // }
 }
 
 pub fn pay_construction_dialog(

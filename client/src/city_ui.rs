@@ -12,10 +12,10 @@ use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, StateUp
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{add_construct_button, add_wonder_buttons};
 use crate::hex_ui::draw_hex_center_text;
-use crate::recruit_unit_ui::RecruitAmount;
-use crate::{hex_ui, influence_ui, player_ui};
 use crate::layout_ui::{bottom_center_texture, icon_pos};
+use crate::recruit_unit_ui::RecruitAmount;
 use crate::resource_ui::ResourceType;
+use crate::{hex_ui, influence_ui, player_ui};
 
 pub struct CityMenu {
     pub player: ShownPlayer,
@@ -45,52 +45,62 @@ impl CityMenu {
     }
 }
 
-pub fn show_city_menu(game: &Game, menu: &CityMenu, state: &State) -> StateUpdate {
-    let position = menu.city_position;
+pub type IconActionVec<'a> = Vec<(&'a Texture2D, &'a str, Box<dyn Fn() -> StateUpdate + 'a>)>;
+
+pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> StateUpdate {
     let city = menu.get_city(game);
 
-
-    let updates = StateUpdates::new();
     let can_play = menu.player.can_play_action && menu.is_city_owner() && city.can_activate();
-    let mut icons: Vec<(&Texture2D, Box<dyn Fn() -> StateUpdate>)> = vec![];
-    if can_play {
-        icons.push((
-            &state.assets.resources[&ResourceType::Food],
-            Box::new(|| StateUpdate::SetDialog(ActiveDialog::CollectResources(CollectResources::new(
-                menu.player.index,
-                position,
-                possible_resource_collections(game, position, menu.city_owner_index),
-            )))),
-        ));
-        // if bottom_center_texture(state, state.assets.resources[ResourceType::Food], icon_pos())ui.button(None, "Collect Resources") {
-        //     return StateUpdate::SetDialog(ActiveDialog::CollectResources(CollectResources::new(
-        //         menu.player.index,
-        //         menu.city_position,
-        //         possible_resource_collections(game, menu.city_position, menu.city_owner_index),
-        //     )));
-        // }
-        // if ui.button(None, "Recruit Units") {
-        //     return RecruitAmount::new_selection(
-        //         game,
-        //         menu.player.index,
-        //         menu.city_position,
-        //         Units::empty(),
-        //         None,
-        //         &[],
-        //     );
-        // }
-        //
-        // updates.add(add_building_actions(game, menu, ui));
-        // updates.add(add_wonder_buttons(game, menu, ui));
+    if !can_play {
+        return StateUpdate::None;
     }
+    let mut icons: IconActionVec<'a> = vec![];
+    icons.push((
+        &state.assets.resources[&ResourceType::Food],
+        "Collect Resources",
+        Box::new(|| {
+            StateUpdate::SetDialog(ActiveDialog::CollectResources(CollectResources::new(
+                menu.player.index,
+                menu.city_position,
+                possible_resource_collections(game, menu.city_position, menu.city_owner_index),
+            )))
+        }),
+    ));
+    icons.push((
+        &state.assets.warrior,
+        "Recruit Units",
+        Box::new(|| {
+            RecruitAmount::new_selection(
+                game,
+                menu.player.index,
+                menu.city_position,
+                Units::empty(),
+                None,
+                &[],
+            )
+        }),
+    ));
 
-    updates.result()
+    add_building_actions(game, state, menu, &mut icons);
+    // add_wonder_buttons(game, menu, &mut icons);
+
+    for (i, (icon, tooltip, action)) in icons.iter().enumerate() {
+        if bottom_center_texture(
+            state,
+            icon,
+            icon_pos(-1 * icons.len() as i8 / 2 + i as i8, -1),
+            tooltip,
+        ) {
+            return action();
+        }
+    }
+    StateUpdate::None
 }
 
-pub fn city_label(game: &Game, city: &City) -> Vec<String> {
-    vec![
-        format!(
-            "size: {} mood: {} activated: {}",
+pub fn city_labels(game: &Game, city: &City) -> Vec<String> {
+    [
+        vec![format!(
+            "Size: {} Mood: {} Activated: {}",
             city.size(),
             match city.mood_state {
                 MoodState::Happy => "Happy",
@@ -98,47 +108,43 @@ pub fn city_label(game: &Game, city: &City) -> Vec<String> {
                 MoodState::Angry => "Angry",
             },
             city.is_activated()
-        ),
-        format!(
-            "Buildings: {}",
-            city.pieces
-                .building_owners()
-                .iter()
-                .filter_map(|(b, o)| {
-                    o.as_ref().map(|o| {
-                        if city.player_index == *o {
-                            building_name(b).to_string()
-                        } else {
-                            format!(
-                                "{} (owned by {})",
-                                building_name(b),
-                                game.get_player(*o).get_name()
-                            )
-                        }
-                    })
+        )],
+        city.pieces
+            .building_owners()
+            .iter()
+            .filter_map(|(b, o)| {
+                o.as_ref().map(|o| {
+                    if city.player_index == *o {
+                        building_name(b).to_string()
+                    } else {
+                        format!(
+                            "{} (owned by {})",
+                            building_name(b),
+                            game.get_player(*o).get_name()
+                        )
+                    }
                 })
-                .collect::<Vec<_>>()
-                .join(", ")
-        ),
+            })
+            .collect(),
     ]
+    .concat()
 }
 
-fn add_building_actions(game: &Game, menu: &CityMenu, ui: &mut Ui) -> StateUpdate {
+fn add_building_actions(game: &Game, state: &State, menu: &CityMenu, icons: &mut IconActionVec) {
     let closest_city_pos = influence_ui::closest_city(game, menu);
 
-    let mut updates = StateUpdates::new();
     for (building, name) in building_names() {
-        updates.add(add_construct_button(game, menu, ui, &building, name));
-        updates.add(influence_ui::add_influence_button(
-            game,
-            menu,
-            ui,
-            closest_city_pos,
-            &building,
-            name,
-        ));
+        add_construct_button(game, state, menu, icons, &building, name);
+        // todo
+        // updates.add(influence_ui::add_influence_button(
+        //     game,
+        //     menu,
+        //     ui,
+        //     closest_city_pos,
+        //     &building,
+        //     name,
+        // ));
     }
-    updates.result()
 }
 
 pub fn draw_city(owner: &Player, city: &City, state: &State) {

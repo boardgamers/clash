@@ -1,4 +1,4 @@
-use crate::city_ui::city_label;
+use crate::city_ui::city_labels;
 use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
@@ -248,25 +248,17 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
                 .map_or("outside the map", terrain_name),
         ));
 
-        let suffix = if let Some(c) = game.get_any_city(position) {
-            city_label(game, c)
-        } else {
-            vec![]
-        };
-
-        let units_str = &unit_ui::units_on_tile(game, position)
-            .map(|(p, unit)| {
-                let army_move = game
-                    .get_player(p)
-                    .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
-                unit_ui::unit_label(&unit, army_move)
-            })
-            .join(", ");
-        if !units_str.is_empty() {
-            label(units_str);
+        if let Some(c) = game.get_any_city(position) {
+            for l in city_labels(game, c) {
+                label(&l);
+            }
         }
-        for s in suffix {
-            label(&s);
+
+        for (p, unit) in unit_ui::units_on_tile(game, position) {
+            let army_move = game
+                .get_player(p)
+                .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
+            label(&unit_ui::unit_label(&unit, army_move));
         }
     }
 }
@@ -350,8 +342,8 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
         if bottom_left_texture(state, &assets.movement, icon_pos(0, -3), "Move units") {
             return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
         }
-        if bottom_left_texture(state, &assets.log, icon_pos(1, -3), "Show log") {
-            return StateUpdate::OpenDialog(ActiveDialog::Log);
+        if bottom_left_texture(state, &assets.advances, icon_pos(1, -3), "Research advances") {
+            return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
         }
         if bottom_left_texture(state, &assets.happy, icon_pos(0, -2), "Increase happiness") {
             return start_increase_happiness(game, player);
@@ -365,7 +357,7 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
         state,
         &assets.advances,
         icon_pos(-2, 0),
-        "Choose or show advances",
+        "Show advances",
     ) {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     };

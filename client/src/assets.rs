@@ -1,14 +1,15 @@
 use crate::client::Features;
+use crate::collect_ui::CollectResources;
 use crate::resource_ui::ResourceType;
 use macroquad::prelude::{
     load_texture, load_ttf_font, Color, Font, Image, ImageFormat, RectOffset,
 };
 use macroquad::texture::Texture2D;
 use macroquad::ui::{root_ui, Skin};
+use server::city_pieces::Building;
 use server::map::Terrain;
 use server::unit::UnitType;
 use std::collections::HashMap;
-use crate::collect_ui::CollectResources;
 
 pub struct Assets {
     pub terrain: HashMap<Terrain, Texture2D>,
@@ -54,6 +55,7 @@ pub struct Assets {
 
     // pub cities: HashMap<CityType, Texture2D>,
     pub resources: HashMap<ResourceType, Texture2D>,
+    pub buildings: HashMap<Building, Texture2D>,
 
     // units
     pub warrior: Texture2D,
@@ -100,6 +102,41 @@ impl Assets {
                 (
                     ResourceType::CultureTokens,
                     load_png(include_bytes!("../assets/theater-drama-svgrepo-com.png")),
+                ),
+            ]
+            .iter()
+            .cloned()
+            .collect(),
+
+            // buildings
+            buildings: [
+                (
+                    Building::Academy,
+                    load_png(include_bytes!("../assets/academy-cap-svgrepo-com.png")),
+                ),
+                (
+                    Building::Market,
+                    load_png(include_bytes!("../assets/market-place-svgrepo-com.png")),
+                    )      ,
+                (
+                    Building::Obelisk,
+                    load_png(include_bytes!("../assets/obelisk-svgrepo-com.png")),
+                ),
+                (
+                    Building::Observatory,
+                    load_png(include_bytes!("../assets/observatory-exploration-svgrepo-com.png")),
+                ),
+                (
+                    Building::Fortress,
+                    load_png(include_bytes!("../assets/castle-fortress-14-svgrepo-com.png")),
+                ),
+                (
+                    Building::Port,
+                    load_png(include_bytes!("../assets/port-location-svgrepo-com.png")),
+                ),
+                (
+                    Building::Temple,
+                    load_png(include_bytes!("../assets/temple-building-with-columns-svgrepo-com.png")),
                 ),
             ]
             .iter()
