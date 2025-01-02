@@ -171,7 +171,7 @@ pub struct CityPiecesData {
     wonders: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize, Eq, PartialEq, Hash, Clone, Debug)]
+#[derive(Serialize, Deserialize, Eq, PartialEq, Hash, Clone, Debug, Copy)]
 pub enum Building {
     Academy,
     Market,

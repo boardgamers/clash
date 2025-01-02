@@ -10,7 +10,7 @@ use server::unit::Units;
 
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, StateUpdates};
 use crate::collect_ui::{possible_resource_collections, CollectResources};
-use crate::construct_ui::{add_construct_button, add_wonder_buttons};
+use crate::construct_ui::{building_positions, ConstructionPayment, ConstructionProject};
 use crate::hex_ui::draw_hex_center_text;
 use crate::layout_ui::{bottom_center_texture, icon_pos};
 use crate::recruit_unit_ui::RecruitAmount;
@@ -45,7 +45,7 @@ impl CityMenu {
     }
 }
 
-pub type IconActionVec<'a> = Vec<(&'a Texture2D, &'a str, Box<dyn Fn() -> StateUpdate + 'a>)>;
+pub type IconActionVec<'a> = Vec<(&'a Texture2D, String, Box<dyn Fn() -> StateUpdate + 'a>)>;
 
 pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> StateUpdate {
     let city = menu.get_city(game);
@@ -57,7 +57,7 @@ pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) 
     let mut icons: IconActionVec<'a> = vec![];
     icons.push((
         &state.assets.resources[&ResourceType::Food],
-        "Collect Resources",
+        "Collect Resources".to_string(),
         Box::new(|| {
             StateUpdate::SetDialog(ActiveDialog::CollectResources(CollectResources::new(
                 menu.player.index,
@@ -68,7 +68,7 @@ pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) 
     ));
     icons.push((
         &state.assets.warrior,
-        "Recruit Units",
+        "Recruit Units".to_string(),
         Box::new(|| {
             RecruitAmount::new_selection(
                 game,
@@ -81,7 +81,50 @@ pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) 
         }),
     ));
 
-    add_building_actions(game, state, menu, &mut icons);
+    let owner = menu.get_city_owner(game);
+    let city = menu.get_city(game);
+    let closest_city_pos = influence_ui::closest_city(game, menu);
+
+    for (building, name) in building_names() {
+        if menu.is_city_owner()
+            && menu.player.can_play_action
+            && city.can_construct(&building, owner)
+        {
+            for pos in building_positions(&building, city, &game.map) {
+                let tooltip = format!(
+                    "Built {}{} for {}",
+                    name,
+                    pos.map_or(String::new(), |p| format!(" at {}", p)),
+                    owner.construct_cost(&building, city).to_string(),
+                );
+                icons.push((
+                    &state.assets.buildings[&building],
+                    tooltip,
+                    Box::new(move || {
+                        StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(
+                            ConstructionPayment::new(
+                                game,
+                                name,
+                                menu.player.index,
+                                menu.city_position,
+                                ConstructionProject::Building(building, pos),
+                            ),
+                        ))
+                    }),
+                ));
+            }
+        }
+        // todo should not be in city menu
+              // updates.add(influence_ui::add_influence_button(
+              //     game,
+              //     menu,
+              //     ui,
+              //     closest_city_pos,
+              //     &building,
+              //     name,
+              // ));
+    }
+
     // add_wonder_buttons(game, menu, &mut icons);
 
     for (i, (icon, tooltip, action)) in icons.iter().enumerate() {
@@ -128,23 +171,6 @@ pub fn city_labels(game: &Game, city: &City) -> Vec<String> {
             .collect(),
     ]
     .concat()
-}
-
-fn add_building_actions(game: &Game, state: &State, menu: &CityMenu, icons: &mut IconActionVec) {
-    let closest_city_pos = influence_ui::closest_city(game, menu);
-
-    for (building, name) in building_names() {
-        add_construct_button(game, state, menu, icons, &building, name);
-        // todo
-        // updates.add(influence_ui::add_influence_button(
-        //     game,
-        //     menu,
-        //     ui,
-        //     closest_city_pos,
-        //     &building,
-        //     name,
-        // ));
-    }
 }
 
 pub fn draw_city(owner: &Player, city: &City, state: &State) {

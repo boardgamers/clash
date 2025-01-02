@@ -21,42 +21,8 @@ use crate::recruit_unit_ui::RecruitSelection;
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::CountSelector;
 
-pub fn add_construct_button<'a>(
-    game: &'a Game,
-    state: &'a State,
-    menu: &'a CityMenu,
-    icons: &'a mut IconActionVec,
-    building: &Building,
-    name: &str,
-) {
-    let owner = menu.get_city_owner(game);
-    let city = menu.get_city(game);
-    if menu.is_city_owner() && menu.player.can_play_action && city.can_construct(building, owner) {
-        for pos in building_positions(building, city, &game.map) {
-            let tooltip = format!(
-                "Built {}{} for {}",
-                name,
-                pos.map_or(String::new(), |p| format!(" at {}", p)),
-                owner.construct_cost(building, city).to_string(),
-            );
-            icons.push((
-                &state.assets.buildings[&building],
-                &tooltip,
-                Box::new(move || {
-                    StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
-                        game,
-                        name,
-                        menu.player.index,
-                        menu.city_position,
-                        ConstructionProject::Building(building.clone(), pos),
-                    )))
-                }),
-            ));
-        }
-    }
-}
 
-fn building_positions(building: &Building, city: &City, map: &Map) -> Vec<Option<Position>> {
+pub fn building_positions(building: &Building, city: &City, map: &Map) -> Vec<Option<Position>> {
     if building != &Building::Port {
         return vec![None];
     }
