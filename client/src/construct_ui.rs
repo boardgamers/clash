@@ -36,27 +36,6 @@ pub fn building_positions(building: Building, city: &City, map: &Map) -> Vec<Opt
         .collect()
 }
 
-// pub fn add_wonder_buttons(game: &Game, menu: &CityMenu, icons: &mut IconActionVec) {
-//     // todo
-//     // let city = menu.get_city(game);
-//     // let owner = menu.get_city_owner(game);
-//     // for w in &owner.wonder_cards {
-//     //     if city.can_build_wonder(w, owner, game)
-//     //         && ui.button(None, format!("Build Wonder {}", w.name))
-//     //     {
-//     //         return StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(
-//     //             ConstructionPayment::new(
-//     //                 game,
-//     //                 &w.name,
-//     //                 menu.player.index,
-//     //                 menu.city_position,
-//     //                 ConstructionProject::Wonder(w.name.clone()),
-//     //             ),
-//     //         ));
-//     //     }
-//     // }
-// }
-
 pub fn pay_construction_dialog(
     game: &Game,
     payment: &ConstructionPayment,

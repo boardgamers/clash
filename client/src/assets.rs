@@ -51,9 +51,9 @@ pub struct Assets {
     pub import: Texture2D,
     pub export: Texture2D,
 
-    // pub cities: HashMap<CityType, Texture2D>,
     pub resources: HashMap<ResourceType, Texture2D>,
     pub buildings: HashMap<Building, Texture2D>,
+    pub wonders: HashMap<String, Texture2D>,
 }
 
 impl Assets {
@@ -66,14 +66,10 @@ impl Assets {
             units: Self::units(),
             skin: Self::skin(&load_ttf_font(&font_name).await.unwrap()),
 
-            // mood icons
             angry: load_png(include_bytes!("../assets/angry-face-svgrepo-com.png")),
-
-            // resource icons
             resources: Self::resources(),
-
-            // buildings
             buildings: Self::buildings(),
+            wonders: Self::wonders(),
 
             // action icons
             advances: load_png(include_bytes!("../assets/lab-svgrepo-com.png")),
@@ -112,6 +108,16 @@ impl Assets {
             import: load_png(include_bytes!("../assets/import-3-svgrepo-com.png")),
             export: load_png(include_bytes!("../assets/export-2-svgrepo-com.png")),
         }
+    }
+
+    fn wonders() -> HashMap<String, Texture2D> {
+        [(
+            "Pyramids".to_string(),
+            load_png(include_bytes!("../assets/pyramid-svgrepo-com.png")),
+        )]
+            .iter()
+            .cloned()
+            .collect()
     }
 
     fn units() -> HashMap<UnitType, Texture2D> {

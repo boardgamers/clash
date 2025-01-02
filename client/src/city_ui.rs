@@ -123,7 +123,25 @@ pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) 
         // ));
     }
 
-    // add_wonder_buttons(game, menu, &mut icons);
+    for w in &owner.wonder_cards {
+        if city.can_build_wonder(w, owner, game) {
+            icons.push((
+                &state.assets.wonders[&w.name],
+                format!("Build wonder {}", w.name),
+                Box::new(move || {
+                    StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(
+                        ConstructionPayment::new(
+                            game,
+                            &w.name,
+                            menu.player.index,
+                            menu.city_position,
+                            ConstructionProject::Wonder(w.name.clone()),
+                        ),
+                    ))
+                }),
+            ));
+        }
+    }
 
     for (i, (icon, tooltip, action)) in icons.iter().enumerate() {
         if bottom_center_texture(
@@ -208,7 +226,14 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
     city.pieces.wonders.iter().for_each(|w| {
         let p = hex_ui::rotate_around(c, 20.0, 90 * i);
         draw_circle(p.x, p.y, 18.0, player_ui::player_color(owner.index));
-        draw_text(&w.name, p.x - 10.0, p.y + 10.0, 40.0, BLACK);
+        let size = 20.;
+        draw_scaled_icon(
+            state,
+            &state.assets.wonders[&w.name],
+            &w.name,
+            p.to_vec2() + vec2(-size / 2., -size / 2.),
+            size,
+        );
         i += 1;
     });
 
