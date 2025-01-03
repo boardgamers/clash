@@ -1,7 +1,6 @@
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::dialog_ui::{active_dialog_window, cancel_button};
-use crate::select_ui;
-use crate::select_ui::{ConfirmSelection, Selection, SelectionConfirm};
+use crate::select_ui::{confirm_update, ConfirmSelection, SelectionConfirm};
 use server::action::Action;
 use server::content::advances;
 use server::game::Game;
@@ -67,24 +66,6 @@ impl ChooseAdditionalAdvances {
     }
 }
 
-impl Selection for ChooseAdditionalAdvances {
-    fn all(&self) -> &[String] {
-        &self.advances
-    }
-
-    fn selected(&self) -> &[String] {
-        &self.selected
-    }
-
-    fn selected_mut(&mut self) -> &mut Vec<String> {
-        &mut self.selected
-    }
-
-    fn can_select(&self, _game: &Game, _name: &str) -> bool {
-        true
-    }
-}
-
 impl ConfirmSelection for ChooseAdditionalAdvances {
     fn cancel_name(&self) -> Option<&str> {
         Some("Back to choose government type")
@@ -136,16 +117,13 @@ pub fn change_government_type_dialog(game: &Game, player: &ShownPlayer) -> State
 
 pub fn choose_additional_advances_dialog(
     game: &Game,
-    additional_advances: &ChooseAdditionalAdvances,
-    player: &ShownPlayer,
+    a: &ChooseAdditionalAdvances,
+    state: &State,
 ) -> StateUpdate {
-    select_ui::selection_dialog(
-        game,
-        player,
-        "Select additional advances:",
-        additional_advances,
-        |a| StateUpdate::SetDialog(ActiveDialog::ChooseAdditionalAdvances(a)),
-        |a| {
+    // todo actual selection should be done in advance selection dialog
+    confirm_update(
+        a,
+        || {
             StateUpdate::status_phase(StatusPhaseAction::ChangeGovernmentType(
                 ChangeGovernmentType::ChangeGovernment(ChangeGovernment {
                     new_government: a.government.clone(),
@@ -153,6 +131,8 @@ pub fn choose_additional_advances_dialog(
                 }),
             ))
         },
+        &a.confirm(game),
+        state,
     )
 }
 

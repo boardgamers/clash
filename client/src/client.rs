@@ -122,7 +122,7 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
             status_phase_ui::change_government_type_dialog(game, player)
         }
         ActiveDialog::ChooseAdditionalAdvances(a) => {
-            status_phase_ui::choose_additional_advances_dialog(game, a, player)
+            status_phase_ui::choose_additional_advances_dialog(game, a, state)
         }
 
         //combat
