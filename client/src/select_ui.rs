@@ -1,8 +1,6 @@
 use crate::client_state::{ShownPlayer, State, StateUpdate, StateUpdates};
 use crate::dialog_ui::{active_dialog_window, cancel_button, ok_button};
-use crate::layout_ui::{
-    bottom_center_anchor, bottom_center_texture, ok_pos, ICON_SIZE,
-};
+use crate::layout_ui::{bottom_center_anchor, bottom_center_texture, ok_pos, ICON_SIZE};
 use macroquad::color::BLACK;
 use macroquad::math::{bool, vec2, Vec2};
 use macroquad::prelude::TextParams;

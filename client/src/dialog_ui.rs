@@ -101,4 +101,3 @@ pub fn ok_button(state: &State, valid: bool) -> bool {
     let ok_tooltip = if valid { "OK" } else { "Invalid selection" };
     bottom_right_texture(state, ok, icon_pos(-8, -1), ok_tooltip) && valid
 }
-

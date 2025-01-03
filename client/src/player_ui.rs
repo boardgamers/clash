@@ -103,28 +103,30 @@ pub fn top_icon_with_label(
     top_center_texture(state, texture, p, tooltip);
 }
 
-pub fn show_top_center(game: &Game, player: &ShownPlayer, state: &State) {
-    let p = game.get_player(player.index);
+pub fn show_top_center(game: &Game, shown_player: &ShownPlayer, state: &State) {
+    let player = game.get_player(shown_player.index);
 
     top_icon_with_label(
-        player,
+        shown_player,
         state,
-        &format!("{}", &p.victory_points()),
+        &format!("{}", &player.victory_points()),
         &state.assets.victory_points,
         icon_pos(3, 0),
         "Victory Points",
     );
-    let amount = new_resource_map(&p.resources);
-    let limit = new_resource_map(&p.resource_limit);
+    let amount = new_resource_map(&player.resources);
+    let limit = new_resource_map(&player.resource_limit);
     for (i, r) in resource_types().iter().rev().enumerate() {
         let x = 2 - i as i8;
         let a = amount[r];
         let l = limit[r];
         let s = match &state.active_dialog {
-            ActiveDialog::CollectResources(c) => format!("{}+{}", a, new_resource_map(&c.collected())[r]),
+            ActiveDialog::CollectResources(c) => {
+                format!("{}+{}", a, new_resource_map(&c.collected())[r])
+            }
             _ => format!("{a}/{l}"),
         };
-        resource_label(player, state, &s, *r, icon_pos(x, 0));
+        resource_label(shown_player, state, &s, *r, icon_pos(x, 0));
     }
 }
 

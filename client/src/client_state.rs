@@ -100,9 +100,7 @@ impl ActiveDialog {
             ActiveDialog::ConstructionPayment(c) => {
                 vec![format!("Click on resources to pay for {}", c.name)]
             }
-            ActiveDialog::CollectResources(collect) => {
-                collect.help_text(game)
-            }
+            ActiveDialog::CollectResources(collect) => collect.help_text(game),
             ActiveDialog::RecruitUnitSelection(_) => vec!["Click on a unit to recruit".to_string()],
             ActiveDialog::ReplaceUnits(_) => vec!["Click on a unit to replace".to_string()],
             ActiveDialog::MoveUnits(m) => {

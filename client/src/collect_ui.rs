@@ -4,7 +4,7 @@ use std::iter;
 use macroquad::color::BLACK;
 use macroquad::input::MouseButton;
 use macroquad::math::{i32, vec2};
-use macroquad::prelude::{draw_circle_lines, is_mouse_button_pressed, mouse_position, WHITE};
+use macroquad::prelude::{is_mouse_button_pressed, mouse_position, WHITE};
 use macroquad::shapes::draw_circle;
 use server::action::Action;
 use server::consts::PORT_CHOICES;
@@ -178,16 +178,16 @@ pub fn draw_resource_collect_tile(state: &State, pos: Position) -> StateUpdate {
                         a.is_some_and(|a| *a > 0).then(|| (*r, a.unwrap()))
                     })
                     .collect();
-                draw_collect_item(&state, center, m);
+                draw_collect_item(state, center, &m);
             }
         }
     };
     StateUpdate::None
 }
 
-fn draw_collect_item(state: &State, center: Point, resources: Vec<(ResourceType, &u32)>) {
+fn draw_collect_item(state: &State, center: Point, resources: &[(ResourceType, &u32)]) {
     if resources.iter().len() == 1 {
-        let (r, a) = resources.first().unwrap();
+        let (r, _) = resources.first().unwrap();
         draw_icon(
             state,
             &state.assets.resources[r],
@@ -195,7 +195,7 @@ fn draw_collect_item(state: &State, center: Point, resources: Vec<(ResourceType,
             center.to_vec2() - vec2(ICON_SIZE / 2., ICON_SIZE / 2.),
         );
     } else {
-        resources.iter().enumerate().for_each(|(j, (r, a))| {
+        resources.iter().enumerate().for_each(|(j, (r, _))| {
             let size = ICON_SIZE / 2.;
             let c = hex_ui::rotate_around(center, 10.0, (180 * j) as i32);
             draw_scaled_icon(

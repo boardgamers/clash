@@ -9,7 +9,7 @@ use server::position::Position;
 
 use crate::advance_ui::{pay_advance_dialog, show_advance_menu, show_free_advance_menu};
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, StateUpdates};
-use crate::collect_ui::{ collect_resources_dialog};
+use crate::collect_ui::collect_resources_dialog;
 use crate::construct_ui::pay_construction_dialog;
 use crate::happiness_ui::{increase_happiness_dialog, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
@@ -144,7 +144,9 @@ pub fn try_click(game: &Game, state: &mut State, player: &ShownPlayer) -> StateU
 
     if player.can_control {
         match &state.active_dialog {
-            ActiveDialog::RemoveCasualties(_) | ActiveDialog::CollectResources(_) => StateUpdate::None,
+            ActiveDialog::RemoveCasualties(_) | ActiveDialog::CollectResources(_) => {
+                StateUpdate::None
+            }
             ActiveDialog::MoveUnits(s) => move_ui::click(pos, s, mouse_pos, game),
             ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::click_replace(pos, r),
             ActiveDialog::RazeSize1City => raze_city_confirm_dialog(game, player, pos),
