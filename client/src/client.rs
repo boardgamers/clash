@@ -128,9 +128,7 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
         //combat
         ActiveDialog::PlayActionCard => combat_ui::play_action_card_dialog(player),
         ActiveDialog::Retreat => combat_ui::retreat_dialog(player),
-        ActiveDialog::RemoveCasualties(s) => {
-            combat_ui::remove_casualties_dialog(game, s, state)
-        }
+        ActiveDialog::RemoveCasualties(s) => combat_ui::remove_casualties_dialog(game, s, state),
     }
 }
 

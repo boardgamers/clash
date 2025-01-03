@@ -136,9 +136,11 @@ pub fn unit_selection_click<T: UnitSelection>(
     on_change: impl Fn(T) -> StateUpdate,
 ) -> StateUpdate {
     if let Some(unit_id) = unit_at_pos(pos, mouse_pos, player.get(game)) {
-        let mut new = sel.clone();
-        unit_selection_clicked(unit_id, new.selected_units_mut());
-        return on_change(new);
+        if sel.can_select(game, player.get(game).get_unit(unit_id).unwrap()) {
+            let mut new = sel.clone();
+            unit_selection_clicked(unit_id, new.selected_units_mut());
+            return on_change(new);
+        }
     }
     StateUpdate::None
 }

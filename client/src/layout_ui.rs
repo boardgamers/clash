@@ -79,9 +79,7 @@ pub fn draw_scaled_icon(
 
 #[must_use]
 pub fn left_mouse_button_pressed_in_rect(rect: Rect, state: &State) -> bool {
-    left_mouse_button_pressed(state)
-        .map(|p| rect.contains(p))
-        .unwrap_or(false)
+    left_mouse_button_pressed(state).is_some_and(|p| rect.contains(p))
 }
 
 #[must_use]

@@ -400,7 +400,7 @@ impl State {
     }
 
     fn close_dialog(&mut self) {
-            self.active_dialog = ActiveDialog::None;
+        self.active_dialog = ActiveDialog::None;
     }
 
     pub fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {
