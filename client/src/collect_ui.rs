@@ -165,7 +165,7 @@ pub fn draw_resource_collect_tile(state: &State, pos: Position) {
                 } else {
                     WHITE
                 };
-                draw_circle(p.x, p.y, ICON_SIZE / 2., color);
+                draw_circle(p.x, p.y, 20., color);
                 let map = new_resource_map(pile);
                 let m: Vec<(ResourceType, &u32)> = resource_types().iter().filter_map(|r| {
                     let a = map.get(r);
@@ -188,8 +188,8 @@ fn draw_collect_item(state: &State, center: Point, resources: Vec<(ResourceType,
         );
     } else {
         resources.iter().enumerate().for_each(|(j, (r, a))| {
-            let size = ICON_SIZE / 4.;
-            let c = hex_ui::rotate_around(center, 30.0, (90 * j) as i32);
+            let size = ICON_SIZE / 2.;
+            let c = hex_ui::rotate_around(center, 10.0, (180 * j) as i32);
             draw_scaled_icon(
                 state,
                 &state.assets.resources[r],
