@@ -144,12 +144,7 @@ impl ActiveDialog {
     pub fn is_map_dialog(&self) -> bool {
         matches!(
             self,
-            ActiveDialog::TileMenu(_)
-                | ActiveDialog::IncreaseHappiness(_)
-                | ActiveDialog::CollectResources(_)
-                | ActiveDialog::MoveUnits(_)
-                | ActiveDialog::PlaceSettler
-                | ActiveDialog::RazeSize1City
+            ActiveDialog::PlaceSettler
         )
     }
 
