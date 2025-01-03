@@ -89,7 +89,7 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         ActiveDialog::AdvanceMenu => show_advance_menu(game, player),
         ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, player, game, state),
         ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p, player, state),
-        ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c, player),
+        ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c, state),
         ActiveDialog::RecruitUnitSelection(s) => {
             recruit_unit_ui::select_dialog(game, s, player, state)
         }

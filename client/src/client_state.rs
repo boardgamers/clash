@@ -85,60 +85,60 @@ impl ActiveDialog {
     }
 
     #[must_use]
-    pub fn help_message(&self) -> Option<String> {
+    pub fn help_message(&self, game: &Game) -> Vec<String> {
         match self {
             ActiveDialog::None
             | ActiveDialog::TileMenu(_)
             | ActiveDialog::Log
-            | ActiveDialog::AdvanceMenu => None,
+            | ActiveDialog::AdvanceMenu => vec![],
             ActiveDialog::IncreaseHappiness(_) => {
-                Some("Click on a city to increase happiness".to_string())
+                vec!["Click on a city to increase happiness".to_string()]
             }
             ActiveDialog::AdvancePayment(a) => {
-                Some(format!("Click on resources to pay for {}", a.name))
+                vec![format!("Click on resources to pay for {}", a.name)]
             }
             ActiveDialog::ConstructionPayment(c) => {
-                Some(format!("Click on resources to pay for {}", c.name))
+                vec![format!("Click on resources to pay for {}", c.name)]
             }
-            ActiveDialog::CollectResources(_) => {
-                Some("Click on a tile to collect resources".to_string())
+            ActiveDialog::CollectResources(collect) => {
+                collect.help_text(game)
             }
-            ActiveDialog::RecruitUnitSelection(_) => Some("Click on a unit to recruit".to_string()),
-            ActiveDialog::ReplaceUnits(_) => Some("Click on a unit to replace".to_string()),
+            ActiveDialog::RecruitUnitSelection(_) => vec!["Click on a unit to recruit".to_string()],
+            ActiveDialog::ReplaceUnits(_) => vec!["Click on a unit to replace".to_string()],
             ActiveDialog::MoveUnits(m) => {
                 if m.start.is_some() {
-                    Some("Click on a highlighted tile to move units".to_string())
+                    vec!["Click on a highlighted tile to move units".to_string()]
                 } else {
-                    Some("Click on a unit to move".to_string())
+                    vec!["Click on a unit to move".to_string()]
                 }
             }
             ActiveDialog::CulturalInfluence => {
-                Some("Click on a building to influence its culture".to_string())
+                vec!["Click on a building to influence its culture".to_string()]
             }
-            ActiveDialog::CulturalInfluenceResolution(_) => Some("todo".to_string()),
+            ActiveDialog::CulturalInfluenceResolution(_) => vec!["todo".to_string()],
             ActiveDialog::FreeAdvance => {
-                Some("Click on an advance to take it for free".to_string())
+                vec!["Click on an advance to take it for free".to_string()]
             }
             ActiveDialog::RazeSize1City => {
-                Some("Click on a city to raze it - or click cancel".to_string())
+                vec!["Click on a city to raze it - or click cancel".to_string()]
             }
             ActiveDialog::CompleteObjectives => {
-                Some("Click on an objective to complete it".to_string())
+                vec!["Click on an objective to complete it".to_string()]
             }
             ActiveDialog::DetermineFirstPlayer => {
-                Some("Click on a player to determine first player".to_string())
+                vec!["Click on a player to determine first player".to_string()]
             }
             ActiveDialog::ChangeGovernmentType => {
-                Some("Click on a government type to change - or click cancel".to_string())
+                vec!["Click on a government type to change - or click cancel".to_string()]
             }
             ActiveDialog::ChooseAdditionalAdvances(_) => {
-                Some("Click on an advance to choose it".to_string())
+                vec!["Click on an advance to choose it".to_string()]
             }
-            ActiveDialog::PlayActionCard => Some("Click on an action card to play it".to_string()),
-            ActiveDialog::PlaceSettler => Some("Click on a tile to place a settler".to_string()),
-            ActiveDialog::Retreat => Some("Click on a unit to retreat".to_string()),
-            ActiveDialog::RemoveCasualties(_) => Some("Click on a unit to remove it".to_string()),
-            ActiveDialog::WaitingForUpdate => Some("Waiting for server update".to_string()),
+            ActiveDialog::PlayActionCard => vec!["Click on an action card to play it".to_string()],
+            ActiveDialog::PlaceSettler => vec!["Click on a tile to place a settler".to_string()],
+            ActiveDialog::Retreat => vec!["Click on a unit to retreat".to_string()],
+            ActiveDialog::RemoveCasualties(_) => vec!["Click on a unit to remove it".to_string()],
+            ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
         }
     }
 
@@ -363,14 +363,6 @@ impl State {
     pub fn clear(&mut self) {
         self.active_dialog = ActiveDialog::None;
         self.pending_update = None;
-    }
-
-    #[must_use]
-    pub fn is_collect(&self) -> bool {
-        if let ActiveDialog::CollectResources(_c) = &self.active_dialog {
-            return true;
-        }
-        false
     }
 
     pub fn update(&mut self, game: &Game, update: StateUpdate) -> GameSyncRequest {

@@ -1,7 +1,7 @@
 use crate::client_state::{ShownPlayer, State, StateUpdate, StateUpdates};
-use crate::dialog_ui::active_dialog_window;
+use crate::dialog_ui::{active_dialog_window, cancel_button, ok_button};
 use crate::layout_ui::{
-    bottom_center_anchor, bottom_center_texture, bottom_right_texture, icon_pos, ok_pos, ICON_SIZE,
+    bottom_center_anchor, bottom_center_texture, ok_pos, ICON_SIZE,
 };
 use macroquad::color::BLACK;
 use macroquad::math::{bool, vec2, Vec2};
@@ -85,17 +85,10 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
         };
     }
 
-    let valid = is_valid(container);
-    let ok = if valid {
-        &state.assets.ok
-    } else {
-        &state.assets.ok_blocked
-    };
-    let ok_tooltip = if valid { "OK" } else { "Invalid selection" };
-    if bottom_right_texture(state, ok, icon_pos(-8, -1), ok_tooltip) && valid {
+    if ok_button(state, is_valid(container)) {
         return execute_action(container);
-    };
-    if bottom_right_texture(state, &state.assets.cancel, icon_pos(-7, -1), "Cancel") {
+    }
+    if cancel_button(state) {
         return StateUpdate::Cancel;
     };
 

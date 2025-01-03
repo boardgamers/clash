@@ -2,9 +2,9 @@ use std::collections::HashMap;
 use std::iter;
 
 use macroquad::color::BLACK;
-use macroquad::math::i32;
-use macroquad::prelude::{draw_circle_lines, draw_text, WHITE};
-
+use macroquad::math::{i32, vec2};
+use macroquad::prelude::{draw_circle_lines, WHITE};
+use macroquad::shapes::draw_circle;
 use server::action::Action;
 use server::consts::PORT_CHOICES;
 use server::game::Game;
@@ -12,11 +12,12 @@ use server::playing_actions::{get_total_collection, PlayingAction};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
-use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
-use crate::dialog_ui::active_dialog_window;
+use crate::client_state::{ActiveDialog, State, StateUpdate};
+use crate::dialog_ui::{cancel_button, ok_button};
 use crate::hex_ui;
-use crate::layout_ui::{cancel_pos, ok_pos};
-use crate::resource_ui::resource_pile_string;
+use crate::hex_ui::Point;
+use crate::layout_ui::{draw_icon, draw_scaled_icon, ICON_SIZE};
+use crate::resource_ui::{new_resource_map, resource_name, resource_types, ResourceType};
 
 #[derive(Clone)]
 pub struct CollectResources {
@@ -46,50 +47,58 @@ impl CollectResources {
             .find(|(pos, _)| pos == &p)
             .map(|(_, r)| r)
     }
+
+    pub fn help_text(&self, game: &Game) -> Vec<String> {
+        let extra = self.extra_resources(game);
+        vec![
+            "Click on a tile to collect resources".to_string(),
+            format!("{extra} left"),
+        ]
+    }
+
+    pub fn extra_resources(&self, game: &Game) -> i8 {
+        let city = game.get_city(self.player_index, self.city_position);
+        city.mood_modified_size() as i8 - self.collections.len() as i8
+    }
+
+    pub fn collected(&self) -> ResourcePile {
+        self.collections.clone().into_iter().map(|(_p, r)| r).sum()
+    }
 }
 
 pub fn collect_resources_dialog(
     game: &Game,
     collect: &CollectResources,
-    player: &ShownPlayer,
+    state: &State,
 ) -> StateUpdate {
-    active_dialog_window(player, "Collect Resources", |ui| {
-        let r: ResourcePile = collect
-            .collections
-            .clone()
-            .into_iter()
-            .map(|(_p, r)| r)
-            .sum();
-        let city = game.get_city(collect.player_index, collect.city_position);
-        let extra: i8 = city.mood_modified_size() as i8 - collect.collections.len() as i8;
-        ui.label(None, &format!("{r}: {extra} left"));
-        let valid = get_total_collection(
-            game,
-            collect.player_index,
-            collect.city_position,
-            &collect.collections,
-        )
-        .is_some();
-        let label = if valid { "OK" } else { "(OK)" };
-        if ui.button(ok_pos(player), label) && valid {
-            return StateUpdate::execute_activation(
-                Action::Playing(PlayingAction::Collect {
-                    city_position: collect.city_position,
-                    collections: collect.collections.clone(),
-                }),
-                if extra > 0 {
-                    vec![format!("{extra} more tiles can be collected")]
-                } else {
-                    vec![]
-                },
-                city,
-            );
-        };
-        if ui.button(cancel_pos(player), "Cancel") {
-            return StateUpdate::Cancel;
-        };
-        StateUpdate::None
-    })
+    let city = game.get_city(collect.player_index, collect.city_position);
+
+    let valid = get_total_collection(
+        game,
+        collect.player_index,
+        collect.city_position,
+        &collect.collections,
+    )
+    .is_some();
+    if ok_button(state, valid) {
+        let extra = collect.extra_resources(game);
+        return StateUpdate::execute_activation(
+            Action::Playing(PlayingAction::Collect {
+                city_position: collect.city_position,
+                collections: collect.collections.clone(),
+            }),
+            if extra > 0 {
+                vec![format!("{extra} more tiles can be collected")]
+            } else {
+                vec![]
+            },
+            city,
+        );
+    };
+    if cancel_button(state) {
+        return StateUpdate::Cancel;
+    };
+    StateUpdate::None
 }
 
 pub fn possible_resource_collections(
@@ -146,34 +155,50 @@ pub fn click_collect_option(col: &CollectResources, p: Position) -> StateUpdate 
 pub fn draw_resource_collect_tile(state: &State, pos: Position) {
     if let ActiveDialog::CollectResources(collect) = &state.active_dialog {
         if let Some(possible) = collect.possible_collections.get(&pos) {
-            draw_circle_lines(
-                hex_ui::center(pos).x,
-                hex_ui::center(pos).y,
-                18.0,
-                2.0,
-                WHITE,
-            );
-
             let col = collect.get_collection(pos);
 
             let c = hex_ui::center(pos);
-            possible.iter().enumerate().for_each(|(i, res)| {
+            possible.iter().enumerate().for_each(|(i, pile)| {
                 let p = hex_ui::rotate_around(c, 30.0, (90 * i) as i32);
-                let color = if col.is_some_and(|r| r == res) {
+                let color = if col.is_some_and(|r| r == pile) {
                     BLACK
                 } else {
                     WHITE
                 };
-                draw_text(
-                    &resource_pile_string(res),
-                    p.x - 12.0,
-                    p.y + 12.0,
-                    50.0,
-                    color,
-                );
+                draw_circle(p.x, p.y, ICON_SIZE / 2., color);
+                let map = new_resource_map(pile);
+                let m: Vec<(ResourceType, &u32)> = resource_types().iter().filter_map(|r| {
+                    let a = map.get(r);
+                    a.is_some_and(|a| *a > 0).then(|| (*r, a.unwrap()))
+                }).collect();
+                draw_collect_item(&state, p, m);
             });
         }
     };
+}
+
+fn draw_collect_item(state: &State, center: Point, resources: Vec<(ResourceType, &u32)>) {
+    if resources.iter().len() == 1 {
+        let (r, a) = resources.first().unwrap();
+        draw_icon(
+            state,
+            &state.assets.resources[r],
+            resource_name(*r),
+            center.to_vec2() - vec2(ICON_SIZE / 2., ICON_SIZE / 2.),
+        );
+    } else {
+        resources.iter().enumerate().for_each(|(j, (r, a))| {
+            let size = ICON_SIZE / 4.;
+            let c = hex_ui::rotate_around(center, 30.0, (90 * j) as i32);
+            draw_scaled_icon(
+                state,
+                &state.assets.resources[r],
+                resource_name(*r),
+                c.to_vec2() - vec2(size / 2., size / 2.),
+                size,
+            );
+        });
+    }
 }
 
 fn is_blocked(game: &Game, player_index: usize, pos: Position) -> bool {

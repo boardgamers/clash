@@ -54,7 +54,7 @@ pub fn draw_map(game: &Game, state: &mut State) {
     if let GameState::Combat(c) = &game.state {
         draw_combat_arrow(c);
     }
-    if !state.is_collect() {
+    if !matches!(&state.active_dialog, ActiveDialog::CollectResources(_)) {
         for p in &game.players {
             for city in &p.cities {
                 draw_city(p, city, state);

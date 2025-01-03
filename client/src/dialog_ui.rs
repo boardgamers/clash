@@ -1,5 +1,5 @@
-use crate::client_state::{PendingUpdate, ShownPlayer, StateUpdate};
-use crate::layout_ui::{cancel_pos, ok_only_pos, ok_pos};
+use crate::client_state::{PendingUpdate, ShownPlayer, State, StateUpdate};
+use crate::layout_ui::{bottom_right_texture, cancel_pos, icon_pos, ok_only_pos, ok_pos};
 use macroquad::hash;
 use macroquad::math::{vec2, Vec2};
 use macroquad::ui::widgets::Window;
@@ -87,3 +87,18 @@ pub fn show_pending_update(update: &PendingUpdate, player: &ShownPlayer) -> Stat
         StateUpdate::None
     })
 }
+
+pub fn cancel_button(state: &State) -> bool {
+    bottom_right_texture(state, &state.assets.cancel, icon_pos(-7, -1), "Cancel")
+}
+
+pub fn ok_button(state: &State, valid: bool) -> bool {
+    let ok = if valid {
+        &state.assets.ok
+    } else {
+        &state.assets.ok_blocked
+    };
+    let ok_tooltip = if valid { "OK" } else { "Invalid selection" };
+    bottom_right_texture(state, ok, icon_pos(-8, -1), ok_tooltip) && valid
+}
+
