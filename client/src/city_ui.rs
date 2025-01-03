@@ -196,8 +196,7 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
             .steps
             .iter()
             .find(|(p, _)| p == &city.position)
-            .map(|(_, s)| s)
-            .unwrap_or(&0);
+            .map_or(&0, |(_, s)| s);
         &city.mood_state.clone().add(*steps)
     } else {
         &city.mood_state

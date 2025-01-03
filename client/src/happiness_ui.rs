@@ -1,14 +1,12 @@
 use server::action::Action;
 use server::city::City;
 use server::game::Game;
-use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
-use crate::dialog_ui::{active_dialog_window, cancel_button, ok_button};
-use crate::layout_ui::{cancel_pos, ok_pos};
+use crate::dialog_ui::{cancel_button, ok_button};
 
 #[derive(Clone)]
 pub struct IncreaseHappiness {
@@ -30,9 +28,7 @@ pub fn increase_happiness_click(
 ) -> StateUpdate {
     if let Some(city) = player.get(game).get_city(pos) {
         StateUpdate::SetDialog(ActiveDialog::IncreaseHappiness(add_increase_happiness(
-            city,
-            pos,
-            h,
+            city, pos, h,
         )))
     } else {
         StateUpdate::None
@@ -68,9 +64,7 @@ fn increase_happiness_steps(
     total_cost: &ResourcePile,
     old_steps: u32,
 ) -> Option<(u32, ResourcePile)> {
-    if let Some(value) =
-        increase_happiness_new_steps(city, total_cost, old_steps, old_steps + 1)
-    {
+    if let Some(value) = increase_happiness_new_steps(city, total_cost, old_steps, old_steps + 1) {
         return Some(value);
     }
     if let Some(value) = increase_happiness_new_steps(city, total_cost, old_steps, 0) {
