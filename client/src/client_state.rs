@@ -135,7 +135,10 @@ impl ActiveDialog {
             ActiveDialog::PlayActionCard => vec!["Click on an action card to play it".to_string()],
             ActiveDialog::PlaceSettler => vec!["Click on a tile to place a settler".to_string()],
             ActiveDialog::Retreat => vec!["Click on a unit to retreat".to_string()],
-            ActiveDialog::RemoveCasualties(r) => vec![format!("Remove {} units: click on a unit to remove it", r.needed)],
+            ActiveDialog::RemoveCasualties(r) => vec![format!(
+                "Remove {} units: click on a unit to remove it",
+                r.needed
+            )],
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
         }
     }

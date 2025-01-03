@@ -165,33 +165,30 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
         }
     ));
 
-    if game.current_player_index == p.index {
+    if game.current_player_index == player.index {
         match &game.state {
             GameState::StatusPhase(_) | GameState::Finished => {}
             _ => label(&format!("{} actions left", game.actions_left)),
         }
+        if let Some(moves) = moves_left(&game.state) {
+            label(&move_units_message(moves));
+        }
+    }
 
+    if let GameState::Combat(c) = &game.state {
+        if c.attacker == player.index {
+            label(&format!("Attack - combat round {}", c.round));
+        } else if c.defender == player.index {
+            label(&format!("Defend - combat round {}", c.round));
+        }
+    }
+
+    if game.active_player() == player.index {
         match &game.state {
-            GameState::Movement {
-                movement_actions_left,
-                ..
-            } => label(&move_units_message(*movement_actions_left)),
             GameState::CulturalInfluenceResolution(_) => {
                 label("Cultural Influence Resolution");
             }
-            GameState::Combat(c) => {
-                label(&move_units_message(
-                    moves_left(&game.state).unwrap_or_default(),
-                ));
-                label(&format!("Combat Round {}", c.round,))
-            }
-            GameState::PlaceSettler {
-                player_index: _,
-                movement_actions_left,
-                ..
-            } => label(&format!(
-                "Place Settler: {movement_actions_left} moves left"
-            )),
+            GameState::PlaceSettler { .. } => label("Place Settler"),
             _ => {}
         }
         for m in state.active_dialog.help_message(game) {
