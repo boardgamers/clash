@@ -36,7 +36,6 @@ pub struct Assets {
     pub ok_blocked: Texture2D,
     pub ok: Texture2D,
     pub cancel: Texture2D,
-    pub restore_menu: Texture2D,
 
     pub zoom_in: Texture2D,
     pub zoom_out: Texture2D,
@@ -87,7 +86,6 @@ impl Assets {
             ok: load_png(include_bytes!("../assets/ok-circle-svgrepo-com.png")),
             ok_blocked: load_png(include_bytes!("../assets/in-progress-svgrepo-com.png")),
             cancel: load_png(include_bytes!("../assets/cancel-svgrepo-com.png")),
-            restore_menu: load_png(include_bytes!("../assets/restore-svgrepo-com.png")),
 
             zoom_in: load_png(include_bytes!("../assets/zoom-in-1462-svgrepo-com.png")),
             zoom_out: load_png(include_bytes!("../assets/zoom-out-1460-svgrepo-com.png")),

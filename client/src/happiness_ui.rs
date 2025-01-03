@@ -1,14 +1,12 @@
 use server::action::Action;
 use server::city::City;
 use server::game::Game;
-use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
-use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
-use crate::dialog_ui::active_dialog_window;
-use crate::layout_ui::{cancel_pos, ok_pos};
+use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
+use crate::dialog_ui::{cancel_button, ok_button};
 
 #[derive(Clone)]
 pub struct IncreaseHappiness {
@@ -22,7 +20,7 @@ impl IncreaseHappiness {
     }
 }
 
-pub fn increase_happiness_dialog(
+pub fn increase_happiness_click(
     game: &Game,
     player: &ShownPlayer,
     pos: Position,
@@ -30,10 +28,7 @@ pub fn increase_happiness_dialog(
 ) -> StateUpdate {
     if let Some(city) = player.get(game).get_city(pos) {
         StateUpdate::SetDialog(ActiveDialog::IncreaseHappiness(add_increase_happiness(
-            player.get(game),
-            city,
-            pos,
-            h,
+            city, pos, h,
         )))
     } else {
         StateUpdate::None
@@ -41,7 +36,6 @@ pub fn increase_happiness_dialog(
 }
 
 pub fn add_increase_happiness(
-    player: &Player,
     city: &City,
     pos: Position,
     increase_happiness: &IncreaseHappiness,
@@ -53,7 +47,7 @@ pub fn add_increase_happiness(
         .map(|(p, steps)| {
             let old_steps = *steps;
             if *p == pos {
-                if let Some(r) = increase_happiness_steps(player, city, &total_cost, old_steps) {
+                if let Some(r) = increase_happiness_steps(city, &total_cost, old_steps) {
                     total_cost = r.1;
                     return (*p, r.0);
                 };
@@ -66,24 +60,20 @@ pub fn add_increase_happiness(
 }
 
 fn increase_happiness_steps(
-    player: &Player,
     city: &City,
     total_cost: &ResourcePile,
     old_steps: u32,
 ) -> Option<(u32, ResourcePile)> {
-    if let Some(value) =
-        increase_happiness_new_steps(player, city, total_cost, old_steps, old_steps + 1)
-    {
+    if let Some(value) = increase_happiness_new_steps(city, total_cost, old_steps, old_steps + 1) {
         return Some(value);
     }
-    if let Some(value) = increase_happiness_new_steps(player, city, total_cost, old_steps, 0) {
+    if let Some(value) = increase_happiness_new_steps(city, total_cost, old_steps, 0) {
         return Some(value);
     }
     None
 }
 
 fn increase_happiness_new_steps(
-    player: &Player,
     city: &City,
     total_cost: &ResourcePile,
     old_steps: u32,
@@ -97,31 +87,32 @@ fn increase_happiness_new_steps(
                 .expect("invalid steps");
         }
         new_total += new_cost;
-        if player.resources.can_afford(&new_total) {
-            return Some((new_steps, new_total));
-        }
+        return Some((new_steps, new_total));
     }
     None
 }
 
-pub fn increase_happiness_menu(h: &IncreaseHappiness, player: &ShownPlayer) -> StateUpdate {
-    active_dialog_window(player, "Increase Happiness", |ui| {
-        ui.label(None, &format!("Cost: {:?}", h.cost));
-        if ui.button(cancel_pos(player), "Cancel") {
-            return StateUpdate::Cancel;
-        }
-        if ui.button(ok_pos(player), "Confirm") {
-            return StateUpdate::Execute(Action::Playing(PlayingAction::IncreaseHappiness {
-                happiness_increases: h.steps.clone(),
-            }));
-        }
-        StateUpdate::None
-    })
+pub fn increase_happiness_menu(
+    h: &IncreaseHappiness,
+    player: &ShownPlayer,
+    state: &State,
+    game: &Game,
+) -> StateUpdate {
+    if ok_button(state, player.get(game).resources.can_afford(&h.cost)) {
+        return StateUpdate::Execute(Action::Playing(PlayingAction::IncreaseHappiness {
+            happiness_increases: h.steps.clone(),
+        }));
+    }
+    if cancel_button(state) {
+        return StateUpdate::Cancel;
+    }
+    StateUpdate::None
 }
 
 pub fn start_increase_happiness(game: &Game, player: &ShownPlayer) -> StateUpdate {
     StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(IncreaseHappiness::new(
-        game.get_player(player.index)
+        player
+            .get(game)
             .cities
             .iter()
             .map(|c| (c.position, 0))

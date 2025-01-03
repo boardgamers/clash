@@ -1,7 +1,6 @@
-use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
-use crate::dialog_ui::active_dialog_window;
-use crate::select_ui;
-use crate::select_ui::{ConfirmSelection, Selection, SelectionConfirm};
+use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
+use crate::dialog_ui::{active_dialog_window, cancel_button};
+use crate::select_ui::{confirm_update, ConfirmSelection, SelectionConfirm};
 use server::action::Action;
 use server::content::advances;
 use server::game::Game;
@@ -43,15 +42,11 @@ pub fn raze_city_confirm_dialog(game: &Game, player: &ShownPlayer, pos: Position
     }
 }
 
-pub fn raze_city_dialog(player: &ShownPlayer) -> StateUpdate {
-    active_dialog_window(player, "Select a city to raze - or decline.", |ui| {
-        if ui.button(None, "Decline") {
-            return StateUpdate::status_phase(StatusPhaseAction::RazeSize1City(
-                RazeSize1City::None,
-            ));
-        }
-        StateUpdate::None
-    })
+pub fn raze_city_dialog(state: &State) -> StateUpdate {
+    if cancel_button(state) {
+        return StateUpdate::status_phase(StatusPhaseAction::RazeSize1City(RazeSize1City::None));
+    }
+    StateUpdate::None
 }
 
 #[derive(Clone)]
@@ -68,24 +63,6 @@ impl ChooseAdditionalAdvances {
             advances,
             selected: Vec::new(),
         }
-    }
-}
-
-impl Selection for ChooseAdditionalAdvances {
-    fn all(&self) -> &[String] {
-        &self.advances
-    }
-
-    fn selected(&self) -> &[String] {
-        &self.selected
-    }
-
-    fn selected_mut(&mut self) -> &mut Vec<String> {
-        &mut self.selected
-    }
-
-    fn can_select(&self, _game: &Game, _name: &str) -> bool {
-        true
     }
 }
 
@@ -140,16 +117,13 @@ pub fn change_government_type_dialog(game: &Game, player: &ShownPlayer) -> State
 
 pub fn choose_additional_advances_dialog(
     game: &Game,
-    additional_advances: &ChooseAdditionalAdvances,
-    player: &ShownPlayer,
+    a: &ChooseAdditionalAdvances,
+    state: &State,
 ) -> StateUpdate {
-    select_ui::selection_dialog(
-        game,
-        player,
-        "Select additional advances:",
-        additional_advances,
-        |a| StateUpdate::SetDialog(ActiveDialog::ChooseAdditionalAdvances(a)),
-        |a| {
+    // todo actual selection should be done in advance selection dialog
+    confirm_update(
+        a,
+        || {
             StateUpdate::status_phase(StatusPhaseAction::ChangeGovernmentType(
                 ChangeGovernmentType::ChangeGovernment(ChangeGovernment {
                     new_government: a.government.clone(),
@@ -157,6 +131,8 @@ pub fn choose_additional_advances_dialog(
                 }),
             ))
         },
+        &a.confirm(game),
+        state,
     )
 }
 

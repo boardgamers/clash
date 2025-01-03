@@ -13,7 +13,7 @@ use server::position::Position;
 use server::resource_pile::PaymentOptions;
 use server::unit::UnitType;
 
-use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
+use crate::client_state::{ActiveDialog, State, StateUpdate};
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::recruit_unit_ui::RecruitSelection;
 use crate::resource_ui::{new_resource_map, ResourceType};
@@ -39,11 +39,9 @@ pub fn building_positions(building: Building, city: &City, map: &Map) -> Vec<Opt
 pub fn pay_construction_dialog(
     game: &Game,
     payment: &ConstructionPayment,
-    player: &ShownPlayer,
     state: &State,
 ) -> StateUpdate {
     payment_dialog(
-        player,
         payment,
         |cp| cp.payment.get(ResourceType::Discount).selectable.current == 0,
         |cp| match &cp.project {

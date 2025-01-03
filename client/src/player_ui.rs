@@ -4,8 +4,8 @@ use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
 use crate::layout_ui::{
-    bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button, top_center_texture,
-    top_right_texture, ICON_SIZE,
+    bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button_pressed_in_rect,
+    top_center_texture, top_right_texture, ICON_SIZE,
 };
 use crate::map_ui::terrain_name;
 use crate::resource_ui::{new_resource_map, resource_name, resource_types, ResourceType};
@@ -58,7 +58,7 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
             );
         }
 
-        if !shown && left_mouse_button(Rect::new(x, pos.y, w, ICON_SIZE)) {
+        if !shown && left_mouse_button_pressed_in_rect(Rect::new(x, pos.y, w, ICON_SIZE), state) {
             return StateUpdate::SetShownPlayer(pl.index);
         }
 
@@ -104,7 +104,7 @@ pub fn top_icon_with_label(
 }
 
 pub fn show_top_center(game: &Game, shown_player: &ShownPlayer, state: &State) {
-    let player = game.get_player(shown_player.index);
+    let player = shown_player.get(game);
 
     top_icon_with_label(
         shown_player,
@@ -123,6 +123,9 @@ pub fn show_top_center(game: &Game, shown_player: &ShownPlayer, state: &State) {
         let s = match &state.active_dialog {
             ActiveDialog::CollectResources(c) => {
                 format!("{}+{}", a, new_resource_map(&c.collected())[r])
+            }
+            ActiveDialog::IncreaseHappiness(h) => {
+                format!("{}-{}", a, new_resource_map(&h.cost)[r])
             }
             _ => format!("{a}/{l}"),
         };
@@ -147,7 +150,7 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
         _ => label(&format!("Round {}", game.round)),
     }
 
-    let p = game.get_player(player.index);
+    let p = player.get(game);
 
     label(&p.get_name());
 
@@ -162,35 +165,30 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
         }
     ));
 
-    if game.current_player_index == p.index {
+    if game.current_player_index == player.index {
         match &game.state {
             GameState::StatusPhase(_) | GameState::Finished => {}
             _ => label(&format!("{} actions left", game.actions_left)),
         }
+        if let Some(moves) = moves_left(&game.state) {
+            label(&move_units_message(moves));
+        }
+    }
 
+    if let GameState::Combat(c) = &game.state {
+        if c.attacker == player.index {
+            label(&format!("Attack - combat round {}", c.round));
+        } else if c.defender == player.index {
+            label(&format!("Defend - combat round {}", c.round));
+        }
+    }
+
+    if game.active_player() == player.index {
         match &game.state {
-            GameState::Movement {
-                movement_actions_left,
-                ..
-            } => label(&format!("Move units: {movement_actions_left} moves left")),
             GameState::CulturalInfluenceResolution(_) => {
                 label("Cultural Influence Resolution");
             }
-            GameState::Combat(c) => label(&format!(
-                "Combat Round {} Phase {:?}{}",
-                c.round,
-                c.phase,
-                moves_left(&game.state)
-                    .map(|m| format!(", {m} moves left"))
-                    .unwrap_or_default()
-            )),
-            GameState::PlaceSettler {
-                player_index: _,
-                movement_actions_left,
-                ..
-            } => label(&format!(
-                "Place Settler: {movement_actions_left} moves left"
-            )),
+            GameState::PlaceSettler { .. } => label("Place Settler"),
             _ => {}
         }
         for m in state.active_dialog.help_message(game) {
@@ -223,6 +221,10 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
     }
 }
 
+fn move_units_message(movement_actions_left: u32) -> String {
+    format!("Move units: {movement_actions_left} moves left")
+}
+
 fn moves_left(state: &GameState) -> Option<u32> {
     match state {
         GameState::Combat(c) => moves_left(&c.initiation),
@@ -244,36 +246,24 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
 
     let assets = &state.assets;
 
-    if let Some(tooltip) = can_end_move(game) {
-        if player.can_control
-            && bottom_right_texture(state, &assets.end_turn, icon_pos(-4, -1), tooltip)
-        {
-            return end_move(game);
+    if player.can_control {
+        if let Some(tooltip) = can_end_move(game) {
+            if bottom_right_texture(state, &assets.end_turn, icon_pos(-4, -1), tooltip) {
+                return end_move(game);
+            }
         }
-    }
-    if game.can_redo() && bottom_right_texture(state, &assets.redo, icon_pos(-5, -1), "Redo") {
-        return StateUpdate::Execute(Action::Redo);
-    }
-    if game.can_undo() && bottom_right_texture(state, &assets.undo, icon_pos(-6, -1), "Undo") {
-        return StateUpdate::Execute(Action::Undo);
-    }
-    let d = state.game_state_dialog(game, &ActiveDialog::None);
-    if d.can_restore()
-        && d.title() != state.active_dialog.title()
-        && bottom_right_texture(
-            state,
-            &assets.restore_menu,
-            icon_pos(-7, -1),
-            format!("Restore {}", d.title()).as_str(),
-        )
-    {
-        return StateUpdate::OpenDialog(d);
-    }
+        if game.can_redo() && bottom_right_texture(state, &assets.redo, icon_pos(-5, -1), "Redo") {
+            return StateUpdate::Execute(Action::Redo);
+        }
+        if game.can_undo() && bottom_right_texture(state, &assets.undo, icon_pos(-6, -1), "Undo") {
+            return StateUpdate::Execute(Action::Undo);
+        }
 
-    if player.can_play_action {
-        let update = action_buttons(game, state, player, assets);
-        if !matches!(update, StateUpdate::None) {
-            return update;
+        if player.can_play_action {
+            let update = action_buttons(game, state, player, assets);
+            if !matches!(update, StateUpdate::None) {
+                return update;
+            }
         }
     }
 

@@ -2,7 +2,7 @@ use macroquad::math::{bool, vec2};
 
 use server::resource_pile::ResourcePile;
 
-use crate::client_state::{ShownPlayer, State, StateUpdate};
+use crate::client_state::{State, StateUpdate};
 use crate::layout_ui::draw_icon;
 use crate::resource_ui::{resource_name, ResourceType};
 use crate::select_ui;
@@ -79,7 +79,6 @@ pub trait HasPayment {
 
 #[allow(clippy::too_many_arguments)]
 pub fn payment_dialog<T: HasPayment>(
-    player: &ShownPlayer,
     has_payment: &T,
     is_valid: impl FnOnce(&T) -> bool,
     execute_action: impl FnOnce(&T) -> StateUpdate,
@@ -89,7 +88,6 @@ pub fn payment_dialog<T: HasPayment>(
     state: &State,
 ) -> StateUpdate {
     select_ui::count_dialog(
-        player,
         state,
         has_payment,
         |p| p.payment().resources.clone(),
