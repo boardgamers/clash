@@ -39,6 +39,11 @@ pub fn bottom_center_texture(state: &State, texture: &Texture2D, p: Vec2, toolti
     draw_icon(state, texture, tooltip, anchor + p)
 }
 
+pub fn bottom_center_text(state: &State, text: &str, p: Vec2)  {
+    let p = bottom_center_anchor(state) + p;
+    state.draw_text(text, p.x, p.y)
+}
+
 pub fn bottom_center_anchor(state: &State) -> Vec2 {
     vec2(state.screen_size.x / 2., state.screen_size.y - MARGIN)
 }
@@ -80,37 +85,6 @@ pub fn draw_scaled_icon(
 #[must_use]
 pub fn left_mouse_button_pressed_in_rect(rect: Rect, state: &State) -> bool {
     left_mouse_button_pressed(state).is_some_and(|p| rect.contains(p))
-}
-
-#[must_use]
-pub fn cancel_pos(player: &ShownPlayer) -> Vec2 {
-    small_dialog(player)
-        .then(|| Vec2::new(player.screen_size.x / 4.0, 190.))
-        .unwrap_or_else(|| Vec2::new(player.screen_size.x / 2., player.screen_size.y - 130.))
-}
-
-#[must_use]
-pub fn ok_pos(player: &ShownPlayer) -> Vec2 {
-    small_dialog(player)
-        .then(|| Vec2::new(player.screen_size.x / 4.0 - 150., 190.))
-        .unwrap_or_else(|| {
-            Vec2::new(
-                player.screen_size.x / 2. - 150.,
-                player.screen_size.y - 130.,
-            )
-        })
-}
-
-#[must_use]
-pub fn ok_only_pos(player: &ShownPlayer) -> Vec2 {
-    small_dialog(player)
-        .then(|| Vec2::new(player.screen_size.x / 4.0 - 75., 190.))
-        .unwrap_or_else(|| Vec2::new(player.screen_size.x / 2. - 75., player.screen_size.y - 130.))
-}
-
-#[must_use]
-fn small_dialog(player: &ShownPlayer) -> bool {
-    player.pending_update
 }
 
 #[must_use]

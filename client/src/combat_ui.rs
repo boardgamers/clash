@@ -3,22 +3,22 @@ use server::game::Game;
 use server::position::Position;
 use server::unit::Unit;
 
-use crate::client_state::{ShownPlayer, State, StateUpdate};
-use crate::dialog_ui::active_dialog_window;
+use crate::client_state::{State, StateUpdate};
+use crate::dialog_ui::{
+    cancel_button_with_tooltip, ok_button_with_tooltip,
+};
 use crate::select_ui::{ConfirmSelection, SelectionConfirm};
 use crate::unit_ui;
 use crate::unit_ui::UnitSelection;
 
-pub fn retreat_dialog(player: &ShownPlayer) -> StateUpdate {
-    active_dialog_window(player, "Do you want to retreat?", |ui| {
-        if ui.button(None, "Retreat") {
-            return retreat(true);
-        }
-        if ui.button(None, "Decline") {
-            return retreat(false);
-        }
-        StateUpdate::None
-    })
+pub fn retreat_dialog(state: &State) -> StateUpdate {
+    if ok_button_with_tooltip(state, true, "Retreat") {
+        return retreat(true);
+    }
+    if cancel_button_with_tooltip(state, "Decline") {
+        return retreat(false);
+    }
+    StateUpdate::None
 }
 
 fn retreat(retreat: bool) -> StateUpdate {
@@ -85,13 +85,11 @@ pub fn remove_casualties_dialog(
     )
 }
 
-pub fn play_action_card_dialog(player: &ShownPlayer) -> StateUpdate {
-    active_dialog_window(player, "Play action card", |ui| {
-        if ui.button(None, "None") {
-            return StateUpdate::Execute(Action::Combat(CombatAction::PlayActionCard(
-                PlayActionCard::None,
-            )));
-        }
-        StateUpdate::None
-    })
+pub fn play_action_card_dialog(state: &State) -> StateUpdate {
+    if cancel_button_with_tooltip(state, "Play no action card") {
+        return StateUpdate::Execute(Action::Combat(CombatAction::PlayActionCard(
+            PlayActionCard::None,
+        )));
+    }
+    StateUpdate::None
 }

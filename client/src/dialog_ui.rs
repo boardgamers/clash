@@ -1,5 +1,7 @@
 use crate::client_state::{PendingUpdate, ShownPlayer, State, StateUpdate};
-use crate::layout_ui::{bottom_right_texture, cancel_pos, icon_pos, ok_only_pos, ok_pos};
+use crate::layout_ui::{
+    bottom_center_text, bottom_right_texture, icon_pos,
+};
 use macroquad::hash;
 use macroquad::math::{vec2, Vec2};
 use macroquad::ui::widgets::Window;
@@ -61,27 +63,25 @@ where
     (update, open)
 }
 
-pub fn show_pending_update(update: &PendingUpdate, player: &ShownPlayer) -> StateUpdate {
-    active_dialog_window(player, "Are you sure?", |ui| {
-        for i in &update.info {
-            ui.label(None, i);
-        }
-        if !update.warning.is_empty() {
-            ui.label(None, &format!("Warning: {}", update.warning.join(", ")));
-        }
-        if update.can_confirm && ui.button(ok_pos(player), "OK") {
-            return StateUpdate::ResolvePendingUpdate(true);
-        }
-        let p = if update.can_confirm {
-            cancel_pos(player)
-        } else {
-            ok_only_pos(player)
-        };
-        if ui.button(p, "Cancel") {
-            return StateUpdate::ResolvePendingUpdate(false);
-        }
-        StateUpdate::None
-    })
+pub fn show_pending_update(
+    update: &PendingUpdate,
+    state: &State,
+) -> StateUpdate {
+    let t = if update.warning.is_empty() {
+        "Are you sure?"
+    } else {
+        &format!("Warning: {}", update.warning.join(", "))
+    };
+    let dimensions = state.measure_text(t);
+    bottom_center_text(state, t, vec2(dimensions.width / 2., -50.));
+
+    if ok_button(state, update.can_confirm) {
+        return StateUpdate::ResolvePendingUpdate(true);
+    }
+    if cancel_button(state) {
+        return StateUpdate::ResolvePendingUpdate(false);
+    }
+    StateUpdate::None
 }
 
 #[must_use]
@@ -96,11 +96,19 @@ pub fn cancel_button_with_tooltip(state: &State, tooltip: &str) -> bool {
 
 #[must_use]
 pub fn ok_button(state: &State, valid: bool) -> bool {
+    ok_button_with_tooltip(
+        &state,
+        valid,
+        if valid { "OK" } else { "Invalid selection" },
+    )
+}
+
+#[must_use]
+pub fn ok_button_with_tooltip(state: &State, valid: bool, tooltip: &str) -> bool {
     let ok = if valid {
         &state.assets.ok
     } else {
         &state.assets.ok_blocked
     };
-    let ok_tooltip = if valid { "OK" } else { "Invalid selection" };
-    bottom_right_texture(state, ok, icon_pos(-8, -1), ok_tooltip) && valid
+    bottom_right_texture(state, ok, icon_pos(-8, -1), tooltip) && valid
 }

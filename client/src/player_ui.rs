@@ -194,6 +194,11 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
         for m in state.active_dialog.help_message(game) {
             label(&m);
         }
+        if let Some(u) = &state.pending_update {
+            for m in u.info {
+                label(&m);
+            }
+        }
     }
 
     if let ActiveDialog::TileMenu(position) = state.active_dialog {

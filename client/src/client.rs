@@ -72,7 +72,7 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
 
     if player.can_control {
         if let Some(u) = &state.pending_update {
-            updates.add(dialog_ui::show_pending_update(u, player));
+            updates.add(dialog_ui::show_pending_update(u, state));
             return updates.result();
         }
     }
@@ -126,8 +126,8 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
         }
 
         //combat
-        ActiveDialog::PlayActionCard => combat_ui::play_action_card_dialog(player),
-        ActiveDialog::Retreat => combat_ui::retreat_dialog(player),
+        ActiveDialog::PlayActionCard => combat_ui::play_action_card_dialog(state),
+        ActiveDialog::Retreat => combat_ui::retreat_dialog(state),
         ActiveDialog::RemoveCasualties(s) => combat_ui::remove_casualties_dialog(game, s, state),
     }
 }
