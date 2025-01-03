@@ -33,7 +33,7 @@ pub fn terrain_name(t: &Terrain) -> &'static str {
     }
 }
 
-pub fn draw_map(game: &Game, state: &mut State) {
+pub fn draw_map(game: &Game, state: &mut State) -> StateUpdate {
     state.set_world_camera();
     for (pos, t) in &game.map.tiles {
         let (base, exhausted) = match t {
@@ -49,7 +49,10 @@ pub fn draw_map(game: &Game, state: &mut State) {
             exhausted,
             state,
         );
-        collect_ui::draw_resource_collect_tile(state, *pos);
+        let update = collect_ui::draw_resource_collect_tile(state, *pos);
+        if !matches!(update, StateUpdate::None) {
+            return update;
+        }
     }
     if let GameState::Combat(c) = &game.state {
         draw_combat_arrow(c);
@@ -64,6 +67,7 @@ pub fn draw_map(game: &Game, state: &mut State) {
         unit_ui::draw_units(game, state, true);
     }
     state.set_screen_camera();
+    StateUpdate::None
 }
 
 fn alpha(game: &Game, state: &State, pos: Position) -> f32 {

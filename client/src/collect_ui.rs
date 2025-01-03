@@ -2,8 +2,9 @@ use std::collections::HashMap;
 use std::iter;
 
 use macroquad::color::BLACK;
+use macroquad::input::MouseButton;
 use macroquad::math::{i32, vec2};
-use macroquad::prelude::{draw_circle_lines, WHITE};
+use macroquad::prelude::{draw_circle_lines, is_mouse_button_pressed, mouse_position, WHITE};
 use macroquad::shapes::draw_circle;
 use server::action::Action;
 use server::consts::PORT_CHOICES;
@@ -16,7 +17,7 @@ use crate::client_state::{ActiveDialog, State, StateUpdate};
 use crate::dialog_ui::{cancel_button, ok_button};
 use crate::hex_ui;
 use crate::hex_ui::Point;
-use crate::layout_ui::{draw_icon, draw_scaled_icon, ICON_SIZE};
+use crate::layout_ui::{draw_icon, draw_scaled_icon, is_in_circle, ICON_SIZE};
 use crate::resource_ui::{new_resource_map, resource_name, resource_types, ResourceType};
 
 #[derive(Clone)]
@@ -132,49 +133,56 @@ pub fn possible_resource_collections(
         .collect()
 }
 
-pub fn click_collect_option(col: &CollectResources, p: Position) -> StateUpdate {
+fn click_collect_option(col: &CollectResources, p: Position, pile: &ResourcePile) -> StateUpdate {
     let mut new = col.clone();
-    if let Some(possible) = new.possible_collections.get(&p) {
-        if let Some(current) = new
-            .get_collection(p)
-            .and_then(|r| possible.iter().position(|p| p == r))
-        {
-            new.collections.retain(|(pos, _)| pos != &p);
-            let next = current + 1;
-            if next < possible.len() {
-                new.collections.push((p, possible[next].clone()));
-            }
-        } else {
-            new.collections.push((p, possible[0].clone()));
-        }
-        return StateUpdate::SetDialog(ActiveDialog::CollectResources(new));
+    let old = col.collections.iter().find(|(pos, _)| pos == &p);
+
+    new.collections.retain(|(pos, _)| pos != &p);
+    if old.is_none_or(|(_, r)| r != pile) {
+        new.collections.push((p, pile.clone()));
     }
-    StateUpdate::None
+
+    StateUpdate::SetDialog(ActiveDialog::CollectResources(new))
 }
 
-pub fn draw_resource_collect_tile(state: &State, pos: Position) {
+pub fn draw_resource_collect_tile(state: &State, pos: Position) -> StateUpdate {
     if let ActiveDialog::CollectResources(collect) = &state.active_dialog {
         if let Some(possible) = collect.possible_collections.get(&pos) {
             let col = collect.get_collection(pos);
 
             let c = hex_ui::center(pos);
-            possible.iter().enumerate().for_each(|(i, pile)| {
-                let p = hex_ui::rotate_around(c, 30.0, (90 * i) as i32);
+            for (i, pile) in possible.iter().enumerate() {
+                let center = if possible.len() == 1 {
+                    c
+                } else {
+                    hex_ui::rotate_around(c, 30.0, (90 * i) as i32)
+                };
                 let color = if col.is_some_and(|r| r == pile) {
                     BLACK
                 } else {
                     WHITE
                 };
-                draw_circle(p.x, p.y, 20., color);
+                draw_circle(center.x, center.y, 20., color);
+                let (x, y) = mouse_position();
+                if is_mouse_button_pressed(MouseButton::Left)
+                    && is_in_circle(state.screen_to_world(vec2(x, y)), center, 20.)
+                {
+                    return click_collect_option(collect, pos, pile);
+                }
+
                 let map = new_resource_map(pile);
-                let m: Vec<(ResourceType, &u32)> = resource_types().iter().filter_map(|r| {
-                    let a = map.get(r);
-                    a.is_some_and(|a| *a > 0).then(|| (*r, a.unwrap()))
-                }).collect();
-                draw_collect_item(&state, p, m);
-            });
+                let m: Vec<(ResourceType, &u32)> = resource_types()
+                    .iter()
+                    .filter_map(|r| {
+                        let a = map.get(r);
+                        a.is_some_and(|a| *a > 0).then(|| (*r, a.unwrap()))
+                    })
+                    .collect();
+                draw_collect_item(&state, center, m);
+            }
         }
     };
+    StateUpdate::None
 }
 
 fn draw_collect_item(state: &State, center: Point, resources: Vec<(ResourceType, &u32)>) {
