@@ -46,12 +46,13 @@ pub fn draw_hex(
     draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, Color::from_vec(v));
     state.draw_text_with_color(&p.to_string(), c.x - 30.0, c.y - 35.0, text_color);
     if exhausted {
+        const SIZE: f32 = 100.;
         draw_scaled_icon(
             state,
             &state.assets.exhausted,
             "Exhausted",
-            vec2(c.x - 30.0, c.y - 30.0),
-            60.,
+            vec2(c.x - SIZE / 2., c.y - SIZE / 2.),
+            SIZE,
         );
     }
 }

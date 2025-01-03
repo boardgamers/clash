@@ -14,6 +14,18 @@ pub enum ResourceType {
     Discount, //discount on building cost, which can be used for any resource that is not a token
 }
 
+pub fn resource_types() -> Vec<ResourceType> {
+    vec![
+        ResourceType::Food,
+        ResourceType::Wood,
+        ResourceType::Ore,
+        ResourceType::Ideas,
+        ResourceType::Gold,
+        ResourceType::MoodTokens,
+        ResourceType::CultureTokens,
+    ]
+}
+
 impl fmt::Display for ResourceType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{self:?}")
@@ -35,28 +47,6 @@ pub fn new_resource_map(p: &ResourcePile) -> HashMap<ResourceType, u32> {
 
 fn add_resource(m: &mut HashMap<ResourceType, u32>, amount: u32, resource_type: ResourceType) {
     m.insert(resource_type, amount);
-}
-
-pub fn resource_pile_string(p: &ResourcePile) -> String {
-    new_resource_map(p)
-        .into_iter()
-        .filter(|(_, v)| *v > 0)
-        .map(|(t, _)| resource_symbol(t))
-        .collect::<Vec<&str>>()
-        .join(",")
-}
-
-pub fn resource_symbol(t: ResourceType) -> &'static str {
-    match t {
-        ResourceType::Food => "F",
-        ResourceType::Wood => "W",
-        ResourceType::Ore => "O",
-        ResourceType::Ideas => "I",
-        ResourceType::Gold => "G",
-        ResourceType::MoodTokens => "M",
-        ResourceType::CultureTokens => "C",
-        ResourceType::Discount => panic!("Discount is not a resource type"),
-    }
 }
 
 pub fn resource_name(t: ResourceType) -> &'static str {

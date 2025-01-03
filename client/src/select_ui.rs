@@ -1,15 +1,10 @@
 use crate::client_state::{ShownPlayer, State, StateUpdate, StateUpdates};
-use crate::dialog_ui::active_dialog_window;
-use crate::layout_ui::{
-    bottom_center_anchor, bottom_center_texture, bottom_right_texture, cancel_pos, icon_pos,
-    ok_pos, ICON_SIZE,
-};
+use crate::dialog_ui::{active_dialog_window, cancel_button, ok_button};
+use crate::layout_ui::{bottom_center_anchor, bottom_center_texture, ok_pos, ICON_SIZE};
 use macroquad::color::BLACK;
-use macroquad::hash;
 use macroquad::math::{bool, vec2, Vec2};
 use macroquad::prelude::TextParams;
 use macroquad::text::draw_text_ex;
-use macroquad::ui::widgets::Group;
 use macroquad::ui::Ui;
 use server::game::Game;
 
@@ -25,56 +20,8 @@ pub trait HasCountSelectableObject {
     fn counter_mut(&mut self) -> &mut CountSelector;
 }
 
-// old code - use count_dialog_icon instead
 #[allow(clippy::too_many_arguments)]
 pub fn count_dialog<C, O: HasCountSelectableObject>(
-    player: &ShownPlayer,
-    title: &str,
-    info: Vec<String>,
-    container: &C,
-    get_objects: impl Fn(&C) -> Vec<O>,
-    label: impl Fn(&O) -> &str,
-    is_valid: impl FnOnce(&C) -> bool,
-    execute_action: impl FnOnce(&C) -> StateUpdate,
-    show: impl Fn(&C, &O) -> bool,
-    plus: impl Fn(&C, &O) -> StateUpdate,
-    minus: impl Fn(&C, &O) -> StateUpdate,
-) -> StateUpdate {
-    active_dialog_window(player, title, |ui| {
-        for i in info {
-            ui.label(None, &i);
-        }
-        let mut updates = StateUpdates::new();
-        for (i, p) in get_objects(container).iter().enumerate() {
-            if show(container, p) {
-                Group::new(hash!("res", i), Vec2::new(120., 150.)).ui(ui, |ui| {
-                    let c = p.counter();
-                    ui.label(Vec2::new(0., 0.), &format!("{} {}", &label(p), c.current));
-                    if c.current > c.min && ui.button(Vec2::new(0., 80.), "-") {
-                        updates.add(minus(container, p));
-                    }
-                    if c.current < c.max && ui.button(Vec2::new(0., 40.), "+") {
-                        updates.add(plus(container, p));
-                    };
-                });
-            }
-        }
-
-        let valid = is_valid(container);
-        let label = if valid { "OK" } else { "(OK)" };
-        if ui.button(ok_pos(player), label) && valid {
-            return execute_action(container);
-        };
-        if ui.button(cancel_pos(player), "Cancel") {
-            return StateUpdate::Cancel;
-        };
-
-        updates.result()
-    })
-}
-
-#[allow(clippy::too_many_arguments)]
-pub fn count_dialog_icon<C, O: HasCountSelectableObject>(
     player: &ShownPlayer,
     state: &State,
     container: &C,
@@ -136,17 +83,10 @@ pub fn count_dialog_icon<C, O: HasCountSelectableObject>(
         };
     }
 
-    let valid = is_valid(container);
-    let ok = if valid {
-        &state.assets.ok
-    } else {
-        &state.assets.ok_blocked
-    };
-    let ok_tooltip = if valid { "OK" } else { "Invalid selection" };
-    if bottom_right_texture(state, ok, icon_pos(-8, -1), ok_tooltip) && valid {
+    if ok_button(state, is_valid(container)) {
         return execute_action(container);
-    };
-    if bottom_right_texture(state, &state.assets.cancel, icon_pos(-7, -1), "Cancel") {
+    }
+    if cancel_button(state) {
         return StateUpdate::Cancel;
     };
 

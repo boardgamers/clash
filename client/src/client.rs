@@ -9,7 +9,7 @@ use server::position::Position;
 
 use crate::advance_ui::{pay_advance_dialog, show_advance_menu, show_free_advance_menu};
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, StateUpdates};
-use crate::collect_ui::{click_collect_option, collect_resources_dialog};
+use crate::collect_ui::collect_resources_dialog;
 use crate::construct_ui::pay_construction_dialog;
 use crate::happiness_ui::{increase_happiness_dialog, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
@@ -62,8 +62,8 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         ..Default::default()
     };
 
-    draw_map(game, state);
     let mut updates = StateUpdates::new();
+    updates.add(draw_map(game, state));
     show_top_left(game, player, state);
     show_top_center(game, player, state);
     updates.add(player_select(game, player, state));
@@ -87,9 +87,9 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         // playing actions
         ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(h, player),
         ActiveDialog::AdvanceMenu => show_advance_menu(game, player),
-        ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, player, game),
-        ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p, player),
-        ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c, player),
+        ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, player, game, state),
+        ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p, player, state),
+        ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c, state),
         ActiveDialog::RecruitUnitSelection(s) => {
             recruit_unit_ui::select_dialog(game, s, player, state)
         }
@@ -144,10 +144,11 @@ pub fn try_click(game: &Game, state: &mut State, player: &ShownPlayer) -> StateU
 
     if player.can_control {
         match &state.active_dialog {
+            ActiveDialog::RemoveCasualties(_) | ActiveDialog::CollectResources(_) => {
+                StateUpdate::None
+            }
             ActiveDialog::MoveUnits(s) => move_ui::click(pos, s, mouse_pos, game),
             ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::click_replace(pos, r),
-            ActiveDialog::RemoveCasualties(_s) => StateUpdate::None,
-            ActiveDialog::CollectResources(col) => click_collect_option(col, pos),
             ActiveDialog::RazeSize1City => raze_city_confirm_dialog(game, player, pos),
             ActiveDialog::PlaceSettler => {
                 if player.get(game).get_city(pos).is_some() {

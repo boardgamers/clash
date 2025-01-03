@@ -8,16 +8,14 @@ use crate::layout_ui::{
     top_right_texture, ICON_SIZE,
 };
 use crate::map_ui::terrain_name;
-use crate::resource_ui::{resource_name, ResourceType};
+use crate::resource_ui::{new_resource_map, resource_name, resource_types, ResourceType};
 use crate::unit_ui;
 use macroquad::math::{u32, vec2};
 use macroquad::prelude::*;
 use server::action::Action;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::game::{Game, GameState};
-use server::player::Player;
 use server::playing_actions::PlayingAction;
-use server::resource_pile::ResourcePile;
 use server::unit::MovementAction;
 
 pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
@@ -105,66 +103,31 @@ pub fn top_icon_with_label(
     top_center_texture(state, texture, p, tooltip);
 }
 
-pub fn show_top_center(game: &Game, player: &ShownPlayer, state: &State) {
-    let p = game.get_player(player.index);
+pub fn show_top_center(game: &Game, shown_player: &ShownPlayer, state: &State) {
+    let player = game.get_player(shown_player.index);
 
     top_icon_with_label(
-        player,
+        shown_player,
         state,
-        &format!("{}", &p.victory_points()),
+        &format!("{}", &player.victory_points()),
         &state.assets.victory_points,
         icon_pos(3, 0),
         "Victory Points",
     );
-    resource_label(
-        player,
-        state,
-        &resource_ui(p, |r| r.culture_tokens),
-        ResourceType::CultureTokens,
-        icon_pos(2, 0),
-    );
-    resource_label(
-        player,
-        state,
-        &resource_ui(p, |r| r.mood_tokens),
-        ResourceType::MoodTokens,
-        icon_pos(1, 0),
-    );
-    resource_label(
-        player,
-        state,
-        &resource_ui(p, |r| r.gold as u32),
-        ResourceType::Gold,
-        icon_pos(0, 0),
-    );
-    resource_label(
-        player,
-        state,
-        &resource_ui(p, |r| r.ideas),
-        ResourceType::Ideas,
-        icon_pos(-1, 0),
-    );
-    resource_label(
-        player,
-        state,
-        &resource_ui(p, |r| r.ore),
-        ResourceType::Ore,
-        icon_pos(-2, 0),
-    );
-    resource_label(
-        player,
-        state,
-        &resource_ui(p, |r| r.wood),
-        ResourceType::Wood,
-        icon_pos(-3, 0),
-    );
-    resource_label(
-        player,
-        state,
-        &resource_ui(p, |r| r.food),
-        ResourceType::Food,
-        icon_pos(-4, 0),
-    );
+    let amount = new_resource_map(&player.resources);
+    let limit = new_resource_map(&player.resource_limit);
+    for (i, r) in resource_types().iter().rev().enumerate() {
+        let x = 2 - i as i8;
+        let a = amount[r];
+        let l = limit[r];
+        let s = match &state.active_dialog {
+            ActiveDialog::CollectResources(c) => {
+                format!("{}+{}", a, new_resource_map(&c.collected())[r])
+            }
+            _ => format!("{a}/{l}"),
+        };
+        resource_label(shown_player, state, &s, *r, icon_pos(x, 0));
+    }
 }
 
 pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
@@ -230,7 +193,7 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
             )),
             _ => {}
         }
-        if let Some(m) = state.active_dialog.help_message() {
+        for m in state.active_dialog.help_message(game) {
             label(&m);
         }
     }
@@ -274,12 +237,6 @@ fn moves_left(state: &GameState) -> Option<u32> {
         } => Some(*movement_actions_left),
         _ => None,
     }
-}
-
-fn resource_ui(player: &Player, f: impl Fn(&ResourcePile) -> u32) -> String {
-    let r: &ResourcePile = &player.resources;
-    let l: &ResourcePile = &player.resource_limit;
-    format!("{}/{}", f(r), f(l))
 }
 
 pub fn show_global_controls(game: &Game, state: &mut State, features: &Features) -> StateUpdate {

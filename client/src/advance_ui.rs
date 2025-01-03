@@ -1,4 +1,4 @@
-use crate::client_state::{ActiveDialog, ShownPlayer, StateUpdate};
+use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::dialog_ui::dialog;
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::resource_ui::{new_resource_map, ResourceType};
@@ -220,14 +220,17 @@ fn description(p: &Player, a: &Advance) -> Vec<String> {
     parts
 }
 
-pub fn pay_advance_dialog(ap: &AdvancePayment, player: &ShownPlayer, game: &Game) -> StateUpdate {
+pub fn pay_advance_dialog(
+    ap: &AdvancePayment,
+    player: &ShownPlayer,
+    game: &Game,
+    state: &State,
+) -> StateUpdate {
     let a = advances::get_advance_by_name(ap.name.as_str()).unwrap();
 
     if can_advance(game, player, &a) {
         payment_dialog(
             player,
-            &format!("Pay for advance {}", ap.name),
-            description(game.get_player(player.index), &a),
             ap,
             AdvancePayment::valid,
             |ap| {
@@ -239,6 +242,7 @@ pub fn pay_advance_dialog(ap: &AdvancePayment, player: &ShownPlayer, game: &Game
             |ap, r| ap.payment.get(r).selectable.max > 0,
             |ap, r| add(ap, r, 1),
             |ap, r| add(ap, r, -1),
+            state,
         )
     } else {
         advance_info(game, player, &a)
