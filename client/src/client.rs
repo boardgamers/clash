@@ -87,8 +87,8 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         // playing actions
         ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(h, player),
         ActiveDialog::AdvanceMenu => show_advance_menu(game, player),
-        ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, player, game),
-        ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p, player),
+        ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, player, game, state),
+        ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p, player, state),
         ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c, player),
         ActiveDialog::RecruitUnitSelection(s) => {
             recruit_unit_ui::select_dialog(game, s, player, state)

@@ -221,7 +221,7 @@ pub fn select_dialog(
     player: &ShownPlayer,
     state: &State,
 ) -> StateUpdate {
-    select_ui::count_dialog_icon(
+    select_ui::count_dialog(
         player,
         state,
         a,
