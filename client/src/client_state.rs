@@ -141,14 +141,6 @@ impl ActiveDialog {
     }
 
     #[must_use]
-    pub fn is_map_dialog(&self) -> bool {
-        matches!(
-            self,
-            ActiveDialog::PlaceSettler
-        )
-    }
-
-    #[must_use]
     pub fn can_restore(&self) -> bool {
         !matches!(
             self,

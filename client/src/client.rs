@@ -80,7 +80,7 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         ActiveDialog::None
         | ActiveDialog::MoveUnits(_)
         | ActiveDialog::WaitingForUpdate
-        | ActiveDialog::CulturalInfluence => StateUpdate::None,
+        | ActiveDialog::CulturalInfluence | ActiveDialog::PlaceSettler => StateUpdate::None,
         ActiveDialog::Log => show_log(game, player),
         ActiveDialog::TileMenu(p) => show_tile_menu(game, *p, player, state),
 
@@ -114,7 +114,6 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
 
         //combat
         ActiveDialog::PlayActionCard => combat_ui::play_action_card_dialog(player),
-        ActiveDialog::PlaceSettler => combat_ui::place_settler_dialog(player),
         ActiveDialog::Retreat => combat_ui::retreat_dialog(player),
         ActiveDialog::RemoveCasualties(s) => combat_ui::remove_casualties_dialog(game, s, player),
     });

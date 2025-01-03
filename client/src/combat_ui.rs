@@ -25,12 +25,6 @@ fn retreat(retreat: bool) -> StateUpdate {
     StateUpdate::Execute(Action::Combat(CombatAction::Retreat(retreat)))
 }
 
-pub fn place_settler_dialog(player: &ShownPlayer) -> StateUpdate {
-    active_dialog_window(player, "Select a city to place a settler in.", |_| {
-        StateUpdate::None
-    })
-}
-
 #[derive(Clone)]
 pub struct RemoveCasualtiesSelection {
     pub position: Position,

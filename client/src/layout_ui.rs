@@ -110,7 +110,7 @@ pub fn ok_only_pos(player: &ShownPlayer) -> Vec2 {
 }
 
 fn small_dialog(player: &ShownPlayer) -> bool {
-    player.active_dialog.is_map_dialog() || player.pending_update
+    player.pending_update
 }
 
 pub fn is_in_circle(mouse_pos: Vec2, p: Point, radius: f32) -> bool {

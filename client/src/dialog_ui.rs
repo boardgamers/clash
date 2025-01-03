@@ -24,11 +24,8 @@ where
 {
     let size = player.screen_size;
     let width = size.x - 20.;
-    let size = if player.active_dialog.is_map_dialog() {
-        vec2(width / 2.0, 270.)
-    } else {
-        vec2(width, size.y - 40.)
-    };
+    let size =
+        vec2(width, size.y - 40.);
     custom_dialog(title, vec2(10., 10.), size, f)
 }
 
