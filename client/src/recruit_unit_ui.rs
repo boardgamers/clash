@@ -156,7 +156,6 @@ pub struct RecruitSelection {
     pub available_units: Units,
     pub need_replacement: Units,
     pub replaced_units: Vec<u32>,
-    pub current_city: Option<Position>,
 }
 
 impl RecruitSelection {
@@ -169,12 +168,7 @@ impl RecruitSelection {
             available_units,
             need_replacement,
             replaced_units,
-            current_city: None,
         }
-    }
-
-    pub fn clear(&mut self) {
-        self.current_city = None;
     }
 
     pub fn is_finished(&self) -> bool {
@@ -183,20 +177,12 @@ impl RecruitSelection {
 }
 
 impl UnitSelection for RecruitSelection {
-    fn selected_units(&self) -> &[u32] {
-        &self.replaced_units
-    }
-
     fn selected_units_mut(&mut self) -> &mut Vec<u32> {
         &mut self.replaced_units
     }
 
     fn can_select(&self, _game: &Game, unit: &Unit) -> bool {
         self.need_replacement.has_unit(&unit.unit_type)
-    }
-
-    fn current_tile(&self) -> Option<Position> {
-        self.current_city
     }
 }
 
@@ -222,7 +208,6 @@ pub fn select_dialog(
     state: &State,
 ) -> StateUpdate {
     select_ui::count_dialog(
-        player,
         state,
         a,
         |s| s.selectable.clone(),
@@ -295,13 +280,10 @@ fn update_selection(
     )
 }
 
-pub fn replace_dialog(game: &Game, sel: &RecruitSelection, player: &ShownPlayer) -> StateUpdate {
+pub fn replace_dialog(game: &Game, sel: &RecruitSelection, state: &mut State) -> StateUpdate {
     unit_ui::unit_selection_dialog::<RecruitSelection>(
         game,
-        player,
-        "Replace units",
         sel,
-        |new| StateUpdate::SetDialog(ActiveDialog::ReplaceUnits(new.clone())),
         |new: RecruitSelection| {
             StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
                 game,
@@ -311,12 +293,6 @@ pub fn replace_dialog(game: &Game, sel: &RecruitSelection, player: &ShownPlayer)
                 ConstructionProject::Units(new),
             )))
         },
-        |_| StateUpdate::None,
+        state,
     )
-}
-
-pub fn click_replace(pos: Position, s: &RecruitSelection) -> StateUpdate {
-    let mut new = s.clone();
-    new.current_city = Some(pos);
-    StateUpdate::SetDialog(ActiveDialog::ReplaceUnits(new))
 }

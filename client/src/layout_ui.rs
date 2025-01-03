@@ -74,24 +74,24 @@ pub fn draw_scaled_icon(
     if !tooltip.is_empty() {
         tooltip::show_tooltip_for_rect(state, tooltip, rect);
     }
-    left_mouse_button(rect)
+    left_mouse_button_pressed_in_rect(rect, state)
 }
 
-pub fn left_mouse_button(rect: Rect) -> bool {
-    if is_mouse_button_pressed(MouseButton::Left) {
-        let (x, y) = mouse_position();
-        rect.contains(vec2(x, y))
-    } else {
-        false
-    }
+#[must_use]
+pub fn left_mouse_button_pressed_in_rect(rect: Rect, state: &State) -> bool {
+    left_mouse_button_pressed(state)
+        .map(|p| rect.contains(p))
+        .unwrap_or(false)
 }
 
+#[must_use]
 pub fn cancel_pos(player: &ShownPlayer) -> Vec2 {
     small_dialog(player)
         .then(|| Vec2::new(player.screen_size.x / 4.0, 190.))
         .unwrap_or_else(|| Vec2::new(player.screen_size.x / 2., player.screen_size.y - 130.))
 }
 
+#[must_use]
 pub fn ok_pos(player: &ShownPlayer) -> Vec2 {
     small_dialog(player)
         .then(|| Vec2::new(player.screen_size.x / 4.0 - 150., 190.))
@@ -103,17 +103,30 @@ pub fn ok_pos(player: &ShownPlayer) -> Vec2 {
         })
 }
 
+#[must_use]
 pub fn ok_only_pos(player: &ShownPlayer) -> Vec2 {
     small_dialog(player)
         .then(|| Vec2::new(player.screen_size.x / 4.0 - 75., 190.))
         .unwrap_or_else(|| Vec2::new(player.screen_size.x / 2. - 75., player.screen_size.y - 130.))
 }
 
+#[must_use]
 fn small_dialog(player: &ShownPlayer) -> bool {
     player.pending_update
 }
 
+#[must_use]
 pub fn is_in_circle(mouse_pos: Vec2, p: Point, radius: f32) -> bool {
     let d = vec2(p.x - mouse_pos.x, p.y - mouse_pos.y);
     d.length() <= radius
+}
+
+#[must_use]
+pub fn left_mouse_button_pressed(state: &State) -> Option<Vec2> {
+    if is_mouse_button_pressed(MouseButton::Left) {
+        let (x, y) = mouse_position();
+        Some(state.screen_to_world(vec2(x, y)))
+    } else {
+        None
+    }
 }

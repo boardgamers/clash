@@ -8,7 +8,7 @@ use server::position::Position;
 use server::unit::MovementAction;
 
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::unit_ui::unit_at_pos;
+use crate::unit_ui::{unit_at_pos, unit_selection_clicked};
 
 fn possible_destinations(
     game: &Game,
@@ -62,12 +62,7 @@ pub fn click(pos: Position, s: &MoveSelection, mouse_pos: Vec2, game: &Game) -> 
         let unit = unit_at_pos(pos, mouse_pos, p);
         unit.map_or(StateUpdate::None, |unit_id| {
             new.start = Some(pos);
-            if new.units.contains(&unit_id) {
-                // deselect unit
-                new.units.retain(|&id| id != unit_id);
-            } else {
-                new.units.push(unit_id);
-            }
+            unit_selection_clicked(unit_id, &mut new.units);
             if new.units.is_empty() {
                 new.destinations.clear();
                 new.start = None;

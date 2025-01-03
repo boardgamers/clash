@@ -43,11 +43,9 @@ pub fn raze_city_confirm_dialog(game: &Game, player: &ShownPlayer, pos: Position
     }
 }
 
-pub fn raze_city_dialog(player: &ShownPlayer, state: &State) -> StateUpdate {
-    if player.can_control {
-        if cancel_button(state) {
-            return StateUpdate::status_phase(StatusPhaseAction::RazeSize1City(RazeSize1City::None));
-        }
+pub fn raze_city_dialog(state: &State) -> StateUpdate {
+    if cancel_button(state) {
+        return StateUpdate::status_phase(StatusPhaseAction::RazeSize1City(RazeSize1City::None));
     }
     StateUpdate::None
 }

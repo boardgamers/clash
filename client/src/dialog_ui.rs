@@ -24,8 +24,7 @@ where
 {
     let size = player.screen_size;
     let width = size.x - 20.;
-    let size =
-        vec2(width, size.y - 40.);
+    let size = vec2(width, size.y - 40.);
     custom_dialog(title, vec2(10., 10.), size, f)
 }
 
@@ -85,10 +84,17 @@ pub fn show_pending_update(update: &PendingUpdate, player: &ShownPlayer) -> Stat
     })
 }
 
+#[must_use]
 pub fn cancel_button(state: &State) -> bool {
-    bottom_right_texture(state, &state.assets.cancel, icon_pos(-7, -1), "Cancel")
+    cancel_button_with_tooltip(state, "Cancel")
 }
 
+#[must_use]
+pub fn cancel_button_with_tooltip(state: &State, tooltip: &str) -> bool {
+    bottom_right_texture(state, &state.assets.cancel, icon_pos(-7, -1), tooltip)
+}
+
+#[must_use]
 pub fn ok_button(state: &State, valid: bool) -> bool {
     let ok = if valid {
         &state.assets.ok

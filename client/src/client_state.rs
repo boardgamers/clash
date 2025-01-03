@@ -141,11 +141,8 @@ impl ActiveDialog {
     }
 
     #[must_use]
-    pub fn can_restore(&self) -> bool {
-        !matches!(
-            self,
-            ActiveDialog::MoveUnits(_) | ActiveDialog::ReplaceUnits(_) | ActiveDialog::None
-        )
+    pub fn show_for_other_player(&self) -> bool {
+        matches!(self, ActiveDialog::Log | ActiveDialog::AdvanceMenu)
     }
 }
 
@@ -395,13 +392,6 @@ impl State {
     }
 
     fn open_dialog(&mut self, dialog: ActiveDialog) {
-        if self.active_dialog.title() == dialog.title() {
-            self.close_dialog();
-            return;
-        }
-        if matches!(self.active_dialog, ActiveDialog::TileMenu(_)) {
-            self.close_dialog();
-        }
         self.active_dialog = dialog;
     }
 
@@ -410,11 +400,7 @@ impl State {
     }
 
     fn close_dialog(&mut self) {
-        if self.active_dialog.can_restore() {
             self.active_dialog = ActiveDialog::None;
-        } else if let ActiveDialog::ReplaceUnits(r) = &mut self.active_dialog {
-            r.clear();
-        }
     }
 
     pub fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {

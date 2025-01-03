@@ -1,5 +1,7 @@
 use crate::client_state::{ShownPlayer, State, StateUpdate, StateUpdates};
-use crate::dialog_ui::{active_dialog_window, cancel_button, ok_button};
+use crate::dialog_ui::{
+    active_dialog_window, cancel_button, cancel_button_with_tooltip, ok_button,
+};
 use crate::layout_ui::{bottom_center_anchor, bottom_center_texture, ok_pos, ICON_SIZE};
 use macroquad::color::BLACK;
 use macroquad::math::{bool, vec2, Vec2};
@@ -22,7 +24,6 @@ pub trait HasCountSelectableObject {
 
 #[allow(clippy::too_many_arguments)]
 pub fn count_dialog<C, O: HasCountSelectableObject>(
-    player: &ShownPlayer,
     state: &State,
     container: &C,
     get_objects: impl Fn(&C) -> Vec<O>,
@@ -33,10 +34,6 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
     plus: impl Fn(&C, &O) -> StateUpdate,
     minus: impl Fn(&C, &O) -> StateUpdate,
 ) -> StateUpdate {
-    if !player.can_control {
-        return StateUpdate::None;
-    }
-
     let mut updates = StateUpdates::new();
     let objects = get_objects(container)
         .into_iter()
@@ -141,11 +138,12 @@ pub fn selection_dialog<T: Selection>(
                 return on_change(new);
             }
         }
-        confirm_update(sel, player, || on_ok(sel.clone()), ui, &sel.confirm(game))
+        confirm_update_depr(sel, player, || on_ok(sel.clone()), ui, &sel.confirm(game))
     })
 }
 
-pub fn confirm_update<T: ConfirmSelection>(
+// old code, doesn't use
+pub fn confirm_update_depr<T: ConfirmSelection>(
     sel: &T,
     player: &ShownPlayer,
     on_ok: impl FnOnce() -> StateUpdate,
@@ -156,21 +154,56 @@ pub fn confirm_update<T: ConfirmSelection>(
         SelectionConfirm::NoConfirm => StateUpdate::None,
         SelectionConfirm::Invalid => {
             ui.label(ok_pos(player), "Invalid selection");
-            may_cancel(sel, ui)
+            may_cancel_depr(sel, ui)
         }
         SelectionConfirm::Valid => {
             if ui.button(ok_pos(player), "OK") {
                 on_ok()
             } else {
-                may_cancel(sel, ui)
+                may_cancel_depr(sel, ui)
             }
         }
     }
 }
 
-fn may_cancel(sel: &impl ConfirmSelection, ui: &mut Ui) -> StateUpdate {
+pub fn confirm_update<T: ConfirmSelection>(
+    sel: &T,
+    on_ok: impl FnOnce() -> StateUpdate,
+    confirm: &SelectionConfirm,
+    state: &State,
+) -> StateUpdate {
+    match confirm {
+        SelectionConfirm::NoConfirm => StateUpdate::None,
+        SelectionConfirm::Invalid => {
+            let _ = ok_button(state, false);
+            may_cancel(sel, state)
+        }
+        SelectionConfirm::Valid => {
+            if ok_button(state, true) {
+                on_ok()
+            } else {
+                may_cancel(sel, state)
+            }
+        }
+    }
+}
+
+// old code, don't use
+fn may_cancel_depr(sel: &impl ConfirmSelection, ui: &mut Ui) -> StateUpdate {
     if let Some(cancel_name) = sel.cancel_name() {
         if ui.button(None, cancel_name) {
+            sel.cancel()
+        } else {
+            StateUpdate::None
+        }
+    } else {
+        StateUpdate::None
+    }
+}
+
+fn may_cancel(sel: &impl ConfirmSelection, state: &State) -> StateUpdate {
+    if let Some(cancel_name) = sel.cancel_name() {
+        if cancel_button_with_tooltip(state, cancel_name) {
             sel.cancel()
         } else {
             StateUpdate::None

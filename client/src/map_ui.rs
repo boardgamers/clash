@@ -85,7 +85,6 @@ fn alpha(game: &Game, state: &State, pos: Position) -> f32 {
                 0.
             }
         }
-        ActiveDialog::ReplaceUnits(s) => highlight_if(s.current_city.is_some_and(|p| p == pos)),
         ActiveDialog::RazeSize1City => {
             highlight_if(game.players[game.active_player()].can_raze_city(pos))
         }

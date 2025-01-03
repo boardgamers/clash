@@ -230,7 +230,6 @@ pub fn pay_advance_dialog(
 
     if can_advance(game, player, &a) {
         payment_dialog(
-            player,
             ap,
             AdvancePayment::valid,
             |ap| {

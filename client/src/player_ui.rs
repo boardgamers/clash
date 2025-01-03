@@ -4,8 +4,8 @@ use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
 use crate::layout_ui::{
-    bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button, top_center_texture,
-    top_right_texture, ICON_SIZE,
+    bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button_pressed_in_rect,
+    top_center_texture, top_right_texture, ICON_SIZE,
 };
 use crate::map_ui::terrain_name;
 use crate::resource_ui::{new_resource_map, resource_name, resource_types, ResourceType};
@@ -58,7 +58,7 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
             );
         }
 
-        if !shown && left_mouse_button(Rect::new(x, pos.y, w, ICON_SIZE)) {
+        if !shown && left_mouse_button_pressed_in_rect(Rect::new(x, pos.y, w, ICON_SIZE), state) {
             return StateUpdate::SetShownPlayer(pl.index);
         }
 
@@ -247,36 +247,24 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
 
     let assets = &state.assets;
 
-    if let Some(tooltip) = can_end_move(game) {
-        if player.can_control
-            && bottom_right_texture(state, &assets.end_turn, icon_pos(-4, -1), tooltip)
-        {
-            return end_move(game);
+    if player.can_control {
+        if let Some(tooltip) = can_end_move(game) {
+            if bottom_right_texture(state, &assets.end_turn, icon_pos(-4, -1), tooltip) {
+                return end_move(game);
+            }
         }
-    }
-    if game.can_redo() && bottom_right_texture(state, &assets.redo, icon_pos(-5, -1), "Redo") {
-        return StateUpdate::Execute(Action::Redo);
-    }
-    if game.can_undo() && bottom_right_texture(state, &assets.undo, icon_pos(-6, -1), "Undo") {
-        return StateUpdate::Execute(Action::Undo);
-    }
-    let d = state.game_state_dialog(game, &ActiveDialog::None);
-    if d.can_restore()
-        && d.title() != state.active_dialog.title()
-        && bottom_right_texture(
-            state,
-            &assets.restore_menu,
-            icon_pos(-7, -1),
-            format!("Restore {}", d.title()).as_str(),
-        )
-    {
-        return StateUpdate::OpenDialog(d);
-    }
+        if game.can_redo() && bottom_right_texture(state, &assets.redo, icon_pos(-5, -1), "Redo") {
+            return StateUpdate::Execute(Action::Redo);
+        }
+        if game.can_undo() && bottom_right_texture(state, &assets.undo, icon_pos(-6, -1), "Undo") {
+            return StateUpdate::Execute(Action::Undo);
+        }
 
-    if player.can_play_action {
-        let update = action_buttons(game, state, player, assets);
-        if !matches!(update, StateUpdate::None) {
-            return update;
+        if player.can_play_action {
+            let update = action_buttons(game, state, player, assets);
+            if !matches!(update, StateUpdate::None) {
+                return update;
+            }
         }
     }
 
