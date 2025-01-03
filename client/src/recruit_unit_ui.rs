@@ -280,7 +280,7 @@ fn update_selection(
     )
 }
 
-pub fn replace_dialog(game: &Game, sel: &RecruitSelection, state: &mut State) -> StateUpdate {
+pub fn replace_dialog(game: &Game, sel: &RecruitSelection, state: &State) -> StateUpdate {
     unit_ui::unit_selection_dialog::<RecruitSelection>(
         game,
         sel,
