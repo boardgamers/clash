@@ -11,7 +11,7 @@ use crate::advance_ui::{pay_advance_dialog, show_advance_menu, show_free_advance
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, StateUpdates};
 use crate::collect_ui::collect_resources_dialog;
 use crate::construct_ui::pay_construction_dialog;
-use crate::happiness_ui::{increase_happiness_dialog, increase_happiness_menu};
+use crate::happiness_ui::{increase_happiness_click, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
 use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
@@ -85,7 +85,7 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         ActiveDialog::TileMenu(p) => show_tile_menu(game, *p, player, state),
 
         // playing actions
-        ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(h, player),
+        ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(h, player, state, game),
         ActiveDialog::AdvanceMenu => show_advance_menu(game, player),
         ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, player, game, state),
         ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p, player, state),
@@ -157,7 +157,7 @@ pub fn try_click(game: &Game, state: &mut State, player: &ShownPlayer) -> StateU
                     StateUpdate::None
                 }
             }
-            ActiveDialog::IncreaseHappiness(h) => increase_happiness_dialog(game, player, pos, h),
+            ActiveDialog::IncreaseHappiness(h) => increase_happiness_click(game, player, pos, h),
             _ => StateUpdate::OpenDialog(ActiveDialog::TileMenu(pos)),
         }
     } else {

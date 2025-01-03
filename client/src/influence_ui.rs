@@ -50,7 +50,7 @@ pub fn hover(
     mouse_pos: Vec2,
     state: &mut State,
 ) -> StateUpdate {
-    let player = game.get_player(shown_player.index);
+    let player = shown_player.get(game);
     if let Some(city) = game.get_any_city(position) {
         let c = hex_ui::center(city.position);
         let mut i = city.pieces.wonders.len() as i32;
@@ -73,7 +73,7 @@ pub fn hover(
                         city.position,
                         *b,
                     ) {
-                        let player = game.get_player(shown_player.index);
+                        let player = shown_player.get(game);
                         if player.resources.can_afford(&cost) {
                             if is_mouse_button_pressed(MouseButton::Left) {
                                 return StateUpdate::Execute(Action::Playing(

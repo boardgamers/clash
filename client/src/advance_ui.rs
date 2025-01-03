@@ -92,7 +92,7 @@ pub fn show_free_advance_menu(game: &Game, player: &ShownPlayer) -> StateUpdate 
     show_generic_advance_menu("Select a free advance", game, player, |a| {
         if can_advance(game, player, a) {
             return StateUpdate::execute_with_confirm(
-                description(game.get_player(player.index), a),
+                description(player.get(game), a),
                 Action::StatusPhase(StatusPhaseAction::FreeAdvance(a.name.clone())),
             );
         }
@@ -101,7 +101,7 @@ pub fn show_free_advance_menu(game: &Game, player: &ShownPlayer) -> StateUpdate 
 }
 
 fn advance_info(game: &Game, player: &ShownPlayer, a: &Advance) -> StateUpdate {
-    StateUpdate::execute_with_cancel(description(game.get_player(player.index), a))
+    StateUpdate::execute_with_cancel(description(player.get(game), a))
 }
 
 pub fn show_generic_advance_menu(

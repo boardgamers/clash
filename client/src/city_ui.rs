@@ -1,4 +1,5 @@
 use macroquad::prelude::*;
+use std::ops::Add;
 
 use server::city::{City, MoodState};
 use server::city_pieces::Building;
@@ -190,29 +191,31 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
     }
     draw_circle(c.x, c.y, 15.0, player_ui::player_color(owner.index));
 
-    if let ActiveDialog::IncreaseHappiness(increase) = &state.active_dialog {
+    let mood = if let ActiveDialog::IncreaseHappiness(increase) = &state.active_dialog {
         let steps = increase
             .steps
             .iter()
             .find(|(p, _)| p == &city.position)
-            .map_or(String::new(), |(_, s)| format!("{s}"));
-        state.draw_text(&steps, c.x - 5., c.y + 6.);
+            .map(|(_, s)| s)
+            .unwrap_or(&0);
+        &city.mood_state.clone().add(*steps)
     } else {
-        let t = match city.mood_state {
-            MoodState::Happy => Some(&state.assets.resources[&ResourceType::MoodTokens]),
-            MoodState::Neutral => None,
-            MoodState::Angry => Some(&state.assets.angry),
-        };
-        if let Some(t) = t {
-            let size = 15.;
-            draw_scaled_icon(
-                state,
-                t,
-                &format!("Happiness: {:?}", city.mood_state),
-                c.to_vec2() + vec2(-size / 2., -size / 2.),
-                size,
-            );
-        }
+        &city.mood_state
+    };
+    let t = match mood {
+        MoodState::Happy => Some(&state.assets.resources[&ResourceType::MoodTokens]),
+        MoodState::Neutral => None,
+        MoodState::Angry => Some(&state.assets.angry),
+    };
+    if let Some(t) = t {
+        let size = 15.;
+        draw_scaled_icon(
+            state,
+            t,
+            &format!("Happiness: {:?}", city.mood_state),
+            c.to_vec2() + vec2(-size / 2., -size / 2.),
+            size,
+        );
     }
 
     let mut i = 0;

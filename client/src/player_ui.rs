@@ -104,7 +104,7 @@ pub fn top_icon_with_label(
 }
 
 pub fn show_top_center(game: &Game, shown_player: &ShownPlayer, state: &State) {
-    let player = game.get_player(shown_player.index);
+    let player = shown_player.get(game);
 
     top_icon_with_label(
         shown_player,
@@ -123,6 +123,9 @@ pub fn show_top_center(game: &Game, shown_player: &ShownPlayer, state: &State) {
         let s = match &state.active_dialog {
             ActiveDialog::CollectResources(c) => {
                 format!("{}+{}", a, new_resource_map(&c.collected())[r])
+            }
+            ActiveDialog::IncreaseHappiness(h) => {
+                format!("{}-{}", a, new_resource_map(&h.cost)[r])
             }
             _ => format!("{a}/{l}"),
         };
@@ -147,7 +150,7 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
         _ => label(&format!("Round {}", game.round)),
     }
 
-    let p = game.get_player(player.index);
+    let p = player.get(game);
 
     label(&p.get_name());
 
