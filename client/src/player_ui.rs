@@ -175,18 +175,16 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
             GameState::Movement {
                 movement_actions_left,
                 ..
-            } => label(&format!("Move units: {movement_actions_left} moves left")),
+            } => label(&move_units_message(*movement_actions_left)),
             GameState::CulturalInfluenceResolution(_) => {
                 label("Cultural Influence Resolution");
             }
-            GameState::Combat(c) => label(&format!(
-                "Combat Round {} Phase {:?}{}",
-                c.round,
-                c.phase,
-                moves_left(&game.state)
-                    .map(|m| format!(", {m} moves left"))
-                    .unwrap_or_default()
-            )),
+            GameState::Combat(c) => {
+                label(&move_units_message(
+                    moves_left(&game.state).unwrap_or_default(),
+                ));
+                label(&format!("Combat Round {}", c.round,))
+            }
             GameState::PlaceSettler {
                 player_index: _,
                 movement_actions_left,
@@ -224,6 +222,10 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
             label(&unit_ui::unit_label(&unit, army_move));
         }
     }
+}
+
+fn move_units_message(movement_actions_left: u32) -> String {
+    format!("Move units: {movement_actions_left} moves left")
 }
 
 fn moves_left(state: &GameState) -> Option<u32> {
