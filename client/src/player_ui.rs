@@ -4,11 +4,12 @@ use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
 use crate::layout_ui::{
-    bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button_pressed_in_rect,
-    top_center_texture, ICON_SIZE,
+    bottom_center_texture, bottom_left_texture, bottom_right_texture, icon_pos,
+    left_mouse_button_pressed_in_rect, top_center_texture, ICON_SIZE,
 };
 use crate::map_ui::terrain_name;
 use crate::resource_ui::{new_resource_map, resource_name, resource_types, ResourceType};
+use crate::tooltip::show_tooltip_for_rect;
 use crate::unit_ui;
 use macroquad::math::{u32, vec2};
 use macroquad::prelude::*;
@@ -18,7 +19,6 @@ use server::game::{Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::status_phase::StatusPhaseAction;
 use server::unit::MovementAction;
-use crate::tooltip::show_tooltip_for_rect;
 
 pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
     let i = game
@@ -80,23 +80,6 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
     StateUpdate::None
 }
 
-pub fn resource_label(
-    player: &ShownPlayer,
-    state: &State,
-    label: &str,
-    resource_type: ResourceType,
-    p: Vec2,
-) {
-    top_icon_with_label(
-        player,
-        state,
-        label,
-        &state.assets.resources[&resource_type],
-        p,
-        resource_name(resource_type),
-    );
-}
-
 pub fn top_icon_with_label(
     player: &ShownPlayer,
     state: &State,
@@ -115,6 +98,24 @@ pub fn top_icon_with_label(
     top_center_texture(state, texture, p, tooltip);
 }
 
+pub fn bottom_icon_with_label(
+    player: &ShownPlayer,
+    state: &State,
+    label: &str,
+    texture: &Texture2D,
+    p: Vec2,
+    tooltip: &str,
+) {
+    let dimensions = state.measure_text(label);
+    let x = (ICON_SIZE - dimensions.width) / 2.0;
+    state.draw_text(
+        label,
+        player.screen_size.x / 2.0 + p.x + x,
+        player.screen_size.y + p.y + 35.,
+    );
+    bottom_center_texture(state, texture, p, tooltip);
+}
+
 pub fn show_top_center(game: &Game, shown_player: &ShownPlayer, state: &State) {
     let player = shown_player.get(game);
 
@@ -129,19 +130,16 @@ pub fn show_top_center(game: &Game, shown_player: &ShownPlayer, state: &State) {
     let amount = new_resource_map(&player.resources);
     let limit = new_resource_map(&player.resource_limit);
     for (i, r) in resource_types().iter().rev().enumerate() {
-        let x = 2 - i as i8;
         let a = amount[r];
         let l = limit[r];
-        let s = match &state.active_dialog {
-            ActiveDialog::CollectResources(c) => {
-                format!("{}+{}", a, new_resource_map(&c.collected())[r])
-            }
-            ActiveDialog::IncreaseHappiness(h) => {
-                format!("{}-{}", a, new_resource_map(&h.cost)[r])
-            }
-            _ => format!("{a}/{l}"),
-        };
-        resource_label(shown_player, state, &s, *r, icon_pos(x, 0));
+        top_icon_with_label(
+            shown_player,
+            state,
+            &format!("{a}/{l}"),
+            &state.assets.resources[r],
+            icon_pos(2 - i as i8, 0),
+            resource_name(*r),
+        );
     }
 }
 

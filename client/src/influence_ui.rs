@@ -44,7 +44,9 @@ pub fn hover(
     let player = shown_player.get(game);
     for p in &game.players {
         for city in &p.cities {
-            if let Some(value) = show_city(position, game, shown_player, mouse_pos, state, player, &city) {
+            if let Some(value) =
+                show_city(position, game, shown_player, mouse_pos, state, player, city)
+            {
                 return value;
             }
         }
@@ -53,7 +55,15 @@ pub fn hover(
     StateUpdate::None
 }
 
-fn show_city(position: Position, game: &Game, shown_player: &ShownPlayer, mouse_pos: Vec2, state: &mut State, player: &Player, city: &City) -> Option<StateUpdate> {
+fn show_city(
+    position: Position,
+    game: &Game,
+    shown_player: &ShownPlayer,
+    mouse_pos: Vec2,
+    state: &mut State,
+    player: &Player,
+    city: &City,
+) -> Option<StateUpdate> {
     let c = hex_ui::center(city.position);
     let mut i = city.pieces.wonders.len() as i32;
     for player_index in 0..4 {
@@ -89,14 +99,12 @@ fn show_city(position: Position, game: &Game, shown_player: &ShownPlayer, mouse_
                         && is_mouse_button_pressed(MouseButton::Left)
                     {
                         return Some(StateUpdate::Execute(Action::Playing(
-                            PlayingAction::InfluenceCultureAttempt(
-                                InfluenceCultureAttempt {
-                                    starting_city_position: start_position,
-                                    target_player_index: city.player_index,
-                                    target_city_position: city.position,
-                                    city_piece: *b,
-                                },
-                            ),
+                            PlayingAction::InfluenceCultureAttempt(InfluenceCultureAttempt {
+                                starting_city_position: start_position,
+                                target_player_index: city.player_index,
+                                target_city_position: city.position,
+                                city_piece: *b,
+                            }),
                         )));
                     }
                 }

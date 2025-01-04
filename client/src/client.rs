@@ -131,7 +131,7 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
         ActiveDialog::AdvanceMenu => show_advance_menu(game, player, state),
         ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, player, game, state),
         ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p, state),
-        ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c, state),
+        ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c, state, player),
         ActiveDialog::RecruitUnitSelection(s) => {
             recruit_unit_ui::select_dialog(game, s, player, state)
         }
