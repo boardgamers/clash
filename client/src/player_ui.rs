@@ -5,7 +5,7 @@ use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET,
 use crate::happiness_ui::start_increase_happiness;
 use crate::layout_ui::{
     bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button_pressed_in_rect,
-    top_center_texture, top_right_texture, ICON_SIZE,
+    top_center_texture, ICON_SIZE,
 };
 use crate::map_ui::terrain_name;
 use crate::resource_ui::{new_resource_map, resource_name, resource_types, ResourceType};
@@ -279,16 +279,6 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
             }
         }
     }
-
-    if top_right_texture(state, &assets.log, icon_pos(-1, 0), "Show log") {
-        if let ActiveDialog::Log = state.active_dialog {
-            return StateUpdate::CloseDialog;
-        }
-        return StateUpdate::OpenDialog(ActiveDialog::Log);
-    };
-    if top_right_texture(state, &assets.advances, icon_pos(-2, 0), "Show advances") {
-        return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
-    };
 
     if features.import_export {
         if bottom_right_texture(state, &assets.export, icon_pos(-1, -3), "Export") {

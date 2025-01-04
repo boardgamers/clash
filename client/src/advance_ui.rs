@@ -1,12 +1,14 @@
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
-use crate::dialog_ui::dialog;
+use crate::layout_ui::{left_mouse_button_pressed_in_rect, top_center_text};
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
+use crate::player_ui::player_color;
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::HasCountSelectableObject;
 use itertools::Itertools;
-use macroquad::hash;
 use macroquad::math::{bool, vec2, Vec2};
-use macroquad::ui::widgets::Checkbox;
+use macroquad::prelude::{
+    draw_rectangle, draw_rectangle_lines, Rect, BLACK, BLUE, GRAY, WHITE, YELLOW,
+};
 use server::action::Action;
 use server::advance::{Advance, Bonus};
 use server::content::advances;
@@ -78,8 +80,8 @@ impl HasPayment for AdvancePayment {
     }
 }
 
-pub fn show_advance_menu(game: &Game, player: &ShownPlayer) -> StateUpdate {
-    show_generic_advance_menu("Advances", game, player, |a| {
+pub fn show_advance_menu(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
+    show_generic_advance_menu("Advances", game, player, state, |a| {
         StateUpdate::SetDialog(ActiveDialog::AdvancePayment(AdvancePayment::new(
             game,
             player.index,
@@ -88,8 +90,8 @@ pub fn show_advance_menu(game: &Game, player: &ShownPlayer) -> StateUpdate {
     })
 }
 
-pub fn show_free_advance_menu(game: &Game, player: &ShownPlayer) -> StateUpdate {
-    show_generic_advance_menu("Select a free advance", game, player, |a| {
+pub fn show_free_advance_menu(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
+    show_generic_advance_menu("Select a free advance", game, player, state, |a| {
         if can_advance(game, player, a) {
             return StateUpdate::execute_with_confirm(
                 description(player.get(game), a),
@@ -108,40 +110,52 @@ pub fn show_generic_advance_menu(
     title: &str,
     game: &Game,
     player: &ShownPlayer,
+    state: &State,
     new_update: impl Fn(&Advance) -> StateUpdate,
 ) -> StateUpdate {
-    dialog(player, title, |ui| {
-        let p = player.get(game);
+    top_center_text(state, title, vec2(0., 10.));
+    let p = player.get(game);
 
-        for advances in groups() {
-            let pos = group_pos(&advances[0]);
-            for (i, a) in advances.into_iter().enumerate() {
-                let pos = pos * vec2(140., 210.) + vec2(0., i as f32 * 35.);
-                let name = &a.name;
-                let can_advance = can_advance(game, player, &a);
+    for advances in groups() {
+        let pos = group_pos(&advances[0]);
+        for (i, a) in advances.into_iter().enumerate() {
+            let pos = pos * vec2(140., 210.) + vec2(20., i as f32 * 35. + 50.);
+            let name = &a.name;
+            let can_advance = can_advance(game, player, &a);
 
-                if can_advance || p.has_advance(name) {
-                    let mut data = p.has_advance(name);
-                    Checkbox::new(hash!(name))
-                        // .label(name)
-                        .pos(pos + vec2(60., 50.))
-                        .size(vec2(0., 0.))
-                        .ui(ui, &mut data);
-                    if data != p.has_advance(name) {
-                        return new_update(&a);
-                    }
+            let fill = if can_advance {
+                WHITE
+            } else if p.has_advance(name) {
+                player_color(player.index)
+            } else {
+                GRAY
+            };
+            let rect = Rect::new(pos.x, pos.y, 135., 30.);
+            draw_rectangle(rect.x, rect.y, rect.w, rect.h, fill);
+            state.draw_text(name, pos.x + 25., pos.y + 22.);
+
+            let border_color = if let Some(b) = &a.bonus {
+                match b {
+                    Bonus::MoodToken => YELLOW,
+                    Bonus::CultureToken => BLUE,
                 }
-                // Button::new(name.clone()).position(pos + vec2(0., 0.)).ui(ui);
-                ui.label(pos + vec2(0., 0.), name);
+            } else {
+                BLACK
+            };
+            draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 4., border_color);
+
+            if left_mouse_button_pressed_in_rect(rect, state) {
+                return new_update(&a);
             }
         }
-        StateUpdate::None
-    })
+    }
+    StateUpdate::None
 }
 
 fn can_advance(game: &Game, player: &ShownPlayer, a: &Advance) -> bool {
     let name = &a.name;
     let p = player.get(game);
+    // todo color should be for selected player, not watching player
     if player.can_play_action {
         p.can_advance(name)
     } else if player.can_control

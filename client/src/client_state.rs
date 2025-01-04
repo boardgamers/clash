@@ -155,7 +155,12 @@ impl ActiveDialog {
 
     #[must_use]
     pub fn is_modal(&self) -> bool {
-        self.show_for_other_player()
+        matches!(self, ActiveDialog::Log | ActiveDialog::AdvanceMenu)
+    }
+
+    #[must_use]
+    pub fn is_full_modal(&self) -> bool {
+        matches!(self, ActiveDialog::AdvanceMenu)
     }
 }
 

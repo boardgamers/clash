@@ -20,8 +20,17 @@ pub fn icon_pos(x: i8, y: i8) -> Vec2 {
 }
 
 pub fn top_center_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
-    let anchor = vec2(state.screen_size.x / 2., MARGIN);
+    let anchor = top_center_anchor(state);
     draw_icon(state, texture, tooltip, anchor + p)
+}
+
+pub fn top_center_text(state: &State, text: &str, p: Vec2) {
+    let p = top_center_anchor(state) + p;
+    state.draw_text(text, p.x, p.y);
+}
+
+fn top_center_anchor(state: &State) -> Vec2 {
+    vec2(state.screen_size.x / 2., MARGIN)
 }
 
 pub fn top_right_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {

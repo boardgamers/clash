@@ -1,7 +1,6 @@
 use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
 use macroquad::prelude::*;
 use macroquad::prelude::{clear_background, vec2};
-use macroquad::ui::root_ui;
 
 use server::action::Action;
 use server::game::Game;
@@ -13,6 +12,7 @@ use crate::collect_ui::collect_resources_dialog;
 use crate::construct_ui::pay_construction_dialog;
 use crate::happiness_ui::{increase_happiness_click, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
+use crate::layout_ui::{icon_pos, top_right_texture};
 use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
 use crate::player_ui::{player_select, show_global_controls, show_top_center, show_top_left};
@@ -23,9 +23,7 @@ use crate::{
 };
 
 pub async fn init(features: &Features) -> State {
-    let state = State::new(features).await;
-    root_ui().push_skin(&state.assets.skin);
-    state
+    State::new(features).await
 }
 
 pub fn render_and_update(
@@ -67,12 +65,34 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     if !state.active_dialog.is_modal() {
         updates.add(draw_map(game, state));
     }
-    show_top_left(game, player, state);
+    if !state.active_dialog.is_full_modal() {
+        show_top_left(game, player, state);
+    }
     if !state.active_dialog.is_modal() {
         show_top_center(game, player, state);
     }
-    updates.add(player_select(game, player, state));
-    updates.add(show_global_controls(game, state, features));
+    if !state.active_dialog.is_full_modal() {
+        updates.add(player_select(game, player, state));
+        updates.add(show_global_controls(game, state, features));
+    }
+
+    if top_right_texture(state, &state.assets.log, icon_pos(-1, 0), "Show log") {
+        if let ActiveDialog::Log = state.active_dialog {
+            return StateUpdate::CloseDialog;
+        }
+        return StateUpdate::OpenDialog(ActiveDialog::Log);
+    };
+    if top_right_texture(
+        state,
+        &state.assets.advances,
+        icon_pos(-2, 0),
+        "Show advances",
+    ) {
+        if let ActiveDialog::AdvanceMenu = state.active_dialog {
+            return StateUpdate::CloseDialog;
+        }
+        return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
+    };
 
     if player.can_control {
         if let Some(u) = &state.pending_update {
@@ -104,7 +124,7 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
 
         // playing actions
         ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(h, player, state, game),
-        ActiveDialog::AdvanceMenu => show_advance_menu(game, player),
+        ActiveDialog::AdvanceMenu => show_advance_menu(game, player, state),
         ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, player, game, state),
         ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p, state),
         ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c, state),
@@ -117,7 +137,7 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
         }
 
         //status phase
-        ActiveDialog::FreeAdvance => show_free_advance_menu(game, player),
+        ActiveDialog::FreeAdvance => show_free_advance_menu(game, player, state),
         ActiveDialog::RazeSize1City => status_phase_ui::raze_city_dialog(state),
         ActiveDialog::CompleteObjectives => status_phase_ui::complete_objectives_dialog(state),
         ActiveDialog::ChangeGovernmentType => status_phase_ui::change_government_type_dialog(),

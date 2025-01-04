@@ -1,52 +1,6 @@
-use crate::client_state::{PendingUpdate, ShownPlayer, State, StateUpdate};
+use crate::client_state::{PendingUpdate, State, StateUpdate};
 use crate::layout_ui::{bottom_center_text, bottom_right_texture, icon_pos};
-use macroquad::hash;
-use macroquad::math::{vec2, Vec2};
-use macroquad::ui::widgets::Window;
-use macroquad::ui::{root_ui, Ui};
-
-pub fn dialog<F>(player: &ShownPlayer, title: &str, f: F) -> StateUpdate
-where
-    F: FnOnce(&mut Ui) -> StateUpdate,
-{
-    let size = player.screen_size;
-    let width = size.x - 20.;
-    let size = vec2(width, size.y - 40.);
-    custom_dialog(title, vec2(10., 10.), size, f)
-}
-
-fn custom_dialog<F>(title: &str, position: Vec2, size: Vec2, f: F) -> StateUpdate
-where
-    F: FnOnce(&mut Ui) -> StateUpdate,
-{
-    let window = Window::new(hash!(), position, size)
-        .titlebar(true)
-        .movable(false)
-        .label(title)
-        .close_button(true);
-
-    let (update, open) = show_window(window, f);
-    if matches!(update, StateUpdate::None) {
-        if open {
-            StateUpdate::None
-        } else {
-            StateUpdate::CloseDialog
-        }
-    } else {
-        update
-    }
-}
-
-fn show_window<F, R>(window: Window, f: F) -> (R, bool)
-where
-    F: FnOnce(&mut Ui) -> R,
-{
-    let ui = &mut root_ui();
-    let token = window.begin(ui);
-    let update = f(ui);
-    let open = token.end(ui);
-    (update, open)
-}
+use macroquad::math::vec2;
 
 pub fn show_pending_update(update: &PendingUpdate, state: &State) -> StateUpdate {
     let t = if update.warning.is_empty() {

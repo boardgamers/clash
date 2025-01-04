@@ -1,10 +1,7 @@
 use crate::client::Features;
 use crate::resource_ui::ResourceType;
-use macroquad::prelude::{
-    load_texture, load_ttf_font, Color, Font, Image, ImageFormat, RectOffset,
-};
+use macroquad::prelude::{load_texture, load_ttf_font, Font, ImageFormat};
 use macroquad::texture::Texture2D;
-use macroquad::ui::{root_ui, Skin};
 use server::city_pieces::Building;
 use server::map::Terrain;
 use server::unit::UnitType;
@@ -14,7 +11,6 @@ pub struct Assets {
     pub terrain: HashMap<Terrain, Texture2D>,
     pub exhausted: Texture2D,
     pub units: HashMap<UnitType, Texture2D>,
-    pub skin: Skin,
     pub font: Font,
 
     // mood icons
@@ -63,7 +59,6 @@ impl Assets {
             terrain: Self::terrain(features).await,
             exhausted: load_png(include_bytes!("../assets/cross-svgrepo-com.png")),
             units: Self::units(),
-            skin: Self::skin(&load_ttf_font(&font_name).await.unwrap()),
 
             angry: load_png(include_bytes!("../assets/angry-face-svgrepo-com.png")),
             resources: Self::resources(),
@@ -241,106 +236,6 @@ impl Assets {
             map.insert(t, load_texture(&features.get_asset(f)).await.unwrap());
         }
         map
-    }
-
-    fn skin(font: &Font) -> Skin {
-        let image =
-            Image::from_file_with_format(include_bytes!("../assets/button_background.png"), None)
-                .unwrap();
-        let label_style = root_ui()
-            .style_builder()
-            .background(image.clone())
-            .background_margin(RectOffset::new(37.0, 37.0, 5.0, 5.0))
-            .margin(RectOffset::new(10.0, 10.0, 0.0, 0.0))
-            .with_font(font)
-            .unwrap()
-            .text_color(Color::from_rgba(180, 180, 120, 255))
-            .font_size(20)
-            .build();
-
-        let window_style = root_ui()
-            .style_builder()
-            .background(
-                Image::from_file_with_format(
-                    include_bytes!("../assets/window_background.png"),
-                    None,
-                )
-                .unwrap(),
-            )
-            .background_margin(RectOffset::new(20.0, 20.0, 10.0, 10.0))
-            .margin(RectOffset::new(-20.0, -30.0, 0.0, 0.0))
-            .build();
-
-        let button_style = root_ui()
-            .style_builder()
-            .background(image)
-            .background_margin(RectOffset::new(37.0, 37.0, 5.0, 5.0))
-            .margin(RectOffset::new(10.0, 10.0, 0.0, 0.0))
-            .background_hovered(
-                Image::from_file_with_format(
-                    include_bytes!("../assets/button_hovered_background.png"),
-                    None,
-                )
-                .unwrap(),
-            )
-            .background_clicked(
-                Image::from_file_with_format(
-                    include_bytes!("../assets/button_clicked_background.png"),
-                    None,
-                )
-                .unwrap(),
-            )
-            .with_font(font)
-            .unwrap()
-            .text_color(Color::from_rgba(180, 180, 100, 255))
-            .font_size(20)
-            .build();
-
-        let editbox_style = root_ui()
-            .style_builder()
-            .background_margin(RectOffset::new(0., 0., 0., 0.))
-            .with_font(font)
-            .unwrap()
-            .text_color(Color::from_rgba(120, 120, 120, 255))
-            .color_selected(Color::from_rgba(190, 190, 190, 255))
-            .font_size(50)
-            .build();
-
-        // let checkbox_style = root_ui()
-        //     .style_builder()
-        //     .background(
-        //         Image::from_file_with_format(
-        //             include_bytes!("../examples/ui_assets/checkbox_background.png"),
-        //             None,
-        //         )
-        //         .unwrap(),
-        //     )
-        //     .background_hovered(
-        //         Image::from_file_with_format(
-        //             include_bytes!("../examples/ui_assets/checkbox_hovered_background.png"),
-        //             None,
-        //         )
-        //         .unwrap(),
-        //     )
-        //     .background_clicked(
-        //         Image::from_file_with_format(
-        //             include_bytes!("../examples/ui_assets/checkbox_clicked_background.png"),
-        //             None,
-        //         )
-        //         .unwrap(),
-        //     )
-        //     .build();
-
-        Skin {
-            editbox_style,
-            window_style,
-            button_style,
-            window_titlebar_style: label_style.clone(),
-            label_style,
-            // checkbox_style,
-            title_height: 30.,
-            ..root_ui().default_skin()
-        }
     }
 }
 
