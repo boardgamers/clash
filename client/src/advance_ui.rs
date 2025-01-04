@@ -94,9 +94,10 @@ pub fn show_advance_menu(game: &Game, player: &ShownPlayer, state: &State) -> St
 
 pub fn show_free_advance_menu(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
     show_generic_advance_menu("Select a free advance", game, player, state, |a| {
-        if can_advance(game, player, a) {
+        let p = player.get(game);
+        if can_advance(game, p, a) {
             return StateUpdate::execute_with_confirm(
-                description(player.get(game), a),
+                description(p, a),
                 Action::StatusPhase(StatusPhaseAction::FreeAdvance(a.name.clone())),
             );
         }
@@ -133,7 +134,7 @@ pub fn show_generic_advance_menu(
             for (i, a) in advances.into_iter().enumerate() {
                 let pos = pos + vec2(0., i as f32 * 35.);
                 let name = &a.name;
-                let can_advance = can_advance(game, player, &a);
+                let can_advance = can_advance(game, p, &a);
 
                 let rect = Rect::new(pos.x, pos.y, 135., 30.);
                 if pass == 0 {
@@ -149,9 +150,12 @@ pub fn show_generic_advance_menu(
                     draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 4., border_color(&a));
                 } else {
                     // tooltip should be shown on top of everything
-                    show_tooltip_for_rect(state, description(p, &a), rect);
+                    show_tooltip_for_rect(state, &description(p, &a), rect);
 
-                    if can_advance && left_mouse_button_pressed_in_rect(rect, state) {
+                    if player.can_control
+                        && can_advance
+                        && left_mouse_button_pressed_in_rect(rect, state)
+                    {
                         return new_update(&a);
                     }
                 }
@@ -161,40 +165,35 @@ pub fn show_generic_advance_menu(
     StateUpdate::None
 }
 
-fn fill_color(p: &Player, name: &String, can_advance: bool) -> Color {
-    let fill = if can_advance {
+fn fill_color(p: &Player, name: &str, can_advance: bool) -> Color {
+    if can_advance {
         WHITE
     } else if p.has_advance(name) {
         player_color(p.index)
     } else {
         GRAY
-    };
-    fill
+    }
 }
 
 fn border_color(a: &Advance) -> Color {
-    let border_color = if let Some(b) = &a.bonus {
+    if let Some(b) = &a.bonus {
         match b {
             Bonus::MoodToken => YELLOW,
             Bonus::CultureToken => BLUE,
         }
     } else {
         BLACK
-    };
-    border_color
+    }
 }
 
-fn can_advance(game: &Game, player: &ShownPlayer, a: &Advance) -> bool {
+fn can_advance(game: &Game, p: &Player, a: &Advance) -> bool {
     let name = &a.name;
-    let p = player.get(game);
-    if player.can_play_action {
+    if game.state == GameState::Playing && game.actions_left > 0 {
         p.can_advance(name)
-    } else if player.can_control
-        && matches!(
-            game.state,
-            GameState::StatusPhase(StatusPhaseState::FreeAdvance)
-        )
-    {
+    } else if matches!(
+        game.state,
+        GameState::StatusPhase(StatusPhaseState::FreeAdvance)
+    ) {
         p.can_advance_free(name)
     } else {
         false
@@ -273,7 +272,7 @@ pub fn pay_advance_dialog(
 ) -> StateUpdate {
     let a = advances::get_advance_by_name(ap.name.as_str()).unwrap();
 
-    if can_advance(game, player, &a) {
+    if can_advance(game, player.get(game), &a) {
         payment_dialog(
             ap,
             AdvancePayment::valid,
