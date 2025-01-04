@@ -16,6 +16,7 @@ use server::action::Action;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::game::{Game, GameState};
 use server::playing_actions::PlayingAction;
+use server::status_phase::StatusPhaseAction;
 use server::unit::MovementAction;
 
 pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
@@ -29,8 +30,8 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
 
     let mut y = (players.len() as f32 * -ICON_SIZE) / 2.;
 
-    for p in players {
-        let pl = game.get_player(p);
+    for player_index in players {
+        let pl = game.get_player(player_index);
         let shown = player.index == pl.index;
         let pos = vec2(player.screen_size.x, player.screen_size.y / 2.0) + vec2(-20., y);
 
@@ -59,6 +60,13 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
         }
 
         if !shown && left_mouse_button_pressed_in_rect(Rect::new(x, pos.y, w, ICON_SIZE), state) {
+            if player.can_control {
+                if let ActiveDialog::DetermineFirstPlayer = state.active_dialog {
+                    return StateUpdate::status_phase(StatusPhaseAction::DetermineFirstPlayer(
+                        player_index,
+                    ));
+                }
+            };
             return StateUpdate::SetShownPlayer(pl.index);
         }
 

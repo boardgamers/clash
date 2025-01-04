@@ -1,13 +1,13 @@
 use crate::city_ui::{building_name, building_position, BUILDING_SIZE};
 use crate::client_state::{ShownPlayer, State, StateUpdate};
-use crate::dialog_ui::active_dialog_window;
+use crate::dialog_ui::{cancel_button_with_tooltip, ok_button};
 use crate::hex_ui;
 use crate::layout_ui::is_in_circle;
 use crate::tooltip::show_tooltip_for_circle;
 use macroquad::input::{is_mouse_button_pressed, MouseButton};
 use macroquad::math::Vec2;
 use server::action::Action;
-use server::game::{CulturalInfluenceResolution, Game};
+use server::game::Game;
 use server::player::Player;
 use server::playing_actions::{InfluenceCultureAttempt, PlayingAction};
 use server::position::Position;
@@ -21,26 +21,15 @@ fn closest_city(player: &Player, position: Position) -> Position {
         .position
 }
 
-pub fn cultural_influence_resolution_dialog(
-    c: &CulturalInfluenceResolution,
-    player: &ShownPlayer,
-) -> StateUpdate {
-    active_dialog_window(player, "Cultural Influence Resolution", |ui| {
-        if ui.button(
-            None,
-            format!(
-                "Pay {} culture tokens to influence {}",
-                c.roll_boost_cost,
-                building_name(&c.city_piece)
-            ),
-        ) {
-            StateUpdate::Execute(Action::CulturalInfluenceResolution(true))
-        } else if ui.button(None, "Decline") {
-            StateUpdate::Execute(Action::CulturalInfluenceResolution(false))
-        } else {
-            StateUpdate::None
-        }
-    })
+pub fn cultural_influence_resolution_dialog(state: &State) -> StateUpdate {
+    if ok_button(state, true) {
+        return StateUpdate::Execute(Action::CulturalInfluenceResolution(true));
+    }
+    if cancel_button_with_tooltip(state, "Decline") {
+        return StateUpdate::Execute(Action::CulturalInfluenceResolution(false));
+    }
+
+    StateUpdate::None
 }
 
 pub fn hover(

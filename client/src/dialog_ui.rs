@@ -5,19 +5,6 @@ use macroquad::math::{vec2, Vec2};
 use macroquad::ui::widgets::Window;
 use macroquad::ui::{root_ui, Ui};
 
-pub fn active_dialog_window<F>(player: &ShownPlayer, title: &str, f: F) -> StateUpdate
-where
-    F: FnOnce(&mut Ui) -> StateUpdate,
-{
-    dialog(player, title, |ui| {
-        if player.can_control {
-            f(ui)
-        } else {
-            StateUpdate::None
-        }
-    })
-}
-
 pub fn dialog<F>(player: &ShownPlayer, title: &str, f: F) -> StateUpdate
 where
     F: FnOnce(&mut Ui) -> StateUpdate,
@@ -68,7 +55,7 @@ pub fn show_pending_update(update: &PendingUpdate, state: &State) -> StateUpdate
         &format!("Warning: {}", update.warning.join(", "))
     };
     let dimensions = state.measure_text(t);
-    bottom_center_text(state, t, vec2(dimensions.width / 2., -50.));
+    bottom_center_text(state, t, vec2(-dimensions.width / 2., -50.));
 
     if ok_button(state, update.can_confirm) {
         return StateUpdate::ResolvePendingUpdate(true);
@@ -91,11 +78,7 @@ pub fn cancel_button_with_tooltip(state: &State, tooltip: &str) -> bool {
 
 #[must_use]
 pub fn ok_button(state: &State, valid: bool) -> bool {
-    ok_button_with_tooltip(
-        state,
-        valid,
-        if valid { "OK" } else { "Invalid selection" },
-    )
+    ok_button_with_tooltip(state, valid, if valid { "OK" } else { "Invalid selection" })
 }
 
 #[must_use]

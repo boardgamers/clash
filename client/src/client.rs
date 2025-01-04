@@ -91,6 +91,7 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
     match &state.active_dialog {
         ActiveDialog::None
         | ActiveDialog::MoveUnits(_)
+        | ActiveDialog::DetermineFirstPlayer
         | ActiveDialog::WaitingForUpdate
         | ActiveDialog::CulturalInfluence
         | ActiveDialog::PlaceSettler => StateUpdate::None,
@@ -107,20 +108,15 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
             recruit_unit_ui::select_dialog(game, s, player, state)
         }
         ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::replace_dialog(game, r, state),
-        ActiveDialog::CulturalInfluenceResolution(c) => {
-            influence_ui::cultural_influence_resolution_dialog(c, player)
+        ActiveDialog::CulturalInfluenceResolution(_) => {
+            influence_ui::cultural_influence_resolution_dialog(state)
         }
 
         //status phase
         ActiveDialog::FreeAdvance => show_free_advance_menu(game, player),
         ActiveDialog::RazeSize1City => status_phase_ui::raze_city_dialog(state),
-        ActiveDialog::CompleteObjectives => status_phase_ui::complete_objectives_dialog(player),
-        ActiveDialog::DetermineFirstPlayer => {
-            status_phase_ui::determine_first_player_dialog(game, player)
-        }
-        ActiveDialog::ChangeGovernmentType => {
-            status_phase_ui::change_government_type_dialog(game, player)
-        }
+        ActiveDialog::CompleteObjectives => status_phase_ui::complete_objectives_dialog(state),
+        ActiveDialog::ChangeGovernmentType => status_phase_ui::change_government_type_dialog(),
         ActiveDialog::ChooseAdditionalAdvances(a) => {
             status_phase_ui::choose_additional_advances_dialog(game, a, state)
         }

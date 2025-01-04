@@ -9,6 +9,7 @@ use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 use crate::advance_ui::AdvancePayment;
 use crate::assets::Assets;
+use crate::city_ui::building_name;
 use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
 use crate::combat_ui::RemoveCasualtiesSelection;
@@ -113,7 +114,11 @@ impl ActiveDialog {
             ActiveDialog::CulturalInfluence => {
                 vec!["Click on a building to influence its culture".to_string()]
             }
-            ActiveDialog::CulturalInfluenceResolution(_) => vec!["todo".to_string()],
+            ActiveDialog::CulturalInfluenceResolution(c) => vec![format!(
+                "Pay {} culture tokens to influence {}",
+                c.roll_boost_cost,
+                building_name(&c.city_piece)
+            )],
             ActiveDialog::FreeAdvance => {
                 vec!["Click on an advance to take it for free".to_string()]
             }

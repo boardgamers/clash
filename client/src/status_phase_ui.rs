@@ -1,33 +1,12 @@
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
-use crate::dialog_ui::{active_dialog_window, cancel_button};
+use crate::dialog_ui::{cancel_button, cancel_button_with_tooltip};
 use crate::select_ui::{confirm_update, ConfirmSelection, SelectionConfirm};
 use server::action::Action;
-use server::content::advances;
 use server::game::Game;
 use server::position::Position;
 use server::status_phase::{
     ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction,
 };
-
-pub fn determine_first_player_dialog(game: &Game, player: &ShownPlayer) -> StateUpdate {
-    active_dialog_window(
-        player,
-        "Who should be the first player in the next age?",
-        |ui| {
-            for p in &game.players {
-                if ui.button(
-                    None,
-                    format!("Player {} - {}", p.index, p.civilization.name),
-                ) {
-                    return StateUpdate::status_phase(StatusPhaseAction::DetermineFirstPlayer(
-                        p.index,
-                    ));
-                }
-            }
-            StateUpdate::None
-        },
-    )
-}
 
 pub fn raze_city_confirm_dialog(game: &Game, player: &ShownPlayer, pos: Position) -> StateUpdate {
     if player.get(game).can_raze_city(pos) {
@@ -56,15 +35,15 @@ pub struct ChooseAdditionalAdvances {
     selected: Vec<String>,
 }
 
-impl ChooseAdditionalAdvances {
-    fn new(government: String, advances: Vec<String>) -> Self {
-        Self {
-            government,
-            advances,
-            selected: Vec::new(),
-        }
-    }
-}
+// impl ChooseAdditionalAdvances {
+//     fn new(government: String, advances: Vec<String>) -> Self {
+//         Self {
+//             government,
+//             advances,
+//             selected: Vec::new(),
+//         }
+//     }
+// }
 
 impl ConfirmSelection for ChooseAdditionalAdvances {
     fn cancel_name(&self) -> Option<&str> {
@@ -84,35 +63,37 @@ impl ConfirmSelection for ChooseAdditionalAdvances {
     }
 }
 
-pub fn change_government_type_dialog(game: &Game, player: &ShownPlayer) -> StateUpdate {
-    active_dialog_window(player, "Select additional advances", |ui| {
-        let current = player
-            .get(game)
-            .government()
-            .expect("should have government");
-        for (g, _) in advances::get_governments()
-            .iter()
-            .filter(|(g, _)| g != &current)
-        {
-            if ui.button(None, format!("Change to {g}")) {
-                let additional = advances::get_government(g)
-                    .iter()
-                    .skip(1) // the government advance itself is always chosen
-                    .map(|a| a.name.clone())
-                    .collect::<Vec<_>>();
-                return StateUpdate::SetDialog(ActiveDialog::ChooseAdditionalAdvances(
-                    ChooseAdditionalAdvances::new(g.clone(), additional),
-                ));
-            }
-        }
-
-        if ui.button(None, "Decline") {
-            return StateUpdate::status_phase(StatusPhaseAction::ChangeGovernmentType(
-                ChangeGovernmentType::KeepGovernment,
-            ));
-        }
-        StateUpdate::None
-    })
+pub fn change_government_type_dialog() -> StateUpdate {
+    //todo integrate in advance selection dialog
+    // active_dialog_window(player, "Select additional advances", |ui| {
+    //     let current = player
+    //         .get(game)
+    //         .government()
+    //         .expect("should have government");
+    //     for (g, _) in advances::get_governments()
+    //         .iter()
+    //         .filter(|(g, _)| g != &current)
+    //     {
+    //         if ui.button(None, format!("Change to {g}")) {
+    //             let additional = advances::get_government(g)
+    //                 .iter()
+    //                 .skip(1) // the government advance itself is always chosen
+    //                 .map(|a| a.name.clone())
+    //                 .collect::<Vec<_>>();
+    //             return StateUpdate::SetDialog(ActiveDialog::ChooseAdditionalAdvances(
+    //                 ChooseAdditionalAdvances::new(g.clone(), additional),
+    //             ));
+    //         }
+    //     }
+    //
+    //     if ui.button(None, "Decline") {
+    //         return StateUpdate::status_phase(StatusPhaseAction::ChangeGovernmentType(
+    //             ChangeGovernmentType::KeepGovernment,
+    //         ));
+    //     }
+    //     StateUpdate::None
+    // })
+    StateUpdate::None
 }
 
 pub fn choose_additional_advances_dialog(
@@ -136,11 +117,9 @@ pub fn choose_additional_advances_dialog(
     )
 }
 
-pub fn complete_objectives_dialog(player: &ShownPlayer) -> StateUpdate {
-    active_dialog_window(player, "Complete Objectives", |ui| {
-        if ui.button(None, "None") {
-            return StateUpdate::status_phase(StatusPhaseAction::CompleteObjectives(vec![]));
-        }
-        StateUpdate::None
-    })
+pub fn complete_objectives_dialog(state: &State) -> StateUpdate {
+    if cancel_button_with_tooltip(state, "Complete no objectives") {
+        return StateUpdate::status_phase(StatusPhaseAction::CompleteObjectives(vec![]));
+    }
+    StateUpdate::None
 }
