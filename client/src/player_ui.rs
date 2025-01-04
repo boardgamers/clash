@@ -144,10 +144,12 @@ pub fn show_top_center(game: &Game, shown_player: &ShownPlayer, state: &State) {
 }
 
 pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
-    let mut y = 0.;
+    let mut p = vec2(10., 10.);
     let mut label = |label: &str| {
-        let p = vec2(10., y * 25. + 20.);
-        y += 1.;
+        p = vec2(p.x, p.y + 25.);
+        if p.y > player.screen_size.y - 150. {
+            p = vec2(p.x + 350., 85.);
+        }
         state.draw_text(label, p.x, p.y);
     };
 
