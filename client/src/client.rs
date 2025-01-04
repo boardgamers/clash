@@ -160,12 +160,13 @@ pub fn try_click(game: &Game, state: &mut State, player: &ShownPlayer) -> StateU
     let (x, y) = mouse_position();
     let mouse_pos = state.camera.screen_to_world(vec2(x, y));
     let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));
-    if !game.map.tiles.contains_key(&pos) {
-        return StateUpdate::None;
-    }
 
     if let ActiveDialog::CulturalInfluence = state.active_dialog {
         return influence_ui::hover(pos, game, player, mouse_pos, state);
+    }
+
+    if !game.map.tiles.contains_key(&pos) {
+        return StateUpdate::None;
     }
 
     if !is_mouse_button_pressed(MouseButton::Left) {
