@@ -21,6 +21,7 @@ use server::resource_pile::AdvancePaymentOptions;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 use std::cmp::min;
 use std::collections::HashMap;
+use macroquad::color::Color;
 
 #[derive(Clone)]
 pub struct AdvancePayment {
@@ -118,32 +119,20 @@ pub fn show_generic_advance_menu(
     let p = player.get(game);
 
     for advances in groups() {
-        let pos = group_pos(&advances[0]);
+        let (group_name,pos) = group_info(&advances[0]);
+        let pos = pos * vec2(140., 180.) + vec2(20., 70.);
+        state.draw_text(group_name, pos.x+(140.- state.measure_text(group_name).width) / 2., pos.y - 15.);
+
         for (i, a) in advances.into_iter().enumerate() {
-            let pos = pos * vec2(140., 210.) + vec2(20., i as f32 * 35. + 50.);
+            let pos = pos + vec2(0., i as f32 * 35.);
             let name = &a.name;
             let can_advance = can_advance(game, player, &a);
 
-            let fill = if can_advance {
-                WHITE
-            } else if p.has_advance(name) {
-                player_color(player.index)
-            } else {
-                GRAY
-            };
             let rect = Rect::new(pos.x, pos.y, 135., 30.);
-            draw_rectangle(rect.x, rect.y, rect.w, rect.h, fill);
-            state.draw_text(name, pos.x + 25., pos.y + 22.);
+            draw_rectangle(rect.x, rect.y, rect.w, rect.h, fill_color(p, name, can_advance));
+            state.draw_text(name, pos.x + 10., pos.y + 22.);
 
-            let border_color = if let Some(b) = &a.bonus {
-                match b {
-                    Bonus::MoodToken => YELLOW,
-                    Bonus::CultureToken => BLUE,
-                }
-            } else {
-                BLACK
-            };
-            draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 4., border_color);
+            draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 4., border_color(&a));
             show_tooltip_for_rect(state, description(p, &a), rect);
 
             if can_advance && left_mouse_button_pressed_in_rect(rect, state) {
@@ -152,6 +141,29 @@ pub fn show_generic_advance_menu(
         }
     }
     StateUpdate::None
+}
+
+fn fill_color(p: &Player, name: &String, can_advance: bool) -> Color {
+    let fill = if can_advance {
+        WHITE
+    } else if p.has_advance(name) {
+        player_color(p.index)
+    } else {
+        GRAY
+    };
+    fill
+}
+
+fn border_color(a: &Advance) -> Color {
+    let border_color = if let Some(b) = &a.bonus {
+        match b {
+            Bonus::MoodToken => YELLOW,
+            Bonus::CultureToken => BLUE,
+        }
+    } else {
+        BLACK
+    };
+    border_color
 }
 
 fn can_advance(game: &Game, player: &ShownPlayer, a: &Advance) -> bool {
@@ -188,16 +200,16 @@ fn groups() -> Vec<Vec<Advance>> {
         .collect::<Vec<_>>()
 }
 
-fn group_pos(advance: &Advance) -> Vec2 {
+fn group_info(advance: &Advance) -> (&str, Vec2) {
     match advance.name.as_str() {
-        "Farming" => vec2(0., 0.),
-        "Mining" => vec2(1., 0.),
-        "Fishing" => vec2(2., 0.),
-        "Philosophy" => vec2(3., 0.),
-        "Tactics" => vec2(4., 0.),
-        "Math" => vec2(2., 1.),
-        "Voting" => vec2(3., 1.),
-        "Dogma" => vec2(5., 1.),
+        "Farming" => ("Agriculture", vec2(0., 0.)),
+        "Mining" => ("Construction", vec2(1., 0.)),
+        "Fishing" =>("Seafaring", vec2(2., 0.)),
+        "Philosophy" => ("Education",vec2(3., 0.)),
+        "Tactics" => ("Warfare",vec2(4., 0.)),
+        "Math" => ("Science",vec2(2., 1.)),
+        "Voting" => ("Democracy",vec2(3., 1.)),
+        "Dogma" => ("Theocracy",vec2(5., 1.)),
         _ => panic!("Unknown advance: {}", advance.name),
     }
 }
