@@ -73,7 +73,7 @@ pub fn show_resource_pile(state: &State, player: &ShownPlayer, p: &ResourcePile)
         .filter(|r| resource_map[r] > 0)
         .collect();
     for (i, r) in show.iter().rev().enumerate() {
-        let x = (show.len() - i) as i8;
+        let x = (show.len() - i) as i8 - 3;
         let a = resource_map[r];
 
         bottom_icon_with_label(
