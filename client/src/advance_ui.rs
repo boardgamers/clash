@@ -6,6 +6,7 @@ use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::HasCountSelectableObject;
 use crate::tooltip::show_tooltip_for_rect;
 use itertools::Itertools;
+use macroquad::color::Color;
 use macroquad::math::{bool, vec2, Vec2};
 use macroquad::prelude::{
     draw_rectangle, draw_rectangle_lines, Rect, BLACK, BLUE, GRAY, WHITE, YELLOW,
@@ -21,7 +22,6 @@ use server::resource_pile::AdvancePaymentOptions;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 use std::cmp::min;
 use std::collections::HashMap;
-use macroquad::color::Color;
 
 #[derive(Clone)]
 pub struct AdvancePayment {
@@ -118,25 +118,42 @@ pub fn show_generic_advance_menu(
     top_center_text(state, title, vec2(0., 10.));
     let p = player.get(game);
 
-    for advances in groups() {
-        let (group_name,pos) = group_info(&advances[0]);
-        let pos = pos * vec2(140., 180.) + vec2(20., 70.);
-        state.draw_text(group_name, pos.x+(140.- state.measure_text(group_name).width) / 2., pos.y - 15.);
+    for pass in 0..2 {
+        for advances in groups() {
+            let (group_name, pos) = group_info(&advances[0]);
+            let pos = pos * vec2(140., 180.) + vec2(20., 70.);
+            if pass == 0 {
+                state.draw_text(
+                    group_name,
+                    pos.x + (140. - state.measure_text(group_name).width) / 2.,
+                    pos.y - 15.,
+                );
+            }
 
-        for (i, a) in advances.into_iter().enumerate() {
-            let pos = pos + vec2(0., i as f32 * 35.);
-            let name = &a.name;
-            let can_advance = can_advance(game, player, &a);
+            for (i, a) in advances.into_iter().enumerate() {
+                let pos = pos + vec2(0., i as f32 * 35.);
+                let name = &a.name;
+                let can_advance = can_advance(game, player, &a);
 
-            let rect = Rect::new(pos.x, pos.y, 135., 30.);
-            draw_rectangle(rect.x, rect.y, rect.w, rect.h, fill_color(p, name, can_advance));
-            state.draw_text(name, pos.x + 10., pos.y + 22.);
+                let rect = Rect::new(pos.x, pos.y, 135., 30.);
+                if pass == 0 {
+                    draw_rectangle(
+                        rect.x,
+                        rect.y,
+                        rect.w,
+                        rect.h,
+                        fill_color(p, name, can_advance),
+                    );
+                    state.draw_text(name, pos.x + 10., pos.y + 22.);
 
-            draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 4., border_color(&a));
-            show_tooltip_for_rect(state, description(p, &a), rect);
+                    draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 4., border_color(&a));
+                } else {
+                    show_tooltip_for_rect(state, description(p, &a), rect);
 
-            if can_advance && left_mouse_button_pressed_in_rect(rect, state) {
-                return new_update(&a);
+                    if can_advance && left_mouse_button_pressed_in_rect(rect, state) {
+                        return new_update(&a);
+                    }
+                }
             }
         }
     }
@@ -204,12 +221,12 @@ fn group_info(advance: &Advance) -> (&str, Vec2) {
     match advance.name.as_str() {
         "Farming" => ("Agriculture", vec2(0., 0.)),
         "Mining" => ("Construction", vec2(1., 0.)),
-        "Fishing" =>("Seafaring", vec2(2., 0.)),
-        "Philosophy" => ("Education",vec2(3., 0.)),
-        "Tactics" => ("Warfare",vec2(4., 0.)),
-        "Math" => ("Science",vec2(2., 1.)),
-        "Voting" => ("Democracy",vec2(3., 1.)),
-        "Dogma" => ("Theocracy",vec2(5., 1.)),
+        "Fishing" => ("Seafaring", vec2(2., 0.)),
+        "Philosophy" => ("Education", vec2(3., 0.)),
+        "Tactics" => ("Warfare", vec2(4., 0.)),
+        "Math" => ("Science", vec2(2., 1.)),
+        "Voting" => ("Democracy", vec2(3., 1.)),
+        "Dogma" => ("Theocracy", vec2(5., 1.)),
         _ => panic!("Unknown advance: {}", advance.name),
     }
 }
