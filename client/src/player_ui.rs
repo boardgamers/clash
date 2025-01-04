@@ -213,7 +213,7 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
         }
     }
 
-    if let ActiveDialog::TileMenu(position) = state.active_dialog {
+    if let Some(position) = state.focused_tile {
         label(&format!(
             "{}/{}",
             position,

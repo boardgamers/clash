@@ -22,30 +22,6 @@ use crate::{
     combat_ui, dialog_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui, tooltip,
 };
 
-pub async fn init(features: &Features) -> State {
-    State::new(features).await
-}
-
-pub fn render_and_update(
-    game: &Game,
-    state: &mut State,
-    sync_result: &GameSyncResult,
-    features: &Features,
-) -> GameSyncRequest {
-    match sync_result {
-        GameSyncResult::None => {}
-        GameSyncResult::Update => {
-            state.update_from_game(game);
-        }
-        GameSyncResult::WaitingForUpdate => {
-            state.set_dialog(ActiveDialog::WaitingForUpdate);
-        }
-    }
-
-    let update = render(game, state, features);
-    state.update(game, update)
-}
-
 fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     tooltip::update(state);
 
@@ -106,10 +82,40 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         updates.add(render_active_dialog(game, state, player));
     }
 
+    if let Some(pos) = state.focused_tile {
+        if player.can_play_action && matches!(state.active_dialog, ActiveDialog::None) {
+            updates.add(show_tile_menu(game, pos, player, state));
+        }
+    }
+
     if player.can_control {
         updates.add(try_click(game, state, player));
     }
     updates.result()
+}
+
+pub async fn init(features: &Features) -> State {
+    State::new(features).await
+}
+
+pub fn render_and_update(
+    game: &Game,
+    state: &mut State,
+    sync_result: &GameSyncResult,
+    features: &Features,
+) -> GameSyncRequest {
+    match sync_result {
+        GameSyncResult::None => {}
+        GameSyncResult::Update => {
+            state.update_from_game(game);
+        }
+        GameSyncResult::WaitingForUpdate => {
+            state.set_dialog(ActiveDialog::WaitingForUpdate);
+        }
+    }
+
+    let update = render(game, state, features);
+    state.update(game, update)
 }
 
 fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) -> StateUpdate {
@@ -121,7 +127,6 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
         | ActiveDialog::CulturalInfluence
         | ActiveDialog::PlaceSettler => StateUpdate::None,
         ActiveDialog::Log => show_log(game, state),
-        ActiveDialog::TileMenu(p) => show_tile_menu(game, *p, player, state),
 
         // playing actions
         ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(h, player, state, game),
@@ -192,7 +197,7 @@ pub fn try_click(game: &Game, state: &mut State, player: &ShownPlayer) -> StateU
             }
         }
         ActiveDialog::IncreaseHappiness(h) => increase_happiness_click(game, player, pos, h),
-        _ => StateUpdate::OpenDialog(ActiveDialog::TileMenu(pos)),
+        _ => StateUpdate::SetFocusedTile(pos),
     }
 }
 

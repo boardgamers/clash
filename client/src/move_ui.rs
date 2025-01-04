@@ -83,11 +83,11 @@ pub struct MoveSelection {
 }
 
 impl MoveSelection {
-    pub fn new(player_index: usize, start: Option<Position>) -> MoveSelection {
+    pub fn new(player_index: usize) -> MoveSelection {
         MoveSelection {
             player_index,
             units: vec![],
-            start,
+            start: None,
             destinations: vec![],
         }
     }
