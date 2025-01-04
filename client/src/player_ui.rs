@@ -19,6 +19,7 @@ use server::game::{Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::status_phase::StatusPhaseAction;
 use server::unit::MovementAction;
+use std::slice::SliceIndex;
 
 pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
     let i = game
@@ -62,7 +63,12 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
         }
 
         let rect = Rect::new(x, pos.y, w, size);
-        show_tooltip_for_rect(state, &[pl.get_name()], rect);
+        let tooltip = if state.control_player.is_some_and(|p| p == pl.index) {
+            format!("{} (You)", pl.get_name())
+        } else {
+            pl.get_name()
+        };
+        show_tooltip_for_rect(state, &[tooltip], rect);
         if !shown && left_mouse_button_pressed_in_rect(rect, state) {
             if player.can_control {
                 if let ActiveDialog::DetermineFirstPlayer = state.active_dialog {

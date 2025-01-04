@@ -135,11 +135,27 @@ pub fn show_generic_advance_menu(
                         rect.y,
                         rect.w,
                         rect.h,
-                        fill_color(p, name, can_advance, state),
+                        fill_color(p, name, can_advance),
                     );
                     state.draw_text(name, pos.x + 10., pos.y + 22.);
 
-                    draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 4., border_color(&a));
+                    let thickness = if let ActiveDialog::AdvancePayment(p) = &state.active_dialog {
+                        if p.name == *name {
+                            12.
+                        } else {
+                            4.
+                        }
+                    } else {
+                        4.
+                    };
+                    draw_rectangle_lines(
+                        rect.x,
+                        rect.y,
+                        rect.w,
+                        rect.h,
+                        thickness,
+                        border_color(&a),
+                    );
                 } else {
                     // tooltip should be shown on top of everything
                     show_tooltip_for_rect(state, &description(p, &a), rect);
@@ -157,13 +173,7 @@ pub fn show_generic_advance_menu(
     StateUpdate::None
 }
 
-fn fill_color(p: &Player, name: &str, can_advance: bool, state: &State) -> Color {
-    if let ActiveDialog::AdvancePayment(p) = &state.active_dialog {
-        if p.name == name {
-            return GREEN;
-        }
-    }
-
+fn fill_color(p: &Player, name: &str, can_advance: bool) -> Color {
     if can_advance {
         WHITE
     } else if p.has_advance(name) {
