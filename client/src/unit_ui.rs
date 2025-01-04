@@ -2,14 +2,12 @@ use macroquad::color::BLACK;
 use macroquad::math::{u32, vec2, Vec2};
 use macroquad::prelude::WHITE;
 use macroquad::shapes::draw_circle;
-use macroquad::ui::Ui;
 
 use server::game::Game;
 use server::position::Position;
 use server::unit::{Unit, UnitType};
 
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
-use crate::dialog_ui::active_dialog_window;
 use crate::select_ui::{confirm_update, ConfirmSelection};
 use crate::{hex_ui, player_ui};
 
@@ -125,53 +123,35 @@ pub fn draw_units(game: &Game, state: &State, tooltip: bool) {
 }
 
 pub trait UnitSelection: ConfirmSelection {
-    fn selected_units(&self) -> &[u32];
     fn selected_units_mut(&mut self) -> &mut Vec<u32>;
     fn can_select(&self, game: &Game, unit: &Unit) -> bool;
-    fn current_tile(&self) -> Option<Position>;
+}
+
+pub fn unit_selection_click<T: UnitSelection>(
+    game: &Game,
+    player: &ShownPlayer,
+    pos: Position,
+    mouse_pos: Vec2,
+    sel: &T,
+    on_change: impl Fn(T) -> StateUpdate,
+) -> StateUpdate {
+    if let Some(unit_id) = unit_at_pos(pos, mouse_pos, player.get(game)) {
+        if sel.can_select(game, player.get(game).get_unit(unit_id).unwrap()) {
+            let mut new = sel.clone();
+            unit_selection_clicked(unit_id, new.selected_units_mut());
+            return on_change(new);
+        }
+    }
+    StateUpdate::None
 }
 
 pub fn unit_selection_dialog<T: UnitSelection>(
     game: &Game,
-    player: &ShownPlayer,
-    title: &str,
     sel: &T,
-    on_change: impl Fn(T) -> StateUpdate,
     on_ok: impl FnOnce(T) -> StateUpdate,
-    additional: impl FnOnce(&mut Ui) -> StateUpdate,
+    state: &State,
 ) -> StateUpdate {
-    if let Some(current_tile) = sel.current_tile() {
-        active_dialog_window(player, title, |ui| {
-            for (i, (p, unit)) in units_on_tile(game, current_tile).enumerate() {
-                let can_sel = sel.can_select(game, &unit);
-                let is_selected = sel.selected_units().contains(&unit.id);
-                let army_move = game
-                    .get_player(p)
-                    .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
-                let mut l = unit_label(&unit, army_move);
-                if is_selected {
-                    l += " (selected)";
-                }
-
-                let pos = vec2(((i / 4) as f32) * 200., i.rem_euclid(4) as f32 * 35.);
-                if !can_sel {
-                    ui.label(pos, &l);
-                } else if ui.button(pos, l) {
-                    let mut new = sel.clone();
-                    if is_selected {
-                        new.selected_units_mut().retain(|u| u != &unit.id);
-                    } else {
-                        new.selected_units_mut().push(unit.id);
-                    }
-                    return on_change(new);
-                }
-            }
-            confirm_update(sel, player, || on_ok(sel.clone()), ui, &sel.confirm(game))
-                .or(|| additional(ui))
-        })
-    } else {
-        StateUpdate::None
-    }
+    confirm_update(sel, || on_ok(sel.clone()), &sel.confirm(game), state)
 }
 
 pub fn units_on_tile(game: &Game, pos: Position) -> impl Iterator<Item = (usize, Unit)> + '_ {
@@ -211,4 +191,13 @@ pub fn unit_label(unit: &Unit, army_move: bool) -> String {
     };
 
     format!("{name}{res}")
+}
+
+pub fn unit_selection_clicked(unit_id: u32, units: &mut Vec<u32>) {
+    if units.contains(&unit_id) {
+        // deselect unit
+        units.retain(|&id| id != unit_id);
+    } else {
+        units.push(unit_id);
+    }
 }

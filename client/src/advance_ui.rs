@@ -1,12 +1,16 @@
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
-use crate::dialog_ui::dialog;
+use crate::layout_ui::{left_mouse_button_pressed_in_rect, top_center_text};
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
+use crate::player_ui::player_color;
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::HasCountSelectableObject;
+use crate::tooltip::show_tooltip_for_rect;
 use itertools::Itertools;
-use macroquad::hash;
+use macroquad::color::Color;
 use macroquad::math::{bool, vec2, Vec2};
-use macroquad::ui::widgets::Checkbox;
+use macroquad::prelude::{
+    draw_rectangle, draw_rectangle_lines, Rect, BLACK, BLUE, GRAY, WHITE, YELLOW,
+};
 use server::action::Action;
 use server::advance::{Advance, Bonus};
 use server::content::advances;
@@ -78,8 +82,8 @@ impl HasPayment for AdvancePayment {
     }
 }
 
-pub fn show_advance_menu(game: &Game, player: &ShownPlayer) -> StateUpdate {
-    show_generic_advance_menu("Advances", game, player, |a| {
+pub fn show_advance_menu(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
+    show_generic_advance_menu("Advances", game, player, state, |a| {
         StateUpdate::SetDialog(ActiveDialog::AdvancePayment(AdvancePayment::new(
             game,
             player.index,
@@ -88,11 +92,12 @@ pub fn show_advance_menu(game: &Game, player: &ShownPlayer) -> StateUpdate {
     })
 }
 
-pub fn show_free_advance_menu(game: &Game, player: &ShownPlayer) -> StateUpdate {
-    show_generic_advance_menu("Select a free advance", game, player, |a| {
-        if can_advance(game, player, a) {
+pub fn show_free_advance_menu(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
+    show_generic_advance_menu("Select a free advance", game, player, state, |a| {
+        let p = player.get(game);
+        if can_advance(game, p, a) {
             return StateUpdate::execute_with_confirm(
-                description(game.get_player(player.index), a),
+                description(p, a),
                 Action::StatusPhase(StatusPhaseAction::FreeAdvance(a.name.clone())),
             );
         }
@@ -101,55 +106,94 @@ pub fn show_free_advance_menu(game: &Game, player: &ShownPlayer) -> StateUpdate 
 }
 
 fn advance_info(game: &Game, player: &ShownPlayer, a: &Advance) -> StateUpdate {
-    StateUpdate::execute_with_cancel(description(game.get_player(player.index), a))
+    StateUpdate::execute_with_cancel(description(player.get(game), a))
 }
 
 pub fn show_generic_advance_menu(
     title: &str,
     game: &Game,
     player: &ShownPlayer,
+    state: &State,
     new_update: impl Fn(&Advance) -> StateUpdate,
 ) -> StateUpdate {
-    dialog(player, title, |ui| {
-        let p = player.get(game);
+    top_center_text(state, title, vec2(0., 10.));
+    let p = player.get(game);
 
+    for pass in 0..2 {
         for advances in groups() {
-            let pos = group_pos(&advances[0]);
-            for (i, a) in advances.into_iter().enumerate() {
-                let pos = pos * vec2(140., 210.) + vec2(0., i as f32 * 35.);
-                let name = &a.name;
-                let can_advance = can_advance(game, player, &a);
+            let (group_name, pos) = group_info(&advances[0]);
+            let pos = pos * vec2(140., 180.) + vec2(20., 70.);
+            if pass == 0 {
+                state.draw_text(
+                    group_name,
+                    pos.x + (140. - state.measure_text(group_name).width) / 2.,
+                    pos.y - 15.,
+                );
+            }
 
-                if can_advance || p.has_advance(name) {
-                    let mut data = p.has_advance(name);
-                    Checkbox::new(hash!(name))
-                        // .label(name)
-                        .pos(pos + vec2(60., 50.))
-                        .size(vec2(0., 0.))
-                        .ui(ui, &mut data);
-                    if data != p.has_advance(name) {
+            for (i, a) in advances.into_iter().enumerate() {
+                let pos = pos + vec2(0., i as f32 * 35.);
+                let name = &a.name;
+                let can_advance = can_advance(game, p, &a);
+
+                let rect = Rect::new(pos.x, pos.y, 135., 30.);
+                if pass == 0 {
+                    draw_rectangle(
+                        rect.x,
+                        rect.y,
+                        rect.w,
+                        rect.h,
+                        fill_color(p, name, can_advance),
+                    );
+                    state.draw_text(name, pos.x + 10., pos.y + 22.);
+
+                    draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 4., border_color(&a));
+                } else {
+                    // tooltip should be shown on top of everything
+                    show_tooltip_for_rect(state, &description(p, &a), rect);
+
+                    if player.can_control
+                        && can_advance
+                        && left_mouse_button_pressed_in_rect(rect, state)
+                    {
                         return new_update(&a);
                     }
                 }
-                // Button::new(name.clone()).position(pos + vec2(0., 0.)).ui(ui);
-                ui.label(pos + vec2(0., 0.), name);
             }
         }
-        StateUpdate::None
-    })
+    }
+    StateUpdate::None
 }
 
-fn can_advance(game: &Game, player: &ShownPlayer, a: &Advance) -> bool {
+fn fill_color(p: &Player, name: &str, can_advance: bool) -> Color {
+    if can_advance {
+        WHITE
+    } else if p.has_advance(name) {
+        player_color(p.index)
+    } else {
+        GRAY
+    }
+}
+
+fn border_color(a: &Advance) -> Color {
+    if let Some(b) = &a.bonus {
+        match b {
+            Bonus::MoodToken => YELLOW,
+            Bonus::CultureToken => BLUE,
+        }
+    } else {
+        BLACK
+    }
+}
+
+fn can_advance(game: &Game, p: &Player, a: &Advance) -> bool {
     let name = &a.name;
-    let p = player.get(game);
-    if player.can_play_action {
+    if game.state == GameState::Playing && game.actions_left > 0 {
         p.can_advance(name)
-    } else if player.can_control
-        && matches!(
-            game.state,
-            GameState::StatusPhase(StatusPhaseState::FreeAdvance)
-        )
-    {
+    } else if matches!(
+        game.state,
+        GameState::StatusPhase(StatusPhaseState::FreeAdvance)
+    ) {
         p.can_advance_free(name)
     } else {
         false
@@ -173,16 +217,16 @@ fn groups() -> Vec<Vec<Advance>> {
         .collect::<Vec<_>>()
 }
 
-fn group_pos(advance: &Advance) -> Vec2 {
+fn group_info(advance: &Advance) -> (&str, Vec2) {
     match advance.name.as_str() {
-        "Farming" => vec2(0., 0.),
-        "Mining" => vec2(1., 0.),
-        "Fishing" => vec2(2., 0.),
-        "Philosophy" => vec2(3., 0.),
-        "Tactics" => vec2(4., 0.),
-        "Math" => vec2(2., 1.),
-        "Voting" => vec2(3., 1.),
-        "Dogma" => vec2(5., 1.),
+        "Farming" => ("Agriculture", vec2(0., 0.)),
+        "Mining" => ("Construction", vec2(1., 0.)),
+        "Fishing" => ("Seafaring", vec2(2., 0.)),
+        "Philosophy" => ("Education", vec2(3., 0.)),
+        "Tactics" => ("Warfare", vec2(4., 0.)),
+        "Math" => ("Science", vec2(2., 1.)),
+        "Voting" => ("Democracy", vec2(3., 1.)),
+        "Dogma" => ("Theocracy", vec2(5., 1.)),
         _ => panic!("Unknown advance: {}", advance.name),
     }
 }
@@ -228,9 +272,8 @@ pub fn pay_advance_dialog(
 ) -> StateUpdate {
     let a = advances::get_advance_by_name(ap.name.as_str()).unwrap();
 
-    if can_advance(game, player, &a) {
+    if can_advance(game, player.get(game), &a) {
         payment_dialog(
-            player,
             ap,
             AdvancePayment::valid,
             |ap| {

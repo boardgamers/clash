@@ -1,4 +1,4 @@
-use crate::client_state::{ShownPlayer, State};
+use crate::client_state::State;
 use crate::hex_ui::Point;
 use crate::tooltip;
 use macroquad::color::WHITE;
@@ -20,8 +20,17 @@ pub fn icon_pos(x: i8, y: i8) -> Vec2 {
 }
 
 pub fn top_center_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
-    let anchor = vec2(state.screen_size.x / 2., MARGIN);
+    let anchor = top_center_anchor(state);
     draw_icon(state, texture, tooltip, anchor + p)
+}
+
+pub fn top_center_text(state: &State, text: &str, p: Vec2) {
+    let p = top_center_anchor(state) + p;
+    state.draw_text(text, p.x, p.y);
+}
+
+fn top_center_anchor(state: &State) -> Vec2 {
+    vec2(state.screen_size.x / 2., MARGIN)
 }
 
 pub fn top_right_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
@@ -37,6 +46,11 @@ pub fn bottom_left_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip:
 pub fn bottom_center_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
     let anchor = bottom_center_anchor(state);
     draw_icon(state, texture, tooltip, anchor + p)
+}
+
+pub fn bottom_center_text(state: &State, text: &str, p: Vec2) {
+    let p = bottom_center_anchor(state) + p;
+    state.draw_text(text, p.x, p.y);
 }
 
 pub fn bottom_center_anchor(state: &State) -> Vec2 {
@@ -72,48 +86,28 @@ pub fn draw_scaled_icon(
 
     let rect = Rect::new(origin.x, origin.y, size, size);
     if !tooltip.is_empty() {
-        tooltip::show_tooltip_for_rect(state, tooltip, rect);
+        tooltip::show_tooltip_for_rect(state, &[tooltip.to_string()], rect);
     }
-    left_mouse_button(rect)
+    left_mouse_button_pressed_in_rect(rect, state)
 }
 
-pub fn left_mouse_button(rect: Rect) -> bool {
-    if is_mouse_button_pressed(MouseButton::Left) {
-        let (x, y) = mouse_position();
-        rect.contains(vec2(x, y))
-    } else {
-        false
-    }
+#[must_use]
+pub fn left_mouse_button_pressed_in_rect(rect: Rect, state: &State) -> bool {
+    left_mouse_button_pressed(state).is_some_and(|p| rect.contains(p))
 }
 
-pub fn cancel_pos(player: &ShownPlayer) -> Vec2 {
-    small_dialog(player)
-        .then(|| Vec2::new(player.screen_size.x / 4.0, 190.))
-        .unwrap_or_else(|| Vec2::new(player.screen_size.x / 2., player.screen_size.y - 130.))
-}
-
-pub fn ok_pos(player: &ShownPlayer) -> Vec2 {
-    small_dialog(player)
-        .then(|| Vec2::new(player.screen_size.x / 4.0 - 150., 190.))
-        .unwrap_or_else(|| {
-            Vec2::new(
-                player.screen_size.x / 2. - 150.,
-                player.screen_size.y - 130.,
-            )
-        })
-}
-
-pub fn ok_only_pos(player: &ShownPlayer) -> Vec2 {
-    small_dialog(player)
-        .then(|| Vec2::new(player.screen_size.x / 4.0 - 75., 190.))
-        .unwrap_or_else(|| Vec2::new(player.screen_size.x / 2. - 75., player.screen_size.y - 130.))
-}
-
-fn small_dialog(player: &ShownPlayer) -> bool {
-    player.active_dialog.is_map_dialog() || player.pending_update
-}
-
+#[must_use]
 pub fn is_in_circle(mouse_pos: Vec2, p: Point, radius: f32) -> bool {
     let d = vec2(p.x - mouse_pos.x, p.y - mouse_pos.y);
     d.length() <= radius
+}
+
+#[must_use]
+pub fn left_mouse_button_pressed(state: &State) -> Option<Vec2> {
+    if is_mouse_button_pressed(MouseButton::Left) {
+        let (x, y) = mouse_position();
+        Some(state.screen_to_world(vec2(x, y)))
+    } else {
+        None
+    }
 }

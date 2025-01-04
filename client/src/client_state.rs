@@ -9,6 +9,7 @@ use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 use crate::advance_ui::AdvancePayment;
 use crate::assets::Assets;
+use crate::city_ui::building_name;
 use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
 use crate::combat_ui::RemoveCasualtiesSelection;
@@ -113,7 +114,11 @@ impl ActiveDialog {
             ActiveDialog::CulturalInfluence => {
                 vec!["Click on a building to influence its culture".to_string()]
             }
-            ActiveDialog::CulturalInfluenceResolution(_) => vec!["todo".to_string()],
+            ActiveDialog::CulturalInfluenceResolution(c) => vec![format!(
+                "Pay {} culture tokens to influence {}",
+                c.roll_boost_cost,
+                building_name(&c.city_piece)
+            )],
             ActiveDialog::FreeAdvance => {
                 vec!["Click on an advance to take it for free".to_string()]
             }
@@ -134,31 +139,28 @@ impl ActiveDialog {
             }
             ActiveDialog::PlayActionCard => vec!["Click on an action card to play it".to_string()],
             ActiveDialog::PlaceSettler => vec!["Click on a tile to place a settler".to_string()],
-            ActiveDialog::Retreat => vec!["Click on a unit to retreat".to_string()],
-            ActiveDialog::RemoveCasualties(_) => vec!["Click on a unit to remove it".to_string()],
+            ActiveDialog::Retreat => vec!["Do you want to retreat?".to_string()],
+            ActiveDialog::RemoveCasualties(r) => vec![format!(
+                "Remove {} units: click on a unit to remove it",
+                r.needed
+            )],
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
         }
     }
 
     #[must_use]
-    pub fn is_map_dialog(&self) -> bool {
-        matches!(
-            self,
-            ActiveDialog::TileMenu(_)
-                | ActiveDialog::IncreaseHappiness(_)
-                | ActiveDialog::CollectResources(_)
-                | ActiveDialog::MoveUnits(_)
-                | ActiveDialog::PlaceSettler
-                | ActiveDialog::RazeSize1City
-        )
+    pub fn show_for_other_player(&self) -> bool {
+        matches!(self, ActiveDialog::Log | ActiveDialog::AdvanceMenu)
     }
 
     #[must_use]
-    pub fn can_restore(&self) -> bool {
-        !matches!(
-            self,
-            ActiveDialog::MoveUnits(_) | ActiveDialog::ReplaceUnits(_) | ActiveDialog::None
-        )
+    pub fn is_modal(&self) -> bool {
+        matches!(self, ActiveDialog::Log | ActiveDialog::AdvanceMenu)
+    }
+
+    #[must_use]
+    pub fn is_full_modal(&self) -> bool {
+        matches!(self, ActiveDialog::AdvanceMenu)
     }
 }
 
@@ -408,13 +410,6 @@ impl State {
     }
 
     fn open_dialog(&mut self, dialog: ActiveDialog) {
-        if self.active_dialog.title() == dialog.title() {
-            self.close_dialog();
-            return;
-        }
-        if matches!(self.active_dialog, ActiveDialog::TileMenu(_)) {
-            self.close_dialog();
-        }
         self.active_dialog = dialog;
     }
 
@@ -423,11 +418,7 @@ impl State {
     }
 
     fn close_dialog(&mut self) {
-        if self.active_dialog.can_restore() {
-            self.active_dialog = ActiveDialog::None;
-        } else if let ActiveDialog::ReplaceUnits(r) = &mut self.active_dialog {
-            r.clear();
-        }
+        self.active_dialog = ActiveDialog::None;
     }
 
     pub fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {

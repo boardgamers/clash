@@ -2,9 +2,8 @@ use std::collections::HashMap;
 use std::iter;
 
 use macroquad::color::BLACK;
-use macroquad::input::MouseButton;
 use macroquad::math::{i32, vec2};
-use macroquad::prelude::{is_mouse_button_pressed, mouse_position, WHITE};
+use macroquad::prelude::WHITE;
 use macroquad::shapes::draw_circle;
 use server::action::Action;
 use server::consts::PORT_CHOICES;
@@ -17,7 +16,9 @@ use crate::client_state::{ActiveDialog, State, StateUpdate};
 use crate::dialog_ui::{cancel_button, ok_button};
 use crate::hex_ui;
 use crate::hex_ui::Point;
-use crate::layout_ui::{draw_icon, draw_scaled_icon, is_in_circle, ICON_SIZE};
+use crate::layout_ui::{
+    draw_icon, draw_scaled_icon, is_in_circle, left_mouse_button_pressed, ICON_SIZE,
+};
 use crate::resource_ui::{new_resource_map, resource_name, resource_types, ResourceType};
 
 #[derive(Clone)]
@@ -163,11 +164,10 @@ pub fn draw_resource_collect_tile(state: &State, pos: Position) -> StateUpdate {
                     WHITE
                 };
                 draw_circle(center.x, center.y, 20., color);
-                let (x, y) = mouse_position();
-                if is_mouse_button_pressed(MouseButton::Left)
-                    && is_in_circle(state.screen_to_world(vec2(x, y)), center, 20.)
-                {
-                    return click_collect_option(collect, pos, pile);
+                if let Some(p) = left_mouse_button_pressed(state) {
+                    if is_in_circle(p, center, 20.) {
+                        return click_collect_option(collect, pos, pile);
+                    }
                 }
 
                 let map = new_resource_map(pile);
