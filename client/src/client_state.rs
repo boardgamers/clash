@@ -23,7 +23,6 @@ use crate::status_phase_ui::ChooseAdditionalAdvances;
 #[derive(Clone)]
 pub enum ActiveDialog {
     None,
-    TileMenu(Position),
     Log,
     WaitingForUpdate,
 
@@ -59,7 +58,6 @@ impl ActiveDialog {
     pub fn title(&self) -> &str {
         match self {
             ActiveDialog::None => "none",
-            ActiveDialog::TileMenu(_) => "tile menu",
             ActiveDialog::Log => "log",
             ActiveDialog::WaitingForUpdate => "waiting for update",
             ActiveDialog::IncreaseHappiness(_) => "increase happiness",
@@ -88,10 +86,7 @@ impl ActiveDialog {
     #[must_use]
     pub fn help_message(&self, game: &Game) -> Vec<String> {
         match self {
-            ActiveDialog::None
-            | ActiveDialog::TileMenu(_)
-            | ActiveDialog::Log
-            | ActiveDialog::AdvanceMenu => vec![],
+            ActiveDialog::None | ActiveDialog::Log | ActiveDialog::AdvanceMenu => vec![],
             ActiveDialog::IncreaseHappiness(_) => {
                 vec!["Click on a city to increase happiness".to_string()]
             }
@@ -150,17 +145,27 @@ impl ActiveDialog {
 
     #[must_use]
     pub fn show_for_other_player(&self) -> bool {
-        matches!(self, ActiveDialog::Log | ActiveDialog::AdvanceMenu)
+        matches!(self, ActiveDialog::Log) || self.is_advance()
     }
 
     #[must_use]
     pub fn is_modal(&self) -> bool {
-        matches!(self, ActiveDialog::Log | ActiveDialog::AdvanceMenu)
+        matches!(self, ActiveDialog::Log) || self.is_full_modal()
     }
 
     #[must_use]
     pub fn is_full_modal(&self) -> bool {
-        matches!(self, ActiveDialog::AdvanceMenu)
+        self.is_advance()
+    }
+
+    #[must_use]
+    pub fn is_advance(&self) -> bool {
+        matches!(
+            self,
+            ActiveDialog::AdvanceMenu
+                | ActiveDialog::FreeAdvance
+                | ActiveDialog::ChooseAdditionalAdvances(_)
+        )
     }
 }
 
@@ -174,7 +179,6 @@ pub struct PendingUpdate {
 #[must_use]
 pub enum StateUpdate {
     None,
-    SetDialog(ActiveDialog),
     OpenDialog(ActiveDialog),
     CloseDialog,
     Cancel,
@@ -184,6 +188,7 @@ pub enum StateUpdate {
     Import,
     Export,
     SetShownPlayer(usize),
+    SetFocusedTile(Position),
 }
 
 impl StateUpdate {
@@ -322,6 +327,8 @@ pub struct State {
     pub offset: Vec2,
     pub screen_size: Vec2,
     pub mouse_positions: Vec<MousePosition>,
+    pub log_scroll: f32,
+    pub focused_tile: Option<Position>,
 }
 
 pub const ZOOM: f32 = 0.001;
@@ -343,6 +350,8 @@ impl State {
             offset: OFFSET,
             screen_size: vec2(0., 0.),
             mouse_positions: vec![],
+            log_scroll: 0.0,
+            focused_tile: None,
         }
     }
 
@@ -363,6 +372,7 @@ impl State {
     pub fn clear(&mut self) {
         self.active_dialog = ActiveDialog::None;
         self.pending_update = None;
+        self.focused_tile = None;
     }
 
     pub fn update(&mut self, game: &Game, update: StateUpdate) -> GameSyncRequest {
@@ -383,21 +393,28 @@ impl State {
                         .action;
                     GameSyncRequest::ExecuteAction(action)
                 } else {
-                    self.pending_update = None;
-                    self.close_dialog();
+                    self.clear();
                     GameSyncRequest::None
                 }
             }
-            StateUpdate::SetDialog(dialog) => {
-                self.set_dialog(dialog);
-                GameSyncRequest::None
-            }
             StateUpdate::OpenDialog(dialog) => {
-                self.open_dialog(dialog);
+                let d = self.game_state_dialog(game);
+                if matches!(dialog, ActiveDialog::AdvanceMenu) && d.is_advance() {
+                    self.set_dialog(d);
+                } else {
+                    self.set_dialog(dialog);
+                }
+                self.focused_tile = None;
                 GameSyncRequest::None
             }
             StateUpdate::CloseDialog => {
-                self.close_dialog();
+                let d = self.game_state_dialog(game);
+                if d.is_advance() {
+                    self.set_dialog(ActiveDialog::None);
+                } else {
+                    self.set_dialog(d);
+                }
+
                 GameSyncRequest::None
             }
             StateUpdate::Import => GameSyncRequest::Import,
@@ -406,39 +423,29 @@ impl State {
                 self.show_player = p;
                 GameSyncRequest::None
             }
+            StateUpdate::SetFocusedTile(p) => {
+                self.focused_tile = Some(p);
+                GameSyncRequest::None
+            }
         }
-    }
-
-    fn open_dialog(&mut self, dialog: ActiveDialog) {
-        self.active_dialog = dialog;
     }
 
     pub fn set_dialog(&mut self, dialog: ActiveDialog) {
         self.active_dialog = dialog;
     }
 
-    fn close_dialog(&mut self) {
-        self.active_dialog = ActiveDialog::None;
-    }
-
     pub fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {
-        let last_dialog = self.active_dialog.clone();
         self.clear();
 
-        self.active_dialog = self.game_state_dialog(game, &last_dialog);
+        self.active_dialog = self.game_state_dialog(game);
         GameSyncRequest::None
     }
 
     #[must_use]
-    pub fn game_state_dialog(&self, game: &Game, last_dialog: &ActiveDialog) -> ActiveDialog {
+    pub fn game_state_dialog(&self, game: &Game) -> ActiveDialog {
         match &game.state {
             GameState::Movement { .. } => {
-                let start = if let ActiveDialog::TileMenu(p) = last_dialog {
-                    Some(*p)
-                } else {
-                    None
-                };
-                ActiveDialog::MoveUnits(MoveSelection::new(game.active_player(), start))
+                ActiveDialog::MoveUnits(MoveSelection::new(game.active_player()))
             }
             GameState::CulturalInfluenceResolution(c) => {
                 ActiveDialog::CulturalInfluenceResolution(c.clone())

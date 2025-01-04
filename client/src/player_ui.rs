@@ -4,11 +4,12 @@ use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
 use crate::happiness_ui::start_increase_happiness;
 use crate::layout_ui::{
-    bottom_left_texture, bottom_right_texture, icon_pos, left_mouse_button_pressed_in_rect,
-    top_center_texture, ICON_SIZE,
+    bottom_center_texture, bottom_left_texture, bottom_right_texture, icon_pos,
+    left_mouse_button_pressed_in_rect, top_center_texture, ICON_SIZE,
 };
 use crate::map_ui::terrain_name;
 use crate::resource_ui::{new_resource_map, resource_name, resource_types, ResourceType};
+use crate::tooltip::show_tooltip_for_rect;
 use crate::unit_ui;
 use macroquad::math::{u32, vec2};
 use macroquad::prelude::*;
@@ -28,29 +29,30 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
     let mut players: Vec<_> = game.players.iter().map(|p| p.index).collect();
     players.rotate_left(i);
 
-    let mut y = (players.len() as f32 * -ICON_SIZE) / 2.;
+    let size = 40.;
+    let mut y = (players.len() as f32 * -size) / 2.;
 
     for player_index in players {
         let pl = game.get_player(player_index);
         let shown = player.index == pl.index;
-        let pos = vec2(player.screen_size.x, player.screen_size.y / 2.0) + vec2(-20., y);
+        let pos = vec2(player.screen_size.x, player.screen_size.y / 2.0) + vec2(-size, y);
 
         let color = player_color(pl.index);
 
-        let w = if shown { ICON_SIZE + 10. } else { ICON_SIZE };
-        let x = pos.x - w + ICON_SIZE;
-        draw_rectangle(x, pos.y, w, ICON_SIZE, color);
-        draw_rectangle_lines(x, pos.y, w, ICON_SIZE, 2.0, BLACK);
+        let w = if shown { size + 10. } else { size };
+        let x = pos.x - w + size;
+        draw_rectangle(x, pos.y, w, size, color);
+        draw_rectangle_lines(x, pos.y, w, size, 2.0, BLACK);
         let text = format!("{}", pl.victory_points());
 
-        state.draw_text(&text, pos.x + 5., pos.y + 20.);
+        state.draw_text(&text, pos.x + 10., pos.y + 22.);
 
         let active = game.active_player();
         if active == pl.index {
             draw_texture_ex(
                 &state.assets.active_player,
                 x - 25.,
-                pos.y + 5.,
+                pos.y + 10.,
                 WHITE,
                 DrawTextureParams {
                     dest_size: Some(vec2(20., 20.)),
@@ -59,7 +61,9 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
             );
         }
 
-        if !shown && left_mouse_button_pressed_in_rect(Rect::new(x, pos.y, w, ICON_SIZE), state) {
+        let rect = Rect::new(x, pos.y, w, size);
+        show_tooltip_for_rect(state, &[pl.get_name()], rect);
+        if !shown && left_mouse_button_pressed_in_rect(rect, state) {
             if player.can_control {
                 if let ActiveDialog::DetermineFirstPlayer = state.active_dialog {
                     return StateUpdate::status_phase(StatusPhaseAction::DetermineFirstPlayer(
@@ -70,27 +74,10 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
             return StateUpdate::SetShownPlayer(pl.index);
         }
 
-        y += ICON_SIZE;
+        y += size;
     }
 
     StateUpdate::None
-}
-
-pub fn resource_label(
-    player: &ShownPlayer,
-    state: &State,
-    label: &str,
-    resource_type: ResourceType,
-    p: Vec2,
-) {
-    top_icon_with_label(
-        player,
-        state,
-        label,
-        &state.assets.resources[&resource_type],
-        p,
-        resource_name(resource_type),
-    );
 }
 
 pub fn top_icon_with_label(
@@ -111,6 +98,24 @@ pub fn top_icon_with_label(
     top_center_texture(state, texture, p, tooltip);
 }
 
+pub fn bottom_icon_with_label(
+    player: &ShownPlayer,
+    state: &State,
+    label: &str,
+    texture: &Texture2D,
+    p: Vec2,
+    tooltip: &str,
+) {
+    let dimensions = state.measure_text(label);
+    let x = (ICON_SIZE - dimensions.width) / 2.0;
+    state.draw_text(
+        label,
+        player.screen_size.x / 2.0 + p.x + x,
+        player.screen_size.y + p.y + 35.,
+    );
+    bottom_center_texture(state, texture, p, tooltip);
+}
+
 pub fn show_top_center(game: &Game, shown_player: &ShownPlayer, state: &State) {
     let player = shown_player.get(game);
 
@@ -125,27 +130,26 @@ pub fn show_top_center(game: &Game, shown_player: &ShownPlayer, state: &State) {
     let amount = new_resource_map(&player.resources);
     let limit = new_resource_map(&player.resource_limit);
     for (i, r) in resource_types().iter().rev().enumerate() {
-        let x = 2 - i as i8;
         let a = amount[r];
         let l = limit[r];
-        let s = match &state.active_dialog {
-            ActiveDialog::CollectResources(c) => {
-                format!("{}+{}", a, new_resource_map(&c.collected())[r])
-            }
-            ActiveDialog::IncreaseHappiness(h) => {
-                format!("{}-{}", a, new_resource_map(&h.cost)[r])
-            }
-            _ => format!("{a}/{l}"),
-        };
-        resource_label(shown_player, state, &s, *r, icon_pos(x, 0));
+        top_icon_with_label(
+            shown_player,
+            state,
+            &format!("{a}/{l}"),
+            &state.assets.resources[r],
+            icon_pos(2 - i as i8, 0),
+            resource_name(*r),
+        );
     }
 }
 
 pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
-    let mut y = 0.;
+    let mut p = vec2(10., 10.);
     let mut label = |label: &str| {
-        let p = vec2(10., y * 25. + 20.);
-        y += 1.;
+        p = vec2(p.x, p.y + 25.);
+        if p.y > player.screen_size.y - 150. {
+            p = vec2(p.x + 350., 85.);
+        }
         state.draw_text(label, p.x, p.y);
     };
 
@@ -209,7 +213,7 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
         }
     }
 
-    if let ActiveDialog::TileMenu(position) = state.active_dialog {
+    if let Some(position) = state.focused_tile {
         label(&format!(
             "{}/{}",
             position,

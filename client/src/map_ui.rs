@@ -91,8 +91,13 @@ fn alpha(game: &Game, state: &State, pos: Position) -> f32 {
         ActiveDialog::PlaceSettler => {
             highlight_if(game.players[game.active_player()].get_city(pos).is_some())
         }
-        ActiveDialog::TileMenu(p) => highlight_if(*p == pos),
-        _ => 0.,
+        _ => {
+            if let Some(p) = state.focused_tile {
+                highlight_if(p == pos)
+            } else {
+                0.
+            }
+        }
     };
     alpha
 }
@@ -127,39 +132,35 @@ pub fn show_tile_menu(
     player: &ShownPlayer,
     state: &State,
 ) -> StateUpdate {
-    if player.can_play_action {
-        if let Some(c) = game.get_any_city(position) {
-            show_city_menu(
-                game,
-                &CityMenu::new(player, c.player_index, position),
-                state,
-            )
-        } else {
-            let units = unit_ui::units_on_tile(game, position);
-            let settlers = units
-                .filter_map(|(_, unit)| {
-                    if unit.can_found_city(game) {
-                        Some(unit)
-                    } else {
-                        None
-                    }
-                })
-                .collect::<Vec<_>>();
-            if !settlers.is_empty()
-                && bottom_center_texture(state, &state.assets.settle, icon_pos(0, -1), "Settle")
-            {
-                let settler = settlers
-                    .iter()
-                    .find(|u| u.movement_restriction != MovementRestriction::None)
-                    .unwrap_or(&settlers[0]);
-                StateUpdate::execute(Action::Playing(PlayingAction::FoundCity {
-                    settler: settler.id,
-                }))
-            } else {
-                StateUpdate::None
-            }
-        }
+    if let Some(c) = game.get_any_city(position) {
+        show_city_menu(
+            game,
+            &CityMenu::new(player, c.player_index, position),
+            state,
+        )
     } else {
-        StateUpdate::None
+        let units = unit_ui::units_on_tile(game, position);
+        let settlers = units
+            .filter_map(|(_, unit)| {
+                if unit.can_found_city(game) {
+                    Some(unit)
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+        if !settlers.is_empty()
+            && bottom_center_texture(state, &state.assets.settle, icon_pos(0, -1), "Settle")
+        {
+            let settler = settlers
+                .iter()
+                .find(|u| u.movement_restriction != MovementRestriction::None)
+                .unwrap_or(&settlers[0]);
+            StateUpdate::execute(Action::Playing(PlayingAction::FoundCity {
+                settler: settler.id,
+            }))
+        } else {
+            StateUpdate::None
+        }
     }
 }

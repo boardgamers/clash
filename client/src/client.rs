@@ -22,30 +22,6 @@ use crate::{
     combat_ui, dialog_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui, tooltip,
 };
 
-pub async fn init(features: &Features) -> State {
-    State::new(features).await
-}
-
-pub fn render_and_update(
-    game: &Game,
-    state: &mut State,
-    sync_result: &GameSyncResult,
-    features: &Features,
-) -> GameSyncRequest {
-    match sync_result {
-        GameSyncResult::None => {}
-        GameSyncResult::Update => {
-            state.update_from_game(game);
-        }
-        GameSyncResult::WaitingForUpdate => {
-            state.set_dialog(ActiveDialog::WaitingForUpdate);
-        }
-    }
-
-    let update = render(game, state, features);
-    state.update(game, update)
-}
-
 fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     tooltip::update(state);
 
@@ -80,6 +56,7 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         if let ActiveDialog::Log = state.active_dialog {
             return StateUpdate::CloseDialog;
         }
+        state.log_scroll = 0.0;
         return StateUpdate::OpenDialog(ActiveDialog::Log);
     };
     if top_right_texture(
@@ -88,7 +65,7 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         icon_pos(-2, 0),
         "Show advances",
     ) {
-        if let ActiveDialog::AdvanceMenu = state.active_dialog {
+        if state.active_dialog.is_advance() {
             return StateUpdate::CloseDialog;
         }
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
@@ -105,10 +82,40 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         updates.add(render_active_dialog(game, state, player));
     }
 
+    if let Some(pos) = state.focused_tile {
+        if player.can_play_action && matches!(state.active_dialog, ActiveDialog::None) {
+            updates.add(show_tile_menu(game, pos, player, state));
+        }
+    }
+
     if player.can_control {
         updates.add(try_click(game, state, player));
     }
     updates.result()
+}
+
+pub async fn init(features: &Features) -> State {
+    State::new(features).await
+}
+
+pub fn render_and_update(
+    game: &Game,
+    state: &mut State,
+    sync_result: &GameSyncResult,
+    features: &Features,
+) -> GameSyncRequest {
+    match sync_result {
+        GameSyncResult::None => {}
+        GameSyncResult::Update => {
+            state.update_from_game(game);
+        }
+        GameSyncResult::WaitingForUpdate => {
+            state.set_dialog(ActiveDialog::WaitingForUpdate);
+        }
+    }
+
+    let update = render(game, state, features);
+    state.update(game, update)
 }
 
 fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) -> StateUpdate {
@@ -120,14 +127,13 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
         | ActiveDialog::CulturalInfluence
         | ActiveDialog::PlaceSettler => StateUpdate::None,
         ActiveDialog::Log => show_log(game, state),
-        ActiveDialog::TileMenu(p) => show_tile_menu(game, *p, player, state),
 
         // playing actions
         ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(h, player, state, game),
         ActiveDialog::AdvanceMenu => show_advance_menu(game, player, state),
         ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, player, game, state),
         ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p, state),
-        ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c, state),
+        ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c, state, player),
         ActiveDialog::RecruitUnitSelection(s) => {
             recruit_unit_ui::select_dialog(game, s, player, state)
         }
@@ -156,12 +162,13 @@ pub fn try_click(game: &Game, state: &mut State, player: &ShownPlayer) -> StateU
     let (x, y) = mouse_position();
     let mouse_pos = state.camera.screen_to_world(vec2(x, y));
     let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));
-    if !game.map.tiles.contains_key(&pos) {
-        return StateUpdate::None;
-    }
 
     if let ActiveDialog::CulturalInfluence = state.active_dialog {
         return influence_ui::hover(pos, game, player, mouse_pos, state);
+    }
+
+    if !game.map.tiles.contains_key(&pos) {
+        return StateUpdate::None;
     }
 
     if !is_mouse_button_pressed(MouseButton::Left) {
@@ -173,12 +180,12 @@ pub fn try_click(game: &Game, state: &mut State, player: &ShownPlayer) -> StateU
         ActiveDialog::MoveUnits(s) => move_ui::click(pos, s, mouse_pos, game),
         ActiveDialog::RemoveCasualties(s) => {
             unit_selection_click(game, player, pos, mouse_pos, s, |new| {
-                StateUpdate::SetDialog(ActiveDialog::RemoveCasualties(new.clone()))
+                StateUpdate::OpenDialog(ActiveDialog::RemoveCasualties(new.clone()))
             })
         }
         ActiveDialog::ReplaceUnits(s) => {
             unit_selection_click(game, player, pos, mouse_pos, s, |new| {
-                StateUpdate::SetDialog(ActiveDialog::ReplaceUnits(new.clone()))
+                StateUpdate::OpenDialog(ActiveDialog::ReplaceUnits(new.clone()))
             })
         }
         ActiveDialog::RazeSize1City => raze_city_confirm_dialog(game, player, pos),
@@ -190,7 +197,7 @@ pub fn try_click(game: &Game, state: &mut State, player: &ShownPlayer) -> StateU
             }
         }
         ActiveDialog::IncreaseHappiness(h) => increase_happiness_click(game, player, pos, h),
-        _ => StateUpdate::OpenDialog(ActiveDialog::TileMenu(pos)),
+        _ => StateUpdate::SetFocusedTile(pos),
     }
 }
 

@@ -7,6 +7,7 @@ use server::resource_pile::ResourcePile;
 
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::dialog_ui::{cancel_button, ok_button};
+use crate::resource_ui::show_resource_pile;
 
 #[derive(Clone)]
 pub struct IncreaseHappiness {
@@ -27,7 +28,7 @@ pub fn increase_happiness_click(
     h: &IncreaseHappiness,
 ) -> StateUpdate {
     if let Some(city) = player.get(game).get_city(pos) {
-        StateUpdate::SetDialog(ActiveDialog::IncreaseHappiness(add_increase_happiness(
+        StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(add_increase_happiness(
             city, pos, h,
         )))
     } else {
@@ -98,6 +99,8 @@ pub fn increase_happiness_menu(
     state: &State,
     game: &Game,
 ) -> StateUpdate {
+    show_resource_pile(state, player, &h.cost);
+
     if ok_button(state, player.get(game).resources.can_afford(&h.cost)) {
         return StateUpdate::Execute(Action::Playing(PlayingAction::IncreaseHappiness {
             happiness_increases: h.steps.clone(),

@@ -12,14 +12,16 @@ use server::playing_actions::{get_total_collection, PlayingAction};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
-use crate::client_state::{ActiveDialog, State, StateUpdate};
+use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::dialog_ui::{cancel_button, ok_button};
 use crate::hex_ui;
 use crate::hex_ui::Point;
 use crate::layout_ui::{
     draw_icon, draw_scaled_icon, is_in_circle, left_mouse_button_pressed, ICON_SIZE,
 };
-use crate::resource_ui::{new_resource_map, resource_name, resource_types, ResourceType};
+use crate::resource_ui::{
+    new_resource_map, resource_name, resource_types, show_resource_pile, ResourceType,
+};
 
 #[derive(Clone)]
 pub struct CollectResources {
@@ -72,7 +74,10 @@ pub fn collect_resources_dialog(
     game: &Game,
     collect: &CollectResources,
     state: &State,
+    player: &ShownPlayer,
 ) -> StateUpdate {
+    show_resource_pile(state, player, &collect.collected());
+
     let city = game.get_city(collect.player_index, collect.city_position);
 
     let valid = get_total_collection(
@@ -143,7 +148,7 @@ fn click_collect_option(col: &CollectResources, p: Position, pile: &ResourcePile
         new.collections.push((p, pile.clone()));
     }
 
-    StateUpdate::SetDialog(ActiveDialog::CollectResources(new))
+    StateUpdate::OpenDialog(ActiveDialog::CollectResources(new))
 }
 
 pub fn draw_resource_collect_tile(state: &State, pos: Position) -> StateUpdate {

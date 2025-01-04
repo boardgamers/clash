@@ -51,7 +51,7 @@ impl ConfirmSelection for ChooseAdditionalAdvances {
     }
 
     fn cancel(&self) -> StateUpdate {
-        StateUpdate::SetDialog(ActiveDialog::ChangeGovernmentType)
+        StateUpdate::OpenDialog(ActiveDialog::ChangeGovernmentType)
     }
 
     fn confirm(&self, _game: &Game) -> SelectionConfirm {
@@ -80,7 +80,7 @@ pub fn change_government_type_dialog() -> StateUpdate {
     //                 .skip(1) // the government advance itself is always chosen
     //                 .map(|a| a.name.clone())
     //                 .collect::<Vec<_>>();
-    //             return StateUpdate::SetDialog(ActiveDialog::ChooseAdditionalAdvances(
+    //             return StateUpdate::OpenDialog(ActiveDialog::ChooseAdditionalAdvances(
     //                 ChooseAdditionalAdvances::new(g.clone(), additional),
     //             ));
     //         }

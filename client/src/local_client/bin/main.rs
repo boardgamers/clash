@@ -22,7 +22,6 @@ async fn main() {
         assets_url: "assets/".to_string(),
     };
 
-    //todo add button to decide random or fixed game
     let game = if false {
         Game::new(2, "a".repeat(32), true)
     } else {
