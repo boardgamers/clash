@@ -4,14 +4,18 @@ use macroquad::math::vec2;
 
 pub fn show_pending_update(update: &PendingUpdate, state: &State) -> StateUpdate {
     let t = if update.warning.is_empty() {
-        "Are you sure?"
+        if state.active_dialog.is_full_modal() {
+            &update.info.join(", ")
+        } else {
+            "Are you sure?"
+        }
     } else {
         &format!("Warning: {}", update.warning.join(", "))
     };
     let dimensions = state.measure_text(t);
     bottom_center_text(state, t, vec2(-dimensions.width / 2., -50.));
 
-    if ok_button(state, update.can_confirm) {
+    if ok_button(state, true) {
         return StateUpdate::ResolvePendingUpdate(true);
     }
     if cancel_button(state) {

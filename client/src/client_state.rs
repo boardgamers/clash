@@ -165,6 +165,7 @@ impl ActiveDialog {
             ActiveDialog::AdvanceMenu
                 | ActiveDialog::FreeAdvance
                 | ActiveDialog::ChooseAdditionalAdvances(_)
+                | ActiveDialog::AdvancePayment(_)
         )
     }
 }
@@ -173,7 +174,6 @@ pub struct PendingUpdate {
     pub action: Action,
     pub warning: Vec<String>,
     pub info: Vec<String>,
-    pub can_confirm: bool,
 }
 
 #[must_use]
@@ -204,7 +204,6 @@ impl StateUpdate {
                 action,
                 warning,
                 info: vec![],
-                can_confirm: true,
             })
         }
     }
@@ -214,16 +213,6 @@ impl StateUpdate {
             action,
             warning: vec![],
             info,
-            can_confirm: true,
-        })
-    }
-
-    pub fn execute_with_cancel(info: Vec<String>) -> StateUpdate {
-        StateUpdate::ExecuteWithWarning(PendingUpdate {
-            action: Action::Undo, // never used
-            warning: vec![],
-            info,
-            can_confirm: false,
         })
     }
 

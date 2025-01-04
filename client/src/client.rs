@@ -74,7 +74,6 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     if player.can_control {
         if let Some(u) = &state.pending_update {
             updates.add(dialog_ui::show_pending_update(u, state));
-            return updates.result();
         }
     }
 
@@ -131,7 +130,7 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
         // playing actions
         ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(h, player, state, game),
         ActiveDialog::AdvanceMenu => show_advance_menu(game, player, state),
-        ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, player, game, state),
+        ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, state, player, game),
         ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p, state),
         ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c, state, player),
         ActiveDialog::RecruitUnitSelection(s) => {

@@ -9,7 +9,7 @@ use itertools::Itertools;
 use macroquad::color::Color;
 use macroquad::math::{bool, vec2, Vec2};
 use macroquad::prelude::{
-    draw_rectangle, draw_rectangle_lines, Rect, BLACK, BLUE, GRAY, WHITE, YELLOW,
+    draw_rectangle, draw_rectangle_lines, Rect, BLACK, BLUE, GRAY, GREEN, WHITE, YELLOW,
 };
 use server::action::Action;
 use server::advance::{Advance, Bonus};
@@ -94,19 +94,11 @@ pub fn show_advance_menu(game: &Game, player: &ShownPlayer, state: &State) -> St
 
 pub fn show_free_advance_menu(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
     show_generic_advance_menu("Select a free advance", game, player, state, |a| {
-        let p = player.get(game);
-        if can_advance(game, p, a) {
-            return StateUpdate::execute_with_confirm(
-                description(p, a),
-                Action::StatusPhase(StatusPhaseAction::FreeAdvance(a.name.clone())),
-            );
-        }
-        advance_info(game, player, a)
+        StateUpdate::execute_with_confirm(
+            vec![format!("Select {} as a free advance?", a.name)],
+            Action::StatusPhase(StatusPhaseAction::FreeAdvance(a.name.clone())),
+        )
     })
-}
-
-fn advance_info(game: &Game, player: &ShownPlayer, a: &Advance) -> StateUpdate {
-    StateUpdate::execute_with_cancel(description(player.get(game), a))
 }
 
 pub fn show_generic_advance_menu(
@@ -143,7 +135,7 @@ pub fn show_generic_advance_menu(
                         rect.y,
                         rect.w,
                         rect.h,
-                        fill_color(p, name, can_advance),
+                        fill_color(p, name, can_advance, state),
                     );
                     state.draw_text(name, pos.x + 10., pos.y + 22.);
 
@@ -165,7 +157,13 @@ pub fn show_generic_advance_menu(
     StateUpdate::None
 }
 
-fn fill_color(p: &Player, name: &str, can_advance: bool) -> Color {
+fn fill_color(p: &Player, name: &str, can_advance: bool, state: &State) -> Color {
+    if let ActiveDialog::AdvancePayment(p) = &state.active_dialog {
+        if p.name == name {
+            return GREEN;
+        }
+    }
+
     if can_advance {
         WHITE
     } else if p.has_advance(name) {
@@ -266,30 +264,29 @@ fn description(p: &Player, a: &Advance) -> Vec<String> {
 
 pub fn pay_advance_dialog(
     ap: &AdvancePayment,
+    state: &State,
     player: &ShownPlayer,
     game: &Game,
-    state: &State,
 ) -> StateUpdate {
-    let a = advances::get_advance_by_name(ap.name.as_str()).unwrap();
-
-    if can_advance(game, player.get(game), &a) {
-        payment_dialog(
-            ap,
-            AdvancePayment::valid,
-            |ap| {
-                StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
-                    advance: ap.name.to_string(),
-                    payment: ap.payment.to_resource_pile(),
-                }))
-            },
-            |ap, r| ap.payment.get(r).selectable.max > 0,
-            |ap, r| add(ap, r, 1),
-            |ap, r| add(ap, r, -1),
-            state,
-        )
-    } else {
-        advance_info(game, player, &a)
-    }
+    let update = show_advance_menu(game, player, state);
+    if !matches!(update, StateUpdate::None) {
+        // select a different advance
+        return update;
+    };
+    payment_dialog(
+        ap,
+        AdvancePayment::valid,
+        |ap| {
+            StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
+                advance: ap.name.to_string(),
+                payment: ap.payment.to_resource_pile(),
+            }))
+        },
+        |ap, r| ap.payment.get(r).selectable.max > 0,
+        |ap, r| add(ap, r, 1),
+        |ap, r| add(ap, r, -1),
+        state,
+    )
 }
 
 fn add(ap: &AdvancePayment, r: ResourceType, i: i32) -> StateUpdate {
