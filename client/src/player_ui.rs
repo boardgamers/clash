@@ -18,6 +18,7 @@ use server::game::{Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::status_phase::StatusPhaseAction;
 use server::unit::MovementAction;
+use crate::tooltip::show_tooltip_for_rect;
 
 pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
     let i = game
@@ -28,29 +29,30 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
     let mut players: Vec<_> = game.players.iter().map(|p| p.index).collect();
     players.rotate_left(i);
 
-    let mut y = (players.len() as f32 * -ICON_SIZE) / 2.;
+    let size = 40.;
+    let mut y = (players.len() as f32 * -size) / 2.;
 
     for player_index in players {
         let pl = game.get_player(player_index);
         let shown = player.index == pl.index;
-        let pos = vec2(player.screen_size.x, player.screen_size.y / 2.0) + vec2(-20., y);
+        let pos = vec2(player.screen_size.x, player.screen_size.y / 2.0) + vec2(-size, y);
 
         let color = player_color(pl.index);
 
-        let w = if shown { ICON_SIZE + 10. } else { ICON_SIZE };
-        let x = pos.x - w + ICON_SIZE;
-        draw_rectangle(x, pos.y, w, ICON_SIZE, color);
-        draw_rectangle_lines(x, pos.y, w, ICON_SIZE, 2.0, BLACK);
+        let w = if shown { size + 10. } else { size };
+        let x = pos.x - w + size;
+        draw_rectangle(x, pos.y, w, size, color);
+        draw_rectangle_lines(x, pos.y, w, size, 2.0, BLACK);
         let text = format!("{}", pl.victory_points());
 
-        state.draw_text(&text, pos.x + 5., pos.y + 20.);
+        state.draw_text(&text, pos.x + 10., pos.y + 22.);
 
         let active = game.active_player();
         if active == pl.index {
             draw_texture_ex(
                 &state.assets.active_player,
                 x - 25.,
-                pos.y + 5.,
+                pos.y + 10.,
                 WHITE,
                 DrawTextureParams {
                     dest_size: Some(vec2(20., 20.)),
@@ -59,7 +61,9 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
             );
         }
 
-        if !shown && left_mouse_button_pressed_in_rect(Rect::new(x, pos.y, w, ICON_SIZE), state) {
+        let rect = Rect::new(x, pos.y, w, size);
+        show_tooltip_for_rect(state, &[pl.get_name()], rect);
+        if !shown && left_mouse_button_pressed_in_rect(rect, state) {
             if player.can_control {
                 if let ActiveDialog::DetermineFirstPlayer = state.active_dialog {
                     return StateUpdate::status_phase(StatusPhaseAction::DetermineFirstPlayer(
@@ -70,7 +74,7 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
             return StateUpdate::SetShownPlayer(pl.index);
         }
 
-        y += ICON_SIZE;
+        y += size;
     }
 
     StateUpdate::None
