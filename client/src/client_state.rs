@@ -399,15 +399,20 @@ impl State {
                 }
             }
             StateUpdate::OpenDialog(dialog) => {
-                self.set_dialog(dialog);
+                let d = self.game_state_dialog(game, &ActiveDialog::None);
+                if matches!(dialog, ActiveDialog::AdvanceMenu) && d.is_advance() {
+                    self.set_dialog(d);
+                } else {
+                    self.set_dialog(dialog);
+                }
                 GameSyncRequest::None
             }
             StateUpdate::CloseDialog => {
                 let d = self.game_state_dialog(game, &ActiveDialog::None);
-                if !d.is_advance() {
-                    self.set_dialog(d);
-                } else {
+                if d.is_advance() {
                     self.set_dialog(ActiveDialog::None);
+                } else {
+                    self.set_dialog(d);
                 }
 
                 GameSyncRequest::None
