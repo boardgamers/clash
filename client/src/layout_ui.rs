@@ -1,4 +1,4 @@
-use crate::client_state::{ShownPlayer, State};
+use crate::client_state::State;
 use crate::hex_ui::Point;
 use crate::tooltip;
 use macroquad::color::WHITE;
@@ -39,9 +39,9 @@ pub fn bottom_center_texture(state: &State, texture: &Texture2D, p: Vec2, toolti
     draw_icon(state, texture, tooltip, anchor + p)
 }
 
-pub fn bottom_center_text(state: &State, text: &str, p: Vec2)  {
+pub fn bottom_center_text(state: &State, text: &str, p: Vec2) {
     let p = bottom_center_anchor(state) + p;
-    state.draw_text(text, p.x, p.y)
+    state.draw_text(text, p.x, p.y);
 }
 
 pub fn bottom_center_anchor(state: &State) -> Vec2 {

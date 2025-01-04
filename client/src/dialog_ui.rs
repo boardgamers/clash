@@ -1,7 +1,5 @@
 use crate::client_state::{PendingUpdate, ShownPlayer, State, StateUpdate};
-use crate::layout_ui::{
-    bottom_center_text, bottom_right_texture, icon_pos,
-};
+use crate::layout_ui::{bottom_center_text, bottom_right_texture, icon_pos};
 use macroquad::hash;
 use macroquad::math::{vec2, Vec2};
 use macroquad::ui::widgets::Window;
@@ -63,10 +61,7 @@ where
     (update, open)
 }
 
-pub fn show_pending_update(
-    update: &PendingUpdate,
-    state: &State,
-) -> StateUpdate {
+pub fn show_pending_update(update: &PendingUpdate, state: &State) -> StateUpdate {
     let t = if update.warning.is_empty() {
         "Are you sure?"
     } else {
@@ -97,7 +92,7 @@ pub fn cancel_button_with_tooltip(state: &State, tooltip: &str) -> bool {
 #[must_use]
 pub fn ok_button(state: &State, valid: bool) -> bool {
     ok_button_with_tooltip(
-        &state,
+        state,
         valid,
         if valid { "OK" } else { "Invalid selection" },
     )

@@ -4,9 +4,7 @@ use server::position::Position;
 use server::unit::Unit;
 
 use crate::client_state::{State, StateUpdate};
-use crate::dialog_ui::{
-    cancel_button_with_tooltip, ok_button_with_tooltip,
-};
+use crate::dialog_ui::{cancel_button_with_tooltip, ok_button_with_tooltip};
 use crate::select_ui::{ConfirmSelection, SelectionConfirm};
 use crate::unit_ui;
 use crate::unit_ui::UnitSelection;

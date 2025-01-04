@@ -195,8 +195,8 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
             label(&m);
         }
         if let Some(u) = &state.pending_update {
-            for m in u.info {
-                label(&m);
+            for m in &u.info {
+                label(m);
             }
         }
     }
