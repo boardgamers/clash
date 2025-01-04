@@ -86,7 +86,7 @@ pub fn draw_scaled_icon(
 
     let rect = Rect::new(origin.x, origin.y, size, size);
     if !tooltip.is_empty() {
-        tooltip::show_tooltip_for_rect(state, tooltip, rect);
+        tooltip::show_tooltip_for_rect(state, vec![tooltip.to_string()], rect);
     }
     left_mouse_button_pressed_in_rect(rect, state)
 }

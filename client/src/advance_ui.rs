@@ -4,6 +4,7 @@ use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::player_ui::player_color;
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::HasCountSelectableObject;
+use crate::tooltip::show_tooltip_for_rect;
 use itertools::Itertools;
 use macroquad::math::{bool, vec2, Vec2};
 use macroquad::prelude::{
@@ -143,8 +144,9 @@ pub fn show_generic_advance_menu(
                 BLACK
             };
             draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 4., border_color);
+            show_tooltip_for_rect(state, description(p, &a), rect);
 
-            if left_mouse_button_pressed_in_rect(rect, state) {
+            if can_advance && left_mouse_button_pressed_in_rect(rect, state) {
                 return new_update(&a);
             }
         }
@@ -155,7 +157,6 @@ pub fn show_generic_advance_menu(
 fn can_advance(game: &Game, player: &ShownPlayer, a: &Advance) -> bool {
     let name = &a.name;
     let p = player.get(game);
-    // todo color should be for selected player, not watching player
     if player.can_play_action {
         p.can_advance(name)
     } else if player.can_control
