@@ -184,10 +184,8 @@ pub struct PendingUpdate {
 #[must_use]
 pub enum StateUpdate {
     None,
-    SetDialog(ActiveDialog),
     OpenDialog(ActiveDialog),
     CloseDialog,
-    MinimizeDialog,
     Cancel,
     ResolvePendingUpdate(bool),
     Execute(Action),
@@ -334,6 +332,7 @@ pub struct State {
     pub offset: Vec2,
     pub screen_size: Vec2,
     pub mouse_positions: Vec<MousePosition>,
+    pub log_scroll: f32,
 }
 
 pub const ZOOM: f32 = 0.001;
@@ -356,6 +355,7 @@ impl State {
             offset: OFFSET,
             screen_size: vec2(0., 0.),
             mouse_positions: vec![],
+            log_scroll: 0.0,
         }
     }
 
@@ -401,26 +401,16 @@ impl State {
                         .action;
                     GameSyncRequest::ExecuteAction(action)
                 } else {
-                    self.pending_update = None;
-                    self.active_dialog = ActiveDialog::None;
+                    self.clear();
                     GameSyncRequest::None
                 }
             }
-            StateUpdate::SetDialog(dialog) => {
+            StateUpdate::OpenDialog(dialog) => {
                 self.set_dialog(dialog);
                 GameSyncRequest::None
             }
-            StateUpdate::OpenDialog(dialog) => {
-                self.active_dialog = dialog;
-                GameSyncRequest::None
-            }
             StateUpdate::CloseDialog => {
-                self.active_dialog = ActiveDialog::None;
-                GameSyncRequest::None
-            }
-            StateUpdate::MinimizeDialog => {
-                self.minimized_dialog = Some(self.active_dialog.clone());
-                self.active_dialog = ActiveDialog::None;
+                self.set_dialog(ActiveDialog::None);
                 GameSyncRequest::None
             }
             StateUpdate::Import => GameSyncRequest::Import,
@@ -433,6 +423,9 @@ impl State {
     }
 
     pub fn set_dialog(&mut self, dialog: ActiveDialog) {
+        if self.active_dialog.is_advance() && !dialog.is_advance() {
+            self.minimized_dialog = Some(self.active_dialog.clone());
+        }
         self.active_dialog = dialog;
     }
 

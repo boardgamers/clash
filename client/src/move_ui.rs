@@ -69,7 +69,7 @@ pub fn click(pos: Position, s: &MoveSelection, mouse_pos: Vec2, game: &Game) -> 
             } else {
                 new.destinations = possible_destinations(game, pos, new.player_index, &new.units);
             }
-            StateUpdate::SetDialog(ActiveDialog::MoveUnits(new))
+            StateUpdate::OpenDialog(ActiveDialog::MoveUnits(new))
         })
     }
 }

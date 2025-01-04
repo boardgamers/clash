@@ -28,7 +28,7 @@ pub fn increase_happiness_click(
     h: &IncreaseHappiness,
 ) -> StateUpdate {
     if let Some(city) = player.get(game).get_city(pos) {
-        StateUpdate::SetDialog(ActiveDialog::IncreaseHappiness(add_increase_happiness(
+        StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(add_increase_happiness(
             city, pos, h,
         )))
     } else {

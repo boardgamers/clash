@@ -80,6 +80,7 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         if let ActiveDialog::Log = state.active_dialog {
             return StateUpdate::CloseDialog;
         }
+        state.log_scroll = 0.0;
         return StateUpdate::OpenDialog(ActiveDialog::Log);
     };
     if top_right_texture(
@@ -89,7 +90,7 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         "Show advances",
     ) {
         if state.active_dialog.is_advance() {
-            return StateUpdate::MinimizeDialog;
+            return StateUpdate::CloseDialog;
         }
         return StateUpdate::OpenDialog(
             state
@@ -178,12 +179,12 @@ pub fn try_click(game: &Game, state: &mut State, player: &ShownPlayer) -> StateU
         ActiveDialog::MoveUnits(s) => move_ui::click(pos, s, mouse_pos, game),
         ActiveDialog::RemoveCasualties(s) => {
             unit_selection_click(game, player, pos, mouse_pos, s, |new| {
-                StateUpdate::SetDialog(ActiveDialog::RemoveCasualties(new.clone()))
+                StateUpdate::OpenDialog(ActiveDialog::RemoveCasualties(new.clone()))
             })
         }
         ActiveDialog::ReplaceUnits(s) => {
             unit_selection_click(game, player, pos, mouse_pos, s, |new| {
-                StateUpdate::SetDialog(ActiveDialog::ReplaceUnits(new.clone()))
+                StateUpdate::OpenDialog(ActiveDialog::ReplaceUnits(new.clone()))
             })
         }
         ActiveDialog::RazeSize1City => raze_city_confirm_dialog(game, player, pos),

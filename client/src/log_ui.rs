@@ -1,10 +1,17 @@
 use macroquad::math::vec2;
+use macroquad::prelude::mouse_wheel;
 use server::game::Game;
 
 use crate::client_state::{State, StateUpdate};
 
 pub fn show_log(game: &Game, state: &mut State) -> StateUpdate {
-    let mut y = 0.;
+    let (_, wheel) = mouse_wheel();
+    state.log_scroll -= wheel;
+    if state.log_scroll < 0. {
+        state.log_scroll = 0.;
+    }
+
+    let mut y = state.log_scroll;
     let mut label = |label: &str| {
         let p = vec2(300., y * 25. + 20.);
         y += 1.;

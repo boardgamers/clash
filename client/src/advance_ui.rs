@@ -84,7 +84,7 @@ impl HasPayment for AdvancePayment {
 
 pub fn show_advance_menu(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
     show_generic_advance_menu("Advances", game, player, state, |a| {
-        StateUpdate::SetDialog(ActiveDialog::AdvancePayment(AdvancePayment::new(
+        StateUpdate::OpenDialog(ActiveDialog::AdvancePayment(AdvancePayment::new(
             game,
             player.index,
             a.name.as_str(),
@@ -298,5 +298,5 @@ fn add(ap: &AdvancePayment, r: ResourceType, i: i32) -> StateUpdate {
 
     let c = p.counter_mut();
     c.current = (c.current as i32 + i) as u32;
-    StateUpdate::SetDialog(ActiveDialog::AdvancePayment(new))
+    StateUpdate::OpenDialog(ActiveDialog::AdvancePayment(new))
 }

@@ -148,7 +148,7 @@ fn click_collect_option(col: &CollectResources, p: Position, pile: &ResourcePile
         new.collections.push((p, pile.clone()));
     }
 
-    StateUpdate::SetDialog(ActiveDialog::CollectResources(new))
+    StateUpdate::OpenDialog(ActiveDialog::CollectResources(new))
 }
 
 pub fn draw_resource_collect_tile(state: &State, pos: Position) -> StateUpdate {

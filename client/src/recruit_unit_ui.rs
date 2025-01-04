@@ -64,7 +64,7 @@ impl RecruitAmount {
             })
             .collect();
 
-        StateUpdate::SetDialog(ActiveDialog::RecruitUnitSelection(RecruitAmount {
+        StateUpdate::OpenDialog(ActiveDialog::RecruitUnitSelection(RecruitAmount {
             player_index,
             city_position,
             units,
@@ -230,15 +230,17 @@ pub fn select_dialog(
             let sel = RecruitSelection::new(game, amount.clone(), vec![]);
 
             if sel.is_finished() {
-                StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
-                    game,
-                    "units",
-                    amount.player_index,
-                    amount.city_position,
-                    ConstructionProject::Units(sel),
-                )))
+                StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(
+                    ConstructionPayment::new(
+                        game,
+                        "units",
+                        amount.player_index,
+                        amount.city_position,
+                        ConstructionProject::Units(sel),
+                    ),
+                ))
             } else {
-                StateUpdate::SetDialog(ActiveDialog::ReplaceUnits(sel))
+                StateUpdate::OpenDialog(ActiveDialog::ReplaceUnits(sel))
             }
         },
         |_s, _u| true,
@@ -285,7 +287,7 @@ pub fn replace_dialog(game: &Game, sel: &RecruitSelection, state: &State) -> Sta
         game,
         sel,
         |new: RecruitSelection| {
-            StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
+            StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
                 game,
                 "units",
                 new.amount.player_index,

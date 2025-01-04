@@ -59,7 +59,7 @@ pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) 
         &state.assets.resources[&ResourceType::Food],
         "Collect Resources".to_string(),
         Box::new(|| {
-            StateUpdate::SetDialog(ActiveDialog::CollectResources(CollectResources::new(
+            StateUpdate::OpenDialog(ActiveDialog::CollectResources(CollectResources::new(
                 menu.player.index,
                 menu.city_position,
                 possible_resource_collections(game, menu.city_position, menu.city_owner_index),
@@ -100,7 +100,7 @@ pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) 
                     &state.assets.buildings[&building],
                     tooltip,
                     Box::new(move || {
-                        StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(
+                        StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(
                             ConstructionPayment::new(
                                 game,
                                 name,
@@ -121,7 +121,7 @@ pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) 
                 &state.assets.wonders[&w.name],
                 format!("Build wonder {}", w.name),
                 Box::new(move || {
-                    StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(
+                    StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(
                         ConstructionPayment::new(
                             game,
                             &w.name,

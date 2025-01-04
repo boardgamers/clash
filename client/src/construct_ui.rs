@@ -94,7 +94,7 @@ pub fn pay_construction_dialog(
                     .current += 1;
             }
             new.payment.get_mut(r).selectable.current += 1;
-            StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(new))
+            StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(new))
         },
         |cp, r| {
             let mut new = cp.clone();
@@ -105,7 +105,7 @@ pub fn pay_construction_dialog(
                 new.payment.get_mut(ResourceType::Gold).selectable.current += 1;
             }
             new.payment.get_mut(r).selectable.current -= 1;
-            StateUpdate::SetDialog(ActiveDialog::ConstructionPayment(new))
+            StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(new))
         },
         state,
     )
