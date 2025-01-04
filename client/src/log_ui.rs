@@ -6,10 +6,7 @@ use crate::client_state::{State, StateUpdate};
 
 pub fn show_log(game: &Game, state: &mut State) -> StateUpdate {
     let (_, wheel) = mouse_wheel();
-    state.log_scroll -= wheel;
-    if state.log_scroll < 0. {
-        state.log_scroll = 0.;
-    }
+    state.log_scroll += wheel;
 
     let mut y = state.log_scroll;
     let mut label = |label: &str| {

@@ -324,7 +324,6 @@ pub struct State {
     pub control_player: Option<usize>,
     pub show_player: usize,
     pub active_dialog: ActiveDialog,
-    minimized_dialog: Option<ActiveDialog>,
     pub pending_update: Option<PendingUpdate>,
     pub camera: Camera2D,
     pub camera_mode: CameraMode,
@@ -342,7 +341,6 @@ impl State {
     pub async fn new(features: &Features) -> State {
         State {
             active_dialog: ActiveDialog::None,
-            minimized_dialog: None,
             pending_update: None,
             assets: Assets::new(features).await,
             control_player: None,
@@ -375,12 +373,7 @@ impl State {
 
     pub fn clear(&mut self) {
         self.active_dialog = ActiveDialog::None;
-        self.minimized_dialog = None;
         self.pending_update = None;
-    }
-
-    pub fn pop_minimized_dialog(&mut self) -> Option<ActiveDialog> {
-        self.minimized_dialog.take()
     }
 
     pub fn update(&mut self, game: &Game, update: StateUpdate) -> GameSyncRequest {
@@ -410,7 +403,13 @@ impl State {
                 GameSyncRequest::None
             }
             StateUpdate::CloseDialog => {
-                self.set_dialog(ActiveDialog::None);
+                let d = self.game_state_dialog(game, &ActiveDialog::None);
+                if !d.is_advance() {
+                    self.set_dialog(d);
+                } else {
+                    self.set_dialog(ActiveDialog::None);
+                }
+
                 GameSyncRequest::None
             }
             StateUpdate::Import => GameSyncRequest::Import,
@@ -423,9 +422,6 @@ impl State {
     }
 
     pub fn set_dialog(&mut self, dialog: ActiveDialog) {
-        if self.active_dialog.is_advance() && !dialog.is_advance() {
-            self.minimized_dialog = Some(self.active_dialog.clone());
-        }
         self.active_dialog = dialog;
     }
 

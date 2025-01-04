@@ -92,11 +92,7 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         if state.active_dialog.is_advance() {
             return StateUpdate::CloseDialog;
         }
-        return StateUpdate::OpenDialog(
-            state
-                .pop_minimized_dialog()
-                .unwrap_or(ActiveDialog::AdvanceMenu),
-        );
+        return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     };
 
     if player.can_control {
