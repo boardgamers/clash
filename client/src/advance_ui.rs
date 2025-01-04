@@ -148,6 +148,7 @@ pub fn show_generic_advance_menu(
 
                     draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 4., border_color(&a));
                 } else {
+                    // tooltip should be shown on top of everything
                     show_tooltip_for_rect(state, description(p, &a), rect);
 
                     if can_advance && left_mouse_button_pressed_in_rect(rect, state) {
