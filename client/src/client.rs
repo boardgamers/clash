@@ -88,10 +88,14 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
         icon_pos(-2, 0),
         "Show advances",
     ) {
-        if let ActiveDialog::AdvanceMenu = state.active_dialog {
-            return StateUpdate::CloseDialog;
+        if state.active_dialog.is_advance() {
+            return StateUpdate::MinimizeDialog;
         }
-        return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
+        return StateUpdate::OpenDialog(
+            state
+                .pop_minimized_dialog()
+                .unwrap_or(ActiveDialog::AdvanceMenu),
+        );
     };
 
     if player.can_control {

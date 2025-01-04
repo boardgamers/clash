@@ -150,17 +150,27 @@ impl ActiveDialog {
 
     #[must_use]
     pub fn show_for_other_player(&self) -> bool {
-        matches!(self, ActiveDialog::Log | ActiveDialog::AdvanceMenu)
+        matches!(self, ActiveDialog::Log) || self.is_advance()
     }
 
     #[must_use]
     pub fn is_modal(&self) -> bool {
-        matches!(self, ActiveDialog::Log | ActiveDialog::AdvanceMenu)
+        matches!(self, ActiveDialog::Log) || self.is_full_modal()
     }
 
     #[must_use]
     pub fn is_full_modal(&self) -> bool {
-        matches!(self, ActiveDialog::AdvanceMenu)
+        self.is_advance()
+    }
+
+    #[must_use]
+    pub fn is_advance(&self) -> bool {
+        matches!(
+            self,
+            ActiveDialog::AdvanceMenu
+                | ActiveDialog::FreeAdvance
+                | ActiveDialog::ChooseAdditionalAdvances(_)
+        )
     }
 }
 
@@ -177,6 +187,7 @@ pub enum StateUpdate {
     SetDialog(ActiveDialog),
     OpenDialog(ActiveDialog),
     CloseDialog,
+    MinimizeDialog,
     Cancel,
     ResolvePendingUpdate(bool),
     Execute(Action),
@@ -315,6 +326,7 @@ pub struct State {
     pub control_player: Option<usize>,
     pub show_player: usize,
     pub active_dialog: ActiveDialog,
+    minimized_dialog: Option<ActiveDialog>,
     pub pending_update: Option<PendingUpdate>,
     pub camera: Camera2D,
     pub camera_mode: CameraMode,
@@ -331,6 +343,7 @@ impl State {
     pub async fn new(features: &Features) -> State {
         State {
             active_dialog: ActiveDialog::None,
+            minimized_dialog: None,
             pending_update: None,
             assets: Assets::new(features).await,
             control_player: None,
@@ -362,7 +375,12 @@ impl State {
 
     pub fn clear(&mut self) {
         self.active_dialog = ActiveDialog::None;
+        self.minimized_dialog = None;
         self.pending_update = None;
+    }
+
+    pub fn pop_minimized_dialog(&mut self) -> Option<ActiveDialog> {
+        self.minimized_dialog.take()
     }
 
     pub fn update(&mut self, game: &Game, update: StateUpdate) -> GameSyncRequest {
@@ -384,7 +402,7 @@ impl State {
                     GameSyncRequest::ExecuteAction(action)
                 } else {
                     self.pending_update = None;
-                    self.close_dialog();
+                    self.active_dialog = ActiveDialog::None;
                     GameSyncRequest::None
                 }
             }
@@ -393,11 +411,16 @@ impl State {
                 GameSyncRequest::None
             }
             StateUpdate::OpenDialog(dialog) => {
-                self.open_dialog(dialog);
+                self.active_dialog = dialog;
                 GameSyncRequest::None
             }
             StateUpdate::CloseDialog => {
-                self.close_dialog();
+                self.active_dialog = ActiveDialog::None;
+                GameSyncRequest::None
+            }
+            StateUpdate::MinimizeDialog => {
+                self.minimized_dialog = Some(self.active_dialog.clone());
+                self.active_dialog = ActiveDialog::None;
                 GameSyncRequest::None
             }
             StateUpdate::Import => GameSyncRequest::Import,
@@ -409,16 +432,8 @@ impl State {
         }
     }
 
-    fn open_dialog(&mut self, dialog: ActiveDialog) {
-        self.active_dialog = dialog;
-    }
-
     pub fn set_dialog(&mut self, dialog: ActiveDialog) {
         self.active_dialog = dialog;
-    }
-
-    fn close_dialog(&mut self) {
-        self.active_dialog = ActiveDialog::None;
     }
 
     pub fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {
