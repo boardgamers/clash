@@ -1,31 +1,31 @@
-use macroquad::ui::Ui;
+use macroquad::math::vec2;
 use server::game::Game;
 
-use crate::client_state::{ShownPlayer, StateUpdate};
-use crate::dialog_ui::dialog;
+use crate::client_state::{State, StateUpdate};
 
-pub fn show_log(game: &Game, player: &ShownPlayer) -> StateUpdate {
-    dialog(player, "Log", |ui| {
-        game.log.iter().for_each(|l| {
-            multiline(ui, l);
+pub fn show_log(game: &Game, state: &mut State) -> StateUpdate {
+    let mut y = 0.;
+    let mut label = |label: &str| {
+        let p = vec2(300., y * 25. + 20.);
+        y += 1.;
+        state.draw_text(label, p.x, p.y);
+    };
+
+    game.log.iter().for_each(|l| {
+        let mut line = String::new();
+        l.split(' ').for_each(|s| {
+            if line.len() + s.len() > 100 {
+                label(&line);
+                line = String::new();
+            }
+            if !line.is_empty() {
+                line.push(' ');
+            }
+            line.push_str(s);
         });
-        StateUpdate::None
-    })
-}
-
-fn multiline(ui: &mut Ui, text: &str) {
-    let mut line = String::new();
-    text.split(' ').for_each(|s| {
-        if line.len() + s.len() > 100 {
-            ui.label(None, &line);
-            line = String::new();
-        }
         if !line.is_empty() {
-            line.push(' ');
+            label(&line);
         }
-        line.push_str(s);
     });
-    if !line.is_empty() {
-        ui.label(None, &line);
-    }
+    StateUpdate::None
 }

@@ -152,6 +152,11 @@ impl ActiveDialog {
     pub fn show_for_other_player(&self) -> bool {
         matches!(self, ActiveDialog::Log | ActiveDialog::AdvanceMenu)
     }
+
+    #[must_use]
+    pub fn is_modal(&self) -> bool {
+        self.show_for_other_player()
+    }
 }
 
 pub struct PendingUpdate {

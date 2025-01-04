@@ -281,6 +281,9 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
     }
 
     if top_right_texture(state, &assets.log, icon_pos(-1, 0), "Show log") {
+        if let ActiveDialog::Log = state.active_dialog {
+            return StateUpdate::CloseDialog;
+        }
         return StateUpdate::OpenDialog(ActiveDialog::Log);
     };
     if top_right_texture(state, &assets.advances, icon_pos(-2, 0), "Show advances") {

@@ -64,9 +64,13 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     };
 
     let mut updates = StateUpdates::new();
-    updates.add(draw_map(game, state));
+    if !state.active_dialog.is_modal() {
+        updates.add(draw_map(game, state));
+    }
     show_top_left(game, player, state);
-    show_top_center(game, player, state);
+    if !state.active_dialog.is_modal() {
+        show_top_center(game, player, state);
+    }
     updates.add(player_select(game, player, state));
     updates.add(show_global_controls(game, state, features));
 
@@ -95,7 +99,7 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
         | ActiveDialog::WaitingForUpdate
         | ActiveDialog::CulturalInfluence
         | ActiveDialog::PlaceSettler => StateUpdate::None,
-        ActiveDialog::Log => show_log(game, player),
+        ActiveDialog::Log => show_log(game, state),
         ActiveDialog::TileMenu(p) => show_tile_menu(game, *p, player, state),
 
         // playing actions
