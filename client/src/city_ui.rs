@@ -48,7 +48,7 @@ impl CityMenu {
 
 pub type IconAction<'a> = (&'a Texture2D, String, Box<dyn Fn() -> StateUpdate + 'a>);
 
-pub type IconActionVec<'a> = Vec<IconAction<'a >>;
+pub type IconActionVec<'a> = Vec<IconAction<'a>>;
 
 pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> StateUpdate {
     let city = menu.get_city(game);
@@ -59,7 +59,9 @@ pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) 
         return StateUpdate::None;
     }
     let mut icons: IconActionVec<'a> = vec![];
-    move_units_button(game, pos, &menu.player, &state).map(|i| icons.push(i));
+    if let Some(i) = move_units_button(game, pos, &menu.player, state) {
+        icons.push(i)
+    }
     icons.push((
         &state.assets.resources[&ResourceType::Food],
         "Collect Resources".to_string(),

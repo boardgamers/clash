@@ -13,7 +13,7 @@ use server::unit::{MovementRestriction, Unit};
 use crate::city_ui::{draw_city, show_city_menu, CityMenu, IconAction, IconActionVec};
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::layout_ui::{bottom_center_texture, icon_pos};
-use crate::move_ui::{movable_units, possible_destinations, MoveSelection};
+use crate::move_ui::movable_units;
 use crate::{collect_ui, hex_ui, unit_ui};
 
 fn terrain_font_color(t: &Terrain) -> Color {
@@ -161,13 +161,17 @@ pub fn show_tile_menu<'a>(
         .collect::<Vec<_>>();
 
     let mut icons: IconActionVec<'a> = vec![];
-    move_units_button(game, pos, player, &state).map(|i| icons.push(i));
-    found_city_button(state, settlers).map(|i| icons.push(i));
+    if let Some(i) = move_units_button(game, pos, player, state) {
+        icons.push(i)
+    }
+    if let Some(i) = found_city_button(state, settlers) {
+        icons.push(i)
+    }
 
     show_map_action_buttons(state, &icons)
 }
 
-fn found_city_button<'a>(state: &'a State, settlers: Vec<Unit>) -> Option<IconAction<'a>> {
+fn found_city_button(state: &State, settlers: Vec<Unit>) -> Option<IconAction<'_>> {
     if settlers.is_empty() {
         None
     } else {
@@ -199,9 +203,7 @@ pub fn move_units_button<'a>(
     Some((
         &state.assets.move_units,
         "Move units".to_string(),
-        Box::new(move || {
-            StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits))
-        }),
+        Box::new(move || StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits))),
     ))
 }
 

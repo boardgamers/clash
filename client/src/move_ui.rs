@@ -32,7 +32,7 @@ pub fn possible_destinations(
         .neighbors()
         .into_iter()
         .filter(|dest| {
-            game.map.tiles.get(dest).is_some()
+            game.map.tiles.contains_key(dest)
                 && player
                     .can_move_units(
                         game,
