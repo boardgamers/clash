@@ -1,4 +1,5 @@
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
+use crate::dialog_ui::OkTooltip;
 use crate::layout_ui::{left_mouse_button_pressed_in_rect, top_center_text};
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::player_ui::player_color;
@@ -9,7 +10,7 @@ use itertools::Itertools;
 use macroquad::color::Color;
 use macroquad::math::{bool, vec2, Vec2};
 use macroquad::prelude::{
-    draw_rectangle, draw_rectangle_lines, Rect, BLACK, BLUE, GRAY, GREEN, WHITE, YELLOW,
+    draw_rectangle, draw_rectangle_lines, Rect, BLACK, BLUE, GRAY, WHITE, YELLOW,
 };
 use server::action::Action;
 use server::advance::{Advance, Bonus};
@@ -66,13 +67,22 @@ impl AdvancePayment {
         Payment { resources }
     }
 
-    pub fn valid(&self) -> bool {
-        self.payment
+    pub fn valid(&self) -> OkTooltip {
+        if self
+            .payment
             .resources
             .iter()
             .map(|r| r.selectable.current)
             .sum::<u32>()
             == self.cost
+        {
+            OkTooltip::Ok(format!("Pay {} to research {}", self.cost, self.name))
+        } else {
+            OkTooltip::Invalid(format!(
+                "You don't have {} to research {}",
+                self.cost, self.name
+            ))
+        }
     }
 }
 

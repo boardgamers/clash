@@ -6,7 +6,7 @@ use server::position::Position;
 use server::resource_pile::ResourcePile;
 
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
-use crate::dialog_ui::{cancel_button, ok_button};
+use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
 use crate::resource_ui::show_resource_pile;
 
 #[derive(Clone)]
@@ -101,7 +101,12 @@ pub fn increase_happiness_menu(
 ) -> StateUpdate {
     show_resource_pile(state, player, &h.cost);
 
-    if ok_button(state, player.get(game).resources.can_afford(&h.cost)) {
+    let tooltip = if player.get(game).resources.can_afford(&h.cost) {
+        OkTooltip::Ok("Increase happiness".to_string())
+    } else {
+        OkTooltip::Invalid("Not enough resources".to_string())
+    };
+    if ok_button(state, tooltip) {
         return StateUpdate::Execute(Action::Playing(PlayingAction::IncreaseHappiness {
             happiness_increases: h.steps.clone(),
         }));

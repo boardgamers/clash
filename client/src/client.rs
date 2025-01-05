@@ -137,8 +137,8 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
             recruit_unit_ui::select_dialog(game, s, player, state)
         }
         ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::replace_dialog(game, r, state),
-        ActiveDialog::CulturalInfluenceResolution(_) => {
-            influence_ui::cultural_influence_resolution_dialog(state)
+        ActiveDialog::CulturalInfluenceResolution(r) => {
+            influence_ui::cultural_influence_resolution_dialog(state, r)
         }
 
         //status phase

@@ -2,6 +2,11 @@ use crate::client_state::{PendingUpdate, State, StateUpdate};
 use crate::layout_ui::{bottom_center_text, bottom_right_texture, icon_pos};
 use macroquad::math::vec2;
 
+pub enum OkTooltip {
+    Ok(String),
+    Invalid(String),
+}
+
 pub fn show_pending_update(update: &PendingUpdate, state: &State) -> StateUpdate {
     let t = if update.warning.is_empty() {
         if state.active_dialog.is_full_modal() {
@@ -15,7 +20,7 @@ pub fn show_pending_update(update: &PendingUpdate, state: &State) -> StateUpdate
     let dimensions = state.measure_text(t);
     bottom_center_text(state, t, vec2(-dimensions.width / 2., -50.));
 
-    if ok_button(state, true) {
+    if ok_button(state, OkTooltip::Ok("OK".to_string())) {
         return StateUpdate::ResolvePendingUpdate(true);
     }
     if cancel_button(state) {
@@ -35,16 +40,13 @@ pub fn cancel_button_with_tooltip(state: &State, tooltip: &str) -> bool {
 }
 
 #[must_use]
-pub fn ok_button(state: &State, valid: bool) -> bool {
-    ok_button_with_tooltip(state, valid, if valid { "OK" } else { "Invalid selection" })
-}
-
-#[must_use]
-pub fn ok_button_with_tooltip(state: &State, valid: bool, tooltip: &str) -> bool {
-    let ok = if valid {
-        &state.assets.ok
-    } else {
-        &state.assets.ok_blocked
-    };
-    bottom_right_texture(state, ok, icon_pos(-8, -1), tooltip) && valid
+pub fn ok_button(state: &State, ok_tooltip: OkTooltip) -> bool {
+    let pos = icon_pos(-8, -1);
+    match ok_tooltip {
+        OkTooltip::Ok(tooltip) => bottom_right_texture(state, &state.assets.ok, pos, &tooltip),
+        OkTooltip::Invalid(tooltip) => {
+            let _ = bottom_right_texture(state, &state.assets.ok_blocked, pos, &tooltip);
+            false
+        }
+    }
 }

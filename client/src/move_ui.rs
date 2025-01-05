@@ -1,6 +1,5 @@
 use macroquad::math::{u32, Vec2};
 
-use crate::select_ui::{ConfirmSelection, SelectionConfirm};
 use server::action::Action;
 use server::game::Game;
 use server::game::GameState::Movement;
@@ -90,11 +89,5 @@ impl MoveSelection {
             start: None,
             destinations: vec![],
         }
-    }
-}
-
-impl ConfirmSelection for MoveSelection {
-    fn confirm(&self, _game: &Game) -> SelectionConfirm {
-        SelectionConfirm::NoConfirm
     }
 }

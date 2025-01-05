@@ -14,6 +14,7 @@ use server::resource_pile::PaymentOptions;
 use server::unit::UnitType;
 
 use crate::client_state::{ActiveDialog, State, StateUpdate};
+use crate::dialog_ui::OkTooltip;
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::recruit_unit_ui::RecruitSelection;
 use crate::resource_ui::{new_resource_map, ResourceType};
@@ -43,7 +44,7 @@ pub fn pay_construction_dialog(
 ) -> StateUpdate {
     payment_dialog(
         payment,
-        |cp| cp.payment.get(ResourceType::Discount).selectable.current == 0,
+        ConstructionPayment::valid,
         |cp| match &cp.project {
             ConstructionProject::Building(b, pos) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Construct(Construct {
@@ -199,6 +200,22 @@ impl ConstructionPayment {
         resources.sort_by_key(|r| r.resource);
 
         Payment { resources }
+    }
+
+    pub fn valid(&self) -> OkTooltip {
+        if self.payment.get(ResourceType::Discount).selectable.current == 0 {
+            OkTooltip::Ok(format!(
+                "Pay {} to build {}",
+                self.payment.to_resource_pile(),
+                self.name
+            ))
+        } else {
+            OkTooltip::Invalid(format!(
+                "You don't have {} to build {}",
+                self.payment.to_resource_pile(),
+                self.name
+            ))
+        }
     }
 }
 

@@ -13,7 +13,7 @@ use server::position::Position;
 use server::resource_pile::ResourcePile;
 
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
-use crate::dialog_ui::{cancel_button, ok_button};
+use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
 use crate::hex_ui;
 use crate::hex_ui::Point;
 use crate::layout_ui::{
@@ -80,14 +80,16 @@ pub fn collect_resources_dialog(
 
     let city = game.get_city(collect.player_index, collect.city_position);
 
-    let valid = get_total_collection(
+    let tooltip = get_total_collection(
         game,
         collect.player_index,
         collect.city_position,
         &collect.collections,
     )
-    .is_some();
-    if ok_button(state, valid) {
+    .map_or(OkTooltip::Invalid(
+        "Too many resources selected".to_string(),
+    ), |p| OkTooltip::Ok(format!("Collect {p}")));
+    if ok_button(state, tooltip) {
         let extra = collect.extra_resources(game);
         return StateUpdate::execute_activation(
             Action::Playing(PlayingAction::Collect {

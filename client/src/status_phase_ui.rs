@@ -56,9 +56,9 @@ impl ConfirmSelection for ChooseAdditionalAdvances {
 
     fn confirm(&self, _game: &Game) -> SelectionConfirm {
         if self.selected.len() == self.advances.len() {
-            SelectionConfirm::Valid
+            SelectionConfirm::Valid("Change government type".to_string())
         } else {
-            SelectionConfirm::Invalid
+            SelectionConfirm::Invalid("Select all additional advances".to_string())
         }
     }
 }

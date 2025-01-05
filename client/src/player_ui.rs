@@ -19,7 +19,6 @@ use server::game::{Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::status_phase::StatusPhaseAction;
 use server::unit::MovementAction;
-use std::slice::SliceIndex;
 
 pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
     let i = game
