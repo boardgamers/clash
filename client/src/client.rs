@@ -6,7 +6,7 @@ use server::action::Action;
 use server::game::Game;
 use server::position::Position;
 
-use crate::advance_ui::{pay_advance_dialog, show_advance_menu, show_free_advance_menu};
+use crate::advance_ui::{pay_advance_dialog, show_paid_advance_menu, show_free_advance_menu};
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, StateUpdates};
 use crate::collect_ui::collect_resources_dialog;
 use crate::construct_ui::pay_construction_dialog;
@@ -124,7 +124,7 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
 
         // playing actions
         ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(h, player, state, game),
-        ActiveDialog::AdvanceMenu => show_advance_menu(game, player, state),
+        ActiveDialog::AdvanceMenu => show_paid_advance_menu(game, player, state),
         ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, state, player, game),
         ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p, state),
         ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c, state, player),
@@ -140,9 +140,9 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
         ActiveDialog::FreeAdvance => show_free_advance_menu(game, player, state),
         ActiveDialog::RazeSize1City => status_phase_ui::raze_city_dialog(state),
         ActiveDialog::CompleteObjectives => status_phase_ui::complete_objectives_dialog(state),
-        ActiveDialog::ChangeGovernmentType => status_phase_ui::change_government_type_dialog(),
+        ActiveDialog::ChangeGovernmentType => status_phase_ui::change_government_type_dialog(game, player, state),
         ActiveDialog::ChooseAdditionalAdvances(a) => {
-            status_phase_ui::choose_additional_advances_dialog(game, a, state)
+            status_phase_ui::choose_additional_advances_dialog(game, a, state, player)
         }
 
         //combat

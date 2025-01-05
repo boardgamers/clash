@@ -164,8 +164,9 @@ impl ActiveDialog {
             self,
             ActiveDialog::AdvanceMenu
                 | ActiveDialog::FreeAdvance
-                | ActiveDialog::ChooseAdditionalAdvances(_)
                 | ActiveDialog::AdvancePayment(_)
+                | ActiveDialog::ChangeGovernmentType
+                | ActiveDialog::ChooseAdditionalAdvances(_)
         )
     }
 }
