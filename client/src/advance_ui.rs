@@ -8,7 +8,7 @@ use crate::select_ui::HasCountSelectableObject;
 use crate::tooltip::show_tooltip_for_rect;
 use itertools::Itertools;
 use macroquad::color::Color;
-use macroquad::math::{bool, vec2, Vec2};
+use macroquad::math::{vec2, Vec2};
 use macroquad::prelude::{
     draw_rectangle, draw_rectangle_lines, Rect, BLACK, BLUE, GRAY, WHITE, YELLOW,
 };
@@ -20,9 +20,16 @@ use server::game::GameState;
 use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::resource_pile::AdvancePaymentOptions;
-use server::status_phase::{StatusPhaseAction, StatusPhaseState};
+use server::status_phase::StatusPhaseAction;
 use std::cmp::min;
 use std::collections::HashMap;
+
+pub enum AdvanceState {
+    Owned,
+    Removable,
+    Available,
+    Unavailable,
+}
 
 #[derive(Clone)]
 pub struct AdvancePayment {
@@ -76,7 +83,7 @@ impl AdvancePayment {
             .sum::<u32>()
             == self.cost
         {
-            OkTooltip::Ok(format!("Pay {} to research {}", self.cost, self.name))
+            OkTooltip::Valid(format!("Pay {} to research {}", self.cost, self.name))
         } else {
             OkTooltip::Invalid(format!(
                 "You don't have {} to research {}",
@@ -92,30 +99,64 @@ impl HasPayment for AdvancePayment {
     }
 }
 
-pub fn show_advance_menu(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
-    show_generic_advance_menu("Advances", game, player, state, |a| {
-        StateUpdate::OpenDialog(ActiveDialog::AdvancePayment(AdvancePayment::new(
-            game,
-            player.index,
-            a.name.as_str(),
-        )))
-    })
+pub fn show_paid_advance_menu(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
+    show_advance_menu(
+        "Advances",
+        game,
+        player,
+        state,
+        |a, p| {
+            if p.has_advance(&a.name) {
+                AdvanceState::Owned
+            } else if game.state == GameState::Playing
+                && game.actions_left > 0
+                && p.can_advance(&a.name)
+            {
+                AdvanceState::Available
+            } else {
+                AdvanceState::Unavailable
+            }
+        },
+        |a| {
+            StateUpdate::OpenDialog(ActiveDialog::AdvancePayment(AdvancePayment::new(
+                game,
+                player.index,
+                a.name.as_str(),
+            )))
+        },
+    )
 }
 
 pub fn show_free_advance_menu(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
-    show_generic_advance_menu("Select a free advance", game, player, state, |a| {
-        StateUpdate::execute_with_confirm(
-            vec![format!("Select {} as a free advance?", a.name)],
-            Action::StatusPhase(StatusPhaseAction::FreeAdvance(a.name.clone())),
-        )
-    })
+    show_advance_menu(
+        "Select a free advance",
+        game,
+        player,
+        state,
+        |a, p| {
+            if p.can_advance_free(&a.name) {
+                AdvanceState::Available
+            } else if p.has_advance(&a.name) {
+                AdvanceState::Owned
+            } else {
+                AdvanceState::Unavailable
+            }
+        },
+        |a| {
+            StateUpdate::execute_with_confirm(
+                vec![format!("Select {} as a free advance?", a.name)],
+                Action::StatusPhase(StatusPhaseAction::FreeAdvance(a.name.clone())),
+            )
+        },
+    )
 }
 
-pub fn show_generic_advance_menu(
+pub fn show_advance_menu(
     title: &str,
     game: &Game,
     player: &ShownPlayer,
     state: &State,
+    advance_state: impl Fn(&Advance, &Player) -> AdvanceState,
     new_update: impl Fn(&Advance) -> StateUpdate,
 ) -> StateUpdate {
     top_center_text(state, title, vec2(0., 10.));
@@ -136,7 +177,7 @@ pub fn show_generic_advance_menu(
             for (i, a) in advances.into_iter().enumerate() {
                 let pos = pos + vec2(0., i as f32 * 35.);
                 let name = &a.name;
-                let can_advance = can_advance(game, p, &a);
+                let advance_state = advance_state(&a, p);
 
                 let rect = Rect::new(pos.x, pos.y, 135., 30.);
                 if pass == 0 {
@@ -145,7 +186,7 @@ pub fn show_generic_advance_menu(
                         rect.y,
                         rect.w,
                         rect.h,
-                        fill_color(p, name, can_advance),
+                        fill_color(p, &advance_state),
                     );
                     state.draw_text(name, pos.x + 10., pos.y + 22.);
 
@@ -171,7 +212,10 @@ pub fn show_generic_advance_menu(
                     show_tooltip_for_rect(state, &description(p, &a), rect);
 
                     if player.can_control
-                        && can_advance
+                        && matches!(
+                            advance_state,
+                            AdvanceState::Available | AdvanceState::Removable
+                        )
                         && left_mouse_button_pressed_in_rect(rect, state)
                     {
                         return new_update(&a);
@@ -183,13 +227,11 @@ pub fn show_generic_advance_menu(
     StateUpdate::None
 }
 
-fn fill_color(p: &Player, name: &str, can_advance: bool) -> Color {
-    if can_advance {
-        WHITE
-    } else if p.has_advance(name) {
-        player_color(p.index)
-    } else {
-        GRAY
+fn fill_color(p: &Player, advance_state: &AdvanceState) -> Color {
+    match advance_state {
+        AdvanceState::Owned | AdvanceState::Removable => player_color(p.index),
+        AdvanceState::Available => WHITE,
+        AdvanceState::Unavailable => GRAY,
     }
 }
 
@@ -201,20 +243,6 @@ fn border_color(a: &Advance) -> Color {
         }
     } else {
         BLACK
-    }
-}
-
-fn can_advance(game: &Game, p: &Player, a: &Advance) -> bool {
-    let name = &a.name;
-    if game.state == GameState::Playing && game.actions_left > 0 {
-        p.can_advance(name)
-    } else if matches!(
-        game.state,
-        GameState::StatusPhase(StatusPhaseState::FreeAdvance)
-    ) {
-        p.can_advance_free(name)
-    } else {
-        false
     }
 }
 
@@ -288,7 +316,7 @@ pub fn pay_advance_dialog(
     player: &ShownPlayer,
     game: &Game,
 ) -> StateUpdate {
-    let update = show_advance_menu(game, player, state);
+    let update = show_paid_advance_menu(game, player, state);
     if !matches!(update, StateUpdate::None) {
         // select a different advance
         return update;

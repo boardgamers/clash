@@ -1,5 +1,5 @@
 use crate::client_state::{State, StateUpdate, StateUpdates};
-use crate::dialog_ui::{cancel_button, cancel_button_with_tooltip, ok_button, OkTooltip};
+use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
 use crate::layout_ui::{bottom_center_anchor, bottom_center_texture, ICON_SIZE};
 use macroquad::color::BLACK;
 use macroquad::math::{bool, vec2, Vec2};
@@ -92,47 +92,5 @@ pub trait ConfirmSelection: Clone {
         Some("Cancel")
     }
 
-    fn cancel(&self) -> StateUpdate {
-        StateUpdate::Cancel
-    }
-
-    fn confirm(&self, game: &Game) -> SelectionConfirm;
-}
-
-pub fn confirm_update<T: ConfirmSelection>(
-    sel: &T,
-    on_ok: impl FnOnce() -> StateUpdate,
-    confirm: &SelectionConfirm,
-    state: &State,
-) -> StateUpdate {
-    match confirm {
-        SelectionConfirm::Invalid(tooltip) => {
-            let _ = ok_button(state, OkTooltip::Invalid(tooltip.to_string()));
-            may_cancel(sel, state)
-        }
-        SelectionConfirm::Valid(tooltip) => {
-            if ok_button(state, OkTooltip::Ok(tooltip.to_string())) {
-                on_ok()
-            } else {
-                may_cancel(sel, state)
-            }
-        }
-    }
-}
-
-fn may_cancel(sel: &impl ConfirmSelection, state: &State) -> StateUpdate {
-    if let Some(cancel_name) = sel.cancel_name() {
-        if cancel_button_with_tooltip(state, cancel_name) {
-            sel.cancel()
-        } else {
-            StateUpdate::None
-        }
-    } else {
-        StateUpdate::None
-    }
-}
-
-pub enum SelectionConfirm {
-    Invalid(String),
-    Valid(String),
+    fn confirm(&self, game: &Game) -> OkTooltip;
 }

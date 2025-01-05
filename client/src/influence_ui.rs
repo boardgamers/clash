@@ -33,7 +33,10 @@ pub fn cultural_influence_resolution_dialog(
     let name = building_name(&r.city_piece);
     let pile = ResourcePile::culture_tokens(r.roll_boost_cost);
     show_resource_pile(state, player, &pile);
-    if ok_button(state, OkTooltip::Ok(format!("Influence {name} for {pile}"))) {
+    if ok_button(
+        state,
+        OkTooltip::Valid(format!("Influence {name} for {pile}")),
+    ) {
         return StateUpdate::Execute(Action::CulturalInfluenceResolution(true));
     }
     if cancel_button_with_tooltip(state, "Decline") {

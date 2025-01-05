@@ -188,6 +188,13 @@ pub fn setup_local_game() -> Game {
         .pieces
         .market = Some(1);
 
+    game.players[player_index1]
+        .advances
+        .push("Dogma".to_string());
+    game.players[player_index1]
+        .advances
+        .push("Theocracy 2".to_string());
+
     game
 }
 

@@ -26,7 +26,7 @@ pub fn top_center_texture(state: &State, texture: &Texture2D, p: Vec2, tooltip: 
 
 pub fn top_center_text(state: &State, text: &str, p: Vec2) {
     let p = top_center_anchor(state) + p;
-    state.draw_text(text, p.x, p.y);
+    state.draw_text(text, p.x - state.measure_text(text).width / 2., p.y);
 }
 
 fn top_center_anchor(state: &State) -> Vec2 {

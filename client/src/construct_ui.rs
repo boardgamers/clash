@@ -204,7 +204,7 @@ impl ConstructionPayment {
 
     pub fn valid(&self) -> OkTooltip {
         if self.payment.get(ResourceType::Discount).selectable.current == 0 {
-            OkTooltip::Ok(format!(
+            OkTooltip::Valid(format!(
                 "Pay {} to build {}",
                 self.payment.to_resource_pile(),
                 self.name

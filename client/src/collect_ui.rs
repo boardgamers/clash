@@ -88,7 +88,7 @@ pub fn collect_resources_dialog(
     )
     .map_or(
         OkTooltip::Invalid("Too many resources selected".to_string()),
-        |p| OkTooltip::Ok(format!("Collect {p}")),
+        |p| OkTooltip::Valid(format!("Collect {p}")),
     );
     if ok_button(state, tooltip) {
         let extra = collect.extra_resources(game);

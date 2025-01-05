@@ -1,7 +1,9 @@
+use crate::advance_ui::{show_advance_menu, AdvanceState};
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
-use crate::dialog_ui::{cancel_button, cancel_button_with_tooltip};
-use crate::select_ui::{confirm_update, ConfirmSelection, SelectionConfirm};
+use crate::dialog_ui::{cancel_button, cancel_button_with_tooltip, ok_button, OkTooltip};
 use server::action::Action;
+use server::content::advances;
+use server::content::advances::get_leading_government_advance;
 use server::game::Game;
 use server::position::Position;
 use server::status_phase::{
@@ -31,89 +33,114 @@ pub fn raze_city_dialog(state: &State) -> StateUpdate {
 #[derive(Clone)]
 pub struct ChooseAdditionalAdvances {
     government: String,
-    advances: Vec<String>,
+    possible: Vec<String>,
     selected: Vec<String>,
 }
 
-// impl ChooseAdditionalAdvances {
-//     fn new(government: String, advances: Vec<String>) -> Self {
-//         Self {
-//             government,
-//             advances,
-//             selected: Vec::new(),
-//         }
-//     }
-// }
-
-impl ConfirmSelection for ChooseAdditionalAdvances {
-    fn cancel_name(&self) -> Option<&str> {
-        Some("Back to choose government type")
-    }
-
-    fn cancel(&self) -> StateUpdate {
-        StateUpdate::OpenDialog(ActiveDialog::ChangeGovernmentType)
-    }
-
-    fn confirm(&self, _game: &Game) -> SelectionConfirm {
-        if self.selected.len() == self.advances.len() {
-            SelectionConfirm::Valid("Change government type".to_string())
-        } else {
-            SelectionConfirm::Invalid("Select all additional advances".to_string())
+impl ChooseAdditionalAdvances {
+    fn new(government: String, possible: Vec<String>) -> Self {
+        Self {
+            government,
+            possible,
+            selected: Vec::new(),
         }
     }
 }
 
-pub fn change_government_type_dialog() -> StateUpdate {
-    //todo integrate in advance selection dialog
-    // active_dialog_window(player, "Select additional advances", |ui| {
-    //     let current = player
-    //         .get(game)
-    //         .government()
-    //         .expect("should have government");
-    //     for (g, _) in advances::get_governments()
-    //         .iter()
-    //         .filter(|(g, _)| g != &current)
-    //     {
-    //         if ui.button(None, format!("Change to {g}")) {
-    //             let additional = advances::get_government(g)
-    //                 .iter()
-    //                 .skip(1) // the government advance itself is always chosen
-    //                 .map(|a| a.name.clone())
-    //                 .collect::<Vec<_>>();
-    //             return StateUpdate::OpenDialog(ActiveDialog::ChooseAdditionalAdvances(
-    //                 ChooseAdditionalAdvances::new(g.clone(), additional),
-    //             ));
-    //         }
-    //     }
-    //
-    //     if ui.button(None, "Decline") {
-    //         return StateUpdate::status_phase(StatusPhaseAction::ChangeGovernmentType(
-    //             ChangeGovernmentType::KeepGovernment,
-    //         ));
-    //     }
-    //     StateUpdate::None
-    // })
-    StateUpdate::None
+pub fn change_government_type_dialog(
+    game: &Game,
+    player: &ShownPlayer,
+    state: &State,
+) -> StateUpdate {
+    let current = player.get(game).government().unwrap();
+    if cancel_button_with_tooltip(state, &format!("Keep {current}")) {
+        return StateUpdate::status_phase(StatusPhaseAction::ChangeGovernmentType(
+            ChangeGovernmentType::KeepGovernment,
+        ));
+    }
+    show_advance_menu(
+        "Change government - or click cancel",
+        game,
+        player,
+        state,
+        |a, p| {
+            if a.government.as_ref().is_some_and(|g| {
+                get_leading_government_advance(g).is_some_and(|l| &l == a)
+                    && g.as_str() != p.government().as_ref().expect("should have government")
+            }) {
+                AdvanceState::Available
+            } else if a.government.as_ref().is_some_and(|g| g == &current) {
+                AdvanceState::Owned
+            } else {
+                AdvanceState::Unavailable
+            }
+        },
+        |a| {
+            let g = a.government.as_ref().expect("should have government");
+            let additional = advances::get_government(g)
+                .iter()
+                .skip(1) // the government advance itself is always chosen
+                .map(|a| a.name.clone())
+                .collect::<Vec<_>>();
+            StateUpdate::OpenDialog(ActiveDialog::ChooseAdditionalAdvances(
+                ChooseAdditionalAdvances::new(g.clone(), additional),
+            ))
+        },
+    )
 }
 
 pub fn choose_additional_advances_dialog(
     game: &Game,
-    a: &ChooseAdditionalAdvances,
+    choose: &ChooseAdditionalAdvances,
     state: &State,
+    player: &ShownPlayer,
 ) -> StateUpdate {
-    // todo actual selection should be done in advance selection dialog
-    confirm_update(
-        a,
-        || {
-            StateUpdate::status_phase(StatusPhaseAction::ChangeGovernmentType(
-                ChangeGovernmentType::ChangeGovernment(ChangeGovernment {
-                    new_government: a.government.clone(),
-                    additional_advances: a.selected.clone(),
-                }),
+    let t = if choose.selected.len() == choose.possible.len() {
+        OkTooltip::Valid("Change government type".to_string())
+    } else {
+        OkTooltip::Invalid("Select all additional advances".to_string())
+    };
+    if ok_button(state, t) {
+        return StateUpdate::status_phase(StatusPhaseAction::ChangeGovernmentType(
+            ChangeGovernmentType::ChangeGovernment(ChangeGovernment {
+                new_government: choose.government.clone(),
+                additional_advances: choose.selected.clone(),
+            }),
+        ));
+    }
+
+    if cancel_button_with_tooltip(state, "Back to choose government type") {
+        return StateUpdate::OpenDialog(ActiveDialog::ChangeGovernmentType);
+    }
+    show_advance_menu(
+        &format!("Choose additional advances for {}", choose.government),
+        game,
+        player,
+        state,
+        |a, _| {
+            if choose.selected.contains(&a.name) {
+                AdvanceState::Removable
+            } else if choose.possible.contains(&a.name) {
+                AdvanceState::Available
+            } else {
+                AdvanceState::Unavailable
+            }
+        },
+        |a| {
+            let mut selected = choose.selected.clone();
+            if selected.contains(&a.name) {
+                selected.retain(|n| n != &a.name);
+            } else {
+                selected.push(a.name.clone());
+            }
+            StateUpdate::OpenDialog(ActiveDialog::ChooseAdditionalAdvances(
+                ChooseAdditionalAdvances {
+                    government: choose.government.clone(),
+                    possible: choose.possible.clone(),
+                    selected,
+                },
             ))
         },
-        &a.confirm(game),
-        state,
     )
 }
 
