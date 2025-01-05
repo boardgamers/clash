@@ -13,6 +13,8 @@ use server::game::{CulturalInfluenceResolution, Game};
 use server::player::Player;
 use server::playing_actions::{InfluenceCultureAttempt, PlayingAction};
 use server::position::Position;
+use server::resource_pile::ResourcePile;
+use crate::resource_ui::show_resource_pile;
 
 fn closest_city(player: &Player, position: Position) -> Position {
     player
@@ -26,10 +28,12 @@ fn closest_city(player: &Player, position: Position) -> Position {
 pub fn cultural_influence_resolution_dialog(
     state: &State,
     r: &CulturalInfluenceResolution,
+    player: &ShownPlayer,
 ) -> StateUpdate {
-    let cost = r.roll_boost_cost;
     let name = building_name(&r.city_piece);
-    if ok_button(state, OkTooltip::Ok(format!("Influence {name} for {cost}"))) {
+    let pile = ResourcePile::culture_tokens(r.roll_boost_cost);
+    show_resource_pile(state, player, &pile);
+    if ok_button(state, OkTooltip::Ok(format!("Influence {name} for {pile}"))) {
         return StateUpdate::Execute(Action::CulturalInfluenceResolution(true));
     }
     if cancel_button_with_tooltip(state, "Decline") {
