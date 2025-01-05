@@ -102,7 +102,7 @@ pub fn increase_happiness_menu(
     show_resource_pile(state, player, &h.cost);
 
     let tooltip = if player.get(game).resources.can_afford(&h.cost) {
-        OkTooltip::Ok("Increase happiness".to_string())
+        OkTooltip::Valid("Increase happiness".to_string())
     } else {
         OkTooltip::Invalid("Not enough resources".to_string())
     };

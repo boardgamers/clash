@@ -96,7 +96,7 @@ pub fn choose_additional_advances_dialog(
     player: &ShownPlayer,
 ) -> StateUpdate {
     let t = if choose.selected.len() == choose.possible.len() {
-        OkTooltip::Ok("Change government type".to_string())
+        OkTooltip::Valid("Change government type".to_string())
     } else {
         OkTooltip::Invalid("Select all additional advances".to_string())
     };

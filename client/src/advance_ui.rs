@@ -82,7 +82,7 @@ impl AdvancePayment {
             .sum::<u32>()
             == self.cost
         {
-            OkTooltip::Ok(format!("Pay {} to research {}", self.cost, self.name))
+            OkTooltip::Valid(format!("Pay {} to research {}", self.cost, self.name))
         } else {
             OkTooltip::Invalid(format!(
                 "You don't have {} to research {}",

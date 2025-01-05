@@ -8,9 +8,10 @@ use server::position::Position;
 use server::unit::{Unit, UnitType};
 
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
-use crate::select_ui::{confirm_update, ConfirmSelection};
+use crate::select_ui::ConfirmSelection;
 use crate::{hex_ui, player_ui};
 
+use crate::dialog_ui::{cancel_button_with_tooltip, ok_button};
 use crate::hex_ui::Point;
 use crate::layout_ui::{draw_scaled_icon, is_in_circle};
 use crate::tooltip::show_tooltip_for_circle;
@@ -150,7 +151,23 @@ pub fn unit_selection_dialog<T: UnitSelection>(
     on_ok: impl FnOnce(T) -> StateUpdate,
     state: &State,
 ) -> StateUpdate {
-    confirm_update(sel, || on_ok(sel.clone()), &sel.confirm(game), state)
+    if ok_button(state, sel.confirm(game)) {
+        on_ok(sel.clone())
+    } else {
+        may_cancel(sel, state)
+    }
+}
+
+fn may_cancel(sel: &impl ConfirmSelection, state: &State) -> StateUpdate {
+    if let Some(cancel_name) = sel.cancel_name() {
+        if cancel_button_with_tooltip(state, cancel_name) {
+            StateUpdate::Cancel
+        } else {
+            StateUpdate::None
+        }
+    } else {
+        StateUpdate::None
+    }
 }
 
 pub fn units_on_tile(game: &Game, pos: Position) -> impl Iterator<Item = (usize, Unit)> + '_ {

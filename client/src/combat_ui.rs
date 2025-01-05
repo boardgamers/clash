@@ -5,12 +5,12 @@ use server::unit::Unit;
 
 use crate::client_state::{State, StateUpdate};
 use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
-use crate::select_ui::{ConfirmSelection, SelectionConfirm};
+use crate::select_ui::ConfirmSelection;
 use crate::unit_ui;
 use crate::unit_ui::UnitSelection;
 
 pub fn retreat_dialog(state: &State) -> StateUpdate {
-    if ok_button(state, OkTooltip::Ok("Retreat".to_string())) {
+    if ok_button(state, OkTooltip::Valid("Retreat".to_string())) {
         return retreat(true);
     }
     if cancel_button_with_tooltip(state, "Decline") {
@@ -57,11 +57,11 @@ impl ConfirmSelection for RemoveCasualtiesSelection {
         None
     }
 
-    fn confirm(&self, _game: &Game) -> SelectionConfirm {
+    fn confirm(&self, _game: &Game) -> OkTooltip {
         if self.needed == self.units.len() as u8 {
-            SelectionConfirm::Valid("Remove casualties".to_string())
+            OkTooltip::Valid("Remove casualties".to_string())
         } else {
-            SelectionConfirm::Invalid(format!(
+            OkTooltip::Invalid(format!(
                 "Need to select {} units",
                 self.needed - self.units.len() as u8
             ))

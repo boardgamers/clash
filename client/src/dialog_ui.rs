@@ -3,7 +3,7 @@ use crate::layout_ui::{bottom_center_text, bottom_right_texture, icon_pos};
 use macroquad::math::vec2;
 
 pub enum OkTooltip {
-    Ok(String),
+    Valid(String),
     Invalid(String),
 }
 
@@ -20,7 +20,7 @@ pub fn show_pending_update(update: &PendingUpdate, state: &State) -> StateUpdate
     let dimensions = state.measure_text(t);
     bottom_center_text(state, t, vec2(-dimensions.width / 2., -50.));
 
-    if ok_button(state, OkTooltip::Ok("OK".to_string())) {
+    if ok_button(state, OkTooltip::Valid("OK".to_string())) {
         return StateUpdate::ResolvePendingUpdate(true);
     }
     if cancel_button(state) {
@@ -43,7 +43,7 @@ pub fn cancel_button_with_tooltip(state: &State, tooltip: &str) -> bool {
 pub fn ok_button(state: &State, ok_tooltip: OkTooltip) -> bool {
     let pos = icon_pos(-8, -1);
     match ok_tooltip {
-        OkTooltip::Ok(tooltip) => bottom_right_texture(state, &state.assets.ok, pos, &tooltip),
+        OkTooltip::Valid(tooltip) => bottom_right_texture(state, &state.assets.ok, pos, &tooltip),
         OkTooltip::Invalid(tooltip) => {
             let _ = bottom_right_texture(state, &state.assets.ok_blocked, pos, &tooltip);
             false
