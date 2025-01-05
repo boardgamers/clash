@@ -119,7 +119,7 @@ pub fn choose_additional_advances_dialog(
         state,
         |a, _| {
             if choose.selected.contains(&a.name) {
-                AdvanceState::Owned
+                AdvanceState::Removable
             } else if choose.possible.contains(&a.name) {
                 AdvanceState::Available
             } else {

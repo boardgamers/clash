@@ -26,6 +26,7 @@ use std::collections::HashMap;
 
 pub enum AdvanceState {
     Owned,
+    Removable,
     Available,
     Unavailable,
 }
@@ -211,7 +212,10 @@ pub fn show_advance_menu(
                     show_tooltip_for_rect(state, &description(p, &a), rect);
 
                     if player.can_control
-                        && matches!(advance_state, AdvanceState::Available)
+                        && matches!(
+                            advance_state,
+                            AdvanceState::Available | AdvanceState::Removable
+                        )
                         && left_mouse_button_pressed_in_rect(rect, state)
                     {
                         return new_update(&a);
@@ -225,7 +229,7 @@ pub fn show_advance_menu(
 
 fn fill_color(p: &Player, advance_state: &AdvanceState) -> Color {
     match advance_state {
-        AdvanceState::Owned => player_color(p.index),
+        AdvanceState::Owned | AdvanceState::Removable => player_color(p.index),
         AdvanceState::Available => WHITE,
         AdvanceState::Unavailable => GRAY,
     }
