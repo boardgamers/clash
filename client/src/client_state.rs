@@ -112,7 +112,7 @@ impl ActiveDialog {
             ActiveDialog::CulturalInfluenceResolution(c) => vec![format!(
                 "Pay {} culture tokens to influence {}",
                 c.roll_boost_cost,
-                building_name(&c.city_piece)
+                building_name(c.city_piece)
             )],
             ActiveDialog::FreeAdvance => {
                 vec!["Click on an advance to take it for free".to_string()]
@@ -425,18 +425,20 @@ impl State {
     }
 
     pub fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {
+        let dialog = self.game_state_dialog(game);
         self.clear();
-
-        self.active_dialog = self.game_state_dialog(game);
+        self.active_dialog = dialog;
         GameSyncRequest::None
     }
 
     #[must_use]
     pub fn game_state_dialog(&self, game: &Game) -> ActiveDialog {
         match &game.state {
-            GameState::Movement { .. } => {
-                ActiveDialog::MoveUnits(MoveSelection::new(game.active_player()))
-            }
+            GameState::Movement { .. } => ActiveDialog::MoveUnits(MoveSelection::new(
+                game.active_player(),
+                self.focused_tile,
+                game,
+            )),
             GameState::CulturalInfluenceResolution(c) => {
                 ActiveDialog::CulturalInfluenceResolution(c.clone())
             }

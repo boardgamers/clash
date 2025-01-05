@@ -8,11 +8,12 @@ use server::game::{Game, GameState};
 use server::map::Terrain;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
-use server::unit::MovementRestriction;
+use server::unit::{MovementRestriction, Unit};
 
-use crate::city_ui::{draw_city, show_city_menu, CityMenu};
+use crate::city_ui::{draw_city, show_city_menu, CityMenu, IconAction, IconActionVec};
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::layout_ui::{bottom_center_texture, icon_pos};
+use crate::move_ui::movable_units;
 use crate::{collect_ui, hex_ui, unit_ui};
 
 fn terrain_font_color(t: &Terrain) -> Color {
@@ -139,41 +140,84 @@ fn highlight_if(b: bool) -> f32 {
     }
 }
 
-pub fn show_tile_menu(
-    game: &Game,
-    position: Position,
-    player: &ShownPlayer,
-    state: &State,
+pub fn show_tile_menu<'a>(
+    game: &'a Game,
+    pos: Position,
+    player: &'a ShownPlayer,
+    state: &'a State,
 ) -> StateUpdate {
-    if let Some(c) = game.get_any_city(position) {
-        show_city_menu(
-            game,
-            &CityMenu::new(player, c.player_index, position),
-            state,
-        )
+    if let Some(c) = game.get_any_city(pos) {
+        return show_city_menu(game, &CityMenu::new(player, c.player_index, pos), state);
+    };
+
+    let settlers: Vec<Unit> = unit_ui::units_on_tile(game, pos)
+        .filter_map(|(_, unit)| {
+            if unit.can_found_city(game) {
+                Some(unit)
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
+
+    show_map_action_buttons(
+        state,
+        &vec![
+            move_units_button(game, pos, player, state),
+            found_city_button(state, settlers),
+        ]
+        .into_iter()
+        .flatten()
+        .collect(),
+    )
+}
+
+fn found_city_button(state: &State, settlers: Vec<Unit>) -> Option<IconAction<'_>> {
+    if settlers.is_empty() {
+        None
     } else {
-        let units = unit_ui::units_on_tile(game, position);
-        let settlers = units
-            .filter_map(|(_, unit)| {
-                if unit.can_found_city(game) {
-                    Some(unit)
-                } else {
-                    None
-                }
-            })
-            .collect::<Vec<_>>();
-        if !settlers.is_empty()
-            && bottom_center_texture(state, &state.assets.settle, icon_pos(0, -1), "Settle")
-        {
-            let settler = settlers
-                .iter()
-                .find(|u| u.movement_restriction != MovementRestriction::None)
-                .unwrap_or(&settlers[0]);
-            StateUpdate::execute(Action::Playing(PlayingAction::FoundCity {
-                settler: settler.id,
-            }))
-        } else {
-            StateUpdate::None
+        Some((
+            &state.assets.settle,
+            "Settle".to_string(),
+            Box::new(move || {
+                let settler = settlers
+                    .iter()
+                    .find(|u| u.movement_restriction != MovementRestriction::None)
+                    .unwrap_or(&settlers[0]);
+                StateUpdate::execute(Action::Playing(PlayingAction::FoundCity {
+                    settler: settler.id,
+                }))
+            }),
+        ))
+    }
+}
+
+pub fn move_units_button<'a>(
+    game: &'a Game,
+    pos: Position,
+    player: &'a ShownPlayer,
+    state: &'a State,
+) -> Option<IconAction<'a>> {
+    if movable_units(pos, game, player.get(game)).is_empty() {
+        return None;
+    }
+    Some((
+        &state.assets.move_units,
+        "Move units".to_string(),
+        Box::new(move || StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits))),
+    ))
+}
+
+pub fn show_map_action_buttons(state: &State, icons: &IconActionVec) -> StateUpdate {
+    for (i, (icon, tooltip, action)) in icons.iter().enumerate() {
+        if bottom_center_texture(
+            state,
+            icon,
+            icon_pos(-(icons.len() as i8) / 2 + i as i8, -1),
+            tooltip,
+        ) {
+            return action();
         }
     }
+    StateUpdate::None
 }
