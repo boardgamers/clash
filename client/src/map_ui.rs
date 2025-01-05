@@ -81,23 +81,6 @@ fn pan_and_zoom(state: &mut State) {
         state.camera.offset = state.camera.offset.add(offset);
     }
     state.pan_map = pan_map;
-
-    // if bottom_left_texture(state, &assets.up, icon_pos(4, -2), "Move up") {
-    //     state.offset += vec2(0., -0.1);
-    //     return StateUpdate::None;
-    // }
-    // if bottom_left_texture(state, &assets.right, icon_pos(5, -1), "Move right") {
-    //     state.offset += vec2(-0.1, 0.);
-    //     return StateUpdate::None;
-    // }
-    // if bottom_left_texture(state, &assets.down, icon_pos(4, -1), "Move down") {
-    //     state.offset += vec2(0., 0.1);
-    //     return StateUpdate::None;
-    // }
-    // if bottom_left_texture(state, &assets.left, icon_pos(3, -1), "Move left") {
-    //     state.offset += vec2(0.1, 0.);
-    //     return StateUpdate::None;
-    // }
 }
 
 fn alpha(game: &Game, state: &State, pos: Position) -> f32 {
