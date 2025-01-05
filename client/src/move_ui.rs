@@ -13,7 +13,7 @@ fn possible_destinations(
     game: &Game,
     start: Position,
     player_index: usize,
-    units: &Vec<u32>,
+    units: &[u32],
 ) -> Vec<Position> {
     if let Movement {
         movement_actions_left,
@@ -61,7 +61,19 @@ pub fn click(pos: Position, s: &MoveSelection, mouse_pos: Vec2, game: &Game) -> 
         let unit = unit_at_pos(pos, mouse_pos, p);
         unit.map_or(StateUpdate::None, |unit_id| {
             new.start = Some(pos);
-            unit_selection_clicked(unit_id, &mut new.units);
+            if new.units.is_empty() {
+                //select all possible units
+                new.units = p
+                    .units
+                    .iter()
+                    .filter(|u| {
+                        !possible_destinations(game, pos, new.player_index, &[u.id]).is_empty()
+                    })
+                    .map(|u| u.id)
+                    .collect();
+            } else {
+                unit_selection_clicked(unit_id, &mut new.units);
+            }
             if new.units.is_empty() {
                 new.destinations.clear();
                 new.start = None;

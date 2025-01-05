@@ -748,7 +748,7 @@ impl Player {
     pub fn can_move_units(
         &self,
         game: &Game,
-        units: &Vec<u32>,
+        units: &[u32],
         starting: Position,
         destination: Position,
         movement_actions_left: u32,
