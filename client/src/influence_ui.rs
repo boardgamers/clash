@@ -30,7 +30,7 @@ pub fn cultural_influence_resolution_dialog(
     r: &CulturalInfluenceResolution,
     player: &ShownPlayer,
 ) -> StateUpdate {
-    let name = building_name(&r.city_piece);
+    let name = building_name(r.city_piece);
     let pile = ResourcePile::culture_tokens(r.roll_boost_cost);
     show_resource_pile(state, player, &pile);
     if ok_button(
@@ -96,7 +96,7 @@ fn show_city(
                 *b,
             ) {
                 if player.resources.can_afford(&cost) {
-                    let name = building_name(b);
+                    let name = building_name(*b);
                     state.set_world_camera();
                     draw_circle_lines(center.x, center.y, BUILDING_SIZE, 1., WHITE);
                     show_tooltip_for_circle(

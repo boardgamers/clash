@@ -10,7 +10,7 @@ use server::unit::{UnitType, Units};
 
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::collect_ui::{possible_resource_collections, CollectResources};
-use crate::construct_ui::{building_positions, ConstructionPayment, ConstructionProject};
+use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
 use crate::hex_ui::Point;
 use crate::layout_ui::draw_scaled_icon;
 use crate::map_ui::{move_units_button, show_map_action_buttons};
@@ -58,74 +58,38 @@ pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) 
     if !can_play {
         return StateUpdate::None;
     }
-    let mut icons: IconActionVec<'a> = vec![];
-    if let Some(i) = move_units_button(game, pos, &menu.player, state) {
-        icons.push(i)
-    }
-    icons.push((
-        &state.assets.resources[&ResourceType::Food],
-        "Collect Resources".to_string(),
-        Box::new(|| {
-            let pos = menu.city_position;
-            StateUpdate::OpenDialog(ActiveDialog::CollectResources(CollectResources::new(
-                menu.player.index,
-                pos,
-                possible_resource_collections(game, pos, menu.city_owner_index),
-            )))
-        }),
-    ));
-    icons.push((
-        &state.assets.units[&UnitType::Infantry],
-        "Recruit Units".to_string(),
-        Box::new(|| {
-            RecruitAmount::new_selection(
-                game,
-                menu.player.index,
-                menu.city_position,
-                Units::empty(),
-                None,
-                &[],
-            )
-        }),
-    ));
+    let icons: IconActionVec<'a> = vec![
+        move_units_button(game, pos, &menu.player, state),
+        Some(collect_resources_button(game, menu, state)),
+        Some(recruit_button(game, menu, state)),
+    ]
+    .into_iter()
+    .flatten()
+    .collect();
 
+    let buildings: IconActionVec<'a> = building_icons(game, menu, state);
+
+    let wonders: IconActionVec<'a> = wonder_icons(game, menu, state);
+
+    show_map_action_buttons(
+        state,
+        &vec![icons, buildings, wonders]
+            .into_iter()
+            .flatten()
+            .collect(),
+    )
+}
+
+fn wonder_icons<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> IconActionVec<'a> {
     let owner = menu.get_city_owner(game);
     let city = menu.get_city(game);
 
-    for (building, name) in building_names() {
-        if menu.is_city_owner()
-            && menu.player.can_play_action
-            && city.can_construct(building, owner)
-        {
-            for pos in building_positions(building, city, &game.map) {
-                let tooltip = format!(
-                    "Built {}{} for {}",
-                    name,
-                    pos.map_or(String::new(), |p| format!(" at {p}")),
-                    owner.construct_cost(building, city),
-                );
-                icons.push((
-                    &state.assets.buildings[&building],
-                    tooltip,
-                    Box::new(move || {
-                        StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(
-                            ConstructionPayment::new(
-                                game,
-                                name,
-                                menu.player.index,
-                                menu.city_position,
-                                ConstructionProject::Building(building, pos),
-                            ),
-                        ))
-                    }),
-                ));
-            }
-        }
-    }
-
-    for w in &owner.wonder_cards {
-        if city.can_build_wonder(w, owner, game) {
-            icons.push((
+    owner
+        .wonder_cards
+        .iter()
+        .filter(|w| city.can_build_wonder(w, owner, game))
+        .map(|w| {
+            let x: IconAction<'a> = (
                 &state.assets.wonders[&w.name],
                 format!("Build wonder {}", w.name),
                 Box::new(move || {
@@ -139,11 +103,88 @@ pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) 
                         ),
                     ))
                 }),
-            ));
-        }
-    }
+            );
+            x
+        })
+        .collect()
+}
 
-    show_map_action_buttons(state, &icons)
+fn building_icons<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> IconActionVec<'a> {
+    let owner = menu.get_city_owner(game);
+    let city = menu.get_city(game);
+    building_names()
+        .iter()
+        .filter_map(|(b, _)| {
+            if menu.is_city_owner() && menu.player.can_play_action && city.can_construct(*b, owner)
+            {
+                Some(*b)
+            } else {
+                None
+            }
+        })
+        .flat_map(|b| new_building_positions(b, city, &game.map))
+        .map(|(b, pos)| {
+            let name = building_name(b);
+            let tooltip = format!(
+                "Built {}{} for {}",
+                name,
+                pos.map_or(String::new(), |p| format!(" at {p}")),
+                owner.construct_cost(b, city),
+            );
+            let x: IconAction<'a> = (
+                &state.assets.buildings[&b],
+                tooltip,
+                Box::new(move || {
+                    StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(
+                        ConstructionPayment::new(
+                            game,
+                            name,
+                            menu.player.index,
+                            menu.city_position,
+                            ConstructionProject::Building(b, pos),
+                        ),
+                    ))
+                }),
+            );
+            x
+        })
+        .collect()
+}
+
+fn recruit_button<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> IconAction<'a> {
+    (
+        &state.assets.units[&UnitType::Infantry],
+        "Recruit Units".to_string(),
+        Box::new(|| {
+            RecruitAmount::new_selection(
+                game,
+                menu.player.index,
+                menu.city_position,
+                Units::empty(),
+                None,
+                &[],
+            )
+        }),
+    )
+}
+
+fn collect_resources_button<'a>(
+    game: &'a Game,
+    menu: &'a CityMenu,
+    state: &'a State,
+) -> IconAction<'a> {
+    (
+        &state.assets.resources[&ResourceType::Food],
+        "Collect Resources".to_string(),
+        Box::new(|| {
+            let pos = menu.city_position;
+            StateUpdate::OpenDialog(ActiveDialog::CollectResources(CollectResources::new(
+                menu.player.index,
+                pos,
+                possible_resource_collections(game, pos, menu.city_owner_index),
+            )))
+        }),
+    )
 }
 
 pub fn city_labels(game: &Game, city: &City) -> Vec<String> {
@@ -164,11 +205,11 @@ pub fn city_labels(game: &Game, city: &City) -> Vec<String> {
             .filter_map(|(b, o)| {
                 o.as_ref().map(|o| {
                     if city.player_index == *o {
-                        building_name(b).to_string()
+                        building_name(*b).to_string()
                     } else {
                         format!(
                             "{} (owned by {})",
-                            building_name(b),
+                            building_name(*b),
                             game.get_player(*o).get_name()
                         )
                     }
@@ -242,7 +283,7 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
             let tooltip = if matches!(state.active_dialog, ActiveDialog::CulturalInfluence) {
                 ""
             } else {
-                building_name(b)
+                building_name(*b)
             };
             draw_scaled_icon(
                 state,
@@ -269,10 +310,10 @@ pub fn building_position(city: &City, center: Point, i: i32, building: Building)
     }
 }
 
-pub fn building_name(b: &Building) -> &str {
+pub fn building_name(b: Building) -> &'static str {
     building_names()
         .iter()
-        .find_map(|(b2, n)| if b == b2 { Some(n) } else { None })
+        .find_map(|(b2, n)| if &b == b2 { Some(n) } else { None })
         .unwrap()
 }
 

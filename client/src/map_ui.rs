@@ -160,15 +160,16 @@ pub fn show_tile_menu<'a>(
         })
         .collect::<Vec<_>>();
 
-    let mut icons: IconActionVec<'a> = vec![];
-    if let Some(i) = move_units_button(game, pos, player, state) {
-        icons.push(i)
-    }
-    if let Some(i) = found_city_button(state, settlers) {
-        icons.push(i)
-    }
-
-    show_map_action_buttons(state, &icons)
+    show_map_action_buttons(
+        state,
+        &vec![
+            move_units_button(game, pos, player, state),
+            found_city_button(state, settlers),
+        ]
+        .into_iter()
+        .flatten()
+        .collect(),
+    )
 }
 
 fn found_city_button(state: &State, settlers: Vec<Unit>) -> Option<IconAction<'_>> {

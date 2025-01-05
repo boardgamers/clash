@@ -20,16 +20,20 @@ use crate::recruit_unit_ui::RecruitSelection;
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::CountSelector;
 
-pub fn building_positions(building: Building, city: &City, map: &Map) -> Vec<Option<Position>> {
+pub fn new_building_positions(
+    building: Building,
+    city: &City,
+    map: &Map,
+) -> Vec<(Building, Option<Position>)> {
     if building != Building::Port {
-        return vec![None];
+        return vec![(building, None)];
     }
 
     map.tiles
         .iter()
         .filter_map(|(p, t)| {
             if *t == Terrain::Water && city.position.is_neighbor(*p) {
-                Some(Some(*p))
+                Some((building, Some(*p)))
             } else {
                 None
             }

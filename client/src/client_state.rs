@@ -112,7 +112,7 @@ impl ActiveDialog {
             ActiveDialog::CulturalInfluenceResolution(c) => vec![format!(
                 "Pay {} culture tokens to influence {}",
                 c.roll_boost_cost,
-                building_name(&c.city_piece)
+                building_name(c.city_piece)
             )],
             ActiveDialog::FreeAdvance => {
                 vec!["Click on an advance to take it for free".to_string()]
