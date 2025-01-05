@@ -89,7 +89,7 @@ fn wonder_icons<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> Ico
         .iter()
         .filter(|w| city.can_build_wonder(w, owner, game))
         .map(|w| {
-            let x: IconAction<'a> = (
+            let a: IconAction<'a> = (
                 &state.assets.wonders[&w.name],
                 format!("Build wonder {}", w.name),
                 Box::new(move || {
@@ -104,7 +104,7 @@ fn wonder_icons<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> Ico
                     ))
                 }),
             );
-            x
+            a
         })
         .collect()
 }
@@ -131,7 +131,7 @@ fn building_icons<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> I
                 pos.map_or(String::new(), |p| format!(" at {p}")),
                 owner.construct_cost(b, city),
             );
-            let x: IconAction<'a> = (
+            let a: IconAction<'a> = (
                 &state.assets.buildings[&b],
                 tooltip,
                 Box::new(move || {
@@ -146,7 +146,7 @@ fn building_icons<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> I
                     ))
                 }),
             );
-            x
+            a
         })
         .collect()
 }
