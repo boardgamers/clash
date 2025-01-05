@@ -201,13 +201,6 @@ pub fn move_units_button<'a>(
         "Move units".to_string(),
         Box::new(move || {
             StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits))
-            let movable_units = movable_units(pos, game, player.get(game));
-            StateUpdate::OpenDialog(ActiveDialog::MoveUnits(MoveSelection {
-                player_index: player.index,
-                start: Some(pos),
-                destinations: possible_destinations(game, pos, player.index, &movable_units),
-                units: movable_units,
-            }))
         }),
     ))
 }

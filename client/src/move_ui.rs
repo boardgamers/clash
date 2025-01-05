@@ -96,12 +96,23 @@ pub struct MoveSelection {
 }
 
 impl MoveSelection {
-    pub fn new(player_index: usize) -> MoveSelection {
-        MoveSelection {
-            player_index,
-            units: vec![],
-            start: None,
-            destinations: vec![],
+    pub fn new(player_index: usize, start: Option<Position>, game: &Game) -> MoveSelection {
+        match start {
+            Some(pos) => {
+                let movable_units = movable_units(pos, game, game.get_player(player_index));
+                MoveSelection {
+                    player_index,
+                    start: Some(pos),
+                    destinations: possible_destinations(game, pos, player_index, &movable_units),
+                    units: movable_units,
+                }
+            }
+            None => MoveSelection {
+                player_index,
+                start: None,
+                units: vec![],
+                destinations: vec![],
+            },
         }
     }
 }

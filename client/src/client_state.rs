@@ -16,7 +16,7 @@ use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
 use crate::happiness_ui::IncreaseHappiness;
 use crate::layout_ui::FONT_SIZE;
-use crate::move_ui::MoveSelection;
+use crate::move_ui::{movable_units, possible_destinations, MoveSelection};
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use crate::status_phase_ui::ChooseAdditionalAdvances;
 
@@ -425,9 +425,9 @@ impl State {
     }
 
     pub fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {
+        let dialog = self.game_state_dialog(game);
         self.clear();
-
-        self.active_dialog = self.game_state_dialog(game);
+        self.active_dialog = dialog;
         GameSyncRequest::None
     }
 
@@ -435,7 +435,7 @@ impl State {
     pub fn game_state_dialog(&self, game: &Game) -> ActiveDialog {
         match &game.state {
             GameState::Movement { .. } => {
-                ActiveDialog::MoveUnits(MoveSelection::new(game.active_player()))
+                ActiveDialog::MoveUnits(MoveSelection::new(game.active_player(), self.focused_tile, game))
             }
             GameState::CulturalInfluenceResolution(c) => {
                 ActiveDialog::CulturalInfluenceResolution(c.clone())
