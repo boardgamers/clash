@@ -1,22 +1,21 @@
-use macroquad::prelude::*;
-use std::ops::Add;
-
-use server::city::{City, MoodState};
-use server::city_pieces::Building;
-use server::game::Game;
-use server::player::Player;
-use server::position::Position;
-use server::unit::{UnitType, Units};
-
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
+use crate::happiness_ui::{add_increase_happiness, IncreaseHappiness};
 use crate::hex_ui::Point;
 use crate::layout_ui::draw_scaled_icon;
 use crate::map_ui::{move_units_button, show_map_action_buttons};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::resource_ui::ResourceType;
 use crate::{hex_ui, player_ui};
+use macroquad::prelude::*;
+use server::city::{City, MoodState};
+use server::city_pieces::Building;
+use server::game::Game;
+use server::player::Player;
+use server::position::Position;
+use server::unit::{UnitType, Units};
+use std::ops::Add;
 
 pub struct CityMenu {
     pub player: ShownPlayer,
@@ -58,7 +57,9 @@ pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) 
     if !can_play {
         return StateUpdate::None;
     }
-    let icons: IconActionVec<'a> = vec![
+
+    let base_icons: IconActionVec<'a> = vec![
+        increase_happiness_button(game, menu, state),
         move_units_button(game, pos, &menu.player, state),
         Some(collect_resources_button(game, menu, state)),
         Some(recruit_button(game, menu, state)),
@@ -73,11 +74,36 @@ pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) 
 
     show_map_action_buttons(
         state,
-        &vec![icons, buildings, wonders]
+        &vec![base_icons, buildings, wonders]
             .into_iter()
             .flatten()
             .collect(),
     )
+}
+
+fn increase_happiness_button<'a>(
+    game: &'a Game,
+    menu: &'a CityMenu,
+    state: &'a State,
+) -> Option<IconAction<'a>> {
+    let city = menu.get_city(game);
+    if city.mood_state == MoodState::Happy {
+        return None;
+    }
+    Some((
+        &state.assets.resources[&ResourceType::MoodTokens],
+        "Increase happiness".to_string(),
+        Box::new(move || {
+            let player = &menu.player;
+            let mut happiness = IncreaseHappiness::new(player.get(game));
+            let mut target = city.mood_state.clone();
+            while target != MoodState::Happy {
+                happiness = add_increase_happiness(city, &happiness);
+                target = target.clone().add(1);
+            }
+            StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(happiness))
+        }),
+    ))
 }
 
 fn wonder_icons<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> IconActionVec<'a> {

@@ -2,7 +2,7 @@ use crate::assets::Assets;
 use crate::city_ui::city_labels;
 use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
-use crate::happiness_ui::start_increase_happiness;
+use crate::happiness_ui::IncreaseHappiness;
 use crate::layout_ui::{
     bottom_center_texture, bottom_left_texture, bottom_right_texture, icon_pos,
     left_mouse_button_pressed_in_rect, top_center_texture, ICON_SIZE,
@@ -324,7 +324,9 @@ fn action_buttons(
         icon_pos(0, -2),
         "Increase happiness",
     ) {
-        return start_increase_happiness(game, player);
+        return StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(IncreaseHappiness::new(
+            player.get(game),
+        )));
     }
     if bottom_left_texture(
         state,
