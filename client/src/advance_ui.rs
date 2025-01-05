@@ -1,6 +1,6 @@
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::dialog_ui::OkTooltip;
-use crate::layout_ui::{left_mouse_button_pressed_in_rect, top_center_text};
+use crate::layout_ui::{bottom_center_text, left_mouse_button_pressed_in_rect, top_center_text};
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::player_ui::player_color;
 use crate::resource_ui::{new_resource_map, ResourceType};
@@ -151,7 +151,7 @@ pub fn show_generic_advance_menu(
 
                     let thickness = if let ActiveDialog::AdvancePayment(p) = &state.active_dialog {
                         if p.name == *name {
-                            12.
+                            8.
                         } else {
                             4.
                         }
@@ -293,6 +293,7 @@ pub fn pay_advance_dialog(
         // select a different advance
         return update;
     };
+    bottom_center_text(state, &ap.name, vec2(-200., -50.));
     payment_dialog(
         ap,
         AdvancePayment::valid,
