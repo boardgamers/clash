@@ -1,5 +1,5 @@
 use crate::client_state::{State, StateUpdate, StateUpdates};
-use crate::dialog_ui::{cancel_button, cancel_button_with_tooltip, ok_button};
+use crate::dialog_ui::{cancel_button, cancel_button_with_tooltip, ok_button, OkTooltip};
 use crate::layout_ui::{bottom_center_anchor, bottom_center_texture, ICON_SIZE};
 use macroquad::color::BLACK;
 use macroquad::math::{bool, vec2, Vec2};
@@ -25,7 +25,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
     container: &C,
     get_objects: impl Fn(&C) -> Vec<O>,
     draw: impl Fn(&O, Vec2),
-    is_valid: impl FnOnce(&C) -> bool,
+    is_valid: impl FnOnce(&C) -> OkTooltip,
     execute_action: impl FnOnce(&C) -> StateUpdate,
     show: impl Fn(&C, &O) -> bool,
     plus: impl Fn(&C, &O) -> StateUpdate,
@@ -106,13 +106,12 @@ pub fn confirm_update<T: ConfirmSelection>(
     state: &State,
 ) -> StateUpdate {
     match confirm {
-        SelectionConfirm::NoConfirm => StateUpdate::None,
-        SelectionConfirm::Invalid => {
-            let _ = ok_button(state, false);
+        SelectionConfirm::Invalid(tooltip) => {
+            let _ = ok_button(state, OkTooltip::Invalid(tooltip.to_string()));
             may_cancel(sel, state)
         }
-        SelectionConfirm::Valid => {
-            if ok_button(state, true) {
+        SelectionConfirm::Valid(tooltip) => {
+            if ok_button(state, OkTooltip::Ok(tooltip.to_string())) {
                 on_ok()
             } else {
                 may_cancel(sel, state)
@@ -134,7 +133,6 @@ fn may_cancel(sel: &impl ConfirmSelection, state: &State) -> StateUpdate {
 }
 
 pub enum SelectionConfirm {
-    NoConfirm,
-    Invalid,
-    Valid,
+    Invalid(String),
+    Valid(String),
 }

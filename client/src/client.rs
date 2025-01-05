@@ -1,6 +1,6 @@
 use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
+use macroquad::prelude::clear_background;
 use macroquad::prelude::*;
-use macroquad::prelude::{clear_background, vec2};
 
 use server::action::Action;
 use server::game::Game;
@@ -30,12 +30,7 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     let player = &state.shown_player(game);
 
     let s = state.screen_size;
-
-    state.camera = Camera2D {
-        zoom: vec2(state.zoom, state.zoom * s.x / s.y),
-        offset: state.offset,
-        ..Default::default()
-    };
+    state.camera.zoom.y = state.camera.zoom.x * s.x / s.y;
 
     let mut updates = StateUpdates::new();
     if !state.active_dialog.is_modal() {
@@ -74,7 +69,6 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     if player.can_control {
         if let Some(u) = &state.pending_update {
             updates.add(dialog_ui::show_pending_update(u, state));
-            return updates.result();
         }
     }
 
@@ -131,15 +125,15 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
         // playing actions
         ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(h, player, state, game),
         ActiveDialog::AdvanceMenu => show_advance_menu(game, player, state),
-        ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, player, game, state),
+        ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, state, player, game),
         ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p, state),
         ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c, state, player),
         ActiveDialog::RecruitUnitSelection(s) => {
             recruit_unit_ui::select_dialog(game, s, player, state)
         }
         ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::replace_dialog(game, r, state),
-        ActiveDialog::CulturalInfluenceResolution(_) => {
-            influence_ui::cultural_influence_resolution_dialog(state)
+        ActiveDialog::CulturalInfluenceResolution(r) => {
+            influence_ui::cultural_influence_resolution_dialog(state, r, player)
         }
 
         //status phase
@@ -159,8 +153,7 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
 }
 
 pub fn try_click(game: &Game, state: &mut State, player: &ShownPlayer) -> StateUpdate {
-    let (x, y) = mouse_position();
-    let mouse_pos = state.camera.screen_to_world(vec2(x, y));
+    let mouse_pos = state.camera.screen_to_world(mouse_position().into());
     let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));
 
     if let ActiveDialog::CulturalInfluence = state.active_dialog {

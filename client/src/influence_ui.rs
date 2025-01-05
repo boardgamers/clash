@@ -1,18 +1,20 @@
 use crate::city_ui::{building_name, building_position, BUILDING_SIZE};
 use crate::client_state::{ShownPlayer, State, StateUpdate};
-use crate::dialog_ui::{cancel_button_with_tooltip, ok_button};
+use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
 use crate::hex_ui;
 use crate::layout_ui::is_in_circle;
+use crate::resource_ui::show_resource_pile;
 use crate::tooltip::show_tooltip_for_circle;
 use macroquad::input::{is_mouse_button_pressed, MouseButton};
 use macroquad::math::Vec2;
 use macroquad::prelude::{draw_circle_lines, WHITE};
 use server::action::Action;
 use server::city::City;
-use server::game::Game;
+use server::game::{CulturalInfluenceResolution, Game};
 use server::player::Player;
 use server::playing_actions::{InfluenceCultureAttempt, PlayingAction};
 use server::position::Position;
+use server::resource_pile::ResourcePile;
 
 fn closest_city(player: &Player, position: Position) -> Position {
     player
@@ -23,8 +25,15 @@ fn closest_city(player: &Player, position: Position) -> Position {
         .position
 }
 
-pub fn cultural_influence_resolution_dialog(state: &State) -> StateUpdate {
-    if ok_button(state, true) {
+pub fn cultural_influence_resolution_dialog(
+    state: &State,
+    r: &CulturalInfluenceResolution,
+    player: &ShownPlayer,
+) -> StateUpdate {
+    let name = building_name(&r.city_piece);
+    let pile = ResourcePile::culture_tokens(r.roll_boost_cost);
+    show_resource_pile(state, player, &pile);
+    if ok_button(state, OkTooltip::Ok(format!("Influence {name} for {pile}"))) {
         return StateUpdate::Execute(Action::CulturalInfluenceResolution(true));
     }
     if cancel_button_with_tooltip(state, "Decline") {

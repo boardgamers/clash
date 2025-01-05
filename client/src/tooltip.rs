@@ -8,13 +8,12 @@ use macroquad::prelude::{draw_circle, draw_rectangle, get_time};
 const TOOLTIP_DELAY: f64 = 0.5;
 
 pub fn update(state: &mut State) {
-    let (x, y) = mouse_position();
     let now = get_time();
     state
         .mouse_positions
         .retain(|mp| now - mp.time < TOOLTIP_DELAY);
     state.mouse_positions.push(MousePosition {
-        position: vec2(x, y),
+        position: mouse_position().into(),
         time: now,
     });
 }

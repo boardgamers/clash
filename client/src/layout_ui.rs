@@ -105,8 +105,7 @@ pub fn is_in_circle(mouse_pos: Vec2, p: Point, radius: f32) -> bool {
 #[must_use]
 pub fn left_mouse_button_pressed(state: &State) -> Option<Vec2> {
     if is_mouse_button_pressed(MouseButton::Left) {
-        let (x, y) = mouse_position();
-        Some(state.screen_to_world(vec2(x, y)))
+        Some(state.screen_to_world(mouse_position().into()))
     } else {
         None
     }

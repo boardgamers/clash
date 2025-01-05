@@ -1,7 +1,7 @@
 use crate::assets::Assets;
 use crate::city_ui::city_labels;
 use crate::client::Features;
-use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, OFFSET, ZOOM};
+use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::happiness_ui::start_increase_happiness;
 use crate::layout_ui::{
     bottom_center_texture, bottom_left_texture, bottom_right_texture, icon_pos,
@@ -62,7 +62,12 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
         }
 
         let rect = Rect::new(x, pos.y, w, size);
-        show_tooltip_for_rect(state, &[pl.get_name()], rect);
+        let tooltip = if state.control_player.is_some_and(|p| p == pl.index) {
+            format!("{} (You)", pl.get_name())
+        } else {
+            pl.get_name()
+        };
+        show_tooltip_for_rect(state, &[tooltip], rect);
         if !shown && left_mouse_button_pressed_in_rect(rect, state) {
             if player.can_control {
                 if let ActiveDialog::DetermineFirstPlayer = state.active_dialog {
@@ -291,43 +296,6 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
         if bottom_right_texture(state, &assets.import, icon_pos(-2, -3), "Import") {
             return StateUpdate::Import;
         };
-    }
-
-    if bottom_left_texture(state, &assets.up, icon_pos(4, -2), "Move up") {
-        state.offset += vec2(0., -0.1);
-        return StateUpdate::None;
-    }
-    if bottom_left_texture(state, &assets.right, icon_pos(5, -1), "Move right") {
-        state.offset += vec2(-0.1, 0.);
-        return StateUpdate::None;
-    }
-    if bottom_left_texture(state, &assets.down, icon_pos(4, -1), "Move down") {
-        state.offset += vec2(0., 0.1);
-        return StateUpdate::None;
-    }
-    if bottom_left_texture(state, &assets.left, icon_pos(3, -1), "Move left") {
-        state.offset += vec2(0.1, 0.);
-        return StateUpdate::None;
-    }
-
-    if bottom_left_texture(
-        state,
-        &assets.reset,
-        icon_pos(2, -1),
-        "Reset zoom and offset",
-    ) {
-        state.zoom = ZOOM;
-        state.offset = OFFSET;
-        return StateUpdate::None;
-    }
-
-    if bottom_left_texture(state, &assets.zoom_in, icon_pos(1, -1), "Zoom in") {
-        state.zoom *= 1.1;
-        return StateUpdate::None;
-    }
-    if bottom_left_texture(state, &assets.zoom_out, icon_pos(0, -1), "Zoom out") {
-        state.zoom /= 1.1;
-        return StateUpdate::None;
     }
 
     StateUpdate::None

@@ -165,6 +165,7 @@ impl ActiveDialog {
             ActiveDialog::AdvanceMenu
                 | ActiveDialog::FreeAdvance
                 | ActiveDialog::ChooseAdditionalAdvances(_)
+                | ActiveDialog::AdvancePayment(_)
         )
     }
 }
@@ -173,7 +174,6 @@ pub struct PendingUpdate {
     pub action: Action,
     pub warning: Vec<String>,
     pub info: Vec<String>,
-    pub can_confirm: bool,
 }
 
 #[must_use]
@@ -204,7 +204,6 @@ impl StateUpdate {
                 action,
                 warning,
                 info: vec![],
-                can_confirm: true,
             })
         }
     }
@@ -214,16 +213,6 @@ impl StateUpdate {
             action,
             warning: vec![],
             info,
-            can_confirm: true,
-        })
-    }
-
-    pub fn execute_with_cancel(info: Vec<String>) -> StateUpdate {
-        StateUpdate::ExecuteWithWarning(PendingUpdate {
-            action: Action::Undo, // never used
-            warning: vec![],
-            info,
-            can_confirm: false,
         })
     }
 
@@ -323,12 +312,11 @@ pub struct State {
     pub pending_update: Option<PendingUpdate>,
     pub camera: Camera2D,
     pub camera_mode: CameraMode,
-    pub zoom: f32,
-    pub offset: Vec2,
     pub screen_size: Vec2,
     pub mouse_positions: Vec<MousePosition>,
     pub log_scroll: f32,
     pub focused_tile: Option<Position>,
+    pub pan_map: bool,
 }
 
 pub const ZOOM: f32 = 0.001;
@@ -343,15 +331,16 @@ impl State {
             control_player: None,
             show_player: 0,
             camera: Camera2D {
+                zoom: vec2(ZOOM, ZOOM),
+                offset: OFFSET,
                 ..Default::default()
             },
             camera_mode: CameraMode::Screen,
-            zoom: ZOOM,
-            offset: OFFSET,
             screen_size: vec2(0., 0.),
             mouse_positions: vec![],
             log_scroll: 0.0,
             focused_tile: None,
+            pan_map: false,
         }
     }
 

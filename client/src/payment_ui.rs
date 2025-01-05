@@ -3,6 +3,7 @@ use macroquad::math::{bool, vec2};
 use server::resource_pile::ResourcePile;
 
 use crate::client_state::{State, StateUpdate};
+use crate::dialog_ui::OkTooltip;
 use crate::layout_ui::draw_icon;
 use crate::resource_ui::{resource_name, ResourceType};
 use crate::select_ui;
@@ -80,7 +81,7 @@ pub trait HasPayment {
 #[allow(clippy::too_many_arguments)]
 pub fn payment_dialog<T: HasPayment>(
     has_payment: &T,
-    is_valid: impl FnOnce(&T) -> bool,
+    is_valid: impl FnOnce(&T) -> OkTooltip,
     execute_action: impl FnOnce(&T) -> StateUpdate,
     show: impl Fn(&T, ResourceType) -> bool,
     plus: impl Fn(&T, ResourceType) -> StateUpdate,

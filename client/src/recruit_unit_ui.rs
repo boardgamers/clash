@@ -7,6 +7,7 @@ use server::unit::{Unit, UnitType, Units};
 
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
+use crate::dialog_ui::OkTooltip;
 use crate::hex_ui::Point;
 use crate::select_ui::{
     ConfirmSelection, CountSelector, HasCountSelectableObject, SelectionConfirm,
@@ -194,9 +195,9 @@ impl ConfirmSelection for RecruitSelection {
             self.amount.leader_index,
             self.replaced_units.as_slice(),
         ) {
-            SelectionConfirm::Valid
+            SelectionConfirm::Valid("Recruit units".to_string())
         } else {
-            SelectionConfirm::Invalid
+            SelectionConfirm::Invalid("Not enough resources".to_string())
         }
     }
 }
@@ -225,7 +226,7 @@ pub fn select_dialog(
                 20.,
             );
         },
-        |_s| true,
+        |_s| OkTooltip::Ok("Recruit units".to_string()),
         |amount| {
             let sel = RecruitSelection::new(game, amount.clone(), vec![]);
 
