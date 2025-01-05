@@ -3,6 +3,7 @@ use crate::client_state::{ShownPlayer, State, StateUpdate};
 use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
 use crate::hex_ui;
 use crate::layout_ui::is_in_circle;
+use crate::resource_ui::show_resource_pile;
 use crate::tooltip::show_tooltip_for_circle;
 use macroquad::input::{is_mouse_button_pressed, MouseButton};
 use macroquad::math::Vec2;
@@ -14,7 +15,6 @@ use server::player::Player;
 use server::playing_actions::{InfluenceCultureAttempt, PlayingAction};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-use crate::resource_ui::show_resource_pile;
 
 fn closest_city(player: &Player, position: Position) -> Position {
     player

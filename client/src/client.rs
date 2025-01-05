@@ -1,6 +1,6 @@
 use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
+use macroquad::prelude::clear_background;
 use macroquad::prelude::*;
-use macroquad::prelude::{clear_background, vec2};
 
 use server::action::Action;
 use server::game::Game;
@@ -30,12 +30,7 @@ fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     let player = &state.shown_player(game);
 
     let s = state.screen_size;
-
-    state.camera = Camera2D {
-        zoom: vec2(state.zoom, state.zoom * s.x / s.y),
-        offset: state.offset,
-        ..Default::default()
-    };
+    state.camera.zoom.y = state.camera.zoom.x * s.x / s.y;
 
     let mut updates = StateUpdates::new();
     if !state.active_dialog.is_modal() {
@@ -158,8 +153,7 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
 }
 
 pub fn try_click(game: &Game, state: &mut State, player: &ShownPlayer) -> StateUpdate {
-    let (x, y) = mouse_position();
-    let mouse_pos = state.camera.screen_to_world(vec2(x, y));
+    let mouse_pos = state.camera.screen_to_world(mouse_position().into());
     let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));
 
     if let ActiveDialog::CulturalInfluence = state.active_dialog {

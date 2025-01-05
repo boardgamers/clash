@@ -34,6 +34,7 @@ pub fn terrain_name(t: &Terrain) -> &'static str {
 }
 
 pub fn draw_map(game: &Game, state: &mut State) -> StateUpdate {
+    pan_and_zoom(state);
     state.set_world_camera();
     for (pos, t) in &game.map.tiles {
         let (base, exhausted) = match t {
@@ -68,6 +69,35 @@ pub fn draw_map(game: &Game, state: &mut State) -> StateUpdate {
     }
     state.set_screen_camera();
     StateUpdate::None
+}
+
+fn pan_and_zoom(state: &mut State) {
+    let (_, wheel) = mouse_wheel();
+    state.camera.zoom += wheel * 0.0001;
+
+    let pan_map = is_mouse_button_down(MouseButton::Left);
+    if state.pan_map && pan_map {
+        let offset = mouse_delta_position().mul(vec2(-1., 1.));
+        state.camera.offset = state.camera.offset.add(offset);
+    }
+    state.pan_map = pan_map;
+
+    // if bottom_left_texture(state, &assets.up, icon_pos(4, -2), "Move up") {
+    //     state.offset += vec2(0., -0.1);
+    //     return StateUpdate::None;
+    // }
+    // if bottom_left_texture(state, &assets.right, icon_pos(5, -1), "Move right") {
+    //     state.offset += vec2(-0.1, 0.);
+    //     return StateUpdate::None;
+    // }
+    // if bottom_left_texture(state, &assets.down, icon_pos(4, -1), "Move down") {
+    //     state.offset += vec2(0., 0.1);
+    //     return StateUpdate::None;
+    // }
+    // if bottom_left_texture(state, &assets.left, icon_pos(3, -1), "Move left") {
+    //     state.offset += vec2(0.1, 0.);
+    //     return StateUpdate::None;
+    // }
 }
 
 fn alpha(game: &Game, state: &State, pos: Position) -> f32 {

@@ -33,12 +33,6 @@ pub struct Assets {
     pub ok: Texture2D,
     pub cancel: Texture2D,
 
-    pub zoom_in: Texture2D,
-    pub zoom_out: Texture2D,
-    pub up: Texture2D,
-    pub down: Texture2D,
-    pub left: Texture2D,
-    pub right: Texture2D,
     pub victory_points: Texture2D,
     pub active_player: Texture2D,
 
@@ -82,18 +76,6 @@ impl Assets {
             ok_blocked: load_png(include_bytes!("../assets/in-progress-svgrepo-com.png")),
             cancel: load_png(include_bytes!("../assets/cancel-svgrepo-com.png")),
 
-            zoom_in: load_png(include_bytes!("../assets/zoom-in-1462-svgrepo-com.png")),
-            zoom_out: load_png(include_bytes!("../assets/zoom-out-1460-svgrepo-com.png")),
-            up: load_png(include_bytes!("../assets/up-arrow-circle-svgrepo-com.png")),
-            down: load_png(include_bytes!(
-                "../assets/down-arrow-circle-svgrepo-com.png"
-            )),
-            left: load_png(include_bytes!(
-                "../assets/left-arrow-circle-svgrepo-com.png"
-            )),
-            right: load_png(include_bytes!(
-                "../assets/right-arrow-circle-svgrepo-com.png"
-            )),
             victory_points: load_png(include_bytes!("../assets/trophy-cup-svgrepo-com.png")),
             active_player: load_png(include_bytes!("../assets/triangle-svgrepo-com.png")),
 

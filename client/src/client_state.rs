@@ -312,12 +312,11 @@ pub struct State {
     pub pending_update: Option<PendingUpdate>,
     pub camera: Camera2D,
     pub camera_mode: CameraMode,
-    pub zoom: f32,
-    pub offset: Vec2,
     pub screen_size: Vec2,
     pub mouse_positions: Vec<MousePosition>,
     pub log_scroll: f32,
     pub focused_tile: Option<Position>,
+    pub pan_map: bool,
 }
 
 pub const ZOOM: f32 = 0.001;
@@ -332,15 +331,16 @@ impl State {
             control_player: None,
             show_player: 0,
             camera: Camera2D {
+                zoom: vec2(ZOOM, ZOOM),
+                offset: OFFSET,
                 ..Default::default()
             },
             camera_mode: CameraMode::Screen,
-            zoom: ZOOM,
-            offset: OFFSET,
             screen_size: vec2(0., 0.),
             mouse_positions: vec![],
             log_scroll: 0.0,
             focused_tile: None,
+            pan_map: false,
         }
     }
 

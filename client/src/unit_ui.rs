@@ -103,8 +103,7 @@ pub fn draw_units(game: &Game, state: &State, tooltip: bool) {
                 let army_move = game
                     .get_player(*p)
                     .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
-                let point = unit_center(i.try_into().unwrap(), u.position);
-                let center = vec2(point.x, point.y);
+                let center = unit_center(i.try_into().unwrap(), u.position).to_vec2();
                 show_tooltip_for_circle(state, &unit_label(u, army_move), center, UNIT_RADIUS);
             } else {
                 let selected = *p == game.active_player() && selected_units.contains(&u.id);
