@@ -17,7 +17,7 @@ pub struct Assets {
     pub angry: Texture2D,
 
     // action icons
-    pub movement: Texture2D,
+    pub move_units: Texture2D,
     pub log: Texture2D,
     pub end_turn: Texture2D,
     pub advances: Texture2D,
@@ -63,7 +63,7 @@ impl Assets {
             advances: load_png(include_bytes!("../assets/lab-svgrepo-com.png")),
             end_turn: load_png(include_bytes!("../assets/hour-glass-svgrepo-com.png")),
             log: load_png(include_bytes!("../assets/scroll-svgrepo-com.png")),
-            movement: load_png(include_bytes!("../assets/route-start-svgrepo-com.png")),
+            move_units: load_png(include_bytes!("../assets/route-start-svgrepo-com.png")),
             settle: load_png(include_bytes!("../assets/castle-manor-14-svgrepo-com.png")),
 
             // UI

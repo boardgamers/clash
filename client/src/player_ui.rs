@@ -307,7 +307,7 @@ fn action_buttons(
     player: &ShownPlayer,
     assets: &Assets,
 ) -> StateUpdate {
-    if bottom_left_texture(state, &assets.movement, icon_pos(0, -3), "Move units") {
+    if bottom_left_texture(state, &assets.move_units, icon_pos(0, -3), "Move units") {
         return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
     }
     if bottom_left_texture(

@@ -3,46 +3,48 @@ use macroquad::math::{u32, Vec2};
 use server::action::Action;
 use server::game::Game;
 use server::game::GameState::Movement;
+use server::player::Player;
 use server::position::Position;
 use server::unit::MovementAction;
 
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::unit_ui::{unit_at_pos, unit_selection_clicked};
 
-fn possible_destinations(
+pub fn possible_destinations(
     game: &Game,
     start: Position,
     player_index: usize,
     units: &[u32],
 ) -> Vec<Position> {
-    if let Movement {
+    let player = game.get_player(player_index);
+
+    let (moved_units, movement_actions_left) = if let Movement {
         movement_actions_left,
         moved_units,
     } = &game.state
     {
-        let player = game.get_player(player_index);
-
-        game.map
-            .tiles
-            .keys()
-            .copied()
-            .filter(|dest| {
-                start != *dest
-                    && player
-                        .can_move_units(
-                            game,
-                            units,
-                            start,
-                            *dest,
-                            *movement_actions_left,
-                            moved_units,
-                        )
-                        .is_ok()
-            })
-            .collect::<Vec<_>>()
+        (moved_units, movement_actions_left)
     } else {
-        vec![]
-    }
+        (&vec![], &1)
+    };
+
+    start
+        .neighbors()
+        .into_iter()
+        .filter(|dest| {
+            game.map.tiles.get(dest).is_some()
+                && player
+                    .can_move_units(
+                        game,
+                        units,
+                        start,
+                        *dest,
+                        *movement_actions_left,
+                        moved_units,
+                    )
+                    .is_ok()
+        })
+        .collect::<Vec<_>>()
 }
 
 pub fn click(pos: Position, s: &MoveSelection, mouse_pos: Vec2, game: &Game) -> StateUpdate {
@@ -62,15 +64,7 @@ pub fn click(pos: Position, s: &MoveSelection, mouse_pos: Vec2, game: &Game) -> 
         unit.map_or(StateUpdate::None, |unit_id| {
             new.start = Some(pos);
             if new.units.is_empty() {
-                //select all possible units
-                new.units = p
-                    .units
-                    .iter()
-                    .filter(|u| {
-                        !possible_destinations(game, pos, new.player_index, &[u.id]).is_empty()
-                    })
-                    .map(|u| u.id)
-                    .collect();
+                new.units = movable_units(pos, game, p);
             } else {
                 unit_selection_clicked(unit_id, &mut new.units);
             }
@@ -83,6 +77,14 @@ pub fn click(pos: Position, s: &MoveSelection, mouse_pos: Vec2, game: &Game) -> 
             StateUpdate::OpenDialog(ActiveDialog::MoveUnits(new))
         })
     }
+}
+
+pub fn movable_units(pos: Position, game: &Game, p: &Player) -> Vec<u32> {
+    p.units
+        .iter()
+        .filter(|u| !possible_destinations(game, pos, p.index, &[u.id]).is_empty())
+        .map(|u| u.id)
+        .collect()
 }
 
 #[derive(Clone, Debug)]

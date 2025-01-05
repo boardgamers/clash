@@ -12,7 +12,8 @@ use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{building_positions, ConstructionPayment, ConstructionProject};
 use crate::hex_ui::Point;
-use crate::layout_ui::{bottom_center_texture, draw_scaled_icon, icon_pos};
+use crate::layout_ui::draw_scaled_icon;
+use crate::map_ui::{move_units_button, show_map_action_buttons};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::resource_ui::ResourceType;
 use crate::{hex_ui, player_ui};
@@ -45,24 +46,29 @@ impl CityMenu {
     }
 }
 
-pub type IconActionVec<'a> = Vec<(&'a Texture2D, String, Box<dyn Fn() -> StateUpdate + 'a>)>;
+pub type IconAction<'a> = (&'a Texture2D, String, Box<dyn Fn() -> StateUpdate + 'a>);
+
+pub type IconActionVec<'a> = Vec<IconAction<'a >>;
 
 pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> StateUpdate {
     let city = menu.get_city(game);
+    let pos = menu.city_position;
 
     let can_play = menu.player.can_play_action && menu.is_city_owner() && city.can_activate();
     if !can_play {
         return StateUpdate::None;
     }
     let mut icons: IconActionVec<'a> = vec![];
+    move_units_button(game, pos, &menu.player, &state).map(|i| icons.push(i));
     icons.push((
         &state.assets.resources[&ResourceType::Food],
         "Collect Resources".to_string(),
         Box::new(|| {
+            let pos = menu.city_position;
             StateUpdate::OpenDialog(ActiveDialog::CollectResources(CollectResources::new(
                 menu.player.index,
-                menu.city_position,
-                possible_resource_collections(game, menu.city_position, menu.city_owner_index),
+                pos,
+                possible_resource_collections(game, pos, menu.city_owner_index),
             )))
         }),
     ));
@@ -135,17 +141,7 @@ pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) 
         }
     }
 
-    for (i, (icon, tooltip, action)) in icons.iter().enumerate() {
-        if bottom_center_texture(
-            state,
-            icon,
-            icon_pos(-(icons.len() as i8) / 2 + i as i8, -1),
-            tooltip,
-        ) {
-            return action();
-        }
-    }
-    StateUpdate::None
+    show_map_action_buttons(state, &icons)
 }
 
 pub fn city_labels(game: &Game, city: &City) -> Vec<String> {
