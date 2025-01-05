@@ -1,7 +1,6 @@
-use crate::advance_ui::show_advance_menu;
+use crate::advance_ui::{show_advance_menu, AdvanceState};
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::dialog_ui::{cancel_button, cancel_button_with_tooltip, ok_button, OkTooltip};
-use crate::select_ui::{confirm_update, ConfirmSelection, SelectionConfirm};
 use server::action::Action;
 use server::content::advances;
 use server::content::advances::get_leading_government_advance;
@@ -53,10 +52,8 @@ pub fn change_government_type_dialog(
     player: &ShownPlayer,
     state: &State,
 ) -> StateUpdate {
-    if cancel_button_with_tooltip(
-        state,
-        &format!("Keep {}", player.get(game).government().unwrap()),
-    ) {
+    let current = player.get(game).government().unwrap();
+    if cancel_button_with_tooltip(state, &format!("Keep {current}")) {
         return StateUpdate::status_phase(StatusPhaseAction::ChangeGovernmentType(
             ChangeGovernmentType::KeepGovernment,
         ));
@@ -67,10 +64,16 @@ pub fn change_government_type_dialog(
         player,
         state,
         |a, p| {
-            a.government.as_ref().is_some_and(|g| {
+            if a.government.as_ref().is_some_and(|g| {
                 get_leading_government_advance(g).is_some_and(|l| &l == a)
                     && g.as_str() != p.government().as_ref().expect("should have government")
-            })
+            }) {
+                AdvanceState::Available
+            } else if a.government.as_ref().is_some_and(|g| g == &current) {
+                AdvanceState::Owned
+            } else {
+                AdvanceState::Unavailable
+            }
         },
         |a| {
             let g = a.government.as_ref().expect("should have government");
@@ -106,10 +109,7 @@ pub fn choose_additional_advances_dialog(
         ));
     }
 
-    if cancel_button_with_tooltip(
-        state,
-        "Back to choose government type",
-    ) {
+    if cancel_button_with_tooltip(state, "Back to choose government type") {
         return StateUpdate::OpenDialog(ActiveDialog::ChangeGovernmentType);
     }
     show_advance_menu(
@@ -117,7 +117,15 @@ pub fn choose_additional_advances_dialog(
         game,
         player,
         state,
-        |a, _| choose.possible.contains(&a.name),
+        |a, _| {
+            if choose.selected.contains(&a.name) {
+                AdvanceState::Owned
+            } else if choose.possible.contains(&a.name) {
+                AdvanceState::Available
+            } else {
+                AdvanceState::Unavailable
+            }
+        },
         |a| {
             let mut selected = choose.selected.clone();
             if selected.contains(&a.name) {
@@ -125,11 +133,13 @@ pub fn choose_additional_advances_dialog(
             } else {
                 selected.push(a.name.clone());
             }
-            StateUpdate::OpenDialog(ActiveDialog::ChooseAdditionalAdvances(ChooseAdditionalAdvances {
-                government: choose.government.clone(),
-                possible: choose.possible.clone(),
-                selected,
-            }))
+            StateUpdate::OpenDialog(ActiveDialog::ChooseAdditionalAdvances(
+                ChooseAdditionalAdvances {
+                    government: choose.government.clone(),
+                    possible: choose.possible.clone(),
+                    selected,
+                },
+            ))
         },
     )
 }
