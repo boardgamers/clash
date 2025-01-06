@@ -8,7 +8,7 @@ use server::game::{Game, GameState};
 use server::map::Terrain;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
-use server::unit::{MovementRestriction, Unit};
+use server::unit::{MovementRestriction, Unit, UnitType};
 
 use crate::city_ui::{draw_city, show_city_menu, CityMenu, IconAction, IconActionVec};
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
@@ -177,8 +177,8 @@ fn found_city_button(state: &State, settlers: Vec<Unit>) -> Option<IconAction<'_
         None
     } else {
         Some((
-            &state.assets.settle,
-            "Settle".to_string(),
+            &state.assets.units[&UnitType::Settler],
+            "Found a new city".to_string(),
             Box::new(move || {
                 let settler = settlers
                     .iter()

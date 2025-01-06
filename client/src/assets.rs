@@ -21,7 +21,6 @@ pub struct Assets {
     pub log: Texture2D,
     pub end_turn: Texture2D,
     pub advances: Texture2D,
-    pub settle: Texture2D,
 
     // UI
     pub redo: Texture2D,
@@ -64,7 +63,6 @@ impl Assets {
             end_turn: load_png(include_bytes!("../assets/hour-glass-svgrepo-com.png")),
             log: load_png(include_bytes!("../assets/scroll-svgrepo-com.png")),
             move_units: load_png(include_bytes!("../assets/route-start-svgrepo-com.png")),
-            settle: load_png(include_bytes!("../assets/castle-manor-14-svgrepo-com.png")),
 
             // UI
             redo: load_png(include_bytes!("../assets/redo-svgrepo-com.png")),
