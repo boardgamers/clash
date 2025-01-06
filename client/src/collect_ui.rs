@@ -76,7 +76,7 @@ pub fn collect_resources_dialog(
     state: &State,
     player: &ShownPlayer,
 ) -> StateUpdate {
-    show_resource_pile(state, player, &collect.collected());
+    show_resource_pile(state, player, &collect.collected(), &[]);
 
     let city = game.get_city(collect.player_index, collect.city_position);
 
