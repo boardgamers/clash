@@ -11,11 +11,13 @@ pub enum CustomAction {
         wonder: String,
         payment: ResourcePile,
     },
+    WhipWorkers,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash)]
 pub enum CustomActionType {
     ConstructWonder,
+    WhipWorkers,
 }
 
 impl CustomAction {
@@ -58,6 +60,7 @@ impl CustomAction {
     pub fn custom_action_type(&self) -> CustomActionType {
         match self {
             CustomAction::ConstructWonder { .. } => CustomActionType::ConstructWonder,
+            CustomAction::WhipWorkers => CustomActionType::WhipWorkers,
         }
     }
 
@@ -88,6 +91,7 @@ impl CustomActionType {
     pub fn action_type(&self) -> ActionType {
         match self {
             CustomActionType::ConstructWonder => ActionType::default(),
+            CustomActionType::WhipWorkers => ActionType::free_and_once_per_turn(),
         }
     }
 }
