@@ -13,7 +13,7 @@ pub enum ResourceType {
     Ore,
     Ideas,
     Gold,
-    MoodTokens, // is not a resource, but a token, with no limit
+    MoodTokens,    // is not a resource, but a token, with no limit
     CultureTokens, // is not a resource, but a token, with no limit
     Discount, //discount on building cost, which can be used for any resource that is not a token
 }
