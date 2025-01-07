@@ -17,6 +17,7 @@ pub fn get_all() -> Vec<Advance> {
         .chain(warfare())
         .chain(science())
         .chain(democracy())
+        .chain(autocracy())
         .chain(theocracy())
         .collect()
 }
@@ -172,6 +173,12 @@ fn democracy() -> Vec<Advance> {
         Advance::builder("Democracy 2", "TestGovernment1")
             .with_required_advance("Voting")
             .build(),
+    ]
+}
+
+fn autocracy() -> Vec<Advance> {
+    vec![
+
     ]
 }
 
