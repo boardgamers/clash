@@ -118,12 +118,6 @@ impl ResourcePile {
         if self.gold > limit.gold {
             self.gold = limit.gold;
         }
-        if self.mood_tokens > limit.mood_tokens {
-            self.mood_tokens = limit.mood_tokens;
-        }
-        if self.culture_tokens > limit.culture_tokens {
-            self.culture_tokens = limit.culture_tokens;
-        }
     }
 
     //this function assumes that `self` can afford `cost`
