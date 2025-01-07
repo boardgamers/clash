@@ -137,10 +137,15 @@ pub fn show_top_center(game: &Game, shown_player: &ShownPlayer, state: &State) {
     for (i, r) in resource_types().iter().rev().enumerate() {
         let a = amount[r];
         let l = limit[r];
+        let t = if l > 0 {
+            format!("{a}/{l}")
+        } else {
+            format!("{a}")
+        };
         top_icon_with_label(
             shown_player,
             state,
-            &format!("{a}/{l}"),
+            &t,
             &state.assets.resources[r],
             icon_pos(2 - i as i8, 0),
             resource_name(*r),

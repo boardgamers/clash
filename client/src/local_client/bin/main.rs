@@ -79,8 +79,8 @@ pub fn setup_local_game() -> Game {
 
     let player_index1 = 0;
     let player_index2 = 1;
-    game.players[player_index1].gain_resources(ResourcePile::new(50, 50, 50, 50, 50, 50, 50));
-    game.players[player_index2].gain_resources(ResourcePile::new(50, 50, 50, 50, 50, 50, 50));
+    game.players[player_index1].gain_resources(ResourcePile::new(50, 50, 50, 50, 50, 9, 9));
+    game.players[player_index2].gain_resources(ResourcePile::new(50, 50, 50, 50, 50, 9, 9));
     add_city(&mut game, player_index1, "A1");
     add_city(&mut game, player_index1, "C2");
     add_city(&mut game, player_index1, "B1");

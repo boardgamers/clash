@@ -118,12 +118,6 @@ impl ResourcePile {
         if self.gold > limit.gold {
             self.gold = limit.gold;
         }
-        if self.mood_tokens > limit.mood_tokens {
-            self.mood_tokens = limit.mood_tokens;
-        }
-        if self.culture_tokens > limit.culture_tokens {
-            self.culture_tokens = limit.culture_tokens;
-        }
     }
 
     //this function assumes that `self` can afford `cost`
@@ -461,7 +455,7 @@ mod tests {
     fn resource_limit_test() {
         let mut resources = ResourcePile::new(3, 6, 9, 9, 0, 10, 6);
         resources.apply_resource_limit(&ResourcePile::new(7, 5, 7, 10, 3, 7, 6));
-        assert_eq!(ResourcePile::new(3, 5, 7, 9, 0, 7, 6), resources);
+        assert_eq!(ResourcePile::new(3, 5, 7, 9, 0, 10, 6), resources);
     }
 
     #[test]

@@ -315,7 +315,7 @@ impl Player {
             name: None,
             index,
             resources: ResourcePile::food(2),
-            resource_limit: ResourcePile::new(2, 7, 7, 7, 7, 7, 7),
+            resource_limit: ResourcePile::new(2, 7, 7, 7, 7, 0, 0),
             events: Some(PlayerEvents::new()),
             cities: Vec::new(),
             units: Vec::new(),
