@@ -9,17 +9,26 @@ use crate::{
 
 #[must_use]
 pub fn get_all() -> Vec<Advance> {
-    agriculture()
-        .into_iter()
-        .chain(construction())
-        .chain(seafaring())
-        .chain(education())
-        .chain(warfare())
-        .chain(science())
-        .chain(democracy())
-        .chain(autocracy())
-        .chain(theocracy())
-        .collect()
+    get_groups().into_iter().flat_map(|(_, advances)| advances).collect()
+}
+
+#[must_use]
+pub fn get_groups() -> Vec<(String, Vec<Advance>)> {
+    vec![
+        ("Agriculture".to_string(), agriculture()),
+        ("Construction".to_string(), construction()),
+        ("Seafaring".to_string(), seafaring()),
+        ("Education".to_string(), education()),
+        ("Warfare".to_string(), warfare()),
+        ("Spirituality".to_string(), vec![]),
+        // second half of the advances
+        ("Economy".to_string(), vec![]),
+        ("Culture".to_string(), vec![]),
+        ("Science".to_string(), science()),
+        ("Democracy".to_string(), democracy()),
+        ("Autocracy".to_string(), autocracy()),
+        ("Theocracy".to_string(), theocracy()),
+    ]
 }
 
 fn agriculture() -> Vec<Advance> {
@@ -178,7 +187,13 @@ fn democracy() -> Vec<Advance> {
 
 fn autocracy() -> Vec<Advance> {
     vec![
-
+       Advance::builder("Nationalism", "TestGovernment1")
+            .leading_government_advance("Autocracy")
+            .build(),
+        Advance::builder("Absolute Power", "Once per turn, as a free action, you may spend 2 mood tokens to get an additional action")
+            .with_required_advance("Nationalism")
+            .add_custom_action(WhipWorkers)
+            .build(),
     ]
 }
 

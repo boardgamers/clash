@@ -23,6 +23,9 @@ use server::resource_pile::AdvancePaymentOptions;
 use server::status_phase::StatusPhaseAction;
 use std::cmp::min;
 use std::collections::HashMap;
+use std::ops::Rem;
+
+const COLUMNS : usize = 6;
 
 pub enum AdvanceState {
     Owned,
@@ -163,9 +166,8 @@ pub fn show_advance_menu(
     let p = player.get(game);
 
     for pass in 0..2 {
-        for advances in groups() {
-            let (group_name, pos) = group_info(&advances[0]);
-            let pos = pos * vec2(140., 180.) + vec2(20., 70.);
+        for(i, (group_name, advances)) in advances::get_groups().iter().enumerate() {
+            let pos = vec2(i.rem(COLUMNS) as f32 * 140., (i / COLUMNS) as f32 * 180.) + vec2(20., 70.);
             if pass == 0 {
                 state.draw_text(
                     group_name,
@@ -243,37 +245,6 @@ fn border_color(a: &Advance) -> Color {
         }
     } else {
         BLACK
-    }
-}
-
-fn groups() -> Vec<Vec<Advance>> {
-    let mut current_group = None;
-    advances::get_all()
-        .into_iter()
-        .chunk_by(|a| {
-            if a.required.is_none() {
-                current_group = Some(a.name.clone());
-                a.name.clone()
-            } else {
-                current_group.as_ref().unwrap().clone()
-            }
-        })
-        .into_iter()
-        .map(|(_k, a)| a.collect::<Vec<_>>())
-        .collect::<Vec<_>>()
-}
-
-fn group_info(advance: &Advance) -> (&str, Vec2) {
-    match advance.name.as_str() {
-        "Farming" => ("Agriculture", vec2(0., 0.)),
-        "Mining" => ("Construction", vec2(1., 0.)),
-        "Fishing" => ("Seafaring", vec2(2., 0.)),
-        "Philosophy" => ("Education", vec2(3., 0.)),
-        "Tactics" => ("Warfare", vec2(4., 0.)),
-        "Math" => ("Science", vec2(2., 1.)),
-        "Voting" => ("Democracy", vec2(3., 1.)),
-        "Dogma" => ("Theocracy", vec2(5., 1.)),
-        _ => panic!("Unknown advance: {}", advance.name),
     }
 }
 

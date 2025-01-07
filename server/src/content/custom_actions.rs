@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::{
     game::Game, playing_actions::ActionType, position::Position, resource_pile::ResourcePile,
 };
+use crate::content::wonders::construct_wonder;
+use crate::player::Player;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub enum CustomAction {
@@ -32,29 +34,13 @@ impl CustomAction {
                 city_position,
                 wonder,
                 payment,
-            } => {
-                let wonder_cards_index = game.players[player_index]
-                    .wonder_cards
-                    .iter()
-                    .position(|wonder_card| wonder_card.name == wonder)
-                    .expect("Illegal action");
-                let wonder = game.players[player_index]
-                    .wonder_cards
-                    .remove(wonder_cards_index);
-                let city = game.players[player_index]
-                    .get_city(city_position)
-                    .expect("player should have city");
-                if !city.can_build_wonder(&wonder, &game.players[player_index], game)
-                    || !payment.can_afford(&wonder.cost)
-                {
-                    panic!("Illegal action");
-                }
-                game.players[player_index].loose_resources(payment);
-
-                game.build_wonder(wonder, city_position, player_index);
+            } => construct_wonder(game, player_index, city_position, wonder, payment),
+            CustomAction::WhipWorkers => {
+                whip_workers(&game.players[player_index]);
             }
         }
     }
+
 
     #[must_use]
     pub fn custom_action_type(&self) -> CustomActionType {
@@ -74,7 +60,8 @@ impl CustomAction {
                 game.players[player_index].gain_resources(payment);
                 let wonder = game.undo_build_wonder(city_position, player_index);
                 game.players[player_index].wonder_cards.push(wonder);
-            }
+            },
+            CustomAction::WhipWorkers => undo_whip_workers(&game.players[player_index]),
         }
     }
 
@@ -82,8 +69,19 @@ impl CustomAction {
     pub fn format_log_item(&self, _game: &Game, player_name: &str) -> String {
         match self {
             CustomAction::ConstructWonder { city_position, wonder, payment } => format!("{player_name} paid {payment} to construct the {wonder} wonder in the city at {city_position}"),
+            CustomAction::WhipWorkers => format!("{player_name} whipped workers"),
         }
     }
+}
+
+fn whip_workers(p: &Player) {
+    todo!()
+
+}
+
+fn undo_whip_workers(p: &Player) {
+    todo!()
+
 }
 
 impl CustomActionType {
