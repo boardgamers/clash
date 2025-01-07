@@ -27,7 +27,7 @@ pub fn terrain_name(t: &Terrain) -> &'static str {
     match t {
         Terrain::Barren => "Barren",
         Terrain::Mountain => "Mountain",
-        Terrain::Fertile => "Fertile",
+        Terrain::Fertile => "Grassland",
         Terrain::Forest => "Forest",
         Terrain::Exhausted(_) => "Exhausted",
         Terrain::Water => "Water",
