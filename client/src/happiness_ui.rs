@@ -8,7 +8,7 @@ use server::resource_pile::ResourcePile;
 
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
-use crate::resource_ui::show_resource_pile;
+use crate::resource_ui::{show_resource_pile, ResourceType};
 
 #[derive(Clone)]
 pub struct IncreaseHappiness {
@@ -106,7 +106,7 @@ pub fn increase_happiness_menu(
     state: &State,
     game: &Game,
 ) -> StateUpdate {
-    show_resource_pile(state, player, &h.cost);
+    show_resource_pile(state, player, &h.cost, &[ResourceType::MoodTokens]);
 
     let tooltip = if player.get(game).resources.can_afford(&h.cost) {
         OkTooltip::Valid("Increase happiness".to_string())

@@ -3,7 +3,7 @@ use crate::client_state::{ShownPlayer, State, StateUpdate};
 use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
 use crate::hex_ui;
 use crate::layout_ui::is_in_circle;
-use crate::resource_ui::show_resource_pile;
+use crate::resource_ui::{show_resource_pile, ResourceType};
 use crate::tooltip::show_tooltip_for_circle;
 use macroquad::input::{is_mouse_button_pressed, MouseButton};
 use macroquad::math::Vec2;
@@ -32,7 +32,7 @@ pub fn cultural_influence_resolution_dialog(
 ) -> StateUpdate {
     let name = building_name(r.city_piece);
     let pile = ResourcePile::culture_tokens(r.roll_boost_cost);
-    show_resource_pile(state, player, &pile);
+    show_resource_pile(state, player, &pile, &[ResourceType::CultureTokens]);
     if ok_button(
         state,
         OkTooltip::Valid(format!("Influence {name} for {pile}")),

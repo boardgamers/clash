@@ -66,11 +66,16 @@ pub fn resource_name(t: ResourceType) -> &'static str {
     }
 }
 
-pub fn show_resource_pile(state: &State, player: &ShownPlayer, p: &ResourcePile) {
+pub fn show_resource_pile(
+    state: &State,
+    player: &ShownPlayer,
+    p: &ResourcePile,
+    must_show: &[ResourceType],
+) {
     let resource_map = new_resource_map(p);
     let show: Vec<ResourceType> = resource_types()
         .into_iter()
-        .filter(|r| resource_map[r] > 0)
+        .filter(|r| resource_map[r] > 0 || must_show.contains(r))
         .collect();
     for (i, r) in show.iter().rev().enumerate() {
         let x = (show.len() - i) as i8 - 3;
