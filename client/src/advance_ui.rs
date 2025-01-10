@@ -278,10 +278,7 @@ fn description(p: &Player, a: &Advance) -> Vec<String> {
     parts
 }
 
-pub fn pay_advance_dialog(
-    ap: &AdvancePayment,
-    rc: &RenderContext
-) -> StateUpdate {
+pub fn pay_advance_dialog(ap: &AdvancePayment, rc: &RenderContext) -> StateUpdate {
     let update = show_paid_advance_menu(rc);
     if !matches!(update, StateUpdate::None) {
         // select a different advance

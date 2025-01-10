@@ -67,12 +67,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
             updates.add(minus(container, o));
         }
         if c.current < c.max
-            && bottom_center_texture(
-                rc,
-                &rc.assets().plus,
-                vec2(x + 15., -ICON_SIZE),
-                "Add one",
-            )
+            && bottom_center_texture(rc, &rc.assets().plus, vec2(x + 15., -ICON_SIZE), "Add one")
         {
             updates.add(plus(container, o));
         };

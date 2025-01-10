@@ -2,7 +2,7 @@ use macroquad::math::{bool, vec2};
 
 use server::resource_pile::ResourcePile;
 
-use crate::client_state::{State, StateUpdate};
+use crate::client_state::StateUpdate;
 use crate::dialog_ui::OkTooltip;
 use crate::layout_ui::draw_icon;
 use crate::render_context::RenderContext;

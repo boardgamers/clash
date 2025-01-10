@@ -142,10 +142,7 @@ fn highlight_if(b: bool) -> f32 {
     }
 }
 
-pub fn show_tile_menu(
-    rc: &RenderContext,
-    pos: Position,
-) -> StateUpdate {
+pub fn show_tile_menu(rc: &RenderContext, pos: Position) -> StateUpdate {
     let game = &rc.game;
     if let Some(c) = game.get_any_city(pos) {
         return show_city_menu(rc, c);
@@ -163,13 +160,10 @@ pub fn show_tile_menu(
 
     show_map_action_buttons(
         rc,
-        &vec![
-            move_units_button(rc, pos),
-            found_city_button(rc, settlers),
-        ]
-        .into_iter()
-        .flatten()
-        .collect(),
+        &vec![move_units_button(rc, pos), found_city_button(rc, settlers)]
+            .into_iter()
+            .flatten()
+            .collect(),
     )
 }
 
@@ -193,10 +187,7 @@ fn found_city_button<'a>(rc: &'a RenderContext<'a>, settlers: Vec<Unit>) -> Opti
     }
 }
 
-pub fn move_units_button<'a>(
-    rc: &'a RenderContext,
-    pos: Position,
-) -> Option<IconAction<'a>> {
+pub fn move_units_button<'a>(rc: &'a RenderContext, pos: Position) -> Option<IconAction<'a>> {
     if movable_units(pos, rc.game, rc.player).is_empty() {
         return None;
     }

@@ -23,7 +23,9 @@ pub type IconActionVec<'a> = Vec<IconAction<'a>>;
 pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate {
     let pos = city.position;
 
-    let can_play = rc.shown_player.can_play_action && city.player_index == rc.player.index && city.can_activate();
+    let can_play = rc.shown_player.can_play_action
+        && city.player_index == rc.player.index
+        && city.can_activate();
     if !can_play {
         return StateUpdate::None;
     }
@@ -38,7 +40,7 @@ pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate 
     .flatten()
     .collect();
 
-    let buildings: IconActionVec<'a> = building_icons( rc, city);
+    let buildings: IconActionVec<'a> = building_icons(rc, city);
 
     let wonders: IconActionVec<'a> = wonder_icons(rc, city);
 
@@ -51,9 +53,7 @@ pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate 
     )
 }
 
-fn increase_happiness_button<'a>(
-    rc: &'a RenderContext, city: &'a City,
-) -> Option<IconAction<'a>> {
+fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
     if city.mood_state == MoodState::Happy {
         return None;
     }
@@ -105,14 +105,16 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
     building_names()
         .iter()
         .filter_map(|(b, _)| {
-            if rc.player.index == city.player_index && rc.shown_player.can_play_action && city.can_construct(*b, owner)
+            if rc.player.index == city.player_index
+                && rc.shown_player.can_play_action
+                && city.can_construct(*b, owner)
             {
                 Some(*b)
             } else {
                 None
             }
         })
-        .flat_map(|b| new_building_positions(b,rc,city))
+        .flat_map(|b| new_building_positions(b, rc, city))
         .map(|(b, pos)| {
             let name = building_name(b);
             let tooltip = format!(
@@ -157,9 +159,7 @@ fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> IconAction<'a> {
     )
 }
 
-fn collect_resources_button<'a>(
-    rc: &'a RenderContext, city: &'a City,
-) -> IconAction<'a> {
+fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> IconAction<'a> {
     (
         &rc.assets().resources[&ResourceType::Food],
         "Collect Resources".to_string(),

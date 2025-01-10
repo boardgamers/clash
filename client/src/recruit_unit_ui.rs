@@ -201,10 +201,7 @@ impl ConfirmSelection for RecruitSelection {
     }
 }
 
-pub fn select_dialog(
-    rc: &RenderContext,
-    a: &RecruitAmount,
-) -> StateUpdate {
+pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
     let game = rc.game;
     select_ui::count_dialog(
         rc,
@@ -281,16 +278,13 @@ fn update_selection(
 }
 
 pub fn replace_dialog(rc: &RenderContext, sel: &RecruitSelection) -> StateUpdate {
-    unit_ui::unit_selection_dialog::<RecruitSelection>(
-        rc,
-        sel,
-        |new: RecruitSelection| {
-            StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
-                rc,
-                rc.game.get_city(new.amount.player_index, new.amount.city_position),
-                "units",
-                ConstructionProject::Units(new),
-            )))
-        },
-    )
+    unit_ui::unit_selection_dialog::<RecruitSelection>(rc, sel, |new: RecruitSelection| {
+        StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
+            rc,
+            rc.game
+                .get_city(new.amount.player_index, new.amount.city_position),
+            "units",
+            ConstructionProject::Units(new),
+        )))
+    })
 }

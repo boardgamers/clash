@@ -1,14 +1,13 @@
 use std::f32::consts::PI;
 
-use crate::client_state::State;
 use crate::layout_ui::draw_scaled_icon;
+use crate::render_context::RenderContext;
 use hex2d::{Coordinate, Spacing};
 use macroquad::color::Color;
 use macroquad::math::{f32, i32, vec2, Vec2};
 use macroquad::prelude::{draw_texture_ex, DrawTextureParams, Rect, Texture2D, DARKGRAY, WHITE};
 use macroquad::shapes::draw_hexagon;
 use server::position::Position;
-use crate::render_context::RenderContext;
 
 const SIZE: f32 = 60.0;
 
@@ -45,7 +44,8 @@ pub fn draw_hex(
         },
     );
     draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, Color::from_vec(v));
-    rc.state.draw_text_with_color(&p.to_string(), c.x - 30.0, c.y - 35.0, text_color);
+    rc.state
+        .draw_text_with_color(&p.to_string(), c.x - 30.0, c.y - 35.0, text_color);
     if exhausted {
         const SIZE: f32 = 100.;
         draw_scaled_icon(

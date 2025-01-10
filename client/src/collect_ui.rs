@@ -71,13 +71,9 @@ impl CollectResources {
     }
 }
 
-pub fn collect_resources_dialog(
-    rc: &RenderContext,
-    collect: &CollectResources,
-) -> StateUpdate {
-    show_resource_pile(rc,&collect.collected(), &[]);
+pub fn collect_resources_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUpdate {
+    show_resource_pile(rc, &collect.collected(), &[]);
 
-    let state = rc.state;
     let game = rc.game;
     let city = game.get_city(collect.player_index, collect.city_position);
 

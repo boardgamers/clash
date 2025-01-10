@@ -66,11 +66,7 @@ pub fn resource_name(t: ResourceType) -> &'static str {
     }
 }
 
-pub fn show_resource_pile(
-    rc: &RenderContext,
-    p: &ResourcePile,
-    must_show: &[ResourceType],
-) {
+pub fn show_resource_pile(rc: &RenderContext, p: &ResourcePile, must_show: &[ResourceType]) {
     let resource_map = new_resource_map(p);
     let show: Vec<ResourceType> = resource_types()
         .into_iter()

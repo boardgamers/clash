@@ -88,7 +88,7 @@ impl RemoteClient {
 
         let mut client = RemoteClient {
             control,
-            rc,
+            state,
             sync_state: SyncState::New,
             game: None,
             features,

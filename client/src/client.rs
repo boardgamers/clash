@@ -46,7 +46,7 @@ fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
 
     let mut updates = StateUpdates::new();
     if show_map {
-        updates.add(rc.with_camera(CameraMode::World, |r| draw_map(r)));
+        updates.add(rc.with_camera(CameraMode::World, draw_map));
     }
     if !state.active_dialog.is_full_modal() {
         show_top_left(rc);
@@ -120,8 +120,7 @@ pub fn render_and_update(
 }
 
 fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
-    let game = &rc.game;
-    let state = &rc.state;
+    let state = rc.state;
     match &state.active_dialog {
         ActiveDialog::None
         | ActiveDialog::MoveUnits(_)
@@ -131,14 +130,12 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::Log => show_log(rc),
 
         // playing actions
-        ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(rc,h),
+        ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(rc, h),
         ActiveDialog::AdvanceMenu => show_paid_advance_menu(rc),
         ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, rc),
         ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(rc, p),
         ActiveDialog::CollectResources(c) => collect_resources_dialog(rc, c),
-        ActiveDialog::RecruitUnitSelection(s) => {
-            recruit_unit_ui::select_dialog(rc, s)
-        }
+        ActiveDialog::RecruitUnitSelection(s) => recruit_unit_ui::select_dialog(rc, s),
         ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::replace_dialog(rc, r),
         ActiveDialog::CulturalInfluenceResolution(r) => {
             influence_ui::cultural_influence_resolution_dialog(rc, r)
@@ -152,9 +149,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::ChooseAdditionalAdvances(a) => {
             status_phase_ui::choose_additional_advances_dialog(rc, a)
         }
-        ActiveDialog::DetermineFirstPlayer => {
-            status_phase_ui::determine_first_player_dialog(rc)
-        }
+        ActiveDialog::DetermineFirstPlayer => status_phase_ui::determine_first_player_dialog(rc),
 
         //combat
         ActiveDialog::PlayActionCard => combat_ui::play_action_card_dialog(rc),
@@ -184,16 +179,12 @@ pub fn try_click(rc: &RenderContext) -> StateUpdate {
     match &state.active_dialog {
         ActiveDialog::CollectResources(_) => StateUpdate::None,
         ActiveDialog::MoveUnits(s) => move_ui::click(pos, s, mouse_pos, game),
-        ActiveDialog::RemoveCasualties(s) => {
-            unit_selection_click(rc, pos, mouse_pos, s, |new| {
-                StateUpdate::OpenDialog(ActiveDialog::RemoveCasualties(new.clone()))
-            })
-        }
-        ActiveDialog::ReplaceUnits(s) => {
-            unit_selection_click(rc, pos, mouse_pos, s, |new| {
-                StateUpdate::OpenDialog(ActiveDialog::ReplaceUnits(new.clone()))
-            })
-        }
+        ActiveDialog::RemoveCasualties(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
+            StateUpdate::OpenDialog(ActiveDialog::RemoveCasualties(new.clone()))
+        }),
+        ActiveDialog::ReplaceUnits(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
+            StateUpdate::OpenDialog(ActiveDialog::ReplaceUnits(new.clone()))
+        }),
         ActiveDialog::RazeSize1City => raze_city_confirm_dialog(rc, pos),
         ActiveDialog::PlaceSettler => {
             if rc.player.get_city(pos).is_some() {

@@ -48,9 +48,7 @@ impl ChooseAdditionalAdvances {
     }
 }
 
-pub fn change_government_type_dialog(
-    rc: &RenderContext
-) -> StateUpdate {
+pub fn change_government_type_dialog(rc: &RenderContext) -> StateUpdate {
     let current = rc.player.government().unwrap();
     if cancel_button_with_tooltip(rc, &format!("Keep {current}")) {
         return StateUpdate::status_phase(StatusPhaseAction::ChangeGovernmentType(
@@ -144,9 +142,7 @@ pub fn complete_objectives_dialog(rc: &RenderContext) -> StateUpdate {
     StateUpdate::None
 }
 
-pub fn determine_first_player_dialog(
-    rc: &RenderContext,
-) -> StateUpdate {
+pub fn determine_first_player_dialog(rc: &RenderContext) -> StateUpdate {
     if rc.shown_player.can_control_active_player {
         bottom_centered_text(
             rc,

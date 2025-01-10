@@ -1,9 +1,9 @@
 use crate::hex_ui::Point;
+use crate::render_context::RenderContext;
 use crate::tooltip;
 use macroquad::color::WHITE;
 use macroquad::math::{f32, vec2, Vec2};
 use macroquad::prelude::*;
-use crate::render_context::RenderContext;
 
 pub const ICON_SIZE: f32 = 30.;
 
@@ -26,7 +26,8 @@ pub fn top_center_texture(rc: &RenderContext, texture: &Texture2D, p: Vec2, tool
 
 pub fn top_centered_text(rc: &RenderContext, text: &str, p: Vec2) {
     let p = top_center_anchor(rc) + p;
-    rc.state.draw_text(text, p.x - rc.state.measure_text(text).width / 2., p.y);
+    rc.state
+        .draw_text(text, p.x - rc.state.measure_text(text).width / 2., p.y);
 }
 
 fn top_center_anchor(rc: &RenderContext) -> Vec2 {
@@ -38,12 +39,22 @@ pub fn top_right_texture(rc: &RenderContext, texture: &Texture2D, p: Vec2, toolt
     draw_icon(rc, texture, tooltip, anchor + p)
 }
 
-pub fn bottom_left_texture(rc: &RenderContext, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
+pub fn bottom_left_texture(
+    rc: &RenderContext,
+    texture: &Texture2D,
+    p: Vec2,
+    tooltip: &str,
+) -> bool {
     let anchor = vec2(MARGIN, rc.state.screen_size.y - MARGIN);
     draw_icon(rc, texture, tooltip, anchor + p)
 }
 
-pub fn bottom_center_texture(rc: &RenderContext, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
+pub fn bottom_center_texture(
+    rc: &RenderContext,
+    texture: &Texture2D,
+    p: Vec2,
+    tooltip: &str,
+) -> bool {
     let anchor = bottom_center_anchor(rc);
     draw_icon(rc, texture, tooltip, anchor + p)
 }
@@ -62,8 +73,16 @@ pub fn bottom_center_anchor(rc: &RenderContext) -> Vec2 {
     vec2(rc.state.screen_size.x / 2., rc.state.screen_size.y - MARGIN)
 }
 
-pub fn bottom_right_texture(rc: &RenderContext, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
-    let anchor = vec2(rc.state.screen_size.x - MARGIN, rc.state.screen_size.y - MARGIN);
+pub fn bottom_right_texture(
+    rc: &RenderContext,
+    texture: &Texture2D,
+    p: Vec2,
+    tooltip: &str,
+) -> bool {
+    let anchor = vec2(
+        rc.state.screen_size.x - MARGIN,
+        rc.state.screen_size.y - MARGIN,
+    );
     draw_icon(rc, texture, tooltip, anchor + p)
 }
 

@@ -1,4 +1,4 @@
-use crate::client_state::{PendingUpdate, State, StateUpdate};
+use crate::client_state::{PendingUpdate, StateUpdate};
 use crate::layout_ui::{bottom_centered_text, bottom_right_texture, icon_pos};
 use crate::render_context::RenderContext;
 
@@ -23,7 +23,7 @@ pub fn show_pending_update(update: &PendingUpdate, rc: &RenderContext) -> StateU
     if ok_button(rc, OkTooltip::Valid("OK".to_string())) {
         return StateUpdate::ResolvePendingUpdate(true);
     }
-    if cancel_button(   rc) {
+    if cancel_button(rc) {
         return StateUpdate::ResolvePendingUpdate(false);
     }
     StateUpdate::None
@@ -43,9 +43,9 @@ pub fn cancel_button_with_tooltip(rc: &RenderContext, tooltip: &str) -> bool {
 pub fn ok_button(rc: &RenderContext, ok_tooltip: OkTooltip) -> bool {
     let pos = icon_pos(-8, -1);
     match ok_tooltip {
-        OkTooltip::Valid(tooltip) => bottom_right_texture(rc,  &rc.assets().ok, pos, &tooltip),
+        OkTooltip::Valid(tooltip) => bottom_right_texture(rc, &rc.assets().ok, pos, &tooltip),
         OkTooltip::Invalid(tooltip) => {
-            let _ = bottom_right_texture(rc,  &rc.assets().ok_blocked, pos, &tooltip);
+            let _ = bottom_right_texture(rc, &rc.assets().ok_blocked, pos, &tooltip);
             false
         }
     }

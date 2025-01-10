@@ -21,13 +21,16 @@ use server::unit::UnitType;
 
 pub fn new_building_positions(
     building: Building,
-    rc: &RenderContext, city: &City,
+    rc: &RenderContext,
+    city: &City,
 ) -> Vec<(Building, Option<Position>)> {
     if building != Building::Port {
         return vec![(building, None)];
     }
 
-rc.game.map.tiles
+    rc.game
+        .map
+        .tiles
         .iter()
         .filter_map(|(p, t)| {
             if *t == Terrain::Water && city.position.is_neighbor(*p) {
@@ -39,10 +42,7 @@ rc.game.map.tiles
         .collect()
 }
 
-pub fn pay_construction_dialog(
-    rc: &RenderContext,
-    cp: &ConstructionPayment,
-) -> StateUpdate {
+pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> StateUpdate {
     let city = rc.game.get_any_city(cp.city_position).unwrap();
     payment_dialog(
         cp,
@@ -133,15 +133,14 @@ pub struct ConstructionPayment {
 
 impl ConstructionPayment {
     pub fn new(
-        rc: &RenderContext, city: &City,
+        rc: &RenderContext,
+        city: &City,
         name: &str,
         project: ConstructionProject,
     ) -> ConstructionPayment {
         let p = rc.game.get_player(city.player_index);
         let cost = match &project {
-            ConstructionProject::Building(b, _) => {
-                p.construct_cost(*b, city)
-            }
+            ConstructionProject::Building(b, _) => p.construct_cost(*b, city),
             ConstructionProject::Wonder(name) => p
                 .wonder_cards
                 .iter()

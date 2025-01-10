@@ -1,12 +1,13 @@
 use crate::action_buttons::action_buttons;
 use crate::city_ui::city_labels;
 use crate::client::Features;
-use crate::client_state::{State, StateUpdate};
+use crate::client_state::StateUpdate;
 use crate::layout_ui::{
     bottom_center_texture, bottom_right_texture, icon_pos, left_mouse_button_pressed_in_rect,
     top_center_texture, ICON_SIZE,
 };
 use crate::map_ui::terrain_name;
+use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name, resource_types};
 use crate::tooltip::show_tooltip_for_rect;
 use crate::unit_ui;
@@ -17,7 +18,6 @@ use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::game::{Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::unit::MovementAction;
-use crate::render_context::{RenderContext, ShownPlayer};
 
 pub fn player_select(rc: &RenderContext) -> StateUpdate {
     let game = rc.game;
@@ -95,7 +95,7 @@ pub fn top_icon_with_label(
         player.screen_size.x / 2.0 + p.x + x,
         p.y + ICON_SIZE + 30.,
     );
-    top_center_texture(rc,  texture, p, tooltip);
+    top_center_texture(rc, texture, p, tooltip);
 }
 
 pub fn bottom_icon_with_label(
@@ -114,7 +114,7 @@ pub fn bottom_icon_with_label(
         player.screen_size.x / 2.0 + p.x + x,
         player.screen_size.y + p.y + 35.,
     );
-    bottom_center_texture(rc,  texture, p, tooltip);
+    bottom_center_texture(rc, texture, p, tooltip);
 }
 
 pub fn show_top_center(rc: &RenderContext) {
@@ -203,13 +203,13 @@ pub fn show_top_left(rc: &RenderContext) {
         }
     }
 
-    if player.shown_player_is_active || state.active_dialog.show_for_other_player() {
+    if player.is_active || state.active_dialog.show_for_other_player() {
         for m in state.active_dialog.help_message(game) {
             label(&m);
         }
     }
 
-    if player.shown_player_is_active {
+    if player.is_active {
         if let Some(u) = &state.pending_update {
             for m in &u.info {
                 label(m);
@@ -269,14 +269,14 @@ pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpd
     if player.can_control {
         let game = rc.game;
         if let Some(tooltip) = can_end_move(game) {
-            if bottom_right_texture(rc,  &assets.end_turn, icon_pos(-4, -1), tooltip) {
+            if bottom_right_texture(rc, &assets.end_turn, icon_pos(-4, -1), tooltip) {
                 return end_move(game);
             }
         }
-        if game.can_redo() && bottom_right_texture(rc,  &assets.redo, icon_pos(-5, -1), "Redo") {
+        if game.can_redo() && bottom_right_texture(rc, &assets.redo, icon_pos(-5, -1), "Redo") {
             return StateUpdate::Execute(Action::Redo);
         }
-        if game.can_undo() && bottom_right_texture(rc,  &assets.undo, icon_pos(-6, -1), "Undo") {
+        if game.can_undo() && bottom_right_texture(rc, &assets.undo, icon_pos(-6, -1), "Undo") {
             return StateUpdate::Execute(Action::Undo);
         }
 
@@ -289,10 +289,10 @@ pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpd
     }
 
     if features.import_export {
-        if bottom_right_texture(rc,  &assets.export, icon_pos(-1, -3), "Export") {
+        if bottom_right_texture(rc, &assets.export, icon_pos(-1, -3), "Export") {
             return StateUpdate::Export;
         };
-        if bottom_right_texture(rc,  &assets.import, icon_pos(-2, -3), "Import") {
+        if bottom_right_texture(rc, &assets.import, icon_pos(-2, -3), "Import") {
             return StateUpdate::Import;
         };
     }

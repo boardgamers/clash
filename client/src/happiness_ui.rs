@@ -1,14 +1,13 @@
 use server::action::Action;
 use server::city::City;
-use server::game::Game;
 use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
-use crate::client_state::{ActiveDialog, State, StateUpdate};
+use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
-use crate::render_context::{RenderContext, ShownPlayer};
+use crate::render_context::RenderContext;
 use crate::resource_ui::{show_resource_pile, ResourceType};
 
 #[derive(Clone)]
@@ -100,11 +99,8 @@ fn increase_happiness_new_steps(
     None
 }
 
-pub fn increase_happiness_menu(
-    rc: &RenderContext,
-    h: &IncreaseHappiness,
-) -> StateUpdate {
-    show_resource_pile(rc,&h.cost, &[ResourceType::MoodTokens]);
+pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappiness) -> StateUpdate {
+    show_resource_pile(rc, &h.cost, &[ResourceType::MoodTokens]);
 
     let tooltip = if rc.player.resources.can_afford(&h.cost) {
         OkTooltip::Valid("Increase happiness".to_string())

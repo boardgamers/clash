@@ -3,7 +3,7 @@ use server::game::Game;
 use server::position::Position;
 use server::unit::Unit;
 
-use crate::client_state::{State, StateUpdate};
+use crate::client_state::StateUpdate;
 use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
 use crate::render_context::RenderContext;
 use crate::select_ui::ConfirmSelection;

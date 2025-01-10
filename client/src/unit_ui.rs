@@ -7,18 +7,18 @@ use server::game::Game;
 use server::position::Position;
 use server::unit::{Unit, UnitType};
 
-use crate::client_state::{ActiveDialog, State, StateUpdate};
+use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::select_ui::ConfirmSelection;
 use crate::{hex_ui, player_ui};
 
 use crate::dialog_ui::{cancel_button_with_tooltip, ok_button};
 use crate::hex_ui::Point;
 use crate::layout_ui::{draw_scaled_icon, is_in_circle};
+use crate::render_context::RenderContext;
 use crate::tooltip::show_tooltip_for_circle;
 use itertools::Itertools;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::player::Player;
-use crate::render_context::{RenderContext, ShownPlayer};
 
 pub const UNIT_RADIUS: f32 = 11.0;
 

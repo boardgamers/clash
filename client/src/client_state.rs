@@ -326,14 +326,14 @@ impl State {
         }
     }
 
-    pub fn render_context<'a>(&'a self, game: &'a Game) -> RenderContext<'a> {
+    #[must_use] pub fn render_context<'a>(&'a self, game: &'a Game) -> RenderContext<'a> {
         let shown_player = self.shown_player(game);
         RenderContext {
             player: game.get_player(shown_player.index),
             shown_player,
             game,
             state: self,
-            camera_mode: CameraMode::World,
+            camera_mode: CameraMode::Screen,
         }
     }
 
@@ -345,7 +345,7 @@ impl State {
         let can_control = can_control_active_player && self.show_player == a;
         ShownPlayer {
             index: self.show_player,
-            shown_player_is_active,
+            is_active: shown_player_is_active,
             can_control_active_player,
             can_control,
             can_play_action: can_control
@@ -499,5 +499,4 @@ impl State {
             },
         );
     }
-
 }

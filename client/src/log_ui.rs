@@ -1,8 +1,6 @@
 use macroquad::math::vec2;
-use macroquad::prelude::mouse_wheel;
-use server::game::Game;
 
-use crate::client_state::{State, StateUpdate};
+use crate::client_state::StateUpdate;
 use crate::render_context::RenderContext;
 
 pub fn show_log(rc: &RenderContext) -> StateUpdate {

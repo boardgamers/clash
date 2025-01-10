@@ -1,9 +1,9 @@
 use crate::city_ui::{building_name, building_position, BUILDING_SIZE};
-use crate::client_state::{CameraMode, State, StateUpdate};
+use crate::client_state::{CameraMode, StateUpdate};
 use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
 use crate::hex_ui;
 use crate::layout_ui::is_in_circle;
-use crate::render_context::{RenderContext, ShownPlayer};
+use crate::render_context::RenderContext;
 use crate::resource_ui::{show_resource_pile, ResourceType};
 use crate::tooltip::show_tooltip_for_circle;
 use macroquad::input::{is_mouse_button_pressed, MouseButton};
@@ -11,7 +11,7 @@ use macroquad::math::Vec2;
 use macroquad::prelude::{draw_circle_lines, WHITE};
 use server::action::Action;
 use server::city::City;
-use server::game::{CulturalInfluenceResolution, Game};
+use server::game::CulturalInfluenceResolution;
 use server::player::Player;
 use server::playing_actions::{InfluenceCultureAttempt, PlayingAction};
 use server::position::Position;
@@ -55,11 +55,7 @@ pub fn hover(rc: &RenderContext, mouse_pos: Vec2) -> StateUpdate {
     StateUpdate::None
 }
 
-fn show_city(
-    rc: &RenderContext,
-    mouse_pos: Vec2,
-    city: &City,
-) -> Option<StateUpdate> {
+fn show_city(rc: &RenderContext, mouse_pos: Vec2, city: &City) -> Option<StateUpdate> {
     let player = rc.player;
     let c = hex_ui::center(city.position);
     let mut i = city.pieces.wonders.len() as i32;

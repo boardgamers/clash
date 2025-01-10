@@ -10,7 +10,7 @@ use server::player::Player;
 #[derive(Clone)]
 pub struct ShownPlayer {
     pub index: usize,
-    pub shown_player_is_active: bool,
+    pub is_active: bool,
     pub can_control_active_player: bool,
     pub can_control: bool,
     pub can_play_action: bool,
@@ -39,7 +39,11 @@ impl RenderContext<'_> {
         &self.state.assets
     }
 
-    pub fn with_camera(&self, mode: CameraMode, f: impl FnOnce(&RenderContext) -> StateUpdate + Sized) -> StateUpdate {
+    pub fn with_camera(
+        &self,
+        mode: CameraMode,
+        f: impl FnOnce(&RenderContext) -> StateUpdate + Sized,
+    ) -> StateUpdate {
         let next = RenderContext {
             shown_player: self.shown_player.clone(),
             game: self.game,
