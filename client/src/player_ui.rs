@@ -1,14 +1,13 @@
-use crate::assets::Assets;
+use crate::action_buttons::action_buttons;
 use crate::city_ui::city_labels;
 use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
-use crate::happiness_ui::IncreaseHappiness;
 use crate::layout_ui::{
-    bottom_center_texture, bottom_left_texture, bottom_right_texture, icon_pos,
-    left_mouse_button_pressed_in_rect, top_center_texture, ICON_SIZE,
+    bottom_center_texture, bottom_right_texture, icon_pos, left_mouse_button_pressed_in_rect,
+    top_center_texture, ICON_SIZE,
 };
 use crate::map_ui::terrain_name;
-use crate::resource_ui::{new_resource_map, resource_name, resource_types, ResourceType};
+use crate::resource_ui::{new_resource_map, resource_name, resource_types};
 use crate::tooltip::show_tooltip_for_rect;
 use crate::unit_ui;
 use macroquad::math::{u32, vec2};
@@ -286,7 +285,7 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
             return StateUpdate::Execute(Action::Undo);
         }
 
-        if player.can_play_action {
+        if player.can_control {
             let update = action_buttons(game, state, player, assets);
             if !matches!(update, StateUpdate::None) {
                 return update;
@@ -303,44 +302,6 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
         };
     }
 
-    StateUpdate::None
-}
-
-fn action_buttons(
-    game: &Game,
-    state: &State,
-    player: &ShownPlayer,
-    assets: &Assets,
-) -> StateUpdate {
-    if bottom_left_texture(state, &assets.move_units, icon_pos(0, -3), "Move units") {
-        return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
-    }
-    if bottom_left_texture(
-        state,
-        &assets.advances,
-        icon_pos(1, -3),
-        "Research advances",
-    ) {
-        return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
-    }
-    if bottom_left_texture(
-        state,
-        &assets.resources[&ResourceType::MoodTokens],
-        icon_pos(0, -2),
-        "Increase happiness",
-    ) {
-        return StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(IncreaseHappiness::new(
-            player.get(game),
-        )));
-    }
-    if bottom_left_texture(
-        state,
-        &assets.resources[&ResourceType::CultureTokens],
-        icon_pos(1, -2),
-        "Cultural Influence",
-    ) {
-        return StateUpdate::OpenDialog(ActiveDialog::CulturalInfluence);
-    }
     StateUpdate::None
 }
 

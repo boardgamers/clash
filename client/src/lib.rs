@@ -8,6 +8,7 @@
     clippy::missing_panics_doc
 )]
 
+mod action_buttons;
 mod advance_ui;
 mod assets;
 mod cards_ui;

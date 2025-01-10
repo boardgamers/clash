@@ -8,15 +8,39 @@ use crate::{
 };
 
 #[must_use]
-#[rustfmt::skip]
 pub fn get_all() -> Vec<Advance> {
+    get_groups()
+        .into_iter()
+        .flat_map(|(_, advances)| advances)
+        .collect()
+}
+
+#[must_use]
+pub fn get_groups() -> Vec<(String, Vec<Advance>)> {
     vec![
-        //Agriculture
+        ("Agriculture".to_string(), agriculture()),
+        ("Construction".to_string(), construction()),
+        ("Seafaring".to_string(), seafaring()),
+        ("Education".to_string(), education()),
+        ("Warfare".to_string(), warfare()),
+        ("Spirituality".to_string(), vec![]),
+        // second half of the advances
+        ("Economy".to_string(), vec![]),
+        ("Culture".to_string(), vec![]),
+        ("Science".to_string(), science()),
+        ("Democracy".to_string(), democracy()),
+        ("Autocracy".to_string(), autocracy()),
+        ("Theocracy".to_string(), theocracy()),
+    ]
+}
+
+fn agriculture() -> Vec<Advance> {
+    vec![
         Advance::builder(
             "Farming",
-            "Your cities may Collect food from Grassland",
-        ).build(),
-
+            "Your cities may Collect food from Grassland and wood from Forest spaces",
+        )
+        .build(),
         Advance::builder(
             "Storage",
             "Your maximum food limit is increased from 2 to 7",
@@ -30,7 +54,6 @@ pub fn get_all() -> Vec<Advance> {
         .with_advance_bonus(MoodToken)
         .with_required_advance("Farming")
         .build(),
-
         Advance::builder(
             "Irrigation",
             "Your cities may Collect food from Barren spaces, Ignore Famine events",
@@ -39,13 +62,12 @@ pub fn get_all() -> Vec<Advance> {
         .with_advance_bonus(MoodToken)
         .with_required_advance("Farming")
         .build(),
+    ]
+}
 
-        //Construction
-        Advance::builder(
-            "Mining",
-            "Your cities may Collect ore from Mountain spaces",
-        ).build(),
-
+fn construction() -> Vec<Advance> {
+    vec![
+        Advance::builder("Mining", "Your cities may Collect ore from Mountain spaces").build(),
         Advance::builder(
             "Engineering",
             "Immediately draw 1 wonder, May Construct wonder happy cities",
@@ -54,67 +76,71 @@ pub fn get_all() -> Vec<Advance> {
         .add_custom_action(ConstructWonder)
         .with_required_advance("Mining")
         .build(),
+    ]
+}
 
-        //Maritime
-
+fn seafaring() -> Vec<Advance> {
+    vec![
         Advance::builder("Fishing", "Your cities may Collect food from one Sea space")
             .add_collect_option(Water, ResourcePile::food(1))
             .with_advance_bonus(MoodToken)
             .build(),
+    ]
+}
 
-        //Education
+fn education() -> Vec<Advance> {
+    vec![Advance::builder(
+        "Philosophy",
+        "Immediately gain 1 idea, Gain 1 idea after getting a Science advance",
+    )
+    .add_one_time_ability_initializer(|game, player_index| {
+        game.players[player_index].gain_resources(ResourcePile::ideas(1));
+    })
+    .add_ability_undo_deinitializer(|game, player_index| {
+        game.players[player_index].loose_resources(ResourcePile::ideas(1));
+    })
+    .add_player_event_listener(
+        |event| &mut event.on_advance,
+        |player, advance, ()| {
+            if advance == "Math"
+                || advance == "Astronomy"
+                || advance == "Medicine"
+                || advance == "Metallurgy"
+            {
+                player.gain_resources(ResourcePile::ideas(1));
+            }
+        },
+        0,
+    )
+    .add_player_event_listener(
+        |event| &mut event.on_undo_advance,
+        |player, advance, ()| {
+            if advance == "Math"
+                || advance == "Astronomy"
+                || advance == "Medicine"
+                || advance == "Metallurgy"
+            {
+                player.loose_resources(ResourcePile::ideas(1));
+            }
+        },
+        0,
+    )
+    .with_advance_bonus(MoodToken)
+    .build()]
+}
 
-        Advance::builder(
-            "Philosophy",
-            "Immediately gain 1 idea, Gain 1 idea after getting a Science advance",
-        )
-        .add_one_time_ability_initializer(|game, player_index| {
-            game.players[player_index].gain_resources(ResourcePile::ideas(1));
-        })
-        .add_ability_undo_deinitializer(|game, player_index| {
-            game.players[player_index].loose_resources(ResourcePile::ideas(1));
-        })
-        .add_player_event_listener(
-            |event| &mut event.on_advance,
-            |player, advance, ()| {
-                if advance == "Math"
-                    || advance == "Astronomy"
-                    || advance == "Medicine"
-                    || advance == "Metallurgy"
-                {
-                    player.gain_resources(ResourcePile::ideas(1));
-                }
-            },
-            0,
-        )
-        .add_player_event_listener(
-            |event| &mut event.on_undo_advance,
-            |player, advance, ()| {
-                if advance == "Math"
-                    || advance == "Astronomy"
-                    || advance == "Medicine"
-                    || advance == "Metallurgy"
-                {
-                    player.loose_resources(ResourcePile::ideas(1));
-                }
-            },
-            0,
-        )
-        .with_advance_bonus(MoodToken)
-        .build(),
+fn warfare() -> Vec<Advance> {
+    vec![Advance::builder(
+        "Tactics",
+        "May Move Army units, May use Tactics on Action Cards",
+    )
+    .with_advance_bonus(CultureToken)
+    .with_unlocked_building("Fortress")
+    .build()]
+}
 
-        //Warfare
-
-        Advance::builder(
-            "Tactics",
-            "May Move Army units, May use Tactics on Action Cards",
-        )
-        .with_advance_bonus(CultureToken)
-        .with_unlocked_building("Fortress")
-        .build(),
-
-        //Science
-
+fn science() -> Vec<Advance> {
+    vec![
         Advance::builder(
             "Math",
             "Engineering and Roads can be bought at no food cost",
@@ -131,7 +157,6 @@ pub fn get_all() -> Vec<Advance> {
         .with_advance_bonus(CultureToken)
         .with_unlocked_building("Observatory")
         .build(),
-
         Advance::builder(
             "Astronomy",
             "Navigation and Cartography can be bought at no food cost",
@@ -148,32 +173,41 @@ pub fn get_all() -> Vec<Advance> {
         .with_required_advance("Math")
         .with_advance_bonus(CultureToken)
         .build(),
+    ]
+}
 
-        Advance::builder(
-            "Voting",
-            "TestGovernment1",
-        )
-        .leading_government_advance("Democracy")
-        .build(),
-        Advance::builder(
-            "Democracy 2",
-            "TestGovernment1",
-        )
-        .with_required_advance("Voting")
-        .build(),
+fn democracy() -> Vec<Advance> {
+    vec![
+        Advance::builder("Voting", "TestGovernment1")
+            .leading_government_advance("Democracy")
+            .with_required_advance("Philosophy")
+            .build(),
+        Advance::builder("Democracy 2", "TestGovernment1")
+            .with_required_advance("Voting")
+            .build(),
+    ]
+}
 
-        Advance::builder(
-            "Dogma",
-            "TestGovernment2",
-        )
-        .leading_government_advance("Theocracy")
-        .build(),
-        Advance::builder(
-            "Theocracy 2",
-            "TestGovernment2",
-        )
-        .with_required_advance("Dogma")
-        .build(),
+fn autocracy() -> Vec<Advance> {
+    vec![
+       Advance::builder("Nationalism", "TestGovernment1")
+            .leading_government_advance("Autocracy")
+            .build(),
+        Advance::builder("Absolute Power", "Once per turn, as a free action, you may spend 2 mood tokens to get an additional action")
+            .with_required_advance("Nationalism")
+            .add_custom_action(ForcedLabor)
+            .build(),
+    ]
+}
+
+fn theocracy() -> Vec<Advance> {
+    vec![
+        Advance::builder("Dogma", "TestGovernment2")
+            .leading_government_advance("Theocracy")
+            .build(),
+        Advance::builder("Theocracy 2", "TestGovernment2")
+            .with_required_advance("Dogma")
+            .build(),
     ]
 }
 

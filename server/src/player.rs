@@ -385,7 +385,16 @@ impl Player {
         self.resources.apply_resource_limit(&self.resource_limit);
     }
 
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if player cannot afford the resources
     pub fn loose_resources(&mut self, resources: ResourcePile) {
+        assert!(
+            self.resources.can_afford(&resources),
+            "player should be able to afford the resources"
+        );
         self.resources -= resources;
     }
 

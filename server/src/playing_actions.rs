@@ -78,6 +78,8 @@ impl PlayingAction {
             assert_ne!(game.actions_left, 0, "Illegal action");
             game.actions_left -= 1;
         }
+        game.players[player_index].loose_resources(self.action_type().cost);
+
         match self {
             Advance { advance, payment } => {
                 let player = &mut game.players[player_index];
@@ -181,10 +183,6 @@ impl PlayingAction {
                 for (city_position, steps) in happiness_increases {
                     let city = player.get_city(city_position).expect("Illegal action");
                     let cost = city.increase_happiness_cost(steps).expect("Illegal action");
-                    assert!(
-                        city.player_index == player_index && player.resources.can_afford(&cost),
-                        "Illegal action"
-                    );
                     player.loose_resources(cost);
                     let city = player.get_city_mut(city_position).expect("Illegal action");
                     for _ in 0..steps {
@@ -275,6 +273,8 @@ impl PlayingAction {
         if !free_action {
             game.actions_left += 1;
         }
+        game.players[player_index].gain_resources(self.action_type().cost);
+
         match self {
             Advance { advance, payment } => {
                 let player = &mut game.players[player_index];
@@ -347,29 +347,31 @@ impl PlayingAction {
 pub struct ActionType {
     pub free: bool,
     pub once_per_turn: bool,
+    pub cost: ResourcePile,
 }
 
 impl ActionType {
     #[must_use]
     pub fn free() -> Self {
-        Self::new(true, false)
+        Self::new(true, false, ResourcePile::empty())
     }
 
     #[must_use]
-    pub fn once_per_turn() -> Self {
-        Self::new(false, true)
+    pub fn once_per_turn(cost: ResourcePile) -> Self {
+        Self::new(false, true, cost)
     }
 
     #[must_use]
-    pub fn free_and_once_per_turn() -> Self {
-        Self::new(true, true)
+    pub fn free_and_once_per_turn(cost: ResourcePile) -> Self {
+        Self::new(true, true, cost)
     }
 
     #[must_use]
-    fn new(free: bool, once_per_turn: bool) -> Self {
+    fn new(free: bool, once_per_turn: bool, cost: ResourcePile) -> Self {
         Self {
             free,
             once_per_turn,
+            cost,
         }
     }
 }

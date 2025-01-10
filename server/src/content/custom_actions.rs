@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+use crate::content::wonders::construct_wonder;
 use crate::{
     game::Game, playing_actions::ActionType, position::Position, resource_pile::ResourcePile,
 };
@@ -11,11 +12,13 @@ pub enum CustomAction {
         wonder: String,
         payment: ResourcePile,
     },
+    ForcedLabor,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash)]
 pub enum CustomActionType {
     ConstructWonder,
+    ForcedLabor,
 }
 
 impl CustomAction {
@@ -30,26 +33,9 @@ impl CustomAction {
                 city_position,
                 wonder,
                 payment,
-            } => {
-                let wonder_cards_index = game.players[player_index]
-                    .wonder_cards
-                    .iter()
-                    .position(|wonder_card| wonder_card.name == wonder)
-                    .expect("Illegal action");
-                let wonder = game.players[player_index]
-                    .wonder_cards
-                    .remove(wonder_cards_index);
-                let city = game.players[player_index]
-                    .get_city(city_position)
-                    .expect("player should have city");
-                if !city.can_build_wonder(&wonder, &game.players[player_index], game)
-                    || !payment.can_afford(&wonder.cost)
-                {
-                    panic!("Illegal action");
-                }
-                game.players[player_index].loose_resources(payment);
-
-                game.build_wonder(wonder, city_position, player_index);
+            } => construct_wonder(game, player_index, city_position, &wonder, payment),
+            CustomAction::ForcedLabor => {
+                game.actions_left += 1;
             }
         }
     }
@@ -58,10 +44,15 @@ impl CustomAction {
     pub fn custom_action_type(&self) -> CustomActionType {
         match self {
             CustomAction::ConstructWonder { .. } => CustomActionType::ConstructWonder,
+            CustomAction::ForcedLabor => CustomActionType::ForcedLabor,
         }
     }
 
     pub fn undo(self, game: &mut Game, player_index: usize) {
+        let action = self.custom_action_type();
+        if action.action_type().once_per_turn {
+            game.played_once_per_turn_actions.retain(|a| a != &action);
+        }
         match self {
             CustomAction::ConstructWonder {
                 city_position,
@@ -72,6 +63,7 @@ impl CustomAction {
                 let wonder = game.undo_build_wonder(city_position, player_index);
                 game.players[player_index].wonder_cards.push(wonder);
             }
+            CustomAction::ForcedLabor => game.actions_left -= 1,
         }
     }
 
@@ -79,6 +71,7 @@ impl CustomAction {
     pub fn format_log_item(&self, _game: &Game, player_name: &str) -> String {
         match self {
             CustomAction::ConstructWonder { city_position, wonder, payment } => format!("{player_name} paid {payment} to construct the {wonder} wonder in the city at {city_position}"),
+            CustomAction::ForcedLabor => format!("{player_name} paid 2 mood tokens to get an extra action using Forced Labor"),
         }
     }
 }
@@ -88,6 +81,9 @@ impl CustomActionType {
     pub fn action_type(&self) -> ActionType {
         match self {
             CustomActionType::ConstructWonder => ActionType::default(),
+            CustomActionType::ForcedLabor => {
+                ActionType::free_and_once_per_turn(ResourcePile::mood_tokens(2))
+            }
         }
     }
 }

@@ -1,0 +1,663 @@
+{
+  "state": "Playing",
+  "players": [
+    {
+      "name": null,
+      "id": 0,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 9,
+        "culture_tokens": 10
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 0,
+        "culture_tokens": 0
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "academy": null,
+            "market": 1,
+            "obelisk": null,
+            "observatory": null,
+            "fortress": null,
+            "port": null,
+            "temple": null,
+            "wonders": []
+          },
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "player_index": 0,
+          "position": "A1",
+          "port_position": null
+        },
+        {
+          "city_pieces": {
+            "academy": 1,
+            "market": null,
+            "obelisk": null,
+            "observatory": null,
+            "fortress": null,
+            "port": 1,
+            "temple": null,
+            "wonders": []
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "player_index": 0,
+          "position": "C2",
+          "port_position": "C3"
+        },
+        {
+          "city_pieces": {
+            "academy": null,
+            "market": null,
+            "obelisk": 1,
+            "observatory": 1,
+            "fortress": 1,
+            "port": null,
+            "temple": 1,
+            "wonders": []
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "player_index": 0,
+          "position": "B1",
+          "port_position": null
+        },
+        {
+          "city_pieces": {
+            "academy": null,
+            "market": null,
+            "obelisk": null,
+            "observatory": null,
+            "fortress": null,
+            "port": null,
+            "temple": null,
+            "wonders": []
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "player_index": 0,
+          "position": "B3",
+          "port_position": null
+        }
+      ],
+      "units": [
+        {
+          "player_index": 0,
+          "position": "C2",
+          "unit_type": "Infantry",
+          "movement_restriction": "None",
+          "id": 0
+        },
+        {
+          "player_index": 0,
+          "position": "C2",
+          "unit_type": "Cavalry",
+          "movement_restriction": "None",
+          "id": 1
+        },
+        {
+          "player_index": 0,
+          "position": "C2",
+          "unit_type": "Elephant",
+          "movement_restriction": "None",
+          "id": 2
+        },
+        {
+          "player_index": 0,
+          "position": "C2",
+          "unit_type": "Settler",
+          "movement_restriction": "None",
+          "id": 3
+        },
+        {
+          "player_index": 0,
+          "position": "C2",
+          "unit_type": "Settler",
+          "movement_restriction": "None",
+          "id": 4
+        },
+        {
+          "player_index": 0,
+          "position": "C2",
+          "unit_type": "Settler",
+          "movement_restriction": "None",
+          "id": 5
+        },
+        {
+          "player_index": 0,
+          "position": "B3",
+          "unit_type": "Settler",
+          "movement_restriction": "None",
+          "id": 6
+        }
+      ],
+      "civilization": "test1",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [
+        "Absolute Power",
+        "Farming",
+        "Math",
+        "Mining",
+        "Nationalism"
+      ],
+      "unlocked_special_advance": [],
+      "wonders": [],
+      "wonders_build": 0,
+      "leader_position": null,
+      "game_event_tokens": 3,
+      "influenced_buildings": 0,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [
+        "Pyramids"
+      ],
+      "available_settlements": 7,
+      "available_buildings": {
+        "academies": 5,
+        "markets": 5,
+        "obelisks": 5,
+        "observatories": 5,
+        "fortresses": 5,
+        "ports": 5,
+        "temples": 5
+      },
+      "available_units": {
+        "settlers": 0,
+        "infantry": 15,
+        "ships": 4,
+        "cavalry": 3,
+        "elephants": 3,
+        "leaders": 1
+      },
+      "collect_options": [
+        [
+          "Mountain",
+          [
+            {
+              "food": 0,
+              "wood": 0,
+              "ore": 1,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
+            }
+          ]
+        ],
+        [
+          "Fertile",
+          [
+            {
+              "food": 1,
+              "wood": 0,
+              "ore": 0,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
+            }
+          ]
+        ],
+        [
+          "Forest",
+          [
+            {
+              "food": 0,
+              "wood": 1,
+              "ore": 0,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
+            }
+          ]
+        ]
+      ],
+      "next_unit_id": 7
+    },
+    {
+      "name": null,
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 9,
+        "culture_tokens": 10
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 0,
+        "culture_tokens": 0
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "academy": null,
+            "market": null,
+            "obelisk": null,
+            "observatory": null,
+            "fortress": null,
+            "port": null,
+            "temple": null,
+            "wonders": []
+          },
+          "mood_state": "Angry",
+          "activations": 0,
+          "angry_activation": false,
+          "player_index": 1,
+          "position": "C1",
+          "port_position": null
+        },
+        {
+          "city_pieces": {
+            "academy": null,
+            "market": null,
+            "obelisk": null,
+            "observatory": null,
+            "fortress": null,
+            "port": 1,
+            "temple": null,
+            "wonders": []
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "player_index": 1,
+          "position": "B2",
+          "port_position": "C3"
+        }
+      ],
+      "units": [
+        {
+          "player_index": 1,
+          "position": "C1",
+          "unit_type": "Infantry",
+          "movement_restriction": "None",
+          "id": 0
+        },
+        {
+          "player_index": 1,
+          "position": "C1",
+          "unit_type": "Infantry",
+          "movement_restriction": "None",
+          "id": 1
+        },
+        {
+          "player_index": 1,
+          "position": "C3",
+          "unit_type": "Ship",
+          "movement_restriction": "None",
+          "id": 2
+        }
+      ],
+      "civilization": "test0",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [
+        "Farming",
+        "Math",
+        "Mining"
+      ],
+      "unlocked_special_advance": [],
+      "wonders": [],
+      "wonders_build": 0,
+      "leader_position": null,
+      "game_event_tokens": 2,
+      "influenced_buildings": 0,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "available_settlements": 7,
+      "available_buildings": {
+        "academies": 5,
+        "markets": 5,
+        "obelisks": 5,
+        "observatories": 5,
+        "fortresses": 5,
+        "ports": 5,
+        "temples": 5
+      },
+      "available_units": {
+        "settlers": 4,
+        "infantry": 14,
+        "ships": 3,
+        "cavalry": 4,
+        "elephants": 4,
+        "leaders": 1
+      },
+      "collect_options": [
+        [
+          "Mountain",
+          [
+            {
+              "food": 0,
+              "wood": 0,
+              "ore": 1,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
+            }
+          ]
+        ],
+        [
+          "Fertile",
+          [
+            {
+              "food": 1,
+              "wood": 0,
+              "ore": 0,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
+            }
+          ]
+        ],
+        [
+          "Forest",
+          [
+            {
+              "food": 0,
+              "wood": 1,
+              "ore": 0,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
+            }
+          ]
+        ]
+      ],
+      "next_unit_id": 3
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Water"
+      ],
+      [
+        "A3",
+        {
+          "Exhausted": "Forest"
+        }
+      ],
+      [
+        "A4",
+        "Mountain"
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "B4",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "D2",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 1,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "Playing": "EndTurn"
+    },
+    {
+      "Playing": "EndTurn"
+    },
+    {
+      "StatusPhase": {
+        "FreeAdvance": "Math"
+      }
+    },
+    {
+      "StatusPhase": {
+        "FreeAdvance": "Math"
+      }
+    },
+    {
+      "StatusPhase": {
+        "RazeSize1City": "None"
+      }
+    },
+    {
+      "StatusPhase": {
+        "RazeSize1City": "None"
+      }
+    },
+    {
+      "StatusPhase": {
+        "ChangeGovernmentType": {
+          "ChangeGovernment": {
+            "new_government": "Autocracy",
+            "additional_advances": [
+              "Absolute Power"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "StatusPhase": {
+        "DetermineFirstPlayer": 1
+      }
+    },
+    {
+      "Playing": "EndTurn"
+    },
+    {
+      "Playing": "MoveUnits"
+    },
+    {
+      "Movement": "Stop"
+    },
+    {
+      "Playing": "MoveUnits"
+    },
+    {
+      "Movement": "Stop"
+    },
+    {
+      "Playing": "MoveUnits"
+    },
+    {
+      "Movement": "Stop"
+    }
+  ],
+  "action_log_index": 15,
+  "log": [
+    "The game has started",
+    "Age 1 has started",
+    "Round 1/3",
+    "Player1 ended his turn with 3 actions left",
+    "It's Player2's turn",
+    "Player2 ended his turn with 3 actions left",
+    "It's Player1's turn",
+    "The game has entered the 1st status phase",
+    "Player1 advanced Math for free",
+    "It's Player2's turn",
+    "Player2 advanced Math for free",
+    "It's Player1's turn",
+    "Player1 did not rase a city",
+    "It's Player2's turn",
+    "Player2 did not rase a city",
+    "It's Player1's turn",
+    "Player1 changed his government from Theocracy to Autocracy - additional advances: Absolute Power",
+    "It's Player2's turn",
+    "Player1 choose Player2 as the new starting player",
+    "Age 2 has started",
+    "Round 1/3",
+    "Player2 ended his turn with 3 actions left",
+    "It's Player1's turn",
+    "Player1 used a move units action",
+    "\tPlayer1 ended the movement action",
+    "Player1 used a move units action",
+    "\tPlayer1 ended the movement action",
+    "Player1 used a move units action",
+    "\tPlayer1 ended the movement action"
+  ],
+  "undo_limit": 9,
+  "played_once_per_turn_actions": [],
+  "actions_left": 0,
+  "successful_cultural_influence": false,
+  "round": 1,
+  "age": 2,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+  ],
+  "dice_roll_log": [],
+  "dropped_players": [],
+  "wonders_left": [],
+  "wonder_amount_left": 1,
+  "undo_context_stack": [
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
+    {
+      "Recruit": {
+        "replaced_units": [],
+        "replaced_leader": null
+      }
+    },
+    {
+      "Movement": {
+        "starting_position": null,
+        "movement_actions_left": 3,
+        "moved_units": []
+      }
+    },
+    {
+      "Movement": {
+        "starting_position": null,
+        "movement_actions_left": 3,
+        "moved_units": []
+      }
+    },
+    {
+      "Movement": {
+        "starting_position": null,
+        "movement_actions_left": 3,
+        "moved_units": []
+      }
+    }
+  ]
+}
