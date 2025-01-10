@@ -17,7 +17,7 @@ use crate::happiness_ui::IncreaseHappiness;
 use crate::layout_ui::FONT_SIZE;
 use crate::move_ui::MoveSelection;
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
-use crate::render_context::ShownPlayer;
+use crate::render_context::{RenderContext, ShownPlayer};
 use crate::status_phase_ui::ChooseAdditionalAdvances;
 
 #[derive(Clone)]
@@ -295,7 +295,6 @@ pub struct State {
     pub active_dialog: ActiveDialog,
     pub pending_update: Option<PendingUpdate>,
     pub camera: Camera2D,
-    pub camera_mode: CameraMode,
     pub screen_size: Vec2,
     pub mouse_positions: Vec<MousePosition>,
     pub log_scroll: f32,
@@ -319,12 +318,22 @@ impl State {
                 offset: OFFSET,
                 ..Default::default()
             },
-            camera_mode: CameraMode::Screen,
             screen_size: vec2(0., 0.),
             mouse_positions: vec![],
             log_scroll: 0.0,
             focused_tile: None,
             pan_map: false,
+        }
+    }
+
+    pub fn render_context(&self, game: &Game) -> RenderContext {
+        let player = &self.shown_player(game);
+        RenderContext {
+            shown_player: player,
+            game,
+            state: self,
+            player: game.get_player(player.index),
+            camera_mode: CameraMode::World,
         }
     }
 
@@ -384,6 +393,7 @@ impl State {
                     self.set_dialog(dialog);
                 }
                 self.focused_tile = None;
+                self.log_scroll = 0.0;
                 GameSyncRequest::None
             }
             StateUpdate::CloseDialog => {
@@ -490,36 +500,4 @@ impl State {
         );
     }
 
-    pub fn set_screen_camera(&mut self) {
-        set_default_camera();
-        self.camera_mode = CameraMode::Screen;
-    }
-
-    pub fn set_world_camera(&mut self) {
-        set_camera(&self.camera);
-        self.camera_mode = CameraMode::World;
-    }
-
-    pub fn set_camera(&self) {
-        match self.camera_mode {
-            CameraMode::Screen => set_default_camera(),
-            CameraMode::World => set_camera(&self.camera),
-        };
-    }
-
-    #[must_use]
-    pub fn world_to_screen(&self, point: Vec2) -> Vec2 {
-        match self.camera_mode {
-            CameraMode::Screen => point,
-            CameraMode::World => self.camera.world_to_screen(point),
-        }
-    }
-
-    #[must_use]
-    pub fn screen_to_world(&self, point: Vec2) -> Vec2 {
-        match self.camera_mode {
-            CameraMode::Screen => point,
-            CameraMode::World => self.camera.screen_to_world(point),
-        }
-    }
 }

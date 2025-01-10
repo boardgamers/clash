@@ -5,7 +5,7 @@ use macroquad::math::vec2;
 use server::resource_pile::ResourcePile;
 use std::collections::HashMap;
 use std::fmt;
-use crate::render_context::ShownPlayer;
+use crate::render_context::{RenderContext, ShownPlayer};
 
 #[derive(PartialEq, Eq, Debug, Clone, Copy, Hash, Ord, PartialOrd)]
 pub enum ResourceType {
@@ -68,8 +68,7 @@ pub fn resource_name(t: ResourceType) -> &'static str {
 }
 
 pub fn show_resource_pile(
-    state: &State,
-    player: &ShownPlayer,
+    rc: &RenderContext,
     p: &ResourcePile,
     must_show: &[ResourceType],
 ) {
@@ -83,10 +82,9 @@ pub fn show_resource_pile(
         let a = resource_map[r];
 
         bottom_icon_with_label(
-            player,
-            state,
+            rc,
             &format!("{a}"),
-            &state.assets.resources[r],
+            &rc.assets().resources[r],
             icon_pos(x, -2) + vec2(0., 10.),
             resource_name(*r),
         );

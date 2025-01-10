@@ -5,15 +5,16 @@ use server::unit::Unit;
 
 use crate::client_state::{State, StateUpdate};
 use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
+use crate::render_context::RenderContext;
 use crate::select_ui::ConfirmSelection;
 use crate::unit_ui;
 use crate::unit_ui::UnitSelection;
 
-pub fn retreat_dialog(state: &State) -> StateUpdate {
-    if ok_button(state, OkTooltip::Valid("Retreat".to_string())) {
+pub fn retreat_dialog(rc: &RenderContext) -> StateUpdate {
+    if ok_button(rc, OkTooltip::Valid("Retreat".to_string())) {
         return retreat(true);
     }
-    if cancel_button_with_tooltip(state, "Decline") {
+    if cancel_button_with_tooltip(rc, "Decline") {
         return retreat(false);
     }
     StateUpdate::None
@@ -70,24 +71,22 @@ impl ConfirmSelection for RemoveCasualtiesSelection {
 }
 
 pub fn remove_casualties_dialog(
-    game: &Game,
+    rc: &RenderContext,
     sel: &RemoveCasualtiesSelection,
-    state: &State,
 ) -> StateUpdate {
     unit_ui::unit_selection_dialog::<RemoveCasualtiesSelection>(
-        game,
+        rc,
         sel,
         |new: RemoveCasualtiesSelection| {
             StateUpdate::Execute(Action::Combat(CombatAction::RemoveCasualties(
                 new.units.clone(),
             )))
         },
-        state,
     )
 }
 
-pub fn play_action_card_dialog(state: &State) -> StateUpdate {
-    if cancel_button_with_tooltip(state, "Play no action card") {
+pub fn play_action_card_dialog(rc: &RenderContext) -> StateUpdate {
+    if cancel_button_with_tooltip(rc, "Play no action card") {
         return StateUpdate::Execute(Action::Combat(CombatAction::PlayActionCard(
             PlayActionCard::None,
         )));

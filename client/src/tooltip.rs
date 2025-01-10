@@ -1,9 +1,10 @@
-use crate::client_state::{MousePosition, State};
+use crate::client_state::{CameraMode, MousePosition, State, StateUpdate};
 use macroquad::camera::set_default_camera;
 use macroquad::color::{Color, GRAY};
 use macroquad::input::mouse_position;
 use macroquad::math::{bool, f32, f64, vec2, Rect, Vec2};
 use macroquad::prelude::{draw_circle, draw_rectangle, get_time};
+use crate::render_context::RenderContext;
 
 const TOOLTIP_DELAY: f64 = 0.5;
 
@@ -18,17 +19,17 @@ pub fn update(state: &mut State) {
     });
 }
 
-fn is_rect_tooltip_active(state: &State, rect: Rect) -> bool {
-    state
+fn is_rect_tooltip_active(rc: &RenderContext, rect: Rect) -> bool {
+    rc.state
         .mouse_positions
         .iter()
-        .all(|mp| rect.contains(state.screen_to_world(mp.position)))
+        .all(|mp| rect.contains(rc.screen_to_world(mp.position)))
 }
 
-pub fn show_tooltip_for_rect(state: &State, tooltip: &[String], rect: Rect) {
+pub fn show_tooltip_for_rect(rc: &RenderContext, tooltip: &[String], rect: Rect) {
     let origin = rect.point();
-    let screen_origin = state.world_to_screen(rect.point());
-    if is_rect_tooltip_active(state, rect) {
+    let screen_origin = rc.world_to_screen(rect.point());
+    if is_rect_tooltip_active(rc, rect) {
         draw_rectangle(
             origin.x,
             origin.y,
@@ -36,34 +37,37 @@ pub fn show_tooltip_for_rect(state: &State, tooltip: &[String], rect: Rect) {
             rect.size().y,
             Color::new(0.0, 0.0, 0.0, 0.5),
         );
-        set_default_camera();
-        show_tooltip_text(state, tooltip, screen_origin);
-        state.set_camera();
+        let _ = rc.with_camera(CameraMode::Screen, |rc| {
+            show_tooltip_text(rc, tooltip, screen_origin);
+            StateUpdate::None
+        });
     }
 }
 
-fn is_circle_tooltip_active(state: &State, center: Vec2, radius: f32) -> bool {
-    state
+fn is_circle_tooltip_active(rc: &RenderContext, center: Vec2, radius: f32) -> bool {
+    rc.state
         .mouse_positions
         .iter()
-        .all(|mp| (center - state.screen_to_world(mp.position)).length() < radius)
+        .all(|mp| (center - rc.screen_to_world(mp.position)).length() < radius)
 }
 
-pub fn show_tooltip_for_circle(state: &State, tooltip: &str, center: Vec2, radius: f32) {
-    let screen_center = state.world_to_screen(center);
-    if is_circle_tooltip_active(state, center, radius) {
+pub fn show_tooltip_for_circle(rc: &RenderContext, tooltip: &str, center: Vec2, radius: f32) {
+    let screen_center = rc.world_to_screen(center);
+    if is_circle_tooltip_active(rc, center, radius) {
         draw_circle(center.x, center.y, radius, Color::new(0.0, 0.0, 0.0, 0.5));
-        set_default_camera();
-        show_tooltip_text(
-            state,
-            &[tooltip.to_string()],
-            screen_center + vec2(radius, radius),
-        );
-        state.set_camera();
+        let _ = rc.with_camera(CameraMode::Screen, |rc| {
+            show_tooltip_text(
+                rc,
+                &[tooltip.to_string()],
+                screen_center + vec2(radius, radius),
+            );
+            StateUpdate::None
+        });
     }
 }
 
-fn show_tooltip_text(state: &State, tooltip: &[String], origin: Vec2) {
+fn show_tooltip_text(rc: &RenderContext, tooltip: &[String], origin: Vec2) {
+    let state = rc.state;
     let dim = tooltip.iter().map(|t| state.measure_text(t));
     let total = dim.fold(Vec2::new(0., 0.), |acc, d| {
         vec2(acc.x.max(d.width), acc.y + 20.)

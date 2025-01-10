@@ -8,7 +8,7 @@ use server::resource_pile::ResourcePile;
 
 use crate::client_state::{ActiveDialog, State, StateUpdate};
 use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
-use crate::render_context::ShownPlayer;
+use crate::render_context::{RenderContext, ShownPlayer};
 use crate::resource_ui::{show_resource_pile, ResourceType};
 
 #[derive(Clone)]
@@ -28,12 +28,11 @@ impl IncreaseHappiness {
 }
 
 pub fn increase_happiness_click(
-    game: &Game,
-    player: &ShownPlayer,
+    rc: &RenderContext,
     pos: Position,
     h: &IncreaseHappiness,
 ) -> StateUpdate {
-    if let Some(city) = player.get(game).get_city(pos) {
+    if let Some(city) = rc.player.get_city(pos) {
         StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(add_increase_happiness(
             city, h,
         )))
@@ -102,24 +101,22 @@ fn increase_happiness_new_steps(
 }
 
 pub fn increase_happiness_menu(
+    rc: &RenderContext,
     h: &IncreaseHappiness,
-    player: &ShownPlayer,
-    state: &State,
-    game: &Game,
 ) -> StateUpdate {
-    show_resource_pile(state, player, &h.cost, &[ResourceType::MoodTokens]);
+    show_resource_pile(rc,&h.cost, &[ResourceType::MoodTokens]);
 
-    let tooltip = if player.get(game).resources.can_afford(&h.cost) {
+    let tooltip = if rc.player.resources.can_afford(&h.cost) {
         OkTooltip::Valid("Increase happiness".to_string())
     } else {
         OkTooltip::Invalid("Not enough resources".to_string())
     };
-    if ok_button(state, tooltip) {
+    if ok_button(rc, tooltip) {
         return StateUpdate::Execute(Action::Playing(PlayingAction::IncreaseHappiness {
             happiness_increases: h.steps.clone(),
         }));
     }
-    if cancel_button(state) {
+    if cancel_button(rc) {
         return StateUpdate::Cancel;
     }
     StateUpdate::None

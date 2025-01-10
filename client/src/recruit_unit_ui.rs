@@ -5,14 +5,14 @@ use server::player::Player;
 use server::position::Position;
 use server::unit::{Unit, UnitType, Units};
 
-use crate::client_state::{ActiveDialog, State, StateUpdate};
+use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::dialog_ui::OkTooltip;
 use crate::hex_ui::Point;
+use crate::render_context::RenderContext;
 use crate::select_ui::{ConfirmSelection, CountSelector, HasCountSelectableObject};
 use crate::unit_ui::{draw_unit_type, UnitSelection};
 use crate::{select_ui, unit_ui};
-use crate::render_context::ShownPlayer;
 
 #[derive(Clone)]
 pub struct SelectableUnit {
@@ -202,22 +202,21 @@ impl ConfirmSelection for RecruitSelection {
 }
 
 pub fn select_dialog(
-    game: &Game,
+    rc: &RenderContext,
     a: &RecruitAmount,
-    player: &ShownPlayer,
-    state: &State,
 ) -> StateUpdate {
+    let game = rc.game;
     select_ui::count_dialog(
-        state,
+        rc,
         a,
         |s| s.selectable.clone(),
         |s, p| {
             draw_unit_type(
+                rc,
                 false,
                 Point::from_vec2(p),
                 &s.unit_type,
-                player.index,
-                state,
+                rc.shown_player.index,
                 &format!(
                     "{} ({} available with current resources)",
                     s.name, s.selectable.max
@@ -232,10 +231,9 @@ pub fn select_dialog(
             if sel.is_finished() {
                 StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(
                     ConstructionPayment::new(
-                        game,
+                        rc,
+                        game.get_city(amount.player_index, amount.city_position),
                         "units",
-                        amount.player_index,
-                        amount.city_position,
                         ConstructionProject::Units(sel),
                     ),
                 ))
@@ -282,19 +280,16 @@ fn update_selection(
     )
 }
 
-pub fn replace_dialog(game: &Game, sel: &RecruitSelection, state: &State) -> StateUpdate {
+pub fn replace_dialog(rc: &RenderContext, sel: &RecruitSelection) -> StateUpdate {
     unit_ui::unit_selection_dialog::<RecruitSelection>(
-        game,
+        rc,
         sel,
         |new: RecruitSelection| {
             StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
-                game,
+                &rc.city_menu(new.amount.city_position),
                 "units",
-                new.amount.player_index,
-                new.amount.city_position,
                 ConstructionProject::Units(new),
             )))
         },
-        state,
     )
 }

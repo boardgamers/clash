@@ -1,6 +1,7 @@
-use crate::client_state::{State, StateUpdate, StateUpdates};
+use crate::client_state::{StateUpdate, StateUpdates};
 use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
 use crate::layout_ui::{bottom_center_anchor, bottom_center_texture, ICON_SIZE};
+use crate::render_context::RenderContext;
 use macroquad::color::BLACK;
 use macroquad::math::{bool, vec2, Vec2};
 use macroquad::prelude::TextParams;
@@ -21,7 +22,7 @@ pub trait HasCountSelectableObject {
 
 #[allow(clippy::too_many_arguments)]
 pub fn count_dialog<C, O: HasCountSelectableObject>(
-    state: &State,
+    rc: &RenderContext,
     container: &C,
     get_objects: impl Fn(&C) -> Vec<O>,
     draw: impl Fn(&O, Vec2),
@@ -37,7 +38,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
         .filter(|o| show(container, o))
         .collect::<Vec<_>>();
     let start_x = objects.len() as f32 * -1. / 2.;
-    let anchor = bottom_center_anchor(state);
+    let anchor = bottom_center_anchor(rc);
     for (i, o) in objects.iter().enumerate() {
         let x = (start_x + i as f32) * ICON_SIZE * 2.;
         let c = o.counter();
@@ -50,15 +51,15 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
             TextParams {
                 font_size: 20,
                 font_scale: 1.,
-                font: Some(&state.assets.font),
+                font: Some(&rc.assets().font),
                 color: BLACK,
                 ..Default::default()
             },
         );
         if c.current > c.min
             && bottom_center_texture(
-                state,
-                &state.assets.minus,
+                rc,
+                &rc.assets().minus,
                 vec2(x - 15., -ICON_SIZE),
                 "Remove one",
             )
@@ -67,8 +68,8 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
         }
         if c.current < c.max
             && bottom_center_texture(
-                state,
-                &state.assets.plus,
+                rc,
+                &rc.assets().plus,
                 vec2(x + 15., -ICON_SIZE),
                 "Add one",
             )
@@ -77,10 +78,10 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
         };
     }
 
-    if ok_button(state, is_valid(container)) {
+    if ok_button(rc, is_valid(container)) {
         return execute_action(container);
     }
-    if cancel_button(state) {
+    if cancel_button(rc) {
         return StateUpdate::Cancel;
     };
 

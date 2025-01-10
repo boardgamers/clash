@@ -1,5 +1,5 @@
 use crate::assets::Assets;
-use crate::client_state::{ActiveDialog, State, StateUpdate};
+use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::happiness_ui::IncreaseHappiness;
 use crate::layout_ui::{bottom_left_texture, icon_pos};
 use crate::resource_ui::ResourceType;
@@ -8,29 +8,29 @@ use server::content::advances::get_advance_by_name;
 use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::game::Game;
 use server::playing_actions::PlayingAction;
-use crate::render_context::ShownPlayer;
+use crate::render_context::{RenderContext, ShownPlayer};
 
 pub fn action_buttons(
-    game: &Game,
-    state: &State,
-    player: &ShownPlayer,
-    assets: &Assets,
+    rc: &RenderContext
 ) -> StateUpdate {
+    let assets = rc.assets();
+    let player = rc.shown_player;
+    let game = rc.game;
     if player.can_play_action {
-        if bottom_left_texture(state, &assets.move_units, icon_pos(0, -3), "Move units") {
+        if bottom_left_texture(rc,  &assets.move_units, icon_pos(0, -3), "Move units") {
             return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
         }
         if bottom_left_texture(
-            state,
+            rc,
             &assets.advances,
             icon_pos(1, -3),
             "Research advances",
         ) {
             return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
         }
-        let p = player.get(game);
+        let p = rc.player;
         if bottom_left_texture(
-            state,
+            rc,
             &assets.resources[&ResourceType::MoodTokens],
             icon_pos(0, -2),
             "Increase happiness",
@@ -40,7 +40,7 @@ pub fn action_buttons(
             ));
         }
         if bottom_left_texture(
-            state,
+            rc,
             &assets.resources[&ResourceType::CultureTokens],
             icon_pos(1, -2),
             "Cultural Influence",
@@ -54,7 +54,7 @@ pub fn action_buttons(
             continue;
         };
         if bottom_left_texture(
-            state,
+            rc,
             &assets.custom_actions[a],
             icon_pos(i as i8, -1),
             &custom_action_tooltip(a),

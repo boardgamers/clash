@@ -17,9 +17,10 @@ use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::game::{Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::unit::MovementAction;
-use crate::render_context::ShownPlayer;
+use crate::render_context::{RenderContext, ShownPlayer};
 
-pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
+pub fn player_select(rc: &RenderContext) -> StateUpdate {
+    let game = rc.game;
     let i = game
         .players
         .iter()
@@ -31,6 +32,7 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
     let size = 40.;
     let mut y = (players.len() as f32 * -size) / 2.;
 
+    let player = rc.shown_player;
     for player_index in players {
         let pl = game.get_player(player_index);
         let shown = player.index == pl.index;
@@ -44,11 +46,12 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
         draw_rectangle_lines(x, pos.y, w, size, 2.0, BLACK);
         let text = format!("{}", pl.victory_points());
 
+        let state = rc.state;
         state.draw_text(&text, pos.x + 10., pos.y + 22.);
 
         if game.active_player() == pl.index {
             draw_texture_ex(
-                &state.assets.active_player,
+                &rc.assets().active_player,
                 x - 25.,
                 pos.y + 10.,
                 WHITE,
@@ -65,8 +68,8 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
         } else {
             pl.get_name()
         };
-        show_tooltip_for_rect(state, &[tooltip], rect);
-        if !shown && left_mouse_button_pressed_in_rect(rect, state) {
+        show_tooltip_for_rect(rc, &[tooltip], rect);
+        if !shown && left_mouse_button_pressed_in_rect(rect, rc) {
             return StateUpdate::SetShownPlayer(pl.index);
         }
 
@@ -77,13 +80,14 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
 }
 
 pub fn top_icon_with_label(
-    player: &ShownPlayer,
-    state: &State,
+    rc: &RenderContext,
     label: &str,
     texture: &Texture2D,
     p: Vec2,
     tooltip: &str,
 ) {
+    let state = rc.state;
+    let player = rc.shown_player;
     let dimensions = state.measure_text(label);
     let x = (ICON_SIZE - dimensions.width) / 2.0;
     state.draw_text(
@@ -91,17 +95,18 @@ pub fn top_icon_with_label(
         player.screen_size.x / 2.0 + p.x + x,
         p.y + ICON_SIZE + 30.,
     );
-    top_center_texture(state, texture, p, tooltip);
+    top_center_texture(rc,  texture, p, tooltip);
 }
 
 pub fn bottom_icon_with_label(
-    player: &ShownPlayer,
-    state: &State,
+    rc: &RenderContext,
     label: &str,
     texture: &Texture2D,
     p: Vec2,
     tooltip: &str,
 ) {
+    let state = rc.state;
+    let player = rc.shown_player;
     let dimensions = state.measure_text(label);
     let x = (ICON_SIZE - dimensions.width) / 2.0;
     state.draw_text(
@@ -109,17 +114,16 @@ pub fn bottom_icon_with_label(
         player.screen_size.x / 2.0 + p.x + x,
         player.screen_size.y + p.y + 35.,
     );
-    bottom_center_texture(state, texture, p, tooltip);
+    bottom_center_texture(rc,  texture, p, tooltip);
 }
 
-pub fn show_top_center(game: &Game, shown_player: &ShownPlayer, state: &State) {
-    let player = shown_player.get(game);
+pub fn show_top_center(rc: &RenderContext) {
+    let player = rc.player;
 
     top_icon_with_label(
-        shown_player,
-        state,
+        rc,
         &format!("{}", &player.victory_points()),
-        &state.assets.victory_points,
+        &rc.assets().victory_points,
         icon_pos(3, 0),
         "Victory Points",
     );
@@ -134,17 +138,18 @@ pub fn show_top_center(game: &Game, shown_player: &ShownPlayer, state: &State) {
             format!("{a}")
         };
         top_icon_with_label(
-            shown_player,
-            state,
+            rc,
             &t,
-            &state.assets.resources[r],
+            &rc.assets().resources[r],
             icon_pos(2 - i as i8, 0),
             resource_name(*r),
         );
     }
 }
 
-pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
+pub fn show_top_left(rc: &RenderContext) {
+    let player = rc.shown_player;
+    let state = rc.state;
     let mut p = vec2(10., 10.);
     let mut label = |label: &str| {
         p = vec2(p.x, p.y + 25.);
@@ -153,6 +158,8 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
         }
         state.draw_text(label, p.x, p.y);
     };
+
+    let game = rc.game;
 
     match &game.state {
         GameState::Finished => label("Finished"),
@@ -163,7 +170,7 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
         _ => label(&format!("Round {}", game.round)),
     }
 
-    let p = player.get(game);
+    let p = rc.player;
 
     label(&p.get_name());
 
@@ -255,26 +262,26 @@ fn moves_left(state: &GameState) -> Option<u32> {
     }
 }
 
-pub fn show_global_controls(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
-    let player = &state.shown_player(game);
-
-    let assets = &state.assets;
+pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpdate {
+    let player = rc.shown_player;
+    let assets = rc.assets();
 
     if player.can_control {
+        let game = rc.game;
         if let Some(tooltip) = can_end_move(game) {
-            if bottom_right_texture(state, &assets.end_turn, icon_pos(-4, -1), tooltip) {
+            if bottom_right_texture(rc,  &assets.end_turn, icon_pos(-4, -1), tooltip) {
                 return end_move(game);
             }
         }
-        if game.can_redo() && bottom_right_texture(state, &assets.redo, icon_pos(-5, -1), "Redo") {
+        if game.can_redo() && bottom_right_texture(rc,  &assets.redo, icon_pos(-5, -1), "Redo") {
             return StateUpdate::Execute(Action::Redo);
         }
-        if game.can_undo() && bottom_right_texture(state, &assets.undo, icon_pos(-6, -1), "Undo") {
+        if game.can_undo() && bottom_right_texture(rc,  &assets.undo, icon_pos(-6, -1), "Undo") {
             return StateUpdate::Execute(Action::Undo);
         }
 
         if player.can_control {
-            let update = action_buttons(game, state, player, assets);
+            let update = action_buttons(rc);
             if !matches!(update, StateUpdate::None) {
                 return update;
             }
@@ -282,10 +289,10 @@ pub fn show_global_controls(game: &Game, state: &mut State, features: &Features)
     }
 
     if features.import_export {
-        if bottom_right_texture(state, &assets.export, icon_pos(-1, -3), "Export") {
+        if bottom_right_texture(rc,  &assets.export, icon_pos(-1, -3), "Export") {
             return StateUpdate::Export;
         };
-        if bottom_right_texture(state, &assets.import, icon_pos(-2, -3), "Import") {
+        if bottom_right_texture(rc,  &assets.import, icon_pos(-2, -3), "Import") {
             return StateUpdate::Import;
         };
     }
