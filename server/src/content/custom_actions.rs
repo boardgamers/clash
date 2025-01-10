@@ -12,13 +12,13 @@ pub enum CustomAction {
         wonder: String,
         payment: ResourcePile,
     },
-    WhipWorkers,
+    ForcedLabor,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash)]
 pub enum CustomActionType {
     ConstructWonder,
-    WhipWorkers,
+    ForcedLabor,
 }
 
 impl CustomAction {
@@ -34,7 +34,7 @@ impl CustomAction {
                 wonder,
                 payment,
             } => construct_wonder(game, player_index, city_position, wonder, payment),
-            CustomAction::WhipWorkers => {
+            CustomAction::ForcedLabor => {
                 game.actions_left += 1;
             }
         }
@@ -45,7 +45,7 @@ impl CustomAction {
     pub fn custom_action_type(&self) -> CustomActionType {
         match self {
             CustomAction::ConstructWonder { .. } => CustomActionType::ConstructWonder,
-            CustomAction::WhipWorkers => CustomActionType::WhipWorkers,
+            CustomAction::ForcedLabor => CustomActionType::ForcedLabor,
         }
     }
 
@@ -60,7 +60,7 @@ impl CustomAction {
                 let wonder = game.undo_build_wonder(city_position, player_index);
                 game.players[player_index].wonder_cards.push(wonder);
             },
-            CustomAction::WhipWorkers => game.actions_left -= 1,
+            CustomAction::ForcedLabor => game.actions_left -= 1,
         }
     }
 
@@ -68,7 +68,7 @@ impl CustomAction {
     pub fn format_log_item(&self, _game: &Game, player_name: &str) -> String {
         match self {
             CustomAction::ConstructWonder { city_position, wonder, payment } => format!("{player_name} paid {payment} to construct the {wonder} wonder in the city at {city_position}"),
-            CustomAction::WhipWorkers => format!("{player_name} whipped workers"),
+            CustomAction::ForcedLabor => format!("{player_name} paid 2 mood tokens to get an extra action using Forced Labor"),
         }
     }
 }
@@ -78,7 +78,7 @@ impl CustomActionType {
     pub fn action_type(&self) -> ActionType {
         match self {
             CustomActionType::ConstructWonder => ActionType::default(),
-            CustomActionType::WhipWorkers => ActionType::free_and_once_per_turn(ResourcePile::mood_tokens(2)),
+            CustomActionType::ForcedLabor => ActionType::free_and_once_per_turn(ResourcePile::mood_tokens(2)),
         }
     }
 }

@@ -67,7 +67,7 @@ pub fn action_buttons(
 fn custom_action_tooltip(custom_action_type: &CustomActionType) -> &'static str {
     match custom_action_type {
         CustomActionType::ConstructWonder => "Construct a wonder",
-        CustomActionType::WhipWorkers => &get_advance_by_name("Absolute Power").unwrap().description,
+        CustomActionType::ForcedLabor => &get_advance_by_name("Absolute Power").unwrap().description,
     }
 }
 
@@ -76,6 +76,6 @@ fn new_custom_action(custom_action_type: &CustomActionType) -> CustomAction {
         CustomActionType::ConstructWonder => {
             panic!("Construct wonder is handled in city_ui")
         }
-        CustomActionType::WhipWorkers => CustomAction::WhipWorkers,
+        CustomActionType::ForcedLabor => CustomAction::ForcedLabor,
     }
 }

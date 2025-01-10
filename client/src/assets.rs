@@ -209,7 +209,7 @@ impl Assets {
     fn custom_actions() -> HashMap<CustomActionType, Texture2D> {
         [
             (
-                CustomActionType::WhipWorkers,
+                CustomActionType::ForcedLabor,
                 load_png(include_bytes!("../assets/slavery-whip-svgrepo-com.png")),
             )
         ]

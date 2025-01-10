@@ -192,7 +192,7 @@ fn autocracy() -> Vec<Advance> {
             .build(),
         Advance::builder("Absolute Power", "Once per turn, as a free action, you may spend 2 mood tokens to get an additional action")
             .with_required_advance("Nationalism")
-            .add_custom_action(WhipWorkers)
+            .add_custom_action(ForcedLabor)
             .build(),
     ]
 }
