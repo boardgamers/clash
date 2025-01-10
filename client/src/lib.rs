@@ -5,8 +5,7 @@
     clippy::cast_sign_loss,
     clippy::cast_possible_wrap,
     clippy::cast_possible_truncation,
-    clippy::missing_panics_doc,
-    clippy::module_name_repetitions
+    clippy::missing_panics_doc
 )]
 
 mod action_buttons;

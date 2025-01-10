@@ -12,17 +12,17 @@ use crate::render_context::RenderContext;
 use crate::resource_ui::{show_resource_pile, ResourceType};
 
 #[derive(Clone)]
-pub struct IncreaseHappinessUi {
+pub struct IncreaseHappinessConfig {
     pub title: String,
     pub steps: Vec<(Position, u32)>,
     pub cost: ResourcePile,
     pub special_action: bool,
 }
 
-impl IncreaseHappinessUi {
-    pub fn new(p: &Player, title: &str, special_action: bool) -> IncreaseHappinessUi {
+impl IncreaseHappinessConfig {
+    pub fn new(p: &Player, title: &str, special_action: bool) -> IncreaseHappinessConfig {
         let steps = p.cities.iter().map(|c| (c.position, 0)).collect();
-        IncreaseHappinessUi {
+        IncreaseHappinessConfig {
             title: title.to_string(),
             steps,
             cost: ResourcePile::empty(),
@@ -33,10 +33,10 @@ impl IncreaseHappinessUi {
 
 pub fn open_increase_happiness_dialog(
     rc: &RenderContext,
-    init: impl Fn(IncreaseHappinessUi) -> IncreaseHappinessUi,
+    init: impl Fn(IncreaseHappinessConfig) -> IncreaseHappinessConfig,
 ) -> StateUpdate {
     let p = rc.shown_player;
-    let base = ActiveDialog::IncreaseHappiness(init(IncreaseHappinessUi::new(
+    let base = ActiveDialog::IncreaseHappiness(init(IncreaseHappinessConfig::new(
         p,
         "Increase happiness",
         false,
@@ -49,7 +49,7 @@ pub fn open_increase_happiness_dialog(
     {
         StateUpdate::dialog_chooser(
             "Use special action from voting?",
-            ActiveDialog::IncreaseHappiness(init(IncreaseHappinessUi::new(
+            ActiveDialog::IncreaseHappiness(init(IncreaseHappinessConfig::new(
                 p,
                 "Increase happiness with voting",
                 true,
@@ -64,7 +64,7 @@ pub fn open_increase_happiness_dialog(
 pub fn increase_happiness_click(
     rc: &RenderContext,
     pos: Position,
-    h: &IncreaseHappinessUi,
+    h: &IncreaseHappinessConfig,
 ) -> StateUpdate {
     if let Some(city) = rc.shown_player.get_city(pos) {
         StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(add_increase_happiness(
@@ -77,8 +77,8 @@ pub fn increase_happiness_click(
 
 pub fn add_increase_happiness(
     city: &City,
-    increase_happiness: &IncreaseHappinessUi,
-) -> IncreaseHappinessUi {
+    increase_happiness: &IncreaseHappinessConfig,
+) -> IncreaseHappinessConfig {
     let mut total_cost = increase_happiness.cost.clone();
     let new_steps = increase_happiness
         .steps
@@ -95,7 +95,7 @@ pub fn add_increase_happiness(
         })
         .collect();
 
-    IncreaseHappinessUi {
+    IncreaseHappinessConfig {
         steps: new_steps,
         cost: total_cost,
         special_action: increase_happiness.special_action,
@@ -136,7 +136,7 @@ fn increase_happiness_new_steps(
     None
 }
 
-pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessUi) -> StateUpdate {
+pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) -> StateUpdate {
     show_resource_pile(rc, &h.cost, &[ResourceType::MoodTokens]);
 
     let tooltip = if rc.shown_player.resources.can_afford(&h.cost) {
