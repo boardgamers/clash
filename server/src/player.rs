@@ -6,6 +6,7 @@ use std::{
     mem,
 };
 
+use crate::advance::Advance;
 use crate::{
     city::{City, CityData},
     city_pieces::{
@@ -398,14 +399,8 @@ impl Player {
         self.resources -= resources;
     }
 
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if advance does not exist
     #[must_use]
-    pub fn can_advance_free(&self, advance: &str) -> bool {
-        let advance = advances::get_advance_by_name(advance).expect("advance should exist");
+    pub fn can_advance_in_change_government(&self, advance: &Advance) -> bool {
         if self.has_advance(&advance.name) {
             return false;
         }
@@ -414,18 +409,23 @@ impl Player {
                 return false;
             }
         }
-        if let Some(contradicting_advance) = &advance.contradicting {
-            if self.has_advance(contradicting_advance) {
-                return false;
-            }
-        }
         true
     }
 
     #[must_use]
-    pub fn can_advance(&self, advance: &str) -> bool {
+    pub fn can_advance_free(&self, advance: &Advance) -> bool {
+        for contradicting_advance in &advance.contradicting {
+            if self.has_advance(contradicting_advance) {
+                return false;
+            }
+        }
+        self.can_advance_in_change_government(advance)
+    }
+
+    #[must_use]
+    pub fn can_advance(&self, advance: &Advance) -> bool {
         if self.resources.food + self.resources.ideas + (self.resources.gold as u32)
-            < self.advance_cost(advance)
+            < self.advance_cost(&advance.name)
         {
             return false;
         }

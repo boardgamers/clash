@@ -74,7 +74,7 @@ impl CustomAction {
             }
             CustomAction::ForcedLabor => game.actions_left -= 1,
             CustomAction::VotingIncreaseHappiness(i) => {
-                undo_increase_happiness(game, player_index, i)
+                undo_increase_happiness(game, player_index, i);
             }
         }
     }

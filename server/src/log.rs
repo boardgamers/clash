@@ -169,12 +169,18 @@ fn format_cultural_influence_attempt_log_item(
     format!("{player_name} tried to influence culture the {city_piece:?} in the city at {target_city_position} by {player}{city}")
 }
 
+///
+/// # Panics
+///
+/// Panics if the city does not exist
+#[must_use]
 pub fn format_happiness_increase(
     player: &Player,
     player_name: &str,
     happiness_increases: &IncreaseHappiness,
 ) -> String {
-    let happiness_increases = happiness_increases.happiness_increases
+    let happiness_increases = happiness_increases
+        .happiness_increases
         .iter()
         .filter_map(|(position, steps)| {
             if *steps > 0 {

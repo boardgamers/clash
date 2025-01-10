@@ -22,7 +22,7 @@ pub struct ResourcePile {
 
 impl ResourcePile {
     #[must_use]
-    pub fn new(
+    pub const fn new(
         food: u32,
         wood: u32,
         ore: u32,

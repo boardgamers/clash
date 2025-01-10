@@ -110,9 +110,7 @@ pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
         |a, p| {
             if p.has_advance(&a.name) {
                 AdvanceState::Owned
-            } else if game.state == GameState::Playing
-                && game.actions_left > 0
-                && p.can_advance(&a.name)
+            } else if game.state == GameState::Playing && game.actions_left > 0 && p.can_advance(a)
             {
                 AdvanceState::Available
             } else {
@@ -134,7 +132,7 @@ pub fn show_free_advance_menu(rc: &RenderContext) -> StateUpdate {
         rc,
         "Select a free advance",
         |a, p| {
-            if p.can_advance_free(&a.name) {
+            if p.can_advance_free(a) {
                 AdvanceState::Available
             } else if p.has_advance(&a.name) {
                 AdvanceState::Owned
@@ -256,8 +254,8 @@ fn description(p: &Player, a: &Advance) -> Vec<String> {
     if let Some(r) = &a.required {
         parts.push(format!("Required: {r}"));
     }
-    if let Some(c) = &a.contradicting {
-        parts.push(format!("Contradicts: {c}"));
+    if !a.contradicting.is_empty() {
+        parts.push(format!("Contradicts: {}", a.contradicting.join(", ")));
     }
     if let Some(b) = &a.bonus {
         parts.push(format!(

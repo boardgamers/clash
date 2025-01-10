@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use PlayingAction::*;
 
+use crate::content::advances;
 use crate::game::{CulturalInfluenceResolution, GameState};
 use crate::{
     city::City,
@@ -89,8 +90,9 @@ impl PlayingAction {
                 let player = &mut game.players[player_index];
                 let cost = player.advance_cost(&advance);
                 assert!(
-                    player.can_advance(&advance)
-                        && payment.food + payment.ideas + payment.gold as u32 == cost,
+                    player.can_advance(
+                        &advances::get_advance_by_name(&advance).expect("advance should exist")
+                    ) && payment.food + payment.ideas + payment.gold as u32 == cost,
                     "Illegal action"
                 );
                 player.loose_resources(payment);
@@ -419,7 +421,7 @@ fn add_collect_terrain(
     }
 }
 
-pub fn increase_happiness(game: &mut Game, player_index: usize, i: IncreaseHappiness) {
+pub(crate) fn increase_happiness(game: &mut Game, player_index: usize, i: IncreaseHappiness) {
     let player = &mut game.players[player_index];
     for (city_position, steps) in i.happiness_increases {
         let city = player.get_city(city_position).expect("Illegal action");
@@ -432,7 +434,7 @@ pub fn increase_happiness(game: &mut Game, player_index: usize, i: IncreaseHappi
     }
 }
 
-pub fn undo_increase_happiness(game: &mut Game, player_index: usize, i: IncreaseHappiness) {
+pub(crate) fn undo_increase_happiness(game: &mut Game, player_index: usize, i: IncreaseHappiness) {
     let mut cost = 0;
     let player = &mut game.players[player_index];
     for (city_position, steps) in i.happiness_increases {
