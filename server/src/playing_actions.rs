@@ -183,10 +183,6 @@ impl PlayingAction {
                 for (city_position, steps) in happiness_increases {
                     let city = player.get_city(city_position).expect("Illegal action");
                     let cost = city.increase_happiness_cost(steps).expect("Illegal action");
-                    assert!(
-                        city.player_index == player_index && player.resources.can_afford(&cost),
-                        "Illegal action"
-                    );
                     player.loose_resources(cost);
                     let city = player.get_city_mut(city_position).expect("Illegal action");
                     for _ in 0..steps {

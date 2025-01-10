@@ -38,11 +38,7 @@ pub fn construct_wonder(
     let city = game.players[player_index]
         .get_city(city_position)
         .expect("player should have city");
-    if !city.can_build_wonder(&wonder, &game.players[player_index], game)
-        || !payment.can_afford(&wonder.cost)
-    {
-        panic!("Illegal action");
-    }
+    assert!(city.can_build_wonder(&wonder, &game.players[player_index], game), "Illegal action");
     game.players[player_index].loose_resources(payment);
 
     game.build_wonder(wonder, city_position, player_index);
