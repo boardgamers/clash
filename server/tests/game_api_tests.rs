@@ -453,7 +453,7 @@ fn test_action(
         &json,
         name,
         &outcome,
-        &format!("the game did not match the expectation after the initial {name} action"),
+        &format!("EXECUTE: the game did not match the expectation after the initial {name} action"),
     );
     if !undoable {
         assert!(!game.can_undo());
@@ -469,7 +469,7 @@ fn test_action(
         &json,
         name,
         name,
-        &format!("the game did not match the expectation after undoing the {name} action"),
+        &format!("UNDO: the game did not match the expectation after undoing the {name} action"),
     );
     let game = game_api::execute_action(game, Action::Redo, player_index);
     let json = serde_json::to_string_pretty(&game.cloned_data())
@@ -479,7 +479,7 @@ fn test_action(
         &json,
         name,
         &outcome,
-        &format!("the game did not match the expectation after redoing the {name} action"),
+        &format!("REDO: the game did not match the expectation after redoing the {name} action"),
     );
 }
 
@@ -545,6 +545,18 @@ fn test_wonder() {
             city_position: Position::from_offset("A1"),
             wonder: String::from("Pyramids"),
             payment: ResourcePile::new(2, 3, 3, 0, 0, 0, 4),
+        })),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
+fn test_custom_action_forced_labor() {
+    test_action(
+        "custom_action_forced_labor",
+        Action::Playing(Custom(ForcedLabor {
         })),
         0,
         true,

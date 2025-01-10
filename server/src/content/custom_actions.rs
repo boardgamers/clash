@@ -50,6 +50,10 @@ impl CustomAction {
     }
 
     pub fn undo(self, game: &mut Game, player_index: usize) {
+        let action = self.custom_action_type();
+        if action.action_type().once_per_turn {
+            game.played_once_per_turn_actions.retain(|a| a != &action);
+        }
         match self {
             CustomAction::ConstructWonder {
                 city_position,

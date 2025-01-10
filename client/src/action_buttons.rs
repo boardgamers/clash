@@ -56,7 +56,7 @@ pub fn action_buttons(
             state,
             &assets.custom_actions[&a],
             icon_pos(i as i8, -1),
-            custom_action_tooltip(a),
+            &custom_action_tooltip(a),
         ) {
             return StateUpdate::execute(Action::Playing(PlayingAction::Custom(new_custom_action(a))));
         }
@@ -64,10 +64,10 @@ pub fn action_buttons(
     StateUpdate::None
 }
 
-fn custom_action_tooltip(custom_action_type: &CustomActionType) -> &'static str {
+fn custom_action_tooltip(custom_action_type: &CustomActionType) -> String {
     match custom_action_type {
-        CustomActionType::ConstructWonder => "Construct a wonder",
-        CustomActionType::ForcedLabor => &get_advance_by_name("Absolute Power").unwrap().description,
+        CustomActionType::ConstructWonder => "Construct a wonder".to_string(),
+        CustomActionType::ForcedLabor => get_advance_by_name("Absolute Power").unwrap().description,
     }
 }
 
