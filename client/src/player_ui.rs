@@ -3,8 +3,8 @@ use crate::city_ui::city_labels;
 use crate::client::Features;
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::layout_ui::{
-    bottom_center_texture, bottom_right_texture, icon_pos,
-    left_mouse_button_pressed_in_rect, top_center_texture, ICON_SIZE,
+    bottom_center_texture, bottom_right_texture, icon_pos, left_mouse_button_pressed_in_rect,
+    top_center_texture, ICON_SIZE,
 };
 use crate::map_ui::terrain_name;
 use crate::resource_ui::{new_resource_map, resource_name, resource_types};

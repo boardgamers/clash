@@ -3,10 +3,10 @@ use crate::resource_ui::ResourceType;
 use macroquad::prelude::{load_texture, load_ttf_font, Font, ImageFormat};
 use macroquad::texture::Texture2D;
 use server::city_pieces::Building;
+use server::content::custom_actions::CustomActionType;
 use server::map::Terrain;
 use server::unit::UnitType;
 use std::collections::HashMap;
-use server::content::custom_actions::{CustomAction, CustomActionType};
 
 pub struct Assets {
     pub terrain: HashMap<Terrain, Texture2D>,
@@ -207,12 +207,10 @@ impl Assets {
     }
 
     fn custom_actions() -> HashMap<CustomActionType, Texture2D> {
-        [
-            (
-                CustomActionType::ForcedLabor,
-                load_png(include_bytes!("../assets/slavery-whip-svgrepo-com.png")),
-            )
-        ]
+        [(
+            CustomActionType::ForcedLabor,
+            load_png(include_bytes!("../assets/slavery-whip-svgrepo-com.png")),
+        )]
         .iter()
         .cloned()
         .collect()

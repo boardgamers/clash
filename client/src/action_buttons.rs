@@ -54,11 +54,13 @@ pub fn action_buttons(
         };
         if bottom_left_texture(
             state,
-            &assets.custom_actions[&a],
+            &assets.custom_actions[a],
             icon_pos(i as i8, -1),
             &custom_action_tooltip(a),
         ) {
-            return StateUpdate::execute(Action::Playing(PlayingAction::Custom(new_custom_action(a))));
+            return StateUpdate::execute(Action::Playing(PlayingAction::Custom(
+                new_custom_action(a),
+            )));
         }
     }
     StateUpdate::None

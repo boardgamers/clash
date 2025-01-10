@@ -6,9 +6,8 @@ use crate::player_ui::player_color;
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::HasCountSelectableObject;
 use crate::tooltip::show_tooltip_for_rect;
-use itertools::Itertools;
 use macroquad::color::Color;
-use macroquad::math::{vec2, Vec2};
+use macroquad::math::vec2;
 use macroquad::prelude::{
     draw_rectangle, draw_rectangle_lines, Rect, BLACK, BLUE, GRAY, WHITE, YELLOW,
 };
@@ -25,7 +24,7 @@ use std::cmp::min;
 use std::collections::HashMap;
 use std::ops::Rem;
 
-const COLUMNS : usize = 6;
+const COLUMNS: usize = 6;
 
 pub enum AdvanceState {
     Owned,
@@ -166,8 +165,9 @@ pub fn show_advance_menu(
     let p = player.get(game);
 
     for pass in 0..2 {
-        for(i, (group_name, advances)) in advances::get_groups().iter().enumerate() {
-            let pos = vec2(i.rem(COLUMNS) as f32 * 140., (i / COLUMNS) as f32 * 180.) + vec2(20., 70.);
+        for (i, (group_name, advances)) in advances::get_groups().iter().enumerate() {
+            let pos =
+                vec2(i.rem(COLUMNS) as f32 * 140., (i / COLUMNS) as f32 * 180.) + vec2(20., 70.);
             if pass == 0 {
                 state.draw_text(
                     group_name,
@@ -176,10 +176,10 @@ pub fn show_advance_menu(
                 );
             }
 
-            for (i, a) in advances.into_iter().enumerate() {
+            for (i, a) in advances.iter().enumerate() {
                 let pos = pos + vec2(0., i as f32 * 35.);
                 let name = &a.name;
-                let advance_state = advance_state(&a, p);
+                let advance_state = advance_state(a, p);
 
                 let rect = Rect::new(pos.x, pos.y, 135., 30.);
                 if pass == 0 {
@@ -207,11 +207,11 @@ pub fn show_advance_menu(
                         rect.w,
                         rect.h,
                         thickness,
-                        border_color(&a),
+                        border_color(a),
                     );
                 } else {
                     // tooltip should be shown on top of everything
-                    show_tooltip_for_rect(state, &description(p, &a), rect);
+                    show_tooltip_for_rect(state, &description(p, a), rect);
 
                     if player.can_control
                         && matches!(
@@ -220,7 +220,7 @@ pub fn show_advance_menu(
                         )
                         && left_mouse_button_pressed_in_rect(rect, state)
                     {
-                        return new_update(&a);
+                        return new_update(a);
                     }
                 }
             }
