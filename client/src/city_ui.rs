@@ -1,7 +1,7 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
-use crate::happiness_ui::{add_increase_happiness, IncreaseHappiness};
+use crate::happiness_ui::{add_increase_happiness, IncreaseHappinessWithCost};
 use crate::hex_ui::Point;
 use crate::layout_ui::draw_scaled_icon;
 use crate::map_ui::{move_units_button, show_map_action_buttons};
@@ -59,7 +59,7 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
         &rc.assets().resources[&ResourceType::MoodTokens],
         "Increase happiness".to_string(),
         Box::new(move || {
-            let mut happiness = IncreaseHappiness::new(rc.shown_player);
+            let mut happiness = IncreaseHappinessWithCost::new(rc.shown_player);
             let mut target = city.mood_state.clone();
             while target != MoodState::Happy {
                 happiness = add_increase_happiness(city, &happiness);

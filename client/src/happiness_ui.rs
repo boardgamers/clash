@@ -1,7 +1,7 @@
 use server::action::Action;
 use server::city::City;
 use server::player::Player;
-use server::playing_actions::PlayingAction;
+use server::playing_actions::{IncreaseHappiness, PlayingAction};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
@@ -11,15 +11,15 @@ use crate::render_context::RenderContext;
 use crate::resource_ui::{show_resource_pile, ResourceType};
 
 #[derive(Clone)]
-pub struct IncreaseHappiness {
+pub struct IncreaseHappinessWithCost {
     pub steps: Vec<(Position, u32)>,
     pub cost: ResourcePile,
 }
 
-impl IncreaseHappiness {
-    pub fn new(p: &Player) -> IncreaseHappiness {
+impl IncreaseHappinessWithCost {
+    pub fn new(p: &Player) -> IncreaseHappinessWithCost {
         let steps = p.cities.iter().map(|c| (c.position, 0)).collect();
-        IncreaseHappiness {
+        IncreaseHappinessWithCost {
             steps,
             cost: ResourcePile::empty(),
         }
@@ -29,7 +29,7 @@ impl IncreaseHappiness {
 pub fn increase_happiness_click(
     rc: &RenderContext,
     pos: Position,
-    h: &IncreaseHappiness,
+    h: &IncreaseHappinessWithCost,
 ) -> StateUpdate {
     if let Some(city) = rc.shown_player.get_city(pos) {
         StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(add_increase_happiness(
@@ -42,8 +42,8 @@ pub fn increase_happiness_click(
 
 pub fn add_increase_happiness(
     city: &City,
-    increase_happiness: &IncreaseHappiness,
-) -> IncreaseHappiness {
+    increase_happiness: &IncreaseHappinessWithCost,
+) -> IncreaseHappinessWithCost {
     let mut total_cost = increase_happiness.cost.clone();
     let new_steps = increase_happiness
         .steps
@@ -60,7 +60,7 @@ pub fn add_increase_happiness(
         })
         .collect();
 
-    IncreaseHappiness {
+    IncreaseHappinessWithCost {
         steps: new_steps,
         cost: total_cost,
     }
@@ -99,7 +99,7 @@ fn increase_happiness_new_steps(
     None
 }
 
-pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappiness) -> StateUpdate {
+pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessWithCost) -> StateUpdate {
     show_resource_pile(rc, &h.cost, &[ResourceType::MoodTokens]);
 
     let tooltip = if rc.shown_player.resources.can_afford(&h.cost) {
@@ -108,9 +108,11 @@ pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappiness) -> Sta
         OkTooltip::Invalid("Not enough resources".to_string())
     };
     if ok_button(rc, tooltip) {
-        return StateUpdate::Execute(Action::Playing(PlayingAction::IncreaseHappiness {
-            happiness_increases: h.steps.clone(),
-        }));
+        return StateUpdate::Execute(Action::Playing(PlayingAction::IncreaseHappiness(
+            IncreaseHappiness {
+                happiness_increases: h.steps.clone(),
+            },
+        )));
     }
     if cancel_button(rc) {
         return StateUpdate::Cancel;

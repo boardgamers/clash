@@ -1,5 +1,5 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::happiness_ui::IncreaseHappiness;
+use crate::happiness_ui::IncreaseHappinessWithCost;
 use crate::layout_ui::{bottom_left_texture, icon_pos};
 use crate::render_context::RenderContext;
 use crate::resource_ui::ResourceType;
@@ -26,7 +26,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
             "Increase happiness",
         ) {
             return StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(
-                IncreaseHappiness::new(p),
+                IncreaseHappinessWithCost::new(p),
             ));
         }
         if bottom_left_texture(
@@ -39,19 +39,15 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
         }
     }
     for (i, a) in game.get_available_custom_actions().iter().enumerate() {
-        if matches!(a, CustomActionType::ConstructWonder) {
-            // handled in city_ui
-            continue;
-        };
-        if bottom_left_texture(
-            rc,
-            &assets.custom_actions[a],
-            icon_pos(i as i8, -1),
-            &custom_action_tooltip(a),
-        ) {
-            return StateUpdate::execute(Action::Playing(PlayingAction::Custom(
-                new_custom_action(a),
-            )));
+        if let Some(action) = generic_custom_action(a) {
+            if bottom_left_texture(
+                rc,
+                &assets.custom_actions[a],
+                icon_pos(i as i8, -1),
+                &custom_action_tooltip(a),
+            ) {
+                return StateUpdate::execute(Action::Playing(PlayingAction::Custom(action)));
+            }
         }
     }
     StateUpdate::None
@@ -61,14 +57,22 @@ fn custom_action_tooltip(custom_action_type: &CustomActionType) -> String {
     match custom_action_type {
         CustomActionType::ConstructWonder => "Construct a wonder".to_string(),
         CustomActionType::ForcedLabor => get_advance_by_name("Absolute Power").unwrap().description,
+        CustomActionType::VotingIncreaseHappiness => {
+            get_advance_by_name("Voting").unwrap().description
+        }
     }
 }
 
-fn new_custom_action(custom_action_type: &CustomActionType) -> CustomAction {
+fn generic_custom_action(custom_action_type: &CustomActionType) -> Option<CustomAction> {
     match custom_action_type {
         CustomActionType::ConstructWonder => {
-            panic!("Construct wonder is handled in city_ui")
+            // handled in city_ui
+            None
         }
-        CustomActionType::ForcedLabor => CustomAction::ForcedLabor,
+        CustomActionType::VotingIncreaseHappiness => {
+            // handled in happiness_ui
+            None
+        }
+        CustomActionType::ForcedLabor => Some(CustomAction::ForcedLabor),
     }
 }

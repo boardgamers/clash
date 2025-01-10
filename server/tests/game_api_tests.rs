@@ -113,9 +113,10 @@ fn basic_actions() {
     assert_eq!(3, game.actions_left);
     assert_eq!(0, game.active_player());
 
-    let increase_happiness_action = Action::Playing(IncreaseHappiness {
-        happiness_increases: vec![(city_position, 1)],
-    });
+    let increase_happiness_action =
+        Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness {
+            happiness_increases: vec![(city_position, 1)],
+        }));
     let game = game_api::execute_action(game, increase_happiness_action, 0);
     let player = &game.players[0];
 
@@ -312,9 +313,10 @@ fn assert_undo(
 }
 
 fn increase_happiness(game: Game) -> Game {
-    let increase_happiness_action = Action::Playing(IncreaseHappiness {
-        happiness_increases: vec![(Position::new(0, 0), 1)],
-    });
+    let increase_happiness_action =
+        Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness {
+            happiness_increases: vec![(Position::new(0, 0), 1)],
+        }));
     game_api::execute_action(game, increase_happiness_action, 0)
 }
 

@@ -178,9 +178,10 @@ fn science() -> Vec<Advance> {
 
 fn democracy() -> Vec<Advance> {
     vec![
-        Advance::builder("Voting", "TestGovernment1")
+        Advance::builder("Voting", "As a free action, you may spend 1 mood token to gain an action 'Increase happiness'")
             .leading_government_advance("Democracy")
             .with_required_advance("Philosophy")
+            .add_custom_action(VotingIncreaseHappiness)
             .build(),
         Advance::builder("Democracy 2", "TestGovernment1")
             .with_required_advance("Voting")

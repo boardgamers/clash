@@ -13,7 +13,7 @@ use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
 use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
-use crate::happiness_ui::IncreaseHappiness;
+use crate::happiness_ui::IncreaseHappinessWithCost;
 use crate::layout_ui::FONT_SIZE;
 use crate::move_ui::MoveSelection;
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
@@ -27,7 +27,7 @@ pub enum ActiveDialog {
     WaitingForUpdate,
 
     // playing actions
-    IncreaseHappiness(IncreaseHappiness),
+    IncreaseHappiness(IncreaseHappinessWithCost),
     AdvanceMenu,
     AdvancePayment(AdvancePayment),
     ConstructionPayment(ConstructionPayment),
