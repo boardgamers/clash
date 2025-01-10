@@ -12,8 +12,8 @@
         "ore": 7,
         "ideas": 3,
         "gold": 7,
-        "mood_tokens": 7,
-        "culture_tokens": 7
+        "mood_tokens": 6,
+        "culture_tokens": 6
       },
       "resource_limit": {
         "food": 2,
@@ -407,7 +407,7 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 0,
+  "current_player_index": 1,
   "action_log": [
     {
       "Playing": {

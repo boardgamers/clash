@@ -1,6 +1,6 @@
 {
   "state": {
-    "StatusPhase": "RazeSize1City"
+    "StatusPhase": "DetermineFirstPlayer"
   },
   "players": [
     {
@@ -384,7 +384,7 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 1,
+  "current_player_index": 0,
   "action_log": [
     {
       "StatusPhase": {
