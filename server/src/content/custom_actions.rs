@@ -33,7 +33,7 @@ impl CustomAction {
                 city_position,
                 wonder,
                 payment,
-            } => construct_wonder(game, player_index, city_position, wonder, payment),
+            } => construct_wonder(game, player_index, city_position, &wonder, payment),
             CustomAction::ForcedLabor => {
                 game.actions_left += 1;
             }

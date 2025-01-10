@@ -15,11 +15,16 @@ pub fn get_wonder_by_name(name: &str) -> Option<Wonder> {
     get_all().into_iter().find(|wonder| wonder.name == name)
 }
 
+///
+///
+/// # Panics
+///
+/// Panics if city does not exist or if player does not have enough resources
 pub fn construct_wonder(
     game: &mut Game,
     player_index: usize,
     city_position: Position,
-    wonder: String,
+    wonder: &str,
     payment: ResourcePile,
 ) {
     let wonder_cards_index = game.players[player_index]
