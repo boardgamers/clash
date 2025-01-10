@@ -7,12 +7,15 @@ use server::game::Game;
 use server::position::Position;
 
 use crate::advance_ui::{pay_advance_dialog, show_free_advance_menu, show_paid_advance_menu};
-use crate::client_state::{ActiveDialog, CameraMode, State, StateUpdate, StateUpdates};
+use crate::client_state::{
+    ActiveDialog, CameraMode, DialogChooser, State, StateUpdate, StateUpdates,
+};
 use crate::collect_ui::collect_resources_dialog;
 use crate::construct_ui::pay_construction_dialog;
+use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
 use crate::happiness_ui::{increase_happiness_click, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
-use crate::layout_ui::{icon_pos, top_right_texture};
+use crate::layout_ui::{bottom_centered_text, icon_pos, top_right_texture};
 use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
 use crate::player_ui::{player_select, show_global_controls, show_top_center, show_top_left};
@@ -127,6 +130,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         | ActiveDialog::WaitingForUpdate
         | ActiveDialog::CulturalInfluence
         | ActiveDialog::PlaceSettler => StateUpdate::None,
+        ActiveDialog::DialogChooser(d) => dialog_chooser(rc, d),
         ActiveDialog::Log => show_log(rc),
 
         // playing actions
@@ -155,6 +159,17 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::PlayActionCard => combat_ui::play_action_card_dialog(rc),
         ActiveDialog::Retreat => combat_ui::retreat_dialog(rc),
         ActiveDialog::RemoveCasualties(s) => combat_ui::remove_casualties_dialog(rc, s),
+    }
+}
+
+fn dialog_chooser(rc: &RenderContext, c: &DialogChooser) -> StateUpdate {
+    bottom_centered_text(rc, &c.title);
+    if ok_button(rc, OkTooltip::Valid("OK".to_string())) {
+        StateUpdate::OpenDialog(c.yes.clone())
+    } else if cancel_button(rc) {
+        StateUpdate::OpenDialog(c.no.clone())
+    } else {
+        StateUpdate::None
     }
 }
 

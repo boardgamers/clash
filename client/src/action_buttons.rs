@@ -1,5 +1,5 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::happiness_ui::IncreaseHappinessWithCost;
+use crate::happiness_ui::open_increase_happiness_dialog;
 use crate::layout_ui::{bottom_left_texture, icon_pos};
 use crate::render_context::RenderContext;
 use crate::resource_ui::ResourceType;
@@ -18,16 +18,13 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
         if bottom_left_texture(rc, &assets.advances, icon_pos(1, -3), "Research advances") {
             return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
         }
-        let p = rc.shown_player;
         if bottom_left_texture(
             rc,
             &assets.resources[&ResourceType::MoodTokens],
             icon_pos(0, -2),
             "Increase happiness",
         ) {
-            return StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(
-                IncreaseHappinessWithCost::new(p),
-            ));
+            return open_increase_happiness_dialog(rc, |h| h);
         }
         if bottom_left_texture(
             rc,

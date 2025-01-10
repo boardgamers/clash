@@ -1,5 +1,6 @@
 use server::action::Action;
 use server::city::City;
+use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::player::Player;
 use server::playing_actions::{IncreaseHappiness, PlayingAction};
 use server::position::Position;
@@ -11,25 +12,59 @@ use crate::render_context::RenderContext;
 use crate::resource_ui::{show_resource_pile, ResourceType};
 
 #[derive(Clone)]
-pub struct IncreaseHappinessWithCost {
+pub struct IncreaseHappinessUi {
+    pub title: String,
     pub steps: Vec<(Position, u32)>,
     pub cost: ResourcePile,
+    pub special_action: bool,
 }
 
-impl IncreaseHappinessWithCost {
-    pub fn new(p: &Player) -> IncreaseHappinessWithCost {
+impl IncreaseHappinessUi {
+    pub fn new(p: &Player, title: &str, special_action: bool) -> IncreaseHappinessUi {
         let steps = p.cities.iter().map(|c| (c.position, 0)).collect();
-        IncreaseHappinessWithCost {
+        IncreaseHappinessUi {
+            title: title.to_string(),
             steps,
             cost: ResourcePile::empty(),
+            special_action,
         }
+    }
+}
+
+pub fn open_increase_happiness_dialog(
+    rc: &RenderContext,
+    init: impl Fn(IncreaseHappinessUi) -> IncreaseHappinessUi,
+) -> StateUpdate {
+    let p = rc.shown_player;
+    let base = ActiveDialog::IncreaseHappiness(init(IncreaseHappinessUi::new(
+        p,
+        "Increase happiness",
+        false,
+    )));
+
+    if rc
+        .game
+        .get_available_custom_actions()
+        .contains(&CustomActionType::VotingIncreaseHappiness)
+    {
+        StateUpdate::dialog_chooser(
+            "Use special action from voting?",
+            ActiveDialog::IncreaseHappiness(init(IncreaseHappinessUi::new(
+                p,
+                "Increase happiness with voting",
+                true,
+            ))),
+            base,
+        )
+    } else {
+        StateUpdate::OpenDialog(base)
     }
 }
 
 pub fn increase_happiness_click(
     rc: &RenderContext,
     pos: Position,
-    h: &IncreaseHappinessWithCost,
+    h: &IncreaseHappinessUi,
 ) -> StateUpdate {
     if let Some(city) = rc.shown_player.get_city(pos) {
         StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(add_increase_happiness(
@@ -42,8 +77,8 @@ pub fn increase_happiness_click(
 
 pub fn add_increase_happiness(
     city: &City,
-    increase_happiness: &IncreaseHappinessWithCost,
-) -> IncreaseHappinessWithCost {
+    increase_happiness: &IncreaseHappinessUi,
+) -> IncreaseHappinessUi {
     let mut total_cost = increase_happiness.cost.clone();
     let new_steps = increase_happiness
         .steps
@@ -60,9 +95,11 @@ pub fn add_increase_happiness(
         })
         .collect();
 
-    IncreaseHappinessWithCost {
+    IncreaseHappinessUi {
         steps: new_steps,
         cost: total_cost,
+        special_action: increase_happiness.special_action,
+        title: increase_happiness.title.clone(),
     }
 }
 
@@ -99,7 +136,7 @@ fn increase_happiness_new_steps(
     None
 }
 
-pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessWithCost) -> StateUpdate {
+pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessUi) -> StateUpdate {
     show_resource_pile(rc, &h.cost, &[ResourceType::MoodTokens]);
 
     let tooltip = if rc.shown_player.resources.can_afford(&h.cost) {
@@ -108,11 +145,16 @@ pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessWithCost
         OkTooltip::Invalid("Not enough resources".to_string())
     };
     if ok_button(rc, tooltip) {
-        return StateUpdate::Execute(Action::Playing(PlayingAction::IncreaseHappiness(
-            IncreaseHappiness {
+        let action = if h.special_action {
+            PlayingAction::Custom(CustomAction::VotingIncreaseHappiness(IncreaseHappiness {
                 happiness_increases: h.steps.clone(),
-            },
-        )));
+            }))
+        } else {
+            PlayingAction::IncreaseHappiness(IncreaseHappiness {
+                happiness_increases: h.steps.clone(),
+            })
+        };
+        return StateUpdate::Execute(Action::Playing(action));
     }
     if cancel_button(rc) {
         return StateUpdate::Cancel;
