@@ -4,7 +4,6 @@ use crate::{
     game::Game, playing_actions::ActionType, position::Position, resource_pile::ResourcePile,
 };
 use crate::content::wonders::construct_wonder;
-use crate::player::Player;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub enum CustomAction {
@@ -36,7 +35,7 @@ impl CustomAction {
                 payment,
             } => construct_wonder(game, player_index, city_position, wonder, payment),
             CustomAction::WhipWorkers => {
-                whip_workers(&game.players[player_index]);
+                game.actions_left += 1;
             }
         }
     }
@@ -61,7 +60,7 @@ impl CustomAction {
                 let wonder = game.undo_build_wonder(city_position, player_index);
                 game.players[player_index].wonder_cards.push(wonder);
             },
-            CustomAction::WhipWorkers => undo_whip_workers(&game.players[player_index]),
+            CustomAction::WhipWorkers => game.actions_left -= 1,
         }
     }
 
@@ -74,22 +73,12 @@ impl CustomAction {
     }
 }
 
-fn whip_workers(p: &Player) {
-    todo!()
-
-}
-
-fn undo_whip_workers(p: &Player) {
-    todo!()
-
-}
-
 impl CustomActionType {
     #[must_use]
     pub fn action_type(&self) -> ActionType {
         match self {
             CustomActionType::ConstructWonder => ActionType::default(),
-            CustomActionType::WhipWorkers => ActionType::free_and_once_per_turn(),
+            CustomActionType::WhipWorkers => ActionType::free_and_once_per_turn(ResourcePile::mood_tokens(2)),
         }
     }
 }

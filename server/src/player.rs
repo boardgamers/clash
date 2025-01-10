@@ -386,6 +386,7 @@ impl Player {
     }
 
     pub fn loose_resources(&mut self, resources: ResourcePile) {
+        assert!(self.resources.can_afford(&resources), "player should be able to afford the resources");
         self.resources -= resources;
     }
 

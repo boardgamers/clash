@@ -823,7 +823,6 @@ impl Game {
         }
     }
 
-    //todo also return if it's a free action and what it costs
     #[must_use]
     pub fn get_available_custom_actions(&self) -> Vec<CustomActionType> {
         let custom_actions = &self.players[self.current_player_index].custom_actions;
