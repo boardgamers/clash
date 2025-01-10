@@ -36,7 +36,8 @@ pub fn player_select(rc: &RenderContext) -> StateUpdate {
     for player_index in players {
         let pl = game.get_player(player_index);
         let shown = player.index == pl.index;
-        let pos = vec2(player.screen_size.x, player.screen_size.y / 2.0) + vec2(-size, y);
+        let screen = rc.state.screen_size;
+        let pos = vec2(screen.x, screen.y / 2.0) + vec2(-size, y);
 
         let color = player_color(pl.index);
 
@@ -87,12 +88,11 @@ pub fn top_icon_with_label(
     tooltip: &str,
 ) {
     let state = rc.state;
-    let player = &rc.shown_player;
     let dimensions = state.measure_text(label);
     let x = (ICON_SIZE - dimensions.width) / 2.0;
     state.draw_text(
         label,
-        player.screen_size.x / 2.0 + p.x + x,
+        state.screen_size.x / 2.0 + p.x + x,
         p.y + ICON_SIZE + 30.,
     );
     top_center_texture(rc, texture, p, tooltip);
@@ -106,13 +106,12 @@ pub fn bottom_icon_with_label(
     tooltip: &str,
 ) {
     let state = rc.state;
-    let player = &rc.shown_player;
     let dimensions = state.measure_text(label);
     let x = (ICON_SIZE - dimensions.width) / 2.0;
     state.draw_text(
         label,
-        player.screen_size.x / 2.0 + p.x + x,
-        player.screen_size.y + p.y + 35.,
+        rc.state.screen_size.x / 2.0 + p.x + x,
+        rc.state.screen_size.y + p.y + 35.,
     );
     bottom_center_texture(rc, texture, p, tooltip);
 }
@@ -153,7 +152,7 @@ pub fn show_top_left(rc: &RenderContext) {
     let mut p = vec2(10., 10.);
     let mut label = |label: &str| {
         p = vec2(p.x, p.y + 25.);
-        if p.y > player.screen_size.y - 150. {
+        if p.y > state.screen_size.y - 150. {
             p = vec2(p.x + 350., 85.);
         }
         state.draw_text(label, p.x, p.y);

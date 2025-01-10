@@ -14,9 +14,6 @@ pub struct ShownPlayer {
     pub can_control_active_player: bool,
     pub can_control: bool,
     pub can_play_action: bool,
-    pub active_dialog: ActiveDialog,
-    pub pending_update: bool,
-    pub screen_size: Vec2,
 }
 
 impl ShownPlayer {

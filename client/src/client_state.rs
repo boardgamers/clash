@@ -351,9 +351,6 @@ impl State {
             can_play_action: can_control
                 && game.state == GameState::Playing
                 && game.actions_left > 0,
-            active_dialog: self.active_dialog.clone(),
-            pending_update: self.pending_update.is_some(),
-            screen_size: self.screen_size,
         }
     }
 
