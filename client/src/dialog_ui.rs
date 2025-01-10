@@ -1,6 +1,5 @@
 use crate::client_state::{PendingUpdate, State, StateUpdate};
-use crate::layout_ui::{bottom_center_text, bottom_right_texture, icon_pos};
-use macroquad::math::vec2;
+use crate::layout_ui::{bottom_centered_text, bottom_right_texture, icon_pos};
 
 pub enum OkTooltip {
     Valid(String),
@@ -17,8 +16,7 @@ pub fn show_pending_update(update: &PendingUpdate, state: &State) -> StateUpdate
     } else {
         &format!("Warning: {}", update.warning.join(", "))
     };
-    let dimensions = state.measure_text(t);
-    bottom_center_text(state, t, vec2(-dimensions.width / 2., -50.));
+    bottom_centered_text(state, t);
 
     if ok_button(state, OkTooltip::Valid("OK".to_string())) {
         return StateUpdate::ResolvePendingUpdate(true);

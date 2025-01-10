@@ -1,6 +1,7 @@
 use crate::advance_ui::{show_advance_menu, AdvanceState};
 use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
 use crate::dialog_ui::{cancel_button, cancel_button_with_tooltip, ok_button, OkTooltip};
+use crate::layout_ui::bottom_centered_text;
 use server::action::Action;
 use server::content::advances;
 use server::content::advances::get_leading_government_advance;
@@ -147,6 +148,25 @@ pub fn choose_additional_advances_dialog(
 pub fn complete_objectives_dialog(state: &State) -> StateUpdate {
     if cancel_button_with_tooltip(state, "Complete no objectives") {
         return StateUpdate::status_phase(StatusPhaseAction::CompleteObjectives(vec![]));
+    }
+    StateUpdate::None
+}
+
+pub fn determine_first_player_dialog(
+    state: &State,
+    player: &ShownPlayer,
+    game: &Game,
+) -> StateUpdate {
+    if player.can_control_active_player {
+        bottom_centered_text(
+            state,
+            &format!("Select {} as first player", player.get(game).get_name()),
+        );
+        if ok_button(state, OkTooltip::Valid("Select".to_string())) {
+            return StateUpdate::status_phase(StatusPhaseAction::DetermineFirstPlayer(
+                player.index,
+            ));
+        }
     }
     StateUpdate::None
 }

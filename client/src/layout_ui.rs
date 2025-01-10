@@ -48,6 +48,11 @@ pub fn bottom_center_texture(state: &State, texture: &Texture2D, p: Vec2, toolti
     draw_icon(state, texture, tooltip, anchor + p)
 }
 
+pub fn bottom_centered_text(state: &State, text: &str) {
+    let dimensions = state.measure_text(text);
+    bottom_center_text(state, text, vec2(-dimensions.width / 2., -50.));
+}
+
 pub fn bottom_center_text(state: &State, text: &str, p: Vec2) {
     let p = bottom_center_anchor(state) + p;
     state.draw_text(text, p.x, p.y);

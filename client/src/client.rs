@@ -116,7 +116,6 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
     match &state.active_dialog {
         ActiveDialog::None
         | ActiveDialog::MoveUnits(_)
-        | ActiveDialog::DetermineFirstPlayer
         | ActiveDialog::WaitingForUpdate
         | ActiveDialog::CulturalInfluence
         | ActiveDialog::PlaceSettler => StateUpdate::None,
@@ -145,6 +144,9 @@ fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) ->
         }
         ActiveDialog::ChooseAdditionalAdvances(a) => {
             status_phase_ui::choose_additional_advances_dialog(game, a, state, player)
+        }
+        ActiveDialog::DetermineFirstPlayer => {
+            status_phase_ui::determine_first_player_dialog(state, player, game)
         }
 
         //combat
