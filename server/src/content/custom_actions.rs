@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+use crate::content::wonders::construct_wonder;
 use crate::{
     game::Game, playing_actions::ActionType, position::Position, resource_pile::ResourcePile,
 };
-use crate::content::wonders::construct_wonder;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub enum CustomAction {
@@ -40,7 +40,6 @@ impl CustomAction {
         }
     }
 
-
     #[must_use]
     pub fn custom_action_type(&self) -> CustomActionType {
         match self {
@@ -63,7 +62,7 @@ impl CustomAction {
                 game.players[player_index].gain_resources(payment);
                 let wonder = game.undo_build_wonder(city_position, player_index);
                 game.players[player_index].wonder_cards.push(wonder);
-            },
+            }
             CustomAction::ForcedLabor => game.actions_left -= 1,
         }
     }
@@ -82,7 +81,9 @@ impl CustomActionType {
     pub fn action_type(&self) -> ActionType {
         match self {
             CustomActionType::ConstructWonder => ActionType::default(),
-            CustomActionType::ForcedLabor => ActionType::free_and_once_per_turn(ResourcePile::mood_tokens(2)),
+            CustomActionType::ForcedLabor => {
+                ActionType::free_and_once_per_turn(ResourcePile::mood_tokens(2))
+            }
         }
     }
 }

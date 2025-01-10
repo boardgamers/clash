@@ -556,8 +556,7 @@ fn test_wonder() {
 fn test_custom_action_forced_labor() {
     test_action(
         "custom_action_forced_labor",
-        Action::Playing(Custom(ForcedLabor {
-        })),
+        Action::Playing(Custom(ForcedLabor {})),
         0,
         true,
         false,

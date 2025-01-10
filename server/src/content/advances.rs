@@ -9,7 +9,10 @@ use crate::{
 
 #[must_use]
 pub fn get_all() -> Vec<Advance> {
-    get_groups().into_iter().flat_map(|(_, advances)| advances).collect()
+    get_groups()
+        .into_iter()
+        .flat_map(|(_, advances)| advances)
+        .collect()
 }
 
 #[must_use]
@@ -77,53 +80,53 @@ fn construction() -> Vec<Advance> {
 }
 
 fn seafaring() -> Vec<Advance> {
-    vec![Advance::builder("Fishing", "Your cities may Collect food from one Sea space")
-        .add_collect_option(Water, ResourcePile::food(1))
-        .with_advance_bonus(MoodToken)
-        .build()]
+    vec![
+        Advance::builder("Fishing", "Your cities may Collect food from one Sea space")
+            .add_collect_option(Water, ResourcePile::food(1))
+            .with_advance_bonus(MoodToken)
+            .build(),
+    ]
 }
 
 fn education() -> Vec<Advance> {
-    vec![
-        Advance::builder(
-            "Philosophy",
-            "Immediately gain 1 idea, Gain 1 idea after getting a Science advance",
-        )
-        .add_one_time_ability_initializer(|game, player_index| {
-            game.players[player_index].gain_resources(ResourcePile::ideas(1));
-        })
-        .add_ability_undo_deinitializer(|game, player_index| {
-            game.players[player_index].loose_resources(ResourcePile::ideas(1));
-        })
-        .add_player_event_listener(
-            |event| &mut event.on_advance,
-            |player, advance, ()| {
-                if advance == "Math"
-                    || advance == "Astronomy"
-                    || advance == "Medicine"
-                    || advance == "Metallurgy"
-                {
-                    player.gain_resources(ResourcePile::ideas(1));
-                }
-            },
-            0,
-        )
-        .add_player_event_listener(
-            |event| &mut event.on_undo_advance,
-            |player, advance, ()| {
-                if advance == "Math"
-                    || advance == "Astronomy"
-                    || advance == "Medicine"
-                    || advance == "Metallurgy"
-                {
-                    player.loose_resources(ResourcePile::ideas(1));
-                }
-            },
-            0,
-        )
-        .with_advance_bonus(MoodToken)
-        .build(),
-    ]
+    vec![Advance::builder(
+        "Philosophy",
+        "Immediately gain 1 idea, Gain 1 idea after getting a Science advance",
+    )
+    .add_one_time_ability_initializer(|game, player_index| {
+        game.players[player_index].gain_resources(ResourcePile::ideas(1));
+    })
+    .add_ability_undo_deinitializer(|game, player_index| {
+        game.players[player_index].loose_resources(ResourcePile::ideas(1));
+    })
+    .add_player_event_listener(
+        |event| &mut event.on_advance,
+        |player, advance, ()| {
+            if advance == "Math"
+                || advance == "Astronomy"
+                || advance == "Medicine"
+                || advance == "Metallurgy"
+            {
+                player.gain_resources(ResourcePile::ideas(1));
+            }
+        },
+        0,
+    )
+    .add_player_event_listener(
+        |event| &mut event.on_undo_advance,
+        |player, advance, ()| {
+            if advance == "Math"
+                || advance == "Astronomy"
+                || advance == "Medicine"
+                || advance == "Metallurgy"
+            {
+                player.loose_resources(ResourcePile::ideas(1));
+            }
+        },
+        0,
+    )
+    .with_advance_bonus(MoodToken)
+    .build()]
 }
 
 fn warfare() -> Vec<Advance> {
