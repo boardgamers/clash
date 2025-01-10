@@ -326,13 +326,13 @@ impl State {
         }
     }
 
-    pub fn render_context(&self, game: &Game) -> RenderContext {
-        let player = &self.shown_player(game);
+    pub fn render_context<'a>(&'a self, game: &'a Game) -> RenderContext<'a> {
+        let shown_player = self.shown_player(game);
         RenderContext {
-            shown_player: player,
+            player: game.get_player(shown_player.index),
+            shown_player,
             game,
             state: self,
-            player: game.get_player(player.index),
             camera_mode: CameraMode::World,
         }
     }

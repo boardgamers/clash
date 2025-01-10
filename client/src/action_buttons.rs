@@ -14,7 +14,7 @@ pub fn action_buttons(
     rc: &RenderContext
 ) -> StateUpdate {
     let assets = rc.assets();
-    let player = rc.shown_player;
+    let player = &rc.shown_player;
     let game = rc.game;
     if player.can_play_action {
         if bottom_left_texture(rc,  &assets.move_units, icon_pos(0, -3), "Move units") {

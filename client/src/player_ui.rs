@@ -32,7 +32,7 @@ pub fn player_select(rc: &RenderContext) -> StateUpdate {
     let size = 40.;
     let mut y = (players.len() as f32 * -size) / 2.;
 
-    let player = rc.shown_player;
+    let player = &rc.shown_player;
     for player_index in players {
         let pl = game.get_player(player_index);
         let shown = player.index == pl.index;
@@ -87,7 +87,7 @@ pub fn top_icon_with_label(
     tooltip: &str,
 ) {
     let state = rc.state;
-    let player = rc.shown_player;
+    let player = &rc.shown_player;
     let dimensions = state.measure_text(label);
     let x = (ICON_SIZE - dimensions.width) / 2.0;
     state.draw_text(
@@ -106,7 +106,7 @@ pub fn bottom_icon_with_label(
     tooltip: &str,
 ) {
     let state = rc.state;
-    let player = rc.shown_player;
+    let player = &rc.shown_player;
     let dimensions = state.measure_text(label);
     let x = (ICON_SIZE - dimensions.width) / 2.0;
     state.draw_text(
@@ -148,7 +148,7 @@ pub fn show_top_center(rc: &RenderContext) {
 }
 
 pub fn show_top_left(rc: &RenderContext) {
-    let player = rc.shown_player;
+    let player = &rc.shown_player;
     let state = rc.state;
     let mut p = vec2(10., 10.);
     let mut label = |label: &str| {
@@ -263,7 +263,7 @@ fn moves_left(state: &GameState) -> Option<u32> {
 }
 
 pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpdate {
-    let player = rc.shown_player;
+    let player = &rc.shown_player;
     let assets = rc.assets();
 
     if player.can_control {

@@ -27,7 +27,7 @@ impl ShownPlayer {
 }
 
 pub struct RenderContext<'a> {
-    pub shown_player: &'a ShownPlayer,
+    pub shown_player: ShownPlayer,
     pub game: &'a Game,
     pub state: &'a State,
     pub player: &'a Player, // the player that is being shown
@@ -41,7 +41,7 @@ impl RenderContext<'_> {
 
     pub fn with_camera(&self, mode: CameraMode, f: impl FnOnce(&RenderContext) -> StateUpdate + Sized) -> StateUpdate {
         let next = RenderContext {
-            shown_player: self.shown_player,
+            shown_player: self.shown_player.clone(),
             game: self.game,
             state: self.state,
             player: self.player,

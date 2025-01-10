@@ -72,7 +72,7 @@ fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     };
 
-    let player = rc.shown_player;
+    let player = &rc.shown_player;
     if player.can_control {
         if let Some(u) = &state.pending_update {
             updates.add(dialog_ui::show_pending_update(u, rc));

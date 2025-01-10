@@ -291,7 +291,7 @@ pub fn pay_advance_dialog(
     payment_dialog(
         ap,
         AdvancePayment::valid,
-        |ap| {
+        || {
             StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
                 advance: ap.name.to_string(),
                 payment: ap.payment.to_resource_pile(),

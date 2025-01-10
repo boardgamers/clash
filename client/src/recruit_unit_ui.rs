@@ -225,14 +225,14 @@ pub fn select_dialog(
             );
         },
         |_s| OkTooltip::Valid("Recruit units".to_string()),
-        |amount| {
-            let sel = RecruitSelection::new(game, amount.clone(), vec![]);
+        || {
+            let sel = RecruitSelection::new(game, a.clone(), vec![]);
 
             if sel.is_finished() {
                 StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(
                     ConstructionPayment::new(
                         rc,
-                        game.get_city(amount.player_index, amount.city_position),
+                        game.get_city(a.player_index, a.city_position),
                         "units",
                         ConstructionProject::Units(sel),
                     ),
@@ -286,7 +286,8 @@ pub fn replace_dialog(rc: &RenderContext, sel: &RecruitSelection) -> StateUpdate
         sel,
         |new: RecruitSelection| {
             StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
-                &rc.city_menu(new.amount.city_position),
+                rc,
+                rc.game.get_city(new.amount.player_index, new.amount.city_position),
                 "units",
                 ConstructionProject::Units(new),
             )))

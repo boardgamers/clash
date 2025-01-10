@@ -41,13 +41,13 @@ rc.game.map.tiles
 
 pub fn pay_construction_dialog(
     rc: &RenderContext,
-    payment: &ConstructionPayment,
+    cp: &ConstructionPayment,
 ) -> StateUpdate {
-    let city = rc.game.get_any_city(payment.city_position).unwrap();
+    let city = rc.game.get_any_city(cp.city_position).unwrap();
     payment_dialog(
-        payment,
+        cp,
         ConstructionPayment::valid,
-        |cp| match &cp.project {
+        || match &cp.project {
             ConstructionProject::Building(b, pos) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Construct(Construct {
                     city_position: cp.city_position,

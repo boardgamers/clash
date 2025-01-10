@@ -83,7 +83,7 @@ pub trait HasPayment {
 pub fn payment_dialog<T: HasPayment>(
     has_payment: &T,
     is_valid: impl FnOnce(&T) -> OkTooltip,
-    execute_action: impl FnOnce(&T) -> StateUpdate,
+    execute_action: impl FnOnce() -> StateUpdate,
     show: impl Fn(&T, ResourceType) -> bool,
     plus: impl Fn(&T, ResourceType) -> StateUpdate,
     minus: impl Fn(&T, ResourceType) -> StateUpdate,

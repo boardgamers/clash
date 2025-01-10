@@ -40,7 +40,7 @@ pub async fn run(mut game: Game, features: &Features) {
         state.control_player = Some(game.active_player());
         state.screen_size = vec2(screen_width(), screen_height());
 
-        let message = render_and_update(&game, &mut rc, &sync_result, features);
+        let message = render_and_update(&game, &mut state, &sync_result, features);
         sync_result = GameSyncResult::None;
         match message {
             GameSyncRequest::None => {}
