@@ -145,7 +145,7 @@ impl ActiveDialog {
 
     #[must_use]
     pub fn show_for_other_player(&self) -> bool {
-        matches!(self, ActiveDialog::Log) || self.is_advance()
+        matches!(self, ActiveDialog::Log | ActiveDialog::DetermineFirstPlayer) || self.is_advance()
     }
 
     #[must_use]
@@ -278,9 +278,12 @@ impl StateUpdates {
     }
 }
 
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Clone)]
 pub struct ShownPlayer {
     pub index: usize,
+    pub shown_player_is_active: bool,
+    pub can_control_active_player: bool,
     pub can_control: bool,
     pub can_play_action: bool,
     pub active_dialog: ActiveDialog,
@@ -348,11 +351,17 @@ impl State {
     #[must_use]
     pub fn shown_player(&self, game: &Game) -> ShownPlayer {
         let a = game.active_player();
-        let control = self.control_player == Some(a) && self.show_player == a;
+        let shown_player_is_active = a == self.show_player;
+        let can_control_active_player = self.control_player == Some(a);
+        let can_control = can_control_active_player && self.show_player == a;
         ShownPlayer {
             index: self.show_player,
-            can_control: control,
-            can_play_action: control && game.state == GameState::Playing && game.actions_left > 0,
+            shown_player_is_active,
+            can_control_active_player,
+            can_control,
+            can_play_action: can_control
+                && game.state == GameState::Playing
+                && game.actions_left > 0,
             active_dialog: self.active_dialog.clone(),
             pending_update: self.pending_update.is_some(),
             screen_size: self.screen_size,

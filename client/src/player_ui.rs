@@ -1,7 +1,7 @@
 use crate::action_buttons::action_buttons;
 use crate::city_ui::city_labels;
 use crate::client::Features;
-use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
+use crate::client_state::{ShownPlayer, State, StateUpdate};
 use crate::layout_ui::{
     bottom_center_texture, bottom_right_texture, icon_pos, left_mouse_button_pressed_in_rect,
     top_center_texture, ICON_SIZE,
@@ -16,7 +16,6 @@ use server::action::Action;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::game::{Game, GameState};
 use server::playing_actions::PlayingAction;
-use server::status_phase::StatusPhaseAction;
 use server::unit::MovementAction;
 
 pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
@@ -46,8 +45,7 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
 
         state.draw_text(&text, pos.x + 10., pos.y + 22.);
 
-        let active = game.active_player();
-        if active == pl.index {
+        if game.active_player() == pl.index {
             draw_texture_ex(
                 &state.assets.active_player,
                 x - 25.,
@@ -68,13 +66,6 @@ pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateU
         };
         show_tooltip_for_rect(state, &[tooltip], rect);
         if !shown && left_mouse_button_pressed_in_rect(rect, state) {
-            if player.can_control {
-                if let ActiveDialog::DetermineFirstPlayer = state.active_dialog {
-                    return StateUpdate::status_phase(StatusPhaseAction::DetermineFirstPlayer(
-                        player_index,
-                    ));
-                }
-            };
             return StateUpdate::SetShownPlayer(pl.index);
         }
 
@@ -204,17 +195,13 @@ pub fn show_top_left(game: &Game, player: &ShownPlayer, state: &State) {
         }
     }
 
-    if game.active_player() == player.index {
-        match &game.state {
-            GameState::CulturalInfluenceResolution(_) => {
-                label("Cultural Influence Resolution");
-            }
-            GameState::PlaceSettler { .. } => label("Place Settler"),
-            _ => {}
-        }
+    if player.shown_player_is_active || state.active_dialog.show_for_other_player() {
         for m in state.active_dialog.help_message(game) {
             label(&m);
         }
+    }
+
+    if player.shown_player_is_active {
         if let Some(u) = &state.pending_update {
             for m in &u.info {
                 label(m);
