@@ -3,7 +3,6 @@ use server::action::Action;
 use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
 use server::game::{CulturalInfluenceResolution, Game, GameState};
-use server::player::Player;
 use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
@@ -18,6 +17,7 @@ use crate::happiness_ui::IncreaseHappiness;
 use crate::layout_ui::FONT_SIZE;
 use crate::move_ui::MoveSelection;
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
+use crate::render_context::RenderContext;
 use crate::status_phase_ui::ChooseAdditionalAdvances;
 
 #[derive(Clone)]
@@ -278,26 +278,6 @@ impl StateUpdates {
     }
 }
 
-#[allow(clippy::struct_excessive_bools)]
-#[derive(Clone)]
-pub struct ShownPlayer {
-    pub index: usize,
-    pub shown_player_is_active: bool,
-    pub can_control_active_player: bool,
-    pub can_control: bool,
-    pub can_play_action: bool,
-    pub active_dialog: ActiveDialog,
-    pub pending_update: bool,
-    pub screen_size: Vec2,
-}
-
-impl ShownPlayer {
-    #[must_use]
-    pub fn get<'a>(&self, game: &'a Game) -> &'a Player {
-        game.get_player(self.index)
-    }
-}
-
 pub struct MousePosition {
     pub position: Vec2,
     pub time: f64,
@@ -315,7 +295,6 @@ pub struct State {
     pub active_dialog: ActiveDialog,
     pub pending_update: Option<PendingUpdate>,
     pub camera: Camera2D,
-    pub camera_mode: CameraMode,
     pub screen_size: Vec2,
     pub mouse_positions: Vec<MousePosition>,
     pub log_scroll: f32,
@@ -339,7 +318,6 @@ impl State {
                 offset: OFFSET,
                 ..Default::default()
             },
-            camera_mode: CameraMode::Screen,
             screen_size: vec2(0., 0.),
             mouse_positions: vec![],
             log_scroll: 0.0,
@@ -349,22 +327,12 @@ impl State {
     }
 
     #[must_use]
-    pub fn shown_player(&self, game: &Game) -> ShownPlayer {
-        let a = game.active_player();
-        let shown_player_is_active = a == self.show_player;
-        let can_control_active_player = self.control_player == Some(a);
-        let can_control = can_control_active_player && self.show_player == a;
-        ShownPlayer {
-            index: self.show_player,
-            shown_player_is_active,
-            can_control_active_player,
-            can_control,
-            can_play_action: can_control
-                && game.state == GameState::Playing
-                && game.actions_left > 0,
-            active_dialog: self.active_dialog.clone(),
-            pending_update: self.pending_update.is_some(),
-            screen_size: self.screen_size,
+    pub fn render_context<'a>(&'a self, game: &'a Game) -> RenderContext<'a> {
+        RenderContext {
+            shown_player: game.get_player(self.show_player),
+            game,
+            state: self,
+            camera_mode: CameraMode::Screen,
         }
     }
 
@@ -404,6 +372,7 @@ impl State {
                     self.set_dialog(dialog);
                 }
                 self.focused_tile = None;
+                self.log_scroll = 0.0;
                 GameSyncRequest::None
             }
             StateUpdate::CloseDialog => {
@@ -508,38 +477,5 @@ impl State {
                 ..Default::default()
             },
         );
-    }
-
-    pub fn set_screen_camera(&mut self) {
-        set_default_camera();
-        self.camera_mode = CameraMode::Screen;
-    }
-
-    pub fn set_world_camera(&mut self) {
-        set_camera(&self.camera);
-        self.camera_mode = CameraMode::World;
-    }
-
-    pub fn set_camera(&self) {
-        match self.camera_mode {
-            CameraMode::Screen => set_default_camera(),
-            CameraMode::World => set_camera(&self.camera),
-        };
-    }
-
-    #[must_use]
-    pub fn world_to_screen(&self, point: Vec2) -> Vec2 {
-        match self.camera_mode {
-            CameraMode::Screen => point,
-            CameraMode::World => self.camera.world_to_screen(point),
-        }
-    }
-
-    #[must_use]
-    pub fn screen_to_world(&self, point: Vec2) -> Vec2 {
-        match self.camera_mode {
-            CameraMode::Screen => point,
-            CameraMode::World => self.camera.screen_to_world(point),
-        }
     }
 }

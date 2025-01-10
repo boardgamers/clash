@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 
-use crate::client_state::State;
 use crate::layout_ui::draw_scaled_icon;
+use crate::render_context::RenderContext;
 use hex2d::{Coordinate, Spacing};
 use macroquad::color::Color;
 use macroquad::math::{f32, i32, vec2, Vec2};
@@ -27,7 +27,7 @@ pub fn draw_hex(
     alpha: f32,
     t: &Texture2D,
     exhausted: bool,
-    state: &State,
+    rc: &RenderContext,
 ) {
     let c = center(p);
     let mut v = WHITE.to_vec();
@@ -44,12 +44,13 @@ pub fn draw_hex(
         },
     );
     draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, Color::from_vec(v));
-    state.draw_text_with_color(&p.to_string(), c.x - 30.0, c.y - 35.0, text_color);
+    rc.state
+        .draw_text_with_color(&p.to_string(), c.x - 30.0, c.y - 35.0, text_color);
     if exhausted {
         const SIZE: f32 = 100.;
         draw_scaled_icon(
-            state,
-            &state.assets.exhausted,
+            rc,
+            &rc.assets().exhausted,
             "Exhausted",
             vec2(c.x - SIZE / 2., c.y - SIZE / 2.),
             SIZE,

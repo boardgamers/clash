@@ -1,13 +1,10 @@
 use macroquad::math::vec2;
-use macroquad::prelude::mouse_wheel;
-use server::game::Game;
 
-use crate::client_state::{State, StateUpdate};
+use crate::client_state::StateUpdate;
+use crate::render_context::RenderContext;
 
-pub fn show_log(game: &Game, state: &mut State) -> StateUpdate {
-    let (_, wheel) = mouse_wheel();
-    state.log_scroll += wheel;
-
+pub fn show_log(rc: &RenderContext) -> StateUpdate {
+    let state = rc.state;
     let mut y = state.log_scroll;
     let mut label = |label: &str| {
         let p = vec2(300., y * 25. + 20.);
@@ -15,7 +12,7 @@ pub fn show_log(game: &Game, state: &mut State) -> StateUpdate {
         state.draw_text(label, p.x, p.y);
     };
 
-    game.log.iter().for_each(|l| {
+    rc.game.log.iter().for_each(|l| {
         let mut line = String::new();
         l.split(' ').for_each(|s| {
             if line.len() + s.len() > 100 {

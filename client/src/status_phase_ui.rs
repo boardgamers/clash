@@ -1,18 +1,18 @@
 use crate::advance_ui::{show_advance_menu, AdvanceState};
-use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
+use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{cancel_button, cancel_button_with_tooltip, ok_button, OkTooltip};
 use crate::layout_ui::bottom_centered_text;
+use crate::render_context::RenderContext;
 use server::action::Action;
 use server::content::advances;
 use server::content::advances::get_leading_government_advance;
-use server::game::Game;
 use server::position::Position;
 use server::status_phase::{
     ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction,
 };
 
-pub fn raze_city_confirm_dialog(game: &Game, player: &ShownPlayer, pos: Position) -> StateUpdate {
-    if player.get(game).can_raze_city(pos) {
+pub fn raze_city_confirm_dialog(rc: &RenderContext, pos: Position) -> StateUpdate {
+    if rc.shown_player.can_raze_city(pos) {
         StateUpdate::execute_with_confirm(
             vec![format!("Raze {pos} to get 1 gold")],
             Action::StatusPhase(StatusPhaseAction::RazeSize1City(RazeSize1City::Position(
@@ -24,8 +24,8 @@ pub fn raze_city_confirm_dialog(game: &Game, player: &ShownPlayer, pos: Position
     }
 }
 
-pub fn raze_city_dialog(state: &State) -> StateUpdate {
-    if cancel_button(state) {
+pub fn raze_city_dialog(rc: &RenderContext) -> StateUpdate {
+    if cancel_button(rc) {
         return StateUpdate::status_phase(StatusPhaseAction::RazeSize1City(RazeSize1City::None));
     }
     StateUpdate::None
@@ -48,22 +48,16 @@ impl ChooseAdditionalAdvances {
     }
 }
 
-pub fn change_government_type_dialog(
-    game: &Game,
-    player: &ShownPlayer,
-    state: &State,
-) -> StateUpdate {
-    let current = player.get(game).government().unwrap();
-    if cancel_button_with_tooltip(state, &format!("Keep {current}")) {
+pub fn change_government_type_dialog(rc: &RenderContext) -> StateUpdate {
+    let current = rc.shown_player.government().unwrap();
+    if cancel_button_with_tooltip(rc, &format!("Keep {current}")) {
         return StateUpdate::status_phase(StatusPhaseAction::ChangeGovernmentType(
             ChangeGovernmentType::KeepGovernment,
         ));
     }
     show_advance_menu(
+        rc,
         "Change government - or click cancel",
-        game,
-        player,
-        state,
         |a, p| {
             if a.government.as_ref().is_some_and(|g| {
                 get_leading_government_advance(g).is_some_and(|l| &l == a)
@@ -91,17 +85,15 @@ pub fn change_government_type_dialog(
 }
 
 pub fn choose_additional_advances_dialog(
-    game: &Game,
+    rc: &RenderContext,
     choose: &ChooseAdditionalAdvances,
-    state: &State,
-    player: &ShownPlayer,
 ) -> StateUpdate {
     let t = if choose.selected.len() == choose.possible.len() {
         OkTooltip::Valid("Change government type".to_string())
     } else {
         OkTooltip::Invalid("Select all additional advances".to_string())
     };
-    if ok_button(state, t) {
+    if ok_button(rc, t) {
         return StateUpdate::status_phase(StatusPhaseAction::ChangeGovernmentType(
             ChangeGovernmentType::ChangeGovernment(ChangeGovernment {
                 new_government: choose.government.clone(),
@@ -110,14 +102,12 @@ pub fn choose_additional_advances_dialog(
         ));
     }
 
-    if cancel_button_with_tooltip(state, "Back to choose government type") {
+    if cancel_button_with_tooltip(rc, "Back to choose government type") {
         return StateUpdate::OpenDialog(ActiveDialog::ChangeGovernmentType);
     }
     show_advance_menu(
+        rc,
         &format!("Choose additional advances for {}", choose.government),
-        game,
-        player,
-        state,
         |a, _| {
             if choose.selected.contains(&a.name) {
                 AdvanceState::Removable
@@ -145,26 +135,22 @@ pub fn choose_additional_advances_dialog(
     )
 }
 
-pub fn complete_objectives_dialog(state: &State) -> StateUpdate {
-    if cancel_button_with_tooltip(state, "Complete no objectives") {
+pub fn complete_objectives_dialog(rc: &RenderContext) -> StateUpdate {
+    if cancel_button_with_tooltip(rc, "Complete no objectives") {
         return StateUpdate::status_phase(StatusPhaseAction::CompleteObjectives(vec![]));
     }
     StateUpdate::None
 }
 
-pub fn determine_first_player_dialog(
-    state: &State,
-    player: &ShownPlayer,
-    game: &Game,
-) -> StateUpdate {
-    if player.can_control_active_player {
+pub fn determine_first_player_dialog(rc: &RenderContext) -> StateUpdate {
+    if rc.can_control_active_player() {
         bottom_centered_text(
-            state,
-            &format!("Select {} as first player", player.get(game).get_name()),
+            rc,
+            &format!("Select {} as first player", rc.shown_player.get_name()),
         );
-        if ok_button(state, OkTooltip::Valid("Select".to_string())) {
+        if ok_button(rc, OkTooltip::Valid("Select".to_string())) {
             return StateUpdate::status_phase(StatusPhaseAction::DetermineFirstPlayer(
-                player.index,
+                rc.shown_player.index,
             ));
         }
     }

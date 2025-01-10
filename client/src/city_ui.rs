@@ -1,4 +1,4 @@
-use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
+use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
 use crate::happiness_ui::{add_increase_happiness, IncreaseHappiness};
@@ -6,74 +6,44 @@ use crate::hex_ui::Point;
 use crate::layout_ui::draw_scaled_icon;
 use crate::map_ui::{move_units_button, show_map_action_buttons};
 use crate::recruit_unit_ui::RecruitAmount;
+use crate::render_context::RenderContext;
 use crate::resource_ui::ResourceType;
 use crate::{hex_ui, player_ui};
 use macroquad::prelude::*;
 use server::city::{City, MoodState};
 use server::city_pieces::Building;
 use server::game::Game;
-use server::player::Player;
-use server::position::Position;
 use server::unit::{UnitType, Units};
 use std::ops::Add;
-
-pub struct CityMenu {
-    pub player: ShownPlayer,
-    pub city_owner_index: usize,
-    pub city_position: Position,
-}
-
-impl CityMenu {
-    pub fn new(player: &ShownPlayer, city_owner_index: usize, city_position: Position) -> Self {
-        CityMenu {
-            player: player.clone(),
-            city_owner_index,
-            city_position,
-        }
-    }
-
-    pub fn get_city_owner<'a>(&self, game: &'a Game) -> &'a Player {
-        game.get_player(self.city_owner_index)
-    }
-
-    pub fn get_city<'a>(&self, game: &'a Game) -> &'a City {
-        game.get_city(self.city_owner_index, self.city_position)
-    }
-
-    pub fn is_city_owner(&self) -> bool {
-        self.player.index == self.city_owner_index
-    }
-}
 
 pub type IconAction<'a> = (&'a Texture2D, String, Box<dyn Fn() -> StateUpdate + 'a>);
 
 pub type IconActionVec<'a> = Vec<IconAction<'a>>;
 
-pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> StateUpdate {
-    let city = menu.get_city(game);
-    let pos = menu.city_position;
+pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate {
+    let pos = city.position;
 
-    let can_play = menu.player.can_play_action && menu.is_city_owner() && city.can_activate();
+    let can_play = city.can_activate(); //todo some custom actions don't require activation
     if !can_play {
         return StateUpdate::None;
     }
 
     let base_icons: IconActionVec<'a> = vec![
-        increase_happiness_button(game, menu, state),
-        move_units_button(game, pos, &menu.player, state),
-        Some(collect_resources_button(game, menu, state)),
-        Some(recruit_button(game, menu, state)),
+        increase_happiness_button(rc, city),
+        move_units_button(rc, pos),
+        Some(collect_resources_button(rc, city)),
+        Some(recruit_button(rc, city)),
     ]
     .into_iter()
     .flatten()
     .collect();
 
-    let buildings: IconActionVec<'a> = building_icons(game, menu, state);
+    let buildings: IconActionVec<'a> = building_icons(rc, city);
 
-    let wonders: IconActionVec<'a> = wonder_icons(game, menu, state);
+    let wonders: IconActionVec<'a> = wonder_icons(rc, city);
 
     show_map_action_buttons(
-        state,
+        rc,
         &vec![base_icons, buildings, wonders]
             .into_iter()
             .flatten()
@@ -81,21 +51,15 @@ pub fn show_city_menu<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) 
     )
 }
 
-fn increase_happiness_button<'a>(
-    game: &'a Game,
-    menu: &'a CityMenu,
-    state: &'a State,
-) -> Option<IconAction<'a>> {
-    let city = menu.get_city(game);
+fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
     if city.mood_state == MoodState::Happy {
         return None;
     }
     Some((
-        &state.assets.resources[&ResourceType::MoodTokens],
+        &rc.assets().resources[&ResourceType::MoodTokens],
         "Increase happiness".to_string(),
         Box::new(move || {
-            let player = &menu.player;
-            let mut happiness = IncreaseHappiness::new(player.get(game));
+            let mut happiness = IncreaseHappiness::new(rc.shown_player);
             let mut target = city.mood_state.clone();
             while target != MoodState::Happy {
                 happiness = add_increase_happiness(city, &happiness);
@@ -106,9 +70,9 @@ fn increase_happiness_button<'a>(
     ))
 }
 
-fn wonder_icons<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> IconActionVec<'a> {
-    let owner = menu.get_city_owner(game);
-    let city = menu.get_city(game);
+fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> {
+    let owner = rc.shown_player;
+    let game = rc.game;
 
     owner
         .wonder_cards
@@ -116,15 +80,14 @@ fn wonder_icons<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> Ico
         .filter(|w| city.can_build_wonder(w, owner, game))
         .map(|w| {
             let a: IconAction<'a> = (
-                &state.assets.wonders[&w.name],
+                &rc.assets().wonders[&w.name],
                 format!("Build wonder {}", w.name),
                 Box::new(move || {
                     StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(
                         ConstructionPayment::new(
-                            game,
+                            rc,
+                            city,
                             &w.name,
-                            menu.player.index,
-                            menu.city_position,
                             ConstructionProject::Wonder(w.name.clone()),
                         ),
                     ))
@@ -135,20 +98,18 @@ fn wonder_icons<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> Ico
         .collect()
 }
 
-fn building_icons<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> IconActionVec<'a> {
-    let owner = menu.get_city_owner(game);
-    let city = menu.get_city(game);
+fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> {
+    let owner = rc.shown_player;
     building_names()
         .iter()
         .filter_map(|(b, _)| {
-            if menu.is_city_owner() && menu.player.can_play_action && city.can_construct(*b, owner)
-            {
+            if rc.can_play_action() && city.can_construct(*b, owner) {
                 Some(*b)
             } else {
                 None
             }
         })
-        .flat_map(|b| new_building_positions(b, city, &game.map))
+        .flat_map(|b| new_building_positions(b, rc, city))
         .map(|(b, pos)| {
             let name = building_name(b);
             let tooltip = format!(
@@ -158,15 +119,14 @@ fn building_icons<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> I
                 owner.construct_cost(b, city),
             );
             let a: IconAction<'a> = (
-                &state.assets.buildings[&b],
+                &rc.assets().buildings[&b],
                 tooltip,
                 Box::new(move || {
                     StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(
                         ConstructionPayment::new(
-                            game,
+                            rc,
+                            city,
                             name,
-                            menu.player.index,
-                            menu.city_position,
                             ConstructionProject::Building(b, pos),
                         ),
                     ))
@@ -177,15 +137,15 @@ fn building_icons<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> I
         .collect()
 }
 
-fn recruit_button<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> IconAction<'a> {
+fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> IconAction<'a> {
     (
-        &state.assets.units[&UnitType::Infantry],
+        &rc.assets().units[&UnitType::Infantry],
         "Recruit Units".to_string(),
         Box::new(|| {
             RecruitAmount::new_selection(
-                game,
-                menu.player.index,
-                menu.city_position,
+                rc.game,
+                city.player_index,
+                city.position,
                 Units::empty(),
                 None,
                 &[],
@@ -194,20 +154,16 @@ fn recruit_button<'a>(game: &'a Game, menu: &'a CityMenu, state: &'a State) -> I
     )
 }
 
-fn collect_resources_button<'a>(
-    game: &'a Game,
-    menu: &'a CityMenu,
-    state: &'a State,
-) -> IconAction<'a> {
+fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> IconAction<'a> {
     (
-        &state.assets.resources[&ResourceType::Food],
+        &rc.assets().resources[&ResourceType::Food],
         "Collect Resources".to_string(),
         Box::new(|| {
-            let pos = menu.city_position;
+            let pos = city.position;
             StateUpdate::OpenDialog(ActiveDialog::CollectResources(CollectResources::new(
-                menu.player.index,
+                city.player_index,
                 pos,
-                possible_resource_collections(game, pos, menu.city_owner_index),
+                possible_resource_collections(rc.game, pos, city.player_index),
             )))
         }),
     )
@@ -248,14 +204,16 @@ pub fn city_labels(game: &Game, city: &City) -> Vec<String> {
 
 pub const BUILDING_SIZE: f32 = 12.0;
 
-pub fn draw_city(owner: &Player, city: &City, state: &State) {
+pub fn draw_city(rc: &RenderContext, city: &City) {
     let c = hex_ui::center(city.position);
+    let owner = city.player_index;
 
     if city.is_activated() {
         draw_circle(c.x, c.y, 18.0, WHITE);
     }
-    draw_circle(c.x, c.y, 15.0, player_ui::player_color(owner.index));
+    draw_circle(c.x, c.y, 15.0, player_ui::player_color(owner));
 
+    let state = &rc.state;
     let mood = if let ActiveDialog::IncreaseHappiness(increase) = &state.active_dialog {
         let steps = increase
             .steps
@@ -267,14 +225,14 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
         &city.mood_state
     };
     let t = match mood {
-        MoodState::Happy => Some(&state.assets.resources[&ResourceType::MoodTokens]),
+        MoodState::Happy => Some(&rc.assets().resources[&ResourceType::MoodTokens]),
         MoodState::Neutral => None,
-        MoodState::Angry => Some(&state.assets.angry),
+        MoodState::Angry => Some(&rc.assets().angry),
     };
     if let Some(t) = t {
         let size = 15.;
         draw_scaled_icon(
-            state,
+            rc,
             t,
             &format!("Happiness: {:?}", city.mood_state),
             c.to_vec2() + vec2(-size / 2., -size / 2.),
@@ -285,11 +243,11 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
     let mut i = 0;
     city.pieces.wonders.iter().for_each(|w| {
         let p = hex_ui::rotate_around(c, 20.0, 90 * i);
-        draw_circle(p.x, p.y, 18.0, player_ui::player_color(owner.index));
+        draw_circle(p.x, p.y, 18.0, player_ui::player_color(owner));
         let size = 20.;
         draw_scaled_icon(
-            state,
-            &state.assets.wonders[&w.name],
+            rc,
+            &rc.assets().wonders[&w.name],
             &w.name,
             p.to_vec2() + vec2(-size / 2., -size / 2.),
             size,
@@ -312,8 +270,8 @@ pub fn draw_city(owner: &Player, city: &City, state: &State) {
                 building_name(*b)
             };
             draw_scaled_icon(
-                state,
-                &state.assets.buildings[b],
+                rc,
+                &rc.assets().buildings[b],
                 tooltip,
                 p.to_vec2() + vec2(-8., -8.),
                 16.,

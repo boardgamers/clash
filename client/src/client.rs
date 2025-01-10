@@ -7,7 +7,7 @@ use server::game::Game;
 use server::position::Position;
 
 use crate::advance_ui::{pay_advance_dialog, show_free_advance_menu, show_paid_advance_menu};
-use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, StateUpdates};
+use crate::client_state::{ActiveDialog, CameraMode, State, StateUpdate, StateUpdates};
 use crate::collect_ui::collect_resources_dialog;
 use crate::construct_ui::pay_construction_dialog;
 use crate::happiness_ui::{increase_happiness_click, increase_happiness_menu};
@@ -16,74 +16,81 @@ use crate::layout_ui::{icon_pos, top_right_texture};
 use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, show_tile_menu};
 use crate::player_ui::{player_select, show_global_controls, show_top_center, show_top_left};
+use crate::render_context::RenderContext;
 use crate::status_phase_ui::raze_city_confirm_dialog;
 use crate::unit_ui::unit_selection_click;
 use crate::{
-    combat_ui, dialog_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui, tooltip,
+    combat_ui, dialog_ui, influence_ui, map_ui, move_ui, recruit_unit_ui, status_phase_ui, tooltip,
 };
 
-fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
+fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     tooltip::update(state);
-
-    clear_background(WHITE);
-
-    let player = &state.shown_player(game);
+    if !state.active_dialog.is_modal() {
+        map_ui::pan_and_zoom(state);
+    }
+    if matches!(state.active_dialog, ActiveDialog::Log) {
+        state.log_scroll += mouse_wheel().1;
+    }
 
     let s = state.screen_size;
     state.camera.zoom.y = state.camera.zoom.x * s.x / s.y;
 
+    render(&state.render_context(game), features)
+}
+
+fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
+    clear_background(WHITE);
+
+    let state = &rc.state;
+    let show_map = !state.active_dialog.is_modal();
+
     let mut updates = StateUpdates::new();
-    if !state.active_dialog.is_modal() {
-        updates.add(draw_map(game, state));
+    if show_map {
+        updates.add(rc.with_camera(CameraMode::World, draw_map));
     }
     if !state.active_dialog.is_full_modal() {
-        show_top_left(game, player, state);
+        show_top_left(rc);
     }
-    if !state.active_dialog.is_modal() {
-        show_top_center(game, player, state);
+    if show_map {
+        show_top_center(rc);
     }
     if !state.active_dialog.is_full_modal() {
-        updates.add(player_select(game, player, state));
-        updates.add(show_global_controls(game, state, features));
+        updates.add(player_select(rc));
+        updates.add(show_global_controls(rc, features));
     }
 
-    if top_right_texture(state, &state.assets.log, icon_pos(-1, 0), "Show log") {
+    if top_right_texture(rc, &rc.assets().log, icon_pos(-1, 0), "Show log") {
         if let ActiveDialog::Log = state.active_dialog {
             return StateUpdate::CloseDialog;
         }
-        state.log_scroll = 0.0;
         return StateUpdate::OpenDialog(ActiveDialog::Log);
     };
-    if top_right_texture(
-        state,
-        &state.assets.advances,
-        icon_pos(-2, 0),
-        "Show advances",
-    ) {
+    if top_right_texture(rc, &rc.assets().advances, icon_pos(-2, 0), "Show advances") {
         if state.active_dialog.is_advance() {
             return StateUpdate::CloseDialog;
         }
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     };
 
-    if player.can_control {
+    let can_control = rc.can_control();
+    if can_control {
         if let Some(u) = &state.pending_update {
-            updates.add(dialog_ui::show_pending_update(u, state));
+            updates.add(dialog_ui::show_pending_update(u, rc));
         }
     }
 
-    if player.can_control || state.active_dialog.show_for_other_player() {
-        updates.add(render_active_dialog(game, state, player));
+    if can_control || state.active_dialog.show_for_other_player() {
+        updates.add(render_active_dialog(rc));
     }
 
     if let Some(pos) = state.focused_tile {
-        if player.can_play_action && matches!(state.active_dialog, ActiveDialog::None) {
-            updates.add(show_tile_menu(game, pos, player, state));
+        if rc.can_play_action() && matches!(state.active_dialog, ActiveDialog::None) {
+            updates.add(show_tile_menu(rc, pos));
         }
     }
 
-    if player.can_control {
-        updates.add(try_click(game, state, player));
+    if can_control {
+        updates.add(try_click(rc));
     }
     updates.result()
 }
@@ -108,60 +115,57 @@ pub fn render_and_update(
         }
     }
 
-    let update = render(game, state, features);
+    let update = render_with_mutable_state(game, state, features);
     state.update(game, update)
 }
 
-fn render_active_dialog(game: &Game, state: &mut State, player: &ShownPlayer) -> StateUpdate {
+fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
+    let state = rc.state;
     match &state.active_dialog {
         ActiveDialog::None
         | ActiveDialog::MoveUnits(_)
         | ActiveDialog::WaitingForUpdate
         | ActiveDialog::CulturalInfluence
         | ActiveDialog::PlaceSettler => StateUpdate::None,
-        ActiveDialog::Log => show_log(game, state),
+        ActiveDialog::Log => show_log(rc),
 
         // playing actions
-        ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(h, player, state, game),
-        ActiveDialog::AdvanceMenu => show_paid_advance_menu(game, player, state),
-        ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, state, player, game),
-        ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(game, p, state),
-        ActiveDialog::CollectResources(c) => collect_resources_dialog(game, c, state, player),
-        ActiveDialog::RecruitUnitSelection(s) => {
-            recruit_unit_ui::select_dialog(game, s, player, state)
-        }
-        ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::replace_dialog(game, r, state),
+        ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(rc, h),
+        ActiveDialog::AdvanceMenu => show_paid_advance_menu(rc),
+        ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, rc),
+        ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(rc, p),
+        ActiveDialog::CollectResources(c) => collect_resources_dialog(rc, c),
+        ActiveDialog::RecruitUnitSelection(s) => recruit_unit_ui::select_dialog(rc, s),
+        ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::replace_dialog(rc, r),
         ActiveDialog::CulturalInfluenceResolution(r) => {
-            influence_ui::cultural_influence_resolution_dialog(state, r, player)
+            influence_ui::cultural_influence_resolution_dialog(rc, r)
         }
 
         //status phase
-        ActiveDialog::FreeAdvance => show_free_advance_menu(game, player, state),
-        ActiveDialog::RazeSize1City => status_phase_ui::raze_city_dialog(state),
-        ActiveDialog::CompleteObjectives => status_phase_ui::complete_objectives_dialog(state),
-        ActiveDialog::ChangeGovernmentType => {
-            status_phase_ui::change_government_type_dialog(game, player, state)
-        }
+        ActiveDialog::FreeAdvance => show_free_advance_menu(rc),
+        ActiveDialog::RazeSize1City => status_phase_ui::raze_city_dialog(rc),
+        ActiveDialog::CompleteObjectives => status_phase_ui::complete_objectives_dialog(rc),
+        ActiveDialog::ChangeGovernmentType => status_phase_ui::change_government_type_dialog(rc),
         ActiveDialog::ChooseAdditionalAdvances(a) => {
-            status_phase_ui::choose_additional_advances_dialog(game, a, state, player)
+            status_phase_ui::choose_additional_advances_dialog(rc, a)
         }
-        ActiveDialog::DetermineFirstPlayer => {
-            status_phase_ui::determine_first_player_dialog(state, player, game)
-        }
+        ActiveDialog::DetermineFirstPlayer => status_phase_ui::determine_first_player_dialog(rc),
 
         //combat
-        ActiveDialog::PlayActionCard => combat_ui::play_action_card_dialog(state),
-        ActiveDialog::Retreat => combat_ui::retreat_dialog(state),
-        ActiveDialog::RemoveCasualties(s) => combat_ui::remove_casualties_dialog(game, s, state),
+        ActiveDialog::PlayActionCard => combat_ui::play_action_card_dialog(rc),
+        ActiveDialog::Retreat => combat_ui::retreat_dialog(rc),
+        ActiveDialog::RemoveCasualties(s) => combat_ui::remove_casualties_dialog(rc, s),
     }
 }
 
-pub fn try_click(game: &Game, state: &mut State, player: &ShownPlayer) -> StateUpdate {
+pub fn try_click(rc: &RenderContext) -> StateUpdate {
+    let game = rc.game;
+    let state = &rc.state;
     let mouse_pos = state.camera.screen_to_world(mouse_position().into());
     let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));
 
     if let ActiveDialog::CulturalInfluence = state.active_dialog {
-        return influence_ui::hover(pos, game, player, mouse_pos, state);
+        return influence_ui::hover(rc, mouse_pos);
     }
 
     if !game.map.tiles.contains_key(&pos) {
@@ -175,25 +179,21 @@ pub fn try_click(game: &Game, state: &mut State, player: &ShownPlayer) -> StateU
     match &state.active_dialog {
         ActiveDialog::CollectResources(_) => StateUpdate::None,
         ActiveDialog::MoveUnits(s) => move_ui::click(pos, s, mouse_pos, game),
-        ActiveDialog::RemoveCasualties(s) => {
-            unit_selection_click(game, player, pos, mouse_pos, s, |new| {
-                StateUpdate::OpenDialog(ActiveDialog::RemoveCasualties(new.clone()))
-            })
-        }
-        ActiveDialog::ReplaceUnits(s) => {
-            unit_selection_click(game, player, pos, mouse_pos, s, |new| {
-                StateUpdate::OpenDialog(ActiveDialog::ReplaceUnits(new.clone()))
-            })
-        }
-        ActiveDialog::RazeSize1City => raze_city_confirm_dialog(game, player, pos),
+        ActiveDialog::RemoveCasualties(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
+            StateUpdate::OpenDialog(ActiveDialog::RemoveCasualties(new.clone()))
+        }),
+        ActiveDialog::ReplaceUnits(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
+            StateUpdate::OpenDialog(ActiveDialog::ReplaceUnits(new.clone()))
+        }),
+        ActiveDialog::RazeSize1City => raze_city_confirm_dialog(rc, pos),
         ActiveDialog::PlaceSettler => {
-            if player.get(game).get_city(pos).is_some() {
+            if rc.shown_player.get_city(pos).is_some() {
                 StateUpdate::Execute(Action::PlaceSettler(pos))
             } else {
                 StateUpdate::None
             }
         }
-        ActiveDialog::IncreaseHappiness(h) => increase_happiness_click(game, player, pos, h),
+        ActiveDialog::IncreaseHappiness(h) => increase_happiness_click(rc, pos, h),
         _ => StateUpdate::SetFocusedTile(pos),
     }
 }

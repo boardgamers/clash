@@ -2,9 +2,10 @@ use macroquad::math::{bool, vec2};
 
 use server::resource_pile::ResourcePile;
 
-use crate::client_state::{State, StateUpdate};
+use crate::client_state::StateUpdate;
 use crate::dialog_ui::OkTooltip;
 use crate::layout_ui::draw_icon;
+use crate::render_context::RenderContext;
 use crate::resource_ui::{resource_name, ResourceType};
 use crate::select_ui;
 use crate::select_ui::{CountSelector, HasCountSelectableObject};
@@ -82,20 +83,20 @@ pub trait HasPayment {
 pub fn payment_dialog<T: HasPayment>(
     has_payment: &T,
     is_valid: impl FnOnce(&T) -> OkTooltip,
-    execute_action: impl FnOnce(&T) -> StateUpdate,
+    execute_action: impl FnOnce() -> StateUpdate,
     show: impl Fn(&T, ResourceType) -> bool,
     plus: impl Fn(&T, ResourceType) -> StateUpdate,
     minus: impl Fn(&T, ResourceType) -> StateUpdate,
-    state: &State,
+    rc: &RenderContext,
 ) -> StateUpdate {
     select_ui::count_dialog(
-        state,
+        rc,
         has_payment,
         |p| p.payment().resources.clone(),
         |s, p| {
             let _ = draw_icon(
-                state,
-                &state.assets.resources[&s.resource],
+                rc,
+                &rc.assets().resources[&s.resource],
                 resource_name(s.resource),
                 p + vec2(0., -10.),
             );

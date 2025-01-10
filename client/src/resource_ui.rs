@@ -1,6 +1,6 @@
-use crate::client_state::{ShownPlayer, State};
 use crate::layout_ui::icon_pos;
 use crate::player_ui::bottom_icon_with_label;
+use crate::render_context::RenderContext;
 use macroquad::math::vec2;
 use server::resource_pile::ResourcePile;
 use std::collections::HashMap;
@@ -66,12 +66,7 @@ pub fn resource_name(t: ResourceType) -> &'static str {
     }
 }
 
-pub fn show_resource_pile(
-    state: &State,
-    player: &ShownPlayer,
-    p: &ResourcePile,
-    must_show: &[ResourceType],
-) {
+pub fn show_resource_pile(rc: &RenderContext, p: &ResourcePile, must_show: &[ResourceType]) {
     let resource_map = new_resource_map(p);
     let show: Vec<ResourceType> = resource_types()
         .into_iter()
@@ -82,10 +77,9 @@ pub fn show_resource_pile(
         let a = resource_map[r];
 
         bottom_icon_with_label(
-            player,
-            state,
+            rc,
             &format!("{a}"),
-            &state.assets.resources[r],
+            &rc.assets().resources[r],
             icon_pos(x, -2) + vec2(0., 10.),
             resource_name(*r),
         );

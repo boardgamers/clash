@@ -2,34 +2,35 @@ use std::cmp;
 
 use macroquad::math::{i32, u32};
 
+use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::dialog_ui::OkTooltip;
+use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
+use crate::recruit_unit_ui::RecruitSelection;
+use crate::render_context::RenderContext;
+use crate::resource_ui::{new_resource_map, ResourceType};
+use crate::select_ui::CountSelector;
 use server::action::Action;
 use server::city::City;
 use server::city_pieces::Building;
 use server::content::custom_actions::CustomAction;
-use server::game::Game;
-use server::map::{Map, Terrain};
+use server::map::Terrain;
 use server::playing_actions::{Construct, PlayingAction, Recruit};
 use server::position::Position;
 use server::resource_pile::PaymentOptions;
 use server::unit::UnitType;
 
-use crate::client_state::{ActiveDialog, State, StateUpdate};
-use crate::dialog_ui::OkTooltip;
-use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
-use crate::recruit_unit_ui::RecruitSelection;
-use crate::resource_ui::{new_resource_map, ResourceType};
-use crate::select_ui::CountSelector;
-
 pub fn new_building_positions(
     building: Building,
+    rc: &RenderContext,
     city: &City,
-    map: &Map,
 ) -> Vec<(Building, Option<Position>)> {
     if building != Building::Port {
         return vec![(building, None)];
     }
 
-    map.tiles
+    rc.game
+        .map
+        .tiles
         .iter()
         .filter_map(|(p, t)| {
             if *t == Terrain::Water && city.position.is_neighbor(*p) {
@@ -41,15 +42,12 @@ pub fn new_building_positions(
         .collect()
 }
 
-pub fn pay_construction_dialog(
-    game: &Game,
-    payment: &ConstructionPayment,
-    state: &State,
-) -> StateUpdate {
+pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> StateUpdate {
+    let city = rc.game.get_any_city(cp.city_position).unwrap();
     payment_dialog(
-        payment,
+        cp,
         ConstructionPayment::valid,
-        |cp| match &cp.project {
+        || match &cp.project {
             ConstructionProject::Building(b, pos) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Construct(Construct {
                     city_position: cp.city_position,
@@ -59,7 +57,7 @@ pub fn pay_construction_dialog(
                     temple_bonus: None,
                 })),
                 vec![],
-                game.get_any_city(cp.city_position).unwrap(),
+                city,
             ),
             ConstructionProject::Wonder(w) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Custom(CustomAction::ConstructWonder {
@@ -68,7 +66,7 @@ pub fn pay_construction_dialog(
                     wonder: w.clone(),
                 })),
                 vec![],
-                game.get_any_city(cp.city_position).unwrap(),
+                city,
             ),
             ConstructionProject::Units(r) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Recruit(Recruit {
@@ -79,7 +77,7 @@ pub fn pay_construction_dialog(
                     leader_index: r.amount.leader_index,
                 })),
                 vec![],
-                game.get_any_city(cp.city_position).unwrap(),
+                city,
             ),
         },
         |ap, r| match r {
@@ -112,7 +110,7 @@ pub fn pay_construction_dialog(
             new.payment.get_mut(r).selectable.current -= 1;
             StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(new))
         },
-        state,
+        rc,
     )
 }
 
@@ -135,17 +133,14 @@ pub struct ConstructionPayment {
 
 impl ConstructionPayment {
     pub fn new(
-        game: &Game,
+        rc: &RenderContext,
+        city: &City,
         name: &str,
-        player_index: usize,
-        city_position: Position,
         project: ConstructionProject,
     ) -> ConstructionPayment {
-        let p = game.get_player(player_index);
+        let p = rc.game.get_player(city.player_index);
         let cost = match &project {
-            ConstructionProject::Building(b, _) => {
-                p.construct_cost(*b, p.get_city(city_position).unwrap())
-            }
+            ConstructionProject::Building(b, _) => p.construct_cost(*b, city),
             ConstructionProject::Wonder(name) => p
                 .wonder_cards
                 .iter()
@@ -169,8 +164,8 @@ impl ConstructionPayment {
 
         ConstructionPayment {
             name: name.to_string(),
-            player_index,
-            city_position,
+            player_index: city.player_index,
+            city_position: city.position,
             project,
             payment,
             payment_options,

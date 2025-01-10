@@ -12,13 +12,14 @@ use server::playing_actions::{get_total_collection, PlayingAction};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
-use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
+use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
 use crate::hex_ui;
 use crate::hex_ui::Point;
 use crate::layout_ui::{
     draw_icon, draw_scaled_icon, is_in_circle, left_mouse_button_pressed, ICON_SIZE,
 };
+use crate::render_context::RenderContext;
 use crate::resource_ui::{
     new_resource_map, resource_name, resource_types, show_resource_pile, ResourceType,
 };
@@ -70,14 +71,10 @@ impl CollectResources {
     }
 }
 
-pub fn collect_resources_dialog(
-    game: &Game,
-    collect: &CollectResources,
-    state: &State,
-    player: &ShownPlayer,
-) -> StateUpdate {
-    show_resource_pile(state, player, &collect.collected(), &[]);
+pub fn collect_resources_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUpdate {
+    show_resource_pile(rc, &collect.collected(), &[]);
 
+    let game = rc.game;
     let city = game.get_city(collect.player_index, collect.city_position);
 
     let tooltip = get_total_collection(
@@ -90,7 +87,7 @@ pub fn collect_resources_dialog(
         OkTooltip::Invalid("Too many resources selected".to_string()),
         |p| OkTooltip::Valid(format!("Collect {p}")),
     );
-    if ok_button(state, tooltip) {
+    if ok_button(rc, tooltip) {
         let extra = collect.extra_resources(game);
         return StateUpdate::execute_activation(
             Action::Playing(PlayingAction::Collect {
@@ -105,7 +102,7 @@ pub fn collect_resources_dialog(
             city,
         );
     };
-    if cancel_button(state) {
+    if cancel_button(rc) {
         return StateUpdate::Cancel;
     };
     StateUpdate::None
@@ -154,7 +151,8 @@ fn click_collect_option(col: &CollectResources, p: Position, pile: &ResourcePile
     StateUpdate::OpenDialog(ActiveDialog::CollectResources(new))
 }
 
-pub fn draw_resource_collect_tile(state: &State, pos: Position) -> StateUpdate {
+pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpdate {
+    let state = &rc.state;
     if let ActiveDialog::CollectResources(collect) = &state.active_dialog {
         if let Some(possible) = collect.possible_collections.get(&pos) {
             let col = collect.get_collection(pos);
@@ -172,7 +170,7 @@ pub fn draw_resource_collect_tile(state: &State, pos: Position) -> StateUpdate {
                     WHITE
                 };
                 draw_circle(center.x, center.y, 20., color);
-                if let Some(p) = left_mouse_button_pressed(state) {
+                if let Some(p) = left_mouse_button_pressed(rc) {
                     if is_in_circle(p, center, 20.) {
                         return click_collect_option(collect, pos, pile);
                     }
@@ -186,19 +184,19 @@ pub fn draw_resource_collect_tile(state: &State, pos: Position) -> StateUpdate {
                         a.is_some_and(|a| *a > 0).then(|| (*r, a.unwrap()))
                     })
                     .collect();
-                draw_collect_item(state, center, &m);
+                draw_collect_item(rc, center, &m);
             }
         }
     };
     StateUpdate::None
 }
 
-fn draw_collect_item(state: &State, center: Point, resources: &[(ResourceType, &u32)]) {
+fn draw_collect_item(rc: &RenderContext, center: Point, resources: &[(ResourceType, &u32)]) {
     if resources.iter().len() == 1 {
         let (r, _) = resources.first().unwrap();
         draw_icon(
-            state,
-            &state.assets.resources[r],
+            rc,
+            &rc.assets().resources[r],
             resource_name(*r),
             center.to_vec2() - vec2(ICON_SIZE / 2., ICON_SIZE / 2.),
         );
@@ -207,8 +205,8 @@ fn draw_collect_item(state: &State, center: Point, resources: &[(ResourceType, &
             let size = ICON_SIZE / 2.;
             let c = hex_ui::rotate_around(center, 10.0, (180 * j) as i32);
             draw_scaled_icon(
-                state,
-                &state.assets.resources[r],
+                rc,
+                &rc.assets().resources[r],
                 resource_name(*r),
                 c.to_vec2() - vec2(size / 2., size / 2.),
                 size,

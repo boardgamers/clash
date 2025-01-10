@@ -1,8 +1,9 @@
-use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
+use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::OkTooltip;
-use crate::layout_ui::{bottom_center_text, left_mouse_button_pressed_in_rect, top_center_text};
+use crate::layout_ui::{bottom_center_text, left_mouse_button_pressed_in_rect, top_centered_text};
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::player_ui::player_color;
+use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::HasCountSelectableObject;
 use crate::tooltip::show_tooltip_for_rect;
@@ -101,12 +102,11 @@ impl HasPayment for AdvancePayment {
     }
 }
 
-pub fn show_paid_advance_menu(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
+pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
+    let game = rc.game;
     show_advance_menu(
+        rc,
         "Advances",
-        game,
-        player,
-        state,
         |a, p| {
             if p.has_advance(&a.name) {
                 AdvanceState::Owned
@@ -122,19 +122,17 @@ pub fn show_paid_advance_menu(game: &Game, player: &ShownPlayer, state: &State) 
         |a| {
             StateUpdate::OpenDialog(ActiveDialog::AdvancePayment(AdvancePayment::new(
                 game,
-                player.index,
+                rc.shown_player.index,
                 a.name.as_str(),
             )))
         },
     )
 }
 
-pub fn show_free_advance_menu(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
+pub fn show_free_advance_menu(rc: &RenderContext) -> StateUpdate {
     show_advance_menu(
+        rc,
         "Select a free advance",
-        game,
-        player,
-        state,
         |a, p| {
             if p.can_advance_free(&a.name) {
                 AdvanceState::Available
@@ -154,15 +152,14 @@ pub fn show_free_advance_menu(game: &Game, player: &ShownPlayer, state: &State) 
 }
 
 pub fn show_advance_menu(
+    rc: &RenderContext,
     title: &str,
-    game: &Game,
-    player: &ShownPlayer,
-    state: &State,
     advance_state: impl Fn(&Advance, &Player) -> AdvanceState,
     new_update: impl Fn(&Advance) -> StateUpdate,
 ) -> StateUpdate {
-    top_center_text(state, title, vec2(0., 10.));
-    let p = player.get(game);
+    top_centered_text(rc, title, vec2(0., 10.));
+    let p = rc.shown_player;
+    let state = rc.state;
 
     for pass in 0..2 {
         for (i, (group_name, advances)) in advances::get_groups().iter().enumerate() {
@@ -211,14 +208,14 @@ pub fn show_advance_menu(
                     );
                 } else {
                     // tooltip should be shown on top of everything
-                    show_tooltip_for_rect(state, &description(p, a), rect);
+                    show_tooltip_for_rect(rc, &description(p, a), rect);
 
-                    if player.can_control
+                    if rc.can_control()
                         && matches!(
                             advance_state,
                             AdvanceState::Available | AdvanceState::Removable
                         )
-                        && left_mouse_button_pressed_in_rect(rect, state)
+                        && left_mouse_button_pressed_in_rect(rect, rc)
                     {
                         return new_update(a);
                     }
@@ -281,22 +278,17 @@ fn description(p: &Player, a: &Advance) -> Vec<String> {
     parts
 }
 
-pub fn pay_advance_dialog(
-    ap: &AdvancePayment,
-    state: &State,
-    player: &ShownPlayer,
-    game: &Game,
-) -> StateUpdate {
-    let update = show_paid_advance_menu(game, player, state);
+pub fn pay_advance_dialog(ap: &AdvancePayment, rc: &RenderContext) -> StateUpdate {
+    let update = show_paid_advance_menu(rc);
     if !matches!(update, StateUpdate::None) {
         // select a different advance
         return update;
     };
-    bottom_center_text(state, &ap.name, vec2(-200., -50.));
+    bottom_center_text(rc, &ap.name, vec2(-200., -50.));
     payment_dialog(
         ap,
         AdvancePayment::valid,
-        |ap| {
+        || {
             StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
                 advance: ap.name.to_string(),
                 payment: ap.payment.to_resource_pile(),
@@ -305,7 +297,7 @@ pub fn pay_advance_dialog(
         |ap, r| ap.payment.get(r).selectable.max > 0,
         |ap, r| add(ap, r, 1),
         |ap, r| add(ap, r, -1),
-        state,
+        rc,
     )
 }
 

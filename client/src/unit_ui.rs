@@ -7,13 +7,14 @@ use server::game::Game;
 use server::position::Position;
 use server::unit::{Unit, UnitType};
 
-use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
+use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::select_ui::ConfirmSelection;
 use crate::{hex_ui, player_ui};
 
 use crate::dialog_ui::{cancel_button_with_tooltip, ok_button};
 use crate::hex_ui::Point;
 use crate::layout_ui::{draw_scaled_icon, is_in_circle};
+use crate::render_context::RenderContext;
 use crate::tooltip::show_tooltip_for_circle;
 use itertools::Itertools;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
@@ -22,11 +23,11 @@ use server::player::Player;
 pub const UNIT_RADIUS: f32 = 11.0;
 
 pub fn draw_unit_type(
+    rc: &RenderContext,
     selected: bool,
     center: Point,
     unit_type: &UnitType,
     player_index: usize,
-    state: &State,
     tooltip: &str,
     size: f32,
 ) {
@@ -44,8 +45,8 @@ pub fn draw_unit_type(
     );
     let icon_size = size * 1.1;
     draw_scaled_icon(
-        state,
-        &state.assets.units[unit_type],
+        rc,
+        &rc.assets().units[unit_type],
         tooltip,
         vec2(center.x - icon_size / 2., center.y - icon_size / 2.),
         icon_size,
@@ -83,14 +84,15 @@ pub fn non_leader_names() -> [(UnitType, &'static str); 5] {
     ]
 }
 
-pub fn draw_units(game: &Game, state: &State, tooltip: bool) {
-    let selected_units = match state.active_dialog {
+pub fn draw_units(rc: &RenderContext, tooltip: bool) {
+    let selected_units = match rc.state.active_dialog {
         ActiveDialog::MoveUnits(ref s) => s.units.clone(),
         ActiveDialog::ReplaceUnits(ref s) => s.replaced_units.clone(),
         ActiveDialog::RemoveCasualties(ref s) => s.units.clone(),
         _ => vec![],
     };
 
+    let game = rc.game;
     for (_pos, units) in &game
         .players
         .iter()
@@ -105,15 +107,15 @@ pub fn draw_units(game: &Game, state: &State, tooltip: bool) {
                     .get_player(*p)
                     .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
                 let center = unit_center(i.try_into().unwrap(), u.position).to_vec2();
-                show_tooltip_for_circle(state, &unit_label(u, army_move), center, UNIT_RADIUS);
+                show_tooltip_for_circle(rc, &unit_label(u, army_move), center, UNIT_RADIUS);
             } else {
                 let selected = *p == game.active_player() && selected_units.contains(&u.id);
                 draw_unit_type(
+                    rc,
                     selected,
                     unit_center(i.try_into().unwrap(), u.position),
                     &u.unit_type,
                     u.player_index,
-                    state,
                     "",
                     UNIT_RADIUS,
                 );
@@ -128,15 +130,14 @@ pub trait UnitSelection: ConfirmSelection {
 }
 
 pub fn unit_selection_click<T: UnitSelection>(
-    game: &Game,
-    player: &ShownPlayer,
+    rc: &RenderContext,
     pos: Position,
     mouse_pos: Vec2,
     sel: &T,
     on_change: impl Fn(T) -> StateUpdate,
 ) -> StateUpdate {
-    if let Some(unit_id) = unit_at_pos(pos, mouse_pos, player.get(game)) {
-        if sel.can_select(game, player.get(game).get_unit(unit_id).unwrap()) {
+    if let Some(unit_id) = unit_at_pos(pos, mouse_pos, rc.shown_player) {
+        if sel.can_select(rc.game, rc.shown_player.get_unit(unit_id).unwrap()) {
             let mut new = sel.clone();
             unit_selection_clicked(unit_id, new.selected_units_mut());
             return on_change(new);
@@ -146,21 +147,20 @@ pub fn unit_selection_click<T: UnitSelection>(
 }
 
 pub fn unit_selection_dialog<T: UnitSelection>(
-    game: &Game,
+    rc: &RenderContext,
     sel: &T,
     on_ok: impl FnOnce(T) -> StateUpdate,
-    state: &State,
 ) -> StateUpdate {
-    if ok_button(state, sel.confirm(game)) {
+    if ok_button(rc, sel.confirm(rc.game)) {
         on_ok(sel.clone())
     } else {
-        may_cancel(sel, state)
+        may_cancel(sel, rc)
     }
 }
 
-fn may_cancel(sel: &impl ConfirmSelection, state: &State) -> StateUpdate {
+fn may_cancel(sel: &impl ConfirmSelection, rc: &RenderContext) -> StateUpdate {
     if let Some(cancel_name) = sel.cancel_name() {
-        if cancel_button_with_tooltip(state, cancel_name) {
+        if cancel_button_with_tooltip(rc, cancel_name) {
             StateUpdate::Cancel
         } else {
             StateUpdate::None
