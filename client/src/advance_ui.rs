@@ -158,7 +158,7 @@ pub fn show_advance_menu(
     new_update: impl Fn(&Advance) -> StateUpdate,
 ) -> StateUpdate {
     top_centered_text(rc, title, vec2(0., 10.));
-    let p = rc.player;
+    let p = rc.shown_player;
     let state = rc.state;
 
     for pass in 0..2 {
@@ -210,7 +210,7 @@ pub fn show_advance_menu(
                     // tooltip should be shown on top of everything
                     show_tooltip_for_rect(rc, &description(p, a), rect);
 
-                    if rc.shown_player.can_control
+                    if rc.can_control()
                         && matches!(
                             advance_state,
                             AdvanceState::Available | AdvanceState::Removable

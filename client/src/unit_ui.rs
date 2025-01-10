@@ -92,7 +92,7 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
         _ => vec![],
     };
 
-    let game = &rc.game;
+    let game = rc.game;
     for (_pos, units) in &game
         .players
         .iter()
@@ -136,8 +136,8 @@ pub fn unit_selection_click<T: UnitSelection>(
     sel: &T,
     on_change: impl Fn(T) -> StateUpdate,
 ) -> StateUpdate {
-    if let Some(unit_id) = unit_at_pos(pos, mouse_pos, rc.player) {
-        if sel.can_select(rc.game, rc.player.get_unit(unit_id).unwrap()) {
+    if let Some(unit_id) = unit_at_pos(pos, mouse_pos, rc.shown_player) {
+        if sel.can_select(rc.game, rc.shown_player.get_unit(unit_id).unwrap()) {
             let mut new = sel.clone();
             unit_selection_clicked(unit_id, new.selected_units_mut());
             return on_change(new);

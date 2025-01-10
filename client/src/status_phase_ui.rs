@@ -12,7 +12,7 @@ use server::status_phase::{
 };
 
 pub fn raze_city_confirm_dialog(rc: &RenderContext, pos: Position) -> StateUpdate {
-    if rc.player.can_raze_city(pos) {
+    if rc.shown_player.can_raze_city(pos) {
         StateUpdate::execute_with_confirm(
             vec![format!("Raze {pos} to get 1 gold")],
             Action::StatusPhase(StatusPhaseAction::RazeSize1City(RazeSize1City::Position(
@@ -49,7 +49,7 @@ impl ChooseAdditionalAdvances {
 }
 
 pub fn change_government_type_dialog(rc: &RenderContext) -> StateUpdate {
-    let current = rc.player.government().unwrap();
+    let current = rc.shown_player.government().unwrap();
     if cancel_button_with_tooltip(rc, &format!("Keep {current}")) {
         return StateUpdate::status_phase(StatusPhaseAction::ChangeGovernmentType(
             ChangeGovernmentType::KeepGovernment,
@@ -143,10 +143,10 @@ pub fn complete_objectives_dialog(rc: &RenderContext) -> StateUpdate {
 }
 
 pub fn determine_first_player_dialog(rc: &RenderContext) -> StateUpdate {
-    if rc.shown_player.can_control_active_player {
+    if rc.can_control_active_player() {
         bottom_centered_text(
             rc,
-            &format!("Select {} as first player", rc.player.get_name()),
+            &format!("Select {} as first player", rc.shown_player.get_name()),
         );
         if ok_button(rc, OkTooltip::Valid("Select".to_string())) {
             return StateUpdate::status_phase(StatusPhaseAction::DetermineFirstPlayer(

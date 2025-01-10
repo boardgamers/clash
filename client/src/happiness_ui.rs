@@ -31,7 +31,7 @@ pub fn increase_happiness_click(
     pos: Position,
     h: &IncreaseHappiness,
 ) -> StateUpdate {
-    if let Some(city) = rc.player.get_city(pos) {
+    if let Some(city) = rc.shown_player.get_city(pos) {
         StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(add_increase_happiness(
             city, h,
         )))
@@ -102,7 +102,7 @@ fn increase_happiness_new_steps(
 pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappiness) -> StateUpdate {
     show_resource_pile(rc, &h.cost, &[ResourceType::MoodTokens]);
 
-    let tooltip = if rc.player.resources.can_afford(&h.cost) {
+    let tooltip = if rc.shown_player.resources.can_afford(&h.cost) {
         OkTooltip::Valid("Increase happiness".to_string())
     } else {
         OkTooltip::Invalid("Not enough resources".to_string())

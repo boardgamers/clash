@@ -23,9 +23,7 @@ pub type IconActionVec<'a> = Vec<IconAction<'a>>;
 pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate {
     let pos = city.position;
 
-    let can_play = rc.shown_player.can_play_action
-        && city.player_index == rc.player.index
-        && city.can_activate();
+    let can_play = city.can_activate(); //todo some custom actions don't require activation
     if !can_play {
         return StateUpdate::None;
     }
@@ -61,7 +59,7 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
         &rc.assets().resources[&ResourceType::MoodTokens],
         "Increase happiness".to_string(),
         Box::new(move || {
-            let mut happiness = IncreaseHappiness::new(rc.player);
+            let mut happiness = IncreaseHappiness::new(rc.shown_player);
             let mut target = city.mood_state.clone();
             while target != MoodState::Happy {
                 happiness = add_increase_happiness(city, &happiness);
@@ -73,7 +71,7 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
 }
 
 fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> {
-    let owner = rc.player;
+    let owner = rc.shown_player;
     let game = rc.game;
 
     owner
@@ -101,14 +99,11 @@ fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> 
 }
 
 fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> {
-    let owner = rc.player;
+    let owner = rc.shown_player;
     building_names()
         .iter()
         .filter_map(|(b, _)| {
-            if rc.player.index == city.player_index
-                && rc.shown_player.can_play_action
-                && city.can_construct(*b, owner)
-            {
+            if rc.can_play_action() && city.can_construct(*b, owner) {
                 Some(*b)
             } else {
                 None

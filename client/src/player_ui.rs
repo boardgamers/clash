@@ -32,10 +32,9 @@ pub fn player_select(rc: &RenderContext) -> StateUpdate {
     let size = 40.;
     let mut y = (players.len() as f32 * -size) / 2.;
 
-    let player = &rc.shown_player;
     for player_index in players {
         let pl = game.get_player(player_index);
-        let shown = player.index == pl.index;
+        let shown = rc.shown_player.index == pl.index;
         let screen = rc.state.screen_size;
         let pos = vec2(screen.x, screen.y / 2.0) + vec2(-size, y);
 
@@ -117,7 +116,7 @@ pub fn bottom_icon_with_label(
 }
 
 pub fn show_top_center(rc: &RenderContext) {
-    let player = rc.player;
+    let player = rc.shown_player;
 
     top_icon_with_label(
         rc,
@@ -147,7 +146,6 @@ pub fn show_top_center(rc: &RenderContext) {
 }
 
 pub fn show_top_left(rc: &RenderContext) {
-    let player = &rc.shown_player;
     let state = rc.state;
     let mut p = vec2(10., 10.);
     let mut label = |label: &str| {
@@ -169,15 +167,15 @@ pub fn show_top_left(rc: &RenderContext) {
         _ => label(&format!("Round {}", game.round)),
     }
 
-    let p = rc.player;
+    let player = rc.shown_player;
 
-    label(&p.get_name());
+    label(&player.get_name());
 
-    label(&format!("Civ {}", p.civilization.name));
+    label(&format!("Civ {}", player.civilization.name));
 
     label(&format!(
         "Leader {}",
-        if let Some(l) = &p.active_leader {
+        if let Some(l) = &player.active_leader {
             &l.name
         } else {
             "-"
@@ -202,13 +200,13 @@ pub fn show_top_left(rc: &RenderContext) {
         }
     }
 
-    if player.is_active || state.active_dialog.show_for_other_player() {
+    if rc.shown_player_is_active() || state.active_dialog.show_for_other_player() {
         for m in state.active_dialog.help_message(game) {
             label(&m);
         }
     }
 
-    if player.is_active {
+    if rc.shown_player_is_active() {
         if let Some(u) = &state.pending_update {
             for m in &u.info {
                 label(m);
@@ -262,10 +260,9 @@ fn moves_left(state: &GameState) -> Option<u32> {
 }
 
 pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpdate {
-    let player = &rc.shown_player;
     let assets = rc.assets();
-
-    if player.can_control {
+    let can_control = rc.can_control();
+    if can_control {
         let game = rc.game;
         if let Some(tooltip) = can_end_move(game) {
             if bottom_right_texture(rc, &assets.end_turn, icon_pos(-4, -1), tooltip) {
@@ -279,7 +276,7 @@ pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpd
             return StateUpdate::Execute(Action::Undo);
         }
 
-        if player.can_control {
+        if can_control {
             let update = action_buttons(rc);
             if !matches!(update, StateUpdate::None) {
                 return update;

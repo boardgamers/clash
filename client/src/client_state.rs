@@ -17,7 +17,7 @@ use crate::happiness_ui::IncreaseHappiness;
 use crate::layout_ui::FONT_SIZE;
 use crate::move_ui::MoveSelection;
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
-use crate::render_context::{RenderContext, ShownPlayer};
+use crate::render_context::RenderContext;
 use crate::status_phase_ui::ChooseAdditionalAdvances;
 
 #[derive(Clone)]
@@ -326,31 +326,13 @@ impl State {
         }
     }
 
-    #[must_use] pub fn render_context<'a>(&'a self, game: &'a Game) -> RenderContext<'a> {
-        let shown_player = self.shown_player(game);
+    #[must_use]
+    pub fn render_context<'a>(&'a self, game: &'a Game) -> RenderContext<'a> {
         RenderContext {
-            player: game.get_player(shown_player.index),
-            shown_player,
+            shown_player: game.get_player(self.show_player),
             game,
             state: self,
             camera_mode: CameraMode::Screen,
-        }
-    }
-
-    #[must_use]
-    pub fn shown_player(&self, game: &Game) -> ShownPlayer {
-        let a = game.active_player();
-        let shown_player_is_active = a == self.show_player;
-        let can_control_active_player = self.control_player == Some(a);
-        let can_control = can_control_active_player && self.show_player == a;
-        ShownPlayer {
-            index: self.show_player,
-            is_active: shown_player_is_active,
-            can_control_active_player,
-            can_control,
-            can_play_action: can_control
-                && game.state == GameState::Playing
-                && game.actions_left > 0,
         }
     }
 

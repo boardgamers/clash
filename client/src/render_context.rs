@@ -1,33 +1,15 @@
 use crate::assets::Assets;
-use crate::client_state::{ActiveDialog, CameraMode, State, StateUpdate};
+use crate::client_state::{CameraMode, State, StateUpdate};
 use macroquad::camera::set_default_camera;
 use macroquad::math::{bool, Vec2};
 use macroquad::prelude::set_camera;
-use server::game::Game;
+use server::game::{Game, GameState};
 use server::player::Player;
 
-#[allow(clippy::struct_excessive_bools)]
-#[derive(Clone)]
-pub struct ShownPlayer {
-    pub index: usize,
-    pub is_active: bool,
-    pub can_control_active_player: bool,
-    pub can_control: bool,
-    pub can_play_action: bool,
-}
-
-impl ShownPlayer {
-    #[must_use]
-    pub fn get<'a>(&self, game: &'a Game) -> &'a Player {
-        game.get_player(self.index)
-    }
-}
-
 pub struct RenderContext<'a> {
-    pub shown_player: ShownPlayer,
     pub game: &'a Game,
     pub state: &'a State,
-    pub player: &'a Player, // the player that is being shown
+    pub shown_player: &'a Player, // the player that is being shown
     pub camera_mode: CameraMode,
 }
 
@@ -42,10 +24,9 @@ impl RenderContext<'_> {
         f: impl FnOnce(&RenderContext) -> StateUpdate + Sized,
     ) -> StateUpdate {
         let next = RenderContext {
-            shown_player: self.shown_player.clone(),
             game: self.game,
             state: self.state,
-            player: self.player,
+            shown_player: self.shown_player,
             camera_mode: mode,
         };
         next.set_camera();
@@ -75,5 +56,21 @@ impl RenderContext<'_> {
             CameraMode::Screen => point,
             CameraMode::World => self.state.camera.screen_to_world(point),
         }
+    }
+
+    pub fn can_play_action(&self) -> bool {
+        self.can_control() && self.game.state == GameState::Playing && self.game.actions_left > 0
+    }
+
+    pub fn can_control(&self) -> bool {
+        self.can_control_active_player() && self.shown_player_is_active()
+    }
+
+    pub fn can_control_active_player(&self) -> bool {
+        self.state.control_player == Some(self.game.active_player())
+    }
+
+    pub fn shown_player_is_active(&self) -> bool {
+        self.game.active_player() == self.state.show_player
     }
 }

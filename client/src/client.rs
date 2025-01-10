@@ -72,24 +72,24 @@ fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     };
 
-    let player = &rc.shown_player;
-    if player.can_control {
+    let can_control = rc.can_control();
+    if can_control {
         if let Some(u) = &state.pending_update {
             updates.add(dialog_ui::show_pending_update(u, rc));
         }
     }
 
-    if player.can_control || state.active_dialog.show_for_other_player() {
+    if can_control || state.active_dialog.show_for_other_player() {
         updates.add(render_active_dialog(rc));
     }
 
     if let Some(pos) = state.focused_tile {
-        if player.can_play_action && matches!(state.active_dialog, ActiveDialog::None) {
+        if rc.can_play_action() && matches!(state.active_dialog, ActiveDialog::None) {
             updates.add(show_tile_menu(rc, pos));
         }
     }
 
-    if player.can_control {
+    if can_control {
         updates.add(try_click(rc));
     }
     updates.result()
@@ -159,7 +159,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
 }
 
 pub fn try_click(rc: &RenderContext) -> StateUpdate {
-    let game = &rc.game;
+    let game = rc.game;
     let state = &rc.state;
     let mouse_pos = state.camera.screen_to_world(mouse_position().into());
     let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));
@@ -187,7 +187,7 @@ pub fn try_click(rc: &RenderContext) -> StateUpdate {
         }),
         ActiveDialog::RazeSize1City => raze_city_confirm_dialog(rc, pos),
         ActiveDialog::PlaceSettler => {
-            if rc.player.get_city(pos).is_some() {
+            if rc.shown_player.get_city(pos).is_some() {
                 StateUpdate::Execute(Action::PlaceSettler(pos))
             } else {
                 StateUpdate::None

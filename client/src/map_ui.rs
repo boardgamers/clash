@@ -36,7 +36,7 @@ pub fn terrain_name(t: &Terrain) -> &'static str {
 }
 
 pub fn draw_map(rc: &RenderContext) -> StateUpdate {
-    let game = &rc.game;
+    let game = rc.game;
     for (pos, t) in &game.map.tiles {
         let (base, exhausted) = match t {
             Terrain::Exhausted(e) => (e.as_ref(), true),
@@ -85,7 +85,7 @@ pub fn pan_and_zoom(state: &mut State) {
 }
 
 fn alpha(rc: &RenderContext, pos: Position) -> f32 {
-    let game = &rc.game;
+    let game = rc.game;
     let state = &rc.state;
     let alpha = match &state.active_dialog {
         ActiveDialog::MoveUnits(s) => {
@@ -143,7 +143,7 @@ fn highlight_if(b: bool) -> f32 {
 }
 
 pub fn show_tile_menu(rc: &RenderContext, pos: Position) -> StateUpdate {
-    let game = &rc.game;
+    let game = rc.game;
     if let Some(c) = game.get_any_city(pos) {
         return show_city_menu(rc, c);
     };
@@ -188,7 +188,7 @@ fn found_city_button<'a>(rc: &'a RenderContext<'a>, settlers: Vec<Unit>) -> Opti
 }
 
 pub fn move_units_button<'a>(rc: &'a RenderContext, pos: Position) -> Option<IconAction<'a>> {
-    if movable_units(pos, rc.game, rc.player).is_empty() {
+    if movable_units(pos, rc.game, rc.shown_player).is_empty() {
         return None;
     }
     Some((

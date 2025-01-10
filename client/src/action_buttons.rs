@@ -10,16 +10,15 @@ use server::playing_actions::PlayingAction;
 
 pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     let assets = rc.assets();
-    let player = &rc.shown_player;
     let game = rc.game;
-    if player.can_play_action {
+    if rc.can_play_action() {
         if bottom_left_texture(rc, &assets.move_units, icon_pos(0, -3), "Move units") {
             return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
         }
         if bottom_left_texture(rc, &assets.advances, icon_pos(1, -3), "Research advances") {
             return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
         }
-        let p = rc.player;
+        let p = rc.shown_player;
         if bottom_left_texture(
             rc,
             &assets.resources[&ResourceType::MoodTokens],
