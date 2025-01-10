@@ -1,4 +1,4 @@
-use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
+use crate::client_state::{ActiveDialog, State, StateUpdate};
 use crate::dialog_ui::OkTooltip;
 use crate::layout_ui::{bottom_center_text, left_mouse_button_pressed_in_rect, top_center_text};
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
@@ -23,6 +23,7 @@ use server::status_phase::StatusPhaseAction;
 use std::cmp::min;
 use std::collections::HashMap;
 use std::ops::Rem;
+use crate::render_context::ShownPlayer;
 
 const COLUMNS: usize = 6;
 

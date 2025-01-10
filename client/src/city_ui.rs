@@ -1,4 +1,4 @@
-use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
+use crate::client_state::{ActiveDialog, State, StateUpdate};
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
 use crate::happiness_ui::{add_increase_happiness, IncreaseHappiness};
@@ -16,6 +16,7 @@ use server::player::Player;
 use server::position::Position;
 use server::unit::{UnitType, Units};
 use std::ops::Add;
+use crate::render_context::ShownPlayer;
 
 pub struct CityMenu {
     pub player: ShownPlayer,

@@ -7,7 +7,7 @@ use server::game::Game;
 use server::position::Position;
 
 use crate::advance_ui::{pay_advance_dialog, show_free_advance_menu, show_paid_advance_menu};
-use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate, StateUpdates};
+use crate::client_state::{ActiveDialog, State, StateUpdate, StateUpdates};
 use crate::collect_ui::collect_resources_dialog;
 use crate::construct_ui::pay_construction_dialog;
 use crate::happiness_ui::{increase_happiness_click, increase_happiness_menu};
@@ -21,6 +21,7 @@ use crate::unit_ui::unit_selection_click;
 use crate::{
     combat_ui, dialog_ui, influence_ui, move_ui, recruit_unit_ui, status_phase_ui, tooltip,
 };
+use crate::render_context::ShownPlayer;
 
 fn render(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     tooltip::update(state);

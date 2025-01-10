@@ -1,5 +1,5 @@
 use crate::city_ui::{building_name, building_position, BUILDING_SIZE};
-use crate::client_state::{ShownPlayer, State, StateUpdate};
+use crate::client_state::{State, StateUpdate};
 use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
 use crate::hex_ui;
 use crate::layout_ui::is_in_circle;
@@ -15,6 +15,7 @@ use server::player::Player;
 use server::playing_actions::{InfluenceCultureAttempt, PlayingAction};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
+use crate::render_context::ShownPlayer;
 
 fn closest_city(player: &Player, position: Position) -> Position {
     player

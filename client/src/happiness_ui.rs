@@ -6,8 +6,9 @@ use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
-use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
+use crate::client_state::{ActiveDialog, State, StateUpdate};
 use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
+use crate::render_context::ShownPlayer;
 use crate::resource_ui::{show_resource_pile, ResourceType};
 
 #[derive(Clone)]

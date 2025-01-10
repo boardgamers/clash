@@ -11,10 +11,11 @@ use server::position::Position;
 use server::unit::{MovementRestriction, Unit, UnitType};
 
 use crate::city_ui::{draw_city, show_city_menu, CityMenu, IconAction, IconActionVec};
-use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
+use crate::client_state::{ActiveDialog, State, StateUpdate};
 use crate::layout_ui::{bottom_center_texture, icon_pos};
 use crate::move_ui::movable_units;
 use crate::{collect_ui, hex_ui, unit_ui};
+use crate::render_context::ShownPlayer;
 
 fn terrain_font_color(t: &Terrain) -> Color {
     match t {

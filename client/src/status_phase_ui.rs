@@ -1,5 +1,5 @@
 use crate::advance_ui::{show_advance_menu, AdvanceState};
-use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
+use crate::client_state::{ActiveDialog, State, StateUpdate};
 use crate::dialog_ui::{cancel_button, cancel_button_with_tooltip, ok_button, OkTooltip};
 use crate::layout_ui::bottom_centered_text;
 use server::action::Action;
@@ -10,6 +10,7 @@ use server::position::Position;
 use server::status_phase::{
     ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction,
 };
+use crate::render_context::ShownPlayer;
 
 pub fn raze_city_confirm_dialog(game: &Game, player: &ShownPlayer, pos: Position) -> StateUpdate {
     if player.get(game).can_raze_city(pos) {

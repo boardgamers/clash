@@ -1,7 +1,7 @@
 use crate::action_buttons::action_buttons;
 use crate::city_ui::city_labels;
 use crate::client::Features;
-use crate::client_state::{ShownPlayer, State, StateUpdate};
+use crate::client_state::{State, StateUpdate};
 use crate::layout_ui::{
     bottom_center_texture, bottom_right_texture, icon_pos, left_mouse_button_pressed_in_rect,
     top_center_texture, ICON_SIZE,
@@ -17,6 +17,7 @@ use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::game::{Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::unit::MovementAction;
+use crate::render_context::ShownPlayer;
 
 pub fn player_select(game: &Game, player: &ShownPlayer, state: &State) -> StateUpdate {
     let i = game

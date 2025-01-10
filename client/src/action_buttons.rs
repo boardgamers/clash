@@ -1,5 +1,5 @@
 use crate::assets::Assets;
-use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
+use crate::client_state::{ActiveDialog, State, StateUpdate};
 use crate::happiness_ui::IncreaseHappiness;
 use crate::layout_ui::{bottom_left_texture, icon_pos};
 use crate::resource_ui::ResourceType;
@@ -8,6 +8,7 @@ use server::content::advances::get_advance_by_name;
 use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::game::Game;
 use server::playing_actions::PlayingAction;
+use crate::render_context::ShownPlayer;
 
 pub fn action_buttons(
     game: &Game,

@@ -3,7 +3,6 @@ use server::action::Action;
 use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
 use server::game::{CulturalInfluenceResolution, Game, GameState};
-use server::player::Player;
 use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
@@ -18,6 +17,7 @@ use crate::happiness_ui::IncreaseHappiness;
 use crate::layout_ui::FONT_SIZE;
 use crate::move_ui::MoveSelection;
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
+use crate::render_context::ShownPlayer;
 use crate::status_phase_ui::ChooseAdditionalAdvances;
 
 #[derive(Clone)]
@@ -275,26 +275,6 @@ impl StateUpdates {
             .into_iter()
             .find(|u| !matches!(u, StateUpdate::None))
             .unwrap_or(StateUpdate::None)
-    }
-}
-
-#[allow(clippy::struct_excessive_bools)]
-#[derive(Clone)]
-pub struct ShownPlayer {
-    pub index: usize,
-    pub shown_player_is_active: bool,
-    pub can_control_active_player: bool,
-    pub can_control: bool,
-    pub can_play_action: bool,
-    pub active_dialog: ActiveDialog,
-    pub pending_update: bool,
-    pub screen_size: Vec2,
-}
-
-impl ShownPlayer {
-    #[must_use]
-    pub fn get<'a>(&self, game: &'a Game) -> &'a Player {
-        game.get_player(self.index)
     }
 }
 

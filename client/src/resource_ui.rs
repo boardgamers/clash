@@ -1,10 +1,11 @@
-use crate::client_state::{ShownPlayer, State};
+use crate::client_state::State;
 use crate::layout_ui::icon_pos;
 use crate::player_ui::bottom_icon_with_label;
 use macroquad::math::vec2;
 use server::resource_pile::ResourcePile;
 use std::collections::HashMap;
 use std::fmt;
+use crate::render_context::ShownPlayer;
 
 #[derive(PartialEq, Eq, Debug, Clone, Copy, Hash, Ord, PartialOrd)]
 pub enum ResourceType {

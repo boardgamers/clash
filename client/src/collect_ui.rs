@@ -12,13 +12,14 @@ use server::playing_actions::{get_total_collection, PlayingAction};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
-use crate::client_state::{ActiveDialog, ShownPlayer, State, StateUpdate};
+use crate::client_state::{ActiveDialog, State, StateUpdate};
 use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
 use crate::hex_ui;
 use crate::hex_ui::Point;
 use crate::layout_ui::{
     draw_icon, draw_scaled_icon, is_in_circle, left_mouse_button_pressed, ICON_SIZE,
 };
+use crate::render_context::ShownPlayer;
 use crate::resource_ui::{
     new_resource_map, resource_name, resource_types, show_resource_pile, ResourceType,
 };
