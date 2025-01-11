@@ -252,13 +252,27 @@ impl StateUpdate {
         }
     }
 
-    pub fn dialog_chooser(title: &str, yes: ActiveDialog, no: ActiveDialog) -> StateUpdate {
+    pub fn dialog_chooser(
+        title: &str,
+        yes: Option<ActiveDialog>,
+        no: Option<ActiveDialog>,
+    ) -> StateUpdate {
         let title = title.to_string();
-        StateUpdate::OpenDialog(ActiveDialog::DialogChooser(Box::new(DialogChooser {
-            title,
-            yes,
-            no,
-        })))
+        if let Some(yes) = yes {
+            if let Some(no) = no {
+                StateUpdate::OpenDialog(ActiveDialog::DialogChooser(Box::new(DialogChooser {
+                    title,
+                    yes,
+                    no,
+                })))
+            } else {
+                StateUpdate::OpenDialog(yes)
+            }
+        } else if let Some(no) = no {
+            StateUpdate::OpenDialog(no)
+        } else {
+            panic!("no dialog to open")
+        }
     }
 
     pub fn status_phase(action: StatusPhaseAction) -> StateUpdate {

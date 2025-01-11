@@ -5,9 +5,7 @@ use crate::layout_ui::bottom_centered_text;
 use crate::render_context::RenderContext;
 use server::action::Action;
 use server::content::advances;
-use server::content::advances::{
-    get_government, get_leading_government_advance,
-};
+use server::content::advances::{get_government, get_leading_government_advance};
 use server::position::Position;
 use server::status_phase::{
     ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction,

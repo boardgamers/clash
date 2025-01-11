@@ -87,7 +87,7 @@ fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
     }
 
     if let Some(pos) = state.focused_tile {
-        if rc.can_play_action() && matches!(state.active_dialog, ActiveDialog::None) {
+        if matches!(state.active_dialog, ActiveDialog::None) {
             updates.add(show_tile_menu(rc, pos));
         }
     }

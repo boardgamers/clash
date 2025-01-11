@@ -31,34 +31,41 @@ impl IncreaseHappinessConfig {
     }
 }
 
+pub fn can_play_increase_happiness(rc: &RenderContext) -> bool {
+    rc.can_play_action()
+        || rc
+            .game
+            .get_available_custom_actions()
+            .contains(&CustomActionType::VotingIncreaseHappiness)
+}
+
 pub fn open_increase_happiness_dialog(
     rc: &RenderContext,
     init: impl Fn(IncreaseHappinessConfig) -> IncreaseHappinessConfig,
 ) -> StateUpdate {
     let p = rc.shown_player;
-    let base = ActiveDialog::IncreaseHappiness(init(IncreaseHappinessConfig::new(
-        p,
-        "Increase happiness",
-        false,
-    )));
+    let base = if rc.can_play_action() {
+        Some(ActiveDialog::IncreaseHappiness(init(
+            IncreaseHappinessConfig::new(p, "Increase happiness", false),
+        )))
+    } else {
+        None
+    };
 
-    if rc
+    let special = rc
         .game
         .get_available_custom_actions()
-        .contains(&CustomActionType::VotingIncreaseHappiness)
-    {
-        StateUpdate::dialog_chooser(
-            "Use special action from voting?",
+        .iter()
+        .find(|a| **a == CustomActionType::VotingIncreaseHappiness)
+        .map(|_| {
             ActiveDialog::IncreaseHappiness(init(IncreaseHappinessConfig::new(
                 p,
                 "Increase happiness with voting",
                 true,
-            ))),
-            base,
-        )
-    } else {
-        StateUpdate::OpenDialog(base)
-    }
+            )))
+        });
+    let title = "Use special action from voting?";
+    StateUpdate::dialog_chooser(title, special, base)
 }
 
 pub fn increase_happiness_click(

@@ -1,7 +1,9 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
-use crate::happiness_ui::{add_increase_happiness, open_increase_happiness_dialog};
+use crate::happiness_ui::{
+    add_increase_happiness, can_play_increase_happiness, open_increase_happiness_dialog,
+};
 use crate::hex_ui::Point;
 use crate::layout_ui::draw_scaled_icon;
 use crate::map_ui::{move_units_button, show_map_action_buttons};
@@ -22,37 +24,29 @@ pub type IconActionVec<'a> = Vec<IconAction<'a>>;
 
 pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate {
     let pos = city.position;
-
-    let can_play = city.can_activate(); //todo some custom actions don't require activation
-    if !can_play {
+    if !city.can_activate() {
         return StateUpdate::None;
     }
 
     let base_icons: IconActionVec<'a> = vec![
         increase_happiness_button(rc, city),
         move_units_button(rc, pos),
-        Some(collect_resources_button(rc, city)),
-        Some(recruit_button(rc, city)),
+        collect_resources_button(rc, city),
+        recruit_button(rc, city),
     ]
     .into_iter()
     .flatten()
     .collect();
 
-    let buildings: IconActionVec<'a> = building_icons(rc, city);
-
-    let wonders: IconActionVec<'a> = wonder_icons(rc, city);
-
-    show_map_action_buttons(
-        rc,
-        &vec![base_icons, buildings, wonders]
-            .into_iter()
-            .flatten()
-            .collect(),
-    )
+    let icons = vec![base_icons, building_icons(rc, city), wonder_icons(rc, city)]
+        .into_iter()
+        .flatten()
+        .collect();
+    show_map_action_buttons(rc, &icons)
 }
 
 fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
-    if city.mood_state == MoodState::Happy {
+    if city.mood_state == MoodState::Happy || !can_play_increase_happiness(rc) {
         return None;
     }
     Some((
@@ -72,6 +66,9 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
 }
 
 fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> {
+    if !rc.can_play_action() {
+        return vec![];
+    }
     let owner = rc.shown_player;
     let game = rc.game;
 
@@ -100,6 +97,9 @@ fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> 
 }
 
 fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> {
+    if !rc.can_play_action() {
+        return vec![];
+    }
     let owner = rc.shown_player;
     building_names()
         .iter()
@@ -138,8 +138,11 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
         .collect()
 }
 
-fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> IconAction<'a> {
-    (
+fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
+    if !rc.can_play_action() {
+        return None;
+    }
+    Some((
         &rc.assets().units[&UnitType::Infantry],
         "Recruit Units".to_string(),
         Box::new(|| {
@@ -152,11 +155,14 @@ fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> IconAction<'a> {
                 &[],
             )
         }),
-    )
+    ))
 }
 
-fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> IconAction<'a> {
-    (
+fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
+    if !rc.can_play_action() {
+        return None;
+    }
+    Some((
         &rc.assets().resources[&ResourceType::Food],
         "Collect Resources".to_string(),
         Box::new(|| {
@@ -167,7 +173,7 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> IconAc
                 possible_resource_collections(rc.game, pos, city.player_index),
             )))
         }),
-    )
+    ))
 }
 
 pub fn city_labels(game: &Game, city: &City) -> Vec<String> {
