@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use PlayingAction::*;
 
+use crate::content::advances;
 use crate::game::{CulturalInfluenceResolution, GameState};
 use crate::{
     city::City,
@@ -43,6 +44,12 @@ pub struct InfluenceCultureAttempt {
     pub target_city_position: Position,
     pub city_piece: Building,
 }
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
+pub struct IncreaseHappiness {
+    pub happiness_increases: Vec<(Position, u32)>,
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub enum PlayingAction {
     Advance {
@@ -59,9 +66,7 @@ pub enum PlayingAction {
     },
     Recruit(Recruit),
     MoveUnits,
-    IncreaseHappiness {
-        happiness_increases: Vec<(Position, u32)>,
-    },
+    IncreaseHappiness(IncreaseHappiness),
     InfluenceCultureAttempt(InfluenceCultureAttempt),
     Custom(CustomAction),
     EndTurn,
@@ -85,8 +90,9 @@ impl PlayingAction {
                 let player = &mut game.players[player_index];
                 let cost = player.advance_cost(&advance);
                 assert!(
-                    player.can_advance(&advance)
-                        && payment.food + payment.ideas + payment.gold as u32 == cost,
+                    player.can_advance(
+                        &advances::get_advance_by_name(&advance).expect("advance should exist")
+                    ) && payment.food + payment.ideas + payment.gold as u32 == cost,
                     "Illegal action"
                 );
                 player.loose_resources(payment);
@@ -176,19 +182,8 @@ impl PlayingAction {
                     moved_units: Vec::new(),
                 }
             }
-            IncreaseHappiness {
-                happiness_increases,
-            } => {
-                let player = &mut game.players[player_index];
-                for (city_position, steps) in happiness_increases {
-                    let city = player.get_city(city_position).expect("Illegal action");
-                    let cost = city.increase_happiness_cost(steps).expect("Illegal action");
-                    player.loose_resources(cost);
-                    let city = player.get_city_mut(city_position).expect("Illegal action");
-                    for _ in 0..steps {
-                        city.increase_mood_state();
-                    }
-                }
+            IncreaseHappiness(i) => {
+                increase_happiness(game, player_index, i);
             }
             InfluenceCultureAttempt(c) => {
                 let starting_city_position = c.starting_city_position;
@@ -258,7 +253,7 @@ impl PlayingAction {
     pub fn action_type(&self) -> ActionType {
         match self {
             Custom(custom_action) => custom_action.custom_action_type().action_type(),
-            EndTurn => ActionType::free(),
+            EndTurn => ActionType::free(ResourcePile::empty()),
             _ => ActionType::default(),
         }
     }
@@ -322,20 +317,8 @@ impl PlayingAction {
                 game.undo_recruit(player_index, &r.units, r.city_position, r.leader_index);
             }
             MoveUnits => game.state = GameState::Playing,
-            IncreaseHappiness {
-                happiness_increases,
-            } => {
-                let mut cost = 0;
-                let player = &mut game.players[player_index];
-                for (city_position, steps) in happiness_increases {
-                    let city = player.get_city(city_position).expect("Illegal action");
-                    cost += city.size() as u32 * steps;
-                    let city = player.get_city_mut(city_position).expect("Illegal action");
-                    for _ in 0..steps {
-                        city.decrease_mood_state();
-                    }
-                }
-                player.gain_resources(ResourcePile::mood_tokens(cost));
+            IncreaseHappiness(i) => {
+                undo_increase_happiness(game, player_index, i);
             }
             Custom(custom_action) => custom_action.undo(game, player_index),
             InfluenceCultureAttempt(_) | EndTurn => panic!("Action can't be undone"),
@@ -352,8 +335,8 @@ pub struct ActionType {
 
 impl ActionType {
     #[must_use]
-    pub fn free() -> Self {
-        Self::new(true, false, ResourcePile::empty())
+    pub fn free(cost: ResourcePile) -> Self {
+        Self::new(true, false, cost)
     }
 
     #[must_use]
@@ -436,4 +419,31 @@ fn add_collect_terrain(
         }
         *terrain_left += 1;
     }
+}
+
+pub(crate) fn increase_happiness(game: &mut Game, player_index: usize, i: IncreaseHappiness) {
+    let player = &mut game.players[player_index];
+    for (city_position, steps) in i.happiness_increases {
+        let city = player.get_city(city_position).expect("Illegal action");
+        let cost = city.increase_happiness_cost(steps).expect("Illegal action");
+        player.loose_resources(cost);
+        let city = player.get_city_mut(city_position).expect("Illegal action");
+        for _ in 0..steps {
+            city.increase_mood_state();
+        }
+    }
+}
+
+pub(crate) fn undo_increase_happiness(game: &mut Game, player_index: usize, i: IncreaseHappiness) {
+    let mut cost = 0;
+    let player = &mut game.players[player_index];
+    for (city_position, steps) in i.happiness_increases {
+        let city = player.get_city(city_position).expect("Illegal action");
+        cost += city.size() as u32 * steps;
+        let city = player.get_city_mut(city_position).expect("Illegal action");
+        for _ in 0..steps {
+            city.decrease_mood_state();
+        }
+    }
+    player.gain_resources(ResourcePile::mood_tokens(cost));
 }

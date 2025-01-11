@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::action::PlayActionCard;
 use crate::player::Player;
-use crate::playing_actions::{Construct, InfluenceCultureAttempt, Recruit};
+use crate::playing_actions::{Construct, IncreaseHappiness, InfluenceCultureAttempt, Recruit};
 use crate::status_phase::{ChangeGovernmentType, RazeSize1City};
 use crate::{
     action::{Action, CombatAction},
@@ -132,13 +132,11 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         } => format_collect_log_item(player, &player_name, *city_position, collections),
         PlayingAction::Recruit(r) => format_recruit_log_item(player, &player_name, r),
         PlayingAction::MoveUnits => format!("{player_name} used a move units action"),
-        PlayingAction::IncreaseHappiness {
-            happiness_increases,
-        } => format_happiness_increase(player, &player_name, happiness_increases),
+        PlayingAction::IncreaseHappiness(i) => format_happiness_increase(player, &player_name, i),
         PlayingAction::InfluenceCultureAttempt(c) => {
             format_cultural_influence_attempt_log_item(game, &player_name, c)
         }
-        PlayingAction::Custom(action) => action.format_log_item(game, &player_name),
+        PlayingAction::Custom(action) => action.format_log_item(game, player, &player_name),
         PlayingAction::EndTurn => format!(
             "{player_name} ended his turn{}",
             match game.actions_left {
@@ -171,12 +169,18 @@ fn format_cultural_influence_attempt_log_item(
     format!("{player_name} tried to influence culture the {city_piece:?} in the city at {target_city_position} by {player}{city}")
 }
 
-fn format_happiness_increase(
+///
+/// # Panics
+///
+/// Panics if the city does not exist
+#[must_use]
+pub fn format_happiness_increase(
     player: &Player,
-    player_name: &String,
-    happiness_increases: &[(Position, u32)],
+    player_name: &str,
+    happiness_increases: &IncreaseHappiness,
 ) -> String {
     let happiness_increases = happiness_increases
+        .happiness_increases
         .iter()
         .filter_map(|(position, steps)| {
             if *steps > 0 {

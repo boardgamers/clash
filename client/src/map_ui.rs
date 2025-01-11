@@ -143,11 +143,24 @@ fn highlight_if(b: bool) -> f32 {
 }
 
 pub fn show_tile_menu(rc: &RenderContext, pos: Position) -> StateUpdate {
-    let game = rc.game;
-    if let Some(c) = game.get_any_city(pos) {
+    if let Some(c) = rc.game.get_any_city(pos) {
         return show_city_menu(rc, c);
     };
 
+    show_map_action_buttons(
+        rc,
+        &vec![move_units_button(rc, pos), found_city_button(rc, pos)]
+            .into_iter()
+            .flatten()
+            .collect(),
+    )
+}
+
+fn found_city_button<'a>(rc: &'a RenderContext<'a>, pos: Position) -> Option<IconAction<'a>> {
+    if !rc.can_play_action() {
+        return None;
+    }
+    let game = rc.game;
     let settlers: Vec<Unit> = unit_ui::units_on_tile(game, pos)
         .filter_map(|(_, unit)| {
             if unit.can_found_city(game) {
@@ -158,16 +171,6 @@ pub fn show_tile_menu(rc: &RenderContext, pos: Position) -> StateUpdate {
         })
         .collect::<Vec<_>>();
 
-    show_map_action_buttons(
-        rc,
-        &vec![move_units_button(rc, pos), found_city_button(rc, settlers)]
-            .into_iter()
-            .flatten()
-            .collect(),
-    )
-}
-
-fn found_city_button<'a>(rc: &'a RenderContext<'a>, settlers: Vec<Unit>) -> Option<IconAction<'a>> {
     if settlers.is_empty() {
         None
     } else {
@@ -188,7 +191,7 @@ fn found_city_button<'a>(rc: &'a RenderContext<'a>, settlers: Vec<Unit>) -> Opti
 }
 
 pub fn move_units_button<'a>(rc: &'a RenderContext, pos: Position) -> Option<IconAction<'a>> {
-    if movable_units(pos, rc.game, rc.shown_player).is_empty() {
+    if !rc.can_play_action() || movable_units(pos, rc.game, rc.shown_player).is_empty() {
         return None;
     }
     Some((

@@ -11,7 +11,7 @@ pub struct Advance {
     pub description: String,
     pub bonus: Option<Bonus>,
     pub required: Option<String>,
-    pub contradicting: Option<String>,
+    pub contradicting: Vec<String>,
     pub unlocked_building: Option<String>,
     pub government: Option<String>,
     pub player_initializer: AbilityInitializer,
@@ -38,7 +38,7 @@ pub struct AdvanceBuilder {
     description: String,
     advance_bonus: Option<Bonus>,
     required_advance: Option<String>,
-    contradicting_advance: Option<String>,
+    contradicting_advance: Vec<String>,
     unlocked_building: Option<String>,
     government: Option<String>,
     player_initializers: Vec<AbilityInitializer>,
@@ -54,7 +54,7 @@ impl AdvanceBuilder {
             description,
             advance_bonus: None,
             required_advance: None,
-            contradicting_advance: None,
+            contradicting_advance: vec![],
             unlocked_building: None,
             government: None,
             player_initializers: Vec::new(),
@@ -77,8 +77,11 @@ impl AdvanceBuilder {
     }
 
     #[must_use]
-    pub fn with_contradicting_advance(mut self, contradicting_advance: &str) -> Self {
-        self.contradicting_advance = Some(contradicting_advance.to_string());
+    pub fn with_contradicting_advance(mut self, contradicting_advance: &[&str]) -> Self {
+        self.contradicting_advance = contradicting_advance
+            .iter()
+            .map(|s| (*s).to_string())
+            .collect();
         self
     }
 

@@ -5,7 +5,7 @@ use crate::layout_ui::bottom_centered_text;
 use crate::render_context::RenderContext;
 use server::action::Action;
 use server::content::advances;
-use server::content::advances::get_leading_government_advance;
+use server::content::advances::{get_government, get_leading_government_advance};
 use server::position::Position;
 use server::status_phase::{
     ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction,
@@ -36,14 +36,16 @@ pub struct ChooseAdditionalAdvances {
     government: String,
     possible: Vec<String>,
     selected: Vec<String>,
+    needed: usize,
 }
 
 impl ChooseAdditionalAdvances {
-    fn new(government: String, possible: Vec<String>) -> Self {
+    fn new(government: String, possible: Vec<String>, needed: usize) -> Self {
         Self {
             government,
             possible,
             selected: Vec::new(),
+            needed,
         }
     }
 }
@@ -59,10 +61,12 @@ pub fn change_government_type_dialog(rc: &RenderContext) -> StateUpdate {
         rc,
         "Change government - or click cancel",
         |a, p| {
-            if a.government.as_ref().is_some_and(|g| {
-                get_leading_government_advance(g).is_some_and(|l| &l == a)
-                    && g.as_str() != p.government().as_ref().expect("should have government")
-            }) {
+            if p.can_advance_in_change_government(a)
+                && a.government.as_ref().is_some_and(|g| {
+                    get_leading_government_advance(g).is_some_and(|l| &l == a)
+                        && g.as_str() != p.government().as_ref().expect("should have government")
+                })
+            {
                 AdvanceState::Available
             } else if a.government.as_ref().is_some_and(|g| g == &current) {
                 AdvanceState::Owned
@@ -77,8 +81,13 @@ pub fn change_government_type_dialog(rc: &RenderContext) -> StateUpdate {
                 .skip(1) // the government advance itself is always chosen
                 .map(|a| a.name.clone())
                 .collect::<Vec<_>>();
+            let needed = get_government(&rc.shown_player.government().unwrap())
+                .iter()
+                .filter(|a| rc.shown_player.has_advance(&a.name))
+                .count()
+                - 1;
             StateUpdate::OpenDialog(ActiveDialog::ChooseAdditionalAdvances(
-                ChooseAdditionalAdvances::new(g.clone(), additional),
+                ChooseAdditionalAdvances::new(g.clone(), additional, needed),
             ))
         },
     )
@@ -88,7 +97,7 @@ pub fn choose_additional_advances_dialog(
     rc: &RenderContext,
     choose: &ChooseAdditionalAdvances,
 ) -> StateUpdate {
-    let t = if choose.selected.len() == choose.possible.len() {
+    let t = if choose.selected.len() == choose.needed {
         OkTooltip::Valid("Change government type".to_string())
     } else {
         OkTooltip::Invalid("Select all additional advances".to_string())
@@ -111,7 +120,7 @@ pub fn choose_additional_advances_dialog(
         |a, _| {
             if choose.selected.contains(&a.name) {
                 AdvanceState::Removable
-            } else if choose.possible.contains(&a.name) {
+            } else if choose.possible.contains(&a.name) && choose.selected.len() < choose.needed {
                 AdvanceState::Available
             } else {
                 AdvanceState::Unavailable
@@ -129,6 +138,7 @@ pub fn choose_additional_advances_dialog(
                     government: choose.government.clone(),
                     possible: choose.possible.clone(),
                     selected,
+                    needed: choose.needed,
                 },
             ))
         },

@@ -13,7 +13,7 @@ use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
 use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
-use crate::happiness_ui::IncreaseHappiness;
+use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
 use crate::move_ui::MoveSelection;
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
@@ -25,9 +25,10 @@ pub enum ActiveDialog {
     None,
     Log,
     WaitingForUpdate,
+    DialogChooser(Box<DialogChooser>),
 
     // playing actions
-    IncreaseHappiness(IncreaseHappiness),
+    IncreaseHappiness(IncreaseHappinessConfig),
     AdvanceMenu,
     AdvancePayment(AdvancePayment),
     ConstructionPayment(ConstructionPayment),
@@ -58,6 +59,7 @@ impl ActiveDialog {
     pub fn title(&self) -> &str {
         match self {
             ActiveDialog::None => "none",
+            ActiveDialog::DialogChooser(_) => "dialog chooser",
             ActiveDialog::Log => "log",
             ActiveDialog::WaitingForUpdate => "waiting for update",
             ActiveDialog::IncreaseHappiness(_) => "increase happiness",
@@ -86,9 +88,15 @@ impl ActiveDialog {
     #[must_use]
     pub fn help_message(&self, game: &Game) -> Vec<String> {
         match self {
-            ActiveDialog::None | ActiveDialog::Log | ActiveDialog::AdvanceMenu => vec![],
-            ActiveDialog::IncreaseHappiness(_) => {
-                vec!["Click on a city to increase happiness".to_string()]
+            ActiveDialog::None
+            | ActiveDialog::Log
+            | ActiveDialog::DialogChooser(_)
+            | ActiveDialog::AdvanceMenu => vec![],
+            ActiveDialog::IncreaseHappiness(h) => {
+                vec![
+                    h.title.clone(),
+                    "Click on a city to increase happiness".to_string(),
+                ]
             }
             ActiveDialog::AdvancePayment(a) => {
                 vec![format!("Click on resources to pay for {}", a.name)]
@@ -150,12 +158,12 @@ impl ActiveDialog {
 
     #[must_use]
     pub fn is_modal(&self) -> bool {
-        matches!(self, ActiveDialog::Log) || self.is_full_modal()
+        matches!(self, ActiveDialog::Log) || self.is_advance()
     }
 
     #[must_use]
     pub fn is_full_modal(&self) -> bool {
-        self.is_advance()
+        self.is_modal()
     }
 
     #[must_use]
@@ -175,6 +183,13 @@ pub struct PendingUpdate {
     pub action: Action,
     pub warning: Vec<String>,
     pub info: Vec<String>,
+}
+
+#[derive(Clone)]
+pub struct DialogChooser {
+    pub title: String,
+    pub yes: ActiveDialog,
+    pub no: ActiveDialog,
 }
 
 #[must_use]
@@ -234,6 +249,29 @@ impl StateUpdate {
             }
         } else {
             StateUpdate::execute_with_warning(action, warning)
+        }
+    }
+
+    pub fn dialog_chooser(
+        title: &str,
+        yes: Option<ActiveDialog>,
+        no: Option<ActiveDialog>,
+    ) -> StateUpdate {
+        let title = title.to_string();
+        if let Some(yes) = yes {
+            if let Some(no) = no {
+                StateUpdate::OpenDialog(ActiveDialog::DialogChooser(Box::new(DialogChooser {
+                    title,
+                    yes,
+                    no,
+                })))
+            } else {
+                StateUpdate::OpenDialog(yes)
+            }
+        } else if let Some(no) = no {
+            StateUpdate::OpenDialog(no)
+        } else {
+            panic!("no dialog to open")
         }
     }
 

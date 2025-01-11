@@ -1,6 +1,9 @@
 use serde::{Deserialize, Serialize};
 
 use crate::content::wonders::construct_wonder;
+use crate::log::format_happiness_increase;
+use crate::player::Player;
+use crate::playing_actions::{increase_happiness, undo_increase_happiness, IncreaseHappiness};
 use crate::{
     game::Game, playing_actions::ActionType, position::Position, resource_pile::ResourcePile,
 };
@@ -13,12 +16,14 @@ pub enum CustomAction {
         payment: ResourcePile,
     },
     ForcedLabor,
+    VotingIncreaseHappiness(IncreaseHappiness),
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash)]
 pub enum CustomActionType {
     ConstructWonder,
     ForcedLabor,
+    VotingIncreaseHappiness,
 }
 
 impl CustomAction {
@@ -37,6 +42,9 @@ impl CustomAction {
             CustomAction::ForcedLabor => {
                 game.actions_left += 1;
             }
+            CustomAction::VotingIncreaseHappiness(i) => {
+                increase_happiness(game, player_index, i);
+            }
         }
     }
 
@@ -45,6 +53,7 @@ impl CustomAction {
         match self {
             CustomAction::ConstructWonder { .. } => CustomActionType::ConstructWonder,
             CustomAction::ForcedLabor => CustomActionType::ForcedLabor,
+            CustomAction::VotingIncreaseHappiness(_) => CustomActionType::VotingIncreaseHappiness,
         }
     }
 
@@ -64,14 +73,21 @@ impl CustomAction {
                 game.players[player_index].wonder_cards.push(wonder);
             }
             CustomAction::ForcedLabor => game.actions_left -= 1,
+            CustomAction::VotingIncreaseHappiness(i) => {
+                undo_increase_happiness(game, player_index, i);
+            }
         }
     }
 
     #[must_use]
-    pub fn format_log_item(&self, _game: &Game, player_name: &str) -> String {
+    pub fn format_log_item(&self, _game: &Game, player: &Player, player_name: &str) -> String {
         match self {
             CustomAction::ConstructWonder { city_position, wonder, payment } => format!("{player_name} paid {payment} to construct the {wonder} wonder in the city at {city_position}"),
             CustomAction::ForcedLabor => format!("{player_name} paid 2 mood tokens to get an extra action using Forced Labor"),
+            CustomAction::VotingIncreaseHappiness(i) => format!("{} using Voting", format_happiness_increase(
+                player,
+                player_name,i
+            )),
         }
     }
 }
@@ -83,6 +99,9 @@ impl CustomActionType {
             CustomActionType::ConstructWonder => ActionType::default(),
             CustomActionType::ForcedLabor => {
                 ActionType::free_and_once_per_turn(ResourcePile::mood_tokens(2))
+            }
+            CustomActionType::VotingIncreaseHappiness => {
+                ActionType::free(ResourcePile::mood_tokens(1))
             }
         }
     }

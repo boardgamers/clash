@@ -178,10 +178,15 @@ fn science() -> Vec<Advance> {
 
 fn democracy() -> Vec<Advance> {
     vec![
-        Advance::builder("Voting", "TestGovernment1")
-            .leading_government_advance("Democracy")
-            .with_required_advance("Philosophy")
-            .build(),
+        Advance::builder(
+            "Voting",
+            "As a free action, you may spend 1 mood token to gain an action 'Increase happiness'",
+        )
+        .leading_government_advance("Democracy")
+        .with_required_advance("Philosophy")
+        .with_contradicting_advance(&["Nationalism", "Dogma"])
+        .add_custom_action(VotingIncreaseHappiness)
+        .build(),
         Advance::builder("Democracy 2", "TestGovernment1")
             .with_required_advance("Voting")
             .build(),
@@ -192,6 +197,7 @@ fn autocracy() -> Vec<Advance> {
     vec![
        Advance::builder("Nationalism", "TestGovernment1")
             .leading_government_advance("Autocracy")
+           .with_contradicting_advance(&["Voting", "Dogma"])
             .build(),
         Advance::builder("Absolute Power", "Once per turn, as a free action, you may spend 2 mood tokens to get an additional action")
             .with_required_advance("Nationalism")
@@ -204,6 +210,7 @@ fn theocracy() -> Vec<Advance> {
     vec![
         Advance::builder("Dogma", "TestGovernment2")
             .leading_government_advance("Theocracy")
+            .with_contradicting_advance(&["Voting", "Nationalism"])
             .build(),
         Advance::builder("Theocracy 2", "TestGovernment2")
             .with_required_advance("Dogma")
@@ -227,14 +234,10 @@ pub fn get_leading_government_advance(government: &str) -> Option<Advance> {
 }
 
 #[must_use]
-pub fn get_governments() -> Vec<(String, String)> {
+pub fn get_governments() -> Vec<(String, Advance)> {
     get_all()
         .into_iter()
-        .filter_map(|advance| {
-            advance
-                .government
-                .map(|g| (g.clone(), advance.name.clone()))
-        })
+        .filter_map(|advance| advance.government.clone().map(|g| (g.clone(), advance)))
         .collect()
 }
 
@@ -242,7 +245,7 @@ pub fn get_governments() -> Vec<(String, String)> {
 ///
 /// # Panics
 ///
-/// Panics if government does'nt have a leading government advance or if some of the government advances do no have their government tier specified
+/// Panics if government doesn't have a leading government advance or if some of the government advances do no have their government tier specified
 #[must_use]
 pub fn get_government(government: &str) -> Vec<Advance> {
     let leading_government =

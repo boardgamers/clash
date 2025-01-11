@@ -63,7 +63,9 @@ impl StatusPhaseAction {
             }
             StatusPhaseAction::FreeAdvance(ref advance) => {
                 assert!(
-                    game.players[player_index].can_advance_free(advance),
+                    game.players[player_index].can_advance_free(
+                        &advances::get_advance_by_name(advance).expect("advance should exist")
+                    ),
                     "Illegal action"
                 );
                 game.advance(advance, player_index);
@@ -96,15 +98,17 @@ impl StatusPhaseAction {
     }
 }
 
+pub const CHANGE_GOVERNMENT_COST: ResourcePile = ResourcePile::new(0, 0, 0, 0, 0, 1, 1);
+
 fn change_government_type(game: &mut Game, player_index: usize, new_government: &ChangeGovernment) {
+    game.players[player_index].loose_resources(CHANGE_GOVERNMENT_COST);
     let government = &new_government.new_government;
-    if advances::get_leading_government_advance(government)
-        .expect("government should exist")
-        .required
-        .is_some_and(|required_advance| !game.players[player_index].has_advance(&required_advance))
-    {
-        panic!("Player doesn't have the required advance for the government");
-    }
+    let a = advances::get_leading_government_advance(government).expect("government should exist");
+    assert!(
+        game.players[player_index].can_advance_in_change_government(&a),
+        "Cannot advance in change government"
+    );
+
     let current_player_government = game.players[player_index]
         .government()
         .expect("player should have a government");
@@ -171,7 +175,7 @@ pub fn skip_status_phase_players(game: &mut Game) {
 
         game.skip_dropped_players();
 
-        if !skip_player(
+        if play_status_phase_for_player(
             game,
             game.active_player(),
             phase.as_ref().expect("phase should be set"),
@@ -182,23 +186,29 @@ pub fn skip_status_phase_players(game: &mut Game) {
     }
 }
 
-fn skip_player(game: &Game, player_index: usize, state: &StatusPhaseState) -> bool {
+fn play_status_phase_for_player(
+    game: &Game,
+    player_index: usize,
+    state: &StatusPhaseState,
+) -> bool {
     let player = &game.players[player_index];
     match state {
-        StatusPhaseState::CompleteObjectives => true, //todo only skip player if the doesn't have objective cards in his hand (don't skip if the can't complete them unless otherwise specified via setting)
-        StatusPhaseState::FreeAdvance => !advances::get_all()
+        StatusPhaseState::CompleteObjectives => false, //todo only skip player if the doesn't have objective cards in his hand (don't skip if the can't complete them unless otherwise specified via setting)
+        StatusPhaseState::FreeAdvance => advances::get_all()
             .into_iter()
-            .any(|advance| player.can_advance_free(&advance.name)),
-        StatusPhaseState::RazeSize1City => !player.cities.iter().any(|city| city.size() == 1),
+            .any(|advance| player.can_advance_free(&advance)),
+        StatusPhaseState::RazeSize1City => {
+            player.cities.len() > 1 && player.cities.iter().any(|city| city.size() == 1)
+        }
         StatusPhaseState::ChangeGovernmentType => {
-            player.government().is_none()
-                || player.government().is_some_and(|government| {
-                    !advances::get_governments()
-                        .iter()
-                        .any(|(g, a)| g != &government && player.can_advance(a))
+            player.resources.can_afford(&CHANGE_GOVERNMENT_COST)
+                && player.government().is_some_and(|government| {
+                    advances::get_governments().iter().any(|(g, a)| {
+                        g != &government && player.can_advance_in_change_government(a)
+                    })
                 })
         }
-        StatusPhaseState::DetermineFirstPlayer => false,
+        StatusPhaseState::DetermineFirstPlayer => true,
     }
 }
 
