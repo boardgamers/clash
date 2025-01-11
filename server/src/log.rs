@@ -5,7 +5,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::action::PlayActionCard;
 use crate::player::Player;
-use crate::playing_actions::{Collect, Construct, IncreaseHappiness, InfluenceCultureAttempt, Recruit};
+use crate::playing_actions::{
+    Collect, Construct, IncreaseHappiness, InfluenceCultureAttempt, Recruit,
+};
 use crate::status_phase::{ChangeGovernmentType, RazeSize1City};
 use crate::{
     action::{Action, CombatAction},
@@ -244,11 +246,7 @@ fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -
     )
 }
 
-pub(crate) fn format_collect_log_item(
-    player: &Player,
-    player_name: &str,
-    c: &Collect,
-) -> String {
+pub(crate) fn format_collect_log_item(player: &Player, player_name: &str, c: &Collect) -> String {
     let collections = &c.collections;
     let res = utils::format_list(
         &collections

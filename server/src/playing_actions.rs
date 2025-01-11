@@ -6,6 +6,7 @@ use PlayingAction::*;
 
 use crate::content::advances;
 use crate::game::{CulturalInfluenceResolution, GameState};
+use crate::log::ActionLogItem;
 use crate::{
     city::City,
     city_pieces::Building::{self, *},
@@ -145,7 +146,19 @@ impl PlayingAction {
                 player.loose_resources(c.payment);
                 player.construct(c.city_piece, c.city_position, c.port_position);
             }
-            Collect(c) => collect(game, player_index, c),
+            Collect(c) => {
+                if game.action_log.iter().any(|a| {
+                    matches!(
+                        a,
+                        ActionLogItem::Playing(PlayingAction::Custom(
+                            CustomAction::FreeEconomyProduction(_)
+                        ))
+                    )
+                }) {
+                    assert!(game.state == GameState::Playing, "Illegal action");
+                }
+                collect(game, player_index, &c);
+            }
             Recruit(r) => {
                 let cost = r.units.iter().map(UnitType::cost).sum::<ResourcePile>();
                 let player = &mut game.players[player_index];
@@ -399,7 +412,7 @@ fn add_collect_terrain(
     }
 }
 
-pub(crate) fn collect(game: &mut Game, player_index: usize, c: Collect) {
+pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) {
     let total_collect = get_total_collection(game, player_index, c.city_position, &c.collections)
         .expect("Illegal action");
     let city = game.players[player_index]

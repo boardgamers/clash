@@ -50,7 +50,7 @@ impl CustomAction {
                 increase_happiness(game, player_index, i);
             }
             CustomAction::FreeEconomyProduction(c) => {
-                collect(game, player_index, c);
+                collect(game, player_index, &c);
             }
         }
     }
@@ -82,7 +82,7 @@ impl CustomAction {
             }
             CustomAction::ForcedLabor => game.actions_left -= 1,
             CustomAction::VotingIncreaseHappiness(i) => {
-                undo_increase_happiness(game, player_index, i)
+                undo_increase_happiness(game, player_index, i);
             }
             CustomAction::FreeEconomyProduction(c) => undo_collect(game, player_index, c),
         }
