@@ -189,7 +189,7 @@ pub fn setup_local_game() -> Game {
         .market = Some(1);
 
     game.advance("Voting", player_index1);
-    game.advance("Democracy 2", player_index1);
+    game.advance("Free Economy", player_index1);
     game
 }
 

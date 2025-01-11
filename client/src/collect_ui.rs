@@ -1,19 +1,10 @@
 use std::collections::HashMap;
 use std::iter;
 
-use macroquad::color::BLACK;
-use macroquad::math::{i32, vec2};
-use macroquad::prelude::WHITE;
-use macroquad::shapes::draw_circle;
-use server::action::Action;
-use server::consts::PORT_CHOICES;
-use server::game::Game;
-use server::playing_actions::{get_total_collection, PlayingAction};
-use server::position::Position;
-use server::resource_pile::ResourcePile;
-
+use crate::action_buttons::{base_or_custom_action, base_or_custom_available};
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
+use crate::dialog_ui::{cancel_button, ok_button, BaseOrCustomAction, BaseOrCustomDialog, OkTooltip};
+use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::hex_ui;
 use crate::hex_ui::Point;
 use crate::layout_ui::{
@@ -23,6 +14,18 @@ use crate::render_context::RenderContext;
 use crate::resource_ui::{
     new_resource_map, resource_name, resource_types, show_resource_pile, ResourceType,
 };
+use macroquad::color::BLACK;
+use macroquad::math::{i32, vec2};
+use macroquad::prelude::WHITE;
+use macroquad::shapes::draw_circle;
+use server::action::Action;
+use server::city::City;
+use server::consts::PORT_CHOICES;
+use server::content::custom_actions::{CustomAction, CustomActionType};
+use server::game::Game;
+use server::playing_actions::{get_total_collection, Collect, IncreaseHappiness, PlayingAction};
+use server::position::Position;
+use server::resource_pile::ResourcePile;
 
 #[derive(Clone)]
 pub struct CollectResources {
@@ -30,6 +33,7 @@ pub struct CollectResources {
     city_position: Position,
     possible_collections: HashMap<Position, Vec<ResourcePile>>,
     collections: Vec<(Position, ResourcePile)>,
+    custom: BaseOrCustomDialog,
 }
 
 impl CollectResources {
@@ -37,12 +41,14 @@ impl CollectResources {
         player_index: usize,
         city_position: Position,
         possible_collections: HashMap<Position, Vec<ResourcePile>>,
+        custom: BaseOrCustomDialog,
     ) -> CollectResources {
         CollectResources {
             player_index,
             city_position,
             collections: vec![],
             possible_collections,
+            custom,
         }
     }
 
@@ -56,6 +62,7 @@ impl CollectResources {
     pub fn help_text(&self, game: &Game) -> Vec<String> {
         let extra = self.extra_resources(game);
         vec![
+            self.custom.title.clone(),
             "Click on a tile to collect resources".to_string(),
             format!("{extra} left"),
         ]
@@ -71,7 +78,7 @@ impl CollectResources {
     }
 }
 
-pub fn collect_resources_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUpdate {
+pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUpdate {
     show_resource_pile(rc, &collect.collected(), &[]);
 
     let game = rc.game;
@@ -83,17 +90,23 @@ pub fn collect_resources_dialog(rc: &RenderContext, collect: &CollectResources) 
         collect.city_position,
         &collect.collections,
     )
-    .map_or(
-        OkTooltip::Invalid("Too many resources selected".to_string()),
-        |p| OkTooltip::Valid(format!("Collect {p}")),
-    );
+        .map_or(
+            OkTooltip::Invalid("Too many resources selected".to_string()),
+            |p| OkTooltip::Valid(format!("Collect {p}")),
+        );
     if ok_button(rc, tooltip) {
         let extra = collect.extra_resources(game);
+
+        let c = Collect {
+            city_position: collect.city_position,
+            collections: collect.collections.clone(),
+        };
+        let action = match collect.custom.custom {
+            BaseOrCustomAction::Base => PlayingAction::Collect(c),
+            BaseOrCustomAction::Custom { .. } => PlayingAction::Custom(CustomAction::FreeEconomyProduction(c)),
+        };
         return StateUpdate::execute_activation(
-            Action::Playing(PlayingAction::Collect {
-                city_position: collect.city_position,
-                collections: collect.collections.clone(),
-            }),
+            Action::Playing(action),
             if extra > 0 {
                 vec![format!("{extra} more tiles can be collected")]
             } else {

@@ -10,7 +10,7 @@ use crate::advance_ui::{pay_advance_dialog, show_free_advance_menu, show_paid_ad
 use crate::client_state::{
     ActiveDialog, CameraMode, DialogChooser, State, StateUpdate, StateUpdates,
 };
-use crate::collect_ui::collect_resources_dialog;
+use crate::collect_ui::collect_dialog;
 use crate::construct_ui::pay_construction_dialog;
 use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
 use crate::happiness_ui::{increase_happiness_click, increase_happiness_menu};
@@ -138,7 +138,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::AdvanceMenu => show_paid_advance_menu(rc),
         ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, rc),
         ActiveDialog::ConstructionPayment(p) => pay_construction_dialog(rc, p),
-        ActiveDialog::CollectResources(c) => collect_resources_dialog(rc, c),
+        ActiveDialog::CollectResources(c) => collect_dialog(rc, c),
         ActiveDialog::RecruitUnitSelection(s) => recruit_unit_ui::select_dialog(rc, s),
         ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::replace_dialog(rc, r),
         ActiveDialog::CulturalInfluenceResolution(r) => {

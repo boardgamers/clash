@@ -1,9 +1,11 @@
 use serde::{Deserialize, Serialize};
 
 use crate::content::wonders::construct_wonder;
-use crate::log::format_happiness_increase;
+use crate::log::{format_collect_log_item, format_happiness_increase};
 use crate::player::Player;
-use crate::playing_actions::{increase_happiness, undo_increase_happiness, IncreaseHappiness};
+use crate::playing_actions::{
+    collect, increase_happiness, undo_collect, undo_increase_happiness, Collect, IncreaseHappiness,
+};
 use crate::{
     game::Game, playing_actions::ActionType, position::Position, resource_pile::ResourcePile,
 };
@@ -17,6 +19,7 @@ pub enum CustomAction {
     },
     ForcedLabor,
     VotingIncreaseHappiness(IncreaseHappiness),
+    FreeEconomyProduction(Collect),
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash)]
@@ -24,6 +27,7 @@ pub enum CustomActionType {
     ConstructWonder,
     ForcedLabor,
     VotingIncreaseHappiness,
+    FreeEconomyCollect,
 }
 
 impl CustomAction {
@@ -45,6 +49,9 @@ impl CustomAction {
             CustomAction::VotingIncreaseHappiness(i) => {
                 increase_happiness(game, player_index, i);
             }
+            CustomAction::FreeEconomyProduction(c) => {
+                collect(game, player_index, c);
+            }
         }
     }
 
@@ -54,6 +61,7 @@ impl CustomAction {
             CustomAction::ConstructWonder { .. } => CustomActionType::ConstructWonder,
             CustomAction::ForcedLabor => CustomActionType::ForcedLabor,
             CustomAction::VotingIncreaseHappiness(_) => CustomActionType::VotingIncreaseHappiness,
+            CustomAction::FreeEconomyProduction(_) => CustomActionType::FreeEconomyCollect,
         }
     }
 
@@ -74,8 +82,9 @@ impl CustomAction {
             }
             CustomAction::ForcedLabor => game.actions_left -= 1,
             CustomAction::VotingIncreaseHappiness(i) => {
-                undo_increase_happiness(game, player_index, i);
+                undo_increase_happiness(game, player_index, i)
             }
+            CustomAction::FreeEconomyProduction(c) => undo_collect(game, player_index, c),
         }
     }
 
@@ -88,6 +97,10 @@ impl CustomAction {
                 player,
                 player_name,i
             )),
+            CustomAction::FreeEconomyProduction(c) => format!("{} using Free Economy", format_collect_log_item(
+                            player,
+                            player_name,c
+                        )),
         }
     }
 }
@@ -102,6 +115,9 @@ impl CustomActionType {
             }
             CustomActionType::VotingIncreaseHappiness => {
                 ActionType::free(ResourcePile::mood_tokens(1))
+            }
+            CustomActionType::FreeEconomyCollect => {
+                ActionType::free_and_once_per_turn(ResourcePile::mood_tokens(1))
             }
         }
     }

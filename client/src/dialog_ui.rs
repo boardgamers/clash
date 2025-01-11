@@ -17,6 +17,12 @@ pub enum BaseOrCustomAction {
     },
 }
 
+#[derive(Clone)]
+pub struct BaseOrCustomDialog {
+    pub title: String,
+    pub custom: BaseOrCustomAction,
+} 
+
 pub fn show_pending_update(update: &PendingUpdate, rc: &RenderContext) -> StateUpdate {
     let state = &rc.state;
     let t = if update.warning.is_empty() {

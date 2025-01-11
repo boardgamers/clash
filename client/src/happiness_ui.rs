@@ -1,6 +1,8 @@
-use crate::action_buttons::base_or_custom_action;
+use crate::action_buttons::{base_or_custom_action, base_or_custom_available};
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::dialog_ui::{cancel_button, ok_button, BaseOrCustomAction, OkTooltip};
+use crate::dialog_ui::{
+    cancel_button, ok_button, BaseOrCustomAction, BaseOrCustomDialog, OkTooltip,
+};
 use crate::render_context::RenderContext;
 use crate::resource_ui::{show_resource_pile, ResourceType};
 use server::action::Action;
@@ -13,17 +15,15 @@ use server::resource_pile::ResourcePile;
 
 #[derive(Clone)]
 pub struct IncreaseHappinessConfig {
-    pub title: String,
     pub steps: Vec<(Position, u32)>,
     pub cost: ResourcePile,
-    pub custom: BaseOrCustomAction,
+    pub custom: BaseOrCustomDialog,
 }
 
 impl IncreaseHappinessConfig {
-    pub fn new(p: &Player, title: &str, custom: BaseOrCustomAction) -> IncreaseHappinessConfig {
+    pub fn new(p: &Player, custom: BaseOrCustomDialog) -> IncreaseHappinessConfig {
         let steps = p.cities.iter().map(|c| (c.position, 0)).collect();
         IncreaseHappinessConfig {
-            title: title.to_string(),
             steps,
             cost: ResourcePile::empty(),
             custom,
@@ -32,11 +32,7 @@ impl IncreaseHappinessConfig {
 }
 
 pub fn can_play_increase_happiness(rc: &RenderContext) -> bool {
-    rc.can_play_action()
-        || rc
-            .game
-            .get_available_custom_actions()
-            .contains(&CustomActionType::VotingIncreaseHappiness)
+    base_or_custom_available(rc, CustomActionType::VotingIncreaseHappiness)
 }
 
 pub fn open_increase_happiness_dialog(
@@ -47,10 +43,9 @@ pub fn open_increase_happiness_dialog(
         rc,
         "Increase happiness",
         &[("Voting", CustomActionType::VotingIncreaseHappiness)],
-        |title, custom| {
+        |custom| {
             ActiveDialog::IncreaseHappiness(init(IncreaseHappinessConfig::new(
                 rc.shown_player,
-                title,
                 custom,
             )))
         },
@@ -95,7 +90,6 @@ pub fn add_increase_happiness(
         steps: new_steps,
         cost: total_cost,
         custom: increase_happiness.custom.clone(),
-        title: increase_happiness.title.clone(),
     }
 }
 
@@ -141,17 +135,13 @@ pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) 
         OkTooltip::Invalid("Not enough resources".to_string())
     };
     if ok_button(rc, tooltip) {
-        let action = match &h.custom {
-            BaseOrCustomAction::Base => PlayingAction::IncreaseHappiness(IncreaseHappiness {
-                happiness_increases: h.steps.clone(),
-            }),
-            BaseOrCustomAction::Custom { .. } => {
-                PlayingAction::Custom(CustomAction::VotingIncreaseHappiness(IncreaseHappiness {
-                    happiness_increases: h.steps.clone(),
-                }))
-            }
+        let i = IncreaseHappiness {
+            happiness_increases: h.steps.clone(),
         };
-
+        let action = match &h.custom.custom {
+            BaseOrCustomAction::Base => PlayingAction::IncreaseHappiness(i),
+            BaseOrCustomAction::Custom { .. } => PlayingAction::Custom(CustomAction::VotingIncreaseHappiness(i)),
+        };
         return StateUpdate::Execute(Action::Playing(action));
     }
     if cancel_button(rc) {

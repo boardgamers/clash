@@ -94,7 +94,7 @@ impl ActiveDialog {
             | ActiveDialog::AdvanceMenu => vec![],
             ActiveDialog::IncreaseHappiness(h) => {
                 vec![
-                    h.title.clone(),
+                    h.custom.title.clone(),
                     "Click on a city to increase happiness".to_string(),
                 ]
             }

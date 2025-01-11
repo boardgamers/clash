@@ -187,8 +187,9 @@ fn democracy() -> Vec<Advance> {
         .with_contradicting_advance(&["Nationalism", "Dogma"])
         .add_custom_action(VotingIncreaseHappiness)
         .build(),
-        Advance::builder("Democracy 2", "TestGovernment1")
+        Advance::builder("Free Economy", "As a free action, you may spend 1 mood token to collect resources in one city. This must be your only collect action this turn")
             .with_required_advance("Voting")
+            .add_custom_action(FreeEconomyCollect)
             .build(),
     ]
 }

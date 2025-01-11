@@ -1,5 +1,5 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::dialog_ui::BaseOrCustomAction;
+use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
 use crate::happiness_ui::{can_play_increase_happiness, open_increase_happiness_dialog};
 use crate::layout_ui::{bottom_left_texture, icon_pos};
 use crate::render_context::RenderContext;
@@ -14,11 +14,11 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     let game = rc.game;
     if can_play_increase_happiness(rc)
         && bottom_left_texture(
-            rc,
-            &assets.resources[&ResourceType::MoodTokens],
-            icon_pos(0, -2),
-            "Increase happiness",
-        )
+        rc,
+        &assets.resources[&ResourceType::MoodTokens],
+        icon_pos(0, -2),
+        "Increase happiness",
+    )
     {
         return open_increase_happiness_dialog(rc, |h| h);
     }
@@ -61,31 +61,39 @@ fn custom_action_tooltip(custom_action_type: &CustomActionType) -> String {
         CustomActionType::VotingIncreaseHappiness => {
             get_advance_by_name("Voting").unwrap().description
         }
+        CustomActionType::FreeEconomyCollect => {
+            get_advance_by_name("Free Economy").unwrap().description
+        }
     }
 }
 
 fn generic_custom_action(custom_action_type: &CustomActionType) -> Option<CustomAction> {
     match custom_action_type {
-        CustomActionType::ConstructWonder => {
-            // handled in city_ui
-            None
-        }
-        CustomActionType::VotingIncreaseHappiness => {
-            // handled in happiness_ui
+        CustomActionType::ConstructWonder
+        | CustomActionType::VotingIncreaseHappiness
+        | CustomActionType::FreeEconomyCollect => {
+            // handled explicitly
             None
         }
         CustomActionType::ForcedLabor => Some(CustomAction::ForcedLabor),
     }
 }
 
+pub fn base_or_custom_available(rc: &RenderContext, custom: CustomActionType) -> bool {
+    rc.can_play_action() || rc.game.get_available_custom_actions().contains(&custom)
+}
+
 pub fn base_or_custom_action(
     rc: &RenderContext,
     title: &str,
     custom: &[(&str, CustomActionType)],
-    f: impl Fn(&str, BaseOrCustomAction) -> ActiveDialog,
+    f: impl Fn(BaseOrCustomDialog) -> ActiveDialog,
 ) -> StateUpdate {
     let base = if rc.can_play_action() {
-        Some(f(title, BaseOrCustomAction::Base))
+        Some(f(BaseOrCustomDialog {
+            custom: BaseOrCustomAction::Base,
+            title: title.to_string(),
+        }))
     } else {
         None
     };
@@ -97,13 +105,13 @@ pub fn base_or_custom_action(
         .find(|a| custom.iter().any(|(_, b)| **a == *b))
         .map(|a| {
             let advance = custom.iter().find(|(_, b)| *b == *a).unwrap().0;
-            let dialog = f(
-                &format!("{title} with {advance}"),
-                BaseOrCustomAction::Custom {
+            let dialog = f(BaseOrCustomDialog {
+                custom: BaseOrCustomAction::Custom {
                     custom: a.clone(),
                     advance: advance.to_string(),
                 },
-            );
+                title: format!("{title} with {advance}"),
+            });
 
             StateUpdate::dialog_chooser(
                 &format!("Use special action from {advance}?"),
