@@ -14,11 +14,11 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     let game = rc.game;
     if can_play_increase_happiness(rc)
         && bottom_left_texture(
-        rc,
-        &assets.resources[&ResourceType::MoodTokens],
-        icon_pos(0, -2),
-        "Increase happiness",
-    )
+            rc,
+            &assets.resources[&ResourceType::MoodTokens],
+            icon_pos(0, -2),
+            "Increase happiness",
+        )
     {
         return open_increase_happiness_dialog(rc, |h| h);
     }
@@ -79,8 +79,8 @@ fn generic_custom_action(custom_action_type: &CustomActionType) -> Option<Custom
     }
 }
 
-pub fn base_or_custom_available(rc: &RenderContext, custom: CustomActionType) -> bool {
-    rc.can_play_action() || rc.game.get_available_custom_actions().contains(&custom)
+pub fn base_or_custom_available(rc: &RenderContext, custom: &CustomActionType) -> bool {
+    rc.can_play_action() || rc.game.get_available_custom_actions().contains(custom)
 }
 
 pub fn base_or_custom_action(

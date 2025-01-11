@@ -32,7 +32,7 @@ impl IncreaseHappinessConfig {
 }
 
 pub fn can_play_increase_happiness(rc: &RenderContext) -> bool {
-    base_or_custom_available(rc, CustomActionType::VotingIncreaseHappiness)
+    base_or_custom_available(rc, &CustomActionType::VotingIncreaseHappiness)
 }
 
 pub fn open_increase_happiness_dialog(
@@ -140,7 +140,9 @@ pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) 
         };
         let action = match &h.custom.custom {
             BaseOrCustomAction::Base => PlayingAction::IncreaseHappiness(i),
-            BaseOrCustomAction::Custom { .. } => PlayingAction::Custom(CustomAction::VotingIncreaseHappiness(i)),
+            BaseOrCustomAction::Custom { .. } => {
+                PlayingAction::Custom(CustomAction::VotingIncreaseHappiness(i))
+            }
         };
         return StateUpdate::Execute(Action::Playing(action));
     }

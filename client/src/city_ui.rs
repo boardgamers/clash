@@ -1,6 +1,6 @@
+use crate::action_buttons::{base_or_custom_action, base_or_custom_available};
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::collect_ui::{possible_resource_collections, CollectResources,
-};
+use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
 use crate::happiness_ui::{
     add_increase_happiness, can_play_increase_happiness, open_increase_happiness_dialog,
@@ -15,11 +15,10 @@ use crate::{hex_ui, player_ui};
 use macroquad::prelude::*;
 use server::city::{City, MoodState};
 use server::city_pieces::Building;
+use server::content::custom_actions::CustomActionType;
 use server::game::Game;
 use server::unit::{UnitType, Units};
 use std::ops::Add;
-use server::content::custom_actions::CustomActionType;
-use crate::action_buttons::{base_or_custom_action, base_or_custom_available};
 
 pub type IconAction<'a> = (&'a Texture2D, String, Box<dyn Fn() -> StateUpdate + 'a>);
 
@@ -162,7 +161,7 @@ fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconActio
 }
 
 fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
-    if !base_or_custom_available(rc, CustomActionType::FreeEconomyCollect) {
+    if !base_or_custom_available(rc, &CustomActionType::FreeEconomyCollect) {
         return None;
     }
     Some((

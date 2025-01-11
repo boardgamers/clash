@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 use std::iter;
 
-use crate::action_buttons::{base_or_custom_action, base_or_custom_available};
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::dialog_ui::{cancel_button, ok_button, BaseOrCustomAction, BaseOrCustomDialog, OkTooltip};
-use crate::happiness_ui::IncreaseHappinessConfig;
+use crate::dialog_ui::{
+    cancel_button, ok_button, BaseOrCustomAction, BaseOrCustomDialog, OkTooltip,
+};
 use crate::hex_ui;
 use crate::hex_ui::Point;
 use crate::layout_ui::{
@@ -19,11 +19,10 @@ use macroquad::math::{i32, vec2};
 use macroquad::prelude::WHITE;
 use macroquad::shapes::draw_circle;
 use server::action::Action;
-use server::city::City;
 use server::consts::PORT_CHOICES;
-use server::content::custom_actions::{CustomAction, CustomActionType};
+use server::content::custom_actions::CustomAction;
 use server::game::Game;
-use server::playing_actions::{get_total_collection, Collect, IncreaseHappiness, PlayingAction};
+use server::playing_actions::{get_total_collection, Collect, PlayingAction};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
@@ -90,10 +89,10 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
         collect.city_position,
         &collect.collections,
     )
-        .map_or(
-            OkTooltip::Invalid("Too many resources selected".to_string()),
-            |p| OkTooltip::Valid(format!("Collect {p}")),
-        );
+    .map_or(
+        OkTooltip::Invalid("Too many resources selected".to_string()),
+        |p| OkTooltip::Valid(format!("Collect {p}")),
+    );
     if ok_button(rc, tooltip) {
         let extra = collect.extra_resources(game);
 
@@ -103,7 +102,9 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
         };
         let action = match collect.custom.custom {
             BaseOrCustomAction::Base => PlayingAction::Collect(c),
-            BaseOrCustomAction::Custom { .. } => PlayingAction::Custom(CustomAction::FreeEconomyProduction(c)),
+            BaseOrCustomAction::Custom { .. } => {
+                PlayingAction::Custom(CustomAction::FreeEconomyProduction(c))
+            }
         };
         return StateUpdate::execute_activation(
             Action::Playing(action),
