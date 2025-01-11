@@ -257,11 +257,10 @@ impl StateUpdate {
         yes: Option<ActiveDialog>,
         no: Option<ActiveDialog>,
     ) -> StateUpdate {
-        let title = title.to_string();
         if let Some(yes) = yes {
             if let Some(no) = no {
                 StateUpdate::OpenDialog(ActiveDialog::DialogChooser(Box::new(DialogChooser {
-                    title,
+                    title: title.to_string(),
                     yes,
                     no,
                 })))

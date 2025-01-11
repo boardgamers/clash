@@ -1,4 +1,5 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::dialog_ui::BaseOrCustomAction;
 use crate::happiness_ui::{can_play_increase_happiness, open_increase_happiness_dialog};
 use crate::layout_ui::{bottom_left_texture, icon_pos};
 use crate::render_context::RenderContext;
@@ -75,4 +76,40 @@ fn generic_custom_action(custom_action_type: &CustomActionType) -> Option<Custom
         }
         CustomActionType::ForcedLabor => Some(CustomAction::ForcedLabor),
     }
+}
+
+pub fn base_or_custom_action(
+    rc: &RenderContext,
+    title: &str,
+    custom: &[(&str, CustomActionType)],
+    f: impl Fn(&str, BaseOrCustomAction) -> ActiveDialog,
+) -> StateUpdate {
+    let base = if rc.can_play_action() {
+        Some(f(title, BaseOrCustomAction::Base))
+    } else {
+        None
+    };
+
+    let special = rc
+        .game
+        .get_available_custom_actions()
+        .iter()
+        .find(|a| custom.iter().any(|(_, b)| **a == *b))
+        .map(|a| {
+            let advance = custom.iter().find(|(_, b)| *b == *a).unwrap().0;
+            let dialog = f(
+                &format!("{title} with {advance}"),
+                BaseOrCustomAction::Custom {
+                    custom: a.clone(),
+                    advance: advance.to_string(),
+                },
+            );
+
+            StateUpdate::dialog_chooser(
+                &format!("Use special action from {advance}?"),
+                Some(dialog),
+                base.clone(),
+            )
+        });
+    special.unwrap_or(StateUpdate::OpenDialog(base.unwrap()))
 }
