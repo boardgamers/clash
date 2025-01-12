@@ -5,7 +5,9 @@ use crate::render_context::RenderContext;
 use hex2d::{Coordinate, Spacing};
 use macroquad::color::Color;
 use macroquad::math::{f32, i32, vec2, Vec2};
-use macroquad::prelude::{draw_texture_ex, DrawTextureParams, Rect, Texture2D, DARKGRAY, WHITE};
+use macroquad::prelude::{
+    draw_texture_ex, DrawTextureParams, Rect, Texture2D, BEIGE, DARKGRAY, WHITE,
+};
 use macroquad::shapes::draw_hexagon;
 use server::position::Position;
 
@@ -25,24 +27,29 @@ pub fn draw_hex(
     p: Position,
     text_color: Color,
     alpha: f32,
-    t: &Texture2D,
+    terrain: Option<&Texture2D>,
     exhausted: bool,
     rc: &RenderContext,
 ) {
     let c = center(p);
     let mut v = WHITE.to_vec();
     v.w = alpha;
-    draw_texture_ex(
-        t,
-        c.x - SIZE,
-        c.y - SHORT_SIZE,
-        WHITE,
-        DrawTextureParams {
-            source: Some(Rect::new(0., 0., 298., 257.)),
-            dest_size: Some(vec2(SIZE * 2.0, SHORT_SIZE * 2.)),
-            ..Default::default()
-        },
-    );
+    if let Some(terrain) = terrain {
+        draw_texture_ex(
+            terrain,
+            c.x - SIZE,
+            c.y - SHORT_SIZE,
+            WHITE,
+            DrawTextureParams {
+                source: Some(Rect::new(0., 0., 298., 257.)),
+                dest_size: Some(vec2(SIZE * 2.0, SHORT_SIZE * 2.)),
+                ..Default::default()
+            },
+        );
+    } else {
+        // Terrain::Unexplored
+        draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, BEIGE);
+    }
     draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, Color::from_vec(v));
     rc.state
         .draw_text_with_color(&p.to_string(), c.x - 30.0, c.y - 35.0, text_color);

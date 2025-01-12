@@ -32,6 +32,7 @@ pub fn terrain_name(t: &Terrain) -> &'static str {
         Terrain::Forest => "Forest",
         Terrain::Exhausted(_) => "Exhausted",
         Terrain::Water => "Water",
+        Terrain::Unexplored => "Unexplored",
     }
 }
 
@@ -47,7 +48,7 @@ pub fn draw_map(rc: &RenderContext) -> StateUpdate {
             *pos,
             terrain_font_color(t),
             alpha(rc, *pos),
-            rc.assets().terrain.get(base).unwrap(),
+            rc.assets().terrain.get(base),
             exhausted,
             rc,
         );

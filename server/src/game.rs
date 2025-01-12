@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::combat::Combat;
 use crate::combat::{capture_position, execute_combat_action, initiate_combat, CombatPhase};
-use crate::map::{maximum_size_2_player_random_map, setup_home_city};
 use crate::utils::shuffle;
 use crate::{
     action::Action,
@@ -91,10 +90,6 @@ impl Game {
             players.push(Player::new(civilizations.remove(civilization), i));
         }
 
-        if setup {
-            setup_home_city(&mut players, 0, "F1");
-            setup_home_city(&mut players, 1, "F8");
-        }
         let starting_player = quad_rand::gen_range(0, players.len());
         let mut dice_roll_outcomes = Vec::new();
         for _ in 0..DICE_ROLL_BUFFER {
@@ -105,7 +100,7 @@ impl Game {
         let wonder_amount = wonders.len();
 
         let map = if setup {
-            Map::new(maximum_size_2_player_random_map())
+            Map::random_map(&mut players)
         } else {
             Map::new(HashMap::new())
         };
