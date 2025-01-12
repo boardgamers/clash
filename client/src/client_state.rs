@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 use server::action::Action;
 use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
-use server::game::{CulturalInfluenceResolution, ExploreResolutionState, Game, GameState};
+use server::game::{CulturalInfluenceResolution, Game, GameState};
 use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
@@ -496,10 +496,12 @@ impl State {
                 }
                 CombatPhase::Retreat => ActiveDialog::Retreat,
             },
-            GameState::ExploreResolution(r) => ActiveDialog::ExploreResolution(ExploreResolutionConfig {
-                block: r.block.clone(),
-                rotation: r.block.position.rotation,
-            }),
+            GameState::ExploreResolution(r) => {
+                ActiveDialog::ExploreResolution(ExploreResolutionConfig {
+                    block: r.block.clone(),
+                    rotation: r.block.position.rotation,
+                })
+            }
         }
     }
 

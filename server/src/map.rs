@@ -81,7 +81,8 @@ impl Map {
     }
 
     fn add_block_tiles(&mut self, pos: &BlockPosition, block: &Block, rotation: Rotation) {
-        block.tiles(pos, rotation)
+        block
+            .tiles(pos, rotation)
             .into_iter()
             .for_each(|(position, tile)| {
                 self.tiles.insert(position, tile);
@@ -147,7 +148,8 @@ pub struct Block {
 }
 
 impl Block {
-    #[must_use] pub fn tiles(&self, pos: &BlockPosition, rotation: Rotation) -> Vec<(Position, Terrain)> {
+    #[must_use]
+    pub fn tiles(&self, pos: &BlockPosition, rotation: Rotation) -> Vec<(Position, Terrain)> {
         let center = pos.top_tile;
         let flip = rotation > 2; // need to move the block to keep the tile in place
         BLOCK_RELATIVE_POSITIONS
@@ -156,7 +158,8 @@ impl Block {
             .map(|(i, relative)| {
                 let tile = self.terrain[i].clone();
                 let src = center.coordinate() + relative.coordinate();
-                let mut dst = src.rotate_around(center.coordinate(), Angle::from_int(rotation as i32));
+                let mut dst =
+                    src.rotate_around(center.coordinate(), Angle::from_int(rotation as i32));
                 if flip {
                     dst = dst.neighbors()[rotation - 3];
                 }
@@ -460,7 +463,7 @@ pub(crate) fn move_to_unexplored_tile(
 
 pub(crate) fn move_to_unexplored_block(
     game: &mut Game,
-    player_index: usize,
+    _player_index: usize,
     move_to: &UnexploredBlock,
     move_state: &MoveState,
 ) -> bool {

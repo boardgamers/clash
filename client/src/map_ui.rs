@@ -1,25 +1,23 @@
-use std::collections::HashMap;
 use macroquad::math::vec2;
 use macroquad::prelude::*;
+use std::collections::HashMap;
 use std::ops::{Add, Mul, Rem, Sub};
 
 use server::action::Action;
 use server::combat::Combat;
-use server::game::{CulturalInfluenceResolution, ExploreResolutionState, GameState};
+use server::game::GameState;
 use server::map::{Rotation, Terrain, UnexploredBlock};
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
-use server::resource_pile::ResourcePile;
 use server::unit::{MovementRestriction, Unit, UnitType};
 
-use crate::city_ui::{building_name, draw_city, show_city_menu, IconAction, IconActionVec};
+use crate::city_ui::{draw_city, show_city_menu, IconAction, IconActionVec};
 use crate::client_state::{ActiveDialog, State, StateUpdate};
+use crate::dialog_ui::{cancel_button_pos, ok_button, OkTooltip};
 use crate::layout_ui::{bottom_center_texture, bottom_right_texture, icon_pos};
 use crate::move_ui::movable_units;
 use crate::render_context::RenderContext;
 use crate::{collect_ui, hex_ui, unit_ui};
-use crate::dialog_ui::{cancel_button_pos, cancel_button_with_tooltip, ok_button, OkTooltip};
-use crate::resource_ui::{show_resource_pile, ResourceType};
 
 #[derive(Clone)]
 pub struct ExploreResolutionConfig {
@@ -87,11 +85,15 @@ pub fn draw_map(rc: &RenderContext) -> StateUpdate {
 
 fn get_overlay(rc: &RenderContext) -> HashMap<Position, Terrain> {
     if let ActiveDialog::ExploreResolution(r) = &rc.state.active_dialog {
-        r.block.block.tiles(&r.block.position, r.rotation)
+        r.block
+            .block
+            .tiles(&r.block.position, r.rotation)
             .iter()
             .map(|(pos, t)| (*pos, t.clone()))
             .collect()
-    } else { HashMap::new() }
+    } else {
+        HashMap::new()
+    }
 }
 
 pub fn pan_and_zoom(state: &mut State) {
@@ -239,14 +241,19 @@ pub fn show_map_action_buttons(rc: &RenderContext, icons: &IconActionVec) -> Sta
     StateUpdate::None
 }
 
-pub fn explore_dialog(
-    rc: &RenderContext,
-    r: &ExploreResolutionConfig,
-) -> StateUpdate {
-    if ok_button(rc, OkTooltip::Valid("Accept current tile rotation".to_string())) {
+pub fn explore_dialog(rc: &RenderContext, r: &ExploreResolutionConfig) -> StateUpdate {
+    if ok_button(
+        rc,
+        OkTooltip::Valid("Accept current tile rotation".to_string()),
+    ) {
         return StateUpdate::execute(Action::ExploreResolution(r.rotation));
     }
-    if bottom_right_texture(rc, &rc.assets().rotate_explore, cancel_button_pos(), "Rotate tile") {
+    if bottom_right_texture(
+        rc,
+        &rc.assets().rotate_explore,
+        cancel_button_pos(),
+        "Rotate tile",
+    ) {
         let mut new = r.clone();
         new.rotation = (r.rotation + 3).rem(6);
         return StateUpdate::OpenDialog(ActiveDialog::ExploreResolution(new));

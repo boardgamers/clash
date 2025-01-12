@@ -475,8 +475,14 @@ impl Game {
                         capture_position(self, enemy, destination, player_index);
                     }
                 }
-                let dest_terrain = self.map.tiles.get(&destination).expect("destination should be a valid tile");
-                if dest_terrain == &Unexplored && move_to_unexplored_tile(self, player_index, destination, &move_state) {
+                let dest_terrain = self
+                    .map
+                    .tiles
+                    .get(&destination)
+                    .expect("destination should be a valid tile");
+                if dest_terrain == &Unexplored
+                    && move_to_unexplored_tile(self, player_index, destination, &move_state)
+                {
                     return;
                 }
 
