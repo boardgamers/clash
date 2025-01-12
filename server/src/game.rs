@@ -429,6 +429,7 @@ impl Game {
         player_index: usize,
         mut move_state: MoveState,
     ) {
+        let saved_state = move_state.clone();
         let starting_position = match action {
             Move { units, destination } => {
                 let player = &self.players[player_index];
@@ -449,6 +450,8 @@ impl Game {
                     )
                     .expect("Illegal action");
                 move_state.moved_units.extend(units.iter());
+                move_state.movement_actions_left -= 1;
+
                 if let Some(defender) = self.enemy_player(player_index, destination) {
                     if self.move_to_defended_tile(
                         player_index,
@@ -472,7 +475,7 @@ impl Game {
                         capture_position(self, enemy, destination, player_index);
                     }
                 }
-                move_state.movement_actions_left -= 1;
+
                 self.back_to_move(&move_state);
                 // todo maybe explore should be done here
                 Some(starting_position)
@@ -484,7 +487,7 @@ impl Game {
         };
         self.undo_context_stack.push(UndoContext::Movement {
             starting_position,
-            move_state: move_state.clone(),
+            move_state: saved_state,
         });
     }
 
@@ -518,7 +521,6 @@ impl Game {
                     .position = starting_position;
             }
             assert!(military, "Illegal action");
-            move_state.movement_actions_left -= 1;
             self.back_to_move(move_state);
 
             initiate_combat(
@@ -541,7 +543,7 @@ impl Game {
     fn undo_movement_action(&mut self, action: MovementAction, player_index: usize) {
         let Some(UndoContext::Movement {
             starting_position,
-            mut move_state,
+            move_state,
         }) = self.undo_context_stack.pop()
         else {
             panic!("when undoing a movement action, the game should have stored movement context")
@@ -551,11 +553,6 @@ impl Game {
             destination: _,
         } = action
         {
-            if !units.is_empty() {
-                move_state
-                    .moved_units
-                    .drain(move_state.moved_units.len() - units.len()..);
-            }
             self.undo_move_units(
                 player_index,
                 units,
@@ -1201,10 +1198,9 @@ impl Game {
         old_player.available_settlements += 1;
         if old_player.available_units.settlers > 0 && !old_player.cities.is_empty() {
             let state = mem::replace(&mut self.state, Playing);
-            let Movement(mut m) = state else {
+            let Movement(m) = state else {
                 panic!("conquering a city should only happen in a movement action")
             };
-            m.movement_actions_left -= 1;
             self.state = PlaceSettler(PlaceSettlerState {
                 player_index: old_player_index,
                 move_state: m,
@@ -1483,11 +1479,13 @@ pub struct MoveState {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct PlaceSettlerState {
     pub player_index: usize,
+    #[serde(flatten)]
     pub move_state: MoveState,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct ExploreResolutionState {
+    #[serde(flatten)]
     pub move_state: MoveState,
     pub block: UnexploredBlock,
     pub rotation: Rotation,
@@ -1526,6 +1524,7 @@ pub enum UndoContext {
     },
     Movement {
         starting_position: Option<Position>,
+        #[serde(flatten)]
         move_state: MoveState,
     },
 }
