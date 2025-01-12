@@ -871,7 +871,7 @@ impl Game {
         self.players[player_index].take_events(|events, player| {
             events.on_advance.trigger(player, &advance.to_string(), &());
         });
-        let advance = advances::get_advance_by_name(advance).expect("advance should exist");
+        let advance = advances::get_advance_by_name(advance);
         (advance.player_initializer)(self, player_index);
         (advance.player_one_time_initializer)(self, player_index);
         for i in 0..self.players[player_index]
@@ -917,7 +917,7 @@ impl Game {
                 .on_undo_advance
                 .trigger(player, &advance.to_string(), &());
         });
-        let advance = advances::get_advance_by_name(advance).expect("advance should exist");
+        let advance = advances::get_advance_by_name(advance);
         (advance.player_deinitializer)(self, player_index);
         (advance.player_undo_deinitializer)(self, player_index);
         for i in 0..self.players[player_index]
@@ -1100,7 +1100,7 @@ impl Game {
             &mut self.players[player_index].advances,
             &advance.to_string(),
         );
-        let advance = advances::get_advance_by_name(advance).expect("advance should exist");
+        let advance = advances::get_advance_by_name(advance);
         (advance.player_deinitializer)(self, player_index);
     }
 

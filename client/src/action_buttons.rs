@@ -66,13 +66,9 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
 fn custom_action_tooltip(custom_action_type: &CustomActionType) -> String {
     match custom_action_type {
         CustomActionType::ConstructWonder => "Construct a wonder".to_string(),
-        CustomActionType::ForcedLabor => get_advance_by_name("Absolute Power").unwrap().description,
-        CustomActionType::VotingIncreaseHappiness => {
-            get_advance_by_name("Voting").unwrap().description
-        }
-        CustomActionType::FreeEconomyCollect => {
-            get_advance_by_name("Free Economy").unwrap().description
-        }
+        CustomActionType::ForcedLabor => get_advance_by_name("Absolute Power").description,
+        CustomActionType::VotingIncreaseHappiness => get_advance_by_name("Voting").description,
+        CustomActionType::FreeEconomyCollect => get_advance_by_name("Free Economy").description,
     }
 }
 

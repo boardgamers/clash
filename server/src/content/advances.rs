@@ -229,9 +229,15 @@ fn theocracy() -> Vec<Advance> {
     ]
 }
 
+/// 
+/// # Panics
+/// 
+/// Panics if advance with name doesn't exist
 #[must_use]
-pub fn get_advance_by_name(name: &str) -> Option<Advance> {
-    get_all().into_iter().find(|advance| advance.name == name)
+pub fn get_advance_by_name(name: &str) -> Advance {
+    get_all().into_iter().find(|advance| advance.name == name).unwrap_or_else(|| {
+        panic!("Advance with name {name} not found");
+    })
 }
 
 #[must_use]

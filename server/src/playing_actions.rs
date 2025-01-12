@@ -136,7 +136,7 @@ impl PlayingAction {
                 let cost = player.advance_cost(&advance);
                 assert!(
                     player.can_advance(
-                        &advances::get_advance_by_name(&advance).expect("advance should exist")
+                        &advances::get_advance_by_name(&advance)
                     ) && payment.food + payment.ideas + payment.gold as u32 == cost,
                     "Illegal action"
                 );

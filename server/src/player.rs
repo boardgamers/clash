@@ -125,7 +125,7 @@ impl Player {
         game.players.push(player);
         let advances = mem::take(&mut game.players[player_index].advances);
         for advance in &advances {
-            let advance = advances::get_advance_by_name(advance).expect("advance should exist");
+            let advance = advances::get_advance_by_name(advance);
             (advance.player_initializer)(game, player_index);
             for i in 0..game.players[player_index]
                 .civilization
@@ -382,7 +382,6 @@ impl Player {
     pub fn government(&self) -> Option<String> {
         self.advances.iter().find_map(|advance| {
             advances::get_advance_by_name(advance)
-                .expect("all player owned advances should exist")
                 .government
         })
     }
@@ -908,5 +907,7 @@ pub struct PlayerData {
     available_units: Units,
     collect_options: Vec<(Terrain, Vec<ResourcePile>)>,
     next_unit_id: u32,
+    #[serde(default)]
+    #[serde(skip_serializing_if="Vec::is_empty")]
     played_once_per_turn_actions: Vec<CustomActionType>,
 }

@@ -417,7 +417,6 @@
     "\tPlayer1 moved 1 settler from B2 to B3 and captured Player2's city at B3"
   ],
   "undo_limit": 0,
-  "played_once_per_turn_actions": [],
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,

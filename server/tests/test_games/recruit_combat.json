@@ -447,7 +447,6 @@
     "Player1 paid 1 food, 1 wood and 1 ore to construct a Port in the city at C2 at the water tile C3 making it Angry"
   ],
   "undo_limit": 0,
-  "played_once_per_turn_actions": [],
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,

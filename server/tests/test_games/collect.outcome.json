@@ -495,7 +495,6 @@
     "Player1 collects 1 ore and 1 wood in the city at C2"
   ],
   "undo_limit": 5,
-  "played_once_per_turn_actions": [],
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 2,

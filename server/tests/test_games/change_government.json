@@ -125,7 +125,7 @@
       "available_leaders": [],
       "advances": [
         "Voting",
-        "Democracy 2",
+        "Free Economy",
         "Farming",
         "Fishing",
         "Mining"
@@ -428,7 +428,7 @@
     {
       "Playing": {
         "Advance": {
-          "advance": "Democracy 2",
+          "advance": "Free Economy",
           "payment": {
             "food": 0,
             "wood": 0,
@@ -486,7 +486,7 @@
     "Age 1 has started",
     "Round 1/3",
     "Player1 paid 2 ideas to get the Voting advance",
-    "Player1 paid 2 ideas to get the Democracy 2 advance",
+    "Player1 paid 2 ideas to get the Free Economy advance",
     "Player1 ended his turn with 1 actions left",
     "It's Player2's turn",
     "Player2 ended his turn with 3 actions left",
@@ -512,7 +512,6 @@
     "It's Player1's turn"
   ],
   "undo_limit": 12,
-  "played_once_per_turn_actions": [],
   "actions_left": 3,
   "successful_cultural_influence": false,
   "round": 1,
