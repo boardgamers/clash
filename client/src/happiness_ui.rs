@@ -9,7 +9,7 @@ use server::action::Action;
 use server::city::City;
 use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::player::Player;
-use server::playing_actions::{IncreaseHappiness, PlayingAction};
+use server::playing_actions::{IncreaseHappiness, PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
@@ -32,7 +32,11 @@ impl IncreaseHappinessConfig {
 }
 
 pub fn can_play_increase_happiness(rc: &RenderContext) -> bool {
-    base_or_custom_available(rc, &CustomActionType::VotingIncreaseHappiness)
+    base_or_custom_available(
+        rc,
+        PlayingActionType::IncreaseHappiness,
+        &CustomActionType::VotingIncreaseHappiness,
+    )
 }
 
 pub fn open_increase_happiness_dialog(
@@ -41,6 +45,7 @@ pub fn open_increase_happiness_dialog(
 ) -> StateUpdate {
     base_or_custom_action(
         rc,
+        PlayingActionType::IncreaseHappiness,
         "Increase happiness",
         &[("Voting", CustomActionType::VotingIncreaseHappiness)],
         |custom| {

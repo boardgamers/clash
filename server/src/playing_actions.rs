@@ -57,6 +57,43 @@ pub struct IncreaseHappiness {
     pub happiness_increases: Vec<(Position, u32)>,
 }
 
+#[derive(Clone, Copy)]
+pub enum PlayingActionType {
+    Advance,
+    FoundCity,
+    Construct,
+    Collect,
+    Recruit,
+    MoveUnits,
+    IncreaseHappiness,
+    InfluenceCultureAttempt,
+    Custom,
+    EndTurn,
+}
+
+// pub const playable_base_actions: [PlayingActionType; 8] = [
+//     PlayingActionType::Advance,
+//     PlayingActionType::FoundCity,
+//     PlayingActionType::Construct,
+//     PlayingActionType::Collect,
+//     PlayingActionType::Recruit,
+//     PlayingActionType::MoveUnits,
+//     PlayingActionType::IncreaseHappiness,
+//     PlayingActionType::InfluenceCultureAttempt,
+// ];
+
+impl PlayingActionType {
+    #[must_use]
+    pub fn is_available(&self, game: &Game, player_index: usize) -> bool {
+        let mut possible = true;
+        let p = &game.players[player_index];
+        p.get_events()
+            .is_playing_action_available
+            .trigger(&mut possible, self, p);
+        possible
+    }
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub enum PlayingAction {
     Advance {
@@ -83,6 +120,10 @@ impl PlayingAction {
     ///
     /// Panics if action is illegal
     pub fn execute(self, game: &mut Game, player_index: usize) {
+        assert!(
+            self.playing_action_type().is_available(game, player_index),
+            "Illegal action"
+        );
         if !self.action_type().free {
             assert_ne!(game.actions_left, 0, "Illegal action");
             game.actions_left -= 1;
@@ -151,7 +192,7 @@ impl PlayingAction {
                     matches!(
                         a,
                         ActionLogItem::Playing(PlayingAction::Custom(
-                            CustomAction::FreeEconomyProduction(_)
+                            CustomAction::FreeEconomyCollect(_)
                         ))
                     )
                 }) {
@@ -240,11 +281,17 @@ impl PlayingAction {
             Custom(custom_action) => {
                 let action = custom_action.custom_action_type();
                 assert!(
-                    !game.played_once_per_turn_actions.contains(&action),
-                    "Illegal action"
+                    !game
+                        .get_player(player_index)
+                        .played_once_per_turn_actions
+                        .contains(&action),
+                    "Already played once per turn"
                 );
+                assert!(action.is_available(game, player_index), "Not available");
                 if action.action_type().once_per_turn {
-                    game.played_once_per_turn_actions.push(action);
+                    game.players[player_index]
+                        .played_once_per_turn_actions
+                        .push(action);
                 }
                 custom_action.execute(game, player_index);
             }
@@ -258,6 +305,24 @@ impl PlayingAction {
             Custom(custom_action) => custom_action.custom_action_type().action_type(),
             EndTurn => ActionType::free(ResourcePile::empty()),
             _ => ActionType::default(),
+        }
+    }
+
+    #[must_use]
+    pub fn playing_action_type(&self) -> PlayingActionType {
+        match self {
+            PlayingAction::Advance { .. } => PlayingActionType::Advance,
+            PlayingAction::FoundCity { .. } => PlayingActionType::FoundCity,
+            PlayingAction::Construct { .. } => PlayingActionType::Construct,
+            PlayingAction::Collect { .. } => PlayingActionType::Collect,
+            PlayingAction::Recruit { .. } => PlayingActionType::Recruit,
+            PlayingAction::MoveUnits => PlayingActionType::MoveUnits,
+            PlayingAction::IncreaseHappiness { .. } => PlayingActionType::IncreaseHappiness,
+            PlayingAction::InfluenceCultureAttempt { .. } => {
+                PlayingActionType::InfluenceCultureAttempt
+            }
+            PlayingAction::Custom(_) => PlayingActionType::Custom,
+            PlayingAction::EndTurn => PlayingActionType::EndTurn,
         }
     }
 

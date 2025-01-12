@@ -465,3 +465,16 @@ fn format_combat_action_log_item(action: &CombatAction, game: &Game) -> String {
         ),
     }
 }
+
+#[must_use]
+pub fn current_turn_log(game: &Game) -> Vec<ActionLogItem> {
+    let from = game.action_log[0..game.action_log_index]
+        .iter()
+        .rposition(|action| matches!(action, ActionLogItem::Playing(PlayingAction::EndTurn)))
+        .unwrap_or(0);
+    game.action_log[from..game.action_log_index]
+        .iter()
+        .filter(|action| !matches!(action, ActionLogItem::StatusPhase(_)))
+        .cloned()
+        .collect()
+}

@@ -17,6 +17,7 @@ use server::city::{City, MoodState};
 use server::city_pieces::Building;
 use server::content::custom_actions::CustomActionType;
 use server::game::Game;
+use server::playing_actions::PlayingActionType;
 use server::unit::{UnitType, Units};
 use std::ops::Add;
 
@@ -68,7 +69,8 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
 }
 
 fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> {
-    if !rc.can_play_action() {
+    if !rc.can_play_action(PlayingActionType::Construct) {
+        // is this the right thing to check?
         return vec![];
     }
     let owner = rc.shown_player;
@@ -99,14 +101,14 @@ fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> 
 }
 
 fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> {
-    if !rc.can_play_action() {
+    if !rc.can_play_action(PlayingActionType::Construct) {
         return vec![];
     }
     let owner = rc.shown_player;
     building_names()
         .iter()
         .filter_map(|(b, _)| {
-            if rc.can_play_action() && city.can_construct(*b, owner) {
+            if city.can_construct(*b, owner) {
                 Some(*b)
             } else {
                 None
@@ -141,7 +143,7 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
 }
 
 fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
-    if !rc.can_play_action() {
+    if !rc.can_play_action(PlayingActionType::Recruit) {
         return None;
     }
     Some((
@@ -161,7 +163,11 @@ fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconActio
 }
 
 fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
-    if !base_or_custom_available(rc, &CustomActionType::FreeEconomyCollect) {
+    if !base_or_custom_available(
+        rc,
+        PlayingActionType::Collect,
+        &CustomActionType::FreeEconomyCollect,
+    ) {
         return None;
     }
     Some((
@@ -170,6 +176,7 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
         Box::new(|| {
             base_or_custom_action(
                 rc,
+                PlayingActionType::Collect,
                 "Collect resources",
                 &[("Free Economy", CustomActionType::FreeEconomyCollect)],
                 |custom| {

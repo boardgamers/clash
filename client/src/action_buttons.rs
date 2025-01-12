@@ -7,7 +7,7 @@ use crate::resource_ui::ResourceType;
 use server::action::Action;
 use server::content::advances::get_advance_by_name;
 use server::content::custom_actions::{CustomAction, CustomActionType};
-use server::playing_actions::PlayingAction;
+use server::playing_actions::{PlayingAction, PlayingActionType};
 
 pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     let assets = rc.assets();
@@ -23,23 +23,32 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
         return open_increase_happiness_dialog(rc, |h| h);
     }
 
-    if rc.can_play_action() {
-        if bottom_left_texture(rc, &assets.move_units, icon_pos(0, -3), "Move units") {
-            return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
-        }
-        if bottom_left_texture(rc, &assets.advances, icon_pos(1, -3), "Research advances") {
-            return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
-        }
-        if bottom_left_texture(
+    if rc.can_play_action(PlayingActionType::MoveUnits)
+        && bottom_left_texture(rc, &assets.move_units, icon_pos(0, -3), "Move units")
+    {
+        return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
+    }
+
+    if rc.can_play_action(PlayingActionType::Advance)
+        && bottom_left_texture(rc, &assets.advances, icon_pos(1, -3), "Research advances")
+    {
+        return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
+    }
+    if rc.can_play_action(PlayingActionType::InfluenceCultureAttempt)
+        && bottom_left_texture(
             rc,
             &assets.resources[&ResourceType::CultureTokens],
             icon_pos(1, -2),
             "Cultural Influence",
-        ) {
-            return StateUpdate::OpenDialog(ActiveDialog::CulturalInfluence);
-        }
+        )
+    {
+        return StateUpdate::OpenDialog(ActiveDialog::CulturalInfluence);
     }
-    for (i, a) in game.get_available_custom_actions().iter().enumerate() {
+    for (i, a) in game
+        .get_available_custom_actions(rc.shown_player.index)
+        .iter()
+        .enumerate()
+    {
         if let Some(action) = generic_custom_action(a) {
             if bottom_left_texture(
                 rc,
@@ -79,17 +88,26 @@ fn generic_custom_action(custom_action_type: &CustomActionType) -> Option<Custom
     }
 }
 
-pub fn base_or_custom_available(rc: &RenderContext, custom: &CustomActionType) -> bool {
-    rc.can_play_action() || rc.game.get_available_custom_actions().contains(custom)
+pub fn base_or_custom_available(
+    rc: &RenderContext,
+    action: PlayingActionType,
+    custom: &CustomActionType,
+) -> bool {
+    rc.can_play_action(action)
+        || rc
+            .game
+            .get_available_custom_actions(rc.shown_player.index)
+            .contains(custom)
 }
 
 pub fn base_or_custom_action(
     rc: &RenderContext,
+    action: PlayingActionType,
     title: &str,
     custom: &[(&str, CustomActionType)],
     f: impl Fn(BaseOrCustomDialog) -> ActiveDialog,
 ) -> StateUpdate {
-    let base = if rc.can_play_action() {
+    let base = if rc.can_play_action(action) {
         Some(f(BaseOrCustomDialog {
             custom: BaseOrCustomAction::Base,
             title: title.to_string(),
@@ -100,7 +118,7 @@ pub fn base_or_custom_action(
 
     let special = rc
         .game
-        .get_available_custom_actions()
+        .get_available_custom_actions(rc.shown_player.index)
         .iter()
         .find(|a| custom.iter().any(|(_, b)| **a == *b))
         .map(|a| {

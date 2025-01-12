@@ -103,7 +103,7 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
         let action = match collect.custom.custom {
             BaseOrCustomAction::Base => PlayingAction::Collect(c),
             BaseOrCustomAction::Custom { .. } => {
-                PlayingAction::Custom(CustomAction::FreeEconomyProduction(c))
+                PlayingAction::Custom(CustomAction::FreeEconomyCollect(c))
             }
         };
         return StateUpdate::execute_activation(

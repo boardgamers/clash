@@ -44,7 +44,6 @@ pub struct Game {
     pub action_log_index: usize,
     pub log: Vec<String>,
     pub undo_limit: usize,
-    pub played_once_per_turn_actions: Vec<CustomActionType>,
     pub actions_left: u32,
     pub successful_cultural_influence: bool,
     pub round: u32, // starts with 1
@@ -124,7 +123,6 @@ impl Game {
                 String::from("Round 1/3"),
             ],
             undo_limit: 0,
-            played_once_per_turn_actions: Vec::new(),
             actions_left: 3,
             successful_cultural_influence: false,
             round: 1,
@@ -158,7 +156,6 @@ impl Game {
             action_log_index: data.action_log_index,
             log: data.log,
             undo_limit: data.undo_limit,
-            played_once_per_turn_actions: data.played_once_per_turn_actions,
             round: data.round,
             age: data.age,
             messages: data.messages,
@@ -194,7 +191,6 @@ impl Game {
             action_log_index: self.action_log_index,
             log: self.log,
             undo_limit: self.undo_limit,
-            played_once_per_turn_actions: self.played_once_per_turn_actions,
             actions_left: self.actions_left,
             successful_cultural_influence: self.successful_cultural_influence,
             round: self.round,
@@ -225,7 +221,6 @@ impl Game {
             action_log_index: self.action_log_index,
             log: self.log.clone(),
             undo_limit: self.undo_limit,
-            played_once_per_turn_actions: self.played_once_per_turn_actions.clone(),
             actions_left: self.actions_left,
             successful_cultural_influence: self.successful_cultural_influence,
             round: self.round,
@@ -731,7 +726,6 @@ impl Game {
     pub fn next_turn(&mut self) {
         self.actions_left = 3;
         self.successful_cultural_influence = false;
-        self.played_once_per_turn_actions = Vec::new();
         self.players[self.current_player_index].end_turn();
         self.next_player();
         self.skip_dropped_players();
@@ -824,14 +818,30 @@ impl Game {
     }
 
     #[must_use]
-    pub fn get_available_custom_actions(&self) -> Vec<CustomActionType> {
+    pub fn get_available_custom_actions(&self, player_index: usize) -> Vec<CustomActionType> {
         let custom_actions = &self.players[self.current_player_index].custom_actions;
         custom_actions
             .iter()
-            .filter(|&action| !self.played_once_per_turn_actions.contains(action))
+            .filter(|&action| {
+                !self
+                    .get_player(player_index)
+                    .played_once_per_turn_actions
+                    .contains(action)
+                    && action.is_available(self, player_index)
+            })
             .cloned()
             .collect()
     }
+
+    // #[must_use]
+    // pub fn get_available_playing_actions(&self, player_index: usize) -> Vec<PlayingActionType> {
+    //     playable_base_actions.iter().filter(|action| action.is_available(self, player_index)).cloned().collect()
+    // }
+    //
+    // #[must_use]
+    // pub fn is_playing_action_available(&self, player_index: usize, action: PlayingActionType) -> Vec<PlayingActionType> {
+    //     playable_base_actions.iter().filter(|action| action.is_available(self, player_index)).cloned().collect()
+    // }
 
     pub fn draw_wonder_card(&mut self, player_index: usize) {
         let Some(wonder) = self.wonders_left.pop() else {
@@ -1454,7 +1464,6 @@ pub struct GameData {
     action_log_index: usize,
     log: Vec<String>,
     undo_limit: usize,
-    played_once_per_turn_actions: Vec<CustomActionType>,
     actions_left: u32,
     successful_cultural_influence: bool,
     round: u32,
@@ -1571,7 +1580,6 @@ pub mod tests {
                 String::from("Round 1/3"),
             ],
             undo_limit: 0,
-            played_once_per_turn_actions: Vec::new(),
             actions_left: 3,
             successful_cultural_influence: false,
             round: 1,

@@ -1,4 +1,5 @@
 use super::custom_actions::CustomActionType::*;
+use crate::playing_actions::PlayingActionType;
 use crate::{
     ability_initializer::AbilityInitializerSetup,
     advance::{Advance, Bonus::*},
@@ -190,6 +191,15 @@ fn democracy() -> Vec<Advance> {
         Advance::builder("Free Economy", "As a free action, you may spend 1 mood token to collect resources in one city. This must be your only collect action this turn")
             .with_required_advance("Voting")
             .add_custom_action(FreeEconomyCollect)
+            .add_player_event_listener(
+                |event| &mut event.is_playing_action_available,
+                |available, action_type, player| {
+                    if matches!(action_type, PlayingActionType::Collect) && player.played_once_per_turn_actions.contains(&FreeEconomyCollect) {
+                        *available = false;
+                    }
+                },
+                0,
+            )
             .build(),
     ]
 }

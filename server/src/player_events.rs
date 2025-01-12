@@ -1,3 +1,4 @@
+use crate::playing_actions::PlayingActionType;
 use crate::{
     city::City, city_pieces::Building, events::EventMut, player::Player, position::Position,
     resource_pile::ResourcePile, wonder::Wonder,
@@ -14,6 +15,7 @@ pub struct PlayerEvents {
     pub on_advance: EventMut<Player, String, ()>,
     pub on_undo_advance: EventMut<Player, String, ()>,
     pub advance_cost: EventMut<u32, String>,
+    pub is_playing_action_available: EventMut<bool, PlayingActionType, Player>,
 }
 
 impl PlayerEvents {
