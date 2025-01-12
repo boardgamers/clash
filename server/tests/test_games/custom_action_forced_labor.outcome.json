@@ -231,7 +231,10 @@
           ]
         ]
       ],
-      "next_unit_id": 7
+      "next_unit_id": 7,
+      "played_once_per_turn_actions": [
+        "ForcedLabor"
+      ]
     },
     {
       "name": null,
@@ -559,9 +562,6 @@
     "Player1 paid 2 mood tokens to get an extra action using Forced Labor"
   ],
   "undo_limit": 9,
-  "played_once_per_turn_actions": [
-    "ForcedLabor"
-  ],
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,

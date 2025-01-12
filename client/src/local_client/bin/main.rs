@@ -10,6 +10,7 @@ use server::map::Terrain;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::UnitType;
+use std::env;
 use std::fs::File;
 use std::io::BufReader;
 
@@ -22,7 +23,8 @@ async fn main() {
         assets_url: "assets/".to_string(),
     };
 
-    let game = if false {
+    let args: Vec<String> = env::args().collect();
+    let game = if args.len() > 1 && args[1] == "generate" {
         Game::new(2, "a".repeat(32), true)
     } else {
         setup_local_game()
@@ -189,7 +191,7 @@ pub fn setup_local_game() -> Game {
         .market = Some(1);
 
     game.advance("Voting", player_index1);
-    game.advance("Democracy 2", player_index1);
+    game.advance("Free Economy", player_index1);
     game
 }
 

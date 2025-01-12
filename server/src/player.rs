@@ -63,6 +63,7 @@ pub struct Player {
     pub available_units: Units,
     pub collect_options: HashMap<Terrain, Vec<ResourcePile>>,
     pub next_unit_id: u32,
+    pub played_once_per_turn_actions: Vec<CustomActionType>,
 }
 
 impl Clone for Player {
@@ -124,7 +125,7 @@ impl Player {
         game.players.push(player);
         let advances = mem::take(&mut game.players[player_index].advances);
         for advance in &advances {
-            let advance = advances::get_advance_by_name(advance).expect("advance should exist");
+            let advance = advances::get_advance_by_name(advance);
             (advance.player_initializer)(game, player_index);
             for i in 0..game.players[player_index]
                 .civilization
@@ -208,6 +209,7 @@ impl Player {
             available_units: data.available_units,
             collect_options: data.collect_options.into_iter().collect(),
             next_unit_id: data.next_unit_id,
+            played_once_per_turn_actions: data.played_once_per_turn_actions,
         };
         player
     }
@@ -256,6 +258,7 @@ impl Player {
                 .sorted_by_key(|(terrain, _)| terrain.clone())
                 .collect(),
             next_unit_id: self.next_unit_id,
+            played_once_per_turn_actions: self.played_once_per_turn_actions,
         }
     }
 
@@ -307,6 +310,7 @@ impl Player {
                 .sorted_by_key(|(terrain, _)| terrain.clone())
                 .collect(),
             next_unit_id: self.next_unit_id,
+            played_once_per_turn_actions: self.played_once_per_turn_actions.clone(),
         }
     }
 
@@ -344,6 +348,7 @@ impl Player {
                 (Forest, vec![ResourcePile::wood(1)]),
             ]),
             next_unit_id: 0,
+            played_once_per_turn_actions: Vec::new(),
         }
     }
 
@@ -354,6 +359,7 @@ impl Player {
         for unit in &mut self.units {
             unit.reset_movement_restriction();
         }
+        self.played_once_per_turn_actions.clear();
     }
 
     pub fn set_name(&mut self, name: String) {
@@ -374,11 +380,9 @@ impl Player {
     /// Panics if the player has advances which don't exist
     #[must_use]
     pub fn government(&self) -> Option<String> {
-        self.advances.iter().find_map(|advance| {
-            advances::get_advance_by_name(advance)
-                .expect("all player owned advances should exist")
-                .government
-        })
+        self.advances
+            .iter()
+            .find_map(|advance| advances::get_advance_by_name(advance).government)
     }
 
     pub fn gain_resources(&mut self, resources: ResourcePile) {
@@ -856,7 +860,7 @@ impl Player {
             .collect()
     }
 
-    fn get_events(&self) -> &PlayerEvents {
+    pub(crate) fn get_events(&self) -> &PlayerEvents {
         self.events.as_ref().expect("events should be set")
     }
 
@@ -902,4 +906,7 @@ pub struct PlayerData {
     available_units: Units,
     collect_options: Vec<(Terrain, Vec<ResourcePile>)>,
     next_unit_id: u32,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    played_once_per_turn_actions: Vec<CustomActionType>,
 }

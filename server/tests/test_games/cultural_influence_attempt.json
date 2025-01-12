@@ -397,7 +397,6 @@
     "It's Player2's turn"
   ],
   "undo_limit": 3,
-  "played_once_per_turn_actions": [],
   "actions_left": 3,
   "successful_cultural_influence": false,
   "round": 1,

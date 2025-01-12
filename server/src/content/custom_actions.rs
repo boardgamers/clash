@@ -1,9 +1,14 @@
 use serde::{Deserialize, Serialize};
 
 use crate::content::wonders::construct_wonder;
-use crate::log::format_happiness_increase;
+use crate::log::{
+    current_turn_log, format_collect_log_item, format_happiness_increase, ActionLogItem,
+};
 use crate::player::Player;
-use crate::playing_actions::{increase_happiness, undo_increase_happiness, IncreaseHappiness};
+use crate::playing_actions::{
+    collect, increase_happiness, undo_collect, undo_increase_happiness, Collect, IncreaseHappiness,
+    PlayingAction,
+};
 use crate::{
     game::Game, playing_actions::ActionType, position::Position, resource_pile::ResourcePile,
 };
@@ -17,6 +22,7 @@ pub enum CustomAction {
     },
     ForcedLabor,
     VotingIncreaseHappiness(IncreaseHappiness),
+    FreeEconomyCollect(Collect),
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash)]
@@ -24,6 +30,7 @@ pub enum CustomActionType {
     ConstructWonder,
     ForcedLabor,
     VotingIncreaseHappiness,
+    FreeEconomyCollect,
 }
 
 impl CustomAction {
@@ -45,6 +52,9 @@ impl CustomAction {
             CustomAction::VotingIncreaseHappiness(i) => {
                 increase_happiness(game, player_index, i);
             }
+            CustomAction::FreeEconomyCollect(c) => {
+                collect(game, player_index, &c);
+            }
         }
     }
 
@@ -54,13 +64,16 @@ impl CustomAction {
             CustomAction::ConstructWonder { .. } => CustomActionType::ConstructWonder,
             CustomAction::ForcedLabor => CustomActionType::ForcedLabor,
             CustomAction::VotingIncreaseHappiness(_) => CustomActionType::VotingIncreaseHappiness,
+            CustomAction::FreeEconomyCollect(_) => CustomActionType::FreeEconomyCollect,
         }
     }
 
     pub fn undo(self, game: &mut Game, player_index: usize) {
         let action = self.custom_action_type();
         if action.action_type().once_per_turn {
-            game.played_once_per_turn_actions.retain(|a| a != &action);
+            game.players[player_index]
+                .played_once_per_turn_actions
+                .retain(|a| a != &action);
         }
         match self {
             CustomAction::ConstructWonder {
@@ -76,6 +89,7 @@ impl CustomAction {
             CustomAction::VotingIncreaseHappiness(i) => {
                 undo_increase_happiness(game, player_index, i);
             }
+            CustomAction::FreeEconomyCollect(c) => undo_collect(game, player_index, c),
         }
     }
 
@@ -88,6 +102,10 @@ impl CustomAction {
                 player,
                 player_name,i
             )),
+            CustomAction::FreeEconomyCollect(c) => format!("{} using Free Economy", format_collect_log_item(
+                            player,
+                            player_name,c
+                        )),
         }
     }
 }
@@ -103,6 +121,19 @@ impl CustomActionType {
             CustomActionType::VotingIncreaseHappiness => {
                 ActionType::free(ResourcePile::mood_tokens(1))
             }
+            CustomActionType::FreeEconomyCollect => {
+                ActionType::free_and_once_per_turn(ResourcePile::mood_tokens(1))
+            }
+        }
+    }
+
+    #[must_use]
+    pub fn is_available(&self, game: &Game, _player_index: usize) -> bool {
+        match self {
+            CustomActionType::FreeEconomyCollect => !current_turn_log(game)
+                .iter()
+                .any(|action| matches!(action, ActionLogItem::Playing(PlayingAction::Collect(_)))),
+            _ => true,
         }
     }
 }

@@ -1,71 +1,60 @@
+use crate::action_buttons::{base_or_custom_action, base_or_custom_available};
+use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::dialog_ui::{
+    cancel_button, ok_button, BaseOrCustomAction, BaseOrCustomDialog, OkTooltip,
+};
+use crate::render_context::RenderContext;
+use crate::resource_ui::{show_resource_pile, ResourceType};
 use server::action::Action;
 use server::city::City;
 use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::player::Player;
-use server::playing_actions::{IncreaseHappiness, PlayingAction};
+use server::playing_actions::{IncreaseHappiness, PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 
-use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
-use crate::render_context::RenderContext;
-use crate::resource_ui::{show_resource_pile, ResourceType};
-
 #[derive(Clone)]
 pub struct IncreaseHappinessConfig {
-    pub title: String,
     pub steps: Vec<(Position, u32)>,
     pub cost: ResourcePile,
-    pub special_action: bool,
+    pub custom: BaseOrCustomDialog,
 }
 
 impl IncreaseHappinessConfig {
-    pub fn new(p: &Player, title: &str, special_action: bool) -> IncreaseHappinessConfig {
+    pub fn new(p: &Player, custom: BaseOrCustomDialog) -> IncreaseHappinessConfig {
         let steps = p.cities.iter().map(|c| (c.position, 0)).collect();
         IncreaseHappinessConfig {
-            title: title.to_string(),
             steps,
             cost: ResourcePile::empty(),
-            special_action,
+            custom,
         }
     }
 }
 
 pub fn can_play_increase_happiness(rc: &RenderContext) -> bool {
-    rc.can_play_action()
-        || rc
-            .game
-            .get_available_custom_actions()
-            .contains(&CustomActionType::VotingIncreaseHappiness)
+    base_or_custom_available(
+        rc,
+        PlayingActionType::IncreaseHappiness,
+        &CustomActionType::VotingIncreaseHappiness,
+    )
 }
 
 pub fn open_increase_happiness_dialog(
     rc: &RenderContext,
     init: impl Fn(IncreaseHappinessConfig) -> IncreaseHappinessConfig,
 ) -> StateUpdate {
-    let p = rc.shown_player;
-    let base = if rc.can_play_action() {
-        Some(ActiveDialog::IncreaseHappiness(init(
-            IncreaseHappinessConfig::new(p, "Increase happiness", false),
-        )))
-    } else {
-        None
-    };
-
-    let special = rc
-        .game
-        .get_available_custom_actions()
-        .iter()
-        .find(|a| **a == CustomActionType::VotingIncreaseHappiness)
-        .map(|_| {
+    base_or_custom_action(
+        rc,
+        PlayingActionType::IncreaseHappiness,
+        "Increase happiness",
+        &[("Voting", CustomActionType::VotingIncreaseHappiness)],
+        |custom| {
             ActiveDialog::IncreaseHappiness(init(IncreaseHappinessConfig::new(
-                p,
-                "Increase happiness with voting",
-                true,
+                rc.shown_player,
+                custom,
             )))
-        });
-    let title = "Use special action from voting?";
-    StateUpdate::dialog_chooser(title, special, base)
+        },
+    )
 }
 
 pub fn increase_happiness_click(
@@ -105,8 +94,7 @@ pub fn add_increase_happiness(
     IncreaseHappinessConfig {
         steps: new_steps,
         cost: total_cost,
-        special_action: increase_happiness.special_action,
-        title: increase_happiness.title.clone(),
+        custom: increase_happiness.custom.clone(),
     }
 }
 
@@ -152,14 +140,14 @@ pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) 
         OkTooltip::Invalid("Not enough resources".to_string())
     };
     if ok_button(rc, tooltip) {
-        let action = if h.special_action {
-            PlayingAction::Custom(CustomAction::VotingIncreaseHappiness(IncreaseHappiness {
-                happiness_increases: h.steps.clone(),
-            }))
-        } else {
-            PlayingAction::IncreaseHappiness(IncreaseHappiness {
-                happiness_increases: h.steps.clone(),
-            })
+        let i = IncreaseHappiness {
+            happiness_increases: h.steps.clone(),
+        };
+        let action = match &h.custom.custom {
+            BaseOrCustomAction::Base => PlayingAction::IncreaseHappiness(i),
+            BaseOrCustomAction::Custom { .. } => {
+                PlayingAction::Custom(CustomAction::VotingIncreaseHappiness(i))
+            }
         };
         return StateUpdate::Execute(Action::Playing(action));
     }

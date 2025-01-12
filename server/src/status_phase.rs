@@ -63,9 +63,8 @@ impl StatusPhaseAction {
             }
             StatusPhaseAction::FreeAdvance(ref advance) => {
                 assert!(
-                    game.players[player_index].can_advance_free(
-                        &advances::get_advance_by_name(advance).expect("advance should exist")
-                    ),
+                    game.players[player_index]
+                        .can_advance_free(&advances::get_advance_by_name(advance)),
                     "Illegal action"
                 );
                 game.advance(advance, player_index);
@@ -133,7 +132,9 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
         let (pos, advance) = new_government_advances
             .iter()
             .find_position(|a| a.name == *advance)
-            .expect("advance should exist");
+            .unwrap_or_else(|| {
+                panic!("Advance with name {advance} not found in government advances");
+            });
         assert!(
             pos > 0,
             "Additional advances should not include the leading government advance"

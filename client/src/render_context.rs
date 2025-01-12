@@ -5,6 +5,7 @@ use macroquad::math::{bool, Vec2};
 use macroquad::prelude::set_camera;
 use server::game::{Game, GameState};
 use server::player::Player;
+use server::playing_actions::PlayingActionType;
 
 pub struct RenderContext<'a> {
     pub game: &'a Game,
@@ -58,8 +59,11 @@ impl RenderContext<'_> {
         }
     }
 
-    pub fn can_play_action(&self) -> bool {
-        self.can_control() && self.game.state == GameState::Playing && self.game.actions_left > 0
+    pub fn can_play_action(&self, action: PlayingActionType) -> bool {
+        self.can_control()
+            && self.game.state == GameState::Playing
+            && self.game.actions_left > 0
+            && action.is_available(self.game, self.shown_player.index)
     }
 
     pub fn can_control(&self) -> bool {

@@ -6,6 +6,7 @@ use PlayingAction::*;
 
 use crate::content::advances;
 use crate::game::{CulturalInfluenceResolution, GameState};
+use crate::log::ActionLogItem;
 use crate::{
     city::City,
     city_pieces::Building::{self, *},
@@ -26,6 +27,12 @@ pub struct Construct {
     pub payment: ResourcePile,
     pub port_position: Option<Position>,
     pub temple_bonus: Option<ResourcePile>,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
+pub struct Collect {
+    pub city_position: Position,
+    pub collections: Vec<(Position, ResourcePile)>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
@@ -50,6 +57,43 @@ pub struct IncreaseHappiness {
     pub happiness_increases: Vec<(Position, u32)>,
 }
 
+#[derive(Clone, Copy)]
+pub enum PlayingActionType {
+    Advance,
+    FoundCity,
+    Construct,
+    Collect,
+    Recruit,
+    MoveUnits,
+    IncreaseHappiness,
+    InfluenceCultureAttempt,
+    Custom,
+    EndTurn,
+}
+
+// pub const playable_base_actions: [PlayingActionType; 8] = [
+//     PlayingActionType::Advance,
+//     PlayingActionType::FoundCity,
+//     PlayingActionType::Construct,
+//     PlayingActionType::Collect,
+//     PlayingActionType::Recruit,
+//     PlayingActionType::MoveUnits,
+//     PlayingActionType::IncreaseHappiness,
+//     PlayingActionType::InfluenceCultureAttempt,
+// ];
+
+impl PlayingActionType {
+    #[must_use]
+    pub fn is_available(&self, game: &Game, player_index: usize) -> bool {
+        let mut possible = true;
+        let p = &game.players[player_index];
+        p.get_events()
+            .is_playing_action_available
+            .trigger(&mut possible, self, p);
+        possible
+    }
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub enum PlayingAction {
     Advance {
@@ -60,10 +104,7 @@ pub enum PlayingAction {
         settler: u32,
     },
     Construct(Construct),
-    Collect {
-        city_position: Position,
-        collections: Vec<(Position, ResourcePile)>,
-    },
+    Collect(Collect),
     Recruit(Recruit),
     MoveUnits,
     IncreaseHappiness(IncreaseHappiness),
@@ -79,6 +120,10 @@ impl PlayingAction {
     ///
     /// Panics if action is illegal
     pub fn execute(self, game: &mut Game, player_index: usize) {
+        assert!(
+            self.playing_action_type().is_available(game, player_index),
+            "Illegal action"
+        );
         if !self.action_type().free {
             assert_ne!(game.actions_left, 0, "Illegal action");
             game.actions_left -= 1;
@@ -90,9 +135,8 @@ impl PlayingAction {
                 let player = &mut game.players[player_index];
                 let cost = player.advance_cost(&advance);
                 assert!(
-                    player.can_advance(
-                        &advances::get_advance_by_name(&advance).expect("advance should exist")
-                    ) && payment.food + payment.ideas + payment.gold as u32 == cost,
+                    player.can_advance(&advances::get_advance_by_name(&advance))
+                        && payment.food + payment.ideas + payment.gold as u32 == cost,
                     "Illegal action"
                 );
                 player.loose_resources(payment);
@@ -142,19 +186,18 @@ impl PlayingAction {
                 player.loose_resources(c.payment);
                 player.construct(c.city_piece, c.city_position, c.port_position);
             }
-            Collect {
-                city_position,
-                collections,
-            } => {
-                let total_collect =
-                    get_total_collection(game, player_index, city_position, &collections)
-                        .expect("Illegal action");
-                let city = game.players[player_index]
-                    .get_city_mut(city_position)
-                    .expect("Illegal action");
-                assert!(city.can_activate(), "Illegal action");
-                city.activate();
-                game.players[player_index].gain_resources(total_collect);
+            Collect(c) => {
+                if game.action_log.iter().any(|a| {
+                    matches!(
+                        a,
+                        ActionLogItem::Playing(PlayingAction::Custom(
+                            CustomAction::FreeEconomyCollect(_)
+                        ))
+                    )
+                }) {
+                    assert!(game.state == GameState::Playing, "Illegal action");
+                }
+                collect(game, player_index, &c);
             }
             Recruit(r) => {
                 let cost = r.units.iter().map(UnitType::cost).sum::<ResourcePile>();
@@ -237,11 +280,17 @@ impl PlayingAction {
             Custom(custom_action) => {
                 let action = custom_action.custom_action_type();
                 assert!(
-                    !game.played_once_per_turn_actions.contains(&action),
-                    "Illegal action"
+                    !game
+                        .get_player(player_index)
+                        .played_once_per_turn_actions
+                        .contains(&action),
+                    "Already played once per turn"
                 );
+                assert!(action.is_available(game, player_index), "Not available");
                 if action.action_type().once_per_turn {
-                    game.played_once_per_turn_actions.push(action);
+                    game.players[player_index]
+                        .played_once_per_turn_actions
+                        .push(action);
                 }
                 custom_action.execute(game, player_index);
             }
@@ -255,6 +304,24 @@ impl PlayingAction {
             Custom(custom_action) => custom_action.custom_action_type().action_type(),
             EndTurn => ActionType::free(ResourcePile::empty()),
             _ => ActionType::default(),
+        }
+    }
+
+    #[must_use]
+    pub fn playing_action_type(&self) -> PlayingActionType {
+        match self {
+            PlayingAction::Advance { .. } => PlayingActionType::Advance,
+            PlayingAction::FoundCity { .. } => PlayingActionType::FoundCity,
+            PlayingAction::Construct { .. } => PlayingActionType::Construct,
+            PlayingAction::Collect { .. } => PlayingActionType::Collect,
+            PlayingAction::Recruit { .. } => PlayingActionType::Recruit,
+            PlayingAction::MoveUnits => PlayingActionType::MoveUnits,
+            PlayingAction::IncreaseHappiness { .. } => PlayingActionType::IncreaseHappiness,
+            PlayingAction::InfluenceCultureAttempt { .. } => {
+                PlayingActionType::InfluenceCultureAttempt
+            }
+            PlayingAction::Custom(_) => PlayingActionType::Custom,
+            PlayingAction::EndTurn => PlayingActionType::EndTurn,
         }
     }
 
@@ -301,25 +368,13 @@ impl PlayingAction {
                     );
                 }
             }
-            Collect {
-                city_position,
-                collections,
-            } => {
-                game.players[player_index]
-                    .get_city_mut(city_position)
-                    .expect("city should be owned by the player")
-                    .undo_activate();
-                let total_collect = collections.into_iter().map(|(_, collect)| collect).sum();
-                game.players[player_index].loose_resources(total_collect);
-            }
+            Collect(c) => undo_collect(game, player_index, c),
             Recruit(r) => {
                 game.players[player_index].gain_resources(r.payment);
                 game.undo_recruit(player_index, &r.units, r.city_position, r.leader_index);
             }
             MoveUnits => game.state = GameState::Playing,
-            IncreaseHappiness(i) => {
-                undo_increase_happiness(game, player_index, i);
-            }
+            IncreaseHappiness(i) => undo_increase_happiness(game, player_index, i),
             Custom(custom_action) => custom_action.undo(game, player_index),
             InfluenceCultureAttempt(_) | EndTurn => panic!("Action can't be undone"),
         }
@@ -419,6 +474,26 @@ fn add_collect_terrain(
         }
         *terrain_left += 1;
     }
+}
+
+pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) {
+    let total_collect = get_total_collection(game, player_index, c.city_position, &c.collections)
+        .expect("Illegal action");
+    let city = game.players[player_index]
+        .get_city_mut(c.city_position)
+        .expect("Illegal action");
+    assert!(city.can_activate(), "Illegal action");
+    city.activate();
+    game.players[player_index].gain_resources(total_collect);
+}
+
+pub(crate) fn undo_collect(game: &mut Game, player_index: usize, c: Collect) {
+    game.players[player_index]
+        .get_city_mut(c.city_position)
+        .expect("city should be owned by the player")
+        .undo_activate();
+    let total_collect = c.collections.into_iter().map(|(_, collect)| collect).sum();
+    game.players[player_index].loose_resources(total_collect);
 }
 
 pub(crate) fn increase_happiness(game: &mut Game, player_index: usize, i: IncreaseHappiness) {

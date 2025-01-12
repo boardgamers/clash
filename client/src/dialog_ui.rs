@@ -1,10 +1,26 @@
 use crate::client_state::{PendingUpdate, StateUpdate};
 use crate::layout_ui::{bottom_centered_text, bottom_right_texture, icon_pos};
 use crate::render_context::RenderContext;
+use server::content::custom_actions::CustomActionType;
 
 pub enum OkTooltip {
     Valid(String),
     Invalid(String),
+}
+
+#[derive(Clone)]
+pub enum BaseOrCustomAction {
+    Base,
+    Custom {
+        custom: CustomActionType,
+        advance: String,
+    },
+}
+
+#[derive(Clone)]
+pub struct BaseOrCustomDialog {
+    pub title: String,
+    pub custom: BaseOrCustomAction,
 }
 
 pub fn show_pending_update(update: &PendingUpdate, rc: &RenderContext) -> StateUpdate {

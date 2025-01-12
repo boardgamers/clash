@@ -433,7 +433,6 @@
     "\tPlayer2 killed all attacking units"
   ],
   "undo_limit": 4,
-  "played_once_per_turn_actions": [],
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,

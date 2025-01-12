@@ -94,7 +94,7 @@ impl ActiveDialog {
             | ActiveDialog::AdvanceMenu => vec![],
             ActiveDialog::IncreaseHappiness(h) => {
                 vec![
-                    h.title.clone(),
+                    h.custom.title.clone(),
                     "Click on a city to increase happiness".to_string(),
                 ]
             }
@@ -257,11 +257,10 @@ impl StateUpdate {
         yes: Option<ActiveDialog>,
         no: Option<ActiveDialog>,
     ) -> StateUpdate {
-        let title = title.to_string();
         if let Some(yes) = yes {
             if let Some(no) = no {
                 StateUpdate::OpenDialog(ActiveDialog::DialogChooser(Box::new(DialogChooser {
-                    title,
+                    title: title.to_string(),
                     yes,
                     no,
                 })))

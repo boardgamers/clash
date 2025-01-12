@@ -458,7 +458,6 @@
     "Player1 retreated ending the battle in a draw"
   ],
   "undo_limit": 4,
-  "played_once_per_turn_actions": [],
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,

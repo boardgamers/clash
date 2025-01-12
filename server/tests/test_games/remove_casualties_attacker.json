@@ -452,7 +452,6 @@
     "\tPlayer1 has to remove 2 of his attacking units"
   ],
   "undo_limit": 3,
-  "played_once_per_turn_actions": [],
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,

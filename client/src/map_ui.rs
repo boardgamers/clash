@@ -6,7 +6,7 @@ use server::action::Action;
 use server::combat::Combat;
 use server::game::GameState;
 use server::map::Terrain;
-use server::playing_actions::PlayingAction;
+use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::unit::{MovementRestriction, Unit, UnitType};
 
@@ -157,7 +157,7 @@ pub fn show_tile_menu(rc: &RenderContext, pos: Position) -> StateUpdate {
 }
 
 fn found_city_button<'a>(rc: &'a RenderContext<'a>, pos: Position) -> Option<IconAction<'a>> {
-    if !rc.can_play_action() {
+    if !rc.can_play_action(PlayingActionType::FoundCity) {
         return None;
     }
     let game = rc.game;
@@ -191,7 +191,9 @@ fn found_city_button<'a>(rc: &'a RenderContext<'a>, pos: Position) -> Option<Ico
 }
 
 pub fn move_units_button<'a>(rc: &'a RenderContext, pos: Position) -> Option<IconAction<'a>> {
-    if !rc.can_play_action() || movable_units(pos, rc.game, rc.shown_player).is_empty() {
+    if !rc.can_play_action(PlayingActionType::MoveUnits)
+        || movable_units(pos, rc.game, rc.shown_player).is_empty()
+    {
         return None;
     }
     Some((

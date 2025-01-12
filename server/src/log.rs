@@ -5,7 +5,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::action::PlayActionCard;
 use crate::player::Player;
-use crate::playing_actions::{Construct, IncreaseHappiness, InfluenceCultureAttempt, Recruit};
+use crate::playing_actions::{
+    Collect, Construct, IncreaseHappiness, InfluenceCultureAttempt, Recruit,
+};
 use crate::status_phase::{ChangeGovernmentType, RazeSize1City};
 use crate::{
     action::{Action, CombatAction},
@@ -126,10 +128,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
                 .position
         ),
         PlayingAction::Construct(c) => format_construct_log_item(game, player, &player_name, c),
-        PlayingAction::Collect {
-            city_position,
-            collections,
-        } => format_collect_log_item(player, &player_name, *city_position, collections),
+        PlayingAction::Collect(c) => format_collect_log_item(player, &player_name, c),
         PlayingAction::Recruit(r) => format_recruit_log_item(player, &player_name, r),
         PlayingAction::MoveUnits => format!("{player_name} used a move units action"),
         PlayingAction::IncreaseHappiness(i) => format_happiness_increase(player, &player_name, i),
@@ -247,12 +246,8 @@ fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -
     )
 }
 
-fn format_collect_log_item(
-    player: &Player,
-    player_name: &String,
-    city_position: Position,
-    collections: &[(Position, ResourcePile)],
-) -> String {
+pub(crate) fn format_collect_log_item(player: &Player, player_name: &str, c: &Collect) -> String {
+    let collections = &c.collections;
     let res = utils::format_list(
         &collections
             .iter()
@@ -277,6 +272,7 @@ fn format_collect_log_item(
     } else {
         String::new()
     };
+    let city_position = c.city_position;
     let mood = format_mood_change(player, city_position);
     format!("{player_name} collects {res}{total} in the city at {city_position}{mood}")
 }
@@ -468,4 +464,17 @@ fn format_combat_action_log_item(action: &CombatAction, game: &Game) -> String {
             }
         ),
     }
+}
+
+#[must_use]
+pub fn current_turn_log(game: &Game) -> Vec<ActionLogItem> {
+    let from = game.action_log[0..game.action_log_index]
+        .iter()
+        .rposition(|action| matches!(action, ActionLogItem::Playing(PlayingAction::EndTurn)))
+        .unwrap_or(0);
+    game.action_log[from..game.action_log_index]
+        .iter()
+        .filter(|action| !matches!(action, ActionLogItem::StatusPhase(_)))
+        .cloned()
+        .collect()
 }

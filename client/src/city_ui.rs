@@ -1,3 +1,4 @@
+use crate::action_buttons::{base_or_custom_action, base_or_custom_available};
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::{possible_resource_collections, CollectResources};
 use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
@@ -14,7 +15,9 @@ use crate::{hex_ui, player_ui};
 use macroquad::prelude::*;
 use server::city::{City, MoodState};
 use server::city_pieces::Building;
+use server::content::custom_actions::CustomActionType;
 use server::game::Game;
+use server::playing_actions::PlayingActionType;
 use server::unit::{UnitType, Units};
 use std::ops::Add;
 
@@ -66,7 +69,8 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
 }
 
 fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> {
-    if !rc.can_play_action() {
+    if !rc.can_play_action(PlayingActionType::Construct) {
+        // is this the right thing to check?
         return vec![];
     }
     let owner = rc.shown_player;
@@ -97,14 +101,14 @@ fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> 
 }
 
 fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> {
-    if !rc.can_play_action() {
+    if !rc.can_play_action(PlayingActionType::Construct) {
         return vec![];
     }
     let owner = rc.shown_player;
     building_names()
         .iter()
         .filter_map(|(b, _)| {
-            if rc.can_play_action() && city.can_construct(*b, owner) {
+            if city.can_construct(*b, owner) {
                 Some(*b)
             } else {
                 None
@@ -139,7 +143,7 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
 }
 
 fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
-    if !rc.can_play_action() {
+    if !rc.can_play_action(PlayingActionType::Recruit) {
         return None;
     }
     Some((
@@ -159,19 +163,31 @@ fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconActio
 }
 
 fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
-    if !rc.can_play_action() {
+    if !base_or_custom_available(
+        rc,
+        PlayingActionType::Collect,
+        &CustomActionType::FreeEconomyCollect,
+    ) {
         return None;
     }
     Some((
         &rc.assets().resources[&ResourceType::Food],
         "Collect Resources".to_string(),
         Box::new(|| {
-            let pos = city.position;
-            StateUpdate::OpenDialog(ActiveDialog::CollectResources(CollectResources::new(
-                city.player_index,
-                pos,
-                possible_resource_collections(rc.game, pos, city.player_index),
-            )))
+            base_or_custom_action(
+                rc,
+                PlayingActionType::Collect,
+                "Collect resources",
+                &[("Free Economy", CustomActionType::FreeEconomyCollect)],
+                |custom| {
+                    ActiveDialog::CollectResources(CollectResources::new(
+                        city.player_index,
+                        city.position,
+                        possible_resource_collections(rc.game, city.position, city.player_index),
+                        custom,
+                    ))
+                },
+            )
         }),
     ))
 }
