@@ -17,7 +17,7 @@ use crate::happiness_ui::{increase_happiness_click, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
 use crate::layout_ui::{bottom_centered_text, icon_pos, top_right_texture};
 use crate::log_ui::show_log;
-use crate::map_ui::{draw_map, show_tile_menu};
+use crate::map_ui::{draw_map, explore_dialog, show_tile_menu};
 use crate::player_ui::{player_select, show_global_controls, show_top_center, show_top_left};
 use crate::render_context::RenderContext;
 use crate::status_phase_ui::raze_city_confirm_dialog;
@@ -144,6 +144,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::CulturalInfluenceResolution(r) => {
             influence_ui::cultural_influence_resolution_dialog(rc, r)
         }
+        ActiveDialog::ExploreResolution(r) => explore_dialog(rc, r),
 
         //status phase
         ActiveDialog::FreeAdvance => show_free_advance_menu(rc),

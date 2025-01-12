@@ -18,14 +18,10 @@ pub fn possible_destinations(
 ) -> Vec<Position> {
     let player = game.get_player(player_index);
 
-    let (moved_units, movement_actions_left) = if let Movement {
-        movement_actions_left,
-        moved_units,
-    } = &game.state
-    {
-        (moved_units, movement_actions_left)
+    let (moved_units, movement_actions_left) = if let Movement(m) = &game.state {
+        (&m.moved_units, m.movement_actions_left)
     } else {
-        (&vec![], &1)
+        (&vec![], 1)
     };
 
     start
@@ -39,7 +35,7 @@ pub fn possible_destinations(
                         units,
                         start,
                         *dest,
-                        *movement_actions_left,
+                        movement_actions_left,
                         moved_units,
                     )
                     .is_ok()

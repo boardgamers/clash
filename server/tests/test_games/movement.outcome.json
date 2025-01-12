@@ -525,9 +525,7 @@
       "Movement": {
         "starting_position": "B2",
         "movement_actions_left": 3,
-        "moved_units": [
-          4
-        ]
+        "moved_units": []
       }
     }
   ]

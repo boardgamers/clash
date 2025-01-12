@@ -15,6 +15,7 @@ use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
+use crate::map_ui::ExploreResolutionConfig;
 use crate::move_ui::MoveSelection;
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use crate::render_context::RenderContext;
@@ -38,6 +39,7 @@ pub enum ActiveDialog {
     MoveUnits(MoveSelection),
     CulturalInfluence,
     CulturalInfluenceResolution(CulturalInfluenceResolution),
+    ExploreResolution(ExploreResolutionConfig),
 
     // status phase
     FreeAdvance,
@@ -72,6 +74,7 @@ impl ActiveDialog {
             ActiveDialog::MoveUnits(_) => "move units",
             ActiveDialog::CulturalInfluence => "cultural influence",
             ActiveDialog::CulturalInfluenceResolution(_) => "cultural influence resolution",
+            ActiveDialog::ExploreResolution(_) => "explore resolution",
             ActiveDialog::FreeAdvance => "free advance",
             ActiveDialog::RazeSize1City => "raze size 1 city",
             ActiveDialog::CompleteObjectives => "complete objectives",
@@ -122,6 +125,9 @@ impl ActiveDialog {
                 c.roll_boost_cost,
                 building_name(c.city_piece)
             )],
+            ActiveDialog::ExploreResolution(_) => {
+                vec!["Click on the new tile to rotate it".to_string()]
+            }
             ActiveDialog::FreeAdvance => {
                 vec!["Click on an advance to take it for free".to_string()]
             }
@@ -449,6 +455,7 @@ impl State {
     #[must_use]
     pub fn game_state_dialog(&self, game: &Game) -> ActiveDialog {
         match &game.state {
+            GameState::Playing | GameState::Finished => ActiveDialog::None,
             GameState::Movement { .. } => ActiveDialog::MoveUnits(MoveSelection::new(
                 game.active_player(),
                 self.focused_tile,
@@ -489,7 +496,12 @@ impl State {
                 }
                 CombatPhase::Retreat => ActiveDialog::Retreat,
             },
-            _ => ActiveDialog::None,
+            GameState::ExploreResolution(r) => {
+                ActiveDialog::ExploreResolution(ExploreResolutionConfig {
+                    block: r.block.clone(),
+                    rotation: r.block.position.rotation,
+                })
+            }
         }
     }
 

@@ -15,7 +15,7 @@ use macroquad::math::{u32, vec2};
 use macroquad::prelude::*;
 use server::action::Action;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
-use server::game::{Game, GameState};
+use server::game::{Game, GameState, MoveState};
 use server::playing_actions::PlayingAction;
 use server::unit::MovementAction;
 
@@ -187,8 +187,8 @@ pub fn show_top_left(rc: &RenderContext) {
             GameState::StatusPhase(_) | GameState::Finished => {}
             _ => label(&format!("{} actions left", game.actions_left)),
         }
-        if let Some(moves) = moves_left(&game.state) {
-            label(&move_units_message(moves));
+        if let Some(moves) = move_state(&game.state) {
+            label(&move_units_message(moves.movement_actions_left));
         }
     }
 
@@ -243,18 +243,12 @@ fn move_units_message(movement_actions_left: u32) -> String {
     format!("Move units: {movement_actions_left} moves left")
 }
 
-fn moves_left(state: &GameState) -> Option<u32> {
+fn move_state(state: &GameState) -> Option<&MoveState> {
     match state {
-        GameState::Combat(c) => moves_left(&c.initiation),
-        GameState::Movement {
-            movement_actions_left,
-            ..
-        }
-        | GameState::PlaceSettler {
-            player_index: _,
-            movement_actions_left,
-            ..
-        } => Some(*movement_actions_left),
+        GameState::Combat(c) => move_state(&c.initiation),
+        GameState::ExploreResolution(r) => Some(&r.move_state),
+        GameState::Movement(m) => Some(m),
+        GameState::PlaceSettler(p) => Some(&p.move_state),
         _ => None,
     }
 }
@@ -305,14 +299,11 @@ fn can_end_move(game: &Game) -> Option<&str> {
 }
 
 fn end_move(game: &Game) -> StateUpdate {
-    if let GameState::Movement {
-        movement_actions_left,
-        ..
-    } = &game.state
-    {
+    if let GameState::Movement(m) = &game.state {
+        let movement_actions_left = m.movement_actions_left;
         return StateUpdate::execute_with_warning(
             Action::Movement(MovementAction::Stop),
-            if *movement_actions_left > 0 {
+            if movement_actions_left > 0 {
                 vec![format!("{movement_actions_left} movement actions left")]
             } else {
                 vec![]

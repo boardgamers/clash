@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::combat::Combat;
 use crate::combat::{capture_position, execute_combat_action, initiate_combat, CombatPhase};
-use crate::map::{maximum_size_2_player_random_map, setup_home_city};
+use crate::map::{move_to_unexplored_tile, UnexploredBlock};
 use crate::utils::shuffle;
 use crate::{
     action::Action,
@@ -91,10 +91,6 @@ impl Game {
             players.push(Player::new(civilizations.remove(civilization), i));
         }
 
-        if setup {
-            setup_home_city(&mut players, 0, "F1");
-            setup_home_city(&mut players, 1, "F8");
-        }
         let starting_player = quad_rand::gen_range(0, players.len());
         let mut dice_roll_outcomes = Vec::new();
         for _ in 0..DICE_ROLL_BUFFER {
@@ -105,7 +101,7 @@ impl Game {
         let wonder_amount = wonders.len();
 
         let map = if setup {
-            Map::new(maximum_size_2_player_random_map())
+            Map::random_map(&mut players)
         } else {
             Map::new(HashMap::new())
         };
@@ -326,58 +322,36 @@ impl Game {
                 self.add_action_log_item(ActionLogItem::StatusPhase(action.clone()));
                 action.execute(self, player_index);
             }
-            Movement {
-                movement_actions_left,
-                moved_units,
-            } => {
-                let action = action
-                    .movement()
-                    .expect("action should be a movement action");
-                self.add_action_log_item(ActionLogItem::Movement(action.clone()));
-                self.execute_movement_action(
-                    action,
-                    player_index,
-                    movement_actions_left,
-                    moved_units,
-                );
-            }
+            Movement(m) => self.execute_move(action, player_index, m),
             CulturalInfluenceResolution(c) => {
-                let action = action
-                    .cultural_influence_resolution()
-                    .expect("action should be a cultural influence resolution action");
-                self.add_action_log_item(ActionLogItem::CulturalInfluenceResolution(action));
-                self.execute_cultural_influence_resolution_action(
-                    action,
-                    c.roll_boost_cost,
-                    c.target_player_index,
-                    c.target_city_position,
-                    c.city_piece,
-                    player_index,
-                );
+                self.cultural_influence_resolution(action, player_index, &c);
             }
             Combat(c) => {
                 let action = action.combat().expect("action should be a combat action");
                 self.add_action_log_item(ActionLogItem::Combat(action.clone()));
                 execute_combat_action(self, action, c);
             }
-            PlaceSettler {
-                player_index,
-                movement_actions_left,
-                moved_units,
-            } => {
-                let action = action
-                    .place_settler()
-                    .expect("action should be place_settler action");
-                self.add_action_log_item(ActionLogItem::PlaceSettler(action));
-                self.execute_place_settler_action(
-                    action,
-                    player_index,
-                    movement_actions_left,
-                    moved_units,
-                );
-            }
+            PlaceSettler(p) => self.place_settler(action, player_index, &p),
+            ExploreResolution(r) => self.explore_resolution(action, &r),
             Finished => panic!("actions can't be executed when the game is finished"),
         }
+    }
+
+    fn execute_move(&mut self, action: Action, player_index: usize, m: MoveState) {
+        let action = action
+            .movement()
+            .expect("action should be a movement action");
+        self.add_action_log_item(ActionLogItem::Movement(action.clone()));
+        self.execute_movement_action(action, player_index, m);
+    }
+
+    fn explore_resolution(&mut self, action: Action, r: &ExploreResolutionState) {
+        let rotation = action
+            .explore_resolution()
+            .expect("action should be an explore resolution action");
+        self.add_action_log_item(ActionLogItem::ExploreResolution(rotation));
+        self.map.explore_resolution(r, rotation);
+        self.back_to_move(&r.move_state);
     }
 
     fn undo(&mut self, player_index: usize) {
@@ -392,6 +366,9 @@ impl Game {
             }
             ActionLogItem::Combat(_action) => unimplemented!("retreat can't yet be undone"),
             ActionLogItem::PlaceSettler(_action) => panic!("placing a settler can't be undone"),
+            ActionLogItem::ExploreResolution(_rotation) => {
+                panic!("exploration actions can't be undone")
+            }
         }
         self.action_log_index -= 1;
         self.log.remove(self.log.len() - 1);
@@ -407,21 +384,12 @@ impl Game {
             ActionLogItem::Playing(action) => action.clone().execute(self, player_index),
             ActionLogItem::StatusPhase(_) => panic!("status phase actions can't be redone"),
             ActionLogItem::Movement(action) => {
-                let Movement {
-                    movement_actions_left,
-                    moved_units,
-                } = &self.state
-                else {
+                let Movement(m) = &self.state else {
                     panic!(
                         "movement actions can only be redone if the game is in a movement state"
                     );
                 };
-                self.execute_movement_action(
-                    action.clone(),
-                    player_index,
-                    *movement_actions_left,
-                    moved_units.clone(),
-                );
+                self.execute_movement_action(action.clone(), player_index, m.clone());
             }
             ActionLogItem::CulturalInfluenceResolution(action) => {
                 let CulturalInfluenceResolution(c) = &self.state else {
@@ -438,6 +406,9 @@ impl Game {
             }
             ActionLogItem::Combat(_) => unimplemented!("retreat can't yet be redone"),
             ActionLogItem::PlaceSettler(_) => panic!("place settler actions can't be redone"),
+            ActionLogItem::ExploreResolution(_) => {
+                panic!("exploration actions can't be redone")
+            }
         }
         self.action_log_index += 1;
     }
@@ -456,9 +427,9 @@ impl Game {
         &mut self,
         action: MovementAction,
         player_index: usize,
-        movement_actions_left: u32,
-        mut moved_units: Vec<u32>,
+        mut move_state: MoveState,
     ) {
+        let saved_state = move_state.clone();
         let starting_position = match action {
             Move { units, destination } => {
                 let player = &self.players[player_index];
@@ -474,55 +445,23 @@ impl Game {
                         &units,
                         starting_position,
                         destination,
-                        movement_actions_left,
-                        &moved_units,
+                        move_state.movement_actions_left,
+                        &move_state.moved_units,
                     )
                     .expect("Illegal action");
-                moved_units.extend(units.iter());
-                if let Some(defender) = self.enemy_player(player_index, destination) {
-                    if self.players[defender]
-                        .get_units(destination)
-                        .iter()
-                        .any(|unit| !unit.unit_type.is_settler())
-                    {
-                        let mut military = false;
-                        for unit_id in &units {
-                            let unit = self.players[player_index]
-                                .get_unit_mut(*unit_id)
-                                .expect("the player should have all units to move");
-                            assert!(unit.can_attack());
-                            if !unit.unit_type.is_settler() {
-                                military = true;
-                            }
-                            self.move_unit(player_index, *unit_id, destination);
-                            self.players[player_index]
-                                .get_unit_mut(*unit_id)
-                                .expect("the player should have all units to move")
-                                .position = starting_position;
-                        }
-                        assert!(military, "Illegal action");
-                        self.state = if movement_actions_left > 1 {
-                            Movement {
-                                movement_actions_left: movement_actions_left - 1,
-                                moved_units: moved_units.clone(),
-                            }
-                        } else {
-                            Playing
-                        };
+                move_state.moved_units.extend(units.iter());
+                move_state.movement_actions_left -= 1;
 
-                        initiate_combat(
-                            self,
-                            defender,
-                            destination,
-                            player_index,
-                            starting_position,
-                            units,
-                            true,
-                            None,
-                        );
-                        if matches!(self.state, Combat(_)) {
-                            return;
-                        }
+                if let Some(defender) = self.enemy_player(player_index, destination) {
+                    if self.move_to_defended_tile(
+                        player_index,
+                        &mut move_state,
+                        &units,
+                        destination,
+                        starting_position,
+                        defender,
+                    ) {
+                        return;
                     }
                 } else {
                     self.move_units(player_index, &units, destination);
@@ -536,14 +475,19 @@ impl Game {
                         capture_position(self, enemy, destination, player_index);
                     }
                 }
-                self.state = if movement_actions_left > 1 {
-                    Movement {
-                        movement_actions_left: movement_actions_left - 1,
-                        moved_units: moved_units.clone(),
-                    }
-                } else {
-                    Playing
-                };
+                let dest_terrain = self
+                    .map
+                    .tiles
+                    .get(&destination)
+                    .expect("destination should be a valid tile");
+                if dest_terrain == &Unexplored
+                    && move_to_unexplored_tile(self, player_index, destination, &move_state)
+                {
+                    return;
+                }
+
+                self.back_to_move(&move_state);
+                // todo maybe explore should be done here
                 Some(starting_position)
             }
             Stop => {
@@ -553,16 +497,63 @@ impl Game {
         };
         self.undo_context_stack.push(UndoContext::Movement {
             starting_position,
-            movement_actions_left,
-            moved_units,
+            move_state: saved_state,
         });
+    }
+
+    fn move_to_defended_tile(
+        &mut self,
+        player_index: usize,
+        move_state: &mut MoveState,
+        units: &Vec<u32>,
+        destination: Position,
+        starting_position: Position,
+        defender: usize,
+    ) -> bool {
+        if self.players[defender]
+            .get_units(destination)
+            .iter()
+            .any(|unit| !unit.unit_type.is_settler())
+        {
+            let mut military = false;
+            for unit_id in units {
+                let unit = self.players[player_index]
+                    .get_unit_mut(*unit_id)
+                    .expect("the player should have all units to move");
+                assert!(unit.can_attack());
+                if !unit.unit_type.is_settler() {
+                    military = true;
+                }
+                self.move_unit(player_index, *unit_id, destination);
+                self.players[player_index]
+                    .get_unit_mut(*unit_id)
+                    .expect("the player should have all units to move")
+                    .position = starting_position;
+            }
+            assert!(military, "Illegal action");
+            self.back_to_move(move_state);
+
+            initiate_combat(
+                self,
+                defender,
+                destination,
+                player_index,
+                starting_position,
+                units.clone(),
+                true,
+                None,
+            );
+            if matches!(self.state, Combat(_)) {
+                return true;
+            }
+        }
+        false
     }
 
     fn undo_movement_action(&mut self, action: MovementAction, player_index: usize) {
         let Some(UndoContext::Movement {
             starting_position,
-            movement_actions_left,
-            mut moved_units,
+            move_state,
         }) = self.undo_context_stack.pop()
         else {
             panic!("when undoing a movement action, the game should have stored movement context")
@@ -572,9 +563,6 @@ impl Game {
             destination: _,
         } = action
         {
-            if !units.is_empty() {
-                moved_units.drain(moved_units.len() - units.len()..);
-            }
             self.undo_move_units(
                 player_index,
                 units,
@@ -583,10 +571,27 @@ impl Game {
                 ),
             );
         }
-        self.state = Movement {
-            movement_actions_left,
-            moved_units,
-        };
+        self.state = Movement(move_state);
+    }
+
+    fn cultural_influence_resolution(
+        &mut self,
+        action: Action,
+        player_index: usize,
+        c: &CulturalInfluenceResolution,
+    ) {
+        let action = action
+            .cultural_influence_resolution()
+            .expect("action should be a cultural influence resolution action");
+        self.add_action_log_item(ActionLogItem::CulturalInfluenceResolution(action));
+        self.execute_cultural_influence_resolution_action(
+            action,
+            c.roll_boost_cost,
+            c.target_player_index,
+            c.target_city_position,
+            c.city_piece,
+            player_index,
+        );
     }
 
     fn execute_cultural_influence_resolution_action(
@@ -644,23 +649,22 @@ impl Game {
         );
     }
 
-    fn execute_place_settler_action(
-        &mut self,
-        action: Position,
-        player_index: usize,
-        movement_actions_left: u32,
-        moved_units: Vec<u32>,
-    ) {
+    fn place_settler(&mut self, action: Action, player_index: usize, p: &PlaceSettlerState) {
+        let action = action
+            .place_settler()
+            .expect("action should be place_settler action");
+        self.add_action_log_item(ActionLogItem::PlaceSettler(action));
         let player = &mut self.players[player_index];
         assert!(player.get_city(action).is_some(), "Illegal action");
         player.add_unit(action, Settler);
-        self.state = if movement_actions_left == 0 {
+        self.back_to_move(&p.move_state);
+    }
+
+    fn back_to_move(&mut self, move_state: &MoveState) {
+        self.state = if move_state.movement_actions_left == 0 {
             Playing
         } else {
-            Movement {
-                movement_actions_left,
-                moved_units,
-            }
+            Movement(move_state.clone())
         };
     }
 
@@ -714,11 +718,7 @@ impl Game {
                 | CombatPhase::PlayActionCard(player) => player,
                 CombatPhase::Retreat => c.attacker,
             },
-            PlaceSettler {
-                player_index,
-                movement_actions_left: _,
-                moved_units: _,
-            } => *player_index,
+            PlaceSettler(p) => p.player_index,
             _ => self.current_player_index,
         }
     }
@@ -1208,18 +1208,13 @@ impl Game {
         old_player.available_settlements += 1;
         if old_player.available_units.settlers > 0 && !old_player.cities.is_empty() {
             let state = mem::replace(&mut self.state, Playing);
-            let Movement {
-                movement_actions_left,
-                moved_units,
-            } = state
-            else {
+            let Movement(m) = state else {
                 panic!("conquering a city should only happen in a movement action")
             };
-            self.state = PlaceSettler {
+            self.state = PlaceSettler(PlaceSettlerState {
                 player_index: old_player_index,
-                movement_actions_left: movement_actions_left - 1,
-                moved_units,
-            };
+                move_state: m,
+            });
         }
     }
 
@@ -1486,20 +1481,34 @@ pub struct CulturalInfluenceResolution {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct MoveState {
+    pub movement_actions_left: u32,
+    pub moved_units: Vec<u32>,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct PlaceSettlerState {
+    pub player_index: usize,
+    #[serde(flatten)]
+    pub move_state: MoveState,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct ExploreResolutionState {
+    #[serde(flatten)]
+    pub move_state: MoveState,
+    pub block: UnexploredBlock,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum GameState {
     Playing,
     StatusPhase(StatusPhaseState),
-    Movement {
-        movement_actions_left: u32,
-        moved_units: Vec<u32>,
-    },
+    Movement(MoveState),
     CulturalInfluenceResolution(CulturalInfluenceResolution),
     Combat(Combat),
-    PlaceSettler {
-        player_index: usize,
-        movement_actions_left: u32,
-        moved_units: Vec<u32>,
-    },
+    PlaceSettler(PlaceSettlerState),
+    ExploreResolution(ExploreResolutionState),
     Finished,
 }
 
@@ -1507,11 +1516,7 @@ impl GameState {
     #[must_use]
     pub fn settler_placer(&self) -> Option<usize> {
         match self {
-            PlaceSettler {
-                player_index,
-                movement_actions_left: _,
-                moved_units: _,
-            } => Some(*player_index),
+            PlaceSettler(p) => Some(p.player_index),
             _ => None,
         }
     }
@@ -1528,8 +1533,8 @@ pub enum UndoContext {
     },
     Movement {
         starting_position: Option<Position>,
-        movement_actions_left: u32,
-        moved_units: Vec<u32>,
+        #[serde(flatten)]
+        move_state: MoveState,
     },
 }
 
