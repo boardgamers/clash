@@ -107,6 +107,7 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
             player.strip_secret();
         }
     }
+    game.map.strip_secret();
     game
 }
 

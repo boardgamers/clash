@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::combat::Combat;
 use crate::combat::{capture_position, execute_combat_action, initiate_combat, CombatPhase};
+use crate::map::{Rotation, UnexploredBlock};
 use crate::utils::shuffle;
 use crate::{
     action::Action,
@@ -371,6 +372,13 @@ impl Game {
                     moved_units,
                 );
             }
+            ExploreResolution(r) => {
+                let rotation = action
+                    .explore_resolution()
+                    .expect("action should be an explore resolution action");
+                self.add_action_log_item(ActionLogItem::ExploreResolution(rotation));
+                self.map.explore(&r, rotation);
+            }
             Finished => panic!("actions can't be executed when the game is finished"),
         }
     }
@@ -387,6 +395,9 @@ impl Game {
             }
             ActionLogItem::Combat(_action) => unimplemented!("retreat can't yet be undone"),
             ActionLogItem::PlaceSettler(_action) => panic!("placing a settler can't be undone"),
+            ActionLogItem::ExploreResolution(_rotation) => {
+                panic!("exploration actions can't be undone")
+            }
         }
         self.action_log_index -= 1;
         self.log.remove(self.log.len() - 1);
@@ -433,6 +444,9 @@ impl Game {
             }
             ActionLogItem::Combat(_) => unimplemented!("retreat can't yet be redone"),
             ActionLogItem::PlaceSettler(_) => panic!("place settler actions can't be redone"),
+            ActionLogItem::ExploreResolution(_) => {
+                panic!("exploration actions can't be redone")
+            }
         }
         self.action_log_index += 1;
     }
@@ -1481,6 +1495,12 @@ pub struct CulturalInfluenceResolution {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct ExploreResolution {
+    pub block: UnexploredBlock,
+    pub rotation: Rotation,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum GameState {
     Playing,
     StatusPhase(StatusPhaseState),
@@ -1495,6 +1515,7 @@ pub enum GameState {
         movement_actions_left: u32,
         moved_units: Vec<u32>,
     },
+    ExploreResolution(ExploreResolution),
     Finished,
 }
 

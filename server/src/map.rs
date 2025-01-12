@@ -5,6 +5,7 @@ use std::collections::HashMap;
 
 use crate::city::City;
 use crate::city::MoodState::Happy;
+use crate::game::ExploreResolution;
 use crate::player::Player;
 use crate::position::Position;
 use crate::unit::UnitType;
@@ -29,8 +30,7 @@ impl Map {
     pub fn random_map(players: &mut [Player]) -> Self {
         let setup = get_map_setup(players.len());
 
-        let mut blocks = BLOCKS.to_vec();
-        shuffle(&mut blocks);
+        let blocks = shuffle(&mut BLOCKS.to_vec());
         let unexplored_blocks = setup
             .free_positions
             .iter()
@@ -62,11 +62,21 @@ impl Map {
         map
     }
 
-    pub fn explore(&mut self, pos: &BlockPosition, block: &Block, rotation: Rotation) {
-        self.unexplored_blocks
-            .retain(|b| b.position.top_tile != pos.top_tile);
+    pub(crate) fn strip_secret(&mut self) {
+        for b in &mut self.unexplored_blocks {
+            b.block = UNEXPLORED_BLOCK.clone();
+        }
+    }
 
-        self.add_block_tiles(pos, block, rotation);
+    pub(crate) fn explore(&mut self, r: &ExploreResolution, rotation: Rotation) {
+        let position = &r.block.position;
+        self.unexplored_blocks
+            .retain(|b| b.position.top_tile != position.top_tile);
+        let rotate_by = rotation - position.rotation;
+        let valid_rotation = rotate_by == 0 || rotate_by == 3;
+        assert!(valid_rotation, "Invalid rotation {rotate_by}");
+
+        self.add_block_tiles(position, &r.block.block, rotation);
     }
 
     fn add_block_tiles(&mut self, pos: &BlockPosition, block: &Block, rotation: Rotation) {
@@ -132,7 +142,7 @@ pub struct MapData {
     pub unexplored_blocks: Vec<UnexploredBlock>,
 }
 
-#[derive(Serialize, Deserialize, Hash, PartialEq, Eq, Clone, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Hash, PartialEq, Eq, Clone, PartialOrd, Ord, Debug)]
 pub enum Terrain {
     Barren,
     Mountain,
@@ -143,7 +153,7 @@ pub enum Terrain {
     Unexplored,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct Block {
     terrain: [Terrain; 4],
 }
@@ -322,13 +332,13 @@ const STARTING_BLOCKS: [Block; 2] = [
 
 pub type Rotation = usize;
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct BlockPosition {
     pub top_tile: Position,
     pub rotation: Rotation,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct UnexploredBlock {
     pub position: BlockPosition,
     pub block: Block,

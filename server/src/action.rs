@@ -1,9 +1,9 @@
-use serde::{Deserialize, Serialize};
-
+use crate::map::Rotation;
 use crate::playing_actions::PlayingAction;
 use crate::position::Position;
 use crate::status_phase::StatusPhaseAction;
 use crate::unit::MovementAction;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub enum Action {
@@ -13,6 +13,7 @@ pub enum Action {
     CulturalInfluenceResolution(bool),
     Combat(CombatAction),
     PlaceSettler(Position),
+    ExploreResolution(Rotation),
     Undo,
     Redo,
 }
@@ -66,6 +67,15 @@ impl Action {
     #[must_use]
     pub fn place_settler(self) -> Option<Position> {
         if let Self::PlaceSettler(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
+
+    #[must_use]
+    pub fn explore_resolution(self) -> Option<Rotation> {
+        if let Self::ExploreResolution(v) = self {
             Some(v)
         } else {
             None

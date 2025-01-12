@@ -4,6 +4,7 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 use crate::action::PlayActionCard;
+use crate::map::Rotation;
 use crate::player::Player;
 use crate::playing_actions::{
     Collect, Construct, IncreaseHappiness, InfluenceCultureAttempt, Recruit,
@@ -29,6 +30,7 @@ pub enum ActionLogItem {
     CulturalInfluenceResolution(bool),
     Combat(CombatAction),
     PlaceSettler(Position),
+    ExploreResolution(Rotation),
 }
 
 impl ActionLogItem {
@@ -57,6 +59,7 @@ impl ActionLogItem {
             }
             Self::Combat(action) => Action::Combat(action),
             Self::PlaceSettler(action) => Action::PlaceSettler(action),
+            Self::ExploreResolution(rotation) => Action::ExploreResolution(rotation),
         }
     }
 }
@@ -86,6 +89,9 @@ pub fn format_action_log_item(action: &Action, game: &Game) -> String {
         }
         Action::Combat(action) => format_combat_action_log_item(action, game),
         Action::PlaceSettler(position) => format_place_settler_log_item(game, *position),
+        Action::ExploreResolution(rotation) => {
+            format!("the exploration was resolved with a rotation of {rotation}")
+        }
         Action::Undo | Action::Redo => {
             panic!("undoing or redoing actions should not be written to the log")
         }
