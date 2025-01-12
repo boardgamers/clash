@@ -324,7 +324,7 @@ impl Game {
             }
             Movement(m) => self.execute_move(action, player_index, m),
             CulturalInfluenceResolution(c) => {
-                self.cultural_influence_resolution(action, player_index, &c)
+                self.cultural_influence_resolution(action, player_index, &c);
             }
             Combat(c) => {
                 let action = action.combat().expect("action should be a combat action");
@@ -450,43 +450,15 @@ impl Game {
                     .expect("Illegal action");
                 move_state.moved_units.extend(units.iter());
                 if let Some(defender) = self.enemy_player(player_index, destination) {
-                    if self.players[defender]
-                        .get_units(destination)
-                        .iter()
-                        .any(|unit| !unit.unit_type.is_settler())
-                    {
-                        let mut military = false;
-                        for unit_id in &units {
-                            let unit = self.players[player_index]
-                                .get_unit_mut(*unit_id)
-                                .expect("the player should have all units to move");
-                            assert!(unit.can_attack());
-                            if !unit.unit_type.is_settler() {
-                                military = true;
-                            }
-                            self.move_unit(player_index, *unit_id, destination);
-                            self.players[player_index]
-                                .get_unit_mut(*unit_id)
-                                .expect("the player should have all units to move")
-                                .position = starting_position;
-                        }
-                        assert!(military, "Illegal action");
-                        move_state.movement_actions_left -= 1;
-                        self.back_to_move(&move_state);
-
-                        initiate_combat(
-                            self,
-                            defender,
-                            destination,
-                            player_index,
-                            starting_position,
-                            units,
-                            true,
-                            None,
-                        );
-                        if matches!(self.state, Combat(_)) {
-                            return;
-                        }
+                    if self.move_to_defended_tile(
+                        player_index,
+                        &mut move_state,
+                        &units,
+                        destination,
+                        starting_position,
+                        defender,
+                    ) {
+                        return;
                     }
                 } else {
                     self.move_units(player_index, &units, destination);
@@ -514,6 +486,56 @@ impl Game {
             starting_position,
             move_state: move_state.clone(),
         });
+    }
+
+    fn move_to_defended_tile(
+        &mut self,
+        player_index: usize,
+        move_state: &mut MoveState,
+        units: &Vec<u32>,
+        destination: Position,
+        starting_position: Position,
+        defender: usize,
+    ) -> bool {
+        if self.players[defender]
+            .get_units(destination)
+            .iter()
+            .any(|unit| !unit.unit_type.is_settler())
+        {
+            let mut military = false;
+            for unit_id in units {
+                let unit = self.players[player_index]
+                    .get_unit_mut(*unit_id)
+                    .expect("the player should have all units to move");
+                assert!(unit.can_attack());
+                if !unit.unit_type.is_settler() {
+                    military = true;
+                }
+                self.move_unit(player_index, *unit_id, destination);
+                self.players[player_index]
+                    .get_unit_mut(*unit_id)
+                    .expect("the player should have all units to move")
+                    .position = starting_position;
+            }
+            assert!(military, "Illegal action");
+            move_state.movement_actions_left -= 1;
+            self.back_to_move(move_state);
+
+            initiate_combat(
+                self,
+                defender,
+                destination,
+                player_index,
+                starting_position,
+                units.clone(),
+                true,
+                None,
+            );
+            if matches!(self.state, Combat(_)) {
+                return true;
+            }
+        }
+        false
     }
 
     fn undo_movement_action(&mut self, action: MovementAction, player_index: usize) {
