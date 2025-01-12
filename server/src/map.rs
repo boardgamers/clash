@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 use crate::city::City;
 use crate::city::MoodState::Happy;
-use crate::game::ExploreResolutionState;
+use crate::game::{ExploreResolutionState, Game, GameState, MoveState};
 use crate::player::Player;
 use crate::position::Position;
 use crate::unit::UnitType;
@@ -68,7 +68,7 @@ impl Map {
         }
     }
 
-    pub(crate) fn explore(&mut self, r: &ExploreResolutionState, rotation: Rotation) {
+    pub(crate) fn explore_resolution(&mut self, r: &ExploreResolutionState, rotation: Rotation) {
         let position = &r.block.position;
         self.unexplored_blocks
             .retain(|b| b.position.top_tile != position.top_tile);
@@ -80,24 +80,11 @@ impl Map {
     }
 
     fn add_block_tiles(&mut self, pos: &BlockPosition, block: &Block, rotation: Rotation) {
-        let center = pos.top_tile;
-        let left_relative = Position::new(-1, 1);
-        let right_relative = Position::new(1, 0);
-        let bottom = Position::new(0, 1);
-
-        self.tiles.insert(center, block.terrain[0].clone());
-        self.tiles.insert(
-            rotate_around_center(center, left_relative, rotation),
-            block.terrain[1].clone(),
-        );
-        self.tiles.insert(
-            rotate_around_center(center, right_relative, rotation),
-            block.terrain[2].clone(),
-        );
-        self.tiles.insert(
-            rotate_around_center(center, bottom, rotation),
-            block.terrain[3].clone(),
-        );
+        block.tiles(pos, rotation)
+            .into_iter()
+            .for_each(|(position, tile)| {
+                self.tiles.insert(position, tile);
+            });
     }
 
     #[must_use]
@@ -158,6 +145,35 @@ pub struct Block {
     terrain: [Terrain; 4],
 }
 
+impl Block {
+    #[must_use] pub fn tiles(&self, pos: &BlockPosition, rotation: Rotation) -> Vec<(Position, Terrain)> {
+        let center = pos.top_tile;
+        BLOCK_RELATIVE_POSITIONS
+            .into_iter()
+            .enumerate()
+            .map(|(i, relative)| {
+                let tile = self.terrain[i].clone();
+                let dest = rotate_around_center(center, relative, rotation);
+                (dest, tile)
+            })
+            .collect()
+    }
+}
+
+//     ┌──┐
+//     │  │
+// ┌───┐0 ┌───┐
+// │1  │──│ 2 │
+// └───┘  └───┘
+//     │3 │
+//     └──┘
+const BLOCK_RELATIVE_POSITIONS: [Position; 4] = [
+    Position { q: 0, r: 0 },
+    Position { q: -1, r: 1 },
+    Position { q: 1, r: 0 },
+    Position { q: 0, r: 1 },
+];
+
 const UNEXPLORED_BLOCK: Block = Block {
     terrain: [
         Terrain::Unexplored,
@@ -168,13 +184,6 @@ const UNEXPLORED_BLOCK: Block = Block {
 };
 
 // by amount of water, descending
-//     ┌──┐
-//     │  │
-// ┌───┐0 ┌───┐
-// │1  │──│ 2 │
-// └───┘  └───┘
-//     │3 │
-//     └──┘
 const BLOCKS: [Block; 16] = [
     // 2 water tiles
     Block {
@@ -425,4 +434,37 @@ fn rotate_around_center(center: Position, relative: Position, rotation: Rotation
     let pos = center.coordinate() + relative.coordinate();
     let coordinate = pos.rotate_around(center.coordinate(), Angle::all()[rotation]);
     Position::from_coordinate(coordinate)
+}
+
+pub(crate) fn move_to_unexplored_tile(
+    game: &mut Game,
+    player_index: usize,
+    move_to: Position,
+    move_state: &MoveState,
+) -> bool {
+    for b in &game.map.unexplored_blocks.clone() {
+        for (position, _tile) in b.block.tiles(&b.position, b.position.rotation) {
+            if position == move_to {
+                return move_to_unexplored_block(game, player_index, b, move_state);
+            }
+        }
+    }
+    panic!("No unexplored tile at {move_to}")
+}
+
+pub(crate) fn move_to_unexplored_block(
+    game: &mut Game,
+    player_index: usize,
+    move_to: &UnexploredBlock,
+    move_state: &MoveState,
+) -> bool {
+    // todo: check if only one position is possible => return false
+
+    game.lock_undo();
+    game.state = GameState::ExploreResolution(ExploreResolutionState {
+        block: move_to.clone(),
+        move_state: move_state.clone(),
+    });
+
+    true
 }

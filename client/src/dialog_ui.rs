@@ -1,3 +1,4 @@
+use macroquad::math::Vec2;
 use crate::client_state::{PendingUpdate, StateUpdate};
 use crate::layout_ui::{bottom_centered_text, bottom_right_texture, icon_pos};
 use crate::render_context::RenderContext;
@@ -52,7 +53,12 @@ pub fn cancel_button(rc: &RenderContext) -> bool {
 
 #[must_use]
 pub fn cancel_button_with_tooltip(rc: &RenderContext, tooltip: &str) -> bool {
-    bottom_right_texture(rc, &rc.assets().cancel, icon_pos(-7, -1), tooltip)
+    bottom_right_texture(rc, &rc.assets().cancel, cancel_button_pos(), tooltip)
+}
+
+#[must_use]
+pub fn cancel_button_pos() -> Vec2 {
+    icon_pos(-7, -1)
 }
 
 #[must_use]

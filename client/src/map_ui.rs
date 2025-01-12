@@ -1,21 +1,31 @@
+use std::collections::HashMap;
 use macroquad::math::vec2;
 use macroquad::prelude::*;
-use std::ops::{Add, Mul, Sub};
+use std::ops::{Add, Mul, Rem, Sub};
 
 use server::action::Action;
 use server::combat::Combat;
-use server::game::GameState;
-use server::map::Terrain;
+use server::game::{CulturalInfluenceResolution, ExploreResolutionState, GameState};
+use server::map::{Rotation, Terrain, UnexploredBlock};
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
+use server::resource_pile::ResourcePile;
 use server::unit::{MovementRestriction, Unit, UnitType};
 
-use crate::city_ui::{draw_city, show_city_menu, IconAction, IconActionVec};
+use crate::city_ui::{building_name, draw_city, show_city_menu, IconAction, IconActionVec};
 use crate::client_state::{ActiveDialog, State, StateUpdate};
-use crate::layout_ui::{bottom_center_texture, icon_pos};
+use crate::layout_ui::{bottom_center_texture, bottom_right_texture, icon_pos};
 use crate::move_ui::movable_units;
 use crate::render_context::RenderContext;
 use crate::{collect_ui, hex_ui, unit_ui};
+use crate::dialog_ui::{cancel_button_pos, cancel_button_with_tooltip, ok_button, OkTooltip};
+use crate::resource_ui::{show_resource_pile, ResourceType};
+
+#[derive(Clone)]
+pub struct ExploreResolutionConfig {
+    pub block: UnexploredBlock,
+    pub rotation: Rotation,
+}
 
 fn terrain_font_color(t: &Terrain) -> Color {
     match t {
@@ -38,15 +48,17 @@ pub fn terrain_name(t: &Terrain) -> &'static str {
 
 pub fn draw_map(rc: &RenderContext) -> StateUpdate {
     let game = rc.game;
+    let overlay = get_overlay(rc);
     for (pos, t) in &game.map.tiles {
-        let (base, exhausted) = match t {
+        let terrain = overlay.get(pos).unwrap_or(t);
+        let (base, exhausted) = match terrain {
             Terrain::Exhausted(e) => (e.as_ref(), true),
-            _ => (t, false),
+            _ => (terrain, false),
         };
 
         hex_ui::draw_hex(
             *pos,
-            terrain_font_color(t),
+            terrain_font_color(terrain),
             alpha(rc, *pos),
             rc.assets().terrain.get(base),
             exhausted,
@@ -71,6 +83,15 @@ pub fn draw_map(rc: &RenderContext) -> StateUpdate {
         unit_ui::draw_units(rc, true);
     }
     StateUpdate::None
+}
+
+fn get_overlay(rc: &RenderContext) -> HashMap<Position, Terrain> {
+    if let ActiveDialog::ExploreResolution(r) = &rc.state.active_dialog {
+        r.block.block.tiles(&r.block.position, r.rotation)
+            .iter()
+            .map(|(pos, t)| (*pos, t.clone()))
+            .collect()
+    } else { HashMap::new() }
 }
 
 pub fn pan_and_zoom(state: &mut State) {
@@ -215,5 +236,21 @@ pub fn show_map_action_buttons(rc: &RenderContext, icons: &IconActionVec) -> Sta
             return action();
         }
     }
+    StateUpdate::None
+}
+
+pub fn explore_dialog(
+    rc: &RenderContext,
+    r: &ExploreResolutionConfig,
+) -> StateUpdate {
+    if ok_button(rc, OkTooltip::Valid("Accept current tile rotation".to_string())) {
+        return StateUpdate::execute(Action::ExploreResolution(r.rotation));
+    }
+    if bottom_right_texture(rc, &rc.assets().rotate_explore, cancel_button_pos(), "Rotate tile") {
+        let mut new = r.clone();
+        new.rotation = (r.rotation + 3).rem(6);
+        return StateUpdate::OpenDialog(ActiveDialog::ExploreResolution(new));
+    };
+
     StateUpdate::None
 }

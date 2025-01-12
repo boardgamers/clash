@@ -15,6 +15,7 @@ use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
+use crate::map_ui::ExploreResolutionConfig;
 use crate::move_ui::MoveSelection;
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use crate::render_context::RenderContext;
@@ -38,7 +39,7 @@ pub enum ActiveDialog {
     MoveUnits(MoveSelection),
     CulturalInfluence,
     CulturalInfluenceResolution(CulturalInfluenceResolution),
-    ExploreResolution(ExploreResolutionState),
+    ExploreResolution(ExploreResolutionConfig),
 
     // status phase
     FreeAdvance,
@@ -495,7 +496,10 @@ impl State {
                 }
                 CombatPhase::Retreat => ActiveDialog::Retreat,
             },
-            GameState::ExploreResolution(r) => ActiveDialog::ExploreResolution(r.clone()),
+            GameState::ExploreResolution(r) => ActiveDialog::ExploreResolution(ExploreResolutionConfig {
+                block: r.block.clone(),
+                rotation: r.block.position.rotation,
+            }),
         }
     }
 

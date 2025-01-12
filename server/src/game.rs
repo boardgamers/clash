@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::combat::Combat;
 use crate::combat::{capture_position, execute_combat_action, initiate_combat, CombatPhase};
-use crate::map::{Rotation, UnexploredBlock};
+use crate::map::{move_to_unexplored_tile, UnexploredBlock};
 use crate::utils::shuffle;
 use crate::{
     action::Action,
@@ -350,7 +350,7 @@ impl Game {
             .explore_resolution()
             .expect("action should be an explore resolution action");
         self.add_action_log_item(ActionLogItem::ExploreResolution(rotation));
-        self.map.explore(r, rotation);
+        self.map.explore_resolution(r, rotation);
         self.back_to_move(&r.move_state);
     }
 
@@ -474,6 +474,10 @@ impl Game {
                         }
                         capture_position(self, enemy, destination, player_index);
                     }
+                }
+                let dest_terrain = self.map.tiles.get(&destination).expect("destination should be a valid tile");
+                if dest_terrain == &Unexplored && move_to_unexplored_tile(self, player_index, destination, &move_state) {
+                    return;
                 }
 
                 self.back_to_move(&move_state);
@@ -1488,7 +1492,6 @@ pub struct ExploreResolutionState {
     #[serde(flatten)]
     pub move_state: MoveState,
     pub block: UnexploredBlock,
-    pub rotation: Rotation,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
