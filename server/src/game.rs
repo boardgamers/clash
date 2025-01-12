@@ -322,54 +322,36 @@ impl Game {
                 self.add_action_log_item(ActionLogItem::StatusPhase(action.clone()));
                 action.execute(self, player_index);
             }
-            Movement(m) => {
-                let action = action
-                    .movement()
-                    .expect("action should be a movement action");
-                self.add_action_log_item(ActionLogItem::Movement(action.clone()));
-                self.execute_movement_action(
-                    action,
-                    player_index,
-                    m,
-                    // m.movement_actions_left,
-                    // m.moved_units.clone(),
-                );
-            }
+            Movement(m) => self.execute_move(action, player_index, m),
             CulturalInfluenceResolution(c) => {
-                let action = action
-                    .cultural_influence_resolution()
-                    .expect("action should be a cultural influence resolution action");
-                self.add_action_log_item(ActionLogItem::CulturalInfluenceResolution(action));
-                self.execute_cultural_influence_resolution_action(
-                    action,
-                    c.roll_boost_cost,
-                    c.target_player_index,
-                    c.target_city_position,
-                    c.city_piece,
-                    player_index,
-                );
+                self.cultural_influence_resolution(action, player_index, &c)
             }
             Combat(c) => {
                 let action = action.combat().expect("action should be a combat action");
                 self.add_action_log_item(ActionLogItem::Combat(action.clone()));
                 execute_combat_action(self, action, c);
             }
-            PlaceSettler(p) => {
-                let action = action
-                    .place_settler()
-                    .expect("action should be place_settler action");
-                self.add_action_log_item(ActionLogItem::PlaceSettler(action));
-                self.execute_place_settler_action(action, player_index, &p.move_state);
-            }
-            ExploreResolution(r) => {
-                let rotation = action
-                    .explore_resolution()
-                    .expect("action should be an explore resolution action");
-                self.add_action_log_item(ActionLogItem::ExploreResolution(rotation));
-                self.map.explore(&r, rotation);
-            }
+            PlaceSettler(p) => self.place_settler(action, player_index, &p),
+            ExploreResolution(r) => self.explore_resolution(action, &r),
             Finished => panic!("actions can't be executed when the game is finished"),
         }
+    }
+
+    fn execute_move(&mut self, action: Action, player_index: usize, m: MoveState) {
+        let action = action
+            .movement()
+            .expect("action should be a movement action");
+        self.add_action_log_item(ActionLogItem::Movement(action.clone()));
+        self.execute_movement_action(action, player_index, m);
+    }
+
+    fn explore_resolution(&mut self, action: Action, r: &ExploreResolutionState) {
+        let rotation = action
+            .explore_resolution()
+            .expect("action should be an explore resolution action");
+        self.add_action_log_item(ActionLogItem::ExploreResolution(rotation));
+        self.map.explore(r, rotation);
+        self.back_to_move(&r.move_state);
     }
 
     fn undo(&mut self, player_index: usize) {
@@ -563,6 +545,26 @@ impl Game {
         self.state = Movement(move_state);
     }
 
+    fn cultural_influence_resolution(
+        &mut self,
+        action: Action,
+        player_index: usize,
+        c: &CulturalInfluenceResolution,
+    ) {
+        let action = action
+            .cultural_influence_resolution()
+            .expect("action should be a cultural influence resolution action");
+        self.add_action_log_item(ActionLogItem::CulturalInfluenceResolution(action));
+        self.execute_cultural_influence_resolution_action(
+            action,
+            c.roll_boost_cost,
+            c.target_player_index,
+            c.target_city_position,
+            c.city_piece,
+            player_index,
+        );
+    }
+
     fn execute_cultural_influence_resolution_action(
         &mut self,
         action: bool,
@@ -618,16 +620,15 @@ impl Game {
         );
     }
 
-    fn execute_place_settler_action(
-        &mut self,
-        action: Position,
-        player_index: usize,
-        move_state: &MoveState,
-    ) {
+    fn place_settler(&mut self, action: Action, player_index: usize, p: &PlaceSettlerState) {
+        let action = action
+            .place_settler()
+            .expect("action should be place_settler action");
+        self.add_action_log_item(ActionLogItem::PlaceSettler(action));
         let player = &mut self.players[player_index];
         assert!(player.get_city(action).is_some(), "Illegal action");
         player.add_unit(action, Settler);
-        self.back_to_move(move_state);
+        self.back_to_move(&p.move_state);
     }
 
     fn back_to_move(&mut self, move_state: &MoveState) {
