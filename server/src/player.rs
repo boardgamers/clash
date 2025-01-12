@@ -380,10 +380,9 @@ impl Player {
     /// Panics if the player has advances which don't exist
     #[must_use]
     pub fn government(&self) -> Option<String> {
-        self.advances.iter().find_map(|advance| {
-            advances::get_advance_by_name(advance)
-                .government
-        })
+        self.advances
+            .iter()
+            .find_map(|advance| advances::get_advance_by_name(advance).government)
     }
 
     pub fn gain_resources(&mut self, resources: ResourcePile) {
@@ -908,6 +907,6 @@ pub struct PlayerData {
     collect_options: Vec<(Terrain, Vec<ResourcePile>)>,
     next_unit_id: u32,
     #[serde(default)]
-    #[serde(skip_serializing_if="Vec::is_empty")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     played_once_per_turn_actions: Vec<CustomActionType>,
 }

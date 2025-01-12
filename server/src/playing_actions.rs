@@ -135,9 +135,8 @@ impl PlayingAction {
                 let player = &mut game.players[player_index];
                 let cost = player.advance_cost(&advance);
                 assert!(
-                    player.can_advance(
-                        &advances::get_advance_by_name(&advance)
-                    ) && payment.food + payment.ideas + payment.gold as u32 == cost,
+                    player.can_advance(&advances::get_advance_by_name(&advance))
+                        && payment.food + payment.ideas + payment.gold as u32 == cost,
                     "Illegal action"
                 );
                 player.loose_resources(payment);
