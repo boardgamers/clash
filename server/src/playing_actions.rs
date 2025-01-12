@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use PlayingAction::*;
 
 use crate::content::advances;
-use crate::game::{CulturalInfluenceResolution, GameState};
+use crate::game::{CulturalInfluenceResolution, GameState, MoveState};
 use crate::log::ActionLogItem;
 use crate::{
     city::City,
@@ -220,10 +220,10 @@ impl PlayingAction {
                 );
             }
             MoveUnits => {
-                game.state = GameState::Movement {
+                game.state = GameState::Movement(MoveState {
                     movement_actions_left: MOVEMENT_ACTIONS,
                     moved_units: Vec::new(),
-                }
+                });
             }
             IncreaseHappiness(i) => {
                 increase_happiness(game, player_index, i);

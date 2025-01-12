@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 use server::action::Action;
 use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
-use server::game::{CulturalInfluenceResolution, Game, GameState};
+use server::game::{CulturalInfluenceResolution, ExploreResolutionState, Game, GameState};
 use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
@@ -38,6 +38,7 @@ pub enum ActiveDialog {
     MoveUnits(MoveSelection),
     CulturalInfluence,
     CulturalInfluenceResolution(CulturalInfluenceResolution),
+    ExploreResolution(ExploreResolutionState),
 
     // status phase
     FreeAdvance,
@@ -72,6 +73,7 @@ impl ActiveDialog {
             ActiveDialog::MoveUnits(_) => "move units",
             ActiveDialog::CulturalInfluence => "cultural influence",
             ActiveDialog::CulturalInfluenceResolution(_) => "cultural influence resolution",
+            ActiveDialog::ExploreResolution(_) => "explore resolution",
             ActiveDialog::FreeAdvance => "free advance",
             ActiveDialog::RazeSize1City => "raze size 1 city",
             ActiveDialog::CompleteObjectives => "complete objectives",
@@ -122,6 +124,9 @@ impl ActiveDialog {
                 c.roll_boost_cost,
                 building_name(c.city_piece)
             )],
+            ActiveDialog::ExploreResolution(_) => {
+                vec!["Click on the new tile to rotate it".to_string()]
+            }
             ActiveDialog::FreeAdvance => {
                 vec!["Click on an advance to take it for free".to_string()]
             }
@@ -449,6 +454,7 @@ impl State {
     #[must_use]
     pub fn game_state_dialog(&self, game: &Game) -> ActiveDialog {
         match &game.state {
+            GameState::Playing | GameState::Finished => ActiveDialog::None,
             GameState::Movement { .. } => ActiveDialog::MoveUnits(MoveSelection::new(
                 game.active_player(),
                 self.focused_tile,
@@ -489,7 +495,7 @@ impl State {
                 }
                 CombatPhase::Retreat => ActiveDialog::Retreat,
             },
-            _ => ActiveDialog::None,
+            GameState::ExploreResolution(r) => ActiveDialog::ExploreResolution(r.clone()),
         }
     }
 

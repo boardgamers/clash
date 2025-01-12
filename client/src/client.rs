@@ -129,7 +129,8 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         | ActiveDialog::MoveUnits(_)
         | ActiveDialog::WaitingForUpdate
         | ActiveDialog::CulturalInfluence
-        | ActiveDialog::PlaceSettler => StateUpdate::None,
+        | ActiveDialog::PlaceSettler
+        | ActiveDialog::ExploreResolution(_) => StateUpdate::None,
         ActiveDialog::DialogChooser(d) => dialog_chooser(rc, d),
         ActiveDialog::Log => show_log(rc),
 

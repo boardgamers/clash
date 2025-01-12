@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 use crate::city::City;
 use crate::city::MoodState::Happy;
-use crate::game::ExploreResolution;
+use crate::game::ExploreResolutionState;
 use crate::player::Player;
 use crate::position::Position;
 use crate::unit::UnitType;
@@ -68,7 +68,7 @@ impl Map {
         }
     }
 
-    pub(crate) fn explore(&mut self, r: &ExploreResolution, rotation: Rotation) {
+    pub(crate) fn explore(&mut self, r: &ExploreResolutionState, rotation: Rotation) {
         let position = &r.block.position;
         self.unexplored_blocks
             .retain(|b| b.position.top_tile != position.top_tile);
