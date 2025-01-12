@@ -27,7 +27,7 @@ pub type IconActionVec<'a> = Vec<IconAction<'a>>;
 
 pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate {
     let pos = city.position;
-    if !city.can_activate() {
+    if !city.can_activate() || rc.shown_player.index != city.player_index {
         return StateUpdate::None;
     }
 

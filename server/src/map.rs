@@ -56,7 +56,8 @@ impl Map {
             .enumerate()
             .for_each(|(i, h)| {
                 map.add_block_tiles(&h.position, &h.block, h.position.rotation);
-                setup_home_city(&mut players[i], h.position.top_tile);
+                let position = h.block.tiles(&h.position, h.position.rotation)[0].0;
+                setup_home_city(&mut players[i], position);
             });
 
         map
@@ -148,13 +149,18 @@ pub struct Block {
 impl Block {
     #[must_use] pub fn tiles(&self, pos: &BlockPosition, rotation: Rotation) -> Vec<(Position, Terrain)> {
         let center = pos.top_tile;
+        let flip = rotation > 2; // need to move the block to keep the tile in place
         BLOCK_RELATIVE_POSITIONS
             .into_iter()
             .enumerate()
             .map(|(i, relative)| {
                 let tile = self.terrain[i].clone();
-                let dest = rotate_around_center(center, relative, rotation);
-                (dest, tile)
+                let src = center.coordinate() + relative.coordinate();
+                let mut dst = src.rotate_around(center.coordinate(), Angle::from_int(rotation as i32));
+                if flip {
+                    dst = dst.neighbors()[rotation - 3];
+                }
+                (Position::from_coordinate(dst), tile)
             })
             .collect()
     }
@@ -339,6 +345,12 @@ const STARTING_BLOCKS: [Block; 2] = [
     },
 ];
 
+// 0 if top
+// 1 if top right
+// 2 if bottom right
+// 3 if bottom
+// 4 if bottom left
+// 5 if top left
 pub type Rotation = usize;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -376,7 +388,7 @@ pub(crate) fn get_map_setup(player_count: usize) -> MapSetup {
             },
             MapHomePosition {
                 position: BlockPosition {
-                    top_tile: Position::from_offset("D8"),
+                    top_tile: Position::from_offset("D7"),
                     rotation: 3,
                 },
                 block: STARTING_BLOCKS[0].clone(),
@@ -428,12 +440,6 @@ pub fn setup_home_city(player: &mut Player, pos: Position) {
     city.mood_state = Happy;
     player.cities.push(city);
     player.add_unit(pos, UnitType::Settler);
-}
-
-fn rotate_around_center(center: Position, relative: Position, rotation: Rotation) -> Position {
-    let pos = center.coordinate() + relative.coordinate();
-    let coordinate = pos.rotate_around(center.coordinate(), Angle::all()[rotation]);
-    Position::from_coordinate(coordinate)
 }
 
 pub(crate) fn move_to_unexplored_tile(
