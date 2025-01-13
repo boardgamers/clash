@@ -498,7 +498,6 @@ pub(crate) fn move_to_unexplored_block(
         return instant_explore(game, move_to, base);
     }
 
-    // todo test this
     // second rule: water must be connected
     let base_has_water_neighbors = water_has_water_neighbors(&game.map, move_to, base);
     let opposite_has_water_neighbors = water_has_water_neighbors(&game.map, move_to, opposite);

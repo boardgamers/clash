@@ -857,6 +857,20 @@ fn test_explore_auto_no_walk_on_water() {
 }
 
 #[test]
+fn test_explore_auto_adjacent_water() {
+    test_action(
+        "explore_auto_adjacent_water",
+        Action::Movement(Move {
+            units: vec![0],
+            destination: Position::from_offset("C7"),
+        }),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
 fn test_explore_resolution() {
     test_action(
         "explore_resolution",
