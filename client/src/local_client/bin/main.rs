@@ -25,7 +25,12 @@ async fn main() {
 
     let args: Vec<String> = env::args().collect();
     let game = if args.len() > 1 && args[1] == "generate" {
-        Game::new(2, "a".repeat(32), true)
+        let seed = if args.len() > 2 {
+            args[2].parse().unwrap()
+        } else {
+            "a".repeat(32)
+        };
+        Game::new(2, seed, true)
     } else {
         setup_local_game()
     };
