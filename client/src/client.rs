@@ -191,16 +191,24 @@ pub fn try_click(rc: &RenderContext) -> StateUpdate {
         return StateUpdate::None;
     }
 
-    if !rc.can_control() {
-        return StateUpdate::SetFocusedTile(pos);
+    if rc.can_control() {
+        let update = controlling_player_click(rc, mouse_pos, pos);
+        if !matches!(update, StateUpdate::None) {
+            return update;
+        }
     }
+    StateUpdate::SetFocusedTile(pos)
+}
 
-    match &state.active_dialog {
+fn controlling_player_click(rc: &RenderContext, mouse_pos: Vec2, pos: Position) -> StateUpdate {
+    match &rc.state.active_dialog {
         ActiveDialog::CollectResources(_) => StateUpdate::None,
-        ActiveDialog::MoveUnits(s) => move_ui::click(pos, s, mouse_pos, game),
-        ActiveDialog::RemoveCasualties(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
-            StateUpdate::OpenDialog(ActiveDialog::RemoveCasualties(new.clone()))
-        }),
+        ActiveDialog::MoveUnits(s) => move_ui::click(pos, s, mouse_pos, rc.game),
+        ActiveDialog::RemoveCasualties(s) => {
+            unit_selection_click(rc, pos, mouse_pos, s, |new| {
+                StateUpdate::OpenDialog(ActiveDialog::RemoveCasualties(new.clone()))
+            })
+        }
         ActiveDialog::ReplaceUnits(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
             StateUpdate::OpenDialog(ActiveDialog::ReplaceUnits(new.clone()))
         }),
