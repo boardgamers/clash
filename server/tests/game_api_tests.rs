@@ -827,3 +827,42 @@ fn test_dont_retreat_and_next_combat_round() {
         false,
     );
 }
+
+#[test]
+fn test_explore_choose() {
+    test_action(
+        "explore_choose",
+        Action::Movement(Move {
+            units: vec![0],
+            destination: Position::from_offset("C7"),
+        }),
+        1,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_explore_auto_no_walk_on_water() {
+    test_action(
+        "explore_auto_no_walk_on_water",
+        Action::Movement(Move {
+            units: vec![0],
+            destination: Position::from_offset("B2"),
+        }),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_explore_resolution() {
+    test_action(
+        "explore_resolution",
+        Action::ExploreResolution(3),
+        1,
+        true,
+        false,
+    );
+}

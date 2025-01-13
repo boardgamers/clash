@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::combat::Combat;
 use crate::combat::{capture_position, execute_combat_action, initiate_combat, CombatPhase};
-use crate::map::{move_to_unexplored_tile, UnexploredBlock};
+use crate::map::{explore_resolution, move_to_unexplored_tile, UnexploredBlock};
 use crate::utils::shuffle;
 use crate::{
     action::Action,
@@ -350,7 +350,8 @@ impl Game {
             .explore_resolution()
             .expect("action should be an explore resolution action");
         self.add_action_log_item(ActionLogItem::ExploreResolution(rotation));
-        self.map.explore_resolution(r, rotation);
+        explore_resolution(self,r, rotation);
+        self.move_units(self.current_player_index, &r.units, r.destination);
         self.back_to_move(&r.move_state);
     }
 
@@ -452,6 +453,18 @@ impl Game {
                 move_state.moved_units.extend(units.iter());
                 move_state.movement_actions_left -= 1;
 
+                let dest_terrain = self
+                    .map
+                    .tiles
+                    .get(&destination)
+                    .expect("destination should be a valid tile");
+                if dest_terrain == &Unexplored
+                    && move_to_unexplored_tile(self, player_index, &units, destination, &move_state)
+                {
+                    // go to explore resolution
+                    return;
+                }
+
                 if let Some(defender) = self.enemy_player(player_index, destination) {
                     if self.move_to_defended_tile(
                         player_index,
@@ -474,16 +487,6 @@ impl Game {
                         }
                         capture_position(self, enemy, destination, player_index);
                     }
-                }
-                let dest_terrain = self
-                    .map
-                    .tiles
-                    .get(&destination)
-                    .expect("destination should be a valid tile");
-                if dest_terrain == &Unexplored
-                    && move_to_unexplored_tile(self, player_index, destination, &move_state)
-                {
-                    return;
                 }
 
                 self.back_to_move(&move_state);
@@ -1133,13 +1136,13 @@ impl Game {
         new_player_index: usize,
         old_player_index: usize,
     ) {
+        let Some(mut city) = self.players[old_player_index].take_city(position) else {
+            return;
+        };
         self.add_to_last_log_item(&format!(
             " and captured {}'s city at {position}",
             self.players[old_player_index].get_name()
         ));
-        let Some(mut city) = self.players[old_player_index].take_city(position) else {
-            return;
-        };
         self.players[new_player_index]
             .gain_resources(ResourcePile::gold(city.mood_modified_size() as i32));
         let settlements_left = self.players[new_player_index].available_settlements > 0;
@@ -1498,6 +1501,8 @@ pub struct ExploreResolutionState {
     #[serde(flatten)]
     pub move_state: MoveState,
     pub block: UnexploredBlock,
+    pub units: Vec<u32>,
+    pub destination: Position,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
