@@ -350,7 +350,7 @@ impl Game {
             .explore_resolution()
             .expect("action should be an explore resolution action");
         self.add_action_log_item(ActionLogItem::ExploreResolution(rotation));
-        explore_resolution(self,r, rotation);
+        explore_resolution(self, r, rotation);
         self.move_units(self.current_player_index, &r.units, r.destination);
         self.back_to_move(&r.move_state);
     }

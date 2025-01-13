@@ -204,11 +204,9 @@ fn controlling_player_click(rc: &RenderContext, mouse_pos: Vec2, pos: Position) 
     match &rc.state.active_dialog {
         ActiveDialog::CollectResources(_) => StateUpdate::None,
         ActiveDialog::MoveUnits(s) => move_ui::click(pos, s, mouse_pos, rc.game),
-        ActiveDialog::RemoveCasualties(s) => {
-            unit_selection_click(rc, pos, mouse_pos, s, |new| {
-                StateUpdate::OpenDialog(ActiveDialog::RemoveCasualties(new.clone()))
-            })
-        }
+        ActiveDialog::RemoveCasualties(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
+            StateUpdate::OpenDialog(ActiveDialog::RemoveCasualties(new.clone()))
+        }),
         ActiveDialog::ReplaceUnits(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
             StateUpdate::OpenDialog(ActiveDialog::ReplaceUnits(new.clone()))
         }),

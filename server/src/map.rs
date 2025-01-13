@@ -158,7 +158,7 @@ impl Block {
     }
 
     #[must_use]
-    pub fn opposite(&self, i: usize) -> Terrain {
+    fn opposite(&self, i: usize) -> Terrain {
         let j = match i {
             0 => 3,
             1 => 2,
@@ -449,7 +449,7 @@ pub fn setup_home_city(player: &mut Player, pos: Position) {
 pub(crate) fn move_to_unexplored_tile(
     game: &mut Game,
     player_index: usize,
-    units: &Vec<u32>,
+    units: &[u32],
     destination: Position,
     move_state: &MoveState,
 ) -> bool {
@@ -460,9 +460,9 @@ pub(crate) fn move_to_unexplored_tile(
                     game,
                     player_index,
                     b,
-                    &units,
+                    units,
                     destination,
-                    &move_state,
+                    move_state,
                 );
             }
         }
@@ -474,7 +474,7 @@ pub(crate) fn move_to_unexplored_block(
     game: &mut Game,
     _player_index: usize,
     move_to: &UnexploredBlock,
-    units: &Vec<u32>,
+    units:  &[u32],
     destination: Position,
     move_state: &MoveState,
 ) -> bool {
@@ -489,7 +489,7 @@ pub(crate) fn move_to_unexplored_block(
         .expect("Destination not in block");
     let unrotated = &block.terrain[i];
     let rotated = &block.opposite(i);
-    
+
     // first rule: don't move into water
     if matches!(unrotated, Terrain::Water) {
         return instant_explore(game, move_to, opposite);
@@ -528,7 +528,7 @@ pub(crate) fn move_to_unexplored_block(
     game.state = GameState::ExploreResolution(ExploreResolutionState {
         block: move_to.clone(),
         move_state: move_state.clone(),
-        units: units.clone(),
+        units: units.to_vec(),
         destination,
     });
 

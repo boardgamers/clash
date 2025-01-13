@@ -1,4 +1,4 @@
-use crate::client_state::{StateUpdate, StateUpdates};
+use crate::client_state::StateUpdate;
 use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
 use crate::layout_ui::{bottom_center_anchor, bottom_center_texture, ICON_SIZE};
 use crate::render_context::RenderContext;

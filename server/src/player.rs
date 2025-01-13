@@ -770,7 +770,7 @@ impl Player {
         if units.is_empty() {
             return Err("no units to move".to_string());
         }
-        
+
         if !starting.is_neighbor(destination) {
             return Err("the destination should be adjacent to the starting position".to_string());
         }
