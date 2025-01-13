@@ -32,7 +32,6 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
     plus: impl Fn(&C, &O) -> StateUpdate,
     minus: impl Fn(&C, &O) -> StateUpdate,
 ) -> StateUpdate {
-    let mut updates = StateUpdates::new();
     let objects = get_objects(container)
         .into_iter()
         .filter(|o| show(container, o))
@@ -64,12 +63,12 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
                 "Remove one",
             )
         {
-            updates.add(minus(container, o));
+            return minus(container, o);
         }
         if c.current < c.max
             && bottom_center_texture(rc, &rc.assets().plus, vec2(x + 15., -ICON_SIZE), "Add one")
         {
-            updates.add(plus(container, o));
+            return plus(container, o);
         };
     }
 
@@ -80,7 +79,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
         return StateUpdate::Cancel;
     };
 
-    updates.result()
+    StateUpdate::None
 }
 
 pub trait ConfirmSelection: Clone {

@@ -91,10 +91,7 @@ fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
             updates.add(show_tile_menu(rc, pos));
         }
     }
-
-    if can_control {
-        updates.add(try_click(rc));
-    }
+    updates.add(try_click(rc));
     updates.result()
 }
 
@@ -180,8 +177,10 @@ pub fn try_click(rc: &RenderContext) -> StateUpdate {
     let mouse_pos = state.camera.screen_to_world(mouse_position().into());
     let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));
 
-    if let ActiveDialog::CulturalInfluence = state.active_dialog {
-        return influence_ui::hover(rc, mouse_pos);
+    if rc.can_control() {
+        if let ActiveDialog::CulturalInfluence = state.active_dialog {
+            return influence_ui::hover(rc, mouse_pos);
+        }
     }
 
     if !game.map.tiles.contains_key(&pos) {
@@ -190,6 +189,10 @@ pub fn try_click(rc: &RenderContext) -> StateUpdate {
 
     if !is_mouse_button_pressed(MouseButton::Left) {
         return StateUpdate::None;
+    }
+
+    if !rc.can_control() {
+        return StateUpdate::SetFocusedTile(pos);
     }
 
     match &state.active_dialog {
