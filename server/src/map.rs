@@ -5,7 +5,6 @@ use std::collections::HashMap;
 
 use crate::city::City;
 use crate::city::MoodState::Happy;
-use crate::game::{ExploreResolutionState, Game, GameState, MoveState};
 use crate::player::Player;
 use crate::position::Position;
 use crate::unit::UnitType;
@@ -28,7 +27,8 @@ impl Map {
 
     pub fn add_unexplored_blocks(&mut self, blocks: Vec<UnexploredBlock>) {
         self.unexplored_blocks.extend(blocks);
-        self.unexplored_blocks.sort_by(|a, b| a.position.top_tile.cmp(&b.position.top_tile));
+        self.unexplored_blocks
+            .sort_by(|a, b| a.position.top_tile.cmp(&b.position.top_tile));
     }
 
     #[must_use]
@@ -71,7 +71,12 @@ impl Map {
         }
     }
 
-    pub(crate) fn add_block_tiles(&mut self, pos: &BlockPosition, block: &Block, rotation: Rotation) {
+    pub(crate) fn add_block_tiles(
+        &mut self,
+        pos: &BlockPosition,
+        block: &Block,
+        rotation: Rotation,
+    ) {
         block
             .tiles(pos, rotation)
             .into_iter()

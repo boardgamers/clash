@@ -85,7 +85,7 @@ pub(crate) fn move_to_unexplored_block(
     let start = game
         .get_player(player_index)
         .get_unit(units[0])
-        .unwrap()
+        .expect("unit not found")
         .position;
     game.state = GameState::ExploreResolution(ExploreResolutionState {
         block: move_to.clone(),
@@ -199,7 +199,8 @@ pub(crate) fn undo_explore_resolution(game: &mut Game, player_index: usize) {
             game.map.tiles.insert(position, Terrain::Unexplored);
         });
 
-    game.map.add_unexplored_blocks(vec![unexplored_block.clone()]);
+    game.map
+        .add_unexplored_blocks(vec![unexplored_block.clone()]);
 
     game.undo_move_units(player_index, s.units.clone(), s.start);
     game.state = GameState::ExploreResolution(s);

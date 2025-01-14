@@ -6,7 +6,8 @@ use serde::{Deserialize, Serialize};
 use crate::combat::Combat;
 use crate::combat::{capture_position, execute_combat_action, initiate_combat, CombatPhase};
 use crate::explore::{
-    explore_resolution, explore_resolution_with_log, move_to_unexplored_tile, undo_explore_resolution,
+    explore_resolution, explore_resolution_with_log, move_to_unexplored_tile,
+    undo_explore_resolution,
 };
 use crate::map::UnexploredBlock;
 use crate::utils::shuffle;
@@ -342,8 +343,8 @@ impl Game {
 
     fn execute_move_with_log(&mut self, action: Action, player_index: usize, m: MoveState) {
         let action = action
-             .movement()
-             .expect("action should be a movement action");
+            .movement()
+            .expect("action should be a movement action");
         self.add_action_log_item(ActionLogItem::Movement(action.clone()));
         self.execute_movement_action(action, player_index, m);
     }
@@ -361,7 +362,9 @@ impl Game {
             // todo: can remove casualties be undone?
             ActionLogItem::Combat(_action) => unimplemented!("retreat can't yet be undone"),
             ActionLogItem::PlaceSettler(_action) => panic!("placing a settler can't be undone"),
-            ActionLogItem::ExploreResolution(_rotation) => undo_explore_resolution(self, player_index),
+            ActionLogItem::ExploreResolution(_rotation) => {
+                undo_explore_resolution(self, player_index);
+            }
         }
         self.action_log_index -= 1;
         self.log.remove(self.log.len() - 1);

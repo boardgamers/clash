@@ -461,10 +461,26 @@ fn test_action(
         assert!(!game.can_undo());
         return;
     }
-    undo_redo(&name, player_index, &original_game, game, &outcome, &expected_game, 0);
+    undo_redo(
+        name,
+        player_index,
+        &original_game,
+        game,
+        &outcome,
+        &expected_game,
+        0,
+    );
 }
 
-fn undo_redo(name: &&str, player_index: usize, original_game: &String, game: Game, outcome: &String, expected_game: &String, cycle: usize) {
+fn undo_redo(
+    name: &str,
+    player_index: usize,
+    original_game: &String,
+    game: Game,
+    outcome: &String,
+    expected_game: &String,
+    cycle: usize,
+) {
     if cycle == 2 {
         return;
     }
@@ -478,19 +494,31 @@ fn undo_redo(name: &&str, player_index: usize, original_game: &String, game: Gam
         &json,
         name,
         name,
-        &format!("UNDO {cycle}: the game did not match the expectation after undoing the {name} action"),
+        &format!(
+            "UNDO {cycle}: the game did not match the expectation after undoing the {name} action"
+        ),
     );
     let game = game_api::execute_action(game, Action::Redo, player_index);
     let json = serde_json::to_string_pretty(&game.cloned_data())
         .expect("game data should be serializable");
     assert_eq_game_json(
-        &expected_game,
+        expected_game,
         &json,
         name,
-        &outcome,
-        &format!("REDO {cycle}: the game did not match the expectation after redoing the {name} action"),
+        outcome,
+        &format!(
+            "REDO {cycle}: the game did not match the expectation after redoing the {name} action"
+        ),
     );
-    undo_redo(name, player_index, original_game, game, outcome, expected_game, cycle + 1);
+    undo_redo(
+        name,
+        player_index,
+        original_game,
+        game,
+        outcome,
+        expected_game,
+        cycle + 1,
+    );
 }
 
 #[test]
