@@ -43,11 +43,6 @@ impl ActionLogItem {
         }
     }
 
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if variant does'nt match with it's contents
     #[must_use]
     pub fn as_action(self) -> Action {
         match self {
