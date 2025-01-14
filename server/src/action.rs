@@ -5,7 +5,7 @@ use crate::status_phase::StatusPhaseAction;
 use crate::unit::MovementAction;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub enum Action {
     Playing(PlayingAction),
     StatusPhase(StatusPhaseAction),
@@ -21,6 +21,15 @@ pub enum Action {
 impl Action {
     #[must_use]
     pub fn playing(self) -> Option<PlayingAction> {
+        if let Self::Playing(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
+
+    #[must_use]
+    pub fn playing_ref(&self) -> Option<&PlayingAction> {
         if let Self::Playing(v) = self {
             Some(v)
         } else {

@@ -1,9 +1,8 @@
 use serde::{Deserialize, Serialize};
 
+use crate::action::Action;
 use crate::content::wonders::construct_wonder;
-use crate::log::{
-    current_turn_log, format_collect_log_item, format_happiness_increase, ActionLogItem,
-};
+use crate::log::{current_turn_log, format_collect_log_item, format_happiness_increase};
 use crate::player::Player;
 use crate::playing_actions::{
     collect, increase_happiness, undo_collect, undo_increase_happiness, Collect, IncreaseHappiness,
@@ -132,7 +131,7 @@ impl CustomActionType {
         match self {
             CustomActionType::FreeEconomyCollect => !current_turn_log(game)
                 .iter()
-                .any(|action| matches!(action, ActionLogItem::Playing(PlayingAction::Collect(_)))),
+                .any(|action| matches!(action, Action::Playing(PlayingAction::Collect(_)))),
             _ => true,
         }
     }

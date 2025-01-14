@@ -14,7 +14,7 @@ use crate::{
     city_pieces::Building::{self, *},
     consts::{AGES, DICE_ROLL_BUFFER},
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
-    log::{self, ActionLogItem},
+    log::{self},
     map::{Map, MapData, Terrain::*},
     player::{Player, PlayerData},
     playing_actions::PlayingAction,
@@ -41,7 +41,7 @@ pub struct Game {
     pub map: Map,
     pub starting_player_index: usize,
     pub current_player_index: usize,
-    pub action_log: Vec<ActionLogItem>,
+    pub action_log: Vec<Action>,
     pub action_log_index: usize,
     pub log: Vec<String>,
     pub undo_limit: usize,
@@ -262,7 +262,7 @@ impl Game {
             .find_map(|player| player.get_city(position))
     }
 
-    pub(crate) fn add_action_log_item(&mut self, item: ActionLogItem) {
+    pub(crate) fn add_action_log_item(&mut self, item: Action) {
         if self.action_log_index < self.action_log.len() {
             self.action_log.drain(self.action_log_index..);
         }
@@ -305,14 +305,14 @@ impl Game {
                 let action = action.playing().expect("action should be a playing action");
                 if self.can_redo()
                     && self.action_log[self.action_log_index]
-                        .as_playing_action()
+                        .playing_ref()
                         .expect("undone actions should be playing actions")
-                        == action
+                        == &action
                 {
                     self.redo(player_index);
                     return;
                 }
-                self.add_action_log_item(ActionLogItem::Playing(action.clone()));
+                self.add_action_log_item(Action::Playing(action.clone()));
                 action.execute(self, player_index);
             }
             StatusPhase(phase) => {
@@ -320,21 +320,21 @@ impl Game {
                     .status_phase()
                     .expect("action should be a status phase action");
                 assert!(phase == action.phase(), "Illegal action");
-                self.add_action_log_item(ActionLogItem::StatusPhase(action.clone()));
+                self.add_action_log_item(Action::StatusPhase(action.clone()));
                 action.execute(self, player_index);
             }
             Movement(m) => {
                 let action = action
                     .movement()
                     .expect("action should be a movement action");
-                self.add_action_log_item(ActionLogItem::Movement(action.clone()));
+                self.add_action_log_item(Action::Movement(action.clone()));
                 self.execute_movement_action(action, player_index, m);
             }
             CulturalInfluenceResolution(c) => {
                 let action = action
                     .cultural_influence_resolution()
                     .expect("action should be a cultural influence resolution action");
-                self.add_action_log_item(ActionLogItem::CulturalInfluenceResolution(action));
+                self.add_action_log_item(Action::CulturalInfluenceResolution(action));
                 self.execute_cultural_influence_resolution_action(
                     action,
                     c.roll_boost_cost,
@@ -346,7 +346,7 @@ impl Game {
             }
             Combat(c) => {
                 let action = action.combat().expect("action should be a combat action");
-                self.add_action_log_item(ActionLogItem::Combat(action.clone()));
+                self.add_action_log_item(Action::Combat(action.clone()));
                 execute_combat_action(self, action, c);
             }
             PlaceSettler(p) => self.place_settler(action, player_index, &p),
@@ -354,7 +354,7 @@ impl Game {
                 let rotation = action
                     .explore_resolution()
                     .expect("action should be an explore resolution action");
-                self.add_action_log_item(ActionLogItem::ExploreResolution(rotation));
+                self.add_action_log_item(Action::ExploreResolution(rotation));
                 explore_resolution(self, &r, rotation);
             }
             Finished => panic!("actions can't be executed when the game is finished"),
@@ -363,20 +363,22 @@ impl Game {
 
     fn undo(&mut self, player_index: usize) {
         match &self.action_log[self.action_log_index - 1] {
-            ActionLogItem::Playing(action) => action.clone().undo(self, player_index),
-            ActionLogItem::StatusPhase(_) => panic!("status phase actions can't be undone"),
-            ActionLogItem::Movement(action) => {
+            Action::Playing(action) => action.clone().undo(self, player_index),
+            Action::StatusPhase(_) => panic!("status phase actions can't be undone"),
+            Action::Movement(action) => {
                 self.undo_movement_action(action.clone(), player_index);
             }
-            ActionLogItem::CulturalInfluenceResolution(action) => {
+            Action::CulturalInfluenceResolution(action) => {
                 self.undo_cultural_influence_resolution_action(*action);
             }
             // todo: can remove casualties be undone?
-            ActionLogItem::Combat(_action) => unimplemented!("retreat can't yet be undone"),
-            ActionLogItem::PlaceSettler(_action) => panic!("placing a settler can't be undone"),
-            ActionLogItem::ExploreResolution(_rotation) => {
+            Action::Combat(_action) => unimplemented!("retreat can't yet be undone"),
+            Action::PlaceSettler(_action) => panic!("placing a settler can't be undone"),
+            Action::ExploreResolution(_rotation) => {
                 undo_explore_resolution(self, player_index);
             }
+            Action::Undo => panic!("undo action can't be undone"),
+            Action::Redo => panic!("redo action can't be undone"),
         }
         self.action_log_index -= 1;
         self.log.remove(self.log.len() - 1);
@@ -384,14 +386,12 @@ impl Game {
 
     fn redo(&mut self, player_index: usize) {
         let action_log_item = &self.action_log[self.action_log_index];
-        self.log.push(log::format_action_log_item(
-            &action_log_item.clone().as_action(),
-            self,
-        ));
+        self.log
+            .push(log::format_action_log_item(&action_log_item.clone(), self));
         match action_log_item {
-            ActionLogItem::Playing(action) => action.clone().execute(self, player_index),
-            ActionLogItem::StatusPhase(_) => panic!("status phase actions can't be redone"),
-            ActionLogItem::Movement(action) => {
+            Action::Playing(action) => action.clone().execute(self, player_index),
+            Action::StatusPhase(_) => panic!("status phase actions can't be redone"),
+            Action::Movement(action) => {
                 let Movement(m) = &self.state else {
                     panic!(
                         "movement actions can only be redone if the game is in a movement state"
@@ -399,7 +399,7 @@ impl Game {
                 };
                 self.execute_movement_action(action.clone(), player_index, m.clone());
             }
-            ActionLogItem::CulturalInfluenceResolution(action) => {
+            Action::CulturalInfluenceResolution(action) => {
                 let CulturalInfluenceResolution(c) = &self.state else {
                     panic!("cultural influence resolution actions can only be redone if the game is in a cultural influence resolution state");
                 };
@@ -412,14 +412,16 @@ impl Game {
                     player_index,
                 );
             }
-            ActionLogItem::Combat(_) => unimplemented!("retreat can't yet be redone"),
-            ActionLogItem::PlaceSettler(_) => panic!("place settler actions can't be redone"),
-            ActionLogItem::ExploreResolution(rotation) => {
+            Action::Combat(_) => unimplemented!("retreat can't yet be redone"),
+            Action::PlaceSettler(_) => panic!("place settler actions can't be redone"),
+            Action::ExploreResolution(rotation) => {
                 let ExploreResolution(r) = &self.state else {
                     panic!("explore resolution actions can only be redone if the game is in a explore resolution state");
                 };
                 explore_resolution(self, &r.clone(), *rotation);
             }
+            Action::Undo => panic!("undo action can't be redone"),
+            Action::Redo => panic!("redo action can't be redone"),
         }
         self.action_log_index += 1;
     }
@@ -614,7 +616,7 @@ impl Game {
     }
 
     fn undo_cultural_influence_resolution_action(&mut self, action: bool) {
-        let cultural_influence_attempt_action = self.action_log[self.action_log_index - 2].as_playing_action().expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
+        let cultural_influence_attempt_action = self.action_log[self.action_log_index - 2].playing_ref().expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
         let PlayingAction::InfluenceCultureAttempt(c) = cultural_influence_attempt_action else {
             panic!("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
         };
@@ -650,7 +652,7 @@ impl Game {
         let action = action
             .place_settler()
             .expect("action should be place_settler action");
-        self.add_action_log_item(ActionLogItem::PlaceSettler(action));
+        self.add_action_log_item(Action::PlaceSettler(action));
         let player = &mut self.players[player_index];
         assert!(player.get_city(action).is_some(), "Illegal action");
         player.add_unit(action, Settler);
@@ -1453,7 +1455,7 @@ pub struct GameData {
     map: MapData,
     starting_player_index: usize,
     current_player_index: usize,
-    action_log: Vec<ActionLogItem>,
+    action_log: Vec<Action>,
     action_log_index: usize,
     log: Vec<String>,
     undo_limit: usize,

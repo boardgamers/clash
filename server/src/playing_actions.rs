@@ -4,9 +4,9 @@ use serde::{Deserialize, Serialize};
 
 use PlayingAction::*;
 
+use crate::action::Action;
 use crate::content::advances;
 use crate::game::{CulturalInfluenceResolution, GameState, MoveState};
-use crate::log::ActionLogItem;
 use crate::{
     city::City,
     city_pieces::Building::{self, *},
@@ -190,9 +190,7 @@ impl PlayingAction {
                 if game.action_log.iter().any(|a| {
                     matches!(
                         a,
-                        ActionLogItem::Playing(PlayingAction::Custom(
-                            CustomAction::FreeEconomyCollect(_)
-                        ))
+                        Action::Playing(PlayingAction::Custom(CustomAction::FreeEconomyCollect(_)))
                     )
                 }) {
                     assert!(game.state == GameState::Playing, "Illegal action");
