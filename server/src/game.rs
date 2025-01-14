@@ -365,6 +365,7 @@ impl Game {
             ActionLogItem::CulturalInfluenceResolution(action) => {
                 self.undo_cultural_influence_resolution_action(*action);
             }
+            // todo: can remove casualties be undone?
             ActionLogItem::Combat(_action) => unimplemented!("retreat can't yet be undone"),
             ActionLogItem::PlaceSettler(_action) => panic!("placing a settler can't be undone"),
             ActionLogItem::ExploreResolution(_rotation) => {

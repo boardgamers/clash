@@ -871,6 +871,20 @@ fn test_explore_auto_adjacent_water() {
 }
 
 #[test]
+fn test_explore_auto_water_outside() {
+    test_action(
+        "explore_auto_water_outside",
+        Action::Movement(Move {
+            units: vec![1],
+            destination: Position::from_offset("F5"),
+        }),
+        1,
+        false,
+        false,
+    );
+}
+
+#[test]
 fn test_explore_resolution() {
     test_action(
         "explore_resolution",

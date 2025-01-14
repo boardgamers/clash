@@ -578,10 +578,15 @@ fn add_block_tiles_with_log(
     block: &Block,
     rotation: Rotation,
 ) {
+    game.map
+        .unexplored_blocks
+        .retain(|b| b.position.top_tile != pos.top_tile);
+    
     let s = block
         .tiles(pos, rotation)
         .into_iter()
         .map(|(position, tile)| format!("{position}={tile:?}"))
+        .sorted()
         .join(", ");
 
     game.add_to_last_log_item(&format!(". Explored tiles {s}"));
@@ -590,9 +595,6 @@ fn add_block_tiles_with_log(
 
 pub(crate) fn explore_resolution(game: &mut Game, r: &ExploreResolutionState, rotation: Rotation) {
     let position = &r.block.position;
-    game.map
-        .unexplored_blocks
-        .retain(|b| b.position.top_tile != position.top_tile);
     let rotate_by = rotation - position.rotation;
     let valid_rotation = rotate_by == 0 || rotate_by == 3;
     assert!(valid_rotation, "Invalid rotation {rotate_by}");
