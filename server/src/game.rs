@@ -5,10 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::combat::Combat;
 use crate::combat::{capture_position, execute_combat_action, initiate_combat, CombatPhase};
-use crate::explore::{
-    explore_resolution, explore_resolution_with_log, move_to_unexplored_tile,
-    undo_explore_resolution,
-};
+use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
 use crate::map::UnexploredBlock;
 use crate::utils::shuffle;
 use crate::{
@@ -326,9 +323,26 @@ impl Game {
                 self.add_action_log_item(ActionLogItem::StatusPhase(action.clone()));
                 action.execute(self, player_index);
             }
-            Movement(m) => self.execute_move_with_log(action, player_index, m),
+            Movement(m) => {
+                let action = action
+                    .movement()
+                    .expect("action should be a movement action");
+                self.add_action_log_item(ActionLogItem::Movement(action.clone()));
+                self.execute_movement_action(action, player_index, m);
+            }
             CulturalInfluenceResolution(c) => {
-                self.cultural_influence_resolution(action, player_index, &c);
+                let action = action
+                    .cultural_influence_resolution()
+                    .expect("action should be a cultural influence resolution action");
+                self.add_action_log_item(ActionLogItem::CulturalInfluenceResolution(action));
+                self.execute_cultural_influence_resolution_action(
+                    action,
+                    c.roll_boost_cost,
+                    c.target_player_index,
+                    c.target_city_position,
+                    c.city_piece,
+                    player_index,
+                );
             }
             Combat(c) => {
                 let action = action.combat().expect("action should be a combat action");
@@ -336,17 +350,15 @@ impl Game {
                 execute_combat_action(self, action, c);
             }
             PlaceSettler(p) => self.place_settler(action, player_index, &p),
-            ExploreResolution(r) => explore_resolution_with_log(self, action, &r),
+            ExploreResolution(r) => {
+                let rotation = action
+                    .explore_resolution()
+                    .expect("action should be an explore resolution action");
+                self.add_action_log_item(ActionLogItem::ExploreResolution(rotation));
+                explore_resolution(self, &r, rotation);
+            }
             Finished => panic!("actions can't be executed when the game is finished"),
         }
-    }
-
-    fn execute_move_with_log(&mut self, action: Action, player_index: usize, m: MoveState) {
-        let action = action
-            .movement()
-            .expect("action should be a movement action");
-        self.add_action_log_item(ActionLogItem::Movement(action.clone()));
-        self.execute_movement_action(action, player_index, m);
     }
 
     fn undo(&mut self, player_index: usize) {
@@ -577,26 +589,6 @@ impl Game {
             );
         }
         self.state = Movement(move_state);
-    }
-
-    fn cultural_influence_resolution(
-        &mut self,
-        action: Action,
-        player_index: usize,
-        c: &CulturalInfluenceResolution,
-    ) {
-        let action = action
-            .cultural_influence_resolution()
-            .expect("action should be a cultural influence resolution action");
-        self.add_action_log_item(ActionLogItem::CulturalInfluenceResolution(action));
-        self.execute_cultural_influence_resolution_action(
-            action,
-            c.roll_boost_cost,
-            c.target_player_index,
-            c.target_city_position,
-            c.city_piece,
-            player_index,
-        );
     }
 
     fn execute_cultural_influence_resolution_action(

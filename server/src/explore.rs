@@ -1,6 +1,4 @@
-use crate::action::Action;
 use crate::game::{ExploreResolutionState, Game, GameState, MoveState, UndoContext};
-use crate::log::ActionLogItem;
 use crate::map::{Block, BlockPosition, Map, Rotation, Terrain, UnexploredBlock};
 use crate::position::Position;
 use itertools::Itertools;
@@ -155,18 +153,6 @@ fn add_block_tiles_with_log(
 
     game.add_to_last_log_item(&format!(". Explored tiles {s}"));
     game.map.add_block_tiles(pos, block, rotation);
-}
-
-pub(crate) fn explore_resolution_with_log(
-    game: &mut Game,
-    action: Action,
-    r: &ExploreResolutionState,
-) {
-    let rotation = action
-        .explore_resolution()
-        .expect("action should be an explore resolution action");
-    game.add_action_log_item(ActionLogItem::ExploreResolution(rotation));
-    explore_resolution(game, r, rotation);
 }
 
 pub(crate) fn explore_resolution(game: &mut Game, r: &ExploreResolutionState, rotation: Rotation) {
