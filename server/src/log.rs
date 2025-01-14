@@ -4,7 +4,6 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 use crate::action::PlayActionCard;
-use crate::map::Rotation;
 use crate::player::Player;
 use crate::playing_actions::{
     Collect, Construct, IncreaseHappiness, InfluenceCultureAttempt, Recruit,
@@ -21,43 +20,6 @@ use crate::{
     unit::{MovementAction, Units},
     utils,
 };
-
-#[derive(Serialize, Deserialize, Clone)]
-pub enum ActionLogItem {
-    Playing(PlayingAction),
-    StatusPhase(StatusPhaseAction),
-    Movement(MovementAction),
-    CulturalInfluenceResolution(bool),
-    Combat(CombatAction),
-    PlaceSettler(Position),
-    ExploreResolution(Rotation),
-}
-
-impl ActionLogItem {
-    #[must_use]
-    pub fn as_playing_action(&self) -> Option<PlayingAction> {
-        if let Self::Playing(v) = self {
-            Some(v.clone())
-        } else {
-            None
-        }
-    }
-
-    #[must_use]
-    pub fn as_action(self) -> Action {
-        match self {
-            Self::Playing(action) => Action::Playing(action),
-            Self::StatusPhase(action) => Action::StatusPhase(action),
-            Self::Movement(action) => Action::Movement(action),
-            Self::CulturalInfluenceResolution(action) => {
-                Action::CulturalInfluenceResolution(action)
-            }
-            Self::Combat(action) => Action::Combat(action),
-            Self::PlaceSettler(action) => Action::PlaceSettler(action),
-            Self::ExploreResolution(rotation) => Action::ExploreResolution(rotation),
-        }
-    }
-}
 
 #[derive(Serialize, Deserialize)]
 pub struct LogSliceOptions {
@@ -471,14 +433,14 @@ fn format_combat_action_log_item(action: &CombatAction, game: &Game) -> String {
 }
 
 #[must_use]
-pub fn current_turn_log(game: &Game) -> Vec<ActionLogItem> {
+pub fn current_turn_log(game: &Game) -> Vec<Action> {
     let from = game.action_log[0..game.action_log_index]
         .iter()
-        .rposition(|action| matches!(action, ActionLogItem::Playing(PlayingAction::EndTurn)))
+        .rposition(|action| matches!(action, Action::Playing(PlayingAction::EndTurn)))
         .unwrap_or(0);
     game.action_log[from..game.action_log_index]
         .iter()
-        .filter(|action| !matches!(action, ActionLogItem::StatusPhase(_)))
+        .filter(|action| !matches!(action, Action::StatusPhase(_)))
         .cloned()
         .collect()
 }
