@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::combat::Combat;
 use crate::combat::{capture_position, execute_combat_action, initiate_combat, CombatPhase};
-use crate::map::{explore_resolution, move_to_unexplored_tile, UnexploredBlock};
+use crate::explore::{explore_resolution, move_to_unexplored_tile};
 use crate::utils::shuffle;
 use crate::{
     action::Action,
@@ -33,6 +33,7 @@ use crate::{
     wonder::Wonder,
 };
 use GameState::*;
+use crate::map::UnexploredBlock;
 
 pub struct Game {
     pub state: GameState,
