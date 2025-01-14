@@ -21,6 +21,7 @@ pub mod combat;
 pub mod consts;
 pub mod content;
 mod events;
+mod explore;
 pub mod game;
 pub mod game_api;
 pub mod game_api_wrapper;

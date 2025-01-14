@@ -461,27 +461,63 @@ fn test_action(
         assert!(!game.can_undo());
         return;
     }
+    undo_redo(
+        name,
+        player_index,
+        &original_game,
+        game,
+        &outcome,
+        &expected_game,
+        0,
+    );
+}
+
+fn undo_redo(
+    name: &str,
+    player_index: usize,
+    original_game: &String,
+    game: Game,
+    outcome: &String,
+    expected_game: &String,
+    cycle: usize,
+) {
+    if cycle == 2 {
+        return;
+    }
     let game = game_api::execute_action(game, Action::Undo, player_index);
     let mut trimmed_game = game.clone();
     trimmed_game.action_log.pop();
     let json = serde_json::to_string_pretty(&trimmed_game.cloned_data())
         .expect("game data should be serializable");
     assert_eq_game_json(
-        &original_game,
+        original_game,
         &json,
         name,
         name,
-        &format!("UNDO: the game did not match the expectation after undoing the {name} action"),
+        &format!(
+            "UNDO {cycle}: the game did not match the expectation after undoing the {name} action"
+        ),
     );
     let game = game_api::execute_action(game, Action::Redo, player_index);
     let json = serde_json::to_string_pretty(&game.cloned_data())
         .expect("game data should be serializable");
     assert_eq_game_json(
-        &expected_game,
+        expected_game,
         &json,
         name,
-        &outcome,
-        &format!("REDO: the game did not match the expectation after redoing the {name} action"),
+        outcome,
+        &format!(
+            "REDO {cycle}: the game did not match the expectation after redoing the {name} action"
+        ),
+    );
+    undo_redo(
+        name,
+        player_index,
+        original_game,
+        game,
+        outcome,
+        expected_game,
+        cycle + 1,
     );
 }
 
@@ -824,6 +860,73 @@ fn test_dont_retreat_and_next_combat_round() {
         Action::Combat(CombatAction::Retreat(false)),
         0,
         false,
+        false,
+    );
+}
+
+#[test]
+fn test_explore_choose() {
+    test_action(
+        "explore_choose",
+        Action::Movement(Move {
+            units: vec![0],
+            destination: Position::from_offset("C7"),
+        }),
+        1,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_explore_auto_no_walk_on_water() {
+    test_action(
+        "explore_auto_no_walk_on_water",
+        Action::Movement(Move {
+            units: vec![0],
+            destination: Position::from_offset("B2"),
+        }),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_explore_auto_adjacent_water() {
+    test_action(
+        "explore_auto_adjacent_water",
+        Action::Movement(Move {
+            units: vec![0],
+            destination: Position::from_offset("C7"),
+        }),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_explore_auto_water_outside() {
+    test_action(
+        "explore_auto_water_outside",
+        Action::Movement(Move {
+            units: vec![1],
+            destination: Position::from_offset("F5"),
+        }),
+        1,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_explore_resolution() {
+    test_action(
+        "explore_resolution",
+        Action::ExploreResolution(3),
+        1,
+        true,
         false,
     );
 }

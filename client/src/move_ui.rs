@@ -96,6 +96,9 @@ impl MoveSelection {
         match start {
             Some(pos) => {
                 let movable_units = movable_units(pos, game, game.get_player(player_index));
+                if movable_units.is_empty() {
+                    return Self::empty(player_index);
+                }
                 MoveSelection {
                     player_index,
                     start: Some(pos),
@@ -103,12 +106,16 @@ impl MoveSelection {
                     units: movable_units,
                 }
             }
-            None => MoveSelection {
-                player_index,
-                start: None,
-                units: vec![],
-                destinations: vec![],
-            },
+            None => Self::empty(player_index),
+        }
+    }
+
+    fn empty(player_index: usize) -> MoveSelection {
+        MoveSelection {
+            player_index,
+            start: None,
+            units: vec![],
+            destinations: vec![],
         }
     }
 }

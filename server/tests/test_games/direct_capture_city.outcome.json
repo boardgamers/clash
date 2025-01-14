@@ -425,7 +425,7 @@
     "\tPlayer1 moved 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1",
     "\nCombat round 1",
     "\tPlayer1 rolled a combined combat value of 25 and gets 5 hits against defending units. Player2 rolled a combined combat value of 2 and gets 0 hits against attacking units.",
-    "\tPlayer1 killed all defending units and captured Player2's city at C1 and captured Player2's city at C1"
+    "\tPlayer1 killed all defending units and captured Player2's city at C1"
   ],
   "undo_limit": 3,
   "actions_left": 1,

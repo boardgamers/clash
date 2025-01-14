@@ -43,11 +43,6 @@ impl ActionLogItem {
         }
     }
 
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if variant does'nt match with it's contents
     #[must_use]
     pub fn as_action(self) -> Action {
         match self {
@@ -89,13 +84,16 @@ pub fn format_action_log_item(action: &Action, game: &Game) -> String {
         }
         Action::Combat(action) => format_combat_action_log_item(action, game),
         Action::PlaceSettler(position) => format_place_settler_log_item(game, *position),
-        Action::ExploreResolution(rotation) => {
-            format!("the exploration was resolved with a rotation of {rotation}")
-        }
+        Action::ExploreResolution(_rotation) => format_explore_action_log_item(game),
         Action::Undo | Action::Redo => {
             panic!("undoing or redoing actions should not be written to the log")
         }
     }
+}
+
+fn format_explore_action_log_item(game: &Game) -> String {
+    let player = game.players[game.active_player()].get_name();
+    format!("{player} chose the orientation of the newly explored tiles")
 }
 
 fn format_place_settler_log_item(game: &Game, position: Position) -> String {

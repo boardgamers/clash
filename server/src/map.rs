@@ -5,7 +5,6 @@ use std::collections::HashMap;
 
 use crate::city::City;
 use crate::city::MoodState::Happy;
-use crate::game::{ExploreResolutionState, Game, GameState, MoveState};
 use crate::player::Player;
 use crate::position::Position;
 use crate::unit::UnitType;
@@ -26,6 +25,12 @@ impl Map {
         }
     }
 
+    pub fn add_unexplored_blocks(&mut self, blocks: Vec<UnexploredBlock>) {
+        self.unexplored_blocks.extend(blocks);
+        self.unexplored_blocks
+            .sort_by(|a, b| a.position.top_tile.cmp(&b.position.top_tile));
+    }
+
     #[must_use]
     pub fn random_map(players: &mut [Player]) -> Self {
         let setup = get_map_setup(players.len());
@@ -41,14 +46,11 @@ impl Map {
             })
             .collect_vec();
 
-        let mut map = Self {
-            tiles: HashMap::new(),
-            unexplored_blocks: unexplored_blocks.clone(),
-        };
-
-        for b in unexplored_blocks {
+        let mut map = Map::new(HashMap::new());
+        for b in &unexplored_blocks {
             map.add_block_tiles(&b.position, &UNEXPLORED_BLOCK, b.position.rotation);
         }
+        map.add_unexplored_blocks(unexplored_blocks);
 
         setup
             .home_positions
@@ -69,18 +71,12 @@ impl Map {
         }
     }
 
-    pub(crate) fn explore_resolution(&mut self, r: &ExploreResolutionState, rotation: Rotation) {
-        let position = &r.block.position;
-        self.unexplored_blocks
-            .retain(|b| b.position.top_tile != position.top_tile);
-        let rotate_by = rotation - position.rotation;
-        let valid_rotation = rotate_by == 0 || rotate_by == 3;
-        assert!(valid_rotation, "Invalid rotation {rotate_by}");
-
-        self.add_block_tiles(position, &r.block.block, rotation);
-    }
-
-    fn add_block_tiles(&mut self, pos: &BlockPosition, block: &Block, rotation: Rotation) {
+    pub(crate) fn add_block_tiles(
+        &mut self,
+        pos: &BlockPosition,
+        block: &Block,
+        rotation: Rotation,
+    ) {
         block
             .tiles(pos, rotation)
             .into_iter()
@@ -144,7 +140,7 @@ pub enum Terrain {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct Block {
-    terrain: [Terrain; 4],
+    pub(crate) terrain: [Terrain; 4],
 }
 
 impl Block {
@@ -166,6 +162,18 @@ impl Block {
                 (Position::from_coordinate(dst), tile)
             })
             .collect()
+    }
+
+    #[must_use]
+    pub(crate) fn opposite(&self, i: usize) -> Terrain {
+        let j = match i {
+            0 => 3,
+            1 => 2,
+            2 => 1,
+            3 => 0,
+            _ => panic!("Invalid index {i}"),
+        };
+        self.terrain[j].clone()
     }
 }
 
@@ -443,37 +451,4 @@ pub fn setup_home_city(player: &mut Player, pos: Position) {
     city.mood_state = Happy;
     player.cities.push(city);
     player.add_unit(pos, UnitType::Settler);
-}
-
-pub(crate) fn move_to_unexplored_tile(
-    game: &mut Game,
-    player_index: usize,
-    move_to: Position,
-    move_state: &MoveState,
-) -> bool {
-    for b in &game.map.unexplored_blocks.clone() {
-        for (position, _tile) in b.block.tiles(&b.position, b.position.rotation) {
-            if position == move_to {
-                return move_to_unexplored_block(game, player_index, b, move_state);
-            }
-        }
-    }
-    panic!("No unexplored tile at {move_to}")
-}
-
-pub(crate) fn move_to_unexplored_block(
-    game: &mut Game,
-    _player_index: usize,
-    move_to: &UnexploredBlock,
-    move_state: &MoveState,
-) -> bool {
-    // todo: check if only one position is possible => return false
-
-    game.lock_undo();
-    game.state = GameState::ExploreResolution(ExploreResolutionState {
-        block: move_to.clone(),
-        move_state: move_state.clone(),
-    });
-
-    true
 }

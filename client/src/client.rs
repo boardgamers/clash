@@ -91,10 +91,7 @@ fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
             updates.add(show_tile_menu(rc, pos));
         }
     }
-
-    if can_control {
-        updates.add(try_click(rc));
-    }
+    updates.add(try_click(rc));
     updates.result()
 }
 
@@ -180,8 +177,10 @@ pub fn try_click(rc: &RenderContext) -> StateUpdate {
     let mouse_pos = state.camera.screen_to_world(mouse_position().into());
     let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));
 
-    if let ActiveDialog::CulturalInfluence = state.active_dialog {
-        return influence_ui::hover(rc, mouse_pos);
+    if rc.can_control() {
+        if let ActiveDialog::CulturalInfluence = state.active_dialog {
+            return influence_ui::hover(rc, mouse_pos);
+        }
     }
 
     if !game.map.tiles.contains_key(&pos) {
@@ -192,9 +191,19 @@ pub fn try_click(rc: &RenderContext) -> StateUpdate {
         return StateUpdate::None;
     }
 
-    match &state.active_dialog {
+    if rc.can_control() {
+        let update = controlling_player_click(rc, mouse_pos, pos);
+        if !matches!(update, StateUpdate::None) {
+            return update;
+        }
+    }
+    StateUpdate::SetFocusedTile(pos)
+}
+
+fn controlling_player_click(rc: &RenderContext, mouse_pos: Vec2, pos: Position) -> StateUpdate {
+    match &rc.state.active_dialog {
         ActiveDialog::CollectResources(_) => StateUpdate::None,
-        ActiveDialog::MoveUnits(s) => move_ui::click(pos, s, mouse_pos, game),
+        ActiveDialog::MoveUnits(s) => move_ui::click(pos, s, mouse_pos, rc.game),
         ActiveDialog::RemoveCasualties(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
             StateUpdate::OpenDialog(ActiveDialog::RemoveCasualties(new.clone()))
         }),
