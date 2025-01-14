@@ -26,6 +26,11 @@ impl Map {
         }
     }
 
+    pub fn add_unexplored_blocks(&mut self, blocks: Vec<UnexploredBlock>) {
+        self.unexplored_blocks.extend(blocks);
+        self.unexplored_blocks.sort_by(|a, b| a.position.top_tile.cmp(&b.position.top_tile));
+    }
+
     #[must_use]
     pub fn random_map(players: &mut [Player]) -> Self {
         let setup = get_map_setup(players.len());
@@ -41,14 +46,11 @@ impl Map {
             })
             .collect_vec();
 
-        let mut map = Self {
-            tiles: HashMap::new(),
-            unexplored_blocks: unexplored_blocks.clone(),
-        };
-
-        for b in unexplored_blocks {
+        let mut map = Map::new(HashMap::new());
+        for b in &unexplored_blocks {
             map.add_block_tiles(&b.position, &UNEXPLORED_BLOCK, b.position.rotation);
         }
+        map.add_unexplored_blocks(unexplored_blocks);
 
         setup
             .home_positions

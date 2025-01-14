@@ -22,6 +22,7 @@
       "units": [
         0
       ],
+      "start": "D7",
       "destination": "C7"
     }
   },
@@ -469,15 +470,29 @@
       },
       {
         "position": {
-          "top_tile": "F2",
+          "top_tile": "B4",
           "rotation": 0
         },
         "block": {
           "terrain": [
             "Water",
-            "Water",
+            "Fertile",
             "Forest",
-            "Forest"
+            "Mountain"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "B6",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Fertile",
+            "Fertile",
+            "Barren"
           ]
         }
       },
@@ -497,34 +512,6 @@
       },
       {
         "position": {
-          "top_tile": "B4",
-          "rotation": 0
-        },
-        "block": {
-          "terrain": [
-            "Water",
-            "Fertile",
-            "Forest",
-            "Mountain"
-          ]
-        }
-      },
-      {
-        "position": {
-          "top_tile": "F4",
-          "rotation": 0
-        },
-        "block": {
-          "terrain": [
-            "Fertile",
-            "Water",
-            "Fertile",
-            "Barren"
-          ]
-        }
-      },
-      {
-        "position": {
           "top_tile": "D5",
           "rotation": 0
         },
@@ -539,13 +526,27 @@
       },
       {
         "position": {
-          "top_tile": "B6",
+          "top_tile": "F2",
           "rotation": 0
         },
         "block": {
           "terrain": [
             "Water",
+            "Water",
+            "Forest",
+            "Forest"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "F4",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
             "Fertile",
+            "Water",
             "Fertile",
             "Barren"
           ]

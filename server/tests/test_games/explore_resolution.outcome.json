@@ -4,9 +4,9 @@
       "movement_actions_left": 2,
       "moved_units": [
         0
-          ]
-        }
-      },
+      ]
+    }
+  },
   "players": [
     {
       "name": null,
@@ -451,15 +451,15 @@
       },
       {
         "position": {
-          "top_tile": "F2",
+          "top_tile": "B4",
           "rotation": 0
         },
         "block": {
           "terrain": [
             "Water",
-            "Water",
+            "Fertile",
             "Forest",
-            "Forest"
+            "Mountain"
           ]
         }
       },
@@ -479,15 +479,29 @@
       },
       {
         "position": {
-          "top_tile": "B4",
+          "top_tile": "D5",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Forest",
+            "Mountain",
+            "Fertile",
+            "Mountain"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "F2",
           "rotation": 0
         },
         "block": {
           "terrain": [
             "Water",
-            "Fertile",
+            "Water",
             "Forest",
-            "Mountain"
+            "Forest"
           ]
         }
       },
@@ -502,20 +516,6 @@
             "Water",
             "Fertile",
             "Barren"
-          ]
-        }
-      },
-      {
-        "position": {
-          "top_tile": "D5",
-          "rotation": 0
-        },
-        "block": {
-          "terrain": [
-            "Forest",
-            "Mountain",
-            "Fertile",
-            "Mountain"
           ]
         }
       },
@@ -814,6 +814,33 @@
         "moved_units": [
           0
         ]
+      }
+    },
+    {
+      "ExploreResolution": {
+        "movement_actions_left": 2,
+        "moved_units": [
+          0
+        ],
+        "block": {
+          "position": {
+            "top_tile": "B6",
+            "rotation": 0
+          },
+          "block": {
+            "terrain": [
+              "Water",
+              "Fertile",
+              "Fertile",
+              "Barren"
+            ]
+          }
+        },
+        "units": [
+          0
+        ],
+        "start": "D7",
+        "destination": "C7"
       }
     }
   ]

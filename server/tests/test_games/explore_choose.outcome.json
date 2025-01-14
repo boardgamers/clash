@@ -22,6 +22,7 @@
       "units": [
         0
       ],
+      "start": "D7",
       "destination": "C7"
     }
   },

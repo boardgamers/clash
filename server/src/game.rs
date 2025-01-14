@@ -5,7 +5,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::combat::Combat;
 use crate::combat::{capture_position, execute_combat_action, initiate_combat, CombatPhase};
-use crate::explore::{explore_resolution, move_to_unexplored_tile};
+use crate::explore::{
+    explore_resolution, explore_resolution_with_log, move_to_unexplored_tile, undo_explore_resolution,
+};
+use crate::map::UnexploredBlock;
 use crate::utils::shuffle;
 use crate::{
     action::Action,
@@ -33,7 +36,6 @@ use crate::{
     wonder::Wonder,
 };
 use GameState::*;
-use crate::map::UnexploredBlock;
 
 pub struct Game {
     pub state: GameState,
@@ -262,7 +264,7 @@ impl Game {
             .find_map(|player| player.get_city(position))
     }
 
-    fn add_action_log_item(&mut self, item: ActionLogItem) {
+    pub(crate) fn add_action_log_item(&mut self, item: ActionLogItem) {
         if self.action_log_index < self.action_log.len() {
             self.action_log.drain(self.action_log_index..);
         }
@@ -323,7 +325,7 @@ impl Game {
                 self.add_action_log_item(ActionLogItem::StatusPhase(action.clone()));
                 action.execute(self, player_index);
             }
-            Movement(m) => self.execute_move(action, player_index, m),
+            Movement(m) => self.execute_move_with_log(action, player_index, m),
             CulturalInfluenceResolution(c) => {
                 self.cultural_influence_resolution(action, player_index, &c);
             }
@@ -333,27 +335,17 @@ impl Game {
                 execute_combat_action(self, action, c);
             }
             PlaceSettler(p) => self.place_settler(action, player_index, &p),
-            ExploreResolution(r) => self.explore_resolution(action, &r),
+            ExploreResolution(r) => explore_resolution_with_log(self, action, &r),
             Finished => panic!("actions can't be executed when the game is finished"),
         }
     }
 
-    fn execute_move(&mut self, action: Action, player_index: usize, m: MoveState) {
+    fn execute_move_with_log(&mut self, action: Action, player_index: usize, m: MoveState) {
         let action = action
-            .movement()
-            .expect("action should be a movement action");
+             .movement()
+             .expect("action should be a movement action");
         self.add_action_log_item(ActionLogItem::Movement(action.clone()));
         self.execute_movement_action(action, player_index, m);
-    }
-
-    fn explore_resolution(&mut self, action: Action, r: &ExploreResolutionState) {
-        let rotation = action
-            .explore_resolution()
-            .expect("action should be an explore resolution action");
-        self.add_action_log_item(ActionLogItem::ExploreResolution(rotation));
-        explore_resolution(self, r, rotation);
-        self.move_units(self.current_player_index, &r.units, r.destination);
-        self.back_to_move(&r.move_state);
     }
 
     fn undo(&mut self, player_index: usize) {
@@ -369,9 +361,7 @@ impl Game {
             // todo: can remove casualties be undone?
             ActionLogItem::Combat(_action) => unimplemented!("retreat can't yet be undone"),
             ActionLogItem::PlaceSettler(_action) => panic!("placing a settler can't be undone"),
-            ActionLogItem::ExploreResolution(_rotation) => {
-                panic!("exploration actions can't be undone")
-            }
+            ActionLogItem::ExploreResolution(_rotation) => undo_explore_resolution(self, player_index),
         }
         self.action_log_index -= 1;
         self.log.remove(self.log.len() - 1);
@@ -409,8 +399,11 @@ impl Game {
             }
             ActionLogItem::Combat(_) => unimplemented!("retreat can't yet be redone"),
             ActionLogItem::PlaceSettler(_) => panic!("place settler actions can't be redone"),
-            ActionLogItem::ExploreResolution(_) => {
-                panic!("exploration actions can't be redone")
+            ActionLogItem::ExploreResolution(rotation) => {
+                let ExploreResolution(r) = &self.state else {
+                    panic!("explore resolution actions can only be redone if the game is in a explore resolution state");
+                };
+                explore_resolution(self, &r.clone(), *rotation);
             }
         }
         self.action_log_index += 1;
@@ -500,10 +493,14 @@ impl Game {
                 None
             }
         };
-        self.undo_context_stack.push(UndoContext::Movement {
+        self.push_undo_context(UndoContext::Movement {
             starting_position,
             move_state: saved_state,
         });
+    }
+
+    pub(crate) fn push_undo_context(&mut self, context: UndoContext) {
+        self.undo_context_stack.push(context);
     }
 
     fn move_to_defended_tile(
@@ -665,7 +662,7 @@ impl Game {
         self.back_to_move(&p.move_state);
     }
 
-    fn back_to_move(&mut self, move_state: &MoveState) {
+    pub(crate) fn back_to_move(&mut self, move_state: &MoveState) {
         self.state = if move_state.movement_actions_left == 0 {
             Playing
         } else {
@@ -976,19 +973,20 @@ impl Game {
             }
             self.set_active_leader(leader_index, player_index);
         }
-        let player = &mut self.players[player_index];
         let mut replaced_units_undo_context = Vec::new();
         for unit in replaced_units {
+            let player = &mut self.players[player_index];
             let unit = player
                 .remove_unit(unit)
                 .expect("the player should have the replaced units");
             player.available_units += &unit.unit_type;
             replaced_units_undo_context.push(unit);
         }
-        self.undo_context_stack.push(UndoContext::Recruit {
+        self.push_undo_context(UndoContext::Recruit {
             replaced_units: replaced_units_undo_context,
             replaced_leader,
         });
+        let player = &mut self.players[player_index];
         let mut ships = Vec::new();
         player.units.reserve_exact(units.len());
         for unit_type in units {
@@ -1375,7 +1373,7 @@ impl Game {
         //todo every player draws 1 action card and 1 objective card
     }
 
-    fn move_units(&mut self, player_index: usize, units: &[u32], destination: Position) {
+    pub(crate) fn move_units(&mut self, player_index: usize, units: &[u32], destination: Position) {
         for unit_id in units {
             self.move_unit(player_index, *unit_id, destination);
         }
@@ -1399,7 +1397,7 @@ impl Game {
         };
     }
 
-    fn undo_move_units(
+    pub(crate) fn undo_move_units(
         &mut self,
         player_index: usize,
         units: Vec<u32>,
@@ -1504,6 +1502,7 @@ pub struct ExploreResolutionState {
     pub move_state: MoveState,
     pub block: UnexploredBlock,
     pub units: Vec<u32>,
+    pub start: Position,
     pub destination: Position,
 }
 
@@ -1543,6 +1542,7 @@ pub enum UndoContext {
         #[serde(flatten)]
         move_state: MoveState,
     },
+    ExploreResolution(ExploreResolutionState),
 }
 
 #[derive(Serialize, Deserialize)]

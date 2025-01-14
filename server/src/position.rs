@@ -3,7 +3,7 @@ use std::fmt::{Debug, Display};
 use hex2d::Coordinate;
 use serde::{Deserialize, Serialize};
 
-#[derive(PartialEq, Eq, Copy, Clone, Hash, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, Copy, Clone, Hash, PartialOrd)]
 pub struct Position {
     pub q: i32,
     pub r: i32,
@@ -93,6 +93,12 @@ impl Debug for Position {
 impl Serialize for Position {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         serializer.serialize_str(&self.to_string())
+    }
+}
+
+impl Ord for Position {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.to_string().cmp(&other.to_string())
     }
 }
 

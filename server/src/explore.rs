@@ -1,7 +1,9 @@
-use itertools::Itertools;
-use crate::game::{ExploreResolutionState, Game, GameState, MoveState};
+use crate::action::Action;
+use crate::game::{ExploreResolutionState, Game, GameState, MoveState, UndoContext};
+use crate::log::ActionLogItem;
 use crate::map::{Block, BlockPosition, Map, Rotation, Terrain, UnexploredBlock};
 use crate::position::Position;
+use itertools::Itertools;
 
 pub(crate) fn move_to_unexplored_tile(
     game: &mut Game,
@@ -29,9 +31,9 @@ pub(crate) fn move_to_unexplored_tile(
 
 pub(crate) fn move_to_unexplored_block(
     game: &mut Game,
-    _player_index: usize,
+    player_index: usize,
     move_to: &UnexploredBlock,
-    units:  &[u32],
+    units: &[u32],
     destination: Position,
     move_state: &MoveState,
 ) -> bool {
@@ -80,10 +82,16 @@ pub(crate) fn move_to_unexplored_block(
     }
 
     game.lock_undo();
+    let start = game
+        .get_player(player_index)
+        .get_unit(units[0])
+        .unwrap()
+        .position;
     game.state = GameState::ExploreResolution(ExploreResolutionState {
         block: move_to.clone(),
         move_state: move_state.clone(),
         units: units.to_vec(),
+        start,
         destination,
     });
 
@@ -137,7 +145,7 @@ fn add_block_tiles_with_log(
     game.map
         .unexplored_blocks
         .retain(|b| b.position.top_tile != pos.top_tile);
-    
+
     let s = block
         .tiles(pos, rotation)
         .into_iter()
@@ -149,6 +157,18 @@ fn add_block_tiles_with_log(
     game.map.add_block_tiles(pos, block, rotation);
 }
 
+pub(crate) fn explore_resolution_with_log(
+    game: &mut Game,
+    action: Action,
+    r: &ExploreResolutionState,
+) {
+    let rotation = action
+        .explore_resolution()
+        .expect("action should be an explore resolution action");
+    game.add_action_log_item(ActionLogItem::ExploreResolution(rotation));
+    explore_resolution(game, r, rotation);
+}
+
 pub(crate) fn explore_resolution(game: &mut Game, r: &ExploreResolutionState, rotation: Rotation) {
     let position = &r.block.position;
     let rotate_by = rotation - position.rotation;
@@ -156,4 +176,31 @@ pub(crate) fn explore_resolution(game: &mut Game, r: &ExploreResolutionState, ro
     assert!(valid_rotation, "Invalid rotation {rotate_by}");
 
     add_block_tiles_with_log(game, position, &r.block.block, rotation);
+    game.move_units(game.current_player_index, &r.units, r.destination);
+    game.back_to_move(&r.move_state);
+    game.push_undo_context(UndoContext::ExploreResolution(r.clone()));
+}
+
+pub(crate) fn undo_explore_resolution(game: &mut Game, player_index: usize) {
+    let Some(UndoContext::ExploreResolution(s)) = game.undo_context_stack.pop() else {
+        panic!("when undoing explore resolution, the undo context stack should have an explore resolution")
+    };
+
+    let unexplored_block = &s.block;
+
+    let block = &unexplored_block.block;
+    block
+        .tiles(
+            &unexplored_block.position,
+            unexplored_block.position.rotation,
+        )
+        .into_iter()
+        .for_each(|(position, _tile)| {
+            game.map.tiles.insert(position, Terrain::Unexplored);
+        });
+
+    game.map.add_unexplored_blocks(vec![unexplored_block.clone()]);
+
+    game.undo_move_units(player_index, s.units.clone(), s.start);
+    game.state = GameState::ExploreResolution(s);
 }
