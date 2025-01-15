@@ -1,15 +1,48 @@
 use macroquad::math::{u32, Vec2};
-
+use macroquad::prelude::Texture2D;
 use server::action::Action;
 use server::game::Game;
 use server::game::GameState::Movement;
 use server::player::Player;
 use server::position::Position;
-use server::unit::{MovementAction, Unit};
+use server::unit::{MovementAction, Unit, UnitType};
 
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::render_context::RenderContext;
 use crate::unit_ui::{click_unit, unit_selection_clicked};
+
+#[derive(Clone)]
+pub enum MoveIntent {
+    Land,
+    Sea,
+    Disembark,
+}
+
+impl MoveIntent {
+    pub fn to_predicate(&self) -> impl Fn(&Unit) -> bool {
+        match self {
+            MoveIntent::Land => |u: &Unit| u.unit_type.is_land_based() && !u.is_transported(),
+            MoveIntent::Sea => |u: &Unit| !u.unit_type.is_land_based(),
+            MoveIntent::Disembark => |u: &Unit| u.is_transported(),
+        }
+    }
+    
+    pub fn toolip(&self) -> &str {
+        match self {
+            MoveIntent::Land => "Move land units",
+            MoveIntent::Sea => "Move sea units",
+            MoveIntent::Disembark => "Disembark units",
+        }
+    }
+    
+    pub fn icon<'a>(&self, rc: &'a RenderContext) -> &'a Texture2D {
+        match self {
+            MoveIntent::Land => &rc.assets().move_units,
+            MoveIntent::Sea => &rc.assets().units[&UnitType::Ship],
+            MoveIntent::Disembark => &rc.assets().export,
+        }
+    }
+}
 
 pub fn possible_destinations(
     game: &Game,
@@ -60,10 +93,10 @@ pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Ve
         let p = game.get_player(s.player_index);
         let unit = click_unit(rc, pos, mouse_pos, p);
         unit.map_or(StateUpdate::None, |unit_id| {
-            let is_carrier = p.get_unit(unit_id).unwrap().carrier_id.is_some();
+            let is_transported = p.get_unit(unit_id).unwrap().is_transported();
             new.start = Some(pos);
             if new.units.is_empty() {
-                new.units = movable_units(pos, game, p, |u| u.carrier_id.is_some() == is_carrier);
+                new.units = movable_units(pos, game, p, |u| u.is_transported() == is_transported);
             } else {
                 unit_selection_clicked(unit_id, &mut new.units);
             }
@@ -95,10 +128,10 @@ pub struct MoveSelection {
 }
 
 impl MoveSelection {
-    pub fn new(player_index: usize, start: Option<Position>, game: &Game) -> MoveSelection {
+    pub fn new(player_index: usize, start: Option<Position>, game: &Game, move_intent: &MoveIntent) -> MoveSelection {
         match start {
             Some(pos) => {
-                let movable_units = movable_units(pos, game, game.get_player(player_index));
+                let movable_units = movable_units(pos, game, game.get_player(player_index), move_intent.to_predicate());
                 if movable_units.is_empty() {
                     return Self::empty(player_index);
                 }

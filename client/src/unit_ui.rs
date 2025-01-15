@@ -75,7 +75,7 @@ fn unit_place(rc: &RenderContext, index: usize, position: Position) -> UnitPlace
     let has_city = rc.game.get_any_city(position).is_some();
     let c = hex_ui::center(position);
     let n = units_on_tile(rc.game, position)
-        .filter(|(_, u)| u.carrier_id.is_none())
+        .filter(|(_, u)| !u.is_transported())
         .count();
     if has_city || n > 4 {
         UnitPlace::new(hex_ui::rotate_around(c, 40.0, (40 * index) + 45), 11.0)
@@ -97,7 +97,7 @@ pub fn click_unit(
     player
         .units
         .iter()
-        .filter(|u| u.position == pos && u.carrier_id.is_none())
+        .filter(|u| u.position == pos && !u.is_transported())
         .enumerate()
         .find_map(|(i, u)| {
             let place = unit_place(rc, i, pos);
@@ -141,7 +141,7 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
         .flat_map(|p| {
             p.units
                 .iter()
-                .filter(|u| u.carrier_id.is_none())
+                .filter(|u| !u.is_transported())
                 .map(move |u| (p.index, u))
         })
         .sorted_by_key(|(_, u)| u.position)

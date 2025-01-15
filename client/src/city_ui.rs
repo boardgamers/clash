@@ -7,7 +7,7 @@ use crate::happiness_ui::{
 };
 use crate::hex_ui::Point;
 use crate::layout_ui::draw_scaled_icon;
-use crate::map_ui::{move_units_button, show_map_action_buttons};
+use crate::map_ui::{move_units_button, move_units_buttons, show_map_action_buttons};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::render_context::RenderContext;
 use crate::resource_ui::ResourceType;
@@ -28,7 +28,6 @@ pub type IconActionVec<'a> = Vec<IconAction<'a>>;
 pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate {
     let base_icons: IconActionVec<'a> = vec![
         increase_happiness_button(rc, city),
-        move_units_button(rc, city.position),
         collect_resources_button(rc, city),
         recruit_button(rc, city),
     ]
@@ -36,10 +35,15 @@ pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate 
     .flatten()
     .collect();
 
-    let icons = vec![base_icons, building_icons(rc, city), wonder_icons(rc, city)]
-        .into_iter()
-        .flatten()
-        .collect();
+    let icons = vec![
+        base_icons,
+        move_units_buttons(rc, city.position),
+        building_icons(rc, city),
+        wonder_icons(rc, city),
+    ]
+    .into_iter()
+    .flatten()
+    .collect();
     show_map_action_buttons(rc, &icons)
 }
 

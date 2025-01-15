@@ -43,7 +43,7 @@ impl Unit {
     pub fn can_attack(&self) -> bool {
         matches!(self.movement_restriction, MovementRestriction::None)
     }
-    
+
     #[must_use]
     pub fn carried_units<'a>(&'a self, game: &'a Game) -> Vec<&'a Unit> {
         game.players[self.player_index]
@@ -63,7 +63,7 @@ impl Unit {
         if !self.unit_type.is_settler() {
             return false;
         }
-        if self.is_transported(game) {
+        if self.is_transported() {
             return false;
         }
         let player = &game.players[self.player_index];
@@ -86,8 +86,8 @@ impl Unit {
     }
 
     #[must_use]
-    pub fn is_transported(&self, game: &Game) -> bool {
-        self.unit_type.is_land_based() && game.map.tiles[&self.position] == Water
+    pub fn is_transported(&self) -> bool {
+        self.carrier_id.is_some()
     }
 
     pub fn restrict_movement(&mut self) {

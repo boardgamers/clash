@@ -26,6 +26,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     if rc.can_play_action(PlayingActionType::MoveUnits)
         && bottom_left_texture(rc, &assets.move_units, icon_pos(0, -3), "Move units")
     {
+        // no move intent, because we don't know what units type the player wants to move
         return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
     }
 
