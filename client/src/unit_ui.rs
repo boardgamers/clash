@@ -5,7 +5,7 @@ use macroquad::shapes::draw_circle;
 
 use server::game::Game;
 use server::position::Position;
-use server::unit::{Unit, UnitType};
+use server::unit::{carried_units, Unit, UnitType};
 
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::select_ui::ConfirmSelection;
@@ -101,11 +101,11 @@ pub fn click_unit(
         .enumerate()
         .find_map(|(i, u)| {
             let place = unit_place(rc, i, pos);
-            let carried_units = u.carried_units(rc.game);
+            let carried_units = carried_units(rc.game, player.index, u.id);
             for (j, carried) in carried_units.iter().enumerate() {
                 let carried_place = carried_unit_place(&place, carried_units.len(), j);
                 if is_in_circle(mouse_pos, carried_place.center, carried_place.radius) {
-                    return Some(carried.id);
+                    return Some(*carried);
                 }
             }
             if is_in_circle(mouse_pos, place.center, place.radius) {
@@ -156,14 +156,15 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
 
                 draw_unit(rc, tooltip, &selected_units, *p, u, &place);
 
-                let carried = u.carried_units(rc.game);
+                let player = rc.game.get_player(*p);
+                let carried = carried_units(rc.game, *p, u.id);
                 carried.iter().enumerate().for_each(|(j, u)| {
                     draw_unit(
                         rc,
                         tooltip,
                         &selected_units,
                         *p,
-                        u,
+                        player.get_unit(*u).unwrap(),
                         &carried_unit_place(&place, carried.len(), j),
                     );
                 });

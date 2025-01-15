@@ -7,6 +7,7 @@ use crate::combat::Combat;
 use crate::combat::{capture_position, execute_combat_action, initiate_combat, CombatPhase};
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
 use crate::map::UnexploredBlock;
+use crate::unit::carried_units;
 use crate::utils::shuffle;
 use crate::{
     action::Action,
@@ -1386,6 +1387,7 @@ impl Game {
             .get_unit_mut(unit_id)
             .expect("the player should have all units to move");
         unit.position = destination;
+
         let terrain = self
             .map
             .tiles
@@ -1397,6 +1399,13 @@ impl Game {
             Forest => unit.restrict_attack(),
             _ => (),
         };
+
+        for id in carried_units(self, player_index, unit_id) {
+            self.players[player_index]
+                .get_unit_mut(id)
+                .expect("the player should have all units to move")
+                .position = destination;
+        }
     }
 
     pub(crate) fn undo_move_units(

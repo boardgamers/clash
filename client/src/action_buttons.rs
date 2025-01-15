@@ -7,7 +7,9 @@ use crate::resource_ui::ResourceType;
 use server::action::Action;
 use server::content::advances::get_advance_by_name;
 use server::content::custom_actions::{CustomAction, CustomActionType};
+use server::map::Terrain;
 use server::playing_actions::{PlayingAction, PlayingActionType};
+use crate::move_ui::MoveIntent;
 
 pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     let assets = rc.assets();
@@ -26,8 +28,11 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     if rc.can_play_action(PlayingActionType::MoveUnits)
         && bottom_left_texture(rc, &assets.move_units, icon_pos(0, -3), "Move units")
     {
-        // no move intent, because we don't know what units type the player wants to move
-        return StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits));
+        return StateUpdate::MoveUnits(if rc.state.focused_tile.is_some_and(|t| matches!(rc.game.map.tiles[&t], Terrain::Water)) {
+            MoveIntent::Sea
+        } else {
+            MoveIntent::Land
+        });
     }
 
     if rc.can_play_action(PlayingActionType::Advance)

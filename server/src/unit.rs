@@ -44,15 +44,6 @@ impl Unit {
         matches!(self.movement_restriction, MovementRestriction::None)
     }
 
-    #[must_use]
-    pub fn carried_units<'a>(&'a self, game: &'a Game) -> Vec<&'a Unit> {
-        game.players[self.player_index]
-            .units
-            .iter()
-            .filter(|u| u.carrier_id == Some(self.id))
-            .collect()
-    }
-
     ///
     ///
     /// # Panics
@@ -432,4 +423,13 @@ mod tests {
             Units::new(0, 1, 0, 0, 0, 0)
         );
     }
+}
+
+#[must_use]
+pub fn carried_units(game: &Game, player_index: usize, carrier: u32) -> Vec<u32> {
+    (&game.players[player_index].units)
+        .into_iter()
+        .filter(|u| u.carrier_id == Some(carrier))
+        .map(|u| u.id)
+        .collect()
 }
