@@ -444,7 +444,7 @@ impl Game {
         mut move_state: MoveState,
     ) {
         let saved_state = move_state.clone();
-        let starting_position = match action {
+        let (starting_position, disembarked_units) = match action {
             Move { units, destination } => {
                 let player = &self.players[player_index];
                 let starting_position = player
@@ -453,6 +453,16 @@ impl Game {
                     ))
                     .expect("the player should have all units to move")
                     .position;
+                let disembarked_units = units
+                    .iter()
+                    .filter_map(|unit| {
+                        let unit = player.get_unit(*unit).expect("unit should exist");
+                        unit.carrier_id.map(|carrier_id| DisembarkUndoContext {
+                            unit_id: unit.id,
+                            carrier_id,
+                        })
+                    })
+                    .collect();
                 player
                     .can_move_units(
                         self,
@@ -508,16 +518,17 @@ impl Game {
                 }
 
                 self.back_to_move(&move_state);
-                Some(starting_position)
+                (Some(starting_position), disembarked_units)
             }
             Stop => {
                 self.state = Playing;
-                None
+                (None, Vec::new())
             }
         };
         self.push_undo_context(UndoContext::Movement {
             starting_position,
             move_state: saved_state,
+            disembarked_units,
         });
     }
 
@@ -578,6 +589,7 @@ impl Game {
         let Some(UndoContext::Movement {
             starting_position,
             move_state,
+            disembarked_units,
         }) = self.undo_context_stack.pop()
         else {
             panic!("when undoing a movement action, the game should have stored movement context")
@@ -594,6 +606,12 @@ impl Game {
                     "undo context should contain the starting position if units where moved",
                 ),
             );
+            for unit in disembarked_units {
+                self.players[player_index]
+                    .get_unit_mut(unit.unit_id)
+                    .expect("unit should exist")
+                    .carrier_id = Some(unit.carrier_id);
+            }
         }
         self.state = Movement(move_state);
     }
@@ -1540,6 +1558,12 @@ impl GameState {
 }
 
 #[derive(Serialize, Deserialize, Clone)]
+pub struct DisembarkUndoContext {
+    unit_id: u32,
+    carrier_id: u32,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
 pub enum UndoContext {
     FoundCity {
         settler: Unit,
@@ -1552,6 +1576,9 @@ pub enum UndoContext {
         starting_position: Option<Position>,
         #[serde(flatten)]
         move_state: MoveState,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        disembarked_units: Vec<DisembarkUndoContext>,
     },
     ExploreResolution(ExploreResolutionState),
 }

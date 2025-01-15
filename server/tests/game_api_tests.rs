@@ -947,3 +947,18 @@ fn test_ship_disembark_capture_empty_city() {
         false,
     );
 }
+
+#[test]
+fn test_ship_disembark() {
+    // undo capture empty city is broken
+    test_action(
+        "ship_disembark",
+        Action::Movement(Move {
+            units: vec![1,2],
+            destination: Position::from_offset("B3"),
+        }),
+        0,
+        true,
+        false,
+    );
+}
