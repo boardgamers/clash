@@ -462,7 +462,13 @@ impl Game {
                         &move_state.moved_units,
                     )
                     .expect("Illegal action");
-                move_state.moved_units.extend(units.iter());
+                move_state.moved_units.extend(units.iter().filter(|unit| {
+                    player
+                        .get_unit(**unit)
+                        .expect("the player should have all units to move")
+                        .unit_type
+                        .is_land_based()
+                }));
                 move_state.movement_actions_left -= 1;
 
                 let dest_terrain = self
@@ -502,7 +508,6 @@ impl Game {
                 }
 
                 self.back_to_move(&move_state);
-                // todo maybe explore should be done here
                 Some(starting_position)
             }
             Stop => {
