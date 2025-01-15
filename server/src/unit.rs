@@ -18,6 +18,7 @@ pub struct Unit {
     pub unit_type: UnitType,
     pub movement_restriction: MovementRestriction,
     pub id: u32,
+    pub carrier_id: Option<u32>,
 }
 
 impl Unit {
@@ -29,6 +30,7 @@ impl Unit {
             unit_type,
             movement_restriction: MovementRestriction::None,
             id,
+            carrier_id: None,
         }
     }
 
@@ -40,6 +42,15 @@ impl Unit {
     #[must_use]
     pub fn can_attack(&self) -> bool {
         matches!(self.movement_restriction, MovementRestriction::None)
+    }
+    
+    #[must_use]
+    pub fn carried_units<'a>(&'a self, game: &'a Game) -> Vec<&'a Unit> {
+        game.players[self.player_index]
+            .units
+            .iter()
+            .filter(|u| u.carrier_id == Some(self.id))
+            .collect()
     }
 
     ///

@@ -70,7 +70,7 @@ pub fn pixel_to_coordinate(p: Vec2) -> Coordinate {
     Coordinate::from_pixel(p.x, p.y, SPACING)
 }
 
-pub fn rotate_around(center: Point, radius: f32, angle_deg: i32) -> Point {
+pub fn rotate_around(center: Point, radius: f32, angle_deg: usize) -> Point {
     rotate_around_rad(center, radius, PI / 180.0 * (angle_deg as f32))
 }
 

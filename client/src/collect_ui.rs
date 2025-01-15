@@ -176,7 +176,7 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpd
                 let center = if possible.len() == 1 {
                     c
                 } else {
-                    hex_ui::rotate_around(c, 30.0, (90 * i) as i32)
+                    hex_ui::rotate_around(c, 30.0, (90 * i))
                 };
                 let color = if col.is_some_and(|r| r == pile) {
                     BLACK
@@ -217,7 +217,7 @@ fn draw_collect_item(rc: &RenderContext, center: Point, resources: &[(ResourceTy
     } else {
         resources.iter().enumerate().for_each(|(j, (r, _))| {
             let size = ICON_SIZE / 2.;
-            let c = hex_ui::rotate_around(center, 10.0, (180 * j) as i32);
+            let c = hex_ui::rotate_around(center, 10.0, 180 * j);
             draw_scaled_icon(
                 rc,
                 &rc.assets().resources[r],

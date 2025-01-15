@@ -18,9 +18,19 @@ use crate::render_context::RenderContext;
 use crate::tooltip::show_tooltip_for_circle;
 use itertools::Itertools;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
+use server::map::Terrain;
 use server::player::Player;
 
-pub const UNIT_RADIUS: f32 = 11.0;
+pub struct UnitPlace {
+    pub center: Point,
+    pub radius: f32,
+}
+
+impl UnitPlace {
+    pub fn new(center: Point, radius: f32) -> UnitPlace {
+        UnitPlace { center, radius }
+    }
+}
 
 pub fn draw_unit_type(
     rc: &RenderContext,
@@ -53,20 +63,52 @@ pub fn draw_unit_type(
     );
 }
 
-fn unit_center(index: u32, position: Position) -> Point {
-    let r = 40.0;
-    hex_ui::rotate_around(hex_ui::center(position), r, (40 * index) as i32 + 45)
+fn carried_unit_place(carrier: &UnitPlace, total: usize, index: usize) -> UnitPlace {
+    let r = carrier.radius / 2.0;
+        UnitPlace::new(
+            hex_ui::rotate_around(carrier.center, r, 180 * index),
+            r,
+        )
 }
 
-pub fn unit_at_pos(pos: Position, mouse_pos: Vec2, player: &Player) -> Option<u32> {
+fn unit_place(rc: &RenderContext, index: usize, position: Position) -> UnitPlace {
+    let has_city = rc.game.get_any_city(position).is_some();
+    let c = hex_ui::center(position);
+    let n = units_on_tile(rc.game, position)
+        .filter(|(_, u)| u.carrier_id.is_none())
+        .count();
+    if has_city || n > 4 {
+        UnitPlace::new(hex_ui::rotate_around(c, 40.0, (40 * index) + 45), 11.0)
+    } else if n == 1 {
+        UnitPlace::new(c, 18.0)
+    } else if n == 2 {
+        UnitPlace::new(hex_ui::rotate_around(c, 27.0, 180 * index), 18.0)
+    } else {
+        UnitPlace::new(hex_ui::rotate_around(c, 27.0, 90 * index), 18.0)
+    }
+}
+
+pub fn click_unit(
+    rc: &RenderContext,
+    pos: Position,
+    mouse_pos: Vec2,
+    player: &Player,
+) -> Option<u32> {
     player
         .units
         .iter()
-        .filter(|u| u.position == pos)
+        .filter(|u| u.position == pos && u.carrier_id.is_none())
         .enumerate()
         .find_map(|(i, u)| {
-            let p = unit_center(i.try_into().unwrap(), pos);
-            if is_in_circle(mouse_pos, p, UNIT_RADIUS) {
+            let place = unit_place(rc, i, pos);
+            let carried_units = u.carried_units(rc.game);
+            for (j, carried) in carried_units.iter().enumerate() {
+                let carried_place = carried_unit_place(&place, carried_units.len(), j);
+                if is_in_circle(mouse_pos, carried_place.center, carried_place.radius) {
+                    return Some(carried.id);
+                }
+            }
+            if is_in_circle(mouse_pos, place.center, place.radius) {
                 Some(u.id)
             } else {
                 None
@@ -92,35 +134,70 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
         _ => vec![],
     };
 
-    let game = rc.game;
-    for (_pos, units) in &game
+    for (_pos, on_tile) in &rc
+        .game
         .players
         .iter()
-        .flat_map(|p| p.units.iter().map(move |u| (p.index, u)))
+        .flat_map(|p| {
+            p.units
+                .iter()
+                .filter(|u| u.carrier_id.is_none())
+                .map(move |u| (p.index, u))
+        })
         .sorted_by_key(|(_, u)| u.position)
         .chunk_by(|(_, a)| a.position)
     {
-        let vec = units.collect::<Vec<_>>();
-        vec.iter().enumerate().for_each(|(i, (p, u))| {
-            if tooltip {
-                let army_move = game
-                    .get_player(*p)
-                    .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
-                let center = unit_center(i.try_into().unwrap(), u.position).to_vec2();
-                show_tooltip_for_circle(rc, &unit_label(u, army_move), center, UNIT_RADIUS);
-            } else {
-                let selected = *p == game.active_player() && selected_units.contains(&u.id);
-                draw_unit_type(
-                    rc,
-                    selected,
-                    unit_center(i.try_into().unwrap(), u.position),
-                    &u.unit_type,
-                    u.player_index,
-                    "",
-                    UNIT_RADIUS,
-                );
-            }
-        });
+        on_tile
+            .collect::<Vec<_>>()
+            .iter()
+            .enumerate()
+            .for_each(|(i, (p, u))| {
+                let place = unit_place(rc, i, u.position);
+
+                draw_unit(rc, tooltip, &selected_units, *p, u, &place);
+
+                let carried = u.carried_units(rc.game);
+                carried.iter().enumerate().for_each(|(j, u)| {
+                    draw_unit(
+                        rc,
+                        tooltip,
+                        &selected_units,
+                        *p,
+                        u,
+                        &carried_unit_place(&place, carried.len(), j),
+                    );
+                });
+            });
+    }
+}
+
+fn draw_unit(
+    rc: &RenderContext,
+    tooltip: bool,
+    selected_units: &[u32],
+    player_index: usize,
+    unit: &Unit,
+    place: &UnitPlace,
+) {
+    let center = place.center;
+    let radius = place.radius;
+    let game = &rc.game;
+    if tooltip {
+        let army_move = game
+            .get_player(player_index)
+            .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
+        show_tooltip_for_circle(rc, &unit_label(unit, army_move), center.to_vec2(), radius);
+    } else {
+        let selected = player_index == game.active_player() && selected_units.contains(&unit.id);
+        draw_unit_type(
+            rc,
+            selected,
+            center,
+            &unit.unit_type,
+            unit.player_index,
+            "",
+            radius,
+        );
     }
 }
 
@@ -136,7 +213,7 @@ pub fn unit_selection_click<T: UnitSelection>(
     sel: &T,
     on_change: impl Fn(T) -> StateUpdate,
 ) -> StateUpdate {
-    if let Some(unit_id) = unit_at_pos(pos, mouse_pos, rc.shown_player) {
+    if let Some(unit_id) = click_unit(rc, pos, mouse_pos, rc.shown_player) {
         if sel.can_select(rc.game, rc.shown_player.get_unit(unit_id).unwrap()) {
             let mut new = sel.clone();
             unit_selection_clicked(unit_id, new.selected_units_mut());

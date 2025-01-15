@@ -167,13 +167,15 @@ fn highlight_if(b: bool) -> f32 {
 }
 
 pub fn show_tile_menu(rc: &RenderContext, pos: Position) -> StateUpdate {
-    if let Some(c) = rc.game.get_any_city(pos) {
-        return show_city_menu(rc, c);
+    if let Some(city) = rc.game.get_any_city(pos) {
+        if city.can_activate() && rc.shown_player.index == city.player_index {
+            return show_city_menu(rc, city);
+        }
     };
 
     show_map_action_buttons(
         rc,
-        &vec![move_units_button(rc, pos), found_city_button(rc, pos)]
+        &vec![move_units_button(rc, pos,|u|true), found_city_button(rc, pos)]
             .into_iter()
             .flatten()
             .collect(),
@@ -214,9 +216,9 @@ fn found_city_button<'a>(rc: &'a RenderContext<'a>, pos: Position) -> Option<Ico
     }
 }
 
-pub fn move_units_button<'a>(rc: &'a RenderContext, pos: Position) -> Option<IconAction<'a>> {
+pub fn move_units_button<'a>(rc: &'a RenderContext, pos: Position, pred: impl Fn(&Unit) -> bool) -> Option<IconAction<'a>> {
     if !rc.can_play_action(PlayingActionType::MoveUnits)
-        || movable_units(pos, rc.game, rc.shown_player).is_empty()
+        || movable_units(pos, rc.game, rc.shown_player, pred).is_empty()
     {
         return None;
     }

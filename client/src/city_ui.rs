@@ -26,14 +26,9 @@ pub type IconAction<'a> = (&'a Texture2D, String, Box<dyn Fn() -> StateUpdate + 
 pub type IconActionVec<'a> = Vec<IconAction<'a>>;
 
 pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate {
-    let pos = city.position;
-    if !city.can_activate() || rc.shown_player.index != city.player_index {
-        return StateUpdate::None;
-    }
-
     let base_icons: IconActionVec<'a> = vec![
         increase_happiness_button(rc, city),
-        move_units_button(rc, pos),
+        move_units_button(rc, city.position),
         collect_resources_button(rc, city),
         recruit_button(rc, city),
     ]
@@ -304,7 +299,7 @@ pub fn draw_city(rc: &RenderContext, city: &City) {
     }
 }
 
-pub fn building_position(city: &City, center: Point, i: i32, building: Building) -> Point {
+pub fn building_position(city: &City, center: Point, i: usize, building: Building) -> Point {
     if matches!(building, Building::Port) {
         let r: f32 = city
             .position

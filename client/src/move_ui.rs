@@ -5,10 +5,11 @@ use server::game::Game;
 use server::game::GameState::Movement;
 use server::player::Player;
 use server::position::Position;
-use server::unit::MovementAction;
+use server::unit::{MovementAction, Unit};
 
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::unit_ui::{unit_at_pos, unit_selection_clicked};
+use crate::render_context::RenderContext;
+use crate::unit_ui::{click_unit, unit_selection_clicked};
 
 pub fn possible_destinations(
     game: &Game,
@@ -43,7 +44,7 @@ pub fn possible_destinations(
         .collect::<Vec<_>>()
 }
 
-pub fn click(pos: Position, s: &MoveSelection, mouse_pos: Vec2, game: &Game) -> StateUpdate {
+pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Vec2) -> StateUpdate {
     if s.destinations.contains(&pos) {
         let units = s.units.clone();
         StateUpdate::execute(Action::Movement(MovementAction::Move {
@@ -54,13 +55,15 @@ pub fn click(pos: Position, s: &MoveSelection, mouse_pos: Vec2, game: &Game) -> 
         // first need to deselect units
         StateUpdate::None
     } else {
+        let game = rc.game;
         let mut new = s.clone();
         let p = game.get_player(s.player_index);
-        let unit = unit_at_pos(pos, mouse_pos, p);
+        let unit = click_unit(rc, pos, mouse_pos, p);
         unit.map_or(StateUpdate::None, |unit_id| {
+            let is_carrier = p.get_unit(unit_id).unwrap().carrier_id.is_some();
             new.start = Some(pos);
             if new.units.is_empty() {
-                new.units = movable_units(pos, game, p);
+                new.units = movable_units(pos, game, p, |u| u.carrier_id.is_some() == is_carrier);
             } else {
                 unit_selection_clicked(unit_id, &mut new.units);
             }
@@ -75,10 +78,10 @@ pub fn click(pos: Position, s: &MoveSelection, mouse_pos: Vec2, game: &Game) -> 
     }
 }
 
-pub fn movable_units(pos: Position, game: &Game, p: &Player) -> Vec<u32> {
+pub fn movable_units(pos: Position, game: &Game, p: &Player, pred: impl Fn(&Unit) -> bool) -> Vec<u32> {
     p.units
         .iter()
-        .filter(|u| !possible_destinations(game, pos, p.index, &[u.id]).is_empty())
+        .filter(|u| pred(u) && !possible_destinations(game, pos, p.index, &[u.id]).is_empty())
         .map(|u| u.id)
         .collect()
 }

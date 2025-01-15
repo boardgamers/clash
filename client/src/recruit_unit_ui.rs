@@ -196,7 +196,7 @@ impl ConfirmSelection for RecruitSelection {
         ) {
             OkTooltip::Valid("Recruit units".to_string())
         } else {
-            OkTooltip::Invalid("Not enough resources".to_string())
+            OkTooltip::Invalid("Replace exact amount of units".to_string())
         }
     }
 }

@@ -203,7 +203,7 @@ pub fn try_click(rc: &RenderContext) -> StateUpdate {
 fn controlling_player_click(rc: &RenderContext, mouse_pos: Vec2, pos: Position) -> StateUpdate {
     match &rc.state.active_dialog {
         ActiveDialog::CollectResources(_) => StateUpdate::None,
-        ActiveDialog::MoveUnits(s) => move_ui::click(pos, s, mouse_pos, rc.game),
+        ActiveDialog::MoveUnits(s) => move_ui::click(rc, pos, s, mouse_pos),
         ActiveDialog::RemoveCasualties(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
             StateUpdate::OpenDialog(ActiveDialog::RemoveCasualties(new.clone()))
         }),
