@@ -63,7 +63,7 @@ fn format_place_settler_log_item(game: &Game, position: Position) -> String {
         .state
         .settler_placer()
         .expect("the game should be in the place settler state")]
-        .get_name();
+    .get_name();
     format!("{player} placed a settler in the city at {position}")
 }
 
@@ -223,10 +223,10 @@ pub(crate) fn format_collect_log_item(player: &Player, player_name: &str, c: &Co
     );
     let total = if collections.len() > 1
         && collections
-        .iter()
-        .permutations(2)
-        .unique()
-        .any(|permutation| permutation[0].1.has_common_resource(&permutation[1].1))
+            .iter()
+            .permutations(2)
+            .unique()
+            .any(|permutation| permutation[0].1.has_common_resource(&permutation[1].1))
     {
         format!(
             " for a total of {}",
@@ -351,7 +351,7 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
             } else {
                 "marched"
             };
-            format!("\t{player_name} {verb} {units_str} from {start} to {destination}", )
+            format!("\t{player_name} {verb} {units_str} from {start} to {destination}",)
         }
         MovementAction::Stop => format!("\t{player_name} ended the movement action"),
     }

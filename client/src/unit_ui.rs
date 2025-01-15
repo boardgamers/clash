@@ -18,7 +18,6 @@ use crate::render_context::RenderContext;
 use crate::tooltip::show_tooltip_for_circle;
 use itertools::Itertools;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
-use server::map::Terrain;
 use server::player::Player;
 
 pub struct UnitPlace {
@@ -63,12 +62,9 @@ pub fn draw_unit_type(
     );
 }
 
-fn carried_unit_place(carrier: &UnitPlace, total: usize, index: usize) -> UnitPlace {
+fn carried_unit_place(carrier: &UnitPlace, index: usize) -> UnitPlace {
     let r = carrier.radius / 2.0;
-        UnitPlace::new(
-            hex_ui::rotate_around(carrier.center, r, 180 * index),
-            r,
-        )
+    UnitPlace::new(hex_ui::rotate_around(carrier.center, r, 180 * index), r)
 }
 
 fn unit_place(rc: &RenderContext, index: usize, position: Position) -> UnitPlace {
@@ -103,7 +99,7 @@ pub fn click_unit(
             let place = unit_place(rc, i, pos);
             let carried_units = carried_units(rc.game, player.index, u.id);
             for (j, carried) in carried_units.iter().enumerate() {
-                let carried_place = carried_unit_place(&place, carried_units.len(), j);
+                let carried_place = carried_unit_place(&place, j);
                 if is_in_circle(mouse_pos, carried_place.center, carried_place.radius) {
                     return Some(*carried);
                 }
@@ -165,7 +161,7 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
                         &selected_units,
                         *p,
                         player.get_unit(*u).unwrap(),
-                        &carried_unit_place(&place, carried.len(), j),
+                        &carried_unit_place(&place, j),
                     );
                 });
             });

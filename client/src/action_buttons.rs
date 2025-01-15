@@ -2,14 +2,13 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
 use crate::happiness_ui::{can_play_increase_happiness, open_increase_happiness_dialog};
 use crate::layout_ui::{bottom_left_texture, icon_pos};
+use crate::move_ui::MoveIntent;
 use crate::render_context::RenderContext;
 use crate::resource_ui::ResourceType;
 use server::action::Action;
 use server::content::advances::get_advance_by_name;
 use server::content::custom_actions::{CustomAction, CustomActionType};
-use server::map::Terrain;
 use server::playing_actions::{PlayingAction, PlayingActionType};
-use crate::move_ui::MoveIntent;
 
 pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     let assets = rc.assets();
@@ -28,11 +27,17 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     if rc.can_play_action(PlayingActionType::MoveUnits)
         && bottom_left_texture(rc, &assets.move_units, icon_pos(0, -3), "Move units")
     {
-        return StateUpdate::MoveUnits(if rc.state.focused_tile.is_some_and(|t| rc.game.map.tiles[&t].is_water()) {
-            MoveIntent::Sea
-        } else {
-            MoveIntent::Land
-        });
+        return StateUpdate::MoveUnits(
+            if rc
+                .state
+                .focused_tile
+                .is_some_and(|t| rc.game.map.tiles[&t].is_water())
+            {
+                MoveIntent::Sea
+            } else {
+                MoveIntent::Land
+            },
+        );
     }
 
     if rc.can_play_action(PlayingActionType::Advance)

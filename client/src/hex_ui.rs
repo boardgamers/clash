@@ -4,7 +4,7 @@ use crate::layout_ui::draw_scaled_icon;
 use crate::render_context::RenderContext;
 use hex2d::{Coordinate, Spacing};
 use macroquad::color::Color;
-use macroquad::math::{f32, i32, vec2, Vec2};
+use macroquad::math::{f32, vec2, Vec2};
 use macroquad::prelude::{
     draw_texture_ex, DrawTextureParams, Rect, Texture2D, BEIGE, DARKGRAY, WHITE,
 };

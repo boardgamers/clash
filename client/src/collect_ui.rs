@@ -15,7 +15,7 @@ use crate::resource_ui::{
     new_resource_map, resource_name, resource_types, show_resource_pile, ResourceType,
 };
 use macroquad::color::BLACK;
-use macroquad::math::{i32, vec2};
+use macroquad::math::vec2;
 use macroquad::prelude::WHITE;
 use macroquad::shapes::draw_circle;
 use server::action::Action;
@@ -176,7 +176,7 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpd
                 let center = if possible.len() == 1 {
                     c
                 } else {
-                    hex_ui::rotate_around(c, 30.0, (90 * i))
+                    hex_ui::rotate_around(c, 30.0, 90 * i)
                 };
                 let color = if col.is_some_and(|r| r == pile) {
                     BLACK

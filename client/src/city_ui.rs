@@ -7,7 +7,7 @@ use crate::happiness_ui::{
 };
 use crate::hex_ui::Point;
 use crate::layout_ui::draw_scaled_icon;
-use crate::map_ui::{move_units_button, move_units_buttons, show_map_action_buttons};
+use crate::map_ui::{move_units_buttons, show_map_action_buttons};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::render_context::RenderContext;
 use crate::resource_ui::ResourceType;

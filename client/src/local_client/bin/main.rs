@@ -193,14 +193,41 @@ pub fn setup_local_game() -> Game {
 
     add_unit(&mut game, "C2", player_index1, UnitType::Ship);
 
-    let ship_id = game.players[player_index1].units.iter().find(|u| u.unit_type == UnitType::Ship).map(|u| u.id).unwrap();
-    let elephant = game.players[player_index1].units.iter().find(|u| u.unit_type == UnitType::Elephant).map(|u| u.id).unwrap();
-    let cavalry = game.players[player_index1].units.iter().find(|u| u.unit_type == UnitType::Cavalry).map(|u| u.id).unwrap();
+    let ship_id = game.players[player_index1]
+        .units
+        .iter()
+        .find(|u| u.unit_type == UnitType::Ship)
+        .map(|u| u.id)
+        .unwrap();
+    let elephant = game.players[player_index1]
+        .units
+        .iter()
+        .find(|u| u.unit_type == UnitType::Elephant)
+        .map(|u| u.id)
+        .unwrap();
+    let cavalry = game.players[player_index1]
+        .units
+        .iter()
+        .find(|u| u.unit_type == UnitType::Cavalry)
+        .map(|u| u.id)
+        .unwrap();
 
-    game.players[player_index1].get_unit_mut(elephant).unwrap().carrier_id = Some(ship_id);
-    game.players[player_index1].get_unit_mut(elephant).unwrap().position = Position::from_offset("C3");
-    game.players[player_index1].get_unit_mut(cavalry).unwrap().carrier_id = Some(ship_id);
-    game.players[player_index1].get_unit_mut(cavalry).unwrap().position = Position::from_offset("C3");
+    game.players[player_index1]
+        .get_unit_mut(elephant)
+        .unwrap()
+        .carrier_id = Some(ship_id);
+    game.players[player_index1]
+        .get_unit_mut(elephant)
+        .unwrap()
+        .position = Position::from_offset("C3");
+    game.players[player_index1]
+        .get_unit_mut(cavalry)
+        .unwrap()
+        .carrier_id = Some(ship_id);
+    game.players[player_index1]
+        .get_unit_mut(cavalry)
+        .unwrap()
+        .position = Position::from_offset("C3");
 
     game.players[player_index1]
         .get_city_mut(Position::from_offset("A1"))

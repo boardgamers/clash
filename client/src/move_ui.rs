@@ -111,7 +111,12 @@ pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Ve
     }
 }
 
-pub fn movable_units(pos: Position, game: &Game, p: &Player, pred: impl Fn(&Unit) -> bool) -> Vec<u32> {
+pub fn movable_units(
+    pos: Position,
+    game: &Game,
+    p: &Player,
+    pred: impl Fn(&Unit) -> bool,
+) -> Vec<u32> {
     p.units
         .iter()
         .filter(|u| pred(u) && !possible_destinations(game, pos, p.index, &[u.id]).is_empty())
@@ -128,10 +133,20 @@ pub struct MoveSelection {
 }
 
 impl MoveSelection {
-    pub fn new(player_index: usize, start: Option<Position>, game: &Game, move_intent: &MoveIntent) -> MoveSelection {
+    pub fn new(
+        player_index: usize,
+        start: Option<Position>,
+        game: &Game,
+        move_intent: &MoveIntent,
+    ) -> MoveSelection {
         match start {
             Some(pos) => {
-                let movable_units = movable_units(pos, game, game.get_player(player_index), move_intent.to_predicate());
+                let movable_units = movable_units(
+                    pos,
+                    game,
+                    game.get_player(player_index),
+                    move_intent.to_predicate(),
+                );
                 if movable_units.is_empty() {
                     return Self::empty(player_index);
                 }

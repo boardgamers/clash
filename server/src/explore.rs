@@ -110,7 +110,7 @@ fn water_has_water_neighbors(
     has_neighbors(unexplored_block, rotation, |p| {
         map.tiles
             .get(p)
-            .map_or(false, |t| t.is_water())
+            .map_or(false, super::map::Terrain::is_water)
     })
 }
 

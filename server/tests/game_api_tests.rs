@@ -939,7 +939,7 @@ fn test_ship_disembark_capture_empty_city() {
     test_action(
         "ship_disembark_capture_empty_city",
         Action::Movement(Move {
-            units: vec![1,2],
+            units: vec![1, 2],
             destination: Position::from_offset("B2"),
         }),
         0,
@@ -954,7 +954,7 @@ fn test_ship_disembark() {
     test_action(
         "ship_disembark",
         Action::Movement(Move {
-            units: vec![1,2],
+            units: vec![1, 2],
             destination: Position::from_offset("B3"),
         }),
         0,

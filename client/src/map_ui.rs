@@ -220,7 +220,7 @@ pub fn move_units_button<'a>(
     pos: Position,
     move_intent: MoveIntent,
 ) -> Option<IconAction<'a>> {
-     if !rc.can_play_action(PlayingActionType::MoveUnits)
+    if !rc.can_play_action(PlayingActionType::MoveUnits)
         || movable_units(pos, rc.game, rc.shown_player, move_intent.to_predicate()).is_empty()
     {
         return None;
@@ -228,8 +228,8 @@ pub fn move_units_button<'a>(
     Some((
         move_intent.icon(rc),
         move_intent.toolip().to_string(),
-        Box::new(move || StateUpdate::MoveUnits(move_intent.clone())
-        )))
+        Box::new(move || StateUpdate::MoveUnits(move_intent.clone())),
+    ))
 }
 
 pub fn move_units_buttons<'a>(rc: &'a RenderContext, pos: Position) -> Vec<IconAction<'a>> {
