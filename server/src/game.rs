@@ -1455,6 +1455,12 @@ impl Game {
                 Forest => unit.undo_attack_restriction(),
                 _ => (),
             };
+            for id in &carried_units(self, player_index, unit_id) {
+                self.players[player_index]
+                    .get_unit_mut(*id)
+                    .expect("the player should have all units to move")
+                    .position = starting_position;
+            }
         }
     }
 
