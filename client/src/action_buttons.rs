@@ -28,7 +28,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     if rc.can_play_action(PlayingActionType::MoveUnits)
         && bottom_left_texture(rc, &assets.move_units, icon_pos(0, -3), "Move units")
     {
-        return StateUpdate::MoveUnits(if rc.state.focused_tile.is_some_and(|t| matches!(rc.game.map.tiles[&t], Terrain::Water)) {
+        return StateUpdate::MoveUnits(if rc.state.focused_tile.is_some_and(|t| rc.game.map.tiles[&t].is_water()) {
             MoveIntent::Sea
         } else {
             MoveIntent::Land

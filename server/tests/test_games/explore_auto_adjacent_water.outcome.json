@@ -782,7 +782,7 @@
     "\tPlayer1 moved 1 settler from D5 to C6",
     "\tPlayer1 ended the movement action",
     "Player1 used a move units action",
-    "\tPlayer1 moved 1 settler from C6 to C7. Explored tiles A7=Barren, B6=Water, B7=Fertile, C7=Forest"
+    "\tPlayer1 marched 1 settler from C6 to C7. Explored tiles A7=Barren, B6=Water, B7=Fertile, C7=Forest"
   ],
   "undo_limit": 40,
   "actions_left": 1,

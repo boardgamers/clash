@@ -26,7 +26,7 @@ impl MoveIntent {
             MoveIntent::Disembark => |u: &Unit| u.is_transported(),
         }
     }
-    
+
     pub fn toolip(&self) -> &str {
         match self {
             MoveIntent::Land => "Move land units",
@@ -34,7 +34,7 @@ impl MoveIntent {
             MoveIntent::Disembark => "Disembark units",
         }
     }
-    
+
     pub fn icon<'a>(&self, rc: &'a RenderContext) -> &'a Texture2D {
         match self {
             MoveIntent::Land => &rc.assets().move_units,

@@ -1043,7 +1043,7 @@
     "Player1 ended his turn with 2 actions left",
     "It's Player2's turn",
     "Player2 used a move units action",
-    "\tPlayer2 moved 1 settler from E6 to F5. Explored tiles E5=Mountain, F4=Barren, F5=Mountain, G5=Water"
+    "\tPlayer2 marched 1 settler from E6 to F5. Explored tiles E5=Mountain, F4=Barren, F5=Mountain, G5=Water"
   ],
   "undo_limit": 69,
   "actions_left": 2,

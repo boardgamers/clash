@@ -63,7 +63,7 @@ fn format_place_settler_log_item(game: &Game, position: Position) -> String {
         .state
         .settler_placer()
         .expect("the game should be in the place settler state")]
-    .get_name();
+        .get_name();
     format!("{player} placed a settler in the city at {position}")
 }
 
@@ -223,10 +223,10 @@ pub(crate) fn format_collect_log_item(player: &Player, player_name: &str, c: &Co
     );
     let total = if collections.len() > 1
         && collections
-            .iter()
-            .permutations(2)
-            .unique()
-            .any(|permutation| permutation[0].1.has_common_resource(&permutation[1].1))
+        .iter()
+        .permutations(2)
+        .unique()
+        .any(|permutation| permutation[0].1.has_common_resource(&permutation[1].1))
     {
         format!(
             " for a total of {}",
@@ -313,22 +313,46 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
         } if units.is_empty() => {
             format!("\t{player_name} used a movement actions but moved no units")
         }
-        MovementAction::Move { units, destination } => format!(
-            "\t{player_name} moved {} from {} to {}",
-            units
+        MovementAction::Move { units, destination } => {
+            let units_str = units
                 .iter()
-                .map(|unit| player
-                    .get_unit(*unit)
-                    .expect("the player should have moved units")
-                    .unit_type
-                    .clone())
-                .collect::<Units>(),
-            player
+                .map(|unit| {
+                    player
+                        .get_unit(*unit)
+                        .expect("the player should have moved units")
+                        .unit_type
+                        .clone()
+                })
+                .collect::<Units>();
+            let start = player
                 .get_unit(units[0])
                 .expect("the player should have moved units")
-                .position,
-            destination
-        ),
+                .position;
+            let start_is_water = game
+                .map
+                .tiles
+                .get(&start)
+                .expect("the start position should be on the map")
+                .is_water();
+            let destination_is_water = game
+                .map
+                .tiles
+                .get(destination)
+                .expect("the destination position should be on the map")
+                .is_water();
+            let verb = if start_is_water {
+                if destination_is_water {
+                    "sailed"
+                } else {
+                    "disembarked"
+                }
+            } else if destination_is_water {
+                "embarked"
+            } else {
+                "marched"
+            };
+            format!("\t{player_name} {verb} {units_str} from {start} to {destination}", )
+        }
         MovementAction::Stop => format!("\t{player_name} ended the movement action"),
     }
 }

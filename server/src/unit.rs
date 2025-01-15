@@ -18,6 +18,8 @@ pub struct Unit {
     pub unit_type: UnitType,
     pub movement_restriction: MovementRestriction,
     pub id: u32,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub carrier_id: Option<u32>,
 }
 

@@ -495,9 +495,8 @@ impl Game {
                     ) {
                         return;
                     }
-                } else {
-                    self.move_units(player_index, &units, destination);
                 }
+                self.move_units(player_index, &units, destination);
                 if !self.players[player_index].get_units(destination).is_empty() {
                     //todo this should be inside combat_loop, so the conquer can be done later, too
                     for enemy in 0..self.players.len() {
@@ -1387,6 +1386,7 @@ impl Game {
             .get_unit_mut(unit_id)
             .expect("the player should have all units to move");
         unit.position = destination;
+        unit.carrier_id = None; // unit has disembarked
 
         let terrain = self
             .map

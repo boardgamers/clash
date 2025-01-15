@@ -579,7 +579,7 @@
     "\tPlayer1 moved 1 settler from D1 to C2 and captured Player2's city at C2",
     "\tPlayer1 ended the movement action",
     "Player1 used a move units action",
-    "\tPlayer1 moved 1 settler from C2 to B2. Explored tiles A3=Forest, B2=Mountain, B3=Water, C3=Fertile"
+    "\tPlayer1 marched 1 settler from C2 to B2. Explored tiles A3=Forest, B2=Mountain, B3=Water, C3=Fertile"
   ],
   "undo_limit": 5,
   "actions_left": 1,

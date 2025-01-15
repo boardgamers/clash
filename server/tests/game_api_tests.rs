@@ -162,6 +162,7 @@ fn basic_actions() {
 
     let tile_position = Position::new(1, 0);
     game.map.tiles.insert(tile_position, Mountain);
+    game.map.tiles.insert(city_position, Fertile);
     let collect_action = Action::Playing(Collect(playing_actions::Collect {
         city_position,
         collections: vec![(tile_position, ResourcePile::ore(1))],
@@ -926,6 +927,22 @@ fn test_explore_resolution() {
         "explore_resolution",
         Action::ExploreResolution(3),
         1,
+        true,
+        false,
+    );
+}
+
+#[ignore]
+#[test]
+fn test_ship_disembark_capture_empty_city() {
+    // undo capture empty city is broken
+    test_action(
+        "ship_disembark_capture_empty_city",
+        Action::Movement(Move {
+            units: vec![1,2],
+            destination: Position::from_offset("B2"),
+        }),
+        0,
         true,
         false,
     );
