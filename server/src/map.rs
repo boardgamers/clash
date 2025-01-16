@@ -8,7 +8,7 @@ use crate::city::MoodState::Happy;
 use crate::player::Player;
 use crate::position::Position;
 use crate::unit::UnitType;
-use crate::utils::shuffle;
+use crate::utils::{Rng, Shuffle};
 
 #[derive(Clone)]
 pub struct Map {
@@ -32,10 +32,11 @@ impl Map {
     }
 
     #[must_use]
-    pub fn random_map(players: &mut [Player]) -> Self {
+    pub fn random_map(players: &mut [Player], rng: &mut Rng) -> Self {
         let setup = get_map_setup(players.len());
 
-        let blocks = shuffle(&mut BLOCKS.to_vec());
+        let blocks = &mut BLOCKS.to_vec();
+        blocks.shuffle(rng);
         let unexplored_blocks = setup
             .free_positions
             .iter()
