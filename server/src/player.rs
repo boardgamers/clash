@@ -9,7 +9,7 @@ use std::{
 use crate::advance::Advance;
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
-use crate::unit::{get_current_move, land_movement};
+use crate::unit::{carried_units, get_current_move, land_movement};
 use crate::{
     city::{City, CityData},
     city_pieces::{
@@ -794,6 +794,10 @@ impl Player {
                 return Err("some units have already moved".to_string());
             }
         }
+        
+        if embark_carrier_id.is_some_and(|id| carried_units(game,self.index, id).len() + units.len() > 2) {
+            return Err("carrier capacity exceeded".to_string());
+        }
 
         let land_movement = land_movement(game, destination);
         let mut stack_size = 0;
@@ -809,7 +813,20 @@ impl Player {
             if !unit.can_move() {
                 return Err("the unit should be able to move".to_string());
             }
-            if unit.unit_type.is_land_based() != land_movement {
+            if let Some(embark_carrier_id) = embark_carrier_id {
+                if !unit.unit_type.is_land_based() {
+                    return Err("the unit should be land based to embark".to_string());
+                }
+                let carrier = self
+                    .get_unit(embark_carrier_id)
+                    .ok_or("the player should have the carrier unit")?;
+                if !carrier.unit_type.is_ship() {
+                    return Err("the carrier should be a ship".to_string());
+                }
+                if carrier.position != destination {
+                    return Err("the carrier should be at the destination position".to_string());
+                }
+            } else if unit.unit_type.is_land_based() != land_movement {
                 return Err("the unit cannot move here".to_string());
             }
             if unit.unit_type.is_army_unit() && !self.has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE) {

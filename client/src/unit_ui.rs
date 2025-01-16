@@ -1,6 +1,6 @@
 use macroquad::color::BLACK;
 use macroquad::math::{u32, vec2, Vec2};
-use macroquad::prelude::WHITE;
+use macroquad::prelude::{Color, BLUE, GREEN, WHITE};
 use macroquad::shapes::draw_circle;
 
 use server::game::Game;
@@ -14,6 +14,7 @@ use crate::{hex_ui, player_ui};
 use crate::dialog_ui::{cancel_button_with_tooltip, ok_button};
 use crate::hex_ui::Point;
 use crate::layout_ui::{draw_scaled_icon, is_in_circle};
+use crate::move_ui::MoveDestination;
 use crate::render_context::RenderContext;
 use crate::tooltip::show_tooltip_for_circle;
 use itertools::Itertools;
@@ -31,21 +32,38 @@ impl UnitPlace {
     }
 }
 
+#[derive(Clone)]
+pub enum UnitHighlightType {
+    None,
+    Primary,
+    Secondary,
+}
+
+impl UnitHighlightType {
+    fn color(&self) -> Color {
+        match self {
+            UnitHighlightType::None => BLACK,
+            UnitHighlightType::Primary => WHITE,
+            UnitHighlightType::Secondary => BLUE,
+        }
+    }
+}
+
+struct UnitHighlight {
+    unit: u32,
+    highlight_type: UnitHighlightType,
+}
+
 pub fn draw_unit_type(
     rc: &RenderContext,
-    selected: bool,
+    unit_highlight_type: UnitHighlightType,
     center: Point,
     unit_type: &UnitType,
     player_index: usize,
     tooltip: &str,
     size: f32,
 ) {
-    draw_circle(
-        center.x,
-        center.y,
-        size,
-        if selected { WHITE } else { BLACK },
-    );
+    draw_circle(center.x, center.y, size, unit_highlight_type.color());
     draw_circle(
         center.x,
         center.y,
@@ -89,6 +107,7 @@ pub fn click_unit(
     pos: Position,
     mouse_pos: Vec2,
     player: &Player,
+    can_select_carried_units: bool,
 ) -> Option<u32> {
     player
         .units
@@ -97,11 +116,13 @@ pub fn click_unit(
         .enumerate()
         .find_map(|(i, u)| {
             let place = unit_place(rc, i, pos);
-            let carried_units = carried_units(rc.game, player.index, u.id);
-            for (j, carried) in carried_units.iter().enumerate() {
-                let carried_place = carried_unit_place(&place, j);
-                if is_in_circle(mouse_pos, carried_place.center, carried_place.radius) {
-                    return Some(*carried);
+            if can_select_carried_units {
+                let carried_units = carried_units(rc.game, player.index, u.id);
+                for (j, carried) in carried_units.iter().enumerate() {
+                    let carried_place = carried_unit_place(&place, j);
+                    if is_in_circle(mouse_pos, carried_place.center, carried_place.radius) {
+                        return Some(*carried);
+                    }
                 }
             }
             if is_in_circle(mouse_pos, place.center, place.radius) {
@@ -123,10 +144,21 @@ pub fn non_leader_names() -> [(UnitType, &'static str); 5] {
 }
 
 pub fn draw_units(rc: &RenderContext, tooltip: bool) {
-    let selected_units = match rc.state.active_dialog {
-        ActiveDialog::MoveUnits(ref s) => s.units.clone(),
-        ActiveDialog::ReplaceUnits(ref s) => s.replaced_units.clone(),
-        ActiveDialog::RemoveCasualties(ref s) => s.units.clone(),
+    let highlighted_units = match rc.state.active_dialog {
+        ActiveDialog::MoveUnits(ref s) => {
+            let mut h = highlight_primary(&s.units);
+            for d in &s.destinations {
+                if let MoveDestination::Carrier(id) = d {
+                    h.push(UnitHighlight {
+                        unit: *id,
+                        highlight_type: UnitHighlightType::Secondary,
+                    });
+                }
+            }
+            h
+        }
+        ActiveDialog::ReplaceUnits(ref s) => highlight_primary(&s.replaced_units),
+        ActiveDialog::RemoveCasualties(ref s) => highlight_primary(&s.units),
         _ => vec![],
     };
 
@@ -150,7 +182,7 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
             .for_each(|(i, (p, u))| {
                 let place = unit_place(rc, i, u.position);
 
-                draw_unit(rc, tooltip, &selected_units, *p, u, &place);
+                draw_unit(rc, tooltip, &highlighted_units, *p, u, &place);
 
                 let player = rc.game.get_player(*p);
                 let carried = carried_units(rc.game, *p, u.id);
@@ -158,7 +190,7 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
                     draw_unit(
                         rc,
                         tooltip,
-                        &selected_units,
+                        &highlighted_units,
                         *p,
                         player.get_unit(*u).unwrap(),
                         &carried_unit_place(&place, j),
@@ -168,10 +200,17 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
     }
 }
 
+fn highlight_primary(units: &[u32]) -> Vec<UnitHighlight> {
+    units.iter().map(|unit| UnitHighlight {
+        unit: *unit,
+        highlight_type: UnitHighlightType::Primary,
+    }).collect()
+}
+
 fn draw_unit(
     rc: &RenderContext,
     tooltip: bool,
-    selected_units: &[u32],
+    selected_units: &[UnitHighlight],
     player_index: usize,
     unit: &Unit,
     place: &UnitPlace,
@@ -185,10 +224,18 @@ fn draw_unit(
             .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
         show_tooltip_for_circle(rc, &unit_label(unit, army_move), center.to_vec2(), radius);
     } else {
-        let selected = player_index == game.active_player() && selected_units.contains(&unit.id);
+        let highlight = if player_index == game.active_player() {
+            selected_units
+                .iter()
+                .find(|u| u.unit == unit.id)
+                .map(|u| u.highlight_type.clone())
+                .unwrap_or(UnitHighlightType::None)
+        } else {
+            UnitHighlightType::None
+        };
         draw_unit_type(
             rc,
-            selected,
+            highlight,
             center,
             &unit.unit_type,
             unit.player_index,
@@ -210,7 +257,7 @@ pub fn unit_selection_click<T: UnitSelection>(
     sel: &T,
     on_change: impl Fn(T) -> StateUpdate,
 ) -> StateUpdate {
-    if let Some(unit_id) = click_unit(rc, pos, mouse_pos, rc.shown_player) {
+    if let Some(unit_id) = click_unit(rc, pos, mouse_pos, rc.shown_player,true) {
         if sel.can_select(rc.game, rc.shown_player.get_unit(unit_id).unwrap()) {
             let mut new = sel.clone();
             unit_selection_clicked(unit_id, new.selected_units_mut());

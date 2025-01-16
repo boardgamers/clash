@@ -17,7 +17,7 @@ use crate::construct_ui::ConstructionPayment;
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
 use crate::map_ui::ExploreResolutionConfig;
-use crate::move_ui::{MoveIntent, MoveSelection};
+use crate::move_ui::{MoveDestination, MoveIntent, MoveSelection};
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use crate::render_context::RenderContext;
 use crate::status_phase_ui::ChooseAdditionalAdvances;
@@ -113,7 +113,17 @@ impl ActiveDialog {
             ActiveDialog::ReplaceUnits(_) => vec!["Click on a unit to replace".to_string()],
             ActiveDialog::MoveUnits(m) => {
                 if m.start.is_some() {
-                    vec!["Click on a highlighted tile to move units".to_string()]
+                    let mut result = vec![];
+                    if m.destinations.is_empty() {
+                        result.push("No unit on this tile can move".to_string());
+                    }
+                    if m.destinations.iter().any(|d| matches!(d, MoveDestination::Tile(_))) {
+                        result.push("Click on a highlighted tile to move units".to_string());
+                    };
+                    if m.destinations.iter().any(|d| matches!(d, MoveDestination::Carrier(_))) {
+                        result.push("Click on a carrier to embark units".to_string());
+                    };
+                    result
                 } else {
                     vec!["Click on a unit to move".to_string()]
                 }

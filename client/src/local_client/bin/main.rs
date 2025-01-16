@@ -192,6 +192,8 @@ pub fn setup_local_game() -> Game {
         .fortress = Some(1);
 
     add_unit(&mut game, "C2", player_index1, UnitType::Ship);
+    add_unit(&mut game, "C2", player_index1, UnitType::Ship);
+    add_unit(&mut game, "C2", player_index1, UnitType::Ship);
 
     let ship_id = game.players[player_index1]
         .units

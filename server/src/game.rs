@@ -516,7 +516,7 @@ impl Game {
                         return;
                     }
                 }
-                self.move_units(player_index, &units, destination);
+                self.move_units(player_index, &units, destination, embark_carrier_id);
                 if !self.players[player_index].get_units(destination).is_empty() {
                     //todo this should be inside combat_loop, so the conquer can be done later, too
                     for enemy in 0..self.players.len() {
@@ -569,7 +569,7 @@ impl Game {
                 if !unit.unit_type.is_settler() {
                     military = true;
                 }
-                self.move_unit(player_index, *unit_id, destination);
+                self.move_unit(player_index, *unit_id, destination, None);
                 self.players[player_index]
                     .get_unit_mut(*unit_id)
                     .expect("the player should have all units to move")
@@ -1406,18 +1406,18 @@ impl Game {
         //todo every player draws 1 action card and 1 objective card
     }
 
-    pub(crate) fn move_units(&mut self, player_index: usize, units: &[u32], destination: Position) {
+    pub(crate) fn move_units(&mut self, player_index: usize, units: &[u32], destination: Position, embark_carrier_id: Option<u32>) {
         for unit_id in units {
-            self.move_unit(player_index, *unit_id, destination);
+            self.move_unit(player_index, *unit_id, destination, embark_carrier_id);
         }
     }
 
-    fn move_unit(&mut self, player_index: usize, unit_id: u32, destination: Position) {
+    fn move_unit(&mut self, player_index: usize, unit_id: u32, destination: Position, embark_carrier_id: Option<u32>) {
         let unit = self.players[player_index]
             .get_unit_mut(unit_id)
             .expect("the player should have all units to move");
         unit.position = destination;
-        unit.carrier_id = None; // unit has disembarked
+        unit.carrier_id = embark_carrier_id;
 
         let terrain = self
             .map

@@ -162,7 +162,7 @@ pub(crate) fn explore_resolution(game: &mut Game, r: &ExploreResolutionState, ro
     assert!(valid_rotation, "Invalid rotation {rotate_by}");
 
     add_block_tiles_with_log(game, position, &r.block.block, rotation);
-    game.move_units(game.current_player_index, &r.units, r.destination);
+    game.move_units(game.current_player_index, &r.units, r.destination, None);
     game.back_to_move(&r.move_state);
     game.push_undo_context(UndoContext::ExploreResolution(r.clone()));
 }

@@ -15,7 +15,7 @@ use crate::city_ui::{draw_city, show_city_menu, IconAction, IconActionVec};
 use crate::client_state::{ActiveDialog, State, StateUpdate};
 use crate::dialog_ui::{cancel_button_pos, ok_button, OkTooltip};
 use crate::layout_ui::{bottom_center_texture, bottom_right_texture, icon_pos};
-use crate::move_ui::{movable_units, MoveIntent};
+use crate::move_ui::{movable_units, MoveDestination, MoveIntent};
 use crate::render_context::RenderContext;
 use crate::{collect_ui, hex_ui, unit_ui};
 
@@ -116,7 +116,7 @@ fn alpha(rc: &RenderContext, pos: Position) -> f32 {
             if let Some(start) = s.start {
                 if start == pos {
                     0.5
-                } else if s.destinations.contains(&pos) {
+                } else if s.destinations.iter().any(|d| matches!(d, MoveDestination::Tile(p) if *p == pos)) {
                     0.8
                 } else {
                     0.
