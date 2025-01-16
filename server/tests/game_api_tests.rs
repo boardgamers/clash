@@ -936,6 +936,18 @@ fn test_ship_transport() {
 }
 
 #[test]
+fn test_ship_transport_same_sea() {
+    // undo capture empty city is broken
+    test_action(
+        "ship_transport_same_sea",
+        move_action(vec![7], Position::from_offset("C3")),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
 fn test_ship_disembark() {
     // undo capture empty city is broken
     test_action(

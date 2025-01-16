@@ -1,7 +1,7 @@
+use itertools::Itertools;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::mem;
-
-use serde::{Deserialize, Serialize};
 
 use crate::combat::Combat;
 use crate::combat::{capture_position, execute_combat_action, initiate_combat, CombatPhase};
@@ -477,6 +477,7 @@ impl Game {
                     )
                     .expect("Illegal action");
                 move_state.moved_units.extend(units.iter());
+                move_state.moved_units = move_state.moved_units.iter().unique().copied().collect();
                 let current_move = get_current_move(
                     self,
                     &units,
