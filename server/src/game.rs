@@ -551,7 +551,7 @@ impl Game {
             move_state: saved_state,
             disembarked_units,
             captured_settlers,
-            captured_city,
+            captured_city: Box::new(captured_city),
         });
     }
 
@@ -632,7 +632,7 @@ impl Game {
                     "undo context should contain the starting position if units where moved",
                 ),
             );
-            if let Some(captured_city) = captured_city {
+            if let Some(captured_city) = *captured_city {
                 let city = City::from_data(captured_city);
                 self.undo_conquer_city(city, player_index);
             }
@@ -847,7 +847,7 @@ impl Game {
         self.add_message("The game has ended");
     }
 
-    pub fn get_next_dice_roll(&mut self) -> u8 {
+    pub(crate) fn get_next_dice_roll(&mut self) -> u8 {
         self.lock_undo();
         let dice_roll = if self.dice_roll_outcomes.is_empty() {
             self.rng.range(0, 12) as u8
@@ -1802,7 +1802,7 @@ pub enum UndoContext {
         disembarked_units: Vec<DisembarkUndoContext>,
         #[serde(default)]
         #[serde(skip_serializing_if = "Option::is_none")]
-        captured_city: Option<CityData>,
+        captured_city: Box<Option<CityData>>,
         #[serde(default)]
         #[serde(skip_serializing_if = "Option::is_none")]
         captured_settlers: Option<(Vec<u32>, usize)>,
@@ -1862,7 +1862,7 @@ pub mod tests {
             round: 1,
             age: 1,
             messages: vec![String::from("Game has started")],
-            rng: Rng::from_seed(1234567890),
+            rng: Rng::from_seed(1_234_567_890),
             dice_roll_outcomes: Vec::new(),
             dice_roll_log: Vec::new(),
             dropped_players: Vec::new(),

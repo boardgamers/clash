@@ -61,9 +61,9 @@ impl Rng {
 }
 
 fn next_seed(seed: u128) -> u128 {
-    const XOR: u128 = 295990755076957304699390954000840642031;
+    const XOR: u128 = 295_990_755_076_957_304_699_390_954_000_840_642_031;
     const ROTATE: u32 = 37;
-    const MULTIPLIER: u128 = 6364136223846793005;
+    const MULTIPLIER: u128 = 6_364_136_223_846_793_005;
     const INCREMENT: u128 = 1;
 
     let new_seed = seed ^ XOR;
