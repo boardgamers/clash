@@ -610,7 +610,7 @@
     "\tPlayer2 moved 1 settler from D8 to D7 and captured Player1's city at D7",
     "\tPlayer2 ended the movement action",
     "Player2 used a move units action",
-    "\tPlayer2 moved 1 settler from D7 to C7"
+    "\tPlayer2 marched 1 settler from D7 to C7"
   ],
   "undo_limit": 5,
   "actions_left": 1,

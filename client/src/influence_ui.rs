@@ -58,7 +58,7 @@ pub fn hover(rc: &RenderContext, mouse_pos: Vec2) -> StateUpdate {
 fn show_city(rc: &RenderContext, mouse_pos: Vec2, city: &City) -> Option<StateUpdate> {
     let player = rc.shown_player;
     let c = hex_ui::center(city.position);
-    let mut i = city.pieces.wonders.len() as i32;
+    let mut i = city.pieces.wonders.len();
     for player_index in 0..4 {
         for b in &city.pieces.buildings(Some(player_index)) {
             let center = building_position(city, c, i, *b);

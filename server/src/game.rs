@@ -1,12 +1,13 @@
+use itertools::Itertools;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::mem;
-
-use serde::{Deserialize, Serialize};
 
 use crate::combat::Combat;
 use crate::combat::{capture_position, execute_combat_action, initiate_combat, CombatPhase};
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
 use crate::map::UnexploredBlock;
+use crate::unit::{carried_units, get_current_move};
 use crate::utils::shuffle;
 use crate::{
     action::Action,
@@ -443,8 +444,12 @@ impl Game {
         mut move_state: MoveState,
     ) {
         let saved_state = move_state.clone();
-        let starting_position = match action {
-            Move { units, destination } => {
+        let (starting_position, disembarked_units) = match action {
+            Move {
+                units,
+                destination,
+                embark_carrier_id,
+            } => {
                 let player = &self.players[player_index];
                 let starting_position = player
                     .get_unit(*units.first().expect(
@@ -452,18 +457,40 @@ impl Game {
                     ))
                     .expect("the player should have all units to move")
                     .position;
+                let disembarked_units = units
+                    .iter()
+                    .filter_map(|unit| {
+                        let unit = player.get_unit(*unit).expect("unit should exist");
+                        unit.carrier_id.map(|carrier_id| DisembarkUndoContext {
+                            unit_id: unit.id,
+                            carrier_id,
+                        })
+                    })
+                    .collect();
                 player
                     .can_move_units(
                         self,
                         &units,
                         starting_position,
                         destination,
-                        move_state.movement_actions_left,
-                        &move_state.moved_units,
+                        embark_carrier_id,
                     )
                     .expect("Illegal action");
                 move_state.moved_units.extend(units.iter());
-                move_state.movement_actions_left -= 1;
+                move_state.moved_units = move_state.moved_units.iter().unique().copied().collect();
+                let current_move = get_current_move(
+                    self,
+                    &units,
+                    starting_position,
+                    destination,
+                    embark_carrier_id,
+                );
+                if matches!(current_move, CurrentMove::None)
+                    || move_state.current_move != current_move
+                {
+                    move_state.movement_actions_left -= 1;
+                    move_state.current_move = current_move;
+                }
 
                 let dest_terrain = self
                     .map
@@ -488,9 +515,8 @@ impl Game {
                     ) {
                         return;
                     }
-                } else {
-                    self.move_units(player_index, &units, destination);
                 }
+                self.move_units(player_index, &units, destination, embark_carrier_id);
                 if !self.players[player_index].get_units(destination).is_empty() {
                     //todo this should be inside combat_loop, so the conquer can be done later, too
                     for enemy in 0..self.players.len() {
@@ -502,17 +528,17 @@ impl Game {
                 }
 
                 self.back_to_move(&move_state);
-                // todo maybe explore should be done here
-                Some(starting_position)
+                (Some(starting_position), disembarked_units)
             }
             Stop => {
                 self.state = Playing;
-                None
+                (None, Vec::new())
             }
         };
         self.push_undo_context(UndoContext::Movement {
             starting_position,
             move_state: saved_state,
+            disembarked_units,
         });
     }
 
@@ -543,7 +569,7 @@ impl Game {
                 if !unit.unit_type.is_settler() {
                     military = true;
                 }
-                self.move_unit(player_index, *unit_id, destination);
+                self.move_unit(player_index, *unit_id, destination, None);
                 self.players[player_index]
                     .get_unit_mut(*unit_id)
                     .expect("the player should have all units to move")
@@ -573,6 +599,7 @@ impl Game {
         let Some(UndoContext::Movement {
             starting_position,
             move_state,
+            disembarked_units,
         }) = self.undo_context_stack.pop()
         else {
             panic!("when undoing a movement action, the game should have stored movement context")
@@ -580,6 +607,7 @@ impl Game {
         if let Move {
             units,
             destination: _,
+            embark_carrier_id: _,
         } = action
         {
             self.undo_move_units(
@@ -589,6 +617,12 @@ impl Game {
                     "undo context should contain the starting position if units where moved",
                 ),
             );
+            for unit in disembarked_units {
+                self.players[player_index]
+                    .get_unit_mut(unit.unit_id)
+                    .expect("unit should exist")
+                    .carrier_id = Some(unit.carrier_id);
+            }
         }
         self.state = Movement(move_state);
     }
@@ -660,7 +694,9 @@ impl Game {
     }
 
     pub(crate) fn back_to_move(&mut self, move_state: &MoveState) {
-        self.state = if move_state.movement_actions_left == 0 {
+        self.state = if move_state.movement_actions_left == 0
+            && move_state.current_move == CurrentMove::None
+        {
             Playing
         } else {
             Movement(move_state.clone())
@@ -1370,17 +1406,31 @@ impl Game {
         //todo every player draws 1 action card and 1 objective card
     }
 
-    pub(crate) fn move_units(&mut self, player_index: usize, units: &[u32], destination: Position) {
+    pub(crate) fn move_units(
+        &mut self,
+        player_index: usize,
+        units: &[u32],
+        destination: Position,
+        embark_carrier_id: Option<u32>,
+    ) {
         for unit_id in units {
-            self.move_unit(player_index, *unit_id, destination);
+            self.move_unit(player_index, *unit_id, destination, embark_carrier_id);
         }
     }
 
-    fn move_unit(&mut self, player_index: usize, unit_id: u32, destination: Position) {
+    fn move_unit(
+        &mut self,
+        player_index: usize,
+        unit_id: u32,
+        destination: Position,
+        embark_carrier_id: Option<u32>,
+    ) {
         let unit = self.players[player_index]
             .get_unit_mut(unit_id)
             .expect("the player should have all units to move");
         unit.position = destination;
+        unit.carrier_id = embark_carrier_id;
+
         let terrain = self
             .map
             .tiles
@@ -1392,6 +1442,13 @@ impl Game {
             Forest => unit.restrict_attack(),
             _ => (),
         };
+
+        for id in carried_units(self, player_index, unit_id) {
+            self.players[player_index]
+                .get_unit_mut(id)
+                .expect("the player should have all units to move")
+                .position = destination;
+        }
     }
 
     pub(crate) fn undo_move_units(
@@ -1407,7 +1464,13 @@ impl Game {
             .get_unit(*unit)
             .expect("there should be at least one moved unit")
             .position;
-        let terrain = self
+        let start_terain = self
+            .map
+            .tiles
+            .get(&starting_position)
+            .expect("the starting position should exist on the map")
+            .clone();
+        let dest_terrain = self
             .map
             .tiles
             .get(&destination)
@@ -1418,11 +1481,20 @@ impl Game {
                 .get_unit_mut(unit_id)
                 .expect("the player should have all units to move");
             unit.position = starting_position;
-            match terrain {
+            match dest_terrain {
                 Mountain => unit.undo_movement_restriction(),
                 Forest => unit.undo_attack_restriction(),
                 _ => (),
             };
+            if !start_terain.is_water() {
+                unit.carrier_id = None;
+            }
+            for id in &carried_units(self, player_index, unit_id) {
+                self.players[player_index]
+                    .get_unit_mut(*id)
+                    .expect("the player should have all units to move")
+                    .position = starting_position;
+            }
         }
     }
 
@@ -1439,6 +1511,11 @@ impl Game {
                     .expect("A player should have an active leader when having a leader unit");
                 (leader.player_deinitializer)(self, player_index);
                 self.players[killer].captured_leaders.push(leader.name);
+            }
+        }
+        if let GameState::Movement(m) = &mut self.state {
+            if let CurrentMove::Fleet { units } = &mut m.current_move {
+                units.retain(|&id| id != unit_id);
             }
         }
     }
@@ -1480,10 +1557,33 @@ pub struct CulturalInfluenceResolution {
     pub city_piece: Building,
 }
 
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Default)]
+pub enum CurrentMove {
+    #[default]
+    None,
+    Embark {
+        source: Position,
+        destination: Position,
+    },
+    Fleet {
+        units: Vec<u32>,
+    },
+}
+
+impl CurrentMove {
+    #[must_use]
+    pub fn is_none(&self) -> bool {
+        matches!(self, CurrentMove::None)
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct MoveState {
     pub movement_actions_left: u32,
     pub moved_units: Vec<u32>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "CurrentMove::is_none")]
+    pub current_move: CurrentMove,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -1526,6 +1626,12 @@ impl GameState {
 }
 
 #[derive(Serialize, Deserialize, Clone)]
+pub struct DisembarkUndoContext {
+    unit_id: u32,
+    carrier_id: u32,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
 pub enum UndoContext {
     FoundCity {
         settler: Unit,
@@ -1538,6 +1644,9 @@ pub enum UndoContext {
         starting_position: Option<Position>,
         #[serde(flatten)]
         move_state: MoveState,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        disembarked_units: Vec<DisembarkUndoContext>,
     },
     ExploreResolution(ExploreResolutionState),
 }

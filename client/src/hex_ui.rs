@@ -4,7 +4,7 @@ use crate::layout_ui::draw_scaled_icon;
 use crate::render_context::RenderContext;
 use hex2d::{Coordinate, Spacing};
 use macroquad::color::Color;
-use macroquad::math::{f32, i32, vec2, Vec2};
+use macroquad::math::{f32, vec2, Vec2};
 use macroquad::prelude::{
     draw_texture_ex, DrawTextureParams, Rect, Texture2D, BEIGE, DARKGRAY, WHITE,
 };
@@ -70,7 +70,7 @@ pub fn pixel_to_coordinate(p: Vec2) -> Coordinate {
     Coordinate::from_pixel(p.x, p.y, SPACING)
 }
 
-pub fn rotate_around(center: Point, radius: f32, angle_deg: i32) -> Point {
+pub fn rotate_around(center: Point, radius: f32, angle_deg: usize) -> Point {
     rotate_around_rad(center, radius, PI / 180.0 * (angle_deg as f32))
 }
 

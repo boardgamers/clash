@@ -310,25 +310,54 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
         MovementAction::Move {
             units,
             destination: _,
+            embark_carrier_id: _,
         } if units.is_empty() => {
             format!("\t{player_name} used a movement actions but moved no units")
         }
-        MovementAction::Move { units, destination } => format!(
-            "\t{player_name} moved {} from {} to {}",
-            units
+        MovementAction::Move {
+            units,
+            destination,
+            embark_carrier_id: _,
+        } => {
+            let units_str = units
                 .iter()
-                .map(|unit| player
-                    .get_unit(*unit)
-                    .expect("the player should have moved units")
-                    .unit_type
-                    .clone())
-                .collect::<Units>(),
-            player
+                .map(|unit| {
+                    player
+                        .get_unit(*unit)
+                        .expect("the player should have moved units")
+                        .unit_type
+                        .clone()
+                })
+                .collect::<Units>();
+            let start = player
                 .get_unit(units[0])
                 .expect("the player should have moved units")
-                .position,
-            destination
-        ),
+                .position;
+            let start_is_water = game
+                .map
+                .tiles
+                .get(&start)
+                .expect("the start position should be on the map")
+                .is_water();
+            let destination_is_water = game
+                .map
+                .tiles
+                .get(destination)
+                .expect("the destination position should be on the map")
+                .is_water();
+            let verb = if start_is_water {
+                if destination_is_water {
+                    "sailed"
+                } else {
+                    "disembarked"
+                }
+            } else if destination_is_water {
+                "embarked"
+            } else {
+                "marched"
+            };
+            format!("\t{player_name} {verb} {units_str} from {start} to {destination}",)
+        }
         MovementAction::Stop => format!("\t{player_name} ended the movement action"),
     }
 }

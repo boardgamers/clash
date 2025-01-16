@@ -1,8 +1,5 @@
 use macroquad::math::vec2;
 use macroquad::prelude::*;
-use std::collections::HashMap;
-use std::ops::{Add, Mul, Rem, Sub};
-
 use server::action::Action;
 use server::combat::Combat;
 use server::game::GameState;
@@ -10,12 +7,15 @@ use server::map::{Rotation, Terrain, UnexploredBlock};
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::unit::{MovementRestriction, Unit, UnitType};
+use std::collections::HashMap;
+use std::ops::{Add, Mul, Rem, Sub};
+use std::vec;
 
 use crate::city_ui::{draw_city, show_city_menu, IconAction, IconActionVec};
 use crate::client_state::{ActiveDialog, State, StateUpdate};
 use crate::dialog_ui::{cancel_button_pos, ok_button, OkTooltip};
 use crate::layout_ui::{bottom_center_texture, bottom_right_texture, icon_pos};
-use crate::move_ui::movable_units;
+use crate::move_ui::{movable_units, MoveDestination, MoveIntent};
 use crate::render_context::RenderContext;
 use crate::{collect_ui, hex_ui, unit_ui};
 
@@ -116,7 +116,11 @@ fn alpha(rc: &RenderContext, pos: Position) -> f32 {
             if let Some(start) = s.start {
                 if start == pos {
                     0.5
-                } else if s.destinations.contains(&pos) {
+                } else if s
+                    .destinations
+                    .iter()
+                    .any(|d| matches!(d, MoveDestination::Tile(p) if *p == pos))
+                {
                     0.8
                 } else {
                     0.
@@ -167,17 +171,18 @@ fn highlight_if(b: bool) -> f32 {
 }
 
 pub fn show_tile_menu(rc: &RenderContext, pos: Position) -> StateUpdate {
-    if let Some(c) = rc.game.get_any_city(pos) {
-        return show_city_menu(rc, c);
+    if let Some(city) = rc.game.get_any_city(pos) {
+        if city.can_activate() && rc.shown_player.index == city.player_index {
+            return show_city_menu(rc, city);
+        }
     };
 
-    show_map_action_buttons(
-        rc,
-        &vec![move_units_button(rc, pos), found_city_button(rc, pos)]
-            .into_iter()
-            .flatten()
-            .collect(),
-    )
+    let mut icons = move_units_buttons(rc, pos);
+    if let Some(action) = found_city_button(rc, pos) {
+        icons.push(action);
+    }
+
+    show_map_action_buttons(rc, &icons)
 }
 
 fn found_city_button<'a>(rc: &'a RenderContext<'a>, pos: Position) -> Option<IconAction<'a>> {
@@ -214,17 +219,35 @@ fn found_city_button<'a>(rc: &'a RenderContext<'a>, pos: Position) -> Option<Ico
     }
 }
 
-pub fn move_units_button<'a>(rc: &'a RenderContext, pos: Position) -> Option<IconAction<'a>> {
+pub fn move_units_button<'a>(
+    rc: &'a RenderContext,
+    pos: Position,
+    move_intent: MoveIntent,
+) -> Option<IconAction<'a>> {
     if !rc.can_play_action(PlayingActionType::MoveUnits)
-        || movable_units(pos, rc.game, rc.shown_player).is_empty()
+        || movable_units(pos, rc.game, rc.shown_player, move_intent.to_predicate()).is_empty()
     {
         return None;
     }
     Some((
-        &rc.assets().move_units,
-        "Move units".to_string(),
-        Box::new(move || StateUpdate::execute(Action::Playing(PlayingAction::MoveUnits))),
+        move_intent.icon(rc),
+        move_intent.toolip().to_string(),
+        Box::new(move || StateUpdate::MoveUnits(move_intent.clone())),
     ))
+}
+
+pub fn move_units_buttons<'a>(rc: &'a RenderContext, pos: Position) -> Vec<IconAction<'a>> {
+    let mut res = vec![];
+    if let Some(action) = move_units_button(rc, pos, MoveIntent::Land) {
+        res.push(action);
+    }
+    if let Some(action) = move_units_button(rc, pos, MoveIntent::Sea) {
+        res.push(action);
+    }
+    if let Some(action) = move_units_button(rc, pos, MoveIntent::Disembark) {
+        res.push(action);
+    }
+    res
 }
 
 pub fn show_map_action_buttons(rc: &RenderContext, icons: &IconActionVec) -> StateUpdate {

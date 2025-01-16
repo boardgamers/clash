@@ -1,14 +1,15 @@
+use itertools::Itertools;
+use serde::{Deserialize, Serialize};
 use std::iter;
 use std::{
     fmt::Display,
     ops::{AddAssign, SubAssign},
 };
 
-use serde::{Deserialize, Serialize};
-
 use MovementRestriction::{AllMovement, Attack};
 use UnitType::*;
 
+use crate::game::CurrentMove;
 use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
@@ -18,6 +19,9 @@ pub struct Unit {
     pub unit_type: UnitType,
     pub movement_restriction: MovementRestriction,
     pub id: u32,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub carrier_id: Option<u32>,
 }
 
 impl Unit {
@@ -29,6 +33,7 @@ impl Unit {
             unit_type,
             movement_restriction: MovementRestriction::None,
             id,
+            carrier_id: None,
         }
     }
 
@@ -52,7 +57,7 @@ impl Unit {
         if !self.unit_type.is_settler() {
             return false;
         }
-        if self.is_transported(game) {
+        if self.is_transported() {
             return false;
         }
         let player = &game.players[self.player_index];
@@ -75,8 +80,8 @@ impl Unit {
     }
 
     #[must_use]
-    pub fn is_transported(&self, game: &Game) -> bool {
-        self.unit_type.is_land_based() && game.map.tiles[&self.position] == Water
+    pub fn is_transported(&self) -> bool {
+        self.carrier_id.is_some()
     }
 
     pub fn restrict_movement(&mut self) {
@@ -139,6 +144,11 @@ impl UnitType {
     #[must_use]
     pub fn is_land_based(&self) -> bool {
         !matches!(self, Ship)
+    }
+
+    #[must_use]
+    pub fn is_ship(&self) -> bool {
+        matches!(self, Ship)
     }
 
     #[must_use]
@@ -378,8 +388,52 @@ pub enum MovementAction {
     Move {
         units: Vec<u32>,
         destination: Position,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        embark_carrier_id: Option<u32>,
     },
     Stop,
+}
+
+#[must_use]
+pub fn carried_units(game: &Game, player_index: usize, carrier: u32) -> Vec<u32> {
+    game.players[player_index]
+        .units
+        .iter()
+        .filter(|u| u.carrier_id == Some(carrier))
+        .map(|u| u.id)
+        .collect()
+}
+
+pub(crate) fn get_current_move(
+    game: &Game,
+    units: &[u32],
+    starting: Position,
+    destination: Position,
+    embark_carrier_id: Option<u32>,
+) -> CurrentMove {
+    if embark_carrier_id.is_some() {
+        CurrentMove::Embark {
+            source: starting,
+            destination,
+        }
+    } else if land_movement(game, destination) {
+        CurrentMove::None
+    } else {
+        CurrentMove::Fleet {
+            units: units.iter().sorted().copied().collect(),
+        }
+    }
+}
+
+pub(crate) fn land_movement(game: &Game, destination: Position) -> bool {
+    !matches!(
+        game.map
+            .tiles
+            .get(&destination)
+            .expect("destination should exist"),
+        Water
+    )
 }
 
 #[cfg(test)]

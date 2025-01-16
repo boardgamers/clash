@@ -121,8 +121,8 @@ pub fn left_mouse_button_pressed_in_rect(rect: Rect, rc: &RenderContext) -> bool
 }
 
 #[must_use]
-pub fn is_in_circle(mouse_pos: Vec2, p: Point, radius: f32) -> bool {
-    let d = vec2(p.x - mouse_pos.x, p.y - mouse_pos.y);
+pub fn is_in_circle(mouse_pos: Vec2, center: Point, radius: f32) -> bool {
+    let d = vec2(center.x - mouse_pos.x, center.y - mouse_pos.y);
     d.length() <= radius
 }
 

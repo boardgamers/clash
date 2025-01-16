@@ -110,15 +110,18 @@ pub fn setup_local_game() -> Game {
     add_terrain(&mut game, "C1", Terrain::Barren);
     add_terrain(&mut game, "C2", Terrain::Forest);
     add_terrain(&mut game, "C3", Terrain::Water);
+    add_terrain(&mut game, "C4", Terrain::Water);
+    add_terrain(&mut game, "C5", Terrain::Water);
+    add_terrain(&mut game, "D1", Terrain::Fertile);
     add_terrain(&mut game, "D2", Terrain::Water);
 
     add_unit(&mut game, "C2", player_index1, UnitType::Infantry);
     add_unit(&mut game, "C2", player_index1, UnitType::Cavalry);
     // add_unit(&mut game, "C2", player_index1, UnitType::Leader);
     add_unit(&mut game, "C2", player_index1, UnitType::Elephant);
-    add_unit(&mut game, "C2", player_index1, UnitType::Settler);
-    add_unit(&mut game, "C2", player_index1, UnitType::Settler);
-    add_unit(&mut game, "C2", player_index1, UnitType::Settler);
+    add_unit(&mut game, "B3", player_index1, UnitType::Settler);
+    add_unit(&mut game, "B3", player_index1, UnitType::Settler);
+    add_unit(&mut game, "B3", player_index1, UnitType::Settler);
     add_unit(&mut game, "B3", player_index1, UnitType::Settler);
     // game.players[player_index1].active_leader =
     //     Some(Leader::builder("Alexander", "", "", "", "").build());
@@ -166,7 +169,6 @@ pub fn setup_local_game() -> Game {
         .get_city_mut(Position::from_offset("B2"))
         .unwrap()
         .port_position = Some(Position::from_offset("C3"));
-    add_unit(&mut game, "B2", player_index2, UnitType::Ship);
 
     game.players[player_index1]
         .get_city_mut(Position::from_offset("B1"))
@@ -188,6 +190,46 @@ pub fn setup_local_game() -> Game {
         .unwrap()
         .pieces
         .fortress = Some(1);
+
+    add_unit(&mut game, "C2", player_index1, UnitType::Ship);
+    add_unit(&mut game, "C2", player_index1, UnitType::Ship);
+    add_unit(&mut game, "C2", player_index1, UnitType::Ship);
+
+    let ship_id = game.players[player_index1]
+        .units
+        .iter()
+        .find(|u| u.unit_type == UnitType::Ship)
+        .map(|u| u.id)
+        .unwrap();
+    let elephant = game.players[player_index1]
+        .units
+        .iter()
+        .find(|u| u.unit_type == UnitType::Elephant)
+        .map(|u| u.id)
+        .unwrap();
+    let cavalry = game.players[player_index1]
+        .units
+        .iter()
+        .find(|u| u.unit_type == UnitType::Cavalry)
+        .map(|u| u.id)
+        .unwrap();
+
+    game.players[player_index1]
+        .get_unit_mut(elephant)
+        .unwrap()
+        .carrier_id = Some(ship_id);
+    game.players[player_index1]
+        .get_unit_mut(elephant)
+        .unwrap()
+        .position = Position::from_offset("C3");
+    game.players[player_index1]
+        .get_unit_mut(cavalry)
+        .unwrap()
+        .carrier_id = Some(ship_id);
+    game.players[player_index1]
+        .get_unit_mut(cavalry)
+        .unwrap()
+        .position = Position::from_offset("C3");
 
     game.players[player_index1]
         .get_city_mut(Position::from_offset("A1"))

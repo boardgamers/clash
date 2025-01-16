@@ -48,10 +48,10 @@ pub(crate) fn move_to_unexplored_block(
     let rotated = &block.opposite(i);
 
     // first rule: don't move into water
-    if matches!(unrotated, Terrain::Water) {
+    if unrotated.is_water() {
         return instant_explore(game, move_to, opposite);
     }
-    if matches!(rotated, Terrain::Water) {
+    if rotated.is_water() {
         return instant_explore(game, move_to, base);
     }
 
@@ -110,7 +110,7 @@ fn water_has_water_neighbors(
     has_neighbors(unexplored_block, rotation, |p| {
         map.tiles
             .get(p)
-            .map_or(false, |t| matches!(t, Terrain::Water))
+            .map_or(false, super::map::Terrain::is_water)
     })
 }
 
@@ -131,7 +131,7 @@ fn has_neighbors(
     let tiles = block.tiles(&unexplored_block.position, rotation);
     tiles
         .into_iter()
-        .any(|(p, t)| matches!(t, Terrain::Water) && p.neighbors().iter().any(&pred))
+        .any(|(p, t)| t.is_water() && p.neighbors().iter().any(&pred))
 }
 
 fn add_block_tiles_with_log(
@@ -162,7 +162,7 @@ pub(crate) fn explore_resolution(game: &mut Game, r: &ExploreResolutionState, ro
     assert!(valid_rotation, "Invalid rotation {rotate_by}");
 
     add_block_tiles_with_log(game, position, &r.block.block, rotation);
-    game.move_units(game.current_player_index, &r.units, r.destination);
+    game.move_units(game.current_player_index, &r.units, r.destination, None);
     game.back_to_move(&r.move_state);
     game.push_undo_context(UndoContext::ExploreResolution(r.clone()));
 }

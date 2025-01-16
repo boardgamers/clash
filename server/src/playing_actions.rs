@@ -6,7 +6,7 @@ use PlayingAction::*;
 
 use crate::action::Action;
 use crate::content::advances;
-use crate::game::{CulturalInfluenceResolution, GameState, MoveState};
+use crate::game::{CulturalInfluenceResolution, CurrentMove, GameState, MoveState};
 use crate::{
     city::City,
     city_pieces::Building::{self, *},
@@ -221,6 +221,7 @@ impl PlayingAction {
                 game.state = GameState::Movement(MoveState {
                     movement_actions_left: MOVEMENT_ACTIONS,
                     moved_units: Vec::new(),
+                    current_move: CurrentMove::None,
                 });
             }
             IncreaseHappiness(i) => {

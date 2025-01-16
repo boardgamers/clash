@@ -138,6 +138,13 @@ pub enum Terrain {
     Unexplored,
 }
 
+impl Terrain {
+    #[must_use]
+    pub fn is_water(&self) -> bool {
+        matches!(self, Terrain::Water)
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct Block {
     pub(crate) terrain: [Terrain; 4],
