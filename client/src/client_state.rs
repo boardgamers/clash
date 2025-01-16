@@ -474,11 +474,12 @@ impl State {
     pub fn game_state_dialog(&self, game: &Game) -> ActiveDialog {
         match &game.state {
             GameState::Playing | GameState::Finished => ActiveDialog::None,
-            GameState::Movement { .. } => ActiveDialog::MoveUnits(MoveSelection::new(
+            GameState::Movement(move_state) => ActiveDialog::MoveUnits(MoveSelection::new(
                 game.active_player(),
                 self.focused_tile,
                 game,
                 &self.move_intent,
+                move_state,
             )),
             GameState::CulturalInfluenceResolution(c) => {
                 ActiveDialog::CulturalInfluenceResolution(c.clone())

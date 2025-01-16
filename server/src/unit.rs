@@ -3,7 +3,7 @@ use std::{
     fmt::Display,
     ops::{AddAssign, SubAssign},
 };
-
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 use MovementRestriction::{AllMovement, Attack};
@@ -421,7 +421,7 @@ pub(crate) fn get_current_move(
         CurrentMove::None
     } else {
         CurrentMove::Fleet {
-            units: units.to_vec(),
+            units: units.iter().sorted().copied().collect(),
         }
     }
 }

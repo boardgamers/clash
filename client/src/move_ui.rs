@@ -1,7 +1,7 @@
 use macroquad::math::{u32, Vec2};
 use macroquad::prelude::Texture2D;
 use server::action::Action;
-use server::game::Game;
+use server::game::{CurrentMove, Game, MoveState};
 use server::player::Player;
 use server::position::Position;
 use server::unit::{MovementAction, Unit, UnitType};
@@ -141,6 +141,7 @@ pub struct MoveSelection {
     pub units: Vec<u32>,
     pub start: Option<Position>,
     pub destinations: Vec<MoveDestination>,
+    // pub lo
 }
 
 impl MoveSelection {
@@ -149,7 +150,18 @@ impl MoveSelection {
         start: Option<Position>,
         game: &Game,
         move_intent: &MoveIntent,
+        move_state: &MoveState,
     ) -> MoveSelection {
+        if let CurrentMove::Fleet { units} = &move_state.current_move {
+            let fleet_pos = game.get_player(player_index).get_unit(units[0]).unwrap().position;
+            return MoveSelection {
+                player_index,
+                start: Some(fleet_pos),
+                units: units.clone(),
+                destinations: possible_destinations(game, fleet_pos, player_index, units),
+            };
+        }
+        
         match start {
             Some(pos) => {
                 let movable_units = movable_units(
