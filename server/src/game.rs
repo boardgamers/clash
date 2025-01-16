@@ -295,47 +295,36 @@ impl Game {
             self.undo(player_index);
             return;
         }
-        if let Action::Redo = action {
+        if matches!(action, Action::Redo) || self.can_auto_redo(&action) {
             assert!(self.can_redo(), "no action can be redone");
             self.redo(player_index);
             return;
         }
         self.log.push(log::format_action_log_item(&action, self));
+        self.add_action_log_item(action.clone());
         match self.state.clone() {
             Playing => {
                 let action = action.playing().expect("action should be a playing action");
-                if self.can_redo()
-                    && self.action_log[self.action_log_index]
-                        .playing_ref()
-                        .expect("undone actions should be playing actions")
-                        == &action
-                {
-                    self.redo(player_index);
-                    return;
-                }
-                self.add_action_log_item(Action::Playing(action.clone()));
+
                 action.execute(self, player_index);
             }
             StatusPhase(phase) => {
                 let action = action
                     .status_phase()
                     .expect("action should be a status phase action");
-                assert!(phase == action.phase(), "Illegal action");
-                self.add_action_log_item(Action::StatusPhase(action.clone()));
+                assert!(phase == action.phase(), "Illegal action: Same phase again");
                 action.execute(self, player_index);
             }
             Movement(m) => {
                 let action = action
                     .movement()
                     .expect("action should be a movement action");
-                self.add_action_log_item(Action::Movement(action.clone()));
                 self.execute_movement_action(action, player_index, m);
             }
             CulturalInfluenceResolution(c) => {
                 let action = action
                     .cultural_influence_resolution()
                     .expect("action should be a cultural influence resolution action");
-                self.add_action_log_item(Action::CulturalInfluenceResolution(action));
                 self.execute_cultural_influence_resolution_action(
                     action,
                     c.roll_boost_cost,
@@ -347,7 +336,6 @@ impl Game {
             }
             Combat(c) => {
                 let action = action.combat().expect("action should be a combat action");
-                self.add_action_log_item(Action::Combat(action.clone()));
                 execute_combat_action(self, action, c);
             }
             PlaceSettler(p) => self.place_settler(action, player_index, &p),
@@ -355,11 +343,21 @@ impl Game {
                 let rotation = action
                     .explore_resolution()
                     .expect("action should be an explore resolution action");
-                self.add_action_log_item(Action::ExploreResolution(rotation));
                 explore_resolution(self, &r, rotation);
             }
             Finished => panic!("actions can't be executed when the game is finished"),
         }
+    }
+
+    fn can_auto_redo(&mut self, action: &Action) -> bool {
+        self.state.is_playing()
+            && self.can_redo()
+            && self.action_log[self.action_log_index]
+                .playing_ref()
+                .expect("undone actions should be playing actions")
+                == action
+                    .playing_ref()
+                    .expect("action should be a playing action")
     }
 
     fn undo(&mut self, player_index: usize) {
@@ -686,7 +684,6 @@ impl Game {
         let action = action
             .place_settler()
             .expect("action should be place_settler action");
-        self.add_action_log_item(Action::PlaceSettler(action));
         let player = &mut self.players[player_index];
         assert!(player.get_city(action).is_some(), "Illegal action");
         player.add_unit(action, Settler);
@@ -1622,6 +1619,11 @@ impl GameState {
             PlaceSettler(p) => Some(p.player_index),
             _ => None,
         }
+    }
+
+    #[must_use]
+    pub fn is_playing(&self) -> bool {
+        matches!(self, Playing)
     }
 }
 
