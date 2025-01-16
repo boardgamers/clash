@@ -274,7 +274,7 @@ impl PlayingAction {
                     target_city_position,
                     city_piece,
                 });
-                game.add_to_last_log_item(&format!("and rolled a {roll}. {} now has the option to pay {} culture tokens to increase the dice roll and proceed with the cultural influence", game.players[player_index].get_name(), 5 - roll as u32));
+                game.add_to_last_log_item(&format!(" and rolled a {roll}. {} now has the option to pay {} culture tokens to increase the dice roll and proceed with the cultural influence", game.players[player_index].get_name(), 5 - roll as u32));
             }
             Custom(custom_action) => {
                 let action = custom_action.custom_action_type();
