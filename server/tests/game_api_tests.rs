@@ -218,10 +218,10 @@ fn basic_actions() {
     );
 }
 
-fn move_action(units: Vec<u32>, founded_city_position: Position) -> Action {
+fn move_action(units: Vec<u32>, destination: Position) -> Action {
     Action::Movement(Move {
         units,
-        destination: founded_city_position,
+        destination,
         embark_carrier_id: None,
     })
 }
@@ -910,19 +910,6 @@ fn test_explore_resolution() {
     );
 }
 
-#[ignore]
-#[test]
-fn test_ship_disembark_capture_empty_city() {
-    // undo capture empty city is broken
-    test_action(
-        "ship_disembark_capture_empty_city",
-        move_action(vec![1, 2], Position::from_offset("B2")),
-        0,
-        true,
-        false,
-    );
-}
-
 #[test]
 fn test_ship_transport() {
     // undo capture empty city is broken
@@ -948,11 +935,55 @@ fn test_ship_transport_same_sea() {
 }
 
 #[test]
+fn test_ship_embark() {
+    test_action(
+        "ship_embark",
+        Action::Movement(Move {
+            units: vec![3, 4],
+            destination: Position::from_offset("C3"),
+            embark_carrier_id: Some(8),
+        }),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
+fn test_ship_embark_continue() {      
+    test_action(
+        "ship_embark_continue",
+        Action::Movement(Move {
+            units: vec![5,6],
+            destination: Position::from_offset("C3"),
+            embark_carrier_id: Some(9),
+        }),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
 fn test_ship_disembark() {
     // undo capture empty city is broken
     test_action(
         "ship_disembark",
         move_action(vec![1, 2], Position::from_offset("B3")),
+        0,
+        true,
+        false,
+    );
+}
+
+
+#[ignore]
+#[test]
+fn test_ship_disembark_capture_empty_city() {
+    // undo capture empty city is broken
+    test_action(
+        "ship_disembark_capture_empty_city",
+        move_action(vec![1, 2], Position::from_offset("B2")),
         0,
         true,
         false,

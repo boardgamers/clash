@@ -1452,7 +1452,13 @@ impl Game {
             .get_unit(*unit)
             .expect("there should be at least one moved unit")
             .position;
-        let terrain = self
+        let start_terain = self
+            .map
+            .tiles
+            .get(&starting_position)
+            .expect("the starting position should exist on the map")
+            .clone();
+        let dest_terrain = self
             .map
             .tiles
             .get(&destination)
@@ -1463,11 +1469,14 @@ impl Game {
                 .get_unit_mut(unit_id)
                 .expect("the player should have all units to move");
             unit.position = starting_position;
-            match terrain {
+            match dest_terrain {
                 Mountain => unit.undo_movement_restriction(),
                 Forest => unit.undo_attack_restriction(),
                 _ => (),
             };
+            if !start_terain.is_water() {
+                unit.carrier_id = None;
+            }
             for id in &carried_units(self, player_index, unit_id) {
                 self.players[player_index]
                     .get_unit_mut(*id)
