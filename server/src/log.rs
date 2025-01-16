@@ -310,10 +310,15 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
         MovementAction::Move {
             units,
             destination: _,
+            embark_carrier_id: _,
         } if units.is_empty() => {
             format!("\t{player_name} used a movement actions but moved no units")
         }
-        MovementAction::Move { units, destination } => {
+        MovementAction::Move {
+            units,
+            destination,
+            embark_carrier_id: _,
+        } => {
             let units_str = units
                 .iter()
                 .map(|unit| {

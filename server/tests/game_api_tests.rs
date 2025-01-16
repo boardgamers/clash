@@ -197,10 +197,7 @@ fn basic_actions() {
         .is_activated());
 
     let game = game_api::execute_action(game, Action::Playing(MoveUnits), 0);
-    let movement_action = Action::Movement(Move {
-        units: vec![0],
-        destination: founded_city_position,
-    });
+    let movement_action = move_action(vec![0], founded_city_position);
     let game = game_api::execute_action(game, movement_action, 0);
     let game = game_api::execute_action(game, Action::Movement(Stop), 0);
     let player = &game.players[0];
@@ -219,6 +216,14 @@ fn basic_actions() {
             .expect("The player should have the founded city")
             .size()
     );
+}
+
+fn move_action(units: Vec<u32>, founded_city_position: Position) -> Action {
+    Action::Movement(Move {
+        units,
+        destination: founded_city_position,
+        embark_carrier_id: None,
+    })
 }
 
 #[test]
@@ -526,10 +531,7 @@ fn undo_redo(
 fn test_movement() {
     test_action(
         "movement",
-        Action::Movement(Move {
-            units: vec![4],
-            destination: Position::from_offset("B3"),
-        }),
+        move_action(vec![4], Position::from_offset("B3")),
         0,
         true,
         false,
@@ -769,10 +771,7 @@ fn test_change_government() {
 fn test_until_remove_casualties_attacker() {
     test_action(
         "until_remove_casualties_attacker",
-        Action::Movement(Move {
-            units: vec![0, 1, 2, 3],
-            destination: Position::from_offset("C1"),
-        }),
+        move_action(vec![0, 1, 2, 3], Position::from_offset("C1")),
         0,
         false,
         false,
@@ -794,10 +793,7 @@ fn test_remove_casualties_attacker_and_capture_city() {
 fn test_until_remove_casualties_defender() {
     test_action(
         "until_remove_casualties_defender",
-        Action::Movement(Move {
-            units: vec![0],
-            destination: Position::from_offset("C1"),
-        }),
+        move_action(vec![0], Position::from_offset("C1")),
         0,
         false,
         false,
@@ -819,10 +815,7 @@ fn test_remove_casualties_defender_and_defender_wins() {
 fn test_direct_capture_city() {
     test_action(
         "direct_capture_city",
-        Action::Movement(Move {
-            units: vec![0, 1, 2, 3],
-            destination: Position::from_offset("C1"),
-        }),
+        move_action(vec![0, 1, 2, 3], Position::from_offset("C1")),
         0,
         false,
         false,
@@ -833,10 +826,7 @@ fn test_direct_capture_city() {
 fn test_first_combat_round_no_hits_attacker_may_retreat() {
     test_action(
         "first_combat_round_no_hits",
-        Action::Movement(Move {
-            units: vec![0],
-            destination: Position::from_offset("C1"),
-        }),
+        move_action(vec![0], Position::from_offset("C1")),
         0,
         false,
         false,
@@ -869,10 +859,7 @@ fn test_dont_retreat_and_next_combat_round() {
 fn test_explore_choose() {
     test_action(
         "explore_choose",
-        Action::Movement(Move {
-            units: vec![0],
-            destination: Position::from_offset("C7"),
-        }),
+        move_action(vec![0], Position::from_offset("C7")),
         1,
         false,
         false,
@@ -883,10 +870,7 @@ fn test_explore_choose() {
 fn test_explore_auto_no_walk_on_water() {
     test_action(
         "explore_auto_no_walk_on_water",
-        Action::Movement(Move {
-            units: vec![0],
-            destination: Position::from_offset("B2"),
-        }),
+        move_action(vec![0], Position::from_offset("B2")),
         0,
         false,
         false,
@@ -897,10 +881,7 @@ fn test_explore_auto_no_walk_on_water() {
 fn test_explore_auto_adjacent_water() {
     test_action(
         "explore_auto_adjacent_water",
-        Action::Movement(Move {
-            units: vec![0],
-            destination: Position::from_offset("C7"),
-        }),
+        move_action(vec![0], Position::from_offset("C7")),
         0,
         false,
         false,
@@ -911,10 +892,7 @@ fn test_explore_auto_adjacent_water() {
 fn test_explore_auto_water_outside() {
     test_action(
         "explore_auto_water_outside",
-        Action::Movement(Move {
-            units: vec![1],
-            destination: Position::from_offset("F5"),
-        }),
+        move_action(vec![1], Position::from_offset("F5")),
         1,
         false,
         false,
@@ -938,10 +916,7 @@ fn test_ship_disembark_capture_empty_city() {
     // undo capture empty city is broken
     test_action(
         "ship_disembark_capture_empty_city",
-        Action::Movement(Move {
-            units: vec![1, 2],
-            destination: Position::from_offset("B2"),
-        }),
+        move_action(vec![1, 2], Position::from_offset("B2")),
         0,
         true,
         false,
@@ -953,10 +928,7 @@ fn test_ship_transport() {
     // undo capture empty city is broken
     test_action(
         "ship_transport",
-        Action::Movement(Move {
-            units: vec![7],
-            destination: Position::from_offset("D2"),
-        }),
+        move_action(vec![7], Position::from_offset("D2")),
         0,
         true,
         false,
@@ -968,10 +940,7 @@ fn test_ship_disembark() {
     // undo capture empty city is broken
     test_action(
         "ship_disembark",
-        Action::Movement(Move {
-            units: vec![1, 2],
-            destination: Position::from_offset("B3"),
-        }),
+        move_action(vec![1, 2], Position::from_offset("B3")),
         0,
         true,
         false,

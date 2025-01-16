@@ -11,11 +11,11 @@ use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name, resource_types};
 use crate::tooltip::show_tooltip_for_rect;
 use crate::unit_ui;
-use macroquad::math::{u32, vec2};
+use macroquad::math::vec2;
 use macroquad::prelude::*;
 use server::action::Action;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
-use server::game::{Game, GameState, MoveState};
+use server::game::{CurrentMove, Game, GameState, MoveState};
 use server::playing_actions::PlayingAction;
 use server::unit::MovementAction;
 
@@ -188,7 +188,17 @@ pub fn show_top_left(rc: &RenderContext) {
             _ => label(&format!("{} actions left", game.actions_left)),
         }
         if let Some(moves) = move_state(&game.state) {
-            label(&move_units_message(moves.movement_actions_left));
+            let movement_actions_left = moves.movement_actions_left;
+            label(&format!("Move units: {movement_actions_left} moves left"));
+            match moves.current_move {
+                CurrentMove::Fleet { .. } => label(
+                    "May continue to move the fleet in the same sea without using movement actions",
+                ),
+                CurrentMove::Embark { .. } => {
+                    label("May continue to embark units without using movement actions");
+                }
+                CurrentMove::None => {}
+            }
         }
     }
 
@@ -237,10 +247,6 @@ pub fn show_top_left(rc: &RenderContext) {
             label(&unit_ui::unit_label(&unit, army_move));
         }
     }
-}
-
-fn move_units_message(movement_actions_left: u32) -> String {
-    format!("Move units: {movement_actions_left} moves left")
 }
 
 fn move_state(state: &GameState) -> Option<&MoveState> {

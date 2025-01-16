@@ -2,7 +2,6 @@ use macroquad::math::{u32, Vec2};
 use macroquad::prelude::Texture2D;
 use server::action::Action;
 use server::game::Game;
-use server::game::GameState::Movement;
 use server::player::Player;
 use server::position::Position;
 use server::unit::{MovementAction, Unit, UnitType};
@@ -52,12 +51,6 @@ pub fn possible_destinations(
 ) -> Vec<Position> {
     let player = game.get_player(player_index);
 
-    let (moved_units, movement_actions_left) = if let Movement(m) = &game.state {
-        (&m.moved_units, m.movement_actions_left)
-    } else {
-        (&vec![], 1)
-    };
-
     start
         .neighbors()
         .into_iter()
@@ -65,12 +58,7 @@ pub fn possible_destinations(
             game.map.tiles.contains_key(dest)
                 && player
                     .can_move_units(
-                        game,
-                        units,
-                        start,
-                        *dest,
-                        movement_actions_left,
-                        moved_units,
+                        game, units, start, *dest, None, //todo: add support for embark
                     )
                     .is_ok()
         })
@@ -83,6 +71,7 @@ pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Ve
         StateUpdate::execute(Action::Movement(MovementAction::Move {
             units,
             destination: pos,
+            embark_carrier_id: None, //todo: add support for embark
         }))
     } else if s.start.is_some_and(|p| p != pos) {
         // first need to deselect units

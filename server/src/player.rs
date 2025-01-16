@@ -7,6 +7,9 @@ use std::{
 };
 
 use crate::advance::Advance;
+use crate::game::CurrentMove;
+use crate::game::GameState::Movement;
+use crate::unit::{get_current_move, land_movement};
 use crate::{
     city::{City, CityData},
     city_pieces::{
@@ -764,9 +767,14 @@ impl Player {
         units: &[u32],
         starting: Position,
         destination: Position,
-        movement_actions_left: u32,
-        moved_units: &[u32],
+        embark_carrier_id: Option<u32>,
     ) -> Result<(), String> {
+        let (moved_units, movement_actions_left, current_move) = if let Movement(m) = &game.state {
+            (&m.moved_units, m.movement_actions_left, &m.current_move)
+        } else {
+            (&vec![], 1, &CurrentMove::None)
+        };
+
         if units.is_empty() {
             return Err("no units to move".to_string());
         }
@@ -774,21 +782,20 @@ impl Player {
         if !starting.is_neighbor(destination) {
             return Err("the destination should be adjacent to the starting position".to_string());
         }
-        if movement_actions_left == 0 {
-            return Err("no movement actions left".to_string());
+        if matches!(current_move, CurrentMove::None)
+            || current_move
+                != &get_current_move(game, units, starting, destination, embark_carrier_id)
+        {
+            if movement_actions_left == 0 {
+                return Err("no movement actions left".to_string());
+            }
+
+            if units.iter().any(|unit| moved_units.contains(unit)) {
+                return Err("some units have already moved".to_string());
+            }
         }
 
-        if units.iter().any(|unit| moved_units.contains(unit)) {
-            return Err("some units have already moved".to_string());
-        }
-
-        let land_movement = !matches!(
-            game.map
-                .tiles
-                .get(&destination)
-                .expect("destination should exist"),
-            Water
-        );
+        let land_movement = land_movement(game, destination);
         let mut stack_size = 0;
 
         for unit_id in units {
@@ -821,7 +828,7 @@ impl Player {
             && self
                 .get_units(destination)
                 .iter()
-                .filter(|unit| unit.unit_type.is_army_unit())
+                .filter(|unit| unit.unit_type.is_army_unit() && !unit.is_transported())
                 .count()
                 + stack_size
                 > STACK_LIMIT

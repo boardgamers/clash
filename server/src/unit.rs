@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use MovementRestriction::{AllMovement, Attack};
 use UnitType::*;
 
+use crate::game::CurrentMove;
 use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
@@ -382,6 +383,9 @@ pub enum MovementAction {
     Move {
         units: Vec<u32>,
         destination: Position,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        embark_carrier_id: Option<u32>,
     },
     Stop,
 }
@@ -394,6 +398,37 @@ pub fn carried_units(game: &Game, player_index: usize, carrier: u32) -> Vec<u32>
         .filter(|u| u.carrier_id == Some(carrier))
         .map(|u| u.id)
         .collect()
+}
+
+pub(crate) fn get_current_move(
+    game: &Game,
+    units: &[u32],
+    starting: Position,
+    destination: Position,
+    embark_carrier_id: Option<u32>,
+) -> CurrentMove {
+    if embark_carrier_id.is_some() {
+        CurrentMove::Embark {
+            source: starting,
+            destination,
+        }
+    } else if land_movement(game, destination) {
+        CurrentMove::None
+    } else {
+        CurrentMove::Fleet {
+            units: units.to_vec(),
+        }
+    }
+}
+
+pub(crate) fn land_movement(game: &Game, destination: Position) -> bool {
+    !matches!(
+        game.map
+            .tiles
+            .get(&destination)
+            .expect("destination should exist"),
+        Water
+    )
 }
 
 #[cfg(test)]

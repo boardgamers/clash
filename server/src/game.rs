@@ -7,7 +7,7 @@ use crate::combat::Combat;
 use crate::combat::{capture_position, execute_combat_action, initiate_combat, CombatPhase};
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
 use crate::map::UnexploredBlock;
-use crate::unit::carried_units;
+use crate::unit::{carried_units, get_current_move};
 use crate::utils::shuffle;
 use crate::{
     action::Action,
@@ -445,7 +445,11 @@ impl Game {
     ) {
         let saved_state = move_state.clone();
         let (starting_position, disembarked_units) = match action {
-            Move { units, destination } => {
+            Move {
+                units,
+                destination,
+                embark_carrier_id,
+            } => {
                 let player = &self.players[player_index];
                 let starting_position = player
                     .get_unit(*units.first().expect(
@@ -469,18 +473,23 @@ impl Game {
                         &units,
                         starting_position,
                         destination,
-                        move_state.movement_actions_left,
-                        &move_state.moved_units,
+                        embark_carrier_id,
                     )
                     .expect("Illegal action");
-                move_state.moved_units.extend(units.iter().filter(|unit| {
-                    player
-                        .get_unit(**unit)
-                        .expect("the player should have all units to move")
-                        .unit_type
-                        .is_land_based()
-                }));
-                move_state.movement_actions_left -= 1;
+                move_state.moved_units.extend(units.iter());
+                let current_move = get_current_move(
+                    self,
+                    &units,
+                    starting_position,
+                    destination,
+                    embark_carrier_id,
+                );
+                if matches!(current_move, CurrentMove::None)
+                    || move_state.current_move != current_move
+                {
+                    move_state.movement_actions_left -= 1;
+                    move_state.current_move = current_move;
+                }
 
                 let dest_terrain = self
                     .map
@@ -597,6 +606,7 @@ impl Game {
         if let Move {
             units,
             destination: _,
+            embark_carrier_id: _,
         } = action
         {
             self.undo_move_units(
@@ -683,7 +693,9 @@ impl Game {
     }
 
     pub(crate) fn back_to_move(&mut self, move_state: &MoveState) {
-        self.state = if move_state.movement_actions_left == 0 {
+        self.state = if move_state.movement_actions_left == 0
+            && move_state.current_move == CurrentMove::None
+        {
             Playing
         } else {
             Movement(move_state.clone())
@@ -1479,6 +1491,11 @@ impl Game {
                 self.players[killer].captured_leaders.push(leader.name);
             }
         }
+        if let GameState::Movement(m) = &mut self.state {
+            if let CurrentMove::Fleet { units } = &mut m.current_move {
+                units.retain(|&id| id != unit_id);
+            }
+        }
     }
 
     pub fn set_player_index(&mut self, current_player_index: usize) {
@@ -1518,10 +1535,33 @@ pub struct CulturalInfluenceResolution {
     pub city_piece: Building,
 }
 
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Default)]
+pub enum CurrentMove {
+    #[default]
+    None,
+    Embark {
+        source: Position,
+        destination: Position,
+    },
+    Fleet {
+        units: Vec<u32>,
+    },
+}
+
+impl CurrentMove {
+    #[must_use]
+    pub fn is_none(&self) -> bool {
+        matches!(self, CurrentMove::None)
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct MoveState {
     pub movement_actions_left: u32,
     pub moved_units: Vec<u32>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "CurrentMove::is_none")]
+    pub current_move: CurrentMove,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
