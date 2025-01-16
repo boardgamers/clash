@@ -108,9 +108,7 @@ fn water_has_water_neighbors(
     rotation: Rotation,
 ) -> bool {
     has_neighbors(unexplored_block, rotation, |p| {
-        map.tiles
-            .get(p)
-            .is_some_and(Terrain::is_water)
+        map.tiles.get(p).is_some_and(Terrain::is_water)
     })
 }
 
