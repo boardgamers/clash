@@ -54,6 +54,10 @@ impl Rng {
         let random_value = self.seed % range;
         start + random_value as usize
     }
+
+    pub fn is_zero(&self) -> bool {
+        self.seed == 0
+    }
 }
 
 fn next_seed(seed: u128) -> u128 {
@@ -63,7 +67,10 @@ fn next_seed(seed: u128) -> u128 {
     const INCREMENT: u128 = 1;
 
     let new_seed = seed ^ XOR;
-    new_seed.rotate_left(ROTATE).wrapping_mul(MULTIPLIER).wrapping_add(INCREMENT)
+    new_seed
+        .rotate_left(ROTATE)
+        .wrapping_mul(MULTIPLIER)
+        .wrapping_add(INCREMENT)
 }
 
 pub trait Shuffle {
@@ -122,7 +129,8 @@ pub mod tests {
         const TOLERANCE_PERCENTAGE: f32 = 10.;
 
         const EXPECTED_OCCURRENCES: usize = ITERATIONS / MODULO;
-        const TOLERANCE: usize = (EXPECTED_OCCURRENCES as f32 * TOLERANCE_PERCENTAGE * 0.01) as usize;
+        const TOLERANCE: usize =
+            (EXPECTED_OCCURRENCES as f32 * TOLERANCE_PERCENTAGE * 0.01) as usize;
 
         let initial_seed = get_current_time().as_nanos();
         let mut rng = Rng::from_seed(initial_seed);

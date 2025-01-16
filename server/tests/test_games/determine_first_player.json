@@ -449,9 +449,18 @@
   "messages": [
     "The game has started"
   ],
-  "rng": {
-    "seed": 1234567890
-  },
+   "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+  ],
   "dice_roll_log": [
     10
   ],

@@ -54,6 +54,7 @@ pub struct Game {
     pub age: u32,   // starts at 1
     pub messages: Vec<String>,
     pub rng: Rng,
+    pub dice_roll_outcomes: Vec<u8>, // for testing
     pub dice_roll_log: Vec<u8>,
     pub dropped_players: Vec<usize>,
     pub wonders_left: Vec<Wonder>,
@@ -129,6 +130,7 @@ impl Game {
             age: 1,
             messages: vec![String::from("The game has started")],
             rng,
+            dice_roll_outcomes: Vec::new(),
             dice_roll_log: Vec::new(),
             dropped_players: Vec::new(),
             wonders_left: wonders,
@@ -160,6 +162,7 @@ impl Game {
             age: data.age,
             messages: data.messages,
             rng: data.rng,
+            dice_roll_outcomes: data.dice_roll_outcomes,
             dice_roll_log: data.dice_roll_log,
             dropped_players: data.dropped_players,
             wonders_left: data
@@ -197,6 +200,7 @@ impl Game {
             age: self.age,
             messages: self.messages,
             rng: self.rng,
+            dice_roll_outcomes: self.dice_roll_outcomes,
             dice_roll_log: self.dice_roll_log,
             dropped_players: self.dropped_players,
             wonders_left: self
@@ -227,6 +231,7 @@ impl Game {
             age: self.age,
             messages: self.messages.clone(),
             rng: self.rng.clone(),
+            dice_roll_outcomes: self.dice_roll_outcomes.clone(),
             dice_roll_log: self.dice_roll_log.clone(),
             dropped_players: self.dropped_players.clone(),
             wonders_left: self
@@ -844,7 +849,14 @@ impl Game {
 
     pub fn get_next_dice_roll(&mut self) -> u8 {
         self.lock_undo();
-        let dice_roll = self.rng.range(0, 12) as u8;
+        let dice_roll = if self.dice_roll_outcomes.is_empty() {
+            self.rng.range(0, 12) as u8
+        } else {
+            // only for testing
+            self.dice_roll_outcomes
+                .pop()
+                .expect("dice roll outcomes should not be empty")
+        };
         self.dice_roll_log.push(dice_roll);
         dice_roll
     }
@@ -1672,6 +1684,11 @@ pub struct GameData {
     round: u32,
     age: u32,
     messages: Vec<String>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    dice_roll_outcomes: Vec<u8>, // for testing purposes
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Rng::is_zero")]
     rng: Rng,
     dice_roll_log: Vec<u8>,
     dropped_players: Vec<usize>,
@@ -1846,6 +1863,7 @@ pub mod tests {
             age: 1,
             messages: vec![String::from("Game has started")],
             rng: Rng::from_seed(1234567890),
+            dice_roll_outcomes: Vec::new(),
             dice_roll_log: Vec::new(),
             dropped_players: Vec::new(),
             wonders_left: Vec::new(),

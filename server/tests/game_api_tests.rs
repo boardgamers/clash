@@ -229,7 +229,7 @@ fn move_action(units: Vec<u32>, destination: Position) -> Action {
 #[test]
 fn cultural_influence() {
     let mut game = Game::new(2, String::new(), false);
-    // game.dice_roll_outcomes = vec![10, 6, 8, 4];
+    game.dice_roll_outcomes = vec![10, 6, 8, 4];
     game.set_player_index(0);
     game.players[0].gain_resources(ResourcePile::culture_tokens(4));
     game.players[1].gain_resources(ResourcePile::culture_tokens(1));

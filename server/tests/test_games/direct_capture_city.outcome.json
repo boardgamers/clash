@@ -435,9 +435,11 @@
   "messages": [
     "The game has started"
   ],
-  "rng": {
-    "seed": 1234567890
-  },
+   "dice_roll_outcomes": [
+    1,
+    1,
+    1
+  ],
   "dice_roll_log": [
     11,
     11,
@@ -516,7 +518,7 @@
       "Movement": {
         "starting_position": "C2",
         "movement_actions_left": 3,
-        "moved_units": [],
+        "moved_units": []
       }
     }
   ]
