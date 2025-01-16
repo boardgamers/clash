@@ -950,11 +950,11 @@ fn test_ship_embark() {
 }
 
 #[test]
-fn test_ship_embark_continue() {      
+fn test_ship_embark_continue() {
     test_action(
         "ship_embark_continue",
         Action::Movement(Move {
-            units: vec![5,6],
+            units: vec![5, 6],
             destination: Position::from_offset("C3"),
             embark_carrier_id: Some(9),
         }),
@@ -975,7 +975,6 @@ fn test_ship_disembark() {
         false,
     );
 }
-
 
 #[ignore]
 #[test]

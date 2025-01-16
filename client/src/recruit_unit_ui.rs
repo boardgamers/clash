@@ -210,7 +210,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
         |s, p| {
             draw_unit_type(
                 rc,
-                UnitHighlightType::None,
+                &UnitHighlightType::None,
                 Point::from_vec2(p),
                 &s.unit_type,
                 rc.shown_player.index,

@@ -57,26 +57,32 @@ pub fn possible_destinations(
         .filter(|dest| {
             game.map.tiles.contains_key(dest)
                 && player
-                .can_move_units(
-                    game, units, start, *dest, None,
-                )
-                .is_ok()
+                    .can_move_units(game, units, start, *dest, None)
+                    .is_ok()
         })
         .map(MoveDestination::Tile)
         .collect::<Vec<_>>();
     player.units.iter().for_each(|u| {
-        if u.unit_type.is_ship() && player.can_move_units(game, units, start, u.position, Some(u.id)).is_ok() {
+        if u.unit_type.is_ship()
+            && player
+                .can_move_units(game, units, start, u.position, Some(u.id))
+                .is_ok()
+        {
             res.push(MoveDestination::Carrier(u.id));
         }
     });
     res
 }
 
-fn move_destination(dest: &MoveDestination, pos: Position, unit: Option<u32>) -> Option<(Position, Option<u32>)> {
+fn move_destination(
+    dest: &MoveDestination,
+    pos: Position,
+    unit: Option<u32>,
+) -> Option<(Position, Option<u32>)> {
     match dest {
         MoveDestination::Tile(p) if p == &pos => Some((*p, None)),
-        MoveDestination::Carrier(id) if unit.is_some_and(|u|u==*id) => Some((pos, Some(*id))), 
-            _ => None
+        MoveDestination::Carrier(id) if unit.is_some_and(|u| u == *id) => Some((pos, Some(*id))),
+        _ => None,
     }
 }
 
@@ -84,7 +90,11 @@ pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Ve
     let game = rc.game;
     let p = game.get_player(s.player_index);
     let carrier = click_unit(rc, pos, mouse_pos, p, false);
-    if let Some((destination, embark_carrier_id)) = s.destinations.iter().find_map(|d| move_destination(d, pos, carrier)) {
+    if let Some((destination, embark_carrier_id)) = s
+        .destinations
+        .iter()
+        .find_map(|d| move_destination(d, pos, carrier))
+    {
         let units = s.units.clone();
         StateUpdate::execute(Action::Movement(MovementAction::Move {
             units,
@@ -152,8 +162,12 @@ impl MoveSelection {
         move_intent: &MoveIntent,
         move_state: &MoveState,
     ) -> MoveSelection {
-        if let CurrentMove::Fleet { units} = &move_state.current_move {
-            let fleet_pos = game.get_player(player_index).get_unit(units[0]).unwrap().position;
+        if let CurrentMove::Fleet { units } = &move_state.current_move {
+            let fleet_pos = game
+                .get_player(player_index)
+                .get_unit(units[0])
+                .unwrap()
+                .position;
             return MoveSelection {
                 player_index,
                 start: Some(fleet_pos),
@@ -161,7 +175,7 @@ impl MoveSelection {
                 destinations: possible_destinations(game, fleet_pos, player_index, units),
             };
         }
-        
+
         match start {
             Some(pos) => {
                 let movable_units = movable_units(

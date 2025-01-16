@@ -794,8 +794,10 @@ impl Player {
                 return Err("some units have already moved".to_string());
             }
         }
-        
-        if embark_carrier_id.is_some_and(|id| carried_units(game,self.index, id).len() + units.len() > 2) {
+
+        if embark_carrier_id
+            .is_some_and(|id| carried_units(game, self.index, id).len() + units.len() > 2)
+        {
             return Err("carrier capacity exceeded".to_string());
         }
 

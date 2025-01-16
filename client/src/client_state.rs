@@ -117,10 +117,16 @@ impl ActiveDialog {
                     if m.destinations.is_empty() {
                         result.push("No unit on this tile can move".to_string());
                     }
-                    if m.destinations.iter().any(|d| matches!(d, MoveDestination::Tile(_))) {
+                    if m.destinations
+                        .iter()
+                        .any(|d| matches!(d, MoveDestination::Tile(_)))
+                    {
                         result.push("Click on a highlighted tile to move units".to_string());
                     };
-                    if m.destinations.iter().any(|d| matches!(d, MoveDestination::Carrier(_))) {
+                    if m.destinations
+                        .iter()
+                        .any(|d| matches!(d, MoveDestination::Carrier(_)))
+                    {
                         result.push("Click on a carrier to embark units".to_string());
                     };
                     result

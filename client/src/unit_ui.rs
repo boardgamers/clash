@@ -1,6 +1,6 @@
 use macroquad::color::BLACK;
 use macroquad::math::{u32, vec2, Vec2};
-use macroquad::prelude::{Color, BLUE, GREEN, WHITE};
+use macroquad::prelude::{Color, BLUE, WHITE};
 use macroquad::shapes::draw_circle;
 
 use server::game::Game;
@@ -56,7 +56,7 @@ struct UnitHighlight {
 
 pub fn draw_unit_type(
     rc: &RenderContext,
-    unit_highlight_type: UnitHighlightType,
+    unit_highlight_type: &UnitHighlightType,
     center: Point,
     unit_type: &UnitType,
     player_index: usize,
@@ -201,10 +201,13 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
 }
 
 fn highlight_primary(units: &[u32]) -> Vec<UnitHighlight> {
-    units.iter().map(|unit| UnitHighlight {
-        unit: *unit,
-        highlight_type: UnitHighlightType::Primary,
-    }).collect()
+    units
+        .iter()
+        .map(|unit| UnitHighlight {
+            unit: *unit,
+            highlight_type: UnitHighlightType::Primary,
+        })
+        .collect()
 }
 
 fn draw_unit(
@@ -228,14 +231,13 @@ fn draw_unit(
             selected_units
                 .iter()
                 .find(|u| u.unit == unit.id)
-                .map(|u| u.highlight_type.clone())
-                .unwrap_or(UnitHighlightType::None)
+                .map_or(UnitHighlightType::None, |u| u.highlight_type.clone())
         } else {
             UnitHighlightType::None
         };
         draw_unit_type(
             rc,
-            highlight,
+            &highlight,
             center,
             &unit.unit_type,
             unit.player_index,
@@ -257,7 +259,7 @@ pub fn unit_selection_click<T: UnitSelection>(
     sel: &T,
     on_change: impl Fn(T) -> StateUpdate,
 ) -> StateUpdate {
-    if let Some(unit_id) = click_unit(rc, pos, mouse_pos, rc.shown_player,true) {
+    if let Some(unit_id) = click_unit(rc, pos, mouse_pos, rc.shown_player, true) {
         if sel.can_select(rc.game, rc.shown_player.get_unit(unit_id).unwrap()) {
             let mut new = sel.clone();
             unit_selection_clicked(unit_id, new.selected_units_mut());

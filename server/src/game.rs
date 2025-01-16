@@ -1406,13 +1406,25 @@ impl Game {
         //todo every player draws 1 action card and 1 objective card
     }
 
-    pub(crate) fn move_units(&mut self, player_index: usize, units: &[u32], destination: Position, embark_carrier_id: Option<u32>) {
+    pub(crate) fn move_units(
+        &mut self,
+        player_index: usize,
+        units: &[u32],
+        destination: Position,
+        embark_carrier_id: Option<u32>,
+    ) {
         for unit_id in units {
             self.move_unit(player_index, *unit_id, destination, embark_carrier_id);
         }
     }
 
-    fn move_unit(&mut self, player_index: usize, unit_id: u32, destination: Position, embark_carrier_id: Option<u32>) {
+    fn move_unit(
+        &mut self,
+        player_index: usize,
+        unit_id: u32,
+        destination: Position,
+        embark_carrier_id: Option<u32>,
+    ) {
         let unit = self.players[player_index]
             .get_unit_mut(unit_id)
             .expect("the player should have all units to move");

@@ -116,7 +116,11 @@ fn alpha(rc: &RenderContext, pos: Position) -> f32 {
             if let Some(start) = s.start {
                 if start == pos {
                     0.5
-                } else if s.destinations.iter().any(|d| matches!(d, MoveDestination::Tile(p) if *p == pos)) {
+                } else if s
+                    .destinations
+                    .iter()
+                    .any(|d| matches!(d, MoveDestination::Tile(p) if *p == pos))
+                {
                     0.8
                 } else {
                     0.

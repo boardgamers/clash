@@ -1,10 +1,10 @@
+use itertools::Itertools;
+use serde::{Deserialize, Serialize};
 use std::iter;
 use std::{
     fmt::Display,
     ops::{AddAssign, SubAssign},
 };
-use itertools::Itertools;
-use serde::{Deserialize, Serialize};
 
 use MovementRestriction::{AllMovement, Attack};
 use UnitType::*;
@@ -145,7 +145,7 @@ impl UnitType {
     pub fn is_land_based(&self) -> bool {
         !matches!(self, Ship)
     }
-    
+
     #[must_use]
     pub fn is_ship(&self) -> bool {
         matches!(self, Ship)
