@@ -160,13 +160,29 @@ impl CityPieces {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct CityPiecesData {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     academy: Option<usize>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     market: Option<usize>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     obelisk: Option<usize>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     observatory: Option<usize>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     fortress: Option<usize>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     port: Option<usize>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     temple: Option<usize>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
     wonders: Vec<String>,
 }
 

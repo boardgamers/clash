@@ -240,6 +240,8 @@ pub struct CityData {
     angry_activation: bool,
     player_index: usize,
     position: Position,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     port_position: Option<Position>,
 }
 

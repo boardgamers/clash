@@ -1,12 +1,7 @@
 {
   "state": {
-    "PlaceSettler": {
-      "player_index": 1,
-      "movement_actions_left": 2,
-      "moved_units": [
-        1,
-        2
-      ]
+    "Movement": {
+      "movement_actions_left": 3
     }
   },
   "players": [
@@ -34,32 +29,18 @@
       "cities": [
         {
           "city_pieces": {
-            "academy": null,
-            "market": 1,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
+            "market": 1
           },
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
-          "position": "A1",
-          "port_position": null
+          "position": "A1"
         },
         {
           "city_pieces": {
             "academy": 1,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": 1,
-            "temple": null,
-            "wonders": []
+            "port": 1
           },
           "mood_state": "Angry",
           "activations": 4,
@@ -70,57 +51,24 @@
         },
         {
           "city_pieces": {
-            "academy": null,
-            "market": null,
             "obelisk": 1,
             "observatory": 1,
             "fortress": 1,
-            "port": null,
-            "temple": 1,
-            "wonders": []
+            "temple": 1
           },
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
-          "position": "B1",
-          "port_position": null
+          "position": "B1"
         },
         {
-          "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
-          },
+          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 4,
           "angry_activation": true,
           "player_index": 0,
-          "position": "B3",
-          "port_position": null
-        },
-        {
-          "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": 0,
-            "temple": null,
-            "wonders": []
-          },
-          "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
-          "player_index": 0,
-          "position": "B2",
-          "port_position": "C3"
+          "position": "B3"
         }
       ],
       "units": [
@@ -133,21 +81,19 @@
         },
         {
           "player_index": 0,
-          "position": "B2",
+          "position": "C3",
           "unit_type": "Cavalry",
-          "movement_restriction": {
-            "Attack": 1
-          },
-          "id": 1
+          "movement_restriction": "None",
+          "id": 1,
+          "carrier_id": 7
         },
         {
           "player_index": 0,
-          "position": "B2",
+          "position": "C3",
           "unit_type": "Elephant",
-          "movement_restriction": {
-            "Attack": 1
-          },
-          "id": 2
+          "movement_restriction": "None",
+          "id": 2,
+          "carrier_id": 7
         },
         {
           "player_index": 0,
@@ -273,22 +219,23 @@
       },
       "cities": [
         {
-          "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
-          },
+          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
           "angry_activation": false,
           "player_index": 1,
-          "position": "C1",
-          "port_position": null
+          "position": "C1"
+        },
+        {
+          "city_pieces": {
+            "port": 1
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "player_index": 1,
+          "position": "B2",
+          "port_position": "C3"
         }
       ],
       "units": [
@@ -455,27 +402,15 @@
     },
     {
       "Playing": "MoveUnits"
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            1,
-            2
-          ],
-          "destination": "B2"
-        }
-      }
     }
   ],
-  "action_log_index": 3,
+  "action_log_index": 2,
   "log": [
     "The game has started",
     "Age 1 has started",
     "Round 1/3",
     "Player1 paid 2 ideas to get the Tactics advance",
-    "Player1 used a move units action",
-    "\tPlayer1 disembarked 1 cavalry and 1 elephant from C3 to B2 and captured Player2's city at B2"
+    "Player1 used a move units action"
   ],
   "undo_limit": 1,
   "actions_left": 1,
@@ -503,99 +438,34 @@
   "wonder_amount_left": 1,
   "undo_context_stack": [
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "C3",
-        "movement_actions_left": 3,
-        "moved_units": [],
-        "disembarked_units": [
-          {
-            "unit_id": 1,
-            "carrier_id": 7
-          },
-          {
-            "unit_id": 2,
-            "carrier_id": 7
-          }
-        ],
-        "captured_city": {
-          "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": 1,
-            "temple": null,
-            "wonders": []
-          },
-          "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
-          "player_index": 1,
-          "position": "B2",
-          "port_position": "C3"
-        }
-      }
+      "Recruit": {}
     }
   ]
 }

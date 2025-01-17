@@ -27,40 +27,22 @@
       "cities": [
         {
           "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
+
           },
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
-          "position": "A1",
-          "port_position": null
-        },
+          "position": "A1"},
         {
           "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
+
           },
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
-          "position": "C2",
-          "port_position": null
-        }
+          "position": "C2"}
       ],
       "units": [
         {
@@ -221,22 +203,13 @@
       "cities": [
         {
           "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
+
           },
           "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
           "player_index": 1,
-          "position": "C1",
-          "port_position": null
-        }
+          "position": "C1"}
       ],
       "units": [
         {
@@ -496,62 +469,62 @@
   "undo_context_stack": [
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     }
   ]

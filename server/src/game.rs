@@ -675,11 +675,7 @@ impl Game {
         }
         self.players[self.current_player_index]
             .gain_resources(ResourcePile::culture_tokens(roll_boost_cost));
-        self.undo_influence_culture(
-            target_player_index,
-            target_city_position,
-            city_piece,
-        );
+        self.undo_influence_culture(target_player_index, target_city_position, city_piece);
     }
 
     fn place_settler(&mut self, action: Action, player_index: usize, p: &PlaceSettlerState) {
@@ -1090,6 +1086,10 @@ impl Game {
         }
         let player = &mut self.players[player_index];
         for _ in 0..units.len() {
+            player
+                .units
+                .pop()
+                .expect("the player should have the recruited units when undoing");
             player.next_unit_id -= 1;
         }
         player
@@ -1167,6 +1167,9 @@ impl Game {
         let Some(mut city) = self.players[old_player_index].take_city(position) else {
             panic!("player should have this city")
         };
+        // undo would only be possible if the old owner can't spawn a settler
+        // and this would be hard to understand
+        self.lock_undo(); 
         self.add_to_last_log_item(&format!(
             " and captured {}'s city at {position}",
             self.players[old_player_index].get_name()
@@ -1559,6 +1562,8 @@ impl CurrentMove {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct MoveState {
     pub movement_actions_left: u32,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
     pub moved_units: Vec<u32>,
     #[serde(default)]
     #[serde(skip_serializing_if = "CurrentMove::is_none")]
@@ -1621,10 +1626,16 @@ pub enum UndoContext {
         settler: Unit,
     },
     Recruit {
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        #[serde(default)]
         replaced_units: Vec<Unit>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
         replaced_leader: Option<String>,
     },
     Movement {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
         starting_position: Option<Position>,
         #[serde(flatten)]
         move_state: MoveState,
@@ -1652,6 +1663,8 @@ impl Messages {
 pub mod tests {
     use std::collections::HashMap;
 
+    use super::{Game, GameState::Playing};
+    use crate::utils::tests::FloatEq;
     use crate::{
         city::{City, MoodState::*},
         city_pieces::Building::*,
@@ -1663,8 +1676,6 @@ pub mod tests {
         utils::Rng,
         wonder::Wonder,
     };
-    use crate::utils::tests::FloatEq;
-    use super::{Game, GameState::Playing};
 
     #[must_use]
     pub fn test_game() -> Game {

@@ -32,40 +32,22 @@
       "cities": [
         {
           "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
+
           },
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
-          "position": "D1",
-          "port_position": null
-        },
+          "position": "D1"},
         {
           "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
+
           },
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
-          "position": "C7",
-          "port_position": null
-        }
+          "position": "C7"}
       ],
       "units": [
         {
@@ -175,40 +157,22 @@
       "cities": [
         {
           "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
+
           },
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "player_index": 1,
-          "position": "D8",
-          "port_position": null
-        },
+          "position": "D8"},
         {
           "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
+
           },
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
           "player_index": 1,
-          "position": "E7",
-          "port_position": null
-        }
+          "position": "E7"}
       ],
       "units": [
         {
@@ -1223,13 +1187,10 @@
     {
       "Movement": {
         "starting_position": "D1",
-        "movement_actions_left": 3,
-        "moved_units": []
-      }
+        "movement_actions_left": 3}
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1239,13 +1200,10 @@
     {
       "Movement": {
         "starting_position": "C2",
-        "movement_actions_left": 3,
-        "moved_units": []
-      }
+        "movement_actions_left": 3}
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1255,13 +1213,10 @@
     {
       "Movement": {
         "starting_position": "B2",
-        "movement_actions_left": 3,
-        "moved_units": []
-      }
+        "movement_actions_left": 3}
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1270,7 +1225,6 @@
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1280,13 +1234,10 @@
     {
       "Movement": {
         "starting_position": "C4",
-        "movement_actions_left": 3,
-        "moved_units": []
-      }
+        "movement_actions_left": 3}
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1296,13 +1247,10 @@
     {
       "Movement": {
         "starting_position": "B4",
-        "movement_actions_left": 3,
-        "moved_units": []
-      }
+        "movement_actions_left": 3}
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1312,13 +1260,10 @@
     {
       "Movement": {
         "starting_position": "C4",
-        "movement_actions_left": 3,
-        "moved_units": []
-      }
+        "movement_actions_left": 3}
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1327,7 +1272,6 @@
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1337,13 +1281,10 @@
     {
       "Movement": {
         "starting_position": "D5",
-        "movement_actions_left": 3,
-        "moved_units": []
-      }
+        "movement_actions_left": 3}
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1353,13 +1294,10 @@
     {
       "Movement": {
         "starting_position": "C6",
-        "movement_actions_left": 3,
-        "moved_units": []
-      }
+        "movement_actions_left": 3}
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1382,13 +1320,10 @@
     {
       "Movement": {
         "starting_position": "D8",
-        "movement_actions_left": 3,
-        "moved_units": []
-      }
+        "movement_actions_left": 3}
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1398,13 +1333,10 @@
     {
       "Movement": {
         "starting_position": "E8",
-        "movement_actions_left": 3,
-        "moved_units": []
-      }
+        "movement_actions_left": 3}
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1426,20 +1358,17 @@
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Movement": {
         "starting_position": "D1",
-        "movement_actions_left": 3,
-        "moved_units": []
-      }
+        "movement_actions_left": 3}
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           1
@@ -1448,20 +1377,17 @@
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Movement": {
         "starting_position": "E7",
-        "movement_actions_left": 3,
-        "moved_units": []
-      }
+        "movement_actions_left": 3}
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           1
@@ -1470,7 +1396,6 @@
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           1
@@ -1480,9 +1405,7 @@
     {
       "Movement": {
         "starting_position": "E6",
-        "movement_actions_left": 3,
-        "moved_units": []
-      }
+        "movement_actions_left": 3}
     }
   ]
 }
