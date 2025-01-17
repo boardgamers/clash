@@ -430,9 +430,10 @@ fn test_action(
     let a = serde_json::to_string(&action).expect("action should be serializable");
     let a2 = serde_json::from_str(&a).expect("action should be deserializable");
     let original_game = read_game(name);
-    let game = Game::from_data(
-        serde_json::from_str(&original_game).expect(&format!("the game file should be deserializable {}", game_path(name))),
-    );
+    let game =
+        Game::from_data(serde_json::from_str(&original_game).unwrap_or_else(|_| {
+            panic!("the game file should be deserializable {}", game_path(name))
+        }));
     let game = game_api::execute_action(game, a2, player_index);
     if illegal_action_test {
         println!(

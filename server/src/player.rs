@@ -487,14 +487,20 @@ impl Player {
         let sum = parts.iter().sum::<f32>();
         let other_sum = other_parts.iter().sum::<f32>();
 
-        match sum.partial_cmp(&other_sum).expect("should be able to compare") {
+        match sum
+            .partial_cmp(&other_sum)
+            .expect("should be able to compare")
+        {
             Less => return Less,
             Equal => (),
             Greater => return Greater,
         }
 
         for (part, other_part) in parts.iter().zip(other_parts.iter()) {
-            match part.partial_cmp(other_part).expect("should be able to compare") {
+            match part
+                .partial_cmp(other_part)
+                .expect("should be able to compare")
+            {
                 Less => return Less,
                 Equal => (),
                 Greater => return Greater,

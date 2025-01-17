@@ -1169,7 +1169,7 @@ impl Game {
         };
         // undo would only be possible if the old owner can't spawn a settler
         // and this would be hard to understand
-        self.lock_undo(); 
+        self.lock_undo();
         self.add_to_last_log_item(&format!(
             " and captured {}'s city at {position}",
             self.players[old_player_index].get_name()
