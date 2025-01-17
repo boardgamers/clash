@@ -339,7 +339,7 @@
       "wonders_build": 0,
       "leader_position": null,
       "game_event_tokens": 3,
-      "influenced_buildings": 0,
+      "influenced_buildings": 8,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -607,7 +607,35 @@
       "Movement": {
         "starting_position": "C3",
         "movement_actions_left": 3,
-        "moved_units": []
+        "moved_units": [],
+        "disembarked_units": [
+          {
+            "unit_id": 1,
+            "carrier_id": 7
+          },
+          {
+            "unit_id": 2,
+            "carrier_id": 7
+          }
+        ],
+        "captured_city": {
+          "city_pieces": {
+            "academy": null,
+            "market": null,
+            "obelisk": null,
+            "observatory": null,
+            "fortress": null,
+            "port": 1,
+            "temple": null,
+            "wonders": []
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "player_index": 1,
+          "position": "B2",
+          "port_position": "C3"
+        }
       }
     }
   ]

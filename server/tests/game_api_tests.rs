@@ -29,6 +29,7 @@ use server::{
     resource_pile::ResourcePile,
     unit::{MovementAction::*, UnitType::*},
 };
+use server::unit::Units;
 
 #[test]
 fn basic_actions() {
@@ -438,11 +439,18 @@ fn test_action(
 ) {
     let a = serde_json::to_string(&action).expect("action should be serializable");
     let a2 = serde_json::from_str(&a).expect("action should be deserializable");
-    let path = game_path(name);
-    let original_game = fs::read_to_string(&path)
-        .unwrap_or_else(|_| panic!("game file {path} should exist in the test games folder"));
+    let original_game = read_game(name);
     let game = Game::from_data(
         serde_json::from_str(&original_game).expect("the game file should be deserializable"),
+    );
+    let outcome = format!("{name}.outcome");
+    let game = fix_invariants(game);
+    assert_eq_game_json(
+        &original_game,
+        &to_json(&game),
+        name,
+        name,
+        &format!("PRECONDITIONS: invariants should be fixed at the beginning of the {name} test"),
     );
     let game = game_api::execute_action(game, a2, player_index);
     if illegal_action_test {
@@ -451,14 +459,10 @@ fn test_action(
         );
         return;
     }
-    let json = serde_json::to_string_pretty(&game.cloned_data())
-        .expect("game data should be serializable");
-    let outcome = format!("{name}.outcome");
-    let expected_game =
-        fs::read_to_string(game_path(&outcome)).expect("outcome file should be deserializable");
+    let expected_game =  read_game(&outcome);
     assert_eq_game_json(
         &expected_game,
-        &json,
+        &to_json(&game),
         name,
         &outcome,
         &format!("EXECUTE: the game did not match the expectation after the initial {name} action"),
@@ -478,6 +482,42 @@ fn test_action(
     );
 }
 
+fn to_json(game: &Game) -> String {
+    serde_json::to_string_pretty(&game.cloned_data())
+        .expect("game data should be serializable")
+}
+
+fn read_game(name: &str) -> String {
+    let path = game_path(name);
+    fs::read_to_string(&path)
+        .unwrap_or_else(|_| panic!("game file {path} should exist in the test games folder"))
+}
+
+fn fix_invariants(mut game: Game) -> Game {
+    // those make sense to check after each action - add as needed
+    // pub available_settlements: u8,
+    // pub available_buildings: AvailableCityPieces,
+    // pub available_units: Units,
+    // pub influenced_buildings: u32,
+    // pub leader_position: Option<Position>,
+
+    // game.players.len()
+    let mut influenced_buildings=vec![0; game.players.len()];
+    for player in &game.players {
+        for city in &player.cities {
+            city.pieces.building_owners().into_iter().for_each(|(building, owner)| {
+                if let Some(owner) = owner {
+                    influenced_buildings[owner] += 1;
+                }
+            });
+        }
+    }
+    for player in &mut game.players {
+        player.influenced_buildings = influenced_buildings[player.index];
+    }
+    game
+}
+
 fn undo_redo(
     name: &str,
     player_index: usize,
@@ -493,11 +533,9 @@ fn undo_redo(
     let game = game_api::execute_action(game, Action::Undo, player_index);
     let mut trimmed_game = game.clone();
     trimmed_game.action_log.pop();
-    let json = serde_json::to_string_pretty(&trimmed_game.cloned_data())
-        .expect("game data should be serializable");
     assert_eq_game_json(
         original_game,
-        &json,
+        &to_json(&game),
         name,
         name,
         &format!(
@@ -505,11 +543,9 @@ fn undo_redo(
         ),
     );
     let game = game_api::execute_action(game, Action::Redo, player_index);
-    let json = serde_json::to_string_pretty(&game.cloned_data())
-        .expect("game data should be serializable");
     assert_eq_game_json(
         expected_game,
-        &json,
+        &to_json(&game),
         name,
         outcome,
         &format!(
@@ -976,7 +1012,6 @@ fn test_ship_disembark() {
     );
 }
 
-#[ignore]
 #[test]
 fn test_ship_disembark_capture_empty_city() {
     // undo capture empty city is broken
