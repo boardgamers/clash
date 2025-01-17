@@ -58,40 +58,22 @@
       "cities": [
         {
           "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
+
           },
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
-          "position": "A1",
-          "port_position": null
-        },
+          "position": "A1"},
         {
           "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
+
           },
           "mood_state": "Neutral",
           "activations": 8,
           "angry_activation": false,
           "player_index": 0,
-          "position": "C2",
-          "port_position": null
-        }
+          "position": "C2"}
       ],
       "units": [
         {
@@ -160,33 +142,12 @@
         "Tactics"
       ],
       "unlocked_special_advance": [],
-      "wonders": [],
-      "wonders_build": 0,
-      "leader_position": null,
+      "wonders_build": [],
       "game_event_tokens": 2,
-      "influenced_buildings": 0,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "available_settlements": 7,
-      "available_buildings": {
-        "academies": 5,
-        "markets": 5,
-        "obelisks": 5,
-        "observatories": 5,
-        "fortresses": 5,
-        "ports": 5,
-        "temples": 5
-      },
-      "available_units": {
-        "settlers": 0,
-        "infantry": 15,
-        "ships": 4,
-        "cavalry": 3,
-        "elephants": 3,
-        "leaders": 0
-      },
       "collect_options": [
         [
           "Mountain",
@@ -257,22 +218,13 @@
       "cities": [
         {
           "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
+
           },
           "mood_state": "Angry",
           "activations": 2,
           "angry_activation": false,
           "player_index": 1,
-          "position": "C1",
-          "port_position": null
-        }
+          "position": "C1"}
       ],
       "units": [],
       "civilization": "test1",
@@ -283,33 +235,12 @@
         "Mining"
       ],
       "unlocked_special_advance": [],
-      "wonders": [],
-      "wonders_build": 0,
-      "leader_position": null,
+      "wonders_build": [],
       "game_event_tokens": 3,
-      "influenced_buildings": 0,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "available_settlements": 7,
-      "available_buildings": {
-        "academies": 5,
-        "markets": 5,
-        "obelisks": 5,
-        "observatories": 5,
-        "fortresses": 5,
-        "ports": 5,
-        "temples": 5
-      },
-      "available_units": {
-        "settlers": 4,
-        "infantry": 14,
-        "ships": 4,
-        "cavalry": 4,
-        "elephants": 4,
-        "leaders": 1
-      },
       "collect_options": [
         [
           "Mountain",
@@ -481,62 +412,62 @@
   "undo_context_stack": [
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     },
     {
       "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
+
+
       }
     }
   ]

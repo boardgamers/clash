@@ -29,7 +29,7 @@ pub fn ended(game: &Game) -> bool {
 pub fn scores(game: &Game) -> Vec<f32> {
     let mut scores: Vec<f32> = Vec::new();
     for player in &game.players {
-        scores.push(player.victory_points());
+        scores.push(player.victory_points(game));
     }
     scores
 }
@@ -74,7 +74,7 @@ pub fn rankings(game: &Game) -> Vec<u32> {
     for player in &game.players {
         let mut rank = 1;
         for other in &game.players {
-            if other.compare_score(player) == Greater {
+            if other.compare_score(player, game) == Greater {
                 rank += 1;
             }
         }

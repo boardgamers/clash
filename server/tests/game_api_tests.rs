@@ -15,10 +15,7 @@ use server::status_phase::{
 use server::{
     action::Action,
     city::{City, MoodState::*},
-    city_pieces::{
-        AvailableCityPieces,
-        Building::{self, *},
-    },
+    city_pieces::Building::{self, *},
     content::custom_actions::CustomAction::*,
     game::Game,
     game_api,
@@ -86,11 +83,6 @@ fn basic_actions() {
     let player = &game.players[0];
 
     assert_eq!(
-        AvailableCityPieces::new(5, 5, 5, 4, 5, 5, 5),
-        player.available_buildings
-    );
-
-    assert_eq!(
         Some(0),
         player
             .get_city(city_position)
@@ -138,10 +130,9 @@ fn basic_actions() {
     let mut game = game_api::execute_action(game, construct_wonder_action, 0);
     let player = &game.players[0];
 
-    assert_eq!(10.0, player.victory_points());
+    assert_eq!(10.0, player.victory_points(&game));
     assert_eq!(ResourcePile::empty(), player.resources);
-    assert_eq!(1, player.wonders_build);
-    assert_eq!(vec![String::from("Pyramids")], player.wonders);
+    assert_eq!(vec![String::from("Pyramids")], player.wonders_build);
     assert_eq!(
         1,
         player
@@ -438,12 +429,11 @@ fn test_action(
 ) {
     let a = serde_json::to_string(&action).expect("action should be serializable");
     let a2 = serde_json::from_str(&a).expect("action should be deserializable");
-    let path = game_path(name);
-    let original_game = fs::read_to_string(&path)
-        .unwrap_or_else(|_| panic!("game file {path} should exist in the test games folder"));
-    let game = Game::from_data(
-        serde_json::from_str(&original_game).expect("the game file should be deserializable"),
-    );
+    let original_game = read_game(name);
+    let game =
+        Game::from_data(serde_json::from_str(&original_game).unwrap_or_else(|_| {
+            panic!("the game file should be deserializable {}", game_path(name))
+        }));
     let game = game_api::execute_action(game, a2, player_index);
     if illegal_action_test {
         println!(
@@ -451,14 +441,11 @@ fn test_action(
         );
         return;
     }
-    let json = serde_json::to_string_pretty(&game.cloned_data())
-        .expect("game data should be serializable");
     let outcome = format!("{name}.outcome");
-    let expected_game =
-        fs::read_to_string(game_path(&outcome)).expect("outcome file should be deserializable");
+    let expected_game = read_game(&outcome);
     assert_eq_game_json(
         &expected_game,
-        &json,
+        &to_json(&game),
         name,
         &outcome,
         &format!("EXECUTE: the game did not match the expectation after the initial {name} action"),
@@ -478,6 +465,16 @@ fn test_action(
     );
 }
 
+fn to_json(game: &Game) -> String {
+    serde_json::to_string_pretty(&game.cloned_data()).expect("game data should be serializable")
+}
+
+fn read_game(name: &str) -> String {
+    let path = game_path(name);
+    fs::read_to_string(&path)
+        .unwrap_or_else(|_| panic!("game file {path} should exist in the test games folder"))
+}
+
 fn undo_redo(
     name: &str,
     player_index: usize,
@@ -493,11 +490,9 @@ fn undo_redo(
     let game = game_api::execute_action(game, Action::Undo, player_index);
     let mut trimmed_game = game.clone();
     trimmed_game.action_log.pop();
-    let json = serde_json::to_string_pretty(&trimmed_game.cloned_data())
-        .expect("game data should be serializable");
     assert_eq_game_json(
         original_game,
-        &json,
+        &to_json(&trimmed_game),
         name,
         name,
         &format!(
@@ -505,11 +500,9 @@ fn undo_redo(
         ),
     );
     let game = game_api::execute_action(game, Action::Redo, player_index);
-    let json = serde_json::to_string_pretty(&game.cloned_data())
-        .expect("game data should be serializable");
     assert_eq_game_json(
         expected_game,
-        &json,
+        &to_json(&game),
         name,
         outcome,
         &format!(
@@ -976,7 +969,6 @@ fn test_ship_disembark() {
     );
 }
 
-#[ignore]
 #[test]
 fn test_ship_disembark_capture_empty_city() {
     // undo capture empty city is broken
@@ -984,7 +976,7 @@ fn test_ship_disembark_capture_empty_city() {
         "ship_disembark_capture_empty_city",
         move_action(vec![1, 2], Position::from_offset("B2")),
         0,
-        true,
+        false,
         false,
     );
 }

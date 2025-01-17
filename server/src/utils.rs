@@ -111,7 +111,8 @@ pub mod tests {
         }
 
         fn assert_eq(self, expected: Self) {
-            assert!(self.eq(expected));
+            let same = self.eq(expected);
+            assert!(same, "expected: {expected}, got: {self}",);
         }
     }
 

@@ -31,22 +31,12 @@
       },
       "cities": [
         {
-          "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
-          },
+          "city_pieces": {},
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
-          "position": "D1",
-          "port_position": null
+          "position": "D1"
         }
       ],
       "units": [
@@ -69,33 +59,12 @@
         "Mining"
       ],
       "unlocked_special_advance": [],
-      "wonders": [],
-      "wonders_build": 0,
-      "leader_position": null,
+      "wonders_build": [],
       "game_event_tokens": 2,
-      "influenced_buildings": 0,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "available_settlements": 7,
-      "available_buildings": {
-        "academies": 5,
-        "markets": 5,
-        "obelisks": 5,
-        "observatories": 5,
-        "fortresses": 5,
-        "ports": 5,
-        "temples": 5
-      },
-      "available_units": {
-        "settlers": 3,
-        "infantry": 16,
-        "ships": 4,
-        "cavalry": 4,
-        "elephants": 4,
-        "leaders": 1
-      },
       "collect_options": [
         [
           "Mountain",
@@ -179,22 +148,12 @@
       },
       "cities": [
         {
-          "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
-          },
+          "city_pieces": {},
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "player_index": 1,
-          "position": "D8",
-          "port_position": null
+          "position": "D8"
         }
       ],
       "units": [
@@ -215,33 +174,12 @@
         "Mining"
       ],
       "unlocked_special_advance": [],
-      "wonders": [],
-      "wonders_build": 0,
-      "leader_position": null,
+      "wonders_build": [],
       "game_event_tokens": 2,
-      "influenced_buildings": 0,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "available_settlements": 7,
-      "available_buildings": {
-        "academies": 5,
-        "markets": 5,
-        "obelisks": 5,
-        "observatories": 5,
-        "fortresses": 5,
-        "ports": 5,
-        "temples": 5
-      },
-      "available_units": {
-        "settlers": 3,
-        "infantry": 16,
-        "ships": 4,
-        "cavalry": 4,
-        "elephants": 4,
-        "leaders": 1
-      },
       "collect_options": [
         [
           "Mountain",
@@ -1004,13 +942,11 @@
     {
       "Movement": {
         "starting_position": "D1",
-        "movement_actions_left": 3,
-        "moved_units": []
+        "movement_actions_left": 3
       }
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1020,13 +956,11 @@
     {
       "Movement": {
         "starting_position": "C2",
-        "movement_actions_left": 3,
-        "moved_units": []
+        "movement_actions_left": 3
       }
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1036,13 +970,11 @@
     {
       "Movement": {
         "starting_position": "B2",
-        "movement_actions_left": 3,
-        "moved_units": []
+        "movement_actions_left": 3
       }
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1051,7 +983,6 @@
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1061,13 +992,11 @@
     {
       "Movement": {
         "starting_position": "C4",
-        "movement_actions_left": 3,
-        "moved_units": []
+        "movement_actions_left": 3
       }
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1077,13 +1006,11 @@
     {
       "Movement": {
         "starting_position": "B4",
-        "movement_actions_left": 3,
-        "moved_units": []
+        "movement_actions_left": 3
       }
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1093,13 +1020,11 @@
     {
       "Movement": {
         "starting_position": "C4",
-        "movement_actions_left": 3,
-        "moved_units": []
+        "movement_actions_left": 3
       }
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1108,7 +1033,6 @@
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1118,13 +1042,11 @@
     {
       "Movement": {
         "starting_position": "D5",
-        "movement_actions_left": 3,
-        "moved_units": []
+        "movement_actions_left": 3
       }
     },
     {
       "Movement": {
-        "starting_position": null,
         "movement_actions_left": 2,
         "moved_units": [
           0
@@ -1134,8 +1056,7 @@
     {
       "Movement": {
         "starting_position": "C6",
-        "movement_actions_left": 3,
-        "moved_units": []
+        "movement_actions_left": 3
       }
     }
   ]

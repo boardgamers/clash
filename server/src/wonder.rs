@@ -17,7 +17,6 @@ pub struct Wonder {
     pub player_deinitializer: AbilityInitializer,
     pub player_one_time_initializer: AbilityInitializer,
     pub player_undo_deinitializer: AbilityInitializer,
-    pub builder: Option<usize>,
 }
 
 impl Wonder {
@@ -89,7 +88,6 @@ impl WonderBuilder {
             player_deinitializer,
             player_one_time_initializer,
             player_undo_deinitializer,
-            builder: None,
         }
     }
 }

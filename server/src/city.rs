@@ -110,7 +110,7 @@ impl City {
     }
 
     #[must_use]
-    pub fn can_construct(&self, building: Building, player: &Player) -> bool {
+    pub fn can_construct(&self, building: Building, player: &Player, game: &Game) -> bool {
         if self.player_index != player.index {
             return false;
         }
@@ -130,7 +130,7 @@ impl City {
         if !player.has_advance(&building.required_advance()) {
             return false;
         }
-        if !player.available_buildings.can_build(building) {
+        if !player.is_building_available(building, game) {
             return false;
         }
         let cost = player.construct_cost(building, self);
@@ -172,16 +172,13 @@ impl City {
     ///
     /// Panics if the city does not have a builder
     pub fn raze(self, game: &mut Game, player_index: usize) {
-        for (building, owner) in &self.pieces.building_owners() {
-            if let Some(owner) = owner {
-                game.players[*owner].available_buildings += *building;
-            }
-        }
-        for wonder in self.pieces.wonders {
+        for wonder in &self.pieces.wonders {
             (wonder.player_deinitializer)(game, player_index);
-            game.players[player_index].remove_wonder(&wonder);
-            let builder = &mut game.players[wonder.builder.expect("Wonder should have a builder")];
-            builder.wonders_build -= 1;
+        }
+        for wonder in &self.pieces.wonders {
+            for p in &mut game.players {
+                p.remove_wonder(wonder);
+            }
         }
     }
 
@@ -215,7 +212,7 @@ impl City {
     }
 
     #[must_use]
-    pub fn uninfluenced_buildings(&self) -> u32 {
+    fn uninfluenced_buildings(&self) -> u32 {
         self.pieces.buildings(Some(self.player_index)).len() as u32
     }
 
@@ -243,6 +240,8 @@ pub struct CityData {
     angry_activation: bool,
     player_index: usize,
     position: Position,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     port_position: Option<Position>,
 }
 

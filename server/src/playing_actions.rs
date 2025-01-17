@@ -148,19 +148,18 @@ impl PlayingAction {
                     .expect("Illegal action");
                 assert!(settler.can_found_city(game), "Illegal action");
                 let player = &mut game.players[player_index];
-                player.available_settlements -= 1;
-                player.available_units.settlers += 1;
                 let city = City::new(player_index, settler.position);
                 player.cities.push(city);
                 game.undo_context_stack
                     .push(UndoContext::FoundCity { settler });
             }
             Construct(c) => {
-                let player = &mut game.players[player_index];
+                let player = &game.players[player_index];
                 let city = player.get_city(c.city_position).expect("Illegal action");
                 let cost = player.construct_cost(c.city_piece, city);
                 assert!(
-                    city.can_construct(c.city_piece, player) && cost.is_valid_payment(&c.payment),
+                    city.can_construct(c.city_piece, player, game)
+                        && cost.is_valid_payment(&c.payment),
                     "Illegal action"
                 );
                 if matches!(c.city_piece, Port) {
@@ -172,6 +171,7 @@ impl PlayingAction {
                 } else if c.port_position.is_some() {
                     panic!("Illegal action");
                 }
+                let player_mut = &mut game.players[player_index];
                 if matches!(c.city_piece, Temple) {
                     let building_bonus = c.temple_bonus.expect("Illegal action");
                     assert!(
@@ -179,12 +179,12 @@ impl PlayingAction {
                             || building_bonus == ResourcePile::culture_tokens(1),
                         "Illegal action"
                     );
-                    player.gain_resources(building_bonus);
+                    player_mut.gain_resources(building_bonus);
                 } else if c.temple_bonus.is_some() {
                     panic!("Illegal action");
                 }
-                player.loose_resources(c.payment);
-                player.construct(c.city_piece, c.city_position, c.port_position);
+                player_mut.loose_resources(c.payment);
+                player_mut.construct(c.city_piece, c.city_position, c.port_position);
             }
             Collect(c) => {
                 if game.action_log.iter().any(|a| {
@@ -348,8 +348,6 @@ impl PlayingAction {
                     panic!("Settler context should be stored in undo context");
                 };
                 let player = &mut game.players[player_index];
-                player.available_settlements += 1;
-                player.available_units.settlers -= 1;
                 player.units.push(settler);
                 player
                     .cities

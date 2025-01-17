@@ -1,6 +1,7 @@
 {
   "state": {
-    "Movement": {
+    "PlaceSettler": {
+      "player_index": 1,
       "movement_actions_left": 2,
       "moved_units": [
         1,
@@ -33,32 +34,18 @@
       "cities": [
         {
           "city_pieces": {
-            "academy": null,
-            "market": 1,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
+            "market": 1
           },
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
-          "position": "A1",
-          "port_position": null
+          "position": "A1"
         },
         {
           "city_pieces": {
             "academy": 1,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": 1,
-            "temple": null,
-            "wonders": []
+            "port": 1
           },
           "mood_state": "Angry",
           "activations": 4,
@@ -69,50 +56,28 @@
         },
         {
           "city_pieces": {
-            "academy": null,
-            "market": null,
             "obelisk": 1,
             "observatory": 1,
             "fortress": 1,
-            "port": null,
-            "temple": 1,
-            "wonders": []
+            "temple": 1
           },
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
-          "position": "B1",
-          "port_position": null
+          "position": "B1"
         },
         {
-          "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
-          },
+          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 4,
           "angry_activation": true,
           "player_index": 0,
-          "position": "B3",
-          "port_position": null
+          "position": "B3"
         },
         {
           "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": 0,
-            "temple": null,
-            "wonders": []
+            "port": 0
           },
           "mood_state": "Angry",
           "activations": 0,
@@ -195,35 +160,14 @@
         "Voting"
       ],
       "unlocked_special_advance": [],
-      "wonders": [],
-      "wonders_build": 0,
-      "leader_position": null,
+      "wonders_build": [],
       "game_event_tokens": 3,
-      "influenced_buildings": 0,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [
         "Pyramids"
       ],
-      "available_settlements": 6,
-      "available_buildings": {
-        "academies": 5,
-        "markets": 5,
-        "obelisks": 5,
-        "observatories": 5,
-        "fortresses": 5,
-        "ports": 4,
-        "temples": 5
-      },
-      "available_units": {
-        "settlers": 0,
-        "infantry": 15,
-        "ships": 3,
-        "cavalry": 3,
-        "elephants": 3,
-        "leaders": 1
-      },
       "collect_options": [
         [
           "Mountain",
@@ -293,22 +237,12 @@
       },
       "cities": [
         {
-          "city_pieces": {
-            "academy": null,
-            "market": null,
-            "obelisk": null,
-            "observatory": null,
-            "fortress": null,
-            "port": null,
-            "temple": null,
-            "wonders": []
-          },
+          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
           "angry_activation": false,
           "player_index": 1,
-          "position": "C1",
-          "port_position": null
+          "position": "C1"
         }
       ],
       "units": [
@@ -335,33 +269,12 @@
         "Mining"
       ],
       "unlocked_special_advance": [],
-      "wonders": [],
-      "wonders_build": 0,
-      "leader_position": null,
+      "wonders_build": [],
       "game_event_tokens": 3,
-      "influenced_buildings": 0,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "available_settlements": 8,
-      "available_buildings": {
-        "academies": 5,
-        "markets": 5,
-        "obelisks": 5,
-        "observatories": 5,
-        "fortresses": 5,
-        "ports": 6,
-        "temples": 5
-      },
-      "available_units": {
-        "settlers": 4,
-        "infantry": 14,
-        "ships": 4,
-        "cavalry": 4,
-        "elephants": 4,
-        "leaders": 1
-      },
       "collect_options": [
         [
           "Mountain",
@@ -518,7 +431,7 @@
     "Player1 used a move units action",
     "\tPlayer1 disembarked 1 cavalry and 1 elephant from C3 to B2 and captured Player2's city at B2"
   ],
-  "undo_limit": 1,
+  "undo_limit": 3,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 6,
@@ -544,70 +457,49 @@
   "wonder_amount_left": 1,
   "undo_context_stack": [
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-        "replaced_units": [],
-        "replaced_leader": null
-      }
+      "Recruit": {}
     },
     {
       "Movement": {
         "starting_position": "C3",
         "movement_actions_left": 3,
-        "moved_units": []
+        "disembarked_units": [
+          {
+            "unit_id": 1,
+            "carrier_id": 7
+          },
+          {
+            "unit_id": 2,
+            "carrier_id": 7
+          }
+        ]
       }
     }
   ]
