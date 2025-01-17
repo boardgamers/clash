@@ -1,4 +1,4 @@
-use crate::{city_pieces::AvailableCityPieces, resource_pile::ResourcePile, unit::Units};
+use crate::{resource_pile::ResourcePile, unit::Units};
 
 pub const MAX_CITY_SIZE: usize = 4;
 pub const AGES: u32 = 6;
@@ -9,18 +9,11 @@ pub const OBJECTIVE_VICTORY_POINTS: f32 = 2.0;
 pub const WONDER_VICTORY_POINTS: f32 = 4.0;
 pub const CAPTURED_LEADER_VICTORY_POINTS: f32 = 2.0;
 pub const STACK_LIMIT: usize = 4;
-pub const SETTLEMENT_LIMIT: u8 = 7;
+pub const CITY_LIMIT: u8 = 7;
 pub const MOVEMENT_ACTIONS: u32 = 3;
 pub const ARMY_MOVEMENT_REQUIRED_ADVANCE: &str = "Tactics";
-pub const CITY_PIECE_LIMIT: AvailableCityPieces = AvailableCityPieces {
-    academies: 5,
-    markets: 5,
-    obelisks: 5,
-    observatories: 5,
-    fortresses: 5,
-    ports: 5,
-    temples: 5,
-};
+pub const CITY_PIECE_LIMIT: usize = 5;
+
 pub const UNIT_LIMIT: Units = Units {
     settlers: 4,
     infantry: 16,

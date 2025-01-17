@@ -44,7 +44,7 @@ pub fn player_select(rc: &RenderContext) -> StateUpdate {
         let x = pos.x - w + size;
         draw_rectangle(x, pos.y, w, size, color);
         draw_rectangle_lines(x, pos.y, w, size, 2.0, BLACK);
-        let text = format!("{}", pl.victory_points());
+        let text = format!("{}", pl.victory_points(game));
 
         let state = rc.state;
         state.draw_text(&text, pos.x + 10., pos.y + 22.);
@@ -120,7 +120,7 @@ pub fn show_top_center(rc: &RenderContext) {
 
     top_icon_with_label(
         rc,
-        &format!("{}", &player.victory_points()),
+        &format!("{}", &player.victory_points(rc.game)),
         &rc.assets().victory_points,
         icon_pos(3, 0),
         "Victory Points",

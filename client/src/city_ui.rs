@@ -107,7 +107,7 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
     building_names()
         .iter()
         .filter_map(|(b, _)| {
-            if city.can_construct(*b, owner) {
+            if city.can_construct(*b, owner, rc.game) {
                 Some(*b)
             } else {
                 None

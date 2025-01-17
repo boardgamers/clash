@@ -73,10 +73,7 @@ impl Unit {
         ) {
             return false;
         }
-        if player.available_settlements == 0 {
-            return false;
-        }
-        true
+        player.is_city_available()
     }
 
     #[must_use]

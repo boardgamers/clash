@@ -160,7 +160,7 @@ pub struct RecruitSelection {
 
 impl RecruitSelection {
     pub fn new(game: &Game, amount: RecruitAmount, replaced_units: Vec<u32>) -> RecruitSelection {
-        let available_units = game.get_player(amount.player_index).available_units.clone();
+        let available_units = game.get_player(amount.player_index).available_units();
         let need_replacement = available_units.get_units_to_replace(&amount.units);
 
         RecruitSelection {

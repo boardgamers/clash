@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use std::ops::{AddAssign, SubAssign};
 
 use crate::{content::wonders, wonder::Wonder};
 use Building::*;
@@ -214,80 +213,5 @@ impl Building {
             Self::Port => "Fishing",
             Self::Temple => "Myths",
         })
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct AvailableCityPieces {
-    pub academies: u8,
-    pub markets: u8,
-    pub obelisks: u8,
-    pub observatories: u8,
-    pub fortresses: u8,
-    pub ports: u8,
-    pub temples: u8,
-}
-
-impl AvailableCityPieces {
-    #[must_use]
-    pub fn new(
-        academies: u8,
-        markets: u8,
-        obelisks: u8,
-        observatories: u8,
-        fortresses: u8,
-        ports: u8,
-        temples: u8,
-    ) -> Self {
-        Self {
-            academies,
-            markets,
-            obelisks,
-            observatories,
-            fortresses,
-            ports,
-            temples,
-        }
-    }
-
-    #[must_use]
-    pub fn can_build(&self, building: Building) -> bool {
-        match building {
-            Academy => self.academies > 0,
-            Market => self.markets > 0,
-            Obelisk => self.obelisks > 0,
-            Observatory => self.observatories > 0,
-            Fortress => self.fortresses > 0,
-            Port => self.ports > 0,
-            Temple => self.temples > 0,
-        }
-    }
-}
-
-impl AddAssign<Building> for AvailableCityPieces {
-    fn add_assign(&mut self, rhs: Building) {
-        match rhs {
-            Academy => self.academies += 1,
-            Market => self.markets += 1,
-            Obelisk => self.obelisks += 1,
-            Observatory => self.observatories += 1,
-            Fortress => self.fortresses += 1,
-            Port => self.ports += 1,
-            Temple => self.temples += 1,
-        };
-    }
-}
-
-impl SubAssign<Building> for AvailableCityPieces {
-    fn sub_assign(&mut self, rhs: Building) {
-        match rhs {
-            Academy => self.academies -= 1,
-            Market => self.markets -= 1,
-            Obelisk => self.obelisks -= 1,
-            Observatory => self.observatories -= 1,
-            Fortress => self.fortresses -= 1,
-            Port => self.ports -= 1,
-            Temple => self.temples -= 1,
-        };
     }
 }

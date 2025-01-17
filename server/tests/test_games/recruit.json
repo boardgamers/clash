@@ -116,6 +116,20 @@
           "unit_type": "Settler",
           "movement_restriction": "None",
           "id": 7
+        },
+        {
+          "player_index": 0,
+          "position": "A1",
+          "unit_type": "Settler",
+          "movement_restriction": "None",
+          "id": 8
+        },
+        {
+          "player_index": 0,
+          "position": "A1",
+          "unit_type": "Infantry",
+          "movement_restriction": "None",
+          "id": 9
         }
       ],
       "civilization": "test0",
@@ -127,33 +141,12 @@
         "Mining"
       ],
       "unlocked_special_advance": [],
-      "wonders": [],
-      "wonders_build": 0,
-      "leader_position": null,
+      "wonders_build": [],
       "game_event_tokens": 2,
-      "influenced_buildings": 1,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "available_settlements": 7,
-      "available_buildings": {
-        "academies": 5,
-        "markets": 5,
-        "obelisks": 5,
-        "observatories": 4,
-        "fortresses": 5,
-        "ports": 5,
-        "temples": 5
-      },
-      "available_units": {
-        "settlers": 0,
-        "infantry": 15,
-        "ships": 4,
-        "cavalry": 3,
-        "elephants": 3,
-        "leaders": 0
-      },
       "collect_options": [
         [
           "Mountain",
@@ -265,33 +258,12 @@
         "Mining"
       ],
       "unlocked_special_advance": [],
-      "wonders": [],
-      "wonders_build": 0,
-      "leader_position": null,
+      "wonders_build": [],
       "game_event_tokens": 3,
-      "influenced_buildings": 0,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "available_settlements": 7,
-      "available_buildings": {
-        "academies": 5,
-        "markets": 5,
-        "obelisks": 5,
-        "observatories": 5,
-        "fortresses": 5,
-        "ports": 5,
-        "temples": 5
-      },
-      "available_units": {
-        "settlers": 4,
-        "infantry": 14,
-        "ships": 4,
-        "cavalry": 4,
-        "elephants": 4,
-        "leaders": 1
-      },
       "collect_options": [
         [
           "Mountain",

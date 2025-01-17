@@ -15,10 +15,7 @@ use server::status_phase::{
 use server::{
     action::Action,
     city::{City, MoodState::*},
-    city_pieces::{
-        AvailableCityPieces,
-        Building::{self, *},
-    },
+    city_pieces::Building::{self, *},
     content::custom_actions::CustomAction::*,
     game::Game,
     game_api,
@@ -29,7 +26,6 @@ use server::{
     resource_pile::ResourcePile,
     unit::{MovementAction::*, UnitType::*},
 };
-use server::unit::Units;
 
 #[test]
 fn basic_actions() {
@@ -87,11 +83,6 @@ fn basic_actions() {
     let player = &game.players[0];
 
     assert_eq!(
-        AvailableCityPieces::new(5, 5, 5, 4, 5, 5, 5),
-        player.available_buildings
-    );
-
-    assert_eq!(
         Some(0),
         player
             .get_city(city_position)
@@ -139,10 +130,9 @@ fn basic_actions() {
     let mut game = game_api::execute_action(game, construct_wonder_action, 0);
     let player = &game.players[0];
 
-    assert_eq!(10.0, player.victory_points());
+    assert_eq!(10.0, player.victory_points(&game));
     assert_eq!(ResourcePile::empty(), player.resources);
-    assert_eq!(1, player.wonders_build);
-    assert_eq!(vec![String::from("Pyramids")], player.wonders);
+    assert_eq!(vec![String::from("Pyramids")], player.wonders_build);
     assert_eq!(
         1,
         player
@@ -443,15 +433,6 @@ fn test_action(
     let game = Game::from_data(
         serde_json::from_str(&original_game).expect("the game file should be deserializable"),
     );
-    let outcome = format!("{name}.outcome");
-    let game = fix_invariants(game);
-    assert_eq_game_json(
-        &original_game,
-        &to_json(&game),
-        name,
-        name,
-        &format!("PRECONDITIONS: invariants should be fixed at the beginning of the {name} test"),
-    );
     let game = game_api::execute_action(game, a2, player_index);
     if illegal_action_test {
         println!(
@@ -459,7 +440,8 @@ fn test_action(
         );
         return;
     }
-    let expected_game =  read_game(&outcome);
+    let outcome = format!("{name}.outcome");
+    let expected_game = read_game(&outcome);
     assert_eq_game_json(
         &expected_game,
         &to_json(&game),
@@ -483,39 +465,13 @@ fn test_action(
 }
 
 fn to_json(game: &Game) -> String {
-    serde_json::to_string_pretty(&game.cloned_data())
-        .expect("game data should be serializable")
+    serde_json::to_string_pretty(&game.cloned_data()).expect("game data should be serializable")
 }
 
 fn read_game(name: &str) -> String {
     let path = game_path(name);
     fs::read_to_string(&path)
         .unwrap_or_else(|_| panic!("game file {path} should exist in the test games folder"))
-}
-
-fn fix_invariants(mut game: Game) -> Game {
-    // those make sense to check after each action - add as needed
-    // pub available_settlements: u8,
-    // pub available_buildings: AvailableCityPieces,
-    // pub available_units: Units,
-    // pub influenced_buildings: u32,
-    // pub leader_position: Option<Position>,
-
-    // game.players.len()
-    let mut influenced_buildings=vec![0; game.players.len()];
-    for player in &game.players {
-        for city in &player.cities {
-            city.pieces.building_owners().into_iter().for_each(|(building, owner)| {
-                if let Some(owner) = owner {
-                    influenced_buildings[owner] += 1;
-                }
-            });
-        }
-    }
-    for player in &mut game.players {
-        player.influenced_buildings = influenced_buildings[player.index];
-    }
-    game
 }
 
 fn undo_redo(
@@ -1019,7 +975,7 @@ fn test_ship_disembark_capture_empty_city() {
         "ship_disembark_capture_empty_city",
         move_action(vec![1, 2], Position::from_offset("B2")),
         0,
-        true,
+        false,
         false,
     );
 }

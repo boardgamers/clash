@@ -1,26 +1,15 @@
-use itertools::Itertools;
-use serde::{Deserialize, Serialize};
-use std::{
-    cmp::Ordering::{self, *},
-    collections::{HashMap, HashSet},
-    mem,
-};
-
 use crate::advance::Advance;
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
 use crate::unit::{carried_units, get_current_move, land_movement};
 use crate::{
     city::{City, CityData},
-    city_pieces::{
-        AvailableCityPieces,
-        Building::{self, *},
-    },
+    city_pieces::Building::{self, *},
     civilization::Civilization,
     consts::{
         ADVANCE_COST, ADVANCE_VICTORY_POINTS, ARMY_MOVEMENT_REQUIRED_ADVANCE,
-        BUILDING_VICTORY_POINTS, CAPTURED_LEADER_VICTORY_POINTS, CITY_PIECE_LIMIT, CONSTRUCT_COST,
-        OBJECTIVE_VICTORY_POINTS, SETTLEMENT_LIMIT, STACK_LIMIT, UNIT_LIMIT, WONDER_VICTORY_POINTS,
+        BUILDING_VICTORY_POINTS, CAPTURED_LEADER_VICTORY_POINTS, CITY_LIMIT, CITY_PIECE_LIMIT,
+        CONSTRUCT_COST, OBJECTIVE_VICTORY_POINTS, STACK_LIMIT, UNIT_LIMIT, WONDER_VICTORY_POINTS,
     },
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     game::Game,
@@ -37,6 +26,13 @@ use crate::{
     utils,
     wonder::Wonder,
 };
+use itertools::Itertools;
+use serde::{Deserialize, Serialize};
+use std::{
+    cmp::Ordering::{self, *},
+    collections::{HashMap, HashSet},
+    mem,
+};
 
 pub struct Player {
     name: Option<String>,
@@ -51,19 +47,13 @@ pub struct Player {
     pub available_leaders: Vec<Leader>,
     pub advances: Vec<String>,
     pub unlocked_special_advances: Vec<String>,
-    pub wonders: Vec<String>,
-    pub wonders_build: usize,
-    pub leader_position: Option<Position>,
-    pub influenced_buildings: u32,
+    pub wonders_build: Vec<String>,
     pub game_event_tokens: u8,
     pub completed_objectives: Vec<String>,
     pub captured_leaders: Vec<String>,
     pub event_victory_points: f32,
     pub custom_actions: HashSet<CustomActionType>,
     pub wonder_cards: Vec<Wonder>,
-    pub available_settlements: u8,
-    pub available_buildings: AvailableCityPieces,
-    pub available_units: Units,
     pub collect_options: HashMap<Terrain, Vec<ResourcePile>>,
     pub next_unit_id: u32,
     pub played_once_per_turn_actions: Vec<CustomActionType>,
@@ -98,11 +88,8 @@ impl PartialEq for Player {
                 .all(|(i, leader)| leader.name == other.available_leaders[i].name)
             && self.advances == other.advances
             && self.unlocked_special_advances == other.unlocked_special_advances
-            && self.wonders == other.wonders
             && self.wonders_build == other.wonders_build
-            && self.leader_position == other.leader_position
             && self.game_event_tokens == other.game_event_tokens
-            && self.influenced_buildings == other.influenced_buildings
             && self.completed_objectives == other.completed_objectives
             && self.captured_leaders == other.captured_leaders
             && self.event_victory_points == other.event_victory_points
@@ -111,7 +98,6 @@ impl PartialEq for Player {
                 .iter()
                 .enumerate()
                 .all(|(i, wonder)| wonder.name == other.wonder_cards[i].name)
-            && self.available_buildings == other.available_buildings
             && self.collect_options == other.collect_options
     }
 }
@@ -190,11 +176,8 @@ impl Player {
                 .collect(),
             advances: data.advances,
             unlocked_special_advances: data.unlocked_special_advance,
-            wonders: data.wonders,
             wonders_build: data.wonders_build,
-            leader_position: data.leader_position,
             game_event_tokens: data.game_event_tokens,
-            influenced_buildings: data.influenced_buildings,
             completed_objectives: data.completed_objectives,
             captured_leaders: data.captured_leaders,
             event_victory_points: data.event_victory_points,
@@ -207,9 +190,6 @@ impl Player {
                         .expect("player data should have valid wonder cards")
                 })
                 .collect(),
-            available_settlements: data.available_settlements,
-            available_buildings: data.available_buildings,
-            available_units: data.available_units,
             collect_options: data.collect_options.into_iter().collect(),
             next_unit_id: data.next_unit_id,
             played_once_per_turn_actions: data.played_once_per_turn_actions,
@@ -239,11 +219,8 @@ impl Player {
                 .collect(),
             advances: self.advances.into_iter().sorted().collect(),
             unlocked_special_advance: self.unlocked_special_advances,
-            wonders: self.wonders,
             wonders_build: self.wonders_build,
-            leader_position: self.leader_position,
             game_event_tokens: self.game_event_tokens,
-            influenced_buildings: self.influenced_buildings,
             completed_objectives: self.completed_objectives,
             captured_leaders: self.captured_leaders,
             event_victory_points: self.event_victory_points,
@@ -252,9 +229,6 @@ impl Player {
                 .into_iter()
                 .map(|wonder| wonder.name)
                 .collect(),
-            available_settlements: self.available_settlements,
-            available_buildings: self.available_buildings,
-            available_units: self.available_units,
             collect_options: self
                 .collect_options
                 .into_iter()
@@ -290,11 +264,8 @@ impl Player {
                 .collect(),
             advances: self.advances.iter().cloned().sorted().collect(),
             unlocked_special_advance: self.unlocked_special_advances.clone(),
-            wonders: self.wonders.clone(),
-            wonders_build: self.wonders_build,
-            leader_position: self.leader_position,
+            wonders_build: self.wonders_build.clone(),
             game_event_tokens: self.game_event_tokens,
-            influenced_buildings: self.influenced_buildings,
             completed_objectives: self.completed_objectives.clone(),
             captured_leaders: self.captured_leaders.clone(),
             event_victory_points: self.event_victory_points,
@@ -303,9 +274,6 @@ impl Player {
                 .iter()
                 .map(|wonder| wonder.name.clone())
                 .collect(),
-            available_settlements: self.available_settlements,
-            available_buildings: self.available_buildings.clone(),
-            available_units: self.available_units.clone(),
             collect_options: self
                 .collect_options
                 .iter()
@@ -332,19 +300,13 @@ impl Player {
             available_leaders: Vec::new(),
             advances: vec![String::from("Farming"), String::from("Mining")],
             unlocked_special_advances: Vec::new(),
-            wonders: Vec::new(),
-            wonders_build: 0,
-            leader_position: None,
             game_event_tokens: 3,
-            influenced_buildings: 0,
             completed_objectives: Vec::new(),
             captured_leaders: Vec::new(),
             event_victory_points: 0.0,
             custom_actions: HashSet::new(),
             wonder_cards: Vec::new(),
-            available_settlements: SETTLEMENT_LIMIT,
-            available_buildings: CITY_PIECE_LIMIT,
-            available_units: UNIT_LIMIT,
+            wonders_build: Vec::new(),
             collect_options: HashMap::from([
                 (Mountain, vec![ResourcePile::ore(1)]),
                 (Fertile, vec![ResourcePile::food(1)]),
@@ -445,25 +407,67 @@ impl Player {
     }
 
     #[must_use]
-    pub fn victory_points(&self) -> f32 {
-        let mut victory_points = 0.0;
-        for city in &self.cities {
-            victory_points += city.uninfluenced_buildings() as f32 * BUILDING_VICTORY_POINTS;
-            victory_points += 1.0;
+    pub fn victory_points(&self, game: &Game) -> f32 {
+        self.victory_points_parts(game).iter().sum()
+    }
+
+    #[must_use]
+    pub fn victory_points_parts(&self, game: &Game) -> [f32; 6] {
+        [
+            (self.cities.len() + self.owned_buildings(game)) as f32 * BUILDING_VICTORY_POINTS,
+            (self.advances.len() + self.unlocked_special_advances.len()) as f32
+                * ADVANCE_VICTORY_POINTS,
+            self.completed_objectives.len() as f32 * OBJECTIVE_VICTORY_POINTS,
+            (self.wonders_owned() + self.wonders_build.len()) as f32 * WONDER_VICTORY_POINTS / 2.0,
+            self.event_victory_points,
+            self.captured_leaders.len() as f32 * CAPTURED_LEADER_VICTORY_POINTS,
+        ]
+    }
+
+    #[must_use]
+    pub fn owned_buildings(&self, game: &Game) -> usize {
+        game.players
+            .iter()
+            .flat_map(|player| &player.cities)
+            .map(|city| city.pieces.buildings(Some(self.index)).len())
+            .sum()
+    }
+
+    #[must_use]
+    pub fn wonders_owned(&self) -> usize {
+        self.cities
+            .iter()
+            .map(|city| city.pieces.wonders.len())
+            .sum::<usize>()
+    }
+
+    #[must_use]
+    pub fn is_building_available(&self, building: Building, game: &Game) -> bool {
+        game.players
+            .iter()
+            .flat_map(|player| &player.cities)
+            .flat_map(|city| city.pieces.building_owners())
+            .filter(|(b, owner)| b == &building && owner.is_some_and(|owner| owner == self.index))
+            .count()
+            < CITY_PIECE_LIMIT
+    }
+
+    #[must_use]
+    pub fn is_city_available(&self) -> bool {
+        self.cities.len() < CITY_LIMIT as usize
+    }
+
+    #[must_use]
+    pub fn available_units(&self) -> Units {
+        let mut units = UNIT_LIMIT.clone();
+        for u in &self.units {
+            units -= &u.unit_type;
         }
-        victory_points += self.influenced_buildings as f32 * BUILDING_VICTORY_POINTS;
-        victory_points += (self.advances.len() + self.unlocked_special_advances.len()) as f32
-            * ADVANCE_VICTORY_POINTS;
-        victory_points += self.completed_objectives.len() as f32 * OBJECTIVE_VICTORY_POINTS;
-        victory_points += self.wonders.len() as f32 * WONDER_VICTORY_POINTS / 2.0;
-        victory_points += self.wonders_build as f32 * WONDER_VICTORY_POINTS / 2.0;
-        victory_points += self.event_victory_points;
-        victory_points += self.captured_leaders.len() as f32 * CAPTURED_LEADER_VICTORY_POINTS;
-        victory_points
+        units
     }
 
     pub fn remove_wonder(&mut self, wonder: &Wonder) {
-        utils::remove_element(&mut self.wonders, &wonder.name);
+        utils::remove_element(&mut self.wonders_build, &wonder.name);
     }
 
     #[must_use]
@@ -477,47 +481,26 @@ impl Player {
     }
 
     #[must_use]
-    pub fn compare_score(&self, other: &Self) -> Ordering {
-        let mut building_score = 0;
-        for city in &self.cities {
-            building_score += city.uninfluenced_buildings();
-        }
-        building_score += self.influenced_buildings;
-        let mut other_building_score = 0;
-        for city in &self.cities {
-            other_building_score += city.uninfluenced_buildings();
-        }
-        other_building_score += self.influenced_buildings;
-        match building_score.cmp(&other_building_score) {
+    pub(crate) fn compare_score(&self, other: &Self, game: &Game) -> Ordering {
+        let parts = self.victory_points_parts(game);
+        let other_parts = other.victory_points_parts(game);
+        let sum = parts.iter().sum::<f32>();
+        let other_sum = other_parts.iter().sum::<f32>();
+
+        match sum.partial_cmp(&other_sum).expect("should be able to compare") {
             Less => return Less,
             Equal => (),
             Greater => return Greater,
         }
-        match (self.advances.len() + self.unlocked_special_advances.len())
-            .cmp(&(other.advances.len() + other.unlocked_special_advances.len()))
-        {
-            Less => return Less,
-            Equal => (),
-            Greater => return Greater,
+
+        for (part, other_part) in parts.iter().zip(other_parts.iter()) {
+            match part.partial_cmp(other_part).expect("should be able to compare") {
+                Less => return Less,
+                Equal => (),
+                Greater => return Greater,
+            }
         }
-        match self
-            .completed_objectives
-            .len()
-            .cmp(&other.completed_objectives.len())
-        {
-            Less => return Less,
-            Equal => (),
-            Greater => return Greater,
-        }
-        match (self.wonders.len() + self.wonders_build)
-            .cmp(&(other.wonders.len() + other.wonders_build))
-        {
-            Less => return Less,
-            Equal => (),
-            Greater => return Greater,
-        }
-        self.event_victory_points
-            .total_cmp(&other.event_victory_points)
+        Equal
     }
 
     #[must_use]
@@ -616,7 +599,6 @@ impl Player {
         if matches!(building, Academy) {
             self.gain_resources(ResourcePile::ideas(2));
         }
-        self.available_buildings -= building;
     }
 
     ///
@@ -641,7 +623,6 @@ impl Player {
         if matches!(building, Academy) {
             self.loose_resources(ResourcePile::ideas(2));
         }
-        self.available_buildings += building;
     }
 
     ///
@@ -660,7 +641,7 @@ impl Player {
         if !self.can_recruit_without_replaced(units, city_position, leader_index) {
             return false;
         }
-        let mut units_left = self.available_units.clone();
+        let mut units_left = self.available_units();
         let mut required_units = Units::empty();
         for unit in units {
             if !units_left.has_unit(unit) {
@@ -748,7 +729,6 @@ impl Player {
     }
 
     pub fn add_unit(&mut self, position: Position, unit_type: UnitType) {
-        self.available_units -= &unit_type;
         let unit = Unit::new(self.index, position, unit_type, self.next_unit_id);
         self.units.push(unit);
         self.next_unit_id += 1;
@@ -922,18 +902,12 @@ pub struct PlayerData {
     available_leaders: Vec<String>,
     advances: Vec<String>,
     unlocked_special_advance: Vec<String>,
-    wonders: Vec<String>,
-    wonders_build: usize,
-    leader_position: Option<Position>,
+    wonders_build: Vec<String>,
     game_event_tokens: u8,
-    influenced_buildings: u32,
     completed_objectives: Vec<String>,
     captured_leaders: Vec<String>,
     event_victory_points: f32,
     wonder_cards: Vec<String>,
-    available_settlements: u8,
-    available_buildings: AvailableCityPieces,
-    available_units: Units,
     collect_options: Vec<(Terrain, Vec<ResourcePile>)>,
     next_unit_id: u32,
     #[serde(default)]
