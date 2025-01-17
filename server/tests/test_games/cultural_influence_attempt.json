@@ -131,7 +131,7 @@
       "wonders_build": 0,
       "leader_position": null,
       "game_event_tokens": 2,
-      "influenced_buildings": 0,
+      "influenced_buildings": 1,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -404,7 +404,7 @@
   "messages": [
     "The game has started"
   ],
-   "dice_roll_outcomes": [
+  "dice_roll_outcomes": [
     1,
     1,
     10,

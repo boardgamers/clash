@@ -423,7 +423,7 @@
   "messages": [
     "The game has started"
   ],
-   "dice_roll_outcomes": [
+  "dice_roll_outcomes": [
     1,
     1,
     10,

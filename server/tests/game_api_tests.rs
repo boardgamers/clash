@@ -535,7 +535,7 @@ fn undo_redo(
     trimmed_game.action_log.pop();
     assert_eq_game_json(
         original_game,
-        &to_json(&game),
+        &to_json(&trimmed_game),
         name,
         name,
         &format!(

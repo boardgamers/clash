@@ -124,11 +124,11 @@
       "active_leader": null,
       "available_leaders": [],
       "advances": [
-        "Voting",
-        "Free Economy",
         "Farming",
         "Fishing",
-        "Mining"
+        "Free Economy",
+        "Mining",
+        "Voting"
       ],
       "unlocked_special_advance": [],
       "wonders": [],

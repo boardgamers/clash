@@ -362,7 +362,7 @@
       "wonders_build": 0,
       "leader_position": null,
       "game_event_tokens": 3,
-      "influenced_buildings": 0,
+      "influenced_buildings": 8,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
