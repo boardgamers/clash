@@ -34,16 +34,19 @@
       "cities": [
         {
           "city_pieces": {
-            "market": 1},
+            "market": 1
+          },
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
-          "position": "A1"},
+          "position": "A1"
+        },
         {
           "city_pieces": {
             "academy": 1,
-            "port": 1},
+            "port": 1
+          },
           "mood_state": "Angry",
           "activations": 4,
           "angry_activation": false,
@@ -56,23 +59,26 @@
             "obelisk": 1,
             "observatory": 1,
             "fortress": 1,
-            "temple": 1},
+            "temple": 1
+          },
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
           "position": "B1"
-          },
+        },
         {
           "city_pieces": {},
           "mood_state": "Angry",
           "activations": 4,
           "angry_activation": true,
           "player_index": 0,
-          "position": "B3"},
+          "position": "B3"
+        },
         {
           "city_pieces": {
-            "port": 0},
+            "port": 0
+          },
           "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
@@ -231,14 +237,13 @@
       },
       "cities": [
         {
-          "city_pieces": {
-
-          },
+          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
           "angry_activation": false,
           "player_index": 1,
-          "position": "C1"}
+          "position": "C1"
+        }
       ],
       "units": [
         {
@@ -452,64 +457,34 @@
   "wonder_amount_left": 1,
   "undo_context_stack": [
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
       "Movement": {

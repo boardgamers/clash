@@ -31,14 +31,13 @@
       },
       "cities": [
         {
-          "city_pieces": {
-
-          },
+          "city_pieces": {},
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
-          "position": "D1"}
+          "position": "D1"
+        }
       ],
       "units": [
         {
@@ -134,14 +133,13 @@
       },
       "cities": [
         {
-          "city_pieces": {
-
-          },
+          "city_pieces": {},
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "player_index": 1,
-          "position": "D8"}
+          "position": "D8"
+        }
       ],
       "units": [
         {
@@ -741,7 +739,8 @@
     {
       "Movement": {
         "starting_position": "D1",
-        "movement_actions_left": 3}
+        "movement_actions_left": 3
+      }
     },
     {
       "Movement": {
@@ -754,7 +753,8 @@
     {
       "Movement": {
         "starting_position": "C2",
-        "movement_actions_left": 3}
+        "movement_actions_left": 3
+      }
     }
   ]
 }

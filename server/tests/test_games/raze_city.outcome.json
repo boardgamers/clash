@@ -27,12 +27,14 @@
       "cities": [
         {
           "city_pieces": {
-            "fortress": 1},
+            "fortress": 1
+          },
           "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
-          "position": "C2"}
+          "position": "C2"
+        }
       ],
       "units": [
         {
@@ -191,14 +193,13 @@
       },
       "cities": [
         {
-          "city_pieces": {
-
-          },
+          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
           "player_index": 1,
-          "position": "C1"}
+          "position": "C1"
+        }
       ],
       "units": [
         {
@@ -381,7 +382,7 @@
   "messages": [
     "The game has started"
   ],
-   "dice_roll_outcomes": [
+  "dice_roll_outcomes": [
     1,
     1,
     10,
@@ -402,64 +403,34 @@
   "wonder_amount_left": 1,
   "undo_context_stack": [
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     }
   ]
 }

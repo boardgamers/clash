@@ -1,7 +1,8 @@
 {
   "state": {
     "Movement": {
-      "movement_actions_left": 3}
+      "movement_actions_left": 3
+    }
   },
   "players": [
     {
@@ -28,16 +29,19 @@
       "cities": [
         {
           "city_pieces": {
-            "market": 1},
+            "market": 1
+          },
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
-          "position": "A1"},
+          "position": "A1"
+        },
         {
           "city_pieces": {
             "academy": 1,
-            "port": 1},
+            "port": 1
+          },
           "mood_state": "Angry",
           "activations": 4,
           "angry_activation": false,
@@ -50,21 +54,22 @@
             "obelisk": 1,
             "observatory": 1,
             "fortress": 1,
-            "temple": 1},
+            "temple": 1
+          },
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
-          "position": "B1"},
+          "position": "B1"
+        },
         {
-          "city_pieces": {
-
-          },
+          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 4,
           "angry_activation": true,
           "player_index": 0,
-          "position": "B3"}
+          "position": "B3"
+        }
       ],
       "units": [
         {
@@ -214,17 +219,17 @@
       },
       "cities": [
         {
-          "city_pieces": {
-
-          },
+          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
           "angry_activation": false,
           "player_index": 1,
-          "position": "C1"},
+          "position": "C1"
+        },
         {
           "city_pieces": {
-            "port": 1},
+            "port": 1
+          },
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
@@ -433,64 +438,34 @@
   "wonder_amount_left": 1,
   "undo_context_stack": [
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     }
   ]
 }

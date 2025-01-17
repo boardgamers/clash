@@ -31,23 +31,21 @@
       },
       "cities": [
         {
-          "city_pieces": {
-
-          },
+          "city_pieces": {},
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
-          "position": "D1"},
+          "position": "D1"
+        },
         {
-          "city_pieces": {
-
-          },
+          "city_pieces": {},
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
           "player_index": 0,
-          "position": "C7"}
+          "position": "C7"
+        }
       ],
       "units": [
         {
@@ -156,23 +154,21 @@
       },
       "cities": [
         {
-          "city_pieces": {
-
-          },
+          "city_pieces": {},
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "player_index": 1,
-          "position": "D8"},
+          "position": "D8"
+        },
         {
-          "city_pieces": {
-
-          },
+          "city_pieces": {},
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
           "player_index": 1,
-          "position": "E7"}
+          "position": "E7"
+        }
       ],
       "units": [
         {
@@ -1187,7 +1183,8 @@
     {
       "Movement": {
         "starting_position": "D1",
-        "movement_actions_left": 3}
+        "movement_actions_left": 3
+      }
     },
     {
       "Movement": {
@@ -1200,7 +1197,8 @@
     {
       "Movement": {
         "starting_position": "C2",
-        "movement_actions_left": 3}
+        "movement_actions_left": 3
+      }
     },
     {
       "Movement": {
@@ -1213,7 +1211,8 @@
     {
       "Movement": {
         "starting_position": "B2",
-        "movement_actions_left": 3}
+        "movement_actions_left": 3
+      }
     },
     {
       "Movement": {
@@ -1234,7 +1233,8 @@
     {
       "Movement": {
         "starting_position": "C4",
-        "movement_actions_left": 3}
+        "movement_actions_left": 3
+      }
     },
     {
       "Movement": {
@@ -1247,7 +1247,8 @@
     {
       "Movement": {
         "starting_position": "B4",
-        "movement_actions_left": 3}
+        "movement_actions_left": 3
+      }
     },
     {
       "Movement": {
@@ -1260,7 +1261,8 @@
     {
       "Movement": {
         "starting_position": "C4",
-        "movement_actions_left": 3}
+        "movement_actions_left": 3
+      }
     },
     {
       "Movement": {
@@ -1281,7 +1283,8 @@
     {
       "Movement": {
         "starting_position": "D5",
-        "movement_actions_left": 3}
+        "movement_actions_left": 3
+      }
     },
     {
       "Movement": {
@@ -1294,7 +1297,8 @@
     {
       "Movement": {
         "starting_position": "C6",
-        "movement_actions_left": 3}
+        "movement_actions_left": 3
+      }
     },
     {
       "Movement": {
@@ -1320,7 +1324,8 @@
     {
       "Movement": {
         "starting_position": "D8",
-        "movement_actions_left": 3}
+        "movement_actions_left": 3
+      }
     },
     {
       "Movement": {
@@ -1333,7 +1338,8 @@
     {
       "Movement": {
         "starting_position": "E8",
-        "movement_actions_left": 3}
+        "movement_actions_left": 3
+      }
     },
     {
       "Movement": {
@@ -1357,15 +1363,13 @@
       }
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
       "Movement": {
         "starting_position": "D1",
-        "movement_actions_left": 3}
+        "movement_actions_left": 3
+      }
     },
     {
       "Movement": {
@@ -1376,15 +1380,13 @@
       }
     },
     {
-      "Recruit": {
-
-
-      }
+      "Recruit": {}
     },
     {
       "Movement": {
         "starting_position": "E7",
-        "movement_actions_left": 3}
+        "movement_actions_left": 3
+      }
     },
     {
       "Movement": {
@@ -1405,7 +1407,8 @@
     {
       "Movement": {
         "starting_position": "E6",
-        "movement_actions_left": 3}
+        "movement_actions_left": 3
+      }
     }
   ]
 }
