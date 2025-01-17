@@ -35,10 +35,13 @@ fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features
         state.log_scroll += mouse_wheel().1;
     }
 
+    set_y_zoom(state);
+    render(&state.render_context(game), features)
+}
+
+fn set_y_zoom(state: &mut State) {
     let s = state.screen_size;
     state.camera.zoom.y = state.camera.zoom.x * s.x / s.y;
-
-    render(&state.render_context(game), features)
 }
 
 fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
