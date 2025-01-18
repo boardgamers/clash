@@ -1001,3 +1001,14 @@ fn test_ship_explore_teleport() {
         false,
     );
 }
+
+#[test]
+fn test_ship_explore_move_not_possible() {
+    test_action(
+        "ship_explore_move_not_possible",
+        Action::ExploreResolution(3),
+        1,
+        true,
+        false,
+    );
+}

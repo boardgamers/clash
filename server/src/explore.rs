@@ -158,9 +158,12 @@ fn move_to_explored_tile(
                         ". Teleported ship from {destination} to {p}"
                     ));
                     game.move_units(player_index, units, p, None);
+                    return;
                 }
             }
+            panic!("No water tile found to teleport ship");
         }
+        game.add_to_last_log_item(". Ship can't move to the explored tile");
         return;
     }
     game.move_units(player_index, units, destination, None);
