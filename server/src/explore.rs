@@ -325,17 +325,14 @@ fn can_reach_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<P
     if !player.has_advance(NAVIGATION) {
         return vec![];
     }
-    let ship = units
-        .iter()
-        .filter_map(|&id| {
-            let unit = player.get_unit(id).expect("unit not found");
-            if unit.unit_type.is_ship() {
-                Some(unit.position)
-            } else {
-                None
-            }
-        })
-        .next();
+    let ship = units.iter().find_map(|&id| {
+        let unit = player.get_unit(id).expect("unit not found");
+        if unit.unit_type.is_ship() {
+            Some(unit.position)
+        } else {
+            None
+        }
+    });
     if let Some(ship) = ship {
         let mut destination = vec![];
         for outside in ship

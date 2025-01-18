@@ -1,4 +1,5 @@
 use crate::advance::Advance;
+use crate::explore::can_reach;
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
 use crate::unit::{carried_units, get_current_move};
@@ -33,7 +34,6 @@ use std::{
     collections::{HashMap, HashSet},
     mem,
 };
-use crate::explore::can_reach;
 
 pub struct Player {
     name: Option<String>,

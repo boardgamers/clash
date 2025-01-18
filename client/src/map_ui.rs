@@ -106,7 +106,7 @@ pub fn pan_and_zoom(state: &mut State) {
 
     let pan_map = is_mouse_button_down(MouseButton::Left);
     if state.pan_map && pan_map {
-        let mut  new_offset = state
+        let mut new_offset = state
             .camera
             .offset
             .add(mouse_delta_position().mul(vec2(-1., 1.)));
@@ -117,7 +117,7 @@ pub fn pan_and_zoom(state: &mut State) {
         if new_offset.y < min.y {
             new_offset.y = min.y;
         }
-        let max = MAX_OFFSET * state.camera.zoom/ ZOOM;
+        let max = MAX_OFFSET * state.camera.zoom / ZOOM;
         if new_offset.x > max.x {
             new_offset.x = max.x;
         }
