@@ -7,6 +7,7 @@ pub(crate) fn move_to_unexplored_tile(
     game: &mut Game,
     player_index: usize,
     units: &[u32],
+    start: Position,
     destination: Position,
     move_state: &MoveState,
 ) -> bool {
@@ -18,6 +19,7 @@ pub(crate) fn move_to_unexplored_tile(
                     player_index,
                     b,
                     units,
+                    start,
                     destination,
                     move_state,
                 );
@@ -32,6 +34,7 @@ pub(crate) fn move_to_unexplored_block(
     player_index: usize,
     move_to: &UnexploredBlock,
     units: &[u32],
+    start: Position,
     destination: Position,
     move_state: &MoveState,
 ) -> bool {
@@ -47,12 +50,45 @@ pub(crate) fn move_to_unexplored_block(
     let unrotated = &block.terrain[i];
     let rotated = &block.opposite(i);
 
-    // first rule: don't move into water
-    if unrotated.is_water() {
-        return instant_explore(game, move_to, opposite);
-    }
-    if rotated.is_water() {
-        return instant_explore(game, move_to, base);
+    let ship_explore = is_any_ship(game, player_index, units);
+
+    let instant_explore = |game: &mut Game, rotation: Rotation, ship_can_teleport| {
+        game.lock_undo();
+        move_to_explored_tile(
+            game,
+            move_to,
+            rotation,
+            player_index,
+            units,
+            destination,
+            ship_can_teleport,
+        );
+        true // indicates to continue moving
+    };
+
+    let mut ship_can_teleport = false;
+
+    if ship_explore {
+        // first rule: find connected water
+        let base_has_connected_sea = sea_is_connected(&game.map, start, move_to, base);
+        let opposite_has_connected_sea = sea_is_connected(&game.map, start, move_to, opposite);
+        if base_has_connected_sea != opposite_has_connected_sea {
+            let rotation = if base_has_connected_sea {
+                base
+            } else {
+                opposite
+            };
+            return instant_explore(game, rotation, true);
+        }
+        ship_can_teleport = base_has_connected_sea && opposite_has_connected_sea;
+    } else {
+        // first rule: don't move into water
+        if unrotated.is_water() {
+            return instant_explore(game, opposite, false);
+        }
+        if rotated.is_water() {
+            return instant_explore(game, base, false);
+        }
     }
 
     // second rule: water must be connected
@@ -64,7 +100,7 @@ pub(crate) fn move_to_unexplored_block(
         } else {
             opposite
         };
-        return instant_explore(game, move_to, rotation);
+        return instant_explore(game, rotation, false);
     }
 
     // third rule: prefer outside neighbors
@@ -76,7 +112,7 @@ pub(crate) fn move_to_unexplored_block(
         } else {
             opposite
         };
-        return instant_explore(game, move_to, rotation);
+        return instant_explore(game, rotation, false);
     }
 
     game.lock_undo();
@@ -91,36 +127,103 @@ pub(crate) fn move_to_unexplored_block(
         units: units.to_vec(),
         start,
         destination,
+        ship_can_teleport,
     });
 
-    true
+    false // don't continue moving
 }
 
-fn instant_explore(game: &mut Game, h: &UnexploredBlock, rotation: Rotation) -> bool {
-    add_block_tiles_with_log(game, &h.position, &h.block, rotation);
-    game.lock_undo();
-    false // indicates to continue moving
+fn move_to_explored_tile(
+    game: &mut Game,
+    block: &UnexploredBlock,
+    rotation: Rotation,
+    player_index: usize,
+    units: &[u32],
+    destination: Position,
+    ship_can_teleport: bool,
+) {
+    add_block_tiles_with_log(game, &block.position, &block.block, rotation);
+
+    if is_any_ship(game, player_index, units)
+        && game
+            .map
+            .tiles
+            .get(&destination)
+            .is_some_and(Terrain::is_land)
+    {
+        if ship_can_teleport {
+            for (p, t) in block.block.tiles(&block.position, rotation) {
+                if t.is_water() {
+                    game.move_units(player_index, units, p, None);
+                }
+            }
+        }
+        return;
+    }
+    game.move_units(player_index, units, destination, None);
 }
 
+pub fn is_any_ship(game: &Game, player_index: usize, units: &[u32]) -> bool {
+    let p = game.get_player(player_index);
+    units.iter().any(|&id| {
+        p.get_unit(id)
+            .expect("unit should exist")
+            .unit_type
+            .is_ship()
+    })
+}
+
+#[must_use]
 fn water_has_water_neighbors(
     map: &Map,
     unexplored_block: &UnexploredBlock,
     rotation: Rotation,
 ) -> bool {
-    has_neighbors(unexplored_block, rotation, |p| {
+    water_has_neighbors(unexplored_block, rotation, |p| {
         map.tiles.get(p).is_some_and(Terrain::is_water)
     })
 }
 
+#[must_use]
+fn sea_is_connected(
+    map: &Map,
+    start: Position,
+    unexplored_block: &UnexploredBlock,
+    rotation: Rotation,
+) -> bool {
+    let block = &unexplored_block.block;
+    let tiles = block.tiles(&unexplored_block.position, rotation);
+    let mut ocean = vec![start];
+    grow_ocean(map, &mut ocean);
+    tiles
+        .into_iter()
+        .any(|(p, t)| t.is_water() && p.neighbors().iter().any(|n| ocean.contains(n)))
+}
+
+fn grow_ocean(map: &Map, ocean: &mut Vec<Position>) {
+    let mut i = 0;
+    while i < ocean.len() {
+        let pos = ocean[i];
+        for n in pos.neighbors() {
+            if map.tiles.get(&n).is_some_and(Terrain::is_water) && !ocean.contains(&n) {
+                ocean.push(n);
+            }
+        }
+        i += 1;
+    }
+}
+
+#[must_use]
 fn water_has_outside_neighbors(
     map: &Map,
     unexplored_block: &UnexploredBlock,
     rotation: Rotation,
 ) -> bool {
-    has_neighbors(unexplored_block, rotation, |p| !map.tiles.contains_key(p))
+    water_has_neighbors(unexplored_block, rotation, |p| !map.tiles.contains_key(p))
 }
 
-fn has_neighbors(
+#[must_use]
+fn water_has_neighbors(
     unexplored_block: &UnexploredBlock,
     rotation: Rotation,
     pred: impl Fn(&Position) -> bool,
@@ -154,13 +257,20 @@ fn add_block_tiles_with_log(
 }
 
 pub(crate) fn explore_resolution(game: &mut Game, r: &ExploreResolutionState, rotation: Rotation) {
-    let position = &r.block.position;
-    let rotate_by = rotation - position.rotation;
+    let unexplored_block = &r.block;
+    let rotate_by = rotation - unexplored_block.position.rotation;
     let valid_rotation = rotate_by == 0 || rotate_by == 3;
     assert!(valid_rotation, "Invalid rotation {rotate_by}");
 
-    add_block_tiles_with_log(game, position, &r.block.block, rotation);
-    game.move_units(game.current_player_index, &r.units, r.destination, None);
+    move_to_explored_tile(
+        game,
+        unexplored_block,
+        rotation,
+        game.current_player_index,
+        &r.units,
+        r.destination,
+        r.ship_can_teleport,
+    );
     game.back_to_move(&r.move_state);
     game.push_undo_context(UndoContext::ExploreResolution(r.clone()));
 }

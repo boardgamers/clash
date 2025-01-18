@@ -776,7 +776,8 @@
           0
         ],
         "start": "D7",
-        "destination": "C7"
+        "destination": "C7",
+        "ship_can_teleport": false
       }
     }
   ]

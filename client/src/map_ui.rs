@@ -101,12 +101,15 @@ pub fn pan_and_zoom(state: &mut State) {
     let new_zoom = state.camera.zoom + wheel * 0.0001;
     let x = new_zoom.x;
     if x < 0.005 && x > 0.0005 {
-       state.camera.zoom = new_zoom; 
+        state.camera.zoom = new_zoom;
     }
 
     let pan_map = is_mouse_button_down(MouseButton::Left);
     if state.pan_map && pan_map {
-        let new_offset = state.camera.offset.add(mouse_delta_position().mul(vec2(-1., 1.)));
+        let new_offset = state
+            .camera
+            .offset
+            .add(mouse_delta_position().mul(vec2(-1., 1.)));
         if new_offset.x.abs() < 1. && new_offset.y.abs() < 1. {
             state.camera.offset = new_offset;
         }
