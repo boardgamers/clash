@@ -366,6 +366,8 @@ pub struct State {
 
 pub const ZOOM: f32 = 0.001;
 pub const OFFSET: Vec2 = vec2(0., 0.45);
+pub const MIN_OFFSET: Vec2 = vec2(-1.7, -1.);
+pub const MAX_OFFSET: Vec2 = vec2(1.2, 3.);
 
 impl State {
     pub async fn new(features: &Features) -> State {
