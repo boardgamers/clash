@@ -431,8 +431,8 @@ fn test_action(
     let a2 = serde_json::from_str(&a).expect("action should be deserializable");
     let original_game = read_game(name);
     let game =
-        Game::from_data(serde_json::from_str(&original_game).unwrap_or_else(|_| {
-            panic!("the game file should be deserializable {}", game_path(name))
+        Game::from_data(serde_json::from_str(&original_game).unwrap_or_else(|e| {
+            panic!("the game file should be deserializable {}: {}", game_path(name), e)
         }));
     let game = game_api::execute_action(game, a2, player_index);
     if illegal_action_test {
@@ -472,7 +472,7 @@ fn to_json(game: &Game) -> String {
 fn read_game(name: &str) -> String {
     let path = game_path(name);
     fs::read_to_string(&path)
-        .unwrap_or_else(|_| panic!("game file {path} should exist in the test games folder"))
+        .unwrap_or_else(|e| panic!("game file {path} should exist in the test games folder: {e}"))
 }
 
 fn undo_redo(
@@ -1011,4 +1011,14 @@ fn test_ship_explore_move_not_possible() {
         true,
         false,
     );
+}
+
+#[test]
+fn test_ship_navigate() {
+    let name = "ship_navigate";
+    let original_game = read_game(name);
+    let game = Game::from_data(serde_json::from_str(&original_game).unwrap());
+
+    let result = game.get_player(1).can_move_units(&game, &vec![1], Position::from_offset("B5"), Position::from_offset("B3"), None);
+    assert_eq!(result.is_ok(), true);
 }

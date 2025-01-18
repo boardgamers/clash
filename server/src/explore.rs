@@ -3,6 +3,7 @@ use crate::game::{ExploreResolutionState, Game, GameState, MoveState, UndoContex
 use crate::map::{Block, BlockPosition, Map, Rotation, Terrain, UnexploredBlock};
 use crate::player::Player;
 use crate::position::Position;
+use hex2d::{Angle, Back, Coordinate, Direction, Forward, Left, LeftBack, Right, RightBack};
 use itertools::Itertools;
 
 pub(crate) fn move_to_unexplored_tile(
@@ -344,9 +345,38 @@ fn can_reach_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<P
                 if let Some(Terrain::Water) = map.tiles.get(&start) {
                     destination.push(start);
                 } else if start.is_neighbor(ship) {
-                    if let Some(d) = can_navigate_to_ocean(start, map, vec![ship]) {
-                        destination.push(d);
+                    // let mut visited = ship
+                    //     .neighbors()
+                    //     .iter()
+                    //     .filter(|n| map.tiles.get(n).is_some_and(|t| t.is_water()))
+                    //     .copied()
+                    //     .collect::<Vec<_>>();
+                    // visited.retain(|n| n != &start);
+                    // visited.push(ship);
+
+                    let mut visited = vec![ship.coordinate()];
+                    let dir = ship.coordinate().direction_to_cw(start.coordinate());
+
+                    walk(map, start.coordinate(), dir.unwrap(), &mut visited);
+                    let nav = |v:&&Coordinate| **v != ship.coordinate() && map.tiles.get(&Position::from_coordinate(**v)).is_some_and(|t|t.is_water()||t.is_unexplored());
+                    let first = visited.iter().find(nav);
+                    let last = visited.iter().rfind(nav);
+                    // for v in &visited {
+                    //     println!("x={} y={}", v.x, v.y);
+                    // }
+
+                    if let Some(first) = first {
+                        destination.push(Position::from_coordinate(*first));
                     }
+                    if let Some(last) = last {
+                        destination.push(Position::from_coordinate(*last));
+                    }
+
+
+                    break;
+                    // if let Some(d) = can_navigate_to_ocean(start, start, map, visited) {
+                    //     destination.push(d);
+                    // }
                 };
             }
         }
@@ -357,6 +387,7 @@ fn can_reach_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<P
 
 #[must_use]
 fn can_navigate_to_ocean(
+    origin: Position,
     start: Position,
     map: &Map,
     mut visited: Vec<Position>,
@@ -368,7 +399,7 @@ fn can_navigate_to_ocean(
 
     visited.push(start);
 
-    let option: Vec<Position> = start
+    let next: Vec<Position> = start
         .neighbors()
         .iter()
         .filter(|n| {
@@ -379,14 +410,240 @@ fn can_navigate_to_ocean(
         .copied()
         .collect();
 
-    for n in &option {
-        if map.tiles.get(n).is_some_and(Terrain::is_water) {
+    for n in &next {
+        if map
+            .tiles
+            .get(n)
+            .is_some_and(|t| t.is_water() || t.is_unexplored())
+        {
             return Some(*n);
         }
     }
 
-    if option.is_empty() {
+    if next.is_empty() {
         return None;
     }
-    can_navigate_to_ocean(option[0], map, visited)
+    can_navigate_to_ocean(origin, next[0], map, visited)
+}
+
+const ALL_ANGLES: [Angle; 5] = [RightBack, Right, Forward, Left, LeftBack];
+
+fn walk(
+    map: &Map,
+    start: Coordinate,
+    direction: Direction,
+    // destination: Coordinate,
+    visited: &mut Vec<Coordinate>,
+) -> bool {
+    // if start == destination {
+    //     return true;
+    // }
+    if visited.contains(&start) {
+        return false;
+    }
+    visited.push(start);
+
+    for a in ALL_ANGLES.iter().rev() {
+        let new_dir = direction + *a;
+        let new_pos = start + new_dir;
+        if !visited.contains(&new_pos) && is_perim(map, &new_pos) {
+            return walk(map, new_pos, new_dir, visited);
+        }
+    }
+
+    // false
+
+    // let right = direction + Angle::Right;
+    // let f = start + direction;
+    // let r = start + right;
+    //
+    // if map.tiles.contains_key(&Position::from_coordinate(r)) {
+    //     walk(map, r, right,visited);
+    // } else if map.tiles.contains_key(&Position::from_coordinate(f)) {
+    //     walk(map, f, direction,  visited);
+    // }
+
+    // for d in Direction::all() {
+    //     let n = start + *d;
+    //     if map.tiles.get(&n).is_some_and(|t| t.is_land()) {
+    //         if walk(map, n, destination, visited) {
+    //             return true;
+    //         }
+    //     }
+    // }
+
+    false
+}
+
+fn is_perim(map: &Map, coordinate: &Coordinate) -> bool {
+    let p = Position::from_coordinate(*coordinate);
+    let t = map.tiles.get(&p);
+    t.is_some() && p.neighbors().iter().any(|n| map.tiles.get(n).is_none())
+}
+
+// fn FindHexCubePerimeterLoopOutside(
+//     cubeCells: Vec<Coordinate>,
+//     startCell: Coordinate,
+//     map: &Map,
+// ) -> Vec<Coordinate> {
+//     let mut perim: Vec<Coordinate> = vec![];
+//     let footCell = startCell;
+//
+//     let startHandCell = footCell + Direction::XY;
+//     let handCell = startHandCell;
+//     //
+//     // if (cubeCells.Any(x => x == handCell))
+//     // throw
+//     // new
+//     // Exception("Start Cell Must be the top right most cell");
+//
+//     let handMovedFromStartingLocation = false;
+//     let finished = false;
+//
+//     //Yes, this happened to me. Still refining my actual regions and merging is apparently flawed.
+//     if (cubeCells.len() == 1) {
+//         // Debug.LogWarning("Only 1 Tile Perimeter");
+//         return cubeCells;
+//     }
+//
+//     perim.push(startCell);
+//     while true {
+//         let footMoved = false;
+//
+//         handCell
+//             .directions_to(footCell)
+//             .iter()
+//             .for_each(|footDirection| {
+//                 // Angle::Left.
+//                 let newFootLocation = handCell. + footDirection;
+//
+//                 if map
+//                     .tiles
+//                     .contains_key(server::position::Position::from_coordinate(newFootLocation))
+//                 {
+//                     // if newFootLocation == footCell
+//                     // return;
+//                     //
+//                     // //It's possible and common that we ended up crossing a single body of water
+//                     // //The tile muse be connected
+//                     // if footCell.distance(newFootLocation) > 1
+//                     // return;
+//                     //
+//                     // footCell = newFootLocation;
+//                     // perim.push(newFootLocation);
+//                     // footMoved = true;
+//                 }
+//             });
+//     }
+// else if footMoved
+//
+//     if (cubeCells.Any(x => x == newFootLocation))
+//     {
+//         if (newFootLocation == footCell)
+//         return;
+//
+//         //It's possible and common that we ended up crossing a single body of water
+//         //The tile muse be connected
+//         if (footCell.distance(newFootLocation) > 1)
+//         return;
+//
+//         footCell = newFootLocation;
+//         perim.push(newFootLocation);
+//         footMoved = true;
+//     } else if (footMoved)
+//     return;
+// });
+//     //The starting direction is always relative to the hand
+//     foreach ( let footDirection in CounterClockwiseDirections(handCell.CubeCoordDirection(footCell)))
+//     {
+//     let newFootLocation = handCell.GetNeighborCube(footDirection);
+//     if (cubeCells.Any(x => x == newFootLocation))
+//     {
+//     if (newFootLocation == footCell)
+//     continue;
+//
+//     //It's possible and common that we ended up crossing a single body of water
+//     //The tile muse be connected
+//     if (footCell.HexCubeDistance(newFootLocation) > 1)
+//     continue;
+//
+//     footCell = newFootLocation;
+//     perim.Add(newFootLocation);
+//     footMoved = true;
+//     }
+//     else if (footMoved)
+//     break;
+//     }
+//
+//     let handMoved = false;
+//
+//     //The starting direction is always relative to the foot's.
+//     foreach ( let handDirection in ClockwiseFromDirections(footCell.CubeCoordDirection(handCell)))
+//     {
+//     let newHandPosition = footCell.GetNeighborCube(handDirection);
+//
+//     //Just like the other distance check, we need to make sure that if the hand position is back to the original position
+//     //that the current foot cell is a neighbor because it is possible that we are walking back out of an inlet.
+//     if (newHandPosition == startHandCell & & footCell.HexCubeDistance(startCell) < = 1 & & handMovedFromStartingLocation)
+//     {
+//     finished = true;
+//     break;
+//     }
+//
+//     if (cubeCells.All(x => x != newHandPosition))
+//     {
+//     if (newHandPosition == handCell)
+//     continue;
+//
+//     handMovedFromStartingLocation = true;
+//     handCell = newHandPosition;
+//     handMoved = true;
+//     }
+//     else if (handMoved)
+//     {
+//     break;
+//     }
+//     }
+//
+//     if ( ! handMoved)
+//     throw new Exception();
+//
+// }
+// while (!finished && perim.Count < MaxPerimeterResult);
+//
+//
+// if (perim.Count >= MaxPerimeterResult)
+// Debug.LogError("Cancelled out of the perimeter loop. Stuck.");
+//
+// let lastCell = perim.Last();
+// if (lastCell == startCell)
+// perim.RemoveAt(perim.Count - 1);
+//
+// return perim;
+// perim
+// }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::map::Map;
+    use hex2d::Coordinate;
+    use std::collections::HashMap;
+
+    #[test]
+    fn test_can_navigate_to_ocean() {
+
+        let mut map = Map::new(HashMap::new());
+        map.tiles.insert(Position::new(3, 2), Terrain::Barren);
+        map.tiles.insert(Position::new(3, 3), Terrain::Barren);
+        map.tiles.insert(Position::new(4, 1), Terrain::Barren);
+        map.tiles.insert(Position::new(3, 1), Terrain::Barren);
+        walk(
+            &map,
+            Coordinate::new(3, 2),
+            Direction::XY,
+            Coordinate::new(3, 3),
+            &mut vec![],
+        );
+    }
 }

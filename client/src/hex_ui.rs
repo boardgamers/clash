@@ -51,8 +51,12 @@ pub fn draw_hex(
         draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, BEIGE);
     }
     draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, Color::from_vec(v));
-    rc.state
-        .draw_text_with_color(&p.to_string(), c.x - 30.0, c.y - 35.0, text_color);
+    rc.state.draw_text_with_color(
+        &format!("{} x={} y={}", &p.to_string(), p.q, p.r),
+        c.x - 30.0,
+        c.y - 35.0,
+        text_color,
+    );
     if exhausted {
         const SIZE: f32 = 100.;
         draw_scaled_icon(
