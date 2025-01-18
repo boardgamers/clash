@@ -430,10 +430,13 @@ fn test_action(
     let a = serde_json::to_string(&action).expect("action should be serializable");
     let a2 = serde_json::from_str(&a).expect("action should be deserializable");
     let original_game = read_game(name);
-    let game =
-        Game::from_data(serde_json::from_str(&original_game).unwrap_or_else(|e| {
-            panic!("the game file should be deserializable {}: {}", game_path(name), e)
-        }));
+    let game = Game::from_data(serde_json::from_str(&original_game).unwrap_or_else(|e| {
+        panic!(
+            "the game file should be deserializable {}: {}",
+            game_path(name),
+            e
+        )
+    }));
     let game = game_api::execute_action(game, a2, player_index);
     if illegal_action_test {
         println!(
@@ -1015,10 +1018,36 @@ fn test_ship_explore_move_not_possible() {
 
 #[test]
 fn test_ship_navigate() {
-    let name = "ship_navigate";
+    let name = "ship_navigate2";
     let original_game = read_game(name);
-    let game = Game::from_data(serde_json::from_str(&original_game).unwrap());
+    let mut game = Game::from_data(serde_json::from_str(&original_game).unwrap());
 
-    let result = game.get_player(1).can_move_units(&game, &vec![1], Position::from_offset("B5"), Position::from_offset("B3"), None);
-    assert_eq!(result.is_ok(), true);
+    let pairs = [
+        ("B3", "B5"),
+        ("B5", "A7"),
+        ("A7", "F7"),
+        ("G7", "G3"),
+        ("G3", "B3"),
+    ];
+
+    for pair in pairs {
+        let from = Position::from_offset(pair.0);
+        let to = Position::from_offset(pair.1);
+        assert_navigate(&mut game, from, to);
+        assert_navigate(&mut game, to, from);
+    }
+}
+
+fn assert_navigate(game: &mut Game, from: Position, to: Position) {
+    game.players[1].get_unit_mut(1).unwrap().position = from;
+    let result = game
+        .get_player(1)
+        .can_move_units(&game, &[1], from, to, None);
+    assert!(
+        result.is_ok(),
+        "expected to be able to move from {} to {} but got {:?}",
+        from,
+        to,
+        result
+    );
 }

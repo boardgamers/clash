@@ -3,7 +3,7 @@ use crate::game::{ExploreResolutionState, Game, GameState, MoveState, UndoContex
 use crate::map::{Block, BlockPosition, Map, Rotation, Terrain, UnexploredBlock};
 use crate::player::Player;
 use crate::position::Position;
-use hex2d::{Angle, Back, Coordinate, Direction, Forward, Left, LeftBack, Right, RightBack};
+use hex2d::{Angle, Back, Coordinate, Direction, Forward, Left, LeftBack, Right, RightBack, Spacing, Spin};
 use itertools::Itertools;
 
 pub(crate) fn move_to_unexplored_tile(
@@ -336,49 +336,66 @@ fn can_reach_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<P
     });
     if let Some(ship) = ship {
         let mut destination = vec![];
-        for outside in ship
-            .neighbors()
-            .into_iter()
-            .filter(|n| !map.tiles.contains_key(n))
-        {
-            for start in outside.neighbors() {
-                if let Some(Terrain::Water) = map.tiles.get(&start) {
-                    destination.push(start);
-                } else if start.is_neighbor(ship) {
-                    // let mut visited = ship
-                    //     .neighbors()
-                    //     .iter()
-                    //     .filter(|n| map.tiles.get(n).is_some_and(|t| t.is_water()))
-                    //     .copied()
-                    //     .collect::<Vec<_>>();
-                    // visited.retain(|n| n != &start);
-                    // visited.push(ship);
 
-                    let mut visited = vec![ship.coordinate()];
-                    let dir = ship.coordinate().direction_to_cw(start.coordinate());
-
-                    walk(map, start.coordinate(), dir.unwrap(), &mut visited);
-                    let nav = |v:&&Coordinate| **v != ship.coordinate() && map.tiles.get(&Position::from_coordinate(**v)).is_some_and(|t|t.is_water()||t.is_unexplored());
-                    let first = visited.iter().find(nav);
-                    let last = visited.iter().rfind(nav);
-                    // for v in &visited {
-                    //     println!("x={} y={}", v.x, v.y);
-                    // }
-
-                    if let Some(first) = first {
-                        destination.push(Position::from_coordinate(*first));
-                    }
-                    if let Some(last) = last {
-                        destination.push(Position::from_coordinate(*last));
-                    }
-
-
-                    break;
-                    // if let Some(d) = can_navigate_to_ocean(start, start, map, visited) {
-                    //     destination.push(d);
-                    // }
-                };
+        let ring = ship.coordinate().ring_iter(1, Spin::CCW(Direction::XY));
+        for r in ring {
+            // for outside in ship
+            //     .neighbors()
+            //     .into_iter()
+            //     .filter(|n| !map.tiles.contains_key(n))
+            // {
+            if !map.tiles.contains_key(&Position::from_coordinate(r)) {
+                continue;
             }
+
+            let start = Position::from_coordinate(r);
+            // for start in outside {
+            if let Some(Terrain::Water) = map.tiles.get(&start) {
+                destination.push(start);
+            } else if start.is_neighbor(ship) {
+                // let mut visited = ship
+                //     .neighbors()
+                //     .iter()
+                //     .filter(|n| map.tiles.get(n).is_some_and(|t| t.is_water()))
+                //     .copied()
+                //     .collect::<Vec<_>>();
+                // visited.retain(|n| n != &start);
+                // visited.push(ship);
+
+                let mut visited = vec![ship.coordinate()];
+                let c = start.coordinate();
+                let dir = ship.coordinate().direction_to_cw(c).unwrap();
+                // let x = map.tiles.get(&Position::from_coordinate(c + (dir + Right))).is_none();
+                // let y = map.tiles.get(&Position::from_coordinate(c + (dir + Left))).is_none();
+                // assert!(x != y, "x={x} y={y}");
+
+                walk(map, c, dir, &mut visited);
+                let nav = |v: &&Coordinate| {
+                    **v != ship.coordinate()
+                        && map
+                            .tiles
+                            .get(&Position::from_coordinate(**v))
+                            .is_some_and(|t| t.is_water() || t.is_unexplored())
+                };
+                let first = visited.iter().find(nav);
+                let last = visited.iter().rfind(nav);
+                // for v in &visited {
+                //     println!("x={} y={}", v.x, v.y);
+                // }
+
+                if let Some(first) = first {
+                    destination.push(Position::from_coordinate(*first));
+                }
+                if let Some(last) = last {
+                    destination.push(Position::from_coordinate(*last));
+                }
+
+                break;
+                // if let Some(d) = can_navigate_to_ocean(start, start, map, visited) {
+                //     destination.push(d);
+                // }
+            };
+            // }
         }
         return destination;
     }
@@ -428,28 +445,48 @@ fn can_navigate_to_ocean(
 
 const ALL_ANGLES: [Angle; 5] = [RightBack, Right, Forward, Left, LeftBack];
 
+const SIZE: f32 = 60.0;
+const SPACING: Spacing = Spacing::FlatTop(SIZE);
+fn center(c: Coordinate) -> Coordinate {
+    let p = c.to_pixel(SPACING);
+    Coordinate { x: p.0 as i32, y: p.1 as i32 }
+}
+
 fn walk(
     map: &Map,
     start: Coordinate,
     direction: Direction,
     // destination: Coordinate,
     visited: &mut Vec<Coordinate>,
-) -> bool {
+)  {
+    let CENTER = center(Position::from_offset("D4").coordinate());
     // if start == destination {
     //     return true;
     // }
     if visited.contains(&start) {
-        return false;
+        return ;
     }
     visited.push(start);
 
-    for a in ALL_ANGLES.iter().rev() {
-        let new_dir = direction + *a;
-        let new_pos = start + new_dir;
-        if !visited.contains(&new_pos) && is_perim(map, &new_pos) {
-            return walk(map, new_pos, new_dir, visited);
-        }
+    let option = &start
+        .neighbors()
+        .into_iter()
+        .filter(|n| !visited.contains(n) && is_perim(map, n))
+    .sorted_by_key(|n| -center(*n).distance(CENTER))
+        .next();
+
+    if let Some(n) = option {
+        walk(map, *n, direction, visited);
     }
+
+    // st.ring_iter(1, Spin::CCW(Direction::XY))
+    //     for a in ALL_ANGLES.iter() {
+    //         let new_dir = direction + *a;
+    //         let new_pos = start + new_dir;
+    //         if !visited.contains(&new_pos) && is_perim(map, &new_pos) {
+    //             return walk(map, new_pos, new_dir, visited);
+    //         }
+    //     }
 
     // false
 
@@ -472,7 +509,7 @@ fn walk(
     //     }
     // }
 
-    false
+    // false
 }
 
 fn is_perim(map: &Map, coordinate: &Coordinate) -> bool {
@@ -622,28 +659,3 @@ fn is_perim(map: &Map, coordinate: &Coordinate) -> bool {
 // return perim;
 // perim
 // }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::map::Map;
-    use hex2d::Coordinate;
-    use std::collections::HashMap;
-
-    #[test]
-    fn test_can_navigate_to_ocean() {
-
-        let mut map = Map::new(HashMap::new());
-        map.tiles.insert(Position::new(3, 2), Terrain::Barren);
-        map.tiles.insert(Position::new(3, 3), Terrain::Barren);
-        map.tiles.insert(Position::new(4, 1), Terrain::Barren);
-        map.tiles.insert(Position::new(3, 1), Terrain::Barren);
-        walk(
-            &map,
-            Coordinate::new(3, 2),
-            Direction::XY,
-            Coordinate::new(3, 3),
-            &mut vec![],
-        );
-    }
-}
