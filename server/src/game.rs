@@ -501,10 +501,17 @@ impl Game {
                     .tiles
                     .get(&destination)
                     .expect("destination should be a valid tile");
-                if dest_terrain == &Unexplored
-                    && move_to_unexplored_tile(self, player_index, &units, destination, &move_state)
-                {
-                    // go to explore resolution
+                if dest_terrain == &Unexplored {
+                    if move_to_unexplored_tile(
+                        self,
+                        player_index,
+                        &units,
+                        starting_position,
+                        destination,
+                        &move_state,
+                    ) {
+                        self.back_to_move(&move_state);
+                    }
                     return;
                 }
 
@@ -1585,6 +1592,7 @@ pub struct ExploreResolutionState {
     pub units: Vec<u32>,
     pub start: Position,
     pub destination: Position,
+    pub ship_can_teleport: bool,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

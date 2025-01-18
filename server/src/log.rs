@@ -339,19 +339,18 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
                 .get(&start)
                 .expect("the start position should be on the map")
                 .is_water();
-            let destination_is_water = game
+            let t = game
                 .map
                 .tiles
                 .get(destination)
-                .expect("the destination position should be on the map")
-                .is_water();
+                .expect("the destination position should be on the map");
             let verb = if start_is_water {
-                if destination_is_water {
+                if t.is_unexplored() || t.is_water() {
                     "sailed"
                 } else {
                     "disembarked"
                 }
-            } else if destination_is_water {
+            } else if t.is_water() {
                 "embarked"
             } else {
                 "marched"

@@ -1403,12 +1403,6 @@
           1
         ]
       }
-    },
-    {
-      "Movement": {
-        "starting_position": "E6",
-        "movement_actions_left": 3
-      }
     }
   ]
 }

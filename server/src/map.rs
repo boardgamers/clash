@@ -144,6 +144,14 @@ impl Terrain {
     pub fn is_water(&self) -> bool {
         matches!(self, Terrain::Water)
     }
+    #[must_use]
+    pub fn is_unexplored(&self) -> bool {
+        matches!(self, Terrain::Unexplored)
+    }
+    #[must_use]
+    pub fn is_land(&self) -> bool {
+        !self.is_water() && !self.is_unexplored()
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

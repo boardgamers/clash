@@ -1,7 +1,7 @@
 use crate::advance::Advance;
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
-use crate::unit::{carried_units, get_current_move, land_movement};
+use crate::unit::{carried_units, get_current_move};
 use crate::{
     city::{City, CityData},
     city_pieces::Building::{self, *},
@@ -787,7 +787,6 @@ impl Player {
             return Err("carrier capacity exceeded".to_string());
         }
 
-        let land_movement = land_movement(game, destination);
         let mut stack_size = 0;
 
         for unit_id in units {
@@ -814,8 +813,18 @@ impl Player {
                 if carrier.position != destination {
                     return Err("the carrier should be at the destination position".to_string());
                 }
-            } else if unit.unit_type.is_land_based() != land_movement {
-                return Err("the unit cannot move here".to_string());
+            } else {
+                let terrain = game
+                    .map
+                    .tiles
+                    .get(&destination)
+                    .expect("the destination tile should exist");
+                if unit.unit_type.is_land_based() && terrain.is_water() {
+                    return Err("land units can't move into water".to_string());
+                }
+                if unit.unit_type.is_ship() && terrain.is_land() {
+                    return Err("ships can't move into land".to_string());
+                }
             }
             if unit.unit_type.is_army_unit() && !self.has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE) {
                 return Err("army movement advance missing".to_string());
@@ -829,7 +838,12 @@ impl Player {
             return Err("the stack should contain at least one army unit".to_string());
         }
 
-        if land_movement
+        if game
+            .map
+            .tiles
+            .get(&starting)
+            .expect("starting tile should exist")
+            .is_land()
             && self
                 .get_units(destination)
                 .iter()

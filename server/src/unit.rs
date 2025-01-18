@@ -9,6 +9,7 @@ use std::{
 use MovementRestriction::{AllMovement, Attack};
 use UnitType::*;
 
+use crate::explore::is_any_ship;
 use crate::game::CurrentMove;
 use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
 
@@ -414,23 +415,13 @@ pub(crate) fn get_current_move(
             source: starting,
             destination,
         }
-    } else if land_movement(game, destination) {
-        CurrentMove::None
-    } else {
+    } else if is_any_ship(game, game.current_player_index, units) {
         CurrentMove::Fleet {
             units: units.iter().sorted().copied().collect(),
         }
+    } else {
+        CurrentMove::None
     }
-}
-
-pub(crate) fn land_movement(game: &Game, destination: Position) -> bool {
-    !matches!(
-        game.map
-            .tiles
-            .get(&destination)
-            .expect("destination should exist"),
-        Water
-    )
 }
 
 #[cfg(test)]

@@ -971,12 +971,44 @@ fn test_ship_disembark() {
 
 #[test]
 fn test_ship_disembark_capture_empty_city() {
-    // undo capture empty city is broken
     test_action(
         "ship_disembark_capture_empty_city",
         move_action(vec![1, 2], Position::from_offset("B2")),
         0,
         false,
+        false,
+    );
+}
+
+#[test]
+fn test_ship_explore() {
+    test_action(
+        "ship_explore",
+        move_action(vec![1], Position::from_offset("C5")),
+        1,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_ship_explore_teleport() {
+    test_action(
+        "ship_explore_teleport",
+        move_action(vec![1], Position::from_offset("C4")),
+        1,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_ship_explore_move_not_possible() {
+    test_action(
+        "ship_explore_move_not_possible",
+        Action::ExploreResolution(3),
+        1,
+        true,
         false,
     );
 }
