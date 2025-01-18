@@ -1,5 +1,7 @@
+use crate::content::advances::NAVIGATION;
 use crate::game::{ExploreResolutionState, Game, GameState, MoveState, UndoContext};
 use crate::map::{Block, BlockPosition, Map, Rotation, Terrain, UnexploredBlock};
+use crate::player::Player;
 use crate::position::Position;
 use itertools::Itertools;
 
@@ -304,4 +306,90 @@ pub(crate) fn undo_explore_resolution(game: &mut Game, player_index: usize) {
 
     game.undo_move_units(player_index, s.units.clone(), s.start);
     game.state = GameState::ExploreResolution(s);
+}
+
+#[must_use]
+pub fn can_reach(
+    starting: Position,
+    destination: Position,
+    player: &Player,
+    units: &[u32],
+    map: &Map,
+) -> bool {
+    starting.is_neighbor(destination)
+        || can_reach_with_navigation(player, units, map).contains(&destination)
+}
+
+#[must_use]
+fn can_reach_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<Position> {
+    if !player.has_advance(NAVIGATION) {
+        return vec![];
+    }
+    let ship = units
+        .iter()
+        .filter_map(|&id| {
+            let unit = player.get_unit(id).expect("unit not found");
+            if unit.unit_type.is_ship() {
+                Some(unit.position)
+            } else {
+                None
+            }
+        })
+        .next();
+    if let Some(ship) = ship {
+        let mut destination = vec![];
+        for outside in ship
+            .neighbors()
+            .into_iter()
+            .filter(|n| !map.tiles.contains_key(n))
+        {
+            for start in outside.neighbors() {
+                if let Some(Terrain::Water) = map.tiles.get(&start) {
+                    destination.push(start);
+                } else if start.is_neighbor(ship) {
+                    if let Some(d) = can_navigate_to_ocean(start, map, vec![ship]) {
+                        destination.push(d);
+                    }
+                };
+            }
+        }
+        return destination;
+    }
+    vec![]
+}
+
+#[must_use]
+fn can_navigate_to_ocean(
+    start: Position,
+    map: &Map,
+    mut visited: Vec<Position>,
+) -> Option<Position> {
+    // start is a land tile at the edge of the map
+    if visited.contains(&start) {
+        return None;
+    }
+
+    visited.push(start);
+
+    let option: Vec<Position> = start
+        .neighbors()
+        .iter()
+        .filter(|n| {
+            !visited.contains(n)
+                && map.tiles.contains_key(n)
+                && n.neighbors().iter().any(|n| !map.tiles.contains_key(n))
+        })
+        .copied()
+        .collect();
+
+    for n in &option {
+        if map.tiles.get(n).is_some_and(Terrain::is_water) {
+            return Some(*n);
+        }
+    }
+
+    if option.is_empty() {
+        return None;
+    }
+    can_navigate_to_ocean(option[0], map, visited)
 }

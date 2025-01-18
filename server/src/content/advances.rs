@@ -8,6 +8,9 @@ use crate::{
     resource_pile::ResourcePile,
 };
 
+//names of advances that need special handling
+pub const NAVIGATION: &str = "Navigation";
+
 #[must_use]
 pub fn get_all() -> Vec<Advance> {
     get_groups()
@@ -86,6 +89,11 @@ fn seafaring() -> Vec<Advance> {
             .add_collect_option(Water, ResourcePile::food(1))
             .with_advance_bonus(MoodToken)
             .build(),
+        Advance::builder(
+            NAVIGATION,
+            "Ships may leave the map and return at the next sea space",
+        )
+        .build(),
     ]
 }
 

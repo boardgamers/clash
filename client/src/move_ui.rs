@@ -51,17 +51,16 @@ pub fn possible_destinations(
 ) -> Vec<MoveDestination> {
     let player = game.get_player(player_index);
 
-    let mut res = start
-        .neighbors()
-        .into_iter()
-        .filter(|dest| {
-            game.map.tiles.contains_key(dest)
-                && player
+    let mut res =
+        game.map.tiles.keys().copied()
+            .filter(|dest| {
+                player
                     .can_move_units(game, units, start, *dest, None)
                     .is_ok()
-        })
-        .map(MoveDestination::Tile)
-        .collect::<Vec<_>>();
+            })
+            .map(MoveDestination::Tile)
+            .collect::<Vec<_>>();
+        
     player.units.iter().for_each(|u| {
         if u.unit_type.is_ship()
             && player

@@ -33,6 +33,7 @@ use std::{
     collections::{HashMap, HashSet},
     mem,
 };
+use crate::explore::can_reach;
 
 pub struct Player {
     name: Option<String>,
@@ -765,7 +766,7 @@ impl Player {
             return Err("no units to move".to_string());
         }
 
-        if !starting.is_neighbor(destination) {
+        if !can_reach(starting, destination, self, units, &game.map) {
             return Err("the destination should be adjacent to the starting position".to_string());
         }
         if matches!(current_move, CurrentMove::None)
