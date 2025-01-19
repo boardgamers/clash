@@ -411,9 +411,9 @@ impl ActionType {
     }
 }
 
-/// 
+///
 /// # Panics
-/// 
+///
 /// Panics if the action is illegal
 #[must_use]
 pub fn get_total_collection(
