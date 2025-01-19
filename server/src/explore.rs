@@ -1,7 +1,6 @@
 use crate::content::advances::NAVIGATION;
 use crate::game::{CurrentMove, ExploreResolutionState, Game, GameState, MoveState, UndoContext};
 use crate::map::{Block, BlockPosition, Map, Rotation, Terrain, UnexploredBlock};
-use crate::player::Player;
 use crate::position::Position;
 use itertools::Itertools;
 
@@ -307,70 +306,4 @@ pub(crate) fn undo_explore_resolution(game: &mut Game, player_index: usize) {
 
     game.undo_move_units(player_index, s.units.clone(), s.start);
     game.state = GameState::ExploreResolution(s);
-}
-
-#[must_use]
-pub fn reachable_positions(
-    starting: Position,
-    player: &Player,
-    units: &[u32],
-    map: &Map,
-) -> Vec<Position> {
-    let mut base: Vec<_> = starting.neighbors();
-    if player.has_advance(NAVIGATION) {
-        base.extend(reachable_with_navigation(player, units, map));
-    }
-    base
-}
-
-#[must_use]
-fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<Position> {
-    if !player.has_advance(NAVIGATION) {
-        return vec![];
-    }
-    let ship = units.iter().find_map(|&id| {
-        let unit = player.get_unit(id).expect("unit not found");
-        if unit.unit_type.is_ship() {
-            Some(unit.position)
-        } else {
-            None
-        }
-    });
-    if let Some(ship) = ship {
-        let start = ship.neighbors().into_iter().find(|n| map.is_outside(*n));
-        if let Some(start) = start {
-            let mut perimeter = vec![ship];
-
-            add_perimeter(map, start, &mut perimeter);
-            let can_navigate =
-                |p: &Position| *p != ship && (map.is_water(*p) || map.is_unexplored(*p));
-            let first = perimeter.iter().copied().find(can_navigate);
-            let last = perimeter.iter().copied().rfind(can_navigate);
-
-            return vec![first, last].into_iter().flatten().collect();
-        }
-    }
-    vec![]
-}
-
-fn add_perimeter(map: &Map, start: Position, perimeter: &mut Vec<Position>) {
-    if perimeter.contains(&start) {
-        return;
-    }
-    perimeter.push(start);
-
-    let option = &start
-        .neighbors()
-        .into_iter()
-        .filter(|n| {
-            !perimeter.contains(n)
-                && (map.is_inside(*n) && n.neighbors().iter().any(|n| map.is_outside(*n)))
-        })
-        // take with most outside neighbors first
-        .sorted_by_key(|n| n.neighbors().iter().filter(|n| map.is_inside(**n)).count())
-        .next();
-
-    if let Some(n) = option {
-        add_perimeter(map, *n, perimeter);
-    }
 }

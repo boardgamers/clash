@@ -1,37 +1,7 @@
 {
   "state": {
-    "ExploreResolution": {
-      "movement_actions_left": 2,
-      "moved_units": [
-        1
-      ],
-      "current_move": {
-        "Fleet": {
-          "units": [
-            1
-          ]
-        }
-      },
-      "block": {
-        "position": {
-          "top_tile": "F4",
-          "rotation": 0
-        },
-        "block": {
-          "terrain": [
-            "Fertile",
-            "Mountain",
-            "Forest",
-            "Fertile"
-          ]
-        }
-      },
-      "units": [
-        1
-      ],
-      "start": "D5",
-      "destination": "E5",
-      "ship_can_teleport": false
+    "Movement": {
+      "movement_actions_left": 3
     }
   },
   "players": [
@@ -39,10 +9,11 @@
       "name": null,
       "id": 0,
       "resources": {
-        "food": 1,
-        "wood": 2,
-        "gold": 1,
-        "mood_tokens": 2
+        "food": 2,
+        "wood": 1,
+        "ore": 1,
+        "ideas": 1,
+        "mood_tokens": 1
       },
       "resource_limit": {
         "food": 2,
@@ -59,45 +30,33 @@
           "angry_activation": false,
           "player_index": 0,
           "position": "D1"
-        },
-        {
-          "city_pieces": {
-            "port": 0
-          },
-          "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
-          "player_index": 0,
-          "position": "C3",
-          "port_position": "B3"
         }
       ],
-      "units": [],
+      "units": [
+        {
+          "player_index": 0,
+          "position": "D3",
+          "unit_type": "Settler",
+          "movement_restriction": "None",
+          "id": 0
+        }
+      ],
       "civilization": "test0",
       "active_leader": null,
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Fishing",
-        "Irrigation",
-        "Mining"
+        "Mining",
+        "Philosophy"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 1,
+      "game_event_tokens": 2,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
       "collect_options": [
-        [
-          "Barren",
-          [
-            {
-              "food": 1
-            }
-          ]
-        ],
         [
           "Mountain",
           [
@@ -119,14 +78,6 @@
           [
             {
               "wood": 1
-            }
-          ]
-        ],
-        [
-          "Water",
-          [
-            {
-              "food": 1
             }
           ]
         ]
@@ -137,11 +88,13 @@
       "name": null,
       "id": 1,
       "resources": {
-        "food": 3,
-        "mood_tokens": 3
+        "food": 1,
+        "wood": 1,
+        "ore": 1,
+        "mood_tokens": 1
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -150,30 +103,79 @@
       "cities": [
         {
           "city_pieces": {},
-          "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
-          "player_index": 1,
-          "position": "D8"
-        },
-        {
-          "city_pieces": {
-            "port": 1
-          },
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
           "player_index": 1,
-          "position": "E6",
-          "port_position": "D5"
+          "position": "D8"
         }
       ],
       "units": [
         {
           "player_index": 1,
-          "position": "D5",
-          "unit_type": "Ship",
+          "position": "D8",
+          "unit_type": "Infantry",
+          "movement_restriction": "None",
+          "id": 0
+        },
+        {
+          "player_index": 1,
+          "position": "D8",
+          "unit_type": "Infantry",
+          "movement_restriction": "None",
           "id": 1
+        },
+        {
+          "player_index": 1,
+          "position": "D8",
+          "unit_type": "Infantry",
+          "movement_restriction": "None",
+          "id": 2
+        },
+        {
+          "player_index": 1,
+          "position": "C8",
+          "unit_type": "Infantry",
+          "movement_restriction": {
+            "AllMovement": 0
+          },
+          "id": 3
+        },
+        {
+          "player_index": 1,
+          "position": "C8",
+          "unit_type": "Infantry",
+          "movement_restriction": {
+            "AllMovement": 0
+          },
+          "id": 4
+        },
+        {
+          "player_index": 1,
+          "position": "E8",
+          "unit_type": "Infantry",
+          "movement_restriction": {
+            "AllMovement": 0
+          },
+          "id": 5
+        },
+        {
+          "player_index": 1,
+          "position": "E8",
+          "unit_type": "Infantry",
+          "movement_restriction": {
+            "AllMovement": 0
+          },
+          "id": 6
+        },
+        {
+          "player_index": 1,
+          "position": "E7",
+          "unit_type": "Ship",
+          "movement_restriction": {
+            "AllMovement": 0
+          },
+          "id": 7
         }
       ],
       "civilization": "test1",
@@ -181,27 +183,19 @@
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Fishing",
-        "Irrigation",
         "Mining",
-        "Storage"
+        "Philosophy",
+        "Roads",
+        "Tactics"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 3,
+      "game_event_tokens": 1,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
       "collect_options": [
-        [
-          "Barren",
-          [
-            {
-              "food": 1
-            }
-          ]
-        ],
         [
           "Mountain",
           [
@@ -225,24 +219,16 @@
               "wood": 1
             }
           ]
-        ],
-        [
-          "Water",
-          [
-            {
-              "food": 1
-            }
-          ]
         ]
       ],
-      "next_unit_id": 2
+      "next_unit_id": 1
     }
   ],
   "map": {
     "tiles": [
       [
         "A3",
-        "Fertile"
+        "Unexplored"
       ],
       [
         "A5",
@@ -250,15 +236,15 @@
       ],
       [
         "A7",
-        "Unexplored"
+        "Water"
       ],
       [
         "B2",
-        "Barren"
+        "Unexplored"
       ],
       [
         "B3",
-        "Water"
+        "Unexplored"
       ],
       [
         "B4",
@@ -270,11 +256,11 @@
       ],
       [
         "B6",
-        "Unexplored"
+        "Fertile"
       ],
       [
         "B7",
-        "Unexplored"
+        "Barren"
       ],
       [
         "C2",
@@ -282,11 +268,11 @@
       ],
       [
         "C3",
-        "Fertile"
+        "Unexplored"
       ],
       [
         "C4",
-        "Unexplored"
+        "Forest"
       ],
       [
         "C5",
@@ -294,11 +280,11 @@
       ],
       [
         "C6",
-        "Mountain"
+        "Unexplored"
       ],
       [
         "C7",
-        "Unexplored"
+        "Fertile"
       ],
       [
         "C8",
@@ -314,19 +300,19 @@
       ],
       [
         "D3",
-        "Unexplored"
+        "Fertile"
       ],
       [
         "D4",
-        "Unexplored"
-      ],
-      [
-        "D5",
         "Water"
       ],
       [
+        "D5",
+        "Unexplored"
+      ],
+      [
         "D6",
-        "Forest"
+        "Unexplored"
       ],
       [
         "D7",
@@ -346,7 +332,7 @@
       ],
       [
         "E4",
-        "Unexplored"
+        "Barren"
       ],
       [
         "E5",
@@ -354,11 +340,11 @@
       ],
       [
         "E6",
-        "Mountain"
+        "Unexplored"
       ],
       [
         "E7",
-        "Mountain"
+        "Water"
       ],
       [
         "E8",
@@ -382,11 +368,11 @@
       ],
       [
         "F6",
-        "Fertile"
+        "Water"
       ],
       [
         "F7",
-        "Water"
+        "Fertile"
       ],
       [
         "G3",
@@ -398,10 +384,24 @@
       ],
       [
         "G7",
-        "Water"
+        "Mountain"
       ]
     ],
     "unexplored_blocks": [
+      {
+        "position": {
+          "top_tile": "B2",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Fertile",
+            "Fertile",
+            "Barren"
+          ]
+        }
+      },
       {
         "position": {
           "top_tile": "B4",
@@ -418,29 +418,15 @@
       },
       {
         "position": {
-          "top_tile": "B6",
-          "rotation": 0
-        },
-        "block": {
-          "terrain": [
-            "Fertile",
-            "Water",
-            "Fertile",
-            "Barren"
-          ]
-        }
-      },
-      {
-        "position": {
-          "top_tile": "D3",
+          "top_tile": "D5",
           "rotation": 0
         },
         "block": {
           "terrain": [
             "Water",
-            "Barren",
-            "Forest",
-            "Fertile"
+            "Mountain",
+            "Mountain",
+            "Forest"
           ]
         }
       },
@@ -480,7 +466,7 @@
     {
       "Playing": {
         "Advance": {
-          "advance": "Fishing",
+          "advance": "Roads",
           "payment": {
             "food": 2
           }
@@ -504,30 +490,6 @@
       "Movement": "Stop"
     },
     {
-      "Playing": {
-        "Collect": {
-          "city_position": "D8",
-          "collections": [
-            [
-              "E8",
-              {
-                "wood": 1
-              }
-            ],
-            [
-              "D8",
-              {
-                "food": 1
-              }
-            ]
-          ]
-        }
-      }
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
       "Playing": "MoveUnits"
     },
     {
@@ -536,7 +498,7 @@
           "units": [
             0
           ],
-          "destination": "C2"
+          "destination": "F7"
         }
       }
     },
@@ -544,124 +506,17 @@
       "Movement": "Stop"
     },
     {
+      "Playing": "EndTurn"
+    },
+    {
       "Playing": {
         "Collect": {
           "city_position": "D1",
           "collections": [
-            [
-              "D1",
-              {
-                "food": 1
-              }
-            ],
             [
               "C2",
               {
                 "wood": 1
-              }
-            ]
-          ]
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Fishing",
-          "payment": {
-            "food": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "MoveUnits"
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0
-          ],
-          "destination": "E7"
-        }
-      }
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Playing": {
-        "Collect": {
-          "city_position": "D8",
-          "collections": [
-            [
-              "D8",
-              {
-                "food": 1
-              }
-            ],
-            [
-              "C8",
-              {
-                "ore": 1
-              }
-            ]
-          ]
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Irrigation",
-          "payment": {
-            "food": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "MoveUnits"
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0
-          ],
-          "destination": "C3"
-        }
-      }
-    },
-    {
-      "ExploreResolution": 3
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Playing": {
-        "FoundCity": {
-          "settler": 0
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Collect": {
-          "city_position": "D1",
-          "collections": [
-            [
-              "D1",
-              {
-                "food": 1
               }
             ],
             [
@@ -675,6 +530,92 @@
       }
     },
     {
+      "Playing": "MoveUnits"
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            0
+          ],
+          "destination": "D2"
+        }
+      }
+    },
+    {
+      "Movement": "Stop"
+    },
+    {
+      "Playing": "MoveUnits"
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            0
+          ],
+          "destination": "D3"
+        }
+      }
+    },
+    {
+      "Movement": "Stop"
+    },
+    {
+      "Playing": "EndTurn"
+    },
+    {
+      "Playing": {
+        "Collect": {
+          "city_position": "D8",
+          "collections": [
+            [
+              "C8",
+              {
+                "ore": 1
+              }
+            ],
+            [
+              "E8",
+              {
+                "wood": 1
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "Playing": "MoveUnits"
+    },
+    {
+      "Movement": "Stop"
+    },
+    {
+      "Playing": {
+        "Collect": {
+          "city_position": "D8",
+          "collections": [
+            [
+              "E8",
+              {
+                "wood": 1
+              }
+            ],
+            [
+              "C8",
+              {
+                "ore": 1
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "Playing": "EndTurn"
+    },
+    {
       "Playing": "EndTurn"
     },
     {
@@ -686,22 +627,12 @@
           "units": [
             0
           ],
-          "destination": "E6"
+          "destination": "D8"
         }
       }
-    },
-    {
-      "ExploreResolution": 0
     },
     {
       "Movement": "Stop"
-    },
-    {
-      "Playing": {
-        "FoundCity": {
-          "settler": 0
-        }
-      }
     },
     {
       "Playing": {
@@ -709,15 +640,9 @@
           "city_position": "D8",
           "collections": [
             [
-              "D8",
+              "E8",
               {
-                "food": 1
-              }
-            ],
-            [
-              "D7",
-              {
-                "food": 1
+                "wood": 1
               }
             ]
           ]
@@ -728,41 +653,16 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": {
-        "Construct": {
-          "city_position": "C3",
-          "city_piece": "Port",
-          "payment": {
-            "food": 1,
-            "wood": 1,
-            "ore": 1
-          },
-          "port_position": "B3",
-          "temple_bonus": null
-        }
-      }
-    },
-    {
       "Playing": "EndTurn"
     },
     {
       "StatusPhase": {
-        "FreeAdvance": "Storage"
+        "FreeAdvance": "Philosophy"
       }
     },
     {
       "StatusPhase": {
-        "FreeAdvance": "Irrigation"
-      }
-    },
-    {
-      "StatusPhase": {
-        "RazeSize1City": "None"
-      }
-    },
-    {
-      "StatusPhase": {
-        "RazeSize1City": "None"
+        "FreeAdvance": "Philosophy"
       }
     },
     {
@@ -772,34 +672,13 @@
     },
     {
       "Playing": {
-        "Construct": {
-          "city_position": "E6",
-          "city_piece": "Port",
-          "payment": {
-            "food": 1,
-            "wood": 1,
-            "ore": 1
-          },
-          "port_position": "D5",
-          "temple_bonus": null
-        }
-      }
-    },
-    {
-      "Playing": {
         "Collect": {
           "city_position": "D8",
           "collections": [
             [
-              "E8",
+              "C8",
               {
-                "wood": 1
-              }
-            ],
-            [
-              "D8",
-              {
-                "food": 1
+                "ore": 1
               }
             ]
           ]
@@ -807,88 +686,36 @@
       }
     },
     {
-      "Playing": "EndTurn"
+      "Playing": "MoveUnits"
     },
     {
-      "Playing": {
-        "Collect": {
-          "city_position": "D1",
-          "collections": [
-            [
-              "C2",
-              {
-                "wood": 1
-              }
-            ],
-            [
-              "D2",
-              {
-                "food": 1
-              }
-            ]
-          ]
-        }
-      }
+      "Movement": "Stop"
     },
     {
-      "Playing": {
-        "Collect": {
-          "city_position": "C3",
-          "collections": [
-            [
-              "C2",
-              {
-                "wood": 1
-              }
-            ],
-            [
-              "B3",
-              {
-                "gold": 1
-              }
-            ]
-          ]
-        }
-      }
+      "Playing": "MoveUnits"
     },
     {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": {
-        "Collect": {
-          "city_position": "D8",
-          "collections": [
-            [
-              "E8",
-              {
-                "wood": 1
-              }
-            ],
-            [
-              "D8",
-              {
-                "food": 1
-              }
-            ]
-          ]
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Recruit": {
+      "Movement": {
+        "Move": {
           "units": [
-            "Ship"
+            4
           ],
-          "city_position": "E6",
-          "payment": {
-            "wood": 2
-          },
-          "leader_index": null,
-          "replaced_units": []
+          "destination": "C7"
         }
       }
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            3
+          ],
+          "destination": "D7"
+        }
+      }
+    },
+    {
+      "Movement": "Stop"
     },
     {
       "Playing": "EndTurn"
@@ -903,95 +730,100 @@
       "Movement": {
         "Move": {
           "units": [
-            1
+            3
           ],
-          "destination": "E5"
+          "destination": "C8"
         }
       }
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            4
+          ],
+          "destination": "C8"
+        }
+      }
+    },
+    {
+      "Movement": "Stop"
+    },
+    {
+      "Playing": "MoveUnits"
     }
   ],
-  "action_log_index": 51,
+  "action_log_index": 45,
   "log": [
     "The game has started",
     "Age 1 has started",
     "Round 1/3",
-    "Player2 paid 2 food to get the Fishing advance",
+    "Player2 paid 2 food to get the Roads advance",
     "Player2 used a move units action",
     "\tPlayer2 marched 1 settler from D8 to E8",
     "\tPlayer2 ended the movement action",
-    "Player2 collects 1 wood and 1 food in the city at D8",
+    "Player2 used a move units action",
+    "\tPlayer2 marched 1 settler from E8 to F7. Explored tiles E7=Water, F6=Water, F7=Fertile, G7=Mountain",
+    "\tPlayer2 ended the movement action",
     "Player2 ended his turn",
     "It's Player1's turn",
+    "Player1 collects 1 wood and 1 ore in the city at D1",
     "Player1 used a move units action",
-    "\tPlayer1 marched 1 settler from D1 to C2",
+    "\tPlayer1 marched 1 settler from D1 to D2",
     "\tPlayer1 ended the movement action",
-    "Player1 collects 1 food and 1 wood in the city at D1",
-    "Player1 paid 2 food to get the Fishing advance",
+    "Player1 used a move units action",
+    "\tPlayer1 marched 1 settler from D2 to D3. Explored tiles C4=Forest, D3=Fertile, D4=Water, E4=Barren",
+    "\tPlayer1 ended the movement action",
     "Player1 ended his turn",
     "It's Player2's turn",
     "Round 2/3",
+    "Player2 collects 1 ore and 1 wood in the city at D8",
     "Player2 used a move units action",
-    "\tPlayer2 marched 1 settler from E8 to E7. Explored tiles E7=Mountain, F6=Fertile, F7=Water, G7=Water",
     "\tPlayer2 ended the movement action",
-    "Player2 collects 1 food and 1 ore in the city at D8",
-    "Player2 paid 2 food to get the Irrigation advance",
+    "Player2 collects 1 wood and 1 ore in the city at D8 making it Neutral",
     "Player2 ended his turn",
-    "It's Player1's turn",
-    "Player1 used a move units action",
-    "\tPlayer1 marched 1 settler from C2 to C3",
-    "Player1 chose the orientation of the newly explored tiles. Explored tiles A3=Fertile, B2=Barren, B3=Water, C3=Fertile",
-    "\tPlayer1 ended the movement action",
-    "Player1 founded a city at C3",
-    "Player1 collects 1 food and 1 ore in the city at D1",
-    "Player1 ended his turn",
-    "It's Player2's turn",
-    "Round 3/3",
-    "Player2 used a move units action",
-    "\tPlayer2 marched 1 settler from E7 to E6",
-    "Player2 chose the orientation of the newly explored tiles. Explored tiles C6=Mountain, D5=Water, D6=Forest, E6=Mountain",
-    "\tPlayer2 ended the movement action",
-    "Player2 founded a city at E6",
-    "Player2 collects 1 food and 1 food for a total of 2 food in the city at D8",
-    "Player2 ended his turn",
-    "It's Player1's turn",
-    "Player1 paid 1 food, 1 wood and 1 ore to construct a Port in the city at C3",
-    "Player1 ended his turn with 2 actions left",
-    "It's Player2's turn",
-    "The game has entered the 1st status phase",
-    "Player2 advanced Storage for free",
-    "It's Player1's turn",
-    "Player1 advanced Irrigation for free",
-    "It's Player2's turn",
-    "Player2 did not rase a city",
-    "It's Player1's turn",
-    "Player1 did not rase a city",
-    "It's Player2's turn",
-    "Player2 choose  to remain the staring player",
-    "Age 2 has started",
-    "Round 1/3",
-    "Player2 paid 1 food, 1 wood and 1 ore to construct a Port in the city at E6",
-    "Player2 collects 1 wood and 1 food in the city at D8",
-    "Player2 ended his turn with 1 actions left",
-    "It's Player1's turn",
-    "Player1 collects 1 wood and 1 food in the city at D1",
-    "Player1 collects 1 wood and 1 gold in the city at C3",
-    "Player1 ended his turn with 1 actions left",
-    "It's Player2's turn",
-    "Round 2/3",
-    "Player2 collects 1 wood and 1 food in the city at D8",
-    "Player2 paid 2 wood to recruit 1 ship in the city at E6",
-    "Player2 ended his turn with 1 actions left",
     "It's Player1's turn",
     "Player1 ended his turn with 3 actions left",
     "It's Player2's turn",
     "Round 3/3",
     "Player2 used a move units action",
-    "\tPlayer2 sailed 1 ship from D5 to E5"
+    "\tPlayer2 marched 1 settler from F7 to D8 on roads",
+    "\tPlayer2 ended the movement action",
+    "Player2 collects 1 wood in the city at D8",
+    "Player2 ended his turn with 1 actions left",
+    "It's Player1's turn",
+    "Player1 ended his turn with 3 actions left",
+    "It's Player2's turn",
+    "The game has entered the 1st status phase",
+    "Player2 advanced Philosophy for free",
+    "It's Player1's turn",
+    "Player1 advanced Philosophy for free",
+    "It's Player2's turn",
+    "Player2 choose  to remain the staring player",
+    "Age 2 has started",
+    "Round 1/3",
+    "Player2 collects 1 ore in the city at D8",
+    "Player2 used a move units action",
+    "\tPlayer2 ended the movement action",
+    "Player2 used a move units action",
+    "\tPlayer2 marched 1 infantry from C8 to C7. Explored tiles A7=Water, B6=Fertile, B7=Barren, C7=Fertile",
+    "\tPlayer2 marched 1 infantry from C8 to D7",
+    "\tPlayer2 ended the movement action",
+    "Player2 ended his turn",
+    "It's Player1's turn",
+    "Player1 ended his turn with 3 actions left",
+    "It's Player2's turn",
+    "Round 2/3",
+    "Player2 used a move units action",
+    "\tPlayer2 marched 1 infantry from D7 to C8",
+    "\tPlayer2 marched 1 infantry from C7 to C8",
+    "\tPlayer2 ended the movement action",
+    "Player2 used a move units action"
   ],
-  "undo_limit": 51,
-  "actions_left": 2,
+  "undo_limit": 40,
+  "actions_left": 1,
   "successful_cultural_influence": false,
-  "round": 3,
+  "round": 2,
   "age": 2,
   "messages": [
     "The game has started"
@@ -1022,6 +854,14 @@
     },
     {
       "Movement": {
+        "movement_actions_left": 2,
+        "moved_units": [
+          0
+        ]
+      }
+    },
+    {
+      "Movement": {
         "starting_position": "D1",
         "movement_actions_left": 3
       }
@@ -1036,44 +876,25 @@
     },
     {
       "Movement": {
-        "starting_position": "E8",
+        "movement_actions_left": 2,
+        "moved_units": [
+          0
+        ]
+      }
+    },
+    {
+      "Movement": {
         "movement_actions_left": 3
       }
     },
     {
       "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "ExploreResolution": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ],
-        "block": {
-          "position": {
-            "top_tile": "B2",
-            "rotation": 0
-          },
-          "block": {
-            "terrain": [
-              "Water",
-              "Fertile",
-              "Fertile",
-              "Barren"
-            ]
-          }
-        },
-        "units": [
-          0
-        ],
-        "start": "C2",
-        "destination": "C3",
-        "ship_can_teleport": false
+        "starting_position": "F7",
+        "movement_actions_left": 3,
+        "cost": {
+          "wood": 1,
+          "ore": 1
+        }
       }
     },
     {
@@ -1085,63 +906,51 @@
       }
     },
     {
-      "FoundCity": {
-        "settler": {
-          "player_index": 0,
-          "position": "C3",
-          "unit_type": "Settler",
-          "id": 0
-        }
-      }
-    },
-    {
-      "ExploreResolution": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ],
-        "block": {
-          "position": {
-            "top_tile": "D5",
-            "rotation": 0
-          },
-          "block": {
-            "terrain": [
-              "Water",
-              "Mountain",
-              "Mountain",
-              "Forest"
-            ]
-          }
-        },
-        "units": [
-          0
-        ],
-        "start": "E7",
-        "destination": "E6",
-        "ship_can_teleport": false
+      "Movement": {
+        "movement_actions_left": 3
       }
     },
     {
       "Movement": {
+        "starting_position": "C8",
         "movement_actions_left": 2,
         "moved_units": [
-          0
+          4
         ]
       }
     },
     {
-      "FoundCity": {
-        "settler": {
-          "player_index": 1,
-          "position": "E6",
-          "unit_type": "Settler",
-          "id": 0
-        }
+      "Movement": {
+        "movement_actions_left": 1,
+        "moved_units": [
+          4,
+          3
+        ]
       }
     },
     {
-      "Recruit": {}
+      "Movement": {
+        "starting_position": "D7",
+        "movement_actions_left": 3
+      }
+    },
+    {
+      "Movement": {
+        "starting_position": "C7",
+        "movement_actions_left": 2,
+        "moved_units": [
+          3
+        ]
+      }
+    },
+    {
+      "Movement": {
+        "movement_actions_left": 1,
+        "moved_units": [
+          3,
+          4
+        ]
+      }
     }
   ]
 }

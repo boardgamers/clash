@@ -55,14 +55,14 @@ pub fn possible_destinations(
         .move_units_destinations(game, units, start, None)
         .unwrap_or_default()
         .into_iter()
-        .map(MoveDestination::Tile)
+        .map(|route| MoveDestination::Tile(route.destination))
         .collect::<Vec<_>>();
 
     player.units.iter().for_each(|u| {
         if u.unit_type.is_ship()
             && player
                 .move_units_destinations(game, units, start, Some(u.id))
-                .is_ok_and(|v| v.contains(&u.position))
+                .is_ok_and(|v| v.iter().any(|route| route.destination == u.position))
         {
             res.push(MoveDestination::Carrier(u.id));
         }
@@ -101,25 +101,51 @@ pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Ve
         // first need to deselect units
         StateUpdate::None
     } else {
-        let mut new = s.clone();
-        let unit = click_unit(rc, pos, mouse_pos, p, true);
-        unit.map_or(StateUpdate::None, |unit_id| {
-            let is_transported = p.get_unit(unit_id).unwrap().is_transported();
-            new.start = Some(pos);
-            if new.units.is_empty() {
-                new.units = movable_units(pos, game, p, |u| u.is_transported() == is_transported);
-            } else {
-                unit_selection_clicked(unit_id, &mut new.units);
-            }
-            if new.units.is_empty() {
-                new.destinations.clear();
-                new.start = None;
-            } else {
-                new.destinations = possible_destinations(game, pos, new.player_index, &new.units);
-            }
-            StateUpdate::OpenDialog(ActiveDialog::MoveUnits(new))
-        })
+        click_unit(rc, pos, mouse_pos, p, true).map_or_else(
+            || tile_clicked(pos, s, game, p),
+            |unit_id| unit_clicked(pos, s, game, p, unit_id),
+        )
     }
+}
+
+fn unit_clicked(
+    pos: Position,
+    s: &MoveSelection,
+    game: &Game,
+    p: &Player,
+    unit_id: u32,
+) -> StateUpdate {
+    let mut new = s.clone();
+    new.start = Some(pos);
+    let is_transported = p.get_unit(unit_id).unwrap().is_transported();
+    if new.units.is_empty() {
+        new.units = movable_units(pos, game, p, |u| u.is_transported() == is_transported);
+    } else {
+        unit_selection_clicked(unit_id, &mut new.units);
+    }
+
+    unit_selection_changed(pos, game, new)
+}
+
+fn tile_clicked(pos: Position, s: &MoveSelection, game: &Game, p: &Player) -> StateUpdate {
+    let mut new = s.clone();
+    new.start = Some(pos);
+    if new.units.is_empty() {
+        new.units = movable_units(pos, game, p, |u| !u.is_transported());
+        unit_selection_changed(pos, game, new)
+    } else {
+        StateUpdate::None
+    }
+}
+
+fn unit_selection_changed(pos: Position, game: &Game, mut new: MoveSelection) -> StateUpdate {
+    if new.units.is_empty() {
+        new.destinations.clear();
+        new.start = None;
+    } else {
+        new.destinations = possible_destinations(game, pos, new.player_index, &new.units);
+    }
+    StateUpdate::OpenDialog(ActiveDialog::MoveUnits(new))
 }
 
 pub fn movable_units(
@@ -130,7 +156,11 @@ pub fn movable_units(
 ) -> Vec<u32> {
     p.units
         .iter()
-        .filter(|u| pred(u) && !possible_destinations(game, pos, p.index, &[u.id]).is_empty())
+        .filter(|u| {
+            u.position == pos
+                && pred(u)
+                && !possible_destinations(game, pos, p.index, &[u.id]).is_empty()
+        })
         .map(|u| u.id)
         .collect()
 }

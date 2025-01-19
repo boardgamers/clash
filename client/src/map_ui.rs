@@ -1,4 +1,4 @@
-use macroquad::math::vec2;
+use macroquad::math::{f32, vec2};
 use macroquad::prelude::*;
 use server::action::Action;
 use server::combat::Combat;
@@ -46,9 +46,9 @@ pub fn terrain_name(t: &Terrain) -> &'static str {
 
 pub fn draw_map(rc: &RenderContext) -> StateUpdate {
     let game = rc.game;
-    let overlay = get_overlay(rc);
+    let overlay_terrain = get_overlay(rc);
     for (pos, t) in &game.map.tiles {
-        let terrain = overlay.get(pos).unwrap_or(t);
+        let terrain = overlay_terrain.get(pos).unwrap_or(t);
         let (base, exhausted) = match terrain {
             Terrain::Exhausted(e) => (e.as_ref(), true),
             _ => (terrain, false),
@@ -57,7 +57,7 @@ pub fn draw_map(rc: &RenderContext) -> StateUpdate {
         hex_ui::draw_hex(
             *pos,
             terrain_font_color(terrain),
-            alpha(rc, *pos),
+            overlay_color(rc, *pos),
             rc.assets().terrain.get(base),
             exhausted,
             rc,
@@ -129,25 +129,25 @@ pub fn pan_and_zoom(state: &mut State) {
     state.pan_map = pan_map;
 }
 
-fn alpha(rc: &RenderContext, pos: Position) -> f32 {
+fn overlay_color(rc: &RenderContext, pos: Position) -> Color {
     let game = rc.game;
     let state = &rc.state;
-    let alpha = match &state.active_dialog {
+    match &state.active_dialog {
         ActiveDialog::MoveUnits(s) => {
             if let Some(start) = s.start {
                 if start == pos {
-                    0.5
+                    alpha_overlay(0.5)
                 } else if s
                     .destinations
                     .iter()
                     .any(|d| matches!(d, MoveDestination::Tile(p) if *p == pos))
                 {
-                    0.8
+                    with_alpha(GREEN, 0.5)
                 } else {
-                    0.
+                    alpha_overlay(0.)
                 }
             } else {
-                0.
+                alpha_overlay(0.)
             }
         }
         ActiveDialog::RazeSize1City => {
@@ -160,11 +160,20 @@ fn alpha(rc: &RenderContext, pos: Position) -> f32 {
             if let Some(p) = state.focused_tile {
                 highlight_if(p == pos)
             } else {
-                0.
+                alpha_overlay(0.)
             }
         }
-    };
-    alpha
+    }
+}
+
+fn alpha_overlay(alpha: f32) -> Color {
+    with_alpha(WHITE, alpha)
+}
+
+fn with_alpha(base: Color, alpha: f32) -> Color {
+    let mut v = base.to_vec();
+    v.w = alpha;
+    Color::from_vec(v)
 }
 
 fn draw_combat_arrow(c: &Combat) {
@@ -183,12 +192,8 @@ fn draw_combat_arrow(c: &Combat) {
     );
 }
 
-fn highlight_if(b: bool) -> f32 {
-    if b {
-        0.5
-    } else {
-        0.
-    }
+fn highlight_if(b: bool) -> Color {
+    alpha_overlay(if b { 0.5 } else { 0. })
 }
 
 pub fn show_tile_menu(rc: &RenderContext, pos: Position) -> StateUpdate {

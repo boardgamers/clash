@@ -22,7 +22,7 @@ pub struct Advance {
 
 impl Advance {
     #[must_use]
-    pub fn builder(name: &str, description: &str) -> AdvanceBuilder {
+    pub(crate) fn builder(name: &str, description: &str) -> AdvanceBuilder {
         AdvanceBuilder::new(name.to_string(), description.to_string())
     }
 }
@@ -33,11 +33,11 @@ impl PartialEq for Advance {
     }
 }
 
-pub struct AdvanceBuilder {
-    name: String,
+pub(crate) struct AdvanceBuilder {
+    pub name: String,
     description: String,
     advance_bonus: Option<Bonus>,
-    required_advance: Option<String>,
+    pub required_advance: Option<String>,
     contradicting_advance: Vec<String>,
     unlocked_building: Option<String>,
     government: Option<String>,

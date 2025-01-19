@@ -32,22 +32,14 @@
       "name": null,
       "id": 0,
       "resources": {
-        "food": 2,
-        "wood": 0,
-        "ore": 0,
-        "ideas": 0,
-        "gold": 0,
-        "mood_tokens": 0,
-        "culture_tokens": 0
+        "food": 2
       },
       "resource_limit": {
         "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 0,
-        "culture_tokens": 0
+        "gold": 7
       },
       "cities": [
         {
@@ -64,7 +56,6 @@
           "player_index": 0,
           "position": "D1",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 0
         }
       ],
@@ -87,13 +78,7 @@
           "Mountain",
           [
             {
-              "food": 0,
-              "wood": 0,
-              "ore": 1,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "ore": 1
             }
           ]
         ],
@@ -101,13 +86,7 @@
           "Fertile",
           [
             {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "food": 1
             }
           ]
         ],
@@ -115,13 +94,7 @@
           "Forest",
           [
             {
-              "food": 0,
-              "wood": 1,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "wood": 1
             }
           ]
         ]
@@ -132,22 +105,14 @@
       "name": null,
       "id": 1,
       "resources": {
-        "food": 2,
-        "wood": 0,
-        "ore": 0,
-        "ideas": 0,
-        "gold": 0,
-        "mood_tokens": 0,
-        "culture_tokens": 0
+        "food": 2
       },
       "resource_limit": {
         "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 0,
-        "culture_tokens": 0
+        "gold": 7
       },
       "cities": [
         {
@@ -164,7 +129,6 @@
           "player_index": 1,
           "position": "D7",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 0
         }
       ],
@@ -187,13 +151,7 @@
           "Mountain",
           [
             {
-              "food": 0,
-              "wood": 0,
-              "ore": 1,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "ore": 1
             }
           ]
         ],
@@ -201,13 +159,7 @@
           "Fertile",
           [
             {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "food": 1
             }
           ]
         ],
@@ -215,13 +167,7 @@
           "Forest",
           [
             {
-              "food": 0,
-              "wood": 1,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "wood": 1
             }
           ]
         ]

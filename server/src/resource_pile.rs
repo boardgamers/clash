@@ -1,3 +1,6 @@
+use crate::resource::ResourceType;
+use crate::utils;
+use serde::{Deserialize, Serialize};
 use std::{
     cmp,
     fmt::Display,
@@ -5,19 +8,38 @@ use std::{
     ops::{Add, AddAssign, Mul, SubAssign},
 };
 
-use crate::resource::ResourceType;
-use crate::utils;
-use serde::{Deserialize, Serialize};
-
 #[derive(Default, Clone, Serialize, Deserialize, PartialEq, Eq, Debug, Hash)]
 pub struct ResourcePile {
+    #[serde(default)]
+    #[serde(skip_serializing_if = "is_zero_u32")]
     pub food: u32,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "is_zero_u32")]
     pub wood: u32,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "is_zero_u32")]
     pub ore: u32,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "is_zero_u32")]
     pub ideas: u32,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "is_zero_i32")]
     pub gold: i32,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "is_zero_u32")]
     pub mood_tokens: u32,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "is_zero_u32")]
     pub culture_tokens: u32,
+}
+
+#[allow(clippy::trivially_copy_pass_by_ref)]
+fn is_zero_i32(n: &i32) -> bool {
+    *n == 0
+}
+#[allow(clippy::trivially_copy_pass_by_ref)]
+fn is_zero_u32(n: &u32) -> bool {
+    *n == 0
 }
 
 impl ResourcePile {

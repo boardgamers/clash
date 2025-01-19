@@ -1,6 +1,7 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::OkTooltip;
 use crate::layout_ui::{bottom_center_text, left_mouse_button_pressed_in_rect, top_centered_text};
+use crate::log_ui::break_text;
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::player_ui::player_color;
 use crate::render_context::RenderContext;
@@ -234,7 +235,7 @@ fn description(p: &Player, a: &Advance) -> Vec<String> {
 
     let mut parts: Vec<String> = vec![];
     parts.push(name.clone());
-    parts.push(desc.clone());
+    break_text(desc, 70, &mut parts);
     parts.push(format!("Cost: {}", p.advance_cost(name)));
     if let Some(r) = &a.required {
         parts.push(format!("Required: {r}"));

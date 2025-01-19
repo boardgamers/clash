@@ -22,9 +22,7 @@
         "wood": 7,
         "ore": 7,
         "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 0,
-        "culture_tokens": 0
+        "gold": 7
       },
       "cities": [
         {
@@ -76,14 +74,12 @@
           "player_index": 0,
           "position": "C2",
           "unit_type": "Infantry",
-          "movement_restriction": "None",
           "id": 0
         },
         {
           "player_index": 0,
           "position": "C3",
           "unit_type": "Cavalry",
-          "movement_restriction": "None",
           "id": 1,
           "carrier_id": 7
         },
@@ -91,7 +87,6 @@
           "player_index": 0,
           "position": "C3",
           "unit_type": "Elephant",
-          "movement_restriction": "None",
           "id": 2,
           "carrier_id": 7
         },
@@ -99,49 +94,42 @@
           "player_index": 0,
           "position": "B3",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 3
         },
         {
           "player_index": 0,
           "position": "B3",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 4
         },
         {
           "player_index": 0,
           "position": "B3",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 5
         },
         {
           "player_index": 0,
           "position": "B3",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 6
         },
         {
           "player_index": 0,
           "position": "C3",
           "unit_type": "Ship",
-          "movement_restriction": "None",
           "id": 7
         },
         {
           "player_index": 0,
           "position": "C3",
           "unit_type": "Ship",
-          "movement_restriction": "None",
           "id": 8
         },
         {
           "player_index": 0,
           "position": "C3",
           "unit_type": "Ship",
-          "movement_restriction": "None",
           "id": 9
         }
       ],
@@ -168,13 +156,7 @@
           "Mountain",
           [
             {
-              "food": 0,
-              "wood": 0,
-              "ore": 1,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "ore": 1
             }
           ]
         ],
@@ -182,13 +164,7 @@
           "Fertile",
           [
             {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "food": 1
             }
           ]
         ],
@@ -196,13 +172,7 @@
           "Forest",
           [
             {
-              "food": 0,
-              "wood": 1,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "wood": 1
             }
           ]
         ]
@@ -226,9 +196,7 @@
         "wood": 7,
         "ore": 7,
         "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 0,
-        "culture_tokens": 0
+        "gold": 7
       },
       "cities": [
         {
@@ -256,14 +224,12 @@
           "player_index": 1,
           "position": "C1",
           "unit_type": "Infantry",
-          "movement_restriction": "None",
           "id": 0
         },
         {
           "player_index": 1,
           "position": "C1",
           "unit_type": "Infantry",
-          "movement_restriction": "None",
           "id": 1
         }
       ],
@@ -286,13 +252,7 @@
           "Mountain",
           [
             {
-              "food": 0,
-              "wood": 0,
-              "ore": 1,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "ore": 1
             }
           ]
         ],
@@ -300,13 +260,7 @@
           "Fertile",
           [
             {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "food": 1
             }
           ]
         ],
@@ -314,13 +268,7 @@
           "Forest",
           [
             {
-              "food": 0,
-              "wood": 1,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "wood": 1
             }
           ]
         ]

@@ -6,7 +6,6 @@ use std::{
     ops::{AddAssign, SubAssign},
 };
 
-use MovementRestriction::{AllMovement, Attack};
 use UnitType::*;
 
 use crate::explore::is_any_ship;
@@ -18,7 +17,9 @@ pub struct Unit {
     pub player_index: usize,
     pub position: Position,
     pub unit_type: UnitType,
-    pub movement_restriction: MovementRestriction,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub movement_restrictions: Vec<MovementRestriction>,
     pub id: u32,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -32,20 +33,10 @@ impl Unit {
             player_index,
             position,
             unit_type,
-            movement_restriction: MovementRestriction::None,
+            movement_restrictions: Vec::new(),
             id,
             carrier_id: None,
         }
-    }
-
-    #[must_use]
-    pub fn can_move(&self) -> bool {
-        !matches!(self.movement_restriction, AllMovement(_))
-    }
-
-    #[must_use]
-    pub fn can_attack(&self) -> bool {
-        matches!(self.movement_restriction, MovementRestriction::None)
     }
 
     ///
@@ -79,40 +70,6 @@ impl Unit {
     #[must_use]
     pub fn is_transported(&self) -> bool {
         self.carrier_id.is_some()
-    }
-
-    pub fn restrict_movement(&mut self) {
-        self.movement_restriction = match self.movement_restriction {
-            MovementRestriction::None => AllMovement(0),
-            AllMovement(x) | Attack(x) => AllMovement(x),
-        }
-    }
-
-    pub fn undo_movement_restriction(&mut self) {
-        self.movement_restriction = match self.movement_restriction {
-            MovementRestriction::None | AllMovement(0) => MovementRestriction::None,
-            AllMovement(x) | Attack(x) => Attack(x),
-        }
-    }
-
-    pub fn restrict_attack(&mut self) {
-        self.movement_restriction = match self.movement_restriction {
-            MovementRestriction::None => Attack(1),
-            AllMovement(x) => AllMovement(x),
-            Attack(x) => Attack(x + 1),
-        }
-    }
-
-    pub fn undo_attack_restriction(&mut self) {
-        self.movement_restriction = match self.movement_restriction {
-            AllMovement(x) => AllMovement(x),
-            Attack(1) | MovementRestriction::None => MovementRestriction::None,
-            Attack(x) => Attack(x - 1),
-        }
-    }
-
-    pub fn reset_movement_restriction(&mut self) {
-        self.movement_restriction = MovementRestriction::None;
     }
 }
 
@@ -162,11 +119,11 @@ impl UnitType {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum MovementRestriction {
-    None,
-    AllMovement(u32),
-    Attack(u32),
+    Battle,
+    Mountain,
+    Forest,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
