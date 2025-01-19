@@ -3,7 +3,7 @@ use std::fmt::{Debug, Display};
 use hex2d::Coordinate;
 use serde::{Deserialize, Serialize};
 
-#[derive(PartialEq, Eq, Copy, Clone, Hash)]
+#[derive(PartialEq, Eq, Copy, Clone, Hash, Deref)]
 pub struct Position {
     pub q: i32,
     pub r: i32,

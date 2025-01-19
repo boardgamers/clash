@@ -47,7 +47,7 @@ impl Map {
     
     #[must_use]
     pub fn is_inside(&self, pos: Position) -> bool {
-        self.tiles.contains_key(*pos)
+        self.tiles.contains_key(&pos)
     }
     
     #[must_use]

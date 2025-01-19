@@ -472,14 +472,9 @@ impl Game {
                     })
                     .collect();
                 player
-                    .move_units_destinations(
-                        self,
-                        &units,
-                        starting_position,
-                        destination,
-                        embark_carrier_id,
-                    )
-                    .expect("Illegal action");
+                    .move_units_destinations(self, &units, starting_position, embark_carrier_id)
+                    .map(|destinations| destinations.contains(&destination))
+                    .expect("cannot move units to destination");
                 move_state.moved_units.extend(units.iter());
                 move_state.moved_units = move_state.moved_units.iter().unique().copied().collect();
                 let current_move = get_current_move(

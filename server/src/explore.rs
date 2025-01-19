@@ -336,13 +336,13 @@ fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<P
         }
     });
     if let Some(ship) = ship {
-        let start = ship.neighbors().into_iter().find(|n| map.is_outside(n));
+        let start = ship.neighbors().into_iter().find(|n| map.is_outside(*n));
         if let Some(start) = start {
             let mut perimeter = vec![ship];
 
             add_perimeter(map, start, &mut perimeter);
             let can_navigate =
-                |p: &Position| *p != ship && (map.is_water(p) || map.is_unexplored(p));
+                |p: &Position| *p != ship && (map.is_water(*p) || map.is_unexplored(*p));
             let first = perimeter.iter().copied().find(can_navigate);
             let last = perimeter.iter().copied().rfind(can_navigate);
 
@@ -363,10 +363,10 @@ fn add_perimeter(map: &Map, start: Position, perimeter: &mut Vec<Position>) {
         .into_iter()
         .filter(|n| {
             !perimeter.contains(n)
-                && (map.is_inside(n) && n.neighbors().iter().any(|n| map.is_outside(n)))
+                && (map.is_inside(*n) && n.neighbors().iter().any(|n| map.is_outside(*n)))
         })
         // take with most outside neighbors first
-        .sorted_by_key(|n| n.neighbors().iter().filter(|n| map.is_inside(n)).count())
+        .sorted_by_key(|n| n.neighbors().iter().filter(|n| map.is_inside(**n)).count())
         .next();
 
     if let Some(n) = option {

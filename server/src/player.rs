@@ -752,7 +752,7 @@ impl Player {
         &self,
         game: &Game,
         unit_ids: &[u32],
-        starting: Position,
+        start: Position,
         embark_carrier_id: Option<u32>,
     ) -> Result<Vec<Position>, String> {
         let (moved_units, movement_actions_left, current_move) = if let Movement(m) = &game.state {
@@ -762,7 +762,7 @@ impl Player {
         };
 
         let units = unit_ids
-            .iter()
+            .into_iter()
             .map(|id| {
                 self.get_unit(*id)
                     .expect("the player should have all units to move")
@@ -786,8 +786,8 @@ impl Player {
 
         let mut stack_size = 0;
 
-        for unit in units {
-            if unit.position != starting {
+        for unit in units.iter() {
+            if unit.position != start {
                 return Err("the unit should be at the starting position".to_string());
             }
             if !unit.can_move() {
@@ -812,69 +812,66 @@ impl Player {
             }
         }
         
-        let destinations = reachable_positions(starting, self, units, &game.map)
+        let destinations: Vec<Position> = reachable_positions(start, self, &unit_ids, &game.map)
             .iter()
             .filter(|dest| {
-                Self::can_move_to(game, units, carrier_position, starting, dest, stack_size, current_move) 
                 
-            });
+                if stack_size == 0 && game.enemy_player(self.index, **dest).is_some() {
+                    return false
+                }
+        
+                if game
+                    .map.is_land(start)
+                    && self
+                        .get_units(**dest)
+                        .iter()
+                        .filter(|unit| unit.unit_type.is_army_unit() && !unit.is_transported())
+                        .count()
+                        + stack_size
+                        > STACK_LIMIT
+                {
+                    return false;
+                }
+                
+                if carrier_position.is_some_and(|p| p != **dest) {
+                    return false;
+                }
+                if !units.iter().all(|unit| {
+                    let terrain = game
+                        .map
+                        .tiles
+                        .get(&dest)
+                        .expect("the destination tile should exist");
+                    if unit.unit_type.is_land_based() && terrain.is_water() {
+                        return false
+                    }
+                    if unit.unit_type.is_ship() && terrain.is_land() {
+                        return false
+                    }
+                    true
+                }) {
+                    return false;
+                }
+                
+                if !matches!(current_move, CurrentMove::None)
+                    && *current_move
+                        == get_current_move(game, unit_ids, start, **dest, embark_carrier_id)
+                {
+                    return true;
+                }
+        
+                if movement_actions_left == 0 {
+                    return false;
+                }
+        
+                if unit_ids.iter().any(|id| moved_units.contains(id)) {
+                    return false;
+                }
+                true
+                
+            }).copied().collect();
 
         Ok(destinations)
-    }
-
-    fn can_move_to(&self, game: &Game, units: Vec<&Unit>, carrier_position: Option<Position>, start: Position, dest: Position, stack_size: usize, current_move: CurrentMove) -> bool {
-        if stack_size == 0 && game.enemy_player(self.index, dest).is_some() {
-            return false
-        }
-
-        if game
-            .map.is_land(start)
-            && self
-                .get_units(dest)
-                .iter()
-                .filter(|unit| unit.unit_type.is_army_unit() && !unit.is_transported())
-                .count()
-                + stack_size
-                > STACK_LIMIT
-        {
-            return false;
-        }
-        
-        if carrier_position.is_some_and(|p| p != dest) {
-            return false;
-        }
-        if !units.iter().all(|unit| {
-            let terrain = game
-                .map
-                .tiles
-                .get(&dest)
-                .expect("the destination tile should exist");
-            if unit.unit_type.is_land_based() && terrain.is_water() {
-                return false
-            }
-            if unit.unit_type.is_ship() && terrain.is_land() {
-                return false
-            }
-            true
-        }) {
-            return false;
-        }
-        
-        if !matches!(current_move, CurrentMove::None)
-            && current_move
-                == get_current_move(game, unit_ids, starting, dest, embark_carrier_id)
-        {
-            return true;
-        }
-
-        if movement_actions_left == 0 {
-            return false;
-        }
-
-        if unit_ids.iter().any(|unit| moved_units.contains(unit_ids)) {
-            return false;
-        }
-        true
     }
 
     #[must_use]
