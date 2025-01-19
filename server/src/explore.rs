@@ -1,5 +1,5 @@
 use crate::content::advances::NAVIGATION;
-use crate::game::{ExploreResolutionState, Game, GameState, MoveState, UndoContext};
+use crate::game::{CurrentMove, ExploreResolutionState, Game, GameState, MoveState, UndoContext};
 use crate::map::{Block, BlockPosition, Map, Rotation, Terrain, UnexploredBlock};
 use crate::player::Player;
 use crate::position::Position;
@@ -123,9 +123,11 @@ pub(crate) fn move_to_unexplored_block(
         .get_unit(units[0])
         .expect("unit not found")
         .position;
+    let mut state = move_state.clone();
+    state.current_move = CurrentMove::None;
     game.state = GameState::ExploreResolution(ExploreResolutionState {
         block: move_to.clone(),
-        move_state: move_state.clone(),
+        move_state: state,
         units: units.to_vec(),
         start,
         destination,
@@ -153,7 +155,15 @@ fn move_to_explored_tile(
             .get(&destination)
             .is_some_and(Terrain::is_land)
     {
-        if ship_can_teleport {
+        let player = game.get_player(player_index);
+        let used_navigation = player.has_advance(NAVIGATION)
+            && !player
+                .get_unit(units[0])
+                .expect("unit should exist")
+                .position
+                .is_neighbor(destination);
+
+        if ship_can_teleport || used_navigation {
             for (p, t) in block.block.tiles(&block.position, rotation) {
                 if t.is_water() {
                     game.add_to_last_log_item(&format!(
@@ -163,7 +173,6 @@ fn move_to_explored_tile(
                     return;
                 }
             }
-            panic!("No water tile found to teleport ship");
         }
         game.add_to_last_log_item(". Ship can't move to the explored tile");
         return;

@@ -1,7 +1,10 @@
 {
   "state": {
     "Movement": {
-      "movement_actions_left": 3
+      "movement_actions_left": 2,
+      "moved_units": [
+        1
+      ]
     }
   },
   "players": [
@@ -183,7 +186,7 @@
       "units": [
         {
           "player_index": 1,
-          "position": "B5",
+          "position": "A7",
           "unit_type": "Ship",
           "movement_restriction": "None",
           "id": 1
@@ -1105,9 +1108,19 @@
     },
     {
       "Playing": "MoveUnits"
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            1
+          ],
+          "destination": "A7"
+        }
+      }
     }
   ],
-  "action_log_index": 58,
+  "action_log_index": 59,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -1190,7 +1203,8 @@
     "\tPlayer2 sailed 1 ship from B5 to B6. Explored tiles A7=Water, B6=Fertile, B7=Barren, C7=Fertile. Ship can't move to the explored tile",
     "\tPlayer2 ended the movement action",
     "Player2 paid 2 food to get the Navigation advance",
-    "Player2 used a move units action"
+    "Player2 used a move units action",
+    "\tPlayer2 sailed 1 ship from B5 to A7"
   ],
   "undo_limit": 55,
   "actions_left": 0,
@@ -1415,6 +1429,12 @@
             ]
           }
         }
+      }
+    },
+    {
+      "Movement": {
+        "starting_position": "B5",
+        "movement_actions_left": 3
       }
     }
   ]

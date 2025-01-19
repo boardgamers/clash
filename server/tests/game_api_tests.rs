@@ -1018,6 +1018,17 @@ fn test_ship_explore_move_not_possible() {
 
 #[test]
 fn test_ship_navigate() {
+    test_action(
+        "ship_navigate",
+        move_action(vec![1], Position::from_offset("A7")),
+        1,
+        true,
+        false,
+    );
+}
+
+#[test]
+fn test_ship_navigate_coordinates() {
     let name = "ship_navigate2";
     let original_game = read_game(name);
     let mut game = Game::from_data(serde_json::from_str(&original_game).unwrap());
@@ -1048,5 +1059,27 @@ fn assert_navigate(game: &mut Game, from: Position, to: Position) {
         result,
         "expected to be able to move from {} to {}",
         from, to,
+    );
+}
+
+#[test]
+fn test_ship_navigate_explore_move() {
+    test_action(
+        "ship_navigate_explore_move",
+        move_action(vec![1], Position::from_offset("F2")),
+        1,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_ship_navigate_explore_not_move() {
+    test_action(
+        "ship_navigate_explore_not_move",
+        move_action(vec![1], Position::from_offset("F2")),
+        1,
+        false,
+        false,
     );
 }

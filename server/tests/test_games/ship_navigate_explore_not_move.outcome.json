@@ -1,7 +1,30 @@
 {
   "state": {
-    "Movement": {
-      "movement_actions_left": 3
+    "ExploreResolution": {
+      "movement_actions_left": 2,
+      "moved_units": [
+        1
+      ],
+      "block": {
+        "position": {
+          "top_tile": "F2",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Forest",
+            "Forest",
+            "Fertile",
+            "Forest"
+          ]
+        }
+      },
+      "units": [
+        1
+      ],
+      "start": "B3",
+      "destination": "F2",
+      "ship_can_teleport": false
     }
   },
   "players": [
@@ -183,7 +206,7 @@
       "units": [
         {
           "player_index": 1,
-          "position": "B5",
+          "position": "B3",
           "unit_type": "Ship",
           "movement_restriction": "None",
           "id": 1
@@ -468,7 +491,7 @@
         "block": {
           "terrain": [
             "Forest",
-            "Water",
+            "Forest",
             "Fertile",
             "Forest"
           ]
@@ -1105,9 +1128,29 @@
     },
     {
       "Playing": "MoveUnits"
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            1
+          ],
+          "destination": "B3"
+        }
+      }
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            1
+          ],
+          "destination": "F2"
+        }
+      }
     }
   ],
-  "action_log_index": 58,
+  "action_log_index": 60,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -1190,9 +1233,11 @@
     "\tPlayer2 sailed 1 ship from B5 to B6. Explored tiles A7=Water, B6=Fertile, B7=Barren, C7=Fertile. Ship can't move to the explored tile",
     "\tPlayer2 ended the movement action",
     "Player2 paid 2 food to get the Navigation advance",
-    "Player2 used a move units action"
+    "Player2 used a move units action",
+    "\tPlayer2 sailed 1 ship from B5 to B3",
+    "\tPlayer2 sailed 1 ship from B3 to F2"
   ],
-  "undo_limit": 55,
+  "undo_limit": 60,
   "actions_left": 0,
   "successful_cultural_influence": false,
   "round": 3,
@@ -1415,6 +1460,12 @@
             ]
           }
         }
+      }
+    },
+    {
+      "Movement": {
+        "starting_position": "B5",
+        "movement_actions_left": 3
       }
     }
   ]
