@@ -1,6 +1,6 @@
-use std::fmt::{Debug, Display};
 use hex2d::Coordinate;
 use serde::{Deserialize, Serialize};
+use std::fmt::{Debug, Display};
 
 #[derive(PartialEq, Eq, Copy, Clone, Hash)]
 pub struct Position {

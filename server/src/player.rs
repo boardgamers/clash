@@ -762,7 +762,7 @@ impl Player {
         };
 
         let units = unit_ids
-            .into_iter()
+            .iter()
             .map(|id| {
                 self.get_unit(*id)
                     .expect("the player should have all units to move")
@@ -786,7 +786,7 @@ impl Player {
 
         let mut stack_size = 0;
 
-        for unit in units.iter() {
+        for unit in &units {
             if unit.position != start {
                 return Err("the unit should be at the starting position".to_string());
             }
@@ -811,17 +811,15 @@ impl Player {
                 stack_size += 1;
             }
         }
-        
-        let destinations: Vec<Position> = reachable_positions(start, self, &unit_ids, &game.map)
+
+        let destinations: Vec<Position> = reachable_positions(start, self, unit_ids, &game.map)
             .iter()
             .filter(|dest| {
-                
                 if stack_size == 0 && game.enemy_player(self.index, **dest).is_some() {
-                    return false
+                    return false;
                 }
-        
-                if game
-                    .map.is_land(start)
+
+                if game.map.is_land(start)
                     && self
                         .get_units(**dest)
                         .iter()
@@ -832,39 +830,40 @@ impl Player {
                 {
                     return false;
                 }
-                
+
                 if carrier_position.is_some_and(|p| p != **dest) {
                     return false;
                 }
                 if !units.iter().all(|unit| {
                     if unit.unit_type.is_land_based() && game.map.is_water(**dest) {
-                        return false
+                        return false;
                     }
                     if unit.unit_type.is_ship() && game.map.is_land(**dest) {
-                        return false
+                        return false;
                     }
                     true
                 }) {
                     return false;
                 }
-                
+
                 if !matches!(current_move, CurrentMove::None)
                     && *current_move
                         == get_current_move(game, unit_ids, start, **dest, embark_carrier_id)
                 {
                     return true;
                 }
-        
+
                 if movement_actions_left == 0 {
                     return false;
                 }
-        
+
                 if unit_ids.iter().any(|id| moved_units.contains(id)) {
                     return false;
                 }
                 true
-                
-            }).copied().collect();
+            })
+            .copied()
+            .collect();
 
         Ok(destinations)
     }
