@@ -8,7 +8,7 @@ use crate::layout_ui::{
 };
 use crate::map_ui::terrain_name;
 use crate::render_context::RenderContext;
-use crate::resource_ui::{new_resource_map, resource_name, resource_types};
+use crate::resource_ui::resource_name;
 use crate::tooltip::show_tooltip_for_rect;
 use crate::unit_ui;
 use macroquad::math::vec2;
@@ -17,6 +17,7 @@ use server::action::Action;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::game::{CurrentMove, Game, GameState, MoveState};
 use server::playing_actions::PlayingAction;
+use server::resource::{new_resource_map, resource_types};
 use server::unit::MovementAction;
 
 pub fn player_select(rc: &RenderContext) -> StateUpdate {

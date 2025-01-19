@@ -4,13 +4,14 @@ use crate::dialog_ui::{
     cancel_button, ok_button, BaseOrCustomAction, BaseOrCustomDialog, OkTooltip,
 };
 use crate::render_context::RenderContext;
-use crate::resource_ui::{show_resource_pile, ResourceType};
+use crate::resource_ui::show_resource_pile;
 use server::action::Action;
 use server::city::City;
 use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::player::Player;
 use server::playing_actions::{IncreaseHappiness, PlayingAction, PlayingActionType};
 use server::position::Position;
+use server::resource::ResourceType;
 use server::resource_pile::ResourcePile;
 
 #[derive(Clone)]
