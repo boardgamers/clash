@@ -6,9 +6,10 @@ use crate::client_state::StateUpdate;
 use crate::dialog_ui::OkTooltip;
 use crate::layout_ui::draw_icon;
 use crate::render_context::RenderContext;
-use crate::resource_ui::{resource_name, ResourceType};
+use crate::resource_ui::resource_name;
 use crate::select_ui;
 use crate::select_ui::{CountSelector, HasCountSelectableObject};
+use server::resource::ResourceType;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct ResourcePayment {

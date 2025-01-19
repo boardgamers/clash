@@ -71,17 +71,6 @@ pub enum PlayingActionType {
     EndTurn,
 }
 
-// pub const playable_base_actions: [PlayingActionType; 8] = [
-//     PlayingActionType::Advance,
-//     PlayingActionType::FoundCity,
-//     PlayingActionType::Construct,
-//     PlayingActionType::Collect,
-//     PlayingActionType::Recruit,
-//     PlayingActionType::MoveUnits,
-//     PlayingActionType::IncreaseHappiness,
-//     PlayingActionType::InfluenceCultureAttempt,
-// ];
-
 impl PlayingActionType {
     #[must_use]
     pub fn is_available(&self, game: &Game, player_index: usize) -> bool {

@@ -2,6 +2,8 @@ use crate::advance::Advance;
 use crate::explore::reachable_positions;
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
+use crate::payment::{get_sum_payment_options, PaymentModel};
+use crate::resource::ResourceType;
 use crate::unit::{carried_units, get_current_move};
 use crate::{
     city::{City, CityData},
@@ -18,7 +20,7 @@ use crate::{
     map::Terrain::{self, *},
     player_events::PlayerEvents,
     position::Position,
-    resource_pile::{AdvancePaymentOptions, ResourcePile},
+    resource_pile::ResourcePile,
     unit::{
         Unit,
         UnitType::{self, *},
@@ -394,12 +396,9 @@ impl Player {
 
     #[must_use]
     pub fn can_advance(&self, advance: &Advance) -> bool {
-        if self.resources.food + self.resources.ideas + (self.resources.gold as u32)
-            < self.advance_cost(&advance.name)
-        {
-            return false;
-        }
-        self.can_advance_free(advance)
+        self.get_advance_payment_options(&advance.name)
+            .is_valid(&self.resources)
+            && self.can_advance_free(advance)
     }
 
     #[must_use]
@@ -538,9 +537,12 @@ impl Player {
     }
 
     #[must_use]
-    pub fn get_advance_payment_options(&self, advance: &str) -> AdvancePaymentOptions {
-        self.resources
-            .get_advance_payment_options(self.advance_cost(advance))
+    pub fn get_advance_payment_options(&self, advance: &str) -> PaymentModel {
+        PaymentModel::Sum(get_sum_payment_options(
+            &self.resources,
+            self.advance_cost(advance),
+            &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
+        ))
     }
 
     #[must_use]

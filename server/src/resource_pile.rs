@@ -5,9 +5,9 @@ use std::{
     ops::{Add, AddAssign, Mul, SubAssign},
 };
 
-use serde::{Deserialize, Serialize};
-
+use crate::resource::ResourceType;
 use crate::utils;
+use serde::{Deserialize, Serialize};
 
 #[derive(Default, Clone, Serialize, Deserialize, PartialEq, Eq, Debug, Hash)]
 pub struct ResourcePile {
@@ -39,6 +39,60 @@ impl ResourcePile {
             gold,
             mood_tokens,
             culture_tokens,
+        }
+    }
+
+    ///
+    /// # Panics
+    /// Panics if `resource_type` is `Discount`
+    #[must_use]
+    pub fn of_type(resource_type: ResourceType, amount: i32) -> Self {
+        match resource_type {
+            ResourceType::Food => Self::food(amount as u32),
+            ResourceType::Wood => Self::wood(amount as u32),
+            ResourceType::Ore => Self::ore(amount as u32),
+            ResourceType::Ideas => Self::ideas(amount as u32),
+            ResourceType::Gold => Self::gold(amount),
+            ResourceType::MoodTokens => Self::mood_tokens(amount as u32),
+            ResourceType::CultureTokens => Self::culture_tokens(amount as u32),
+            ResourceType::Discount => panic!("Discount is not a resource type"),
+        }
+    }
+
+    ///
+    /// # Panics
+    /// Panics if `resource_type` is `Discount`
+    #[must_use]
+    pub fn amount(&self, resource_type: ResourceType) -> u32 {
+        match resource_type {
+            ResourceType::Food => self.food,
+            ResourceType::Wood => self.wood,
+            ResourceType::Ore => self.ore,
+            ResourceType::Ideas => self.ideas,
+            ResourceType::Gold => self.gold as u32,
+            ResourceType::MoodTokens => self.mood_tokens,
+            ResourceType::CultureTokens => self.culture_tokens,
+            ResourceType::Discount => panic!("Discount is not a resource type"),
+        }
+    }
+
+    ///
+    /// # Panics
+    /// Panics if `resource_type` is `Discount`
+    pub fn add_type(&mut self, resource_type: ResourceType, amount: i32) {
+        match resource_type {
+            ResourceType::Food => self.food = (self.food as i32 + amount) as u32,
+            ResourceType::Wood => self.wood = (self.wood as i32 + amount) as u32,
+            ResourceType::Ore => self.ore = (self.ore as i32 + amount) as u32,
+            ResourceType::Ideas => self.ideas = (self.ideas as i32 + amount) as u32,
+            ResourceType::Gold => self.gold += amount,
+            ResourceType::MoodTokens => {
+                self.mood_tokens = (self.mood_tokens as i32 + amount) as u32;
+            }
+            ResourceType::CultureTokens => {
+                self.culture_tokens = (self.culture_tokens as i32 + amount) as u32;
+            }
+            ResourceType::Discount => panic!("Discount is not a resource type"),
         }
     }
 
@@ -174,31 +228,6 @@ impl ResourcePile {
             cost.culture_tokens,
         );
         PaymentOptions::new(default, gold_left, jokers_left)
-    }
-
-    //this function assumes that `self` can afford `cost`
-    #[must_use]
-    pub fn get_advance_payment_options(&self, cost: u32) -> AdvancePaymentOptions {
-        let mut idea_cost = 0;
-        let mut food_cost = 0;
-        let mut gold_cost = 0;
-        for _ in 0..cost {
-            if idea_cost < self.ideas {
-                idea_cost += 1;
-                continue;
-            }
-            if food_cost < self.food {
-                food_cost += 1;
-                continue;
-            }
-            gold_cost += 1;
-        }
-        let food_left = self.food - food_cost;
-        let gold_left = self.gold as u32 - gold_cost;
-        let default = ResourcePile::ideas(idea_cost)
-            + ResourcePile::food(food_cost)
-            + ResourcePile::gold(gold_cost as i32);
-        AdvancePaymentOptions::new(default, food_left, gold_left)
     }
 
     #[must_use]
@@ -364,27 +393,9 @@ impl PaymentOptions {
     }
 }
 
-#[derive(PartialEq, Eq, Debug)]
-pub struct AdvancePaymentOptions {
-    pub default: ResourcePile,
-    pub food_left: u32,
-    pub gold_left: u32,
-}
-
-impl AdvancePaymentOptions {
-    #[must_use]
-    pub fn new(default: ResourcePile, food_left: u32, gold_left: u32) -> Self {
-        Self {
-            default,
-            food_left,
-            gold_left,
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::{AdvancePaymentOptions, PaymentOptions, ResourcePile};
+    use super::{PaymentOptions, ResourcePile};
 
     fn assert_can_afford(name: &str, cost: &ResourcePile) {
         let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
@@ -399,14 +410,6 @@ mod tests {
     fn assert_payment_options(name: &str, cost: &ResourcePile, options: &PaymentOptions) {
         let budget = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
         assert_eq!(options, &budget.get_payment_options(cost), "{name}");
-    }
-
-    fn assert_advance_payment_options(
-        name: &str,
-        budget: &ResourcePile,
-        options: &AdvancePaymentOptions,
-    ) {
-        assert_eq!(options, &budget.get_advance_payment_options(2), "{name}");
     }
 
     fn assert_to_string(resource_pile: &ResourcePile, expected: &str) {
@@ -474,30 +477,6 @@ mod tests {
             "jokers",
             &(ResourcePile::ore(4) + ResourcePile::ideas(4) + ResourcePile::gold(-3)),
             &(PaymentOptions::new(ResourcePile::ore(3) + ResourcePile::ideas(4), 5, 2)),
-        );
-    }
-
-    #[test]
-    fn advance_payment_options_test() {
-        assert_advance_payment_options(
-            "enough of all resources",
-            &(ResourcePile::food(3) + ResourcePile::ideas(3) + ResourcePile::gold(3)),
-            &(AdvancePaymentOptions::new(ResourcePile::ideas(2), 3, 3)),
-        );
-        assert_advance_payment_options(
-            "using food",
-            &(ResourcePile::food(3) + ResourcePile::gold(3)),
-            &(AdvancePaymentOptions::new(ResourcePile::food(2), 1, 3)),
-        );
-        assert_advance_payment_options(
-            "using 1 gold",
-            &(ResourcePile::ideas(1) + ResourcePile::gold(3)),
-            &(AdvancePaymentOptions::new(ResourcePile::ideas(1) + ResourcePile::gold(1), 0, 2)),
-        );
-        assert_advance_payment_options(
-            "one possible payment",
-            &(ResourcePile::food(1) + ResourcePile::gold(1)),
-            &(AdvancePaymentOptions::new(ResourcePile::food(1) + ResourcePile::gold(1), 0, 0)),
         );
     }
 

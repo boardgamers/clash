@@ -871,16 +871,6 @@ impl Game {
             .collect()
     }
 
-    // #[must_use]
-    // pub fn get_available_playing_actions(&self, player_index: usize) -> Vec<PlayingActionType> {
-    //     playable_base_actions.iter().filter(|action| action.is_available(self, player_index)).cloned().collect()
-    // }
-    //
-    // #[must_use]
-    // pub fn is_playing_action_available(&self, player_index: usize, action: PlayingActionType) -> Vec<PlayingActionType> {
-    //     playable_base_actions.iter().filter(|action| action.is_available(self, player_index)).cloned().collect()
-    // }
-
     pub fn draw_wonder_card(&mut self, player_index: usize) {
         let Some(wonder) = self.wonders_left.pop() else {
             return;

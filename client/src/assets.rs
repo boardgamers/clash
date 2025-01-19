@@ -1,10 +1,10 @@
 use crate::client::Features;
-use crate::resource_ui::ResourceType;
 use macroquad::prelude::{load_texture, load_ttf_font, Font, ImageFormat};
 use macroquad::texture::Texture2D;
 use server::city_pieces::Building;
 use server::content::custom_actions::CustomActionType;
 use server::map::Terrain;
+use server::resource::ResourceType;
 use server::unit::UnitType;
 use std::collections::HashMap;
 

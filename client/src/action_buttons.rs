@@ -4,11 +4,11 @@ use crate::happiness_ui::{can_play_increase_happiness, open_increase_happiness_d
 use crate::layout_ui::{bottom_left_texture, icon_pos};
 use crate::move_ui::MoveIntent;
 use crate::render_context::RenderContext;
-use crate::resource_ui::ResourceType;
 use server::action::Action;
 use server::content::advances::get_advance_by_name;
 use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::playing_actions::{PlayingAction, PlayingActionType};
+use server::resource::ResourceType;
 
 pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     let assets = rc.assets();
