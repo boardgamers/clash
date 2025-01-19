@@ -4,8 +4,8 @@
       "movement_actions_left": 2,
       "moved_units": [
         1
-          ]
-        }
+      ]
+    }
   },
   "players": [
     {
@@ -145,7 +145,7 @@
       "name": null,
       "id": 1,
       "resources": {
-        "food": 3,
+        "food": 1,
         "wood": 0,
         "ore": 0,
         "ideas": 0,
@@ -186,7 +186,7 @@
       "units": [
         {
           "player_index": 1,
-          "position": "C5",
+          "position": "G3",
           "unit_type": "Ship",
           "movement_restriction": "None",
           "id": 1
@@ -200,11 +200,12 @@
         "Fishing",
         "Irrigation",
         "Mining",
+        "Navigation",
         "Storage"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 3,
+      "game_event_tokens": 2,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -296,7 +297,7 @@
       ],
       [
         "A7",
-        "Unexplored"
+        "Water"
       ],
       [
         "B2",
@@ -316,11 +317,11 @@
       ],
       [
         "B6",
-        "Unexplored"
+        "Fertile"
       ],
       [
         "B7",
-        "Unexplored"
+        "Barren"
       ],
       [
         "C2",
@@ -344,7 +345,7 @@
       ],
       [
         "C7",
-        "Unexplored"
+        "Fertile"
       ],
       [
         "C8",
@@ -388,7 +389,7 @@
       ],
       [
         "E3",
-        "Unexplored"
+        "Fertile"
       ],
       [
         "E4",
@@ -396,7 +397,7 @@
       ],
       [
         "E5",
-        "Unexplored"
+        "Mountain"
       ],
       [
         "E6",
@@ -412,19 +413,19 @@
       ],
       [
         "F2",
-        "Unexplored"
+        "Forest"
       ],
       [
         "F3",
-        "Unexplored"
+        "Forest"
       ],
       [
         "F4",
-        "Unexplored"
+        "Fertile"
       ],
       [
         "F5",
-        "Unexplored"
+        "Fertile"
       ],
       [
         "F6",
@@ -436,11 +437,11 @@
       ],
       [
         "G3",
-        "Unexplored"
+        "Water"
       ],
       [
         "G5",
-        "Unexplored"
+        "Forest"
       ],
       [
         "G7",
@@ -450,20 +451,6 @@
     "unexplored_blocks": [
       {
         "position": {
-          "top_tile": "B6",
-          "rotation": 0
-        },
-        "block": {
-          "terrain": [
-            "Fertile",
-            "Water",
-            "Fertile",
-            "Barren"
-          ]
-        }
-      },
-      {
-        "position": {
           "top_tile": "D3",
           "rotation": 0
         },
@@ -471,34 +458,6 @@
           "terrain": [
             "Water",
             "Barren",
-            "Forest",
-            "Fertile"
-          ]
-        }
-      },
-      {
-        "position": {
-          "top_tile": "F2",
-          "rotation": 0
-        },
-        "block": {
-          "terrain": [
-            "Forest",
-            "Water",
-            "Fertile",
-            "Forest"
-          ]
-        }
-      },
-      {
-        "position": {
-          "top_tile": "F4",
-          "rotation": 0
-        },
-        "block": {
-          "terrain": [
-            "Fertile",
-            "Mountain",
             "Forest",
             "Fertile"
           ]
@@ -1077,12 +1036,87 @@
           "units": [
             1
           ],
+          "destination": "E5"
+        }
+      }
+    },
+    {
+      "ExploreResolution": 0
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            1
+          ],
           "destination": "C5"
+        }
+      }
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            1
+          ],
+          "destination": "B5"
+        }
+      }
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            1
+          ],
+          "destination": "B6"
+        }
+      }
+    },
+    {
+      "Movement": "Stop"
+    },
+    {
+      "Playing": {
+        "Advance": {
+          "advance": "Navigation",
+          "payment": {
+            "food": 2,
+            "wood": 0,
+            "ore": 0,
+            "ideas": 0,
+            "gold": 0,
+            "mood_tokens": 0,
+            "culture_tokens": 0
+          }
+        }
+      }
+    },
+    {
+      "Playing": "MoveUnits"
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            1
+          ],
+          "destination": "B3"
+        }
+      }
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            1
+          ],
+          "destination": "F2"
         }
       }
     }
   ],
-  "action_log_index": 51,
+  "action_log_index": 60,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -1158,10 +1192,19 @@
     "It's Player2's turn",
     "Round 3/3",
     "Player2 used a move units action",
-    "\tPlayer2 sailed 1 ship from D5 to C5. Explored tiles A5=Forest, B4=Forest, B5=Water, C5=Water"
+    "\tPlayer2 sailed 1 ship from D5 to E5",
+    "Player2 chose the orientation of the newly explored tiles. Explored tiles E5=Mountain, F4=Fertile, F5=Fertile, G5=Forest. Ship can't move to the explored tile",
+    "\tPlayer2 sailed 1 ship from D5 to C5. Explored tiles A5=Forest, B4=Forest, B5=Water, C5=Water",
+    "\tPlayer2 sailed 1 ship from C5 to B5",
+    "\tPlayer2 sailed 1 ship from B5 to B6. Explored tiles A7=Water, B6=Fertile, B7=Barren, C7=Fertile. Ship can't move to the explored tile",
+    "\tPlayer2 ended the movement action",
+    "Player2 paid 2 food to get the Navigation advance",
+    "Player2 used a move units action",
+    "\tPlayer2 sailed 1 ship from B5 to B3",
+    "\tPlayer2 sailed 1 ship from B3 to F2. Explored tiles E3=Fertile, F2=Forest, F3=Forest, G3=Water. Teleported ship from F2 to G3"
   ],
-  "undo_limit": 51,
-  "actions_left": 2,
+  "undo_limit": 60,
+  "actions_left": 0,
   "successful_cultural_influence": false,
   "round": 3,
   "age": 2,
@@ -1318,6 +1361,78 @@
     },
     {
       "Recruit": {}
+    },
+    {
+      "ExploreResolution": {
+        "movement_actions_left": 2,
+        "moved_units": [
+          1
+        ],
+        "current_move": {
+          "Fleet": {
+            "units": [
+              1
+            ]
+          }
+        },
+        "block": {
+          "position": {
+            "top_tile": "F4",
+            "rotation": 0
+          },
+          "block": {
+            "terrain": [
+              "Fertile",
+              "Mountain",
+              "Forest",
+              "Fertile"
+            ]
+          }
+        },
+        "units": [
+          1
+        ],
+        "start": "D5",
+        "destination": "E5",
+        "ship_can_teleport": false
+      }
+    },
+    {
+      "Movement": {
+        "starting_position": "C5",
+        "movement_actions_left": 2,
+        "moved_units": [
+          1
+        ],
+        "current_move": {
+          "Fleet": {
+            "units": [
+              1
+            ]
+          }
+        }
+      }
+    },
+    {
+      "Movement": {
+        "movement_actions_left": 2,
+        "moved_units": [
+          1
+        ],
+        "current_move": {
+          "Fleet": {
+            "units": [
+              1
+            ]
+          }
+        }
+      }
+    },
+    {
+      "Movement": {
+        "starting_position": "B5",
+        "movement_actions_left": 3
+      }
     }
   ]
 }

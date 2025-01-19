@@ -12,7 +12,7 @@ use std::ops::{Add, Mul, Rem, Sub};
 use std::vec;
 
 use crate::city_ui::{draw_city, show_city_menu, IconAction, IconActionVec};
-use crate::client_state::{ActiveDialog, State, StateUpdate};
+use crate::client_state::{ActiveDialog, State, StateUpdate, MAX_OFFSET, MIN_OFFSET, ZOOM};
 use crate::dialog_ui::{cancel_button_pos, ok_button, OkTooltip};
 use crate::layout_ui::{bottom_center_texture, bottom_right_texture, icon_pos};
 use crate::move_ui::{movable_units, MoveDestination, MoveIntent};
@@ -106,13 +106,25 @@ pub fn pan_and_zoom(state: &mut State) {
 
     let pan_map = is_mouse_button_down(MouseButton::Left);
     if state.pan_map && pan_map {
-        let new_offset = state
+        let mut new_offset = state
             .camera
             .offset
             .add(mouse_delta_position().mul(vec2(-1., 1.)));
-        if new_offset.x.abs() < 1. && new_offset.y.abs() < 1. {
-            state.camera.offset = new_offset;
+        let min = MIN_OFFSET * state.camera.zoom / ZOOM;
+        if new_offset.x < min.x {
+            new_offset.x = min.x;
         }
+        if new_offset.y < min.y {
+            new_offset.y = min.y;
+        }
+        let max = MAX_OFFSET * state.camera.zoom / ZOOM;
+        if new_offset.x > max.x {
+            new_offset.x = max.x;
+        }
+        if new_offset.y > max.y {
+            new_offset.y = max.y;
+        }
+        state.camera.offset = new_offset;
     }
     state.pan_map = pan_map;
 }

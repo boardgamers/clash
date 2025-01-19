@@ -430,10 +430,13 @@ fn test_action(
     let a = serde_json::to_string(&action).expect("action should be serializable");
     let a2 = serde_json::from_str(&a).expect("action should be deserializable");
     let original_game = read_game(name);
-    let game =
-        Game::from_data(serde_json::from_str(&original_game).unwrap_or_else(|_| {
-            panic!("the game file should be deserializable {}", game_path(name))
-        }));
+    let game = Game::from_data(serde_json::from_str(&original_game).unwrap_or_else(|e| {
+        panic!(
+            "the game file should be deserializable {}: {}",
+            game_path(name),
+            e
+        )
+    }));
     let game = game_api::execute_action(game, a2, player_index);
     if illegal_action_test {
         println!(
@@ -472,7 +475,7 @@ fn to_json(game: &Game) -> String {
 fn read_game(name: &str) -> String {
     let path = game_path(name);
     fs::read_to_string(&path)
-        .unwrap_or_else(|_| panic!("game file {path} should exist in the test games folder"))
+        .unwrap_or_else(|e| panic!("game file {path} should exist in the test games folder: {e}"))
 }
 
 fn undo_redo(
@@ -1009,6 +1012,74 @@ fn test_ship_explore_move_not_possible() {
         Action::ExploreResolution(3),
         1,
         true,
+        false,
+    );
+}
+
+#[test]
+fn test_ship_navigate() {
+    test_action(
+        "ship_navigate",
+        move_action(vec![1], Position::from_offset("A7")),
+        1,
+        true,
+        false,
+    );
+}
+
+#[test]
+fn test_ship_navigate_coordinates() {
+    let name = "ship_navigate2";
+    let original_game = read_game(name);
+    let mut game = Game::from_data(serde_json::from_str(&original_game).unwrap());
+
+    let pairs = [
+        ("B3", "B5"),
+        ("B5", "A7"),
+        ("A7", "F7"),
+        ("G7", "G3"),
+        ("G3", "B3"),
+    ];
+
+    for pair in pairs {
+        let from = Position::from_offset(pair.0);
+        let to = Position::from_offset(pair.1);
+        assert_navigate(&mut game, from, to);
+        assert_navigate(&mut game, to, from);
+    }
+}
+
+fn assert_navigate(game: &mut Game, from: Position, to: Position) {
+    game.players[1].get_unit_mut(1).unwrap().position = from;
+    let result = game
+        .get_player(1)
+        .move_units_destinations(game, &[1], from, None)
+        .is_ok_and(|d| d.contains(&to));
+    assert!(
+        result,
+        "expected to be able to move from {} to {}",
+        from, to,
+    );
+}
+
+#[test]
+fn test_ship_navigate_explore_move() {
+    test_action(
+        "ship_navigate_explore_move",
+        move_action(vec![1], Position::from_offset("F2")),
+        1,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_ship_navigate_explore_not_move() {
+    test_action(
+        "ship_navigate_explore_not_move",
+        move_action(vec![1], Position::from_offset("F2")),
+        1,
+        false,
         false,
     );
 }

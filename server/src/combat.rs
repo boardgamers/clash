@@ -1,7 +1,6 @@
 use crate::action::{CombatAction, PlayActionCard};
 use crate::game::GameState::Playing;
 use crate::game::{Game, GameState};
-use crate::map::Terrain::Water;
 use crate::position::Position;
 use crate::unit::UnitType::{Cavalry, Elephant, Infantry, Leader, Ship};
 use crate::unit::{UnitType, Units};
@@ -481,7 +480,7 @@ pub fn active_attackers(
 ) -> Vec<u32> {
     let player = &game.players[attacker];
 
-    let on_water = game.map.tiles[&defender_position] == Water;
+    let on_water = game.map.is_water(defender_position);
     attackers
         .iter()
         .copied()
@@ -500,7 +499,7 @@ pub fn active_attackers(
 #[must_use]
 pub fn active_defenders(game: &Game, defender: usize, defender_position: Position) -> Vec<u32> {
     let p = &game.players[defender];
-    let on_water = game.map.tiles[&defender_position] == Water;
+    let on_water = game.map.is_water(defender_position);
     p.get_units(defender_position)
         .iter()
         .filter(|u| can_fight(on_water, &u.unit_type))

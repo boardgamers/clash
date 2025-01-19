@@ -472,14 +472,9 @@ impl Game {
                     })
                     .collect();
                 player
-                    .can_move_units(
-                        self,
-                        &units,
-                        starting_position,
-                        destination,
-                        embark_carrier_id,
-                    )
-                    .expect("Illegal action");
+                    .move_units_destinations(self, &units, starting_position, embark_carrier_id)
+                    .map(|destinations| destinations.contains(&destination))
+                    .expect("cannot move units to destination");
                 move_state.moved_units.extend(units.iter());
                 move_state.moved_units = move_state.moved_units.iter().unique().copied().collect();
                 let current_move = get_current_move(
@@ -498,8 +493,7 @@ impl Game {
 
                 let dest_terrain = self
                     .map
-                    .tiles
-                    .get(&destination)
+                    .get(destination)
                     .expect("destination should be a valid tile");
                 if dest_terrain == &Unexplored {
                     if move_to_unexplored_tile(
@@ -510,7 +504,7 @@ impl Game {
                         destination,
                         &move_state,
                     ) {
-                        self.back_to_move(&move_state);
+                        self.back_to_move(&move_state, true);
                     }
                     return;
                 }
@@ -530,7 +524,7 @@ impl Game {
                 }
 
                 self.move_units(player_index, &units, destination, embark_carrier_id);
-                self.back_to_move(&move_state);
+                self.back_to_move(&move_state, !starting_position.is_neighbor(destination));
 
                 if let Some(enemy) = enemy {
                     self.capture_position(enemy, destination, player_index);
@@ -584,7 +578,7 @@ impl Game {
                     .position = starting_position;
             }
             assert!(military, "Illegal action");
-            self.back_to_move(move_state);
+            self.back_to_move(move_state, true);
 
             combat::initiate_combat(
                 self,
@@ -692,16 +686,20 @@ impl Game {
         let player = &mut self.players[player_index];
         assert!(player.get_city(action).is_some(), "Illegal action");
         player.add_unit(action, Settler);
-        self.back_to_move(&p.move_state);
+        self.back_to_move(&p.move_state, true);
     }
 
-    pub(crate) fn back_to_move(&mut self, move_state: &MoveState) {
+    pub(crate) fn back_to_move(&mut self, move_state: &MoveState, stop_current_move: bool) {
         self.state = if move_state.movement_actions_left == 0
             && move_state.current_move == CurrentMove::None
         {
             Playing
         } else {
-            Movement(move_state.clone())
+            let mut state = move_state.clone();
+            if stop_current_move {
+                state.current_move = CurrentMove::None;
+            }
+            Movement(state)
         };
     }
 
@@ -1417,8 +1415,7 @@ impl Game {
 
         let terrain = self
             .map
-            .tiles
-            .get(&destination)
+            .get(destination)
             .expect("the destination position should exist on the map")
             .clone();
         match terrain {
@@ -1450,14 +1447,12 @@ impl Game {
             .position;
         let start_terain = self
             .map
-            .tiles
-            .get(&starting_position)
+            .get(starting_position)
             .expect("the starting position should exist on the map")
             .clone();
         let dest_terrain = self
             .map
-            .tiles
-            .get(&destination)
+            .get(destination)
             .expect("the destination position should exist on the map")
             .clone();
         for unit_id in units {

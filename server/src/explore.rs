@@ -1,5 +1,7 @@
-use crate::game::{ExploreResolutionState, Game, GameState, MoveState, UndoContext};
+use crate::content::advances::NAVIGATION;
+use crate::game::{CurrentMove, ExploreResolutionState, Game, GameState, MoveState, UndoContext};
 use crate::map::{Block, BlockPosition, Map, Rotation, Terrain, UnexploredBlock};
+use crate::player::Player;
 use crate::position::Position;
 use itertools::Itertools;
 
@@ -121,9 +123,11 @@ pub(crate) fn move_to_unexplored_block(
         .get_unit(units[0])
         .expect("unit not found")
         .position;
+    let mut state = move_state.clone();
+    state.current_move = CurrentMove::None;
     game.state = GameState::ExploreResolution(ExploreResolutionState {
         block: move_to.clone(),
-        move_state: move_state.clone(),
+        move_state: state,
         units: units.to_vec(),
         start,
         destination,
@@ -144,14 +148,16 @@ fn move_to_explored_tile(
 ) {
     add_block_tiles_with_log(game, &block.position, &block.block, rotation);
 
-    if is_any_ship(game, player_index, units)
-        && game
-            .map
-            .tiles
-            .get(&destination)
-            .is_some_and(Terrain::is_land)
-    {
-        if ship_can_teleport {
+    if is_any_ship(game, player_index, units) && game.map.is_land(destination) {
+        let player = game.get_player(player_index);
+        let used_navigation = player.has_advance(NAVIGATION)
+            && !player
+                .get_unit(units[0])
+                .expect("unit should exist")
+                .position
+                .is_neighbor(destination);
+
+        if ship_can_teleport || used_navigation {
             for (p, t) in block.block.tiles(&block.position, rotation) {
                 if t.is_water() {
                     game.add_to_last_log_item(&format!(
@@ -161,7 +167,6 @@ fn move_to_explored_tile(
                     return;
                 }
             }
-            panic!("No water tile found to teleport ship");
         }
         game.add_to_last_log_item(". Ship can't move to the explored tile");
         return;
@@ -185,9 +190,7 @@ fn water_has_water_neighbors(
     unexplored_block: &UnexploredBlock,
     rotation: Rotation,
 ) -> bool {
-    water_has_neighbors(unexplored_block, rotation, |p| {
-        map.tiles.get(p).is_some_and(Terrain::is_water)
-    })
+    water_has_neighbors(unexplored_block, rotation, |p| map.is_water(*p))
 }
 
 #[must_use]
@@ -211,7 +214,7 @@ fn grow_ocean(map: &Map, ocean: &mut Vec<Position>) {
     while i < ocean.len() {
         let pos = ocean[i];
         for n in pos.neighbors() {
-            if map.tiles.get(&n).is_some_and(Terrain::is_water) && !ocean.contains(&n) {
+            if map.is_water(n) && !ocean.contains(&n) {
                 ocean.push(n);
             }
         }
@@ -277,7 +280,7 @@ pub(crate) fn explore_resolution(game: &mut Game, r: &ExploreResolutionState, ro
         r.destination,
         r.ship_can_teleport,
     );
-    game.back_to_move(&r.move_state);
+    game.back_to_move(&r.move_state, true);
     game.push_undo_context(UndoContext::ExploreResolution(r.clone()));
 }
 
@@ -304,4 +307,70 @@ pub(crate) fn undo_explore_resolution(game: &mut Game, player_index: usize) {
 
     game.undo_move_units(player_index, s.units.clone(), s.start);
     game.state = GameState::ExploreResolution(s);
+}
+
+#[must_use]
+pub fn reachable_positions(
+    starting: Position,
+    player: &Player,
+    units: &[u32],
+    map: &Map,
+) -> Vec<Position> {
+    let mut base: Vec<_> = starting.neighbors();
+    if player.has_advance(NAVIGATION) {
+        base.extend(reachable_with_navigation(player, units, map));
+    }
+    base
+}
+
+#[must_use]
+fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<Position> {
+    if !player.has_advance(NAVIGATION) {
+        return vec![];
+    }
+    let ship = units.iter().find_map(|&id| {
+        let unit = player.get_unit(id).expect("unit not found");
+        if unit.unit_type.is_ship() {
+            Some(unit.position)
+        } else {
+            None
+        }
+    });
+    if let Some(ship) = ship {
+        let start = ship.neighbors().into_iter().find(|n| map.is_outside(*n));
+        if let Some(start) = start {
+            let mut perimeter = vec![ship];
+
+            add_perimeter(map, start, &mut perimeter);
+            let can_navigate =
+                |p: &Position| *p != ship && (map.is_water(*p) || map.is_unexplored(*p));
+            let first = perimeter.iter().copied().find(can_navigate);
+            let last = perimeter.iter().copied().rfind(can_navigate);
+
+            return vec![first, last].into_iter().flatten().collect();
+        }
+    }
+    vec![]
+}
+
+fn add_perimeter(map: &Map, start: Position, perimeter: &mut Vec<Position>) {
+    if perimeter.contains(&start) {
+        return;
+    }
+    perimeter.push(start);
+
+    let option = &start
+        .neighbors()
+        .into_iter()
+        .filter(|n| {
+            !perimeter.contains(n)
+                && (map.is_inside(*n) && n.neighbors().iter().any(|n| map.is_outside(*n)))
+        })
+        // take with most outside neighbors first
+        .sorted_by_key(|n| n.neighbors().iter().filter(|n| map.is_inside(**n)).count())
+        .next();
+
+    if let Some(n) = option {
+        add_perimeter(map, *n, perimeter);
+    }
 }

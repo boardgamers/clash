@@ -25,6 +25,36 @@ impl Map {
         }
     }
 
+    #[must_use]
+    pub fn is_water(&self, pos: Position) -> bool {
+        self.get(pos).is_some_and(Terrain::is_water)
+    }
+
+    #[must_use]
+    pub fn is_unexplored(&self, pos: Position) -> bool {
+        self.get(pos).is_some_and(Terrain::is_unexplored)
+    }
+
+    #[must_use]
+    pub fn is_land(&self, pos: Position) -> bool {
+        self.get(pos).is_some_and(Terrain::is_land)
+    }
+
+    #[must_use]
+    pub fn is_outside(&self, pos: Position) -> bool {
+        !self.tiles.contains_key(&pos)
+    }
+
+    #[must_use]
+    pub fn is_inside(&self, pos: Position) -> bool {
+        self.tiles.contains_key(&pos)
+    }
+
+    #[must_use]
+    pub fn get(&self, pos: Position) -> Option<&Terrain> {
+        self.tiles.get(&pos)
+    }
+
     pub fn add_unexplored_blocks(&mut self, blocks: Vec<UnexploredBlock>) {
         self.unexplored_blocks.extend(blocks);
         self.unexplored_blocks
