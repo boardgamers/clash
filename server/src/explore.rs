@@ -279,7 +279,7 @@ pub(crate) fn explore_resolution(game: &mut Game, r: &ExploreResolutionState, ro
         r.destination,
         r.ship_can_teleport,
     );
-    game.back_to_move(&r.move_state);
+    game.back_to_move(&r.move_state, true);
     game.push_undo_context(UndoContext::ExploreResolution(r.clone()));
 }
 
