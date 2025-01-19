@@ -493,8 +493,7 @@ impl Game {
 
                 let dest_terrain = self
                     .map
-                    .tiles
-                    .get(&destination)
+                    .get(destination)
                     .expect("destination should be a valid tile");
                 if dest_terrain == &Unexplored {
                     if move_to_unexplored_tile(
@@ -1416,8 +1415,7 @@ impl Game {
 
         let terrain = self
             .map
-            .tiles
-            .get(&destination)
+            .get(destination)
             .expect("the destination position should exist on the map")
             .clone();
         match terrain {
@@ -1449,14 +1447,12 @@ impl Game {
             .position;
         let start_terain = self
             .map
-            .tiles
-            .get(&starting_position)
+            .get(starting_position)
             .expect("the starting position should exist on the map")
             .clone();
         let dest_terrain = self
             .map
-            .tiles
-            .get(&destination)
+            .get(destination)
             .expect("the destination position should exist on the map")
             .clone();
         for unit_id in units {

@@ -53,7 +53,7 @@ pub fn possible_destinations(
 
     let mut res = player
         .move_units_destinations(game, units, start, None)
-        .unwrap_or(vec![])
+        .unwrap_or_default()
         .into_iter()
         .map(MoveDestination::Tile)
         .collect::<Vec<_>>();

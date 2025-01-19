@@ -31,7 +31,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
             if rc
                 .state
                 .focused_tile
-                .is_some_and(|t| rc.game.map.tiles[&t].is_water())
+                .is_some_and(|t| rc.game.map.is_water(t))
             {
                 MoveIntent::Sea
             } else {

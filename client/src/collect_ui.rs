@@ -140,7 +140,7 @@ pub fn possible_resource_collections(
             {
                 return Some((pos, PORT_CHOICES.to_vec()));
             }
-            if let Some(t) = game.map.tiles.get(&pos) {
+            if let Some(t) = game.map.get(pos) {
                 if let Some(option) = collect_options
                     .get(t)
                     .filter(|_| pos == city_pos || !is_blocked(game, player_index, pos))

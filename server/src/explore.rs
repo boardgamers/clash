@@ -148,13 +148,7 @@ fn move_to_explored_tile(
 ) {
     add_block_tiles_with_log(game, &block.position, &block.block, rotation);
 
-    if is_any_ship(game, player_index, units)
-        && game
-            .map
-            .tiles
-            .get(&destination)
-            .is_some_and(Terrain::is_land)
-    {
+    if is_any_ship(game, player_index, units) && game.map.is_land(destination) {
         let player = game.get_player(player_index);
         let used_navigation = player.has_advance(NAVIGATION)
             && !player
@@ -196,9 +190,7 @@ fn water_has_water_neighbors(
     unexplored_block: &UnexploredBlock,
     rotation: Rotation,
 ) -> bool {
-    water_has_neighbors(unexplored_block, rotation, |p| {
-        map.tiles.get(p).is_some_and(Terrain::is_water)
-    })
+    water_has_neighbors(unexplored_block, rotation, |p| map.is_water(*p))
 }
 
 #[must_use]
@@ -222,7 +214,7 @@ fn grow_ocean(map: &Map, ocean: &mut Vec<Position>) {
     while i < ocean.len() {
         let pos = ocean[i];
         for n in pos.neighbors() {
-            if map.tiles.get(&n).is_some_and(Terrain::is_water) && !ocean.contains(&n) {
+            if map.is_water(n) && !ocean.contains(&n) {
                 ocean.push(n);
             }
         }

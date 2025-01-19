@@ -411,6 +411,10 @@ impl ActionType {
     }
 }
 
+/// 
+/// # Panics
+/// 
+/// Panics if the action is illegal
 #[must_use]
 pub fn get_total_collection(
     game: &Game,
@@ -436,7 +440,10 @@ pub fn get_total_collection(
     for (position, collect) in collections {
         total_collect += collect.clone();
 
-        let terrain = game.map.tiles.get(position)?.clone();
+        let terrain = game
+            .map
+            .get(*position)
+            .expect("Position should be on the map");
 
         if city.port_position == Some(*position) {
             if !PORT_CHOICES.iter().any(|r| r == collect) {
@@ -444,12 +451,12 @@ pub fn get_total_collection(
             }
         } else if !player
             .collect_options
-            .get(&terrain)
+            .get(terrain)
             .is_some_and(|o| o.contains(collect))
         {
             return None;
         }
-        let terrain_left = available_terrain.entry(terrain).or_insert(0);
+        let terrain_left = available_terrain.entry(terrain.clone()).or_insert(0);
         *terrain_left -= 1;
         if *terrain_left < 0 {
             return None;
@@ -463,7 +470,7 @@ fn add_collect_terrain(
     available_terrain: &mut HashMap<Terrain, i32>,
     adjacent_tile: Position,
 ) {
-    if let Some(terrain) = game.map.tiles.get(&adjacent_tile) {
+    if let Some(terrain) = game.map.get(adjacent_tile) {
         let terrain_left = available_terrain.entry(terrain.clone()).or_insert(0);
         if terrain == &Terrain::Water {
             *terrain_left = 1;

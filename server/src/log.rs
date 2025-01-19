@@ -12,7 +12,6 @@ use crate::status_phase::{ChangeGovernmentType, RazeSize1City};
 use crate::{
     action::{Action, CombatAction},
     game::Game,
-    map::Terrain,
     playing_actions::PlayingAction,
     position::Position,
     resource_pile::ResourcePile,
@@ -254,12 +253,7 @@ fn format_construct_log_item(
             .city_position
             .neighbors()
             .iter()
-            .filter(|neighbor| {
-                game.map
-                    .tiles
-                    .get(neighbor)
-                    .is_some_and(|terrain| terrain == &Terrain::Water)
-            })
+            .filter(|neighbor| game.map.is_water(**neighbor))
             .count();
         if adjacent_water_tiles > 1 {
             format!(" at the water tile {port_position}")
@@ -333,16 +327,10 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
                 .get_unit(units[0])
                 .expect("the player should have moved units")
                 .position;
-            let start_is_water = game
-                .map
-                .tiles
-                .get(&start)
-                .expect("the start position should be on the map")
-                .is_water();
+            let start_is_water = game.map.is_water(start);
             let t = game
                 .map
-                .tiles
-                .get(destination)
+                .get(*destination)
                 .expect("the destination position should be on the map");
             let verb = if start_is_water {
                 if t.is_unexplored() || t.is_water() {

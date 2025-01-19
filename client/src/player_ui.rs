@@ -229,8 +229,7 @@ pub fn show_top_left(rc: &RenderContext) {
             "{}/{}",
             position,
             game.map
-                .tiles
-                .get(&position)
+                .get(position)
                 .map_or("outside the map", terrain_name),
         ));
 

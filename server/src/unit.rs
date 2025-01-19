@@ -67,8 +67,7 @@ impl Unit {
         }
         if matches!(
             game.map
-                .tiles
-                .get(&self.position)
+                .get(self.position)
                 .expect("The unit should be at a valid position"),
             Barren | Exhausted(_)
         ) {
