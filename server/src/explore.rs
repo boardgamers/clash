@@ -3,7 +3,9 @@ use crate::game::{ExploreResolutionState, Game, GameState, MoveState, UndoContex
 use crate::map::{Block, BlockPosition, Map, Rotation, Terrain, UnexploredBlock};
 use crate::player::Player;
 use crate::position::Position;
-use hex2d::{Angle, Back, Coordinate, Direction, Forward, Left, LeftBack, Right, RightBack, Spacing, Spin};
+use hex2d::{
+    Angle, Back, Coordinate, Direction, Forward, Left, LeftBack, Right, RightBack, Spacing, Spin,
+};
 use itertools::Itertools;
 
 pub(crate) fn move_to_unexplored_tile(
@@ -362,300 +364,48 @@ fn can_reach_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<P
                 // visited.retain(|n| n != &start);
                 // visited.push(ship);
 
-                let mut visited = vec![ship.coordinate()];
-                let c = start.coordinate();
-                let dir = ship.coordinate().direction_to_cw(c).unwrap();
-                // let x = map.tiles.get(&Position::from_coordinate(c + (dir + Right))).is_none();
-                // let y = map.tiles.get(&Position::from_coordinate(c + (dir + Left))).is_none();
-                // assert!(x != y, "x={x} y={y}");
+                let mut visited = vec![ship];
 
-                walk(map, c, dir, &mut visited);
-                let nav = |v: &&Coordinate| {
-                    **v != ship.coordinate()
-                        && map
-                            .tiles
-                            .get(&Position::from_coordinate(**v))
-                            .is_some_and(|t| t.is_water() || t.is_unexplored())
+                add_perimeter(map, start, &mut visited);
+                let nav = |v: &&Position| {
+                    **v != ship && (map.is_water(*v) || map.is_unexplored(*v))
                 };
                 let first = visited.iter().find(nav);
                 let last = visited.iter().rfind(nav);
-                // for v in &visited {
-                //     println!("x={} y={}", v.x, v.y);
-                // }
 
                 if let Some(first) = first {
-                    destination.push(Position::from_coordinate(*first));
+                    destination.push(*first);
                 }
                 if let Some(last) = last {
-                    destination.push(Position::from_coordinate(*last));
+                    destination.push(*last);
                 }
 
                 break;
-                // if let Some(d) = can_navigate_to_ocean(start, start, map, visited) {
-                //     destination.push(d);
-                // }
             };
-            // }
         }
         return destination;
     }
     vec![]
 }
 
-#[must_use]
-fn can_navigate_to_ocean(
-    origin: Position,
-    start: Position,
-    map: &Map,
-    mut visited: Vec<Position>,
-) -> Option<Position> {
-    // start is a land tile at the edge of the map
-    if visited.contains(&start) {
-        return None;
+fn add_perimeter(map: &Map, start: Position, perimeter: &mut Vec<Position>) {
+    if perimeter.contains(&start) {
+        return;
     }
-
-    visited.push(start);
-
-    let next: Vec<Position> = start
-        .neighbors()
-        .iter()
-        .filter(|n| {
-            !visited.contains(n)
-                && map.tiles.contains_key(n)
-                && n.neighbors().iter().any(|n| !map.tiles.contains_key(n))
-        })
-        .copied()
-        .collect();
-
-    for n in &next {
-        if map
-            .tiles
-            .get(n)
-            .is_some_and(|t| t.is_water() || t.is_unexplored())
-        {
-            return Some(*n);
-        }
-    }
-
-    if next.is_empty() {
-        return None;
-    }
-    can_navigate_to_ocean(origin, next[0], map, visited)
-}
-
-const ALL_ANGLES: [Angle; 5] = [RightBack, Right, Forward, Left, LeftBack];
-
-const SIZE: f32 = 60.0;
-const SPACING: Spacing = Spacing::FlatTop(SIZE);
-fn center(c: Coordinate) -> Coordinate {
-    let p = c.to_pixel(SPACING);
-    Coordinate { x: p.0 as i32, y: p.1 as i32 }
-}
-
-fn walk(
-    map: &Map,
-    start: Coordinate,
-    direction: Direction,
-    // destination: Coordinate,
-    visited: &mut Vec<Coordinate>,
-)  {
-    let CENTER = center(Position::from_offset("D4").coordinate());
-    // if start == destination {
-    //     return true;
-    // }
-    if visited.contains(&start) {
-        return ;
-    }
-    visited.push(start);
+    perimeter.push(start);
 
     let option = &start
         .neighbors()
         .into_iter()
-        .filter(|n| !visited.contains(n) && is_perim(map, n))
-    .sorted_by_key(|n| -center(*n).distance(CENTER))
+        .filter(|n| {
+            !perimeter.contains(n)
+                && (map.is_inside(n) && n.neighbors().iter().any(|n| map.is_outside(n)))
+        })
+        // take with most outside neighbors first
+        .sorted_by_key(|n| n.neighbors().iter().filter(|n| map.is_inside(n)).count())
         .next();
 
     if let Some(n) = option {
-        walk(map, *n, direction, visited);
+        add_perimeter(map, *n, perimeter);
     }
-
-    // st.ring_iter(1, Spin::CCW(Direction::XY))
-    //     for a in ALL_ANGLES.iter() {
-    //         let new_dir = direction + *a;
-    //         let new_pos = start + new_dir;
-    //         if !visited.contains(&new_pos) && is_perim(map, &new_pos) {
-    //             return walk(map, new_pos, new_dir, visited);
-    //         }
-    //     }
-
-    // false
-
-    // let right = direction + Angle::Right;
-    // let f = start + direction;
-    // let r = start + right;
-    //
-    // if map.tiles.contains_key(&Position::from_coordinate(r)) {
-    //     walk(map, r, right,visited);
-    // } else if map.tiles.contains_key(&Position::from_coordinate(f)) {
-    //     walk(map, f, direction,  visited);
-    // }
-
-    // for d in Direction::all() {
-    //     let n = start + *d;
-    //     if map.tiles.get(&n).is_some_and(|t| t.is_land()) {
-    //         if walk(map, n, destination, visited) {
-    //             return true;
-    //         }
-    //     }
-    // }
-
-    // false
 }
-
-fn is_perim(map: &Map, coordinate: &Coordinate) -> bool {
-    let p = Position::from_coordinate(*coordinate);
-    let t = map.tiles.get(&p);
-    t.is_some() && p.neighbors().iter().any(|n| map.tiles.get(n).is_none())
-}
-
-// fn FindHexCubePerimeterLoopOutside(
-//     cubeCells: Vec<Coordinate>,
-//     startCell: Coordinate,
-//     map: &Map,
-// ) -> Vec<Coordinate> {
-//     let mut perim: Vec<Coordinate> = vec![];
-//     let footCell = startCell;
-//
-//     let startHandCell = footCell + Direction::XY;
-//     let handCell = startHandCell;
-//     //
-//     // if (cubeCells.Any(x => x == handCell))
-//     // throw
-//     // new
-//     // Exception("Start Cell Must be the top right most cell");
-//
-//     let handMovedFromStartingLocation = false;
-//     let finished = false;
-//
-//     //Yes, this happened to me. Still refining my actual regions and merging is apparently flawed.
-//     if (cubeCells.len() == 1) {
-//         // Debug.LogWarning("Only 1 Tile Perimeter");
-//         return cubeCells;
-//     }
-//
-//     perim.push(startCell);
-//     while true {
-//         let footMoved = false;
-//
-//         handCell
-//             .directions_to(footCell)
-//             .iter()
-//             .for_each(|footDirection| {
-//                 // Angle::Left.
-//                 let newFootLocation = handCell. + footDirection;
-//
-//                 if map
-//                     .tiles
-//                     .contains_key(server::position::Position::from_coordinate(newFootLocation))
-//                 {
-//                     // if newFootLocation == footCell
-//                     // return;
-//                     //
-//                     // //It's possible and common that we ended up crossing a single body of water
-//                     // //The tile muse be connected
-//                     // if footCell.distance(newFootLocation) > 1
-//                     // return;
-//                     //
-//                     // footCell = newFootLocation;
-//                     // perim.push(newFootLocation);
-//                     // footMoved = true;
-//                 }
-//             });
-//     }
-// else if footMoved
-//
-//     if (cubeCells.Any(x => x == newFootLocation))
-//     {
-//         if (newFootLocation == footCell)
-//         return;
-//
-//         //It's possible and common that we ended up crossing a single body of water
-//         //The tile muse be connected
-//         if (footCell.distance(newFootLocation) > 1)
-//         return;
-//
-//         footCell = newFootLocation;
-//         perim.push(newFootLocation);
-//         footMoved = true;
-//     } else if (footMoved)
-//     return;
-// });
-//     //The starting direction is always relative to the hand
-//     foreach ( let footDirection in CounterClockwiseDirections(handCell.CubeCoordDirection(footCell)))
-//     {
-//     let newFootLocation = handCell.GetNeighborCube(footDirection);
-//     if (cubeCells.Any(x => x == newFootLocation))
-//     {
-//     if (newFootLocation == footCell)
-//     continue;
-//
-//     //It's possible and common that we ended up crossing a single body of water
-//     //The tile muse be connected
-//     if (footCell.HexCubeDistance(newFootLocation) > 1)
-//     continue;
-//
-//     footCell = newFootLocation;
-//     perim.Add(newFootLocation);
-//     footMoved = true;
-//     }
-//     else if (footMoved)
-//     break;
-//     }
-//
-//     let handMoved = false;
-//
-//     //The starting direction is always relative to the foot's.
-//     foreach ( let handDirection in ClockwiseFromDirections(footCell.CubeCoordDirection(handCell)))
-//     {
-//     let newHandPosition = footCell.GetNeighborCube(handDirection);
-//
-//     //Just like the other distance check, we need to make sure that if the hand position is back to the original position
-//     //that the current foot cell is a neighbor because it is possible that we are walking back out of an inlet.
-//     if (newHandPosition == startHandCell & & footCell.HexCubeDistance(startCell) < = 1 & & handMovedFromStartingLocation)
-//     {
-//     finished = true;
-//     break;
-//     }
-//
-//     if (cubeCells.All(x => x != newHandPosition))
-//     {
-//     if (newHandPosition == handCell)
-//     continue;
-//
-//     handMovedFromStartingLocation = true;
-//     handCell = newHandPosition;
-//     handMoved = true;
-//     }
-//     else if (handMoved)
-//     {
-//     break;
-//     }
-//     }
-//
-//     if ( ! handMoved)
-//     throw new Exception();
-//
-// }
-// while (!finished && perim.Count < MaxPerimeterResult);
-//
-//
-// if (perim.Count >= MaxPerimeterResult)
-// Debug.LogError("Cancelled out of the perimeter loop. Stuck.");
-//
-// let lastCell = perim.Last();
-// if (lastCell == startCell)
-// perim.RemoveAt(perim.Count - 1);
-//
-// return perim;
-// perim
-// }
