@@ -743,7 +743,7 @@ impl Player {
 
     /// # Errors
     ///
-    /// Will return `Err` if the unit cannot move to the destination.
+    /// Will return `Err` if the unit cannot move.
     ///
     /// # Panics
     ///
