@@ -58,7 +58,7 @@ pub fn possible_destinations(
         .copied()
         .filter(|dest| {
             player
-                .can_move_units(game, units, start, *dest, None)
+                .move_units_destinations(game, units, start, *dest, None)
                 .is_ok()
         })
         .map(MoveDestination::Tile)
@@ -67,7 +67,7 @@ pub fn possible_destinations(
     player.units.iter().for_each(|u| {
         if u.unit_type.is_ship()
             && player
-                .can_move_units(game, units, start, u.position, Some(u.id))
+                .move_units_destinations(game, units, start, u.position, Some(u.id))
                 .is_ok()
         {
             res.push(MoveDestination::Carrier(u.id));

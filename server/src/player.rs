@@ -1,5 +1,5 @@
 use crate::advance::Advance;
-use crate::explore::can_reach;
+use crate::explore::reachable_positions;
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
 use crate::unit::{carried_units, get_current_move};
@@ -748,53 +748,45 @@ impl Player {
     /// # Panics
     ///
     /// Panics if destination tile does not exist
-    pub fn can_move_units(
+    pub fn move_units_destinations(
         &self,
         game: &Game,
-        units: &[u32],
+        unit_ids: &[u32],
         starting: Position,
-        destination: Position,
         embark_carrier_id: Option<u32>,
-    ) -> Result<(), String> {
+    ) -> Result<Vec<Position>, String> {
         let (moved_units, movement_actions_left, current_move) = if let Movement(m) = &game.state {
             (&m.moved_units, m.movement_actions_left, &m.current_move)
         } else {
             (&vec![], 1, &CurrentMove::None)
         };
 
+        let units = unit_ids
+            .iter()
+            .map(|id| {
+                self.get_unit(*id)
+                    .expect("the player should have all units to move")
+            })
+            .collect::<Vec<_>>();
+
         if units.is_empty() {
             return Err("no units to move".to_string());
         }
-
-        if !can_reach(starting, destination, self, units, &game.map) {
-            return Err("the destination should be adjacent to the starting position".to_string());
-        }
-        if matches!(current_move, CurrentMove::None)
-            || current_move
-                != &get_current_move(game, units, starting, destination, embark_carrier_id)
-        {
-            if movement_actions_left == 0 {
-                return Err("no movement actions left".to_string());
-            }
-
-            if units.iter().any(|unit| moved_units.contains(unit)) {
-                return Err("some units have already moved".to_string());
-            }
-        }
-
         if embark_carrier_id
             .is_some_and(|id| carried_units(game, self.index, id).len() + units.len() > 2)
         {
             return Err("carrier capacity exceeded".to_string());
         }
 
+        let carrier_position = embark_carrier_id.map(|id| {
+            self.get_unit(id)
+                .expect("the player should have the carrier unit")
+                .position
+        });
+
         let mut stack_size = 0;
 
-        for unit_id in units {
-            let unit = self
-                .get_unit(*unit_id)
-                .ok_or("the player should have all units to move")?;
-
+        for unit in units {
             if unit.position != starting {
                 return Err("the unit should be at the starting position".to_string());
             }
@@ -811,21 +803,6 @@ impl Player {
                 if !carrier.unit_type.is_ship() {
                     return Err("the carrier should be a ship".to_string());
                 }
-                if carrier.position != destination {
-                    return Err("the carrier should be at the destination position".to_string());
-                }
-            } else {
-                let terrain = game
-                    .map
-                    .tiles
-                    .get(&destination)
-                    .expect("the destination tile should exist");
-                if unit.unit_type.is_land_based() && terrain.is_water() {
-                    return Err("land units can't move into water".to_string());
-                }
-                if unit.unit_type.is_ship() && terrain.is_land() {
-                    return Err("ships can't move into land".to_string());
-                }
             }
             if unit.unit_type.is_army_unit() && !self.has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE) {
                 return Err("army movement advance missing".to_string());
@@ -834,28 +811,70 @@ impl Player {
                 stack_size += 1;
             }
         }
+        
+        let destinations = reachable_positions(starting, self, units, &game.map)
+            .iter()
+            .filter(|dest| {
+                Self::can_move_to(game, units, carrier_position, starting, dest, stack_size, current_move) 
+                
+            });
 
-        if stack_size == 0 && game.enemy_player(self.index, destination).is_some() {
-            return Err("the stack should contain at least one army unit".to_string());
+        Ok(destinations)
+    }
+
+    fn can_move_to(&self, game: &Game, units: Vec<&Unit>, carrier_position: Option<Position>, start: Position, dest: Position, stack_size: usize, current_move: CurrentMove) -> bool {
+        if stack_size == 0 && game.enemy_player(self.index, dest).is_some() {
+            return false
         }
 
         if game
-            .map
-            .tiles
-            .get(&starting)
-            .expect("starting tile should exist")
-            .is_land()
+            .map.is_land(start)
             && self
-                .get_units(destination)
+                .get_units(dest)
                 .iter()
                 .filter(|unit| unit.unit_type.is_army_unit() && !unit.is_transported())
                 .count()
                 + stack_size
                 > STACK_LIMIT
         {
-            return Err("the destination stack limit would be exceeded".to_string());
+            return false;
         }
-        Ok(())
+        
+        if carrier_position.is_some_and(|p| p != dest) {
+            return false;
+        }
+        if !units.iter().all(|unit| {
+            let terrain = game
+                .map
+                .tiles
+                .get(&dest)
+                .expect("the destination tile should exist");
+            if unit.unit_type.is_land_based() && terrain.is_water() {
+                return false
+            }
+            if unit.unit_type.is_ship() && terrain.is_land() {
+                return false
+            }
+            true
+        }) {
+            return false;
+        }
+        
+        if !matches!(current_move, CurrentMove::None)
+            && current_move
+                == get_current_move(game, unit_ids, starting, dest, embark_carrier_id)
+        {
+            return true;
+        }
+
+        if movement_actions_left == 0 {
+            return false;
+        }
+
+        if unit_ids.iter().any(|unit| moved_units.contains(unit_ids)) {
+            return false;
+        }
+        true
     }
 
     #[must_use]

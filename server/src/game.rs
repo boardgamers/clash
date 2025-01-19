@@ -472,7 +472,7 @@ impl Game {
                     })
                     .collect();
                 player
-                    .can_move_units(
+                    .move_units_destinations(
                         self,
                         &units,
                         starting_position,

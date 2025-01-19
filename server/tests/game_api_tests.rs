@@ -1042,7 +1042,7 @@ fn assert_navigate(game: &mut Game, from: Position, to: Position) {
     game.players[1].get_unit_mut(1).unwrap().position = from;
     let result = game
         .get_player(1)
-        .can_move_units(&game, &[1], from, to, None);
+        .move_units_destinations(&game, &[1], from, to, None);
     assert!(
         result.is_ok(),
         "expected to be able to move from {} to {} but got {:?}",

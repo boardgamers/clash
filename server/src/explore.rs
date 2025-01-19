@@ -3,9 +3,6 @@ use crate::game::{ExploreResolutionState, Game, GameState, MoveState, UndoContex
 use crate::map::{Block, BlockPosition, Map, Rotation, Terrain, UnexploredBlock};
 use crate::player::Player;
 use crate::position::Position;
-use hex2d::{
-    Direction, Spin,
-};
 use itertools::Itertools;
 
 pub(crate) fn move_to_unexplored_tile(
@@ -151,10 +148,10 @@ fn move_to_explored_tile(
 
     if is_any_ship(game, player_index, units)
         && game
-        .map
-        .tiles
-        .get(&destination)
-        .is_some_and(Terrain::is_land)
+            .map
+            .tiles
+            .get(&destination)
+            .is_some_and(Terrain::is_land)
     {
         if ship_can_teleport {
             for (p, t) in block.block.tiles(&block.position, rotation) {
@@ -312,19 +309,21 @@ pub(crate) fn undo_explore_resolution(game: &mut Game, player_index: usize) {
 }
 
 #[must_use]
-pub fn can_reach(
+pub fn reachable_positions(
     starting: Position,
-    destination: Position,
     player: &Player,
     units: &[u32],
     map: &Map,
-) -> bool {
-    starting.is_neighbor(destination)
-        || can_reach_with_navigation(player, units, map).contains(&destination)
+) -> Vec<Position> {
+    let mut base: Vec<_> = starting.neighbors();
+    if player.has_advance(NAVIGATION) {
+        base.extend(reachable_with_navigation(player, units, map));
+    }
+    base
 }
 
 #[must_use]
-fn can_reach_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<Position> {
+fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<Position> {
     if !player.has_advance(NAVIGATION) {
         return vec![];
     }
@@ -342,15 +341,12 @@ fn can_reach_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<P
             let mut perimeter = vec![ship];
 
             add_perimeter(map, start, &mut perimeter);
-            let can_navigate = |p: &Position| {
-                *p != ship && (map.is_water(p) || map.is_unexplored(p))
-            };
+            let can_navigate =
+                |p: &Position| *p != ship && (map.is_water(p) || map.is_unexplored(p));
             let first = perimeter.iter().copied().find(can_navigate);
             let last = perimeter.iter().copied().rfind(can_navigate);
 
-            return vec![first, last].into_iter()
-                .flatten()
-                .collect();
+            return vec![first, last].into_iter().flatten().collect();
         }
     }
     vec![]
