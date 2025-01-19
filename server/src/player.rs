@@ -837,15 +837,10 @@ impl Player {
                     return false;
                 }
                 if !units.iter().all(|unit| {
-                    let terrain = game
-                        .map
-                        .tiles
-                        .get(&dest)
-                        .expect("the destination tile should exist");
-                    if unit.unit_type.is_land_based() && terrain.is_water() {
+                    if unit.unit_type.is_land_based() && game.map.is_water(**dest) {
                         return false
                     }
-                    if unit.unit_type.is_ship() && terrain.is_land() {
+                    if unit.unit_type.is_ship() && game.map.is_land(**dest) {
                         return false
                     }
                     true
