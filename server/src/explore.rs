@@ -4,7 +4,7 @@ use crate::map::{Block, BlockPosition, Map, Rotation, Terrain, UnexploredBlock};
 use crate::player::Player;
 use crate::position::Position;
 use hex2d::{
-    Angle, Back, Coordinate, Direction, Forward, Left, LeftBack, Right, RightBack, Spacing, Spin,
+    Direction, Spin,
 };
 use itertools::Itertools;
 
@@ -151,10 +151,10 @@ fn move_to_explored_tile(
 
     if is_any_ship(game, player_index, units)
         && game
-            .map
-            .tiles
-            .get(&destination)
-            .is_some_and(Terrain::is_land)
+        .map
+        .tiles
+        .get(&destination)
+        .is_some_and(Terrain::is_land)
     {
         if ship_can_teleport {
             for (p, t) in block.block.tiles(&block.position, rotation) {
@@ -337,56 +337,71 @@ fn can_reach_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<P
         }
     });
     if let Some(ship) = ship {
-        let mut destination = vec![];
+        let start = ship.neighbors().into_iter().find(|n| map.is_outside(n));
+        if let Some(start) = start {
+            let mut perimeter = vec![ship];
 
-        let ring = ship.coordinate().ring_iter(1, Spin::CCW(Direction::XY));
-        for r in ring {
-            // for outside in ship
-            //     .neighbors()
-            //     .into_iter()
-            //     .filter(|n| !map.tiles.contains_key(n))
-            // {
-            if !map.tiles.contains_key(&Position::from_coordinate(r)) {
-                continue;
-            }
-
-            let start = Position::from_coordinate(r);
-            // for start in outside {
-            if let Some(Terrain::Water) = map.tiles.get(&start) {
-                destination.push(start);
-            } else if start.is_neighbor(ship) {
-                // let mut visited = ship
-                //     .neighbors()
-                //     .iter()
-                //     .filter(|n| map.tiles.get(n).is_some_and(|t| t.is_water()))
-                //     .copied()
-                //     .collect::<Vec<_>>();
-                // visited.retain(|n| n != &start);
-                // visited.push(ship);
-
-                let mut visited = vec![ship];
-
-                add_perimeter(map, start, &mut visited);
-                let nav = |v: &&Position| {
-                    **v != ship && (map.is_water(*v) || map.is_unexplored(*v))
-                };
-                let first = visited.iter().find(nav);
-                let last = visited.iter().rfind(nav);
-
-                if let Some(first) = first {
-                    destination.push(*first);
-                }
-                if let Some(last) = last {
-                    destination.push(*last);
-                }
-
-                break;
+            add_perimeter(map, start, &mut perimeter);
+            let nav = |p: &Position| {
+                *p != ship && (map.is_water(p) || map.is_unexplored(p))
             };
+            let first = perimeter.iter().copied().find(nav);
+            let last = perimeter.iter().copied().rfind(nav);
+
+            return vec![first, last].into_iter()
+                .flatten()
+                .collect();
+
+            // 
+            // if let Some(first) = first {
+            //     destination.push(*first);
+            // }
+            // if let Some(last) = last {
+            //     destination.push(*last);
+            // }
+            // 
+            // // break;
         }
-        return destination;
     }
     vec![]
 }
+// let mut destination = vec![];
+// 
+// let ring = ship.coordinate().ring_iter(1, Spin::CCW(Direction::XY));
+// for r in ring {
+//     if !map.tiles.contains_key(&Position::from_coordinate(r)) {
+//         continue;
+//     }
+// 
+//     let start = Position::from_coordinate(r);
+//     // for start in outside {
+//     if let Some(Terrain::Water) = map.tiles.get(&start) {
+//         destination.push(start);
+//     } else if start.is_neighbor(ship) {
+// 
+//         let mut visited = vec![ship];
+// 
+//         add_perimeter(map, start, &mut visited);
+//         let nav = |v: &&Position| {
+//             **v != ship && (map.is_water(*v) || map.is_unexplored(*v))
+//         };
+//         let first = visited.iter().find(nav);
+//         let last = visited.iter().rfind(nav);
+// 
+//         if let Some(first) = first {
+//             destination.push(*first);
+//         }
+//         if let Some(last) = last {
+//             destination.push(*last);
+//         }
+// 
+//         break;
+//     };
+// }
+// return destination;
+// }
+// vec![]
+// }
 
 fn add_perimeter(map: &Map, start: Position, perimeter: &mut Vec<Position>) {
     if perimeter.contains(&start) {
