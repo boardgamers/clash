@@ -342,66 +342,19 @@ fn can_reach_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<P
             let mut perimeter = vec![ship];
 
             add_perimeter(map, start, &mut perimeter);
-            let nav = |p: &Position| {
+            let can_navigate = |p: &Position| {
                 *p != ship && (map.is_water(p) || map.is_unexplored(p))
             };
-            let first = perimeter.iter().copied().find(nav);
-            let last = perimeter.iter().copied().rfind(nav);
+            let first = perimeter.iter().copied().find(can_navigate);
+            let last = perimeter.iter().copied().rfind(can_navigate);
 
             return vec![first, last].into_iter()
                 .flatten()
                 .collect();
-
-            // 
-            // if let Some(first) = first {
-            //     destination.push(*first);
-            // }
-            // if let Some(last) = last {
-            //     destination.push(*last);
-            // }
-            // 
-            // // break;
         }
     }
     vec![]
 }
-// let mut destination = vec![];
-// 
-// let ring = ship.coordinate().ring_iter(1, Spin::CCW(Direction::XY));
-// for r in ring {
-//     if !map.tiles.contains_key(&Position::from_coordinate(r)) {
-//         continue;
-//     }
-// 
-//     let start = Position::from_coordinate(r);
-//     // for start in outside {
-//     if let Some(Terrain::Water) = map.tiles.get(&start) {
-//         destination.push(start);
-//     } else if start.is_neighbor(ship) {
-// 
-//         let mut visited = vec![ship];
-// 
-//         add_perimeter(map, start, &mut visited);
-//         let nav = |v: &&Position| {
-//             **v != ship && (map.is_water(*v) || map.is_unexplored(*v))
-//         };
-//         let first = visited.iter().find(nav);
-//         let last = visited.iter().rfind(nav);
-// 
-//         if let Some(first) = first {
-//             destination.push(*first);
-//         }
-//         if let Some(last) = last {
-//             destination.push(*last);
-//         }
-// 
-//         break;
-//     };
-// }
-// return destination;
-// }
-// vec![]
-// }
 
 fn add_perimeter(map: &Map, start: Position, perimeter: &mut Vec<Position>) {
     if perimeter.contains(&start) {
