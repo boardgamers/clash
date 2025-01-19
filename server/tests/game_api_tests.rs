@@ -819,6 +819,28 @@ fn test_direct_capture_city() {
 }
 
 #[test]
+fn test_direct_capture_city_fortress() {
+    test_action(
+        "direct_capture_city_fortress",
+        move_action(vec![0, 1, 2, 3], Position::from_offset("C1")),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_direct_capture_city_only_fortress() {
+    test_action(
+        "direct_capture_city_only_fortress",
+        move_action(vec![0, 1, 2, 3], Position::from_offset("C1")),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
 fn test_first_combat_round_no_hits_attacker_may_retreat() {
     test_action(
         "first_combat_round_no_hits",

@@ -557,11 +557,14 @@ impl Game {
         starting_position: Position,
         defender: usize,
     ) -> bool {
-        if self.players[defender]
+        let has_defending_units = self.players[defender]
             .get_units(destination)
             .iter()
-            .any(|unit| !unit.unit_type.is_settler())
-        {
+            .any(|unit| !unit.unit_type.is_settler());
+        let has_fortress = self.players[defender]
+            .get_city(destination)
+            .is_some_and(|city| city.pieces.fortress.is_some());
+        if has_defending_units || has_fortress {
             let mut military = false;
             for unit_id in units {
                 let unit = self.players[player_index]
