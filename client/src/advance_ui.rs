@@ -4,7 +4,6 @@ use crate::layout_ui::{bottom_center_text, left_mouse_button_pressed_in_rect, to
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::player_ui::player_color;
 use crate::render_context::RenderContext;
-use crate::resource_ui::{new_resource_map, ResourceType};
 use crate::select_ui::HasCountSelectableObject;
 use crate::tooltip::show_tooltip_for_rect;
 use macroquad::color::Color;
@@ -17,12 +16,12 @@ use server::advance::{Advance, Bonus};
 use server::content::advances;
 use server::game::Game;
 use server::game::GameState;
+use server::payment::PaymentModel;
 use server::player::Player;
 use server::playing_actions::PlayingAction;
-use server::resource_pile::AdvancePaymentOptions;
+use server::resource::{new_resource_map, ResourceType};
 use server::status_phase::StatusPhaseAction;
 use std::cmp::min;
-use std::collections::HashMap;
 use std::ops::Rem;
 
 const COLUMNS: usize = 6;
@@ -37,40 +36,29 @@ pub enum AdvanceState {
 #[derive(Clone)]
 pub struct AdvancePayment {
     pub name: String,
+    model: PaymentModel,
     payment: Payment,
-    cost: u32,
 }
 
 impl AdvancePayment {
     fn new(game: &Game, player_index: usize, name: &str) -> AdvancePayment {
-        let p = game.get_player(player_index);
-        let cost = p.advance_cost(name);
+        let model = game
+            .get_player(player_index)
+            .get_advance_payment_options(name);
         AdvancePayment {
             name: name.to_string(),
-            payment: AdvancePayment::new_payment(
-                &p.resources.get_advance_payment_options(cost),
-                cost,
-            ),
-            cost,
+            payment: AdvancePayment::new_payment(model.clone()),
+            model,
         }
     }
 
-    pub fn new_payment(a: &AdvancePaymentOptions, cost: u32) -> Payment {
-        let left = HashMap::from([
-            (ResourceType::Food, a.food_left),
-            (ResourceType::Gold, a.gold_left),
-        ]);
+    pub fn new_payment(model: PaymentModel) -> Payment {
+        let PaymentModel::Sum(a) = model;
+        let left = a.left;
 
         let mut resources: Vec<ResourcePayment> = new_resource_map(&a.default)
             .into_iter()
-            .map(|e| {
-                ResourcePayment::new(
-                    e.0,
-                    e.1,
-                    0,
-                    min(cost, e.1 + left.get(&e.0).unwrap_or(&(0u32))),
-                )
-            })
+            .map(|e| ResourcePayment::new(e.0, e.1, 0, min(a.cost, e.1 + left.amount(e.0))))
             .collect();
         resources.sort_by_key(|r| r.resource);
 
@@ -78,19 +66,16 @@ impl AdvancePayment {
     }
 
     pub fn valid(&self) -> OkTooltip {
-        if self
-            .payment
-            .resources
-            .iter()
-            .map(|r| r.selectable.current)
-            .sum::<u32>()
-            == self.cost
-        {
-            OkTooltip::Valid(format!("Pay {} to research {}", self.cost, self.name))
+        let pile = self.payment.to_resource_pile();
+        let valid = self.model.is_valid(&pile);
+
+        if valid {
+            OkTooltip::Valid(format!("Pay {} to research {}", pile, self.name))
         } else {
             OkTooltip::Invalid(format!(
                 "You don't have {} to research {}",
-                self.cost, self.name
+                self.model.default(),
+                self.name
             ))
         }
     }

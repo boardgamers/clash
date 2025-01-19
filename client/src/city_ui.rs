@@ -10,7 +10,6 @@ use crate::layout_ui::draw_scaled_icon;
 use crate::map_ui::{move_units_buttons, show_map_action_buttons};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::render_context::RenderContext;
-use crate::resource_ui::ResourceType;
 use crate::{hex_ui, player_ui};
 use macroquad::prelude::*;
 use server::city::{City, MoodState};
@@ -18,6 +17,7 @@ use server::city_pieces::Building;
 use server::content::custom_actions::CustomActionType;
 use server::game::Game;
 use server::playing_actions::PlayingActionType;
+use server::resource::ResourceType;
 use server::unit::{UnitType, Units};
 use std::ops::Add;
 
