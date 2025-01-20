@@ -5,10 +5,11 @@ use std::mem;
 
 use GameState::*;
 
-use crate::combat::{self, Combat, CombatPhase};
+use crate::combat::{self, Combat, CombatDieRoll, CombatPhase, COMBAT_DIE_SIDES};
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
 use crate::map::UnexploredBlock;
-use crate::unit::{carried_units, get_current_move};
+use crate::movement::terrain_movement_restriction;
+use crate::unit::{carried_units, get_current_move, MovementRestriction};
 use crate::utils::Rng;
 use crate::utils::Shuffle;
 use crate::{
@@ -448,6 +449,7 @@ impl Game {
         mut move_state: MoveState,
     ) {
         let saved_state = move_state.clone();
+        let mut cost = None;
         let (starting_position, disembarked_units) = match action {
             Move {
                 units,
@@ -471,10 +473,28 @@ impl Game {
                         })
                     })
                     .collect();
-                player
-                    .move_units_destinations(self, &units, starting_position, embark_carrier_id)
-                    .map(|destinations| destinations.contains(&destination))
-                    .expect("cannot move units to destination");
+                match player.move_units_destinations(
+                    self,
+                    &units,
+                    starting_position,
+                    embark_carrier_id,
+                ) {
+                    Ok(destinations) => {
+                        let c = &destinations
+                            .iter()
+                            .find(|route| route.destination == destination)
+                            .expect("destination should be a valid destination")
+                            .cost;
+                        if c.resource_amount() > 0 {
+                            self.players[player_index].loose_resources(c.clone());
+                            cost = Some(c.clone());
+                        }
+                    }
+                    Err(e) => {
+                        panic!("cannot move units to destination: {e}");
+                    }
+                }
+
                 move_state.moved_units.extend(units.iter());
                 move_state.moved_units = move_state.moved_units.iter().unique().copied().collect();
                 let current_move = get_current_move(
@@ -521,9 +541,10 @@ impl Game {
                     ) {
                         return;
                     }
+                } else {
+                    self.move_units(player_index, &units, destination, embark_carrier_id);
                 }
 
-                self.move_units(player_index, &units, destination, embark_carrier_id);
                 self.back_to_move(&move_state, !starting_position.is_neighbor(destination));
 
                 if let Some(enemy) = enemy {
@@ -541,6 +562,7 @@ impl Game {
             starting_position,
             move_state: saved_state,
             disembarked_units,
+            cost,
         });
     }
 
@@ -564,25 +586,30 @@ impl Game {
         let has_fortress = self.players[defender]
             .get_city(destination)
             .is_some_and(|city| city.pieces.fortress.is_some());
-        if has_defending_units || has_fortress {
-            let mut military = false;
-            for unit_id in units {
-                let unit = self.players[player_index]
-                    .get_unit_mut(*unit_id)
-                    .expect("the player should have all units to move");
-                assert!(unit.can_attack());
-                if !unit.unit_type.is_settler() {
-                    military = true;
-                }
-                self.move_unit(player_index, *unit_id, destination, None);
-                self.players[player_index]
-                    .get_unit_mut(*unit_id)
-                    .expect("the player should have all units to move")
-                    .position = starting_position;
-            }
-            assert!(military, "Illegal action");
-            self.back_to_move(move_state, true);
 
+        let mut military = false;
+        for unit_id in units {
+            let unit = self.players[player_index]
+                .get_unit_mut(*unit_id)
+                .expect("the player should have all units to move");
+            if unit.unit_type.is_settler() {
+                if unit
+                    .movement_restrictions
+                    .contains(&MovementRestriction::Battle)
+                {
+                    panic!("unit can't attack");
+                }
+                unit.movement_restrictions.push(MovementRestriction::Battle);
+            } else {
+                military = true;
+            }
+            // move to destination to apply movement restrictions, etc.
+            self.move_unit(player_index, *unit_id, destination, None);
+        }
+        assert!(military, "Need military units to attack");
+        self.back_to_move(move_state, true);
+
+        if has_defending_units || has_fortress {
             combat::initiate_combat(
                 self,
                 defender,
@@ -594,6 +621,14 @@ impl Game {
                 None,
             );
             if matches!(self.state, Combat(_)) {
+                for unit_id in units {
+                    // but the unit is still in the starting position until the attack is resolved
+                    // mostly to keep the logic clean
+                    self.players[player_index]
+                        .get_unit_mut(*unit_id)
+                        .expect("the player should have all units to move")
+                        .position = starting_position;
+                }
                 return true;
             }
         }
@@ -605,6 +640,7 @@ impl Game {
             starting_position,
             move_state,
             disembarked_units,
+            cost,
         }) = self.undo_context_stack.pop()
         else {
             panic!("when undoing a movement action, the game should have stored movement context")
@@ -622,6 +658,9 @@ impl Game {
                     "undo context should contain the starting position if units where moved",
                 ),
             );
+            if let Some(cost) = cost {
+                self.players[player_index].gain_resources(cost);
+            }
             for unit in disembarked_units {
                 self.players[player_index]
                     .get_unit_mut(unit.unit_id)
@@ -825,7 +864,7 @@ impl Game {
         self.add_message("The game has ended");
     }
 
-    pub(crate) fn get_next_dice_roll(&mut self) -> u8 {
+    pub(crate) fn get_next_dice_roll(&mut self) -> CombatDieRoll {
         self.lock_undo();
         let dice_roll = if self.dice_roll_outcomes.is_empty() {
             self.rng.range(0, 12) as u8
@@ -836,7 +875,7 @@ impl Game {
                 .expect("dice roll outcomes should not be empty")
         };
         self.dice_roll_log.push(dice_roll);
-        dice_roll
+        COMBAT_DIE_SIDES[dice_roll as usize].clone()
     }
 
     fn add_message(&mut self, message: &str) {
@@ -1406,16 +1445,9 @@ impl Game {
         unit.position = destination;
         unit.carrier_id = embark_carrier_id;
 
-        let terrain = self
-            .map
-            .get(destination)
-            .expect("the destination position should exist on the map")
-            .clone();
-        match terrain {
-            Mountain => unit.restrict_movement(),
-            Forest => unit.restrict_attack(),
-            _ => (),
-        };
+        if let Some(terrain) = terrain_movement_restriction(&self.map, destination, unit) {
+            unit.movement_restrictions.push(terrain);
+        }
 
         for id in carried_units(self, player_index, unit_id) {
             self.players[player_index]
@@ -1438,27 +1470,21 @@ impl Game {
             .get_unit(*unit)
             .expect("there should be at least one moved unit")
             .position;
-        let start_terain = self
-            .map
-            .get(starting_position)
-            .expect("the starting position should exist on the map")
-            .clone();
-        let dest_terrain = self
-            .map
-            .get(destination)
-            .expect("the destination position should exist on the map")
-            .clone();
+
         for unit_id in units {
             let unit = self.players[player_index]
                 .get_unit_mut(unit_id)
                 .expect("the player should have all units to move");
             unit.position = starting_position;
-            match dest_terrain {
-                Mountain => unit.undo_movement_restriction(),
-                Forest => unit.undo_attack_restriction(),
-                _ => (),
-            };
-            if !start_terain.is_water() {
+
+            if let Some(terrain) = terrain_movement_restriction(&self.map, destination, unit) {
+                unit.movement_restrictions
+                    .iter()
+                    .position(|r| r == &terrain)
+                    .map(|i| unit.movement_restrictions.remove(i));
+            }
+
+            if !self.map.is_water(starting_position) {
                 unit.carrier_id = None;
             }
             for id in &carried_units(self, player_index, unit_id) {
@@ -1638,6 +1664,9 @@ pub enum UndoContext {
         #[serde(default)]
         #[serde(skip_serializing_if = "Vec::is_empty")]
         disembarked_units: Vec<DisembarkUndoContext>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        cost: Option<ResourcePile>,
     },
     ExploreResolution(ExploreResolutionState),
 }

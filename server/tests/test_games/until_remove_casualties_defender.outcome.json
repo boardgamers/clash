@@ -72,56 +72,48 @@
           "player_index": 0,
           "position": "C2",
           "unit_type": "Infantry",
-          "movement_restriction": "None",
           "id": 0
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Cavalry",
-          "movement_restriction": "None",
           "id": 1
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Leader",
-          "movement_restriction": "None",
           "id": 2
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Elephant",
-          "movement_restriction": "None",
           "id": 3
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 4
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 5
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 6
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 7
         }
       ],
@@ -145,13 +137,7 @@
           "Mountain",
           [
             {
-              "food": 0,
-              "wood": 0,
-              "ore": 1,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "ore": 1
             }
           ]
         ],
@@ -159,13 +145,7 @@
           "Fertile",
           [
             {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "food": 1
             }
           ]
         ],
@@ -173,13 +153,7 @@
           "Forest",
           [
             {
-              "food": 0,
-              "wood": 1,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "wood": 1
             }
           ]
         ]
@@ -222,14 +196,12 @@
           "player_index": 1,
           "position": "C1",
           "unit_type": "Infantry",
-          "movement_restriction": "None",
           "id": 0
         },
         {
           "player_index": 1,
           "position": "C1",
           "unit_type": "Infantry",
-          "movement_restriction": "None",
           "id": 1
         }
       ],
@@ -252,13 +224,7 @@
           "Mountain",
           [
             {
-              "food": 0,
-              "wood": 0,
-              "ore": 1,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "ore": 1
             }
           ]
         ],
@@ -266,13 +232,7 @@
           "Fertile",
           [
             {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "food": 1
             }
           ]
         ],
@@ -280,13 +240,7 @@
           "Forest",
           [
             {
-              "food": 0,
-              "wood": 1,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "wood": 1
             }
           ]
         ]
@@ -348,13 +302,7 @@
         "Advance": {
           "advance": "Tactics",
           "payment": {
-            "food": 0,
-            "wood": 0,
-            "ore": 0,
-            "ideas": 2,
-            "gold": 0,
-            "mood_tokens": 0,
-            "culture_tokens": 0
+            "ideas": 2
           }
         }
       }
@@ -382,7 +330,7 @@
     "Player1 used a move units action",
     "\tPlayer1 marched 1 infantry from C2 to C1",
     "\nCombat round 1",
-    "\tPlayer1 rolled a combined combat value of 7 and gets 1 hits against defending units. Player2 rolled a combined combat value of 14 and gets 2 hits against attacking units.",
+    "\tPlayer1 rolled 6 (Infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units. Player2 rolled 6 (Infantry, +1 combat value), 6 (Infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against attacking units.",
     "\tPlayer2 has to remove 1 of his defending units"
   ],
   "undo_limit": 3,

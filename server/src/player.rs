@@ -1,10 +1,11 @@
 use crate::advance::Advance;
-use crate::explore::reachable_positions;
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
+use crate::movement::move_routes;
+use crate::movement::{is_valid_movement_type, MoveRoute};
 use crate::payment::{get_sum_payment_options, PaymentModel};
 use crate::resource::ResourceType;
-use crate::unit::{carried_units, get_current_move};
+use crate::unit::{carried_units, get_current_move, MovementRestriction};
 use crate::{
     city::{City, CityData},
     city_pieces::Building::{self, *},
@@ -155,6 +156,17 @@ impl Player {
     }
 
     fn from_data(data: PlayerData) -> Player {
+        let units = data.units;
+        units
+            .iter()
+            .into_group_map_by(|unit| unit.id)
+            .iter()
+            .for_each(|(id, units)| {
+                assert!(
+                    units.len() == 1,
+                    "player data should not contain duplicate units {id}"
+                );
+            });
         let player = Self {
             name: data.name,
             index: data.id,
@@ -162,7 +174,7 @@ impl Player {
             resource_limit: data.resource_limit,
             events: Some(PlayerEvents::default()),
             cities: data.cities.into_iter().map(City::from_data).collect(),
-            units: data.units,
+            units,
             civilization: civilizations::get_civilization_by_name(&data.civilization)
                 .expect("player data should have a valid civilization"),
             active_leader: data.active_leader.map(|leader| {
@@ -325,7 +337,7 @@ impl Player {
             city.deactivate();
         }
         for unit in &mut self.units {
-            unit.reset_movement_restriction();
+            unit.movement_restrictions = vec![];
         }
         self.played_once_per_turn_actions.clear();
     }
@@ -756,7 +768,7 @@ impl Player {
         unit_ids: &[u32],
         start: Position,
         embark_carrier_id: Option<u32>,
-    ) -> Result<Vec<Position>, String> {
+    ) -> Result<Vec<MoveRoute>, String> {
         let (moved_units, movement_actions_left, current_move) = if let Movement(m) = &game.state {
             (&m.moved_units, m.movement_actions_left, &m.current_move)
         } else {
@@ -787,14 +799,13 @@ impl Player {
         });
 
         let mut stack_size = 0;
+        let mut movement_restrictions = vec![];
 
         for unit in &units {
             if unit.position != start {
                 return Err("the unit should be at the starting position".to_string());
             }
-            if !unit.can_move() {
-                return Err("the unit should be able to move".to_string());
-            }
+            movement_restrictions.extend(unit.movement_restrictions.iter());
             if let Some(embark_carrier_id) = embark_carrier_id {
                 if !unit.unit_type.is_land_based() {
                     return Err("the unit should be land based to embark".to_string());
@@ -814,58 +825,73 @@ impl Player {
             }
         }
 
-        let destinations: Vec<Position> = reachable_positions(start, self, unit_ids, &game.map)
-            .iter()
-            .filter(|dest| {
-                if stack_size == 0 && game.enemy_player(self.index, **dest).is_some() {
-                    return false;
-                }
-
-                if game.map.is_land(start)
-                    && self
-                        .get_units(**dest)
-                        .iter()
-                        .filter(|unit| unit.unit_type.is_army_unit() && !unit.is_transported())
-                        .count()
-                        + stack_size
-                        > STACK_LIMIT
-                {
-                    return false;
-                }
-
-                if carrier_position.is_some_and(|p| p != **dest) {
-                    return false;
-                }
-                if !units.iter().all(|unit| {
-                    if unit.unit_type.is_land_based() && game.map.is_water(**dest) {
+        let destinations: Vec<MoveRoute> =
+            move_routes(start, self, unit_ids, game, embark_carrier_id)
+                .iter()
+                .filter(|route| {
+                    if !self.resources.can_afford(&route.cost) {
                         return false;
                     }
-                    if unit.unit_type.is_ship() && game.map.is_land(**dest) {
+                    if movement_restrictions.contains(&&MovementRestriction::Battle) {
+                        return false;
+                    }
+                    let dest = route.destination;
+                    let attack = game.enemy_player(self.index, dest).is_some();
+                    if attack && stack_size == 0 {
+                        return false;
+                    }
+
+                    if !route.ignore_terrain_movement_restrictions {
+                        if movement_restrictions
+                            .iter()
+                            .contains(&&MovementRestriction::Mountain)
+                        {
+                            return false;
+                        }
+                        if attack
+                            && movement_restrictions
+                                .iter()
+                                .contains(&&MovementRestriction::Forest)
+                        {
+                            return false;
+                        }
+                    }
+
+                    if game.map.is_land(start)
+                        && self
+                            .get_units(dest)
+                            .iter()
+                            .filter(|unit| unit.unit_type.is_army_unit() && !unit.is_transported())
+                            .count()
+                            + stack_size
+                            + route.stack_size_used
+                            > STACK_LIMIT
+                    {
+                        return false;
+                    }
+
+                    if !is_valid_movement_type(game, &units, carrier_position, dest) {
+                        return false;
+                    }
+
+                    if !matches!(current_move, CurrentMove::None)
+                        && *current_move
+                            == get_current_move(game, unit_ids, start, dest, embark_carrier_id)
+                    {
+                        return true;
+                    }
+
+                    if movement_actions_left == 0 {
+                        return false;
+                    }
+
+                    if unit_ids.iter().any(|id| moved_units.contains(id)) {
                         return false;
                     }
                     true
-                }) {
-                    return false;
-                }
-
-                if !matches!(current_move, CurrentMove::None)
-                    && *current_move
-                        == get_current_move(game, unit_ids, start, **dest, embark_carrier_id)
-                {
-                    return true;
-                }
-
-                if movement_actions_left == 0 {
-                    return false;
-                }
-
-                if unit_ids.iter().any(|id| moved_units.contains(id)) {
-                    return false;
-                }
-                true
-            })
-            .copied()
-            .collect();
+                })
+                .cloned()
+                .collect();
 
         Ok(destinations)
     }

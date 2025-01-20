@@ -26,14 +26,12 @@ pub fn center(pos: Position) -> Point {
 pub fn draw_hex(
     p: Position,
     text_color: Color,
-    alpha: f32,
+    overlay: Color,
     terrain: Option<&Texture2D>,
     exhausted: bool,
     rc: &RenderContext,
 ) {
     let c = center(p);
-    let mut v = WHITE.to_vec();
-    v.w = alpha;
     if let Some(terrain) = terrain {
         draw_texture_ex(
             terrain,
@@ -50,7 +48,7 @@ pub fn draw_hex(
         // Terrain::Unexplored
         draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, BEIGE);
     }
-    draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, Color::from_vec(v));
+    draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, overlay);
     rc.state
         .draw_text_with_color(&p.to_string(), c.x - 30.0, c.y - 35.0, text_color);
     if exhausted {

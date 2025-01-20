@@ -332,18 +332,20 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
                 .map
                 .get(*destination)
                 .expect("the destination position should be on the map");
-            let verb = if start_is_water {
+            let (verb, suffix) = if start_is_water {
                 if t.is_unexplored() || t.is_water() {
-                    "sailed"
+                    ("sailed", "")
                 } else {
-                    "disembarked"
+                    ("disembarked", "")
                 }
             } else if t.is_water() {
-                "embarked"
+                ("embarked", "")
+            } else if start.is_neighbor(*destination) {
+                ("marched", "")
             } else {
-                "marched"
+                ("marched", " on roads")
             };
-            format!("\t{player_name} {verb} {units_str} from {start} to {destination}",)
+            format!("\t{player_name} {verb} {units_str} from {start} to {destination}{suffix}",)
         }
         MovementAction::Stop => format!("\t{player_name} ended the movement action"),
     }

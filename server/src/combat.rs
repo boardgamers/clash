@@ -216,10 +216,17 @@ fn combat_loop(game: &mut Game, mut c: Combat) {
         game.add_info_log_item(format!("\nCombat round {}", c.round));
         //todo: go into tactics phase if either player has tactics card (also if they can not play it unless otherwise specified via setting)
 
+        let attacker_name = game.players[c.attacker].get_name();
         let active_attackers = c.active_attackers(game);
-        let attacker_rolls = roll(game, c.attacker, &active_attackers);
+        let mut attacker_log = vec![];
+        let attacker_rolls = roll(game, c.attacker, &active_attackers, &mut attacker_log);
+        let attacker_log_str = roll_log_str(&attacker_log);
         let active_defenders = active_defenders(game, c.defender, c.defender_position);
-        let defender_rolls = roll(game, c.defender, &active_defenders);
+
+        let defender_name = game.players[c.defender].get_name();
+        let mut defender_log = vec![];
+        let defender_rolls = roll(game, c.defender, &active_defenders, &mut defender_log);
+        let defender_log_str = roll_log_str(&defender_log);
         let attacker_combat_value = attacker_rolls.combat_value;
         let attacker_hit_cancels = attacker_rolls.hit_cancels;
         let defender_combat_value = defender_rolls.combat_value;
@@ -229,7 +236,7 @@ fn combat_loop(game: &mut Game, mut c: Combat) {
         }
         let attacker_hits = (attacker_combat_value / 5).saturating_sub(defender_hit_cancels);
         let defender_hits = (defender_combat_value / 5).saturating_sub(attacker_hit_cancels);
-        game.add_info_log_item(format!("\t{} rolled a combined combat value of {attacker_combat_value} and gets {attacker_hits} hits against defending units. {} rolled a combined combat value of {defender_combat_value} and gets {defender_hits} hits against attacking units.", game.players[c.attacker].get_name(), game.players[c.defender].get_name()));
+        game.add_info_log_item(format!("\t{attacker_name} rolled {attacker_log_str} for combined combat value of {attacker_combat_value} and gets {attacker_hits} hits against defending units. {defender_name} rolled {defender_log_str} for combined combat value of {defender_combat_value} and gets {defender_hits} hits against attacking units."));
         if attacker_hits < active_defenders.len() as u8 && attacker_hits > 0 {
             kill_some_defenders(game, c, attacker_hits, defender_hits);
             return;
@@ -249,6 +256,13 @@ fn combat_loop(game: &mut Game, mut c: Combat) {
             return;
         }
     }
+}
+
+fn roll_log_str(log: &[String]) -> String {
+    if log.is_empty() {
+        return String::from("no dice");
+    }
+    log.join(", ")
 }
 
 fn kill_all_attackers(game: &mut Game, c: &mut Combat) {
@@ -374,30 +388,49 @@ fn end_combat(game: &mut Game, c: &Combat) -> CombatControl {
     CombatControl::Exit
 }
 
-pub struct CombatRolls {
+struct CombatRolls {
     pub combat_value: u8,
     pub hit_cancels: u8,
 }
 
-// Roll translation
-// 0 = 1 leader
-// 1 = 1 leader
-// 2 = 2 cavalry
-// 3 = 2 elephant
-// 4 = 3 elephant
-// 5 = 3 infantry
-// 6 = 4 cavalry
-// 7 = 4 elephant
-// 8 = 5 cavalry
-// 9 = 5 infantry
-// 10= 6 infantry
-// 11= 6 infantry
+#[derive(Clone)]
+pub(crate) struct CombatDieRoll {
+    pub value: u8,
+    pub bonus: UnitType,
+}
+
+impl CombatDieRoll {
+    #[must_use]
+    pub const fn new(value: u8, bonus: UnitType) -> Self {
+        Self { value, bonus }
+    }
+}
+
+pub(crate) const COMBAT_DIE_SIDES: [CombatDieRoll; 12] = [
+    CombatDieRoll::new(1, Leader),
+    CombatDieRoll::new(1, Leader),
+    CombatDieRoll::new(2, Cavalry),
+    CombatDieRoll::new(2, Elephant),
+    CombatDieRoll::new(3, Elephant),
+    CombatDieRoll::new(3, Infantry),
+    CombatDieRoll::new(4, Cavalry),
+    CombatDieRoll::new(4, Elephant),
+    CombatDieRoll::new(5, Cavalry),
+    CombatDieRoll::new(5, Infantry),
+    CombatDieRoll::new(6, Infantry),
+    CombatDieRoll::new(6, Infantry),
+];
 
 ///
 /// # Panics
 ///
 /// Panics if the player does not have all units
-pub fn roll(game: &mut Game, player_index: usize, units: &Vec<u32>) -> CombatRolls {
+fn roll(
+    game: &mut Game,
+    player_index: usize,
+    units: &Vec<u32>,
+    roll_log: &mut Vec<String>,
+) -> CombatRolls {
     let mut dice_rolls = 0;
     let mut unit_types = Units::empty();
     for unit in units {
@@ -416,57 +449,68 @@ pub fn roll(game: &mut Game, player_index: usize, units: &Vec<u32>) -> CombatRol
     rolls.combat_value = 0;
     rolls.hit_cancels = 0;
     for _ in 0..dice_rolls {
-        let dice_roll = dice_roll_with_leader_reroll(game, &mut unit_types);
-        let value = dice_value(dice_roll);
+        let dice_roll = dice_roll_with_leader_reroll(game, &mut unit_types, roll_log);
+        let value = dice_roll.value;
         rolls.combat_value += value;
-        match dice_roll {
-            5 | 9 | 10 | 11 => {
-                if unit_types.has_unit(&Infantry) {
+        if unit_types.has_unit(&dice_roll.bonus) {
+            unit_types -= &dice_roll.bonus;
+
+            match dice_roll.bonus {
+                Infantry => {
                     rolls.combat_value += 1;
-                    unit_types -= &Infantry;
+                    add_roll_log_effect(roll_log, "+1 combat value");
                 }
-            }
-            2 | 6 | 8 => {
-                if unit_types.has_unit(&Cavalry) {
+                Cavalry => {
                     rolls.combat_value += 2;
-                    unit_types -= &Cavalry;
+                    add_roll_log_effect(roll_log, "+2 combat value");
                 }
-            }
-            3 | 4 | 7 => {
-                if unit_types.has_unit(&Elephant) {
+                Elephant => {
                     rolls.hit_cancels += 1;
                     rolls.combat_value -= value;
-                    unit_types -= &Elephant;
+                    add_roll_log_effect(roll_log, "-1 hits, no combat value");
                 }
+                _ => (),
             }
-            _ => (),
+        } else {
+            add_roll_log_effect(roll_log, "no bonus");
         }
     }
     rolls
 }
 
-fn dice_roll_with_leader_reroll(game: &mut Game, unit_types: &mut Units) -> u8 {
-    let roll = game.get_next_dice_roll();
+fn dice_roll_with_leader_reroll(
+    game: &mut Game,
+    unit_types: &mut Units,
+    roll_log: &mut Vec<String>,
+) -> CombatDieRoll {
+    let side = roll_die(game, roll_log);
 
-    if roll > 2 || !unit_types.has_unit(&Leader) {
-        return roll;
+    if side.bonus != Leader || !unit_types.has_unit(&Leader) {
+        return side;
     }
 
     *unit_types -= &Leader;
 
     // if used, the leader grants unlimited rerolls of 1s and 2s
     loop {
-        let roll = game.get_next_dice_roll();
+        add_roll_log_effect(roll_log, "re-roll");
+        let side = roll_die(game, roll_log);
 
-        if roll > 2 {
-            return roll;
+        if side.bonus != Leader {
+            return side;
         }
     }
 }
 
-#[must_use]
-pub fn dice_value(roll: u8) -> u8 {
-    roll / 2 + 1
+fn add_roll_log_effect(roll_log: &mut [String], effect: &str) {
+    let l = roll_log.len();
+    roll_log[l - 1] += &format!("{effect})");
+}
+
+fn roll_die(game: &mut Game, roll_log: &mut Vec<String>) -> CombatDieRoll {
+    let roll = game.get_next_dice_roll();
+    roll_log.push(format!("{} ({:?}, ", roll.value, roll.bonus));
+    roll.clone()
 }
 
 /// # Panics

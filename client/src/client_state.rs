@@ -2,6 +2,7 @@ use macroquad::prelude::*;
 use server::action::Action;
 use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
+use server::content::advances::{NAVIGATION, ROADS};
 use server::game::{CulturalInfluenceResolution, Game, GameState};
 use server::playing_actions::PlayingAction;
 use server::position::Position;
@@ -16,6 +17,7 @@ use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
+use crate::log_ui::advance_help;
 use crate::map_ui::ExploreResolutionConfig;
 use crate::move_ui::{MoveDestination, MoveIntent, MoveSelection};
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
@@ -90,7 +92,7 @@ impl ActiveDialog {
     }
 
     #[must_use]
-    pub fn help_message(&self, game: &Game) -> Vec<String> {
+    pub fn help_message(&self, rc: &RenderContext) -> Vec<String> {
         match self {
             ActiveDialog::None
             | ActiveDialog::Log
@@ -108,7 +110,7 @@ impl ActiveDialog {
             ActiveDialog::ConstructionPayment(c) => {
                 vec![format!("Click on resources to pay for {}", c.name)]
             }
-            ActiveDialog::CollectResources(collect) => collect.help_text(game),
+            ActiveDialog::CollectResources(collect) => collect.help_text(rc.game),
             ActiveDialog::RecruitUnitSelection(_) => vec!["Click on a unit to recruit".to_string()],
             ActiveDialog::ReplaceUnits(_) => vec!["Click on a unit to replace".to_string()],
             ActiveDialog::MoveUnits(m) => {
@@ -129,6 +131,8 @@ impl ActiveDialog {
                     {
                         result.push("Click on a carrier to embark units".to_string());
                     };
+                    advance_help(rc, &mut result, NAVIGATION);
+                    advance_help(rc, &mut result, ROADS);
                     result
                 } else {
                     vec!["Click on a unit to move".to_string()]

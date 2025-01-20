@@ -429,14 +429,7 @@ fn test_action(
 ) {
     let a = serde_json::to_string(&action).expect("action should be serializable");
     let a2 = serde_json::from_str(&a).expect("action should be deserializable");
-    let original_game = read_game(name);
-    let game = Game::from_data(serde_json::from_str(&original_game).unwrap_or_else(|e| {
-        panic!(
-            "the game file should be deserializable {}: {}",
-            game_path(name),
-            e
-        )
-    }));
+    let game = load_game(name);
     let game = game_api::execute_action(game, a2, player_index);
     if illegal_action_test {
         println!(
@@ -445,7 +438,7 @@ fn test_action(
         return;
     }
     let outcome = format!("{name}.outcome");
-    let expected_game = read_game(&outcome);
+    let expected_game = read_game_str(&outcome);
     assert_eq_game_json(
         &expected_game,
         &to_json(&game),
@@ -460,7 +453,7 @@ fn test_action(
     undo_redo(
         name,
         player_index,
-        &original_game,
+        &read_game_str(name),
         game,
         &outcome,
         &expected_game,
@@ -472,7 +465,7 @@ fn to_json(game: &Game) -> String {
     serde_json::to_string_pretty(&game.cloned_data()).expect("game data should be serializable")
 }
 
-fn read_game(name: &str) -> String {
+fn read_game_str(name: &str) -> String {
     let path = game_path(name);
     fs::read_to_string(&path)
         .unwrap_or_else(|e| panic!("game file {path} should exist in the test games folder: {e}"))
@@ -532,6 +525,65 @@ fn test_movement() {
         true,
         false,
     );
+}
+
+#[test]
+fn test_movement_on_roads_from_city() {
+    test_action(
+        "movement_on_roads_from_city",
+        move_action(vec![0], Position::from_offset("F7")),
+        1,
+        true,
+        false,
+    );
+}
+
+#[test]
+fn test_movement_on_roads_to_city() {
+    test_action(
+        "movement_on_roads_to_city",
+        move_action(vec![0], Position::from_offset("D8")),
+        1,
+        true,
+        false,
+    );
+}
+
+#[test]
+fn test_road_coordinates() {
+    let game = &load_game("roads_unit_test");
+    // city units at D8 are 0, 1, 2
+
+    // 3 and 4 are on mountain C8 and can move to the city at D8 (ignoring movement restrictions),
+    // but not both, since the city already has 3 army units
+    assert!(get_destinations(game, &[4], "C8").contains(&"D8".to_string()));
+    assert!(!get_destinations(game, &[3, 4], "C8").contains(&"D8".to_string()));
+
+    // 5 and 6 are on E8 and count against the stack size limit of the units moving out of city D8
+    // so only 2 can move over them towards F7
+    assert!(get_destinations(game, &[0, 1], "D8").contains(&"F7".to_string()));
+    let city_dest = get_destinations(game, &[0, 1, 2], "D8");
+    assert!(!city_dest.contains(&"F7".to_string()));
+
+    // all 3 city units can move around the mountain to C7
+    assert!(city_dest.contains(&"C7".to_string()));
+    // explore for the city units at D6 is not allowed
+    assert!(!city_dest.contains(&"D6".to_string()));
+    // embark for the city units at E7 is not allowed
+    assert!(!city_dest.contains(&"E7".to_string()));
+
+    // don't move to same position
+    assert!(!city_dest.contains(&"D8".to_string()));
+}
+
+fn get_destinations(game: &Game, units: &[u32], position: &str) -> Vec<String> {
+    let player = game.get_player(1);
+    player
+        .move_units_destinations(game, units, Position::from_offset(position), None)
+        .unwrap()
+        .into_iter()
+        .map(|r| r.destination.to_string())
+        .collect()
 }
 
 #[test]
@@ -1051,9 +1103,7 @@ fn test_ship_navigate() {
 
 #[test]
 fn test_ship_navigate_coordinates() {
-    let name = "ship_navigate2";
-    let original_game = read_game(name);
-    let mut game = Game::from_data(serde_json::from_str(&original_game).unwrap());
+    let mut game = load_game("ship_navigation_unit_test");
 
     let pairs = [
         ("B3", "B5"),
@@ -1076,12 +1126,24 @@ fn assert_navigate(game: &mut Game, from: Position, to: Position) {
     let result = game
         .get_player(1)
         .move_units_destinations(game, &[1], from, None)
-        .is_ok_and(|d| d.contains(&to));
+        .is_ok_and(|d| d.iter().any(|route| route.destination == to));
     assert!(
         result,
         "expected to be able to move from {} to {}",
         from, to,
     );
+}
+
+fn load_game(name: &str) -> Game {
+    Game::from_data(
+        serde_json::from_str(&read_game_str(name)).unwrap_or_else(|e| {
+            panic!(
+                "the game file should be deserializable {}: {}",
+                game_path(name),
+                e
+            )
+        }),
+    )
 }
 
 #[test]

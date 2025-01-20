@@ -5,7 +5,7 @@ use macroquad::shapes::draw_circle;
 
 use server::game::Game;
 use server::position::Position;
-use server::unit::{carried_units, Unit, UnitType};
+use server::unit::{carried_units, MovementRestriction, Unit, UnitType};
 
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::select_ui::ConfirmSelection;
@@ -318,18 +318,32 @@ pub fn name(u: &UnitType) -> &str {
 
 pub fn unit_label(unit: &Unit, army_move: bool) -> String {
     let name = name(&unit.unit_type);
+    let mut notes = vec![];
 
-    let res = if unit.unit_type.is_army_unit() && !army_move {
-        " (research Tactics to move the unit) "
-    } else if !unit.can_move() {
-        " (can't move out of a Mountain this turn) "
-    } else if !unit.can_attack() && !unit.unit_type.is_settler() {
-        " (can't attack again this turn) "
+    if unit.unit_type.is_army_unit() && !army_move {
+        notes.push("research Tactics to move the unit");
     } else {
+        for r in unit.movement_restrictions.iter().unique() {
+            match r {
+                MovementRestriction::Battle => {
+                    notes.push("can't move again (battle)");
+                }
+                MovementRestriction::Mountain => {
+                    notes.push("can't move out of a Mountain this turn");
+                }
+                MovementRestriction::Forest => {
+                    notes.push("can't attack from a Forest this turn");
+                }
+            }
+        }
+    }
+    let suffix = if notes.is_empty() {
         ""
+    } else {
+        &format!(" ({})", notes.join(", "))
     };
 
-    format!("{name}{res}")
+    format!("{name}{suffix}")
 }
 
 pub fn unit_selection_clicked(unit_id: u32, units: &mut Vec<u32>) {

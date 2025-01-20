@@ -14,20 +14,14 @@
       "resources": {
         "food": 1,
         "wood": 1,
-        "ore": 0,
-        "ideas": 0,
-        "gold": 0,
-        "mood_tokens": 1,
-        "culture_tokens": 0
+        "mood_tokens": 1
       },
       "resource_limit": {
         "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 0,
-        "culture_tokens": 0
+        "gold": 7
       },
       "cities": [
         {
@@ -52,7 +46,6 @@
           "player_index": 0,
           "position": "E3",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 1
         }
       ],
@@ -76,13 +69,7 @@
           "Mountain",
           [
             {
-              "food": 0,
-              "wood": 0,
-              "ore": 1,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "ore": 1
             }
           ]
         ],
@@ -90,13 +77,7 @@
           "Fertile",
           [
             {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "food": 1
             }
           ]
         ],
@@ -104,13 +85,7 @@
           "Forest",
           [
             {
-              "food": 0,
-              "wood": 1,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "wood": 1
             }
           ]
         ],
@@ -118,13 +93,7 @@
           "Water",
           [
             {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "food": 1
             }
           ]
         ]
@@ -135,12 +104,6 @@
       "name": null,
       "id": 1,
       "resources": {
-        "food": 0,
-        "wood": 0,
-        "ore": 0,
-        "ideas": 0,
-        "gold": 0,
-        "mood_tokens": 0,
         "culture_tokens": 1
       },
       "resource_limit": {
@@ -148,9 +111,7 @@
         "wood": 7,
         "ore": 7,
         "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 0,
-        "culture_tokens": 0
+        "gold": 7
       },
       "cities": [
         {
@@ -175,9 +136,9 @@
           "player_index": 1,
           "position": "F5",
           "unit_type": "Settler",
-          "movement_restriction": {
-            "AllMovement": 0
-          },
+          "movement_restrictions": [
+            "Mountain"
+          ],
           "id": 1
         }
       ],
@@ -201,13 +162,7 @@
           "Mountain",
           [
             {
-              "food": 0,
-              "wood": 0,
-              "ore": 1,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "ore": 1
             }
           ]
         ],
@@ -215,13 +170,7 @@
           "Fertile",
           [
             {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "food": 1
             }
           ]
         ],
@@ -229,13 +178,7 @@
           "Forest",
           [
             {
-              "food": 0,
-              "wood": 1,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "wood": 1
             }
           ]
         ]
@@ -727,13 +670,7 @@
           ],
           "city_position": "D1",
           "payment": {
-            "food": 2,
-            "wood": 0,
-            "ore": 0,
-            "ideas": 0,
-            "gold": 0,
-            "mood_tokens": 0,
-            "culture_tokens": 0
+            "food": 2
           },
           "leader_index": null,
           "replaced_units": []
@@ -764,25 +701,13 @@
             [
               "D1",
               {
-                "food": 1,
-                "wood": 0,
-                "ore": 0,
-                "ideas": 0,
-                "gold": 0,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "food": 1
               }
             ],
             [
               "C2",
               {
-                "food": 0,
-                "wood": 1,
-                "ore": 0,
-                "ideas": 0,
-                "gold": 0,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "wood": 1
               }
             ]
           ]
@@ -800,13 +725,7 @@
           ],
           "city_position": "E7",
           "payment": {
-            "food": 2,
-            "wood": 0,
-            "ore": 0,
-            "ideas": 0,
-            "gold": 0,
-            "mood_tokens": 0,
-            "culture_tokens": 0
+            "food": 2
           },
           "leader_index": null,
           "replaced_units": []
@@ -1314,9 +1233,6 @@
           "player_index": 0,
           "position": "C7",
           "unit_type": "Settler",
-          "movement_restriction": {
-            "Attack": 2
-          },
           "id": 0
         }
       }
@@ -1355,9 +1271,6 @@
           "player_index": 1,
           "position": "E7",
           "unit_type": "Settler",
-          "movement_restriction": {
-            "Attack": 2
-          },
           "id": 0
         }
       }

@@ -28,6 +28,7 @@ pub mod game_api_wrapper;
 pub mod leader;
 pub mod log;
 pub mod map;
+mod movement;
 pub mod payment;
 pub mod player;
 mod player_events;

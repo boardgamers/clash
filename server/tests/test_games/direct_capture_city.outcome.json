@@ -63,56 +63,48 @@
           "player_index": 0,
           "position": "C1",
           "unit_type": "Infantry",
-          "movement_restriction": "None",
           "id": 0
         },
         {
           "player_index": 0,
           "position": "C1",
           "unit_type": "Cavalry",
-          "movement_restriction": "None",
           "id": 1
         },
         {
           "player_index": 0,
           "position": "C1",
           "unit_type": "Leader",
-          "movement_restriction": "None",
           "id": 2
         },
         {
           "player_index": 0,
           "position": "C1",
           "unit_type": "Elephant",
-          "movement_restriction": "None",
           "id": 3
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 4
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 5
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 6
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 7
         }
       ],
@@ -128,7 +120,9 @@
       "wonders_build": [],
       "game_event_tokens": 2,
       "completed_objectives": [],
-      "captured_leaders": [],
+      "captured_leaders": [
+        "Alexander"
+      ],
       "event_victory_points": 0.0,
       "wonder_cards": [],
       "collect_options": [
@@ -136,13 +130,7 @@
           "Mountain",
           [
             {
-              "food": 0,
-              "wood": 0,
-              "ore": 1,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "ore": 1
             }
           ]
         ],
@@ -150,13 +138,7 @@
           "Fertile",
           [
             {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "food": 1
             }
           ]
         ],
@@ -164,13 +146,7 @@
           "Forest",
           [
             {
-              "food": 0,
-              "wood": 1,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "wood": 1
             }
           ]
         ]
@@ -200,7 +176,7 @@
       },
       "cities": [],
       "units": [],
-      "civilization": "test1",
+      "civilization": "test0",
       "active_leader": null,
       "available_leaders": [],
       "advances": [
@@ -219,13 +195,7 @@
           "Mountain",
           [
             {
-              "food": 0,
-              "wood": 0,
-              "ore": 1,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "ore": 1
             }
           ]
         ],
@@ -233,13 +203,7 @@
           "Fertile",
           [
             {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "food": 1
             }
           ]
         ],
@@ -247,13 +211,7 @@
           "Forest",
           [
             {
-              "food": 0,
-              "wood": 1,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "wood": 1
             }
           ]
         ]
@@ -315,13 +273,7 @@
         "Advance": {
           "advance": "Tactics",
           "payment": {
-            "food": 0,
-            "wood": 0,
-            "ore": 0,
-            "ideas": 2,
-            "gold": 0,
-            "mood_tokens": 0,
-            "culture_tokens": 0
+            "ideas": 2
           }
         }
       }
@@ -352,7 +304,7 @@
     "Player1 used a move units action",
     "\tPlayer1 marched 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1",
     "\nCombat round 1",
-    "\tPlayer1 rolled a combined combat value of 25 and gets 5 hits against defending units. Player2 rolled a combined combat value of 2 and gets 0 hits against attacking units.",
+    "\tPlayer1 rolled 2 (Elephant, -1 hits, no combat value), 2 (Elephant, no bonus), 2 (Elephant, no bonus), 1 (Leader, re-roll), 1 (Leader, re-roll), 6 (Infantry, +1 combat value) for combined combat value of 11 and gets 2 hits against defending units. Player2 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 0 hits against attacking units.",
     "\tPlayer1 killed all defending units and captured Player2's city at C1"
   ],
   "undo_limit": 3,
@@ -366,15 +318,20 @@
   "dice_roll_outcomes": [
     1,
     1,
-    1
+    1,
+    1,
+    1,
+    11,
+    11
   ],
   "dice_roll_log": [
-    11,
-    11,
-    11,
-    11,
+    3,
+    3,
+    3,
     1,
-    1
+    1,
+    11,
+    11
   ],
   "dropped_players": [],
   "wonders_left": [

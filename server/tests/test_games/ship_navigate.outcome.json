@@ -14,20 +14,15 @@
       "resources": {
         "food": 1,
         "wood": 2,
-        "ore": 0,
-        "ideas": 0,
         "gold": 1,
-        "mood_tokens": 2,
-        "culture_tokens": 0
+        "mood_tokens": 2
       },
       "resource_limit": {
         "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 0,
-        "culture_tokens": 0
+        "gold": 7
       },
       "cities": [
         {
@@ -72,13 +67,7 @@
           "Barren",
           [
             {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "food": 1
             }
           ]
         ],
@@ -86,13 +75,7 @@
           "Mountain",
           [
             {
-              "food": 0,
-              "wood": 0,
-              "ore": 1,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "ore": 1
             }
           ]
         ],
@@ -100,13 +83,7 @@
           "Fertile",
           [
             {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "food": 1
             }
           ]
         ],
@@ -114,13 +91,7 @@
           "Forest",
           [
             {
-              "food": 0,
-              "wood": 1,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "wood": 1
             }
           ]
         ],
@@ -128,13 +99,7 @@
           "Water",
           [
             {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "food": 1
             }
           ]
         ]
@@ -146,21 +111,14 @@
       "id": 1,
       "resources": {
         "food": 1,
-        "wood": 0,
-        "ore": 0,
-        "ideas": 0,
-        "gold": 0,
-        "mood_tokens": 3,
-        "culture_tokens": 0
+        "mood_tokens": 3
       },
       "resource_limit": {
         "food": 7,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 0,
-        "culture_tokens": 0
+        "gold": 7
       },
       "cities": [
         {
@@ -188,7 +146,6 @@
           "player_index": 1,
           "position": "A7",
           "unit_type": "Ship",
-          "movement_restriction": "None",
           "id": 1
         }
       ],
@@ -215,13 +172,7 @@
           "Barren",
           [
             {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "food": 1
             }
           ]
         ],
@@ -229,13 +180,7 @@
           "Mountain",
           [
             {
-              "food": 0,
-              "wood": 0,
-              "ore": 1,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "ore": 1
             }
           ]
         ],
@@ -243,13 +188,7 @@
           "Fertile",
           [
             {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "food": 1
             }
           ]
         ],
@@ -257,13 +196,7 @@
           "Forest",
           [
             {
-              "food": 0,
-              "wood": 1,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "wood": 1
             }
           ]
         ],
@@ -271,13 +204,7 @@
           "Water",
           [
             {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
+              "food": 1
             }
           ]
         ]
@@ -487,13 +414,7 @@
         "Advance": {
           "advance": "Fishing",
           "payment": {
-            "food": 2,
-            "wood": 0,
-            "ore": 0,
-            "ideas": 0,
-            "gold": 0,
-            "mood_tokens": 0,
-            "culture_tokens": 0
+            "food": 2
           }
         }
       }
@@ -522,25 +443,13 @@
             [
               "E8",
               {
-                "food": 0,
-                "wood": 1,
-                "ore": 0,
-                "ideas": 0,
-                "gold": 0,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "wood": 1
               }
             ],
             [
               "D8",
               {
-                "food": 1,
-                "wood": 0,
-                "ore": 0,
-                "ideas": 0,
-                "gold": 0,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "food": 1
               }
             ]
           ]
@@ -574,25 +483,13 @@
             [
               "D1",
               {
-                "food": 1,
-                "wood": 0,
-                "ore": 0,
-                "ideas": 0,
-                "gold": 0,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "food": 1
               }
             ],
             [
               "C2",
               {
-                "food": 0,
-                "wood": 1,
-                "ore": 0,
-                "ideas": 0,
-                "gold": 0,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "wood": 1
               }
             ]
           ]
@@ -604,13 +501,7 @@
         "Advance": {
           "advance": "Fishing",
           "payment": {
-            "food": 2,
-            "wood": 0,
-            "ore": 0,
-            "ideas": 0,
-            "gold": 0,
-            "mood_tokens": 0,
-            "culture_tokens": 0
+            "food": 2
           }
         }
       }
@@ -642,25 +533,13 @@
             [
               "D8",
               {
-                "food": 1,
-                "wood": 0,
-                "ore": 0,
-                "ideas": 0,
-                "gold": 0,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "food": 1
               }
             ],
             [
               "C8",
               {
-                "food": 0,
-                "wood": 0,
-                "ore": 1,
-                "ideas": 0,
-                "gold": 0,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "ore": 1
               }
             ]
           ]
@@ -672,13 +551,7 @@
         "Advance": {
           "advance": "Irrigation",
           "payment": {
-            "food": 2,
-            "wood": 0,
-            "ore": 0,
-            "ideas": 0,
-            "gold": 0,
-            "mood_tokens": 0,
-            "culture_tokens": 0
+            "food": 2
           }
         }
       }
@@ -720,25 +593,13 @@
             [
               "D1",
               {
-                "food": 1,
-                "wood": 0,
-                "ore": 0,
-                "ideas": 0,
-                "gold": 0,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "food": 1
               }
             ],
             [
               "E2",
               {
-                "food": 0,
-                "wood": 0,
-                "ore": 1,
-                "ideas": 0,
-                "gold": 0,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "ore": 1
               }
             ]
           ]
@@ -782,25 +643,13 @@
             [
               "D8",
               {
-                "food": 1,
-                "wood": 0,
-                "ore": 0,
-                "ideas": 0,
-                "gold": 0,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "food": 1
               }
             ],
             [
               "D7",
               {
-                "food": 1,
-                "wood": 0,
-                "ore": 0,
-                "ideas": 0,
-                "gold": 0,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "food": 1
               }
             ]
           ]
@@ -818,11 +667,7 @@
           "payment": {
             "food": 1,
             "wood": 1,
-            "ore": 1,
-            "ideas": 0,
-            "gold": 0,
-            "mood_tokens": 0,
-            "culture_tokens": 0
+            "ore": 1
           },
           "port_position": "B3",
           "temple_bonus": null
@@ -865,11 +710,7 @@
           "payment": {
             "food": 1,
             "wood": 1,
-            "ore": 1,
-            "ideas": 0,
-            "gold": 0,
-            "mood_tokens": 0,
-            "culture_tokens": 0
+            "ore": 1
           },
           "port_position": "D5",
           "temple_bonus": null
@@ -884,25 +725,13 @@
             [
               "E8",
               {
-                "food": 0,
-                "wood": 1,
-                "ore": 0,
-                "ideas": 0,
-                "gold": 0,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "wood": 1
               }
             ],
             [
               "D8",
               {
-                "food": 1,
-                "wood": 0,
-                "ore": 0,
-                "ideas": 0,
-                "gold": 0,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "food": 1
               }
             ]
           ]
@@ -920,25 +749,13 @@
             [
               "C2",
               {
-                "food": 0,
-                "wood": 1,
-                "ore": 0,
-                "ideas": 0,
-                "gold": 0,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "wood": 1
               }
             ],
             [
               "D2",
               {
-                "food": 1,
-                "wood": 0,
-                "ore": 0,
-                "ideas": 0,
-                "gold": 0,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "food": 1
               }
             ]
           ]
@@ -953,25 +770,13 @@
             [
               "C2",
               {
-                "food": 0,
-                "wood": 1,
-                "ore": 0,
-                "ideas": 0,
-                "gold": 0,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "wood": 1
               }
             ],
             [
               "B3",
               {
-                "food": 0,
-                "wood": 0,
-                "ore": 0,
-                "ideas": 0,
-                "gold": 1,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "gold": 1
               }
             ]
           ]
@@ -989,25 +794,13 @@
             [
               "E8",
               {
-                "food": 0,
-                "wood": 1,
-                "ore": 0,
-                "ideas": 0,
-                "gold": 0,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "wood": 1
               }
             ],
             [
               "D8",
               {
-                "food": 1,
-                "wood": 0,
-                "ore": 0,
-                "ideas": 0,
-                "gold": 0,
-                "mood_tokens": 0,
-                "culture_tokens": 0
+                "food": 1
               }
             ]
           ]
@@ -1022,13 +815,7 @@
           ],
           "city_position": "E6",
           "payment": {
-            "food": 0,
-            "wood": 2,
-            "ore": 0,
-            "ideas": 0,
-            "gold": 0,
-            "mood_tokens": 0,
-            "culture_tokens": 0
+            "wood": 2
           },
           "leader_index": null,
           "replaced_units": []
@@ -1095,13 +882,7 @@
         "Advance": {
           "advance": "Navigation",
           "payment": {
-            "food": 2,
-            "wood": 0,
-            "ore": 0,
-            "ideas": 0,
-            "gold": 0,
-            "mood_tokens": 0,
-            "culture_tokens": 0
+            "food": 2
           }
         }
       }
@@ -1308,7 +1089,6 @@
           "player_index": 0,
           "position": "C3",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 0
         }
       }
@@ -1355,9 +1135,6 @@
           "player_index": 1,
           "position": "E6",
           "unit_type": "Settler",
-          "movement_restriction": {
-            "AllMovement": 0
-          },
           "id": 0
         }
       }

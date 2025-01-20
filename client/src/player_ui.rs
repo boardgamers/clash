@@ -212,7 +212,7 @@ pub fn show_top_left(rc: &RenderContext) {
     }
 
     if rc.shown_player_is_active() || state.active_dialog.show_for_other_player() {
-        for m in state.active_dialog.help_message(game) {
+        for m in state.active_dialog.help_message(rc) {
             label(&m);
         }
     }

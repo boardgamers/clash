@@ -13,6 +13,9 @@
       "id": 0,
       "resources": {
         "food": 2,
+        "wood": 1,
+        "ore": 1,
+        "ideas": 1,
         "mood_tokens": 1
       },
       "resource_limit": {
@@ -35,7 +38,7 @@
       "units": [
         {
           "player_index": 0,
-          "position": "C7",
+          "position": "D3",
           "unit_type": "Settler",
           "id": 0
         }
@@ -45,8 +48,8 @@
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Fishing",
-        "Mining"
+        "Mining",
+        "Philosophy"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
@@ -79,14 +82,6 @@
               "wood": 1
             }
           ]
-        ],
-        [
-          "Water",
-          [
-            {
-              "food": 1
-            }
-          ]
         ]
       ],
       "next_unit_id": 1
@@ -95,8 +90,8 @@
       "name": null,
       "id": 1,
       "resources": {
-        "food": 2,
-        "culture_tokens": 1
+        "ideas": 1,
+        "mood_tokens": 1
       },
       "resource_limit": {
         "food": 2,
@@ -108,8 +103,8 @@
       "cities": [
         {
           "city_pieces": {},
-          "mood_state": "Happy",
-          "activations": 0,
+          "mood_state": "Neutral",
+          "activations": 1,
           "angry_activation": false,
           "player_index": 1,
           "position": "D8"
@@ -118,7 +113,7 @@
       "units": [
         {
           "player_index": 1,
-          "position": "D8",
+          "position": "F7",
           "unit_type": "Settler",
           "id": 0
         }
@@ -128,12 +123,13 @@
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Math",
-        "Mining"
+        "Mining",
+        "Philosophy",
+        "Roads"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 2,
+      "game_event_tokens": 1,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -171,39 +167,39 @@
     "tiles": [
       [
         "A3",
-        "Forest"
+        "Unexplored"
       ],
       [
         "A5",
-        "Mountain"
+        "Unexplored"
       ],
       [
         "A7",
-        "Barren"
+        "Unexplored"
       ],
       [
         "B2",
-        "Mountain"
+        "Unexplored"
       ],
       [
         "B3",
-        "Water"
+        "Unexplored"
       ],
       [
         "B4",
-        "Fertile"
+        "Unexplored"
       ],
       [
         "B5",
-        "Water"
+        "Unexplored"
       ],
       [
         "B6",
-        "Water"
+        "Unexplored"
       ],
       [
         "B7",
-        "Fertile"
+        "Unexplored"
       ],
       [
         "C2",
@@ -211,23 +207,23 @@
       ],
       [
         "C3",
-        "Fertile"
+        "Unexplored"
       ],
       [
         "C4",
-        "Fertile"
+        "Forest"
       ],
       [
         "C5",
-        "Water"
+        "Unexplored"
       ],
       [
         "C6",
-        "Forest"
+        "Unexplored"
       ],
       [
         "C7",
-        "Forest"
+        "Unexplored"
       ],
       [
         "C8",
@@ -243,19 +239,19 @@
       ],
       [
         "D3",
-        "Mountain"
+        "Fertile"
       ],
       [
         "D4",
-        "Forest"
+        "Water"
       ],
       [
         "D5",
-        "Fertile"
+        "Unexplored"
       ],
       [
         "D6",
-        "Fertile"
+        "Unexplored"
       ],
       [
         "D7",
@@ -275,7 +271,7 @@
       ],
       [
         "E4",
-        "Mountain"
+        "Barren"
       ],
       [
         "E5",
@@ -283,11 +279,11 @@
       ],
       [
         "E6",
-        "Mountain"
+        "Unexplored"
       ],
       [
         "E7",
-        "Unexplored"
+        "Water"
       ],
       [
         "E8",
@@ -311,11 +307,11 @@
       ],
       [
         "F6",
-        "Unexplored"
+        "Water"
       ],
       [
         "F7",
-        "Unexplored"
+        "Fertile"
       ],
       [
         "G3",
@@ -327,7 +323,7 @@
       ],
       [
         "G7",
-        "Unexplored"
+        "Mountain"
       ]
     ],
     "unexplored_blocks": [
@@ -340,14 +336,42 @@
           "terrain": [
             "Water",
             "Fertile",
-            "Forest",
-            "Mountain"
+            "Fertile",
+            "Barren"
           ]
         }
       },
       {
         "position": {
-          "top_tile": "F2",
+          "top_tile": "B4",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Water",
+            "Forest",
+            "Forest"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "B6",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Fertile",
+            "Water",
+            "Fertile",
+            "Barren"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "D5",
           "rotation": 0
         },
         "block": {
@@ -361,15 +385,15 @@
       },
       {
         "position": {
-          "top_tile": "B4",
+          "top_tile": "F2",
           "rotation": 0
         },
         "block": {
           "terrain": [
+            "Forest",
             "Water",
-            "Water",
-            "Mountain",
-            "Fertile"
+            "Fertile",
+            "Forest"
           ]
         }
       },
@@ -380,33 +404,29 @@
         },
         "block": {
           "terrain": [
+            "Fertile",
             "Mountain",
             "Forest",
-            "Mountain",
-            "Barren"
-          ]
-        }
-      },
-      {
-        "position": {
-          "top_tile": "F6",
-          "rotation": 0
-        },
-        "block": {
-          "terrain": [
-            "Water",
-            "Forest",
-            "Water",
             "Fertile"
           ]
         }
       }
     ]
   },
-  "starting_player_index": 0,
-  "current_player_index": 0,
+  "starting_player_index": 1,
+  "current_player_index": 1,
   "action_log": [
     {
+      "Playing": {
+        "Advance": {
+          "advance": "Roads",
+          "payment": {
+            "food": 2
+          }
+        }
+      }
+    },
+    {
       "Playing": "MoveUnits"
     },
     {
@@ -415,7 +435,7 @@
           "units": [
             0
           ],
-          "destination": "C2"
+          "destination": "E8"
         }
       }
     },
@@ -431,12 +451,119 @@
           "units": [
             0
           ],
-          "destination": "B2"
+          "destination": "F7"
         }
       }
     },
     {
       "Movement": "Stop"
+    },
+    {
+      "Playing": "EndTurn"
+    },
+    {
+      "Playing": {
+        "Collect": {
+          "city_position": "D1",
+          "collections": [
+            [
+              "C2",
+              {
+                "wood": 1
+              }
+            ],
+            [
+              "E2",
+              {
+                "ore": 1
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "Playing": "MoveUnits"
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            0
+          ],
+          "destination": "D2"
+        }
+      }
+    },
+    {
+      "Movement": "Stop"
+    },
+    {
+      "Playing": "MoveUnits"
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            0
+          ],
+          "destination": "D3"
+        }
+      }
+    },
+    {
+      "Movement": "Stop"
+    },
+    {
+      "Playing": "EndTurn"
+    },
+    {
+      "Playing": {
+        "Collect": {
+          "city_position": "D8",
+          "collections": [
+            [
+              "C8",
+              {
+                "ore": 1
+              }
+            ],
+            [
+              "E8",
+              {
+                "wood": 1
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "Playing": "MoveUnits"
+    },
+    {
+      "Movement": "Stop"
+    },
+    {
+      "Playing": {
+        "Collect": {
+          "city_position": "D8",
+          "collections": [
+            [
+              "E8",
+              {
+                "wood": 1
+              }
+            ],
+            [
+              "C8",
+              {
+                "ore": 1
+              }
+            ]
+          ]
+        }
+      }
     },
     {
       "Playing": "EndTurn"
@@ -453,7 +580,7 @@
           "units": [
             0
           ],
-          "destination": "C3"
+          "destination": "D8"
         }
       }
     },
@@ -461,96 +588,19 @@
       "Movement": "Stop"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0
-          ],
-          "destination": "C4"
+      "Playing": {
+        "Collect": {
+          "city_position": "D8",
+          "collections": [
+            [
+              "E8",
+              {
+                "wood": 1
+              }
+            ]
+          ]
         }
       }
-    },
-    {
-      "ExploreResolution": 3
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0
-          ],
-          "destination": "B4"
-        }
-      }
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "MoveUnits"
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0
-          ],
-          "destination": "C4"
-        }
-      }
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0
-          ],
-          "destination": "D4"
-        }
-      }
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0
-          ],
-          "destination": "D5"
-        }
-      }
-    },
-    {
-      "ExploreResolution": 3
-    },
-    {
-      "Movement": "Stop"
     },
     {
       "Playing": "EndTurn"
@@ -560,36 +610,35 @@
     },
     {
       "StatusPhase": {
-        "FreeAdvance": "Fishing"
+        "FreeAdvance": "Philosophy"
       }
     },
     {
       "StatusPhase": {
-        "FreeAdvance": "Math"
+        "FreeAdvance": "Philosophy"
       }
     },
     {
       "StatusPhase": {
-        "DetermineFirstPlayer": 0
+        "DetermineFirstPlayer": 1
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0
-          ],
-          "destination": "C6"
+      "Playing": {
+        "Collect": {
+          "city_position": "D8",
+          "collections": [
+            [
+              "C8",
+              {
+                "ore": 1
+              }
+            ]
+          ]
         }
       }
     },
     {
-      "Movement": "Stop"
-    },
-    {
       "Playing": "MoveUnits"
     },
     {
@@ -598,71 +647,65 @@
           "units": [
             0
           ],
-          "destination": "C7"
+          "destination": "F7"
         }
       }
     }
   ],
-  "action_log_index": 40,
+  "action_log_index": 34,
   "log": [
     "The game has started",
     "Age 1 has started",
     "Round 1/3",
-    "Player1 used a move units action",
-    "\tPlayer1 moved 1 settler from D1 to C2",
-    "\tPlayer1 ended the movement action",
-    "Player1 used a move units action",
-    "\tPlayer1 moved 1 settler from C2 to B2. Explored tiles B3=Water, C3=Fertile, A3=Forest, B2=Mountain",
-    "\tPlayer1 ended the movement action",
-    "Player1 ended his turn with 1 actions left",
-    "It's Player2's turn",
-    "Player2 ended his turn with 3 actions left",
+    "Player2 paid 2 food to get the Roads advance",
+    "Player2 used a move units action",
+    "\tPlayer2 marched 1 settler from D8 to E8",
+    "\tPlayer2 ended the movement action",
+    "Player2 used a move units action",
+    "\tPlayer2 marched 1 settler from E8 to F7. Explored tiles E7=Water, F6=Water, F7=Fertile, G7=Mountain",
+    "\tPlayer2 ended the movement action",
+    "Player2 ended his turn",
     "It's Player1's turn",
+    "Player1 collects 1 wood and 1 ore in the city at D1",
+    "Player1 used a move units action",
+    "\tPlayer1 marched 1 settler from D1 to D2",
+    "\tPlayer1 ended the movement action",
+    "Player1 used a move units action",
+    "\tPlayer1 marched 1 settler from D2 to D3. Explored tiles C4=Forest, D3=Fertile, D4=Water, E4=Barren",
+    "\tPlayer1 ended the movement action",
+    "Player1 ended his turn",
+    "It's Player2's turn",
     "Round 2/3",
-    "Player1 used a move units action",
-    "\tPlayer1 moved 1 settler from B2 to C3",
-    "\tPlayer1 ended the movement action",
-    "Player1 used a move units action",
-    "\tPlayer1 moved 1 settler from C3 to C4",
-    "Player1 chose the orientation of the newly explored tiles. Explored tiles D4=Forest, E4=Mountain, C4=Fertile, D3=Mountain",
-    "\tPlayer1 ended the movement action",
-    "Player1 used a move units action",
-    "\tPlayer1 moved 1 settler from C4 to B4. Explored tiles B5=Water, C5=Water, A5=Mountain, B4=Fertile",
-    "\tPlayer1 ended the movement action",
-    "Player1 ended his turn",
-    "It's Player2's turn",
-    "Player2 ended his turn with 3 actions left",
+    "Player2 collects 1 ore and 1 wood in the city at D8",
+    "Player2 used a move units action",
+    "\tPlayer2 ended the movement action",
+    "Player2 collects 1 wood and 1 ore in the city at D8 making it Neutral",
+    "Player2 ended his turn",
     "It's Player1's turn",
+    "Player1 ended his turn with 3 actions left",
+    "It's Player2's turn",
     "Round 3/3",
-    "Player1 used a move units action",
-    "\tPlayer1 moved 1 settler from B4 to C4",
-    "\tPlayer1 ended the movement action",
-    "Player1 used a move units action",
-    "\tPlayer1 moved 1 settler from C4 to D4",
-    "\tPlayer1 ended the movement action",
-    "Player1 used a move units action",
-    "\tPlayer1 moved 1 settler from D4 to D5",
-    "Player1 chose the orientation of the newly explored tiles. Explored tiles D6=Fertile, E6=Mountain, C6=Forest, D5=Fertile",
-    "\tPlayer1 ended the movement action",
-    "Player1 ended his turn",
-    "It's Player2's turn",
-    "Player2 ended his turn with 3 actions left",
+    "Player2 used a move units action",
+    "\tPlayer2 marched 1 settler from F7 to D8 on roads",
+    "\tPlayer2 ended the movement action",
+    "Player2 collects 1 wood in the city at D8",
+    "Player2 ended his turn with 1 actions left",
     "It's Player1's turn",
+    "Player1 ended his turn with 3 actions left",
+    "It's Player2's turn",
     "The game has entered the 1st status phase",
-    "Player1 advanced Fishing for free",
-    "It's Player2's turn",
-    "Player2 advanced Math for free",
+    "Player2 advanced Philosophy for free",
     "It's Player1's turn",
-    "Player1 choose  to remain the staring player",
+    "Player1 advanced Philosophy for free",
+    "It's Player2's turn",
+    "Player2 choose  to remain the staring player",
     "Age 2 has started",
     "Round 1/3",
-    "Player1 used a move units action",
-    "\tPlayer1 moved 1 settler from D5 to C6",
-    "\tPlayer1 ended the movement action",
-    "Player1 used a move units action",
-    "\tPlayer1 marched 1 settler from C6 to C7. Explored tiles A7=Barren, B6=Water, B7=Fertile, C7=Forest"
+    "Player2 collects 1 ore in the city at D8",
+    "Player2 used a move units action",
+    "\tPlayer2 marched 1 settler from D8 to F7 on roads"
   ],
-  "undo_limit": 40,
+  "undo_limit": 31,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,
@@ -670,208 +713,9 @@
   "messages": [
     "The game has started"
   ],
-  "dice_roll_outcomes": [
-    6,
-    5,
-    6,
-    10,
-    1,
-    10,
-    0,
-    4,
-    3,
-    9,
-    5,
-    10,
-    1,
-    2,
-    4,
-    4,
-    1,
-    4,
-    7,
-    1,
-    2,
-    7,
-    5,
-    8,
-    1,
-    9,
-    8,
-    0,
-    3,
-    3,
-    2,
-    8,
-    10,
-    0,
-    1,
-    3,
-    6,
-    6,
-    8,
-    5,
-    9,
-    7,
-    2,
-    6,
-    2,
-    11,
-    11,
-    11,
-    7,
-    3,
-    7,
-    2,
-    8,
-    0,
-    7,
-    11,
-    2,
-    0,
-    4,
-    3,
-    7,
-    1,
-    1,
-    1,
-    4,
-    6,
-    8,
-    0,
-    7,
-    0,
-    5,
-    1,
-    3,
-    10,
-    4,
-    1,
-    6,
-    6,
-    9,
-    0,
-    2,
-    5,
-    5,
-    1,
-    8,
-    2,
-    10,
-    8,
-    4,
-    9,
-    2,
-    2,
-    2,
-    0,
-    11,
-    1,
-    6,
-    8,
-    7,
-    6,
-    8,
-    9,
-    8,
-    4,
-    1,
-    8,
-    2,
-    8,
-    1,
-    7,
-    9,
-    4,
-    3,
-    7,
-    10,
-    7,
-    4,
-    7,
-    7,
-    3,
-    2,
-    4,
-    4,
-    1,
-    5,
-    10,
-    7,
-    3,
-    3,
-    1,
-    9,
-    1,
-    11,
-    8,
-    1,
-    11,
-    4,
-    11,
-    4,
-    4,
-    7,
-    1,
-    1,
-    0,
-    0,
-    11,
-    11,
-    1,
-    1,
-    2,
-    5,
-    5,
-    4,
-    1,
-    5,
-    10,
-    10,
-    6,
-    0,
-    2,
-    7,
-    11,
-    0,
-    9,
-    10,
-    0,
-    4,
-    9,
-    2,
-    5,
-    2,
-    2,
-    9,
-    11,
-    4,
-    0,
-    10,
-    11,
-    9,
-    3,
-    4,
-    3,
-    7,
-    11,
-    6,
-    4,
-    6,
-    1,
-    0,
-    6,
-    9,
-    0,
-    9,
-    3,
-    0,
-    8,
-    4,
-    1,
-    9,
-    0
-  ],
+  "rng": {
+    "seed": 216866240505556079347337134957831925981
+  },
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [
@@ -879,6 +723,28 @@
   ],
   "wonder_amount_left": 1,
   "undo_context_stack": [
+    {
+      "Movement": {
+        "starting_position": "D8",
+        "movement_actions_left": 3
+      }
+    },
+    {
+      "Movement": {
+        "movement_actions_left": 2,
+        "moved_units": [
+          0
+        ]
+      }
+    },
+    {
+      "Movement": {
+        "movement_actions_left": 2,
+        "moved_units": [
+          0
+        ]
+      }
+    },
     {
       "Movement": {
         "starting_position": "D1",
@@ -895,30 +761,25 @@
     },
     {
       "Movement": {
-        "starting_position": "C2",
+        "movement_actions_left": 2,
+        "moved_units": [
+          0
+        ]
+      }
+    },
+    {
+      "Movement": {
         "movement_actions_left": 3
       }
     },
     {
       "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "B2",
-        "movement_actions_left": 3
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
+        "starting_position": "F7",
+        "movement_actions_left": 3,
+        "cost": {
+          "wood": 1,
+          "ore": 1
+        }
       }
     },
     {
@@ -931,66 +792,12 @@
     },
     {
       "Movement": {
-        "starting_position": "C4",
-        "movement_actions_left": 3
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "B4",
-        "movement_actions_left": 3
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "C4",
-        "movement_actions_left": 3
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "D5",
-        "movement_actions_left": 3
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
+        "starting_position": "D8",
+        "movement_actions_left": 3,
+        "cost": {
+          "food": 1,
+          "ore": 1
+        }
       }
     }
   ]
