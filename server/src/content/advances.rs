@@ -12,6 +12,7 @@ use crate::{
 //names of advances that need special handling
 pub const NAVIGATION: &str = "Navigation";
 pub const ROADS: &str = "Roads";
+pub const SIEGECRAFT: &str = "Siegecraft";
 
 #[must_use]
 pub fn get_all() -> Vec<Advance> {
@@ -97,7 +98,7 @@ fn construction() -> Vec<Advance> {
             )
             .add_one_time_ability_initializer(Game::draw_wonder_card)
             .add_custom_action(ConstructWonder),
-            Advance::builder(ROADS, "When moving from or to a city, you may pay 1 food and 1 ore to extend the range of a group of land units by 1 and ignore terrain effects. May not be used to embark, disembark, or explore") 
+            Advance::builder(ROADS, "When moving from or to a city, you may pay 1 food and 1 ore to extend the range of a group of land units by 1 and ignore terrain effects. May not be used to embark, disembark, or explore")
         ],
     )
 }
@@ -168,7 +169,13 @@ fn warfare() -> Vec<Advance> {
             "May Move Army units, May use Tactics on Action Cards",
         )
         .with_advance_bonus(CultureToken)
-        .with_unlocked_building("Fortress")],
+        .with_unlocked_building("Fortress"),
+        Advance::builder(
+            SIEGECRAFT,
+            "When attacking a city with a Fortress, pay 2 wood to cancel
+            the Fortress’ ability to add +1 die and/or pay 2 ore to ignore its ability to cancel
+            a hit.",
+        )],
     )
 }
 
