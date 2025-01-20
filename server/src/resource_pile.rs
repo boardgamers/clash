@@ -178,22 +178,30 @@ impl ResourcePile {
             && self.culture_tokens >= other.culture_tokens
     }
 
-    pub fn apply_resource_limit(&mut self, limit: &ResourcePile) {
+    #[must_use]
+    pub fn apply_resource_limit(&mut self, limit: &ResourcePile) -> ResourcePile {
+        let mut waste = ResourcePile::empty();
         if self.food > limit.food {
+            waste.food = self.food - limit.food;
             self.food = limit.food;
         }
         if self.wood > limit.wood {
+            waste.wood = self.wood - limit.wood;
             self.wood = limit.wood;
         }
         if self.ore > limit.ore {
+            waste.ore = self.ore - limit.ore;
             self.ore = limit.ore;
         }
         if self.ideas > limit.ideas {
+            waste.ideas = self.ideas - limit.ideas;
             self.ideas = limit.ideas;
         }
         if self.gold > limit.gold {
+            waste.gold = self.gold - limit.gold;
             self.gold = limit.gold;
         }
+        waste
     }
 
     //this function assumes that `self` can afford `cost`
@@ -277,6 +285,11 @@ impl ResourcePile {
             + self.gold as u32
             + self.mood_tokens
             + self.culture_tokens
+    }
+
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.resource_amount() == 0
     }
 }
 
@@ -479,8 +492,9 @@ mod tests {
     #[test]
     fn resource_limit_test() {
         let mut resources = ResourcePile::new(3, 6, 9, 9, 0, 10, 6);
-        resources.apply_resource_limit(&ResourcePile::new(7, 5, 7, 10, 3, 7, 6));
+        let waste = resources.apply_resource_limit(&ResourcePile::new(7, 5, 7, 10, 3, 7, 6));
         assert_eq!(ResourcePile::new(3, 5, 7, 9, 0, 10, 6), resources);
+        assert_eq!(ResourcePile::new(0, 1, 2, 0, 0, 0, 0), waste);
     }
 
     #[test]

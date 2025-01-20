@@ -37,6 +37,7 @@ use crate::{
     utils,
     wonder::Wonder,
 };
+use crate::resource::check_for_waste;
 
 pub struct Game {
     pub state: GameState,
@@ -354,6 +355,7 @@ impl Game {
             }
             Finished => panic!("actions can't be executed when the game is finished"),
         }
+        check_for_waste(self, player_index);
     }
 
     fn can_auto_redo(&mut self, action: &Action) -> bool {
@@ -388,6 +390,10 @@ impl Game {
         }
         self.action_log_index -= 1;
         self.log.remove(self.log.len() - 1);
+        if let Some(UndoContext::WastedResources { resources }) = self.undo_context_stack.last() {
+            self.players[player_index].gain_resources(resources.clone());
+            self.undo_context_stack.pop();
+        }
     }
 
     fn redo(&mut self, player_index: usize) {
@@ -430,6 +436,7 @@ impl Game {
             Action::Redo => panic!("redo action can't be redone"),
         }
         self.action_log_index += 1;
+        check_for_waste(self, player_index);
     }
 
     #[must_use]
@@ -485,7 +492,7 @@ impl Game {
                             .find(|route| route.destination == destination)
                             .expect("destination should be a valid destination")
                             .cost;
-                        if c.resource_amount() > 0 {
+                        if !c.is_empty() {
                             self.players[player_index].loose_resources(c.clone());
                             cost = Some(c.clone());
                         }
@@ -1669,6 +1676,9 @@ pub enum UndoContext {
         cost: Option<ResourcePile>,
     },
     ExploreResolution(ExploreResolutionState),
+    WastedResources {
+        resources: ResourcePile,
+    },
 }
 
 #[derive(Serialize, Deserialize)]
