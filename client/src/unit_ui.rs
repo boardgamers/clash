@@ -2,7 +2,6 @@ use macroquad::color::BLACK;
 use macroquad::math::{u32, vec2, Vec2};
 use macroquad::prelude::{Color, BLUE, WHITE};
 use macroquad::shapes::draw_circle;
-use std::fmt::format;
 
 use server::game::Game;
 use server::position::Position;

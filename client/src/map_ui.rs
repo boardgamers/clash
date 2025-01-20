@@ -6,7 +6,7 @@ use server::game::GameState;
 use server::map::{Rotation, Terrain, UnexploredBlock};
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
-use server::unit::{MovementRestriction, Unit, UnitType};
+use server::unit::UnitType;
 use std::collections::HashMap;
 use std::ops::{Add, Mul, Rem, Sub};
 use std::vec;
@@ -216,33 +216,21 @@ fn found_city_button<'a>(rc: &'a RenderContext<'a>, pos: Position) -> Option<Ico
         return None;
     }
     let game = rc.game;
-    let settlers: Vec<Unit> = unit_ui::units_on_tile(game, pos)
-        .filter_map(|(_, unit)| {
-            if unit.can_found_city(game) {
-                Some(unit)
-            } else {
-                None
-            }
-        })
-        .collect::<Vec<_>>();
 
-    if settlers.is_empty() {
-        None
-    } else {
-        Some((
-            &rc.assets().units[&UnitType::Settler],
-            "Found a new city".to_string(),
-            Box::new(move || {
-                let settler = settlers
-                    .iter()
-                    .find(|u| u.movement_restriction != MovementRestriction::None)
-                    .unwrap_or(&settlers[0]);
-                StateUpdate::execute(Action::Playing(PlayingAction::FoundCity {
-                    settler: settler.id,
-                }))
-            }),
-        ))
-    }
+    unit_ui::units_on_tile(game, pos)
+        .find(|(_, unit)| unit.can_found_city(game))
+        .map(|(_index, unit)| {
+            let action: IconAction<'a> = (
+                &rc.assets().units[&UnitType::Settler],
+                "Found a new city".to_string(),
+                Box::new(move || {
+                    StateUpdate::execute(Action::Playing(PlayingAction::FoundCity {
+                        settler: unit.id,
+                    }))
+                }),
+            );
+            action
+        })
 }
 
 pub fn move_units_button<'a>(
