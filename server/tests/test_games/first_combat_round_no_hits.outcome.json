@@ -324,7 +324,7 @@
     "Player1 used a move units action",
     "\tPlayer1 marched 1 infantry from C2 to C1",
     "\nCombat round 1",
-    "\tPlayer1 rolled a combined combat value of 1 and gets 0 hits against defending units. Player2 rolled a combined combat value of 2 and gets 0 hits against attacking units.",
+    "\tPlayer1 rolled 1 (Leader, no bonus) for combined combat value of 1 and gets 0 hits against defending units. Player2 rolled 1 (Leader, no bonus), 1 (Leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
     "\tPlayer1 may retreat"
   ],
   "undo_limit": 3,

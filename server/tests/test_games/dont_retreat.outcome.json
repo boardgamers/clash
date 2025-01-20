@@ -339,7 +339,7 @@
     "\tPlayer1 may retreat",
     "Player1 decided not to retreat",
     "\nCombat round 2",
-    "\tPlayer1 rolled a combined combat value of 7 and gets 1 hits against defending units. Player2 rolled a combined combat value of 14 and gets 2 hits against attacking units.",
+    "\tPlayer1 rolled 6 (Infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units. Player2 rolled 6 (Infantry, +1 combat value), 6 (Infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against attacking units.",
     "\tPlayer2 has to remove 1 of his defending units"
   ],
   "undo_limit": 4,

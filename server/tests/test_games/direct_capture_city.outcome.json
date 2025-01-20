@@ -120,7 +120,9 @@
       "wonders_build": [],
       "game_event_tokens": 2,
       "completed_objectives": [],
-      "captured_leaders": [],
+      "captured_leaders": [
+        "Alexander"
+      ],
       "event_victory_points": 0.0,
       "wonder_cards": [],
       "collect_options": [
@@ -174,7 +176,7 @@
       },
       "cities": [],
       "units": [],
-      "civilization": "test1",
+      "civilization": "test0",
       "active_leader": null,
       "available_leaders": [],
       "advances": [
@@ -302,7 +304,7 @@
     "Player1 used a move units action",
     "\tPlayer1 marched 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1",
     "\nCombat round 1",
-    "\tPlayer1 rolled a combined combat value of 25 and gets 5 hits against defending units. Player2 rolled a combined combat value of 2 and gets 0 hits against attacking units.",
+    "\tPlayer1 rolled 2 (Elephant, -1 hits, no combat value), 2 (Elephant, no bonus), 2 (Elephant, no bonus), 1 (Leader, re-roll), 1 (Leader, re-roll), 6 (Infantry, +1 combat value) for combined combat value of 11 and gets 2 hits against defending units. Player2 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 0 hits against attacking units.",
     "\tPlayer1 killed all defending units and captured Player2's city at C1"
   ],
   "undo_limit": 3,
@@ -316,15 +318,20 @@
   "dice_roll_outcomes": [
     1,
     1,
-    1
+    1,
+    1,
+    1,
+    11,
+    11
   ],
   "dice_roll_log": [
-    11,
-    11,
-    11,
-    11,
+    3,
+    3,
+    3,
     1,
-    1
+    1,
+    11,
+    11
   ],
   "dropped_players": [],
   "wonders_left": [

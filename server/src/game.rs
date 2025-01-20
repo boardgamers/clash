@@ -5,7 +5,7 @@ use std::mem;
 
 use GameState::*;
 
-use crate::combat::{self, Combat, CombatPhase};
+use crate::combat::{self, Combat, CombatDieRoll, CombatPhase, COMBAT_DIE_SIDES};
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
 use crate::map::UnexploredBlock;
 use crate::movement::terrain_movement_restriction;
@@ -864,7 +864,7 @@ impl Game {
         self.add_message("The game has ended");
     }
 
-    pub(crate) fn get_next_dice_roll(&mut self) -> u8 {
+    pub(crate) fn get_next_dice_roll(&mut self) -> CombatDieRoll {
         self.lock_undo();
         let dice_roll = if self.dice_roll_outcomes.is_empty() {
             self.rng.range(0, 12) as u8
@@ -875,7 +875,7 @@ impl Game {
                 .expect("dice roll outcomes should not be empty")
         };
         self.dice_roll_log.push(dice_roll);
-        dice_roll
+        COMBAT_DIE_SIDES[dice_roll as usize].clone()
     }
 
     fn add_message(&mut self, message: &str) {
