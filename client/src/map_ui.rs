@@ -19,6 +19,12 @@ use crate::move_ui::{movable_units, MoveDestination, MoveIntent};
 use crate::render_context::RenderContext;
 use crate::{collect_ui, hex_ui, unit_ui};
 
+const MOVE_DESTINATION: Color = color(51, 255, 72, 0.4);
+
+const fn color(r: u8, g: u8, b: u8, a: f32) -> Color {
+    Color::new(r as f32 / 255., g as f32 / 255., b as f32 / 255., a)
+}
+
 #[derive(Clone)]
 pub struct ExploreResolutionConfig {
     pub block: UnexploredBlock,
@@ -142,7 +148,7 @@ fn overlay_color(rc: &RenderContext, pos: Position) -> Color {
                     .iter()
                     .any(|d| matches!(d, MoveDestination::Tile(p) if *p == pos))
                 {
-                    with_alpha(GREEN, 0.5)
+                    MOVE_DESTINATION
                 } else {
                     alpha_overlay(0.)
                 }
