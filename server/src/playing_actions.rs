@@ -138,8 +138,7 @@ impl PlayingAction {
                 let player = &mut game.players[player_index];
                 let city = City::new(player_index, settler.position);
                 player.cities.push(city);
-                game.undo_context_stack
-                    .push(UndoContext::FoundCity { settler });
+                game.push_undo_context(UndoContext::FoundCity { settler });
             }
             Construct(c) => {
                 let player = &game.players[player_index];

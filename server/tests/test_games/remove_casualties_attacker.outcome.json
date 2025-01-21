@@ -360,6 +360,13 @@
     },
     {
       "Recruit": {}
+    },
+    {
+      "WastedResources": {
+        "resources": {
+          "gold": 1
+        }
+      }
     }
   ]
 }

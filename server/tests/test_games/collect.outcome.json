@@ -412,6 +412,13 @@
     },
     {
       "Recruit": {}
+    },
+    {
+      "WastedResources": {
+        "resources": {
+          "ore": 1
+        }
+      }
     }
   ]
 }

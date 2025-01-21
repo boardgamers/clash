@@ -43,6 +43,8 @@ pub struct Player {
     pub index: usize,
     pub resources: ResourcePile,
     pub resource_limit: ResourcePile,
+    // transient, only for the current turn, only the active player can gain resources
+    pub wasted_resources: ResourcePile,
     pub events: Option<PlayerEvents>,
     pub cities: Vec<City>,
     pub units: Vec<Unit>,
@@ -172,6 +174,7 @@ impl Player {
             index: data.id,
             resources: data.resources,
             resource_limit: data.resource_limit,
+            wasted_resources: ResourcePile::empty(),
             events: Some(PlayerEvents::default()),
             cities: data.cities.into_iter().map(City::from_data).collect(),
             units,
@@ -307,6 +310,7 @@ impl Player {
             index,
             resources: ResourcePile::food(2),
             resource_limit: ResourcePile::new(2, 7, 7, 7, 7, 0, 0),
+            wasted_resources: ResourcePile::empty(),
             events: Some(PlayerEvents::new()),
             cities: Vec::new(),
             units: Vec::new(),
@@ -367,7 +371,8 @@ impl Player {
 
     pub fn gain_resources(&mut self, resources: ResourcePile) {
         self.resources += resources;
-        self.resources.apply_resource_limit(&self.resource_limit);
+        let waste = self.resources.apply_resource_limit(&self.resource_limit);
+        self.wasted_resources += waste;
     }
 
     ///

@@ -369,6 +369,13 @@
         "starting_position": "C2",
         "movement_actions_left": 3
       }
+    },
+    {
+      "WastedResources": {
+        "resources": {
+          "gold": 1
+        }
+      }
     }
   ]
 }

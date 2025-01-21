@@ -447,6 +447,13 @@
           }
         ]
       }
+    },
+    {
+      "WastedResources": {
+        "resources": {
+          "gold": 2
+        }
+      }
     }
   ]
 }

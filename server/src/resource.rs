@@ -1,3 +1,4 @@
+use crate::game::{Game, UndoContext};
 use crate::resource_pile::ResourcePile;
 use std::collections::HashMap;
 use std::fmt;
@@ -48,4 +49,25 @@ pub fn new_resource_map(p: &ResourcePile) -> HashMap<ResourceType, u32> {
 
 fn add_resource(m: &mut HashMap<ResourceType, u32>, amount: u32, resource_type: ResourceType) {
     m.insert(resource_type, amount);
+}
+
+pub(crate) fn check_for_waste(game: &mut Game, player_index: usize) {
+    let mut wasted_resources = ResourcePile::empty();
+    for p in &mut game.players {
+        if p.wasted_resources.is_empty() {
+            continue;
+        }
+        assert_eq!(
+            p.index, player_index,
+            "non-active player {} has wasted resources: {:?}",
+            p.index, p.wasted_resources
+        );
+        wasted_resources = p.wasted_resources.clone();
+        p.wasted_resources = ResourcePile::empty();
+    }
+    if !wasted_resources.is_empty() {
+        game.push_undo_context(UndoContext::WastedResources {
+            resources: wasted_resources,
+        });
+    }
 }
