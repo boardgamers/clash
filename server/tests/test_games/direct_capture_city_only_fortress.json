@@ -1,7 +1,7 @@
 {
   "state": {
     "Movement": {
-      "movement_actions_left": 3
+      "movement_actions_left": 2
     }
   },
   "players": [
@@ -324,9 +324,6 @@
           }
         }
       }
-    },
-    {
-      "Playing": "MoveUnits"
     }
   ],
   "action_log_index": 2,

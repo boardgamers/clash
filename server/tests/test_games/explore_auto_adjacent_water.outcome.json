@@ -1,12 +1,5 @@
 {
-  "state": {
-    "Movement": {
-      "movement_actions_left": 2,
-      "moved_units": [
-        0
-      ]
-    }
-  },
+  "state": "Playing",
   "players": [
     {
       "name": null,
@@ -407,9 +400,6 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -421,9 +411,6 @@
     },
     {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -445,9 +432,6 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -459,9 +443,6 @@
     },
     {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -478,9 +459,6 @@
     },
     {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -502,9 +480,6 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -518,9 +493,6 @@
       "Movement": "Stop"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -532,9 +504,6 @@
     },
     {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -574,9 +543,6 @@
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -588,9 +554,6 @@
     },
     {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -882,7 +845,7 @@
     {
       "Movement": {
         "starting_position": "D1",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -896,7 +859,7 @@
     {
       "Movement": {
         "starting_position": "C2",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -910,7 +873,7 @@
     {
       "Movement": {
         "starting_position": "B2",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -932,7 +895,7 @@
     {
       "Movement": {
         "starting_position": "C4",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -946,7 +909,7 @@
     {
       "Movement": {
         "starting_position": "B4",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -960,7 +923,7 @@
     {
       "Movement": {
         "starting_position": "C4",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -982,7 +945,7 @@
     {
       "Movement": {
         "starting_position": "D5",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {

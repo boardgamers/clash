@@ -1,7 +1,7 @@
 {
   "state": {
     "Movement": {
-      "movement_actions_left": 3}
+      "movement_actions_left": 2}
   },
   "players": [
     {
@@ -491,9 +491,6 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -505,9 +502,6 @@
     },
     {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     }
   ],
   "action_log_index": 4,
@@ -740,7 +734,7 @@
     {
       "Movement": {
         "starting_position": "D1",
-        "movement_actions_left": 3}
+        "movement_actions_left": 2}
     },
     {
       "Movement": {

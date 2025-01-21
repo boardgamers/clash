@@ -7,6 +7,7 @@ use crate::dialog_ui::OkTooltip;
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
 use crate::recruit_unit_ui::RecruitSelection;
 use crate::render_context::RenderContext;
+use crate::resource_ui::new_resource_map;
 use crate::select_ui::CountSelector;
 use server::action::Action;
 use server::city::City;
@@ -15,7 +16,7 @@ use server::content::custom_actions::CustomAction;
 use server::map::Terrain;
 use server::playing_actions::{Construct, PlayingAction, Recruit};
 use server::position::Position;
-use server::resource::{new_resource_map, ResourceType};
+use server::resource::ResourceType;
 use server::resource_pile::PaymentOptions;
 use server::unit::UnitType;
 

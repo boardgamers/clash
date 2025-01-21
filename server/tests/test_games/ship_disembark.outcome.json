@@ -1,7 +1,7 @@
 {
   "state": {
     "Movement": {
-      "movement_actions_left": 2,
+      "movement_actions_left": 1,
       "moved_units": [
         1,
         2
@@ -347,9 +347,6 @@
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -361,7 +358,7 @@
       }
     }
   ],
-  "action_log_index": 3,
+  "action_log_index": 2,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -371,7 +368,7 @@
     "\tPlayer1 disembarked 1 cavalry and 1 elephant from C3 to B3"
   ],
   "undo_limit": 1,
-  "actions_left": 1,
+  "actions_left": 0,
   "successful_cultural_influence": false,
   "round": 6,
   "age": 1,
@@ -428,7 +425,7 @@
     {
       "Movement": {
         "starting_position": "C3",
-        "movement_actions_left": 3,
+        "movement_actions_left": 2,
         "disembarked_units": [
           {
             "unit_id": 1,

@@ -367,19 +367,10 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": "Stop"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": "Stop"
@@ -390,7 +381,7 @@
       }
     }
   ],
-  "action_log_index": 16,
+  "action_log_index": 13,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -480,17 +471,17 @@
     },
     {
       "Movement": {
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
       "Movement": {
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
       "Movement": {
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     }
   ]

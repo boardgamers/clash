@@ -27,17 +27,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     if rc.can_play_action(PlayingActionType::MoveUnits)
         && bottom_left_texture(rc, &assets.move_units, icon_pos(0, -3), "Move units")
     {
-        return StateUpdate::MoveUnits(
-            if rc
-                .state
-                .focused_tile
-                .is_some_and(|t| rc.game.map.is_water(t))
-            {
-                MoveIntent::Sea
-            } else {
-                MoveIntent::Land
-            },
-        );
+        return global_move(rc);
     }
 
     if rc.can_play_action(PlayingActionType::Advance)
@@ -72,6 +62,19 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
         }
     }
     StateUpdate::None
+}
+
+fn global_move(rc: &RenderContext) -> StateUpdate {
+    let pos = rc.state.focused_tile;
+    StateUpdate::move_units(
+        rc,
+        pos,
+        if pos.is_some_and(|t| rc.game.map.is_water(t)) {
+            MoveIntent::Sea
+        } else {
+            MoveIntent::Land
+        },
+    )
 }
 
 fn custom_action_tooltip(custom_action_type: &CustomActionType) -> String {

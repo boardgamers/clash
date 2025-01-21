@@ -1,12 +1,5 @@
 {
-  "state": {
-    "Movement": {
-      "movement_actions_left": 2,
-      "moved_units": [
-        1
-      ]
-    }
-  },
+  "state": "Playing",
   "players": [
     {
       "name": null,
@@ -433,9 +426,6 @@
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -471,9 +461,6 @@
     },
     {
       "Playing": "EndTurn"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -523,9 +510,6 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -573,9 +557,6 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -621,9 +602,6 @@
     },
     {
       "Playing": "EndTurn"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -842,9 +820,6 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -965,7 +940,7 @@
     {
       "Movement": {
         "starting_position": "D8",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -979,7 +954,7 @@
     {
       "Movement": {
         "starting_position": "D1",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -993,7 +968,7 @@
     {
       "Movement": {
         "starting_position": "E8",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {

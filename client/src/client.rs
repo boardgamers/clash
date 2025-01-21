@@ -126,7 +126,6 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
     let state = rc.state;
     match &state.active_dialog {
         ActiveDialog::None
-        | ActiveDialog::MoveUnits(_)
         | ActiveDialog::WaitingForUpdate
         | ActiveDialog::CulturalInfluence
         | ActiveDialog::PlaceSettler => StateUpdate::None,
@@ -145,6 +144,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
             influence_ui::cultural_influence_resolution_dialog(rc, r)
         }
         ActiveDialog::ExploreResolution(r) => explore_dialog(rc, r),
+        ActiveDialog::MoveUnits(_) => move_ui::move_units_dialog(rc),
 
         //status phase
         ActiveDialog::FreeAdvance => show_free_advance_menu(rc),

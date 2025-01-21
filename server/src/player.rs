@@ -898,6 +898,9 @@ impl Player {
                 .cloned()
                 .collect();
 
+        if destinations.is_empty() {
+            return Err("no valid destinations".to_string());
+        }
         Ok(destinations)
     }
 

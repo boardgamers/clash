@@ -95,7 +95,6 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         PlayingAction::Construct(c) => format_construct_log_item(game, player, &player_name, c),
         PlayingAction::Collect(c) => format_collect_log_item(player, &player_name, c),
         PlayingAction::Recruit(r) => format_recruit_log_item(player, &player_name, r),
-        PlayingAction::MoveUnits => format!("{player_name} used a move units action"),
         PlayingAction::IncreaseHappiness(i) => format_happiness_increase(player, &player_name, i),
         PlayingAction::InfluenceCultureAttempt(c) => {
             format_cultural_influence_attempt_log_item(game, &player_name, c)

@@ -209,3 +209,22 @@ pub(crate) fn terrain_movement_restriction(
         _ => None,
     }
 }
+
+pub(crate) fn has_movable_units(game: &Game, player: &Player) -> bool {
+    player.units.iter().any(|unit| {
+        player
+            .move_units_destinations(game, &[unit.id], unit.position, None)
+            .is_ok()
+            || can_embark(game, player, unit)
+    })
+}
+
+fn can_embark(game: &Game, player: &Player, unit: &Unit) -> bool {
+    unit.unit_type.is_land_based()
+        && player.units.iter().any(|u| {
+            u.unit_type.is_ship()
+                && player
+                    .move_units_destinations(game, &[unit.id], u.position, Some(u.id))
+                    .is_ok()
+        })
+}

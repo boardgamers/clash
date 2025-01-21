@@ -1,7 +1,7 @@
 {
   "state": {
     "Movement": {
-      "movement_actions_left": 3
+      "movement_actions_left": 2
     }
   },
   "players": [
@@ -417,9 +417,6 @@
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -455,9 +452,6 @@
     },
     {
       "Playing": "EndTurn"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -507,9 +501,6 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -557,9 +548,6 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -605,9 +593,6 @@
     },
     {
       "Playing": "EndTurn"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -826,9 +811,6 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -883,12 +865,9 @@
           }
         }
       }
-    },
-    {
-      "Playing": "MoveUnits"
     }
   ],
-  "action_log_index": 58,
+  "action_log_index": 51,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -973,7 +952,7 @@
     "Player2 paid 2 food to get the Navigation advance",
     "Player2 used a move units action"
   ],
-  "undo_limit": 55,
+  "undo_limit": 48,
   "actions_left": 0,
   "successful_cultural_influence": false,
   "round": 3,
@@ -994,7 +973,7 @@
     {
       "Movement": {
         "starting_position": "D8",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -1008,7 +987,7 @@
     {
       "Movement": {
         "starting_position": "D1",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -1022,7 +1001,7 @@
     {
       "Movement": {
         "starting_position": "E8",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {

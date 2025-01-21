@@ -276,9 +276,6 @@
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [

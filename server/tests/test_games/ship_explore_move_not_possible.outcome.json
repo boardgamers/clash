@@ -1,12 +1,5 @@
 {
-  "state": {
-    "Movement": {
-      "movement_actions_left": 2,
-      "moved_units": [
-        1
-      ]
-    }
-  },
+  "state": "Playing",
   "players": [
     {
       "name": null,
@@ -447,9 +440,6 @@
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -485,9 +475,6 @@
     },
     {
       "Playing": "EndTurn"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -537,9 +524,6 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -587,9 +571,6 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -635,9 +616,6 @@
     },
     {
       "Playing": "EndTurn"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -856,9 +834,6 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -872,7 +847,7 @@
       "ExploreResolution": 3
     }
   ],
-  "action_log_index": 52,
+  "action_log_index": 46,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -951,7 +926,7 @@
     "\tPlayer2 sailed 1 ship from D5 to E5",
     "Player2 chose the orientation of the newly explored tiles. Explored tiles E5=Forest, F4=Fertile, F5=Fertile, G5=Mountain. Ship can't move to the explored tile"
   ],
-  "undo_limit": 51,
+  "undo_limit": 45,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 3,
@@ -972,7 +947,7 @@
     {
       "Movement": {
         "starting_position": "D8",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -986,7 +961,7 @@
     {
       "Movement": {
         "starting_position": "D1",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -1000,7 +975,7 @@
     {
       "Movement": {
         "starting_position": "E8",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {

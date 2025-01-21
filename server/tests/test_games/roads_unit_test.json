@@ -1,7 +1,7 @@
 {
   "state": {
     "Movement": {
-      "movement_actions_left": 3
+      "movement_actions_left": 2
     }
   },
   "players": [
@@ -474,9 +474,6 @@
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -488,9 +485,6 @@
     },
     {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -530,9 +524,6 @@
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -544,9 +535,6 @@
     },
     {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -586,9 +574,6 @@
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": "Stop"
     },
     {
@@ -617,9 +602,6 @@
     },
     {
       "Playing": "EndTurn"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -686,13 +668,7 @@
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -724,9 +700,6 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -748,9 +721,6 @@
     },
     {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     }
   ],
   "action_log_index": 45,
@@ -841,7 +811,7 @@
     {
       "Movement": {
         "starting_position": "D8",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -863,7 +833,7 @@
     {
       "Movement": {
         "starting_position": "D1",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -884,13 +854,13 @@
     },
     {
       "Movement": {
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
       "Movement": {
         "starting_position": "F7",
-        "movement_actions_left": 3,
+        "movement_actions_left": 2,
         "cost": {
           "wood": 1,
           "ore": 1
@@ -907,7 +877,7 @@
     },
     {
       "Movement": {
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -931,7 +901,7 @@
     {
       "Movement": {
         "starting_position": "D7",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {

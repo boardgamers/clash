@@ -1,7 +1,7 @@
 {
   "state": {
     "Movement": {
-      "movement_actions_left": 3
+      "movement_actions_left": 2
     }
   },
   "players": [
@@ -343,12 +343,9 @@
           }
         }
       }
-    },
-    {
-      "Playing": "MoveUnits"
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -357,7 +354,7 @@
     "Player1 used a move units action"
   ],
   "undo_limit": 1,
-  "actions_left": 1,
+  "actions_left": 0,
   "successful_cultural_influence": false,
   "round": 6,
   "age": 1,
