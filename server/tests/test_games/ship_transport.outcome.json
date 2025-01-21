@@ -1,7 +1,7 @@
 {
   "state": {
     "Movement": {
-      "movement_actions_left": 2,
+      "movement_actions_left": 1,
       "moved_units": [
         7
       ],
@@ -432,7 +432,7 @@
     {
       "Movement": {
         "starting_position": "C3",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     }
   ]
