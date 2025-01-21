@@ -11,7 +11,7 @@ use crate::layout_ui::{
     draw_icon, draw_scaled_icon, is_in_circle, left_mouse_button_pressed, ICON_SIZE,
 };
 use crate::render_context::RenderContext;
-use crate::resource_ui::{resource_name, show_resource_pile};
+use crate::resource_ui::{new_resource_map, resource_name, show_resource_pile};
 use macroquad::color::BLACK;
 use macroquad::math::vec2;
 use macroquad::prelude::WHITE;
@@ -22,7 +22,7 @@ use server::content::custom_actions::CustomAction;
 use server::game::Game;
 use server::playing_actions::{get_total_collection, Collect, PlayingAction};
 use server::position::Position;
-use server::resource::{new_resource_map, resource_types, ResourceType};
+use server::resource::{resource_types, ResourceType};
 use server::resource_pile::ResourcePile;
 
 #[derive(Clone)]
