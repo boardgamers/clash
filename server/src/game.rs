@@ -9,7 +9,7 @@ use crate::combat::{self, Combat, CombatDieRoll, CombatPhase, COMBAT_DIE_SIDES};
 use crate::consts::MOVEMENT_ACTIONS;
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
 use crate::map::UnexploredBlock;
-use crate::movement::terrain_movement_restriction;
+use crate::movement::{has_movable_units, terrain_movement_restriction};
 use crate::resource::check_for_waste;
 use crate::unit::{carried_units, get_current_move, MovementRestriction};
 use crate::utils::Rng;
@@ -452,6 +452,10 @@ impl Game {
         player_index: usize,
         mut move_state: MoveState,
     ) {
+        if let Playing = self.state {
+            assert_ne!(self.actions_left, 0, "Illegal action");
+            self.actions_left -= 1;
+        }
         let saved_state = move_state.clone();
         let mut cost = None;
         let (starting_position, disembarked_units) = match action {
@@ -740,17 +744,18 @@ impl Game {
     }
 
     pub(crate) fn back_to_move(&mut self, move_state: &MoveState, stop_current_move: bool) {
-        self.state = if move_state.movement_actions_left == 0
-            && move_state.current_move == CurrentMove::None
-        {
-            Playing
-        } else {
-            let mut state = move_state.clone();
-            if stop_current_move {
-                state.current_move = CurrentMove::None;
-            }
-            Movement(state)
-        };
+        let mut state = move_state.clone();
+        if stop_current_move {
+            state.current_move = CurrentMove::None;
+        }
+        // set state to Movement first, because that affects has_movable_units
+        self.state = Movement(state);
+
+        let all_moves_used =
+            move_state.movement_actions_left == 0 && move_state.current_move == CurrentMove::None;
+        if all_moves_used || !has_movable_units(self, self.get_player(self.current_player_index)) {
+            self.state = Playing;
+        }
     }
 
     #[must_use]

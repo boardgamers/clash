@@ -1,12 +1,5 @@
 {
-  "state": {
-    "Movement": {
-      "movement_actions_left": 2,
-      "moved_units": [
-        0
-      ]
-    }
-  },
+  "state": "Playing",
   "players": [
     {
       "name": null,
@@ -852,7 +845,7 @@
     {
       "Movement": {
         "starting_position": "D1",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -866,7 +859,7 @@
     {
       "Movement": {
         "starting_position": "C2",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -880,7 +873,7 @@
     {
       "Movement": {
         "starting_position": "B2",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -902,7 +895,7 @@
     {
       "Movement": {
         "starting_position": "C4",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -916,7 +909,7 @@
     {
       "Movement": {
         "starting_position": "B4",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -930,7 +923,7 @@
     {
       "Movement": {
         "starting_position": "C4",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -952,7 +945,7 @@
     {
       "Movement": {
         "starting_position": "D5",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {

@@ -1,7 +1,7 @@
 {
   "state": {
     "ExploreResolution": {
-      "movement_actions_left": 2,
+      "movement_actions_left": 1,
       "moved_units": [
         0
       ],
@@ -711,7 +711,7 @@
     {
       "Movement": {
         "starting_position": "D8",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {

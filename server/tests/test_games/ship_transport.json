@@ -1,5 +1,9 @@
 {
-  "state": "Playing",
+  "state": {
+    "Movement": {
+      "movement_actions_left": 2
+    }
+  },
   "players": [
     {
       "name": null,
@@ -350,7 +354,7 @@
     "Player1 used a move units action"
   ],
   "undo_limit": 1,
-  "actions_left": 1,
+  "actions_left": 0,
   "successful_cultural_influence": false,
   "round": 6,
   "age": 1,

@@ -1,12 +1,5 @@
 {
-  "state": {
-    "Movement": {
-      "movement_actions_left": 2,
-      "moved_units": [
-        1
-      ]
-    }
-  },
+  "state": "Playing",
   "players": [
     {
       "name": null,
@@ -984,7 +977,7 @@
     {
       "Movement": {
         "starting_position": "D8",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -998,7 +991,7 @@
     {
       "Movement": {
         "starting_position": "D1",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -1012,7 +1005,7 @@
     {
       "Movement": {
         "starting_position": "E8",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     },
     {
@@ -1187,7 +1180,7 @@
     {
       "Movement": {
         "starting_position": "B5",
-        "movement_actions_left": 3
+        "movement_actions_left": 2
       }
     }
   ]
