@@ -427,9 +427,6 @@
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -441,9 +438,6 @@
     },
     {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -483,9 +477,6 @@
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -497,9 +488,6 @@
     },
     {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -539,9 +527,6 @@
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": "Stop"
     },
     {
@@ -570,9 +555,6 @@
     },
     {
       "Playing": "EndTurn"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -639,9 +621,6 @@
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -652,7 +631,7 @@
       }
     }
   ],
-  "action_log_index": 34,
+  "action_log_index": 27,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -705,7 +684,7 @@
     "Player2 used a move units action",
     "\tPlayer2 marched 1 settler from D8 to F7 on roads"
   ],
-  "undo_limit": 31,
+  "undo_limit": 24,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,

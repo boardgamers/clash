@@ -1,9 +1,5 @@
 {
-  "state": {
-    "Movement": {
-      "movement_actions_left": 3
-    }
-  },
+  "state": "Playing",
   "players": [
     {
       "name": null,
@@ -344,12 +340,8 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "Playing": "MoveUnits"
-    }
-  ],
-  "action_log_index": 1,
+  "action_log": [],
+  "action_log_index": 0,
   "log": [
     "The game has started",
     "Age 1 has started",

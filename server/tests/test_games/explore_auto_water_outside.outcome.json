@@ -412,9 +412,6 @@
   "current_player_index": 1,
   "action_log": [
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -426,9 +423,6 @@
     },
     {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -450,9 +444,6 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -464,9 +455,6 @@
     },
     {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -483,9 +471,6 @@
     },
     {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -507,9 +492,6 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -523,9 +505,6 @@
       "Movement": "Stop"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -537,9 +516,6 @@
     },
     {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -579,9 +555,6 @@
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -593,9 +566,6 @@
     },
     {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -621,9 +591,6 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -635,9 +602,6 @@
     },
     {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -676,9 +640,6 @@
           "replaced_units": []
         }
       }
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -733,9 +694,6 @@
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -750,9 +708,6 @@
     },
     {
       "Playing": "EndTurn"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -772,9 +727,6 @@
     },
     {
       "Playing": "EndTurn"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {

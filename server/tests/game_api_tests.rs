@@ -187,7 +187,6 @@ fn basic_actions() {
         .expect("The player should have a city at this position")
         .is_activated());
 
-    let game = game_api::execute_action(game, Action::Playing(MoveUnits), 0);
     let movement_action = move_action(vec![0], founded_city_position);
     let game = game_api::execute_action(game, movement_action, 0);
     let game = game_api::execute_action(game, Action::Movement(Stop), 0);
@@ -302,11 +301,11 @@ fn assert_undo(
     action_log_index: usize,
     undo_limit: usize,
 ) {
-    assert_eq!(can_undo, game.can_undo());
-    assert_eq!(can_redo, game.can_redo());
-    assert_eq!(action_log_len, game.action_log.len());
-    assert_eq!(action_log_index, game.action_log_index);
-    assert_eq!(undo_limit, game.undo_limit);
+    assert_eq!(can_undo, game.can_undo(), "can_undo");
+    assert_eq!(can_redo, game.can_redo(), "can_redo");
+    assert_eq!(action_log_len, game.action_log.len(), "action_log_len");
+    assert_eq!(action_log_index, game.action_log_index, "action_log_index");
+    assert_eq!(undo_limit, game.undo_limit, "undo_limit");
 }
 
 fn increase_happiness(game: Game) -> Game {
@@ -340,7 +339,7 @@ fn undo() {
     let game = game_api::execute_action(game, Action::Undo, 0);
     assert_undo(&game, false, true, 2, 0, 0);
     assert_eq!(Angry, game.players[0].cities[0].mood_state);
-    let game = increase_happiness(game);
+    let game = game_api::execute_action(game, Action::Redo, 0);
     assert_undo(&game, true, true, 2, 1, 0);
     assert_eq!(Neutral, game.players[0].cities[0].mood_state);
     let game = game_api::execute_action(game, Action::Redo, 0);

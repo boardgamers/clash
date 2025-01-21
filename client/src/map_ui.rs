@@ -246,7 +246,7 @@ pub fn move_units_button<'a>(
     Some((
         move_intent.icon(rc),
         move_intent.toolip().to_string(),
-        Box::new(move || StateUpdate::MoveUnits(move_intent.clone())),
+        Box::new(move || StateUpdate::move_units(rc, Some(pos), move_intent)),
     ))
 }
 

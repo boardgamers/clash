@@ -6,6 +6,7 @@ use std::mem;
 use GameState::*;
 
 use crate::combat::{self, Combat, CombatDieRoll, CombatPhase, COMBAT_DIE_SIDES};
+use crate::consts::MOVEMENT_ACTIONS;
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
 use crate::map::UnexploredBlock;
 use crate::movement::terrain_movement_restriction;
@@ -303,7 +304,7 @@ impl Game {
             self.undo(player_index);
             return;
         }
-        if matches!(action, Action::Redo) || self.can_auto_redo(&action) {
+        if matches!(action, Action::Redo) {
             assert!(self.can_redo(), "no action can be redone");
             self.redo(player_index);
             return;
@@ -312,9 +313,13 @@ impl Game {
         self.add_action_log_item(action.clone());
         match self.state.clone() {
             Playing => {
-                let action = action.playing().expect("action should be a playing action");
+                if let Some(m) = action.clone().movement() {
+                    self.execute_movement_action(m, player_index, MoveState::new());
+                } else {
+                    let action = action.playing().expect("action should be a playing action");
 
-                action.execute(self, player_index);
+                    action.execute(self, player_index);
+                }
             }
             StatusPhase(phase) => {
                 let action = action
@@ -358,17 +363,6 @@ impl Game {
         check_for_waste(self, player_index);
     }
 
-    fn can_auto_redo(&mut self, action: &Action) -> bool {
-        self.state.is_playing()
-            && self.can_redo()
-            && self.action_log[self.action_log_index]
-                .playing_ref()
-                .expect("undone actions should be playing actions")
-                == action
-                    .playing_ref()
-                    .expect("action should be a playing action")
-    }
-
     fn undo(&mut self, player_index: usize) {
         match &self.action_log[self.action_log_index - 1] {
             Action::Playing(action) => action.clone().undo(self, player_index),
@@ -403,14 +397,17 @@ impl Game {
         match action_log_item {
             Action::Playing(action) => action.clone().execute(self, player_index),
             Action::StatusPhase(_) => panic!("status phase actions can't be redone"),
-            Action::Movement(action) => {
-                let Movement(m) = &self.state else {
-                    panic!(
-                        "movement actions can only be redone if the game is in a movement state"
-                    );
-                };
-                self.execute_movement_action(action.clone(), player_index, m.clone());
-            }
+            Action::Movement(action) => match &self.state {
+                Playing => {
+                    self.execute_movement_action(action.clone(), player_index, MoveState::new());
+                }
+                Movement(m) => {
+                    self.execute_movement_action(action.clone(), player_index, m.clone());
+                }
+                _ => {
+                    panic!("movement actions can only be redone if the game is in a movement state")
+                }
+            },
             Action::CulturalInfluenceResolution(action) => {
                 let CulturalInfluenceResolution(c) = &self.state else {
                     panic!("cultural influence resolution actions can only be redone if the game is in a cultural influence resolution state");
@@ -675,7 +672,11 @@ impl Game {
                     .carrier_id = Some(unit.carrier_id);
             }
         }
-        self.state = Movement(move_state);
+        if move_state.movement_actions_left == MOVEMENT_ACTIONS {
+            self.state = Playing;
+        } else {
+            self.state = Movement(move_state);
+        }
     }
 
     fn execute_cultural_influence_resolution_action(
@@ -1596,6 +1597,23 @@ pub struct MoveState {
     #[serde(default)]
     #[serde(skip_serializing_if = "CurrentMove::is_none")]
     pub current_move: CurrentMove,
+}
+
+impl Default for MoveState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl MoveState {
+    #[must_use]
+    pub fn new() -> Self {
+        MoveState {
+            movement_actions_left: MOVEMENT_ACTIONS,
+            moved_units: Vec::new(),
+            current_move: CurrentMove::None,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

@@ -399,9 +399,6 @@
           }
         }
       }
-    },
-    {
-      "Playing": "MoveUnits"
     }
   ],
   "action_log_index": 2,

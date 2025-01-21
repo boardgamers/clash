@@ -420,9 +420,6 @@
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -458,9 +455,6 @@
     },
     {
       "Playing": "EndTurn"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -510,9 +504,6 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -560,9 +551,6 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -608,9 +596,6 @@
     },
     {
       "Playing": "EndTurn"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -829,9 +814,6 @@
       "Playing": "EndTurn"
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -888,9 +870,6 @@
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -901,7 +880,7 @@
       }
     }
   ],
-  "action_log_index": 59,
+  "action_log_index": 52,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -987,7 +966,7 @@
     "Player2 used a move units action",
     "\tPlayer2 sailed 1 ship from B5 to A7"
   ],
-  "undo_limit": 55,
+  "undo_limit": 48,
   "actions_left": 0,
   "successful_cultural_influence": false,
   "round": 3,

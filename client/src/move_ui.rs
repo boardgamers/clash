@@ -1,7 +1,7 @@
 use macroquad::math::{u32, Vec2};
 use macroquad::prelude::Texture2D;
 use server::action::Action;
-use server::game::{CurrentMove, Game, MoveState};
+use server::game::{CurrentMove, Game};
 use server::player::Player;
 use server::position::Position;
 use server::unit::{MovementAction, Unit, UnitType};
@@ -10,7 +10,7 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::render_context::RenderContext;
 use crate::unit_ui::{click_unit, unit_selection_clicked};
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum MoveIntent {
     Land,
     Sea,
@@ -18,7 +18,7 @@ pub enum MoveIntent {
 }
 
 impl MoveIntent {
-    pub fn to_predicate(&self) -> impl Fn(&Unit) -> bool {
+    pub fn to_predicate(self) -> impl Fn(&Unit) -> bool {
         match self {
             MoveIntent::Land => |u: &Unit| u.unit_type.is_land_based() && !u.is_transported(),
             MoveIntent::Sea => |u: &Unit| !u.unit_type.is_land_based(),
@@ -34,7 +34,7 @@ impl MoveIntent {
         }
     }
 
-    pub fn icon<'a>(&self, rc: &'a RenderContext) -> &'a Texture2D {
+    pub fn icon<'a>(self, rc: &'a RenderContext) -> &'a Texture2D {
         match self {
             MoveIntent::Land => &rc.assets().move_units,
             MoveIntent::Sea => &rc.assets().units[&UnitType::Ship],
@@ -177,7 +177,6 @@ pub struct MoveSelection {
     pub units: Vec<u32>,
     pub start: Option<Position>,
     pub destinations: Vec<MoveDestination>,
-    // pub lo
 }
 
 impl MoveSelection {
@@ -185,10 +184,10 @@ impl MoveSelection {
         player_index: usize,
         start: Option<Position>,
         game: &Game,
-        move_intent: &MoveIntent,
-        move_state: &MoveState,
+        move_intent: MoveIntent,
+        current_move: &CurrentMove,
     ) -> MoveSelection {
-        if let CurrentMove::Fleet { units } = &move_state.current_move {
+        if let CurrentMove::Fleet { units } = current_move {
             let fleet_pos = game
                 .get_player(player_index)
                 .get_unit(units[0])

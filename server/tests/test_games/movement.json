@@ -1,9 +1,5 @@
 {
-  "state": {
-    "Movement": {
-      "movement_actions_left": 3
-    }
-  },
+  "state": "Playing",
   "players": [
     {
       "name": null,

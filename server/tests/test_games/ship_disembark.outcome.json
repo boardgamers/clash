@@ -347,9 +347,6 @@
       }
     },
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -361,7 +358,7 @@
       }
     }
   ],
-  "action_log_index": 3,
+  "action_log_index": 2,
   "log": [
     "The game has started",
     "Age 1 has started",

@@ -6,11 +6,11 @@ use PlayingAction::*;
 
 use crate::action::Action;
 use crate::content::advances;
-use crate::game::{CulturalInfluenceResolution, CurrentMove, GameState, MoveState};
+use crate::game::{CulturalInfluenceResolution, GameState};
 use crate::{
     city::City,
     city_pieces::Building::{self, *},
-    consts::{MOVEMENT_ACTIONS, PORT_CHOICES},
+    consts::PORT_CHOICES,
     content::custom_actions::CustomAction,
     game::{Game, UndoContext},
     map::Terrain,
@@ -94,7 +94,6 @@ pub enum PlayingAction {
     Construct(Construct),
     Collect(Collect),
     Recruit(Recruit),
-    MoveUnits,
     IncreaseHappiness(IncreaseHappiness),
     InfluenceCultureAttempt(InfluenceCultureAttempt),
     Custom(CustomAction),
@@ -204,13 +203,6 @@ impl PlayingAction {
                     r.replaced_units,
                 );
             }
-            MoveUnits => {
-                game.state = GameState::Movement(MoveState {
-                    movement_actions_left: MOVEMENT_ACTIONS,
-                    moved_units: Vec::new(),
-                    current_move: CurrentMove::None,
-                });
-            }
             IncreaseHappiness(i) => {
                 increase_happiness(game, player_index, i);
             }
@@ -301,7 +293,6 @@ impl PlayingAction {
             PlayingAction::Construct { .. } => PlayingActionType::Construct,
             PlayingAction::Collect { .. } => PlayingActionType::Collect,
             PlayingAction::Recruit { .. } => PlayingActionType::Recruit,
-            PlayingAction::MoveUnits => PlayingActionType::MoveUnits,
             PlayingAction::IncreaseHappiness { .. } => PlayingActionType::IncreaseHappiness,
             PlayingAction::InfluenceCultureAttempt { .. } => {
                 PlayingActionType::InfluenceCultureAttempt
@@ -357,7 +348,6 @@ impl PlayingAction {
                 game.players[player_index].gain_resources(r.payment);
                 game.undo_recruit(player_index, &r.units, r.city_position, r.leader_index);
             }
-            MoveUnits => game.state = GameState::Playing,
             IncreaseHappiness(i) => undo_increase_happiness(game, player_index, i),
             Custom(custom_action) => custom_action.undo(game, player_index),
             InfluenceCultureAttempt(_) | EndTurn => panic!("Action can't be undone"),

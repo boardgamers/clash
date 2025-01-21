@@ -423,9 +423,6 @@
   "current_player_index": 1,
   "action_log": [
     {
-      "Playing": "MoveUnits"
-    },
-    {
       "Movement": {
         "Move": {
           "units": [
@@ -437,9 +434,6 @@
     },
     {
       "Movement": "Stop"
-    },
-    {
-      "Playing": "MoveUnits"
     },
     {
       "Movement": {
@@ -455,7 +449,7 @@
       "ExploreResolution": 3
     }
   ],
-  "action_log_index": 6,
+  "action_log_index": 4,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -467,7 +461,7 @@
     "\tPlayer2 moved 1 settler from D7 to C7",
     "Player2 chose the orientation of the newly explored tiles. Explored tiles A7=Fertile, B6=Barren, B7=Water, C7=Fertile"
   ],
-  "undo_limit": 5,
+  "undo_limit": 3,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,
