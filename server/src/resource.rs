@@ -52,7 +52,18 @@ fn add_resource(m: &mut HashMap<ResourceType, u32>, amount: u32, resource_type: 
 }
 
 pub(crate) fn check_for_waste(game: &mut Game, player_index: usize) {
-    let wasted_resources = mem::replace(&mut game.players[player_index].wasted_resources, ResourcePile::empty());
+    for p in &game.players {
+        assert!(
+            p.wasted_resources.is_empty() || p.index == player_index,
+            "non-active Player {} has wasted resources: {:?}",
+            p.index,
+            p.wasted_resources
+        );
+    }
+    let wasted_resources = mem::replace(
+        &mut game.players[player_index].wasted_resources,
+        ResourcePile::empty(),
+    );
     if !wasted_resources.is_empty() {
         game.push_undo_context(UndoContext::WastedResources {
             resources: wasted_resources,
