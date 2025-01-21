@@ -1,12 +1,13 @@
 use macroquad::math::{u32, Vec2};
 use macroquad::prelude::Texture2D;
 use server::action::Action;
-use server::game::{CurrentMove, Game};
+use server::game::{CurrentMove, Game, GameState};
 use server::player::Player;
 use server::position::Position;
 use server::unit::{MovementAction, Unit, UnitType};
 
 use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::dialog_ui::cancel_button_with_tooltip;
 use crate::render_context::RenderContext;
 use crate::unit_ui::{click_unit, unit_selection_clicked};
 
@@ -231,4 +232,13 @@ impl MoveSelection {
             destinations: vec![],
         }
     }
+}
+
+pub(crate) fn move_units_dialog(
+    rc: &RenderContext,
+) -> StateUpdate {
+    if matches!(rc.game.state, GameState::Playing) && cancel_button_with_tooltip(rc, "Back to playing actions") {
+        return StateUpdate::CloseDialog;
+    }
+    StateUpdate::None
 }

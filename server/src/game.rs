@@ -678,6 +678,7 @@ impl Game {
         }
         if move_state.movement_actions_left == MOVEMENT_ACTIONS {
             self.state = Playing;
+            self.actions_left += 1;
         } else {
             self.state = Movement(move_state);
         }
