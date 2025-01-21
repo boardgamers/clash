@@ -1,7 +1,7 @@
 use crate::game::{Game, UndoContext};
 use crate::resource_pile::ResourcePile;
 use std::collections::HashMap;
-use std::fmt;
+use std::{fmt, mem};
 
 #[derive(PartialEq, Eq, Debug, Clone, Copy, Hash, Ord, PartialOrd)]
 pub enum ResourceType {
@@ -52,19 +52,7 @@ fn add_resource(m: &mut HashMap<ResourceType, u32>, amount: u32, resource_type: 
 }
 
 pub(crate) fn check_for_waste(game: &mut Game, player_index: usize) {
-    let mut wasted_resources = ResourcePile::empty();
-    for p in &mut game.players {
-        if p.wasted_resources.is_empty() {
-            continue;
-        }
-        assert_eq!(
-            p.index, player_index,
-            "non-active player {} has wasted resources: {:?}",
-            p.index, p.wasted_resources
-        );
-        wasted_resources = p.wasted_resources.clone();
-        p.wasted_resources = ResourcePile::empty();
-    }
+    let wasted_resources = mem::replace(&mut game.players[player_index].wasted_resources, ResourcePile::empty());
     if !wasted_resources.is_empty() {
         game.push_undo_context(UndoContext::WastedResources {
             resources: wasted_resources,
