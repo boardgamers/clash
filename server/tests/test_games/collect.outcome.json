@@ -354,7 +354,7 @@
     "Player2 ended his turn with 3 actions left",
     "It's Player1's turn",
     "Round 2/3",
-    "Player1 collects 1 ore and 1 wood in the city at C2"
+    "Player1 collects 1 ore and 1 wood in the city at C2. Could not store 1 ore"
   ],
   "undo_limit": 5,
   "actions_left": 2,

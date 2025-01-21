@@ -47,6 +47,7 @@ pub(crate) fn check_for_waste(game: &mut Game, player_index: usize) {
         ResourcePile::empty(),
     );
     if !wasted_resources.is_empty() {
+        game.add_to_last_log_item(&format!(". Could not store {wasted_resources}"));
         game.push_undo_context(UndoContext::WastedResources {
             resources: wasted_resources,
         });
