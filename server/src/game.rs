@@ -452,10 +452,6 @@ impl Game {
         player_index: usize,
         mut move_state: MoveState,
     ) {
-        if let Playing = self.state {
-            assert_ne!(self.actions_left, 0, "Illegal action");
-            self.actions_left -= 1;
-        }
         let saved_state = move_state.clone();
         let mut cost = None;
         let (starting_position, disembarked_units) = match action {
@@ -464,6 +460,10 @@ impl Game {
                 destination,
                 embark_carrier_id,
             } => {
+                if let Playing = self.state {
+                    assert_ne!(self.actions_left, 0, "Illegal action");
+                    self.actions_left -= 1;
+                }
                 let player = &self.players[player_index];
                 let starting_position = player
                     .get_unit(*units.first().expect(
