@@ -9,6 +9,7 @@ use crate::combat::{self, Combat, CombatDieRoll, CombatPhase, COMBAT_DIE_SIDES};
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
 use crate::map::UnexploredBlock;
 use crate::movement::terrain_movement_restriction;
+use crate::resource::check_for_waste;
 use crate::unit::{carried_units, get_current_move, MovementRestriction};
 use crate::utils::Rng;
 use crate::utils::Shuffle;
@@ -37,7 +38,6 @@ use crate::{
     utils,
     wonder::Wonder,
 };
-use crate::resource::check_for_waste;
 
 pub struct Game {
     pub state: GameState,

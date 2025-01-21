@@ -1,7 +1,7 @@
+use crate::game::{Game, UndoContext};
 use crate::resource_pile::ResourcePile;
 use std::collections::HashMap;
 use std::fmt;
-use crate::game::{Game, UndoContext};
 
 #[derive(PartialEq, Eq, Debug, Clone, Copy, Hash, Ord, PartialOrd)]
 pub enum ResourceType {
@@ -57,7 +57,11 @@ pub(crate) fn check_for_waste(game: &mut Game, player_index: usize) {
         if p.wasted_resources.is_empty() {
             continue;
         }
-        assert_eq!(p.index, player_index, "non-active player {} has wasted resources: {:?}", p.index, p.wasted_resources);
+        assert_eq!(
+            p.index, player_index,
+            "non-active player {} has wasted resources: {:?}",
+            p.index, p.wasted_resources
+        );
         wasted_resources = p.wasted_resources.clone();
         p.wasted_resources = ResourcePile::empty();
     }
