@@ -7,6 +7,7 @@ pub struct SumPaymentOptions {
     pub types_by_preference: Vec<ResourceType>,
     pub default: ResourcePile,
     pub left: ResourcePile,
+    pub can_afford: bool,
 }
 
 impl SumPaymentOptions {
@@ -16,12 +17,14 @@ impl SumPaymentOptions {
         left: ResourcePile,
         cost: u32,
         types_by_preference: &[ResourceType],
+        can_afford: bool,
     ) -> Self {
         Self {
             default,
             left,
             cost,
             types_by_preference: types_by_preference.to_vec(),
+            can_afford,
         }
     }
 
@@ -41,6 +44,13 @@ pub enum PaymentModel {
 }
 
 impl PaymentModel {
+    #[must_use]
+    pub fn can_afford(&self) -> bool {
+        match self {
+            PaymentModel::Sum(options) => options.can_afford,
+        }
+    }
+
     #[must_use]
     pub fn is_valid(&self, payment: &ResourcePile) -> bool {
         match self {
@@ -86,23 +96,28 @@ pub fn get_single_resource_payment_model(
 
 #[must_use]
 pub fn get_sum_payment_model(
-    pile: &ResourcePile,
+    available: &ResourcePile,
     cost: u32,
     types_by_preference: &[ResourceType],
 ) -> PaymentModel {
     let mut left = ResourcePile::empty();
     for t in types_by_preference {
-        left.add_type(*t, pile.get(*t) as i32);
+        left.add_type(*t, available.get(*t) as i32);
     }
     let default_type = types_by_preference[0];
     let mut default_payment = ResourcePile::empty();
 
+    let mut can_afford = true;
     for _ in 0..cost {
         let t = types_by_preference
             .iter()
             .find(|t| left.get(**t) > 0)
             .unwrap_or(&default_type);
-        left.add_type(*t, -1);
+        if left.get(*t) == 0 {
+            can_afford = false;
+        } else {
+            left.add_type(*t, -1);
+        }
         default_payment.add_type(*t, 1);
     }
 
@@ -111,6 +126,7 @@ pub fn get_sum_payment_model(
         left,
         cost,
         types_by_preference,
+        can_afford,
     ))
 }
 
@@ -125,6 +141,7 @@ mod tests {
         budget: &ResourcePile,
         want_default: ResourcePile,
         left_default: ResourcePile,
+        can_afford: bool,
     ) {
         let model = get_sum_payment_model(
             budget,
@@ -136,6 +153,7 @@ mod tests {
             left_default,
             2,
             &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
+            can_afford,
         ));
         assert_eq!(model, want, "{name}");
     }
@@ -147,24 +165,35 @@ mod tests {
             &(ResourcePile::food(3) + ResourcePile::ideas(3) + ResourcePile::gold(3)),
             ResourcePile::ideas(2),
             ResourcePile::food(3) + ResourcePile::ideas(1) + ResourcePile::gold(3),
+            true,
         );
         assert_sum_payment_options(
             "using food",
             &(ResourcePile::food(3) + ResourcePile::gold(3)),
             ResourcePile::food(2),
             ResourcePile::food(1) + ResourcePile::gold(3),
+            true,
         );
         assert_sum_payment_options(
             "using 1 gold",
             &(ResourcePile::ideas(1) + ResourcePile::gold(3)),
             ResourcePile::ideas(1) + ResourcePile::gold(1),
             ResourcePile::gold(2),
+            true,
         );
         assert_sum_payment_options(
             "one possible payment",
             &(ResourcePile::food(1) + ResourcePile::gold(1)),
             ResourcePile::food(1) + ResourcePile::gold(1),
             ResourcePile::empty(),
+            true,
+        );
+        assert_sum_payment_options(
+            "cannot afford",
+            &(ResourcePile::gold(1)),
+            ResourcePile::ideas(1) + ResourcePile::gold(1),
+            ResourcePile::empty(),
+            false,
         );
     }
 }

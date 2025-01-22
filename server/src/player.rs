@@ -413,8 +413,7 @@ impl Player {
 
     #[must_use]
     pub fn can_advance(&self, advance: &Advance) -> bool {
-        self.get_advance_payment_options(&advance.name)
-            .is_valid(&self.resources)
+        self.get_advance_payment_options(&advance.name).can_afford()
             && self.can_advance_free(advance)
     }
 

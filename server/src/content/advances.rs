@@ -173,9 +173,7 @@ fn warfare() -> Vec<Advance> {
             .with_unlocked_building("Fortress"),
             Advance::builder(
                 SIEGECRAFT,
-                "When attacking a city with a Fortress, pay 2 wood to cancel
-            the Fortress’ ability to add +1 die and/or pay 2 ore to ignore its ability to cancel
-            a hit.",
+                "When attacking a city with a Fortress, pay 2 wood to cancel the Fortress’ ability to add +1 die and/or pay 2 ore to ignore its ability to cancel a hit.",
             ),
         ],
     )

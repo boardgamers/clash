@@ -63,27 +63,7 @@ impl ResourcePile {
             culture_tokens,
         }
     }
-
-    ///
-    /// # Panics
-    /// Panics if `resource_type` is `Discount`
-    #[must_use]
-    pub fn of_type(resource_type: ResourceType, amount: i32) -> Self {
-        match resource_type {
-            ResourceType::Food => Self::food(amount as u32),
-            ResourceType::Wood => Self::wood(amount as u32),
-            ResourceType::Ore => Self::ore(amount as u32),
-            ResourceType::Ideas => Self::ideas(amount as u32),
-            ResourceType::Gold => Self::gold(amount),
-            ResourceType::MoodTokens => Self::mood_tokens(amount as u32),
-            ResourceType::CultureTokens => Self::culture_tokens(amount as u32),
-            ResourceType::Discount => panic!("Discount is not a resource type"),
-        }
-    }
-
-    ///
-    /// # Panics
-    /// Panics if `resource_type` is `Discount`
+    
     #[must_use]
     pub fn get(&self, resource_type: ResourceType) -> u32 {
         match resource_type {
@@ -94,25 +74,8 @@ impl ResourcePile {
             ResourceType::Gold => self.gold as u32,
             ResourceType::MoodTokens => self.mood_tokens,
             ResourceType::CultureTokens => self.culture_tokens,
-            ResourceType::Discount => panic!("Discount is not a resource type"),
+            ResourceType::Discount => 0,
         }
-    }
-
-    pub fn try_take(&mut self, resource_type: ResourceType, amount: u32) -> bool {
-        if self.get(resource_type) >= amount {
-            self.add_type(resource_type, -(amount as i32));
-            return true;
-        } else if resource_type.is_resource() && resource_type != ResourceType::Gold {
-            // may pay rest with gold
-            let rest = self.get(resource_type);
-            let gold_cost = amount as i32 - rest as i32;
-            if self.gold >= gold_cost {
-                self.add_type(resource_type, -(rest as i32));
-                self.add_type(ResourceType::Gold, -gold_cost);
-                return true;
-            }
-        }
-        false
     }
 
     ///
