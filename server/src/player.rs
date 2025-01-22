@@ -3,7 +3,7 @@ use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
 use crate::movement::move_routes;
 use crate::movement::{is_valid_movement_type, MoveRoute};
-use crate::payment::{get_sum_payment_options, PaymentModel};
+use crate::payment::{get_sum_payment_model, PaymentModel};
 use crate::resource::ResourceType;
 use crate::unit::{carried_units, get_current_move, MovementRestriction};
 use crate::{
@@ -555,11 +555,11 @@ impl Player {
 
     #[must_use]
     pub fn get_advance_payment_options(&self, advance: &str) -> PaymentModel {
-        PaymentModel::Sum(get_sum_payment_options(
+        get_sum_payment_model(
             &self.resources,
             self.advance_cost(advance),
             &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
-        ))
+        )
     }
 
     #[must_use]

@@ -22,7 +22,7 @@ use server::content::custom_actions::CustomAction;
 use server::game::Game;
 use server::playing_actions::{get_total_collection, Collect, PlayingAction};
 use server::position::Position;
-use server::resource::{resource_types, ResourceType};
+use server::resource::ResourceType;
 use server::resource_pile::ResourcePile;
 
 #[derive(Clone)]
@@ -190,7 +190,7 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpd
                 }
 
                 let map = new_resource_map(pile);
-                let m: Vec<(ResourceType, &u32)> = resource_types()
+                let m: Vec<(ResourceType, &u32)> = ResourceType::all()
                     .iter()
                     .filter_map(|r| {
                         let a = map.get(r);

@@ -7,6 +7,7 @@ use GameState::*;
 
 use crate::combat::{self, Combat, CombatDieRoll, CombatPhase, COMBAT_DIE_SIDES};
 use crate::consts::MOVEMENT_ACTIONS;
+use crate::content::custom_phase_actions::CustomPhaseState;
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
 use crate::map::UnexploredBlock;
 use crate::movement::{has_movable_units, terrain_movement_restriction};
@@ -39,7 +40,6 @@ use crate::{
     utils,
     wonder::Wonder,
 };
-use crate::content::custom_phase_actions::{CustomPhaseState};
 
 pub struct Game {
     pub state: GameState,
@@ -354,11 +354,11 @@ impl Game {
             }
             PlaceSettler(p) => self.place_settler(action, player_index, &p),
             ExploreResolution(r) => {
-                           let rotation = action
-                               .explore_resolution()
-                               .expect("action should be an explore resolution action");
-                           explore_resolution(self, &r, rotation);
-                       }
+                let rotation = action
+                    .explore_resolution()
+                    .expect("action should be an explore resolution action");
+                explore_resolution(self, &r, rotation);
+            }
             CustomPhase(_) => {
                 let action = action
                     .custom_phase()
@@ -384,8 +384,8 @@ impl Game {
             Action::Combat(_action) => unimplemented!("retreat can't yet be undone"),
             Action::PlaceSettler(_action) => panic!("placing a settler can't be undone"),
             Action::ExploreResolution(_rotation) => {
-                            undo_explore_resolution(self, player_index);
-                        }
+                undo_explore_resolution(self, player_index);
+            }
             Action::CustomPhase(action) => action.clone().undo(self, player_index),
             Action::Undo => panic!("undo action can't be undone"),
             Action::Redo => panic!("redo action can't be undone"),
@@ -432,13 +432,13 @@ impl Game {
             Action::Combat(_) => unimplemented!("retreat can't yet be redone"),
             Action::PlaceSettler(_) => panic!("place settler actions can't be redone"),
             Action::ExploreResolution(rotation) => {
-                            let ExploreResolution(r) = &self.state else {
-                                panic!("explore resolution actions can only be redone if the game is in a explore resolution state");
-                            };
-                            explore_resolution(self, &r.clone(), *rotation);
-                        }
+                let ExploreResolution(r) = &self.state else {
+                    panic!("explore resolution actions can only be redone if the game is in a explore resolution state");
+                };
+                explore_resolution(self, &r.clone(), *rotation);
+            }
             Action::CustomPhase(action) => {
-                    action.clone().execute(self, player_index);
+                action.clone().execute(self, player_index);
             }
             Action::Undo => panic!("undo action can't be redone"),
             Action::Redo => panic!("redo action can't be redone"),

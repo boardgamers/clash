@@ -220,7 +220,7 @@ impl ConstructionPayment {
 }
 
 impl HasPayment for ConstructionPayment {
-    fn payment(&self) -> &Payment {
-        &self.payment
+    fn payment(&self) -> Payment {
+        self.payment.clone()
     }
 }

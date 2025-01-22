@@ -19,7 +19,6 @@ use crate::{
     unit::{MovementAction, Units},
     utils,
 };
-use crate::content::custom_phase_actions::CustomPhaseAction;
 
 #[derive(Serialize, Deserialize)]
 pub struct LogSliceOptions {
@@ -48,7 +47,7 @@ pub fn format_action_log_item(action: &Action, game: &Game) -> String {
         Action::Combat(action) => format_combat_action_log_item(action, game),
         Action::PlaceSettler(position) => format_place_settler_log_item(game, *position),
         Action::ExploreResolution(_rotation) => format_explore_action_log_item(game),
-        Action::CustomPhase(c) => c.format_log_item(game, &player, &player.get_name()),
+        Action::CustomPhase(c) => c.format_log_item(game, player, &player.get_name()),
         Action::Undo | Action::Redo => {
             panic!("undoing or redoing actions should not be written to the log")
         }

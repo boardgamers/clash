@@ -1,11 +1,9 @@
 use crate::combat::{Combat, CombatModifier};
 use crate::content::advances::SIEGECRAFT;
-use crate::content::custom_actions::CustomAction;
 use crate::game::{Game, GameState};
-use crate::log::{format_collect_log_item, format_happiness_increase};
+use crate::payment::get_single_resource_payment_model;
 use crate::player::Player;
 use crate::position::Position;
-use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use serde::{Deserialize, Serialize};
 
@@ -14,20 +12,34 @@ pub enum CustomPhaseState {
     SiegecraftPayment(Combat),
 }
 
+pub const SIEGECRAFT_EXTRA_DIE: ResourcePile = ResourcePile::wood(2);
+pub const SIEGECRAFT_IGNORE_HIT: ResourcePile = ResourcePile::ore(2);
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct SiegecraftPayment {
+    pub extra_die: ResourcePile,
+    pub ignore_hit: ResourcePile,
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub enum CustomPhaseAction {
-    Siegecraft(ResourcePile),
+    SiegecraftPaymentAction(SiegecraftPayment),
 }
 
 impl CustomPhaseAction {
+    ///
+    /// # Panics
+    /// Panics if the action cannot be executed
     pub fn execute(self, game: &mut Game, player_index: usize) {
         match &game.state {
             GameState::CustomPhase(state) => match state {
-                CustomPhaseState::SiegecraftPayment(c) => {
-                    if let CustomPhaseAction::Siegecraft(payment) = self {
-                        pay_siegecraft(game, c.clone(), player_index, payment);
+                CustomPhaseState::SiegecraftPayment(c) =>
+                {
+                    #[allow(irrefutable_let_patterns)]
+                    if let CustomPhaseAction::SiegecraftPaymentAction(payment) = self {
+                        pay_siegecraft(game, c.clone(), player_index, &payment);
                     } else {
-                        panic!("siegecraft actions can only be executed if the game is in a siegecraft state");
+                        panic!("Need to pass SiegecraftPaymentAction to execute");
                     }
                 }
             },
@@ -35,10 +47,13 @@ impl CustomPhaseAction {
         }
     }
 
-    pub fn undo(self, game: &mut Game, player_index: usize) {
+    ///
+    /// # Panics
+    /// Panics if the action cannot be undone
+    pub fn undo(self, game: &mut Game, _player_index: usize) {
         match game.state {
             GameState::CustomPhase(ref state) => match state {
-                CustomPhaseState::SiegecraftPayment(s) => {
+                CustomPhaseState::SiegecraftPayment(_) => {
                     panic!("combat actions cannot be undone");
                 }
             },
@@ -47,16 +62,35 @@ impl CustomPhaseAction {
     }
 
     #[must_use]
-    pub fn format_log_item(&self, _game: &Game, player: &Player, player_name: &str) -> String {
+    pub fn format_log_item(&self, _game: &Game, _player: &Player, player_name: &str) -> String {
         match self {
-            CustomPhaseAction::Siegecraft(payment) => {
-                format!("{} paid {} for siegecraft", player_name, payment)
+            CustomPhaseAction::SiegecraftPaymentAction(payment) => {
+                let mut effects = vec![];
+                if !payment.extra_die.is_empty() {
+                    effects.push(format!(
+                        "{} to increase the combat value",
+                        payment.extra_die
+                    ));
+                }
+                if !payment.ignore_hit.is_empty() {
+                    effects.push(format!("{} to ignore a hit", payment.ignore_hit));
+                }
+                if effects.is_empty() {
+                    format!("{player_name} did not use siegecraft",)
+                } else {
+                    format!("{player_name} paid for siegecraft: {}", effects.join(", "))
+                }
             }
         }
     }
 }
 
-pub fn start_siegecraft_phase(game: &mut Game, attacker: usize, defender_position: Position, c: Combat) -> bool {
+pub fn start_siegecraft_phase(
+    game: &mut Game,
+    attacker: usize,
+    defender_position: Position,
+    c: Combat,
+) -> bool {
     let player = &game.players[attacker];
     let r = &player.resources;
     if game
@@ -72,18 +106,34 @@ pub fn start_siegecraft_phase(game: &mut Game, attacker: usize, defender_positio
     }
 }
 
-fn pay_siegecraft(game: &mut Game, mut combat: Combat, player_index: usize, mut payment: ResourcePile) {
+fn pay_siegecraft(
+    game: &mut Game,
+    mut combat: Combat,
+    player_index: usize,
+    payment: &SiegecraftPayment,
+) {
     let player = &mut game.players[player_index];
-    player.loose_resources(payment.clone());
-    if payment.try_take(ResourceType::Wood, 2) {
-        combat.modifiers.push(CombatModifier::CancelFortressIncreaseCombatValue)
-    } 
-    if payment.try_take(ResourceType::Ore, 2) {
-        combat.modifiers.push(CombatModifier::CancelFortressIgnoreHit)
-    }
-    if !payment.is_empty() {
-        panic!("payment for siegecraft was not empty after paying for siegecraft");
-    }
 
+    let options = [
+        (
+            &payment.extra_die,
+            &SIEGECRAFT_EXTRA_DIE,
+            CombatModifier::CancelFortressExtraDie,
+        ),
+        (
+            &payment.ignore_hit,
+            &SIEGECRAFT_IGNORE_HIT,
+            CombatModifier::CancelFortressIgnoreHit,
+        ),
+    ];
+
+    for (payment, cost, gain) in options {
+        if !payment.is_empty() {
+            let payment_options = get_single_resource_payment_model(&player.resources, cost);
+            assert!(payment_options.is_valid(payment), "Invalid payment");
+            player.loose_resources(cost.clone());
+            combat.modifiers.push(gain);
+        }
+    }
     game.state = GameState::Combat(combat);
 }

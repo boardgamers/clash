@@ -141,12 +141,12 @@ impl ResourcePile {
     }
 
     #[must_use]
-    pub fn wood(amount: u32) -> Self {
+    pub const fn wood(amount: u32) -> Self {
         Self::new(0, amount, 0, 0, 0, 0, 0)
     }
 
     #[must_use]
-    pub fn ore(amount: u32) -> Self {
+    pub const fn ore(amount: u32) -> Self {
         Self::new(0, 0, amount, 0, 0, 0, 0)
     }
 

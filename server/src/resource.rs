@@ -24,24 +24,29 @@ impl ResourceType {
     pub fn is_discount(&self) -> bool {
         matches!(self, ResourceType::Discount)
     }
-    
+
     #[must_use]
     pub fn is_resource(&self) -> bool {
         !self.is_token() && !self.is_discount()
     }
-}
 
-#[must_use]
-pub fn resource_types() -> Vec<ResourceType> {
-    vec![
-        ResourceType::Food,
-        ResourceType::Wood,
-        ResourceType::Ore,
-        ResourceType::Ideas,
-        ResourceType::Gold,
-        ResourceType::MoodTokens,
-        ResourceType::CultureTokens,
-    ]
+    #[must_use]
+    pub fn is_gold(&self) -> bool {
+        matches!(self, ResourceType::Gold)
+    }
+
+    #[must_use]
+    pub fn all() -> Vec<ResourceType> {
+        vec![
+            ResourceType::Food,
+            ResourceType::Wood,
+            ResourceType::Ore,
+            ResourceType::Ideas,
+            ResourceType::Gold,
+            ResourceType::MoodTokens,
+            ResourceType::CultureTokens,
+        ]
+    }
 }
 
 impl fmt::Display for ResourceType {

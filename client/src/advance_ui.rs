@@ -1,12 +1,9 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::dialog_ui::OkTooltip;
-use crate::layout_ui::{bottom_center_text, left_mouse_button_pressed_in_rect, top_centered_text};
+use crate::layout_ui::{left_mouse_button_pressed_in_rect, top_centered_text};
 use crate::log_ui::break_text;
-use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
+use crate::payment_ui::{payment_model_dialog, PaymentModelPayment};
 use crate::player_ui::player_color;
 use crate::render_context::RenderContext;
-use crate::resource_ui::new_resource_map;
-use crate::select_ui::HasCountSelectableObject;
 use crate::tooltip::show_tooltip_for_rect;
 use macroquad::color::Color;
 use macroquad::math::vec2;
@@ -21,9 +18,7 @@ use server::game::GameState;
 use server::payment::PaymentModel;
 use server::player::Player;
 use server::playing_actions::PlayingAction;
-use server::resource::ResourceType;
 use server::status_phase::StatusPhaseAction;
-use std::cmp::min;
 use std::ops::Rem;
 
 const COLUMNS: usize = 6;
@@ -39,7 +34,6 @@ pub enum AdvanceState {
 pub struct AdvancePayment {
     pub name: String,
     model: PaymentModel,
-    payment: Payment,
 }
 
 impl AdvancePayment {
@@ -49,43 +43,22 @@ impl AdvancePayment {
             .get_advance_payment_options(name);
         AdvancePayment {
             name: name.to_string(),
-            payment: AdvancePayment::new_payment(model.clone()),
             model,
-        }
-    }
-
-    pub fn new_payment(model: PaymentModel) -> Payment {
-        let PaymentModel::Sum(a) = model;
-        let left = a.left;
-
-        let mut resources: Vec<ResourcePayment> = new_resource_map(&a.default)
-            .into_iter()
-            .map(|e| ResourcePayment::new(e.0, e.1, 0, min(a.cost, e.1 + left.get(e.0))))
-            .collect();
-        resources.sort_by_key(|r| r.resource);
-
-        Payment { resources }
-    }
-
-    pub fn valid(&self) -> OkTooltip {
-        let pile = self.payment.to_resource_pile();
-        let valid = self.model.is_valid(&pile);
-
-        if valid {
-            OkTooltip::Valid(format!("Pay {} to research {}", pile, self.name))
-        } else {
-            OkTooltip::Invalid(format!(
-                "You don't have {} to research {}",
-                self.model.default(),
-                self.name
-            ))
         }
     }
 }
 
-impl HasPayment for AdvancePayment {
-    fn payment(&self) -> &Payment {
-        &self.payment
+impl PaymentModelPayment for AdvancePayment {
+    fn payment_model(&self) -> &PaymentModel {
+        &self.model
+    }
+
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    fn new_dialog(&self) -> ActiveDialog {
+        ActiveDialog::AdvancePayment(self.clone())
     }
 }
 
@@ -269,28 +242,10 @@ pub fn pay_advance_dialog(ap: &AdvancePayment, rc: &RenderContext) -> StateUpdat
         // select a different advance
         return update;
     };
-    bottom_center_text(rc, &ap.name, vec2(-200., -50.));
-    payment_dialog(
-        ap,
-        AdvancePayment::valid,
-        || {
-            StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
-                advance: ap.name.to_string(),
-                payment: ap.payment.to_resource_pile(),
-            }))
-        },
-        |ap, r| ap.payment.get(r).selectable.max > 0,
-        |ap, r| add(ap, r, 1),
-        |ap, r| add(ap, r, -1),
-        rc,
-    )
-}
-
-fn add(ap: &AdvancePayment, r: ResourceType, i: i32) -> StateUpdate {
-    let mut new = ap.clone();
-    let p = new.payment.get_mut(r);
-
-    let c = p.counter_mut();
-    c.current = (c.current as i32 + i) as u32;
-    StateUpdate::OpenDialog(ActiveDialog::AdvancePayment(new))
+    payment_model_dialog(ap, rc, |p| {
+        StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
+            advance: ap.name.to_string(),
+            payment: p,
+        }))
+    })
 }

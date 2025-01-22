@@ -1,10 +1,10 @@
+use crate::content::custom_phase_actions::CustomPhaseAction;
 use crate::map::Rotation;
 use crate::playing_actions::PlayingAction;
 use crate::position::Position;
 use crate::status_phase::StatusPhaseAction;
 use crate::unit::MovementAction;
 use serde::{Deserialize, Serialize};
-use crate::content::custom_phase_actions::CustomPhaseAction;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub enum Action {

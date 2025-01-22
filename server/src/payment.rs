@@ -56,12 +56,40 @@ impl PaymentModel {
     }
 }
 
+///
+/// # Panics
+/// Panics if the pile is empty or contains more than one resource type
 #[must_use]
-pub fn get_sum_payment_options(
+pub fn get_single_resource_payment_model(
+    available: &ResourcePile,
+    cost: &ResourcePile,
+) -> PaymentModel {
+    let resource_type = ResourceType::all()
+        .into_iter()
+        .find(|t| cost.get(*t) > 0)
+        .expect("exactly one resource must be present");
+
+    assert!(
+        resource_type.is_resource(),
+        "resource type must be a resource"
+    );
+    assert!(!resource_type.is_gold(), "resource type must not be gold");
+    let amount = cost.get(resource_type);
+    assert_eq!(
+        cost.resource_amount(),
+        amount,
+        "exactly one resource must be present"
+    );
+
+    get_sum_payment_model(available, amount, &[resource_type, ResourceType::Gold])
+}
+
+#[must_use]
+pub fn get_sum_payment_model(
     pile: &ResourcePile,
     cost: u32,
     types_by_preference: &[ResourceType],
-) -> SumPaymentOptions {
+) -> PaymentModel {
     let mut left = ResourcePile::empty();
     for t in types_by_preference {
         left.add_type(*t, pile.get(*t) as i32);
@@ -78,12 +106,17 @@ pub fn get_sum_payment_options(
         default_payment.add_type(*t, 1);
     }
 
-    SumPaymentOptions::new(default_payment, left, cost, types_by_preference)
+    PaymentModel::Sum(SumPaymentOptions::new(
+        default_payment,
+        left,
+        cost,
+        types_by_preference,
+    ))
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::payment::{get_sum_payment_options, PaymentModel, SumPaymentOptions};
+    use crate::payment::{get_sum_payment_model, PaymentModel, SumPaymentOptions};
     use crate::resource::ResourceType;
     use crate::resource_pile::ResourcePile;
 
@@ -93,11 +126,11 @@ mod tests {
         want_default: ResourcePile,
         left_default: ResourcePile,
     ) {
-        let model = PaymentModel::Sum(get_sum_payment_options(
+        let model = get_sum_payment_model(
             budget,
             2,
             &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
-        ));
+        );
         let want = PaymentModel::Sum(SumPaymentOptions::new(
             want_default,
             left_default,
