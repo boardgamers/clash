@@ -29,7 +29,7 @@ impl SumPaymentOptions {
     pub fn is_valid(&self, payment: &ResourcePile) -> bool {
         self.types_by_preference
             .iter()
-            .map(|t| payment.amount(*t))
+            .map(|t| payment.get(*t))
             .sum::<u32>()
             == self.cost
     }
@@ -64,7 +64,7 @@ pub fn get_sum_payment_options(
 ) -> SumPaymentOptions {
     let mut left = ResourcePile::empty();
     for t in types_by_preference {
-        left.add_type(*t, pile.amount(*t) as i32);
+        left.add_type(*t, pile.get(*t) as i32);
     }
     let default_type = types_by_preference[0];
     let mut default_payment = ResourcePile::empty();
@@ -72,7 +72,7 @@ pub fn get_sum_payment_options(
     for _ in 0..cost {
         let t = types_by_preference
             .iter()
-            .find(|t| left.amount(**t) > 0)
+            .find(|t| left.get(**t) > 0)
             .unwrap_or(&default_type);
         left.add_type(*t, -1);
         default_payment.add_type(*t, 1);

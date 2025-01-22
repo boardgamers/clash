@@ -7,6 +7,7 @@ use crate::unit::{UnitType, Units};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::mem;
+use crate::content::custom_phase_actions::start_siegecraft_phase;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum CombatPhase {
@@ -33,6 +34,12 @@ impl CombatPhase {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub enum CombatModifier {
+    CancelFortressIncreaseCombatValue,
+    CancelFortressIgnoreHit
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct Combat {
     pub initiation: Box<GameState>,
     pub round: u32, //starts with one,
@@ -43,6 +50,9 @@ pub struct Combat {
     pub attacker_position: Position,
     pub attackers: Vec<u32>,
     pub can_retreat: bool,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub modifiers: Vec<CombatModifier>
 }
 
 impl Combat {
@@ -104,19 +114,25 @@ pub fn initiate_combat(
         || Box::new(mem::replace(&mut game.state, Playing)),
         Box::new,
     );
+    let combat = Combat::new(
+        initiation,
+        1,
+        CombatPhase::Retreat, // is not used
+        defender,
+        defender_position,
+        attacker,
+        attacker_position,
+        attackers,
+        can_retreat,
+    );
+
+    if start_siegecraft_phase(game, attacker, defender_position, combat.clone()) {
+        return;
+    }
+
     combat_loop(
         game,
-        Combat::new(
-            initiation,
-            1,
-            CombatPhase::Retreat, // is not used
-            defender,
-            defender_position,
-            attacker,
-            attacker_position,
-            attackers,
-            can_retreat,
-        ),
+        combat,
     );
 }
 

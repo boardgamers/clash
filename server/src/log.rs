@@ -19,6 +19,7 @@ use crate::{
     unit::{MovementAction, Units},
     utils,
 };
+use crate::content::custom_phase_actions::CustomPhaseAction;
 
 #[derive(Serialize, Deserialize)]
 pub struct LogSliceOptions {
@@ -36,6 +37,7 @@ pub struct LogSliceOptions {
 /// this is called before the action is executed
 #[must_use]
 pub fn format_action_log_item(action: &Action, game: &Game) -> String {
+    let player = &game.players[game.active_player()];
     match action {
         Action::Playing(action) => format_playing_action_log_item(action, game),
         Action::StatusPhase(action) => format_status_phase_action_log_item(action, game),
@@ -46,6 +48,7 @@ pub fn format_action_log_item(action: &Action, game: &Game) -> String {
         Action::Combat(action) => format_combat_action_log_item(action, game),
         Action::PlaceSettler(position) => format_place_settler_log_item(game, *position),
         Action::ExploreResolution(_rotation) => format_explore_action_log_item(game),
+        Action::CustomPhase(c) => c.format_log_item(game, &player, &player.get_name()),
         Action::Undo | Action::Redo => {
             panic!("undoing or redoing actions should not be written to the log")
         }
@@ -70,7 +73,7 @@ fn format_cultural_influence_resolution_log_item(game: &Game, success: bool) -> 
     let player = game.players[game.active_player()].get_name();
     let outcome = if success {
         let price = game.dice_roll_log.last()
-            .expect("there should have been at least one dice roll before a cultural influence resolution action");
+            .expect("there should have been at least one die roll before a cultural influence resolution action");
         format!("paid {} culture tokens to increase the dice roll and proceed with the cultural influence", price / 2 + 1)
     } else {
         String::from("declined to increase the dice roll")

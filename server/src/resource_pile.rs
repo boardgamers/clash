@@ -85,7 +85,7 @@ impl ResourcePile {
     /// # Panics
     /// Panics if `resource_type` is `Discount`
     #[must_use]
-    pub fn amount(&self, resource_type: ResourceType) -> u32 {
+    pub fn get(&self, resource_type: ResourceType) -> u32 {
         match resource_type {
             ResourceType::Food => self.food,
             ResourceType::Wood => self.wood,
@@ -96,6 +96,23 @@ impl ResourcePile {
             ResourceType::CultureTokens => self.culture_tokens,
             ResourceType::Discount => panic!("Discount is not a resource type"),
         }
+    }
+
+    pub fn try_take(&mut self, resource_type: ResourceType, amount: u32) -> bool {
+        if self.get(resource_type) >= amount {
+            self.add_type(resource_type, -(amount as i32));
+            return true;
+        } else if resource_type.is_resource() && resource_type != ResourceType::Gold {
+            // may pay rest with gold
+            let rest = self.get(resource_type);
+            let gold_cost = amount as i32 - rest as i32;
+            if self.gold >= gold_cost {
+                self.add_type(resource_type, -(rest as i32));
+                self.add_type(ResourceType::Gold, -gold_cost);
+                return true;
+            }
+        }
+        false
     }
 
     ///

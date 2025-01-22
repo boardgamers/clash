@@ -1,10 +1,15 @@
+use macroquad::math::vec2;
 use server::action::{Action, CombatAction, PlayActionCard};
 use server::game::Game;
+use server::playing_actions::PlayingAction;
 use server::position::Position;
+use server::resource::ResourceType;
 use server::unit::Unit;
-
+use crate::advance_ui::{show_paid_advance_menu, AdvancePayment};
 use crate::client_state::StateUpdate;
 use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
+use crate::layout_ui::bottom_center_text;
+use crate::payment_ui::{payment_dialog, HasPayment, Payment};
 use crate::render_context::RenderContext;
 use crate::select_ui::ConfirmSelection;
 use crate::unit_ui;
@@ -92,4 +97,59 @@ pub fn play_action_card_dialog(rc: &RenderContext) -> StateUpdate {
         )));
     }
     StateUpdate::None
+}
+
+#[derive(Clone)]
+pub struct SiegecraftPayment {
+    payment: Payment,
+}
+
+impl SiegecraftPayment {
+    pub fn new(game: &Game, player_index: usize) -> SiegecraftPayment {
+        let payment = game
+            .get_player(player_index)
+            .get_siegecraft_payment_options()
+            .to_payment();
+        SiegecraftPayment { payment }
+    }
+    
+    pub fn valid(&self) -> OkTooltip {
+        let pile = self.payment.to_resource_pile();
+        let mut gold_max = 4;
+        if pile.get(ResourceType::Wood) == 1 {
+            gold_max -= 1;
+        }
+        if pile.get(ResourceType::Ore) == 1 {
+            gold_max -= 1;
+        }
+        if self.payment.selectable.max > 0 {
+            OkTooltip::Valid(format!("Pay {} to research siegecraft", self.payment))
+        } else {
+            OkTooltip::Invalid("Gold can be used as a replacement".to_string())
+        }
+    }
+}
+
+impl HasPayment for SiegecraftPayment {
+    fn payment(&self) -> &Payment {
+        &self.payment
+    }
+}
+
+pub fn pay_siegecraft_dialog(p: &SiegecraftPayment, rc: &RenderContext) -> StateUpdate {
+    bottom_center_text(rc, "Pay for siegecraft", vec2(-200., -50.));
+    payment_dialog(
+        p,
+        AdvancePayment::valid,
+        || {
+            StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
+                advance: ap.name.to_string(),
+                payment: ap.payment.to_resource_pile(),
+            }))
+        },
+        |ap, r| ap.payment.get(r).selectable.max > 0,
+        |ap, r| crate::advance_ui::add(ap, r, 1),
+        |ap, r| crate::advance_ui::add(ap, r, -1),
+        rc,
+    )
 }

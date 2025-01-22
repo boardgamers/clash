@@ -3,6 +3,7 @@ use server::action::Action;
 use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
 use server::content::advances::{NAVIGATION, ROADS};
+use server::content::custom_phase_actions::CustomPhaseState;
 use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
 use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
@@ -12,7 +13,7 @@ use crate::assets::Assets;
 use crate::city_ui::building_name;
 use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
-use crate::combat_ui::RemoveCasualtiesSelection;
+use crate::combat_ui::{RemoveCasualtiesSelection, SiegecraftPayment};
 use crate::construct_ui::ConstructionPayment;
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
@@ -56,6 +57,7 @@ pub enum ActiveDialog {
     PlaceSettler,
     Retreat,
     RemoveCasualties(RemoveCasualtiesSelection),
+    SiegecraftPayment(SiegecraftPayment),
 }
 
 impl ActiveDialog {
@@ -541,6 +543,9 @@ impl State {
                     rotation: r.block.position.rotation,
                 })
             }
+            GameState::CustomPhase(c) => match c {
+                CustomPhaseState::SiegecraftPayment(_) => ActiveDialog::SiegecraftPayment,
+            },
         }
     }
 

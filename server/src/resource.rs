@@ -14,6 +14,23 @@ pub enum ResourceType {
     Discount, //discount on building cost, which can be used for any resource that is not a token
 }
 
+impl ResourceType {
+    #[must_use]
+    pub fn is_token(&self) -> bool {
+        matches!(self, ResourceType::MoodTokens | ResourceType::CultureTokens)
+    }
+
+    #[must_use]
+    pub fn is_discount(&self) -> bool {
+        matches!(self, ResourceType::Discount)
+    }
+    
+    #[must_use]
+    pub fn is_resource(&self) -> bool {
+        !self.is_token() && !self.is_discount()
+    }
+}
+
 #[must_use]
 pub fn resource_types() -> Vec<ResourceType> {
     vec![
