@@ -639,7 +639,7 @@ impl Game {
                 true,
                 None,
             );
-            if matches!(self.state, Combat(_)) {
+            if !matches!(self.state, Movement(_)) {
                 for unit_id in units {
                     // but the unit is still in the starting position until the attack is resolved
                     // mostly to keep the logic clean

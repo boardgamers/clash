@@ -57,8 +57,11 @@ impl PaymentModelPayment for AdvancePayment {
         &self.name
     }
 
-    fn new_dialog(&self) -> ActiveDialog {
-        ActiveDialog::AdvancePayment(self.clone())
+    fn new_dialog(&self, model: PaymentModel) -> ActiveDialog {
+        ActiveDialog::AdvancePayment(AdvancePayment {
+            name: self.name.clone(),
+            model,
+        })
     }
 }
 

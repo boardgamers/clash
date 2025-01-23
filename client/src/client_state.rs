@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
 use server::action::Action;
 use server::city::{City, MoodState};
-use server::combat::{active_attackers, active_defenders, CombatPhase};
+use server::combat::{active_attackers, active_defenders, CombatModifier, CombatPhase};
 use server::content::advances::{get_advance_by_name, NAVIGATION, ROADS, SIEGECRAFT};
 use server::content::custom_phase_actions::CustomPhaseState;
 use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
@@ -552,8 +552,8 @@ impl State {
                 CustomPhaseState::SiegecraftPayment(_) => {
                     ActiveDialog::SiegecraftPayment(SiegecraftPaymentModel::new(
                         game,
-                        SiegecraftPaymentModel::next_modifier(game, None).unwrap(),
-                        ResourcePile::empty(),
+                        SiegecraftPaymentModel::next_modifier(game, &ResourcePile::empty(), CombatModifier::CancelFortressExtraDie).unwrap(),
+                        None,
                     ))
                 }
             },

@@ -86,7 +86,7 @@ pub trait PaymentModelPayment {
 
     fn name(&self) -> &str;
 
-    fn new_dialog(&self) -> ActiveDialog;
+    fn new_dialog(&self, model: PaymentModel) -> ActiveDialog;
 }
 
 impl<T> HasPayment for T
@@ -148,7 +148,7 @@ pub fn payment_model_dialog<T: PaymentModelPayment>(
         payment,
         |payment| payment_model_valid(payment),
         || execute_action(payment.payment().to_resource_pile()),
-        |ap, r| ap.payment().get(r).selectable.max > 0,
+        |ap, r| payment.payment_model().default().get(r) > 0 || payment.payment_model().left().get(r) > 0,
         |ap, r| add(ap, r, 1),
         |ap, r| add(ap, r, -1),
         rc,
@@ -174,5 +174,9 @@ fn add<T: PaymentModelPayment>(ap: &T, r: ResourceType, i: i32) -> StateUpdate {
 
     let c = p.counter_mut();
     c.current = (c.current as i32 + i) as u32;
-    StateUpdate::OpenDialog(new.new_dialog())
+    let model = ap.payment_model();
+    let mut p = model.default().clone();
+    p.add_type(r, i);
+
+    StateUpdate::OpenDialog(new.new_dialog(model.with_default(p)))
 }

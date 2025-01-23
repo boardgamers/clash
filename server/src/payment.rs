@@ -64,6 +64,26 @@ impl PaymentModel {
             PaymentModel::Sum(options) => &options.default,
         }
     }
+    
+    #[must_use]
+    pub fn left(&self) -> &ResourcePile {
+        match self {
+            PaymentModel::Sum(options) => &options.left,
+        }
+    }
+    
+    #[must_use]
+    pub fn with_default(&self, default: ResourcePile) -> PaymentModel {
+        match self {
+            PaymentModel::Sum(options) => PaymentModel::Sum(SumPaymentOptions::new(
+                default,
+                options.left.clone(),
+                options.cost,
+                &options.types_by_preference,
+                options.can_afford,
+            )),
+        }
+    }
 }
 
 ///

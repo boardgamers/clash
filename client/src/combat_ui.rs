@@ -104,35 +104,41 @@ pub fn play_action_card_dialog(rc: &RenderContext) -> StateUpdate {
 pub struct SiegecraftPaymentModel {
     modifier: CombatModifier,
     model: PaymentModel,
-    combat_value: ResourcePile,
+    extra_die: Option<ResourcePile>,
 }
 
 impl SiegecraftPaymentModel {
     pub fn new(
         game: &Game,
         modifier: CombatModifier,
-        combat_value: ResourcePile,
+        extra_die: Option<ResourcePile>,
     ) -> SiegecraftPaymentModel {
         let cost = match modifier {
             CombatModifier::CancelFortressExtraDie => SIEGECRAFT_EXTRA_DIE,
             CombatModifier::CancelFortressIgnoreHit => SIEGECRAFT_IGNORE_HIT,
         };
         let mut available = game.get_player(game.active_player()).resources.clone();
-        available -= combat_value.clone();
+        if let Some(extra_die) = &extra_die {
+            available -= extra_die.clone();
+        }
 
         let model = get_single_resource_payment_model(&available, &cost);
         SiegecraftPaymentModel {
             modifier,
             model,
-            combat_value,
+            extra_die,
         }
     }
 
-    pub fn next_modifier(game: &Game, last: Option<ResourcePile>) -> Option<CombatModifier> {
+    pub fn next_modifier(
+        game: &Game,
+        used: &ResourcePile,
+        first: CombatModifier,
+    ) -> Option<CombatModifier> {
         let player = game.get_player(game.active_player());
         let resources = &player.resources;
-        if let Some(extra_die) = last {
-            if resources.can_afford(&(SIEGECRAFT_IGNORE_HIT + extra_die)) {
+        if matches!(first, CombatModifier::CancelFortressIgnoreHit) {
+            if resources.can_afford(&(SIEGECRAFT_IGNORE_HIT + used.clone())) {
                 return Some(CombatModifier::CancelFortressIgnoreHit);
             }
         } else {
@@ -163,16 +169,27 @@ impl PaymentModelPayment for SiegecraftPaymentModel {
         }
     }
 
-    fn new_dialog(&self) -> ActiveDialog {
-        ActiveDialog::SiegecraftPayment(self.clone())
+    fn new_dialog(&self, model: PaymentModel) -> ActiveDialog {
+        ActiveDialog::SiegecraftPayment(SiegecraftPaymentModel {
+            modifier: self.modifier.clone(),
+            model,
+            extra_die: self.extra_die.clone(),
+        })
     }
 }
 
 pub fn pay_siegecraft_dialog(p: &SiegecraftPaymentModel, rc: &RenderContext) -> StateUpdate {
+    let first =
+        if p.extra_die.is_none() {
+            CombatModifier::CancelFortressExtraDie
+        } else {
+            CombatModifier::CancelFortressIgnoreHit
+        };
+
     payment_model_dialog(p, rc, |pile| {
-        SiegecraftPaymentModel::next_modifier(rc.game, Some(pile.clone())).map_or_else(
+        SiegecraftPaymentModel::next_modifier(rc.game, &pile, first).map_or_else(
             || {
-                let mut extra_die = p.combat_value.clone();
+                let mut extra_die = p.extra_die.clone().unwrap_or_else(ResourcePile::empty);
                 let mut ignore_hit = ResourcePile::empty();
 
                 match p.modifier {
@@ -193,7 +210,7 @@ pub fn pay_siegecraft_dialog(p: &SiegecraftPaymentModel, rc: &RenderContext) -> 
             },
             |m| {
                 StateUpdate::OpenDialog(ActiveDialog::SiegecraftPayment(
-                    SiegecraftPaymentModel::new(rc.game, m, pile.clone()),
+                    SiegecraftPaymentModel::new(rc.game, m, Some(pile.clone())),
                 ))
             },
         )
