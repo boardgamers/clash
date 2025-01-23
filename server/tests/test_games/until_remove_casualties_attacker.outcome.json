@@ -78,24 +78,36 @@
           "player_index": 0,
           "position": "C2",
           "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 0
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Cavalry",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 1
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Leader",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 2
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Elephant",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 3
         },
         {

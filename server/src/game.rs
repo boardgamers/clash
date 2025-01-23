@@ -611,7 +611,7 @@ impl Game {
             let unit = self.players[player_index]
                 .get_unit_mut(*unit_id)
                 .expect("the player should have all units to move");
-            if unit.unit_type.is_settler() {
+            if !unit.unit_type.is_settler() {
                 if unit
                     .movement_restrictions
                     .contains(&MovementRestriction::Battle)
@@ -619,7 +619,6 @@ impl Game {
                     panic!("unit can't attack");
                 }
                 unit.movement_restrictions.push(MovementRestriction::Battle);
-            } else {
                 military = true;
             }
             // move to destination to apply movement restrictions, etc.
