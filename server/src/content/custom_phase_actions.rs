@@ -1,4 +1,4 @@
-use crate::combat::{Combat, CombatModifier};
+use crate::combat::{combat_loop, Combat, CombatModifier};
 use crate::content::advances::SIEGECRAFT;
 use crate::game::{Game, GameState};
 use crate::payment::get_single_resource_payment_model;
@@ -135,5 +135,5 @@ fn pay_siegecraft(
             combat.modifiers.push(gain);
         }
     }
-    game.state = GameState::Combat(combat);
+    combat_loop(game, combat);
 }

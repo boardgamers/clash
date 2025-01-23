@@ -65,6 +65,15 @@ impl PaymentModel {
         }
     }
     
+    pub fn add_type(&mut self, t: ResourceType, amount: i32) {
+        match self {
+            PaymentModel::Sum(options) => {
+                //todo remove from left?
+                options.default.add_type(t, amount);
+            }
+        }
+    }
+    
     #[must_use]
     pub fn left(&self) -> &ResourcePile {
         match self {
@@ -82,6 +91,13 @@ impl PaymentModel {
                 &options.types_by_preference,
                 options.can_afford,
             )),
+        }
+    }
+    
+    #[must_use]
+    pub fn show_types(&self) -> Vec<ResourceType> {
+        match self {
+            PaymentModel::Sum(options) => options.types_by_preference.clone(),
         }
     }
 }

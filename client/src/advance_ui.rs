@@ -1,14 +1,14 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::layout_ui::{left_mouse_button_pressed_in_rect, top_centered_text};
 use crate::log_ui::break_text;
-use crate::payment_ui::{payment_model_dialog, PaymentModelPayment};
+use crate::payment_ui::{payment_model_dialog, PaymentModelEntry};
 use crate::player_ui::player_color;
 use crate::render_context::RenderContext;
 use crate::tooltip::show_tooltip_for_rect;
 use macroquad::color::Color;
 use macroquad::math::vec2;
 use macroquad::prelude::{
-    draw_rectangle, draw_rectangle_lines, Rect, Vec2, BLACK, BLUE, GRAY, WHITE, YELLOW,
+    draw_rectangle, draw_rectangle_lines, Rect, BLACK, BLUE, GRAY, WHITE, YELLOW,
 };
 use server::action::Action;
 use server::advance::{Advance, Bonus};
@@ -48,15 +48,15 @@ impl AdvancePayment {
     }
 }
 
-impl PaymentModelPayment for AdvancePayment {
-    fn payment_model_mut(&mut self) -> &mut PaymentModel {
-        &mut self.model
-    }
-
-    fn new_dialog(self) -> ActiveDialog {
-        ActiveDialog::AdvancePayment(self)
-    }
-}
+// impl PaymentModelPayment for AdvancePayment {
+//     fn payment_model_mut(&mut self) -> &mut PaymentModel {
+//         &mut self.model
+//     }
+//
+//     fn new_dialog(self) -> ActiveDialog {
+//         ActiveDialog::AdvancePayment(self)
+//     }
+// }
 
 pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
     let game = rc.game;
@@ -238,10 +238,24 @@ pub fn pay_advance_dialog(ap: &AdvancePayment, rc: &RenderContext) -> StateUpdat
         // select a different advance
         return update;
     };
-    payment_model_dialog(vec![ap], ap.name(), rc,  |p| {
-        StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
-            advance: ap.name.to_string(),
-            payment: p,
-        }))
-    })
+    payment_model_dialog(
+        rc,
+        &vec![PaymentModelEntry {
+            name: ap.name.clone(),
+            model: ap.model.clone(),
+            optional: false,
+        }],
+        |p| {
+            ActiveDialog::AdvancePayment(AdvancePayment {
+                name: ap.name.clone(),
+                model: p[0].model.clone(),
+            })
+        },
+        |pile| {
+            StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
+             advance: ap.name.to_string(),
+             payment: pile[0].clone(),
+         }))
+        },
+    )
 }

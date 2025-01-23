@@ -85,28 +85,28 @@ pub trait PaymentModelPayment: Clone {
     fn payment_model_mut(&mut self) -> &mut PaymentModel;
 
     fn new_dialog(self) -> ActiveDialog;
-    
+
     fn show_types(&self) -> Vec<ResourceType>;
 }
-
-impl<T> HasPayment for T
-where
-    T: PaymentModelPayment,
-{
-    fn payment(&self) -> Payment {
-        let mut t = self.clone();
-        let PaymentModel::Sum(a) = t.payment_model_mut();
-        let left = &a.left;
-
-        let mut resources: Vec<ResourcePayment> = new_resource_map(&a.default)
-            .into_iter()
-            .map(|e| ResourcePayment::new(e.0, e.1, 0, min(a.cost, e.1 + left.get(e.0))))
-            .collect();
-        resources.sort_by_key(|r| r.resource);
-
-        Payment { resources }
-    }
-}
+//
+// impl<T> HasPayment for T
+// where
+//     T: PaymentModelPayment,
+// {
+//     fn payment(&self) -> Payment {
+//         let mut t = self.clone();
+//         let PaymentModel::Sum(a) = t.payment_model_mut();
+//         let left = &a.left;
+//
+//         let mut resources: Vec<ResourcePayment> = new_resource_map(&a.default)
+//             .into_iter()
+//             .map(|e| ResourcePayment::new(e.0, e.1, 0, min(a.cost, e.1 + left.get(e.0))))
+//             .collect();
+//         resources.sort_by_key(|r| r.resource);
+//
+//         Payment { resources }
+//     }
+// }
 
 #[allow(clippy::too_many_arguments)]
 pub fn payment_dialog<T: HasPayment>(
@@ -114,8 +114,8 @@ pub fn payment_dialog<T: HasPayment>(
     is_valid: impl FnOnce(&T) -> OkTooltip,
     execute_action: impl FnOnce() -> StateUpdate,
     show: impl Fn(&T, ResourceType) -> bool,
-    plus: impl Fn(&T, ResourceType) -> StateUpdate,
-    minus: impl Fn(&T, ResourceType) -> StateUpdate,
+    plus: impl FnOnce(&T, ResourceType) -> StateUpdate,
+    minus: impl FnOnce(&T, ResourceType) -> StateUpdate,
     rc: &RenderContext,
     offset: Vec2,
 ) -> StateUpdate {
@@ -140,48 +140,107 @@ pub fn payment_dialog<T: HasPayment>(
     )
 }
 
-pub fn payment_model_dialog<T: PaymentModelPayment>(
-    payment: Vec<T>,
-    name: &str,
+// todo better name
+#[derive(Clone)]
+pub struct PaymentModelEntry {
+    pub name: String,
+    pub model: PaymentModel,
+    pub optional: bool,
+}
+
+impl HasPayment for PaymentModelEntry {
+    fn payment(&self) -> Payment {
+        let PaymentModel::Sum(a) = &self.model;
+        let left = &a.left;
+
+        let mut resources: Vec<ResourcePayment> = new_resource_map(&a.default)
+            .into_iter()
+            .map(|e| ResourcePayment::new(e.0, e.1, 0, min(a.cost, e.1 + left.get(e.0))))
+            .collect();
+        resources.sort_by_key(|r| r.resource);
+
+        Payment { resources }
+    }
+}
+
+pub fn payment_model_dialog(
     rc: &RenderContext,
-    execute_action: impl FnOnce(ResourcePile) -> StateUpdate,
-) -> StateUpdate {      
-    let zero_allowed = payment.len() > 1; // if there are multiple payments, allow paying nothing for each
-    let mut valid = payment.iter().map(|p| payment_model_valid(p, zero_allowed)).collect::<Vec<_>>(); 
-    bottom_center_text(rc, name, vec2(-200., -50.));
-    
+    payment: &[PaymentModelEntry], // None means the player can pay nothing
+    to_dialog: impl FnOnce(Vec<PaymentModelEntry>) -> ActiveDialog,
+    execute_action: impl FnOnce(Vec<ResourcePile>) -> StateUpdate,
+) -> StateUpdate {
+    let mut valid = payment
+        .iter()
+        .map(|p| payment_model_valid(p))
+        .collect::<Vec<_>>();
+    let mut exec: Option<Vec<ResourcePile>> = None;
+    let mut added: Option<Vec<PaymentModelEntry>> = None;
+    let mut removed: Option<Vec<PaymentModelEntry>> = None;
+
     for (i, p) in payment.iter().enumerate() {
-        let types = p.show_types();
+        bottom_center_text(rc, &p.name, vec2(0., i as f32 * -100.));
+        let model = p.model.clone();
+        let types = model.show_types();
         let offset = vec2(0., i as f32 * -100.);
         let result = payment_dialog(
             p,
             |payment| {
-                valid[i] = payment_model_valid(payment, zero_allowed);
-                valid.iter().find(|v| !v.is_valid()).unwrap_or(&valid[0]).clone()
+                valid[i] = payment_model_valid(payment);
+                valid
+                    .iter()
+                    .find(|v| !v.is_valid())
+                    .unwrap_or(&valid[0])
+                    .clone()
             },
-            || execute_action(p.payment().to_resource_pile()),
-            |ap, r| types.contains(&r),
-            |ap, r| add(ap, r, 1),
-            |ap, r| add(ap, r, -1),
+            || {
+                exec = Some(
+                    payment
+                        .iter()
+                        .map(|p| p.payment().to_resource_pile())
+                        .collect(),
+                );
+                StateUpdate::None
+            },
+            |_ap, r| types.contains(&r),
+            |ap, r| {
+                added = Some(add(ap, r, 1, payment));
+                StateUpdate::None
+            },
+            |ap, r| {
+                removed = Some(add(ap, r, -1, payment));
+                StateUpdate::None
+            },
             rc,
             offset,
         );
-        if !matches!(result, StateUpdate::None){
+
+        if let Some(v) = added {
+            return StateUpdate::OpenDialog(to_dialog(v));
+        }
+        if let Some(v) = removed {
+            return StateUpdate::OpenDialog(to_dialog(v));
+        }
+
+        if let Some(v) = exec {
+            return execute_action(v);
+        }
+
+        if !matches!(result, StateUpdate::None) {
             return result;
         }
     }
     StateUpdate::None
 }
 
-fn payment_model_valid<T: PaymentModelPayment>(payment: &T, zero_allowed: bool) -> OkTooltip {
-    let pile = payment.payment().to_resource_pile();
-    let model = payment.payment_model();
-    let name = payment.name();
+fn payment_model_valid(payment: &PaymentModelEntry) -> OkTooltip {
+    let model = &payment.model;
+    let pile = model.default();
+    let name = &payment.name;
 
-    if zero_allowed && pile.is_empty() {
+    if payment.optional && pile.is_empty() {
         return OkTooltip::Valid(format!("Pay nothing for {}", name));
     }
-    
+
     if model.is_valid(&pile) {
         OkTooltip::Valid(format!("Pay {pile} for {name}"))
     } else {
@@ -189,11 +248,16 @@ fn payment_model_valid<T: PaymentModelPayment>(payment: &T, zero_allowed: bool) 
     }
 }
 
-fn add<T: PaymentModelPayment>(ap: &T, r: ResourceType, i: i32) -> StateUpdate {
+fn add(
+    ap: &PaymentModelEntry,
+    r: ResourceType,
+    diff: i32,
+    all: &[PaymentModelEntry],
+) -> Vec<PaymentModelEntry> {
     let mut new = ap.clone();
-    let model = new.payment_model_mut();
-    let mut p = model.default().clone();
-    p.add_type(r, i);
+    new.model.add_type(r, diff);
 
-    StateUpdate::OpenDialog(new.new_dialog())
+    all.iter()
+        .map(|e| if e.name == ap.name { new.clone() } else { e.clone() })
+        .collect::<Vec<_>>()
 }

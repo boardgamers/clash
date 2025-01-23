@@ -29,8 +29,8 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
     is_valid: impl FnOnce(&C) -> OkTooltip,
     execute_action: impl FnOnce() -> StateUpdate,
     show: impl Fn(&C, &O) -> bool,
-    plus: impl Fn(&C, &O) -> StateUpdate,
-    minus: impl Fn(&C, &O) -> StateUpdate,
+    plus: impl FnOnce(&C, &O) -> StateUpdate,
+    minus: impl FnOnce(&C, &O) -> StateUpdate,
     offset: Vec2,
 ) -> StateUpdate {
     let objects = get_objects(container)

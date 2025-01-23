@@ -541,6 +541,7 @@ impl State {
                     ))
                 }
                 CombatPhase::Retreat => ActiveDialog::Retreat,
+                CombatPhase::Start => panic!("combat phase should not be start"),
             },
             GameState::ExploreResolution(r) => {
                 ActiveDialog::ExploreResolution(ExploreResolutionConfig {
@@ -552,8 +553,6 @@ impl State {
                 CustomPhaseState::SiegecraftPayment(_) => {
                     ActiveDialog::SiegecraftPayment(SiegecraftPaymentModel::new(
                         game,
-                        SiegecraftPaymentModel::next_modifier(game, &ResourcePile::empty(), CombatModifier::CancelFortressExtraDie).unwrap(),
-                        None,
                     ))
                 }
             },
