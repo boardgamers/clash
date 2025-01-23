@@ -31,6 +31,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
     show: impl Fn(&C, &O) -> bool,
     plus: impl Fn(&C, &O) -> StateUpdate,
     minus: impl Fn(&C, &O) -> StateUpdate,
+    offset: Vec2,
 ) -> StateUpdate {
     let objects = get_objects(container)
         .into_iter()
@@ -42,11 +43,12 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
         let x = (start_x + i as f32) * ICON_SIZE * 2.;
         let c = o.counter();
 
-        draw(o, vec2(x + 15., -60.) + anchor);
+        draw(o, vec2(x + 15., -60.) + anchor + offset);
+        let current_pos = vec2(x, -ICON_SIZE) + anchor + offset;
         draw_text_ex(
             &format!("{}", c.current),
-            anchor.x + x + 15.,
-            anchor.y - ICON_SIZE,
+            current_pos.x,
+            current_pos.y,
             TextParams {
                 font_size: 20,
                 font_scale: 1.,
@@ -59,14 +61,14 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
             && bottom_center_texture(
                 rc,
                 &rc.assets().minus,
-                vec2(x - 15., -ICON_SIZE),
+                vec2(x - 15., -ICON_SIZE) + offset,
                 "Remove one",
             )
         {
             return minus(container, o);
         }
         if c.current < c.max
-            && bottom_center_texture(rc, &rc.assets().plus, vec2(x + 15., -ICON_SIZE), "Add one")
+            && bottom_center_texture(rc, &rc.assets().plus, vec2(x + 15., -ICON_SIZE) + offset, "Add one")
         {
             return plus(container, o);
         };

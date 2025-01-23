@@ -154,8 +154,8 @@ impl SiegecraftPaymentModel {
 }
 
 impl PaymentModelPayment for SiegecraftPaymentModel {
-    fn payment_model(&self) -> &PaymentModel {
-        &self.model
+    fn payment_model_mut(&mut self) -> &mut PaymentModel {
+        &mut self.model
     }
 
     fn name(&self) -> &str {

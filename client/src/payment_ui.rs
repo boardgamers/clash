@@ -1,4 +1,4 @@
-use macroquad::math::{bool, vec2};
+use macroquad::math::{bool, vec2, Vec2};
 use server::payment::PaymentModel;
 use server::resource_pile::ResourcePile;
 use std::cmp::min;
@@ -81,12 +81,12 @@ pub trait HasPayment {
     fn payment(&self) -> Payment;
 }
 
-pub trait PaymentModelPayment {
-    fn payment_model(&self) -> &PaymentModel;
+pub trait PaymentModelPayment: Clone {
+    fn payment_model_mut(&mut self) -> &mut PaymentModel;
 
-    fn name(&self) -> &str;
-
-    fn new_dialog(&self, model: PaymentModel) -> ActiveDialog;
+    fn new_dialog(self) -> ActiveDialog;
+    
+    fn show_types(&self) -> Vec<ResourceType>;
 }
 
 impl<T> HasPayment for T
@@ -94,8 +94,9 @@ where
     T: PaymentModelPayment,
 {
     fn payment(&self) -> Payment {
-        let PaymentModel::Sum(a) = self.payment_model().clone();
-        let left = a.left;
+        let mut t = self.clone();
+        let PaymentModel::Sum(a) = t.payment_model_mut();
+        let left = &a.left;
 
         let mut resources: Vec<ResourcePayment> = new_resource_map(&a.default)
             .into_iter()
@@ -116,6 +117,7 @@ pub fn payment_dialog<T: HasPayment>(
     plus: impl Fn(&T, ResourceType) -> StateUpdate,
     minus: impl Fn(&T, ResourceType) -> StateUpdate,
     rc: &RenderContext,
+    offset: Vec2,
 ) -> StateUpdate {
     select_ui::count_dialog(
         rc,
@@ -134,32 +136,52 @@ pub fn payment_dialog<T: HasPayment>(
         |c, o| show(c, o.resource),
         |c, o| plus(c, o.resource),
         |c, o| minus(c, o.resource),
+        offset,
     )
 }
 
 pub fn payment_model_dialog<T: PaymentModelPayment>(
-    payment: &T,
+    payment: Vec<T>,
+    name: &str,
     rc: &RenderContext,
     execute_action: impl FnOnce(ResourcePile) -> StateUpdate,
-) -> StateUpdate {
-    bottom_center_text(rc, payment.name(), vec2(-200., -50.));
-
-    payment_dialog(
-        payment,
-        |payment| payment_model_valid(payment),
-        || execute_action(payment.payment().to_resource_pile()),
-        |ap, r| payment.payment_model().default().get(r) > 0 || payment.payment_model().left().get(r) > 0,
-        |ap, r| add(ap, r, 1),
-        |ap, r| add(ap, r, -1),
-        rc,
-    )
+) -> StateUpdate {      
+    let zero_allowed = payment.len() > 1; // if there are multiple payments, allow paying nothing for each
+    let mut valid = payment.iter().map(|p| payment_model_valid(p, zero_allowed)).collect::<Vec<_>>(); 
+    bottom_center_text(rc, name, vec2(-200., -50.));
+    
+    for (i, p) in payment.iter().enumerate() {
+        let types = p.show_types();
+        let offset = vec2(0., i as f32 * -100.);
+        let result = payment_dialog(
+            p,
+            |payment| {
+                valid[i] = payment_model_valid(payment, zero_allowed);
+                valid.iter().find(|v| !v.is_valid()).unwrap_or(&valid[0]).clone()
+            },
+            || execute_action(p.payment().to_resource_pile()),
+            |ap, r| types.contains(&r),
+            |ap, r| add(ap, r, 1),
+            |ap, r| add(ap, r, -1),
+            rc,
+            offset,
+        );
+        if !matches!(result, StateUpdate::None){
+            return result;
+        }
+    }
+    StateUpdate::None
 }
 
-fn payment_model_valid<T: PaymentModelPayment>(payment: &T) -> OkTooltip {
+fn payment_model_valid<T: PaymentModelPayment>(payment: &T, zero_allowed: bool) -> OkTooltip {
     let pile = payment.payment().to_resource_pile();
     let model = payment.payment_model();
     let name = payment.name();
 
+    if zero_allowed && pile.is_empty() {
+        return OkTooltip::Valid(format!("Pay nothing for {}", name));
+    }
+    
     if model.is_valid(&pile) {
         OkTooltip::Valid(format!("Pay {pile} for {name}"))
     } else {
@@ -168,15 +190,10 @@ fn payment_model_valid<T: PaymentModelPayment>(payment: &T) -> OkTooltip {
 }
 
 fn add<T: PaymentModelPayment>(ap: &T, r: ResourceType, i: i32) -> StateUpdate {
-    let new = ap;
-    let mut binding = new.payment();
-    let p = binding.get_mut(r);
-
-    let c = p.counter_mut();
-    c.current = (c.current as i32 + i) as u32;
-    let model = ap.payment_model();
+    let mut new = ap.clone();
+    let model = new.payment_model_mut();
     let mut p = model.default().clone();
     p.add_type(r, i);
 
-    StateUpdate::OpenDialog(new.new_dialog(model.with_default(p)))
+    StateUpdate::OpenDialog(new.new_dialog())
 }

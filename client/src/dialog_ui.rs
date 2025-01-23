@@ -4,9 +4,17 @@ use crate::render_context::RenderContext;
 use macroquad::math::Vec2;
 use server::content::custom_actions::CustomActionType;
 
+#[derive(Clone)]
 pub enum OkTooltip {
     Valid(String),
     Invalid(String),
+}
+
+impl OkTooltip {
+    pub fn is_valid(&self) -> bool {
+        matches!(self, OkTooltip::Valid(_))
+    }
+    
 }
 
 #[derive(Clone)]

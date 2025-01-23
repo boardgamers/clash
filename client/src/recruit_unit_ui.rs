@@ -258,6 +258,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
                 },
             )
         },
+        Vec2::new(0., 0.),
     )
 }
 

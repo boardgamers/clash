@@ -8,7 +8,7 @@ use crate::tooltip::show_tooltip_for_rect;
 use macroquad::color::Color;
 use macroquad::math::vec2;
 use macroquad::prelude::{
-    draw_rectangle, draw_rectangle_lines, Rect, BLACK, BLUE, GRAY, WHITE, YELLOW,
+    draw_rectangle, draw_rectangle_lines, Rect, Vec2, BLACK, BLUE, GRAY, WHITE, YELLOW,
 };
 use server::action::Action;
 use server::advance::{Advance, Bonus};
@@ -49,19 +49,12 @@ impl AdvancePayment {
 }
 
 impl PaymentModelPayment for AdvancePayment {
-    fn payment_model(&self) -> &PaymentModel {
-        &self.model
+    fn payment_model_mut(&mut self) -> &mut PaymentModel {
+        &mut self.model
     }
 
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn new_dialog(&self, model: PaymentModel) -> ActiveDialog {
-        ActiveDialog::AdvancePayment(AdvancePayment {
-            name: self.name.clone(),
-            model,
-        })
+    fn new_dialog(self) -> ActiveDialog {
+        ActiveDialog::AdvancePayment(self)
     }
 }
 
@@ -245,7 +238,7 @@ pub fn pay_advance_dialog(ap: &AdvancePayment, rc: &RenderContext) -> StateUpdat
         // select a different advance
         return update;
     };
-    payment_model_dialog(ap, rc, |p| {
+    payment_model_dialog(vec![ap], ap.name(), rc,  |p| {
         StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
             advance: ap.name.to_string(),
             payment: p,

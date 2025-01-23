@@ -1,7 +1,7 @@
 use std::cmp;
 
 use macroquad::math::{i32, u32};
-
+use macroquad::prelude::Vec2;
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::OkTooltip;
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
@@ -112,6 +112,7 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
             StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(new))
         },
         rc,
+        Vec2::new(0., 0.),
     )
 }
 
