@@ -241,7 +241,7 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
         let mut defender_log = vec![];
         let mut fortress_log = vec![];
         let extra_defender_dies = if c.defender_fortress(game)
-            && c.modifiers
+            && !c.modifiers
                 .contains(&CombatModifier::CancelFortressExtraDie)
         {
             fortress_log.push("added one extra die");
