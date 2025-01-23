@@ -64,7 +64,7 @@ impl PaymentModel {
             PaymentModel::Sum(options) => &options.default,
         }
     }
-    
+
     pub fn add_type(&mut self, t: ResourceType, amount: i32) {
         match self {
             PaymentModel::Sum(options) => {
@@ -73,14 +73,14 @@ impl PaymentModel {
             }
         }
     }
-    
+
     #[must_use]
     pub fn left(&self) -> &ResourcePile {
         match self {
             PaymentModel::Sum(options) => &options.left,
         }
     }
-    
+
     #[must_use]
     pub fn with_default(&self, default: ResourcePile) -> PaymentModel {
         match self {
@@ -93,7 +93,7 @@ impl PaymentModel {
             )),
         }
     }
-    
+
     #[must_use]
     pub fn show_types(&self) -> Vec<ResourceType> {
         match self {

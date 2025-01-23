@@ -240,7 +240,7 @@ pub fn pay_advance_dialog(ap: &AdvancePayment, rc: &RenderContext) -> StateUpdat
     };
     payment_model_dialog(
         rc,
-        &vec![PaymentModelEntry {
+        &[PaymentModelEntry {
             name: ap.name.clone(),
             model: ap.model.clone(),
             optional: false,
@@ -253,9 +253,9 @@ pub fn pay_advance_dialog(ap: &AdvancePayment, rc: &RenderContext) -> StateUpdat
         },
         |pile| {
             StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
-             advance: ap.name.to_string(),
-             payment: pile[0].clone(),
-         }))
+                advance: ap.name.to_string(),
+                payment: pile[0].clone(),
+            }))
         },
     )
 }

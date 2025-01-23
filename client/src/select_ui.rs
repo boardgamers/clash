@@ -17,7 +17,6 @@ pub struct CountSelector {
 
 pub trait HasCountSelectableObject {
     fn counter(&self) -> &CountSelector;
-    fn counter_mut(&mut self) -> &mut CountSelector;
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -68,7 +67,12 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
             return minus(container, o);
         }
         if c.current < c.max
-            && bottom_center_texture(rc, &rc.assets().plus, vec2(x + 15., -ICON_SIZE) + offset, "Add one")
+            && bottom_center_texture(
+                rc,
+                &rc.assets().plus,
+                vec2(x + 15., -ICON_SIZE) + offset,
+                "Add one",
+            )
         {
             return plus(container, o);
         };

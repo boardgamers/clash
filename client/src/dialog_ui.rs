@@ -14,7 +14,6 @@ impl OkTooltip {
     pub fn is_valid(&self) -> bool {
         matches!(self, OkTooltip::Valid(_))
     }
-    
 }
 
 #[derive(Clone)]

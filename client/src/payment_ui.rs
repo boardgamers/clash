@@ -31,9 +31,6 @@ impl HasCountSelectableObject for ResourcePayment {
     fn counter(&self) -> &CountSelector {
         &self.selectable
     }
-    fn counter_mut(&mut self) -> &mut CountSelector {
-        &mut self.selectable
-    }
 }
 
 #[derive(PartialEq, Eq, Debug, Clone)]
@@ -81,33 +78,6 @@ pub trait HasPayment {
     fn payment(&self) -> Payment;
 }
 
-pub trait PaymentModelPayment: Clone {
-    fn payment_model_mut(&mut self) -> &mut PaymentModel;
-
-    fn new_dialog(self) -> ActiveDialog;
-
-    fn show_types(&self) -> Vec<ResourceType>;
-}
-//
-// impl<T> HasPayment for T
-// where
-//     T: PaymentModelPayment,
-// {
-//     fn payment(&self) -> Payment {
-//         let mut t = self.clone();
-//         let PaymentModel::Sum(a) = t.payment_model_mut();
-//         let left = &a.left;
-//
-//         let mut resources: Vec<ResourcePayment> = new_resource_map(&a.default)
-//             .into_iter()
-//             .map(|e| ResourcePayment::new(e.0, e.1, 0, min(a.cost, e.1 + left.get(e.0))))
-//             .collect();
-//         resources.sort_by_key(|r| r.resource);
-//
-//         Payment { resources }
-//     }
-// }
-
 #[allow(clippy::too_many_arguments)]
 pub fn payment_dialog<T: HasPayment>(
     has_payment: &T,
@@ -140,7 +110,6 @@ pub fn payment_dialog<T: HasPayment>(
     )
 }
 
-// todo better name
 #[derive(Clone)]
 pub struct PaymentModelEntry {
     pub name: String,
@@ -169,10 +138,7 @@ pub fn payment_model_dialog(
     to_dialog: impl FnOnce(Vec<PaymentModelEntry>) -> ActiveDialog,
     execute_action: impl FnOnce(Vec<ResourcePile>) -> StateUpdate,
 ) -> StateUpdate {
-    let mut valid = payment
-        .iter()
-        .map(|p| payment_model_valid(p))
-        .collect::<Vec<_>>();
+    let mut valid = payment.iter().map(payment_model_valid).collect::<Vec<_>>();
     let mut exec: Option<Vec<ResourcePile>> = None;
     let mut added: Option<Vec<PaymentModelEntry>> = None;
     let mut removed: Option<Vec<PaymentModelEntry>> = None;
@@ -238,10 +204,10 @@ fn payment_model_valid(payment: &PaymentModelEntry) -> OkTooltip {
     let name = &payment.name;
 
     if payment.optional && pile.is_empty() {
-        return OkTooltip::Valid(format!("Pay nothing for {}", name));
+        return OkTooltip::Valid(format!("Pay nothing for {name}"));
     }
 
-    if model.is_valid(&pile) {
+    if model.is_valid(pile) {
         OkTooltip::Valid(format!("Pay {pile} for {name}"))
     } else {
         OkTooltip::Invalid(format!("You don't have {} for {}", model.default(), name))
@@ -258,6 +224,12 @@ fn add(
     new.model.add_type(r, diff);
 
     all.iter()
-        .map(|e| if e.name == ap.name { new.clone() } else { e.clone() })
+        .map(|e| {
+            if e.name == ap.name {
+                new.clone()
+            } else {
+                e.clone()
+            }
+        })
         .collect::<Vec<_>>()
 }

@@ -63,7 +63,7 @@ impl ResourcePile {
             culture_tokens,
         }
     }
-    
+
     #[must_use]
     pub fn get(&self, resource_type: ResourceType) -> u32 {
         match resource_type {

@@ -35,9 +35,6 @@ impl HasCountSelectableObject for SelectableUnit {
     fn counter(&self) -> &CountSelector {
         &self.selectable
     }
-    fn counter_mut(&mut self) -> &mut CountSelector {
-        &mut self.selectable
-    }
 }
 
 impl RecruitAmount {

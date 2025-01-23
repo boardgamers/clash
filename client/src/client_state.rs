@@ -1,12 +1,11 @@
 use macroquad::prelude::*;
 use server::action::Action;
 use server::city::{City, MoodState};
-use server::combat::{active_attackers, active_defenders, CombatModifier, CombatPhase};
+use server::combat::{active_attackers, active_defenders, CombatPhase};
 use server::content::advances::{get_advance_by_name, NAVIGATION, ROADS, SIEGECRAFT};
 use server::content::custom_phase_actions::CustomPhaseState;
 use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
 use server::position::Position;
-use server::resource_pile::ResourcePile;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 use crate::advance_ui::AdvancePayment;
@@ -550,9 +549,7 @@ impl State {
             }
             GameState::CustomPhase(c) => match c {
                 CustomPhaseState::SiegecraftPayment(_) => {
-                    ActiveDialog::SiegecraftPayment(SiegecraftPaymentModel::new(
-                        game,
-                    ))
+                    ActiveDialog::SiegecraftPayment(SiegecraftPaymentModel::new(game))
                 }
             },
         }
