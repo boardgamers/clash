@@ -541,7 +541,6 @@ impl State {
                     ))
                 }
                 CombatPhase::Retreat => ActiveDialog::Retreat,
-                CombatPhase::Start => panic!("combat phase should not be start"),
             },
             GameState::ExploreResolution(r) => {
                 ActiveDialog::ExploreResolution(ExploreResolutionConfig {

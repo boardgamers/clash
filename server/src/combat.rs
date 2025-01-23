@@ -11,7 +11,6 @@ use std::mem;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum CombatPhase {
-    Start,
     PlayActionCard(usize),
     RemoveCasualties {
         player: usize,
@@ -30,7 +29,6 @@ impl CombatPhase {
                 matches!(action, CombatAction::RemoveCasualties(_))
             }
             CombatPhase::Retreat => matches!(action, CombatAction::Retreat(_)),
-            CombatPhase::Start => false,
         }
     }
 }
@@ -120,7 +118,7 @@ pub fn initiate_combat(
     let combat = Combat::new(
         initiation,
         1,
-        CombatPhase::Start,
+        CombatPhase::Retreat, // is not used
         defender,
         defender_position,
         attacker,

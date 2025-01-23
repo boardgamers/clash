@@ -818,7 +818,7 @@ impl Game {
                     defender_hits: _,
                 }
                 | CombatPhase::PlayActionCard(player) => player,
-                CombatPhase::Retreat | CombatPhase::Start=> c.attacker,
+                    CombatPhase::Retreat => c.attacker,
             },
             PlaceSettler(p) => p.player_index,
             _ => self.current_player_index,
