@@ -31,6 +31,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
     plus: impl FnOnce(&C, &O) -> StateUpdate,
     minus: impl FnOnce(&C, &O) -> StateUpdate,
     offset: Vec2,
+    may_cancel: bool,
 ) -> StateUpdate {
     let objects = get_objects(container)
         .into_iter()
@@ -81,7 +82,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
     if ok_button(rc, is_valid(container)) {
         return execute_action();
     }
-    if cancel_button(rc) {
+    if may_cancel && cancel_button(rc) {
         return StateUpdate::Cancel;
     };
 

@@ -113,6 +113,7 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
         },
         rc,
         Vec2::new(0., 0.),
+        true,
     )
 }
 

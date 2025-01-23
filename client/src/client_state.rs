@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 use server::action::Action;
 use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
-use server::content::advances::{get_advance_by_name, NAVIGATION, ROADS, SIEGECRAFT};
+use server::content::advances::{NAVIGATION, ROADS, SIEGECRAFT};
 use server::content::custom_phase_actions::CustomPhaseState;
 use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
 use server::position::Position;
@@ -178,7 +178,9 @@ impl ActiveDialog {
             )],
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
             ActiveDialog::SiegecraftPayment(_) => {
-                vec![get_advance_by_name(SIEGECRAFT).description.clone()]
+                let mut result = vec![];
+                advance_help(rc, &mut result, SIEGECRAFT);
+                result
             }
         }
     }

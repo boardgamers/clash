@@ -106,16 +106,7 @@ pub struct SiegecraftPaymentModel {
 
 impl SiegecraftPaymentModel {
     pub fn new(game: &Game) -> SiegecraftPaymentModel {
-        // let cost = match modifier {
-        //     CombatModifier::CancelFortressExtraDie => SIEGECRAFT_EXTRA_DIE,
-        //     CombatModifier::CancelFortressIgnoreHit => SIEGECRAFT_IGNORE_HIT,
-        // };
         let available = game.get_player(game.active_player()).resources.clone();
-        // if let Some(extra_die) = &extra_die {
-        //     available -= extra_die.clone();
-        // }
-        //
-        // let model = get_single_resource_payment_model(&available, &cost);
         SiegecraftPaymentModel {
             extra_die: PaymentModelEntry {
                 name: "Cancel fortress extra die in first round of combat".to_string(),
@@ -141,6 +132,7 @@ pub fn pay_siegecraft_dialog(p: &SiegecraftPaymentModel, rc: &RenderContext) -> 
                 ignore_hit: p[1].clone(),
             })
         },
+        false,
         |_| {
             StateUpdate::Execute(Action::CustomPhase(
                 CustomPhaseAction::SiegecraftPaymentAction(SiegecraftPayment {

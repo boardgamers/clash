@@ -48,16 +48,6 @@ impl AdvancePayment {
     }
 }
 
-// impl PaymentModelPayment for AdvancePayment {
-//     fn payment_model_mut(&mut self) -> &mut PaymentModel {
-//         &mut self.model
-//     }
-//
-//     fn new_dialog(self) -> ActiveDialog {
-//         ActiveDialog::AdvancePayment(self)
-//     }
-// }
-
 pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
     let game = rc.game;
     show_advance_menu(
@@ -251,6 +241,7 @@ pub fn pay_advance_dialog(ap: &AdvancePayment, rc: &RenderContext) -> StateUpdat
                 model: p[0].model.clone(),
             })
         },
+        true,
         |pile| {
             StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
                 advance: ap.name.to_string(),

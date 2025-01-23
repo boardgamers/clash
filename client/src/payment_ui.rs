@@ -5,7 +5,7 @@ use std::cmp::min;
 
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::OkTooltip;
-use crate::layout_ui::{bottom_center_text, draw_icon};
+use crate::layout_ui::{bottom_centered_text_with_offset, draw_icon};
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name};
 use crate::select_ui;
@@ -88,6 +88,7 @@ pub fn payment_dialog<T: HasPayment>(
     minus: impl FnOnce(&T, ResourceType) -> StateUpdate,
     rc: &RenderContext,
     offset: Vec2,
+    may_cancel: bool,
 ) -> StateUpdate {
     select_ui::count_dialog(
         rc,
@@ -107,6 +108,7 @@ pub fn payment_dialog<T: HasPayment>(
         |c, o| plus(c, o.resource),
         |c, o| minus(c, o.resource),
         offset,
+        may_cancel,
     )
 }
 
@@ -136,27 +138,50 @@ pub fn payment_model_dialog(
     rc: &RenderContext,
     payment: &[PaymentModelEntry], // None means the player can pay nothing
     to_dialog: impl FnOnce(Vec<PaymentModelEntry>) -> ActiveDialog,
+    may_cancel: bool,
     execute_action: impl FnOnce(Vec<ResourcePile>) -> StateUpdate,
 ) -> StateUpdate {
-    let mut valid = payment.iter().map(payment_model_valid).collect::<Vec<_>>();
+    let mut tooltip = payment.iter().map(payment_model_valid).collect::<Vec<_>>();
     let mut exec: Option<Vec<ResourcePile>> = None;
     let mut added: Option<Vec<PaymentModelEntry>> = None;
     let mut removed: Option<Vec<PaymentModelEntry>> = None;
 
     for (i, p) in payment.iter().enumerate() {
-        bottom_center_text(rc, &p.name, vec2(0., i as f32 * -100.));
         let model = p.model.clone();
         let types = model.show_types();
         let offset = vec2(0., i as f32 * -100.);
+        bottom_centered_text_with_offset(rc, &p.name, offset + vec2(0., -30.));
         let result = payment_dialog(
             p,
             |payment| {
-                valid[i] = payment_model_valid(payment);
-                valid
+                tooltip[i] = payment_model_valid(payment);
+                let invalid: Vec<String> = tooltip
                     .iter()
-                    .find(|v| !v.is_valid())
-                    .unwrap_or(&valid[0])
-                    .clone()
+                    .filter_map(|v| {
+                        if let OkTooltip::Invalid(i) = v {
+                            Some(i.to_string())
+                        } else {
+                            None
+                        }
+                    })
+                    .collect();
+                if invalid.is_empty() {
+                    OkTooltip::Valid(
+                        tooltip
+                            .iter()
+                            .map(|v| {
+                                if let OkTooltip::Valid(i) = v {
+                                    i.to_string()
+                                } else {
+                                    String::new()
+                                }
+                            })
+                            .collect::<Vec<String>>()
+                            .join(", "),
+                    )
+                } else {
+                    OkTooltip::Invalid(invalid.join(", "))
+                }
             },
             || {
                 exec = Some(
@@ -178,6 +203,7 @@ pub fn payment_model_dialog(
             },
             rc,
             offset,
+            may_cancel,
         );
 
         if let Some(v) = added {
