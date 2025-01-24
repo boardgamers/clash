@@ -1734,6 +1734,7 @@ pub mod tests {
     use std::collections::HashMap;
 
     use super::{Game, GameState::Playing};
+    use crate::payment::PaymentModel;
     use crate::utils::tests::FloatEq;
     use crate::{
         city::{City, MoodState::*},
@@ -1746,7 +1747,6 @@ pub mod tests {
         utils::Rng,
         wonder::Wonder,
     };
-    use crate::payment::PaymentModel;
 
     #[must_use]
     pub fn test_game() -> Game {
@@ -1784,7 +1784,12 @@ pub mod tests {
         let old = Player::new(civilizations::tests::get_test_civilization(), 0);
         let new = Player::new(civilizations::tests::get_test_civilization(), 1);
 
-        let wonder = Wonder::builder("wonder", PaymentModel::resources(ResourcePile::empty()), vec![]).build();
+        let wonder = Wonder::builder(
+            "wonder",
+            PaymentModel::resources(ResourcePile::empty()),
+            vec![],
+        )
+        .build();
         let mut game = test_game();
         game.players.push(old);
         game.players.push(new);

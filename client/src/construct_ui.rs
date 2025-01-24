@@ -78,7 +78,8 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
                 vec![],
                 city,
             ),
-        })
+        },
+    )
 }
 
 #[derive(Clone)]
@@ -113,14 +114,15 @@ impl ConstructionPayment {
                 .unwrap()
                 .cost
                 .clone(),
-            ConstructionProject::Units(sel) => PaymentModel::resources(sel
-                .amount
-                .units
-                .clone()
-                .to_vec()
-                .iter()
-                .map(UnitType::cost)
-                .sum()),
+            ConstructionProject::Units(sel) => PaymentModel::resources(
+                sel.amount
+                    .units
+                    .clone()
+                    .to_vec()
+                    .iter()
+                    .map(UnitType::cost)
+                    .sum(),
+            ),
         };
 
         let payment = new_payment(&cost, &rc.shown_player.resources, name, false);

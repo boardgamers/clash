@@ -126,7 +126,7 @@ impl SiegecraftPaymentModel {
 pub fn pay_siegecraft_dialog(p: &SiegecraftPaymentModel, rc: &RenderContext) -> StateUpdate {
     payment_model_dialog(
         rc,
-        &vec![p.extra_die.clone(), p.ignore_hit.clone()],
+        &[p.extra_die.clone(), p.ignore_hit.clone()],
         |p| {
             ActiveDialog::SiegecraftPayment(SiegecraftPaymentModel {
                 extra_die: p[0].clone(),

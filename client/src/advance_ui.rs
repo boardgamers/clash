@@ -230,7 +230,12 @@ pub fn pay_advance_dialog(ap: &AdvancePayment, rc: &RenderContext) -> StateUpdat
     };
     payment_model_dialog(
         rc,
-        &[new_payment(&ap.model, &rc.shown_player.resources, &ap.name, false)], 
+        &[new_payment(
+            &ap.model,
+            &rc.shown_player.resources,
+            &ap.name,
+            false,
+        )],
         |p| {
             ActiveDialog::AdvancePayment(AdvancePayment {
                 name: ap.name.clone(),

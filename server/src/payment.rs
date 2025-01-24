@@ -52,7 +52,8 @@ impl PaymentModel {
     pub const fn resources_with_discount(cost: ResourcePile, discount: u32) -> Self {
         PaymentModel::Resources(CostWithDiscount { cost, discount })
     }
-    #[must_use] pub const fn resources(cost: ResourcePile) -> Self {
+    #[must_use]
+    pub const fn resources(cost: ResourcePile) -> Self {
         Self::resources_with_discount(cost, 0)
     }
 
@@ -114,30 +115,4 @@ fn get_sum_payment_model(cost: u32, types_by_preference: &[ResourceType]) -> Pay
         cost,
         types_by_preference: types_by_preference.to_vec(),
     })
-
-    // let mut left = ResourcePile::empty();
-    // for t in types_by_preference {
-    //     left.add_type(*t, available.get(*t) as i32);
-    // }
-    // let default_type = types_by_preference[0];
-    // let mut default_payment = ResourcePile::empty();
-    //
-    // for _ in 0..cost {
-    //     let t = types_by_preference
-    //         .iter()
-    //         .find(|t| left.get(**t) > 0)
-    //         .unwrap_or(&default_type);
-    //     if left.get(*t) > 0 {
-    //         left.add_type(*t, -1);
-    //     }
-    //     default_payment.add_type(*t, 1);
-    // }
-    //
-    // PaymentModel::Sum(SumPaymentOptions::new(
-    //     default_payment,
-    //     left,
-    //     cost,
-    //     types_by_preference,
-    //     can_afford,
-    // ))
 }

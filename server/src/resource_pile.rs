@@ -357,7 +357,7 @@ impl CostWithDiscount {
         if cost.ideas > available.ideas {
             resource_deficit += cost.ideas - available.ideas;
         }
-        available.gold >= cost.gold - self.discount + resource_deficit
+        available.gold + self.discount >= cost.gold + resource_deficit
             && available.mood_tokens >= cost.mood_tokens
             && available.culture_tokens >= cost.culture_tokens
     }
@@ -463,13 +463,15 @@ mod tests {
 
     fn assert_can_afford(name: &str, cost: &ResourcePile, discount: u32) {
         let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
-        let can_afford = PaymentModel::resources(cost.clone(), discount).can_afford(&player_has);
+        let can_afford =
+            PaymentModel::resources_with_discount(cost.clone(), discount).can_afford(&player_has);
         assert!(can_afford, "{name}");
     }
 
     fn assert_cannot_afford(name: &str, cost: &ResourcePile, discount: u32) {
         let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
-        let can_afford = PaymentModel::resources(cost.clone(), discount).can_afford(&player_has);
+        let can_afford =
+            PaymentModel::resources_with_discount(cost.clone(), discount).can_afford(&player_has);
         assert!(!can_afford, "{name}");
     }
 

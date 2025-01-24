@@ -1,9 +1,3 @@
-use macroquad::math::{bool, vec2};
-use server::payment::{PaymentModel, SumPaymentOptions};
-use server::resource_pile::{PaymentOptions, ResourcePile};
-use std::cmp;
-use std::cmp::min;
-use std::fmt::Display;
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::OkTooltip;
 use crate::layout_ui::{bottom_centered_text_with_offset, draw_icon};
@@ -11,7 +5,12 @@ use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name};
 use crate::select_ui;
 use crate::select_ui::{CountSelector, HasCountSelectableObject};
+use macroquad::math::{bool, vec2};
+use server::payment::{PaymentModel, SumPaymentOptions};
 use server::resource::ResourceType;
+use server::resource_pile::{PaymentOptions, ResourcePile};
+use std::cmp;
+use std::cmp::min;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct ResourcePayment {
@@ -177,12 +176,12 @@ pub fn payment_model_dialog(
                 exec = true;
                 StateUpdate::None
             },
-            |c, o| types.contains(&o.resource),
-            |c, o| {
+            |_, o| types.contains(&o.resource),
+            |_, o| {
                 added = Some(plus(payment.clone(), o.resource));
                 StateUpdate::None
             },
-            |c, o| {
+            |_, o| {
                 removed = Some(minus(payment.clone(), o.resource));
                 StateUpdate::None
             },
@@ -228,7 +227,7 @@ pub fn payment_model_dialog(
         }
 
         if exec {
-            return execute_action(payments.iter().map(|p| p.to_resource_pile()).collect());
+            return execute_action(payments.iter().map(Payment::to_resource_pile).collect());
         }
 
         if !matches!(result, StateUpdate::None) {
@@ -307,7 +306,7 @@ pub fn new_payment(
         PaymentModel::Resources(a) => {
             let options = a.get_payment_options(available);
             discount_used = a.discount - options.discount_left;
-            resource_payment(options)
+            resource_payment(&options)
         }
     };
 
@@ -316,12 +315,12 @@ pub fn new_payment(
         model: model.clone(),
         optional,
         current: resources,
-        discount_used: 0,
+        discount_used,
     }
 }
 
 #[must_use]
-fn resource_payment(options: PaymentOptions) -> Vec<ResourcePayment> {
+fn resource_payment(options: &PaymentOptions) -> Vec<ResourcePayment> {
     let mut resources: Vec<ResourcePayment> = new_resource_map(&options.default)
         .into_iter()
         .map(|e| {
@@ -390,9 +389,8 @@ pub fn minus(mut payment: Payment, t: ResourceType) -> Payment {
         }
         PaymentModel::Resources(_) => {
             {
-                let mut discount = payment.discount_used;
-                if discount > 0 {
-                    discount -= 1;
+                if payment.discount_used > 0 {
+                    payment.discount_used -= 1;
                 } else {
                     payment.get_mut(ResourceType::Gold).selectable.current += 1;
                 }
