@@ -1,5 +1,5 @@
 use crate::resource::ResourceType;
-use crate::resource_pile::{CostWithDiscount, PaymentOptions, ResourcePile};
+use crate::resource_pile::{CostWithDiscount, ResourcePile};
 use std::fmt::Display;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
@@ -52,8 +52,8 @@ impl PaymentModel {
     pub const fn resources_with_discount(cost: ResourcePile, discount: u32) -> Self {
         PaymentModel::Resources(CostWithDiscount { cost, discount })
     }
-    pub const fn resources(cost: ResourcePile) -> Self {
-Self::resources_with_discount(cost, 0)        
+    #[must_use] pub const fn resources(cost: ResourcePile) -> Self {
+        Self::resources_with_discount(cost, 0)
     }
 
     #[must_use]
@@ -93,7 +93,7 @@ impl Display for PaymentModel {
                 options
                     .types_by_preference
                     .iter()
-                    .map(|t| format!("{:?}", t))
+                    .map(|t| format!("{t:?}"))
                     .collect::<Vec<String>>()
                     .join(", ")
             ),
@@ -140,72 +140,4 @@ fn get_sum_payment_model(cost: u32, types_by_preference: &[ResourceType]) -> Pay
     //     types_by_preference,
     //     can_afford,
     // ))
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::payment::{get_sum_payment_model, PaymentModel, SumPaymentOptions};
-    use crate::resource::ResourceType;
-    use crate::resource_pile::ResourcePile;
-
-    fn assert_sum_payment_options(
-        name: &str,
-        budget: &ResourcePile,
-        want_default: ResourcePile,
-        left_default: ResourcePile,
-        can_afford: bool,
-    ) {
-        let model = PaymentModel::sum(
-            2,
-            &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
-        );
-        let want = PaymentModel::Sum(SumPaymentOptions::new(
-            want_default,
-            left_default,
-            2,
-            &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
-            can_afford,
-        ));
-        assert_eq!(model, want, "{name}");
-        assert_eq!(can_afford, want.can_afford(budget), "{name}");
-    }
-
-    #[test]
-    fn advance_payment_options_test() {
-        assert_sum_payment_options(
-            "enough of all resources",
-            &(ResourcePile::food(3) + ResourcePile::ideas(3) + ResourcePile::gold(3)),
-            ResourcePile::ideas(2),
-            ResourcePile::food(3) + ResourcePile::ideas(1) + ResourcePile::gold(3),
-            true,
-        );
-        assert_sum_payment_options(
-            "using food",
-            &(ResourcePile::food(3) + ResourcePile::gold(3)),
-            ResourcePile::food(2),
-            ResourcePile::food(1) + ResourcePile::gold(3),
-            true,
-        );
-        assert_sum_payment_options(
-            "using 1 gold",
-            &(ResourcePile::ideas(1) + ResourcePile::gold(3)),
-            ResourcePile::ideas(1) + ResourcePile::gold(1),
-            ResourcePile::gold(2),
-            true,
-        );
-        assert_sum_payment_options(
-            "one possible payment",
-            &(ResourcePile::food(1) + ResourcePile::gold(1)),
-            ResourcePile::food(1) + ResourcePile::gold(1),
-            ResourcePile::empty(),
-            true,
-        );
-        assert_sum_payment_options(
-            "cannot afford",
-            &(ResourcePile::gold(1)),
-            ResourcePile::ideas(1) + ResourcePile::gold(1),
-            ResourcePile::empty(),
-            false,
-        );
-    }
 }

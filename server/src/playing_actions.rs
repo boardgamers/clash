@@ -7,6 +7,7 @@ use PlayingAction::*;
 use crate::action::Action;
 use crate::content::advances;
 use crate::game::{CulturalInfluenceResolution, GameState};
+use crate::payment::PaymentModel;
 use crate::{
     city::City,
     city_pieces::Building::{self, *},
@@ -18,7 +19,6 @@ use crate::{
     resource_pile::ResourcePile,
     unit::UnitType,
 };
-use crate::payment::PaymentModel;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Construct {
@@ -124,7 +124,7 @@ impl PlayingAction {
                 let cost = player.advance_cost(&advance);
                 assert!(
                     player.can_advance(&advances::get_advance_by_name(&advance))
-                        && payment.food + payment.ideas + payment.gold as u32 == cost,
+                        && payment.food + payment.ideas + payment.gold == cost,
                     "Illegal action"
                 );
                 player.loose_resources(payment);
@@ -185,7 +185,9 @@ impl PlayingAction {
                 collect(game, player_index, &c);
             }
             Recruit(r) => {
-                let cost = PaymentModel::resources(r.units.iter().map(UnitType::cost).sum::<ResourcePile>());
+                let cost = PaymentModel::resources(
+                    r.units.iter().map(UnitType::cost).sum::<ResourcePile>(),
+                );
                 let player = &mut game.players[player_index];
                 assert!(
                     player.can_recruit(

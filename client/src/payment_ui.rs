@@ -3,7 +3,7 @@ use server::payment::{PaymentModel, SumPaymentOptions};
 use server::resource_pile::{PaymentOptions, ResourcePile};
 use std::cmp;
 use std::cmp::min;
-
+use std::fmt::Display;
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::OkTooltip;
 use crate::layout_ui::{bottom_centered_text_with_offset, draw_icon};
@@ -39,13 +39,13 @@ pub struct Payment {
     pub name: String,
     pub model: PaymentModel,
     pub optional: bool,
-    pub resources: Vec<ResourcePayment>,
+    pub current: Vec<ResourcePayment>,
     pub discount_used: u32,
 }
 
 impl Payment {
     pub fn to_resource_pile(&self) -> ResourcePile {
-        let r = &self.resources;
+        let r = &self.current;
         ResourcePile::new(
             Self::current(r, ResourceType::Food),
             Self::current(r, ResourceType::Wood),
@@ -58,13 +58,13 @@ impl Payment {
     }
 
     pub fn get_mut(&mut self, r: ResourceType) -> &mut ResourcePayment {
-        self.resources
+        self.current
             .iter_mut()
             .find(|p| p.resource == r)
             .unwrap_or_else(|| panic!("Resource {r:?} not found in payment"))
     }
     pub fn get(&self, r: ResourceType) -> &ResourcePayment {
-        self.resources
+        self.current
             .iter()
             .find(|p| p.resource == r)
             .unwrap_or_else(|| panic!("Resource {r:?} not found in payment"))
@@ -150,7 +150,7 @@ pub fn payment_model_dialog(
     may_cancel: bool,
     execute_action: impl FnOnce(Vec<ResourcePile>) -> StateUpdate,
 ) -> StateUpdate {
-    let mut tooltip = payments.iter().map(payment_model_valid).collect::<Vec<_>>();
+    let tooltip = ok_tooltip(payments, rc.shown_player.resources.clone());
     let mut exec = false;
     let mut added: Option<Payment> = None;
     let mut removed: Option<Payment> = None;
@@ -163,7 +163,7 @@ pub fn payment_model_dialog(
         let result = select_ui::count_dialog(
             rc,
             payment,
-            |p| p.resources.clone(),
+            |p| p.current.clone(),
             |s, p| {
                 let _ = draw_icon(
                     rc,
@@ -172,7 +172,7 @@ pub fn payment_model_dialog(
                     p + vec2(0., -10.),
                 );
             },
-            || valid(&mut tooltip, i, &payment),
+            || tooltip.clone(),
             || {
                 exec = true;
                 StateUpdate::None
@@ -221,10 +221,10 @@ pub fn payment_model_dialog(
         // );
 
         if let Some(p) = added {
-            return StateUpdate::OpenDialog(to_dialog(replace_updated_payment(p, payments)));
+            return StateUpdate::OpenDialog(to_dialog(replace_updated_payment(&p, payments)));
         }
         if let Some(p) = removed {
-            return StateUpdate::OpenDialog(to_dialog(replace_updated_payment(p, payments)));
+            return StateUpdate::OpenDialog(to_dialog(replace_updated_payment(&p, payments)));
         }
 
         if exec {
@@ -238,58 +238,41 @@ pub fn payment_model_dialog(
     StateUpdate::None
 }
 
-fn valid(tooltip: &mut Vec<OkTooltip>, i: usize, payment: &Payment) -> OkTooltip {
-    tooltip[i] = payment_model_valid(payment);
-    let invalid: Vec<String> = tooltip
-        .iter()
-        .filter_map(|v| {
-            if let OkTooltip::Invalid(i) = v {
-                Some(i.to_string())
-            } else {
-                None
-            }
-        })
-        .collect();
+fn ok_tooltip(payments: &[Payment], mut available: ResourcePile) -> OkTooltip {
+    let mut valid: Vec<String> = vec![];
+    let mut invalid: Vec<String> = vec![];
+
+    for payment in payments {
+        let model = &payment.model;
+        let pile = payment.to_resource_pile();
+        let name = &payment.name;
+        let tooltip = if payment.optional && pile.is_empty() {
+            OkTooltip::Valid(format!("Pay nothing for {name}"))
+        } else if model.can_afford(&available) && model.is_valid_payment(&pile) {
+            // make sure that we can afford all of the payments
+            OkTooltip::Valid(format!("Pay {pile} for {name}"))
+        } else {
+            OkTooltip::Invalid(format!("You don't have {:?} for {}", payment.model, name))
+        };
+        match tooltip {
+            OkTooltip::Valid(v) => valid.push(v),
+            OkTooltip::Invalid(i) => invalid.push(i),
+        }
+        available -= payment.to_resource_pile();
+    }
+
     if invalid.is_empty() {
-        OkTooltip::Valid(
-            tooltip
-                .iter()
-                .map(|v| {
-                    if let OkTooltip::Valid(i) = v {
-                        i.to_string()
-                    } else {
-                        String::new()
-                    }
-                })
-                .collect::<Vec<String>>()
-                .join(", "),
-        )
+        OkTooltip::Valid(valid.join(", "))
     } else {
         OkTooltip::Invalid(invalid.join(", "))
     }
 }
 
-fn payment_model_valid(payment: &Payment, available: ResourcePile) -> OkTooltip {
-    let model = &payment.model;
-    let pile = model.default();
-    let name = &payment.name;
-
-    if payment.optional && pile.is_empty() {
-        return OkTooltip::Valid(format!("Pay nothing for {name}"));
-    }
-
-    if model.is_valid_payment(pile) {
-        OkTooltip::Valid(format!("Pay {pile} for {name}"))
-    } else {
-        OkTooltip::Invalid(format!("You don't have {} for {}", model.default(), name))
-    }
-}
-
-fn replace_updated_payment(payment: Payment, all: &[Payment]) -> Vec<Payment> {
+fn replace_updated_payment(payment: &Payment, all: &[Payment]) -> Vec<Payment> {
     all.iter()
         .map(|e| {
             if e.name == payment.name {
-                payment
+                payment.clone()
             } else {
                 e.clone()
             }
@@ -306,9 +289,8 @@ fn sum_payment(a: &SumPaymentOptions, available: &ResourcePile) -> Vec<ResourceP
             let have = available.get(*t);
             let used = min(have, cost_left);
             cost_left -= used;
-            ResourcePayment::new(*t, used, 0, have);
+            ResourcePayment::new(*t, used, 0, have)
         })
-        .copied()
         .collect()
 }
 
@@ -333,7 +315,7 @@ pub fn new_payment(
         name: name.to_string(),
         model: model.clone(),
         optional,
-        resources,
+        current: resources,
         discount_used: 0,
     }
 }

@@ -18,10 +18,10 @@ impl ResourceType {
     pub fn is_token(&self) -> bool {
         matches!(self, ResourceType::MoodTokens | ResourceType::CultureTokens)
     }
-    
+
     #[must_use]
     pub fn is_resource(&self) -> bool {
-        !self.is_token() 
+        !self.is_token()
     }
 
     #[must_use]

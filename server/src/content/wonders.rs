@@ -1,7 +1,7 @@
 use crate::game::Game;
+use crate::payment::PaymentModel;
 use crate::position::Position;
 use crate::{resource_pile::ResourcePile, wonder::Wonder};
-use crate::payment::PaymentModel;
 
 #[must_use]
 #[rustfmt::skip]

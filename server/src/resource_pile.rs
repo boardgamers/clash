@@ -68,7 +68,7 @@ impl ResourcePile {
             ResourceType::Wood => self.wood,
             ResourceType::Ore => self.ore,
             ResourceType::Ideas => self.ideas,
-            ResourceType::Gold => self.gold as u32,
+            ResourceType::Gold => self.gold,
             ResourceType::MoodTokens => self.mood_tokens,
             ResourceType::CultureTokens => self.culture_tokens,
         }
@@ -163,7 +163,7 @@ impl ResourcePile {
         }
         waste
     }
-    
+
     #[must_use]
     pub fn has_common_resource(&self, other: &Self) -> bool {
         self.food > 0 && other.food > 0
@@ -181,7 +181,7 @@ impl ResourcePile {
             + self.wood
             + self.ore
             + self.ideas
-            + self.gold as u32
+            + self.gold
             + self.mood_tokens
             + self.culture_tokens
     }
@@ -361,22 +361,22 @@ impl CostWithDiscount {
             && available.mood_tokens >= cost.mood_tokens
             && available.culture_tokens >= cost.culture_tokens
     }
-    
+
     //this function assumes that `self` can afford `cost`
     #[must_use]
     pub fn get_payment_options(&self, available: &ResourcePile) -> PaymentOptions {
         let cost = &self.cost;
         let mut jokers_left = self.discount;
-    
-        let mut gold_left = available.gold as u32;
+
+        let mut gold_left = available.gold;
         let mut gold_cost = cost.gold;
-        gold_left -= gold_cost as u32;
-    
+        gold_left -= gold_cost;
+
         if cost.food > available.food {
             let joker_cost = cost.food - available.food;
             if joker_cost > jokers_left {
                 gold_left -= joker_cost - jokers_left;
-                gold_cost += (joker_cost - jokers_left);
+                gold_cost += joker_cost - jokers_left;
             }
             jokers_left = jokers_left.saturating_sub(joker_cost);
         }
@@ -384,7 +384,7 @@ impl CostWithDiscount {
             let joker_cost = cost.wood - available.wood;
             if joker_cost > jokers_left {
                 gold_left -= joker_cost - jokers_left;
-                gold_cost += (joker_cost - jokers_left);
+                gold_cost += joker_cost - jokers_left;
             }
             jokers_left = jokers_left.saturating_sub(joker_cost);
         }
@@ -392,7 +392,7 @@ impl CostWithDiscount {
             let joker_cost = cost.ore - available.ore;
             if joker_cost > jokers_left {
                 gold_left -= joker_cost - jokers_left;
-                gold_cost += (joker_cost - jokers_left);
+                gold_cost += joker_cost - jokers_left;
             }
             jokers_left = jokers_left.saturating_sub(joker_cost);
         }
@@ -400,7 +400,7 @@ impl CostWithDiscount {
             let joker_cost = cost.ideas - available.ideas;
             if joker_cost > jokers_left {
                 gold_left -= joker_cost - jokers_left;
-                gold_cost += (joker_cost - jokers_left);
+                gold_cost += joker_cost - jokers_left;
             }
             jokers_left = jokers_left.saturating_sub(joker_cost);
         }
@@ -458,25 +458,19 @@ impl PaymentOptions {
 
 #[cfg(test)]
 mod tests {
-    use crate::payment::PaymentModel;
     use super::{CostWithDiscount, PaymentOptions, ResourcePile};
+    use crate::payment::PaymentModel;
 
     fn assert_can_afford(name: &str, cost: &ResourcePile, discount: u32) {
         let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
         let can_afford = PaymentModel::resources(cost.clone(), discount).can_afford(&player_has);
-        assert!(
-            can_afford,
-            "{name}"
-        );
+        assert!(can_afford, "{name}");
     }
 
     fn assert_cannot_afford(name: &str, cost: &ResourcePile, discount: u32) {
         let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
         let can_afford = PaymentModel::resources(cost.clone(), discount).can_afford(&player_has);
-        assert!(
-            !can_afford,
-            "{name}"
-        );
+        assert!(!can_afford, "{name}");
     }
 
     fn assert_payment_options(
@@ -486,7 +480,10 @@ mod tests {
         want: &PaymentOptions,
     ) {
         let budget = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
-        let c = CostWithDiscount { cost: cost.clone(), discount };
+        let c = CostWithDiscount {
+            cost: cost.clone(),
+            discount,
+        };
         assert_eq!(want, &c.get_payment_options(&budget), "{name}");
     }
 

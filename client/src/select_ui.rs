@@ -79,7 +79,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
         };
     }
 
-    if ok_button(rc, is_valid(container)) {
+    if ok_button(rc, is_valid()) {
         return execute_action();
     }
     if may_cancel && cancel_button(rc) {

@@ -1,11 +1,11 @@
 use crate::combat::{combat_loop, Combat, CombatModifier};
 use crate::content::advances::SIEGECRAFT;
 use crate::game::{Game, GameState};
+use crate::payment::PaymentModel;
 use crate::player::Player;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use serde::{Deserialize, Serialize};
-use crate::payment::PaymentModel;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum CustomPhaseState {

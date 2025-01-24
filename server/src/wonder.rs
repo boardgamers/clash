@@ -1,10 +1,9 @@
+use crate::payment::PaymentModel;
 use crate::{
     ability_initializer::{self, AbilityInitializer, AbilityInitializerSetup},
     game::Game,
     position::Position,
-    resource_pile::ResourcePile,
 };
-use crate::payment::PaymentModel;
 
 type PlacementChecker = Box<dyn Fn(Position, &Game) -> bool>;
 

@@ -3,7 +3,7 @@ use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
 use crate::movement::move_routes;
 use crate::movement::{is_valid_movement_type, MoveRoute};
-use crate::payment::{ PaymentModel};
+use crate::payment::PaymentModel;
 use crate::resource::ResourceType;
 use crate::unit::{carried_units, get_current_move, MovementRestriction};
 use crate::{
@@ -413,7 +413,8 @@ impl Player {
 
     #[must_use]
     pub fn can_advance(&self, advance: &Advance) -> bool {
-        self.get_advance_payment_options(&advance.name).can_afford(&self.resources)
+        self.get_advance_payment_options(&advance.name)
+            .can_afford(&self.resources)
             && self.can_advance_free(advance)
     }
 

@@ -1,9 +1,9 @@
+use crate::payment::PaymentModel;
 use crate::playing_actions::PlayingActionType;
 use crate::{
     city::City, city_pieces::Building, events::EventMut, player::Player, position::Position,
     resource_pile::ResourcePile, wonder::Wonder,
 };
-use crate::payment::PaymentModel;
 
 #[derive(Default)]
 pub struct PlayerEvents {
