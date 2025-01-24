@@ -76,71 +76,7 @@ impl Payment {
             .selectable
             .current
     }
-    //
-    // pub fn is_valid(&self) -> bool {
-    //     self.model.is_valid(&self.to_resource_pile())
-    // }
 }
-//
-// pub trait HasPayment {
-//     fn payment(&self) -> Payment;
-// }
-
-// #[allow(clippy::too_many_arguments)]
-// pub fn payment_dialog(
-//     payment: &Payment,
-//     execute_action: impl FnOnce() -> StateUpdate,
-//     show: impl Fn(&Payment, ResourceType) -> bool,
-//     plus: impl FnOnce(&Payment, ResourceType) -> StateUpdate,
-//     minus: impl FnOnce(&Payment, ResourceType) -> StateUpdate,
-//     rc: &RenderContext,
-//     offset: Vec2,
-//     may_cancel: bool,
-// ) -> StateUpdate {
-//     select_ui::count_dialog(
-//         rc,
-//         payment,
-//         |p| p.payment().resources.clone(),
-//         |s, p| {
-//             let _ = draw_icon(
-//                 rc,
-//                 &rc.assets().resources[&s.resource],
-//                 resource_name(s.resource),
-//                 p + vec2(0., -10.),
-//             );
-//         },
-//         Payment::is_valid,
-//         execute_action,
-//         |c, o| show(c, o.resource),
-//         |c, o| plus(c, o.resource),
-//         |c, o| minus(c, o.resource),
-//         offset,
-//         may_cancel,
-//     )
-// }
-//
-// #[derive(Clone)]
-// pub struct PaymentModelEntry {
-//     pub name: String,
-//     pub model: PaymentModel,
-//     pub payment: Payment,
-//     pub optional: bool,
-// }
-
-// impl HasPayment for PaymentModelEntry {
-//     fn payment(&self) -> Payment {
-//         let PaymentModel::Sum(a) = &self.model;
-//         let left = &a.left;
-//
-//         let mut resources: Vec<ResourcePayment> = new_resource_map(&a.default)
-//             .into_iter()
-//             .map(|e| ResourcePayment::new(e.0, e.1, 0, min(a.cost, e.1 + left.get(e.0))))
-//             .collect();
-//         resources.sort_by_key(|r| r.resource);
-//
-//         Payment { resources }
-//     }
-// }
 
 pub fn payment_model_dialog(
     rc: &RenderContext,
@@ -188,36 +124,6 @@ pub fn payment_model_dialog(
             offset,
             may_cancel,
         );
-
-        //
-        // let result = payment_dialog(
-        //     payment,
-        //     |payment| {
-        //         valid(tooltip, i, payment)
-        //     },
-        //     || {
-        //         exec = Some(
-        //             payment
-        //                 .iter()
-        //                 .map(|p| p.payment().to_resource_pile())
-        //                 .collect(),
-        //         );
-        //         StateUpdate::None
-        //     },
-        //     |_ap, r| types.contains(&r),
-        //     |ap, r| {
-        //         plus()
-        //         added = Some(add(ap, r, 1, payment));
-        //         StateUpdate::None
-        //     },
-        //     |ap, r| {
-        //         removed = Some(add(ap, r, -1, payment));
-        //         StateUpdate::None
-        //     },
-        //     rc,
-        //     offset,
-        //     may_cancel,
-        // );
 
         if let Some(p) = added {
             return StateUpdate::OpenDialog(to_dialog(replace_updated_payment(&p, payments)));

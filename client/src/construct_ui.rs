@@ -134,26 +134,4 @@ impl ConstructionPayment {
             payment,
         }
     }
-
-    // pub fn valid(&self) -> OkTooltip {
-    //     if self.payment.get(ResourceType::Discount).selectable.current == 0 {
-    //         OkTooltip::Valid(format!(
-    //             "Pay {} to build {}",
-    //             self.payment.to_resource_pile(),
-    //             self.name
-    //         ))
-    //     } else {
-    //         OkTooltip::Invalid(format!(
-    //             "You don't have {} to build {}",
-    //             self.payment.to_resource_pile(),
-    //             self.name
-    //         ))
-    //     }
-    // }
 }
-
-// impl HasPayment for ConstructionPayment {
-//     fn payment(&self) -> Payment {
-//         self.payment.clone()
-//     }
-// }

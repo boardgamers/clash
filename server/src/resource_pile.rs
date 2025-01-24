@@ -433,27 +433,6 @@ impl PaymentOptions {
             discount_left,
         }
     }
-
-    // #[must_use]
-    // pub fn can_afford(&self, available: &ResourcePile) -> bool {
-    //     let cost = &self.default;
-    //     let mut resource_deficit = 0;
-    //     if cost.food > available.food {
-    //         resource_deficit += cost.food - available.food;
-    //     }
-    //     if cost.wood > available.wood {
-    //         resource_deficit += cost.wood - available.wood;
-    //     }
-    //     if cost.ore > available.ore {
-    //         resource_deficit += cost.ore - available.ore;
-    //     }
-    //     if cost.ideas > available.ideas {
-    //         resource_deficit += cost.ideas - available.ideas;
-    //     }
-    //     available.gold >= cost.gold - self.discount + resource_deficit
-    //         && available.mood_tokens >= cost.mood_tokens
-    //         && available.culture_tokens >= cost.culture_tokens
-    // }
 }
 
 #[cfg(test)]

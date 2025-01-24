@@ -9,23 +9,6 @@ pub struct SumPaymentOptions {
 }
 
 impl SumPaymentOptions {
-    // #[must_use]
-    // pub fn new(
-    //     default: ResourcePile,
-    //     left: ResourcePile,
-    //     cost: u32,
-    //     types_by_preference: &[ResourceType],
-    //     can_afford: bool,
-    // ) -> Self {
-    //     Self {
-    //         default,
-    //         left,
-    //         cost,
-    //         types_by_preference: types_by_preference.to_vec(),
-    //         can_afford,
-    //     }
-    // }
-
     #[must_use]
     pub fn is_valid_payment(&self, payment: &ResourcePile) -> bool {
         self.types_by_preference
