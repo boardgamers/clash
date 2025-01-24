@@ -68,8 +68,8 @@ impl PaymentModel {
     pub fn add_type(&mut self, t: ResourceType, amount: i32) {
         match self {
             PaymentModel::Sum(options) => {
-                //todo remove from left?
                 options.default.add_type(t, amount);
+                options.left.add_type(t, -amount);
             }
         }
     }
@@ -78,19 +78,6 @@ impl PaymentModel {
     pub fn left(&self) -> &ResourcePile {
         match self {
             PaymentModel::Sum(options) => &options.left,
-        }
-    }
-
-    #[must_use]
-    pub fn with_default(&self, default: ResourcePile) -> PaymentModel {
-        match self {
-            PaymentModel::Sum(options) => PaymentModel::Sum(SumPaymentOptions::new(
-                default,
-                options.left.clone(),
-                options.cost,
-                &options.types_by_preference,
-                options.can_afford,
-            )),
         }
     }
 
