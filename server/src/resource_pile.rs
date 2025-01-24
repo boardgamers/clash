@@ -64,28 +64,8 @@ impl ResourcePile {
         }
     }
 
-    ///
-    /// # Panics
-    /// Panics if `resource_type` is `Discount`
     #[must_use]
-    pub fn of_type(resource_type: ResourceType, amount: i32) -> Self {
-        match resource_type {
-            ResourceType::Food => Self::food(amount as u32),
-            ResourceType::Wood => Self::wood(amount as u32),
-            ResourceType::Ore => Self::ore(amount as u32),
-            ResourceType::Ideas => Self::ideas(amount as u32),
-            ResourceType::Gold => Self::gold(amount),
-            ResourceType::MoodTokens => Self::mood_tokens(amount as u32),
-            ResourceType::CultureTokens => Self::culture_tokens(amount as u32),
-            ResourceType::Discount => panic!("Discount is not a resource type"),
-        }
-    }
-
-    ///
-    /// # Panics
-    /// Panics if `resource_type` is `Discount`
-    #[must_use]
-    pub fn amount(&self, resource_type: ResourceType) -> u32 {
+    pub fn get(&self, resource_type: ResourceType) -> u32 {
         match resource_type {
             ResourceType::Food => self.food,
             ResourceType::Wood => self.wood,
@@ -94,7 +74,7 @@ impl ResourcePile {
             ResourceType::Gold => self.gold as u32,
             ResourceType::MoodTokens => self.mood_tokens,
             ResourceType::CultureTokens => self.culture_tokens,
-            ResourceType::Discount => panic!("Discount is not a resource type"),
+            ResourceType::Discount => 0,
         }
     }
 
@@ -124,12 +104,12 @@ impl ResourcePile {
     }
 
     #[must_use]
-    pub fn wood(amount: u32) -> Self {
+    pub const fn wood(amount: u32) -> Self {
         Self::new(0, amount, 0, 0, 0, 0, 0)
     }
 
     #[must_use]
-    pub fn ore(amount: u32) -> Self {
+    pub const fn ore(amount: u32) -> Self {
         Self::new(0, 0, amount, 0, 0, 0, 0)
     }
 

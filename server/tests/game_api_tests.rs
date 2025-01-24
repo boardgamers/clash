@@ -6,7 +6,9 @@ use std::{
     path::MAIN_SEPARATOR as SEPARATOR,
 };
 
+use server::action::Action::CustomPhase;
 use server::action::CombatAction;
+use server::content::custom_phase_actions::{CustomPhaseAction, SiegecraftPayment};
 use server::game::{CulturalInfluenceResolution, GameState};
 use server::playing_actions::PlayingAction;
 use server::status_phase::{
@@ -896,6 +898,33 @@ fn test_first_combat_round_no_hits_attacker_may_retreat() {
     test_action(
         "first_combat_round_no_hits",
         move_action(vec![0], Position::from_offset("C1")),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_ask_for_siegecraft() {
+    test_action(
+        "ask_for_siegecraft",
+        move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
+        0,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_attack_with_siegecraft() {
+    test_action(
+        "attack_with_siegecraft",
+        CustomPhase(CustomPhaseAction::SiegecraftPaymentAction(
+            SiegecraftPayment {
+                ignore_hit: ResourcePile::ore(2),
+                extra_die: ResourcePile::empty(),
+            },
+        )),
         0,
         false,
         false,

@@ -1,7 +1,5 @@
 use std::cmp;
 
-use macroquad::math::{i32, u32};
-
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::OkTooltip;
 use crate::payment_ui::{payment_dialog, HasPayment, Payment, ResourcePayment};
@@ -9,6 +7,8 @@ use crate::recruit_unit_ui::RecruitSelection;
 use crate::render_context::RenderContext;
 use crate::resource_ui::new_resource_map;
 use crate::select_ui::CountSelector;
+use macroquad::math::{i32, u32};
+use macroquad::prelude::Vec2;
 use server::action::Action;
 use server::city::City;
 use server::city_pieces::Building;
@@ -112,6 +112,8 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
             StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(new))
         },
         rc,
+        Vec2::new(0., 0.),
+        true,
     )
 }
 
@@ -220,7 +222,7 @@ impl ConstructionPayment {
 }
 
 impl HasPayment for ConstructionPayment {
-    fn payment(&self) -> &Payment {
-        &self.payment
+    fn payment(&self) -> Payment {
+        self.payment.clone()
     }
 }

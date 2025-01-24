@@ -35,9 +35,6 @@ impl HasCountSelectableObject for SelectableUnit {
     fn counter(&self) -> &CountSelector {
         &self.selectable
     }
-    fn counter_mut(&mut self) -> &mut CountSelector {
-        &mut self.selectable
-    }
 }
 
 impl RecruitAmount {
@@ -258,6 +255,8 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
                 },
             )
         },
+        Vec2::new(0., 0.),
+        true,
     )
 }
 

@@ -59,9 +59,13 @@ pub fn bottom_center_texture(
     draw_icon(rc, texture, tooltip, anchor + p)
 }
 
-pub fn bottom_centered_text(rc: &RenderContext, text: &str) {
+pub fn bottom_centered_text_with_offset(rc: &RenderContext, text: &str, offset: Vec2) {
     let dimensions = rc.state.measure_text(text);
-    bottom_center_text(rc, text, vec2(-dimensions.width / 2., -50.));
+    bottom_center_text(rc, text, vec2(-dimensions.width / 2., -50.) + offset);
+}
+
+pub fn bottom_centered_text(rc: &RenderContext, text: &str) {
+    bottom_centered_text_with_offset(rc, text, vec2(0., 0.));
 }
 
 pub fn bottom_center_text(rc: &RenderContext, text: &str, p: Vec2) {

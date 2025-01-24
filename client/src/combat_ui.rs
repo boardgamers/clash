@@ -1,14 +1,18 @@
-use server::action::{Action, CombatAction, PlayActionCard};
-use server::game::Game;
-use server::position::Position;
-use server::unit::Unit;
-
-use crate::client_state::StateUpdate;
+use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
+use crate::payment_ui::{payment_model_dialog, PaymentModelEntry};
 use crate::render_context::RenderContext;
 use crate::select_ui::ConfirmSelection;
 use crate::unit_ui;
 use crate::unit_ui::UnitSelection;
+use server::action::{Action, CombatAction, PlayActionCard};
+use server::content::custom_phase_actions::{
+    CustomPhaseAction, SiegecraftPayment, SIEGECRAFT_EXTRA_DIE, SIEGECRAFT_IGNORE_HIT,
+};
+use server::game::Game;
+use server::payment::get_single_resource_payment_model;
+use server::position::Position;
+use server::unit::Unit;
 
 pub fn retreat_dialog(rc: &RenderContext) -> StateUpdate {
     if ok_button(rc, OkTooltip::Valid("Retreat".to_string())) {
@@ -92,4 +96,50 @@ pub fn play_action_card_dialog(rc: &RenderContext) -> StateUpdate {
         )));
     }
     StateUpdate::None
+}
+
+#[derive(Clone)]
+pub struct SiegecraftPaymentModel {
+    extra_die: PaymentModelEntry,
+    ignore_hit: PaymentModelEntry,
+}
+
+impl SiegecraftPaymentModel {
+    pub fn new(game: &Game) -> SiegecraftPaymentModel {
+        let available = game.get_player(game.active_player()).resources.clone();
+        SiegecraftPaymentModel {
+            extra_die: PaymentModelEntry {
+                name: "Cancel fortress extra die in first round of combat".to_string(),
+                model: get_single_resource_payment_model(&available, &SIEGECRAFT_EXTRA_DIE),
+                optional: true,
+            },
+            ignore_hit: PaymentModelEntry {
+                name: "Cancel fortress ignore hit in first round of combat".to_string(),
+                model: get_single_resource_payment_model(&available, &SIEGECRAFT_IGNORE_HIT),
+                optional: true,
+            },
+        }
+    }
+}
+
+pub fn pay_siegecraft_dialog(p: &SiegecraftPaymentModel, rc: &RenderContext) -> StateUpdate {
+    payment_model_dialog(
+        rc,
+        &vec![p.extra_die.clone(), p.ignore_hit.clone()],
+        |p| {
+            ActiveDialog::SiegecraftPayment(SiegecraftPaymentModel {
+                extra_die: p[0].clone(),
+                ignore_hit: p[1].clone(),
+            })
+        },
+        false,
+        |_| {
+            StateUpdate::Execute(Action::CustomPhase(
+                CustomPhaseAction::SiegecraftPaymentAction(SiegecraftPayment {
+                    extra_die: p.extra_die.model.default().clone(),
+                    ignore_hit: p.ignore_hit.model.default().clone(),
+                }),
+            ))
+        },
+    )
 }

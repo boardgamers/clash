@@ -2,7 +2,7 @@ use crate::layout_ui::icon_pos;
 use crate::player_ui::bottom_icon_with_label;
 use crate::render_context::RenderContext;
 use macroquad::math::vec2;
-use server::resource::{resource_types, ResourceType};
+use server::resource::ResourceType;
 use server::resource_pile::ResourcePile;
 use std::collections::HashMap;
 
@@ -39,7 +39,7 @@ fn add_resource(m: &mut HashMap<ResourceType, u32>, amount: u32, resource_type: 
 
 pub fn show_resource_pile(rc: &RenderContext, p: &ResourcePile, must_show: &[ResourceType]) {
     let resource_map = new_resource_map(p);
-    let show: Vec<ResourceType> = resource_types()
+    let show: Vec<ResourceType> = ResourceType::all()
         .into_iter()
         .filter(|r| resource_map[r] > 0 || must_show.contains(r))
         .collect();

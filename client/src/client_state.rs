@@ -2,7 +2,8 @@ use macroquad::prelude::*;
 use server::action::Action;
 use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
-use server::content::advances::{NAVIGATION, ROADS};
+use server::content::advances::{NAVIGATION, ROADS, SIEGECRAFT};
+use server::content::custom_phase_actions::CustomPhaseState;
 use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
 use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
@@ -12,7 +13,7 @@ use crate::assets::Assets;
 use crate::city_ui::building_name;
 use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
-use crate::combat_ui::RemoveCasualtiesSelection;
+use crate::combat_ui::{RemoveCasualtiesSelection, SiegecraftPaymentModel};
 use crate::construct_ui::ConstructionPayment;
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
@@ -56,6 +57,7 @@ pub enum ActiveDialog {
     PlaceSettler,
     Retreat,
     RemoveCasualties(RemoveCasualtiesSelection),
+    SiegecraftPayment(SiegecraftPaymentModel),
 }
 
 impl ActiveDialog {
@@ -87,6 +89,7 @@ impl ActiveDialog {
             ActiveDialog::PlaceSettler => "place settler",
             ActiveDialog::Retreat => "retreat",
             ActiveDialog::RemoveCasualties(_) => "remove casualties",
+            ActiveDialog::SiegecraftPayment(_) => "siegecraft payment",
         }
     }
 
@@ -174,6 +177,11 @@ impl ActiveDialog {
                 r.needed
             )],
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
+            ActiveDialog::SiegecraftPayment(_) => {
+                let mut result = vec![];
+                advance_help(rc, &mut result, SIEGECRAFT);
+                result
+            }
         }
     }
 
@@ -541,6 +549,11 @@ impl State {
                     rotation: r.block.position.rotation,
                 })
             }
+            GameState::CustomPhase(c) => match c {
+                CustomPhaseState::SiegecraftPayment(_) => {
+                    ActiveDialog::SiegecraftPayment(SiegecraftPaymentModel::new(game))
+                }
+            },
         }
     }
 

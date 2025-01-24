@@ -17,7 +17,7 @@ use server::action::Action;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::game::{CurrentMove, Game, GameState, MoveState};
 use server::playing_actions::PlayingAction;
-use server::resource::resource_types;
+use server::resource::ResourceType;
 use server::unit::MovementAction;
 
 pub fn player_select(rc: &RenderContext) -> StateUpdate {
@@ -128,7 +128,7 @@ pub fn show_top_center(rc: &RenderContext) {
     );
     let amount = new_resource_map(&player.resources);
     let limit = new_resource_map(&player.resource_limit);
-    for (i, r) in resource_types().iter().rev().enumerate() {
+    for (i, r) in ResourceType::all().iter().rev().enumerate() {
         let a = amount[r];
         let l = limit[r];
         let t = if l > 0 {

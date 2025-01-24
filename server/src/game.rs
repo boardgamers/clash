@@ -7,6 +7,7 @@ use GameState::*;
 
 use crate::combat::{self, Combat, CombatDieRoll, CombatPhase, COMBAT_DIE_SIDES};
 use crate::consts::MOVEMENT_ACTIONS;
+use crate::content::custom_phase_actions::CustomPhaseState;
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
 use crate::map::UnexploredBlock;
 use crate::movement::{has_movable_units, terrain_movement_restriction};
@@ -358,6 +359,12 @@ impl Game {
                     .expect("action should be an explore resolution action");
                 explore_resolution(self, &r, rotation);
             }
+            CustomPhase(_) => {
+                let action = action
+                    .custom_phase()
+                    .expect("action should be a custom phase action");
+                action.execute(self, player_index);
+            }
             Finished => panic!("actions can't be executed when the game is finished"),
         }
         check_for_waste(self, player_index);
@@ -379,6 +386,7 @@ impl Game {
             Action::ExploreResolution(_rotation) => {
                 undo_explore_resolution(self, player_index);
             }
+            Action::CustomPhase(action) => action.clone().undo(self, player_index),
             Action::Undo => panic!("undo action can't be undone"),
             Action::Redo => panic!("redo action can't be undone"),
         }
@@ -428,6 +436,9 @@ impl Game {
                     panic!("explore resolution actions can only be redone if the game is in a explore resolution state");
                 };
                 explore_resolution(self, &r.clone(), *rotation);
+            }
+            Action::CustomPhase(action) => {
+                action.clone().execute(self, player_index);
             }
             Action::Undo => panic!("undo action can't be redone"),
             Action::Redo => panic!("redo action can't be redone"),
@@ -600,7 +611,7 @@ impl Game {
             let unit = self.players[player_index]
                 .get_unit_mut(*unit_id)
                 .expect("the player should have all units to move");
-            if unit.unit_type.is_settler() {
+            if !unit.unit_type.is_settler() {
                 if unit
                     .movement_restrictions
                     .contains(&MovementRestriction::Battle)
@@ -608,7 +619,6 @@ impl Game {
                     panic!("unit can't attack");
                 }
                 unit.movement_restrictions.push(MovementRestriction::Battle);
-            } else {
                 military = true;
             }
             // move to destination to apply movement restrictions, etc.
@@ -628,7 +638,7 @@ impl Game {
                 true,
                 None,
             );
-            if matches!(self.state, Combat(_)) {
+            if !matches!(self.state, Movement(_)) {
                 for unit_id in units {
                     // but the unit is still in the starting position until the attack is resolved
                     // mostly to keep the logic clean
@@ -1649,6 +1659,7 @@ pub enum GameState {
     Combat(Combat),
     PlaceSettler(PlaceSettlerState),
     ExploreResolution(ExploreResolutionState),
+    CustomPhase(CustomPhaseState),
     Finished,
 }
 

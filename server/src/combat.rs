@@ -1,4 +1,5 @@
 use crate::action::{CombatAction, PlayActionCard};
+use crate::content::custom_phase_actions::start_siegecraft_phase;
 use crate::game::GameState::Playing;
 use crate::game::{Game, GameState};
 use crate::position::Position;
@@ -33,6 +34,12 @@ impl CombatPhase {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub enum CombatModifier {
+    CancelFortressExtraDie,
+    CancelFortressIgnoreHit,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct Combat {
     pub initiation: Box<GameState>,
     pub round: u32, //starts with one,
@@ -43,6 +50,9 @@ pub struct Combat {
     pub attacker_position: Position,
     pub attackers: Vec<u32>,
     pub can_retreat: bool,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub modifiers: Vec<CombatModifier>,
 }
 
 impl Combat {
@@ -68,6 +78,7 @@ impl Combat {
             attacker_position,
             attackers,
             can_retreat,
+            modifiers: vec![],
         }
     }
 
@@ -80,7 +91,7 @@ impl Combat {
     pub fn defender_fortress(&self, game: &Game) -> bool {
         game.players[self.defender]
             .get_city(self.defender_position)
-            .is_some_and(|city| city.pieces.fortress.is_some())
+            .is_some_and(|city| city.pieces.fortress.is_some() && self.round == 1)
     }
 }
 
@@ -104,20 +115,23 @@ pub fn initiate_combat(
         || Box::new(mem::replace(&mut game.state, Playing)),
         Box::new,
     );
-    combat_loop(
-        game,
-        Combat::new(
-            initiation,
-            1,
-            CombatPhase::Retreat, // is not used
-            defender,
-            defender_position,
-            attacker,
-            attacker_position,
-            attackers,
-            can_retreat,
-        ),
+    let combat = Combat::new(
+        initiation,
+        1,
+        CombatPhase::Retreat, // is not used
+        defender,
+        defender_position,
+        attacker,
+        attacker_position,
+        attackers,
+        can_retreat,
     );
+
+    if start_siegecraft_phase(game, attacker, defender_position, combat.clone()) {
+        return;
+    }
+
+    combat_loop(game, combat);
 }
 
 //phase is consumed but it is not registered by clippy
@@ -211,7 +225,7 @@ fn remove_casualties(game: &mut Game, c: &mut Combat, units: Vec<u32>) -> Combat
     resolve_combat(game, c)
 }
 
-fn combat_loop(game: &mut Game, mut c: Combat) {
+pub fn combat_loop(game: &mut Game, mut c: Combat) {
     loop {
         game.add_info_log_item(format!("\nCombat round {}", c.round));
         //todo: go into tactics phase if either player has tactics card (also if they can not play it unless otherwise specified via setting)
@@ -219,24 +233,52 @@ fn combat_loop(game: &mut Game, mut c: Combat) {
         let attacker_name = game.players[c.attacker].get_name();
         let active_attackers = c.active_attackers(game);
         let mut attacker_log = vec![];
-        let attacker_rolls = roll(game, c.attacker, &active_attackers, &mut attacker_log);
+        let attacker_rolls = roll(game, c.attacker, &active_attackers, 0, &mut attacker_log);
         let attacker_log_str = roll_log_str(&attacker_log);
         let active_defenders = active_defenders(game, c.defender, c.defender_position);
 
         let defender_name = game.players[c.defender].get_name();
         let mut defender_log = vec![];
-        let defender_rolls = roll(game, c.defender, &active_defenders, &mut defender_log);
+        let mut fortress_log = vec![];
+        let extra_defender_dies = if c.defender_fortress(game)
+            && !c
+                .modifiers
+                .contains(&CombatModifier::CancelFortressExtraDie)
+        {
+            fortress_log.push("added one extra die");
+            1
+        } else {
+            0
+        };
+        let defender_rolls = roll(
+            game,
+            c.defender,
+            &active_defenders,
+            extra_defender_dies,
+            &mut defender_log,
+        );
         let defender_log_str = roll_log_str(&defender_log);
         let attacker_combat_value = attacker_rolls.combat_value;
         let attacker_hit_cancels = attacker_rolls.hit_cancels;
         let defender_combat_value = defender_rolls.combat_value;
         let mut defender_hit_cancels = defender_rolls.hit_cancels;
-        if c.defender_fortress(game) && c.round == 1 {
+        if c.defender_fortress(game)
+            && !c
+                .modifiers
+                .contains(&CombatModifier::CancelFortressIgnoreHit)
+        {
             defender_hit_cancels += 1;
+            fortress_log.push("cancelled one hit");
         }
         let attacker_hits = (attacker_combat_value / 5).saturating_sub(defender_hit_cancels);
         let defender_hits = (defender_combat_value / 5).saturating_sub(attacker_hit_cancels);
         game.add_info_log_item(format!("\t{attacker_name} rolled {attacker_log_str} for combined combat value of {attacker_combat_value} and gets {attacker_hits} hits against defending units. {defender_name} rolled {defender_log_str} for combined combat value of {defender_combat_value} and gets {defender_hits} hits against attacking units."));
+        if !fortress_log.is_empty() {
+            game.add_info_log_item(format!(
+                " {defender_name} has a fortress, which {}",
+                fortress_log.join(", ")
+            ));
+        }
         if attacker_hits < active_defenders.len() as u8 && attacker_hits > 0 {
             kill_some_defenders(game, c, attacker_hits, defender_hits);
             return;
@@ -371,7 +413,7 @@ fn defender_wins(game: &mut Game, c: &mut Combat) -> CombatControl {
 }
 
 fn draw(game: &mut Game, c: &mut Combat) -> CombatControl {
-    if c.defender_fortress(game) && c.round == 1 {
+    if c.defender_fortress(game) {
         game.add_info_log_item(format!("\tAll attacking and defending units where eliminated. {} wins the battle because he has a defending fortress", game.players[c.defender].get_name()));
         //todo defender wins
         return end_combat(game, c);
@@ -429,9 +471,10 @@ fn roll(
     game: &mut Game,
     player_index: usize,
     units: &Vec<u32>,
+    extra_dies: u8,
     roll_log: &mut Vec<String>,
 ) -> CombatRolls {
-    let mut dice_rolls = 0;
+    let mut dice_rolls = extra_dies;
     let mut unit_types = Units::empty();
     for unit in units {
         let unit = &game.players[player_index]

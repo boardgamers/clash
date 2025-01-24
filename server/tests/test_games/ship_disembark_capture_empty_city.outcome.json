@@ -97,6 +97,7 @@
           "position": "B2",
           "unit_type": "Cavalry",
           "movement_restrictions": [
+            "Battle",
             "Forest"
           ],
           "id": 1
@@ -106,6 +107,7 @@
           "position": "B2",
           "unit_type": "Elephant",
           "movement_restrictions": [
+            "Battle",
             "Forest"
           ],
           "id": 2
