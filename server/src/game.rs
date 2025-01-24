@@ -1236,7 +1236,7 @@ impl Game {
             self.players[old_player_index].get_name()
         ));
         self.players[new_player_index]
-            .gain_resources(ResourcePile::gold(city.mood_modified_size() as i32));
+            .gain_resources(ResourcePile::gold(city.mood_modified_size() as u32));
         let take_over = self.players[new_player_index].is_city_available();
 
         if take_over {
@@ -1267,7 +1267,7 @@ impl Game {
         if take_over {
             self.players[new_player_index].cities.push(city);
         } else {
-            self.players[new_player_index].gain_resources(ResourcePile::gold(city.size() as i32));
+            self.players[new_player_index].gain_resources(ResourcePile::gold(city.size() as u32));
             city.raze(self, old_player_index);
         }
         let old_player = &mut self.players[old_player_index];

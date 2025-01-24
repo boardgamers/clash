@@ -1,12 +1,15 @@
 use crate::game::Game;
 use crate::position::Position;
 use crate::{resource_pile::ResourcePile, wonder::Wonder};
+use crate::payment::PaymentModel;
 
 #[must_use]
 #[rustfmt::skip]
 pub fn get_all() -> Vec<Wonder> {
     vec![
-        Wonder::builder("Pyramids", ResourcePile::new(3, 3, 3, 0, -1, 0, 4), vec![]).build()
+        Wonder::builder("Pyramids", 
+            PaymentModel::resources_with_discount (
+            ResourcePile::new(3, 3, 3, 0, 0, 0, 4), 1), vec![]).build()
     ]
 }
 
@@ -27,6 +30,7 @@ pub fn construct_wonder(
     wonder: &str,
     payment: ResourcePile,
 ) {
+    // TODO: check costs
     let wonder_cards_index = game.players[player_index]
         .wonder_cards
         .iter()

@@ -218,7 +218,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
                 20.,
             );
         },
-        |_s| OkTooltip::Valid("Recruit units".to_string()),
+        || OkTooltip::Valid("Recruit units".to_string()),
         || {
             let sel = RecruitSelection::new(game, a.clone(), vec![]);
 

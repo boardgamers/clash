@@ -11,6 +11,7 @@ use UnitType::*;
 use crate::explore::is_any_ship;
 use crate::game::CurrentMove;
 use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
+use crate::payment::PaymentModel;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct Unit {

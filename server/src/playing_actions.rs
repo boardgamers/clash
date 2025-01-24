@@ -18,6 +18,7 @@ use crate::{
     resource_pile::ResourcePile,
     unit::UnitType,
 };
+use crate::payment::PaymentModel;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Construct {
@@ -184,7 +185,7 @@ impl PlayingAction {
                 collect(game, player_index, &c);
             }
             Recruit(r) => {
-                let cost = r.units.iter().map(UnitType::cost).sum::<ResourcePile>();
+                let cost = PaymentModel::resources(r.units.iter().map(UnitType::cost).sum::<ResourcePile>());
                 let player = &mut game.players[player_index];
                 assert!(
                     player.can_recruit(

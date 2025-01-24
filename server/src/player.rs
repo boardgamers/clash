@@ -3,7 +3,7 @@ use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
 use crate::movement::move_routes;
 use crate::movement::{is_valid_movement_type, MoveRoute};
-use crate::payment::{get_sum_payment_model, PaymentModel};
+use crate::payment::{ PaymentModel};
 use crate::resource::ResourceType;
 use crate::unit::{carried_units, get_current_move, MovementRestriction};
 use crate::{
@@ -413,7 +413,7 @@ impl Player {
 
     #[must_use]
     pub fn can_advance(&self, advance: &Advance) -> bool {
-        self.get_advance_payment_options(&advance.name).can_afford()
+        self.get_advance_payment_options(&advance.name).can_afford(&self.resources)
             && self.can_advance_free(advance)
     }
 
@@ -526,16 +526,16 @@ impl Player {
     }
 
     #[must_use]
-    pub fn construct_cost(&self, building: Building, city: &City) -> ResourcePile {
+    pub fn construct_cost(&self, building: Building, city: &City) -> PaymentModel {
         let mut cost = CONSTRUCT_COST;
         self.get_events()
             .construct_cost
             .trigger(&mut cost, city, &building);
-        cost
+        PaymentModel::resources(cost)
     }
 
     #[must_use]
-    pub fn wonder_cost(&self, wonder: &Wonder, city: &City) -> ResourcePile {
+    pub fn wonder_cost(&self, wonder: &Wonder, city: &City) -> PaymentModel {
         let mut cost = wonder.cost.clone();
         self.get_events()
             .wonder_cost
@@ -554,8 +554,7 @@ impl Player {
 
     #[must_use]
     pub fn get_advance_payment_options(&self, advance: &str) -> PaymentModel {
-        get_sum_payment_model(
-            &self.resources,
+        PaymentModel::sum(
             self.advance_cost(advance),
             &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
         )
@@ -708,8 +707,8 @@ impl Player {
         if !city.can_activate() {
             return false;
         }
-        let cost = units.iter().map(UnitType::cost).sum();
-        if !self.resources.can_afford(&cost) {
+        let cost = PaymentModel::resources(units.iter().map(UnitType::cost).sum());
+        if !cost.can_afford(&self.resources) {
             return false;
         }
         if units.len() > city.mood_modified_size() {

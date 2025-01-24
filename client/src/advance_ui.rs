@@ -1,7 +1,7 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::layout_ui::{left_mouse_button_pressed_in_rect, top_centered_text};
 use crate::log_ui::break_text;
-use crate::payment_ui::{payment_model_dialog, PaymentModelEntry};
+use crate::payment_ui::{new_payment, payment_model_dialog};
 use crate::player_ui::player_color;
 use crate::render_context::RenderContext;
 use crate::tooltip::show_tooltip_for_rect;
@@ -230,11 +230,7 @@ pub fn pay_advance_dialog(ap: &AdvancePayment, rc: &RenderContext) -> StateUpdat
     };
     payment_model_dialog(
         rc,
-        &[PaymentModelEntry {
-            name: ap.name.clone(),
-            model: ap.model.clone(),
-            optional: false,
-        }],
+        &[new_payment(&ap.model, &rc.shown_player.resources, &ap.name, false)], 
         |p| {
             ActiveDialog::AdvancePayment(AdvancePayment {
                 name: ap.name.clone(),

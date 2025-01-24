@@ -25,7 +25,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
     container: &C,
     get_objects: impl Fn(&C) -> Vec<O>,
     draw: impl Fn(&O, Vec2),
-    is_valid: impl FnOnce(&C) -> OkTooltip,
+    is_valid: impl FnOnce() -> OkTooltip,
     execute_action: impl FnOnce() -> StateUpdate,
     show: impl Fn(&C, &O) -> bool,
     plus: impl FnOnce(&C, &O) -> StateUpdate,

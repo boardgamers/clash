@@ -1,3 +1,4 @@
+use crate::payment::PaymentModel;
 use crate::resource::ResourceType;
 use crate::utils;
 use serde::{Deserialize, Serialize};
@@ -23,8 +24,8 @@ pub struct ResourcePile {
     #[serde(skip_serializing_if = "is_zero_u32")]
     pub ideas: u32,
     #[serde(default)]
-    #[serde(skip_serializing_if = "is_zero_i32")]
-    pub gold: i32,
+    #[serde(skip_serializing_if = "is_zero_u32")]
+    pub gold: u32,
     #[serde(default)]
     #[serde(skip_serializing_if = "is_zero_u32")]
     pub mood_tokens: u32,
@@ -33,10 +34,6 @@ pub struct ResourcePile {
     pub culture_tokens: u32,
 }
 
-#[allow(clippy::trivially_copy_pass_by_ref)]
-fn is_zero_i32(n: &i32) -> bool {
-    *n == 0
-}
 #[allow(clippy::trivially_copy_pass_by_ref)]
 fn is_zero_u32(n: &u32) -> bool {
     *n == 0
@@ -49,7 +46,7 @@ impl ResourcePile {
         wood: u32,
         ore: u32,
         ideas: u32,
-        gold: i32,
+        gold: u32,
         mood_tokens: u32,
         culture_tokens: u32,
     ) -> Self {
@@ -74,7 +71,6 @@ impl ResourcePile {
             ResourceType::Gold => self.gold as u32,
             ResourceType::MoodTokens => self.mood_tokens,
             ResourceType::CultureTokens => self.culture_tokens,
-            ResourceType::Discount => 0,
         }
     }
 
@@ -87,14 +83,13 @@ impl ResourcePile {
             ResourceType::Wood => self.wood = (self.wood as i32 + amount) as u32,
             ResourceType::Ore => self.ore = (self.ore as i32 + amount) as u32,
             ResourceType::Ideas => self.ideas = (self.ideas as i32 + amount) as u32,
-            ResourceType::Gold => self.gold += amount,
+            ResourceType::Gold => self.gold = (self.gold as i32 + amount) as u32,
             ResourceType::MoodTokens => {
                 self.mood_tokens = (self.mood_tokens as i32 + amount) as u32;
             }
             ResourceType::CultureTokens => {
                 self.culture_tokens = (self.culture_tokens as i32 + amount) as u32;
             }
-            ResourceType::Discount => panic!("Discount is not a resource type"),
         }
     }
 
@@ -119,7 +114,7 @@ impl ResourcePile {
     }
 
     #[must_use]
-    pub fn gold(amount: i32) -> Self {
+    pub fn gold(amount: u32) -> Self {
         Self::new(0, 0, 0, 0, amount, 0, 0)
     }
 
@@ -139,23 +134,8 @@ impl ResourcePile {
     }
 
     #[must_use]
-    pub fn can_afford(&self, other: &Self) -> bool {
-        let mut resource_deficit = 0;
-        if other.food > self.food {
-            resource_deficit += other.food - self.food;
-        }
-        if other.wood > self.wood {
-            resource_deficit += other.wood - self.wood;
-        }
-        if other.ore > self.ore {
-            resource_deficit += other.ore - self.ore;
-        }
-        if other.ideas > self.ideas {
-            resource_deficit += other.ideas - self.ideas;
-        }
-        self.gold >= other.gold + resource_deficit as i32
-            && self.mood_tokens >= other.mood_tokens
-            && self.culture_tokens >= other.culture_tokens
+    pub fn can_afford(&self, cost: &ResourcePile) -> bool {
+        PaymentModel::resources(cost.clone()).can_afford(self)
     }
 
     #[must_use]
@@ -183,63 +163,7 @@ impl ResourcePile {
         }
         waste
     }
-
-    //this function assumes that `self` can afford `cost`
-    #[must_use]
-    pub fn get_payment_options(&self, cost: &Self) -> PaymentOptions {
-        let mut gold_left = self.gold as u32;
-        let mut gold_cost = cost.gold;
-        let mut jokers_left = 0;
-        if gold_cost >= 0 {
-            gold_left -= gold_cost as u32;
-        } else {
-            jokers_left = (-gold_cost) as u32;
-            gold_cost = 0;
-        }
-        if cost.food > self.food {
-            let joker_cost = cost.food - self.food;
-            if joker_cost > jokers_left {
-                gold_left -= joker_cost - jokers_left;
-                gold_cost += (joker_cost - jokers_left) as i32;
-            }
-            jokers_left = jokers_left.saturating_sub(joker_cost);
-        }
-        if cost.wood > self.wood {
-            let joker_cost = cost.wood - self.wood;
-            if joker_cost > jokers_left {
-                gold_left -= joker_cost - jokers_left;
-                gold_cost += (joker_cost - jokers_left) as i32;
-            }
-            jokers_left = jokers_left.saturating_sub(joker_cost);
-        }
-        if cost.ore > self.ore {
-            let joker_cost = cost.ore - self.ore;
-            if joker_cost > jokers_left {
-                gold_left -= joker_cost - jokers_left;
-                gold_cost += (joker_cost - jokers_left) as i32;
-            }
-            jokers_left = jokers_left.saturating_sub(joker_cost);
-        }
-        if cost.ideas > self.ideas {
-            let joker_cost = cost.ideas - self.ideas;
-            if joker_cost > jokers_left {
-                gold_left -= joker_cost - jokers_left;
-                gold_cost += (joker_cost - jokers_left) as i32;
-            }
-            jokers_left = jokers_left.saturating_sub(joker_cost);
-        }
-        let default = Self::new(
-            cmp::min(cost.food, self.food),
-            cmp::min(cost.wood, self.wood),
-            cmp::min(cost.ore, self.ore),
-            cmp::min(cost.ideas, self.ideas),
-            gold_cost,
-            cost.mood_tokens,
-            cost.culture_tokens,
-        );
-        PaymentOptions::new(default, gold_left, jokers_left)
-    }
-
+    
     #[must_use]
     pub fn has_common_resource(&self, other: &Self) -> bool {
         self.food > 0 && other.food > 0
@@ -249,11 +173,6 @@ impl ResourcePile {
             || self.gold > 0 && other.gold > 0
             || self.mood_tokens > 0 && other.mood_tokens > 0
             || self.culture_tokens > 0 && other.culture_tokens > 0
-    }
-
-    #[must_use]
-    pub fn is_valid_payment(&self, payment: &Self) -> bool {
-        payment.can_afford(self) && self.resource_amount() == payment.resource_amount()
     }
 
     #[must_use]
@@ -270,6 +189,33 @@ impl ResourcePile {
     #[must_use]
     pub fn is_empty(&self) -> bool {
         self.resource_amount() == 0
+    }
+
+    #[must_use]
+    pub fn types(&self) -> std::vec::Vec<ResourceType> {
+        let mut types = Vec::new();
+        if self.food > 0 {
+            types.push(ResourceType::Food);
+        }
+        if self.wood > 0 {
+            types.push(ResourceType::Wood);
+        }
+        if self.ore > 0 {
+            types.push(ResourceType::Ore);
+        }
+        if self.ideas > 0 {
+            types.push(ResourceType::Ideas);
+        }
+        if self.gold > 0 {
+            types.push(ResourceType::Gold);
+        }
+        if self.mood_tokens > 0 {
+            types.push(ResourceType::MoodTokens);
+        }
+        if self.culture_tokens > 0 {
+            types.push(ResourceType::CultureTokens);
+        }
+        types
     }
 }
 
@@ -322,7 +268,7 @@ impl Mul<u32> for ResourcePile {
             self.wood * rhs,
             self.ore * rhs,
             self.ideas * rhs,
-            self.gold * rhs as i32,
+            self.gold * rhs,
             self.mood_tokens * rhs,
             self.culture_tokens * rhs,
         )
@@ -361,9 +307,6 @@ impl Display for ResourcePile {
         if self.gold > 0 {
             resources.push(format!("{} gold", self.gold));
         }
-        if self.gold < 0 {
-            resources.push(format!("{} discount", -self.gold));
-        }
         if self.mood_tokens > 0 {
             resources.push(format!(
                 "{} {}",
@@ -390,41 +333,161 @@ impl Display for ResourcePile {
     }
 }
 
+// Used for payments where gold can be used to replace other resources (not tokens)
+#[derive(PartialEq, Eq, Debug, Clone)]
+pub struct CostWithDiscount {
+    pub cost: ResourcePile,
+    pub discount: u32,
+}
+
+impl CostWithDiscount {
+    #[must_use]
+    pub fn can_afford(&self, available: &ResourcePile) -> bool {
+        let cost = &self.cost;
+        let mut resource_deficit = 0;
+        if cost.food > available.food {
+            resource_deficit += cost.food - available.food;
+        }
+        if cost.wood > available.wood {
+            resource_deficit += cost.wood - available.wood;
+        }
+        if cost.ore > available.ore {
+            resource_deficit += cost.ore - available.ore;
+        }
+        if cost.ideas > available.ideas {
+            resource_deficit += cost.ideas - available.ideas;
+        }
+        available.gold >= cost.gold - self.discount + resource_deficit
+            && available.mood_tokens >= cost.mood_tokens
+            && available.culture_tokens >= cost.culture_tokens
+    }
+    
+    //this function assumes that `self` can afford `cost`
+    #[must_use]
+    pub fn get_payment_options(&self, available: &ResourcePile) -> PaymentOptions {
+        let cost = &self.cost;
+        let mut jokers_left = self.discount;
+    
+        let mut gold_left = available.gold as u32;
+        let mut gold_cost = cost.gold;
+        gold_left -= gold_cost as u32;
+    
+        if cost.food > available.food {
+            let joker_cost = cost.food - available.food;
+            if joker_cost > jokers_left {
+                gold_left -= joker_cost - jokers_left;
+                gold_cost += (joker_cost - jokers_left);
+            }
+            jokers_left = jokers_left.saturating_sub(joker_cost);
+        }
+        if cost.wood > available.wood {
+            let joker_cost = cost.wood - available.wood;
+            if joker_cost > jokers_left {
+                gold_left -= joker_cost - jokers_left;
+                gold_cost += (joker_cost - jokers_left);
+            }
+            jokers_left = jokers_left.saturating_sub(joker_cost);
+        }
+        if cost.ore > available.ore {
+            let joker_cost = cost.ore - available.ore;
+            if joker_cost > jokers_left {
+                gold_left -= joker_cost - jokers_left;
+                gold_cost += (joker_cost - jokers_left);
+            }
+            jokers_left = jokers_left.saturating_sub(joker_cost);
+        }
+        if cost.ideas > available.ideas {
+            let joker_cost = cost.ideas - available.ideas;
+            if joker_cost > jokers_left {
+                gold_left -= joker_cost - jokers_left;
+                gold_cost += (joker_cost - jokers_left);
+            }
+            jokers_left = jokers_left.saturating_sub(joker_cost);
+        }
+        let default = ResourcePile::new(
+            cmp::min(cost.food, available.food),
+            cmp::min(cost.wood, available.wood),
+            cmp::min(cost.ore, available.ore),
+            cmp::min(cost.ideas, available.ideas),
+            gold_cost,
+            cost.mood_tokens,
+            cost.culture_tokens,
+        );
+        PaymentOptions::new(default, gold_left, jokers_left)
+    }
+}
+
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct PaymentOptions {
     pub default: ResourcePile,
     pub gold_left: u32,
-    pub discount: u32,
+    pub discount_left: u32,
 }
 
 impl PaymentOptions {
     #[must_use]
-    pub fn new(default: ResourcePile, gold_left: u32, jokers_left: u32) -> Self {
+    pub fn new(default: ResourcePile, gold_left: u32, discount_left: u32) -> Self {
         Self {
             default,
             gold_left,
-            discount: jokers_left,
+            discount_left,
         }
     }
+
+    // #[must_use]
+    // pub fn can_afford(&self, available: &ResourcePile) -> bool {
+    //     let cost = &self.default;
+    //     let mut resource_deficit = 0;
+    //     if cost.food > available.food {
+    //         resource_deficit += cost.food - available.food;
+    //     }
+    //     if cost.wood > available.wood {
+    //         resource_deficit += cost.wood - available.wood;
+    //     }
+    //     if cost.ore > available.ore {
+    //         resource_deficit += cost.ore - available.ore;
+    //     }
+    //     if cost.ideas > available.ideas {
+    //         resource_deficit += cost.ideas - available.ideas;
+    //     }
+    //     available.gold >= cost.gold - self.discount + resource_deficit
+    //         && available.mood_tokens >= cost.mood_tokens
+    //         && available.culture_tokens >= cost.culture_tokens
+    // }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{PaymentOptions, ResourcePile};
+    use crate::payment::PaymentModel;
+    use super::{CostWithDiscount, PaymentOptions, ResourcePile};
 
-    fn assert_can_afford(name: &str, cost: &ResourcePile) {
+    fn assert_can_afford(name: &str, cost: &ResourcePile, discount: u32) {
         let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
-        assert!(player_has.can_afford(cost), "{name}");
+        let can_afford = PaymentModel::resources(cost.clone(), discount).can_afford(&player_has);
+        assert!(
+            can_afford,
+            "{name}"
+        );
     }
 
-    fn assert_cannot_afford(name: &str, cost: &ResourcePile) {
+    fn assert_cannot_afford(name: &str, cost: &ResourcePile, discount: u32) {
         let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
-        assert!(!player_has.can_afford(cost), "{name}");
+        let can_afford = PaymentModel::resources(cost.clone(), discount).can_afford(&player_has);
+        assert!(
+            !can_afford,
+            "{name}"
+        );
     }
 
-    fn assert_payment_options(name: &str, cost: &ResourcePile, options: &PaymentOptions) {
+    fn assert_payment_options(
+        name: &str,
+        cost: &ResourcePile,
+        discount: u32,
+        want: &PaymentOptions,
+    ) {
         let budget = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
-        assert_eq!(options, &budget.get_payment_options(cost), "{name}");
+        let c = CostWithDiscount { cost: cost.clone(), discount };
+        assert_eq!(want, &c.get_payment_options(&budget), "{name}");
     }
 
     fn assert_to_string(resource_pile: &ResourcePile, expected: &str) {
@@ -437,35 +500,37 @@ mod tests {
 
     #[test]
     fn can_afford_test() {
-        assert_can_afford("use 6 gold as wood", &ResourcePile::wood(7));
-        assert_cannot_afford("6 gold is not enough", &ResourcePile::wood(8));
+        assert_can_afford("use 6 gold as wood", &ResourcePile::wood(7), 0);
+        assert_cannot_afford("6 gold is not enough", &ResourcePile::wood(8), 0);
 
         assert_cannot_afford(
             "gold cannot be converted to mood",
             &ResourcePile::mood_tokens(7),
+            0,
         );
         assert_cannot_afford(
             "gold cannot be converted to culture",
             &ResourcePile::culture_tokens(8),
+            0,
         );
 
-        assert_can_afford(
-            "negative gold means rebate",
-            &(ResourcePile::gold(-2) + ResourcePile::wood(9)),
+        assert_can_afford("negative gold means rebate", &(ResourcePile::wood(9)), 2);
+        assert_cannot_afford(
+            "discount cannot rebate mood",
+            &(ResourcePile::mood_tokens(9)),
+            2,
         );
         assert_cannot_afford(
-            "negative gold cannot rebate mood",
-            &(ResourcePile::gold(-2) + ResourcePile::mood_tokens(9)),
-        );
-        assert_cannot_afford(
-            "negative gold cannot rebate culture",
-            &(ResourcePile::gold(-2) + ResourcePile::mood_tokens(8)),
+            "discount cannot rebate culture",
+            &(ResourcePile::mood_tokens(8)),
+            2,
         );
 
-        assert_can_afford("payment costs gold", &ResourcePile::wood(5));
+        assert_can_afford("payment costs gold", &ResourcePile::wood(5), 0);
         assert_cannot_afford(
             "gold cannot be converted, because it's already used for payment",
             &(ResourcePile::wood(7) + ResourcePile::gold(1)),
+            0,
         );
     }
 
@@ -482,16 +547,19 @@ mod tests {
         assert_payment_options(
             "no gold use",
             &ResourcePile::new(1, 1, 3, 2, 0, 2, 4),
+            0,
             &(PaymentOptions::new(ResourcePile::new(1, 1, 3, 2, 0, 2, 4), 5, 0)),
         );
         assert_payment_options(
             "use some gold",
             &ResourcePile::new(2, 2, 3, 5, 2, 0, 0),
+            0,
             &(PaymentOptions::new(ResourcePile::new(1, 2, 3, 4, 4, 0, 0), 1, 0)),
         );
         assert_payment_options(
             "jokers",
-            &(ResourcePile::ore(4) + ResourcePile::ideas(4) + ResourcePile::gold(-3)),
+            &(ResourcePile::ore(4) + ResourcePile::ideas(4)),
+            3,
             &(PaymentOptions::new(ResourcePile::ore(3) + ResourcePile::ideas(4), 5, 2)),
         );
     }

@@ -29,7 +29,6 @@ pub fn new_resource_map(p: &ResourcePile) -> HashMap<ResourceType, u32> {
     add_resource(&mut m, p.gold as u32, ResourceType::Gold);
     add_resource(&mut m, p.mood_tokens, ResourceType::MoodTokens);
     add_resource(&mut m, p.culture_tokens, ResourceType::CultureTokens);
-    add_resource(&mut m, 0, ResourceType::Discount);
     m
 }
 

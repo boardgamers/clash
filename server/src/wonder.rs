@@ -4,13 +4,14 @@ use crate::{
     position::Position,
     resource_pile::ResourcePile,
 };
+use crate::payment::PaymentModel;
 
 type PlacementChecker = Box<dyn Fn(Position, &Game) -> bool>;
 
 pub struct Wonder {
     pub name: String,
     pub description: String,
-    pub cost: ResourcePile,
+    pub cost: PaymentModel,
     pub required_advances: Vec<String>,
     pub placement_requirement: Option<PlacementChecker>,
     pub player_initializer: AbilityInitializer,
@@ -20,7 +21,7 @@ pub struct Wonder {
 }
 
 impl Wonder {
-    pub fn builder(name: &str, cost: ResourcePile, required_advances: Vec<&str>) -> WonderBuilder {
+    pub fn builder(name: &str, cost: PaymentModel, required_advances: Vec<&str>) -> WonderBuilder {
         WonderBuilder::new(
             name.to_string(),
             cost,
@@ -35,7 +36,7 @@ impl Wonder {
 pub struct WonderBuilder {
     name: String,
     descriptions: Vec<String>,
-    cost: ResourcePile,
+    cost: PaymentModel,
     required_advances: Vec<String>,
     placement_requirement: Option<PlacementChecker>,
     player_initializers: Vec<AbilityInitializer>,
@@ -45,7 +46,7 @@ pub struct WonderBuilder {
 }
 
 impl WonderBuilder {
-    fn new(name: String, cost: ResourcePile, required_advances: Vec<String>) -> Self {
+    fn new(name: String, cost: PaymentModel, required_advances: Vec<String>) -> Self {
         Self {
             name,
             descriptions: Vec::new(),
