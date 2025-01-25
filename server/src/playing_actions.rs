@@ -497,7 +497,9 @@ pub(crate) fn increase_happiness(game: &mut Game, player_index: usize, i: Increa
         let cost = player
             .increase_happiness_cost(city, steps)
             .expect("Illegal action");
-        assert!(steps > 0, "Illegal action");
+        if steps == 0 {
+            continue;
+        }
         if city.mood_state == MoodState::Angry {
             angry_activations.push(city_position);
         }

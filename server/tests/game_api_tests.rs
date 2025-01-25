@@ -715,6 +715,26 @@ fn test_increase_happiness_voting() {
     );
 }
 
+
+#[test]
+fn test_increase_happiness_voting_rituals() {
+    test_action(
+        "increase_happiness_voting_rituals",
+        Action::Playing(Custom(CustomAction::VotingIncreaseHappiness(
+            playing_actions::IncreaseHappiness {
+                happiness_increases: vec![
+                    (Position::from_offset("C2"), 1),
+                    (Position::from_offset("B3"), 2),
+                ],
+                payment: ResourcePile::new(1,0,1,1,1,1,0),
+            },
+        ))),
+        0,
+        true,
+        false,
+    );
+}
+
 #[test]
 fn test_custom_action_forced_labor() {
     test_action(
