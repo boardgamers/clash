@@ -688,6 +688,23 @@ fn test_recruit_leader() {
 }
 
 #[test]
+fn test_replace_leader() {
+    test_action(
+        "replace_leader",
+        Action::Playing(Recruit(server::playing_actions::Recruit {
+            units: vec![Leader],
+            city_position: Position::from_offset("A1"),
+            payment: ResourcePile::mood_tokens  (1) + ResourcePile::culture_tokens(1),
+            leader_index: Some(0),
+            replaced_units: vec![10],
+        })),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
 fn test_recruit_combat() {
     test_action(
         "recruit_combat",
