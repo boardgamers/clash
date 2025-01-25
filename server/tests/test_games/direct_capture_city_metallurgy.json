@@ -1,36 +1,7 @@
 {
   "state": {
-    "CustomPhase": {
-      "SiegecraftPayment": {
-        "initiation": {
-          "Movement": {
-            "movement_actions_left": 2,
-            "moved_units": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ]
-          }
-        },
-        "round": 1,
-        "phase": "Retreat",
-        "defender": 1,
-        "defender_position": "C1",
-        "attacker": 0,
-        "attacker_position": "C2",
-        "attackers": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5
-        ],
-        "can_retreat": true
-      }
+    "Movement": {
+      "movement_actions_left": 2
     }
   },
   "players": [
@@ -41,7 +12,7 @@
         "food": 2,
         "wood": 7,
         "ore": 7,
-        "ideas": 3,
+        "ideas": 5,
         "gold": 7,
         "mood_tokens": 7,
         "culture_tokens": 7
@@ -57,7 +28,8 @@
       },
       "cities": [
         {
-          "city_pieces": {},
+          "city_pieces": {
+          },
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
@@ -65,9 +37,10 @@
           "position": "A1"
         },
         {
-          "city_pieces": {},
+          "city_pieces": {
+          },
           "mood_state": "Neutral",
-          "activations": 0,
+          "activations": 8,
           "angry_activation": false,
           "player_index": 0,
           "position": "C2"
@@ -78,60 +51,56 @@
           "player_index": 0,
           "position": "C2",
           "unit_type": "Infantry",
-          "movement_restrictions": [
-            "Battle"
-          ],
+          "movement_restriction": "None",
           "id": 0
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Cavalry",
-          "movement_restrictions": [
-            "Battle"
-          ],
+          "movement_restriction": "None",
           "id": 1
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Leader",
-          "movement_restrictions": [
-            "Battle"
-          ],
+          "movement_restriction": "None",
           "id": 2
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Elephant",
-          "movement_restrictions": [
-            "Battle"
-          ],
+          "movement_restriction": "None",
           "id": 3
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
+          "movement_restriction": "None",
           "id": 4
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
+          "movement_restriction": "None",
           "id": 5
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
+          "movement_restriction": "None",
           "id": 6
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
+          "movement_restriction": "None",
           "id": 7
         }
       ],
@@ -141,12 +110,13 @@
       "advances": [
         "Farming",
         "Mining",
-        "Siegecraft",
-        "Tactics"
+        "Tactics",
+        "Steel Weapons",
+        "Metallurgy"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 1,
+      "game_event_tokens": 2,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -156,7 +126,13 @@
           "Mountain",
           [
             {
-              "ore": 1
+              "food": 0,
+              "wood": 0,
+              "ore": 1,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
             }
           ]
         ],
@@ -164,7 +140,13 @@
           "Fertile",
           [
             {
-              "food": 1
+              "food": 1,
+              "wood": 0,
+              "ore": 0,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
             }
           ]
         ],
@@ -172,7 +154,13 @@
           "Forest",
           [
             {
-              "wood": 1
+              "food": 0,
+              "wood": 1,
+              "ore": 0,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
             }
           ]
         ]
@@ -203,10 +191,9 @@
       "cities": [
         {
           "city_pieces": {
-            "fortress": 1
           },
           "mood_state": "Angry",
-          "activations": 0,
+          "activations": 2,
           "angry_activation": false,
           "player_index": 1,
           "position": "C1"
@@ -216,18 +203,13 @@
         {
           "player_index": 1,
           "position": "C1",
-          "unit_type": "Infantry",
-          "id": 0
-        },
-        {
-          "player_index": 1,
-          "position": "C1",
-          "unit_type": "Infantry",
+          "unit_type": "Leader",
+          "movement_restriction": "None",
           "id": 1
         }
       ],
-      "civilization": "test1",
-      "active_leader": null,
+      "civilization": "test0",
+      "active_leader": "Alexander",
       "available_leaders": [],
       "advances": [
         "Farming",
@@ -245,7 +227,13 @@
           "Mountain",
           [
             {
-              "ore": 1
+              "food": 0,
+              "wood": 0,
+              "ore": 1,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
             }
           ]
         ],
@@ -253,7 +241,13 @@
           "Fertile",
           [
             {
-              "food": 1
+              "food": 1,
+              "wood": 0,
+              "ore": 0,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
             }
           ]
         ],
@@ -261,7 +255,13 @@
           "Forest",
           [
             {
-              "wood": 1
+              "food": 0,
+              "wood": 1,
+              "ore": 0,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
             }
           ]
         ]
@@ -323,66 +323,30 @@
         "Advance": {
           "advance": "Tactics",
           "payment": {
-            "ideas": 2
+            "food": 0,
+            "wood": 0,
+            "ore": 0,
+            "ideas": 2,
+            "gold": 0,
+            "mood_tokens": 0,
+            "culture_tokens": 0
           }
-        }
-      }
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Siegecraft",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5
-          ],
-          "destination": "C1"
         }
       }
     }
   ],
-  "action_log_index": 6,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
     "Round 1/3",
     "Player1 paid 2 ideas to get the Tactics advance",
-    "Player1 used a move units action",
-    "\tPlayer1 ended the movement action",
-    "Player1 paid 2 ideas to get the Siegecraft advance",
-    "Player1 ended their turn",
-    "It's Player2's turn",
-    "Player2 ended their turn with 3 actions left",
-    "It's Player1's turn",
-    "Round 2/3",
-    "\tPlayer1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1"
+    "Player1 used a move units action"
   ],
-  "undo_limit": 6,
-  "actions_left": 2,
+  "undo_limit": 0,
+  "actions_left": 1,
   "successful_cultural_influence": false,
-  "round": 2,
+  "round": 1,
   "age": 1,
   "messages": [
     "The game has started"
@@ -396,7 +360,12 @@
     11,
     11,
     11,
-    11
+    11,
+    1,
+    1,
+    3,
+    3,
+    3
   ],
   "dice_roll_log": [],
   "dropped_players": [],
@@ -406,38 +375,43 @@
   "wonder_amount_left": 1,
   "undo_context_stack": [
     {
-      "Recruit": {}
+      "Recruit": {
+      }
     },
     {
-      "Recruit": {}
+      "Recruit": {
+      }
     },
     {
-      "Recruit": {}
+      "Recruit": {
+      }
     },
     {
-      "Recruit": {}
+      "Recruit": {
+      }
     },
     {
-      "Recruit": {}
+      "Recruit": {
+      }
     },
     {
-      "Recruit": {}
+      "Recruit": {
+      }
     },
     {
-      "Recruit": {}
+      "Recruit": {
+      }
     },
     {
-      "Recruit": {}
+      "Recruit": {
+      }
     },
     {
-      "Recruit": {}
+      "Recruit": {
+      }
     },
     {
-      "Recruit": {}
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
+      "Recruit": {
       }
     }
   ]

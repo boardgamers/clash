@@ -1,5 +1,38 @@
 {
-  "state": "Playing",
+  "state": {
+    "CustomPhase": {
+      "SteelWeaponsAttacker": {
+        "initiation": {
+          "Movement": {
+            "movement_actions_left": 2,
+            "moved_units": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ]
+          }
+        },
+        "round": 1,
+        "phase": "Retreat",
+        "defender": 1,
+        "defender_position": "C1",
+        "attacker": 0,
+        "attacker_position": "C2",
+        "attackers": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "can_retreat": true
+      }
+    }
+  },
   "players": [
     {
       "name": null,
@@ -45,24 +78,36 @@
           "player_index": 0,
           "position": "C2",
           "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 0
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Cavalry",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 1
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Leader",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 2
         },
         {
           "player_index": 0,
           "position": "C2",
           "unit_type": "Elephant",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 3
         },
         {
@@ -97,6 +142,7 @@
         "Farming",
         "Mining",
         "Siegecraft",
+        "Steel Weapons",
         "Tactics"
       ],
       "unlocked_special_advance": [],
@@ -186,7 +232,8 @@
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Mining"
+        "Mining",
+        "Steel Weapons"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
@@ -301,9 +348,24 @@
     },
     {
       "Playing": "EndTurn"
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "destination": "C1"
+        }
+      }
     }
   ],
-  "action_log_index": 5,
+  "action_log_index": 6,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -316,10 +378,11 @@
     "It's Player2's turn",
     "Player2 ended their turn with 3 actions left",
     "It's Player1's turn",
-    "Round 2/3"
+    "Round 2/3",
+    "\tPlayer1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1"
   ],
-  "undo_limit": 5,
-  "actions_left": 3,
+  "undo_limit": 6,
+  "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 2,
   "age": 1,

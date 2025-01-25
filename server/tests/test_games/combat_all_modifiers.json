@@ -1,17 +1,5 @@
 {
-  "state": {
-    "Movement": {
-      "movement_actions_left": 2,
-      "moved_units": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5
-      ]
-    }
-  },
+  "state": "Playing",
   "players": [
     {
       "name": null,
@@ -19,7 +7,7 @@
       "resources": {
         "food": 2,
         "wood": 7,
-        "ore": 5,
+        "ore": 7,
         "ideas": 3,
         "gold": 7,
         "mood_tokens": 7,
@@ -50,64 +38,42 @@
           "angry_activation": false,
           "player_index": 0,
           "position": "C2"
-        },
-        {
-          "city_pieces": {
-            "fortress": 0
-          },
-          "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
-          "player_index": 0,
-          "position": "C1"
         }
       ],
       "units": [
         {
           "player_index": 0,
-          "position": "C1",
+          "position": "C2",
           "unit_type": "Infantry",
-          "movement_restrictions": [
-            "Battle"
-          ],
           "id": 0
         },
         {
           "player_index": 0,
-          "position": "C1",
+          "position": "C2",
           "unit_type": "Cavalry",
-          "movement_restrictions": [
-            "Battle"
-          ],
           "id": 1
         },
         {
           "player_index": 0,
-          "position": "C1",
+          "position": "C2",
           "unit_type": "Leader",
-          "movement_restrictions": [
-            "Battle"
-          ],
           "id": 2
         },
         {
           "player_index": 0,
-          "position": "C1",
+          "position": "C2",
           "unit_type": "Elephant",
-          "movement_restrictions": [
-            "Battle"
-          ],
           "id": 3
         },
         {
           "player_index": 0,
-          "position": "C1",
+          "position": "C2",
           "unit_type": "Settler",
           "id": 4
         },
         {
           "player_index": 0,
-          "position": "C1",
+          "position": "C2",
           "unit_type": "Settler",
           "id": 5
         },
@@ -131,7 +97,8 @@
         "Farming",
         "Mining",
         "Siegecraft",
-        "Tactics"
+        "Tactics"    ,
+        "Steel Weapons"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
@@ -189,14 +156,39 @@
         "mood_tokens": 7,
         "culture_tokens": 7
       },
-      "cities": [],
-      "units": [],
+      "cities": [
+        {
+          "city_pieces": {
+            "fortress": 1
+          },
+          "mood_state": "Angry",
+          "activations": 0,
+          "angry_activation": false,
+          "player_index": 1,
+          "position": "C1"
+        }
+      ],
+      "units": [
+        {
+          "player_index": 1,
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "player_index": 1,
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 1
+        }
+      ],
       "civilization": "test1",
       "active_leader": null,
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Mining"
+        "Mining",
+        "Steel Weapons"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
@@ -311,34 +303,9 @@
     },
     {
       "Playing": "EndTurn"
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5
-          ],
-          "destination": "C1"
-        }
-      }
-    },
-    {
-      "CustomPhase": {
-        "SiegecraftPaymentAction": {
-          "extra_die": {},
-          "ignore_hit": {
-            "ore": 2
-          }
-        }
-      }
     }
   ],
-  "action_log_index": 7,
+  "action_log_index": 5,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -351,16 +318,10 @@
     "It's Player2's turn",
     "Player2 ended their turn with 3 actions left",
     "It's Player1's turn",
-    "Round 2/3",
-    "\tPlayer1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1",
-    "Player1 paid for siegecraft: 2 ore to ignore a hit",
-    "\nCombat round 1",
-    "\tPlayer1 rolled 6 (Infantry, +1 combat value), 6 (Infantry, no bonus), 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 25 and gets 5 hits against defending units. Player2 rolled 1 (Leader, no bonus), 1 (Leader, no bonus), 1 (Leader, no bonus) for combined combat value of 3 and gets 0 hits against attacking units.",
-    " Player2 has a fortress, which added one extra die",
-    "\tPlayer1 killed all defending units and captured Player2's city at C1. Could not store 1 gold"
+    "Round 2/3"
   ],
-  "undo_limit": 7,
-  "actions_left": 2,
+  "undo_limit": 5,
+  "actions_left": 3,
   "successful_cultural_influence": false,
   "round": 2,
   "age": 1,
@@ -369,17 +330,16 @@
   ],
   "dice_roll_outcomes": [
     1,
-    1
-  ],
-  "dice_roll_log": [
-    11,
-    11,
-    11,
-    11,
     1,
     1,
-    1
+    1,
+    1,
+    11,
+    11,
+    11,
+    11
   ],
+  "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [
     "Pyramids"
@@ -419,13 +379,6 @@
     {
       "Movement": {
         "movement_actions_left": 2
-      }
-    },
-    {
-      "WastedResources": {
-        "resources": {
-          "gold": 1
-        }
       }
     }
   ]

@@ -116,7 +116,6 @@ pub fn initiate_combat(
     can_retreat: bool,
     next_game_state: Option<GameState>,
 ) {
-    game.lock_undo();
     let initiation = next_game_state.map_or_else(
         || Box::new(mem::replace(&mut game.state, Playing)),
         Box::new,
@@ -137,30 +136,33 @@ pub fn initiate_combat(
 }
 
 pub(crate) fn start_combat(game: &mut Game, combat: Combat, skip: Option<CombatModifier>) {
-    if skip != Some(CancelFortressExtraDie) {
-        if skip != Some(SteelWeaponsDefender) {
-            if skip != Some(SteelWeaponsAttacker)
-                && start_steel_weapons_phase(
-                    game,
-                    combat.clone(),
-                    combat.attacker,
-                    SteelWeaponsAttacker,
-                )
-            {
-                return;
-            }
-            if start_steel_weapons_phase(
-                game,
-                combat.clone(),
-                combat.defender,
-                SteelWeaponsDefender,
-            ) {
-                return;
-            }
-        }
-        if start_siegecraft_phase(game, combat.clone()) {
-            return;
-        }
+    game.lock_undo();
+    let evaluate: &[CombatModifier] = match skip {
+        None => &[
+            SteelWeaponsAttacker,
+            SteelWeaponsDefender,
+            CancelFortressExtraDie,
+        ],
+        Some(SteelWeaponsAttacker) => &[SteelWeaponsDefender, CancelFortressExtraDie],
+        Some(SteelWeaponsDefender) => &[CancelFortressExtraDie],
+        Some(CancelFortressExtraDie) => &[],
+        _ => panic!("Illegal action"),
+    };
+
+    if evaluate.contains(&SteelWeaponsAttacker)
+        && start_steel_weapons_phase(game, combat.clone(), combat.attacker, SteelWeaponsAttacker)
+    {
+        return;
+    }
+
+    if evaluate.contains(&SteelWeaponsDefender)
+        && start_steel_weapons_phase(game, combat.clone(), combat.defender, SteelWeaponsDefender)
+    {
+        return;
+    }
+
+    if evaluate.contains(&CancelFortressExtraDie) && start_siegecraft_phase(game, combat.clone()) {
+        return;
     }
 
     combat_loop(game, combat);

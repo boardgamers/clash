@@ -1,7 +1,7 @@
 {
   "state": {
     "CustomPhase": {
-      "SiegecraftPayment": {
+      "SteelWeaponsDefender": {
         "initiation": {
           "Movement": {
             "movement_actions_left": 2,
@@ -29,7 +29,10 @@
           4,
           5
         ],
-        "can_retreat": true
+        "can_retreat": true,
+        "modifiers": [
+          "SteelWeaponsAttacker"
+        ]
       }
     }
   },
@@ -40,7 +43,7 @@
       "resources": {
         "food": 2,
         "wood": 7,
-        "ore": 7,
+        "ore": 6,
         "ideas": 3,
         "gold": 7,
         "mood_tokens": 7,
@@ -142,6 +145,7 @@
         "Farming",
         "Mining",
         "Siegecraft",
+        "Steel Weapons",
         "Tactics"
       ],
       "unlocked_special_advance": [],
@@ -231,7 +235,8 @@
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Mining"
+        "Mining",
+        "Steel Weapons"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
@@ -361,9 +366,16 @@
           "destination": "C1"
         }
       }
+    },
+    {
+      "CustomPhase": {
+        "SteelWeaponsAttackerAction": {
+          "ore": 1
+        }
+      }
     }
   ],
-  "action_log_index": 6,
+  "action_log_index": 7,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -377,9 +389,10 @@
     "Player2 ended their turn with 3 actions left",
     "It's Player1's turn",
     "Round 2/3",
-    "\tPlayer1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1"
+    "\tPlayer1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1",
+    "Player1 paid for steel weapons: 1 ore"
   ],
-  "undo_limit": 6,
+  "undo_limit": 7,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 2,
