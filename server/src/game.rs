@@ -1056,7 +1056,7 @@ impl Game {
         player_index: usize,
         units: Vec<UnitType>,
         city_position: Position,
-        leader_name: Option<String>,
+        leader_name: Option<&String>,
         replaced_units: Vec<u32>,
     ) {
         let mut replaced_leader = None;
@@ -1072,7 +1072,7 @@ impl Game {
                 );
                 replaced_leader = Some(previous_leader);
             }
-            self.set_active_leader(leader_name, player_index);
+            self.set_active_leader(leader_name.clone(), player_index);
         }
         let mut replaced_units_undo_context = Vec::new();
         for unit in replaced_units {
@@ -1140,7 +1140,7 @@ impl Game {
         player_index: usize,
         units: &[UnitType],
         city_position: Position,
-        leader_name: Option<String>,
+        leader_name: Option<&String>,
     ) {
         if let Some(leader_name) = leader_name {
             let current_leader = self.players[player_index]
@@ -1159,7 +1159,7 @@ impl Game {
 
             self.players[player_index]
                 .available_leaders
-                .push(leader_name);
+                .push(leader_name.clone());
             self.players[player_index].available_leaders.sort();
 
             self.players[player_index].active_leader = None;

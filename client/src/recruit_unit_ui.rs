@@ -43,7 +43,7 @@ impl RecruitAmount {
         player_index: usize,
         city_position: Position,
         units: Units,
-        leader_name: Option<String>,
+        leader_name: Option<&String>,
         must_show_units: &[SelectableUnit],
     ) -> StateUpdate {
         let player = game.get_player(player_index);
@@ -53,7 +53,7 @@ impl RecruitAmount {
                 selectable_unit(
                     city_position,
                     &units,
-                    leader_name.clone(),
+                    leader_name,
                     must_show_units,
                     player,
                     &u,
@@ -65,7 +65,7 @@ impl RecruitAmount {
             player_index,
             city_position,
             units,
-            leader_name: leader_name.clone(),
+            leader_name: leader_name.cloned(),
             selectable,
         }))
     }
@@ -74,7 +74,7 @@ impl RecruitAmount {
 fn selectable_unit(
     city_position: Position,
     units: &Units,
-    leader_name: Option<String>,
+    leader_name: Option<&String>,
     must_show_units: &[SelectableUnit],
     player: &Player,
     unit: &NewUnit,
@@ -83,11 +83,7 @@ fn selectable_unit(
     all += &unit.unit_type;
 
     let current: u8 = if matches!(unit.unit_type, UnitType::Leader) {
-        u8::from(
-            leader_name
-                .clone()
-                .is_some_and(|i| i == unit.leader_name.clone().unwrap()),
-        )
+        u8::from(leader_name.is_some_and(|i| *i == unit.leader_name.clone().unwrap()))
     } else {
         units.get(&unit.unit_type)
     };
@@ -95,7 +91,7 @@ fn selectable_unit(
     let max = if player.can_recruit_without_replaced(
         all.to_vec().as_slice(),
         city_position,
-        unit.leader_name.clone().or(leader_name),
+        unit.leader_name.as_ref().or(leader_name),
     ) {
         u32::from(current + 1)
     } else {
@@ -191,7 +187,7 @@ impl ConfirmSelection for RecruitSelection {
         if game.get_player(self.amount.player_index).can_recruit(
             self.amount.units.clone().to_vec().as_slice(),
             self.amount.city_position,
-            self.amount.leader_name.clone(),
+            self.amount.leader_name.as_ref(),
             self.replaced_units.as_slice(),
         ) {
             OkTooltip::Valid("Recruit units".to_string())
@@ -239,7 +235,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
                 game,
                 s,
                 units,
-                u.leader_name.clone().or(s.leader_name.clone()),
+                u.leader_name.as_ref().or(s.leader_name.as_ref()),
             )
         },
         |s, u| {
@@ -252,7 +248,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
                 if matches!(u.unit_type, UnitType::Leader) {
                     None
                 } else {
-                    s.leader_name.clone()
+                    s.leader_name.as_ref()
                 },
             )
         },
@@ -283,7 +279,7 @@ fn update_selection(
     game: &Game,
     s: &RecruitAmount,
     units: Units,
-    leader_name: Option<String>,
+    leader_name: Option<&String>,
 ) -> StateUpdate {
     RecruitAmount::new_selection(
         game,

@@ -194,7 +194,7 @@ impl PlayingAction {
                     player.can_recruit(
                         &r.units,
                         r.city_position,
-                        r.leader_name.clone(),
+                        r.leader_name.as_ref(),
                         &r.replaced_units
                     ) && cost.is_valid_payment(&r.payment)
                 );
@@ -203,7 +203,7 @@ impl PlayingAction {
                     player_index,
                     r.units,
                     r.city_position,
-                    r.leader_name.clone(),
+                    r.leader_name.as_ref(),
                     r.replaced_units,
                 );
             }
@@ -350,7 +350,12 @@ impl PlayingAction {
             Collect(c) => undo_collect(game, player_index, c),
             Recruit(r) => {
                 game.players[player_index].gain_resources(r.payment);
-                game.undo_recruit(player_index, &r.units, r.city_position, r.leader_name);
+                game.undo_recruit(
+                    player_index,
+                    &r.units,
+                    r.city_position,
+                    r.leader_name.as_ref(),
+                );
             }
             IncreaseHappiness(i) => undo_increase_happiness(game, player_index, i),
             Custom(custom_action) => custom_action.undo(game, player_index),

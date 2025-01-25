@@ -684,7 +684,7 @@ impl Player {
         &self,
         units: &[UnitType],
         city_position: Position,
-        leader_name: Option<String>,
+        leader_name: Option<&String>,
         replaced_units: &[u32],
     ) -> bool {
         if !self.can_recruit_without_replaced(units, city_position, leader_name) {
@@ -724,7 +724,7 @@ impl Player {
         &self,
         units: &[UnitType],
         city_position: Position,
-        leader_name: Option<String>,
+        leader_name: Option<&String>,
     ) -> bool {
         let city = self
             .get_city(city_position)
@@ -764,7 +764,7 @@ impl Player {
             .count();
         match leaders {
             0 => leader_name.is_none(),
-            1 => leader_name.is_some_and(|n| self.available_leaders.contains(&n)),
+            1 => leader_name.is_some_and(|n| self.available_leaders.contains(n)),
             _ => false,
         }
     }
