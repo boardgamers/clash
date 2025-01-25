@@ -142,9 +142,9 @@ fn format_cultural_influence_attempt_log_item(
 pub fn format_happiness_increase(
     player: &Player,
     player_name: &str,
-    happiness_increases: &IncreaseHappiness,
+    i: &IncreaseHappiness,
 ) -> String {
-    let happiness_increases = happiness_increases
+    let happiness_increases = i
         .happiness_increases
         .iter()
         .filter_map(|(position, steps)| {
@@ -164,7 +164,8 @@ pub fn format_happiness_increase(
         })
         .collect::<Vec<String>>();
     format!(
-        "{player_name} increased happiness in {}",
+        "{player_name} paid {} to increase happiness in {}",
+        i.payment,
         utils::format_list(&happiness_increases, "no city")
     )
 }

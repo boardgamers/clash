@@ -497,7 +497,9 @@ pub(crate) fn increase_happiness(game: &mut Game, player_index: usize, i: Increa
         let cost = player
             .increase_happiness_cost(city, steps)
             .expect("Illegal action");
-        assert!(steps > 0, "Illegal action");
+        if steps == 0 {
+            continue;
+        }
         if city.mood_state == MoodState::Angry {
             angry_activations.push(city_position);
         }
@@ -520,17 +522,14 @@ pub(crate) fn increase_happiness(game: &mut Game, player_index: usize, i: Increa
 }
 
 pub(crate) fn undo_increase_happiness(game: &mut Game, player_index: usize, i: IncreaseHappiness) {
-    let mut cost = 0;
     let player = &mut game.players[player_index];
     for (city_position, steps) in i.happiness_increases {
-        let city = player.get_city(city_position).expect("Illegal action");
-        cost += city.size() as u32 * steps;
         let city = player.get_city_mut(city_position).expect("Illegal action");
         for _ in 0..steps {
             city.decrease_mood_state();
         }
     }
-    player.gain_resources(ResourcePile::mood_tokens(cost));
+    player.gain_resources(i.payment);
 
     if let Some(UndoContext::IncreaseHappiness { angry_activations }) =
         game.undo_context_stack.pop()
