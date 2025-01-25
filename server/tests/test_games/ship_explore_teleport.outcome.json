@@ -807,9 +807,7 @@
           "city_position": "E6",
           "payment": {
             "wood": 2
-          },
-          "leader_index": null,
-          "replaced_units": []
+          }
         }
       }
     },

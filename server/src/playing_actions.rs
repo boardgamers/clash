@@ -39,7 +39,11 @@ pub struct Recruit {
     pub units: Vec<UnitType>,
     pub city_position: Position,
     pub payment: ResourcePile,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub leader_index: Option<usize>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub replaced_units: Vec<u32>,
 }
 

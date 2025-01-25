@@ -1052,9 +1052,7 @@
             "gold": 0,
             "mood_tokens": 0,
             "culture_tokens": 0
-          },
-          "leader_index": null,
-          "replaced_units": []
+          }
         }
       }
     },
