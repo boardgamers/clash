@@ -135,7 +135,7 @@ fn increase_happiness_new_steps(
 pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) -> StateUpdate {
     show_resource_pile(rc, &h.cost, &[ResourceType::MoodTokens]);
 
-    let tooltip = if rc.shown_player.resources.can_afford(&h.cost) {
+    let tooltip = if rc.shown_player.can_afford_resources(&h.cost) {
         OkTooltip::Valid("Increase happiness".to_string())
     } else {
         OkTooltip::Invalid("Not enough resources".to_string())

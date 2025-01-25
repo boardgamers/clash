@@ -27,6 +27,11 @@ pub enum PaymentModel {
 
 impl PaymentModel {
     #[must_use]
+    pub const fn empty() -> Self {
+        Self::resources(ResourcePile::empty())
+    }
+
+    #[must_use]
     pub const fn sum(cost: u32, types_by_preference: &'static [ResourceType]) -> Self {
         PaymentModel::Sum(SumPaymentOptions {
             cost,

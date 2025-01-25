@@ -244,15 +244,15 @@ impl PlayingAction {
                     game.add_to_last_log_item(&format!(" and failed (rolled {roll})"));
                     return;
                 }
+                let roll_boost_cost = 5 - roll as u32;
                 if !game.players[player_index]
-                    .resources
-                    .can_afford(&ResourcePile::culture_tokens(5 - roll as u32))
+                    .can_afford_resources(&ResourcePile::culture_tokens(roll_boost_cost))
                 {
                     game.add_to_last_log_item(&format!(" but rolled a {roll} and has not enough culture tokens to increase the roll "));
                     return;
                 }
                 game.state = GameState::CulturalInfluenceResolution(CulturalInfluenceResolution {
-                    roll_boost_cost: 5 - roll as u32,
+                    roll_boost_cost,
                     target_player_index,
                     target_city_position,
                     city_piece,

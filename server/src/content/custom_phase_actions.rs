@@ -139,7 +139,7 @@ pub fn start_steel_weapons_phase(
             new.modifiers.push(combat_modifier);
             start_combat(game, new, Some(combat_modifier));
             return true;
-        } else if cost.can_afford(&player.resources) {
+        } else if player.can_afford(&cost) {
             let phase = if c.attacker == player_index {
                 CustomPhaseState::SteelWeaponsAttacker(c)
             } else {
@@ -154,12 +154,11 @@ pub fn start_steel_weapons_phase(
 
 pub fn start_siegecraft_phase(game: &mut Game, c: Combat) -> bool {
     let player = &game.players[c.attacker];
-    let r = &player.resources;
     if game
         .get_any_city(c.defender_position)
         .is_some_and(|c| c.pieces.fortress.is_some())
         && player.has_advance(SIEGECRAFT)
-        && (SIEGECRAFT_EXTRA_DIE.can_afford(r) || SIEGECRAFT_IGNORE_HIT.can_afford(r))
+        && (player.can_afford(&SIEGECRAFT_EXTRA_DIE) || player.can_afford(&SIEGECRAFT_IGNORE_HIT))
     {
         game.state = GameState::CustomPhase(CustomPhaseState::SiegecraftPayment(c));
         true

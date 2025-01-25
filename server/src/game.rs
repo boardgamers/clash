@@ -40,7 +40,6 @@ use crate::{
     utils,
     wonder::Wonder,
 };
-
 pub struct Game {
     pub state: GameState,
     pub players: Vec<Player>,
@@ -1409,7 +1408,7 @@ impl Game {
         let player = &self.players[player_index];
         if matches!(city_piece, Building::Obelisk)
             || starting_city.player_index != player_index
-            || !player.resources.can_afford(&range_boost_cost)
+            || !player.can_afford_resources(&range_boost_cost)
             || (starting_city.influenced() && !self_influence)
             || self.successful_cultural_influence
             || !player.is_building_available(city_piece, self)
