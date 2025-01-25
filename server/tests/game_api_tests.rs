@@ -8,6 +8,7 @@ use std::{
 
 use server::action::Action::CustomPhase;
 use server::action::CombatAction;
+use server::content::custom_actions::CustomAction;
 use server::content::custom_phase_actions::{CustomPhaseAction, SiegecraftPayment};
 use server::game::{CulturalInfluenceResolution, GameState};
 use server::status_phase::{
@@ -27,7 +28,6 @@ use server::{
     resource_pile::ResourcePile,
     unit::{MovementAction::*, UnitType::*},
 };
-use server::content::custom_actions::CustomAction;
 
 #[test]
 fn basic_actions() {
@@ -172,14 +172,13 @@ fn basic_actions() {
     let mut game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
     let player = &mut game.players[0];
     player.gain_resources(ResourcePile::food(2));
-    let recruit_action =
-        Action::Playing(Recruit(server::playing_actions::Recruit {
-            units: vec![Settler],
-            city_position,
-            payment: ResourcePile::food(2),
-            leader_name: None,
-            replaced_units: Vec::new(),
-        }));
+    let recruit_action = Action::Playing(Recruit(server::playing_actions::Recruit {
+        units: vec![Settler],
+        city_position,
+        payment: ResourcePile::food(2),
+        leader_name: None,
+        replaced_units: Vec::new(),
+    }));
     let mut game = game_api::execute_action(game, recruit_action, 0);
     let player = &mut game.players[0];
     assert_eq!(1, player.units.len());
@@ -685,7 +684,10 @@ fn test_increase_happiness() {
     test_action(
         "increase_happiness",
         Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness {
-            happiness_increases: vec![(Position::from_offset("C2"), 1), (Position::from_offset("B3"), 2)],
+            happiness_increases: vec![
+                (Position::from_offset("C2"), 1),
+                (Position::from_offset("B3"), 2),
+            ],
             payment: ResourcePile::mood_tokens(5),
         })),
         0,
@@ -698,10 +700,15 @@ fn test_increase_happiness() {
 fn test_increase_happiness_voting() {
     test_action(
         "increase_happiness_voting",
-        Action::Playing(Custom(CustomAction::VotingIncreaseHappiness(playing_actions::IncreaseHappiness {
-            happiness_increases: vec![(Position::from_offset("C2"), 1), (Position::from_offset("B3"), 2)],
-            payment: ResourcePile::mood_tokens(5),
-        }))),
+        Action::Playing(Custom(CustomAction::VotingIncreaseHappiness(
+            playing_actions::IncreaseHappiness {
+                happiness_increases: vec![
+                    (Position::from_offset("C2"), 1),
+                    (Position::from_offset("B3"), 2),
+                ],
+                payment: ResourcePile::mood_tokens(5),
+            },
+        ))),
         0,
         true,
         false,

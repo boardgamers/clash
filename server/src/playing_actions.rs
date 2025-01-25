@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use PlayingAction::*;
 
 use crate::action::Action;
+use crate::city::MoodState;
 use crate::game::{CulturalInfluenceResolution, GameState};
 use crate::payment::PaymentModel;
 use crate::{
@@ -18,7 +19,6 @@ use crate::{
     resource_pile::ResourcePile,
     unit::UnitType,
 };
-use crate::city::MoodState;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Construct {
@@ -511,11 +511,12 @@ pub(crate) fn increase_happiness(game: &mut Game, player_index: usize, i: Increa
             city.increase_mood_state();
         }
     }
-    assert!(total_cost.is_valid_payment(&i.payment.clone()), "Illegal action");
+    assert!(
+        total_cost.is_valid_payment(&i.payment.clone()),
+        "Illegal action"
+    );
     player.loose_resources(i.payment);
-    game.push_undo_context(UndoContext::IncreaseHappiness {
-        angry_activations,
-    });
+    game.push_undo_context(UndoContext::IncreaseHappiness { angry_activations });
 }
 
 pub(crate) fn undo_increase_happiness(game: &mut Game, player_index: usize, i: IncreaseHappiness) {
@@ -538,5 +539,7 @@ pub(crate) fn undo_increase_happiness(game: &mut Game, player_index: usize, i: I
             let city = player.get_city_mut(city_position).expect("Illegal action");
             city.angry_activation = true;
         }
-    } else { panic!("Increase happiness context should be stored in undo context") }
+    } else {
+        panic!("Increase happiness context should be stored in undo context")
+    }
 }

@@ -1,20 +1,16 @@
 use crate::action_buttons::{base_or_custom_action, base_or_custom_available};
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{
-    cancel_button, ok_button, BaseOrCustomAction, BaseOrCustomDialog, OkTooltip,
+    BaseOrCustomAction, BaseOrCustomDialog,
 };
 use crate::payment_ui::{new_payment, payment_dialog, Payment};
 use crate::render_context::RenderContext;
-use crate::resource_ui::show_resource_pile;
 use server::action::Action;
 use server::city::City;
 use server::content::custom_actions::{CustomAction, CustomActionType};
-use server::payment::PaymentModel;
 use server::player::Player;
 use server::playing_actions::{IncreaseHappiness, PlayingAction, PlayingActionType};
 use server::position::Position;
-use server::resource::ResourceType;
-use server::resource_pile::ResourcePile;
 
 #[derive(Clone)]
 pub struct IncreaseHappinessConfig {
@@ -28,7 +24,7 @@ impl IncreaseHappinessConfig {
         let steps = p.cities.iter().map(|c| (c.position, 0)).collect();
         IncreaseHappinessConfig {
             steps,
-            payment: Self::happiness_payment(&p, &[(p.cities[0].position, 0)]),
+            payment: Self::happiness_payment(p, &[(p.cities[0].position, 0)]),
             custom,
         }
     }
@@ -40,14 +36,10 @@ impl IncreaseHappinessConfig {
                 let city = p.get_city(*pos).unwrap();
                 p.increase_happiness_cost(city, *steps).unwrap()
             })
-            .reduce(|a, b| a + b).unwrap();
+            .reduce(|a, b| a + b)
+            .unwrap();
 
-        new_payment(
-            &payment,
-            &p.resources,
-            "Increase happiness",
-            false,
-        )
+        new_payment(&payment, &p.resources, "Increase happiness", false)
     }
 }
 
@@ -112,19 +104,14 @@ pub fn add_increase_happiness(
         })
         .collect();
 
-    increase_happiness.payment = IncreaseHappinessConfig::happiness_payment(rc.shown_player, &new_steps);
+    increase_happiness.payment =
+        IncreaseHappinessConfig::happiness_payment(rc.shown_player, &new_steps);
     increase_happiness.steps = new_steps;
     increase_happiness
 }
 
-fn increase_happiness_steps(
-    rc: &RenderContext,
-    city: &City,
-    old_steps: u32,
-) -> Option<u32> {
-    if let Some(value) =
-        increase_happiness_new_steps(rc, city, old_steps + 1)
-    {
+fn increase_happiness_steps(rc: &RenderContext, city: &City, old_steps: u32) -> Option<u32> {
+    if let Some(value) = increase_happiness_new_steps(rc, city, old_steps + 1) {
         return Some(value);
     }
     if let Some(value) = increase_happiness_new_steps(rc, city, 0) {
@@ -133,12 +120,10 @@ fn increase_happiness_steps(
     None
 }
 
-fn increase_happiness_new_steps(
-    rc: &RenderContext,
-    city: &City,
-    new_steps: u32,
-) -> Option<u32> {
-    rc.shown_player.increase_happiness_cost(city, new_steps).map(|_| new_steps)
+fn increase_happiness_new_steps(rc: &RenderContext, city: &City, new_steps: u32) -> Option<u32> {
+    rc.shown_player
+        .increase_happiness_cost(city, new_steps)
+        .map(|_| new_steps)
 }
 
 pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) -> StateUpdate {

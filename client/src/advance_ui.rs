@@ -1,7 +1,7 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::layout_ui::{left_mouse_button_pressed_in_rect, top_centered_text};
 use crate::log_ui::break_text;
-use crate::payment_ui::{new_payment, payment_dialog,  Payment};
+use crate::payment_ui::{new_payment, payment_dialog, Payment};
 use crate::player_ui::player_color;
 use crate::render_context::RenderContext;
 use crate::tooltip::show_tooltip_for_rect;
@@ -214,8 +214,8 @@ pub fn pay_advance_dialog(ap: &Payment, rc: &RenderContext) -> StateUpdate {
     };
     payment_dialog(
         rc,
-        &ap,
-        |p| ActiveDialog::AdvancePayment(p),
+        ap,
+        ActiveDialog::AdvancePayment,
         true,
         |payment| {
             StateUpdate::Execute(Action::Playing(PlayingAction::Advance {

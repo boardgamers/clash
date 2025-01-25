@@ -1738,7 +1738,7 @@ pub enum UndoContext {
         resources: ResourcePile,
     },
     IncreaseHappiness {
-        angry_activations: Vec<Position>
+        angry_activations: Vec<Position>,
     },
 }
 
