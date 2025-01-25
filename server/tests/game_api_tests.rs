@@ -421,8 +421,45 @@ fn game_path(name: &str) -> String {
     format!("tests{SEPARATOR}test_games{SEPARATOR}{name}.json")
 }
 
+fn test_actions(name: &str, player_index: usize, actions: Vec<Action>) {
+    for (i, action) in actions.into_iter().enumerate() {
+        let from = if i == 0 {
+            name.to_string()
+        } else {
+            format!("{name}.outcome{}", i - 1)
+        };
+        test_action_internal(
+            &from,
+            &format!("{name}.outcome{i}"),
+            action,
+            player_index,
+            false,
+            false,
+        );
+    }
+}
+
 fn test_action(
     name: &str,
+    action: Action,
+    player_index: usize,
+    undoable: bool,
+    illegal_action_test: bool,
+) {
+    let outcome = format!("{name}.outcome");
+    test_action_internal(
+        name,
+        &outcome,
+        action,
+        player_index,
+        undoable,
+        illegal_action_test,
+    );
+}
+
+fn test_action_internal(
+    name: &str,
+    outcome: &str,
     action: Action,
     player_index: usize,
     undoable: bool,
@@ -438,17 +475,16 @@ fn test_action(
         );
         return;
     }
-    let outcome = format!("{name}.outcome");
-    let expected_game = read_game_str(&outcome);
+    let expected_game = read_game_str(outcome);
     assert_eq_game_json(
         &expected_game,
         &to_json(&game),
         name,
-        &outcome,
+        outcome,
         &format!("EXECUTE: the game did not match the expectation after the initial {name} action"),
     );
     if !undoable {
-        assert!(!game.can_undo());
+        assert!(!game.can_undo(), "should not be able to undo");
         return;
     }
     undo_redo(
@@ -456,7 +492,7 @@ fn test_action(
         player_index,
         &read_game_str(name),
         game,
-        &outcome,
+        outcome,
         &expected_game,
         0,
     );
@@ -475,10 +511,10 @@ fn read_game_str(name: &str) -> String {
 fn undo_redo(
     name: &str,
     player_index: usize,
-    original_game: &String,
+    original_game: &str,
     game: Game,
-    outcome: &String,
-    expected_game: &String,
+    outcome: &str,
+    expected_game: &str,
     cycle: usize,
 ) {
     if cycle == 2 {
@@ -895,9 +931,9 @@ fn test_remove_casualties_defender_and_defender_wins() {
 }
 
 #[test]
-fn test_direct_capture_city() {
+fn test_direct_capture_city_metallurgy() {
     test_action(
-        "direct_capture_city",
+        "direct_capture_city_metallurgy",
         move_action(vec![0, 1, 2, 3], Position::from_offset("C1")),
         0,
         false,
@@ -939,29 +975,25 @@ fn test_first_combat_round_no_hits_attacker_may_retreat() {
 }
 
 #[test]
-fn test_ask_for_siegecraft() {
-    test_action(
-        "ask_for_siegecraft",
-        move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
+fn test_combat_all_modifiers() {
+    test_actions(
+        "combat_all_modifiers",
         0,
-        false,
-        false,
-    );
-}
-
-#[test]
-fn test_attack_with_siegecraft() {
-    test_action(
-        "attack_with_siegecraft",
-        CustomPhase(CustomPhaseAction::SiegecraftPaymentAction(
-            SiegecraftPayment {
-                ignore_hit: ResourcePile::ore(2),
-                extra_die: ResourcePile::empty(),
-            },
-        )),
-        0,
-        false,
-        false,
+        vec![
+            move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
+            CustomPhase(CustomPhaseAction::SteelWeaponsAttackerAction(
+                ResourcePile::ore(1),
+            )),
+            CustomPhase(CustomPhaseAction::SteelWeaponsDefenderAction(
+                ResourcePile::ore(1),
+            )),
+            CustomPhase(CustomPhaseAction::SiegecraftPaymentAction(
+                SiegecraftPayment {
+                    ignore_hit: ResourcePile::ore(2),
+                    extra_die: ResourcePile::empty(),
+                },
+            )),
+        ],
     );
 }
 
