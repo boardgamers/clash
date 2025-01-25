@@ -1,5 +1,9 @@
 use crate::action::{CombatAction, PlayActionCard};
-use crate::content::custom_phase_actions::start_siegecraft_phase;
+use crate::combat::CombatModifier::{
+    CancelFortressExtraDie, SteelWeaponsAttacker, SteelWeaponsDefender,
+};
+use crate::content::advances::STEEL_WEAPONS;
+use crate::content::custom_phase_actions::{start_siegecraft_phase, start_steel_weapons_phase};
 use crate::game::GameState::Playing;
 use crate::game::{Game, GameState};
 use crate::position::Position;
@@ -33,10 +37,12 @@ impl CombatPhase {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Copy)]
 pub enum CombatModifier {
     CancelFortressExtraDie,
     CancelFortressIgnoreHit,
+    SteelWeaponsAttacker,
+    SteelWeaponsDefender,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -127,8 +133,34 @@ pub fn initiate_combat(
         can_retreat,
     );
 
-    if start_siegecraft_phase(game, attacker, defender_position, combat.clone()) {
-        return;
+    start_combat(game, combat, None);
+}
+
+pub(crate) fn start_combat(game: &mut Game, combat: Combat, skip: Option<CombatModifier>) {
+    if skip != Some(CancelFortressExtraDie) {
+        if skip != Some(SteelWeaponsDefender) {
+            if skip != Some(SteelWeaponsAttacker)
+                && start_steel_weapons_phase(
+                    game,
+                    combat.clone(),
+                    combat.attacker,
+                    SteelWeaponsAttacker,
+                )
+            {
+                return;
+            }
+            if start_steel_weapons_phase(
+                game,
+                combat.clone(),
+                combat.defender,
+                SteelWeaponsDefender,
+            ) {
+                return;
+            }
+        }
+        if start_siegecraft_phase(game, combat.clone()) {
+            return;
+        }
     }
 
     combat_loop(game, combat);
@@ -230,23 +262,51 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
         game.add_info_log_item(format!("\nCombat round {}", c.round));
         //todo: go into tactics phase if either player has tactics card (also if they can not play it unless otherwise specified via setting)
 
+        let steel_weapon_value = if game.get_player(c.attacker).has_advance(STEEL_WEAPONS)
+            && game.get_player(c.defender).has_advance(STEEL_WEAPONS)
+        {
+            1
+        } else {
+            2
+        };
+        let mut steel_weapon_log = vec![];
         let attacker_name = game.players[c.attacker].get_name();
         let active_attackers = c.active_attackers(game);
+        let attacker_extra = if c.modifiers.contains(&SteelWeaponsAttacker) {
+            steel_weapon_log.push(format!(
+                "Attacker used steel weapons to add {steel_weapon_value} to their combat value"
+            ));
+            steel_weapon_value
+        } else {
+            0
+        };
         let mut attacker_log = vec![];
-        let attacker_rolls = roll(game, c.attacker, &active_attackers, 0, &mut attacker_log);
+        let attacker_rolls = roll(
+            game,
+            c.attacker,
+            &active_attackers,
+            0,
+            attacker_extra,
+            &mut attacker_log,
+        );
         let attacker_log_str = roll_log_str(&attacker_log);
-        let active_defenders = active_defenders(game, c.defender, c.defender_position);
 
+        let active_defenders = active_defenders(game, c.defender, c.defender_position);
         let defender_name = game.players[c.defender].get_name();
         let mut defender_log = vec![];
         let mut fortress_log = vec![];
-        let extra_defender_dies = if c.defender_fortress(game)
-            && !c
-                .modifiers
-                .contains(&CombatModifier::CancelFortressExtraDie)
-        {
-            fortress_log.push("added one extra die");
-            1
+        let extra_defender_dies =
+            if c.defender_fortress(game) && !c.modifiers.contains(&CancelFortressExtraDie) {
+                fortress_log.push("added one extra die");
+                1
+            } else {
+                0
+            };
+        let defender_extra = if c.modifiers.contains(&SteelWeaponsDefender) {
+            steel_weapon_log.push(format!(
+                "Defender used steel weapons to add {steel_weapon_value} to their combat value"
+            ));
+            steel_weapon_value
         } else {
             0
         };
@@ -255,6 +315,7 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
             c.defender,
             &active_defenders,
             extra_defender_dies,
+            defender_extra,
             &mut defender_log,
         );
         let defender_log_str = roll_log_str(&defender_log);
@@ -273,6 +334,9 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
         let attacker_hits = (attacker_combat_value / 5).saturating_sub(defender_hit_cancels);
         let defender_hits = (defender_combat_value / 5).saturating_sub(attacker_hit_cancels);
         game.add_info_log_item(format!("\t{attacker_name} rolled {attacker_log_str} for combined combat value of {attacker_combat_value} and gets {attacker_hits} hits against defending units. {defender_name} rolled {defender_log_str} for combined combat value of {defender_combat_value} and gets {defender_hits} hits against attacking units."));
+        if !steel_weapon_log.is_empty() {
+            game.add_info_log_item(steel_weapon_log.join(", "));
+        }
         if !fortress_log.is_empty() {
             game.add_info_log_item(format!(
                 " {defender_name} has a fortress, which {}",
@@ -472,6 +536,7 @@ fn roll(
     player_index: usize,
     units: &Vec<u32>,
     extra_dies: u8,
+    extra_combat_value: u8,
     roll_log: &mut Vec<String>,
 ) -> CombatRolls {
     let mut dice_rolls = extra_dies;
@@ -486,11 +551,9 @@ fn roll(
     }
 
     let mut rolls = CombatRolls {
-        combat_value: 0,
+        combat_value: extra_combat_value,
         hit_cancels: 0,
     };
-    rolls.combat_value = 0;
-    rolls.hit_cancels = 0;
     for _ in 0..dice_rolls {
         let dice_roll = dice_roll_with_leader_reroll(game, &mut unit_types, roll_log);
         let value = dice_roll.value;

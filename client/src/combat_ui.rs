@@ -6,6 +6,7 @@ use crate::select_ui::ConfirmSelection;
 use crate::unit_ui;
 use crate::unit_ui::UnitSelection;
 use server::action::{Action, CombatAction, PlayActionCard};
+use server::combat::Combat;
 use server::content::custom_phase_actions::{
     CustomPhaseAction, SiegecraftPayment, SIEGECRAFT_EXTRA_DIE, SIEGECRAFT_IGNORE_HIT,
 };
@@ -98,15 +99,15 @@ pub fn play_action_card_dialog(rc: &RenderContext) -> StateUpdate {
 }
 
 #[derive(Clone)]
-pub struct SiegecraftPaymentModel {
+pub struct SiegecraftPaymentDialog {
     extra_die: Payment,
     ignore_hit: Payment,
 }
 
-impl SiegecraftPaymentModel {
-    pub fn new(game: &Game) -> SiegecraftPaymentModel {
+impl SiegecraftPaymentDialog {
+    pub fn new(game: &Game) -> SiegecraftPaymentDialog {
         let available = game.get_player(game.active_player()).resources.clone();
-        SiegecraftPaymentModel {
+        SiegecraftPaymentDialog {
             extra_die: new_payment(
                 &SIEGECRAFT_EXTRA_DIE,
                 &available,
@@ -123,12 +124,12 @@ impl SiegecraftPaymentModel {
     }
 }
 
-pub fn pay_siegecraft_dialog(p: &SiegecraftPaymentModel, rc: &RenderContext) -> StateUpdate {
+pub fn pay_siegecraft_dialog(p: &SiegecraftPaymentDialog, rc: &RenderContext) -> StateUpdate {
     payment_model_dialog(
         rc,
         &[p.extra_die.clone(), p.ignore_hit.clone()],
         |p| {
-            ActiveDialog::SiegecraftPayment(SiegecraftPaymentModel {
+            ActiveDialog::SiegecraftPayment(SiegecraftPaymentDialog {
                 extra_die: p[0].clone(),
                 ignore_hit: p[1].clone(),
             })
@@ -141,6 +142,42 @@ pub fn pay_siegecraft_dialog(p: &SiegecraftPaymentModel, rc: &RenderContext) -> 
                     ignore_hit: p[1].clone(),
                 }),
             ))
+        },
+    )
+}
+
+#[derive(Clone)]
+pub struct SteelWeaponDialog {
+    pub attacker: bool,
+    pub payment: Payment,
+    pub combat: Combat,
+}
+
+pub(crate) fn pay_steel_weapons_dialog(
+    rc: &RenderContext,
+    dialog: &SteelWeaponDialog,
+) -> StateUpdate {
+    let attacker = dialog.attacker;
+
+    payment_model_dialog(
+        rc,
+        &[dialog.payment.clone()],
+        |p| {
+            let mut n = dialog.clone();
+            n.payment = p[0].clone();
+            ActiveDialog::SteelWeaponPayment(n)
+        },
+        false,
+        |p| {
+            if attacker {
+                StateUpdate::Execute(Action::CustomPhase(
+                    CustomPhaseAction::SteelWeaponsAttackerAction(p[0].clone()),
+                ))
+            } else {
+                StateUpdate::Execute(Action::CustomPhase(
+                    CustomPhaseAction::SteelWeaponsDefenderAction(p[0].clone()),
+                ))
+            }
         },
     )
 }
