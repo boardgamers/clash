@@ -68,6 +68,11 @@ impl PaymentModel {
             }
         }
     }
+
+    #[must_use]
+    pub fn is_free(&self) -> bool {
+        self.is_valid_payment(&ResourcePile::empty())
+    }
 }
 
 impl Display for PaymentModel {

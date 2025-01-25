@@ -161,6 +161,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::Retreat => combat_ui::retreat_dialog(rc),
         ActiveDialog::RemoveCasualties(s) => combat_ui::remove_casualties_dialog(rc, s),
         ActiveDialog::SiegecraftPayment(p) => combat_ui::pay_siegecraft_dialog(p, rc),
+        ActiveDialog::SteelWeaponPayment(p) => combat_ui::pay_steel_weapons_dialog(rc, p),
     }
 }
 

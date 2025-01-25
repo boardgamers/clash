@@ -13,6 +13,8 @@ use crate::{
 pub const NAVIGATION: &str = "Navigation";
 pub const ROADS: &str = "Roads";
 pub const SIEGECRAFT: &str = "Siegecraft";
+pub const STEEL_WEAPONS: &str = "Steel Weapons";
+pub const METALLURGY: &str = "Metallurgy";
 
 #[must_use]
 pub fn get_all() -> Vec<Advance> {
@@ -96,8 +98,8 @@ fn construction() -> Vec<Advance> {
                 "Engineering",
                 "Immediately draw 1 wonder, May Construct wonder happy cities",
             )
-            .add_one_time_ability_initializer(Game::draw_wonder_card)
-            .add_custom_action(ConstructWonder),
+                .add_one_time_ability_initializer(Game::draw_wonder_card)
+                .add_custom_action(ConstructWonder),
             Advance::builder(ROADS, "When moving from or to a city, you may pay 1 food and 1 ore to extend the range of a group of land units by 1 and ignore terrain effects. May not be used to embark, disembark, or explore")
         ],
     )
@@ -169,11 +171,15 @@ fn warfare() -> Vec<Advance> {
                 "Tactics",
                 "May Move Army units, May use Tactics on Action Cards",
             )
-            .with_advance_bonus(CultureToken)
-            .with_unlocked_building("Fortress"),
+                .with_advance_bonus(CultureToken)
+                .with_unlocked_building("Fortress"),
             Advance::builder(
                 SIEGECRAFT,
                 "When attacking a city with a Fortress, pay 2 wood to cancel the Fortress’ ability to add +1 die and/or pay 2 ore to ignore its ability to cancel a hit.",
+            ),
+            Advance::builder(
+                STEEL_WEAPONS,
+                "Immediately before a Land battle starts, you may pay 1 ore to get +2 combat value in every Combat Round against an enemy that does not have the Steel Weapons advance, but only +1 combat value against an enemy that does have it (regardless if they use it or not this battle).",
             ),
         ],
     )
@@ -187,31 +193,36 @@ fn science() -> Vec<Advance> {
                 "Math",
                 "Engineering and Roads can be bought at no food cost",
             )
-            .add_player_event_listener(
-                |event| &mut event.advance_cost,
-                |cost, advance, ()| {
-                    if advance == "Engineering" || advance == "Roads" {
-                        *cost = 0;
-                    }
-                },
-                0,
-            )
-            .with_advance_bonus(CultureToken)
-            .with_unlocked_building("Observatory"),
+                .add_player_event_listener(
+                    |event| &mut event.advance_cost,
+                    |cost, advance, ()| {
+                        if advance == "Engineering" || advance == "Roads" {
+                            *cost = 0;
+                        }
+                    },
+                    0,
+                )
+                .with_advance_bonus(CultureToken)
+                .with_unlocked_building("Observatory"),
             Advance::builder(
                 "Astronomy",
                 "Navigation and Cartography can be bought at no food cost",
             )
-            .add_player_event_listener(
-                |event| &mut event.advance_cost,
-                |cost, advance, ()| {
-                    if advance == "Navigation" || advance == "Cartography" {
-                        *cost = 0;
-                    }
-                },
-                0,
-            )
-            .with_advance_bonus(CultureToken),
+                .add_player_event_listener(
+                    |event| &mut event.advance_cost,
+                    |cost, advance, ()| {
+                        if advance == "Navigation" || advance == "Cartography" {
+                            *cost = 0;
+                        }
+                    },
+                    0,
+                )
+                .with_advance_bonus(CultureToken),
+            // part of metallurgy is not implemented
+            Advance::builder(
+                METALLURGY,
+                "If you have the Steel Weapons Advance, you no longer have to pay 1 ore to activate it against enemies without Steel Weapons.")
+                .with_advance_bonus(CultureToken),
         ],
     )
 }

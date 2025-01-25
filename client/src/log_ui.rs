@@ -40,7 +40,13 @@ pub fn break_text(label: &str, len: usize, result: &mut Vec<String>) {
     });
 }
 
-pub fn advance_help(rc: &RenderContext, result: &mut Vec<String>, advance: &str) {
+pub fn advance_help(rc: &RenderContext, advance: &str) -> Vec<String> {
+    let mut result = vec![];
+    add_advance_help(rc, &mut result, advance);
+    result
+}
+
+pub fn add_advance_help(rc: &RenderContext, result: &mut Vec<String>, advance: &str) {
     if rc.shown_player.has_advance(advance) {
         break_text(
             &format!("{}: {}", advance, get_advance_by_name(advance).description),
