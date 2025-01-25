@@ -89,10 +89,11 @@ pub fn payment_model_dialog(
     let mut removed: Option<Payment> = None;
 
     for (i, payment) in payments.iter().enumerate() {
+        let name = &payment.name;
         let model = payment.model.clone();
         let types = show_types(&model);
         let offset = vec2(0., i as f32 * -100.);
-        bottom_centered_text_with_offset(rc, &payment.name, offset + vec2(0., -30.));
+        bottom_centered_text_with_offset(rc, &format!("{name} for {model}"), offset + vec2(0., -30.));
         let result = select_ui::count_dialog(
             rc,
             payment,

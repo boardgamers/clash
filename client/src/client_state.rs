@@ -106,11 +106,8 @@ impl ActiveDialog {
                     "Click on a city to increase happiness".to_string(),
                 ]
             }
-            ActiveDialog::AdvancePayment(a) => {
-                vec![format!("Click on resources to pay for {}", a.name)]
-            }
-            ActiveDialog::ConstructionPayment(c) => {
-                vec![format!("Click on resources to pay for {}", c.payment.name)]
+            ActiveDialog::AdvancePayment(_) | ActiveDialog::ConstructionPayment(_) => {
+                vec!["Pay resources".to_string()]
             }
             ActiveDialog::CollectResources(collect) => collect.help_text(rc.game),
             ActiveDialog::RecruitUnitSelection(_) => vec!["Click on a unit to recruit".to_string()],
