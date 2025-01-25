@@ -314,9 +314,10 @@ impl Player {
             events: Some(PlayerEvents::new()),
             cities: Vec::new(),
             units: Vec::new(),
-            civilization,
             active_leader: None,
-            available_leaders: Vec::new(),
+            available_leaders:civilizations::get_civilization_by_name(&civilization.name)
+                .expect("player data should have a valid civilization").leaders,
+            civilization,
             advances: vec![String::from("Farming"), String::from("Mining")],
             unlocked_special_advances: Vec::new(),
             game_event_tokens: 3,
