@@ -58,7 +58,7 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
             open_increase_happiness_dialog(rc, |mut happiness| {
                 let mut target = city.mood_state.clone();
                 while target != MoodState::Happy {
-                    happiness = add_increase_happiness(city, &happiness);
+                    happiness = add_increase_happiness(rc, city, happiness);
                     target = target.clone().add(1);
                 }
                 happiness

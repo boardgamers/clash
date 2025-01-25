@@ -1,6 +1,6 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
-use crate::payment_ui::{new_payment, payment_model_dialog, Payment};
+use crate::payment_ui::{multi_payment_dialog, new_payment, payment_dialog,  Payment};
 use crate::render_context::RenderContext;
 use crate::select_ui::ConfirmSelection;
 use crate::unit_ui;
@@ -125,7 +125,7 @@ impl SiegecraftPaymentDialog {
 }
 
 pub fn pay_siegecraft_dialog(p: &SiegecraftPaymentDialog, rc: &RenderContext) -> StateUpdate {
-    payment_model_dialog(
+    multi_payment_dialog(
         rc,
         &[p.extra_die.clone(), p.ignore_hit.clone()],
         |p| {
@@ -159,23 +159,23 @@ pub(crate) fn pay_steel_weapons_dialog(
 ) -> StateUpdate {
     let attacker = dialog.attacker;
 
-    payment_model_dialog(
+    payment_dialog(
         rc,
-        &[dialog.payment.clone()],
+        &dialog.payment.clone(),
         |p| {
             let mut n = dialog.clone();
-            n.payment = p[0].clone();
+            n.payment = p;
             ActiveDialog::SteelWeaponPayment(n)
         },
         false,
         |p| {
             if attacker {
                 StateUpdate::Execute(Action::CustomPhase(
-                    CustomPhaseAction::SteelWeaponsAttackerAction(p[0].clone()),
+                    CustomPhaseAction::SteelWeaponsAttackerAction(p),
                 ))
             } else {
                 StateUpdate::Execute(Action::CustomPhase(
-                    CustomPhaseAction::SteelWeaponsDefenderAction(p[0].clone()),
+                    CustomPhaseAction::SteelWeaponsDefenderAction(p),
                 ))
             }
         },

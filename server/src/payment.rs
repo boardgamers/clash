@@ -1,6 +1,7 @@
 use crate::resource::ResourceType;
 use crate::resource_pile::{CostWithDiscount, ResourcePile};
 use std::fmt::Display;
+use std::ops::{Add, SubAssign};
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct SumPaymentOptions {
@@ -27,7 +28,7 @@ pub enum PaymentModel {
 
 impl PaymentModel {
     #[must_use]
-    pub const fn empty() -> Self {
+    pub const fn free() -> Self {
         Self::resources(ResourcePile::empty())
     }
 
@@ -101,6 +102,58 @@ impl Display for PaymentModel {
                     c.cost.fmt(f)
                 }
             }
+        }
+    }
+}
+
+impl Add for PaymentModel {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        match self {
+            PaymentModel::Sum(s) => match rhs {
+                PaymentModel::Sum(r) => {
+                    assert_eq!(s.types_by_preference, r.types_by_preference);
+                    PaymentModel::sum(s.cost + r.cost, s.types_by_preference)
+                }
+                PaymentModel::Resources(_) => {
+                    panic!("Cannot add Sum and Resources")
+                }
+            },
+            PaymentModel::Resources(r) => match rhs {
+                PaymentModel::Sum(_) => {
+                    panic!("Cannot add Resources and Sum")
+                }
+                PaymentModel::Resources(r2) => PaymentModel::resources_with_discount(
+                    r.cost + r2.cost,
+                    r.discount + r2.discount,
+                ),
+            },
+        }
+    }
+}
+
+impl SubAssign for PaymentModel {
+    fn sub_assign(&mut self, rhs: Self) {
+        match self {
+            PaymentModel::Sum(s) => match rhs {
+                PaymentModel::Sum(r) => {
+                    assert_eq!(s.types_by_preference, r.types_by_preference);
+                    s.cost -= r.cost;
+                }
+                PaymentModel::Resources(_) => {
+                    panic!("Cannot subtract Resources from Sum")
+                }
+            },
+            PaymentModel::Resources(r) => match rhs {
+                PaymentModel::Sum(_) => {
+                    panic!("Cannot subtract Sum from Resources")
+                }
+                PaymentModel::Resources(r2) => {
+                    r.cost -= r2.cost;
+                    r.discount -= r2.discount;
+                }
+            },
         }
     }
 }

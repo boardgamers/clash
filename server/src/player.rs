@@ -1,4 +1,5 @@
 use crate::advance::Advance;
+use crate::content::advances::RITUALS;
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
 use crate::movement::move_routes;
@@ -580,6 +581,29 @@ impl Player {
             .wonder_cost
             .trigger(&mut cost, city, wonder);
         cost
+    }
+
+    #[must_use]
+    pub fn increase_happiness_cost(&self, city: &City, steps: u32) -> Option<PaymentModel> {
+        let max_steps = 2 - city.mood_state.clone() as u32;
+        let cost = city.size() as u32 * steps;
+        if steps > max_steps {
+            None
+        } else if self.has_advance(RITUALS) {
+            Some(PaymentModel::sum(
+                cost,
+                &[
+                    ResourceType::Food,
+                    ResourceType::Wood,
+                    ResourceType::Ore,
+                    ResourceType::Ideas,
+                    ResourceType::MoodTokens,
+                    ResourceType::Gold,
+                ],
+            ))
+        } else {
+            Some(PaymentModel::sum(cost, &[ResourceType::MoodTokens]))
+        }
     }
 
     #[must_use]

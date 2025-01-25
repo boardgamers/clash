@@ -76,9 +76,25 @@ impl Payment {
     }
 }
 
-pub fn payment_model_dialog(
+pub fn payment_dialog(
     rc: &RenderContext,
-    payments: &[Payment], // None means the player can pay nothing
+    payments: &Payment,
+    to_dialog: impl FnOnce(Payment) -> ActiveDialog,
+    may_cancel: bool,
+    execute_action: impl FnOnce(ResourcePile) -> StateUpdate,
+) -> StateUpdate {
+    multi_payment_dialog(
+        rc,
+        &[payments.clone()],
+        |v| to_dialog(v[0].clone()),
+        may_cancel,
+        |v| execute_action(v[0].clone()),
+    )
+}
+
+pub fn multi_payment_dialog(
+    rc: &RenderContext,
+    payments: &[Payment],
     to_dialog: impl FnOnce(Vec<Payment>) -> ActiveDialog,
     may_cancel: bool,
     execute_action: impl FnOnce(Vec<ResourcePile>) -> StateUpdate,
@@ -202,6 +218,7 @@ fn sum_payment(a: &SumPaymentOptions, available: &ResourcePile) -> Vec<ResourceP
         .collect()
 }
 
+// todo: move to Payment::new
 #[must_use]
 pub fn new_payment(
     model: &PaymentModel,
