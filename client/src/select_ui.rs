@@ -25,7 +25,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
     container: &C,
     get_objects: impl Fn(&C) -> Vec<O>,
     draw: impl Fn(&O, Vec2),
-    is_valid: impl FnOnce(&C) -> OkTooltip,
+    is_valid: impl FnOnce() -> OkTooltip,
     execute_action: impl FnOnce() -> StateUpdate,
     show: impl Fn(&C, &O) -> bool,
     plus: impl FnOnce(&C, &O) -> StateUpdate,
@@ -43,8 +43,8 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
         let x = (start_x + i as f32) * ICON_SIZE * 2.;
         let c = o.counter();
 
-        draw(o, vec2(x + 15., -60.) + anchor + offset);
-        let current_pos = vec2(x, -ICON_SIZE) + anchor + offset;
+        draw(o, vec2(x + 7., -60.) + anchor + offset);
+        let current_pos = vec2(x + 13., -ICON_SIZE) + anchor + offset;
         draw_text_ex(
             &format!("{}", c.current),
             current_pos.x,
@@ -79,7 +79,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
         };
     }
 
-    if ok_button(rc, is_valid(container)) {
+    if ok_button(rc, is_valid()) {
         return execute_action();
     }
     if may_cancel && cancel_button(rc) {

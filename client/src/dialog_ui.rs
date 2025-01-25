@@ -10,12 +10,6 @@ pub enum OkTooltip {
     Invalid(String),
 }
 
-impl OkTooltip {
-    pub fn is_valid(&self) -> bool {
-        matches!(self, OkTooltip::Valid(_))
-    }
-}
-
 #[derive(Clone)]
 pub enum BaseOrCustomAction {
     Base,

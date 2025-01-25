@@ -35,7 +35,7 @@ use crate::{
     unit::{
         MovementAction::{self, *},
         Unit,
-        UnitType::{self, *},
+        UnitType::{self},
     },
     utils,
     wonder::Wonder,
@@ -750,7 +750,7 @@ impl Game {
             .expect("action should be place_settler action");
         let player = &mut self.players[player_index];
         assert!(player.get_city(action).is_some(), "Illegal action");
-        player.add_unit(action, Settler);
+        player.add_unit(action, UnitType::Settler);
         self.back_to_move(&p.move_state, true);
     }
 
@@ -947,13 +947,15 @@ impl Game {
         self.lock_undo();
     }
 
-    pub fn set_active_leader(&mut self, leader_index: usize, player_index: usize) {
-        let new_leader = self.players[player_index]
+    fn set_active_leader(&mut self, leader_name: String, player_index: usize) {
+        self.players[player_index]
             .available_leaders
-            .remove(leader_index);
-        (new_leader.player_initializer)(self, player_index);
-        (new_leader.player_one_time_initializer)(self, leader_index);
-        self.players[player_index].active_leader = Some(new_leader);
+            .retain(|name| name != &leader_name);
+        Player::with_leader(&leader_name, self, player_index, |game, leader| {
+            (leader.player_initializer)(game, player_index);
+            (leader.player_one_time_initializer)(game, player_index);
+        });
+        self.players[player_index].active_leader = Some(leader_name);
     }
 
     ///
@@ -1054,16 +1056,23 @@ impl Game {
         player_index: usize,
         units: Vec<UnitType>,
         city_position: Position,
-        leader_index: Option<usize>,
+        leader_name: Option<&String>,
         replaced_units: Vec<u32>,
     ) {
         let mut replaced_leader = None;
-        if let Some(leader_index) = leader_index {
+        if let Some(leader_name) = leader_name {
             if let Some(previous_leader) = self.players[player_index].active_leader.take() {
-                (previous_leader.player_deinitializer)(self, player_index);
-                replaced_leader = Some(previous_leader.name);
+                Player::with_leader(
+                    &previous_leader,
+                    self,
+                    player_index,
+                    |game, previous_leader| {
+                        (previous_leader.player_deinitializer)(game, player_index);
+                    },
+                );
+                replaced_leader = Some(previous_leader);
             }
-            self.set_active_leader(leader_index, player_index);
+            self.set_active_leader(leader_name.clone(), player_index);
         }
         let mut replaced_units_undo_context = Vec::new();
         for unit in replaced_units {
@@ -1085,7 +1094,7 @@ impl Game {
                 .get_city(city_position)
                 .expect("player should have a city at the recruitment position");
             let position = match &unit_type {
-                Ship => {
+                UnitType::Ship => {
                     ships.push(player.next_unit_id);
                     city.port_position
                         .expect("there should be a port in the city")
@@ -1131,18 +1140,28 @@ impl Game {
         player_index: usize,
         units: &[UnitType],
         city_position: Position,
-        leader_index: Option<usize>,
+        leader_name: Option<&String>,
     ) {
-        if let Some(leader_index) = leader_index {
+        if let Some(leader_name) = leader_name {
             let current_leader = self.players[player_index]
                 .active_leader
                 .take()
                 .expect("the player should have an active leader");
-            (current_leader.player_deinitializer)(self, player_index);
-            (current_leader.player_undo_deinitializer)(self, player_index);
+            Player::with_leader(
+                &current_leader,
+                self,
+                player_index,
+                |game, current_leader| {
+                    (current_leader.player_deinitializer)(game, player_index);
+                    (current_leader.player_undo_deinitializer)(game, player_index);
+                },
+            );
+
             self.players[player_index]
                 .available_leaders
-                .insert(leader_index, current_leader);
+                .push(leader_name.clone());
+            self.players[player_index].available_leaders.sort();
+
             self.players[player_index].active_leader = None;
         }
         let player = &mut self.players[player_index];
@@ -1166,13 +1185,16 @@ impl Game {
                 player.units.push(unit);
             }
             if let Some(replaced_leader) = replaced_leader {
-                let replaced_leader =
-                    civilizations::get_leader_by_name(&replaced_leader, &player.civilization.name)
-                        .expect("there should be a replaced leader in context data");
-                (replaced_leader.player_initializer)(self, player_index);
-                (replaced_leader.player_one_time_initializer)(self, player_index);
-                let player = &mut self.players[player_index];
-                player.active_leader = Some(replaced_leader);
+                player.active_leader = Some(replaced_leader.clone());
+                Player::with_leader(
+                    &replaced_leader,
+                    self,
+                    player_index,
+                    |game, replaced_leader| {
+                        (replaced_leader.player_initializer)(game, player_index);
+                        (replaced_leader.player_one_time_initializer)(game, player_index);
+                    },
+                );
             }
         }
     }
@@ -1236,7 +1258,7 @@ impl Game {
             self.players[old_player_index].get_name()
         ));
         self.players[new_player_index]
-            .gain_resources(ResourcePile::gold(city.mood_modified_size() as i32));
+            .gain_resources(ResourcePile::gold(city.mood_modified_size() as u32));
         let take_over = self.players[new_player_index].is_city_available();
 
         if take_over {
@@ -1267,7 +1289,7 @@ impl Game {
         if take_over {
             self.players[new_player_index].cities.push(city);
         } else {
-            self.players[new_player_index].gain_resources(ResourcePile::gold(city.size() as i32));
+            self.players[new_player_index].gain_resources(ResourcePile::gold(city.size() as u32));
             city.raze(self, old_player_index);
         }
         let old_player = &mut self.players[old_player_index];
@@ -1526,13 +1548,15 @@ impl Game {
     /// Panics if the player does not have the unit
     pub fn kill_unit(&mut self, unit_id: u32, player_index: usize, killer: usize) {
         if let Some(unit) = self.players[player_index].remove_unit(unit_id) {
-            if matches!(unit.unit_type, Leader) {
+            if matches!(unit.unit_type, UnitType::Leader) {
                 let leader = self.players[player_index]
                     .active_leader
                     .take()
                     .expect("A player should have an active leader when having a leader unit");
-                (leader.player_deinitializer)(self, player_index);
-                self.players[killer].captured_leaders.push(leader.name);
+                Player::with_leader(&leader, self, player_index, |game, leader| {
+                    (leader.player_deinitializer)(game, player_index);
+                });
+                self.players[killer].captured_leaders.push(leader);
             }
         }
         if let GameState::Movement(m) = &mut self.state {
@@ -1734,6 +1758,7 @@ pub mod tests {
     use std::collections::HashMap;
 
     use super::{Game, GameState::Playing};
+    use crate::payment::PaymentModel;
     use crate::utils::tests::FloatEq;
     use crate::{
         city::{City, MoodState::*},
@@ -1783,7 +1808,12 @@ pub mod tests {
         let old = Player::new(civilizations::tests::get_test_civilization(), 0);
         let new = Player::new(civilizations::tests::get_test_civilization(), 1);
 
-        let wonder = Wonder::builder("wonder", ResourcePile::empty(), vec![]).build();
+        let wonder = Wonder::builder(
+            "wonder",
+            PaymentModel::resources(ResourcePile::empty()),
+            vec![],
+        )
+        .build();
         let mut game = test_game();
         game.players.push(old);
         game.players.push(new);

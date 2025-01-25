@@ -11,7 +11,6 @@ pub enum ResourceType {
     Gold,
     MoodTokens,    // is not a resource, but a token, with no limit
     CultureTokens, // is not a resource, but a token, with no limit
-    Discount, //discount on building cost, which can be used for any resource that is not a token
 }
 
 impl ResourceType {
@@ -21,13 +20,8 @@ impl ResourceType {
     }
 
     #[must_use]
-    pub fn is_discount(&self) -> bool {
-        matches!(self, ResourceType::Discount)
-    }
-
-    #[must_use]
     pub fn is_resource(&self) -> bool {
-        !self.is_token() && !self.is_discount()
+        !self.is_token()
     }
 
     #[must_use]

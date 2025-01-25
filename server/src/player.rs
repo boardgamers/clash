@@ -3,7 +3,7 @@ use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
 use crate::movement::move_routes;
 use crate::movement::{is_valid_movement_type, MoveRoute};
-use crate::payment::{get_sum_payment_model, PaymentModel};
+use crate::payment::PaymentModel;
 use crate::resource::ResourceType;
 use crate::unit::{carried_units, get_current_move, MovementRestriction};
 use crate::{
@@ -49,8 +49,8 @@ pub struct Player {
     pub cities: Vec<City>,
     pub units: Vec<Unit>,
     pub civilization: Civilization,
-    pub active_leader: Option<Leader>,
-    pub available_leaders: Vec<Leader>,
+    pub active_leader: Option<String>,
+    pub available_leaders: Vec<String>,
     pub advances: Vec<String>,
     pub unlocked_special_advances: Vec<String>,
     pub wonders_build: Vec<String>,
@@ -85,13 +85,12 @@ impl PartialEq for Player {
                 .all(|(i, city)| city.position == other.cities[i].position)
             && self.units == other.units
             && self.civilization.name == other.civilization.name
-            && self.active_leader.as_ref().map(|leader| &leader.name)
-                == other.active_leader.as_ref().map(|leader| &leader.name)
+            && self.active_leader == other.active_leader
             && self
                 .available_leaders
                 .iter()
                 .enumerate()
-                .all(|(i, leader)| leader.name == other.available_leaders[i].name)
+                .all(|(i, leader)| *leader == other.available_leaders[i])
             && self.advances == other.advances
             && self.unlocked_special_advances == other.unlocked_special_advances
             && self.wonders_build == other.wonders_build
@@ -115,6 +114,7 @@ impl Player {
     ///
     /// Panics if elements like wonders or advances don't exist
     pub fn initialize_player(data: PlayerData, game: &mut Game) {
+        let leader = data.active_leader.clone();
         let player = Self::from_data(data);
         let player_index = player.index;
         game.players.push(player);
@@ -143,9 +143,10 @@ impl Player {
                 }
             }
         }
-        if let Some(leader) = game.players[player_index].active_leader.take() {
-            (leader.player_initializer)(game, player_index);
-            game.players[player_index].active_leader = Some(leader);
+        if let Some(leader) = leader {
+            Self::with_leader(&leader, game, player_index, |game, leader| {
+                (leader.player_initializer)(game, player_index);
+            });
         }
         let mut cities = mem::take(&mut game.players[player_index].cities);
         for city in &mut cities {
@@ -180,18 +181,8 @@ impl Player {
             units,
             civilization: civilizations::get_civilization_by_name(&data.civilization)
                 .expect("player data should have a valid civilization"),
-            active_leader: data.active_leader.map(|leader| {
-                civilizations::get_leader_by_name(&leader, &data.civilization)
-                    .expect("player data should contain a valid leader")
-            }),
-            available_leaders: data
-                .available_leaders
-                .into_iter()
-                .map(|leader| {
-                    civilizations::get_leader_by_name(&leader, &data.civilization)
-                        .expect("player data should contain valid leaders")
-                })
-                .collect(),
+            active_leader: data.active_leader,
+            available_leaders: data.available_leaders,
             advances: data.advances,
             unlocked_special_advances: data.unlocked_special_advance,
             wonders_build: data.wonders_build,
@@ -229,12 +220,8 @@ impl Player {
                 .sorted_by_key(|unit| unit.id)
                 .collect(),
             civilization: self.civilization.name,
-            active_leader: self.active_leader.map(|leader| leader.name),
-            available_leaders: self
-                .available_leaders
-                .into_iter()
-                .map(|leader| leader.name)
-                .collect(),
+            active_leader: self.active_leader,
+            available_leaders: self.available_leaders.into_iter().collect(),
             advances: self.advances.into_iter().sorted().collect(),
             unlocked_special_advance: self.unlocked_special_advances,
             wonders_build: self.wonders_build,
@@ -271,15 +258,8 @@ impl Player {
                 .sorted_by_key(|unit| unit.id)
                 .collect(),
             civilization: self.civilization.name.clone(),
-            active_leader: self
-                .active_leader
-                .as_ref()
-                .map(|leader| leader.name.clone()),
-            available_leaders: self
-                .available_leaders
-                .iter()
-                .map(|leader| leader.name.clone())
-                .collect(),
+            active_leader: self.active_leader.clone(),
+            available_leaders: self.available_leaders.clone(),
             advances: self.advances.iter().cloned().sorted().collect(),
             unlocked_special_advance: self.unlocked_special_advances.clone(),
             wonders_build: self.wonders_build.clone(),
@@ -303,6 +283,9 @@ impl Player {
         }
     }
 
+    ///
+    /// # Panics
+    /// Panics if the civilization does not exist
     #[must_use]
     pub fn new(civilization: Civilization, index: usize) -> Self {
         Self {
@@ -314,9 +297,13 @@ impl Player {
             events: Some(PlayerEvents::new()),
             cities: Vec::new(),
             units: Vec::new(),
-            civilization,
             active_leader: None,
-            available_leaders: Vec::new(),
+            available_leaders: civilization
+                .leaders
+                .iter()
+                .map(|l| l.name.clone())
+                .collect(),
+            civilization,
             advances: vec![String::from("Farming"), String::from("Mining")],
             unlocked_special_advances: Vec::new(),
             game_event_tokens: 3,
@@ -334,6 +321,49 @@ impl Player {
             next_unit_id: 0,
             played_once_per_turn_actions: Vec::new(),
         }
+    }
+
+    #[must_use]
+    pub fn active_leader(&self) -> Option<&Leader> {
+        self.active_leader
+            .as_ref()
+            .and_then(|name| self.get_leader(name))
+    }
+
+    #[must_use]
+    pub fn get_leader(&self, name: &String) -> Option<&Leader> {
+        self.civilization
+            .leaders
+            .iter()
+            .find(|leader| &leader.name == name)
+    }
+
+    pub(crate) fn with_leader(
+        leader: &str,
+        game: &mut Game,
+        player_index: usize,
+        f: impl FnOnce(&mut Game, &Leader),
+    ) {
+        let pos = game.players[player_index]
+            .civilization
+            .leaders
+            .iter()
+            .position(|l| l.name == leader)
+            .expect("player should have the leader");
+        let l = game.players[player_index].civilization.leaders.remove(pos);
+        f(game, &l);
+        game.players[player_index]
+            .civilization
+            .leaders
+            .insert(pos, l);
+    }
+
+    #[must_use]
+    pub fn available_leaders(&self) -> Vec<&Leader> {
+        self.available_leaders
+            .iter()
+            .filter_map(|name| self.get_leader(name))
+            .collect()
     }
 
     pub fn end_turn(&mut self) {
@@ -413,7 +443,7 @@ impl Player {
 
     #[must_use]
     pub fn can_advance(&self, advance: &Advance) -> bool {
-        self.get_advance_payment_options(&advance.name).can_afford()
+        self.advance_cost(&advance.name).can_afford(&self.resources)
             && self.can_advance_free(advance)
     }
 
@@ -526,16 +556,16 @@ impl Player {
     }
 
     #[must_use]
-    pub fn construct_cost(&self, building: Building, city: &City) -> ResourcePile {
+    pub fn construct_cost(&self, building: Building, city: &City) -> PaymentModel {
         let mut cost = CONSTRUCT_COST;
         self.get_events()
             .construct_cost
             .trigger(&mut cost, city, &building);
-        cost
+        PaymentModel::resources(cost)
     }
 
     #[must_use]
-    pub fn wonder_cost(&self, wonder: &Wonder, city: &City) -> ResourcePile {
+    pub fn wonder_cost(&self, wonder: &Wonder, city: &City) -> PaymentModel {
         let mut cost = wonder.cost.clone();
         self.get_events()
             .wonder_cost
@@ -544,19 +574,13 @@ impl Player {
     }
 
     #[must_use]
-    pub fn advance_cost(&self, advance: &str) -> u32 {
+    pub fn advance_cost(&self, advance: &str) -> PaymentModel {
         let mut cost = ADVANCE_COST;
         self.get_events()
             .advance_cost
             .trigger(&mut cost, &advance.to_string(), &());
-        cost
-    }
-
-    #[must_use]
-    pub fn get_advance_payment_options(&self, advance: &str) -> PaymentModel {
-        get_sum_payment_model(
-            &self.resources,
-            self.advance_cost(advance),
+        PaymentModel::sum(
+            cost,
             &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
         )
     }
@@ -660,10 +684,10 @@ impl Player {
         &self,
         units: &[UnitType],
         city_position: Position,
-        leader_index: Option<usize>,
+        leader_name: Option<&String>,
         replaced_units: &[u32],
     ) -> bool {
-        if !self.can_recruit_without_replaced(units, city_position, leader_index) {
+        if !self.can_recruit_without_replaced(units, city_position, leader_name) {
             return false;
         }
         let mut units_left = self.available_units();
@@ -700,7 +724,7 @@ impl Player {
         &self,
         units: &[UnitType],
         city_position: Position,
-        leader_index: Option<usize>,
+        leader_name: Option<&String>,
     ) -> bool {
         let city = self
             .get_city(city_position)
@@ -708,8 +732,8 @@ impl Player {
         if !city.can_activate() {
             return false;
         }
-        let cost = units.iter().map(UnitType::cost).sum();
-        if !self.resources.can_afford(&cost) {
+        let cost = PaymentModel::resources(units.iter().map(UnitType::cost).sum());
+        if !cost.can_afford(&self.resources) {
             return false;
         }
         if units.len() > city.mood_modified_size() {
@@ -733,24 +757,16 @@ impl Player {
         {
             return false;
         }
-        if units.iter().any(|unit| matches!(unit, UnitType::Leader))
-            && (leader_index.is_none()
-                || leader_index.is_none_or(|index| index >= self.available_leaders.len()))
-        {
-            return false;
-        }
-        if units
+
+        let leaders = units
             .iter()
             .filter(|unit| matches!(unit, UnitType::Leader))
-            .count()
-            > 1
-        {
-            return false;
+            .count();
+        match leaders {
+            0 => leader_name.is_none(),
+            1 => leader_name.is_some_and(|n| self.available_leaders.contains(n)),
+            _ => false,
         }
-        if leader_index.is_some_and(|leader_index| leader_index >= self.available_leaders.len()) {
-            return false;
-        }
-        true
     }
 
     pub fn add_unit(&mut self, position: Position, unit_type: UnitType) {

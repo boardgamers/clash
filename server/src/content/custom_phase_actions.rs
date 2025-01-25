@@ -1,9 +1,10 @@
 use crate::combat::{combat_loop, Combat, CombatModifier};
 use crate::content::advances::SIEGECRAFT;
 use crate::game::{Game, GameState};
-use crate::payment::get_single_resource_payment_model;
+use crate::payment::PaymentModel;
 use crate::player::Player;
 use crate::position::Position;
+use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use serde::{Deserialize, Serialize};
 
@@ -12,8 +13,10 @@ pub enum CustomPhaseState {
     SiegecraftPayment(Combat),
 }
 
-pub const SIEGECRAFT_EXTRA_DIE: ResourcePile = ResourcePile::wood(2);
-pub const SIEGECRAFT_IGNORE_HIT: ResourcePile = ResourcePile::ore(2);
+pub const SIEGECRAFT_EXTRA_DIE: PaymentModel =
+    PaymentModel::sum(2, &[ResourceType::Wood, ResourceType::Gold]);
+pub const SIEGECRAFT_IGNORE_HIT: PaymentModel =
+    PaymentModel::sum(2, &[ResourceType::Ore, ResourceType::Gold]);
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct SiegecraftPayment {
@@ -129,9 +132,8 @@ fn pay_siegecraft(
 
     for (payment, cost, gain) in options {
         if !payment.is_empty() {
-            let payment_options = get_single_resource_payment_model(&player.resources, cost);
-            assert!(payment_options.is_valid(payment), "Invalid payment");
-            player.loose_resources(cost.clone());
+            assert!(cost.is_valid_payment(payment), "Invalid payment");
+            player.loose_resources(payment.clone());
             combat.modifiers.push(gain);
         }
     }

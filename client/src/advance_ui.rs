@@ -1,7 +1,7 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::layout_ui::{left_mouse_button_pressed_in_rect, top_centered_text};
 use crate::log_ui::break_text;
-use crate::payment_ui::{payment_model_dialog, PaymentModelEntry};
+use crate::payment_ui::{new_payment, payment_model_dialog, Payment};
 use crate::player_ui::player_color;
 use crate::render_context::RenderContext;
 use crate::tooltip::show_tooltip_for_rect;
@@ -13,9 +13,7 @@ use macroquad::prelude::{
 use server::action::Action;
 use server::advance::{Advance, Bonus};
 use server::content::advances;
-use server::game::Game;
 use server::game::GameState;
-use server::payment::PaymentModel;
 use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::status_phase::StatusPhaseAction;
@@ -30,22 +28,9 @@ pub enum AdvanceState {
     Unavailable,
 }
 
-#[derive(Clone)]
-pub struct AdvancePayment {
-    pub name: String,
-    model: PaymentModel,
-}
-
-impl AdvancePayment {
-    fn new(game: &Game, player_index: usize, name: &str) -> AdvancePayment {
-        let model = game
-            .get_player(player_index)
-            .get_advance_payment_options(name);
-        AdvancePayment {
-            name: name.to_string(),
-            model,
-        }
-    }
+fn new_advance_payment(rc: &RenderContext, name: &str) -> Payment {
+    let p = rc.shown_player;
+    new_payment(&p.advance_cost(name), &p.resources, name, false)
 }
 
 pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
@@ -64,9 +49,8 @@ pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
             }
         },
         |a| {
-            StateUpdate::OpenDialog(ActiveDialog::AdvancePayment(AdvancePayment::new(
-                game,
-                rc.shown_player.index,
+            StateUpdate::OpenDialog(ActiveDialog::AdvancePayment(new_advance_payment(
+                rc,
                 a.name.as_str(),
             )))
         },
@@ -222,7 +206,7 @@ fn description(p: &Player, a: &Advance) -> Vec<String> {
     parts
 }
 
-pub fn pay_advance_dialog(ap: &AdvancePayment, rc: &RenderContext) -> StateUpdate {
+pub fn pay_advance_dialog(ap: &Payment, rc: &RenderContext) -> StateUpdate {
     let update = show_paid_advance_menu(rc);
     if !matches!(update, StateUpdate::None) {
         // select a different advance
@@ -230,17 +214,8 @@ pub fn pay_advance_dialog(ap: &AdvancePayment, rc: &RenderContext) -> StateUpdat
     };
     payment_model_dialog(
         rc,
-        &[PaymentModelEntry {
-            name: ap.name.clone(),
-            model: ap.model.clone(),
-            optional: false,
-        }],
-        |p| {
-            ActiveDialog::AdvancePayment(AdvancePayment {
-                name: ap.name.clone(),
-                model: p[0].model.clone(),
-            })
-        },
+        &[ap.clone()],
+        |p| ActiveDialog::AdvancePayment(p[0].clone()),
         true,
         |pile| {
             StateUpdate::Execute(Action::Playing(PlayingAction::Advance {

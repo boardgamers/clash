@@ -103,7 +103,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         }
         PlayingAction::Custom(action) => action.format_log_item(game, player, &player_name),
         PlayingAction::EndTurn => format!(
-            "{player_name} ended his turn{}",
+            "{player_name} ended their turn{}",
             match game.actions_left {
                 0 => String::new(),
                 actions_left => format!(" with {actions_left} actions left"),
@@ -170,21 +170,21 @@ pub fn format_happiness_increase(
 }
 
 fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -> String {
-    let leader_index = r.leader_index;
+    let leader_name = r.leader_name.clone();
     let city_position = &r.city_position;
     let units = &r.units;
     let payment = &r.payment;
     let replaced_units = &r.replaced_units;
     let units_str = units.iter().cloned().collect::<Units>();
-    let leader_str = leader_index.map_or(String::new(), |leader_index| {
+    let leader_str = leader_name.map_or(String::new(), |leader_name| {
         format!(
-            " {} {} as his leader",
+            " {} {} as their leader",
             if player.available_leaders.len() > 1 {
                 "choosing"
             } else {
                 "getting"
             },
-            &player.available_leaders[leader_index].name
+            &leader_name
         )
     });
     let mood = format_mood_change(player, *city_position);
@@ -379,7 +379,7 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
                 "{player_name} {}",
                 match new_government {
                     ChangeGovernmentType::ChangeGovernment(new_government_advance) => format!(
-                        "changed his government from {} to {} - additional advances: {}",
+                        "changed their government from {} to {} - additional advances: {}",
                         game.players[game.active_player()]
                             .government()
                             .expect("player should have a government before changing it"),
@@ -387,7 +387,7 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
                         new_government_advance.additional_advances.join(", ")
                     ),
                     ChangeGovernmentType::KeepGovernment =>
-                        String::from("did not change his government"),
+                        String::from("did not change their government"),
                 }
             )
         }

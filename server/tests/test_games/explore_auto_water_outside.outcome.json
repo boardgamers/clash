@@ -628,9 +628,7 @@
           "city_position": "D1",
           "payment": {
             "food": 2
-          },
-          "leader_index": null,
-          "replaced_units": []
+          }
         }
       }
     },
@@ -680,9 +678,7 @@
           "city_position": "E7",
           "payment": {
             "food": 2
-          },
-          "leader_index": null,
-          "replaced_units": []
+          }
         }
       }
     },
@@ -743,9 +739,9 @@
     "Player1 used a move units action",
     "\tPlayer1 moved 1 settler from C2 to B2. Explored tiles B3=Water, C3=Fertile, A3=Forest, B2=Mountain",
     "\tPlayer1 ended the movement action",
-    "Player1 ended his turn with 1 actions left",
+    "Player1 ended their turn with 1 actions left",
     "It's Player2's turn",
-    "Player2 ended his turn with 3 actions left",
+    "Player2 ended their turn with 3 actions left",
     "It's Player1's turn",
     "Round 2/3",
     "Player1 used a move units action",
@@ -758,9 +754,9 @@
     "Player1 used a move units action",
     "\tPlayer1 moved 1 settler from C4 to B4. Explored tiles B5=Water, C5=Water, A5=Mountain, B4=Fertile",
     "\tPlayer1 ended the movement action",
-    "Player1 ended his turn",
+    "Player1 ended their turn",
     "It's Player2's turn",
-    "Player2 ended his turn with 3 actions left",
+    "Player2 ended their turn with 3 actions left",
     "It's Player1's turn",
     "Round 3/3",
     "Player1 used a move units action",
@@ -773,9 +769,9 @@
     "\tPlayer1 moved 1 settler from D4 to D5",
     "Player1 chose the orientation of the newly explored tiles. Explored tiles D6=Fertile, E6=Mountain, C6=Forest, D5=Fertile",
     "\tPlayer1 ended the movement action",
-    "Player1 ended his turn",
+    "Player1 ended their turn",
     "It's Player2's turn",
-    "Player2 ended his turn with 3 actions left",
+    "Player2 ended their turn with 3 actions left",
     "It's Player1's turn",
     "The game has entered the 1st status phase",
     "Player1 advanced Fishing for free",
@@ -792,7 +788,7 @@
     "\tPlayer1 moved 1 settler from C6 to C7. Explored tiles B6=Water, A7=Barren, C7=Forest, B7=Fertile",
     "\tPlayer1 ended the movement action",
     "Player1 founded a city at C7",
-    "Player1 ended his turn",
+    "Player1 ended their turn",
     "It's Player2's turn",
     "Player2 used a move units action",
     "\tPlayer2 moved 1 settler from D8 to E8",
@@ -801,7 +797,7 @@
     "\tPlayer2 moved 1 settler from E8 to E7. Explored tiles F6=Water, E7=Forest, G7=Water, F7=Fertile",
     "\tPlayer2 ended the movement action",
     "Player2 founded a city at E7",
-    "Player2 ended his turn",
+    "Player2 ended their turn",
     "It's Player1's turn",
     "Round 2/3",
     "Player1 paid 2 food to recruit 1 settler in the city at D1",
@@ -809,20 +805,20 @@
     "\tPlayer1 moved 1 settler from D1 to E2",
     "\tPlayer1 ended the movement action",
     "Player1 collects 1 food and 1 wood in the city at D1 making it Neutral",
-    "Player1 ended his turn",
+    "Player1 ended their turn",
     "It's Player2's turn",
     "Player2 paid 2 food to recruit 1 settler in the city at E7",
     "Player2 used a move units action",
     "\tPlayer2 moved 1 settler from E7 to E6",
     "\tPlayer2 ended the movement action",
-    "Player2 ended his turn with 1 actions left",
+    "Player2 ended their turn with 1 actions left",
     "It's Player1's turn",
     "Round 3/3",
     "Player1 used a move units action",
     "\tPlayer1 moved 1 settler from E2 to E3",
     "Player1 chose the orientation of the newly explored tiles. Explored tiles F3=Water, G3=Mountain, E3=Mountain, F2=Forest",
     "\tPlayer1 ended the movement action",
-    "Player1 ended his turn with 2 actions left",
+    "Player1 ended their turn with 2 actions left",
     "It's Player2's turn",
     "Player2 used a move units action",
     "\tPlayer2 marched 1 settler from E6 to F5. Explored tiles E5=Mountain, F4=Barren, F5=Mountain, G5=Water"

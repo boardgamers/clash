@@ -15,7 +15,6 @@ pub fn resource_name(t: ResourceType) -> &'static str {
         ResourceType::Gold => "Gold",
         ResourceType::MoodTokens => "Mood",
         ResourceType::CultureTokens => "Culture",
-        ResourceType::Discount => panic!("Discount is not a resource type"),
     }
 }
 
@@ -26,10 +25,9 @@ pub fn new_resource_map(p: &ResourcePile) -> HashMap<ResourceType, u32> {
     add_resource(&mut m, p.wood, ResourceType::Wood);
     add_resource(&mut m, p.ore, ResourceType::Ore);
     add_resource(&mut m, p.ideas, ResourceType::Ideas);
-    add_resource(&mut m, p.gold as u32, ResourceType::Gold);
+    add_resource(&mut m, p.gold, ResourceType::Gold);
     add_resource(&mut m, p.mood_tokens, ResourceType::MoodTokens);
     add_resource(&mut m, p.culture_tokens, ResourceType::CultureTokens);
-    add_resource(&mut m, 0, ResourceType::Discount);
     m
 }
 

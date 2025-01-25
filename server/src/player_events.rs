@@ -1,3 +1,4 @@
+use crate::payment::PaymentModel;
 use crate::playing_actions::PlayingActionType;
 use crate::{
     city::City, city_pieces::Building, events::EventMut, player::Player, position::Position,
@@ -11,7 +12,7 @@ pub struct PlayerEvents {
     pub construct_cost: EventMut<ResourcePile, City, Building>,
     pub on_construct_wonder: EventMut<Player, Position, Wonder>,
     pub on_undo_construct_wonder: EventMut<Player, Position, Wonder>,
-    pub wonder_cost: EventMut<ResourcePile, City, Wonder>,
+    pub wonder_cost: EventMut<PaymentModel, City, Wonder>,
     pub on_advance: EventMut<Player, String, ()>,
     pub on_undo_advance: EventMut<Player, String, ()>,
     pub advance_cost: EventMut<u32, String>,

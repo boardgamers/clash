@@ -1,4 +1,5 @@
 use crate::game::Game;
+use crate::payment::PaymentModel;
 use crate::position::Position;
 use crate::{resource_pile::ResourcePile, wonder::Wonder};
 
@@ -6,7 +7,9 @@ use crate::{resource_pile::ResourcePile, wonder::Wonder};
 #[rustfmt::skip]
 pub fn get_all() -> Vec<Wonder> {
     vec![
-        Wonder::builder("Pyramids", ResourcePile::new(3, 3, 3, 0, -1, 0, 4), vec![]).build()
+        Wonder::builder("Pyramids", 
+            PaymentModel::resources_with_discount (
+            ResourcePile::new(3, 3, 3, 0, 0, 0, 4), 1), vec![]).build()
     ]
 }
 

@@ -176,7 +176,7 @@ fn basic_actions() {
             units: vec![Settler],
             city_position,
             payment: ResourcePile::food(2),
-            leader_index: None,
+            leader_name: None,
             replaced_units: Vec::new(),
         }));
     let mut game = game_api::execute_action(game, recruit_action, 0);
@@ -661,8 +661,42 @@ fn test_recruit() {
             units: vec![Settler, Infantry],
             city_position: Position::from_offset("A1"),
             payment: ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2),
-            leader_index: None,
+            leader_name: None,
             replaced_units: vec![4],
+        })),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
+fn test_recruit_leader() {
+    test_action(
+        "recruit_leader",
+        Action::Playing(Recruit(server::playing_actions::Recruit {
+            units: vec![Leader],
+            city_position: Position::from_offset("A1"),
+            payment: ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
+            leader_name: Some("Alexander".to_string()),
+            replaced_units: vec![],
+        })),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
+fn test_replace_leader() {
+    test_action(
+        "replace_leader",
+        Action::Playing(Recruit(server::playing_actions::Recruit {
+            units: vec![Leader],
+            city_position: Position::from_offset("A1"),
+            payment: ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
+            leader_name: Some("Kleopatra".to_string()),
+            replaced_units: vec![10],
         })),
         0,
         true,
@@ -678,7 +712,7 @@ fn test_recruit_combat() {
             units: vec![Ship],
             city_position: Position::from_offset("C2"),
             payment: ResourcePile::wood(2),
-            leader_index: None,
+            leader_name: None,
             replaced_units: vec![],
         })),
         0,
