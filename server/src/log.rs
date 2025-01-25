@@ -184,7 +184,7 @@ fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -
             } else {
                 "getting"
             },
-            &player.available_leaders[leader_index].name
+            &player.available_leaders[leader_index]
         )
     });
     let mood = format_mood_change(player, *city_position);

@@ -120,7 +120,10 @@ impl PlayingAction {
         match self {
             Advance { advance, payment } => {
                 let player = &mut game.players[player_index];
-                assert!(player.advance_cost(&advance).is_valid_payment(&payment), "Illegal action");
+                assert!(
+                    player.advance_cost(&advance).is_valid_payment(&payment),
+                    "Illegal action"
+                );
                 player.loose_resources(payment);
                 game.advance(&advance, player_index);
             }

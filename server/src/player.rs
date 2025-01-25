@@ -49,8 +49,8 @@ pub struct Player {
     pub cities: Vec<City>,
     pub units: Vec<Unit>,
     pub civilization: Civilization,
-    pub active_leader: Option<Leader>,
-    pub available_leaders: Vec<Leader>,
+    pub active_leader: Option<String>,
+    pub available_leaders: Vec<String>,
     pub advances: Vec<String>,
     pub unlocked_special_advances: Vec<String>,
     pub wonders_build: Vec<String>,
@@ -85,13 +85,12 @@ impl PartialEq for Player {
                 .all(|(i, city)| city.position == other.cities[i].position)
             && self.units == other.units
             && self.civilization.name == other.civilization.name
-            && self.active_leader.as_ref().map(|leader| &leader.name)
-                == other.active_leader.as_ref().map(|leader| &leader.name)
+            && self.active_leader == other.active_leader
             && self
                 .available_leaders
                 .iter()
                 .enumerate()
-                .all(|(i, leader)| leader.name == other.available_leaders[i].name)
+                .all(|(i, leader)| *leader == other.available_leaders[i])
             && self.advances == other.advances
             && self.unlocked_special_advances == other.unlocked_special_advances
             && self.wonders_build == other.wonders_build
@@ -115,6 +114,7 @@ impl Player {
     ///
     /// Panics if elements like wonders or advances don't exist
     pub fn initialize_player(data: PlayerData, game: &mut Game) {
+        let leader = data.active_leader.clone();
         let player = Self::from_data(data);
         let player_index = player.index;
         game.players.push(player);
@@ -143,9 +143,10 @@ impl Player {
                 }
             }
         }
-        if let Some(leader) = game.players[player_index].active_leader.take() {
-            (leader.player_initializer)(game, player_index);
-            game.players[player_index].active_leader = Some(leader);
+        if let Some(leader) = leader {
+            Self::with_leader(&leader, game, player_index, |game, leader| {
+                (leader.player_initializer)(game, player_index);
+            });
         }
         let mut cities = mem::take(&mut game.players[player_index].cities);
         for city in &mut cities {
@@ -180,18 +181,8 @@ impl Player {
             units,
             civilization: civilizations::get_civilization_by_name(&data.civilization)
                 .expect("player data should have a valid civilization"),
-            active_leader: data.active_leader.map(|leader| {
-                civilizations::get_leader_by_name(&leader, &data.civilization)
-                    .expect("player data should contain a valid leader")
-            }),
-            available_leaders: data
-                .available_leaders
-                .into_iter()
-                .map(|leader| {
-                    civilizations::get_leader_by_name(&leader, &data.civilization)
-                        .expect("player data should contain valid leaders")
-                })
-                .collect(),
+            active_leader: data.active_leader,
+            available_leaders: data.available_leaders,
             advances: data.advances,
             unlocked_special_advances: data.unlocked_special_advance,
             wonders_build: data.wonders_build,
@@ -229,11 +220,10 @@ impl Player {
                 .sorted_by_key(|unit| unit.id)
                 .collect(),
             civilization: self.civilization.name,
-            active_leader: self.active_leader.map(|leader| leader.name),
+            active_leader: self.active_leader,
             available_leaders: self
                 .available_leaders
                 .into_iter()
-                .map(|leader| leader.name)
                 .collect(),
             advances: self.advances.into_iter().sorted().collect(),
             unlocked_special_advance: self.unlocked_special_advances,
@@ -271,15 +261,9 @@ impl Player {
                 .sorted_by_key(|unit| unit.id)
                 .collect(),
             civilization: self.civilization.name.clone(),
-            active_leader: self
-                .active_leader
-                .as_ref()
-                .map(|leader| leader.name.clone()),
+            active_leader: self.active_leader.clone(),
             available_leaders: self
-                .available_leaders
-                .iter()
-                .map(|leader| leader.name.clone())
-                .collect(),
+                .available_leaders.clone(),
             advances: self.advances.iter().cloned().sorted().collect(),
             unlocked_special_advance: self.unlocked_special_advances.clone(),
             wonders_build: self.wonders_build.clone(),
@@ -318,9 +302,11 @@ impl Player {
             cities: Vec::new(),
             units: Vec::new(),
             active_leader: None,
-            available_leaders: civilizations::get_civilization_by_name(&civilization.name)
-                .expect("player data should have a valid civilization")
-                .leaders,
+            available_leaders: civilization
+                .leaders
+                .iter()
+                .map(|l| l.name.clone())
+                .collect(),
             civilization,
             advances: vec![String::from("Farming"), String::from("Mining")],
             unlocked_special_advances: Vec::new(),
@@ -339,6 +325,52 @@ impl Player {
             next_unit_id: 0,
             played_once_per_turn_actions: Vec::new(),
         }
+    }
+
+    #[must_use]
+    pub fn active_leader(&self) -> Option<&Leader> {
+        self.active_leader
+            .as_ref()
+            .and_then(|name| self.get_leader(name))
+    }
+
+    #[must_use]
+    pub fn get_leader(&self, name: &String) -> Option<&Leader> {
+        self.civilization
+            .leaders
+            .iter()
+            .find(|leader| &leader.name == name)
+    }
+
+    pub(crate) fn with_leader(
+        leader: &str,
+        game: &mut Game,
+        player_index: usize,
+        f: impl FnOnce(&mut Game, &Leader),
+    ) {
+        let pos = game.players[player_index]
+            .civilization
+            .leaders
+            .iter()
+            .position(|l| l.name == leader)
+            .expect("player should have the leader");
+        let l = game.players[player_index]
+            .civilization
+            .leaders
+            .remove(pos);
+        f(game, &l);
+        game.players[player_index]
+            .civilization
+            .leaders
+            .insert(pos, l);
+    }
+
+    #[must_use]
+    pub fn available_leaders(&self) -> Vec<&Leader> {
+        self.available_leaders
+            .iter()
+            .filter_map(|name| self.get_leader(name))
+            .collect()
     }
 
     pub fn end_turn(&mut self) {

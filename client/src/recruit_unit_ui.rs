@@ -142,7 +142,7 @@ fn new_units(player: &Player) -> Vec<NewUnit> {
                 .available_leaders
                 .iter()
                 .enumerate()
-                .map(|(i, l)| NewUnit::new(UnitType::Leader, l.name.as_str(), Some(i))),
+                .map(|(i, l)| NewUnit::new(UnitType::Leader, l.as_str(), Some(i))),
         )
         .collect()
 }
@@ -263,7 +263,7 @@ fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> Sta
             sel.amount.units,
             sel.amount.leader_index.map_or(String::new(), |i| format!(
                 " ({})",
-                rc.shown_player.available_leaders[i].name
+                rc.shown_player.available_leaders[i]
             )),
             city
         ),

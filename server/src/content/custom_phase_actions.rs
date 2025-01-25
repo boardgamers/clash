@@ -4,17 +4,19 @@ use crate::game::{Game, GameState};
 use crate::payment::PaymentModel;
 use crate::player::Player;
 use crate::position::Position;
+use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use serde::{Deserialize, Serialize};
-use crate::resource::ResourceType;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum CustomPhaseState {
     SiegecraftPayment(Combat),
 }
 
-pub const SIEGECRAFT_EXTRA_DIE: PaymentModel = PaymentModel::sum(2, &[ResourceType::Wood, ResourceType::Gold]);
-pub const SIEGECRAFT_IGNORE_HIT: PaymentModel = PaymentModel::sum(2, &[ResourceType::Ore, ResourceType::Gold]);
+pub const SIEGECRAFT_EXTRA_DIE: PaymentModel =
+    PaymentModel::sum(2, &[ResourceType::Wood, ResourceType::Gold]);
+pub const SIEGECRAFT_IGNORE_HIT: PaymentModel =
+    PaymentModel::sum(2, &[ResourceType::Ore, ResourceType::Gold]);
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct SiegecraftPayment {
