@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 use PlayingAction::*;
 
 use crate::action::Action;
-use crate::content::advances;
 use crate::game::{CulturalInfluenceResolution, GameState};
 use crate::payment::PaymentModel;
 use crate::{
@@ -121,12 +120,7 @@ impl PlayingAction {
         match self {
             Advance { advance, payment } => {
                 let player = &mut game.players[player_index];
-                let cost = player.advance_cost(&advance);
-                assert!(
-                    player.can_advance(&advances::get_advance_by_name(&advance))
-                        && payment.food + payment.ideas + payment.gold == cost,
-                    "Illegal action"
-                );
+                assert!(player.advance_cost(&advance).is_valid_payment(&payment), "Illegal action");
                 player.loose_resources(payment);
                 game.advance(&advance, player_index);
             }

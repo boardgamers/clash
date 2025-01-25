@@ -15,7 +15,6 @@ use server::advance::{Advance, Bonus};
 use server::content::advances;
 use server::game::Game;
 use server::game::GameState;
-use server::payment::PaymentModel;
 use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::status_phase::StatusPhaseAction;
@@ -30,13 +29,11 @@ pub enum AdvanceState {
     Unavailable,
 }
 
-fn new_advance_payment(game: &Game, player_index: usize, name: &str) -> Payment {
-    let model = game
-        .get_player(player_index)
-        .get_advance_payment_options(name);
+fn new_advance_payment(rc: &RenderContext, name: &str) -> Payment {
+    let p = rc.shown_player;
     new_payment(
-        &model,
-        &game.get_player(player_index).resources,
+        &p.advance_cost(name),
+        &p.resources,
         name,
         false,
     )

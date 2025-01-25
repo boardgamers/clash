@@ -315,8 +315,9 @@ impl Player {
             cities: Vec::new(),
             units: Vec::new(),
             active_leader: None,
-            available_leaders:civilizations::get_civilization_by_name(&civilization.name)
-                .expect("player data should have a valid civilization").leaders,
+            available_leaders: civilizations::get_civilization_by_name(&civilization.name)
+                .expect("player data should have a valid civilization")
+                .leaders,
             civilization,
             advances: vec![String::from("Farming"), String::from("Mining")],
             unlocked_special_advances: Vec::new(),
@@ -414,8 +415,7 @@ impl Player {
 
     #[must_use]
     pub fn can_advance(&self, advance: &Advance) -> bool {
-        self.get_advance_payment_options(&advance.name)
-            .can_afford(&self.resources)
+        self.advance_cost(&advance.name).can_afford(&self.resources)
             && self.can_advance_free(advance)
     }
 
@@ -546,18 +546,13 @@ impl Player {
     }
 
     #[must_use]
-    pub fn advance_cost(&self, advance: &str) -> u32 {
+    pub fn advance_cost(&self, advance: &str) -> PaymentModel {
         let mut cost = ADVANCE_COST;
         self.get_events()
             .advance_cost
             .trigger(&mut cost, &advance.to_string(), &());
-        cost
-    }
-
-    #[must_use]
-    pub fn get_advance_payment_options(&self, advance: &str) -> PaymentModel {
         PaymentModel::sum(
-            self.advance_cost(advance),
+            cost,
             &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
         )
     }
