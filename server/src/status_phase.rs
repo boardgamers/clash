@@ -193,7 +193,7 @@ fn play_status_phase_for_player(
 ) -> bool {
     let player = &game.players[player_index];
     match state {
-        StatusPhaseState::CompleteObjectives => false, //todo only skip player if the doesn't have objective cards in his hand (don't skip if the can't complete them unless otherwise specified via setting)
+        StatusPhaseState::CompleteObjectives => false, //todo only skip player if the doesn't have objective cards in their hand (don't skip if the can't complete them unless otherwise specified via setting)
         StatusPhaseState::FreeAdvance => advances::get_all()
             .into_iter()
             .any(|advance| player.can_advance_free(&advance)),

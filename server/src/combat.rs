@@ -202,7 +202,7 @@ fn remove_casualties(game: &mut Game, c: &mut Combat, units: Vec<u32>) -> Combat
     if let Some(defender_hits) = defender_hits {
         if defender_hits < c.attackers.len() as u8 && defender_hits > 0 {
             game.add_info_log_item(format!(
-                "\t{} has to remove {} of his attacking units",
+                "\t{} has to remove {} of their attacking units",
                 game.players[c.attacker].get_name(),
                 defender_hits
             ));
@@ -316,7 +316,7 @@ fn kill_all_attackers(game: &mut Game, c: &mut Combat) {
 
 fn kill_some_attackers(game: &mut Game, c: Combat, defender_hits: u8) {
     game.add_info_log_item(format!(
-        "\t{} has to remove {} of his attacking units",
+        "\t{} has to remove {} of their attacking units",
         game.players[c.attacker].get_name(),
         defender_hits
     ));
@@ -343,7 +343,7 @@ fn kill_all_defenders(game: &mut Game, c: &mut Combat) {
 
 fn kill_some_defenders(game: &mut Game, c: Combat, attacker_hits: u8, defender_hits: u8) {
     game.add_info_log_item(format!(
-        "\t{} has to remove {} of his defending units",
+        "\t{} has to remove {} of their defending units",
         game.players[c.defender].get_name(),
         attacker_hits
     ));
