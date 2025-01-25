@@ -170,13 +170,13 @@ pub fn format_happiness_increase(
 }
 
 fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -> String {
-    let leader_index = r.leader_index;
+    let leader_name = r.leader_name.clone();
     let city_position = &r.city_position;
     let units = &r.units;
     let payment = &r.payment;
     let replaced_units = &r.replaced_units;
     let units_str = units.iter().cloned().collect::<Units>();
-    let leader_str = leader_index.map_or(String::new(), |leader_index| {
+    let leader_str = leader_name.map_or(String::new(), |leader_name| {
         format!(
             " {} {} as their leader",
             if player.available_leaders.len() > 1 {
@@ -184,7 +184,7 @@ fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -
             } else {
                 "getting"
             },
-            &player.available_leaders[leader_index]
+            &leader_name
         )
     });
     let mood = format_mood_change(player, *city_position);

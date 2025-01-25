@@ -73,7 +73,7 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
                     units: r.amount.units.clone().to_vec(),
                     payment: p[0].clone(),
                     replaced_units: r.replaced_units.clone(),
-                    leader_index: r.amount.leader_index,
+                    leader_name: r.amount.leader_name,
                 })),
                 vec![],
                 city,

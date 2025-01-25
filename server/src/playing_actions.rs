@@ -41,7 +41,7 @@ pub struct Recruit {
     pub payment: ResourcePile,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub leader_index: Option<usize>,
+    pub leader_name: Option<String>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub replaced_units: Vec<u32>,
@@ -194,7 +194,7 @@ impl PlayingAction {
                     player.can_recruit(
                         &r.units,
                         r.city_position,
-                        r.leader_index,
+                        r.leader_name.clone(),
                         &r.replaced_units
                     ) && cost.is_valid_payment(&r.payment)
                 );
@@ -203,7 +203,7 @@ impl PlayingAction {
                     player_index,
                     r.units,
                     r.city_position,
-                    r.leader_index,
+                    r.leader_name.clone(),
                     r.replaced_units,
                 );
             }
@@ -350,7 +350,7 @@ impl PlayingAction {
             Collect(c) => undo_collect(game, player_index, c),
             Recruit(r) => {
                 game.players[player_index].gain_resources(r.payment);
-                game.undo_recruit(player_index, &r.units, r.city_position, r.leader_index);
+                game.undo_recruit(player_index, &r.units, r.city_position, r.leader_name);
             }
             IncreaseHappiness(i) => undo_increase_happiness(game, player_index, i),
             Custom(custom_action) => custom_action.undo(game, player_index),

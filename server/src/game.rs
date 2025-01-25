@@ -947,15 +947,15 @@ impl Game {
         self.lock_undo();
     }
 
-    fn set_active_leader(&mut self, leader_index: usize, player_index: usize) {
-        let name = self.players[player_index]
+    fn set_active_leader(&mut self, leader_name: String, player_index: usize) {
+        self.players[player_index]
             .available_leaders
-            .remove(leader_index);
-        Player::with_leader(&name, self, player_index, |game, leader| {
+            .retain(|name| name != &leader_name);
+        Player::with_leader(&leader_name, self, player_index, |game, leader| {
             (leader.player_initializer)(game, player_index);
-            (leader.player_one_time_initializer)(game, leader_index);
+            (leader.player_one_time_initializer)(game, player_index);
         });
-        self.players[player_index].active_leader = Some(name);
+        self.players[player_index].active_leader = Some(leader_name);
     }
 
     ///
@@ -1056,11 +1056,11 @@ impl Game {
         player_index: usize,
         units: Vec<UnitType>,
         city_position: Position,
-        leader_index: Option<usize>,
+        leader_name: Option<String>,
         replaced_units: Vec<u32>,
     ) {
         let mut replaced_leader = None;
-        if let Some(leader_index) = leader_index {
+        if let Some(leader_name) = leader_name {
             if let Some(previous_leader) = self.players[player_index].active_leader.take() {
                 Player::with_leader(
                     &previous_leader,
@@ -1072,7 +1072,7 @@ impl Game {
                 );
                 replaced_leader = Some(previous_leader);
             }
-            self.set_active_leader(leader_index, player_index);
+            self.set_active_leader(leader_name, player_index);
         }
         let mut replaced_units_undo_context = Vec::new();
         for unit in replaced_units {
@@ -1140,9 +1140,9 @@ impl Game {
         player_index: usize,
         units: &[UnitType],
         city_position: Position,
-        leader_index: Option<usize>,
+        leader_name: Option<String>,
     ) {
-        if let Some(leader_index) = leader_index {
+        if let Some(leader_name) = leader_name {
             let current_leader = self.players[player_index]
                 .active_leader
                 .take()
@@ -1159,7 +1159,9 @@ impl Game {
 
             self.players[player_index]
                 .available_leaders
-                .insert(leader_index, current_leader.clone());
+                .push(leader_name);
+            self.players[player_index].available_leaders.sort();
+
             self.players[player_index].active_leader = None;
         }
         let player = &mut self.players[player_index];

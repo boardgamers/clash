@@ -358,7 +358,7 @@
             "mood_tokens": 1,
             "culture_tokens": 1
           },
-          "leader_index": 0
+          "leader_name": "Alexander"
         }
       }
     },
@@ -373,7 +373,7 @@
             "mood_tokens": 1,
             "culture_tokens": 1
           },
-          "leader_index": 0,
+          "leader_name": "Kleopatra",
           "replaced_units": [
             10
           ]

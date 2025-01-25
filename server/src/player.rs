@@ -221,10 +221,7 @@ impl Player {
                 .collect(),
             civilization: self.civilization.name,
             active_leader: self.active_leader,
-            available_leaders: self
-                .available_leaders
-                .into_iter()
-                .collect(),
+            available_leaders: self.available_leaders.into_iter().collect(),
             advances: self.advances.into_iter().sorted().collect(),
             unlocked_special_advance: self.unlocked_special_advances,
             wonders_build: self.wonders_build,
@@ -262,8 +259,7 @@ impl Player {
                 .collect(),
             civilization: self.civilization.name.clone(),
             active_leader: self.active_leader.clone(),
-            available_leaders: self
-                .available_leaders.clone(),
+            available_leaders: self.available_leaders.clone(),
             advances: self.advances.iter().cloned().sorted().collect(),
             unlocked_special_advance: self.unlocked_special_advances.clone(),
             wonders_build: self.wonders_build.clone(),
@@ -354,10 +350,7 @@ impl Player {
             .iter()
             .position(|l| l.name == leader)
             .expect("player should have the leader");
-        let l = game.players[player_index]
-            .civilization
-            .leaders
-            .remove(pos);
+        let l = game.players[player_index].civilization.leaders.remove(pos);
         f(game, &l);
         game.players[player_index]
             .civilization
@@ -691,10 +684,10 @@ impl Player {
         &self,
         units: &[UnitType],
         city_position: Position,
-        leader_index: Option<usize>,
+        leader_name: Option<String>,
         replaced_units: &[u32],
     ) -> bool {
-        if !self.can_recruit_without_replaced(units, city_position, leader_index) {
+        if !self.can_recruit_without_replaced(units, city_position, leader_name) {
             return false;
         }
         let mut units_left = self.available_units();
@@ -731,7 +724,7 @@ impl Player {
         &self,
         units: &[UnitType],
         city_position: Position,
-        leader_index: Option<usize>,
+        leader_name: Option<String>,
     ) -> bool {
         let city = self
             .get_city(city_position)
@@ -764,24 +757,16 @@ impl Player {
         {
             return false;
         }
-        if units.iter().any(|unit| matches!(unit, UnitType::Leader))
-            && (leader_index.is_none()
-                || leader_index.is_none_or(|index| index >= self.available_leaders.len()))
-        {
-            return false;
-        }
-        if units
+
+        let leaders = units
             .iter()
             .filter(|unit| matches!(unit, UnitType::Leader))
-            .count()
-            > 1
-        {
-            return false;
+            .count();
+        match leaders {
+            0 => leader_name.is_none(),
+            1 => leader_name.is_some_and(|n| self.available_leaders.contains(&n)),
+            _ => false,
         }
-        if leader_index.is_some_and(|leader_index| leader_index >= self.available_leaders.len()) {
-            return false;
-        }
-        true
     }
 
     pub fn add_unit(&mut self, position: Position, unit_type: UnitType) {
