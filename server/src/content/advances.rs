@@ -15,6 +15,7 @@ pub const ROADS: &str = "Roads";
 pub const SIEGECRAFT: &str = "Siegecraft";
 pub const STEEL_WEAPONS: &str = "Steel Weapons";
 pub const METALLURGY: &str = "Metallurgy";
+pub const RITUALS: &str = "Rituals";
 
 #[must_use]
 pub fn get_all() -> Vec<Advance> {
@@ -32,7 +33,7 @@ pub fn get_groups() -> Vec<(String, Vec<Advance>)> {
         ("Seafaring".to_string(), seafaring()),
         ("Education".to_string(), education()),
         ("Warfare".to_string(), warfare()),
-        ("Spirituality".to_string(), vec![]),
+        ("Spirituality".to_string(), spirituality()),
         // second half of the advances
         ("Economy".to_string(), vec![]),
         ("Culture".to_string(), vec![]),
@@ -181,6 +182,16 @@ fn warfare() -> Vec<Advance> {
                 STEEL_WEAPONS,
                 "Immediately before a Land battle starts, you may pay 1 ore to get +2 combat value in every Combat Round against an enemy that does not have the Steel Weapons advance, but only +1 combat value against an enemy that does have it (regardless if they use it or not this battle).",
             ),
+        ],
+    )
+}
+
+fn spirituality() -> Vec<Advance> {
+    advance_group(
+        "Myths",
+        vec![
+            Advance::builder("Myths", "not implemented"),
+            Advance::builder(RITUALS, "When you perform the Increase Happiness Action you may spend any Resources as a substitute for mood tokens. This is done at a 1:1 ratio"),
         ],
     )
 }

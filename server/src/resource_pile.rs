@@ -1,4 +1,3 @@
-use crate::payment::PaymentModel;
 use crate::resource::ResourceType;
 use crate::utils;
 use serde::{Deserialize, Serialize};
@@ -129,13 +128,8 @@ impl ResourcePile {
     }
 
     #[must_use]
-    pub fn empty() -> Self {
-        Self::default()
-    }
-
-    #[must_use]
-    pub fn can_afford(&self, cost: &ResourcePile) -> bool {
-        PaymentModel::resources(cost.clone()).can_afford(self)
+    pub const fn empty() -> Self {
+        Self::wood(0)
     }
 
     #[must_use]

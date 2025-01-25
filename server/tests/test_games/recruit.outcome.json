@@ -295,7 +295,10 @@
               "C2",
               1
             ]
-          ]
+          ],
+          "payment": {
+            "mood_tokens": 2
+          }
         }
       }
     },
@@ -364,7 +367,6 @@
             "ore": 1,
             "gold": 2
           },
-
           "replaced_units": [
             4
           ]

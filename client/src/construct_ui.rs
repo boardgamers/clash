@@ -1,5 +1,5 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::payment_ui::{new_payment, payment_model_dialog, Payment};
+use crate::payment_ui::{new_payment, payment_dialog, Payment};
 use crate::recruit_unit_ui::RecruitSelection;
 use crate::render_context::RenderContext;
 use server::action::Action;
@@ -37,21 +37,21 @@ pub fn new_building_positions(
 
 pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> StateUpdate {
     let city = rc.game.get_any_city(cp.city_position).unwrap();
-    payment_model_dialog(
+    payment_dialog(
         rc,
-        &[cp.payment.clone()],
+        &cp.payment.clone(),
         |p| {
             let mut new = cp.clone();
-            new.payment = p[0].clone();
+            new.payment = p;
             ActiveDialog::ConstructionPayment(new)
         },
         true,
-        |p| match &cp.project {
+        |payment| match &cp.project {
             ConstructionProject::Building(b, pos) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Construct(Construct {
                     city_position: cp.city_position,
                     city_piece: *b,
-                    payment: p[0].clone(),
+                    payment,
                     port_position: *pos,
                     temple_bonus: None,
                 })),
@@ -61,7 +61,7 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
             ConstructionProject::Wonder(w) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Custom(CustomAction::ConstructWonder {
                     city_position: cp.city_position,
-                    payment: p[0].clone(),
+                    payment,
                     wonder: w.clone(),
                 })),
                 vec![],
@@ -71,7 +71,7 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
                 Action::Playing(PlayingAction::Recruit(Recruit {
                     city_position: cp.city_position,
                     units: r.amount.units.clone().to_vec(),
-                    payment: p[0].clone(),
+                    payment,
                     replaced_units: r.replaced_units.clone(),
                     leader_name: r.amount.leader_name.clone(),
                 })),

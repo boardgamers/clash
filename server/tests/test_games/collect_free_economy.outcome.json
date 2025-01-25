@@ -6,11 +6,11 @@
       "id": 0,
       "resources": {
         "food": 1,
-        "wood": 6,
-        "ore": 6,
+        "wood": 7,
+        "ore": 7,
         "ideas": 5,
         "gold": 7,
-        "mood_tokens": 6,
+        "mood_tokens": 5,
         "culture_tokens": 7
       },
       "resource_limit": {
@@ -36,7 +36,7 @@
             "observatory": 0
           },
           "mood_state": "Neutral",
-          "activations": 9,
+          "activations": 1,
           "angry_activation": false,
           "player_index": 0,
           "position": "C2"
@@ -97,6 +97,7 @@
       "available_leaders": [],
       "advances": [
         "Farming",
+        "Free Economy",
         "Math",
         "Mining"
       ],
@@ -133,7 +134,10 @@
           ]
         ]
       ],
-      "next_unit_id": 8
+      "next_unit_id": 8,
+      "played_once_per_turn_actions": [
+        "FreeEconomyCollect"
+      ]
     },
     {
       "name": null,
@@ -160,7 +164,7 @@
         {
           "city_pieces": {},
           "mood_state": "Angry",
-          "activations": 2,
+          "activations": 0,
           "angry_activation": false,
           "player_index": 1,
           "position": "C1"
@@ -315,21 +319,56 @@
           "temple_bonus": null
         }
       }
+    },
+    {
+      "Playing": "EndTurn"
+    },
+    {
+      "Playing": "EndTurn"
+    },
+    {
+      "Playing": {
+        "Custom": {
+          "FreeEconomyCollect": {
+          "city_position": "C2",
+          "collections": [
+            [
+              "B1",
+              {
+                "ore": 1
+              }
+            ],
+            [
+              "B2",
+              {
+                "wood": 1
+              }
+            ]
+          ]
+        }
+      }
+    }
     }
   ],
-  "action_log_index": 3,
+  "action_log_index": 6,
   "log": [
     "The game has started",
     "Age 1 has started",
     "Round 1/3",
     "Player1 increased happiness in the city at C2 by 1 steps, making it Happy",
     "Player1 paid 2 ideas to get the Math advance",
-    "Player1 paid 1 food, 1 wood and 1 ore to construct a Observatory in the city at C2 making it Neutral"
+    "Player1 paid 1 food, 1 wood and 1 ore to construct a Observatory in the city at C2 making it Neutral",
+    "Player1 ended their turn",
+    "It's Player2's turn",
+    "Player2 ended their turn with 3 actions left",
+    "It's Player1's turn",
+    "Round 2/3",
+    "Player1 collects 1 ore and 1 wood in the city at C2 using Free Economy. Could not store 1 ore"
   ],
-  "undo_limit": 0,
-  "actions_left": 0,
+  "undo_limit": 5,
+  "actions_left": 3,
   "successful_cultural_influence": false,
-  "round": 1,
+  "round": 2,
   "age": 1,
   "messages": [
     "The game has started"
@@ -382,6 +421,13 @@
     },
     {
       "Recruit": {}
+    },
+    {
+      "WastedResources": {
+        "resources": {
+          "ore": 1
+        }
+      }
     }
   ]
 }

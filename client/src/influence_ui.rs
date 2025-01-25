@@ -77,7 +77,7 @@ fn show_city(rc: &RenderContext, mouse_pos: Vec2, city: &City) -> Option<StateUp
                 city.position,
                 *b,
             ) {
-                if player.resources.can_afford(&cost) {
+                if player.can_afford_resources(&cost) {
                     let name = building_name(*b);
                     let _ = rc.with_camera(CameraMode::World, |rc| {
                         draw_circle_lines(center.x, center.y, BUILDING_SIZE, 1., WHITE);

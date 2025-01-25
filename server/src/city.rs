@@ -3,7 +3,6 @@ use std::ops::{Add, Sub};
 use serde::{Deserialize, Serialize};
 
 use crate::consts::MAX_CITY_SIZE;
-use crate::resource_pile::ResourcePile;
 use crate::{
     city_pieces::{Building, CityPieces, CityPiecesData},
     game::Game,
@@ -133,9 +132,7 @@ impl City {
         if !player.is_building_available(building, game) {
             return false;
         }
-        player
-            .construct_cost(building, self)
-            .can_afford(&player.resources)
+        player.can_afford(&player.construct_cost(building, self))
     }
 
     #[must_use]
@@ -152,10 +149,7 @@ impl City {
         if !matches!(self.mood_state, Happy) {
             return false;
         }
-        if !player
-            .wonder_cost(wonder, self)
-            .can_afford(&player.resources)
-        {
+        if !player.can_afford(&player.wonder_cost(wonder, self)) {
             return false;
         }
         for advance in &wonder.required_advances {
@@ -222,16 +216,6 @@ impl City {
     #[must_use]
     pub fn influenced(&self) -> bool {
         self.uninfluenced_buildings() as usize != self.pieces.amount()
-    }
-
-    #[must_use]
-    pub fn increase_happiness_cost(&self, steps: u32) -> Option<ResourcePile> {
-        let max_steps = 2 - self.mood_state.clone() as u32;
-        if steps > max_steps {
-            None
-        } else {
-            Some(ResourcePile::mood_tokens(self.size() as u32) * steps)
-        }
     }
 }
 

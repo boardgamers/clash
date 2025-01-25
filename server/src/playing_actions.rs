@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use PlayingAction::*;
 
 use crate::action::Action;
+use crate::city::MoodState;
 use crate::game::{CulturalInfluenceResolution, GameState};
 use crate::payment::PaymentModel;
 use crate::{
@@ -58,6 +59,7 @@ pub struct InfluenceCultureAttempt {
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct IncreaseHappiness {
     pub happiness_increases: Vec<(Position, u32)>,
+    pub payment: ResourcePile,
 }
 
 #[derive(Clone, Copy)]
@@ -244,15 +246,15 @@ impl PlayingAction {
                     game.add_to_last_log_item(&format!(" and failed (rolled {roll})"));
                     return;
                 }
+                let roll_boost_cost = 5 - roll as u32;
                 if !game.players[player_index]
-                    .resources
-                    .can_afford(&ResourcePile::culture_tokens(5 - roll as u32))
+                    .can_afford_resources(&ResourcePile::culture_tokens(roll_boost_cost))
                 {
                     game.add_to_last_log_item(&format!(" but rolled a {roll} and has not enough culture tokens to increase the roll "));
                     return;
                 }
                 game.state = GameState::CulturalInfluenceResolution(CulturalInfluenceResolution {
-                    roll_boost_cost: 5 - roll as u32,
+                    roll_boost_cost,
                     target_player_index,
                     target_city_position,
                     city_piece,
@@ -488,15 +490,33 @@ pub(crate) fn undo_collect(game: &mut Game, player_index: usize, c: Collect) {
 
 pub(crate) fn increase_happiness(game: &mut Game, player_index: usize, i: IncreaseHappiness) {
     let player = &mut game.players[player_index];
+    let mut total_cost: PaymentModel = PaymentModel::free();
+    let mut angry_activations = vec![];
     for (city_position, steps) in i.happiness_increases {
         let city = player.get_city(city_position).expect("Illegal action");
-        let cost = city.increase_happiness_cost(steps).expect("Illegal action");
-        player.loose_resources(cost);
+        let cost = player
+            .increase_happiness_cost(city, steps)
+            .expect("Illegal action");
+        assert!(steps > 0, "Illegal action");
+        if city.mood_state == MoodState::Angry {
+            angry_activations.push(city_position);
+        }
+        if total_cost.is_free() {
+            total_cost = cost;
+        } else {
+            total_cost = total_cost + cost;
+        }
         let city = player.get_city_mut(city_position).expect("Illegal action");
         for _ in 0..steps {
             city.increase_mood_state();
         }
     }
+    assert!(
+        total_cost.is_valid_payment(&i.payment.clone()),
+        "Illegal action"
+    );
+    player.loose_resources(i.payment);
+    game.push_undo_context(UndoContext::IncreaseHappiness { angry_activations });
 }
 
 pub(crate) fn undo_increase_happiness(game: &mut Game, player_index: usize, i: IncreaseHappiness) {
@@ -511,4 +531,15 @@ pub(crate) fn undo_increase_happiness(game: &mut Game, player_index: usize, i: I
         }
     }
     player.gain_resources(ResourcePile::mood_tokens(cost));
+
+    if let Some(UndoContext::IncreaseHappiness { angry_activations }) =
+        game.undo_context_stack.pop()
+    {
+        for city_position in angry_activations {
+            let city = player.get_city_mut(city_position).expect("Illegal action");
+            city.angry_activation = true;
+        }
+    } else {
+        panic!("Increase happiness context should be stored in undo context")
+    }
 }

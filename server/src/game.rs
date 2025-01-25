@@ -40,7 +40,6 @@ use crate::{
     utils,
     wonder::Wonder,
 };
-
 pub struct Game {
     pub state: GameState,
     pub players: Vec<Player>,
@@ -1409,7 +1408,7 @@ impl Game {
         let player = &self.players[player_index];
         if matches!(city_piece, Building::Obelisk)
             || starting_city.player_index != player_index
-            || !player.resources.can_afford(&range_boost_cost)
+            || !player.can_afford_resources(&range_boost_cost)
             || (starting_city.influenced() && !self_influence)
             || self.successful_cultural_influence
             || !player.is_building_available(city_piece, self)
@@ -1738,6 +1737,9 @@ pub enum UndoContext {
     WastedResources {
         resources: ResourcePile,
     },
+    IncreaseHappiness {
+        angry_activations: Vec<Position>,
+    },
 }
 
 #[derive(Serialize, Deserialize)]
@@ -1767,7 +1769,6 @@ pub mod tests {
         map::Map,
         player::Player,
         position::Position,
-        resource_pile::ResourcePile,
         utils::Rng,
         wonder::Wonder,
     };
@@ -1808,12 +1809,7 @@ pub mod tests {
         let old = Player::new(civilizations::tests::get_test_civilization(), 0);
         let new = Player::new(civilizations::tests::get_test_civilization(), 1);
 
-        let wonder = Wonder::builder(
-            "wonder",
-            PaymentModel::resources(ResourcePile::empty()),
-            vec![],
-        )
-        .build();
+        let wonder = Wonder::builder("wonder", PaymentModel::free(), vec![]).build();
         let mut game = test_game();
         game.players.push(old);
         game.players.push(new);

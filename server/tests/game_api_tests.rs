@@ -8,16 +8,16 @@ use std::{
 
 use server::action::Action::CustomPhase;
 use server::action::CombatAction;
+use server::content::custom_actions::CustomAction;
 use server::content::custom_phase_actions::{CustomPhaseAction, SiegecraftPayment};
 use server::game::{CulturalInfluenceResolution, GameState};
-use server::playing_actions::PlayingAction;
 use server::status_phase::{
     ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction,
 };
 use server::{
     action::Action,
     city::{City, MoodState::*},
-    city_pieces::Building::{self, *},
+    city_pieces::Building::*,
     content::custom_actions::CustomAction::*,
     game::Game,
     game_api,
@@ -76,7 +76,7 @@ fn basic_actions() {
 
     let construct_action = Action::Playing(Construct(playing_actions::Construct {
         city_position,
-        city_piece: Building::Observatory,
+        city_piece: Observatory,
         payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
         port_position: None,
         temple_bonus: None,
@@ -110,6 +110,7 @@ fn basic_actions() {
     let increase_happiness_action =
         Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness {
             happiness_increases: vec![(city_position, 1)],
+            payment: ResourcePile::mood_tokens(2),
         }));
     let game = game_api::execute_action(game, increase_happiness_action, 0);
     let player = &game.players[0];
@@ -171,14 +172,13 @@ fn basic_actions() {
     let mut game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
     let player = &mut game.players[0];
     player.gain_resources(ResourcePile::food(2));
-    let recruit_action =
-        Action::Playing(PlayingAction::Recruit(server::playing_actions::Recruit {
-            units: vec![Settler],
-            city_position,
-            payment: ResourcePile::food(2),
-            leader_name: None,
-            replaced_units: Vec::new(),
-        }));
+    let recruit_action = Action::Playing(Recruit(server::playing_actions::Recruit {
+        units: vec![Settler],
+        city_position,
+        payment: ResourcePile::food(2),
+        leader_name: None,
+        replaced_units: Vec::new(),
+    }));
     let mut game = game_api::execute_action(game, recruit_action, 0);
     let player = &mut game.players[0];
     assert_eq!(1, player.units.len());
@@ -314,6 +314,7 @@ fn increase_happiness(game: Game) -> Game {
     let increase_happiness_action =
         Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness {
             happiness_increases: vec![(Position::new(0, 0), 1)],
+            payment: ResourcePile::mood_tokens(1),
         }));
     game_api::execute_action(game, increase_happiness_action, 0)
 }
@@ -679,6 +680,42 @@ fn test_wonder() {
 }
 
 #[test]
+fn test_increase_happiness() {
+    test_action(
+        "increase_happiness",
+        Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness {
+            happiness_increases: vec![
+                (Position::from_offset("C2"), 1),
+                (Position::from_offset("B3"), 2),
+            ],
+            payment: ResourcePile::mood_tokens(5),
+        })),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
+fn test_increase_happiness_voting() {
+    test_action(
+        "increase_happiness_voting",
+        Action::Playing(Custom(CustomAction::VotingIncreaseHappiness(
+            playing_actions::IncreaseHappiness {
+                happiness_increases: vec![
+                    (Position::from_offset("C2"), 1),
+                    (Position::from_offset("B3"), 2),
+                ],
+                payment: ResourcePile::mood_tokens(5),
+            },
+        ))),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
 fn test_custom_action_forced_labor() {
     test_action(
         "custom_action_forced_labor",
@@ -768,6 +805,25 @@ fn test_collect() {
                 (Position::from_offset("B2"), ResourcePile::wood(1)),
             ],
         })),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
+fn test_collect_free_economy() {
+    test_action(
+        "collect_free_economy",
+        Action::Playing(Custom(CustomAction::FreeEconomyCollect(
+            playing_actions::Collect {
+                city_position: Position::from_offset("C2"),
+                collections: vec![
+                    (Position::from_offset("B1"), ResourcePile::ore(1)),
+                    (Position::from_offset("B2"), ResourcePile::wood(1)),
+                ],
+            },
+        ))),
         0,
         true,
         false,

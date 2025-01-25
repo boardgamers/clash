@@ -1,4 +1,5 @@
 use crate::advance::Advance;
+use crate::content::advances::RITUALS;
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
 use crate::movement::move_routes;
@@ -405,6 +406,16 @@ impl Player {
         self.wasted_resources += waste;
     }
 
+    #[must_use]
+    pub fn can_afford_resources(&self, cost: &ResourcePile) -> bool {
+        self.can_afford(&PaymentModel::resources(cost.clone()))
+    }
+
+    #[must_use]
+    pub fn can_afford(&self, cost: &PaymentModel) -> bool {
+        cost.can_afford(&self.resources)
+    }
+
     ///
     ///
     /// # Panics
@@ -412,7 +423,7 @@ impl Player {
     /// Panics if player cannot afford the resources
     pub fn loose_resources(&mut self, resources: ResourcePile) {
         assert!(
-            self.resources.can_afford(&resources),
+            self.can_afford_resources(&resources),
             "player should be able to afford the resources"
         );
         self.resources -= resources;
@@ -443,8 +454,7 @@ impl Player {
 
     #[must_use]
     pub fn can_advance(&self, advance: &Advance) -> bool {
-        self.advance_cost(&advance.name).can_afford(&self.resources)
-            && self.can_advance_free(advance)
+        self.can_afford(&self.advance_cost(&advance.name)) && self.can_advance_free(advance)
     }
 
     #[must_use]
@@ -571,6 +581,29 @@ impl Player {
             .wonder_cost
             .trigger(&mut cost, city, wonder);
         cost
+    }
+
+    #[must_use]
+    pub fn increase_happiness_cost(&self, city: &City, steps: u32) -> Option<PaymentModel> {
+        let max_steps = 2 - city.mood_state.clone() as u32;
+        let cost = city.size() as u32 * steps;
+        if steps > max_steps {
+            None
+        } else if self.has_advance(RITUALS) {
+            Some(PaymentModel::sum(
+                cost,
+                &[
+                    ResourceType::Food,
+                    ResourceType::Wood,
+                    ResourceType::Ore,
+                    ResourceType::Ideas,
+                    ResourceType::MoodTokens,
+                    ResourceType::Gold,
+                ],
+            ))
+        } else {
+            Some(PaymentModel::sum(cost, &[ResourceType::MoodTokens]))
+        }
     }
 
     #[must_use]
@@ -733,7 +766,7 @@ impl Player {
             return false;
         }
         let cost = PaymentModel::resources(units.iter().map(UnitType::cost).sum());
-        if !cost.can_afford(&self.resources) {
+        if !self.can_afford(&cost) {
             return false;
         }
         if units.len() > city.mood_modified_size() {
@@ -849,7 +882,7 @@ impl Player {
             move_routes(start, self, unit_ids, game, embark_carrier_id)
                 .iter()
                 .filter(|route| {
-                    if !self.resources.can_afford(&route.cost) {
+                    if !self.can_afford_resources(&route.cost) {
                         return false;
                     }
                     if movement_restrictions.contains(&&MovementRestriction::Battle) {
