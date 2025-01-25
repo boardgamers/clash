@@ -303,6 +303,9 @@ impl Player {
         }
     }
 
+    ///
+    /// # Panics
+    /// Panics if the civilization does not exist
     #[must_use]
     pub fn new(civilization: Civilization, index: usize) -> Self {
         Self {

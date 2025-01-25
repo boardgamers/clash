@@ -253,21 +253,21 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
     )
 }
 
-fn open_dialog(
-    rc: &RenderContext,
-    city: Position,
-    sel: RecruitSelection,
-) -> StateUpdate {
+fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> StateUpdate {
     let p = rc.shown_player.index;
     StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
         rc,
         rc.game.get_city(p, city),
-        &format!("Recruit {}{} in {}", 
-                 sel.amount.units, 
-                 sel.amount.leader_index.map_or(String::new(), |i| format!(" ({})", 
-                 rc.shown_player.available_leaders[i].name)),
-                 city),  
-        ConstructionProject::Units(sel)
+        &format!(
+            "Recruit {}{} in {}",
+            sel.amount.units,
+            sel.amount.leader_index.map_or(String::new(), |i| format!(
+                " ({})",
+                rc.shown_player.available_leaders[i].name
+            )),
+            city
+        ),
+        ConstructionProject::Units(sel),
     )))
 }
 
