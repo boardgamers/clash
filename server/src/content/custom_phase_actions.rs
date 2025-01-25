@@ -159,8 +159,7 @@ pub fn start_siegecraft_phase(game: &mut Game, c: Combat) -> bool {
         .get_any_city(c.defender_position)
         .is_some_and(|c| c.pieces.fortress.is_some())
         && player.has_advance(SIEGECRAFT)
-        // todo use payment model
-        && (r.can_afford(&ResourcePile::wood(2)) || r.can_afford(&ResourcePile::ore(2)))
+        && (SIEGECRAFT_EXTRA_DIE.can_afford(r) || SIEGECRAFT_IGNORE_HIT.can_afford(r))
     {
         game.state = GameState::CustomPhase(CustomPhaseState::SiegecraftPayment(c));
         true
