@@ -164,7 +164,7 @@ pub fn format_happiness_increase(
         })
         .collect::<Vec<String>>();
     format!(
-        "{player_name} paid {} increased happiness in {}",
+        "{player_name} paid {} to increase happiness in {}",
         i.payment,
         utils::format_list(&happiness_increases, "no city")
     )

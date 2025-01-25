@@ -715,7 +715,6 @@ fn test_increase_happiness_voting() {
     );
 }
 
-
 #[test]
 fn test_increase_happiness_voting_rituals() {
     test_action(
@@ -726,7 +725,7 @@ fn test_increase_happiness_voting_rituals() {
                     (Position::from_offset("C2"), 1),
                     (Position::from_offset("B3"), 2),
                 ],
-                payment: ResourcePile::new(1,0,1,1,1,1,0),
+                payment: ResourcePile::new(1, 0, 1, 1, 1, 1, 0),
             },
         ))),
         0,
