@@ -5,7 +5,7 @@ use std::fmt::Display;
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct SumPaymentOptions {
     pub cost: u32,
-    pub types_by_preference: Vec<ResourceType>,
+    pub types_by_preference: &'static [ResourceType],
 }
 
 impl SumPaymentOptions {
@@ -27,8 +27,11 @@ pub enum PaymentModel {
 
 impl PaymentModel {
     #[must_use]
-    pub fn sum(cost: u32, types_by_preference: &[ResourceType]) -> Self {
-        get_sum_payment_model(cost, types_by_preference)
+    pub const fn sum(cost: u32, types_by_preference: &'static [ResourceType]) -> Self {
+        PaymentModel::Sum(SumPaymentOptions {
+            cost,
+            types_by_preference,
+        })
     }
 
     #[must_use]
@@ -90,12 +93,4 @@ impl Display for PaymentModel {
             }
         }
     }
-}
-
-#[must_use]
-fn get_sum_payment_model(cost: u32, types_by_preference: &[ResourceType]) -> PaymentModel {
-    PaymentModel::Sum(SumPaymentOptions {
-        cost,
-        types_by_preference: types_by_preference.to_vec(),
-    })
 }

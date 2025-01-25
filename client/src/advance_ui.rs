@@ -56,8 +56,7 @@ pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
         },
         |a| {
             StateUpdate::OpenDialog(ActiveDialog::AdvancePayment(new_advance_payment(
-                game,
-                rc.shown_player.index,
+                rc,
                 a.name.as_str(),
             )))
         },
