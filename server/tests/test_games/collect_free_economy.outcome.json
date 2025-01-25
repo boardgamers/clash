@@ -1,0 +1,433 @@
+{
+  "state": "Playing",
+  "players": [
+    {
+      "name": null,
+      "id": 0,
+      "resources": {
+        "food": 1,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 5,
+        "gold": 7,
+        "mood_tokens": 5,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "player_index": 0,
+          "position": "A1"
+        },
+        {
+          "city_pieces": {
+            "observatory": 0
+          },
+          "mood_state": "Neutral",
+          "activations": 1,
+          "angry_activation": false,
+          "player_index": 0,
+          "position": "C2"
+        }
+      ],
+      "units": [
+        {
+          "player_index": 0,
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "player_index": 0,
+          "position": "C2",
+          "unit_type": "Cavalry",
+          "id": 1
+        },
+        {
+          "player_index": 0,
+          "position": "C2",
+          "unit_type": "Leader",
+          "id": 2
+        },
+        {
+          "player_index": 0,
+          "position": "C2",
+          "unit_type": "Elephant",
+          "id": 3
+        },
+        {
+          "player_index": 0,
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "player_index": 0,
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "player_index": 0,
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 6
+        },
+        {
+          "player_index": 0,
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 7
+        }
+      ],
+      "civilization": "test0",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [
+        "Farming",
+        "Free Economy",
+        "Math",
+        "Mining"
+      ],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "game_event_tokens": 2,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "collect_options": [
+        [
+          "Mountain",
+          [
+            {
+              "ore": 1
+            }
+          ]
+        ],
+        [
+          "Fertile",
+          [
+            {
+              "food": 1
+            }
+          ]
+        ],
+        [
+          "Forest",
+          [
+            {
+              "wood": 1
+            }
+          ]
+        ]
+      ],
+      "next_unit_id": 8,
+      "played_once_per_turn_actions": [
+        "FreeEconomyCollect"
+      ]
+    },
+    {
+      "name": null,
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Angry",
+          "activations": 0,
+          "angry_activation": false,
+          "player_index": 1,
+          "position": "C1"
+        }
+      ],
+      "units": [
+        {
+          "player_index": 1,
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "player_index": 1,
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 1
+        }
+      ],
+      "civilization": "test1",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "game_event_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "collect_options": [
+        [
+          "Mountain",
+          [
+            {
+              "ore": 1
+            }
+          ]
+        ],
+        [
+          "Fertile",
+          [
+            {
+              "food": 1
+            }
+          ]
+        ],
+        [
+          "Forest",
+          [
+            {
+              "wood": 1
+            }
+          ]
+        ]
+      ],
+      "next_unit_id": 2
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Water"
+      ],
+      [
+        "A3",
+        {
+          "Exhausted": "Forest"
+        }
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "D2",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "Playing": {
+        "IncreaseHappiness": {
+          "happiness_increases": [
+            [
+              "A1",
+              0
+            ],
+            [
+              "C2",
+              1
+            ]
+          ],
+          "payment": {
+            "mood_tokens": 2
+          }
+        }
+      }
+    },
+    {
+      "Playing": {
+        "Advance": {
+          "advance": "Math",
+          "payment": {
+            "ideas": 2
+          }
+        }
+      }
+    },
+    {
+      "Playing": {
+        "Construct": {
+          "city_position": "C2",
+          "city_piece": "Observatory",
+          "payment": {
+            "food": 1,
+            "wood": 1,
+            "ore": 1
+          },
+          "port_position": null,
+          "temple_bonus": null
+        }
+      }
+    },
+    {
+      "Playing": "EndTurn"
+    },
+    {
+      "Playing": "EndTurn"
+    },
+    {
+      "Playing": {
+        "Custom": {
+          "FreeEconomyCollect": {
+          "city_position": "C2",
+          "collections": [
+            [
+              "B1",
+              {
+                "ore": 1
+              }
+            ],
+            [
+              "B2",
+              {
+                "wood": 1
+              }
+            ]
+          ]
+        }
+      }
+    }
+    }
+  ],
+  "action_log_index": 6,
+  "log": [
+    "The game has started",
+    "Age 1 has started",
+    "Round 1/3",
+    "Player1 increased happiness in the city at C2 by 1 steps, making it Happy",
+    "Player1 paid 2 ideas to get the Math advance",
+    "Player1 paid 1 food, 1 wood and 1 ore to construct a Observatory in the city at C2 making it Neutral",
+    "Player1 ended their turn",
+    "It's Player2's turn",
+    "Player2 ended their turn with 3 actions left",
+    "It's Player1's turn",
+    "Round 2/3",
+    "Player1 collects 1 ore and 1 wood in the city at C2 using Free Economy. Could not store 1 ore"
+  ],
+  "undo_limit": 5,
+  "actions_left": 3,
+  "successful_cultural_influence": false,
+  "round": 2,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+  ],
+  "dice_roll_log": [],
+  "dropped_players": [],
+  "wonders_left": [
+    "Pyramids"
+  ],
+  "wonder_amount_left": 1,
+  "undo_context_stack": [
+    {
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
+    },
+    {
+      "WastedResources": {
+        "resources": {
+          "ore": 1
+        }
+      }
+    }
+  ]
+}

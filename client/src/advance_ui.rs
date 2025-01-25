@@ -212,16 +212,10 @@ pub fn pay_advance_dialog(ap: &Payment, rc: &RenderContext) -> StateUpdate {
         // select a different advance
         return update;
     };
-    payment_dialog(
-        rc,
-        ap,
-        ActiveDialog::AdvancePayment,
-        true,
-        |payment| {
-            StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
-                advance: ap.name.to_string(),
-                payment,
-            }))
-        },
-    )
+    payment_dialog(rc, ap, ActiveDialog::AdvancePayment, true, |payment| {
+        StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
+            advance: ap.name.to_string(),
+            payment,
+        }))
+    })
 }
