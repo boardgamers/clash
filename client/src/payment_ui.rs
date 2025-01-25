@@ -72,9 +72,7 @@ impl Payment {
     fn current(r: &[ResourcePayment], resource_type: ResourceType) -> u32 {
         r.iter()
             .find(|p| p.resource == resource_type)
-            .unwrap()
-            .selectable
-            .current
+            .map_or(0, |p| p.selectable.current)
     }
 }
 
@@ -154,7 +152,7 @@ fn ok_tooltip(payments: &[Payment], mut available: ResourcePile) -> OkTooltip {
         let tooltip = if payment.optional && pile.is_empty() {
             OkTooltip::Valid(format!("Pay nothing for {name}"))
         } else if model.can_afford(&available) && model.is_valid_payment(&pile) {
-            // make sure that we can afford all of the payments
+            // make sure that we can afford all the payments
             OkTooltip::Valid(format!("Pay {pile} for {name}"))
         } else {
             OkTooltip::Invalid(format!("You don't have {:?} for {}", payment.model, name))
@@ -216,7 +214,7 @@ pub fn new_payment(
         }
     };
 
-    Payment {
+     Payment {
         name: name.to_string(),
         model: model.clone(),
         optional,

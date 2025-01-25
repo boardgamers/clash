@@ -8,7 +8,6 @@ use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
 use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
-use crate::advance_ui::AdvancePayment;
 use crate::assets::Assets;
 use crate::city_ui::building_name;
 use crate::client::{Features, GameSyncRequest};
@@ -20,6 +19,7 @@ use crate::layout_ui::FONT_SIZE;
 use crate::log_ui::advance_help;
 use crate::map_ui::ExploreResolutionConfig;
 use crate::move_ui::{MoveDestination, MoveIntent, MoveSelection};
+use crate::payment_ui::Payment;
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use crate::render_context::RenderContext;
 use crate::status_phase_ui::ChooseAdditionalAdvances;
@@ -34,7 +34,7 @@ pub enum ActiveDialog {
     // playing actions
     IncreaseHappiness(IncreaseHappinessConfig),
     AdvanceMenu,
-    AdvancePayment(AdvancePayment),
+    AdvancePayment(Payment),
     ConstructionPayment(ConstructionPayment),
     CollectResources(CollectResources),
     RecruitUnitSelection(RecruitAmount),

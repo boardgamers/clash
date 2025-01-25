@@ -30,7 +30,6 @@ pub fn construct_wonder(
     wonder: &str,
     payment: ResourcePile,
 ) {
-    // TODO: check costs
     let wonder_cards_index = game.players[player_index]
         .wonder_cards
         .iter()

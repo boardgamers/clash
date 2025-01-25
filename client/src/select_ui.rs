@@ -43,8 +43,8 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
         let x = (start_x + i as f32) * ICON_SIZE * 2.;
         let c = o.counter();
 
-        draw(o, vec2(x + 15., -60.) + anchor + offset);
-        let current_pos = vec2(x, -ICON_SIZE) + anchor + offset;
+        draw(o, vec2(x + 7., -60.) + anchor + offset);
+        let current_pos = vec2(x + 13., -ICON_SIZE) + anchor + offset;
         draw_text_ex(
             &format!("{}", c.current),
             current_pos.x,
