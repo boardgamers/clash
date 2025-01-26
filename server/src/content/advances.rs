@@ -16,6 +16,7 @@ pub const SIEGECRAFT: &str = "Siegecraft";
 pub const STEEL_WEAPONS: &str = "Steel Weapons";
 pub const METALLURGY: &str = "Metallurgy";
 pub const RITUALS: &str = "Rituals";
+pub const TACTICS: &str = "Tactics";
 
 #[must_use]
 pub fn get_all() -> Vec<Advance> {
@@ -111,7 +112,35 @@ fn seafaring() -> Vec<Advance> {
         "Fishing",
         vec![
             Advance::builder("Fishing", "Your cities may Collect food from one Sea space")
-                .add_collect_option(Water, ResourcePile::food(1))
+                .add_player_event_listener(
+                    |event| &mut event.collect_options,
+                    |options, c, game| {
+                        let city = game
+                            .get_any_city(c.city_position)
+                            .expect("city should exist");
+                        let port = city.port_position;
+                        if let Some(position) = port.or_else(|| {
+                            c.city_position
+                                .neighbors()
+                                .into_iter()
+                                .find(|pos| game.map.is_water(*pos))
+                        }) {
+                            options.insert(
+                                position,
+                                if port.is_some() {
+                                    vec![
+                                        ResourcePile::food(1),
+                                        ResourcePile::gold(1),
+                                        ResourcePile::mood_tokens(1),
+                                    ]
+                                } else {
+                                    vec![ResourcePile::food(1)]
+                                },
+                            );
+                        }
+                    },
+                    0,
+                )
                 .with_advance_bonus(MoodToken),
             Advance::builder(
                 NAVIGATION,
@@ -166,10 +195,10 @@ fn education() -> Vec<Advance> {
 
 fn warfare() -> Vec<Advance> {
     advance_group(
-        "Tactics",
+        TACTICS,
         vec![
             Advance::builder(
-                "Tactics",
+                TACTICS,
                 "May Move Army units, May use Tactics on Action Cards",
             )
                 .with_advance_bonus(CultureToken)

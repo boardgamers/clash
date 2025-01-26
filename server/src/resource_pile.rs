@@ -93,7 +93,7 @@ impl ResourcePile {
     }
 
     #[must_use]
-    pub fn food(amount: u32) -> Self {
+    pub const fn food(amount: u32) -> Self {
         Self::new(amount, 0, 0, 0, 0, 0, 0)
     }
 
@@ -108,22 +108,22 @@ impl ResourcePile {
     }
 
     #[must_use]
-    pub fn ideas(amount: u32) -> Self {
+    pub const fn ideas(amount: u32) -> Self {
         Self::new(0, 0, 0, amount, 0, 0, 0)
     }
 
     #[must_use]
-    pub fn gold(amount: u32) -> Self {
+    pub const fn gold(amount: u32) -> Self {
         Self::new(0, 0, 0, 0, amount, 0, 0)
     }
 
     #[must_use]
-    pub fn mood_tokens(amount: u32) -> Self {
+    pub const fn mood_tokens(amount: u32) -> Self {
         Self::new(0, 0, 0, 0, 0, amount, 0)
     }
 
     #[must_use]
-    pub fn culture_tokens(amount: u32) -> Self {
+    pub const fn culture_tokens(amount: u32) -> Self {
         Self::new(0, 0, 0, 0, 0, 0, amount)
     }
 

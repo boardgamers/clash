@@ -1,6 +1,7 @@
+use std::collections::HashMap;
 use crate::action_buttons::{base_or_custom_action, base_or_custom_available};
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::collect_ui::{possible_resource_collections, CollectResources};
+use crate::collect_ui::{ CollectResources};
 use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
 use crate::happiness_ui::{
     add_increase_happiness, can_play_increase_happiness, open_increase_happiness_dialog,
@@ -20,6 +21,7 @@ use server::playing_actions::PlayingActionType;
 use server::resource::ResourceType;
 use server::unit::{UnitType, Units};
 use std::ops::Add;
+use server::collect::possible_resource_collections;
 
 pub type IconAction<'a> = (&'a Texture2D, String, Box<dyn Fn() -> StateUpdate + 'a>);
 
@@ -182,7 +184,7 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
                     ActiveDialog::CollectResources(CollectResources::new(
                         city.player_index,
                         city.position,
-                        possible_resource_collections(rc.game, city.position, city.player_index),
+                        possible_resource_collections(rc.game, city.position, city.player_index, &HashMap::new()),
                         custom,
                     ))
                 },

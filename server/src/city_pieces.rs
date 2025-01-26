@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{content::wonders, wonder::Wonder};
 use Building::*;
+use crate::content::advances::TACTICS;
 
 #[derive(Default)]
 pub struct CityPieces {
@@ -225,7 +226,7 @@ impl Building {
             Self::Market => "Bartering",
             Self::Obelisk => "Arts",
             Self::Observatory => "Math",
-            Self::Fortress => "Tactics",
+            Self::Fortress => TACTICS,
             Self::Port => "Fishing",
             Self::Temple => "Myths",
         })

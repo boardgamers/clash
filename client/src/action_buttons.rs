@@ -147,5 +147,7 @@ pub fn base_or_custom_action(
                 base.clone(),
             )
         });
-    special.unwrap_or(StateUpdate::OpenDialog(base.unwrap()))
+    special
+        .or_else(|| base.map(StateUpdate::OpenDialog))
+        .unwrap_or(StateUpdate::None)
 }

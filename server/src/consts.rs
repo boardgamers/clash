@@ -1,4 +1,5 @@
 use crate::{resource_pile::ResourcePile, unit::Units};
+use crate::content::advances::TACTICS;
 
 pub const MAX_CITY_SIZE: usize = 4;
 pub const AGES: u32 = 6;
@@ -11,7 +12,7 @@ pub const CAPTURED_LEADER_VICTORY_POINTS: f32 = 2.0;
 pub const STACK_LIMIT: usize = 4;
 pub const CITY_LIMIT: u8 = 7;
 pub const MOVEMENT_ACTIONS: u32 = 3;
-pub const ARMY_MOVEMENT_REQUIRED_ADVANCE: &str = "Tactics";
+pub const ARMY_MOVEMENT_REQUIRED_ADVANCE: &str = TACTICS;
 pub const CITY_PIECE_LIMIT: usize = 5;
 
 pub const UNIT_LIMIT: Units = Units {
@@ -31,32 +32,3 @@ pub const CONSTRUCT_COST: ResourcePile = ResourcePile {
     mood_tokens: 0,
     culture_tokens: 0,
 };
-pub const PORT_CHOICES: [ResourcePile; 3] = [
-    ResourcePile {
-        food: 1,
-        wood: 0,
-        ore: 0,
-        ideas: 0,
-        gold: 0,
-        mood_tokens: 0,
-        culture_tokens: 0,
-    },
-    ResourcePile {
-        food: 0,
-        wood: 0,
-        ore: 0,
-        ideas: 0,
-        gold: 1,
-        mood_tokens: 0,
-        culture_tokens: 0,
-    },
-    ResourcePile {
-        food: 0,
-        wood: 0,
-        ore: 0,
-        ideas: 0,
-        gold: 0,
-        mood_tokens: 1,
-        culture_tokens: 0,
-    },
-];

@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
@@ -11,14 +10,13 @@ use crate::payment::PaymentModel;
 use crate::{
     city::City,
     city_pieces::Building::{self, *},
-    consts::PORT_CHOICES,
     content::custom_actions::CustomAction,
     game::{Game, UndoContext},
-    map::Terrain,
     position::Position,
     resource_pile::ResourcePile,
     unit::UnitType,
 };
+use crate::collect::{collect, undo_collect};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Construct {
@@ -399,94 +397,6 @@ impl ActionType {
     }
 }
 
-///
-/// # Panics
-///
-/// Panics if the action is illegal
-#[must_use]
-pub fn get_total_collection(
-    game: &Game,
-    player_index: usize,
-    city_position: Position,
-    collections: &Vec<(Position, ResourcePile)>,
-) -> Option<ResourcePile> {
-    let player = &game.players[player_index];
-    let city = player.get_city(city_position)?;
-    if city.mood_modified_size() < collections.len() || city.player_index != player_index {
-        return None;
-    }
-    let mut available_terrain = HashMap::new();
-    add_collect_terrain(game, &mut available_terrain, city_position);
-    for adjacent_tile in city.position.neighbors() {
-        if game.get_any_city(adjacent_tile).is_some() {
-            continue;
-        }
-
-        add_collect_terrain(game, &mut available_terrain, adjacent_tile);
-    }
-    let mut total_collect = ResourcePile::empty();
-    for (position, collect) in collections {
-        total_collect += collect.clone();
-
-        let terrain = game
-            .map
-            .get(*position)
-            .expect("Position should be on the map");
-
-        if city.port_position == Some(*position) {
-            if !PORT_CHOICES.iter().any(|r| r == collect) {
-                return None;
-            }
-        } else if !player
-            .collect_options
-            .get(terrain)
-            .is_some_and(|o| o.contains(collect))
-        {
-            return None;
-        }
-        let terrain_left = available_terrain.entry(terrain.clone()).or_insert(0);
-        *terrain_left -= 1;
-        if *terrain_left < 0 {
-            return None;
-        }
-    }
-    Some(total_collect)
-}
-
-fn add_collect_terrain(
-    game: &Game,
-    available_terrain: &mut HashMap<Terrain, i32>,
-    adjacent_tile: Position,
-) {
-    if let Some(terrain) = game.map.get(adjacent_tile) {
-        let terrain_left = available_terrain.entry(terrain.clone()).or_insert(0);
-        if terrain == &Terrain::Water {
-            *terrain_left = 1;
-            return;
-        }
-        *terrain_left += 1;
-    }
-}
-
-pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) {
-    let total_collect = get_total_collection(game, player_index, c.city_position, &c.collections)
-        .expect("Illegal action");
-    let city = game.players[player_index]
-        .get_city_mut(c.city_position)
-        .expect("Illegal action");
-    assert!(city.can_activate(), "Illegal action");
-    city.activate();
-    game.players[player_index].gain_resources(total_collect);
-}
-
-pub(crate) fn undo_collect(game: &mut Game, player_index: usize, c: Collect) {
-    game.players[player_index]
-        .get_city_mut(c.city_position)
-        .expect("city should be owned by the player")
-        .undo_activate();
-    let total_collect = c.collections.into_iter().map(|(_, collect)| collect).sum();
-    game.players[player_index].loose_resources(total_collect);
-}
 
 pub(crate) fn increase_happiness(game: &mut Game, player_index: usize, i: IncreaseHappiness) {
     let player = &mut game.players[player_index];
