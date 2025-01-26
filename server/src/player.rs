@@ -19,7 +19,6 @@ use crate::{
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     game::Game,
     leader::Leader,
-    map::Terrain::{self, *},
     player_events::PlayerEvents,
     position::Position,
     resource_pile::ResourcePile,
@@ -35,7 +34,7 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering::{self, *},
-    collections::{HashMap, HashSet},
+    collections::HashSet,
     mem,
 };
 
@@ -46,7 +45,7 @@ pub struct Player {
     pub resource_limit: ResourcePile,
     // transient, only for the current turn, only the active player can gain resources
     pub wasted_resources: ResourcePile,
-    pub events: Option<PlayerEvents>,
+    pub(crate) events: Option<PlayerEvents>,
     pub cities: Vec<City>,
     pub units: Vec<Unit>,
     pub civilization: Civilization,
@@ -61,7 +60,6 @@ pub struct Player {
     pub event_victory_points: f32,
     pub custom_actions: HashSet<CustomActionType>,
     pub wonder_cards: Vec<Wonder>,
-    pub collect_options: HashMap<Terrain, Vec<ResourcePile>>,
     pub next_unit_id: u32,
     pub played_once_per_turn_actions: Vec<CustomActionType>,
 }
@@ -104,7 +102,6 @@ impl PartialEq for Player {
                 .iter()
                 .enumerate()
                 .all(|(i, wonder)| wonder.name == other.wonder_cards[i].name)
-            && self.collect_options == other.collect_options
     }
 }
 
@@ -200,7 +197,6 @@ impl Player {
                         .expect("player data should have valid wonder cards")
                 })
                 .collect(),
-            collect_options: data.collect_options.into_iter().collect(),
             next_unit_id: data.next_unit_id,
             played_once_per_turn_actions: data.played_once_per_turn_actions,
         };
@@ -235,11 +231,6 @@ impl Player {
                 .into_iter()
                 .map(|wonder| wonder.name)
                 .collect(),
-            collect_options: self
-                .collect_options
-                .into_iter()
-                .sorted_by_key(|(terrain, _)| terrain.clone())
-                .collect(),
             next_unit_id: self.next_unit_id,
             played_once_per_turn_actions: self.played_once_per_turn_actions,
         }
@@ -272,12 +263,6 @@ impl Player {
                 .wonder_cards
                 .iter()
                 .map(|wonder| wonder.name.clone())
-                .collect(),
-            collect_options: self
-                .collect_options
-                .iter()
-                .map(|(terrain, options)| (terrain.clone(), options.clone()))
-                .sorted_by_key(|(terrain, _)| terrain.clone())
                 .collect(),
             next_unit_id: self.next_unit_id,
             played_once_per_turn_actions: self.played_once_per_turn_actions.clone(),
@@ -314,11 +299,6 @@ impl Player {
             custom_actions: HashSet::new(),
             wonder_cards: Vec::new(),
             wonders_build: Vec::new(),
-            collect_options: HashMap::from([
-                (Mountain, vec![ResourcePile::ore(1)]),
-                (Fertile, vec![ResourcePile::food(1)]),
-                (Forest, vec![ResourcePile::wood(1)]),
-            ]),
             next_unit_id: 0,
             played_once_per_turn_actions: Vec::new(),
         }
@@ -994,7 +974,7 @@ impl Player {
     /// # Panics
     ///
     /// Panics if 'events' is set to None
-    pub fn take_events<F>(&mut self, action: F)
+    pub(crate) fn take_events<F>(&mut self, action: F)
     where
         F: FnOnce(&PlayerEvents, &mut Player),
     {
@@ -1023,7 +1003,6 @@ pub struct PlayerData {
     captured_leaders: Vec<String>,
     event_victory_points: f32,
     wonder_cards: Vec<String>,
-    collect_options: Vec<(Terrain, Vec<ResourcePile>)>,
     next_unit_id: u32,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]

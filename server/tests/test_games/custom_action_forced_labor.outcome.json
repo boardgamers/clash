@@ -128,32 +128,6 @@
       "wonder_cards": [
         "Pyramids"
       ],
-      "collect_options": [
-        [
-          "Mountain",
-          [
-            {
-              "ore": 1
-            }
-          ]
-        ],
-        [
-          "Fertile",
-          [
-            {
-              "food": 1
-            }
-          ]
-        ],
-        [
-          "Forest",
-          [
-            {
-              "wood": 1
-            }
-          ]
-        ]
-      ],
       "next_unit_id": 7,
       "played_once_per_turn_actions": [
         "ForcedLabor"
@@ -234,32 +208,6 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "collect_options": [
-        [
-          "Mountain",
-          [
-            {
-              "ore": 1
-            }
-          ]
-        ],
-        [
-          "Fertile",
-          [
-            {
-              "food": 1
-            }
-          ]
-        ],
-        [
-          "Forest",
-          [
-            {
-              "wood": 1
-            }
-          ]
-        ]
-      ],
       "next_unit_id": 3
     }
   ],

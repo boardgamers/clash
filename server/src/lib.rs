@@ -10,6 +10,7 @@
 #![allow(clippy::cast_precision_loss)]
 #![allow(clippy::cast_possible_wrap)]
 #![allow(clippy::too_many_arguments)]
+#![allow(clippy::implicit_hasher)]
 
 mod ability_initializer;
 pub mod action;
@@ -17,6 +18,7 @@ pub mod advance;
 pub mod city;
 pub mod city_pieces;
 mod civilization;
+pub mod collect;
 pub mod combat;
 pub mod consts;
 pub mod content;

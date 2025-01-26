@@ -108,32 +108,6 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "collect_options": [
-        [
-          "Mountain",
-          [
-            {
-              "ore": 1
-            }
-          ]
-        ],
-        [
-          "Fertile",
-          [
-            {
-              "food": 1
-            }
-          ]
-        ],
-        [
-          "Forest",
-          [
-            {
-              "wood": 1
-            }
-          ]
-        ]
-      ],
       "next_unit_id": 8,
       "played_once_per_turn_actions": [
         "FreeEconomyCollect"
@@ -198,32 +172,6 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "collect_options": [
-        [
-          "Mountain",
-          [
-            {
-              "ore": 1
-            }
-          ]
-        ],
-        [
-          "Fertile",
-          [
-            {
-              "food": 1
-            }
-          ]
-        ],
-        [
-          "Forest",
-          [
-            {
-              "wood": 1
-            }
-          ]
-        ]
-      ],
       "next_unit_id": 2
     }
   ],
@@ -330,24 +278,24 @@
       "Playing": {
         "Custom": {
           "FreeEconomyCollect": {
-          "city_position": "C2",
-          "collections": [
-            [
-              "B1",
-              {
-                "ore": 1
-              }
-            ],
-            [
-              "B2",
-              {
-                "wood": 1
-              }
+            "city_position": "C2",
+            "collections": [
+              [
+                "B1",
+                {
+                  "ore": 1
+                }
+              ],
+              [
+                "B2",
+                {
+                  "wood": 1
+                }
+              ]
             ]
-          ]
+          }
         }
       }
-    }
     }
   ],
   "action_log_index": 6,

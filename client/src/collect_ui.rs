@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::iter;
 
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{
@@ -17,10 +16,10 @@ use macroquad::math::vec2;
 use macroquad::prelude::WHITE;
 use macroquad::shapes::draw_circle;
 use server::action::Action;
-use server::consts::PORT_CHOICES;
+use server::collect::{get_total_collection, possible_resource_collections};
 use server::content::custom_actions::CustomAction;
 use server::game::Game;
-use server::playing_actions::{get_total_collection, Collect, PlayingAction};
+use server::playing_actions::{Collect, PlayingAction};
 use server::position::Position;
 use server::resource::ResourceType;
 use server::resource_pile::ResourcePile;
@@ -121,38 +120,12 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
     StateUpdate::None
 }
 
-pub fn possible_resource_collections(
-    game: &Game,
-    city_pos: Position,
-    player_index: usize,
-) -> HashMap<Position, Vec<ResourcePile>> {
-    let collect_options = &game.get_player(player_index).collect_options;
-    let city = game.get_city(player_index, city_pos);
-    city_pos
-        .neighbors()
-        .into_iter()
-        .chain(iter::once(city_pos))
-        .filter_map(|pos| {
-            if city
-                .port_position
-                .is_some_and(|p| p == pos && !is_blocked(game, player_index, p))
-            {
-                return Some((pos, PORT_CHOICES.to_vec()));
-            }
-            if let Some(t) = game.map.get(pos) {
-                if let Some(option) = collect_options
-                    .get(t)
-                    .filter(|_| pos == city_pos || !is_blocked(game, player_index, pos))
-                {
-                    return Some((pos, option.clone()));
-                }
-            }
-            None
-        })
-        .collect()
-}
-
-fn click_collect_option(col: &CollectResources, p: Position, pile: &ResourcePile) -> StateUpdate {
+fn click_collect_option(
+    rc: &RenderContext,
+    col: &CollectResources,
+    p: Position,
+    pile: &ResourcePile,
+) -> StateUpdate {
     let mut new = col.clone();
     let old = col.collections.iter().find(|(pos, _)| pos == &p);
 
@@ -160,6 +133,10 @@ fn click_collect_option(col: &CollectResources, p: Position, pile: &ResourcePile
     if old.is_none_or(|(_, r)| r != pile) {
         new.collections.push((p, pile.clone()));
     }
+
+    let used = col.collections.clone().into_iter().collect();
+    new.possible_collections =
+        possible_resource_collections(rc.game, col.city_position, col.player_index, &used);
 
     StateUpdate::OpenDialog(ActiveDialog::CollectResources(new))
 }
@@ -185,7 +162,7 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpd
                 draw_circle(center.x, center.y, 20., color);
                 if let Some(p) = left_mouse_button_pressed(rc) {
                     if is_in_circle(p, center, 20.) {
-                        return click_collect_option(collect, pos, pile);
+                        return click_collect_option(rc, collect, pos, pile);
                     }
                 }
 
@@ -226,8 +203,4 @@ fn draw_collect_item(rc: &RenderContext, center: Point, resources: &[(ResourceTy
             );
         });
     }
-}
-
-fn is_blocked(game: &Game, player_index: usize, pos: Position) -> bool {
-    game.get_any_city(pos).is_some() || game.enemy_player(player_index, pos).is_some()
 }

@@ -110,40 +110,6 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "collect_options": [
-        [
-          "Mountain",
-          [
-            {
-              "ore": 1
-            }
-          ]
-        ],
-        [
-          "Fertile",
-          [
-            {
-              "food": 1
-            }
-          ]
-        ],
-        [
-          "Forest",
-          [
-            {
-              "wood": 1
-            }
-          ]
-        ],
-        [
-          "Water",
-          [
-            {
-              "food": 1
-            }
-          ]
-        ]
-      ],
       "next_unit_id": 8
     },
     {
@@ -206,32 +172,6 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "collect_options": [
-        [
-          "Mountain",
-          [
-            {
-              "ore": 1
-            }
-          ]
-        ],
-        [
-          "Fertile",
-          [
-            {
-              "food": 1
-            }
-          ]
-        ],
-        [
-          "Forest",
-          [
-            {
-              "wood": 1
-            }
-          ]
-        ]
-      ],
       "next_unit_id": 2
     }
   ],

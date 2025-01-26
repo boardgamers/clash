@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+use crate::content::advances::TACTICS;
 use crate::{content::wonders, wonder::Wonder};
 use Building::*;
 
@@ -225,7 +226,7 @@ impl Building {
             Self::Market => "Bartering",
             Self::Obelisk => "Arts",
             Self::Observatory => "Math",
-            Self::Fortress => "Tactics",
+            Self::Fortress => TACTICS,
             Self::Port => "Fishing",
             Self::Temple => "Myths",
         })
