@@ -59,6 +59,7 @@ pub enum ActiveDialog {
     RemoveCasualties(RemoveCasualtiesSelection),
     SiegecraftPayment(SiegecraftPaymentDialog),
     SteelWeaponPayment(SteelWeaponDialog),
+    TradeRouteSelection(Payment), // it's actually a gain
 }
 
 impl ActiveDialog {

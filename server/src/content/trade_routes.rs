@@ -1,7 +1,12 @@
 use crate::city::{City, MoodState};
+use crate::content::advances::CURRENCY;
+use crate::content::custom_phase_actions::CustomPhaseState;
 use crate::game::Game;
+use crate::game::GameState::CustomPhase;
+use crate::payment::PaymentModel;
 use crate::player::Player;
 use crate::position::Position;
+use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::unit::Unit;
 
@@ -12,22 +17,65 @@ pub struct TradeRoute {
     to: Position,
 }
 
-pub(crate) fn collect_trade_routes_for_current_player(game: &mut Game) {
+pub fn trade_route_reward(game: &mut Game) -> Option<(PaymentModel, Vec<TradeRoute>)> {
     let p = game.current_player_index;
-    for t in find_trade_routes(game, &game.players[p]) {
-        let reward = ResourcePile::food(1);
+    let trade_routes = find_trade_routes(game, &game.players[p]);
+    if trade_routes.is_empty() {
+        return None;
+    }
+
+    Some((
+        if game.players[p].has_advance(CURRENCY) {
+            PaymentModel::sum(
+                trade_routes.len() as u32,
+                &[ResourceType::Gold, ResourceType::Food],
+            )
+        } else {
+            PaymentModel::sum(trade_routes.len() as u32, &[ResourceType::Food])
+        },
+        trade_routes,
+    ))
+}
+
+pub(crate) fn collect_trade_routes_for_current_player(game: &mut Game) {
+    let r = trade_route_reward(game);
+
+    let Some((reward, routes)) = r else {
+        return;
+    };
+
+    if reward.possible_resource_types().len() > 1 {
+        game.state = CustomPhase(CustomPhaseState::TradeRouteSelection);
+        return;
+    }
+
+    gain_trade_route_reward(
+        game,
+        game.current_player_index,
+        routes.as_slice(),
+        &reward.default_payment(),
+    );
+}
+
+pub(crate) fn gain_trade_route_reward(
+    game: &mut Game,
+    player_index: usize,
+    trade_routes: &[TradeRoute],
+    reward: &ResourcePile,
+) {
+    for t in trade_routes {
         game.add_to_last_log_item(&format!(
-            ". Trade route from {:?} ({:?}) to {:?} collected {:?}",
-            t.from,
-            game.players[p]
+            ". {:?} at {:?} traded with city at {:?}",
+            game.players[player_index]
                 .get_unit(t.unit_id)
                 .expect("unit should exist")
                 .unit_type,
+            t.from,
             t.to,
-            reward.to_string()
         ));
-        game.players[p].gain_resources(reward);
     }
+    game.add_to_last_log_item(&format!(". for a total of {reward}"));
+    game.players[player_index].gain_resources(reward.clone());
 }
 
 #[must_use]

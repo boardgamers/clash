@@ -15,6 +15,7 @@ pub enum CustomPhaseState {
     SteelWeaponsAttacker(Combat),
     SteelWeaponsDefender(Combat),
     SiegecraftPayment(Combat),
+    TradeRouteSelection,
 }
 
 pub const SIEGECRAFT_EXTRA_DIE: PaymentModel =
@@ -33,6 +34,7 @@ pub enum CustomPhaseAction {
     SteelWeaponsAttackerAction(ResourcePile),
     SteelWeaponsDefenderAction(ResourcePile),
     SiegecraftPaymentAction(SiegecraftPayment),
+    TradeRouteSelectionAction(ResourcePile),
 }
 
 impl CustomPhaseAction {
@@ -75,6 +77,14 @@ impl CustomPhaseAction {
                         panic!("Need to pass SiegecraftPaymentAction to execute");
                     }
                 }
+                CustomPhaseState::TradeRouteSelection => {
+                    if let CustomPhaseAction::TradeRouteSelectionAction(_) = self {
+                        // todo
+                        panic!("Trade route selection actions cannot be executed");
+                    } else {
+                        panic!("Need to pass TradeRouteSelectionAction to execute");
+                    }
+                }
             },
             _ => panic!("can only execute custom phase actions if the game is in a custom phase"),
         }
@@ -90,6 +100,10 @@ impl CustomPhaseAction {
                 | CustomPhaseState::SteelWeaponsAttacker(_)
                 | CustomPhaseState::SteelWeaponsDefender(_) => {
                     panic!("combat actions cannot be undone");
+                }
+                CustomPhaseState::TradeRouteSelection => {
+                    // todo maybe add later
+                    panic!("trade route selection actions cannot be undone");
                 }
             },
             _ => panic!("can only undo custom phase actions if the game is in a custom phase"),
@@ -119,6 +133,9 @@ impl CustomPhaseAction {
                 } else {
                     format!("{player_name} paid for siegecraft: {}", effects.join(", "))
                 }
+            }
+            CustomPhaseAction::TradeRouteSelectionAction(_) => {
+                format!("{player_name} selected trade routes",)
             }
         }
     }
