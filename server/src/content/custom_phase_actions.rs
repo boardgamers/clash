@@ -22,13 +22,13 @@ pub const SIEGECRAFT_EXTRA_DIE: PaymentModel =
 pub const SIEGECRAFT_IGNORE_HIT: PaymentModel =
     PaymentModel::sum(2, &[ResourceType::Ore, ResourceType::Gold]);
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct SiegecraftPayment {
     pub extra_die: ResourcePile,
     pub ignore_hit: ResourcePile,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum CustomPhaseAction {
     SteelWeaponsAttackerAction(ResourcePile),
     SteelWeaponsDefenderAction(ResourcePile),

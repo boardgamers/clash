@@ -70,6 +70,12 @@ impl Clone for Game {
     }
 }
 
+impl PartialEq for Game {
+    fn eq(&self, other: &Self) -> bool {
+        self.clone().data() == other.clone().data()
+    }
+}
+
 impl Game {
     /// Creates a new [`Game`].
     ///
@@ -799,6 +805,9 @@ impl Game {
         self.log[last_item_index] += edit;
     }
 
+    ///
+    /// # Panics
+    /// Panics if the player does not have events
     pub fn next_player(&mut self) {
         self.increment_player_index();
         self.add_info_log_item(format!(
@@ -806,6 +815,13 @@ impl Game {
             self.players[self.current_player_index].get_name()
         ));
         self.lock_undo();
+
+        let e = self.players[self.current_player_index]
+            .events
+            .take()
+            .expect("player should have events");
+        e.on_turn_start.trigger(self, &(), &());
+        self.players[self.current_player_index].events = Some(e);
     }
 
     pub fn skip_dropped_players(&mut self) {
@@ -1588,7 +1604,7 @@ impl Game {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq)]
 pub struct GameData {
     state: GameState,
     players: Vec<PlayerData>,
@@ -1719,13 +1735,13 @@ impl GameState {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct DisembarkUndoContext {
     unit_id: u32,
     carrier_id: u32,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum UndoContext {
     FoundCity {
         settler: Unit,

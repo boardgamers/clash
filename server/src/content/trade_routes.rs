@@ -13,6 +13,7 @@ pub struct TradeRoute {
 
 pub fn start_trade_routes(game: &mut Game) {}
 
+#[must_use] 
 pub fn find_trade_routes(game: &Game, player: &Player) -> Vec<TradeRoute> {
     let all: Vec<Vec<TradeRoute>> = player
         .units
@@ -34,7 +35,7 @@ fn find_most_trade_routes(
     let unit_routes: Vec<TradeRoute> = all[unit_index]
         .iter()
         .filter(|&&r| !used_cities.contains(&r.to))
-        .cloned()
+        .copied()
         .collect();
     unit_routes
         .iter()
@@ -47,8 +48,8 @@ fn find_most_trade_routes(
             new_routes.push(*r);
             new_routes
         })
-        .max_by_key(|r| r.len())
-        .unwrap_or_else(|| vec![])
+        .max_by_key(Vec::len)
+        .unwrap_or_else(Vec::new)
 }
 
 fn find_trade_route_for_unit(game: &Game, player: &Player, unit: &Unit) -> Vec<TradeRoute> {

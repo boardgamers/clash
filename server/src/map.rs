@@ -150,7 +150,7 @@ impl Map {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq)]
 pub struct MapData {
     pub tiles: Vec<(Position, Terrain)>,
     #[serde(default)]
