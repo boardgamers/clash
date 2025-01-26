@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::collections::HashSet;
 
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{
@@ -28,7 +29,7 @@ use server::resource_pile::ResourcePile;
 pub struct CollectResources {
     player_index: usize,
     city_position: Position,
-    possible_collections: HashMap<Position, Vec<ResourcePile>>,
+    possible_collections: HashMap<Position, HashSet<ResourcePile>>,
     collections: Vec<(Position, ResourcePile)>,
     custom: BaseOrCustomDialog,
 }
@@ -37,7 +38,7 @@ impl CollectResources {
     pub fn new(
         player_index: usize,
         city_position: Position,
-        possible_collections: HashMap<Position, Vec<ResourcePile>>,
+        possible_collections: HashMap<Position, HashSet<ResourcePile>>,
         custom: BaseOrCustomDialog,
     ) -> CollectResources {
         CollectResources {
@@ -134,7 +135,7 @@ fn click_collect_option(
         new.collections.push((p, pile.clone()));
     }
 
-    let used = col.collections.clone().into_iter().collect();
+    let used = new.collections.clone().into_iter().collect();
     new.possible_collections =
         possible_resource_collections(rc.game, col.city_position, col.player_index, &used);
 

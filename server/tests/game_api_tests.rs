@@ -1,11 +1,3 @@
-use std::{
-    collections::HashMap,
-    env,
-    fs::{self, OpenOptions},
-    io::Write,
-    path::MAIN_SEPARATOR as SEPARATOR,
-};
-
 use server::action::Action::CustomPhase;
 use server::action::CombatAction;
 use server::content::custom_actions::CustomAction;
@@ -27,6 +19,14 @@ use server::{
     position::Position,
     resource_pile::ResourcePile,
     unit::{MovementAction::*, UnitType::*},
+};
+use std::panic::{catch_unwind, AssertUnwindSafe};
+use std::{
+    collections::HashMap,
+    env,
+    fs::{self, OpenOptions},
+    io::Write,
+    path::MAIN_SEPARATOR as SEPARATOR,
 };
 
 #[test]
@@ -422,20 +422,59 @@ fn game_path(name: &str) -> String {
     format!("tests{SEPARATOR}test_games{SEPARATOR}{name}.json")
 }
 
-fn test_actions(name: &str, player_index: usize, actions: Vec<Action>) {
+struct TestAction {
+    action: Action,
+    undoable: bool,
+    illegal_action_test: bool,
+}
+
+impl TestAction {
+    fn illegal(action: Action) -> Self {
+        Self {
+            action,
+            undoable: false,
+            illegal_action_test: true,
+        }
+    }
+
+    fn undoable(action: Action) -> Self {
+        Self {
+            action,
+            undoable: true,
+            illegal_action_test: false,
+        }
+    }
+
+    fn not_undoable(action: Action) -> Self {
+        Self {
+            action,
+            undoable: false,
+            illegal_action_test: false,
+        }
+    }
+}
+
+fn test_actions(name: &str, player_index: usize, actions: Vec<TestAction>) {
+    let outcome: fn(name: &str, i: usize) -> String = |name, i| {
+        if i == 0 {
+            format!("{name}.outcome")
+        } else {
+            format!("{name}.outcome{}", i)
+        }
+    };
     for (i, action) in actions.into_iter().enumerate() {
         let from = if i == 0 {
             name.to_string()
         } else {
-            format!("{name}.outcome{}", i - 1)
+            outcome(name, i - 1)
         };
         test_action_internal(
             &from,
-            &format!("{name}.outcome{i}"),
-            action,
+            outcome(name, i).as_str(),
+            action.action,
             player_index,
-            false,
-            false,
+            action.undoable,
+            action.illegal_action_test,
         );
     }
 }
@@ -469,13 +508,15 @@ fn test_action_internal(
     let a = serde_json::to_string(&action).expect("action should be serializable");
     let a2 = serde_json::from_str(&a).expect("action should be deserializable");
     let game = load_game(name);
-    let game = game_api::execute_action(game, a2, player_index);
+
     if illegal_action_test {
-        println!(
-            "execute action was successful but should have panicked because the action is illegal"
-        );
+        let err = catch_unwind(AssertUnwindSafe(|| {
+            let _ = game_api::execute_action(game, a2, player_index);
+        }));
+        assert!(err.is_err(), "execute action should panic");
         return;
     }
+    let game = game_api::execute_action(game, a2, player_index);
     let expected_game = read_game_str(outcome);
     assert_eq_game_json(
         &expected_game,
@@ -831,6 +872,22 @@ fn test_collect() {
 }
 
 #[test]
+fn test_collect_husbandry() {
+    let action = Action::Playing(Collect(playing_actions::Collect {
+        city_position: Position::from_offset("B3"),
+        collections: vec![(Position::from_offset("B5"), ResourcePile::food(1))],
+    }));
+    test_actions(
+        "collect_husbandry",
+        0,
+        vec![
+            TestAction::undoable(action.clone()),
+            TestAction::illegal(action.clone()), // illegal because it can't be done again
+        ],
+    );
+}
+
+#[test]
 fn test_collect_free_economy() {
     test_action(
         "collect_free_economy",
@@ -884,7 +941,6 @@ fn test_construct_port() {
 }
 
 #[test]
-#[should_panic(expected = "Illegal action")]
 fn test_wrong_status_phase_action() {
     test_action(
         "illegal_free_advance",
@@ -1055,19 +1111,22 @@ fn test_combat_all_modifiers() {
         "combat_all_modifiers",
         0,
         vec![
-            move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
-            CustomPhase(CustomPhaseAction::SteelWeaponsAttackerAction(
-                ResourcePile::ore(1),
+            TestAction::not_undoable(move_action(
+                vec![0, 1, 2, 3, 4, 5],
+                Position::from_offset("C1"),
             )),
-            CustomPhase(CustomPhaseAction::SteelWeaponsDefenderAction(
+            TestAction::not_undoable(CustomPhase(CustomPhaseAction::SteelWeaponsAttackerAction(
                 ResourcePile::ore(1),
-            )),
-            CustomPhase(CustomPhaseAction::SiegecraftPaymentAction(
+            ))),
+            TestAction::not_undoable(CustomPhase(CustomPhaseAction::SteelWeaponsDefenderAction(
+                ResourcePile::ore(1),
+            ))),
+            TestAction::not_undoable(CustomPhase(CustomPhaseAction::SiegecraftPaymentAction(
                 SiegecraftPayment {
                     ignore_hit: ResourcePile::ore(2),
                     extra_die: ResourcePile::empty(),
                 },
-            )),
+            ))),
         ],
     );
 }
