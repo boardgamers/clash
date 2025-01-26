@@ -1,11 +1,3 @@
-use std::{
-    collections::HashMap,
-    env,
-    fs::{self, OpenOptions},
-    io::Write,
-    path::MAIN_SEPARATOR as SEPARATOR,
-};
-
 use server::action::Action::CustomPhase;
 use server::action::CombatAction;
 use server::content::custom_actions::CustomAction;
@@ -27,6 +19,14 @@ use server::{
     position::Position,
     resource_pile::ResourcePile,
     unit::{MovementAction::*, UnitType::*},
+};
+use std::panic::{catch_unwind, AssertUnwindSafe};
+use std::{
+    collections::HashMap,
+    env,
+    fs::{self, OpenOptions},
+    io::Write,
+    path::MAIN_SEPARATOR as SEPARATOR,
 };
 
 #[test]
@@ -469,13 +469,15 @@ fn test_action_internal(
     let a = serde_json::to_string(&action).expect("action should be serializable");
     let a2 = serde_json::from_str(&a).expect("action should be deserializable");
     let game = load_game(name);
-    let game = game_api::execute_action(game, a2, player_index);
+
     if illegal_action_test {
-        println!(
-            "execute action was successful but should have panicked because the action is illegal"
-        );
+        let err = catch_unwind(AssertUnwindSafe(|| {
+            let _ = game_api::execute_action(game, a2, player_index);
+        }));
+        assert!(err.is_err(), "execute action should panic");
         return;
     }
+    let game = game_api::execute_action(game, a2, player_index);
     let expected_game = read_game_str(outcome);
     assert_eq_game_json(
         &expected_game,
@@ -837,9 +839,7 @@ fn test_collect_husbandry() {
         "collect_husbandry",
         Action::Playing(Collect(playing_actions::Collect {
             city_position: Position::from_offset("B3"),
-            collections: vec![
-                (Position::from_offset("B5"), ResourcePile::food(1)),
-            ],
+            collections: vec![(Position::from_offset("B5"), ResourcePile::food(1))],
         })),
         0,
         true,
@@ -901,7 +901,6 @@ fn test_construct_port() {
 }
 
 #[test]
-#[should_panic(expected = "Illegal action")]
 fn test_wrong_status_phase_action() {
     test_action(
         "illegal_free_advance",
