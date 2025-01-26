@@ -17,7 +17,8 @@ pub struct TradeRoute {
     to: Position,
 }
 
-pub fn trade_route_reward(game: &mut Game) -> Option<(PaymentModel, Vec<TradeRoute>)> {
+#[must_use] 
+pub fn trade_route_reward(game: &Game) -> Option<(PaymentModel, Vec<TradeRoute>)> {
     let p = game.current_player_index;
     let trade_routes = find_trade_routes(game, &game.players[p]);
     if trade_routes.is_empty() {

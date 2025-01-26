@@ -92,9 +92,7 @@ impl PaymentModel {
     pub fn default_payment(&self) -> ResourcePile {
         match self {
             PaymentModel::Sum(options) => {
-                let mut pile = ResourcePile::empty();
-                pile.add_type(options.types_by_preference[0], options.cost as i32);
-                pile
+                ResourcePile::of(options.types_by_preference[0], options.cost)
             }
             PaymentModel::Resources(c) => c.cost.clone(),
         }

@@ -2,7 +2,9 @@ use crate::combat::CombatModifier::{
     CancelFortressExtraDie, CancelFortressIgnoreHit, SteelWeaponsAttacker, SteelWeaponsDefender,
 };
 use crate::combat::{start_combat, Combat, CombatModifier};
+use crate::consts::ACTIONS;
 use crate::content::advances::{METALLURGY, SIEGECRAFT, STEEL_WEAPONS};
+use crate::content::trade_routes::{gain_trade_route_reward, trade_route_reward};
 use crate::game::{Game, GameState};
 use crate::payment::PaymentModel;
 use crate::player::Player;
@@ -78,9 +80,12 @@ impl CustomPhaseAction {
                     }
                 }
                 CustomPhaseState::TradeRouteSelection => {
-                    if let CustomPhaseAction::TradeRouteSelectionAction(_) = self {
-                        // todo
-                        panic!("Trade route selection actions cannot be executed");
+                    if let CustomPhaseAction::TradeRouteSelectionAction(p) = self {
+                        let (reward, routes) =
+                            trade_route_reward(game).expect("No trade route reward");
+                        assert!(reward.is_valid_payment(&p), "Invalid payment"); // it's a gain
+                        gain_trade_route_reward(game, player_index, &routes, &p);
+                        game.state = GameState::Playing;
                     } else {
                         panic!("Need to pass TradeRouteSelectionAction to execute");
                     }
@@ -94,19 +99,24 @@ impl CustomPhaseAction {
     /// # Panics
     /// Panics if the action cannot be undone
     pub fn undo(self, game: &mut Game, _player_index: usize) {
-        match game.state {
-            GameState::CustomPhase(ref state) => match state {
-                CustomPhaseState::SiegecraftPayment(_)
-                | CustomPhaseState::SteelWeaponsAttacker(_)
-                | CustomPhaseState::SteelWeaponsDefender(_) => {
-                    panic!("combat actions cannot be undone");
+        match self {
+            CustomPhaseAction::SteelWeaponsAttackerAction(_)
+            | CustomPhaseAction::SteelWeaponsDefenderAction(_)
+            | CustomPhaseAction::SiegecraftPaymentAction(_) => {
+                panic!("combat actions cannot be undone");
+            }
+            CustomPhaseAction::TradeRouteSelectionAction(p) => {
+                match game.state {
+                    GameState::Playing if game.actions_left == ACTIONS => {}
+                    _ => {
+                        panic!(
+                            "can only undo trade route selection if the game is in playing state"
+                        );
+                    }
                 }
-                CustomPhaseState::TradeRouteSelection => {
-                    // todo maybe add later
-                    panic!("trade route selection actions cannot be undone");
-                }
-            },
-            _ => panic!("can only undo custom phase actions if the game is in a custom phase"),
+                game.players[game.current_player_index].loose_resources(p);
+                game.state = GameState::CustomPhase(CustomPhaseState::TradeRouteSelection);
+            }
         }
     }
 

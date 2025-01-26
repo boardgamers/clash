@@ -6,7 +6,7 @@ use std::mem;
 use GameState::*;
 
 use crate::combat::{self, Combat, CombatDieRoll, CombatPhase, COMBAT_DIE_SIDES};
-use crate::consts::MOVEMENT_ACTIONS;
+use crate::consts::{ACTIONS, MOVEMENT_ACTIONS};
 use crate::content::custom_phase_actions::CustomPhaseState;
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
 use crate::map::UnexploredBlock;
@@ -132,7 +132,7 @@ impl Game {
                 String::from("Round 1/3"),
             ],
             undo_limit: 0,
-            actions_left: 3,
+            actions_left: ACTIONS,
             successful_cultural_influence: false,
             round: 1,
             age: 1,
@@ -859,7 +859,7 @@ impl Game {
     }
 
     pub fn next_turn(&mut self) {
-        self.actions_left = 3;
+        self.actions_left = ACTIONS;
         self.successful_cultural_influence = false;
         self.players[self.current_player_index].end_turn();
         self.next_player();

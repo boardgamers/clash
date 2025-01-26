@@ -1,7 +1,7 @@
 use crate::action_buttons::{base_or_custom_action, base_or_custom_available};
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
-use crate::payment_ui::{new_payment, payment_dialog, Payment};
+use crate::payment_ui::{payment_dialog, Payment};
 use crate::render_context::RenderContext;
 use server::action::Action;
 use server::city::City;
@@ -37,7 +37,8 @@ impl IncreaseHappinessConfig {
             .reduce(|a, b| a + b)
             .unwrap();
 
-        new_payment(&payment, &p.resources, "Increase happiness", false)
+        let available = &p.resources;
+        Payment::new(&payment, available, "Increase happiness", false)
     }
 }
 
@@ -135,7 +136,6 @@ pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) 
                 custom: h.custom.clone(),
             })
         },
-        true,
         |payment| {
             let i = IncreaseHappiness {
                 happiness_increases: h.steps.clone(),
