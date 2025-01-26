@@ -6,6 +6,7 @@ use server::game::{CulturalInfluenceResolution, GameState};
 use server::status_phase::{
     ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction,
 };
+
 use server::{
     action::Action,
     city::{City, MoodState::*},
@@ -28,6 +29,7 @@ use std::{
     io::Write,
     path::MAIN_SEPARATOR as SEPARATOR,
 };
+use server::content::trade_routes::{find_trade_routes, TradeRoute};
 
 #[test]
 fn basic_actions() {
@@ -663,6 +665,19 @@ fn get_destinations(game: &Game, units: &[u32], position: &str) -> Vec<String> {
         .into_iter()
         .map(|r| r.destination.to_string())
         .collect()
+}
+
+#[test]
+fn test_trade_route_coordinates() {
+    let game = &load_game("trade_routes_unit_test");
+    // trading cities are C6, D6, E6
+    
+    // our units are at C8, but the path is not explored
+    // 4 ships on E7 can trade with E6
+    // settler on the ship can trade with D6
+
+    let found = find_trade_routes(game, game.get_player(1));
+    assert_eq!(found.len(), 3);
 }
 
 #[test]

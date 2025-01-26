@@ -12,6 +12,7 @@ use crate::{
     resource_pile::ResourcePile,
 };
 use std::collections::{HashMap, HashSet};
+// use crate::content::trade_routes::start_trade_routes;
 
 //names of advances that need special handling
 pub const NAVIGATION: &str = "Navigation";
@@ -21,6 +22,7 @@ pub const STEEL_WEAPONS: &str = "Steel Weapons";
 pub const METALLURGY: &str = "Metallurgy";
 pub const RITUALS: &str = "Rituals";
 pub const TACTICS: &str = "Tactics";
+pub const BARTERING: &str = "Bartering";
 
 #[must_use]
 pub fn get_all() -> Vec<Advance> {
@@ -40,7 +42,7 @@ pub fn get_groups() -> Vec<(String, Vec<Advance>)> {
         ("Warfare".to_string(), warfare()),
         ("Spirituality".to_string(), spirituality()),
         // second half of the advances
-        ("Economy".to_string(), vec![]),
+        ("Economy".to_string(), economy()),
         ("Culture".to_string(), vec![]),
         ("Science".to_string(), science()),
         ("Democracy".to_string(), democracy()),
@@ -293,6 +295,22 @@ fn spirituality() -> Vec<Advance> {
             Advance::builder(RITUALS, "When you perform the Increase Happiness Action you may spend any Resources as a substitute for mood tokens. This is done at a 1:1 ratio"),
         ],
     )
+}
+
+fn economy() -> Vec<Advance> {
+    advance_group(BARTERING, vec![
+        Advance::builder(BARTERING, "todo")
+            .with_advance_bonus(MoodToken),
+        Advance::builder("Trade Routes", "At the beginning of your turn, you gain 1 food for every trade route you can make, to a maximum of 4. A trade route is made between one of your Settlers or Ships and a non-Angry enemy player city within 2 spaces (without counting through unrevealed Regions). Each Settler or Ship can only be paired with one enemy player city. Likewise, each enemy player city must be paired with a different Settler or Ship. In other words, to gain X food you must have at least X Units (Settlers or Ships), each paired with X different enemy cities.")
+            .with_advance_bonus(MoodToken)
+        // .add_player_event_listener(
+        //     |event| &mut event.on_turn_start,
+        //     |game, (), ()| {
+        //         start_trade_routes(game);
+        //     },
+        //     0,
+        // )
+    ])
 }
 
 fn science() -> Vec<Advance> {
