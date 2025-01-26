@@ -85,7 +85,20 @@ fn agriculture() -> Vec<Advance> {
                 "Irrigation",
                 "Your cities may Collect food from Barren spaces, Ignore Famine events",
             )
-            .add_collect_option(Barren, ResourcePile::food(1))
+            .add_player_event_listener(
+                |event| &mut event.collect_options,
+                |options, c, game| {
+                    c.city_position
+                        .neighbors()
+                        .iter()
+                        .chain(std::iter::once(&c.city_position))
+                        .filter(|pos| game.map.get(**pos) == Some(&Barren))
+                        .for_each(|pos| {
+                            options.insert(*pos, vec![ResourcePile::food(1)]);
+                        });
+                },
+                0,
+            )
             .with_advance_bonus(MoodToken),
         ],
     )

@@ -102,10 +102,9 @@ pub fn possible_resource_collections(
             },
             game,
         );
-    collect_options.retain(|p, _| !is_blocked(game, player_index, *p));
+    collect_options.retain(|p, _| {
+        game.get_any_city(*p).is_none_or(|c|c.position == city_pos)
+            && game.enemy_player(player_index, *p).is_none()
+    });
     collect_options
-}
-
-fn is_blocked(game: &Game, player_index: usize, pos: Position) -> bool {
-    game.get_any_city(pos).is_some() || game.enemy_player(player_index, pos).is_some()
 }
