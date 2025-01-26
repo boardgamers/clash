@@ -745,7 +745,7 @@
     "Player2 ended their turn with 1 actions left",
     "It's Player1's turn",
     "Player1 ended their turn with 3 actions left",
-    "It's Player2's turn. Trade route from E7 (Ship) to C6 collected \"1 food\". Trade route from E7 (Settler) to E6 collected \"1 food\"",
+    "It's Player2's turn. Ship at E7 traded with city at C6. Settler at E7 traded with city at E6. Total reward is 2 food",
     "Round 3/3. Could not store 1 food"
   ],
   "undo_limit": 48,

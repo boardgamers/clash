@@ -74,7 +74,7 @@ pub(crate) fn gain_trade_route_reward(
             t.to,
         ));
     }
-    game.add_to_last_log_item(&format!(". for a total of {reward}"));
+    game.add_to_last_log_item(&format!(". Total reward is {reward}"));
     game.players[player_index].gain_resources(reward.clone());
 }
 
