@@ -18,7 +18,7 @@ pub(crate) struct PlayerEvents {
     pub on_construct_wonder: EventMut<Player, Position, Wonder>,
     pub on_undo_construct_wonder: EventMut<Player, Position, Wonder>,
     pub wonder_cost: EventMut<PaymentModel, City, Wonder>,
-    pub on_advance: EventMut<Player, String, ()>, 
+    pub on_advance: EventMut<Player, String, ()>,
     pub on_undo_advance: EventMut<Player, String, ()>,
     pub after_execute_action: EventMut<Player, Action, ()>,
     pub before_undo_action: EventMut<Player, Action, ()>,

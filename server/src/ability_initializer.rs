@@ -54,7 +54,7 @@ pub trait AbilityInitializerSetup: Sized {
 
     fn add_once_per_turn_effect<P>(self, name: &str, pred: P) -> Self
     where
-        P: Fn(&Action) -> bool  + 'static + Clone,
+        P: Fn(&Action) -> bool + 'static + Clone,
     {
         let pred2 = pred.clone();
         let name2 = name.to_string();
@@ -63,9 +63,7 @@ pub trait AbilityInitializerSetup: Sized {
             |event| &mut event.after_execute_action,
             move |player, action, ()| {
                 if pred2(action) {
-                    player
-                        .played_once_per_turn_effects
-                        .push(name2.to_string());
+                    player.played_once_per_turn_effects.push(name2.to_string());
                 }
             },
             0,
@@ -74,9 +72,7 @@ pub trait AbilityInitializerSetup: Sized {
             |event| &mut event.before_undo_action,
             move |player, action, ()| {
                 if pred(action) {
-                    player
-                        .played_once_per_turn_effects
-                        .retain(|a| a != &name3);
+                    player.played_once_per_turn_effects.retain(|a| a != &name3);
                 }
             },
             0,

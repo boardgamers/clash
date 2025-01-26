@@ -148,8 +148,7 @@ fn husbandry_collect(
         return;
     }
 
-    game
-        .map
+    game.map
         .tiles
         .iter()
         .filter(|(pos, t)| pos.distance(c.city_position) == 2 && t.is_land())
@@ -198,14 +197,14 @@ fn fishing_collect(
         .get_any_city(c.city_position)
         .expect("city should exist");
     let port = city.port_position;
-    if let Some(position) = port
-        .filter(|p| game.enemy_player(c.player_index, *p).is_none())
-        .or_else(|| {
-        c.city_position
-            .neighbors()
-            .into_iter()
-            .find(|p| game.map.is_water(*p) && game.enemy_player(c.player_index, *p).is_none())
-    }) {
+    if let Some(position) =
+        port.filter(|p| game.enemy_player(c.player_index, *p).is_none())
+            .or_else(|| {
+                c.city_position.neighbors().into_iter().find(|p| {
+                    game.map.is_water(*p) && game.enemy_player(c.player_index, *p).is_none()
+                })
+            })
+    {
         options.insert(
             position,
             if Some(position) == port {
