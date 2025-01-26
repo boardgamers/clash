@@ -682,13 +682,7 @@ fn test_trade_route_coordinates() {
 
 #[test]
 fn test_trade_routes() {
-    test_action(
-        "trade_routes",
-        Action::Playing(EndTurn),
-        0,
-        false,
-        false,
-    );
+    test_action("trade_routes", Action::Playing(EndTurn), 0, false, false);
 }
 
 #[test]

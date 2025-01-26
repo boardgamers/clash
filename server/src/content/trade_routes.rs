@@ -19,7 +19,8 @@ pub(crate) fn collect_trade_routes_for_current_player(game: &mut Game) {
         game.add_to_last_log_item(&format!(
             ". Trade route from {:?} ({:?}) to {:?} collected {:?}",
             t.from,
-            game.players[p].get_unit(t.unit_id)
+            game.players[p]
+                .get_unit(t.unit_id)
                 .expect("unit should exist")
                 .unit_type,
             t.to,

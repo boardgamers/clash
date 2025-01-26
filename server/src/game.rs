@@ -377,7 +377,7 @@ impl Game {
         }
         self.after_execute_or_redo(&copy, player_index);
         // player can have changed, but we don't need waste check for turn end
-        check_for_waste(self, self.current_player_index); 
+        check_for_waste(self, self.current_player_index);
     }
 
     fn after_execute_or_redo(&mut self, action: &Action, player_index: usize) {
