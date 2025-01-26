@@ -369,13 +369,13 @@ impl Game {
             }
             Finished => panic!("actions can't be executed when the game is finished"),
         }
-        self.on_execute_or_redo(&copy, player_index);
+        self.after_execute_or_redo(&copy, player_index);
         check_for_waste(self, player_index);
     }
 
-    fn on_execute_or_redo(&mut self, action: &Action, player_index: usize) {
+    fn after_execute_or_redo(&mut self, action: &Action, player_index: usize) {
         self.players[player_index].take_events(|events, player| {
-            events.on_execute_action.trigger(player, action, &());
+            events.after_execute_action.trigger(player, action, &());
         });
     }
 
@@ -383,7 +383,7 @@ impl Game {
         let action = &self.action_log[self.action_log_index - 1];
 
         self.players[player_index].take_events(|events, player| {
-            events.on_undo_action.trigger(player, action, &());
+            events.before_undo_action.trigger(player, action, &());
         });
 
         match action {
@@ -460,7 +460,7 @@ impl Game {
             Action::Redo => panic!("redo action can't be redone"),
         }
         self.action_log_index += 1;
-        self.on_execute_or_redo(&copy, player_index);
+        self.after_execute_or_redo(&copy, player_index);
         check_for_waste(self, player_index);
     }
 

@@ -60,7 +60,7 @@ pub trait AbilityInitializerSetup: Sized {
         let name2 = name.to_string();
         let name3 = name.to_string();
         self.add_player_event_listener(
-            |event| &mut event.on_execute_action,
+            |event| &mut event.after_execute_action,
             move |player, action, ()| {
                 if pred2(action) {
                     player
@@ -71,7 +71,7 @@ pub trait AbilityInitializerSetup: Sized {
             0,
         )
         .add_player_event_listener(
-            |event| &mut event.on_undo_action,
+            |event| &mut event.before_undo_action,
             move |player, action, ()| {
                 if pred(action) {
                     player
