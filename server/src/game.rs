@@ -72,7 +72,7 @@ impl Clone for Game {
 
 impl PartialEq for Game {
     fn eq(&self, other: &Self) -> bool {
-        self.clone().data() == other.clone().data()
+        self.cloned_data() == other.cloned_data()
     }
 }
 
