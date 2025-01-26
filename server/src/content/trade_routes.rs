@@ -86,13 +86,13 @@ pub fn find_trade_routes(game: &Game, player: &Player) -> Vec<TradeRoute> {
         .map(|u| find_trade_route_for_unit(game, player, u))
         .filter(|r| !r.is_empty())
         .collect();
-    find_most_trade_routes(all, 0, vec![])
+    find_most_trade_routes(&all, 0, &[])
 }
 
 fn find_most_trade_routes(
-    all: Vec<Vec<TradeRoute>>,
+    all: &[Vec<TradeRoute>],
     unit_index: usize,
-    used_cities: Vec<Position>,
+    used_cities: &[Position],
 ) -> Vec<TradeRoute> {
     if unit_index == all.len() {
         return vec![];
@@ -105,11 +105,11 @@ fn find_most_trade_routes(
     unit_routes
         .iter()
         .map(|r| {
-            let mut new_used_cities = used_cities.clone();
+            let mut new_used_cities = used_cities.to_vec();
             new_used_cities.push(r.to);
-            let mut new_all = all.clone();
+            let mut new_all = all.to_vec();
             new_all[unit_index] = vec![*r];
-            let mut new_routes = find_most_trade_routes(new_all, unit_index + 1, new_used_cities);
+            let mut new_routes = find_most_trade_routes(&new_all, unit_index + 1, &new_used_cities);
             new_routes.push(*r);
             new_routes
         })
@@ -153,15 +153,12 @@ fn find_trade_route_to_city(
     let safe_passage = unit
         .position
         .neighbors()
-        .into_iter()
-        .filter(|&pos| {
+        .iter()
+        .any(|&pos| {
             pos.neighbors().contains(&to.position)
                 && game.map.is_inside(pos)
                 && !game.map.is_unexplored(pos)
-            // && game.enemy_player(player.index, pos).is_none()
-        })
-        .next()
-        .is_some();
+        });
 
     if !safe_passage {
         return None;
