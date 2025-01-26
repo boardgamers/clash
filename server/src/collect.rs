@@ -22,16 +22,6 @@ pub fn get_total_collection(
     if city.mood_modified_size() < collections.len() || city.player_index != player_index {
         return None;
     }
-    // let mut available_terrain = HashMap::new();
-    // add_collect_terrain(game, &mut available_terrain, city_position);
-    // for adjacent_tile in city.position.neighbors() {
-    //     if game.get_any_city(adjacent_tile).is_some() {
-    //         continue;
-    //     }
-    // 
-    //     add_collect_terrain(game, &mut available_terrain, adjacent_tile);
-    // }
-    // let mut total_collect = ResourcePile::empty();
     let choices = possible_resource_collections(game, city_position, player_index, &HashMap::new());
     let possible = collections
         .iter()
@@ -47,50 +37,7 @@ pub fn get_total_collection(
     } else {
         None
     }
-    
-    
-    // for (position, collect) in collections {
-    //     total_collect += collect.clone();
-    // 
-    //     let terrain = game
-    //         .map
-    //         .get(*position)
-    //         .expect("Position should be on the map");
-    // 
-    //     if city.port_position == Some(*position) {
-    //         if !PORT_CHOICES.iter().any(|r| r == collect) {
-    //             return None;
-    //         }
-    //     } else if !player
-    //         .collect_options
-    //         .get(terrain)
-    //         .is_some_and(|o| o.contains(collect))
-    //     {
-    //         return None;
-    //     }
-    //     let terrain_left = available_terrain.entry(terrain.clone()).or_insert(0);
-    //     *terrain_left -= 1;
-    //     if *terrain_left < 0 {
-    //         return None;
-    //     }
-    // }
-    // Some(total_collect)
 }
-
-// fn add_collect_terrain(
-//     game: &Game,
-//     available_terrain: &mut HashMap<Terrain, i32>,
-//     adjacent_tile: Position,
-// ) {
-//     if let Some(terrain) = game.map.get(adjacent_tile) {
-//         let terrain_left = available_terrain.entry(terrain.clone()).or_insert(0);
-//         if terrain == &Terrain::Water {
-//             *terrain_left = 1;
-//             return;
-//         }
-//         *terrain_left += 1;
-//     }
-// }
 
 pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) {
     let total_collect = get_total_collection(game, player_index, c.city_position, &c.collections)
@@ -117,6 +64,9 @@ pub(crate) struct CollectContext {
     pub used: HashMap<Position, ResourcePile>,
 }
 
+///
+/// # Panics
+/// Panics if the action is illegal
 #[must_use]
 pub fn possible_resource_collections(
     game: &Game,
@@ -131,12 +81,6 @@ pub fn possible_resource_collections(
         .into_iter()
         .chain(iter::once(city_pos))
         .filter_map(|pos| {
-            // if city
-            //     .port_position
-            //     .is_some_and(|p| p == pos && !is_blocked(game, player_index, p))
-            // {
-            //     return Some((pos, PORT_CHOICES.to_vec()));
-            // }
             if let Some(t) = game.map.get(pos) {
                 if let Some(option) = terrain_options.get(t) {
                     return Some((pos, option.clone()));
@@ -145,15 +89,10 @@ pub fn possible_resource_collections(
             None
         })
         .collect();
-    // self.players[player_index].take_events(|events, player| {
-    //             events
-    //                 .collect_options
-    //                 .trigger(player, &mut collect_options, &used, &());
-    //         });
     game.players[player_index]
         .events
         .as_ref()
-        .unwrap()
+        .expect("events should be set")
         .collect_options
         .trigger(
             &mut collect_options,

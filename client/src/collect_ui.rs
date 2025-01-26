@@ -18,7 +18,6 @@ use macroquad::prelude::WHITE;
 use macroquad::shapes::draw_circle;
 use server::action::Action;
 use server::collect::{get_total_collection, possible_resource_collections};
-use server::consts::PORT_CHOICES;
 use server::content::custom_actions::CustomAction;
 use server::game::Game;
 use server::playing_actions::{Collect, PlayingAction};
