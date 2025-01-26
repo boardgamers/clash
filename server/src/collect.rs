@@ -3,9 +3,10 @@ use crate::map::Terrain::{Fertile, Forest, Mountain};
 use crate::playing_actions::Collect;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::iter;
 use std::ops::Add;
+use crate::map::Terrain;
 
 ///
 /// # Panics
@@ -64,6 +65,7 @@ pub(crate) struct CollectContext {
     pub player_index: usize,
     pub city_position: Position,
     pub used: HashMap<Position, ResourcePile>,
+    pub terrain_options: HashMap<Terrain, HashSet<ResourcePile>>,
 }
 
 ///
@@ -75,12 +77,19 @@ pub fn possible_resource_collections(
     city_pos: Position,
     player_index: usize,
     used: &HashMap<Position, ResourcePile>,
-) -> HashMap<Position, Vec<ResourcePile>> {
-    let terrain_options = HashMap::from([
-        (Mountain, vec![ResourcePile::ore(1)]),
-        (Fertile, vec![ResourcePile::food(1)]),
-        (Forest, vec![ResourcePile::wood(1)]),
-    ]);
+) -> HashMap<Position, HashSet<ResourcePile>> {
+    let set = [
+        (Mountain, HashSet::from([ResourcePile::ore(1)])),
+        (Fertile, HashSet::from([ResourcePile::food(1)])),
+        (Forest, HashSet::from([ResourcePile::wood(1)])),
+    ];
+    let mut terrain_options = HashMap::from(set);
+    game.players[player_index]
+        .events
+        .as_ref()
+        .expect("events should be set")
+        .terrain_collect_options
+        .trigger(&mut terrain_options, &(), &());
 
     let mut collect_options = city_pos
         .neighbors()
@@ -95,6 +104,7 @@ pub fn possible_resource_collections(
             None
         })
         .collect();
+
     game.players[player_index]
         .events
         .as_ref()
@@ -103,11 +113,18 @@ pub fn possible_resource_collections(
         .trigger(
             &mut collect_options,
             &CollectContext {
+                player_index,
                 city_position: city_pos,
                 used: used.clone(),
+                terrain_options,
             },
             game,
         );
+    for (pos, pile) in used {
+        collect_options.entry(*pos).or_default().insert(pile.clone());
+        // collect_options.insert(*pos, vec![pile.clone()]);
+    }
+
     collect_options.retain(|p, _| {
         game.get_any_city(*p).is_none_or(|c| c.position == city_pos)
             && game.enemy_player(player_index, *p).is_none()

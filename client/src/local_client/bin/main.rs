@@ -113,6 +113,9 @@ pub fn setup_local_game() -> Game {
     add_terrain(&mut game, "C4", Terrain::Water);
     add_terrain(&mut game, "C5", Terrain::Water);
     add_terrain(&mut game, "D1", Terrain::Fertile);
+    add_terrain(&mut game, "E2", Terrain::Fertile);
+    add_terrain(&mut game, "B5", Terrain::Fertile);
+    add_terrain(&mut game, "B6", Terrain::Fertile);
     add_terrain(&mut game, "D2", Terrain::Water);
 
     add_unit(&mut game, "C2", player_index1, UnitType::Infantry);

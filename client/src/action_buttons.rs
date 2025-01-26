@@ -115,10 +115,10 @@ pub fn base_or_custom_action(
     action: PlayingActionType,
     title: &str,
     custom: &[(&str, CustomActionType)],
-    f: impl Fn(BaseOrCustomDialog) -> ActiveDialog,
+    execute: impl Fn(BaseOrCustomDialog) -> ActiveDialog,
 ) -> StateUpdate {
     let base = if rc.can_play_action(action) {
-        Some(f(BaseOrCustomDialog {
+        Some(execute(BaseOrCustomDialog {
             custom: BaseOrCustomAction::Base,
             title: title.to_string(),
         }))
@@ -133,7 +133,7 @@ pub fn base_or_custom_action(
         .find(|a| custom.iter().any(|(_, b)| **a == *b))
         .map(|a| {
             let advance = custom.iter().find(|(_, b)| *b == *a).unwrap().0;
-            let dialog = f(BaseOrCustomDialog {
+            let dialog = execute(BaseOrCustomDialog {
                 custom: BaseOrCustomAction::Custom {
                     custom: a.clone(),
                     advance: advance.to_string(),

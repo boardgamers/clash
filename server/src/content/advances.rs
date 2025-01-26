@@ -2,6 +2,7 @@ use super::custom_actions::CustomActionType::*;
 use crate::action::Action;
 use crate::advance::AdvanceBuilder;
 use crate::collect::CollectContext;
+use crate::map::Terrain;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::position::Position;
 use crate::{
@@ -11,7 +12,7 @@ use crate::{
     map::Terrain::*,
     resource_pile::ResourcePile,
 };
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 //names of advances that need special handling
 pub const NAVIGATION: &str = "Navigation";
@@ -90,8 +91,10 @@ fn agriculture() -> Vec<Advance> {
                 "Your cities may Collect food from Barren spaces, Ignore Famine events",
             )
                 .add_player_event_listener(
-                    |event| &mut event.collect_options,
-                    irrigation_collect,
+                    |event| &mut event.terrain_collect_options,
+                    |m,_,_| {
+                        m.insert(Barren, HashSet::from([ResourcePile::food(1)]));
+                    },
                     0,
                 )
                 .with_advance_bonus(MoodToken),
@@ -99,13 +102,13 @@ fn agriculture() -> Vec<Advance> {
                 "Husbandry",
                 "During a Collect Resources Action, you may collect from a Land space that is 2 Land spaces away, rather than 1. If you have the Roads Advance you may collect from two Land spaces that are 2 Land spaces away. This Advance can only be used once per turn.",
             )
-                //todo advance bonus?
+                .with_advance_bonus(MoodToken)
                 .add_player_event_listener(
                     |event| &mut event.collect_options,
                     husbandry_collect,
                     0,
                 )
-                .add_player_event_listener(
+                .add_player_event_listener(  // todo extract to a function
                     |event| &mut event.on_execute_action,
                     |player, action, ()| {
                         if is_husbandry_action(action) {
@@ -127,21 +130,6 @@ fn agriculture() -> Vec<Advance> {
     )
 }
 
-fn irrigation_collect(
-    options: &mut HashMap<Position, Vec<ResourcePile>>,
-    c: &CollectContext,
-    game: &Game,
-) {
-    c.city_position
-        .neighbors()
-        .iter()
-        .chain(std::iter::once(&c.city_position))
-        .filter(|pos| game.map.get(**pos) == Some(&Barren))
-        .for_each(|pos| {
-            options.insert(*pos, vec![ResourcePile::food(1)]);
-        });
-}
-
 fn is_husbandry_action(action: &Action) -> bool {
     match action {
         Action::Playing(PlayingAction::Collect(collect)) => collect
@@ -153,7 +141,7 @@ fn is_husbandry_action(action: &Action) -> bool {
 }
 
 fn husbandry_collect(
-    options: &mut HashMap<Position, Vec<ResourcePile>>,
+    options: &mut HashMap<Position, HashSet<ResourcePile>>,
     c: &CollectContext,
     game: &Game,
 ) {
@@ -168,18 +156,22 @@ fn husbandry_collect(
     } else {
         1
     };
-    
-    if c.used.iter().filter(|(pos, _)| pos.distance(c.city_position) == 2).count() == allowed {
+
+    if c.used
+        .iter()
+        .filter(|(pos, _)| pos.distance(c.city_position) == 2)
+        .count()
+        == allowed
+    {
         return;
     }
 
-    game.map
+    &game.map
         .tiles
-        .into_iter()
-        .filter(|(pos, t)| pos.distance(c.city_position) == 2)
-        .for_each(|pos| {
-            
-            options.insert(*pos, vec![ResourcePile::food(1)]);
+        .iter()
+        .filter(|(pos, t)| pos.distance(c.city_position) == 2 && t.is_land())
+        .for_each(|(pos, t)| {
+            options.insert(*pos, c.terrain_options.get(&t).cloned().unwrap_or_default());
         });
 }
 
@@ -215,7 +207,7 @@ fn seafaring() -> Vec<Advance> {
 }
 
 fn fishing_collect(
-    options: &mut HashMap<Position, Vec<ResourcePile>>,
+    options: &mut HashMap<Position, HashSet<ResourcePile>>,
     c: &CollectContext,
     game: &Game,
 ) {
@@ -232,13 +224,13 @@ fn fishing_collect(
         options.insert(
             position,
             if port.is_some() {
-                vec![
+                HashSet::from([
                     ResourcePile::food(1),
                     ResourcePile::gold(1),
                     ResourcePile::mood_tokens(1),
-                ]
+                ]                 )
             } else {
-                vec![ResourcePile::food(1)]
+                HashSet::from([ResourcePile::food(1)])
             },
         );
     }

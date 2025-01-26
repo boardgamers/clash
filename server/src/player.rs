@@ -200,6 +200,7 @@ impl Player {
                 .collect(),
             next_unit_id: data.next_unit_id,
             played_once_per_turn_actions: data.played_once_per_turn_actions,
+            played_once_per_turn_effects: data.played_once_per_turn_effects,
         };
         player
     }
@@ -234,6 +235,7 @@ impl Player {
                 .collect(),
             next_unit_id: self.next_unit_id,
             played_once_per_turn_actions: self.played_once_per_turn_actions,
+            played_once_per_turn_effects: self.played_once_per_turn_effects,
         }
     }
 
@@ -267,6 +269,7 @@ impl Player {
                 .collect(),
             next_unit_id: self.next_unit_id,
             played_once_per_turn_actions: self.played_once_per_turn_actions.clone(),
+            played_once_per_turn_effects: self.played_once_per_turn_effects.clone(),
         }
     }
 
@@ -302,6 +305,7 @@ impl Player {
             wonders_build: Vec::new(),
             next_unit_id: 0,
             played_once_per_turn_actions: Vec::new(),
+            played_once_per_turn_effects: Vec::new(),
         }
     }
 
@@ -1008,4 +1012,7 @@ pub struct PlayerData {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     played_once_per_turn_actions: Vec<CustomActionType>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    played_once_per_turn_effects: Vec<String>,
 }
