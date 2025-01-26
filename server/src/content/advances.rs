@@ -107,24 +107,7 @@ fn agriculture() -> Vec<Advance> {
                     husbandry_collect,
                     0,
                 )
-                .add_player_event_listener(  // todo extract to a function
-                    |event| &mut event.on_execute_action,
-                    |player, action, ()| {
-                        if is_husbandry_action(action) {
-                            player.played_once_per_turn_effects.push("Husbandry".to_string());
-                        }
-                    },
-                    0
-                )
-                .add_player_event_listener(
-                    |event| &mut event.on_undo_action,
-                    |player, action, ()| {
-                        if is_husbandry_action(action) {
-                            player.played_once_per_turn_effects.retain(|a| a != "Husbandry");
-                        }
-                    },
-                    0
-                )
+                .add_once_per_turn_effect("Husbandry", is_husbandry_action)
         ],
     )
 }

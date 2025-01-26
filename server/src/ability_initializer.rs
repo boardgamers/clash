@@ -1,3 +1,4 @@
+use crate::action::Action;
 use crate::{
     content::custom_actions::CustomActionType, events::EventMut, game::Game,
     player_events::PlayerEvents,
@@ -49,6 +50,37 @@ pub trait AbilityInitializerSetup: Sized {
         };
         self.add_ability_initializer(initializer)
             .add_ability_deinitializer(deinitializer)
+    }
+
+    fn add_once_per_turn_effect<P>(self, name: &str, pred: P) -> Self
+    where
+        P: Fn(&Action) -> bool  + 'static + Clone,
+    {
+        let pred2 = pred.clone();
+        let name2 = name.to_string();
+        let name3 = name.to_string();
+        self.add_player_event_listener(
+            |event| &mut event.on_execute_action,
+            move |player, action, ()| {
+                if pred2(action) {
+                    player
+                        .played_once_per_turn_effects
+                        .push(name2.to_string());
+                }
+            },
+            0,
+        )
+        .add_player_event_listener(
+            |event| &mut event.on_undo_action,
+            move |player, action, ()| {
+                if pred(action) {
+                    player
+                        .played_once_per_turn_effects
+                        .retain(|a| a != &name3);
+                }
+            },
+            0,
+        )
     }
 
     fn add_custom_action(self, action: CustomActionType) -> Self {
