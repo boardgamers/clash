@@ -4,12 +4,15 @@ use crate::position::Position;
 use crate::{resource_pile::ResourcePile, wonder::Wonder};
 
 #[must_use]
-#[rustfmt::skip]
 pub fn get_all() -> Vec<Wonder> {
     vec![
-        Wonder::builder("Pyramids", 
-            PaymentModel::resources_with_discount (
-            ResourcePile::new(3, 3, 3, 0, 0, 0, 4), 1), vec![]).build()
+        // todo add effects
+        Wonder::builder(
+            "Pyramids",
+            PaymentModel::resources_with_discount(ResourcePile::new(3, 3, 3, 0, 0, 0, 4), 1),
+            vec![],
+        )
+        .build(),
     ]
 }
 

@@ -1,18 +1,22 @@
 use crate::{civilization::Civilization, leader::Leader};
 
 #[must_use]
-#[rustfmt::skip]
 pub fn get_all() -> Vec<Civilization> {
     vec![
-        Civilization::new("test0", vec![], vec![
-            Leader::builder("Alexander", "", "", "", "").build(),
-            Leader::builder("Kleopatra", "", "", "", "").build(),
-        ]),
-
-        Civilization::new("Maya", vec![], vec![
-            Leader::builder("Kʼinich Janaab Pakal I", 
-                "", "", "", "").build(),
-        ]),
+        Civilization::new(
+            "test0",
+            vec![],
+            vec![
+                Leader::builder("Alexander", "", "", "", "").build(),
+                Leader::builder("Kleopatra", "", "", "", "").build(),
+            ],
+        ),
+        Civilization::new("test1", vec![], vec![]),
+        Civilization::new(
+            "Maya",
+            vec![],
+            vec![Leader::builder("Kʼinich Janaab Pakal I", "", "", "", "").build()],
+        ),
     ]
 }
 
