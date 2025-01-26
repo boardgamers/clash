@@ -831,6 +831,23 @@ fn test_collect() {
 }
 
 #[test]
+fn test_collect_husbandry() {
+    // todo: test that the action is legal it can't be done again
+    test_action(
+        "collect_husbandry",
+        Action::Playing(Collect(playing_actions::Collect {
+            city_position: Position::from_offset("B3"),
+            collections: vec![
+                (Position::from_offset("B5"), ResourcePile::food(1)),
+            ],
+        })),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
 fn test_collect_free_economy() {
     test_action(
         "collect_free_economy",

@@ -305,16 +305,13 @@ impl Game {
             return;
         }
 
-        // both for redo and for executing the action
-        self.players[player_index].take_events(|events, player| {
-            events.on_execute_action.trigger(player, &action, &());
-        });
-
         if matches!(action, Action::Redo) {
             assert!(self.can_redo(), "no action can be redone");
             self.redo(player_index);
             return;
         }
+        let copy = action.clone();
+        
         self.log.push(log::format_action_log_item(&action, self));
         self.add_action_log_item(action.clone());
         match self.state.clone() {
@@ -372,7 +369,14 @@ impl Game {
             }
             Finished => panic!("actions can't be executed when the game is finished"),
         }
+        self.on_execute_or_redo(&copy, player_index);
         check_for_waste(self, player_index);
+    }
+
+    fn on_execute_or_redo(&mut self, action: &Action, player_index: usize) {
+        self.players[player_index].take_events(|events, player| {
+            events.on_execute_action.trigger(player, &action, &());
+        });
     }
 
     fn undo(&mut self, player_index: usize) {
@@ -411,6 +415,7 @@ impl Game {
 
     fn redo(&mut self, player_index: usize) {
         let action_log_item = &self.action_log[self.action_log_index];
+        let copy = action_log_item.clone();
         self.log
             .push(log::format_action_log_item(&action_log_item.clone(), self));
         match action_log_item {
@@ -455,6 +460,7 @@ impl Game {
             Action::Redo => panic!("redo action can't be redone"),
         }
         self.action_log_index += 1;
+        self.on_execute_or_redo(&copy, player_index);
         check_for_waste(self, player_index);
     }
 
