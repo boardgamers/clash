@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::iter;
 
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{
@@ -121,7 +120,12 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
     StateUpdate::None
 }
 
-fn click_collect_option(rc: &RenderContext, col: &CollectResources, p: Position, pile: &ResourcePile) -> StateUpdate {
+fn click_collect_option(
+    rc: &RenderContext,
+    col: &CollectResources,
+    p: Position,
+    pile: &ResourcePile,
+) -> StateUpdate {
     let mut new = col.clone();
     let old = col.collections.iter().find(|(pos, _)| pos == &p);
 
@@ -129,9 +133,10 @@ fn click_collect_option(rc: &RenderContext, col: &CollectResources, p: Position,
     if old.is_none_or(|(_, r)| r != pile) {
         new.collections.push((p, pile.clone()));
     }
-    
+
     let used = col.collections.clone().into_iter().collect();
-    new.possible_collections = possible_resource_collections(rc.game, col.city_position, col.player_index, &used);
+    new.possible_collections =
+        possible_resource_collections(rc.game, col.city_position, col.player_index, &used);
 
     StateUpdate::OpenDialog(ActiveDialog::CollectResources(new))
 }
@@ -199,4 +204,3 @@ fn draw_collect_item(rc: &RenderContext, center: Point, resources: &[(ResourceTy
         });
     }
 }
-

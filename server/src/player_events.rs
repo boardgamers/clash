@@ -1,15 +1,15 @@
-use std::collections::HashMap;
+use crate::collect::CollectContext;
+use crate::game::Game;
 use crate::payment::PaymentModel;
 use crate::playing_actions::PlayingActionType;
 use crate::{
     city::City, city_pieces::Building, events::EventMut, player::Player, position::Position,
     resource_pile::ResourcePile, wonder::Wonder,
 };
-use crate::collect::CollectContext;
-use crate::game::Game;
+use std::collections::HashMap;
 
 #[derive(Default)]
-pub struct PlayerEvents {
+pub(crate) struct PlayerEvents {
     pub on_construct: EventMut<Player, Position, Building>,
     pub on_undo_construct: EventMut<Player, Position, Building>,
     pub construct_cost: EventMut<ResourcePile, City, Building>,
@@ -20,7 +20,7 @@ pub struct PlayerEvents {
     pub on_undo_advance: EventMut<Player, String, ()>,
     pub advance_cost: EventMut<u32, String>,
     pub is_playing_action_available: EventMut<bool, PlayingActionType, Player>,
-    pub collect_options: EventMut<HashMap<Position, Vec<ResourcePile>>, CollectContext,Game>,
+    pub collect_options: EventMut<HashMap<Position, Vec<ResourcePile>>, CollectContext, Game>,
 }
 
 impl PlayerEvents {

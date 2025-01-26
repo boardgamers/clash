@@ -23,15 +23,15 @@ pub fn get_total_collection(
         return None;
     }
     let choices = possible_resource_collections(game, city_position, player_index, &HashMap::new());
-    let possible = collections
-        .iter()
-        .all(|(position, collect)| {
-            choices
-                .get(position).is_some_and(|options| options.contains(collect))
-        });
+    let possible = collections.iter().all(|(position, collect)| {
+        choices
+            .get(position)
+            .is_some_and(|options| options.contains(collect))
+    });
 
     if possible {
-        collections.iter()
+        collections
+            .iter()
             .map(|(_, collect)| collect.clone())
             .reduce(|a, b| a.clone().add(b.clone()))
     } else {
@@ -100,7 +100,7 @@ pub fn possible_resource_collections(
                 city_position: city_pos,
                 used: used.clone(),
             },
-            &game,
+            game,
         );
     collect_options.retain(|p, _| !is_blocked(game, player_index, *p));
     collect_options

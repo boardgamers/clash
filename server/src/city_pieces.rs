@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 
+use crate::content::advances::TACTICS;
 use crate::{content::wonders, wonder::Wonder};
 use Building::*;
-use crate::content::advances::TACTICS;
 
 #[derive(Default)]
 pub struct CityPieces {

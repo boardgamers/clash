@@ -1,10 +1,10 @@
-
 use serde::{Deserialize, Serialize};
 
 use PlayingAction::*;
 
 use crate::action::Action;
 use crate::city::MoodState;
+use crate::collect::{collect, undo_collect};
 use crate::game::{CulturalInfluenceResolution, GameState};
 use crate::payment::PaymentModel;
 use crate::{
@@ -16,7 +16,6 @@ use crate::{
     resource_pile::ResourcePile,
     unit::UnitType,
 };
-use crate::collect::{collect, undo_collect};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Construct {
@@ -396,7 +395,6 @@ impl ActionType {
         }
     }
 }
-
 
 pub(crate) fn increase_happiness(game: &mut Game, player_index: usize, i: IncreaseHappiness) {
     let player = &mut game.players[player_index];

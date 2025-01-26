@@ -46,7 +46,7 @@ pub struct Player {
     pub resource_limit: ResourcePile,
     // transient, only for the current turn, only the active player can gain resources
     pub wasted_resources: ResourcePile,
-    pub events: Option<PlayerEvents>,
+    pub(crate) events: Option<PlayerEvents>,
     pub cities: Vec<City>,
     pub units: Vec<Unit>,
     pub civilization: Civilization,

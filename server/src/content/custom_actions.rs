@@ -1,17 +1,16 @@
 use serde::{Deserialize, Serialize};
 
 use crate::action::Action;
+use crate::collect::{collect, undo_collect};
 use crate::content::wonders::construct_wonder;
 use crate::log::{current_turn_log, format_collect_log_item, format_happiness_increase};
 use crate::player::Player;
 use crate::playing_actions::{
-    increase_happiness, undo_increase_happiness, Collect, IncreaseHappiness,
-    PlayingAction,
+    increase_happiness, undo_increase_happiness, Collect, IncreaseHappiness, PlayingAction,
 };
 use crate::{
     game::Game, playing_actions::ActionType, position::Position, resource_pile::ResourcePile,
 };
-use crate::collect::{collect, undo_collect};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub enum CustomAction {
