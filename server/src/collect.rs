@@ -1,11 +1,11 @@
 use crate::game::Game;
+use crate::map::Terrain::{Fertile, Forest, Mountain};
 use crate::playing_actions::Collect;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use std::collections::HashMap;
 use std::iter;
 use std::ops::Add;
-use crate::map::Terrain::{Fertile, Forest, Mountain};
 
 ///
 /// # Panics
@@ -62,6 +62,7 @@ pub(crate) fn undo_collect(game: &mut Game, player_index: usize, c: Collect) {
 
 pub(crate) struct CollectContext {
     pub city_position: Position,
+    #[allow(dead_code)] // will need for other advances
     pub used: HashMap<Position, ResourcePile>,
 }
 
@@ -108,7 +109,7 @@ pub fn possible_resource_collections(
             game,
         );
     collect_options.retain(|p, _| {
-        game.get_any_city(*p).is_none_or(|c|c.position == city_pos)
+        game.get_any_city(*p).is_none_or(|c| c.position == city_pos)
             && game.enemy_player(player_index, *p).is_none()
     });
     collect_options

@@ -1,6 +1,6 @@
 use crate::{
-    content::custom_actions::CustomActionType, events::EventMut, game::Game, map::Terrain,
-    player_events::PlayerEvents, resource_pile::ResourcePile, utils,
+    content::custom_actions::CustomActionType, events::EventMut, game::Game,
+    player_events::PlayerEvents,
 };
 
 pub type AbilityInitializer = Box<dyn Fn(&mut Game, usize)>;

@@ -19,7 +19,6 @@ use crate::{
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     game::Game,
     leader::Leader,
-    map::Terrain::{*},
     player_events::PlayerEvents,
     position::Position,
     resource_pile::ResourcePile,
@@ -35,7 +34,7 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering::{self, *},
-    collections::{HashMap, HashSet},
+    collections::HashSet,
     mem,
 };
 
@@ -975,7 +974,7 @@ impl Player {
     /// # Panics
     ///
     /// Panics if 'events' is set to None
-    pub fn take_events<F>(&mut self, action: F)
+    pub(crate) fn take_events<F>(&mut self, action: F)
     where
         F: FnOnce(&PlayerEvents, &mut Player),
     {

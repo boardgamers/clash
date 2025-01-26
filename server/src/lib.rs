@@ -10,6 +10,7 @@
 #![allow(clippy::cast_precision_loss)]
 #![allow(clippy::cast_possible_wrap)]
 #![allow(clippy::too_many_arguments)]
+#![allow(clippy::implicit_hasher)]
 
 mod ability_initializer;
 pub mod action;
