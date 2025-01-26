@@ -9,7 +9,10 @@ pub fn get_all() -> Vec<Civilization> {
             Leader::builder("Kleopatra", "", "", "", "").build(),
         ]),
 
-        Civilization::new("test1", vec![], vec![]),
+        Civilization::new("Maya", vec![], vec![
+            Leader::builder("Kʼinich Janaab Pakal I", 
+                "", "", "", "").build(),
+        ]),
     ]
 }
 
