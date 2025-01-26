@@ -304,6 +304,12 @@ impl Game {
             self.undo(player_index);
             return;
         }
+
+        // both for redo and for executing the action
+        self.players[player_index].take_events(|events, player| {
+            events.on_execute_action.trigger(player, &action, &());
+        });
+
         if matches!(action, Action::Redo) {
             assert!(self.can_redo(), "no action can be redone");
             self.redo(player_index);
@@ -370,7 +376,13 @@ impl Game {
     }
 
     fn undo(&mut self, player_index: usize) {
-        match &self.action_log[self.action_log_index - 1] {
+        let action = &self.action_log[self.action_log_index - 1];
+
+        self.players[player_index].take_events(|events, player| {
+            events.on_undo_action.trigger(player, &action, &());
+        });
+
+        match action {
             Action::Playing(action) => action.clone().undo(self, player_index),
             Action::StatusPhase(_) => panic!("status phase actions can't be undone"),
             Action::Movement(action) => {

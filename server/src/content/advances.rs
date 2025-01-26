@@ -1,6 +1,9 @@
 use super::custom_actions::CustomActionType::*;
+use crate::action::Action;
 use crate::advance::AdvanceBuilder;
-use crate::playing_actions::PlayingActionType;
+use crate::collect::CollectContext;
+use crate::playing_actions::{PlayingAction, PlayingActionType};
+use crate::position::Position;
 use crate::{
     ability_initializer::AbilityInitializerSetup,
     advance::{Advance, Bonus::*},
@@ -8,6 +11,7 @@ use crate::{
     map::Terrain::*,
     resource_pile::ResourcePile,
 };
+use std::collections::HashMap;
 
 //names of advances that need special handling
 pub const NAVIGATION: &str = "Navigation";
@@ -74,34 +78,109 @@ fn agriculture() -> Vec<Advance> {
                 "Storage",
                 "Your maximum food limit is increased from 2 to 7",
             )
-            .add_one_time_ability_initializer(|game, player_index| {
-                game.players[player_index].resource_limit.food = 7;
-            })
-            .add_ability_undo_deinitializer(|game, player_index| {
-                game.players[player_index].resource_limit.food = 2;
-            })
-            .with_advance_bonus(MoodToken),
+                .add_one_time_ability_initializer(|game, player_index| {
+                    game.players[player_index].resource_limit.food = 7;
+                })
+                .add_ability_undo_deinitializer(|game, player_index| {
+                    game.players[player_index].resource_limit.food = 2;
+                })
+                .with_advance_bonus(MoodToken),
             Advance::builder(
                 "Irrigation",
                 "Your cities may Collect food from Barren spaces, Ignore Famine events",
             )
-            .add_player_event_listener(
-                |event| &mut event.collect_options,
-                |options, c, game| {
-                    c.city_position
-                        .neighbors()
-                        .iter()
-                        .chain(std::iter::once(&c.city_position))
-                        .filter(|pos| game.map.get(**pos) == Some(&Barren))
-                        .for_each(|pos| {
-                            options.insert(*pos, vec![ResourcePile::food(1)]);
-                        });
-                },
-                0,
+                .add_player_event_listener(
+                    |event| &mut event.collect_options,
+                    irrigation_collect,
+                    0,
+                )
+                .with_advance_bonus(MoodToken),
+            Advance::builder(
+                "Husbandry",
+                "During a Collect Resources Action, you may collect from a Land space that is 2 Land spaces away, rather than 1. If you have the Roads Advance you may collect from two Land spaces that are 2 Land spaces away. This Advance can only be used once per turn.",
             )
-            .with_advance_bonus(MoodToken),
+                //todo advance bonus?
+                .add_player_event_listener(
+                    |event| &mut event.collect_options,
+                    husbandry_collect,
+                    0,
+                )
+                .add_player_event_listener(
+                    |event| &mut event.on_execute_action,
+                    |player, action, ()| {
+                        if is_husbandry_action(action) {
+                            player.played_once_per_turn_effects.push("Husbandry".to_string());
+                        }
+                    },
+                    0
+                )
+                .add_player_event_listener(
+                    |event| &mut event.on_undo_action,
+                    |player, action, ()| {
+                        if is_husbandry_action(action) {
+                            player.played_once_per_turn_effects.retain(|a| a != "Husbandry");
+                        }
+                    },
+                    0
+                )
         ],
     )
+}
+
+fn irrigation_collect(
+    options: &mut HashMap<Position, Vec<ResourcePile>>,
+    c: &CollectContext,
+    game: &Game,
+) {
+    c.city_position
+        .neighbors()
+        .iter()
+        .chain(std::iter::once(&c.city_position))
+        .filter(|pos| game.map.get(**pos) == Some(&Barren))
+        .for_each(|pos| {
+            options.insert(*pos, vec![ResourcePile::food(1)]);
+        });
+}
+
+fn is_husbandry_action(action: &Action) -> bool {
+    match action {
+        Action::Playing(PlayingAction::Collect(collect)) => collect
+            .collections
+            .iter()
+            .any(|c| c.0.distance(collect.city_position) > 1),
+        _ => false,
+    }
+}
+
+fn husbandry_collect(
+    options: &mut HashMap<Position, Vec<ResourcePile>>,
+    c: &CollectContext,
+    game: &Game,
+) {
+    let player = &game.players[c.player_index];
+    let allowed = if player
+        .played_once_per_turn_effects
+        .contains(&"Husbandry".to_string())
+    {
+        0
+    } else if player.has_advance(ROADS) {
+        2
+    } else {
+        1
+    };
+    
+    if c.used.iter().filter(|(pos, _)| pos.distance(c.city_position) == 2).count() == allowed {
+        return;
+    }
+
+    game.map
+        .tiles
+        .into_iter()
+        .filter(|(pos, t)| pos.distance(c.city_position) == 2)
+        .for_each(|pos| {
+            
+            options.insert(*pos, vec![ResourcePile::food(1)]);
+        });
 }
 
 fn construction() -> Vec<Advance> {
@@ -125,35 +204,7 @@ fn seafaring() -> Vec<Advance> {
         "Fishing",
         vec![
             Advance::builder("Fishing", "Your cities may Collect food from one Sea space")
-                .add_player_event_listener(
-                    |event| &mut event.collect_options,
-                    |options, c, game| {
-                        let city = game
-                            .get_any_city(c.city_position)
-                            .expect("city should exist");
-                        let port = city.port_position;
-                        if let Some(position) = port.or_else(|| {
-                            c.city_position
-                                .neighbors()
-                                .into_iter()
-                                .find(|pos| game.map.is_water(*pos))
-                        }) {
-                            options.insert(
-                                position,
-                                if port.is_some() {
-                                    vec![
-                                        ResourcePile::food(1),
-                                        ResourcePile::gold(1),
-                                        ResourcePile::mood_tokens(1),
-                                    ]
-                                } else {
-                                    vec![ResourcePile::food(1)]
-                                },
-                            );
-                        }
-                    },
-                    0,
-                )
+                .add_player_event_listener(|event| &mut event.collect_options, fishing_collect, 0)
                 .with_advance_bonus(MoodToken),
             Advance::builder(
                 NAVIGATION,
@@ -161,6 +212,36 @@ fn seafaring() -> Vec<Advance> {
             ),
         ],
     )
+}
+
+fn fishing_collect(
+    options: &mut HashMap<Position, Vec<ResourcePile>>,
+    c: &CollectContext,
+    game: &Game,
+) {
+    let city = game
+        .get_any_city(c.city_position)
+        .expect("city should exist");
+    let port = city.port_position;
+    if let Some(position) = port.or_else(|| {
+        c.city_position
+            .neighbors()
+            .into_iter()
+            .find(|pos| game.map.is_water(*pos))
+    }) {
+        options.insert(
+            position,
+            if port.is_some() {
+                vec![
+                    ResourcePile::food(1),
+                    ResourcePile::gold(1),
+                    ResourcePile::mood_tokens(1),
+                ]
+            } else {
+                vec![ResourcePile::food(1)]
+            },
+        );
+    }
 }
 
 fn education() -> Vec<Advance> {

@@ -61,8 +61,8 @@ pub(crate) fn undo_collect(game: &mut Game, player_index: usize, c: Collect) {
 }
 
 pub(crate) struct CollectContext {
+    pub player_index: usize,
     pub city_position: Position,
-    #[allow(dead_code)] // will need for other advances
     pub used: HashMap<Position, ResourcePile>,
 }
 

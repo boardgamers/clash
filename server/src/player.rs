@@ -62,6 +62,7 @@ pub struct Player {
     pub wonder_cards: Vec<Wonder>,
     pub next_unit_id: u32,
     pub played_once_per_turn_actions: Vec<CustomActionType>,
+    pub played_once_per_turn_effects: Vec<String>,
 }
 
 impl Clone for Player {
