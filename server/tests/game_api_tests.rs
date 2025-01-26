@@ -427,7 +427,7 @@ struct TestAction {
     action: Action,
     undoable: bool,
     illegal_action_test: bool,
-    player_index: usize, 
+    player_index: usize,
 }
 
 impl TestAction {
@@ -693,12 +693,13 @@ fn test_trade_routes_with_currency() {
     test_actions(
         "trade_routes_with_currency",
         vec![
-            TestAction::not_undoable(0,Action::Playing(EndTurn)),
-            TestAction::undoable(1,Action::CustomPhase(
-                CustomPhaseAction::TradeRouteSelectionAction(
+            TestAction::not_undoable(0, Action::Playing(EndTurn)),
+            TestAction::undoable(
+                1,
+                Action::CustomPhase(CustomPhaseAction::TradeRouteSelectionAction(
                     ResourcePile::gold(1) + ResourcePile::food(1),
-                ),
-            )),
+                )),
+            ),
         ],
     );
 }
@@ -918,8 +919,8 @@ fn test_collect_husbandry() {
     test_actions(
         "collect_husbandry",
         vec![
-            TestAction::undoable(0,action.clone()),
-            TestAction::illegal(0,action.clone()), // illegal because it can't be done again
+            TestAction::undoable(0, action.clone()),
+            TestAction::illegal(0, action.clone()), // illegal because it can't be done again
         ],
     );
 }
@@ -1147,22 +1148,31 @@ fn test_combat_all_modifiers() {
     test_actions(
         "combat_all_modifiers",
         vec![
-            TestAction::not_undoable(0,move_action(
-                vec![0, 1, 2, 3, 4, 5],
-                Position::from_offset("C1"),
-            )),
-            TestAction::not_undoable(0,Action::CustomPhase(CustomPhaseAction::SteelWeaponsAttackerAction(
-                ResourcePile::ore(1),
-            ))),
-            TestAction::not_undoable(0,Action::CustomPhase(CustomPhaseAction::SteelWeaponsDefenderAction(
-                ResourcePile::ore(1),
-            ))),
-            TestAction::not_undoable(0,Action::CustomPhase(CustomPhaseAction::SiegecraftPaymentAction(
-                SiegecraftPayment {
-                    ignore_hit: ResourcePile::ore(2),
-                    extra_die: ResourcePile::empty(),
-                },
-            ))),
+            TestAction::not_undoable(
+                0,
+                move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::CustomPhase(CustomPhaseAction::SteelWeaponsAttackerAction(
+                    ResourcePile::ore(1),
+                )),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::CustomPhase(CustomPhaseAction::SteelWeaponsDefenderAction(
+                    ResourcePile::ore(1),
+                )),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::CustomPhase(CustomPhaseAction::SiegecraftPaymentAction(
+                    SiegecraftPayment {
+                        ignore_hit: ResourcePile::ore(2),
+                        extra_die: ResourcePile::empty(),
+                    },
+                )),
+            ),
         ],
     );
 }

@@ -79,15 +79,15 @@ impl PaymentModel {
     pub fn is_free(&self) -> bool {
         self.is_valid_payment(&ResourcePile::empty())
     }
-    
+
     #[must_use]
     pub fn possible_resource_types(&self) -> Vec<ResourceType> {
         match self {
             PaymentModel::Sum(options) => options.types_by_preference.to_vec(),
-            PaymentModel::Resources(c) => c.cost.types()
+            PaymentModel::Resources(c) => c.cost.types(),
         }
     }
-    
+
     #[must_use]
     pub fn default_payment(&self) -> ResourcePile {
         match self {

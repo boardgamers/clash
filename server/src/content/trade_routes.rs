@@ -17,7 +17,7 @@ pub struct TradeRoute {
     to: Position,
 }
 
-#[must_use] 
+#[must_use]
 pub fn trade_route_reward(game: &Game) -> Option<(PaymentModel, Vec<TradeRoute>)> {
     let p = game.current_player_index;
     let trade_routes = find_trade_routes(game, &game.players[p]);
@@ -151,15 +151,11 @@ fn find_trade_route_to_city(
         return None;
     }
 
-    let safe_passage = unit
-        .position
-        .neighbors()
-        .iter()
-        .any(|&pos| {
-            pos.neighbors().contains(&to.position)
-                && game.map.is_inside(pos)
-                && !game.map.is_unexplored(pos)
-        });
+    let safe_passage = unit.position.neighbors().iter().any(|&pos| {
+        pos.neighbors().contains(&to.position)
+            && game.map.is_inside(pos)
+            && !game.map.is_unexplored(pos)
+    });
 
     if !safe_passage {
         return None;

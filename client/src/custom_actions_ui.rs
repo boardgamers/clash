@@ -6,7 +6,6 @@ use server::content::custom_phase_actions::CustomPhaseAction;
 use server::content::trade_routes::trade_route_reward;
 use server::game::Game;
 
-
 pub fn trade_route_dialog(game: &Game) -> ActiveDialog {
     let model = trade_route_reward(game).unwrap().0;
     ActiveDialog::TradeRouteSelection(Payment::new_gain(model, "Select trade route reward"))

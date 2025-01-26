@@ -7,7 +7,10 @@ use crate::unit_ui;
 use crate::unit_ui::UnitSelection;
 use server::action::{Action, CombatAction, PlayActionCard};
 use server::combat::Combat;
-use server::content::custom_phase_actions::{steel_weapons_cost, CustomPhaseAction, SiegecraftPayment, SIEGECRAFT_EXTRA_DIE, SIEGECRAFT_IGNORE_HIT};
+use server::content::custom_phase_actions::{
+    steel_weapons_cost, CustomPhaseAction, SiegecraftPayment, SIEGECRAFT_EXTRA_DIE,
+    SIEGECRAFT_IGNORE_HIT,
+};
 use server::game::Game;
 use server::position::Position;
 use server::unit::Unit;
@@ -106,8 +109,18 @@ impl SiegecraftPaymentDialog {
     pub fn new(game: &Game) -> SiegecraftPaymentDialog {
         let available = game.get_player(game.active_player()).resources.clone();
         SiegecraftPaymentDialog {
-            extra_die: Payment::new(&SIEGECRAFT_EXTRA_DIE, &available, "Cancel fortress extra die in first round of combat", true),
-            ignore_hit: Payment::new(&SIEGECRAFT_IGNORE_HIT, &available, "Cancel fortress ignore hit in first round of combat", true),
+            extra_die: Payment::new(
+                &SIEGECRAFT_EXTRA_DIE,
+                &available,
+                "Cancel fortress extra die in first round of combat",
+                true,
+            ),
+            ignore_hit: Payment::new(
+                &SIEGECRAFT_IGNORE_HIT,
+                &available,
+                "Cancel fortress ignore hit in first round of combat",
+                true,
+            ),
         }
     }
 }

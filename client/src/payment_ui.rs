@@ -74,17 +74,17 @@ impl Payment {
     #[must_use]
     pub fn new_gain(model: PaymentModel, name: &str) -> Payment {
         let sum = if let PaymentModel::Sum(m) = &model {
-               m.clone()
-           } else {
-               panic!("No trade route reward")
-           };
-           let available = sum
-               .types_by_preference
-               .iter()
-               .map(|t| ResourcePile::of(*t, sum.cost))
-               .reduce(|a, b| a + b)
-               .expect("sum");
-        
+            m.clone()
+        } else {
+            panic!("No trade route reward")
+        };
+        let available = sum
+            .types_by_preference
+            .iter()
+            .map(|t| ResourcePile::of(*t, sum.cost))
+            .reduce(|a, b| a + b)
+            .expect("sum");
+
         Payment {
             name: name.to_string(),
             model,

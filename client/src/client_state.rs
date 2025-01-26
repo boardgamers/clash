@@ -1,23 +1,22 @@
 use macroquad::prelude::*;
 use server::action::Action;
 use server::city::{City, MoodState};
-use server::combat::{active_attackers, active_defenders, Combat, CombatPhase};
+use server::combat::{active_attackers, active_defenders, CombatPhase};
 use server::content::advances::{NAVIGATION, ROADS, SIEGECRAFT, STEEL_WEAPONS};
-use server::content::custom_phase_actions::{steel_weapons_cost, CustomPhaseState};
-use server::content::trade_routes::trade_route_reward;
+use server::content::custom_phase_actions::CustomPhaseState;
 use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
-use server::payment::PaymentModel::Sum;
 use server::position::Position;
-use server::resource_pile::ResourcePile;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 use crate::assets::Assets;
 use crate::city_ui::building_name;
 use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
-use crate::combat_ui::{steel_weapons_dialog, RemoveCasualtiesSelection, SiegecraftPaymentDialog, SteelWeaponDialog};
+use crate::combat_ui::{
+    steel_weapons_dialog, RemoveCasualtiesSelection, SiegecraftPaymentDialog, SteelWeaponDialog,
+};
 use crate::construct_ui::ConstructionPayment;
-use crate::custom_actions_ui::{trade_route_dialog};
+use crate::custom_actions_ui::trade_route_dialog;
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
 use crate::log_ui::{add_advance_help, advance_help};
@@ -569,9 +568,7 @@ impl State {
                 CustomPhaseState::SteelWeaponsDefender(c) => {
                     steel_weapons_dialog(game, c, c.defender)
                 }
-                CustomPhaseState::TradeRouteSelection => {
-                    trade_route_dialog(game)
-                }
+                CustomPhaseState::TradeRouteSelection => trade_route_dialog(game),
             },
         }
     }

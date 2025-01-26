@@ -59,7 +59,7 @@ impl ResourcePile {
             culture_tokens,
         }
     }
-    
+
     #[must_use]
     pub const fn of(resource_type: ResourceType, amount: u32) -> Self {
         let mut p = Self::empty();
