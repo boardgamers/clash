@@ -422,20 +422,58 @@ fn game_path(name: &str) -> String {
     format!("tests{SEPARATOR}test_games{SEPARATOR}{name}.json")
 }
 
-fn test_actions(name: &str, player_index: usize, actions: Vec<Action>) {
+struct TestAction {
+    action: Action,
+    undoable: bool,
+    illegal_action_test: bool,
+}
+
+impl TestAction {
+    fn illegal(action: Action) -> Self {
+        Self {
+            action,
+            undoable: false,
+            illegal_action_test: true,
+        }
+    }
+
+    fn undoable(action: Action) -> Self {
+        Self {
+            action,
+            undoable: true,
+            illegal_action_test: false,
+        }
+    }
+
+    fn not_undoable(action: Action) -> Self {
+        Self {
+            action,
+            undoable: false,
+            illegal_action_test: false,
+        }
+    }
+}
+
+fn test_actions(name: &str, player_index: usize, actions: Vec<TestAction>) {
+    let outcome: fn(name: &str, i: usize) -> String = |name, i|
+        if i == 0 {
+            format!("{name}.outcome")
+        } else {
+            format!("{name}.outcome{}", i)
+        };
     for (i, action) in actions.into_iter().enumerate() {
         let from = if i == 0 {
             name.to_string()
         } else {
-            format!("{name}.outcome{}", i - 1)
+            outcome(name, i - 1)
         };
         test_action_internal(
             &from,
-            &format!("{name}.outcome{i}"),
-            action,
+            outcome(name, i).as_str(),
+            action.action,
             player_index,
-            false,
-            false,
+            action.undoable,
+            action.illegal_action_test,
         );
     }
 }
@@ -834,16 +872,17 @@ fn test_collect() {
 
 #[test]
 fn test_collect_husbandry() {
-    // todo: test that the action is legal it can't be done again
-    test_action(
+    let action = Action::Playing(Collect(playing_actions::Collect {
+        city_position: Position::from_offset("B3"),
+        collections: vec![(Position::from_offset("B5"), ResourcePile::food(1))],
+    }));
+    test_actions(
         "collect_husbandry",
-        Action::Playing(Collect(playing_actions::Collect {
-            city_position: Position::from_offset("B3"),
-            collections: vec![(Position::from_offset("B5"), ResourcePile::food(1))],
-        })),
         0,
-        true,
-        false,
+        vec![
+            TestAction::undoable(action.clone()),
+            TestAction::illegal(action.clone()), // illegal because it can't be done again
+        ],
     );
 }
 
@@ -1071,19 +1110,22 @@ fn test_combat_all_modifiers() {
         "combat_all_modifiers",
         0,
         vec![
-            move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
-            CustomPhase(CustomPhaseAction::SteelWeaponsAttackerAction(
-                ResourcePile::ore(1),
+            TestAction::not_undoable(move_action(
+                vec![0, 1, 2, 3, 4, 5],
+                Position::from_offset("C1"),
             )),
-            CustomPhase(CustomPhaseAction::SteelWeaponsDefenderAction(
+            TestAction::not_undoable(CustomPhase(CustomPhaseAction::SteelWeaponsAttackerAction(
                 ResourcePile::ore(1),
-            )),
-            CustomPhase(CustomPhaseAction::SiegecraftPaymentAction(
+            ))),
+            TestAction::not_undoable(CustomPhase(CustomPhaseAction::SteelWeaponsDefenderAction(
+                ResourcePile::ore(1),
+            ))),
+            TestAction::not_undoable(CustomPhase(CustomPhaseAction::SiegecraftPaymentAction(
                 SiegecraftPayment {
                     ignore_hit: ResourcePile::ore(2),
                     extra_die: ResourcePile::empty(),
                 },
-            )),
+            ))),
         ],
     );
 }
