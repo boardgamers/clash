@@ -8,7 +8,7 @@ use crate::dialog_ui::{
 use crate::hex_ui;
 use crate::hex_ui::Point;
 use crate::layout_ui::{
-    draw_icon, draw_scaled_icon, is_in_circle, left_mouse_button_pressed, ICON_SIZE,
+    draw_scaled_icon, is_in_circle, left_mouse_button_pressed,
 };
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name, show_resource_pile};
@@ -150,19 +150,23 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpd
 
             let c = hex_ui::center(pos);
             for (i, pile) in possible.iter().enumerate() {
-                let center = if possible.len() == 1 {
-                    c
-                } else {
-                    hex_ui::rotate_around(c, 30.0, 90 * i)
+                let deg = (360. / possible.len() as f32) as usize * i;
+                let (center, radius) = match possible.len() {
+                    1 => (c, 20.),
+                    2 => (hex_ui::rotate_around(c, 30.0, deg), 20.),
+                    n if n <= 4 => (hex_ui::rotate_around(c, 30.0, deg), 20.),
+                    _ => (hex_ui::rotate_around(c, 30.0, deg), 10.),
                 };
+                let size = radius * 1.3;
+
                 let color = if col.is_some_and(|r| r == pile) {
                     BLACK
                 } else {
                     WHITE
                 };
-                draw_circle(center.x, center.y, 20., color);
+                draw_circle(center.x, center.y, radius, color);
                 if let Some(p) = left_mouse_button_pressed(rc) {
-                    if is_in_circle(p, center, 20.) {
+                    if is_in_circle(p, center, radius) {
                         return click_collect_option(rc, collect, pos, pile);
                     }
                 }
@@ -175,32 +179,37 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpd
                         a.is_some_and(|a| *a > 0).then(|| (*r, a.unwrap()))
                     })
                     .collect();
-                draw_collect_item(rc, center, &m);
+                draw_collect_item(rc, center, &m, size);
             }
         }
     };
     StateUpdate::None
 }
 
-fn draw_collect_item(rc: &RenderContext, center: Point, resources: &[(ResourceType, &u32)]) {
+fn draw_collect_item(
+    rc: &RenderContext,
+    center: Point,
+    resources: &[(ResourceType, &u32)],
+    size: f32,
+) {
     if resources.iter().len() == 1 {
         let (r, _) = resources.first().unwrap();
-        draw_icon(
+        draw_scaled_icon(
             rc,
             &rc.assets().resources[r],
             resource_name(*r),
-            center.to_vec2() - vec2(ICON_SIZE / 2., ICON_SIZE / 2.),
+            center.to_vec2() - vec2(size / 2., size / 2.),
+            size,
         );
     } else {
         resources.iter().enumerate().for_each(|(j, (r, _))| {
-            let size = ICON_SIZE / 2.;
             let c = hex_ui::rotate_around(center, 10.0, 180 * j);
             draw_scaled_icon(
                 rc,
                 &rc.assets().resources[r],
                 resource_name(*r),
                 c.to_vec2() - vec2(size / 2., size / 2.),
-                size,
+                size / 2.,
             );
         });
     }

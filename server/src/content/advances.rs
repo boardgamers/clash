@@ -25,6 +25,7 @@ pub const RITUALS: &str = "Rituals";
 pub const TACTICS: &str = "Tactics";
 pub const BARTERING: &str = "Bartering";
 pub const CURRENCY: &str = "Currency";
+pub const IRRIGATION: &str = "Irrigation";
 
 #[must_use]
 pub fn get_all() -> Vec<Advance> {
@@ -90,7 +91,7 @@ fn agriculture() -> Vec<Advance> {
                 })
                 .with_advance_bonus(MoodToken),
             Advance::builder(
-                "Irrigation",
+                IRRIGATION,
                 "Your cities may Collect food from Barren spaces, Ignore Famine events",
             )
                 .add_player_event_listener(

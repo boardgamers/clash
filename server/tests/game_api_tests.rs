@@ -34,6 +34,7 @@ use std::{
 fn basic_actions() {
     let seed = String::new();
     let mut game = Game::new(1, seed, false);
+    game.wonders_left.retain(|w| w.name == "Pyramids");
     let founded_city_position = Position::new(0, 1);
     game.map.tiles = HashMap::from([(founded_city_position, Forest)]);
     let advance_action = Action::Playing(Advance {

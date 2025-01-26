@@ -1844,7 +1844,7 @@ pub mod tests {
         let old = Player::new(civilizations::tests::get_test_civilization(), 0);
         let new = Player::new(civilizations::tests::get_test_civilization(), 1);
 
-        let wonder = Wonder::builder("wonder", PaymentModel::free(), vec![]).build();
+        let wonder = Wonder::builder("wonder", "test", PaymentModel::free(), vec![]).build();
         let mut game = test_game();
         game.players.push(old);
         game.players.push(new);
