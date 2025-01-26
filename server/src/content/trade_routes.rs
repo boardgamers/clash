@@ -2,6 +2,7 @@ use crate::city::{City, MoodState};
 use crate::game::Game;
 use crate::player::Player;
 use crate::position::Position;
+use crate::resource_pile::ResourcePile;
 use crate::unit::Unit;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -11,9 +12,24 @@ pub struct TradeRoute {
     to: Position,
 }
 
-pub fn start_trade_routes(game: &mut Game) {}
+pub(crate) fn collect_trade_routes_for_current_player(game: &mut Game) {
+    let p = game.current_player_index;
+    for t in find_trade_routes(game, &game.players[p]) {
+        let reward = ResourcePile::food(1);
+        game.add_to_last_log_item(&format!(
+            ". Trade route from {:?} ({:?}) to {:?} collected {:?}",
+            t.from,
+            game.players[p].get_unit(t.unit_id)
+                .expect("unit should exist")
+                .unit_type,
+            t.to,
+            reward.to_string()
+        ));
+        game.players[p].gain_resources(reward);
+    }
+}
 
-#[must_use] 
+#[must_use]
 pub fn find_trade_routes(game: &Game, player: &Player) -> Vec<TradeRoute> {
     let all: Vec<Vec<TradeRoute>> = player
         .units
