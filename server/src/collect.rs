@@ -5,6 +5,7 @@ use crate::resource_pile::ResourcePile;
 use std::collections::HashMap;
 use std::iter;
 use std::ops::Add;
+use crate::map::Terrain::{Fertile, Forest, Mountain};
 
 ///
 /// # Panics
@@ -74,7 +75,11 @@ pub fn possible_resource_collections(
     player_index: usize,
     used: &HashMap<Position, ResourcePile>,
 ) -> HashMap<Position, Vec<ResourcePile>> {
-    let terrain_options = &game.get_player(player_index).collect_options;
+    let terrain_options = HashMap::from([
+        (Mountain, vec![ResourcePile::ore(1)]),
+        (Fertile, vec![ResourcePile::food(1)]),
+        (Forest, vec![ResourcePile::wood(1)]),
+    ]);
 
     let mut collect_options = city_pos
         .neighbors()
