@@ -1,5 +1,5 @@
-use std::collections::HashSet;
 use std::collections::HashMap;
+use std::collections::HashSet;
 
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{

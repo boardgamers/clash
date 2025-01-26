@@ -455,12 +455,13 @@ impl TestAction {
 }
 
 fn test_actions(name: &str, player_index: usize, actions: Vec<TestAction>) {
-    let outcome: fn(name: &str, i: usize) -> String = |name, i|
+    let outcome: fn(name: &str, i: usize) -> String = |name, i| {
         if i == 0 {
             format!("{name}.outcome")
         } else {
             format!("{name}.outcome{}", i)
-        };
+        }
+    };
     for (i, action) in actions.into_iter().enumerate() {
         let from = if i == 0 {
             name.to_string()

@@ -2,7 +2,6 @@ use super::custom_actions::CustomActionType::*;
 use crate::action::Action;
 use crate::advance::AdvanceBuilder;
 use crate::collect::CollectContext;
-use crate::map::Terrain;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::position::Position;
 use crate::{
@@ -92,7 +91,7 @@ fn agriculture() -> Vec<Advance> {
             )
                 .add_player_event_listener(
                     |event| &mut event.terrain_collect_options,
-                    |m,_,_| {
+                    |m,(),()| {
                         m.insert(Barren, HashSet::from([ResourcePile::food(1)]));
                     },
                     0,
@@ -166,12 +165,13 @@ fn husbandry_collect(
         return;
     }
 
-    &game.map
+    game
+        .map
         .tiles
         .iter()
         .filter(|(pos, t)| pos.distance(c.city_position) == 2 && t.is_land())
         .for_each(|(pos, t)| {
-            options.insert(*pos, c.terrain_options.get(&t).cloned().unwrap_or_default());
+            options.insert(*pos, c.terrain_options.get(t).cloned().unwrap_or_default());
         });
 }
 
@@ -228,7 +228,7 @@ fn fishing_collect(
                     ResourcePile::food(1),
                     ResourcePile::gold(1),
                     ResourcePile::mood_tokens(1),
-                ]                 )
+                ])
             } else {
                 HashSet::from([ResourcePile::food(1)])
             },

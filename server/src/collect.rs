@@ -1,4 +1,5 @@
 use crate::game::Game;
+use crate::map::Terrain;
 use crate::map::Terrain::{Fertile, Forest, Mountain};
 use crate::playing_actions::Collect;
 use crate::position::Position;
@@ -6,7 +7,6 @@ use crate::resource_pile::ResourcePile;
 use std::collections::{HashMap, HashSet};
 use std::iter;
 use std::ops::Add;
-use crate::map::Terrain;
 
 ///
 /// # Panics
@@ -121,7 +121,10 @@ pub fn possible_resource_collections(
             game,
         );
     for (pos, pile) in used {
-        collect_options.entry(*pos).or_default().insert(pile.clone());
+        collect_options
+            .entry(*pos)
+            .or_default()
+            .insert(pile.clone());
         // collect_options.insert(*pos, vec![pile.clone()]);
     }
 

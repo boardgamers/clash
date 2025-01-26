@@ -311,7 +311,7 @@ impl Game {
             return;
         }
         let copy = action.clone();
-        
+
         self.log.push(log::format_action_log_item(&action, self));
         self.add_action_log_item(action.clone());
         match self.state.clone() {
@@ -375,7 +375,7 @@ impl Game {
 
     fn on_execute_or_redo(&mut self, action: &Action, player_index: usize) {
         self.players[player_index].take_events(|events, player| {
-            events.on_execute_action.trigger(player, &action, &());
+            events.on_execute_action.trigger(player, action, &());
         });
     }
 
@@ -383,7 +383,7 @@ impl Game {
         let action = &self.action_log[self.action_log_index - 1];
 
         self.players[player_index].take_events(|events, player| {
-            events.on_undo_action.trigger(player, &action, &());
+            events.on_undo_action.trigger(player, action, &());
         });
 
         match action {
