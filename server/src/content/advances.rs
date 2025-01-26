@@ -198,15 +198,17 @@ fn fishing_collect(
         .get_any_city(c.city_position)
         .expect("city should exist");
     let port = city.port_position;
-    if let Some(position) = port.or_else(|| {
+    if let Some(position) = port
+        .filter(|p| game.enemy_player(c.player_index, *p).is_none())
+        .or_else(|| {
         c.city_position
             .neighbors()
             .into_iter()
-            .find(|pos| game.map.is_water(*pos))
+            .find(|p| game.map.is_water(*p) && game.enemy_player(c.player_index, *p).is_none())
     }) {
         options.insert(
             position,
-            if port.is_some() {
+            if Some(position) == port {
                 HashSet::from([
                     ResourcePile::food(1),
                     ResourcePile::gold(1),
