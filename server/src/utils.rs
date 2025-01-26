@@ -38,7 +38,7 @@ pub fn ordinal_number(value: u32) -> String {
     )
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, PartialEq)]
 pub struct Rng {
     seed: u128,
 }

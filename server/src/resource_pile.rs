@@ -61,6 +61,13 @@ impl ResourcePile {
     }
 
     #[must_use]
+    pub const fn of(resource_type: ResourceType, amount: u32) -> Self {
+        let mut p = Self::empty();
+        p.add_type(resource_type, amount as i32);
+        p
+    }
+
+    #[must_use]
     pub fn get(&self, resource_type: ResourceType) -> u32 {
         match resource_type {
             ResourceType::Food => self.food,
@@ -76,7 +83,7 @@ impl ResourcePile {
     ///
     /// # Panics
     /// Panics if `resource_type` is `Discount`
-    pub fn add_type(&mut self, resource_type: ResourceType, amount: i32) {
+    pub const fn add_type(&mut self, resource_type: ResourceType, amount: i32) {
         match resource_type {
             ResourceType::Food => self.food = (self.food as i32 + amount) as u32,
             ResourceType::Wood => self.wood = (self.wood as i32 + amount) as u32,

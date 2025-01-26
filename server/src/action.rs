@@ -6,7 +6,7 @@ use crate::status_phase::StatusPhaseAction;
 use crate::unit::MovementAction;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum Action {
     Playing(PlayingAction),
     StatusPhase(StatusPhaseAction),
@@ -103,7 +103,7 @@ impl Action {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum CombatAction {
     PlayActionCard(PlayActionCard),
     RemoveCasualties(Vec<u32>),
@@ -111,7 +111,7 @@ pub enum CombatAction {
 }
 
 // Can't use Option<String> because of mongo stips null values
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum PlayActionCard {
     None,
     Card(String),

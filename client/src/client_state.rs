@@ -1,9 +1,9 @@
 use macroquad::prelude::*;
 use server::action::Action;
 use server::city::{City, MoodState};
-use server::combat::{active_attackers, active_defenders, Combat, CombatPhase};
+use server::combat::{active_attackers, active_defenders, CombatPhase};
 use server::content::advances::{NAVIGATION, ROADS, SIEGECRAFT, STEEL_WEAPONS};
-use server::content::custom_phase_actions::{steel_weapons_cost, CustomPhaseState};
+use server::content::custom_phase_actions::CustomPhaseState;
 use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
 use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
@@ -12,14 +12,17 @@ use crate::assets::Assets;
 use crate::city_ui::building_name;
 use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
-use crate::combat_ui::{RemoveCasualtiesSelection, SiegecraftPaymentDialog, SteelWeaponDialog};
+use crate::combat_ui::{
+    steel_weapons_dialog, RemoveCasualtiesSelection, SiegecraftPaymentDialog, SteelWeaponDialog,
+};
 use crate::construct_ui::ConstructionPayment;
+use crate::custom_actions_ui::trade_route_dialog;
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
 use crate::log_ui::{add_advance_help, advance_help};
 use crate::map_ui::ExploreResolutionConfig;
 use crate::move_ui::{MoveDestination, MoveIntent, MoveSelection};
-use crate::payment_ui::{new_payment, Payment};
+use crate::payment_ui::Payment;
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use crate::render_context::RenderContext;
 use crate::status_phase_ui::ChooseAdditionalAdvances;
@@ -59,6 +62,7 @@ pub enum ActiveDialog {
     RemoveCasualties(RemoveCasualtiesSelection),
     SiegecraftPayment(SiegecraftPaymentDialog),
     SteelWeaponPayment(SteelWeaponDialog),
+    TradeRouteSelection(Payment), // it's actually a gain
 }
 
 impl ActiveDialog {
@@ -92,6 +96,7 @@ impl ActiveDialog {
             ActiveDialog::RemoveCasualties(_) => "remove casualties",
             ActiveDialog::SiegecraftPayment(_) => "siegecraft payment",
             ActiveDialog::SteelWeaponPayment(_) => "steel weapon payment",
+            ActiveDialog::TradeRouteSelection(_) => "trade route selection",
         }
     }
 
@@ -185,6 +190,7 @@ impl ActiveDialog {
                 add_advance_help(rc, &mut result, STEEL_WEAPONS);
                 result
             }
+            ActiveDialog::TradeRouteSelection(_) => vec!["Select trade route reward".to_string()],
         }
     }
 
@@ -557,27 +563,14 @@ impl State {
                     ActiveDialog::SiegecraftPayment(SiegecraftPaymentDialog::new(game))
                 }
                 CustomPhaseState::SteelWeaponsAttacker(c) => {
-                    Self::steel_weapons_dialog(game, c, c.attacker)
+                    steel_weapons_dialog(game, c, c.attacker)
                 }
                 CustomPhaseState::SteelWeaponsDefender(c) => {
-                    Self::steel_weapons_dialog(game, c, c.defender)
+                    steel_weapons_dialog(game, c, c.defender)
                 }
+                CustomPhaseState::TradeRouteSelection => trade_route_dialog(game),
             },
         }
-    }
-
-    fn steel_weapons_dialog(game: &Game, c: &Combat, player_index: usize) -> ActiveDialog {
-        let payment = new_payment(
-            &steel_weapons_cost(game, c, player_index),
-            &game.get_player(player_index).resources,
-            "Use steel weapons",
-            true,
-        );
-        ActiveDialog::SteelWeaponPayment(SteelWeaponDialog {
-            attacker: player_index == c.attacker,
-            payment,
-            combat: c.clone(),
-        })
     }
 
     #[must_use]

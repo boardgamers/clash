@@ -1,7 +1,7 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::layout_ui::{left_mouse_button_pressed_in_rect, top_centered_text};
 use crate::log_ui::break_text;
-use crate::payment_ui::{new_payment, payment_dialog, Payment};
+use crate::payment_ui::{payment_dialog, Payment};
 use crate::player_ui::player_color;
 use crate::render_context::RenderContext;
 use crate::tooltip::show_tooltip_for_rect;
@@ -30,7 +30,9 @@ pub enum AdvanceState {
 
 fn new_advance_payment(rc: &RenderContext, name: &str) -> Payment {
     let p = rc.shown_player;
-    new_payment(&p.advance_cost(name), &p.resources, name, false)
+    let model = &p.advance_cost(name);
+    let available = &p.resources;
+    Payment::new(model, available, name, false)
 }
 
 pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
@@ -212,7 +214,7 @@ pub fn pay_advance_dialog(ap: &Payment, rc: &RenderContext) -> StateUpdate {
         // select a different advance
         return update;
     };
-    payment_dialog(rc, ap, ActiveDialog::AdvancePayment, true, |payment| {
+    payment_dialog(rc, ap, ActiveDialog::AdvancePayment, |payment| {
         StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
             advance: ap.name.to_string(),
             payment,

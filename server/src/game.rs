@@ -6,7 +6,7 @@ use std::mem;
 use GameState::*;
 
 use crate::combat::{self, Combat, CombatDieRoll, CombatPhase, COMBAT_DIE_SIDES};
-use crate::consts::MOVEMENT_ACTIONS;
+use crate::consts::{ACTIONS, MOVEMENT_ACTIONS};
 use crate::content::custom_phase_actions::CustomPhaseState;
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
 use crate::map::UnexploredBlock;
@@ -70,6 +70,12 @@ impl Clone for Game {
     }
 }
 
+impl PartialEq for Game {
+    fn eq(&self, other: &Self) -> bool {
+        self.clone().data() == other.clone().data()
+    }
+}
+
 impl Game {
     /// Creates a new [`Game`].
     ///
@@ -126,7 +132,7 @@ impl Game {
                 String::from("Round 1/3"),
             ],
             undo_limit: 0,
-            actions_left: 3,
+            actions_left: ACTIONS,
             successful_cultural_influence: false,
             round: 1,
             age: 1,
@@ -370,7 +376,8 @@ impl Game {
             Finished => panic!("actions can't be executed when the game is finished"),
         }
         self.after_execute_or_redo(&copy, player_index);
-        check_for_waste(self, player_index);
+        // player can have changed, but we don't need waste check for turn end
+        check_for_waste(self, self.current_player_index);
     }
 
     fn after_execute_or_redo(&mut self, action: &Action, player_index: usize) {
@@ -799,6 +806,9 @@ impl Game {
         self.log[last_item_index] += edit;
     }
 
+    ///
+    /// # Panics
+    /// Panics if the player does not have events
     pub fn next_player(&mut self) {
         self.increment_player_index();
         self.add_info_log_item(format!(
@@ -806,6 +816,13 @@ impl Game {
             self.players[self.current_player_index].get_name()
         ));
         self.lock_undo();
+
+        let e = self.players[self.current_player_index]
+            .events
+            .take()
+            .expect("player should have events");
+        e.on_turn_start.trigger(self, &(), &());
+        self.players[self.current_player_index].events = Some(e);
     }
 
     pub fn skip_dropped_players(&mut self) {
@@ -842,7 +859,7 @@ impl Game {
     }
 
     pub fn next_turn(&mut self) {
-        self.actions_left = 3;
+        self.actions_left = ACTIONS;
         self.successful_cultural_influence = false;
         self.players[self.current_player_index].end_turn();
         self.next_player();
@@ -1588,7 +1605,7 @@ impl Game {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq)]
 pub struct GameData {
     state: GameState,
     players: Vec<PlayerData>,
@@ -1719,13 +1736,13 @@ impl GameState {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct DisembarkUndoContext {
     unit_id: u32,
     carrier_id: u32,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum UndoContext {
     FoundCity {
         settler: Unit,

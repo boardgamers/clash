@@ -1,4 +1,3 @@
-use server::action::Action::CustomPhase;
 use server::action::CombatAction;
 use server::content::custom_actions::CustomAction;
 use server::content::custom_phase_actions::{CustomPhaseAction, SiegecraftPayment};
@@ -6,6 +5,8 @@ use server::game::{CulturalInfluenceResolution, GameState};
 use server::status_phase::{
     ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction,
 };
+
+use server::content::trade_routes::find_trade_routes;
 use server::{
     action::Action,
     city::{City, MoodState::*},
@@ -426,35 +427,39 @@ struct TestAction {
     action: Action,
     undoable: bool,
     illegal_action_test: bool,
+    player_index: usize,
 }
 
 impl TestAction {
-    fn illegal(action: Action) -> Self {
+    fn illegal(player_index: usize, action: Action) -> Self {
         Self {
             action,
             undoable: false,
             illegal_action_test: true,
+            player_index,
         }
     }
 
-    fn undoable(action: Action) -> Self {
+    fn undoable(player_index: usize, action: Action) -> Self {
         Self {
             action,
             undoable: true,
             illegal_action_test: false,
+            player_index,
         }
     }
 
-    fn not_undoable(action: Action) -> Self {
+    fn not_undoable(player_index: usize, action: Action) -> Self {
         Self {
             action,
             undoable: false,
             illegal_action_test: false,
+            player_index,
         }
     }
 }
 
-fn test_actions(name: &str, player_index: usize, actions: Vec<TestAction>) {
+fn test_actions(name: &str, actions: Vec<TestAction>) {
     let outcome: fn(name: &str, i: usize) -> String = |name, i| {
         if i == 0 {
             format!("{name}.outcome")
@@ -472,7 +477,7 @@ fn test_actions(name: &str, player_index: usize, actions: Vec<TestAction>) {
             &from,
             outcome(name, i).as_str(),
             action.action,
-            player_index,
+            action.player_index,
             action.undoable,
             action.illegal_action_test,
         );
@@ -663,6 +668,40 @@ fn get_destinations(game: &Game, units: &[u32], position: &str) -> Vec<String> {
         .into_iter()
         .map(|r| r.destination.to_string())
         .collect()
+}
+
+#[test]
+fn test_trade_route_coordinates() {
+    let game = &load_game("trade_routes_unit_test");
+    // trading cities are C6, D6, E6
+
+    // our units are at C8, but the path is not explored
+    // 4 ships on E7 can trade with E6
+    // settler on the ship can trade with D6
+
+    let found = find_trade_routes(game, game.get_player(1));
+    assert_eq!(found.len(), 3);
+}
+
+#[test]
+fn test_trade_routes() {
+    test_action("trade_routes", Action::Playing(EndTurn), 0, false, false);
+}
+
+#[test]
+fn test_trade_routes_with_currency() {
+    test_actions(
+        "trade_routes_with_currency",
+        vec![
+            TestAction::not_undoable(0, Action::Playing(EndTurn)),
+            TestAction::undoable(
+                1,
+                Action::CustomPhase(CustomPhaseAction::TradeRouteSelectionAction(
+                    ResourcePile::gold(1) + ResourcePile::food(1),
+                )),
+            ),
+        ],
+    );
 }
 
 #[test]
@@ -879,10 +918,9 @@ fn test_collect_husbandry() {
     }));
     test_actions(
         "collect_husbandry",
-        0,
         vec![
-            TestAction::undoable(action.clone()),
-            TestAction::illegal(action.clone()), // illegal because it can't be done again
+            TestAction::undoable(0, action.clone()),
+            TestAction::illegal(0, action.clone()), // illegal because it can't be done again
         ],
     );
 }
@@ -1109,24 +1147,32 @@ fn test_first_combat_round_no_hits_attacker_may_retreat() {
 fn test_combat_all_modifiers() {
     test_actions(
         "combat_all_modifiers",
-        0,
         vec![
-            TestAction::not_undoable(move_action(
-                vec![0, 1, 2, 3, 4, 5],
-                Position::from_offset("C1"),
-            )),
-            TestAction::not_undoable(CustomPhase(CustomPhaseAction::SteelWeaponsAttackerAction(
-                ResourcePile::ore(1),
-            ))),
-            TestAction::not_undoable(CustomPhase(CustomPhaseAction::SteelWeaponsDefenderAction(
-                ResourcePile::ore(1),
-            ))),
-            TestAction::not_undoable(CustomPhase(CustomPhaseAction::SiegecraftPaymentAction(
-                SiegecraftPayment {
-                    ignore_hit: ResourcePile::ore(2),
-                    extra_die: ResourcePile::empty(),
-                },
-            ))),
+            TestAction::not_undoable(
+                0,
+                move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::CustomPhase(CustomPhaseAction::SteelWeaponsAttackerAction(
+                    ResourcePile::ore(1),
+                )),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::CustomPhase(CustomPhaseAction::SteelWeaponsDefenderAction(
+                    ResourcePile::ore(1),
+                )),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::CustomPhase(CustomPhaseAction::SiegecraftPaymentAction(
+                    SiegecraftPayment {
+                        ignore_hit: ResourcePile::ore(2),
+                        extra_die: ResourcePile::empty(),
+                    },
+                )),
+            ),
         ],
     );
 }

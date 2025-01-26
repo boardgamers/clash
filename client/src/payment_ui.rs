@@ -37,12 +37,64 @@ impl HasCountSelectableObject for ResourcePayment {
 pub struct Payment {
     pub name: String,
     pub model: PaymentModel,
+    pub available: ResourcePile,
     pub optional: bool,
     pub current: Vec<ResourcePayment>,
     pub discount_used: u32,
 }
 
 impl Payment {
+    #[must_use]
+    pub fn new(
+        model: &PaymentModel,
+        available: &ResourcePile,
+        name: &str,
+        optional: bool,
+    ) -> Payment {
+        let mut discount_used = 0;
+        let resources = match model {
+            PaymentModel::Sum(options) => sum_payment(options, available),
+            PaymentModel::Resources(a) => {
+                let options = a.get_payment_options(available);
+                discount_used = a.discount - options.discount_left;
+                resource_payment(&options)
+            }
+        };
+
+        Self {
+            name: name.to_string(),
+            model: model.clone(),
+            available: available.clone(),
+            optional,
+            current: resources,
+            discount_used,
+        }
+    }
+
+    #[must_use]
+    pub fn new_gain(model: PaymentModel, name: &str) -> Payment {
+        let sum = if let PaymentModel::Sum(m) = &model {
+            m.clone()
+        } else {
+            panic!("No trade route reward")
+        };
+        let available = sum
+            .types_by_preference
+            .iter()
+            .map(|t| ResourcePile::of(*t, sum.cost))
+            .reduce(|a, b| a + b)
+            .expect("sum");
+
+        Payment {
+            name: name.to_string(),
+            model,
+            optional: false,
+            current: sum_payment(&sum, &available),
+            available,
+            discount_used: 0,
+        }
+    }
+
     pub fn to_resource_pile(&self) -> ResourcePile {
         let r = &self.current;
         ResourcePile::new(
@@ -78,16 +130,15 @@ impl Payment {
 
 pub fn payment_dialog(
     rc: &RenderContext,
-    payments: &Payment,
+    payment: &Payment,
     to_dialog: impl FnOnce(Payment) -> ActiveDialog,
-    may_cancel: bool,
     execute_action: impl FnOnce(ResourcePile) -> StateUpdate,
 ) -> StateUpdate {
     multi_payment_dialog(
         rc,
-        &[payments.clone()],
+        &[payment.clone()],
         |v| to_dialog(v[0].clone()),
-        may_cancel,
+        payment.optional,
         |v| execute_action(v[0].clone()),
     )
 }
@@ -99,7 +150,7 @@ pub fn multi_payment_dialog(
     may_cancel: bool,
     execute_action: impl FnOnce(Vec<ResourcePile>) -> StateUpdate,
 ) -> StateUpdate {
-    let tooltip = ok_tooltip(payments, rc.shown_player.resources.clone());
+    let tooltip = ok_tooltip(payments, payments[0].available.clone());
     let mut exec = false;
     let mut added: Option<Payment> = None;
     let mut removed: Option<Payment> = None;
@@ -216,33 +267,6 @@ fn sum_payment(a: &SumPaymentOptions, available: &ResourcePile) -> Vec<ResourceP
             ResourcePayment::new(*t, used, 0, have)
         })
         .collect()
-}
-
-// todo: move to Payment::new
-#[must_use]
-pub fn new_payment(
-    model: &PaymentModel,
-    available: &ResourcePile,
-    name: &str,
-    optional: bool,
-) -> Payment {
-    let mut discount_used = 0;
-    let resources = match model {
-        PaymentModel::Sum(options) => sum_payment(options, available),
-        PaymentModel::Resources(a) => {
-            let options = a.get_payment_options(available);
-            discount_used = a.discount - options.discount_left;
-            resource_payment(&options)
-        }
-    };
-
-    Payment {
-        name: name.to_string(),
-        model: model.clone(),
-        optional,
-        current: resources,
-        discount_used,
-    }
 }
 
 #[must_use]

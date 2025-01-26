@@ -14,6 +14,7 @@ pub const CITY_LIMIT: u8 = 7;
 pub const MOVEMENT_ACTIONS: u32 = 3;
 pub const ARMY_MOVEMENT_REQUIRED_ADVANCE: &str = TACTICS;
 pub const CITY_PIECE_LIMIT: usize = 5;
+pub const ACTIONS: u32 = 3;
 
 pub const UNIT_LIMIT: Units = Units {
     settlers: 4,

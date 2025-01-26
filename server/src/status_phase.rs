@@ -10,27 +10,27 @@ use crate::{
     resource_pile::ResourcePile,
 };
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct ChangeGovernment {
     pub new_government: String,
     pub additional_advances: Vec<String>,
 }
 
 // Can't use Option<String> because of mongo stips null values
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum ChangeGovernmentType {
     ChangeGovernment(ChangeGovernment),
     KeepGovernment,
 }
 
 // Can't use Option<String> because of mongo stips null values
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum RazeSize1City {
     None,
     Position(Position),
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum StatusPhaseAction {
     CompleteObjectives(Vec<String>),
     FreeAdvance(String),

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::content::advances::TACTICS;
+use crate::content::advances::{BARTERING, TACTICS};
 use crate::{content::wonders, wonder::Wonder};
 use Building::*;
 
@@ -223,7 +223,7 @@ impl Building {
     pub fn required_advance(&self) -> String {
         String::from(match self {
             Self::Academy => "Writing",
-            Self::Market => "Bartering",
+            Self::Market => BARTERING,
             Self::Obelisk => "Arts",
             Self::Observatory => "Math",
             Self::Fortress => TACTICS,

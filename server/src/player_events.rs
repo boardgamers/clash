@@ -26,6 +26,7 @@ pub(crate) struct PlayerEvents {
     pub is_playing_action_available: EventMut<bool, PlayingActionType, Player>,
     pub terrain_collect_options: EventMut<HashMap<Terrain, HashSet<ResourcePile>>, (), ()>,
     pub collect_options: EventMut<HashMap<Position, HashSet<ResourcePile>>, CollectContext, Game>,
+    pub on_turn_start: EventMut<Game, (), ()>,
 }
 
 impl PlayerEvents {

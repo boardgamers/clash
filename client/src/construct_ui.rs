@@ -1,5 +1,5 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::payment_ui::{new_payment, payment_dialog, Payment};
+use crate::payment_ui::{payment_dialog, Payment};
 use crate::recruit_unit_ui::RecruitSelection;
 use crate::render_context::RenderContext;
 use server::action::Action;
@@ -45,7 +45,6 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
             new.payment = p;
             ActiveDialog::ConstructionPayment(new)
         },
-        true,
         |payment| match &cp.project {
             ConstructionProject::Building(b, pos) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Construct(Construct {
@@ -125,7 +124,8 @@ impl ConstructionPayment {
             ),
         };
 
-        let payment = new_payment(&cost, &rc.shown_player.resources, name, false);
+        let available = &rc.shown_player.resources;
+        let payment = Payment::new(&cost, available, name, false);
 
         ConstructionPayment {
             player_index: city.player_index,

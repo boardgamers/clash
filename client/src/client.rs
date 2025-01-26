@@ -23,7 +23,8 @@ use crate::render_context::RenderContext;
 use crate::status_phase_ui::raze_city_confirm_dialog;
 use crate::unit_ui::unit_selection_click;
 use crate::{
-    combat_ui, dialog_ui, influence_ui, map_ui, move_ui, recruit_unit_ui, status_phase_ui, tooltip,
+    combat_ui, custom_actions_ui, dialog_ui, influence_ui, map_ui, move_ui, recruit_unit_ui,
+    status_phase_ui, tooltip,
 };
 
 fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
@@ -155,6 +156,9 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
             status_phase_ui::choose_additional_advances_dialog(rc, a)
         }
         ActiveDialog::DetermineFirstPlayer => status_phase_ui::determine_first_player_dialog(rc),
+        ActiveDialog::TradeRouteSelection(p) => {
+            custom_actions_ui::trade_route_selection_dialog(rc, p)
+        }
 
         //combat
         ActiveDialog::PlayActionCard => combat_ui::play_action_card_dialog(rc),
