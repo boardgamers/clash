@@ -1,5 +1,9 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::{civilization::Civilization, leader::Leader};
+use crate::content::advances::IRRIGATION;
+use crate::map::Terrain;
+use crate::resource_pile::ResourcePile;
+use crate::special_advance::SpecialAdvance;
 
 #[must_use]
 pub fn get_all() -> Vec<Civilization> {
@@ -15,9 +19,27 @@ pub fn get_all() -> Vec<Civilization> {
         Civilization::new("test1", vec![], vec![]),
         Civilization::new(
             "Maya",
-            vec![],
-            vec![Leader::builder("Kʼinich Janaab Pakal I", 
-                                 "Shield of the sun", 
+            vec![
+                // todo add other effects
+                SpecialAdvance::builder("Terrace", IRRIGATION)
+                    .add_player_event_listener(
+                        |events| &mut events.terrain_collect_options,
+                        |m, (), ()| {
+                            m.insert(
+                                Terrain::Mountain,
+                                std::collections::HashSet::from([
+                                    ResourcePile::food(1),
+                                    ResourcePile::wood(1),
+                                    ResourcePile::ore(1),
+                                ]),
+                            );
+                        },
+                        2,
+                    )
+                    .build(),
+            ],
+            vec![Leader::builder("Kʼinich Janaab Pakal I",
+                                 "Shield of the sun",
                                  "ignore the first hit in a battle with an Obelisk", "", "")
                 .add_player_event_listener(
                     |events| &mut events.on_combat_round,
