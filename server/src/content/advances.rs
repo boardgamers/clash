@@ -2,8 +2,10 @@ use super::custom_actions::CustomActionType::*;
 use crate::action::Action;
 use crate::advance::AdvanceBuilder;
 use crate::collect::CollectContext;
-use crate::combat::CombatModifier::{SteelWeaponsAttacker, SteelWeaponsDefender};
-use crate::combat::{Combat, CombatStrength};
+use crate::combat::CombatModifier::{
+    CancelFortressExtraDie, SteelWeaponsAttacker, SteelWeaponsDefender,
+};
+use crate::combat::{Combat, CombatModifier, CombatStrength};
 use crate::content::trade_routes::collect_trade_routes_for_current_player;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::position::Position;
@@ -279,7 +281,11 @@ fn warfare() -> Vec<Advance> {
                 "May Move Army units, May use Tactics on Action Cards",
             )
                 .with_advance_bonus(CultureToken)
-                .with_unlocked_building("Fortress"),
+                .with_unlocked_building("Fortress")
+                .add_player_event_listener(
+                    |event| &mut event.on_combat_round,
+                    fortress,
+                    1),
             Advance::builder(
                 SIEGECRAFT,
                 "When attacking a city with a Fortress, pay 2 wood to cancel the Fortress’ ability to add +1 die and/or pay 2 ore to ignore its ability to cancel a hit.",
@@ -289,13 +295,30 @@ fn warfare() -> Vec<Advance> {
                 "Immediately before a Land battle starts, you may pay 1 ore to get +2 combat value in every Combat Round against an enemy that does not have the Steel Weapons advance, but only +1 combat value against an enemy that does have it (regardless if they use it or not this battle).",
             ).add_player_event_listener(
                 |event| &mut event.on_combat_round,
-                |s, c, game| {
-                    steel_weapons(s, c, game);
-                },
+                steel_weapons,
                 0,
             ),
         ],
     )
+}
+
+fn fortress(s: &mut CombatStrength, c: &Combat, game: &Game) {
+    if s.attacker || !c.defender_fortress(game) {
+        return;
+    }
+
+    if !c.modifiers.contains(&CancelFortressExtraDie) {
+        s.roll_log.push("fortress added one extra die".to_string());
+        s.extra_dies += 1;
+    }
+
+    if !c
+        .modifiers
+        .contains(&CombatModifier::CancelFortressIgnoreHit)
+    {
+        s.roll_log.push("fortress cancelled one hit".to_string());
+        s.hit_cancels += 1;
+    }
 }
 
 fn steel_weapons(s: &mut CombatStrength, c: &Combat, game: &Game) {
@@ -307,14 +330,12 @@ fn steel_weapons(s: &mut CombatStrength, c: &Combat, game: &Game) {
         2
     };
 
-    let add_combat_value =
-        |s: &mut CombatStrength, value: u8| {
-            s.extra_combat_value += value;
-            s.roll_log.push(format!(
-                "steel weapons added {value} combat value"
-            ));
-        };
-    
+    let add_combat_value = |s: &mut CombatStrength, value: u8| {
+        s.extra_combat_value += value;
+        s.roll_log
+            .push(format!("steel weapons added {value} combat value"));
+    };
+
     if s.attacker {
         if c.modifiers.contains(&SteelWeaponsAttacker) {
             add_combat_value(s, steel_weapon_value);

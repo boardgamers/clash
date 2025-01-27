@@ -19,6 +19,7 @@ pub struct CombatStrength {
     pub player_index: usize,
     pub extra_dies: u8,
     pub extra_combat_value: u8,
+    pub hit_cancels: u8,
     pub roll_log: Vec<String>,
 }
 
@@ -30,6 +31,7 @@ impl CombatStrength {
             attacker,
             extra_dies: 0,
             extra_combat_value: 0,
+            hit_cancels: 0,
             roll_log: vec![],
         }
     }
@@ -281,6 +283,9 @@ fn remove_casualties(game: &mut Game, c: &mut Combat, units: Vec<u32>) -> Combat
     resolve_combat(game, c)
 }
 
+///
+/// # Panics
+/// Panics if events are not set
 pub fn combat_loop(game: &mut Game, mut c: Combat) {
     loop {
         game.add_info_log_item(format!("\nCombat round {}", c.round));
@@ -308,14 +313,6 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
         let active_defenders = active_defenders(game, c.defender, c.defender_position);
         let defender_name = game.players[c.defender].get_name();
         let mut defender_log = vec![];
-        let mut fortress_log = vec![];
-        let extra_defender_dies =
-            if c.defender_fortress(game) && !c.modifiers.contains(&CancelFortressExtraDie) {
-                fortress_log.push("added one extra die");
-                1
-            } else {
-                0
-            };
         let mut defender_strength = CombatStrength::new(c.defender, false);
         game.players[c.defender].events
             .as_ref()
@@ -326,23 +323,15 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
             game,
             c.defender,
             &active_defenders,
-            extra_defender_dies + defender_strength.extra_dies,
+            defender_strength.extra_dies,
             defender_strength.extra_combat_value,
             &mut defender_log,
         );
         let defender_log_str = roll_log_str(&defender_log);
         let attacker_combat_value = attacker_rolls.combat_value;
-        let attacker_hit_cancels = attacker_rolls.hit_cancels;
+        let attacker_hit_cancels = attacker_rolls.hit_cancels + attacker_strength.hit_cancels;
         let defender_combat_value = defender_rolls.combat_value;
-        let mut defender_hit_cancels = defender_rolls.hit_cancels;
-        if c.defender_fortress(game)
-            && !c
-                .modifiers
-                .contains(&CombatModifier::CancelFortressIgnoreHit)
-        {
-            defender_hit_cancels += 1;
-            fortress_log.push("cancelled one hit");
-        }
+        let defender_hit_cancels = defender_rolls.hit_cancels + defender_strength.hit_cancels;
         let attacker_hits = (attacker_combat_value / 5).saturating_sub(defender_hit_cancels);
         let defender_hits = (defender_combat_value / 5).saturating_sub(attacker_hit_cancels);
         game.add_info_log_item(format!("\t{attacker_name} rolled {attacker_log_str} for combined combat value of {attacker_combat_value} and gets {attacker_hits} hits against defending units. {defender_name} rolled {defender_log_str} for combined combat value of {defender_combat_value} and gets {defender_hits} hits against attacking units."));
@@ -356,12 +345,6 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
             game.add_info_log_item(format!(
                 ". {defender_name} used the following combat modifiers: {}",
                 defender_strength.roll_log.join(", ")
-            ));
-        }
-        if !fortress_log.is_empty() {
-            game.add_info_log_item(format!(
-                " {defender_name} has a fortress, which {}",
-                fortress_log.join(", ")
             ));
         }
         if attacker_hits < active_defenders.len() as u8 && attacker_hits > 0 {

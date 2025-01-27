@@ -22,7 +22,7 @@ pub fn get_all() -> Vec<Civilization> {
                     |s, c, game| {
                         //todo
                     },
-                    0,
+                    2,
                 )
                 .build()],
         ),

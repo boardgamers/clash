@@ -97,7 +97,7 @@
         "Farming",
         "Mining",
         "Siegecraft",
-        "Tactics"    ,
+        "Tactics",
         "Steel Weapons"
       ],
       "unlocked_special_advance": [],
@@ -188,6 +188,7 @@
       "advances": [
         "Farming",
         "Mining",
+        "Tactics",
         "Steel Weapons"
       ],
       "unlocked_special_advance": [],
