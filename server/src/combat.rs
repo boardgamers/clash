@@ -2,7 +2,6 @@ use crate::action::{CombatAction, PlayActionCard};
 use crate::combat::CombatModifier::{
     CancelFortressExtraDie, SteelWeaponsAttacker, SteelWeaponsDefender,
 };
-use crate::content::advances::STEEL_WEAPONS;
 use crate::content::custom_phase_actions::{start_siegecraft_phase, start_steel_weapons_phase};
 use crate::game::GameState::Playing;
 use crate::game::{Game, GameState};
@@ -16,6 +15,7 @@ use std::mem;
 #[derive(Clone)]
 #[derive(PartialEq)]
 pub struct CombatStrength {
+    pub attacker: bool,
     pub player_index: usize,
     pub extra_dies: u8,
     pub extra_combat_value: u8,
@@ -24,9 +24,10 @@ pub struct CombatStrength {
 
 impl CombatStrength {
     #[must_use]
-    pub fn new(player_index: usize) -> Self {
+    pub fn new(player_index: usize, attacker: bool) -> Self {
         Self {
             player_index,
+            attacker,
             extra_dies: 0,
             extra_combat_value: 0,
             roll_log: vec![],
@@ -285,25 +286,9 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
         game.add_info_log_item(format!("\nCombat round {}", c.round));
         //todo: go into tactics phase if either player has tactics card (also if they can not play it unless otherwise specified via setting)
 
-        let steel_weapon_value = if game.get_player(c.attacker).has_advance(STEEL_WEAPONS)
-            && game.get_player(c.defender).has_advance(STEEL_WEAPONS)
-        {
-            1
-        } else {
-            2
-        };
-        let mut steel_weapon_log = vec![];
         let attacker_name = game.players[c.attacker].get_name();
         let active_attackers = c.active_attackers(game);
-        let attacker_extra = if c.modifiers.contains(&SteelWeaponsAttacker) {
-            steel_weapon_log.push(format!(
-                "Attacker used steel weapons to add {steel_weapon_value} to their combat value"
-            ));
-            steel_weapon_value
-        } else {
-            0
-        };
-        let mut attacker_strength = CombatStrength::new(c.attacker);
+        let mut attacker_strength = CombatStrength::new(c.attacker, true);
         game.players[c.attacker].events
             .as_ref()
             .expect("events should be set")
@@ -315,7 +300,7 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
             c.attacker,
             &active_attackers,
             attacker_strength.extra_dies,
-            attacker_extra + attacker_strength.extra_combat_value,
+            attacker_strength.extra_combat_value,
             &mut attacker_log,
         );
         let attacker_log_str = roll_log_str(&attacker_log);
@@ -331,15 +316,7 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
             } else {
                 0
             };
-        let defender_extra = if c.modifiers.contains(&SteelWeaponsDefender) {
-            steel_weapon_log.push(format!(
-                "Defender used steel weapons to add {steel_weapon_value} to their combat value"
-            ));
-            steel_weapon_value
-        } else {
-            0
-        };
-        let mut defender_strength = CombatStrength::new(c.defender);
+        let mut defender_strength = CombatStrength::new(c.defender, false);
         game.players[c.defender].events
             .as_ref()
             .expect("events should be set")
@@ -350,7 +327,7 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
             c.defender,
             &active_defenders,
             extra_defender_dies + defender_strength.extra_dies,
-            defender_extra + defender_strength.extra_combat_value,
+            defender_strength.extra_combat_value,
             &mut defender_log,
         );
         let defender_log_str = roll_log_str(&defender_log);
@@ -380,9 +357,6 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
                 ". {defender_name} used the following combat modifiers: {}",
                 defender_strength.roll_log.join(", ")
             ));
-        }
-        if !steel_weapon_log.is_empty() {
-            game.add_info_log_item(steel_weapon_log.join(", "));
         }
         if !fortress_log.is_empty() {
             game.add_info_log_item(format!(

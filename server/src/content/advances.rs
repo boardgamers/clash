@@ -2,6 +2,8 @@ use super::custom_actions::CustomActionType::*;
 use crate::action::Action;
 use crate::advance::AdvanceBuilder;
 use crate::collect::CollectContext;
+use crate::combat::CombatModifier::{SteelWeaponsAttacker, SteelWeaponsDefender};
+use crate::combat::{Combat, CombatStrength};
 use crate::content::trade_routes::collect_trade_routes_for_current_player;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::position::Position;
@@ -96,7 +98,7 @@ fn agriculture() -> Vec<Advance> {
             )
                 .add_player_event_listener(
                     |event| &mut event.terrain_collect_options,
-                    |m,(),()| {
+                    |m, (), ()| {
                         m.insert(Barren, HashSet::from([ResourcePile::food(1)]));
                     },
                     0,
@@ -285,9 +287,41 @@ fn warfare() -> Vec<Advance> {
             Advance::builder(
                 STEEL_WEAPONS,
                 "Immediately before a Land battle starts, you may pay 1 ore to get +2 combat value in every Combat Round against an enemy that does not have the Steel Weapons advance, but only +1 combat value against an enemy that does have it (regardless if they use it or not this battle).",
+            ).add_player_event_listener(
+                |event| &mut event.on_combat_round,
+                |s, c, game| {
+                    steel_weapons(s, c, game);
+                },
+                0,
             ),
         ],
     )
+}
+
+fn steel_weapons(s: &mut CombatStrength, c: &Combat, game: &Game) {
+    let steel_weapon_value = if game.get_player(c.attacker).has_advance(STEEL_WEAPONS)
+        && game.get_player(c.defender).has_advance(STEEL_WEAPONS)
+    {
+        1
+    } else {
+        2
+    };
+
+    let add_combat_value =
+        |s: &mut CombatStrength, value: u8| {
+            s.extra_combat_value += value;
+            s.roll_log.push(format!(
+                "steel weapons added {value} combat value"
+            ));
+        };
+    
+    if s.attacker {
+        if c.modifiers.contains(&SteelWeaponsAttacker) {
+            add_combat_value(s, steel_weapon_value);
+        }
+    } else if c.modifiers.contains(&SteelWeaponsDefender) {
+        add_combat_value(s, steel_weapon_value);
+    }
 }
 
 fn spirituality() -> Vec<Advance> {
@@ -306,19 +340,19 @@ fn economy() -> Vec<Advance> {
         vec![
             Advance::builder(
                 BARTERING,
-      "todo")
+                "todo")
                 .with_advance_bonus(MoodToken),
             Advance::builder(
-                "Trade Routes", 
-                 "At the beginning of your turn, you gain 1 food for every trade route you can make, to a maximum of 4. A trade route is made between one of your Settlers or Ships and a non-Angry enemy player city within 2 spaces (without counting through unrevealed Regions). Each Settler or Ship can only be paired with one enemy player city. Likewise, each enemy player city must be paired with a different Settler or Ship. In other words, to gain X food you must have at least X Units (Settlers or Ships), each paired with X different enemy cities.")
+                "Trade Routes",
+                "At the beginning of your turn, you gain 1 food for every trade route you can make, to a maximum of 4. A trade route is made between one of your Settlers or Ships and a non-Angry enemy player city within 2 spaces (without counting through unrevealed Regions). Each Settler or Ship can only be paired with one enemy player city. Likewise, each enemy player city must be paired with a different Settler or Ship. In other words, to gain X food you must have at least X Units (Settlers or Ships), each paired with X different enemy cities.")
                 .with_advance_bonus(MoodToken)
-            .add_player_event_listener(
-                |event| &mut event.on_turn_start,
-                |game, (), ()| {
-                    collect_trade_routes_for_current_player(game);
-                },
-                0,
-            ),
+                .add_player_event_listener(
+                    |event| &mut event.on_turn_start,
+                    |game, (), ()| {
+                        collect_trade_routes_for_current_player(game);
+                    },
+                    0,
+                ),
             Advance::builder(
                 CURRENCY,
                 // also for Taxation
