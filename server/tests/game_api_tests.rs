@@ -1442,3 +1442,14 @@ fn test_ship_navigate_explore_not_move() {
         false,
     );
 }
+
+#[test]
+fn test_civ_maya_leader_pakal() {
+    test_action(
+        "civ_maya_leader_pakal",
+        move_action(vec![10], Position::from_offset("B1")),
+        0,
+        false,
+        false,
+    );
+}
