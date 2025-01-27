@@ -7,6 +7,7 @@ use crate::city::MoodState;
 use crate::collect::{collect, undo_collect};
 use crate::game::{CulturalInfluenceResolution, GameState};
 use crate::payment::PaymentModel;
+use crate::unit::Unit;
 use crate::{
     city::City,
     city_pieces::Building::{self, *},
@@ -16,7 +17,6 @@ use crate::{
     resource_pile::ResourcePile,
     unit::UnitType,
 };
-use crate::unit::Unit;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Construct {
@@ -132,8 +132,7 @@ impl PlayingAction {
                 game.advance(&advance, player_index);
             }
             FoundCity { settler } => {
-                let settler = game.players[player_index]
-                    .remove_unit(settler);
+                let settler = game.players[player_index].remove_unit(settler);
                 assert!(settler.can_found_city(game), "Illegal action");
                 let player = &mut game.players[player_index];
                 let city = City::new(player_index, settler.position);
@@ -204,7 +203,7 @@ impl PlayingAction {
                     r.units,
                     r.city_position,
                     r.leader_name.as_ref(),
-                    r.replaced_units,
+                    &r.replaced_units,
                 );
             }
             IncreaseHappiness(i) => {
@@ -331,9 +330,12 @@ impl PlayingAction {
                 };
                 let player = &mut game.players[player_index];
                 let units = Unit::from_data(player_index, settler);
-                player.units.push(units.into_iter().next().expect(
-                    "The player should have a unit after founding a city",
-                ));
+                player.units.push(
+                    units
+                        .into_iter()
+                        .next()
+                        .expect("The player should have a unit after founding a city"),
+                );
                 player
                     .cities
                     .pop()

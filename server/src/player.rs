@@ -265,7 +265,7 @@ impl Player {
             // carried units are added to carriers
             .filter(|unit| unit.carrier_id.is_none())
             .sorted_by_key(|unit| unit.id)
-            .map(|u| u.data(&self))
+            .map(|u| u.data(self))
             .collect();
         PlayerData {
             name: self.name.clone(),
@@ -978,8 +978,8 @@ impl Player {
         self.units.iter_mut().find(|unit| unit.id == id)
     }
 
-    pub fn remove_unit(&mut self, id: u32) -> Unit {
-        for id in carried_units(id, &self) {
+    pub(crate) fn remove_unit(&mut self, id: u32) -> Unit {
+        for id in carried_units(id, self) {
             self.remove_unit(id);
         }
 

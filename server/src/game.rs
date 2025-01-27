@@ -1092,7 +1092,7 @@ impl Game {
         units: Vec<UnitType>,
         city_position: Position,
         leader_name: Option<&String>,
-        replaced_units: Vec<u32>,
+        replaced_units: &[u32],
     ) {
         let mut replaced_leader = None;
         if let Some(leader_name) = leader_name {
@@ -1110,7 +1110,7 @@ impl Game {
             self.set_active_leader(leader_name.clone(), player_index);
         }
         let mut replaced_units_undo_context = Vec::new();
-        for unit in &replaced_units {
+        for unit in replaced_units {
             let player = &mut self.players[player_index];
             let u = player.remove_unit(*unit);
             if u.carrier_id.is_some_and(|c| replaced_units.contains(&c)) {

@@ -108,7 +108,7 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
     let owner = rc.shown_player;
     Building::all()
         .iter()
-        .filter_map(|(b)| {
+        .filter_map(|b| {
             if city.can_construct(*b, owner, rc.game) {
                 Some(*b)
             } else {
@@ -218,11 +218,7 @@ pub fn city_labels(game: &Game, city: &City) -> Vec<String> {
                     if city.player_index == *o {
                         b.name().to_string()
                     } else {
-                        format!(
-                            "{} (owned by {})",
-                            b.name(),
-                            game.get_player(*o).get_name()
-                        )
+                        format!("{} (owned by {})", b.name(), game.get_player(*o).get_name())
                     }
                 })
             })
@@ -322,4 +318,3 @@ pub fn building_position(city: &City, center: Point, i: usize, building: Buildin
         hex_ui::rotate_around(center, 25.0, 90 * i)
     }
 }
-

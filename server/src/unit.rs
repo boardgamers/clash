@@ -13,6 +13,7 @@ use crate::game::CurrentMove;
 use crate::player::Player;
 use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
 
+#[derive(Clone)]
 pub struct Unit {
     pub player_index: usize,
     pub position: Position,
@@ -88,7 +89,7 @@ impl Unit {
     }
 
     #[must_use]
-    pub fn data(&self, player: &Player) -> UnitData {
+    pub(crate) fn data(&self, player: &Player) -> UnitData {
         UnitData {
             position: self.position,
             data: UnitBaseData {
@@ -99,7 +100,7 @@ impl Unit {
             carried_units: carried_units(self.id, player)
                 .iter()
                 .map(|id| {
-                    let unit = player.get_unit(*id).unwrap();
+                    let unit = player.get_unit(*id).expect("unit not found");
                     UnitBaseData {
                         unit_type: unit.unit_type.clone(),
                         movement_restrictions: unit.movement_restrictions.clone(),
@@ -411,6 +412,7 @@ pub enum MovementAction {
     Stop,
 }
 
+#[must_use]
 pub fn carried_units(carrier: u32, player: &Player) -> Vec<u32> {
     player
         .units

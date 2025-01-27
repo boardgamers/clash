@@ -1,4 +1,4 @@
-use crate::city_ui::{ building_position, BUILDING_SIZE};
+use crate::city_ui::{building_position, BUILDING_SIZE};
 use crate::client_state::{CameraMode, StateUpdate};
 use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
 use crate::hex_ui;
