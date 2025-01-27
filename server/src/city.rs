@@ -124,7 +124,11 @@ impl City {
         if size >= player.cities.len() {
             return false;
         }
-        if !player.has_advance(&building.required_advance()) {
+        if !player
+            .advances
+            .iter()
+            .any(|a| a.unlocked_building == Some(building))
+        {
             return false;
         }
         if !player.is_building_available(building, game) {

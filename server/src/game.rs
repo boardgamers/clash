@@ -5,6 +5,7 @@ use std::mem;
 
 use GameState::*;
 
+use crate::advance::Advance;
 use crate::combat::{self, Combat, CombatDieRoll, CombatPhase, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, MOVEMENT_ACTIONS};
 use crate::content::custom_phase_actions::CustomPhaseState;
@@ -40,6 +41,7 @@ use crate::{
     utils,
     wonder::Wonder,
 };
+
 pub struct Game {
     pub state: GameState,
     pub players: Vec<Player>,
@@ -1028,7 +1030,7 @@ impl Game {
         if let Some(advance_bonus) = &advance.bonus {
             player.gain_resources(advance_bonus.resources());
         }
-        player.advances.push(advance.name);
+        player.advances.push(advance);
         player.game_event_tokens -= 1;
         if player.game_event_tokens == 0 {
             player.game_event_tokens = 3;
@@ -1243,12 +1245,8 @@ impl Game {
     /// # Panics
     ///
     /// Panics if advance does not exist
-    pub fn remove_advance(&mut self, advance: &str, player_index: usize) {
-        utils::remove_element(
-            &mut self.players[player_index].advances,
-            &advance.to_string(),
-        );
-        let advance = advances::get_advance_by_name(advance);
+    pub fn remove_advance(&mut self, advance: &Advance, player_index: usize) {
+        utils::remove_element(&mut self.players[player_index].advances, advance);
         (advance.player_deinitializer)(self, player_index);
     }
 

@@ -123,7 +123,7 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
     );
 
     for advance in player_government_advances {
-        game.remove_advance(&advance.name, player_index);
+        game.remove_advance(&advance, player_index);
     }
 
     let new_government_advances = advances::get_government(government);

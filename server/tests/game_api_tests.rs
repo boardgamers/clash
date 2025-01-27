@@ -61,7 +61,11 @@ fn basic_actions() {
             String::from("Math"),
             String::from("Engineering")
         ],
-        player.advances
+        player
+            .advances
+            .iter()
+            .map(|a| a.name.clone())
+            .collect::<Vec<String>>()
     );
     assert_eq!(ResourcePile::culture_tokens(1), player.resources);
     assert_eq!(1, game.actions_left);

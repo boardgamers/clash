@@ -9,7 +9,6 @@ use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 use crate::assets::Assets;
-use crate::city_ui::building_name;
 use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
 use crate::combat_ui::{
@@ -150,7 +149,7 @@ impl ActiveDialog {
             ActiveDialog::CulturalInfluenceResolution(c) => vec![format!(
                 "Pay {} culture tokens to influence {}",
                 c.roll_boost_cost,
-                building_name(c.city_piece)
+                c.city_piece.name()
             )],
             ActiveDialog::ExploreResolution(_) => {
                 vec!["Click on the new tile to rotate it".to_string()]

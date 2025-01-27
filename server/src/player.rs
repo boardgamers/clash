@@ -1,5 +1,5 @@
 use crate::advance::Advance;
-use crate::content::advances::RITUALS;
+use crate::content::advances::{get_advance_by_name, RITUALS};
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
 use crate::movement::move_routes;
@@ -51,7 +51,7 @@ pub struct Player {
     pub civilization: Civilization,
     pub active_leader: Option<String>,
     pub available_leaders: Vec<String>,
-    pub advances: Vec<String>,
+    pub advances: Vec<Advance>,
     pub unlocked_special_advances: Vec<String>,
     pub wonders_build: Vec<String>,
     pub game_event_tokens: u8,
@@ -119,7 +119,6 @@ impl Player {
         game.players.push(player);
         let advances = mem::take(&mut game.players[player_index].advances);
         for advance in &advances {
-            let advance = advances::get_advance_by_name(advance);
             (advance.player_initializer)(game, player_index);
             for i in 0..game.players[player_index]
                 .civilization
@@ -176,13 +175,21 @@ impl Player {
             resource_limit: data.resource_limit,
             wasted_resources: ResourcePile::empty(),
             events: Some(PlayerEvents::default()),
-            cities: data.cities.into_iter().map(|d|City::from_data(d, data.id)).collect(),
+            cities: data
+                .cities
+                .into_iter()
+                .map(|d| City::from_data(d, data.id))
+                .collect(),
             units,
             civilization: civilizations::get_civilization_by_name(&data.civilization)
                 .expect("player data should have a valid civilization"),
             active_leader: data.active_leader,
             available_leaders: data.available_leaders,
-            advances: data.advances,
+            advances: data
+                .advances
+                .iter()
+                .map(|a| get_advance_by_name(a))
+                .collect(),
             unlocked_special_advances: data.unlocked_special_advance,
             wonders_build: data.wonders_build,
             game_event_tokens: data.game_event_tokens,
@@ -221,7 +228,7 @@ impl Player {
             civilization: self.civilization.name,
             active_leader: self.active_leader,
             available_leaders: self.available_leaders.into_iter().collect(),
-            advances: self.advances.into_iter().sorted().collect(),
+            advances: self.advances.into_iter().map(|a| a.name).sorted().collect(),
             unlocked_special_advance: self.unlocked_special_advances,
             wonders_build: self.wonders_build,
             game_event_tokens: self.game_event_tokens,
@@ -255,7 +262,12 @@ impl Player {
             civilization: self.civilization.name.clone(),
             active_leader: self.active_leader.clone(),
             available_leaders: self.available_leaders.clone(),
-            advances: self.advances.iter().cloned().sorted().collect(),
+            advances: self
+                .advances
+                .iter()
+                .map(|a| a.name.clone())
+                .sorted()
+                .collect(),
             unlocked_special_advance: self.unlocked_special_advances.clone(),
             wonders_build: self.wonders_build.clone(),
             game_event_tokens: self.game_event_tokens,
@@ -294,7 +306,10 @@ impl Player {
                 .map(|l| l.name.clone())
                 .collect(),
             civilization,
-            advances: vec![String::from("Farming"), String::from("Mining")],
+            advances: vec![
+                advances::get_advance_by_name("Farming"),
+                advances::get_advance_by_name("Mining"),
+            ],
             unlocked_special_advances: Vec::new(),
             game_event_tokens: 3,
             completed_objectives: Vec::new(),
@@ -382,7 +397,7 @@ impl Player {
     pub fn government(&self) -> Option<String> {
         self.advances
             .iter()
-            .find_map(|advance| advances::get_advance_by_name(advance).government)
+            .find_map(|advance| advance.government.clone())
     }
 
     pub fn gain_resources(&mut self, resources: ResourcePile) {
@@ -444,7 +459,7 @@ impl Player {
 
     #[must_use]
     pub fn has_advance(&self, advance: &str) -> bool {
-        self.advances.iter().any(|advances| advances == advance)
+        self.advances.iter().any(|a| a.name == advance)
     }
 
     #[must_use]

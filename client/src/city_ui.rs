@@ -106,9 +106,9 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
         return vec![];
     }
     let owner = rc.shown_player;
-    building_names()
+    Building::all()
         .iter()
-        .filter_map(|(b, _)| {
+        .filter_map(|(b)| {
             if city.can_construct(*b, owner, rc.game) {
                 Some(*b)
             } else {
@@ -117,7 +117,7 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
         })
         .flat_map(|b| new_building_positions(b, rc, city))
         .map(|(b, pos)| {
-            let name = building_name(b);
+            let name = b.name();
             let tooltip = format!(
                 "Built {}{} for {}",
                 name,
@@ -216,11 +216,11 @@ pub fn city_labels(game: &Game, city: &City) -> Vec<String> {
             .filter_map(|(b, o)| {
                 o.as_ref().map(|o| {
                     if city.player_index == *o {
-                        building_name(*b).to_string()
+                        b.name().to_string()
                     } else {
                         format!(
                             "{} (owned by {})",
-                            building_name(*b),
+                            b.name(),
                             game.get_player(*o).get_name()
                         )
                     }
@@ -296,7 +296,7 @@ pub fn draw_city(rc: &RenderContext, city: &City) {
             let tooltip = if matches!(state.active_dialog, ActiveDialog::CulturalInfluence) {
                 ""
             } else {
-                building_name(*b)
+                b.name()
             };
             draw_scaled_icon(
                 rc,
@@ -323,21 +323,3 @@ pub fn building_position(city: &City, center: Point, i: usize, building: Buildin
     }
 }
 
-pub fn building_name(b: Building) -> &'static str {
-    building_names()
-        .iter()
-        .find_map(|(b2, n)| if &b == b2 { Some(n) } else { None })
-        .unwrap()
-}
-
-fn building_names() -> [(Building, &'static str); 7] {
-    [
-        (Building::Academy, "Academy"),
-        (Building::Market, "Market"),
-        (Building::Obelisk, "Obelisk"),
-        (Building::Observatory, "Observatory"),
-        (Building::Fortress, "Fortress"),
-        (Building::Port, "Port"),
-        (Building::Temple, "Temple"),
-    ]
-}

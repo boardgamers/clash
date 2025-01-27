@@ -4,6 +4,7 @@ use crate::{
     resource_pile::ResourcePile,
 };
 
+use crate::city_pieces::Building;
 use Bonus::*;
 
 pub struct Advance {
@@ -12,7 +13,7 @@ pub struct Advance {
     pub bonus: Option<Bonus>,
     pub required: Option<String>,
     pub contradicting: Vec<String>,
-    pub unlocked_building: Option<String>,
+    pub unlocked_building: Option<Building>,
     pub government: Option<String>,
     pub player_initializer: AbilityInitializer,
     pub player_deinitializer: AbilityInitializer,
@@ -39,7 +40,7 @@ pub(crate) struct AdvanceBuilder {
     advance_bonus: Option<Bonus>,
     pub required_advance: Option<String>,
     contradicting_advance: Vec<String>,
-    unlocked_building: Option<String>,
+    unlocked_building: Option<Building>,
     government: Option<String>,
     player_initializers: Vec<AbilityInitializer>,
     player_deinitializers: Vec<AbilityInitializer>,
@@ -86,8 +87,8 @@ impl AdvanceBuilder {
     }
 
     #[must_use]
-    pub fn with_unlocked_building(mut self, unlocked_building: &str) -> Self {
-        self.unlocked_building = Some(unlocked_building.to_string());
+    pub fn with_unlocked_building(mut self, unlocked_building: Building) -> Self {
+        self.unlocked_building = Some(unlocked_building);
         self
     }
 

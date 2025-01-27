@@ -1,4 +1,4 @@
-use crate::city_ui::{building_name, building_position, BUILDING_SIZE};
+use crate::city_ui::{ building_position, BUILDING_SIZE};
 use crate::client_state::{CameraMode, StateUpdate};
 use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
 use crate::hex_ui;
@@ -31,7 +31,7 @@ pub fn cultural_influence_resolution_dialog(
     rc: &RenderContext,
     r: &CulturalInfluenceResolution,
 ) -> StateUpdate {
-    let name = building_name(r.city_piece);
+    let name = r.city_piece.name();
     let pile = ResourcePile::culture_tokens(r.roll_boost_cost);
     show_resource_pile(rc, &pile, &[ResourceType::CultureTokens]);
     if ok_button(rc, OkTooltip::Valid(format!("Influence {name} for {pile}"))) {
@@ -78,7 +78,7 @@ fn show_city(rc: &RenderContext, mouse_pos: Vec2, city: &City) -> Option<StateUp
                 *b,
             ) {
                 if player.can_afford_resources(&cost) {
-                    let name = building_name(*b);
+                    let name = b.name();
                     let _ = rc.with_camera(CameraMode::World, |rc| {
                         draw_circle_lines(center.x, center.y, BUILDING_SIZE, 1., WHITE);
                         show_tooltip_for_circle(
