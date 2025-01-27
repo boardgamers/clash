@@ -1,4 +1,5 @@
 use crate::{civilization::Civilization, leader::Leader};
+use crate::ability_initializer::AbilityInitializerSetup;
 
 #[must_use]
 pub fn get_all() -> Vec<Civilization> {
@@ -15,7 +16,15 @@ pub fn get_all() -> Vec<Civilization> {
         Civilization::new(
             "Maya",
             vec![],
-            vec![Leader::builder("Kʼinich Janaab Pakal I", "", "", "", "").build()],
+            vec![Leader::builder("Kʼinich Janaab Pakal I", "", "", "", "")
+                .add_player_event_listener(
+                    |events| &mut events.on_combat_round,
+                    |s, c, game| {
+                        //todo
+                    },
+                    0,
+                )
+                .build()],
         ),
     ]
 }

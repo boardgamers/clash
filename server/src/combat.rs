@@ -13,6 +13,27 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::mem;
 
+#[derive(Clone)]
+#[derive(PartialEq)]
+pub struct CombatStrength {
+    pub player_index: usize,
+    pub extra_dies: u8,
+    pub extra_combat_value: u8,
+    pub roll_log: Vec<String>,
+}
+
+impl CombatStrength {
+    #[must_use]
+    pub fn new(player_index: usize) -> Self {
+        Self {
+            player_index,
+            extra_dies: 0,
+            extra_combat_value: 0,
+            roll_log: vec![],
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum CombatPhase {
     PlayActionCard(usize),
@@ -282,13 +303,19 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
         } else {
             0
         };
+        let mut attacker_strength = CombatStrength::new(c.attacker);
+        game.players[c.attacker].events
+            .as_ref()
+            .expect("events should be set")
+            .on_combat_round
+            .trigger(&mut attacker_strength, &c, game);
         let mut attacker_log = vec![];
         let attacker_rolls = roll(
             game,
             c.attacker,
             &active_attackers,
-            0,
-            attacker_extra,
+            attacker_strength.extra_dies,
+            attacker_extra + attacker_strength.extra_combat_value,
             &mut attacker_log,
         );
         let attacker_log_str = roll_log_str(&attacker_log);
@@ -312,12 +339,18 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
         } else {
             0
         };
+        let mut defender_strength = CombatStrength::new(c.defender);
+        game.players[c.defender].events
+            .as_ref()
+            .expect("events should be set")
+            .on_combat_round
+            .trigger(&mut defender_strength, &c, game);
         let defender_rolls = roll(
             game,
             c.defender,
             &active_defenders,
-            extra_defender_dies,
-            defender_extra,
+            extra_defender_dies + defender_strength.extra_dies,
+            defender_extra + defender_strength.extra_combat_value,
             &mut defender_log,
         );
         let defender_log_str = roll_log_str(&defender_log);
@@ -336,6 +369,18 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
         let attacker_hits = (attacker_combat_value / 5).saturating_sub(defender_hit_cancels);
         let defender_hits = (defender_combat_value / 5).saturating_sub(attacker_hit_cancels);
         game.add_info_log_item(format!("\t{attacker_name} rolled {attacker_log_str} for combined combat value of {attacker_combat_value} and gets {attacker_hits} hits against defending units. {defender_name} rolled {defender_log_str} for combined combat value of {defender_combat_value} and gets {defender_hits} hits against attacking units."));
+        if !attacker_strength.roll_log.is_empty() {
+            game.add_info_log_item(format!(
+                ". {attacker_name} used the following combat modifiers: {}",
+                attacker_strength.roll_log.join(", ")
+            ));
+        }
+        if !defender_strength.roll_log.is_empty() {
+            game.add_info_log_item(format!(
+                ". {defender_name} used the following combat modifiers: {}",
+                defender_strength.roll_log.join(", ")
+            ));
+        }
         if !steel_weapon_log.is_empty() {
             game.add_info_log_item(steel_weapon_log.join(", "));
         }
