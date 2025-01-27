@@ -7,9 +7,7 @@ use crate::dialog_ui::{
 };
 use crate::hex_ui;
 use crate::hex_ui::Point;
-use crate::layout_ui::{
-    draw_scaled_icon, is_in_circle, left_mouse_button_pressed,
-};
+use crate::layout_ui::{draw_scaled_icon, is_in_circle, left_mouse_button_pressed};
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name, show_resource_pile};
 use macroquad::color::BLACK;

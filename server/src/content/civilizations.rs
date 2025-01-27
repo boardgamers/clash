@@ -1,5 +1,5 @@
-use crate::{civilization::Civilization, leader::Leader};
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::{civilization::Civilization, leader::Leader};
 
 #[must_use]
 pub fn get_all() -> Vec<Civilization> {

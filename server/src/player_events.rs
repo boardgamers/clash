@@ -1,5 +1,6 @@
 use crate::action::Action;
 use crate::collect::CollectContext;
+use crate::combat::{Combat, CombatStrength};
 use crate::game::Game;
 use crate::map::Terrain;
 use crate::payment::PaymentModel;
@@ -9,7 +10,6 @@ use crate::{
     resource_pile::ResourcePile, wonder::Wonder,
 };
 use std::collections::{HashMap, HashSet};
-use crate::combat::{Combat, CombatStrength};
 
 #[derive(Default)]
 pub(crate) struct PlayerEvents {

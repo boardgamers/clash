@@ -12,8 +12,7 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::mem;
 
-#[derive(Clone)]
-#[derive(PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct CombatStrength {
     pub attacker: bool,
     pub player_index: usize,
@@ -294,7 +293,8 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
         let attacker_name = game.players[c.attacker].get_name();
         let active_attackers = c.active_attackers(game);
         let mut attacker_strength = CombatStrength::new(c.attacker, true);
-        game.players[c.attacker].events
+        game.players[c.attacker]
+            .events
             .as_ref()
             .expect("events should be set")
             .on_combat_round
@@ -314,7 +314,8 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
         let defender_name = game.players[c.defender].get_name();
         let mut defender_log = vec![];
         let mut defender_strength = CombatStrength::new(c.defender, false);
-        game.players[c.defender].events
+        game.players[c.defender]
+            .events
             .as_ref()
             .expect("events should be set")
             .on_combat_round
