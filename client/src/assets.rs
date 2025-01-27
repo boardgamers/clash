@@ -89,10 +89,17 @@ impl Assets {
     }
 
     fn wonders() -> HashMap<String, Texture2D> {
-        [(
-            "Pyramids".to_string(),
-            load_png(include_bytes!("../assets/pyramid-svgrepo-com.png")),
-        )]
+        [
+            (
+                "Pyramids".to_string(),
+                load_png(include_bytes!("../assets/pyramid-svgrepo-com.png")),
+            ),
+            (
+                "Great Gardens".to_string(),
+                // todo find a better icon
+                load_png(include_bytes!("../assets/pyramid-svgrepo-com.png")),
+            ),
+        ]
         .iter()
         .cloned()
         .collect()

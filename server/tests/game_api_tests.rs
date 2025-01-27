@@ -34,6 +34,7 @@ use std::{
 fn basic_actions() {
     let seed = String::new();
     let mut game = Game::new(1, seed, false);
+    game.wonders_left.retain(|w| w.name == "Pyramids");
     let founded_city_position = Position::new(0, 1);
     game.map.tiles = HashMap::from([(founded_city_position, Forest)]);
     let advance_action = Action::Playing(Advance {
@@ -1437,6 +1438,17 @@ fn test_ship_navigate_explore_not_move() {
         "ship_navigate_explore_not_move",
         move_action(vec![1], Position::from_offset("F2")),
         1,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_civ_maya_leader_pakal() {
+    test_action(
+        "civ_maya_leader_pakal",
+        move_action(vec![10], Position::from_offset("B1")),
+        0,
         false,
         false,
     );

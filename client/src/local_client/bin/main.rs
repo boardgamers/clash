@@ -155,9 +155,13 @@ pub fn setup_local_game() -> Game {
     //     .unwrap()
     //     .pieces
     //     .wonders = vec![game.wonders_left.pop().unwrap()];
-    game.players[player_index1]
-        .wonder_cards
-        .push(game.wonders_left.pop().unwrap());
+    let gardens = game.wonders_left.remove(
+        game.wonders_left
+            .iter()
+            .position(|w| w.name == "Great Gardens")
+            .unwrap(),
+    );
+    game.players[player_index1].wonder_cards.push(gardens);
     game.players[player_index1]
         .get_city_mut(Position::from_offset("C2"))
         .unwrap()
@@ -242,6 +246,9 @@ pub fn setup_local_game() -> Game {
 
     game.advance("Voting", player_index1);
     game.advance("Free Economy", player_index1);
+    game.advance("Storage", player_index1);
+    game.players[player_index1].gain_resources(ResourcePile::food(5));
+
     game
 }
 

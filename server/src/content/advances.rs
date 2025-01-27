@@ -2,6 +2,10 @@ use super::custom_actions::CustomActionType::*;
 use crate::action::Action;
 use crate::advance::AdvanceBuilder;
 use crate::collect::CollectContext;
+use crate::combat::CombatModifier::{
+    CancelFortressExtraDie, SteelWeaponsAttacker, SteelWeaponsDefender,
+};
+use crate::combat::{Combat, CombatModifier, CombatStrength};
 use crate::content::trade_routes::collect_trade_routes_for_current_player;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::position::Position;
@@ -25,6 +29,7 @@ pub const RITUALS: &str = "Rituals";
 pub const TACTICS: &str = "Tactics";
 pub const BARTERING: &str = "Bartering";
 pub const CURRENCY: &str = "Currency";
+pub const IRRIGATION: &str = "Irrigation";
 
 #[must_use]
 pub fn get_all() -> Vec<Advance> {
@@ -90,12 +95,12 @@ fn agriculture() -> Vec<Advance> {
                 })
                 .with_advance_bonus(MoodToken),
             Advance::builder(
-                "Irrigation",
+                IRRIGATION,
                 "Your cities may Collect food from Barren spaces, Ignore Famine events",
             )
                 .add_player_event_listener(
                     |event| &mut event.terrain_collect_options,
-                    |m,(),()| {
+                    |m, (), ()| {
                         m.insert(Barren, HashSet::from([ResourcePile::food(1)]));
                     },
                     0,
@@ -276,7 +281,11 @@ fn warfare() -> Vec<Advance> {
                 "May Move Army units, May use Tactics on Action Cards",
             )
                 .with_advance_bonus(CultureToken)
-                .with_unlocked_building("Fortress"),
+                .with_unlocked_building("Fortress")
+                .add_player_event_listener(
+                    |event| &mut event.on_combat_round,
+                    fortress,
+                    1),
             Advance::builder(
                 SIEGECRAFT,
                 "When attacking a city with a Fortress, pay 2 wood to cancel the Fortress’ ability to add +1 die and/or pay 2 ore to ignore its ability to cancel a hit.",
@@ -284,9 +293,56 @@ fn warfare() -> Vec<Advance> {
             Advance::builder(
                 STEEL_WEAPONS,
                 "Immediately before a Land battle starts, you may pay 1 ore to get +2 combat value in every Combat Round against an enemy that does not have the Steel Weapons advance, but only +1 combat value against an enemy that does have it (regardless if they use it or not this battle).",
+            ).add_player_event_listener(
+                |event| &mut event.on_combat_round,
+                steel_weapons,
+                0,
             ),
         ],
     )
+}
+
+fn fortress(s: &mut CombatStrength, c: &Combat, game: &Game) {
+    if s.attacker || !c.defender_fortress(game) {
+        return;
+    }
+
+    if !c.modifiers.contains(&CancelFortressExtraDie) {
+        s.roll_log.push("fortress added one extra die".to_string());
+        s.extra_dies += 1;
+    }
+
+    if !c
+        .modifiers
+        .contains(&CombatModifier::CancelFortressIgnoreHit)
+    {
+        s.roll_log.push("fortress cancelled one hit".to_string());
+        s.hit_cancels += 1;
+    }
+}
+
+fn steel_weapons(s: &mut CombatStrength, c: &Combat, game: &Game) {
+    let steel_weapon_value = if game.get_player(c.attacker).has_advance(STEEL_WEAPONS)
+        && game.get_player(c.defender).has_advance(STEEL_WEAPONS)
+    {
+        1
+    } else {
+        2
+    };
+
+    let add_combat_value = |s: &mut CombatStrength, value: u8| {
+        s.extra_combat_value += value;
+        s.roll_log
+            .push(format!("steel weapons added {value} combat value"));
+    };
+
+    if s.attacker {
+        if c.modifiers.contains(&SteelWeaponsAttacker) {
+            add_combat_value(s, steel_weapon_value);
+        }
+    } else if c.modifiers.contains(&SteelWeaponsDefender) {
+        add_combat_value(s, steel_weapon_value);
+    }
 }
 
 fn spirituality() -> Vec<Advance> {
@@ -305,19 +361,19 @@ fn economy() -> Vec<Advance> {
         vec![
             Advance::builder(
                 BARTERING,
-      "todo")
+                "todo")
                 .with_advance_bonus(MoodToken),
             Advance::builder(
-                "Trade Routes", 
-                 "At the beginning of your turn, you gain 1 food for every trade route you can make, to a maximum of 4. A trade route is made between one of your Settlers or Ships and a non-Angry enemy player city within 2 spaces (without counting through unrevealed Regions). Each Settler or Ship can only be paired with one enemy player city. Likewise, each enemy player city must be paired with a different Settler or Ship. In other words, to gain X food you must have at least X Units (Settlers or Ships), each paired with X different enemy cities.")
+                "Trade Routes",
+                "At the beginning of your turn, you gain 1 food for every trade route you can make, to a maximum of 4. A trade route is made between one of your Settlers or Ships and a non-Angry enemy player city within 2 spaces (without counting through unrevealed Regions). Each Settler or Ship can only be paired with one enemy player city. Likewise, each enemy player city must be paired with a different Settler or Ship. In other words, to gain X food you must have at least X Units (Settlers or Ships), each paired with X different enemy cities.")
                 .with_advance_bonus(MoodToken)
-            .add_player_event_listener(
-                |event| &mut event.on_turn_start,
-                |game, (), ()| {
-                    collect_trade_routes_for_current_player(game);
-                },
-                0,
-            ),
+                .add_player_event_listener(
+                    |event| &mut event.on_turn_start,
+                    |game, (), ()| {
+                        collect_trade_routes_for_current_player(game);
+                    },
+                    0,
+                ),
             Advance::builder(
                 CURRENCY,
                 // also for Taxation

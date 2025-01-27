@@ -1,15 +1,44 @@
+use crate::ability_initializer::AbilityInitializerSetup;
+use crate::content::advances::IRRIGATION;
 use crate::game::Game;
+use crate::map::Terrain::Fertile;
 use crate::payment::PaymentModel;
 use crate::position::Position;
 use crate::{resource_pile::ResourcePile, wonder::Wonder};
+use std::collections::HashSet;
 
 #[must_use]
-#[rustfmt::skip]
 pub fn get_all() -> Vec<Wonder> {
     vec![
-        Wonder::builder("Pyramids", 
-            PaymentModel::resources_with_discount (
-            ResourcePile::new(3, 3, 3, 0, 0, 0, 4), 1), vec![]).build()
+        // todo add effects
+        Wonder::builder(
+            "Pyramids",
+            "todo",
+            PaymentModel::resources_with_discount(ResourcePile::new(3, 3, 3, 0, 0, 0, 4), 1),
+            vec![],
+        )
+        .build(),
+        // add other effects
+        Wonder::builder(
+            "Great Gardens",
+            "The city with this wonder may Collect any type of resource from Grassland spaces including ideas and gold.",
+            PaymentModel::resources_with_discount(ResourcePile::new(5, 5, 2, 0, 0, 0, 5), 0),
+            vec![IRRIGATION],
+        )
+            .add_player_event_listener(
+                |events| &mut events.terrain_collect_options,
+                |m,(),()| {
+                    m.insert(Fertile, HashSet::from([
+                        ResourcePile::food(1),
+                        ResourcePile::wood(1),
+                        ResourcePile::ore(1),
+                        ResourcePile::ideas(1),
+                        ResourcePile::gold(1),
+                    ]));
+                },
+                0
+            )
+        .build(),
     ]
 }
 

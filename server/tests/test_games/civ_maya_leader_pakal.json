@@ -5,39 +5,51 @@
       "name": null,
       "id": 0,
       "resources": {
-        "food": 2,
-        "wood": 7,
-        "ore": 7,
+        "food": 7,
+        "wood": 5,
+        "ore": 5,
         "ideas": 3,
-        "gold": 7,
-        "mood_tokens": 7,
-        "culture_tokens": 7
+        "gold": 5,
+        "mood_tokens": 9,
+        "culture_tokens": 9
       },
       "resource_limit": {
-        "food": 2,
+        "food": 7,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 7,
-        "culture_tokens": 7
+        "gold": 7
       },
       "cities": [
         {
-          "city_pieces": {},
+          "city_pieces": {
+            "market": 1
+          },
           "mood_state": "Happy",
-          "activations": 0,
+          "activations": 1,
           "angry_activation": false,
           "player_index": 0,
           "position": "A1"
         },
         {
-          "city_pieces": {},
-          "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
+          "city_pieces": {
+            "academy": 1,
+            "port": 1
+          },
+          "mood_state": "Angry",
+          "activations": 6,
+          "angry_activation": true,
           "player_index": 0,
-          "position": "C2"
+          "position": "C2",
+          "port_position": "C3"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Angry",
+          "activations": 4,
+          "angry_activation": true,
+          "player_index": 0,
+          "position": "B3"
         }
       ],
       "units": [
@@ -49,123 +61,140 @@
         },
         {
           "player_index": 0,
-          "position": "C2",
+          "position": "C3",
           "unit_type": "Cavalry",
-          "id": 1
+          "id": 1,
+          "carrier_id": 7
         },
         {
           "player_index": 0,
-          "position": "C2",
-          "unit_type": "Leader",
-          "id": 2
-        },
-        {
-          "player_index": 0,
-          "position": "C2",
+          "position": "C3",
           "unit_type": "Elephant",
+          "id": 2,
+          "carrier_id": 7
+        },
+        {
+          "player_index": 0,
+          "position": "B3",
+          "unit_type": "Settler",
           "id": 3
         },
         {
           "player_index": 0,
-          "position": "C2",
+          "position": "B3",
           "unit_type": "Settler",
           "id": 4
         },
         {
           "player_index": 0,
-          "position": "C2",
+          "position": "B3",
           "unit_type": "Settler",
           "id": 5
         },
         {
           "player_index": 0,
-          "position": "C2",
+          "position": "B3",
           "unit_type": "Settler",
           "id": 6
         },
         {
           "player_index": 0,
-          "position": "C2",
-          "unit_type": "Settler",
+          "position": "C3",
+          "unit_type": "Ship",
           "id": 7
+        },
+        {
+          "player_index": 0,
+          "position": "C3",
+          "unit_type": "Ship",
+          "id": 8
+        },
+        {
+          "player_index": 0,
+          "position": "C3",
+          "unit_type": "Ship",
+          "id": 9
+        },
+        {
+          "player_index": 0,
+          "position": "A1",
+          "unit_type": "Leader",
+          "id": 10
         }
       ],
-      "civilization": "test0",
-      "active_leader": null,
+      "civilization": "Maya",
+      "active_leader": "Kʼinich Janaab Pakal I",
       "available_leaders": [],
       "advances": [
         "Farming",
+        "Free Economy",
         "Mining",
-        "Siegecraft",
+        "Storage",
         "Tactics",
-        "Steel Weapons"
+        "Voting"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 1,
+      "game_event_tokens": 2,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
-      "wonder_cards": [],
-      "collect_options": [
-        [
-          "Mountain",
-          [
-            {
-              "ore": 1
-            }
-          ]
-        ],
-        [
-          "Fertile",
-          [
-            {
-              "food": 1
-            }
-          ]
-        ],
-        [
-          "Forest",
-          [
-            {
-              "wood": 1
-            }
-          ]
-        ]
+      "wonder_cards": [
+        "Great Gardens"
       ],
-      "next_unit_id": 8
+      "next_unit_id": 11
     },
     {
       "name": null,
       "id": 1,
       "resources": {
         "food": 2,
-        "wood": 7,
-        "ore": 7,
-        "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 7,
-        "culture_tokens": 7
+        "wood": 5,
+        "ore": 5,
+        "ideas": 5,
+        "gold": 5,
+        "mood_tokens": 9,
+        "culture_tokens": 9
       },
       "resource_limit": {
         "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 7,
-        "culture_tokens": 7
+        "gold": 7
       },
       "cities": [
         {
           "city_pieces": {
-            "fortress": 1
+            "obelisk": 1,
+            "observatory": 1,
+            "fortress": 1,
+            "temple": 1
           },
-          "mood_state": "Angry",
+          "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
           "player_index": 1,
+          "position": "B1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Angry",
+          "activations": 2,
+          "angry_activation": false,
+          "player_index": 1,
           "position": "C1"
+        },
+        {
+          "city_pieces": {
+            "port": 1
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "player_index": 1,
+          "position": "B2",
+          "port_position": "C3"
         }
       ],
       "units": [
@@ -182,14 +211,15 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "test0",
       "active_leader": null,
-      "available_leaders": [],
+      "available_leaders": [
+        "Alexander",
+        "Kleopatra"
+      ],
       "advances": [
         "Farming",
-        "Mining",
-        "Tactics",
-        "Steel Weapons"
+        "Mining"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
@@ -198,32 +228,6 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "collect_options": [
-        [
-          "Mountain",
-          [
-            {
-              "ore": 1
-            }
-          ]
-        ],
-        [
-          "Fertile",
-          [
-            {
-              "food": 1
-            }
-          ]
-        ],
-        [
-          "Forest",
-          [
-            {
-              "wood": 1
-            }
-          ]
-        ]
-      ],
       "next_unit_id": 2
     }
   ],
@@ -244,6 +248,10 @@
         }
       ],
       [
+        "A4",
+        "Mountain"
+      ],
+      [
         "B1",
         "Mountain"
       ],
@@ -253,6 +261,18 @@
       ],
       [
         "B3",
+        "Fertile"
+      ],
+      [
+        "B4",
+        "Fertile"
+      ],
+      [
+        "B5",
+        "Fertile"
+      ],
+      [
+        "B6",
         "Fertile"
       ],
       [
@@ -268,14 +288,45 @@
         "Water"
       ],
       [
+        "C4",
+        "Water"
+      ],
+      [
+        "C5",
+        "Water"
+      ],
+      [
+        "D1",
+        "Fertile"
+      ],
+      [
         "D2",
         "Water"
+      ],
+      [
+        "E2",
+        "Fertile"
       ]
     ]
   },
   "starting_player_index": 0,
   "current_player_index": 0,
   "action_log": [
+    {
+      "Playing": {
+        "Recruit": {
+          "units": [
+            "Leader"
+          ],
+          "city_position": "A1",
+          "payment": {
+            "mood_tokens": 1,
+            "culture_tokens": 1
+          },
+          "leader_name": "Kʼinich Janaab Pakal I"
+        }
+      }
+    },
     {
       "Playing": {
         "Advance": {
@@ -287,44 +338,28 @@
       }
     },
     {
-      "Movement": "Stop"
-    },
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Siegecraft",
-          "payment": {
-            "ideas": 2
-          }
+      "Movement": {
+        "Move": {
+          "units": [
+            10
+          ],
+          "destination": "B1"
         }
       }
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
     }
   ],
-  "action_log_index": 5,
+  "action_log_index": 2,
   "log": [
     "The game has started",
     "Age 1 has started",
     "Round 1/3",
-    "Player1 paid 2 ideas to get the Tactics advance",
-    "Player1 used a move units action",
-    "\tPlayer1 ended the movement action",
-    "Player1 paid 2 ideas to get the Siegecraft advance",
-    "Player1 ended their turn",
-    "It's Player2's turn",
-    "Player2 ended their turn with 3 actions left",
-    "It's Player1's turn",
-    "Round 2/3"
+    "Player1 paid 1 mood token and 1 culture token to recruit a leader getting Kʼinich Janaab Pakal I as their leader in the city at A1",
+    "Player1 paid 2 ideas to get the Tactics advance"
   ],
-  "undo_limit": 5,
-  "actions_left": 3,
+  "undo_limit": 0,
+  "actions_left": 1,
   "successful_cultural_influence": false,
-  "round": 2,
+  "round": 6,
   "age": 1,
   "messages": [
     "The game has started"
@@ -332,20 +367,24 @@
   "dice_roll_outcomes": [
     1,
     1,
-    1,
-    1,
-    1,
-    11,
-    11,
-    11,
-    11
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
   ],
+  "rng": {
+    "seed": 46312381643103681595563341886777350953
+  },
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
+  "wonder_amount_left": 2,
   "undo_context_stack": [
     {
       "Recruit": {}
@@ -378,9 +417,13 @@
       "Recruit": {}
     },
     {
-      "Movement": {
-        "movement_actions_left": 2
-      }
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
     }
   ]
 }

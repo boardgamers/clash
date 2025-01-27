@@ -20,9 +20,15 @@ pub struct Wonder {
 }
 
 impl Wonder {
-    pub fn builder(name: &str, cost: PaymentModel, required_advances: Vec<&str>) -> WonderBuilder {
+    pub fn builder(
+        name: &str,
+        description: &str,
+        cost: PaymentModel,
+        required_advances: Vec<&str>,
+    ) -> WonderBuilder {
         WonderBuilder::new(
-            name.to_string(),
+            name,
+            description,
             cost,
             required_advances
                 .into_iter()
@@ -45,10 +51,15 @@ pub struct WonderBuilder {
 }
 
 impl WonderBuilder {
-    fn new(name: String, cost: PaymentModel, required_advances: Vec<String>) -> Self {
+    fn new(
+        name: &str,
+        description: &str,
+        cost: PaymentModel,
+        required_advances: Vec<String>,
+    ) -> Self {
         Self {
-            name,
-            descriptions: Vec::new(),
+            name: name.to_string(),
+            descriptions: vec![description.to_string()],
             cost,
             required_advances,
             placement_requirement: None,
