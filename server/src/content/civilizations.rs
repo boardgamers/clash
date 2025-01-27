@@ -1,9 +1,9 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::{civilization::Civilization, leader::Leader};
 use crate::content::advances::IRRIGATION;
 use crate::map::Terrain;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
+use crate::{civilization::Civilization, leader::Leader};
 
 #[must_use]
 pub fn get_all() -> Vec<Civilization> {
