@@ -25,7 +25,6 @@
       ],
       "units": [
         {
-          "player_index": 0,
           "position": "B2",
           "unit_type": "Settler",
           "movement_restrictions": [
@@ -74,7 +73,6 @@
       ],
       "units": [
         {
-          "player_index": 1,
           "position": "D8",
           "unit_type": "Settler",
           "id": 0

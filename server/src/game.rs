@@ -2,7 +2,6 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::mem;
-
 use GameState::*;
 
 use crate::advance::Advance;
@@ -13,7 +12,7 @@ use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_r
 use crate::map::UnexploredBlock;
 use crate::movement::{has_movable_units, terrain_movement_restriction};
 use crate::resource::check_for_waste;
-use crate::unit::{carried_units, get_current_move, MovementRestriction};
+use crate::unit::{carried_units, get_current_move, MovementRestriction, UnitData};
 use crate::utils::Rng;
 use crate::utils::Shuffle;
 use crate::{
@@ -1111,11 +1110,14 @@ impl Game {
             self.set_active_leader(leader_name.clone(), player_index);
         }
         let mut replaced_units_undo_context = Vec::new();
-        for unit in replaced_units {
+        for unit in &replaced_units {
             let player = &mut self.players[player_index];
-            let unit = player
-                .remove_unit(unit)
-                .expect("the player should have the replaced units");
+            let u = player.remove_unit(*unit);
+            if u.carrier_id.is_some_and(|c| replaced_units.contains(&c)) {
+                // will be removed when the carrier is removed
+                continue;
+            }
+            let unit = u.data(self.get_player(player_index));
             replaced_units_undo_context.push(unit);
         }
         self.push_undo_context(UndoContext::Recruit {
@@ -1218,7 +1220,7 @@ impl Game {
         }) = self.undo_context_stack.pop()
         {
             for unit in replaced_units {
-                player.units.push(unit);
+                player.units.extend(Unit::from_data(player_index, unit));
             }
             if let Some(replaced_leader) = replaced_leader {
                 player.active_leader = Some(replaced_leader.clone());
@@ -1527,7 +1529,7 @@ impl Game {
             unit.movement_restrictions.push(terrain);
         }
 
-        for id in carried_units(self, player_index, unit_id) {
+        for id in carried_units(unit_id, &self.players[player_index]) {
             self.players[player_index]
                 .get_unit_mut(id)
                 .expect("the player should have all units to move")
@@ -1565,7 +1567,7 @@ impl Game {
             if !self.map.is_water(starting_position) {
                 unit.carrier_id = None;
             }
-            for id in &carried_units(self, player_index, unit_id) {
+            for id in &carried_units(unit_id, &self.players[player_index]) {
                 self.players[player_index]
                     .get_unit_mut(*id)
                     .expect("the player should have all units to move")
@@ -1579,17 +1581,16 @@ impl Game {
     ///
     /// Panics if the player does not have the unit
     pub fn kill_unit(&mut self, unit_id: u32, player_index: usize, killer: usize) {
-        if let Some(unit) = self.players[player_index].remove_unit(unit_id) {
-            if matches!(unit.unit_type, UnitType::Leader) {
-                let leader = self.players[player_index]
-                    .active_leader
-                    .take()
-                    .expect("A player should have an active leader when having a leader unit");
-                Player::with_leader(&leader, self, player_index, |game, leader| {
-                    (leader.player_deinitializer)(game, player_index);
-                });
-                self.players[killer].captured_leaders.push(leader);
-            }
+        let unit = self.players[player_index].remove_unit(unit_id);
+        if matches!(unit.unit_type, UnitType::Leader) {
+            let leader = self.players[player_index]
+                .active_leader
+                .take()
+                .expect("A player should have an active leader when having a leader unit");
+            Player::with_leader(&leader, self, player_index, |game, leader| {
+                (leader.player_deinitializer)(game, player_index);
+            });
+            self.players[killer].captured_leaders.push(leader);
         }
         if let GameState::Movement(m) = &mut self.state {
             if let CurrentMove::Fleet { units } = &mut m.current_move {
@@ -1743,12 +1744,12 @@ pub struct DisembarkUndoContext {
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum UndoContext {
     FoundCity {
-        settler: Unit,
+        settler: UnitData,
     },
     Recruit {
         #[serde(skip_serializing_if = "Vec::is_empty")]
         #[serde(default)]
-        replaced_units: Vec<Unit>,
+        replaced_units: Vec<UnitData>,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
         replaced_leader: Option<String>,

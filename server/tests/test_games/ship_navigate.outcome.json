@@ -90,7 +90,6 @@
       ],
       "units": [
         {
-          "player_index": 1,
           "position": "A7",
           "unit_type": "Ship",
           "id": 1
@@ -968,7 +967,6 @@
     {
       "FoundCity": {
         "settler": {
-          "player_index": 0,
           "position": "C3",
           "unit_type": "Settler",
           "id": 0
@@ -1014,7 +1012,6 @@
     {
       "FoundCity": {
         "settler": {
-          "player_index": 1,
           "position": "E6",
           "unit_type": "Settler",
           "id": 0

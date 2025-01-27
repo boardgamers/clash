@@ -10,20 +10,35 @@ use UnitType::*;
 
 use crate::explore::is_any_ship;
 use crate::game::CurrentMove;
+use crate::player::Player;
 use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct Unit {
     pub player_index: usize,
     pub position: Position,
+    pub unit_type: UnitType,
+    pub movement_restrictions: Vec<MovementRestriction>,
+    pub id: u32,
+    pub carrier_id: Option<u32>,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub struct UnitBaseData {
     pub unit_type: UnitType,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub movement_restrictions: Vec<MovementRestriction>,
     pub id: u32,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub struct UnitData {
+    pub position: Position,
+    #[serde(flatten)]
+    pub data: UnitBaseData,
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub carrier_id: Option<u32>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub carried_units: Vec<UnitBaseData>,
 }
 
 impl Unit {
@@ -70,6 +85,53 @@ impl Unit {
     #[must_use]
     pub fn is_transported(&self) -> bool {
         self.carrier_id.is_some()
+    }
+
+    #[must_use]
+    pub fn data(&self, player: &Player) -> UnitData {
+        UnitData {
+            position: self.position,
+            data: UnitBaseData {
+                unit_type: self.unit_type.clone(),
+                movement_restrictions: self.movement_restrictions.clone(),
+                id: self.id,
+            },
+            carried_units: carried_units(self.id, player)
+                .iter()
+                .map(|id| {
+                    let unit = player.get_unit(*id).unwrap();
+                    UnitBaseData {
+                        unit_type: unit.unit_type.clone(),
+                        movement_restrictions: unit.movement_restrictions.clone(),
+                        id: unit.id,
+                    }
+                })
+                .collect(),
+        }
+    }
+
+    #[must_use]
+    pub fn from_data(player_index: usize, data: UnitData) -> Vec<Self> {
+        let base_data = data.data;
+        let unit_id = base_data.id;
+        vec![Self {
+            player_index,
+            position: data.position,
+            unit_type: base_data.unit_type,
+            movement_restrictions: base_data.movement_restrictions,
+            id: unit_id,
+            carrier_id: None,
+        }]
+        .into_iter()
+        .chain(data.carried_units.into_iter().map(|c| Self {
+            player_index,
+            position: data.position,
+            unit_type: c.unit_type,
+            movement_restrictions: c.movement_restrictions,
+            id: c.id,
+            carrier_id: Some(unit_id),
+        }))
+        .collect()
     }
 }
 
@@ -349,9 +411,8 @@ pub enum MovementAction {
     Stop,
 }
 
-#[must_use]
-pub fn carried_units(game: &Game, player_index: usize, carrier: u32) -> Vec<u32> {
-    game.players[player_index]
+pub fn carried_units(carrier: u32, player: &Player) -> Vec<u32> {
+    player
         .units
         .iter()
         .filter(|u| u.carrier_id == Some(carrier))

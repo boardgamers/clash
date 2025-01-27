@@ -33,7 +33,6 @@
       ],
       "units": [
         {
-          "player_index": 0,
           "position": "D3",
           "unit_type": "Settler",
           "id": 0
@@ -83,7 +82,6 @@
       ],
       "units": [
         {
-          "player_index": 1,
           "position": "D8",
           "unit_type": "Settler",
           "id": 0

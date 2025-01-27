@@ -117,7 +117,9 @@ pub fn click_unit(
         .find_map(|(i, u)| {
             let place = unit_place(rc, i, pos);
             if can_select_carried_units {
-                let carried_units = carried_units(rc.game, player.index, u.id);
+                let game = rc.game;
+                let player_index = player.index;
+                let carried_units = carried_units(u.id, &game.players[player_index]);
                 for (j, carried) in carried_units.iter().enumerate() {
                     let carried_place = carried_unit_place(&place, j);
                     if is_in_circle(mouse_pos, carried_place.center, carried_place.radius) {
@@ -185,7 +187,10 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
                 draw_unit(rc, tooltip, &highlighted_units, *p, u, &place);
 
                 let player = rc.game.get_player(*p);
-                let carried = carried_units(rc.game, *p, u.id);
+                let game = rc.game;
+                let player_index = *p;
+                let carrier = u.id;
+                let carried = carried_units(carrier, &game.players[player_index]);
                 carried.iter().enumerate().for_each(|(j, u)| {
                     draw_unit(
                         rc,
