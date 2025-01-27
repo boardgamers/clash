@@ -32,7 +32,6 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "A1"
         },
         {
@@ -43,7 +42,6 @@
           "mood_state": "Angry",
           "activations": 6,
           "angry_activation": true,
-          "player_index": 0,
           "position": "C2",
           "port_position": "C3"
         },
@@ -57,7 +55,6 @@
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "B1"
         },
         {
@@ -65,7 +62,6 @@
           "mood_state": "Angry",
           "activations": 4,
           "angry_activation": true,
-          "player_index": 0,
           "position": "B3"
         }
       ],
@@ -178,7 +174,6 @@
           "mood_state": "Angry",
           "activations": 2,
           "angry_activation": false,
-          "player_index": 1,
           "position": "C1"
         },
         {
@@ -188,7 +183,6 @@
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 1,
           "position": "B2",
           "port_position": "C3"
         }

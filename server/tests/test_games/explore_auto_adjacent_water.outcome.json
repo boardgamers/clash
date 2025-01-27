@@ -21,7 +21,6 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "D1"
         }
       ],
@@ -70,7 +69,6 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 1,
           "position": "D8"
         }
       ],

@@ -176,7 +176,7 @@ impl Player {
             resource_limit: data.resource_limit,
             wasted_resources: ResourcePile::empty(),
             events: Some(PlayerEvents::default()),
-            cities: data.cities.into_iter().map(City::from_data).collect(),
+            cities: data.cities.into_iter().map(|d|City::from_data(d, data.id)).collect(),
             units,
             civilization: civilizations::get_civilization_by_name(&data.civilization)
                 .expect("player data should have a valid civilization"),

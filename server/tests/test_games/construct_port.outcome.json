@@ -30,7 +30,6 @@
           "mood_state": "Happy",
           "activations": 1,
           "angry_activation": false,
-          "player_index": 0,
           "position": "A1",
           "port_position": "A2"
         },
@@ -39,7 +38,6 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "C2"
         }
       ],
@@ -138,7 +136,6 @@
           "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 1,
           "position": "C1"
         }
       ],
