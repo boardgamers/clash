@@ -202,7 +202,7 @@ fn description(p: &Player, a: &Advance) -> Vec<String> {
         parts.push(format!("Government: {g}"));
     }
     if let Some(u) = &a.unlocked_building {
-        parts.push(format!("Unlocks: {u}"));
+        parts.push(format!("Unlocks: {}", u.name()));
     }
 
     parts

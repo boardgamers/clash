@@ -1,12 +1,12 @@
 use crate::advance::Advance;
-use crate::content::advances::RITUALS;
+use crate::content::advances::{get_advance_by_name, RITUALS};
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
 use crate::movement::move_routes;
 use crate::movement::{is_valid_movement_type, MoveRoute};
 use crate::payment::PaymentModel;
 use crate::resource::ResourceType;
-use crate::unit::{carried_units, get_current_move, MovementRestriction};
+use crate::unit::{carried_units, get_current_move, MovementRestriction, UnitData};
 use crate::{
     city::{City, CityData},
     city_pieces::Building::{self, *},
@@ -51,7 +51,7 @@ pub struct Player {
     pub civilization: Civilization,
     pub active_leader: Option<String>,
     pub available_leaders: Vec<String>,
-    pub advances: Vec<String>,
+    pub advances: Vec<Advance>,
     pub unlocked_special_advances: Vec<String>,
     pub wonders_build: Vec<String>,
     pub game_event_tokens: u8,
@@ -83,7 +83,11 @@ impl PartialEq for Player {
                 .iter()
                 .enumerate()
                 .all(|(i, city)| city.position == other.cities[i].position)
-            && self.units == other.units
+            && self
+                .units
+                .iter()
+                .enumerate()
+                .all(|(i, unit)| unit.id == other.units[i].id)
             && self.civilization.name == other.civilization.name
             && self.active_leader == other.active_leader
             && self
@@ -119,7 +123,6 @@ impl Player {
         game.players.push(player);
         let advances = mem::take(&mut game.players[player_index].advances);
         for advance in &advances {
-            let advance = advances::get_advance_by_name(advance);
             (advance.player_initializer)(game, player_index);
             for i in 0..game.players[player_index]
                 .civilization
@@ -158,7 +161,11 @@ impl Player {
     }
 
     fn from_data(data: PlayerData) -> Player {
-        let units = data.units;
+        let units: Vec<_> = data
+            .units
+            .into_iter()
+            .flat_map(|u| Unit::from_data(data.id, u))
+            .collect();
         units
             .iter()
             .into_group_map_by(|unit| unit.id)
@@ -176,13 +183,21 @@ impl Player {
             resource_limit: data.resource_limit,
             wasted_resources: ResourcePile::empty(),
             events: Some(PlayerEvents::default()),
-            cities: data.cities.into_iter().map(City::from_data).collect(),
+            cities: data
+                .cities
+                .into_iter()
+                .map(|d| City::from_data(d, data.id))
+                .collect(),
             units,
             civilization: civilizations::get_civilization_by_name(&data.civilization)
                 .expect("player data should have a valid civilization"),
             active_leader: data.active_leader,
             available_leaders: data.available_leaders,
-            advances: data.advances,
+            advances: data
+                .advances
+                .iter()
+                .map(|a| get_advance_by_name(a))
+                .collect(),
             unlocked_special_advances: data.unlocked_special_advance,
             wonders_build: data.wonders_build,
             game_event_tokens: data.game_event_tokens,
@@ -207,21 +222,25 @@ impl Player {
 
     #[must_use]
     pub fn data(self) -> PlayerData {
+        let units = self
+            .units
+            .iter()
+            // carried units are added to carriers
+            .filter(|unit| unit.carrier_id.is_none())
+            .sorted_by_key(|unit| unit.id)
+            .map(|u| u.data(&self))
+            .collect();
         PlayerData {
             name: self.name,
             id: self.index,
             resources: self.resources,
             resource_limit: self.resource_limit,
             cities: self.cities.into_iter().map(City::data).collect(),
-            units: self
-                .units
-                .into_iter()
-                .sorted_by_key(|unit| unit.id)
-                .collect(),
+            units,
             civilization: self.civilization.name,
             active_leader: self.active_leader,
             available_leaders: self.available_leaders.into_iter().collect(),
-            advances: self.advances.into_iter().sorted().collect(),
+            advances: self.advances.into_iter().map(|a| a.name).sorted().collect(),
             unlocked_special_advance: self.unlocked_special_advances,
             wonders_build: self.wonders_build,
             game_event_tokens: self.game_event_tokens,
@@ -240,22 +259,30 @@ impl Player {
     }
 
     pub fn cloned_data(&self) -> PlayerData {
+        let units = self
+            .units
+            .iter()
+            // carried units are added to carriers
+            .filter(|unit| unit.carrier_id.is_none())
+            .sorted_by_key(|unit| unit.id)
+            .map(|u| u.data(self))
+            .collect();
         PlayerData {
             name: self.name.clone(),
             id: self.index,
             resources: self.resources.clone(),
             resource_limit: self.resource_limit.clone(),
             cities: self.cities.iter().map(City::cloned_data).collect(),
-            units: self
-                .units
-                .iter()
-                .cloned()
-                .sorted_by_key(|unit| unit.id)
-                .collect(),
+            units,
             civilization: self.civilization.name.clone(),
             active_leader: self.active_leader.clone(),
             available_leaders: self.available_leaders.clone(),
-            advances: self.advances.iter().cloned().sorted().collect(),
+            advances: self
+                .advances
+                .iter()
+                .map(|a| a.name.clone())
+                .sorted()
+                .collect(),
             unlocked_special_advance: self.unlocked_special_advances.clone(),
             wonders_build: self.wonders_build.clone(),
             game_event_tokens: self.game_event_tokens,
@@ -294,7 +321,10 @@ impl Player {
                 .map(|l| l.name.clone())
                 .collect(),
             civilization,
-            advances: vec![String::from("Farming"), String::from("Mining")],
+            advances: vec![
+                advances::get_advance_by_name("Farming"),
+                advances::get_advance_by_name("Mining"),
+            ],
             unlocked_special_advances: Vec::new(),
             game_event_tokens: 3,
             completed_objectives: Vec::new(),
@@ -382,7 +412,7 @@ impl Player {
     pub fn government(&self) -> Option<String> {
         self.advances
             .iter()
-            .find_map(|advance| advances::get_advance_by_name(advance).government)
+            .find_map(|advance| advance.government.clone())
     }
 
     pub fn gain_resources(&mut self, resources: ResourcePile) {
@@ -444,7 +474,7 @@ impl Player {
 
     #[must_use]
     pub fn has_advance(&self, advance: &str) -> bool {
-        self.advances.iter().any(|advances| advances == advance)
+        self.advances.iter().any(|a| a.name == advance)
     }
 
     #[must_use]
@@ -822,11 +852,12 @@ impl Player {
             .collect::<Vec<_>>();
 
         if units.is_empty() {
-            return Err("no units to move".to_string());
+            return Err("noun units to move".to_string());
         }
-        if embark_carrier_id
-            .is_some_and(|id| carried_units(game, self.index, id).len() + units.len() > 2)
-        {
+        if embark_carrier_id.is_some_and(|id| {
+            let player_index = self.index;
+            carried_units(id, &game.players[player_index]).len() + units.len() > 2
+        }) {
             return Err("carrier capacity exceeded".to_string());
         }
 
@@ -947,10 +978,16 @@ impl Player {
         self.units.iter_mut().find(|unit| unit.id == id)
     }
 
-    pub fn remove_unit(&mut self, id: u32) -> Option<Unit> {
-        Some(
+    pub(crate) fn remove_unit(&mut self, id: u32) -> Unit {
+        for id in carried_units(id, self) {
+            self.remove_unit(id);
+        }
+
+        self.units.remove(
             self.units
-                .remove(self.units.iter().position(|unit| unit.id == id)?),
+                .iter()
+                .position(|unit| unit.id == id)
+                .expect("unit should exist"),
         )
     }
 
@@ -996,7 +1033,7 @@ pub struct PlayerData {
     resources: ResourcePile,
     resource_limit: ResourcePile,
     cities: Vec<CityData>,
-    units: Vec<Unit>,
+    units: Vec<UnitData>,
     civilization: String,
     active_leader: Option<String>,
     available_leaders: Vec<String>,

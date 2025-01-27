@@ -38,7 +38,6 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "A1"
         },
         {
@@ -46,7 +45,6 @@
           "mood_state": "Neutral",
           "activations": 8,
           "angry_activation": false,
-          "player_index": 0,
           "position": "C2"
         },
         {
@@ -56,13 +54,11 @@
           "mood_state": "Angry",
           "activations": 2,
           "angry_activation": false,
-          "player_index": 0,
           "position": "C1"
         }
       ],
       "units": [
         {
-          "player_index": 0,
           "position": "C1",
           "unit_type": "Infantry",
           "movement_restrictions": [
@@ -71,7 +67,6 @@
           "id": 0
         },
         {
-          "player_index": 0,
           "position": "C1",
           "unit_type": "Cavalry",
           "movement_restrictions": [
@@ -80,7 +75,6 @@
           "id": 1
         },
         {
-          "player_index": 0,
           "position": "C1",
           "unit_type": "Leader",
           "movement_restrictions": [
@@ -89,7 +83,6 @@
           "id": 2
         },
         {
-          "player_index": 0,
           "position": "C1",
           "unit_type": "Elephant",
           "movement_restrictions": [
@@ -98,25 +91,21 @@
           "id": 3
         },
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
           "id": 4
         },
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
           "id": 5
         },
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
           "id": 6
         },
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
           "id": 7

@@ -7,6 +7,7 @@ use crate::city::MoodState;
 use crate::collect::{collect, undo_collect};
 use crate::game::{CulturalInfluenceResolution, GameState};
 use crate::payment::PaymentModel;
+use crate::unit::Unit;
 use crate::{
     city::City,
     city_pieces::Building::{self, *},
@@ -131,14 +132,13 @@ impl PlayingAction {
                 game.advance(&advance, player_index);
             }
             FoundCity { settler } => {
-                let settler = game.players[player_index]
-                    .remove_unit(settler)
-                    .expect("Illegal action");
+                let settler = game.players[player_index].remove_unit(settler);
                 assert!(settler.can_found_city(game), "Illegal action");
                 let player = &mut game.players[player_index];
                 let city = City::new(player_index, settler.position);
                 player.cities.push(city);
-                game.push_undo_context(UndoContext::FoundCity { settler });
+                let unit_data = settler.data(player);
+                game.push_undo_context(UndoContext::FoundCity { settler: unit_data });
             }
             Construct(c) => {
                 let player = &game.players[player_index];
@@ -203,7 +203,7 @@ impl PlayingAction {
                     r.units,
                     r.city_position,
                     r.leader_name.as_ref(),
-                    r.replaced_units,
+                    &r.replaced_units,
                 );
             }
             IncreaseHappiness(i) => {
@@ -329,7 +329,13 @@ impl PlayingAction {
                     panic!("Settler context should be stored in undo context");
                 };
                 let player = &mut game.players[player_index];
-                player.units.push(settler);
+                let units = Unit::from_data(player_index, settler);
+                player.units.push(
+                    units
+                        .into_iter()
+                        .next()
+                        .expect("The player should have a unit after founding a city"),
+                );
                 player
                     .cities
                     .pop()

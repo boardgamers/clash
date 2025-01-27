@@ -23,7 +23,6 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "D1"
         },
         {
@@ -33,7 +32,6 @@
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "C3",
           "port_position": "B3"
         }
@@ -77,7 +75,6 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 1,
           "position": "D8"
         },
         {
@@ -87,14 +84,12 @@
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 1,
           "position": "E6",
           "port_position": "D5"
         }
       ],
       "units": [
         {
-          "player_index": 1,
           "position": "D5",
           "unit_type": "Ship",
           "id": 1
@@ -939,7 +934,6 @@
     {
       "FoundCity": {
         "settler": {
-          "player_index": 0,
           "position": "C3",
           "unit_type": "Settler",
           "id": 0
@@ -985,7 +979,6 @@
     {
       "FoundCity": {
         "settler": {
-          "player_index": 1,
           "position": "E6",
           "unit_type": "Settler",
           "id": 0

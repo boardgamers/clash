@@ -42,7 +42,6 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "A1"
         },
         {
@@ -53,7 +52,6 @@
           "mood_state": "Angry",
           "activations": 4,
           "angry_activation": false,
-          "player_index": 0,
           "position": "C2",
           "port_position": "C3"
         },
@@ -67,7 +65,6 @@
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "B1"
         },
         {
@@ -75,57 +72,46 @@
           "mood_state": "Angry",
           "activations": 4,
           "angry_activation": true,
-          "player_index": 0,
           "position": "B3"
         }
       ],
       "units": [
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Infantry",
           "id": 0
         },
         {
-          "player_index": 0,
-          "position": "C3",
+          "position": "D2",
           "unit_type": "Cavalry",
-          "id": 1,
-          "carrier_id": 7
+          "id": 1
         },
         {
-          "player_index": 0,
-          "position": "C3",
+          "position": "D2",
           "unit_type": "Elephant",
-          "id": 2,
-          "carrier_id": 7
+          "id": 2
         },
         {
-          "player_index": 0,
           "position": "B3",
           "unit_type": "Settler",
           "id": 3
         },
         {
-          "player_index": 0,
           "position": "B3",
           "unit_type": "Settler",
           "id": 4
         },
         {
-          "player_index": 0,
           "position": "B3",
           "unit_type": "Settler",
           "id": 5
         },
         {
-          "player_index": 0,
           "position": "B3",
           "unit_type": "Settler",
           "id": 6
         },
         {
-          "player_index": 0,
           "position": "C3",
           "unit_type": "Ship",
           "id": 7
@@ -177,7 +163,6 @@
           "mood_state": "Angry",
           "activations": 2,
           "angry_activation": false,
-          "player_index": 1,
           "position": "C1"
         },
         {
@@ -187,20 +172,17 @@
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 1,
           "position": "B2",
           "port_position": "C3"
         }
       ],
       "units": [
         {
-          "player_index": 1,
           "position": "C1",
           "unit_type": "Infantry",
           "id": 0
         },
         {
-          "player_index": 1,
           "position": "C1",
           "unit_type": "Infantry",
           "id": 1

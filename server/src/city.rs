@@ -24,13 +24,13 @@ pub struct City {
 
 impl City {
     #[must_use]
-    pub fn from_data(data: CityData) -> Self {
+    pub fn from_data(data: CityData, player_index: usize) -> Self {
         Self {
             pieces: CityPieces::from_data(&data.city_pieces),
             mood_state: data.mood_state,
             activations: data.activations,
             angry_activation: data.angry_activation,
-            player_index: data.player_index,
+            player_index,
             position: data.position,
             port_position: data.port_position,
         }
@@ -43,7 +43,6 @@ impl City {
             self.mood_state,
             self.activations,
             self.angry_activation,
-            self.player_index,
             self.position,
             self.port_position,
         )
@@ -56,7 +55,6 @@ impl City {
             self.mood_state.clone(),
             self.activations,
             self.angry_activation,
-            self.player_index,
             self.position,
             self.port_position,
         )
@@ -126,7 +124,11 @@ impl City {
         if size >= player.cities.len() {
             return false;
         }
-        if !player.has_advance(&building.required_advance()) {
+        if !player
+            .advances
+            .iter()
+            .any(|a| a.unlocked_building == Some(building))
+        {
             return false;
         }
         if !player.is_building_available(building, game) {
@@ -225,7 +227,6 @@ pub struct CityData {
     mood_state: MoodState,
     activations: u32,
     angry_activation: bool,
-    player_index: usize,
     position: Position,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
@@ -239,7 +240,6 @@ impl CityData {
         mood_state: MoodState,
         activations: u32,
         angry_activation: bool,
-        player_index: usize,
         position: Position,
         port_position: Option<Position>,
     ) -> Self {
@@ -248,7 +248,6 @@ impl CityData {
             mood_state,
             activations,
             angry_activation,
-            player_index,
             position,
             port_position,
         }

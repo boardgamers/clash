@@ -80,7 +80,7 @@ pub fn setup_local_game() -> Game {
             vec![unit_type],
             Position::from_offset(pos),
             None,
-            vec![],
+            &[],
         );
     };
 

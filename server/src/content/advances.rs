@@ -1,6 +1,7 @@
 use super::custom_actions::CustomActionType::*;
 use crate::action::Action;
 use crate::advance::AdvanceBuilder;
+use crate::city_pieces::Building::{Academy, Fortress, Market, Obelisk, Observatory, Port, Temple};
 use crate::collect::CollectContext;
 use crate::combat::CombatModifier::{
     CancelFortressExtraDie, SteelWeaponsAttacker, SteelWeaponsDefender,
@@ -50,7 +51,7 @@ pub fn get_groups() -> Vec<(String, Vec<Advance>)> {
         ("Spirituality".to_string(), spirituality()),
         // second half of the advances
         ("Economy".to_string(), economy()),
-        ("Culture".to_string(), vec![]),
+        ("Culture".to_string(), culture()),
         ("Science".to_string(), science()),
         ("Democracy".to_string(), democracy()),
         ("Autocracy".to_string(), autocracy()),
@@ -188,7 +189,8 @@ fn seafaring() -> Vec<Advance> {
         vec![
             Advance::builder("Fishing", "Your cities may Collect food from one Sea space")
                 .add_player_event_listener(|event| &mut event.collect_options, fishing_collect, 0)
-                .with_advance_bonus(MoodToken),
+                .with_advance_bonus(MoodToken)
+                .with_unlocked_building(Port),
             Advance::builder(
                 NAVIGATION,
                 "Ships may leave the map and return at the next sea space",
@@ -231,44 +233,49 @@ fn fishing_collect(
 
 fn education() -> Vec<Advance> {
     advance_group(
-        "Philosophy",
-        vec![Advance::builder(
-            "Philosophy",
-            "Immediately gain 1 idea, Gain 1 idea after getting a Science advance",
-        )
-        .add_one_time_ability_initializer(|game, player_index| {
-            game.players[player_index].gain_resources(ResourcePile::ideas(1));
-        })
-        .add_ability_undo_deinitializer(|game, player_index| {
-            game.players[player_index].loose_resources(ResourcePile::ideas(1));
-        })
-        .add_player_event_listener(
-            |event| &mut event.on_advance,
-            |player, advance, ()| {
-                if advance == "Math"
-                    || advance == "Astronomy"
-                    || advance == "Medicine"
-                    || advance == "Metallurgy"
-                {
-                    player.gain_resources(ResourcePile::ideas(1));
-                }
-            },
-            0,
-        )
-        .add_player_event_listener(
-            |event| &mut event.on_undo_advance,
-            |player, advance, ()| {
-                if advance == "Math"
-                    || advance == "Astronomy"
-                    || advance == "Medicine"
-                    || advance == "Metallurgy"
-                {
-                    player.loose_resources(ResourcePile::ideas(1));
-                }
-            },
-            0,
-        )
-        .with_advance_bonus(MoodToken)],
+        "Writing",
+        vec![
+            Advance::builder("Writing", "todo")
+                .with_advance_bonus(CultureToken)
+                .with_unlocked_building(Academy),
+            Advance::builder(
+                "Philosophy",
+                "Immediately gain 1 idea, Gain 1 idea after getting a Science advance",
+            )
+            .add_one_time_ability_initializer(|game, player_index| {
+                game.players[player_index].gain_resources(ResourcePile::ideas(1));
+            })
+            .add_ability_undo_deinitializer(|game, player_index| {
+                game.players[player_index].loose_resources(ResourcePile::ideas(1));
+            })
+            .add_player_event_listener(
+                |event| &mut event.on_advance,
+                |player, advance, ()| {
+                    if advance == "Math"
+                        || advance == "Astronomy"
+                        || advance == "Medicine"
+                        || advance == "Metallurgy"
+                    {
+                        player.gain_resources(ResourcePile::ideas(1));
+                    }
+                },
+                0,
+            )
+            .add_player_event_listener(
+                |event| &mut event.on_undo_advance,
+                |player, advance, ()| {
+                    if advance == "Math"
+                        || advance == "Astronomy"
+                        || advance == "Medicine"
+                        || advance == "Metallurgy"
+                    {
+                        player.loose_resources(ResourcePile::ideas(1));
+                    }
+                },
+                0,
+            )
+            .with_advance_bonus(MoodToken),
+        ],
     )
 }
 
@@ -281,7 +288,7 @@ fn warfare() -> Vec<Advance> {
                 "May Move Army units, May use Tactics on Action Cards",
             )
                 .with_advance_bonus(CultureToken)
-                .with_unlocked_building("Fortress")
+                .with_unlocked_building(Fortress)
                 .add_player_event_listener(
                     |event| &mut event.on_combat_round,
                     fortress,
@@ -349,8 +356,11 @@ fn spirituality() -> Vec<Advance> {
     advance_group(
         "Myths",
         vec![
-            Advance::builder("Myths", "not implemented"),
-            Advance::builder(RITUALS, "When you perform the Increase Happiness Action you may spend any Resources as a substitute for mood tokens. This is done at a 1:1 ratio"),
+            Advance::builder("Myths", "not implemented")
+                .with_advance_bonus(MoodToken)
+                .with_unlocked_building(Temple),
+            Advance::builder(RITUALS, "When you perform the Increase Happiness Action you may spend any Resources as a substitute for mood tokens. This is done at a 1:1 ratio")
+                .with_advance_bonus(CultureToken),
         ],
     )
 }
@@ -362,7 +372,8 @@ fn economy() -> Vec<Advance> {
             Advance::builder(
                 BARTERING,
                 "todo")
-                .with_advance_bonus(MoodToken),
+                .with_advance_bonus(MoodToken)
+                .with_unlocked_building(Market),
             Advance::builder(
                 "Trade Routes",
                 "At the beginning of your turn, you gain 1 food for every trade route you can make, to a maximum of 4. A trade route is made between one of your Settlers or Ships and a non-Angry enemy player city within 2 spaces (without counting through unrevealed Regions). Each Settler or Ship can only be paired with one enemy player city. Likewise, each enemy player city must be paired with a different Settler or Ship. In other words, to gain X food you must have at least X Units (Settlers or Ships), each paired with X different enemy cities.")
@@ -384,6 +395,15 @@ fn economy() -> Vec<Advance> {
     )
 }
 
+fn culture() -> Vec<Advance> {
+    advance_group(
+        "Arts",
+        vec![Advance::builder("Arts", "todo")
+            .with_advance_bonus(CultureToken)
+            .with_unlocked_building(Obelisk)],
+    )
+}
+
 fn science() -> Vec<Advance> {
     advance_group(
         "Math",
@@ -402,7 +422,7 @@ fn science() -> Vec<Advance> {
                     0,
                 )
                 .with_advance_bonus(CultureToken)
-                .with_unlocked_building("Observatory"),
+                .with_unlocked_building(Observatory),
             Advance::builder(
                 "Astronomy",
                 "Navigation and Cartography can be bought at no food cost",

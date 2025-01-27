@@ -21,13 +21,11 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "D1"
         }
       ],
       "units": [
         {
-          "player_index": 0,
           "position": "C7",
           "unit_type": "Settler",
           "id": 0
@@ -70,13 +68,11 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 1,
           "position": "D8"
         }
       ],
       "units": [
         {
-          "player_index": 1,
           "position": "D8",
           "unit_type": "Settler",
           "id": 0

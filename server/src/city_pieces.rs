@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::content::advances::{BARTERING, TACTICS};
 use crate::{content::wonders, wonder::Wonder};
 use Building::*;
 
@@ -220,15 +219,28 @@ impl Building {
     }
 
     #[must_use]
-    pub fn required_advance(&self) -> String {
-        String::from(match self {
-            Self::Academy => "Writing",
-            Self::Market => BARTERING,
-            Self::Obelisk => "Arts",
-            Self::Observatory => "Math",
-            Self::Fortress => TACTICS,
-            Self::Port => "Fishing",
-            Self::Temple => "Myths",
-        })
+    pub fn all() -> Vec<Building> {
+        vec![
+            Academy,
+            Market,
+            Obelisk,
+            Observatory,
+            Fortress,
+            Port,
+            Temple,
+        ]
+    }
+
+    #[must_use]
+    pub fn name(&self) -> &'static str {
+        match self {
+            Academy => "Academy",
+            Market => "Market",
+            Obelisk => "Obelisk",
+            Observatory => "Observatory",
+            Fortress => "Fortress",
+            Port => "Port",
+            Temple => "Temple",
+        }
     }
 }

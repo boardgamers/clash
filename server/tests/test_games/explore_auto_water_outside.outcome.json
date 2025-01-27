@@ -22,7 +22,6 @@
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "D1"
         },
         {
@@ -30,13 +29,11 @@
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "C7"
         }
       ],
       "units": [
         {
-          "player_index": 0,
           "position": "E3",
           "unit_type": "Settler",
           "id": 1
@@ -78,7 +75,6 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 1,
           "position": "D8"
         },
         {
@@ -86,13 +82,11 @@
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 1,
           "position": "E7"
         }
       ],
       "units": [
         {
-          "player_index": 1,
           "position": "F5",
           "unit_type": "Settler",
           "movement_restrictions": [
@@ -1111,7 +1105,6 @@
     {
       "FoundCity": {
         "settler": {
-          "player_index": 0,
           "position": "C7",
           "unit_type": "Settler",
           "id": 0
@@ -1149,7 +1142,6 @@
     {
       "FoundCity": {
         "settler": {
-          "player_index": 1,
           "position": "E7",
           "unit_type": "Settler",
           "id": 0
