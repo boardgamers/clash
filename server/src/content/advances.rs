@@ -5,7 +5,7 @@ use crate::city_pieces::Building::{Academy, Fortress, Market, Obelisk, Observato
 use crate::collect::CollectContext;
 use crate::combat::CombatModifier::*;
 use crate::combat::{Combat, CombatModifier, CombatStrength};
-use crate::content::custom_phase_actions::{CustomPhaseEventType, CustomPhasePaymentRequest};
+use crate::content::custom_phase_actions::CustomPhasePaymentRequest;
 use crate::content::trade_routes::collect_trade_routes_for_current_player;
 use crate::game::GameState;
 use crate::payment::PaymentModel;

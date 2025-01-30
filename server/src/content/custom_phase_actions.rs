@@ -22,7 +22,7 @@ pub enum CustomPhaseEventType {
 impl CustomPhaseEventType {
     #[must_use]
     pub fn is_last_type_for_event(&self) -> bool {
-        #[allow(clippy::match_like_matches_macro)]
+        #[allow(clippy::match_like_matches_macro, clippy::match_wildcard_for_single_variants)]
         match self {
             CustomPhaseEventType::StartCombatAttacker => false,
             _ => true,
@@ -94,14 +94,13 @@ impl CustomPhaseAction {
         match &game.state {
             GameState::CustomPhase(state) => match state {
                 CustomPhaseState::TradeRouteSelection => {
+                    #[allow(irrefutable_let_patterns)]
                     if let CustomPhaseAction::TradeRouteSelectionAction(p) = self {
                         let (reward, routes) =
                             trade_route_reward(game).expect("No trade route reward");
                         assert!(reward.is_valid_payment(&p), "Invalid payment"); // it's a gain
                         gain_trade_route_reward(game, player_index, &routes, &p);
                         game.state = GameState::Playing;
-                    } else {
-                        panic!("Need to pass TradeRouteSelectionAction to execute");
                     }
                 }
             },

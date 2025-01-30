@@ -1,7 +1,7 @@
 use crate::action::Action;
 use crate::content::custom_phase_actions::{
-    CustomPhaseEvent, CustomPhaseEventAction, CustomPhaseEventType,
-    CustomPhasePaymentRequest, CustomPhaseRequest,
+    CustomPhaseEvent, CustomPhaseEventAction, CustomPhaseEventType, CustomPhasePaymentRequest,
+    CustomPhaseRequest,
 };
 use crate::resource_pile::ResourcePile;
 use crate::{
@@ -90,7 +90,9 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             + Clone,
     ) -> Self
     where
-        E: Fn(&mut PlayerEvents) -> &mut EventMut<Game, usize, CustomPhaseEventType> + 'static + Clone,
+        E: Fn(&mut PlayerEvents) -> &mut EventMut<Game, usize, CustomPhaseEventType>
+            + 'static
+            + Clone,
     {
         let origin = self.get_key();
         self.add_player_event_listener(
@@ -138,7 +140,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         )
     }
 
-    #[allow(irrefutable_let_patterns)] 
+    #[allow(irrefutable_let_patterns)]
     fn add_payment_request_listener<E>(
         self,
         event: E,
@@ -147,7 +149,9 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         gain_reward: impl Fn(&mut Game, usize, &str, &Vec<ResourcePile>) + 'static + Clone,
     ) -> Self
     where
-        E: Fn(&mut PlayerEvents) -> &mut EventMut<Game, usize, CustomPhaseEventType> + 'static + Clone,
+        E: Fn(&mut PlayerEvents) -> &mut EventMut<Game, usize, CustomPhaseEventType>
+            + 'static
+            + Clone,
     {
         self.add_state_change_event_listener(
             event,

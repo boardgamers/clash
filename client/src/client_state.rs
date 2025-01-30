@@ -180,14 +180,7 @@ impl ActiveDialog {
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
             ActiveDialog::TradeRouteSelection(_) => vec!["Select trade route reward".to_string()],
             ActiveDialog::CustomPhasePaymentRequest(_r) => {
-                match &rc
-                    .game
-                    .custom_phase_state
-                    .current
-                    .as_ref()
-                    .unwrap()
-                    .origin
-                {
+                match &rc.game.custom_phase_state.current.as_ref().unwrap().origin {
                     EventOrigin::Advance(a) => advance_help(rc, a),
                     _ => vec![], // TODO
                 }
@@ -511,21 +504,19 @@ impl State {
     pub fn game_state_dialog(&self, game: &Game) -> ActiveDialog {
         if let Some(e) = &game.custom_phase_state.current {
             return match &e.request {
-                CustomPhaseRequest::Payment(r) => {
-                    ActiveDialog::CustomPhasePaymentRequest(
-                        r.iter()
-                            .map(|p| {
-                                Payment::new(
-                                    &p.model,
-                                    &game.get_player(game.active_player()).resources,
-                                    &p.name,
-                                    p.optional,
-                                )
-                            })
-                            .collect(),
-                    )
-                }
-            }
+                CustomPhaseRequest::Payment(r) => ActiveDialog::CustomPhasePaymentRequest(
+                    r.iter()
+                        .map(|p| {
+                            Payment::new(
+                                &p.model,
+                                &game.get_player(game.active_player()).resources,
+                                &p.name,
+                                p.optional,
+                            )
+                        })
+                        .collect(),
+                ),
+            };
         }
         match &game.state {
             GameState::Playing | GameState::Finished => ActiveDialog::None,

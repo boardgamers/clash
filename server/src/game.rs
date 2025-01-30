@@ -8,7 +8,7 @@ use crate::advance::Advance;
 use crate::combat::{self, start_combat, Combat, CombatDieRoll, CombatPhase, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, MOVEMENT_ACTIONS};
 use crate::content::custom_phase_actions::{
-    CustomPhaseEvent, CustomPhaseEventAction, CustomPhaseEventState, CustomPhaseEventType,
+    CustomPhaseEventState, CustomPhaseEventType,
     CustomPhaseState,
 };
 use crate::events::EventMut;
@@ -1869,6 +1869,7 @@ pub mod tests {
     use std::collections::HashMap;
 
     use super::{Game, GameState::Playing};
+    use crate::content::custom_phase_actions::CustomPhaseEventState;
     use crate::payment::PaymentModel;
     use crate::utils::tests::FloatEq;
     use crate::{
@@ -1881,7 +1882,6 @@ pub mod tests {
         utils::Rng,
         wonder::Wonder,
     };
-    use crate::content::custom_phase_actions::CustomPhaseEventState;
 
     #[must_use]
     pub fn test_game() -> Game {
@@ -1912,7 +1912,6 @@ pub mod tests {
             wonders_left: Vec::new(),
             wonder_amount_left: 0,
             undo_context_stack: Vec::new(),
-
         }
     }
 

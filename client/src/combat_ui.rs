@@ -92,4 +92,3 @@ pub fn play_action_card_dialog(rc: &RenderContext) -> StateUpdate {
     }
     StateUpdate::None
 }
-

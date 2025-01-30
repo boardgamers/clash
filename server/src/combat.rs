@@ -155,10 +155,7 @@ pub fn initiate_combat(
     start_combat(game, combat);
 }
 
-pub(crate) fn start_combat(
-    game: &mut Game,
-    combat: Combat,
-) {
+pub(crate) fn start_combat(game: &mut Game, combat: Combat) {
     game.lock_undo();
     let attacker = combat.attacker;
     let defender = combat.defender;
@@ -171,16 +168,14 @@ pub(crate) fn start_combat(
         attacker,
         |events| &events.on_combat_start,
         CustomPhaseEventType::StartCombatAttacker,
-    )    {
+    ) {
         return;
     }
-    if
-        game.trigger_custom_phase_event(
-            defender,
-            |events| &events.on_combat_start,
-            CustomPhaseEventType::StartCombatDefender,
-        )
-    {
+    if game.trigger_custom_phase_event(
+        defender,
+        |events| &events.on_combat_start,
+        CustomPhaseEventType::StartCombatDefender,
+    ) {
         return;
     }
 
