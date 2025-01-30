@@ -1,38 +1,79 @@
 {
   "state": {
-    "CustomPhase": {
-      "SteelWeaponsDefender": {
-        "initiation": {
-          "Movement": {
-            "movement_actions_left": 2,
-            "moved_units": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ]
+    "Combat": {
+      "initiation": {
+        "Movement": {
+          "movement_actions_left": 2,
+          "moved_units": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        }
+      },
+      "round": 1,
+      "phase": "Retreat",
+      "defender": 1,
+      "defender_position": "C1",
+      "attacker": 0,
+      "attacker_position": "C2",
+      "attackers": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "can_retreat": true,
+      "modifiers": [
+        "SteelWeaponsAttacker"
+      ]
+    }
+  },
+  "state_change_event_state": {
+    "event_used": [],
+    "last_priority_used": 0,
+    "current": {
+      "event_type": "StartCombatAttacker",
+      "priority": 0,
+      "player_index": 0,
+      "request": {
+        "Payment": [
+          {
+            "model": {
+              "Sum": {
+                "cost": 2,
+                "types_by_preference": [
+                  "Wood",
+                  "Gold"
+                ]
+              }
+            },
+            "name": "Cancel fortress ability to add an extra die in the first round of combat",
+            "optional": true
+          },
+          {
+            "model": {
+              "Sum": {
+                "cost": 2,
+                "types_by_preference": [
+                  "Ore",
+                  "Gold"
+                ]
+              }
+            },
+            "name": "Cancel fortress ability to ignore the first hit in the first round of combat",
+            "optional": true
           }
-        },
-        "round": 1,
-        "phase": "Retreat",
-        "defender": 1,
-        "defender_position": "C1",
-        "attacker": 0,
-        "attacker_position": "C2",
-        "attackers": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5
-        ],
-        "can_retreat": true,
-        "modifiers": [
-          "SteelWeaponsAttacker"
         ]
+      },
+      "response": null,
+      "origin": {
+        "Advance": "Siegecraft"
       }
     }
   },
@@ -302,16 +343,9 @@
           "destination": "C1"
         }
       }
-    },
-    {
-      "CustomPhase": {
-        "SteelWeaponsAttackerAction": {
-          "ore": 1
-        }
-      }
     }
   ],
-  "action_log_index": 7,
+  "action_log_index": 6,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -328,7 +362,7 @@
     "\tPlayer1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1",
     "Player1 paid for steel weapons: 1 ore"
   ],
-  "undo_limit": 7,
+  "undo_limit": 6,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 2,

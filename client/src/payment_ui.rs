@@ -307,7 +307,7 @@ fn resource_payment(options: &PaymentOptions) -> Vec<ResourcePayment> {
 #[must_use]
 pub fn show_types(model: &PaymentModel) -> Vec<ResourceType> {
     match model {
-        PaymentModel::Sum(options) => options.types_by_preference.to_vec(),
+        PaymentModel::Sum(options) => options.types_by_preference.clone(),
         PaymentModel::Resources(options) => options.cost.types(),
     }
 }

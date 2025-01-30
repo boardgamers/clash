@@ -1,3 +1,4 @@
+use crate::ability_initializer::EventOrigin;
 use crate::payment::PaymentModel;
 use crate::{
     ability_initializer::{self, AbilityInitializer, AbilityInitializerSetup},
@@ -138,7 +139,7 @@ impl AbilityInitializerSetup for WonderBuilder {
         self
     }
 
-    fn get_key(&self) -> String {
-        self.name.clone()
+    fn get_key(&self) -> EventOrigin {
+        EventOrigin::Wonder(self.name.clone())
     }
 }

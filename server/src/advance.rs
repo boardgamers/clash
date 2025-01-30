@@ -4,6 +4,7 @@ use crate::{
     resource_pile::ResourcePile,
 };
 
+use crate::ability_initializer::EventOrigin;
 use crate::city_pieces::Building;
 use Bonus::*;
 
@@ -159,8 +160,8 @@ impl AbilityInitializerSetup for AdvanceBuilder {
         self
     }
 
-    fn get_key(&self) -> String {
-        self.name.clone()
+    fn get_key(&self) -> EventOrigin {
+        EventOrigin::Advance(self.name.clone())
     }
 }
 

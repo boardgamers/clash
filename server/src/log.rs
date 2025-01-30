@@ -48,6 +48,10 @@ pub fn format_action_log_item(action: &Action, game: &Game) -> String {
         Action::PlaceSettler(position) => format_place_settler_log_item(game, *position),
         Action::ExploreResolution(_rotation) => format_explore_action_log_item(game),
         Action::CustomPhase(c) => c.format_log_item(game, player, &player.get_name()),
+        Action::CustomPhaseEvent(_) => {
+            // is done in the event handler itself
+            String::new()
+        }
         Action::Undo | Action::Redo => {
             panic!("undoing or redoing actions should not be written to the log")
         }

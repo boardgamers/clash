@@ -1,16 +1,10 @@
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::StateUpdate;
 use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
-use crate::payment_ui::{multi_payment_dialog, payment_dialog, Payment};
 use crate::render_context::RenderContext;
 use crate::select_ui::ConfirmSelection;
 use crate::unit_ui;
 use crate::unit_ui::UnitSelection;
 use server::action::{Action, CombatAction, PlayActionCard};
-use server::combat::Combat;
-use server::content::custom_phase_actions::{
-    steel_weapons_cost, CustomPhaseAction, SiegecraftPayment, SIEGECRAFT_EXTRA_DIE,
-    SIEGECRAFT_IGNORE_HIT,
-};
 use server::game::Game;
 use server::position::Position;
 use server::unit::Unit;
@@ -97,98 +91,4 @@ pub fn play_action_card_dialog(rc: &RenderContext) -> StateUpdate {
         )));
     }
     StateUpdate::None
-}
-
-#[derive(Clone)]
-pub struct SiegecraftPaymentDialog {
-    extra_die: Payment,
-    ignore_hit: Payment,
-}
-
-impl SiegecraftPaymentDialog {
-    pub fn new(game: &Game) -> SiegecraftPaymentDialog {
-        let available = game.get_player(game.active_player()).resources.clone();
-        SiegecraftPaymentDialog {
-            extra_die: Payment::new(
-                &SIEGECRAFT_EXTRA_DIE,
-                &available,
-                "Cancel fortress extra die in first round of combat",
-                true,
-            ),
-            ignore_hit: Payment::new(
-                &SIEGECRAFT_IGNORE_HIT,
-                &available,
-                "Cancel fortress ignore hit in first round of combat",
-                true,
-            ),
-        }
-    }
-}
-
-pub fn pay_siegecraft_dialog(p: &SiegecraftPaymentDialog, rc: &RenderContext) -> StateUpdate {
-    multi_payment_dialog(
-        rc,
-        &[p.extra_die.clone(), p.ignore_hit.clone()],
-        |p| {
-            ActiveDialog::SiegecraftPayment(SiegecraftPaymentDialog {
-                extra_die: p[0].clone(),
-                ignore_hit: p[1].clone(),
-            })
-        },
-        false,
-        |p| {
-            StateUpdate::Execute(Action::CustomPhase(
-                CustomPhaseAction::SiegecraftPaymentAction(SiegecraftPayment {
-                    extra_die: p[0].clone(),
-                    ignore_hit: p[1].clone(),
-                }),
-            ))
-        },
-    )
-}
-
-#[derive(Clone)]
-pub struct SteelWeaponDialog {
-    pub attacker: bool,
-    pub payment: Payment,
-    pub combat: Combat,
-}
-
-pub fn steel_weapons_dialog(game: &Game, c: &Combat, player_index: usize) -> ActiveDialog {
-    let model = &steel_weapons_cost(game, c, player_index);
-    let available = &game.get_player(player_index).resources;
-    let payment = Payment::new(model, available, "Use steel weapons", true);
-    ActiveDialog::SteelWeaponPayment(SteelWeaponDialog {
-        attacker: player_index == c.attacker,
-        payment,
-        combat: c.clone(),
-    })
-}
-
-pub(crate) fn pay_steel_weapons_dialog(
-    rc: &RenderContext,
-    dialog: &SteelWeaponDialog,
-) -> StateUpdate {
-    let attacker = dialog.attacker;
-
-    payment_dialog(
-        rc,
-        &dialog.payment.clone(),
-        |p| {
-            let mut n = dialog.clone();
-            n.payment = p;
-            ActiveDialog::SteelWeaponPayment(n)
-        },
-        |p| {
-            if attacker {
-                StateUpdate::Execute(Action::CustomPhase(
-                    CustomPhaseAction::SteelWeaponsAttackerAction(p),
-                ))
-            } else {
-                StateUpdate::Execute(Action::CustomPhase(
-                    CustomPhaseAction::SteelWeaponsDefenderAction(p),
-                ))
-            }
-        },
-    )
 }

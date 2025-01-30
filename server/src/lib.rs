@@ -12,7 +12,7 @@
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::implicit_hasher)]
 
-mod ability_initializer;
+pub mod ability_initializer;
 pub mod action;
 pub mod advance;
 pub mod city;

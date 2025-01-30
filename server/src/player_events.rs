@@ -1,6 +1,7 @@
 use crate::action::Action;
 use crate::collect::CollectContext;
 use crate::combat::{Combat, CombatStrength};
+use crate::content::custom_phase_actions::CustomPhaseEventType;
 use crate::game::Game;
 use crate::map::Terrain;
 use crate::payment::PaymentModel;
@@ -28,6 +29,7 @@ pub(crate) struct PlayerEvents {
     pub terrain_collect_options: EventMut<HashMap<Terrain, HashSet<ResourcePile>>, (), ()>,
     pub collect_options: EventMut<HashMap<Position, HashSet<ResourcePile>>, CollectContext, Game>,
     pub on_turn_start: EventMut<Game, (), ()>,
+    pub on_combat_start: EventMut<Game, usize, CustomPhaseEventType>,
     pub on_combat_round: EventMut<CombatStrength, Combat, Game>,
 }
 

@@ -5,12 +5,16 @@ use std::mem;
 use GameState::*;
 
 use crate::advance::Advance;
-use crate::combat::{self, Combat, CombatDieRoll, CombatPhase, COMBAT_DIE_SIDES};
+use crate::combat::{self, start_combat, Combat, CombatDieRoll, CombatPhase, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, MOVEMENT_ACTIONS};
-use crate::content::custom_phase_actions::CustomPhaseState;
+use crate::content::custom_phase_actions::{
+    CustomPhaseEventState, CustomPhaseEventType, CustomPhaseState,
+};
+use crate::events::EventMut;
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
 use crate::map::UnexploredBlock;
 use crate::movement::{has_movable_units, terrain_movement_restriction};
+use crate::player_events::PlayerEvents;
 use crate::resource::check_for_waste;
 use crate::unit::{carried_units, get_current_move, MovementRestriction, UnitData};
 use crate::utils::Rng;
@@ -43,6 +47,7 @@ use crate::{
 
 pub struct Game {
     pub state: GameState,
+    pub custom_phase_state: CustomPhaseEventState,
     pub players: Vec<Player>,
     pub map: Map,
     pub starting_player_index: usize,
@@ -121,6 +126,7 @@ impl Game {
         };
         Self {
             state: Playing,
+            custom_phase_state: CustomPhaseEventState::new(),
             players,
             map,
             starting_player_index: starting_player,
@@ -184,6 +190,7 @@ impl Game {
                 .collect(),
             wonder_amount_left: data.wonder_amount_left,
             undo_context_stack: data.undo_context_stack,
+            custom_phase_state: data.state_change_event_state,
         };
         for player in data.players {
             Player::initialize_player(player, &mut game);
@@ -195,6 +202,7 @@ impl Game {
     pub fn data(self) -> GameData {
         GameData {
             state: self.state,
+            state_change_event_state: self.custom_phase_state,
             players: self.players.into_iter().map(Player::data).collect(),
             map: self.map.data(),
             starting_player_index: self.starting_player_index,
@@ -226,6 +234,7 @@ impl Game {
     pub fn cloned_data(&self) -> GameData {
         GameData {
             state: self.state.clone(),
+            state_change_event_state: self.custom_phase_state.clone(),
             players: self.players.iter().map(Player::cloned_data).collect(),
             map: self.map.cloned_data(),
             starting_player_index: self.starting_player_index,
@@ -296,6 +305,49 @@ impl Game {
         self.undo_limit = self.action_log_index;
     }
 
+    pub(crate) fn trigger_player_game_event(
+        &mut self,
+        player_index: usize,
+        event: fn(&PlayerEvents) -> &EventMut<Game, (), ()>,
+    ) {
+        let events = self.players[player_index]
+            .events
+            .take()
+            .expect("events should be set");
+        event(&events).trigger(self, &(), &());
+        self.players[player_index].events = Some(events);
+    }
+
+    pub(crate) fn trigger_custom_phase_event(
+        &mut self,
+        player_index: usize,
+        event: fn(&PlayerEvents) -> &EventMut<Game, usize, CustomPhaseEventType>,
+        event_type: CustomPhaseEventType,
+    ) -> bool {
+        if self.custom_phase_state.event_used.contains(&event_type) {
+            return false;
+        }
+
+        let events = self.players[player_index]
+            .events
+            .take()
+            .expect("events should be set");
+        event(&events).trigger(self, &player_index, &event_type);
+        self.players[player_index].events = Some(events);
+
+        let request = self.custom_phase_state.current.is_some();
+        if !request {
+            if event_type.is_last_type_for_event() {
+                self.custom_phase_state = CustomPhaseEventState::new();
+            } else {
+                self.custom_phase_state.event_used.push(event_type);
+                self.custom_phase_state.last_priority_used = None;
+                self.custom_phase_state.current = None;
+            }
+        }
+        request
+    }
+
     ///
     ///
     /// # Panics
@@ -317,6 +369,27 @@ impl Game {
             self.redo(player_index);
             return;
         }
+
+        if let Some(s) = &mut self.custom_phase_state.current {
+            s.response = action.custom_phase_event();
+            match s.event_type {
+                CustomPhaseEventType::StartCombatAttacker
+                | CustomPhaseEventType::StartCombatDefender => {
+                    if let GameState::Combat(c) = mem::replace(&mut self.state, Playing) {
+                        start_combat(self, c);
+                    } else {
+                        panic!("game should be in combat state")
+                    }
+                }
+            }
+        } else {
+            self.execute_regular_action(action, player_index);
+        }
+        // player can have changed, but we don't need waste check for turn end
+        check_for_waste(self, self.current_player_index);
+    }
+
+    fn execute_regular_action(&mut self, action: Action, player_index: usize) {
         let copy = action.clone();
 
         self.log.push(log::format_action_log_item(&action, self));
@@ -377,8 +450,6 @@ impl Game {
             Finished => panic!("actions can't be executed when the game is finished"),
         }
         self.after_execute_or_redo(&copy, player_index);
-        // player can have changed, but we don't need waste check for turn end
-        check_for_waste(self, self.current_player_index);
     }
 
     fn after_execute_or_redo(&mut self, action: &Action, player_index: usize) {
@@ -410,6 +481,7 @@ impl Game {
                 undo_explore_resolution(self, player_index);
             }
             Action::CustomPhase(action) => action.clone().undo(self, player_index),
+            Action::CustomPhaseEvent(_) => panic!("custom phase event actions can't be undone"),
             Action::Undo => panic!("undo action can't be undone"),
             Action::Redo => panic!("redo action can't be undone"),
         }
@@ -464,6 +536,7 @@ impl Game {
             Action::CustomPhase(action) => {
                 action.clone().execute(self, player_index);
             }
+            Action::CustomPhaseEvent(_) => panic!("custom phase event actions can't be redone"),
             Action::Undo => panic!("undo action can't be redone"),
             Action::Redo => panic!("redo action can't be redone"),
         }
@@ -818,12 +891,7 @@ impl Game {
         ));
         self.lock_undo();
 
-        let e = self.players[self.current_player_index]
-            .events
-            .take()
-            .expect("player should have events");
-        e.on_turn_start.trigger(self, &(), &());
-        self.players[self.current_player_index].events = Some(e);
+        self.trigger_player_game_event(self.current_player_index, |e| &e.on_turn_start);
     }
 
     pub fn skip_dropped_players(&mut self) {
@@ -844,6 +912,9 @@ impl Game {
 
     #[must_use]
     pub fn active_player(&self) -> usize {
+        if let Some(custom_phase_event) = &self.custom_phase_state.current {
+            return custom_phase_event.player_index;
+        }
         match &self.state {
             Combat(c) => match c.phase {
                 CombatPhase::RemoveCasualties {
@@ -1607,6 +1678,9 @@ impl Game {
 #[derive(Serialize, Deserialize, PartialEq)]
 pub struct GameData {
     state: GameState,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "CustomPhaseEventState::is_empty")]
+    state_change_event_state: CustomPhaseEventState,
     players: Vec<PlayerData>,
     map: MapData,
     starting_player_index: usize,
@@ -1794,6 +1868,7 @@ pub mod tests {
     use std::collections::HashMap;
 
     use super::{Game, GameState::Playing};
+    use crate::content::custom_phase_actions::CustomPhaseEventState;
     use crate::payment::PaymentModel;
     use crate::utils::tests::FloatEq;
     use crate::{
@@ -1811,6 +1886,7 @@ pub mod tests {
     pub fn test_game() -> Game {
         Game {
             state: Playing,
+            custom_phase_state: CustomPhaseEventState::new(),
             players: Vec::new(),
             map: Map::new(HashMap::new()),
             starting_player_index: 0,
