@@ -10,6 +10,7 @@ use crate::{
     resource_pile::ResourcePile, wonder::Wonder,
 };
 use std::collections::{HashMap, HashSet};
+use crate::content::custom_phase_actions::CustomPhaseEventType;
 
 #[derive(Default)]
 pub(crate) struct PlayerEvents {
@@ -28,6 +29,7 @@ pub(crate) struct PlayerEvents {
     pub terrain_collect_options: EventMut<HashMap<Terrain, HashSet<ResourcePile>>, (), ()>,
     pub collect_options: EventMut<HashMap<Position, HashSet<ResourcePile>>, CollectContext, Game>,
     pub on_turn_start: EventMut<Game, (), ()>,
+    pub on_combat_start: EventMut<Game, usize, CustomPhaseEventType>,
     pub on_combat_round: EventMut<CombatStrength, Combat, Game>,
 }
 

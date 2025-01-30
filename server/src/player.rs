@@ -607,7 +607,7 @@ impl Player {
         } else if self.has_advance(RITUALS) {
             Some(PaymentModel::sum(
                 cost,
-                &[
+                vec![
                     ResourceType::Food,
                     ResourceType::Wood,
                     ResourceType::Ore,
@@ -617,7 +617,7 @@ impl Player {
                 ],
             ))
         } else {
-            Some(PaymentModel::sum(cost, &[ResourceType::MoodTokens]))
+            Some(PaymentModel::sum(cost, vec![ResourceType::MoodTokens]))
         }
     }
 
@@ -629,7 +629,7 @@ impl Player {
             .trigger(&mut cost, &advance.to_string(), &());
         PaymentModel::sum(
             cost,
-            &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
+            vec![ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
         )
     }
 

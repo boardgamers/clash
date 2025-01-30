@@ -1,12 +1,13 @@
 use crate::resource::ResourceType;
 use crate::resource_pile::{CostWithDiscount, ResourcePile};
+use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::ops::{Add, SubAssign};
 
-#[derive(PartialEq, Eq, Debug, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct SumPaymentOptions {
     pub cost: u32,
-    pub types_by_preference: &'static [ResourceType],
+    pub types_by_preference: Vec<ResourceType>,
 }
 
 impl SumPaymentOptions {
@@ -20,7 +21,7 @@ impl SumPaymentOptions {
     }
 }
 
-#[derive(PartialEq, Eq, Debug, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum PaymentModel {
     Sum(SumPaymentOptions),
     Resources(CostWithDiscount),
@@ -33,7 +34,7 @@ impl PaymentModel {
     }
 
     #[must_use]
-    pub const fn sum(cost: u32, types_by_preference: &'static [ResourceType]) -> Self {
+    pub const fn sum(cost: u32, types_by_preference: Vec<ResourceType>) -> Self {
         PaymentModel::Sum(SumPaymentOptions {
             cost,
             types_by_preference,
@@ -83,7 +84,7 @@ impl PaymentModel {
     #[must_use]
     pub fn possible_resource_types(&self) -> Vec<ResourceType> {
         match self {
-            PaymentModel::Sum(options) => options.types_by_preference.to_vec(),
+            PaymentModel::Sum(options) => options.types_by_preference.clone(),
             PaymentModel::Resources(c) => c.cost.types(),
         }
     }

@@ -1,7 +1,6 @@
 {
   "state": {
-    "CustomPhase": {
-      "SteelWeaponsAttacker": {
+    "Combat": {
         "initiation": {
           "Movement": {
             "movement_actions_left": 2,
@@ -30,6 +29,35 @@
           5
         ],
         "can_retreat": true
+      }
+  },
+  "state_change_event_state": {
+    "event_used": [],
+    "last_priority_used": 1,
+    "current": {
+      "event_type": "StartCombatAttacker",
+      "priority": 1,
+      "player_index": 0,
+      "request": {
+        "Payment": [
+          {
+            "model": {
+              "Sum": {
+                "cost": 1,
+                "types_by_preference": [
+                  "Ore",
+                  "Gold"
+                ]
+              }
+            },
+            "name": "Use steel weapons",
+            "optional": true
+          }
+        ]
+      },
+      "response": null,
+      "origin": {
+        "Advance": "Steel Weapons"
       }
     }
   },

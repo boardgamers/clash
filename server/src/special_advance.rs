@@ -1,3 +1,4 @@
+use crate::ability_initializer::EventOrigin;
 use crate::{
     ability_initializer::{self, AbilityInitializer, AbilityInitializerSetup},
     game::Game,
@@ -122,7 +123,7 @@ impl AbilityInitializerSetup for SpecialAdvanceBuilder {
         self
     }
 
-    fn get_key(&self) -> String {
-        self.name.clone()
+    fn get_key(&self) -> EventOrigin {
+        EventOrigin::SpecialAdvance(self.name.clone())
     }
 }

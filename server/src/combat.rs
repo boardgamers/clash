@@ -1,8 +1,5 @@
 use crate::action::{CombatAction, PlayActionCard};
-use crate::combat::CombatModifier::{
-    CancelFortressExtraDie, SteelWeaponsAttacker, SteelWeaponsDefender,
-};
-use crate::content::custom_phase_actions::{start_siegecraft_phase, start_steel_weapons_phase};
+use crate::content::custom_phase_actions::CustomPhaseEventType;
 use crate::game::GameState::Playing;
 use crate::game::{Game, GameState};
 use crate::position::Position;
@@ -155,40 +152,42 @@ pub fn initiate_combat(
         can_retreat,
     );
 
-    start_combat(game, combat, None);
+    start_combat(game, combat);
 }
 
-pub(crate) fn start_combat(game: &mut Game, combat: Combat, skip: Option<CombatModifier>) {
+pub(crate) fn start_combat(
+    game: &mut Game,
+    combat: Combat,
+) {
     game.lock_undo();
-    let evaluate: &[CombatModifier] = match skip {
-        None => &[
-            SteelWeaponsAttacker,
-            SteelWeaponsDefender,
-            CancelFortressExtraDie,
-        ],
-        Some(SteelWeaponsAttacker) => &[SteelWeaponsDefender, CancelFortressExtraDie],
-        Some(SteelWeaponsDefender) => &[CancelFortressExtraDie],
-        Some(CancelFortressExtraDie) => &[],
-        _ => panic!("Illegal action"),
+    let attacker = combat.attacker;
+    let defender = combat.defender;
+
+    if let Playing = game.state {
+        // event listener needs to find the correct state to get the combat position
+        game.state = GameState::Combat(combat);
+    }
+    if game.trigger_custom_phase_event(
+        attacker,
+        |events| &events.on_combat_start,
+        CustomPhaseEventType::StartCombatAttacker,
+    )    {
+        return;
+    }
+    if
+        game.trigger_custom_phase_event(
+            defender,
+            |events| &events.on_combat_start,
+            CustomPhaseEventType::StartCombatDefender,
+        )
+    {
+        return;
+    }
+
+    let GameState::Combat(c) = mem::replace(&mut game.state, GameState::Playing) else {
+        panic!("Illegal state");
     };
-
-    if evaluate.contains(&SteelWeaponsAttacker)
-        && start_steel_weapons_phase(game, combat.clone(), combat.attacker, SteelWeaponsAttacker)
-    {
-        return;
-    }
-
-    if evaluate.contains(&SteelWeaponsDefender)
-        && start_steel_weapons_phase(game, combat.clone(), combat.defender, SteelWeaponsDefender)
-    {
-        return;
-    }
-
-    if evaluate.contains(&CancelFortressExtraDie) && start_siegecraft_phase(game, combat.clone()) {
-        return;
-    }
-
-    combat_loop(game, combat);
+    combat_loop(game, c);
 }
 
 //phase is consumed but it is not registered by clippy

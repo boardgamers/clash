@@ -1,8 +1,9 @@
 use crate::game::{Game, UndoContext};
 use crate::resource_pile::ResourcePile;
+use serde::{Deserialize, Serialize};
 use std::{fmt, mem};
 
-#[derive(PartialEq, Eq, Debug, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Copy, Hash, Ord, PartialOrd)]
 pub enum ResourceType {
     Food,
     Wood,

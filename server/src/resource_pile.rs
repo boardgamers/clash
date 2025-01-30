@@ -335,7 +335,7 @@ impl Display for ResourcePile {
 }
 
 // Used for payments where gold can be used to replace other resources (not tokens)
-#[derive(PartialEq, Eq, Debug, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CostWithDiscount {
     pub cost: ResourcePile,
     pub discount: u32,

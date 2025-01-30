@@ -1,3 +1,4 @@
+use crate::ability_initializer::EventOrigin;
 use crate::{
     ability_initializer::{self, AbilityInitializer, AbilityInitializerSetup},
     game::Game,
@@ -126,7 +127,7 @@ impl AbilityInitializerSetup for LeaderBuilder {
         self
     }
 
-    fn get_key(&self) -> String {
-        self.name.clone()
+    fn get_key(&self) -> EventOrigin {
+        EventOrigin::Leader(self.name.clone())
     }
 }

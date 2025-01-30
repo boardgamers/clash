@@ -1,9 +1,10 @@
 use macroquad::prelude::*;
+use server::ability_initializer::EventOrigin;
 use server::action::Action;
 use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
-use server::content::advances::{NAVIGATION, ROADS, SIEGECRAFT, STEEL_WEAPONS};
-use server::content::custom_phase_actions::CustomPhaseState;
+use server::content::advances::{NAVIGATION, ROADS};
+use server::content::custom_phase_actions::{CustomPhaseRequest, CustomPhaseState};
 use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
 use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
@@ -11,9 +12,7 @@ use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 use crate::assets::Assets;
 use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
-use crate::combat_ui::{
-    steel_weapons_dialog, RemoveCasualtiesSelection, SiegecraftPaymentDialog, SteelWeaponDialog,
-};
+use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
 use crate::custom_actions_ui::trade_route_dialog;
 use crate::happiness_ui::IncreaseHappinessConfig;
@@ -59,9 +58,9 @@ pub enum ActiveDialog {
     PlaceSettler,
     Retreat,
     RemoveCasualties(RemoveCasualtiesSelection),
-    SiegecraftPayment(SiegecraftPaymentDialog),
-    SteelWeaponPayment(SteelWeaponDialog),
     TradeRouteSelection(Payment), // it's actually a gain
+
+    CustomPhasePaymentRequest(Vec<Payment>),
 }
 
 impl ActiveDialog {
@@ -93,9 +92,8 @@ impl ActiveDialog {
             ActiveDialog::PlaceSettler => "place settler",
             ActiveDialog::Retreat => "retreat",
             ActiveDialog::RemoveCasualties(_) => "remove casualties",
-            ActiveDialog::SiegecraftPayment(_) => "siegecraft payment",
-            ActiveDialog::SteelWeaponPayment(_) => "steel weapon payment",
             ActiveDialog::TradeRouteSelection(_) => "trade route selection",
+            ActiveDialog::CustomPhasePaymentRequest(_) => "custom phase payment request",
         }
     }
 
@@ -180,16 +178,20 @@ impl ActiveDialog {
                 r.needed
             )],
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
-            ActiveDialog::SiegecraftPayment(_) => advance_help(rc, SIEGECRAFT),
-            ActiveDialog::SteelWeaponPayment(p) => {
-                let mut result = vec![format!(
-                    "{}: ",
-                    if p.attacker { "Attacker" } else { "Defender" },
-                )];
-                add_advance_help(rc, &mut result, STEEL_WEAPONS);
-                result
-            }
             ActiveDialog::TradeRouteSelection(_) => vec!["Select trade route reward".to_string()],
+            ActiveDialog::CustomPhasePaymentRequest(_r) => {
+                match &rc
+                    .game
+                    .custom_phase_state
+                    .current
+                    .as_ref()
+                    .unwrap()
+                    .origin
+                {
+                    EventOrigin::Advance(a) => advance_help(rc, a),
+                    _ => vec![], // TODO
+                }
+            }
         }
     }
 
@@ -507,6 +509,24 @@ impl State {
 
     #[must_use]
     pub fn game_state_dialog(&self, game: &Game) -> ActiveDialog {
+        if let Some(e) = &game.custom_phase_state.current {
+            return match &e.request {
+                CustomPhaseRequest::Payment(r) => {
+                    ActiveDialog::CustomPhasePaymentRequest(
+                        r.iter()
+                            .map(|p| {
+                                Payment::new(
+                                    &p.model,
+                                    &game.get_player(game.active_player()).resources,
+                                    &p.name,
+                                    p.optional,
+                                )
+                            })
+                            .collect(),
+                    )
+                }
+            }
+        }
         match &game.state {
             GameState::Playing | GameState::Finished => ActiveDialog::None,
             GameState::Movement(move_state) => ActiveDialog::MoveUnits(MoveSelection::new(
@@ -558,15 +578,6 @@ impl State {
                 })
             }
             GameState::CustomPhase(c) => match c {
-                CustomPhaseState::SiegecraftPayment(_) => {
-                    ActiveDialog::SiegecraftPayment(SiegecraftPaymentDialog::new(game))
-                }
-                CustomPhaseState::SteelWeaponsAttacker(c) => {
-                    steel_weapons_dialog(game, c, c.attacker)
-                }
-                CustomPhaseState::SteelWeaponsDefender(c) => {
-                    steel_weapons_dialog(game, c, c.defender)
-                }
                 CustomPhaseState::TradeRouteSelection => trade_route_dialog(game),
             },
         }

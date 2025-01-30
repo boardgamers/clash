@@ -1,39 +1,69 @@
 {
   "state": {
-    "CustomPhase": {
-      "SiegecraftPayment": {
-        "initiation": {
-          "Movement": {
-            "movement_actions_left": 2,
-            "moved_units": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ]
+    "Combat": {
+      "initiation": {
+        "Movement": {
+          "movement_actions_left": 2,
+          "moved_units": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        }
+      },
+      "round": 1,
+      "phase": "Retreat",
+      "defender": 1,
+      "defender_position": "C1",
+      "attacker": 0,
+      "attacker_position": "C2",
+      "attackers": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "can_retreat": true,
+      "modifiers": [
+        "SteelWeaponsAttacker",
+        "CancelFortressIgnoreHit"
+      ]
+    }
+  },
+  "state_change_event_state": {
+    "event_used": [
+      "StartCombatAttacker"
+    ],
+    "last_priority_used": 1,
+    "current": {
+      "event_type": "StartCombatDefender",
+      "priority": 1,
+      "player_index": 1,
+      "request": {
+        "Payment": [
+          {
+            "model": {
+              "Sum": {
+                "cost": 1,
+                "types_by_preference": [
+                  "Ore",
+                  "Gold"
+                ]
+              }
+            },
+            "name": "Use steel weapons",
+            "optional": true
           }
-        },
-        "round": 1,
-        "phase": "Retreat",
-        "defender": 1,
-        "defender_position": "C1",
-        "attacker": 0,
-        "attacker_position": "C2",
-        "attackers": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5
-        ],
-        "can_retreat": true,
-        "modifiers": [
-          "SteelWeaponsAttacker",
-          "SteelWeaponsDefender"
         ]
+      },
+      "response": null,
+      "origin": {
+        "Advance": "Steel Weapons"
       }
     }
   },
@@ -44,7 +74,7 @@
       "resources": {
         "food": 2,
         "wood": 7,
-        "ore": 5,
+        "ore": 4,
         "ideas": 3,
         "gold": 7,
         "mood_tokens": 7,
@@ -303,23 +333,9 @@
           "destination": "C1"
         }
       }
-    },
-    {
-      "CustomPhase": {
-        "SteelWeaponsAttackerAction": {
-          "ore": 1
-        }
-      }
-    },
-    {
-      "CustomPhase": {
-        "SteelWeaponsDefenderAction": {
-          "ore": 1
-        }
-      }
     }
   ],
-  "action_log_index": 8,
+  "action_log_index": 6,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -335,9 +351,9 @@
     "Round 2/3",
     "\tPlayer1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1",
     "Player1 paid for steel weapons: 1 ore",
-    "Player1 paid for steel weapons: 1 ore"
+    "Player1 paid for siegecraft: 2 ore to cancel the fortress ability to ignore a hit"
   ],
-  "undo_limit": 8,
+  "undo_limit": 6,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 2,

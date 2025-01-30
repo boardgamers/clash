@@ -1,6 +1,6 @@
 use server::action::CombatAction;
 use server::content::custom_actions::CustomAction;
-use server::content::custom_phase_actions::{CustomPhaseAction, SiegecraftPayment};
+use server::content::custom_phase_actions::{CustomPhaseAction, CustomPhaseEventAction};
 use server::game::{CulturalInfluenceResolution, GameState};
 use server::status_phase::{
     ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction,
@@ -478,14 +478,17 @@ fn test_actions(name: &str, actions: Vec<TestAction>) {
         } else {
             outcome(name, i - 1)
         };
-        test_action_internal(
-            &from,
-            outcome(name, i).as_str(),
-            action.action,
-            action.player_index,
-            action.undoable,
-            action.illegal_action_test,
-        );
+        let err = catch_unwind(AssertUnwindSafe(|| {
+            test_action_internal(
+                &from,
+                outcome(name, i).as_str(),
+                action.action,
+                action.player_index,
+                action.undoable,
+                action.illegal_action_test,
+            );
+        }));
+        assert!(err.is_ok(), "test action {} should not panic", i);
     }
 }
 
@@ -1159,24 +1162,22 @@ fn test_combat_all_modifiers() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhase(CustomPhaseAction::SteelWeaponsAttackerAction(
-                    ResourcePile::ore(1),
-                )),
+                Action::CustomPhaseEvent(CustomPhaseEventAction::Payment(vec![ResourcePile::ore(
+                    1,
+                )])),
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhase(CustomPhaseAction::SteelWeaponsDefenderAction(
-                    ResourcePile::ore(1),
-                )),
+                Action::CustomPhaseEvent(CustomPhaseEventAction::Payment(vec![
+                    ResourcePile::empty(),
+                    ResourcePile::ore(2),
+                ])),
             ),
             TestAction::not_undoable(
-                0,
-                Action::CustomPhase(CustomPhaseAction::SiegecraftPaymentAction(
-                    SiegecraftPayment {
-                        ignore_hit: ResourcePile::ore(2),
-                        extra_die: ResourcePile::empty(),
-                    },
-                )),
+                1,
+                Action::CustomPhaseEvent(CustomPhaseEventAction::Payment(vec![ResourcePile::ore(
+                    1,
+                )])),
             ),
         ],
     );

@@ -1,12 +1,38 @@
 use crate::action::Action;
+use crate::content::custom_phase_actions::{
+    CustomPhaseEvent, CustomPhaseEventAction, CustomPhaseEventType,
+    CustomPhasePaymentRequest, CustomPhaseRequest,
+};
+use crate::resource_pile::ResourcePile;
 use crate::{
     content::custom_actions::CustomActionType, events::EventMut, game::Game,
     player_events::PlayerEvents,
 };
+use serde::{Deserialize, Serialize};
 
-pub type AbilityInitializer = Box<dyn Fn(&mut Game, usize)>;
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub enum EventOrigin {
+    Advance(String),
+    SpecialAdvance(String),
+    Leader(String),
+    Wonder(String),
+}
 
-pub trait AbilityInitializerSetup: Sized {
+impl EventOrigin {
+    #[must_use]
+    pub fn name(&self) -> &str {
+        match self {
+            EventOrigin::Advance(name)
+            | EventOrigin::SpecialAdvance(name)
+            | EventOrigin::Wonder(name)
+            | EventOrigin::Leader(name) => name,
+        }
+    }
+}
+
+pub(crate) type AbilityInitializer = Box<dyn Fn(&mut Game, usize)>;
+
+pub(crate) trait AbilityInitializerSetup: Sized {
     fn add_ability_initializer<F>(self, initializer: F) -> Self
     where
         F: Fn(&mut Game, usize) + 'static;
@@ -19,7 +45,7 @@ pub trait AbilityInitializerSetup: Sized {
     fn add_ability_undo_deinitializer<F>(self, deinitializer: F) -> Self
     where
         F: Fn(&mut Game, usize) + 'static;
-    fn get_key(&self) -> String;
+    fn get_key(&self) -> EventOrigin;
 
     fn add_player_event_listener<T, U, V, E, F>(self, event: E, listener: F, priority: i32) -> Self
     where
@@ -27,7 +53,7 @@ pub trait AbilityInitializerSetup: Sized {
         E: Fn(&mut PlayerEvents) -> &mut EventMut<T, U, V> + 'static + Clone,
         F: Fn(&mut T, &U, &V) + 'static + Clone,
     {
-        let key = self.get_key();
+        let key = self.get_key().clone();
         let deinitialize_event = event.clone();
         let initializer = move |game: &mut Game, player_index: usize| {
             event(
@@ -36,9 +62,9 @@ pub trait AbilityInitializerSetup: Sized {
                     .as_mut()
                     .expect("events should be set"),
             )
-            .add_listener_mut(listener.clone(), priority, key.clone());
+            .add_listener_mut(listener.clone(), priority, key.name().to_string());
         };
-        let key = self.get_key();
+        let key = self.get_key().name().to_string();
         let deinitializer = move |game: &mut Game, player_index: usize| {
             deinitialize_event(
                 game.players[player_index]
@@ -50,6 +76,104 @@ pub trait AbilityInitializerSetup: Sized {
         };
         self.add_ability_initializer(initializer)
             .add_ability_deinitializer(deinitializer)
+    }
+
+    fn add_state_change_event_listener<E>(
+        self,
+        event: E,
+        priority: i32,
+        start_custom_phase: impl Fn(&mut Game, usize, &str) -> Option<CustomPhaseRequest>
+            + 'static
+            + Clone, //return option<custom phase state>
+        end_custom_phase: impl Fn(&mut Game, usize, &str, CustomPhaseEventAction, CustomPhaseRequest)
+            + 'static
+            + Clone,
+    ) -> Self
+    where
+        E: Fn(&mut PlayerEvents) -> &mut EventMut<Game, usize, CustomPhaseEventType> + 'static + Clone,
+    {
+        let origin = self.get_key();
+        self.add_player_event_listener(
+            event,
+            move |game, &player_index, event_type| {
+                let s = &mut game.custom_phase_state;
+
+                let player_name = game.players[player_index].get_name();
+
+                if let Some(c) = s.current.as_ref() {
+                    if let Some(action) = &c.response {
+                        assert_eq!(&c.event_type, event_type);
+                        if c.priority != priority {
+                            // not our request
+                            return;
+                        }
+
+                        let r = c.request.clone();
+                        let a = action.clone();
+                        s.current = None;
+                        end_custom_phase(game, player_index, &player_name, a, r);
+                    }
+                    return;
+                }
+
+                if s.last_priority_used.is_some_and(|last| last < priority) {
+                    // already handled before
+                    return;
+                }
+
+                if let Some(request) = start_custom_phase(game, player_index, &player_name) {
+                    let s = &mut game.custom_phase_state;
+                    s.last_priority_used = Some(priority);
+                    s.current = Some(CustomPhaseEvent {
+                        event_type: event_type.clone(),
+                        priority,
+                        player_index,
+                        request: request.clone(),
+                        response: None,
+                        origin: origin.clone(),
+                    });
+                };
+            },
+            priority,
+        )
+    }
+
+    #[allow(irrefutable_let_patterns)] 
+    fn add_payment_request_listener<E>(
+        self,
+        event: E,
+        priority: i32,
+        request: impl Fn(&mut Game, usize) -> Option<Vec<CustomPhasePaymentRequest>> + 'static + Clone, //return option<custom phase state>
+        gain_reward: impl Fn(&mut Game, usize, &str, &Vec<ResourcePile>) + 'static + Clone,
+    ) -> Self
+    where
+        E: Fn(&mut PlayerEvents) -> &mut EventMut<Game, usize, CustomPhaseEventType> + 'static + Clone,
+    {
+        self.add_state_change_event_listener(
+            event,
+            priority,
+            move |game, player_index, _player_name| {
+                request(game, player_index).map(CustomPhaseRequest::Payment)
+            },
+            move |game, player_index, player_name, action, request| {
+                if let CustomPhaseRequest::Payment(requests) = &request {
+                    if let CustomPhaseEventAction::Payment(payments) = action {
+                        assert_eq!(requests.len(), payments.len());
+                        for (request, payment) in requests.iter().zip(payments.iter()) {
+                            let zero_payment = payment.is_empty() && request.optional;
+                            assert!(
+                                zero_payment || request.model.is_valid_payment(payment),
+                                "Invalid payment"
+                            );
+                            game.players[player_index].loose_resources(payment.clone());
+                        }
+                        gain_reward(game, player_index, player_name, &payments);
+                        return;
+                    }
+                }
+                panic!("Invalid state");
+            },
+        )
     }
 
     fn add_once_per_turn_effect<P>(self, name: &str, pred: P) -> Self
@@ -92,7 +216,7 @@ pub trait AbilityInitializerSetup: Sized {
     }
 }
 
-pub fn join_ability_initializers(setup: Vec<AbilityInitializer>) -> AbilityInitializer {
+pub(crate) fn join_ability_initializers(setup: Vec<AbilityInitializer>) -> AbilityInitializer {
     Box::new(move |game: &mut Game, player_index: usize| {
         for initializer in &setup {
             initializer(game, player_index);
