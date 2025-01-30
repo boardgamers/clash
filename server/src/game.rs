@@ -8,8 +8,7 @@ use crate::advance::Advance;
 use crate::combat::{self, start_combat, Combat, CombatDieRoll, CombatPhase, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, MOVEMENT_ACTIONS};
 use crate::content::custom_phase_actions::{
-    CustomPhaseEventState, CustomPhaseEventType,
-    CustomPhaseState,
+    CustomPhaseEventState, CustomPhaseEventType, CustomPhaseState,
 };
 use crate::events::EventMut;
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};

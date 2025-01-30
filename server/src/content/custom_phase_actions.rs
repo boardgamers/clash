@@ -22,7 +22,10 @@ pub enum CustomPhaseEventType {
 impl CustomPhaseEventType {
     #[must_use]
     pub fn is_last_type_for_event(&self) -> bool {
-        #[allow(clippy::match_like_matches_macro, clippy::match_wildcard_for_single_variants)]
+        #[allow(
+            clippy::match_like_matches_macro,
+            clippy::match_wildcard_for_single_variants
+        )]
         match self {
             CustomPhaseEventType::StartCombatAttacker => false,
             _ => true,
