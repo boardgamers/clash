@@ -1,4 +1,4 @@
-use crate::content::custom_phase_actions::{CustomPhaseAction, CustomPhaseEventAction};
+use crate::content::custom_phase_actions::CustomPhaseEventAction;
 use crate::map::Rotation;
 use crate::playing_actions::PlayingAction;
 use crate::position::Position;
@@ -15,7 +15,6 @@ pub enum Action {
     Combat(CombatAction),
     PlaceSettler(Position),
     ExploreResolution(Rotation),
-    CustomPhase(CustomPhaseAction),
     CustomPhaseEvent(CustomPhaseEventAction),
     Undo,
     Redo,
@@ -94,14 +93,6 @@ impl Action {
         }
     }
 
-    #[must_use]
-    pub fn custom_phase(self) -> Option<CustomPhaseAction> {
-        if let Self::CustomPhase(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
     #[must_use]
     pub fn custom_phase_event(self) -> Option<CustomPhaseEventAction> {
         if let Self::CustomPhaseEvent(v) = self {

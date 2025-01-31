@@ -5,8 +5,8 @@ use crate::city_pieces::Building::{Academy, Fortress, Market, Obelisk, Observato
 use crate::collect::CollectContext;
 use crate::combat::CombatModifier::*;
 use crate::combat::{Combat, CombatModifier, CombatStrength};
-use crate::content::custom_phase_actions::CustomPhasePaymentRequest;
-use crate::content::trade_routes::collect_trade_routes_for_current_player;
+use crate::content::custom_phase_actions::{CustomPhasePaymentRequest, CustomPhaseRewardRequest};
+use crate::content::trade_routes::{gain_trade_route_reward, trade_route_reward};
 use crate::game::GameState;
 use crate::payment::PaymentModel;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
@@ -474,30 +474,43 @@ fn economy() -> Vec<Advance> {
     advance_group(
         BARTERING,
         vec![
-            Advance::builder(
-                BARTERING,
-                "todo")
+            Advance::builder(BARTERING, "todo")
                 .with_advance_bonus(MoodToken)
                 .with_unlocked_building(Market),
-            Advance::builder(
-                "Trade Routes",
-                "At the beginning of your turn, you gain 1 food for every trade route you can make, to a maximum of 4. A trade route is made between one of your Settlers or Ships and a non-Angry enemy player city within 2 spaces (without counting through unrevealed Regions). Each Settler or Ship can only be paired with one enemy player city. Likewise, each enemy player city must be paired with a different Settler or Ship. In other words, to gain X food you must have at least X Units (Settlers or Ships), each paired with X different enemy cities.")
-                .with_advance_bonus(MoodToken)
-                .add_player_event_listener(
-                    |event| &mut event.on_turn_start,
-                    |game, (), ()| {
-                        collect_trade_routes_for_current_player(game);
-                    },
-                    0,
-                ),
+            trade_routes(),
             Advance::builder(
                 CURRENCY,
                 // also for Taxation
-                "You may collect gold instead of food for Trade Routes"
+                "You may collect gold instead of food for Trade Routes",
             )
-                .with_advance_bonus(CultureToken)
+            .with_advance_bonus(CultureToken),
         ],
     )
+}
+
+fn trade_routes() -> AdvanceBuilder {
+    Advance::builder(
+        "Trade Routes",
+        "At the beginning of your turn, you gain 1 food for every trade route you can make, to a maximum of 4. A trade route is made between one of your Settlers or Ships and a non-Angry enemy player city within 2 spaces (without counting through unrevealed Regions). Each Settler or Ship can only be paired with one enemy player city. Likewise, each enemy player city must be paired with a different Settler or Ship. In other words, to gain X food you must have at least X Units (Settlers or Ships), each paired with X different enemy cities.")
+        .with_advance_bonus(MoodToken)
+        .add_reward_request_listener(
+            |event| &mut event.on_turn_start,
+            0,
+            |game, _player_index| {
+                trade_route_reward(game).map(|(reward, _routes)| {
+                    CustomPhaseRewardRequest {
+                        model: reward,
+                        name: "Collect trade routes reward".to_string(),
+                    }
+                })
+            },
+            |game, player_index, _player_name, p, selected| {
+                let (reward, routes) =
+                    trade_route_reward(game).expect("No trade route reward");
+                assert!(reward.is_valid_payment(p), "Invalid payment"); // it's a gain
+                gain_trade_route_reward(game, player_index, &routes, p, selected);
+            },
+        )
 }
 
 fn culture() -> Vec<Advance> {

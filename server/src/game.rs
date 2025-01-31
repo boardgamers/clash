@@ -7,9 +7,7 @@ use GameState::*;
 use crate::advance::Advance;
 use crate::combat::{self, start_combat, Combat, CombatDieRoll, CombatPhase, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, MOVEMENT_ACTIONS};
-use crate::content::custom_phase_actions::{
-    CustomPhaseEventState, CustomPhaseEventType, CustomPhaseState,
-};
+use crate::content::custom_phase_actions::{CustomPhaseEventState, CustomPhaseEventType};
 use crate::events::EventMut;
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
 use crate::map::UnexploredBlock;
@@ -298,24 +296,10 @@ impl Game {
 
     pub fn add_info_log_item(&mut self, info: String) {
         self.log.push(info);
-        self.lock_undo();
     }
 
     pub fn lock_undo(&mut self) {
         self.undo_limit = self.action_log_index;
-    }
-
-    pub(crate) fn trigger_player_game_event(
-        &mut self,
-        player_index: usize,
-        event: fn(&PlayerEvents) -> &EventMut<Game, (), ()>,
-    ) {
-        let events = self.players[player_index]
-            .events
-            .take()
-            .expect("events should be set");
-        event(&events).trigger(self, &(), &());
-        self.players[player_index].events = Some(events);
     }
 
     pub(crate) fn trigger_custom_phase_event(
@@ -370,6 +354,11 @@ impl Game {
             return;
         }
 
+        self.add_string_log_item(&action);
+        self.add_action_log_item(action.clone());
+
+        let copy = action.clone();
+
         if let Some(s) = &mut self.custom_phase_state.current {
             s.response = action.custom_phase_event();
             match s.event_type {
@@ -381,19 +370,25 @@ impl Game {
                         panic!("game should be in combat state")
                     }
                 }
+                CustomPhaseEventType::TurnStart => self.start_turn(),
             }
         } else {
             self.execute_regular_action(action, player_index);
         }
+        self.after_execute_or_redo(&copy, player_index);
         // player can have changed, but we don't need waste check for turn end
         check_for_waste(self, self.current_player_index);
     }
 
-    fn execute_regular_action(&mut self, action: Action, player_index: usize) {
-        let copy = action.clone();
+    fn add_string_log_item(&mut self, action: &Action) {
+        let log_item = log::format_action_log_item(action, self);
+        if log_item.is_empty() {
+            return;
+        }
+        self.log.push(log_item);
+    }
 
-        self.log.push(log::format_action_log_item(&action, self));
-        self.add_action_log_item(action.clone());
+    fn execute_regular_action(&mut self, action: Action, player_index: usize) {
         match self.state.clone() {
             Playing => {
                 if let Some(m) = action.clone().movement() {
@@ -441,15 +436,8 @@ impl Game {
                     .expect("action should be an explore resolution action");
                 explore_resolution(self, &r, rotation);
             }
-            CustomPhase(_) => {
-                let action = action
-                    .custom_phase()
-                    .expect("action should be a custom phase action");
-                action.execute(self, player_index);
-            }
             Finished => panic!("actions can't be executed when the game is finished"),
         }
-        self.after_execute_or_redo(&copy, player_index);
     }
 
     fn after_execute_or_redo(&mut self, action: &Action, player_index: usize) {
@@ -480,8 +468,7 @@ impl Game {
             Action::ExploreResolution(_rotation) => {
                 undo_explore_resolution(self, player_index);
             }
-            Action::CustomPhase(action) => action.clone().undo(self, player_index),
-            Action::CustomPhaseEvent(_) => panic!("custom phase event actions can't be undone"),
+            Action::CustomPhaseEvent(action) => action.clone().undo(self, player_index),
             Action::Undo => panic!("undo action can't be undone"),
             Action::Redo => panic!("redo action can't be undone"),
         }
@@ -494,11 +481,9 @@ impl Game {
     }
 
     fn redo(&mut self, player_index: usize) {
-        let action_log_item = &self.action_log[self.action_log_index];
-        let copy = action_log_item.clone();
-        self.log
-            .push(log::format_action_log_item(&action_log_item.clone(), self));
-        match action_log_item {
+        let copy = self.action_log[self.action_log_index].clone();
+        self.add_string_log_item(&copy);
+        match &self.action_log[self.action_log_index] {
             Action::Playing(action) => action.clone().execute(self, player_index),
             Action::StatusPhase(_) => panic!("status phase actions can't be redone"),
             Action::Movement(action) => match &self.state {
@@ -533,10 +518,7 @@ impl Game {
                 };
                 explore_resolution(self, &r.clone(), *rotation);
             }
-            Action::CustomPhase(action) => {
-                action.clone().execute(self, player_index);
-            }
-            Action::CustomPhaseEvent(_) => panic!("custom phase event actions can't be redone"),
+            Action::CustomPhaseEvent(action) => action.clone().redo(self, player_index),
             Action::Undo => panic!("undo action can't be redone"),
             Action::Redo => panic!("redo action can't be redone"),
         }
@@ -891,7 +873,15 @@ impl Game {
         ));
         self.lock_undo();
 
-        self.trigger_player_game_event(self.current_player_index, |e| &e.on_turn_start);
+        self.start_turn();
+    }
+
+    fn start_turn(&mut self) {
+        self.trigger_custom_phase_event(
+            self.current_player_index,
+            |e| &e.on_turn_start,
+            CustomPhaseEventType::TurnStart,
+        );
     }
 
     pub fn skip_dropped_players(&mut self) {
@@ -1790,7 +1780,6 @@ pub enum GameState {
     Combat(Combat),
     PlaceSettler(PlaceSettlerState),
     ExploreResolution(ExploreResolutionState),
-    CustomPhase(CustomPhaseState),
     Finished,
 }
 
@@ -1848,6 +1837,7 @@ pub enum UndoContext {
     IncreaseHappiness {
         angry_activations: Vec<Position>,
     },
+    CustomPhaseEvent(CustomPhaseEventState),
 }
 
 #[derive(Serialize, Deserialize)]

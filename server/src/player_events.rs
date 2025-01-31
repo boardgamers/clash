@@ -1,7 +1,9 @@
 use crate::action::Action;
 use crate::collect::CollectContext;
 use crate::combat::{Combat, CombatStrength};
-use crate::content::custom_phase_actions::CustomPhaseEventType;
+use crate::content::custom_phase_actions::{
+    CurrentCustomPhaseEvent, CustomPhaseEventAction, CustomPhaseEventType,
+};
 use crate::game::Game;
 use crate::map::Terrain;
 use crate::payment::PaymentModel;
@@ -11,6 +13,8 @@ use crate::{
     resource_pile::ResourcePile, wonder::Wonder,
 };
 use std::collections::{HashMap, HashSet};
+
+type CustomPhaseEvent = EventMut<Game, usize, CustomPhaseEventType>;
 
 #[derive(Default)]
 pub(crate) struct PlayerEvents {
@@ -28,9 +32,10 @@ pub(crate) struct PlayerEvents {
     pub is_playing_action_available: EventMut<bool, PlayingActionType, Player>,
     pub terrain_collect_options: EventMut<HashMap<Terrain, HashSet<ResourcePile>>, (), ()>,
     pub collect_options: EventMut<HashMap<Position, HashSet<ResourcePile>>, CollectContext, Game>,
-    pub on_turn_start: EventMut<Game, (), ()>,
-    pub on_combat_start: EventMut<Game, usize, CustomPhaseEventType>,
+    pub on_turn_start: CustomPhaseEvent,
+    pub on_combat_start: CustomPhaseEvent,
     pub on_combat_round: EventMut<CombatStrength, Combat, Game>,
+    pub redo_custom_phase_action: EventMut<Game, CurrentCustomPhaseEvent, CustomPhaseEventAction>,
 }
 
 impl PlayerEvents {

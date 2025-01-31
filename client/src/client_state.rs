@@ -4,7 +4,7 @@ use server::action::Action;
 use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
 use server::content::advances::{NAVIGATION, ROADS};
-use server::content::custom_phase_actions::{CustomPhaseRequest, CustomPhaseState};
+use server::content::custom_phase_actions::CustomPhaseRequest;
 use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
 use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
@@ -14,7 +14,6 @@ use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
 use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
-use crate::custom_actions_ui::trade_route_dialog;
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
 use crate::log_ui::{add_advance_help, advance_help};
@@ -58,8 +57,8 @@ pub enum ActiveDialog {
     PlaceSettler,
     Retreat,
     RemoveCasualties(RemoveCasualtiesSelection),
-    TradeRouteSelection(Payment), // it's actually a gain
 
+    CustomPhaseRewardRequest(Payment),
     CustomPhasePaymentRequest(Vec<Payment>),
 }
 
@@ -92,7 +91,7 @@ impl ActiveDialog {
             ActiveDialog::PlaceSettler => "place settler",
             ActiveDialog::Retreat => "retreat",
             ActiveDialog::RemoveCasualties(_) => "remove casualties",
-            ActiveDialog::TradeRouteSelection(_) => "trade route selection",
+            ActiveDialog::CustomPhaseRewardRequest(_) => "trade route selection",
             ActiveDialog::CustomPhasePaymentRequest(_) => "custom phase payment request",
         }
     }
@@ -178,7 +177,9 @@ impl ActiveDialog {
                 r.needed
             )],
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
-            ActiveDialog::TradeRouteSelection(_) => vec!["Select trade route reward".to_string()],
+            ActiveDialog::CustomPhaseRewardRequest(_) => {
+                vec!["Select trade route reward".to_string()]
+            }
             ActiveDialog::CustomPhasePaymentRequest(_r) => {
                 match &rc.game.custom_phase_state.current.as_ref().unwrap().origin {
                     EventOrigin::Advance(a) => advance_help(rc, a),
@@ -516,6 +517,9 @@ impl State {
                         })
                         .collect(),
                 ),
+                CustomPhaseRequest::Reward(r) => ActiveDialog::CustomPhaseRewardRequest(
+                    Payment::new_gain(r.model.clone(), &r.name),
+                ),
             };
         }
         match &game.state {
@@ -568,9 +572,6 @@ impl State {
                     rotation: r.block.position.rotation,
                 })
             }
-            GameState::CustomPhase(c) => match c {
-                CustomPhaseState::TradeRouteSelection => trade_route_dialog(game),
-            },
         }
     }
 

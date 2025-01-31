@@ -1,6 +1,6 @@
 use server::action::CombatAction;
 use server::content::custom_actions::CustomAction;
-use server::content::custom_phase_actions::{CustomPhaseAction, CustomPhaseEventAction};
+use server::content::custom_phase_actions::CustomPhaseEventAction;
 use server::game::{CulturalInfluenceResolution, GameState};
 use server::status_phase::{
     ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction,
@@ -704,7 +704,7 @@ fn test_trade_routes_with_currency() {
             TestAction::not_undoable(0, Action::Playing(EndTurn)),
             TestAction::undoable(
                 1,
-                Action::CustomPhase(CustomPhaseAction::TradeRouteSelectionAction(
+                Action::CustomPhaseEvent(CustomPhaseEventAction::Reward(
                     ResourcePile::gold(1) + ResourcePile::food(1),
                 )),
             ),

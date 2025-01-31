@@ -1,8 +1,6 @@
 use crate::city::{City, MoodState};
 use crate::content::advances::CURRENCY;
-use crate::content::custom_phase_actions::CustomPhaseState;
 use crate::game::Game;
-use crate::game::GameState::CustomPhase;
 use crate::payment::PaymentModel;
 use crate::player::Player;
 use crate::position::Position;
@@ -38,32 +36,19 @@ pub fn trade_route_reward(game: &Game) -> Option<(PaymentModel, Vec<TradeRoute>)
     ))
 }
 
-pub(crate) fn collect_trade_routes_for_current_player(game: &mut Game) {
-    let r = trade_route_reward(game);
-
-    let Some((reward, routes)) = r else {
-        return;
-    };
-
-    if reward.possible_resource_types().len() > 1 {
-        game.state = CustomPhase(CustomPhaseState::TradeRouteSelection);
-        return;
-    }
-
-    gain_trade_route_reward(
-        game,
-        game.current_player_index,
-        routes.as_slice(),
-        &reward.default_payment(),
-    );
-}
-
 pub(crate) fn gain_trade_route_reward(
     game: &mut Game,
     player_index: usize,
     trade_routes: &[TradeRoute],
     reward: &ResourcePile,
+    selected: bool,
 ) {
+    if selected {
+        game.add_info_log_item(format!(
+            "{} selected trade routes",
+            game.players[player_index].get_name(),
+        ));
+    }
     for t in trade_routes {
         game.add_to_last_log_item(&format!(
             ". {:?} at {:?} traded with city at {:?}",
