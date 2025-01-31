@@ -157,7 +157,6 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         }
         ActiveDialog::DetermineFirstPlayer => status_phase_ui::determine_first_player_dialog(rc),
         //combat
-
         ActiveDialog::PlayActionCard => combat_ui::play_action_card_dialog(rc),
         ActiveDialog::Retreat => combat_ui::retreat_dialog(rc),
         ActiveDialog::RemoveCasualties(s) => combat_ui::remove_casualties_dialog(rc, s),
@@ -165,9 +164,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::CustomPhasePaymentRequest(c) => {
             custom_actions_ui::custom_phase_payment_dialog(rc, c)
         }
-        ActiveDialog::CustomPhaseRewardRequest(p) => {
-            custom_actions_ui::reward_dialog(rc, p)
-        }
+        ActiveDialog::CustomPhaseRewardRequest(p) => custom_actions_ui::reward_dialog(rc, p),
     }
 }
 

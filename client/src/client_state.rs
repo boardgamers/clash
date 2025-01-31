@@ -177,7 +177,9 @@ impl ActiveDialog {
                 r.needed
             )],
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
-            ActiveDialog::CustomPhaseRewardRequest(_) => vec!["Select trade route reward".to_string()],
+            ActiveDialog::CustomPhaseRewardRequest(_) => {
+                vec!["Select trade route reward".to_string()]
+            }
             ActiveDialog::CustomPhasePaymentRequest(_r) => {
                 match &rc.game.custom_phase_state.current.as_ref().unwrap().origin {
                     EventOrigin::Advance(a) => advance_help(rc, a),
@@ -515,7 +517,9 @@ impl State {
                         })
                         .collect(),
                 ),
-                CustomPhaseRequest::Reward(r) => ActiveDialog::CustomPhaseRewardRequest(Payment::new_gain(r.model.clone(), &r.name)),
+                CustomPhaseRequest::Reward(r) => ActiveDialog::CustomPhaseRewardRequest(
+                    Payment::new_gain(r.model.clone(), &r.name),
+                ),
             };
         }
         match &game.state {
