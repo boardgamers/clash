@@ -36,7 +36,6 @@ pub struct LogSliceOptions {
 /// this is called before the action is executed
 #[must_use]
 pub fn format_action_log_item(action: &Action, game: &Game) -> String {
-    let player = &game.players[game.active_player()];
     match action {
         Action::Playing(action) => format_playing_action_log_item(action, game),
         Action::StatusPhase(action) => format_status_phase_action_log_item(action, game),
@@ -47,7 +46,6 @@ pub fn format_action_log_item(action: &Action, game: &Game) -> String {
         Action::Combat(action) => format_combat_action_log_item(action, game),
         Action::PlaceSettler(position) => format_place_settler_log_item(game, *position),
         Action::ExploreResolution(_rotation) => format_explore_action_log_item(game),
-        Action::CustomPhase(c) => c.format_log_item(game, player, &player.get_name()),
         Action::CustomPhaseEvent(_) => {
             // is done in the event handler itself
             String::new()

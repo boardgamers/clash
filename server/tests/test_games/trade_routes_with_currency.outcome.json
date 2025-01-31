@@ -1,6 +1,31 @@
 {
-  "state": {
-    "CustomPhase": "TradeRouteSelection"
+  "state": "Playing",
+  "state_change_event_state": {
+    "event_used": [],
+    "last_priority_used": 0,
+    "current": {
+      "event_type": "TurnStart",
+      "priority": 0,
+      "player_index": 1,
+      "request": {
+        "Reward": {
+          "model": {
+            "Sum": {
+              "cost": 2,
+              "types_by_preference": [
+                "Gold",
+                "Food"
+              ]
+            }
+          },
+          "name": "Collect trade routes reward"
+        }
+      },
+      "response": null,
+      "origin": {
+        "Advance": "Trade Routes"
+      }
+    }
   },
   "players": [
     {

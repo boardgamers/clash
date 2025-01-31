@@ -1,35 +1,20 @@
 use crate::ability_initializer::EventOrigin;
-use crate::consts::ACTIONS;
-use crate::content::trade_routes::{gain_trade_route_reward, trade_route_reward};
-use crate::game::{Game, GameState};
+use crate::game::{Game, UndoContext};
 use crate::payment::PaymentModel;
-use crate::player::Player;
 use crate::resource_pile::ResourcePile;
 use serde::{Deserialize, Serialize};
-
-//todo remove
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub enum CustomPhaseState {
-    TradeRouteSelection,
-}
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum CustomPhaseEventType {
     StartCombatAttacker,
     StartCombatDefender,
+    TurnStart,
 }
 
 impl CustomPhaseEventType {
     #[must_use]
     pub fn is_last_type_for_event(&self) -> bool {
-        #[allow(
-            clippy::match_like_matches_macro,
-            clippy::match_wildcard_for_single_variants
-        )]
-        match self {
-            CustomPhaseEventType::StartCombatAttacker => false,
-            _ => true,
-        }
+        !matches!(self, CustomPhaseEventType::StartCombatAttacker)
     }
 }
 
@@ -41,17 +26,25 @@ pub struct CustomPhasePaymentRequest {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct CustomPhaseRewardRequest {
+    pub model: PaymentModel,
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum CustomPhaseRequest {
     Payment(Vec<CustomPhasePaymentRequest>),
+    Reward(CustomPhaseRewardRequest),
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum CustomPhaseEventAction {
     Payment(Vec<ResourcePile>),
+    Reward(ResourcePile),
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct CustomPhaseEvent {
+pub struct CurrentCustomPhaseEvent {
     pub event_type: CustomPhaseEventType,
     pub priority: i32,
     pub player_index: usize,
@@ -64,7 +57,7 @@ pub struct CustomPhaseEvent {
 pub struct CustomPhaseEventState {
     pub event_used: Vec<CustomPhaseEventType>,
     pub last_priority_used: Option<i32>,
-    pub current: Option<CustomPhaseEvent>,
+    pub current: Option<CurrentCustomPhaseEvent>,
 }
 
 impl CustomPhaseEventState {
@@ -83,60 +76,32 @@ impl CustomPhaseEventState {
     }
 }
 
-//todo remove this
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
-pub enum CustomPhaseAction {
-    TradeRouteSelectionAction(ResourcePile),
-}
-
-impl CustomPhaseAction {
-    ///
-    /// # Panics
-    /// Panics if the action cannot be executed
-    pub fn execute(self, game: &mut Game, player_index: usize) {
-        match &game.state {
-            GameState::CustomPhase(state) => match state {
-                CustomPhaseState::TradeRouteSelection => {
-                    #[allow(irrefutable_let_patterns)]
-                    if let CustomPhaseAction::TradeRouteSelectionAction(p) = self {
-                        let (reward, routes) =
-                            trade_route_reward(game).expect("No trade route reward");
-                        assert!(reward.is_valid_payment(&p), "Invalid payment"); // it's a gain
-                        gain_trade_route_reward(game, player_index, &routes, &p);
-                        game.state = GameState::Playing;
-                    }
-                }
-            },
-            _ => panic!("can only execute custom phase actions if the game is in a custom phase"),
-        }
-    }
-
-    ///
-    /// # Panics
-    /// Panics if the action cannot be undone
-    pub fn undo(self, game: &mut Game, _player_index: usize) {
+impl CustomPhaseEventAction {
+    pub(crate) fn undo(self, game: &mut Game, player_index: usize) {
         match self {
-            CustomPhaseAction::TradeRouteSelectionAction(p) => {
-                match game.state {
-                    GameState::Playing if game.actions_left == ACTIONS => {}
-                    _ => {
-                        panic!(
-                            "can only undo trade route selection if the game is in playing state"
-                        );
-                    }
-                }
-                game.players[game.current_player_index].loose_resources(p);
-                game.state = GameState::CustomPhase(CustomPhaseState::TradeRouteSelection);
+            CustomPhaseEventAction::Payment(_) => todo!("undo payment"),
+            CustomPhaseEventAction::Reward(r) => {
+                let player = &mut game.players[player_index];
+                player.loose_resources(r);
             }
         }
+        let Some(UndoContext::CustomPhaseEvent(e)) = game.undo_context_stack.pop() else {
+            panic!("when undoing custom phase event, the undo context stack should have a custom phase event")
+        };
+        game.custom_phase_state = e;
     }
 
-    #[must_use]
-    pub fn format_log_item(&self, _game: &Game, _player: &Player, player_name: &str) -> String {
-        match self {
-            CustomPhaseAction::TradeRouteSelectionAction(_) => {
-                format!("{player_name} selected trade routes",)
-            }
-        }
+    pub(crate) fn redo(self, game: &mut Game, player_index: usize) {
+        let Some(c) = &mut game.custom_phase_state.current else {
+            panic!("current custom phase event should be set")
+        };
+        let c = c.clone();
+
+        let events = game.players[player_index]
+            .events
+            .take()
+            .expect("events should be set");
+        events.redo_custom_phase_action.trigger(game, &c, &self);
+        game.players[player_index].events = Some(events);
     }
 }
