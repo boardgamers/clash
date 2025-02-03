@@ -123,7 +123,7 @@ impl Display for PaymentOptions {
         write!(f, "{}", self.default)?;
         // this is a bit ugly, make it nicer
         for conversion in &self.conversions {
-            write!(f, " > {}", conversion.to)?;
+            write!(f, " > {}", conversion.to.types().first().expect("no type"))?;
             if let Some(limit) = conversion.limit {
                 write!(f, " (limit: {limit})")?;
             }
