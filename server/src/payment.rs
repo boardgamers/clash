@@ -8,24 +8,28 @@ use std::fmt::Display;
 pub struct PaymentConversion {
     pub from: Vec<ResourcePile>, // alternatives
     pub to: ResourcePile,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub limit: Option<u32>,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct PaymentOptions {
     pub default: ResourcePile,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub conversions: Vec<PaymentConversion>,
 }
 
 impl PaymentOptions {
     #[must_use]
     pub fn first_valid_payment(&self, available: &ResourcePile) -> Option<ResourcePile> {
-        let discount_needed = self
+        let discount_left = self
             .conversions
             .iter()
             .filter_map(|c| if c.to.is_empty() { c.limit } else { None })
             .sum::<u32>();
-        if discount_needed == 0 && available.has_at_least(&self.default, 1) {
+        if discount_left == 0 && available.has_at_least(&self.default, 1) {
             return Some(self.default.clone());
         }
 
@@ -33,7 +37,7 @@ impl PaymentOptions {
             .iter()
             .permutations(self.conversions.len())
             .find_map(|conversions| {
-                can_convert(available, &self.default, &conversions, 0, discount_needed)
+                can_convert(available, &self.default, &conversions, 0, discount_left)
             })
     }
 
@@ -65,19 +69,20 @@ impl PaymentOptions {
 
     #[must_use]
     pub fn resources_with_discount(cost: ResourcePile, discount: u32) -> Self {
+        let base_resources = vec![
+            ResourcePile::food(1),
+            ResourcePile::wood(1),
+            ResourcePile::ore(1),
+            ResourcePile::ideas(1),
+        ];
         let mut conversions = vec![PaymentConversion {
-            from: vec![
-                ResourcePile::food(1),
-                ResourcePile::wood(1),
-                ResourcePile::ore(1),
-                ResourcePile::ideas(1),
-            ],
+            from: base_resources.clone(),
             to: ResourcePile::gold(1),
             limit: None,
         }];
         if discount > 0 {
             conversions.push(PaymentConversion {
-                from: vec![cost.clone()],
+                from: base_resources.clone(),
                 to: ResourcePile::empty(),
                 limit: Some(discount),
             });
@@ -138,9 +143,9 @@ pub fn can_convert(
     current: &ResourcePile,
     conversions: &[&PaymentConversion],
     skip_from: usize,
-    discount_needed: u32,
+    discount_left: u32,
 ) -> Option<ResourcePile> {
-    if available.has_at_least(current, 1) && discount_needed == 0 {
+    if available.has_at_least(current, 1) && discount_left == 0 {
         return Some(current.clone());
     }
 
@@ -149,19 +154,19 @@ pub fn can_convert(
     }
     let conversion = &conversions[0];
     if skip_from >= conversion.from.len() {
-        return can_convert(available, current, &conversions[1..], 0, discount_needed);
+        return can_convert(available, current, &conversions[1..], 0, discount_left);
     }
     let from = &conversion.from[skip_from];
 
     let upper_limit = conversion.limit.unwrap_or(u32::MAX);
     for amount in 1..=upper_limit {
-        if !current.has_at_least(from, amount) {
+        if !current.has_at_least(from, amount) || (conversion.to.is_empty() && amount > discount_left) {
             return can_convert(
                 available,
                 current,
                 conversions,
                 skip_from + 1,
-                discount_needed,
+                discount_left,
             );
         }
 
@@ -170,10 +175,10 @@ pub fn can_convert(
             current -= from.clone();
             current += conversion.to.clone();
         }
-        let new_discount_needed = if conversion.to.is_empty() {
-            discount_needed - amount
+        let new_discount_left = if conversion.to.is_empty() {
+            discount_left - amount
         } else {
-            discount_needed
+            discount_left
         };
 
         let can = can_convert(
@@ -181,7 +186,7 @@ pub fn can_convert(
             &current,
             conversions,
             skip_from + 1,
-            new_discount_needed,
+            new_discount_left,
         );
         if can.is_some() {
             return can;

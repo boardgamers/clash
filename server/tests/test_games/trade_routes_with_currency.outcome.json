@@ -9,14 +9,22 @@
       "player_index": 1,
       "request": {
         "Reward": {
-          "model": {
-            "Sum": {
-              "cost": 2,
-              "types_by_preference": [
-                "Gold",
-                "Food"
-              ]
-            }
+          "options": {
+            "default": {
+              "gold": 2
+            },
+            "conversions": [
+              {
+                "from": [
+                  {
+                    "gold": 1
+                  }
+                ],
+                "to": {
+                  "food": 1
+                }
+              }
+            ]
           },
           "name": "Collect trade routes reward"
         }

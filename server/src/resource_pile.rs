@@ -300,32 +300,32 @@ impl Display for ResourcePile {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut resources = Vec::new();
         if self.food > 0 {
-            resources.push(format!("{} Food", self.food));
+            resources.push(format!("{} food", self.food));
         }
         if self.wood > 0 {
-            resources.push(format!("{} Wood", self.wood));
+            resources.push(format!("{} wood", self.wood));
         }
         if self.ore > 0 {
-            resources.push(format!("{} Ore", self.ore));
+            resources.push(format!("{} ore", self.ore));
         }
         if self.ideas > 0 {
             resources.push(format!(
                 "{} {}",
                 self.ideas,
-                if self.ideas == 1 { "Idea" } else { "Ideas" }
+                if self.ideas == 1 { "idea" } else { "ideas" }
             ));
         }
         if self.gold > 0 {
-            resources.push(format!("{} Gold", self.gold));
+            resources.push(format!("{} gold", self.gold));
         }
         if self.mood_tokens > 0 {
             resources.push(format!(
                 "{} {}",
                 self.mood_tokens,
                 if self.mood_tokens == 1 {
-                    "Mood token"
+                    "mood token"
                 } else {
-                    "Mood tokens"
+                    "mood tokens"
                 }
             ));
         }
@@ -334,9 +334,9 @@ impl Display for ResourcePile {
                 "{} {}",
                 self.culture_tokens,
                 if self.culture_tokens == 1 {
-                    "Culture token"
+                    "culture token"
                 } else {
-                    "Culture tokens"
+                    "culture tokens"
                 }
             ));
         }
