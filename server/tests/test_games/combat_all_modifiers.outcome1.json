@@ -44,27 +44,43 @@
       "request": {
         "Payment": [
           {
-            "model": {
-              "Sum": {
-                "cost": 2,
-                "types_by_preference": [
-                  "Wood",
-                  "Gold"
-                ]
-              }
+            "options": {
+              "default": {
+                "wood": 2
+              },
+              "conversions": [
+                {
+                  "from": [
+                    {
+                      "wood": 1
+                    }
+                  ],
+                  "to": {
+                    "gold": 1
+                  }
+                }
+              ]
             },
             "name": "Cancel fortress ability to add an extra die in the first round of combat",
             "optional": true
           },
           {
-            "model": {
-              "Sum": {
-                "cost": 2,
-                "types_by_preference": [
-                  "Ore",
-                  "Gold"
-                ]
-              }
+            "options": {
+              "default": {
+                "ore": 2
+              },
+              "conversions": [
+                {
+                  "from": [
+                    {
+                      "ore": 1
+                    }
+                  ],
+                  "to": {
+                    "gold": 1
+                  }
+                }
+              ]
             },
             "name": "Cancel fortress ability to ignore the first hit in the first round of combat",
             "optional": true
@@ -443,14 +459,22 @@
           "request": {
             "Payment": [
               {
-                "model": {
-                  "Sum": {
-                    "cost": 1,
-                    "types_by_preference": [
-                      "Ore",
-                      "Gold"
-                    ]
-                  }
+                "options": {
+                  "default": {
+                    "ore": 1
+                  },
+                  "conversions": [
+                    {
+                      "from": [
+                        {
+                          "ore": 1
+                        }
+                      ],
+                      "to": {
+                        "gold": 1
+                      }
+                    }
+                  ]
                 },
                 "name": "Use steel weapons",
                 "optional": true

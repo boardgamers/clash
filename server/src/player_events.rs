@@ -6,7 +6,7 @@ use crate::content::custom_phase_actions::{
 };
 use crate::game::Game;
 use crate::map::Terrain;
-use crate::payment::PaymentModel;
+use crate::payment::PaymentOptions;
 use crate::playing_actions::PlayingActionType;
 use crate::{
     city::City, city_pieces::Building, events::EventMut, player::Player, position::Position,
@@ -23,12 +23,13 @@ pub(crate) struct PlayerEvents {
     pub construct_cost: EventMut<ResourcePile, City, Building>,
     pub on_construct_wonder: EventMut<Player, Position, Wonder>,
     pub on_undo_construct_wonder: EventMut<Player, Position, Wonder>,
-    pub wonder_cost: EventMut<PaymentModel, City, Wonder>,
+    pub wonder_cost: EventMut<PaymentOptions, City, Wonder>,
     pub on_advance: EventMut<Player, String, ()>,
     pub on_undo_advance: EventMut<Player, String, ()>,
     pub after_execute_action: EventMut<Player, Action, ()>,
     pub before_undo_action: EventMut<Player, Action, ()>,
     pub advance_cost: EventMut<u32, String>,
+    pub happiness_cost: EventMut<PaymentOptions, (), ()>,
     pub is_playing_action_available: EventMut<bool, PlayingActionType, Player>,
     pub terrain_collect_options: EventMut<HashMap<Terrain, HashSet<ResourcePile>>, (), ()>,
     pub collect_options: EventMut<HashMap<Position, HashSet<ResourcePile>>, CollectContext, Game>,

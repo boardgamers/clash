@@ -509,7 +509,7 @@ impl State {
                     r.iter()
                         .map(|p| {
                             Payment::new(
-                                &p.model,
+                                &p.options,
                                 &game.get_player(game.active_player()).resources,
                                 &p.name,
                                 p.optional,
@@ -517,9 +517,9 @@ impl State {
                         })
                         .collect(),
                 ),
-                CustomPhaseRequest::Reward(r) => ActiveDialog::CustomPhaseRewardRequest(
-                    Payment::new_gain(r.model.clone(), &r.name),
-                ),
+                CustomPhaseRequest::Reward(r) => {
+                    ActiveDialog::CustomPhaseRewardRequest(Payment::new_gain(&r.options, &r.name))
+                }
             };
         }
         match &game.state {

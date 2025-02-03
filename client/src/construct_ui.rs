@@ -7,7 +7,7 @@ use server::city::City;
 use server::city_pieces::Building;
 use server::content::custom_actions::CustomAction;
 use server::map::Terrain;
-use server::payment::PaymentModel;
+use server::payment::PaymentOptions;
 use server::playing_actions::{Construct, PlayingAction, Recruit};
 use server::position::Position;
 use server::unit::UnitType;
@@ -113,7 +113,7 @@ impl ConstructionPayment {
                 .unwrap()
                 .cost
                 .clone(),
-            ConstructionProject::Units(sel) => PaymentModel::resources(
+            ConstructionProject::Units(sel) => PaymentOptions::resources(
                 sel.amount
                     .units
                     .clone()

@@ -1,10 +1,10 @@
 use crate::advance::Advance;
-use crate::content::advances::{get_advance_by_name, RITUALS};
+use crate::content::advances::get_advance_by_name;
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
 use crate::movement::move_routes;
 use crate::movement::{is_valid_movement_type, MoveRoute};
-use crate::payment::PaymentModel;
+use crate::payment::PaymentOptions;
 use crate::resource::ResourceType;
 use crate::unit::{carried_units, get_current_move, MovementRestriction, UnitData};
 use crate::{
@@ -423,11 +423,11 @@ impl Player {
 
     #[must_use]
     pub fn can_afford_resources(&self, cost: &ResourcePile) -> bool {
-        self.can_afford(&PaymentModel::resources(cost.clone()))
+        self.can_afford(&PaymentOptions::resources(cost.clone()))
     }
 
     #[must_use]
-    pub fn can_afford(&self, cost: &PaymentModel) -> bool {
+    pub fn can_afford(&self, cost: &PaymentOptions) -> bool {
         cost.can_afford(&self.resources)
     }
 
@@ -581,16 +581,16 @@ impl Player {
     }
 
     #[must_use]
-    pub fn construct_cost(&self, building: Building, city: &City) -> PaymentModel {
+    pub fn construct_cost(&self, building: Building, city: &City) -> PaymentOptions {
         let mut cost = CONSTRUCT_COST;
         self.get_events()
             .construct_cost
             .trigger(&mut cost, city, &building);
-        PaymentModel::resources(cost)
+        PaymentOptions::resources(cost)
     }
 
     #[must_use]
-    pub fn wonder_cost(&self, wonder: &Wonder, city: &City) -> PaymentModel {
+    pub fn wonder_cost(&self, wonder: &Wonder, city: &City) -> PaymentOptions {
         let mut cost = wonder.cost.clone();
         self.get_events()
             .wonder_cost
@@ -599,37 +599,29 @@ impl Player {
     }
 
     #[must_use]
-    pub fn increase_happiness_cost(&self, city: &City, steps: u32) -> Option<PaymentModel> {
+    pub fn increase_happiness_cost(&self, city: &City, steps: u32) -> Option<PaymentOptions> {
         let max_steps = 2 - city.mood_state.clone() as u32;
         let cost = city.size() as u32 * steps;
         if steps > max_steps {
             None
-        } else if self.has_advance(RITUALS) {
-            Some(PaymentModel::sum(
-                cost,
-                vec![
-                    ResourceType::Food,
-                    ResourceType::Wood,
-                    ResourceType::Ore,
-                    ResourceType::Ideas,
-                    ResourceType::MoodTokens,
-                    ResourceType::Gold,
-                ],
-            ))
         } else {
-            Some(PaymentModel::sum(cost, vec![ResourceType::MoodTokens]))
+            let mut options = PaymentOptions::sum(cost, &[ResourceType::MoodTokens]);
+            self.get_events()
+                .happiness_cost
+                .trigger(&mut options, &(), &());
+            Some(options)
         }
     }
 
     #[must_use]
-    pub fn advance_cost(&self, advance: &str) -> PaymentModel {
+    pub fn advance_cost(&self, advance: &str) -> PaymentOptions {
         let mut cost = ADVANCE_COST;
         self.get_events()
             .advance_cost
             .trigger(&mut cost, &advance.to_string(), &());
-        PaymentModel::sum(
+        PaymentOptions::sum(
             cost,
-            vec![ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
+            &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
         )
     }
 
@@ -780,7 +772,7 @@ impl Player {
         if !city.can_activate() {
             return false;
         }
-        let cost = PaymentModel::resources(units.iter().map(UnitType::cost).sum());
+        let cost = PaymentOptions::resources(units.iter().map(UnitType::cost).sum());
         if !self.can_afford(&cost) {
             return false;
         }
