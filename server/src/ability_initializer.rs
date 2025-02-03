@@ -193,7 +193,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                         for (request, payment) in requests.iter().zip(payments.iter()) {
                             let zero_payment = payment.is_empty() && request.optional;
                             assert!(
-                                zero_payment || request.model.is_valid_payment(payment),
+                                zero_payment || request.options.is_valid_payment(payment),
                                 "Invalid payment"
                             );
                             game.players[player_index].loose_resources(payment.clone());
@@ -226,13 +226,13 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             move |game, player_index, _player_name| {
                 let req = request(game, player_index);
                 if let Some(r) = &req {
-                    if r.model.possible_resource_types().len() == 1 {
+                    if r.options.possible_resource_types().len() == 1 {
                         let player_name = game.players[player_index].get_name();
                         g(
                             game,
                             player_index,
                             &player_name,
-                            &r.model.default_payment(),
+                            &r.options.default_payment(),
                             false,
                         );
                         return None;
@@ -243,7 +243,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             move |game, player_index, player_name, action, request| {
                 if let CustomPhaseRequest::Reward(request) = &request {
                     if let CustomPhaseEventAction::Reward(reward) = action {
-                        assert!(request.model.is_valid_payment(&reward), "Invalid payment");
+                        assert!(request.options.is_valid_payment(&reward), "Invalid payment");
                         gain_reward(game, player_index, player_name, &reward, true);
                         return;
                     }

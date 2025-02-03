@@ -8,7 +8,7 @@ use crate::combat::{Combat, CombatModifier, CombatStrength};
 use crate::content::custom_phase_actions::{CustomPhasePaymentRequest, CustomPhaseRewardRequest};
 use crate::content::trade_routes::{gain_trade_route_reward, trade_route_reward};
 use crate::game::GameState;
-use crate::payment::PaymentModel;
+use crate::payment::PaymentOptions;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::position::Position;
 use crate::resource::ResourceType;
@@ -304,8 +304,8 @@ fn warfare() -> Vec<Advance> {
                     |game, player_index| {
                         let GameState::Combat(c) = &game.state else { panic!("Invalid state") };
 
-                        let extra_die = PaymentModel::sum(2, vec![ResourceType::Wood, ResourceType::Gold]);
-                        let ignore_hit = PaymentModel::sum(2, vec![ResourceType::Ore, ResourceType::Gold]);
+                        let extra_die = PaymentOptions::sum(2, &[ResourceType::Wood, ResourceType::Gold]);
+                        let ignore_hit = PaymentOptions::sum(2, &[ResourceType::Ore, ResourceType::Gold]);
 
                         let player = &game.players[player_index];
                         if game
@@ -315,12 +315,12 @@ fn warfare() -> Vec<Advance> {
                         {
                             Some(vec![
                                 CustomPhasePaymentRequest {
-                                    model: extra_die,
+                                    options: extra_die,
                                     name: "Cancel fortress ability to add an extra die in the first round of combat".to_string(),
                                     optional: true,
                                 },
                                 CustomPhasePaymentRequest {
-                                    model: ignore_hit,
+                                    options: ignore_hit,
                                     name: "Cancel fortress ability to ignore the first hit in the first round of combat".to_string(),
                                     optional: true,
                                 },
@@ -374,7 +374,7 @@ fn warfare() -> Vec<Advance> {
 
                         if player.can_afford(&cost) {
                             Some(vec![CustomPhasePaymentRequest {
-                                model: cost,
+                                options: cost,
                                 name: "Use steel weapons".to_string(),
                                 optional: true,
                             }])
@@ -407,14 +407,14 @@ fn add_steel_weapons(player_index: usize, c: &mut Combat) {
 }
 
 #[must_use]
-fn steel_weapons_cost(game: &Game, combat: &Combat, player_index: usize) -> PaymentModel {
+fn steel_weapons_cost(game: &Game, combat: &Combat, player_index: usize) -> PaymentOptions {
     let player = &game.players[player_index];
     let attacker = &game.players[combat.attacker];
     let defender = &game.players[combat.defender];
     let both_steel_weapons =
         attacker.has_advance(STEEL_WEAPONS) && defender.has_advance(STEEL_WEAPONS);
     let cost = u32::from(!player.has_advance(METALLURGY) || both_steel_weapons);
-    PaymentModel::sum(cost, vec![ResourceType::Ore, ResourceType::Gold])
+    PaymentOptions::sum(cost, &[ResourceType::Ore, ResourceType::Gold])
 }
 
 fn fortress(s: &mut CombatStrength, c: &Combat, game: &Game) {
@@ -499,7 +499,7 @@ fn trade_routes() -> AdvanceBuilder {
             |game, _player_index| {
                 trade_route_reward(game).map(|(reward, _routes)| {
                     CustomPhaseRewardRequest {
-                        model: reward,
+                        options: reward,
                         name: "Collect trade routes reward".to_string(),
                     }
                 })

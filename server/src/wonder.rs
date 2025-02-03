@@ -1,5 +1,5 @@
 use crate::ability_initializer::EventOrigin;
-use crate::payment::PaymentModel;
+use crate::payment::PaymentOptions;
 use crate::{
     ability_initializer::{self, AbilityInitializer, AbilityInitializerSetup},
     game::Game,
@@ -11,7 +11,7 @@ type PlacementChecker = Box<dyn Fn(Position, &Game) -> bool>;
 pub struct Wonder {
     pub name: String,
     pub description: String,
-    pub cost: PaymentModel,
+    pub cost: PaymentOptions,
     pub required_advances: Vec<String>,
     pub placement_requirement: Option<PlacementChecker>,
     pub player_initializer: AbilityInitializer,
@@ -24,7 +24,7 @@ impl Wonder {
     pub fn builder(
         name: &str,
         description: &str,
-        cost: PaymentModel,
+        cost: PaymentOptions,
         required_advances: Vec<&str>,
     ) -> WonderBuilder {
         WonderBuilder::new(
@@ -42,7 +42,7 @@ impl Wonder {
 pub struct WonderBuilder {
     name: String,
     descriptions: Vec<String>,
-    cost: PaymentModel,
+    cost: PaymentOptions,
     required_advances: Vec<String>,
     placement_requirement: Option<PlacementChecker>,
     player_initializers: Vec<AbilityInitializer>,
@@ -55,7 +55,7 @@ impl WonderBuilder {
     fn new(
         name: &str,
         description: &str,
-        cost: PaymentModel,
+        cost: PaymentOptions,
         required_advances: Vec<String>,
     ) -> Self {
         Self {

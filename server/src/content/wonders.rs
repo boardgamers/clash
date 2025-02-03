@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::content::advances::IRRIGATION;
 use crate::game::Game;
 use crate::map::Terrain::Fertile;
-use crate::payment::PaymentModel;
+use crate::payment::PaymentOptions;
 use crate::position::Position;
 use crate::{resource_pile::ResourcePile, wonder::Wonder};
 use std::collections::HashSet;
@@ -14,7 +14,7 @@ pub fn get_all() -> Vec<Wonder> {
         Wonder::builder(
             "Pyramids",
             "todo",
-            PaymentModel::resources_with_discount(ResourcePile::new(3, 3, 3, 0, 0, 0, 4), 1),
+            PaymentOptions::resources_with_discount(ResourcePile::new(3, 3, 3, 0, 0, 0, 4), 1),
             vec![],
         )
         .build(),
@@ -22,7 +22,7 @@ pub fn get_all() -> Vec<Wonder> {
         Wonder::builder(
             "Great Gardens",
             "The city with this wonder may Collect any type of resource from Grassland spaces including ideas and gold.",
-            PaymentModel::resources(ResourcePile::new(5, 5, 2, 0, 0, 0, 5)),
+            PaymentOptions::resources(ResourcePile::new(5, 5, 2, 0, 0, 0, 5)),
             vec![IRRIGATION],
         )
             .add_player_event_listener(

@@ -6,11 +6,9 @@ use crate::resource_ui::{new_resource_map, resource_name};
 use crate::select_ui;
 use crate::select_ui::{CountSelector, HasCountSelectableObject};
 use macroquad::math::{bool, vec2};
-use server::payment::{PaymentModel, SumPaymentOptions};
+use server::payment::PaymentOptions;
 use server::resource::ResourceType;
-use server::resource_pile::{OldPaymentOptions, ResourcePile};
-use std::cmp;
-use std::cmp::min;
+use server::resource_pile::ResourcePile;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct ResourcePayment {
@@ -36,63 +34,32 @@ impl HasCountSelectableObject for ResourcePayment {
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Payment {
     pub name: String,
-    pub model: PaymentModel,
+    pub options: PaymentOptions,
     pub available: ResourcePile,
     pub optional: bool,
     pub current: Vec<ResourcePayment>,
-    pub discount_used: u32,
 }
 
 impl Payment {
     #[must_use]
     pub fn new(
-        model: &PaymentModel,
+        model: &PaymentOptions,
         available: &ResourcePile,
         name: &str,
         optional: bool,
     ) -> Payment {
-        let mut discount_used = 0;
-        let resources = match model {
-            PaymentModel::Sum(options) => sum_payment(options, available),
-            PaymentModel::Resources(a) => {
-                let options = a.get_payment_options(available);
-                discount_used = a.discount - options.discount_left;
-                resource_payment(&options)
-            }
-        };
-
         Self {
             name: name.to_string(),
-            model: model.clone(),
+            options: model.clone(),
             available: available.clone(),
             optional,
-            current: resources,
-            discount_used,
+            current: resource_payment(model, available),
         }
     }
 
     #[must_use]
-    pub fn new_gain(model: PaymentModel, name: &str) -> Payment {
-        let sum = if let PaymentModel::Sum(m) = &model {
-            m.clone()
-        } else {
-            panic!("No trade route reward")
-        };
-        let available = sum
-            .types_by_preference
-            .iter()
-            .map(|t| ResourcePile::of(*t, sum.cost))
-            .reduce(|a, b| a + b)
-            .expect("sum");
-
-        Payment {
-            name: name.to_string(),
-            model,
-            optional: false,
-            current: sum_payment(&sum, &available),
-            available,
-            discount_used: 0,
-        }
+    pub fn new_gain(options: &PaymentOptions, name: &str) -> Payment {
+        Self::new(options, &options.default, name, false)
     }
 
     pub fn to_resource_pile(&self) -> ResourcePile {
@@ -157,12 +124,12 @@ pub fn multi_payment_dialog(
 
     for (i, payment) in payments.iter().enumerate() {
         let name = &payment.name;
-        let model = payment.model.clone();
-        let types = show_types(&model);
+        let options = payment.options.clone();
+        let types = options.possible_resource_types();
         let offset = vec2(0., i as f32 * -100.);
         bottom_centered_text_with_offset(
             rc,
-            &format!("{name} for {model}"),
+            &format!("{name} for {options}"),
             offset + vec2(0., -30.),
         );
         let result = select_ui::count_dialog(
@@ -218,17 +185,17 @@ fn ok_tooltip(payments: &[Payment], mut available: ResourcePile) -> OkTooltip {
     let mut invalid: Vec<String> = vec![];
 
     for payment in payments {
-        let model = &payment.model;
+        let options = &payment.options;
         let pile = payment.to_resource_pile();
         let name = &payment.name;
         let tooltip = if payment.optional && pile.is_empty() {
             OkTooltip::Valid(format!("Pay nothing for {name}"))
-        } else if model.can_afford(&available) && model.is_valid_payment(&pile) {
+        } else if options.can_afford(&available) && options.is_valid_payment(&pile) {
             // make sure that we can afford all the payments
             available -= payment.to_resource_pile();
             OkTooltip::Valid(format!("Pay {pile} for {name}"))
         } else {
-            OkTooltip::Invalid(format!("You don't have {:?} for {}", payment.model, name))
+            OkTooltip::Invalid(format!("You don't have {:?} for {}", payment.options, name))
         };
         match tooltip {
             OkTooltip::Valid(v) => valid.push(v),
@@ -255,46 +222,18 @@ fn replace_updated_payment(payment: &Payment, all: &[Payment]) -> Vec<Payment> {
         .collect::<Vec<_>>()
 }
 
-fn sum_payment(a: &SumPaymentOptions, available: &ResourcePile) -> Vec<ResourcePayment> {
-    let mut cost_left = a.cost;
-
-    a.types_by_preference
-        .iter()
-        .map(|t| {
-            let have = available.get(t);
-            let used = min(have, cost_left);
-            cost_left -= used;
-            ResourcePayment::new(*t, used, 0, have)
-        })
-        .collect()
-}
-
 #[must_use]
-fn resource_payment(options: &OldPaymentOptions) -> Vec<ResourcePayment> {
+fn resource_payment(options: &PaymentOptions, available: &ResourcePile) -> Vec<ResourcePayment> {
     let mut resources: Vec<ResourcePayment> = new_resource_map(&options.default)
         .into_iter()
         .map(|e| {
             let resource_type = e.0;
-            let amount = e.1;
-            match resource_type {
-                ResourceType::Gold => ResourcePayment {
-                    resource: resource_type,
-                    selectable: CountSelector {
-                        current: amount,
-                        min: amount,
-                        max: amount,
-                    },
-                },
-                _ => ResourcePayment {
-                    resource: resource_type,
-                    selectable: CountSelector {
-                        current: amount,
-                        min: cmp::max(
-                            0,
-                            amount as i32 - options.discount_left as i32 - options.gold_left as i32,
-                        ) as u32,
-                        max: amount,
-                    },
+            ResourcePayment {
+                resource: resource_type,
+                selectable: CountSelector {
+                    current: e.1,
+                    min: 0,
+                    max: available.get(&resource_type),
                 },
             }
         })
@@ -304,49 +243,12 @@ fn resource_payment(options: &OldPaymentOptions) -> Vec<ResourcePayment> {
     resources
 }
 
-#[must_use]
-pub fn show_types(model: &PaymentModel) -> Vec<ResourceType> {
-    match model {
-        PaymentModel::Sum(options) => options.types_by_preference.clone(),
-        PaymentModel::Resources(options) => options.cost.types(),
-    }
-}
-
 pub fn plus(mut payment: Payment, t: ResourceType) -> Payment {
-    match payment.model {
-        PaymentModel::Sum(_) => {
-            payment.get_mut(t).selectable.current += 1;
-        }
-        PaymentModel::Resources(_) => {
-            {
-                let gold = payment.get_mut(ResourceType::Gold);
-                if gold.selectable.current > 0 {
-                    gold.selectable.current -= 1;
-                } else {
-                    payment.discount_used += 1;
-                }
-            }
-            payment.get_mut(t).selectable.current += 1;
-        }
-    }
+    payment.get_mut(t).selectable.current += 1;
     payment
 }
 
 pub fn minus(mut payment: Payment, t: ResourceType) -> Payment {
-    match payment.model {
-        PaymentModel::Sum(_) => {
-            payment.get_mut(t).selectable.current -= 1;
-        }
-        PaymentModel::Resources(_) => {
-            {
-                if payment.discount_used > 0 {
-                    payment.discount_used -= 1;
-                } else {
-                    payment.get_mut(ResourceType::Gold).selectable.current += 1;
-                }
-            }
-            payment.get_mut(t).selectable.current -= 1;
-        }
-    }
+    payment.get_mut(t).selectable.current -= 1;
     payment
 }

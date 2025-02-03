@@ -30,9 +30,9 @@ pub enum AdvanceState {
 
 fn new_advance_payment(rc: &RenderContext, name: &str) -> Payment {
     let p = rc.shown_player;
-    let model = &p.advance_cost(name);
+    let options = &p.advance_cost(name);
     let available = &p.resources;
-    Payment::new(model, available, name, false)
+    Payment::new(options, available, name, false)
 }
 
 pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {

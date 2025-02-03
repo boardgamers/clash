@@ -1859,7 +1859,7 @@ pub mod tests {
 
     use super::{Game, GameState::Playing};
     use crate::content::custom_phase_actions::CustomPhaseEventState;
-    use crate::payment::PaymentModel;
+    use crate::payment::PaymentOptions;
     use crate::utils::tests::FloatEq;
     use crate::{
         city::{City, MoodState::*},
@@ -1909,7 +1909,7 @@ pub mod tests {
         let old = Player::new(civilizations::tests::get_test_civilization(), 0);
         let new = Player::new(civilizations::tests::get_test_civilization(), 1);
 
-        let wonder = Wonder::builder("wonder", "test", PaymentModel::free(), vec![]).build();
+        let wonder = Wonder::builder("wonder", "test", PaymentOptions::free(), vec![]).build();
         let mut game = test_game();
         game.players.push(old);
         game.players.push(new);

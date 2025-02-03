@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-use crate::payment::PaymentModel;
+use crate::payment::PaymentOptions;
 use crate::{
     content::advances,
     game::{Game, GameState::*},
@@ -202,7 +202,7 @@ fn play_status_phase_for_player(
             player.cities.len() > 1 && player.cities.iter().any(|city| city.size() == 1)
         }
         StatusPhaseState::ChangeGovernmentType => {
-            let cost = &PaymentModel::resources(CHANGE_GOVERNMENT_COST);
+            let cost = &PaymentOptions::resources(CHANGE_GOVERNMENT_COST);
             player.can_afford(cost)
                 && player.government().is_some_and(|government| {
                     advances::get_governments().iter().any(|(g, a)| {

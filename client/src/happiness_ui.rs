@@ -34,7 +34,10 @@ impl IncreaseHappinessConfig {
                 let city = p.get_city(*pos).unwrap();
                 p.increase_happiness_cost(city, *steps).unwrap()
             })
-            .reduce(|a, b| a + b)
+            .reduce(|mut a, b| {
+                a.default += b.default;
+                a
+            })
             .unwrap();
 
         let available = &p.resources;

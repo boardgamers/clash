@@ -1,6 +1,6 @@
 use crate::ability_initializer::EventOrigin;
 use crate::game::{Game, UndoContext};
-use crate::payment::PaymentModel;
+use crate::payment::PaymentOptions;
 use crate::resource_pile::ResourcePile;
 use serde::{Deserialize, Serialize};
 
@@ -20,14 +20,14 @@ impl CustomPhaseEventType {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CustomPhasePaymentRequest {
-    pub model: PaymentModel,
+    pub options: PaymentOptions,
     pub name: String,
     pub optional: bool,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CustomPhaseRewardRequest {
-    pub model: PaymentModel,
+    pub options: PaymentOptions,
     pub name: String,
 }
 

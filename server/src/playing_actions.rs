@@ -6,7 +6,7 @@ use crate::action::Action;
 use crate::city::MoodState;
 use crate::collect::{collect, undo_collect};
 use crate::game::{CulturalInfluenceResolution, GameState};
-use crate::payment::PaymentModel;
+use crate::payment::PaymentOptions;
 use crate::unit::Unit;
 use crate::{
     city::City,
@@ -185,7 +185,7 @@ impl PlayingAction {
                 collect(game, player_index, &c);
             }
             Recruit(r) => {
-                let cost = PaymentModel::resources(
+                let cost = PaymentOptions::resources(
                     r.units.iter().map(UnitType::cost).sum::<ResourcePile>(),
                 );
                 let player = &mut game.players[player_index];
@@ -404,7 +404,7 @@ impl ActionType {
 
 pub(crate) fn increase_happiness(game: &mut Game, player_index: usize, i: IncreaseHappiness) {
     let player = &mut game.players[player_index];
-    let mut total_cost: PaymentModel = PaymentModel::free();
+    let mut total_cost = PaymentOptions::free();
     let mut angry_activations = vec![];
     for (city_position, steps) in i.happiness_increases {
         let city = player.get_city(city_position).expect("Illegal action");
@@ -417,11 +417,7 @@ pub(crate) fn increase_happiness(game: &mut Game, player_index: usize, i: Increa
         if city.mood_state == MoodState::Angry {
             angry_activations.push(city_position);
         }
-        if total_cost.is_free() {
-            total_cost = cost;
-        } else {
-            total_cost = total_cost + cost;
-        }
+        total_cost.default += cost.default;
         let city = player.get_city_mut(city_position).expect("Illegal action");
         for _ in 0..steps {
             city.increase_mood_state();
