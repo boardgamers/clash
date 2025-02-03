@@ -29,6 +29,7 @@ pub(crate) struct PlayerEvents {
     pub after_execute_action: EventMut<Player, Action, ()>,
     pub before_undo_action: EventMut<Player, Action, ()>,
     pub advance_cost: EventMut<u32, String>,
+    pub happiness_cost: EventMut<PaymentOptions, (), ()>,
     pub is_playing_action_available: EventMut<bool, PlayingActionType, Player>,
     pub terrain_collect_options: EventMut<HashMap<Terrain, HashSet<ResourcePile>>, (), ()>,
     pub collect_options: EventMut<HashMap<Position, HashSet<ResourcePile>>, CollectContext, Game>,

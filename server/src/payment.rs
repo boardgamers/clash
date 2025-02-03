@@ -13,6 +13,17 @@ pub struct PaymentConversion {
     pub limit: Option<u32>,
 }
 
+impl PaymentConversion {
+    #[must_use]
+    pub fn unlimited(from: Vec<ResourcePile>, to: ResourcePile) -> Self {
+        PaymentConversion {
+            from,
+            to,
+            limit: None,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct PaymentOptions {
     pub default: ResourcePile,
@@ -55,11 +66,10 @@ impl PaymentOptions {
     pub fn sum(cost: u32, types_by_preference: &[ResourceType]) -> Self {
         let mut conversions = vec![];
         types_by_preference.windows(2).for_each(|pair| {
-            conversions.push(PaymentConversion {
-                from: vec![ResourcePile::of(pair[0], 1)],
-                to: ResourcePile::of(pair[1], 1),
-                limit: None,
-            });
+            conversions.push(PaymentConversion::unlimited(
+                vec![ResourcePile::of(pair[0], 1)],
+                ResourcePile::of(pair[1], 1),
+            ));
         });
         PaymentOptions {
             default: ResourcePile::of(types_by_preference[0], cost),
@@ -160,7 +170,9 @@ pub fn can_convert(
 
     let upper_limit = conversion.limit.unwrap_or(u32::MAX);
     for amount in 1..=upper_limit {
-        if !current.has_at_least(from, amount) || (conversion.to.is_empty() && amount > discount_left) {
+        if !current.has_at_least(from, amount)
+            || (conversion.to.is_empty() && amount > discount_left)
+        {
             return can_convert(
                 available,
                 current,

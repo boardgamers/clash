@@ -1,5 +1,5 @@
 use crate::advance::Advance;
-use crate::content::advances::{get_advance_by_name, RITUALS};
+use crate::content::advances::get_advance_by_name;
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
 use crate::movement::move_routes;
@@ -604,21 +604,12 @@ impl Player {
         let cost = city.size() as u32 * steps;
         if steps > max_steps {
             None
-        } else if self.has_advance(RITUALS) {
-            // todo can call event to add conversions
-            Some(PaymentOptions::sum(
-                cost,
-                &[
-                    ResourceType::Food,
-                    ResourceType::Wood,
-                    ResourceType::Ore,
-                    ResourceType::Ideas,
-                    ResourceType::MoodTokens,
-                    ResourceType::Gold,
-                ],
-            ))
         } else {
-            Some(PaymentOptions::sum(cost, &[ResourceType::MoodTokens]))
+            let mut options = PaymentOptions::sum(cost, &[ResourceType::MoodTokens]);
+            self.get_events()
+                .happiness_cost
+                .trigger(&mut options, &(), &());
+            Some(options)
         }
     }
 

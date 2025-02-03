@@ -8,7 +8,7 @@ use crate::combat::{Combat, CombatModifier, CombatStrength};
 use crate::content::custom_phase_actions::{CustomPhasePaymentRequest, CustomPhaseRewardRequest};
 use crate::content::trade_routes::{gain_trade_route_reward, trade_route_reward};
 use crate::game::GameState;
-use crate::payment::PaymentOptions;
+use crate::payment::{PaymentConversion, PaymentOptions};
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::position::Position;
 use crate::resource::ResourceType;
@@ -27,7 +27,6 @@ pub const NAVIGATION: &str = "Navigation";
 pub const ROADS: &str = "Roads";
 pub const STEEL_WEAPONS: &str = "Steel Weapons";
 pub const METALLURGY: &str = "Metallurgy";
-pub const RITUALS: &str = "Rituals";
 pub const TACTICS: &str = "Tactics";
 pub const BARTERING: &str = "Bartering";
 pub const CURRENCY: &str = "Currency";
@@ -464,8 +463,23 @@ fn spirituality() -> Vec<Advance> {
             Advance::builder("Myths", "not implemented")
                 .with_advance_bonus(MoodToken)
                 .with_unlocked_building(Temple),
-            Advance::builder(RITUALS, "When you perform the Increase Happiness Action you may spend any Resources as a substitute for mood tokens. This is done at a 1:1 ratio")
-                .with_advance_bonus(CultureToken),
+            Advance::builder("Rituals", "When you perform the Increase Happiness Action you may spend any Resources as a substitute for mood tokens. This is done at a 1:1 ratio")
+                .with_advance_bonus(CultureToken)
+                .add_player_event_listener(
+                    |event| &mut event.happiness_cost,
+                    |cost, (), ()| {
+                        for r in &[
+                            ResourceType::Food,
+                            ResourceType::Wood,
+                            ResourceType::Ore,
+                            ResourceType::Ideas,
+                            ResourceType::Gold,
+                        ] {
+                            cost.conversions.push(PaymentConversion::unlimited(vec![ResourcePile::mood_tokens(1)],ResourcePile::of(*r, 1)));
+                        }
+                    },
+                    0,
+                ),
         ],
     )
 }
