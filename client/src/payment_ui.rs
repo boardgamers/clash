@@ -8,7 +8,7 @@ use crate::select_ui::{CountSelector, HasCountSelectableObject};
 use macroquad::math::{bool, vec2};
 use server::payment::{PaymentModel, SumPaymentOptions};
 use server::resource::ResourceType;
-use server::resource_pile::{PaymentOptions, ResourcePile};
+use server::resource_pile::{OldPaymentOptions, ResourcePile};
 use std::cmp;
 use std::cmp::min;
 
@@ -261,7 +261,7 @@ fn sum_payment(a: &SumPaymentOptions, available: &ResourcePile) -> Vec<ResourceP
     a.types_by_preference
         .iter()
         .map(|t| {
-            let have = available.get(*t);
+            let have = available.get(t);
             let used = min(have, cost_left);
             cost_left -= used;
             ResourcePayment::new(*t, used, 0, have)
@@ -270,7 +270,7 @@ fn sum_payment(a: &SumPaymentOptions, available: &ResourcePile) -> Vec<ResourceP
 }
 
 #[must_use]
-fn resource_payment(options: &PaymentOptions) -> Vec<ResourcePayment> {
+fn resource_payment(options: &OldPaymentOptions) -> Vec<ResourcePayment> {
     let mut resources: Vec<ResourcePayment> = new_resource_map(&options.default)
         .into_iter()
         .map(|e| {

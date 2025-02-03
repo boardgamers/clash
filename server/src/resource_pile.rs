@@ -68,7 +68,7 @@ impl ResourcePile {
     }
 
     #[must_use]
-    pub fn get(&self, resource_type: ResourceType) -> u32 {
+    pub fn get(&self, resource_type: &ResourceType) -> u32 {
         match resource_type {
             ResourceType::Food => self.food,
             ResourceType::Wood => self.wood,
@@ -78,6 +78,17 @@ impl ResourcePile {
             ResourceType::MoodTokens => self.mood_tokens,
             ResourceType::CultureTokens => self.culture_tokens,
         }
+    }
+    
+    #[must_use]
+    pub fn has_at_least(&self, other: &ResourcePile, times: u32) -> bool {
+        self.food >= other.food * times
+            && self.wood >= other.wood * times
+            && self.ore >= other.ore * times
+            && self.ideas >= other.ideas * times
+            && self.gold >= other.gold * times
+            && self.mood_tokens >= other.mood_tokens * times
+            && self.culture_tokens >= other.culture_tokens * times
     }
 
     ///
@@ -365,7 +376,7 @@ impl CostWithDiscount {
 
     //this function assumes that `self` can afford `cost`
     #[must_use]
-    pub fn get_payment_options(&self, available: &ResourcePile) -> PaymentOptions {
+    pub fn get_payment_options(&self, available: &ResourcePile) -> OldPaymentOptions {
         let cost = &self.cost;
         let mut jokers_left = self.discount;
 
@@ -414,18 +425,18 @@ impl CostWithDiscount {
             cost.mood_tokens,
             cost.culture_tokens,
         );
-        PaymentOptions::new(default, gold_left, jokers_left)
+        OldPaymentOptions::new(default, gold_left, jokers_left)
     }
 }
 
 #[derive(PartialEq, Eq, Debug, Clone)]
-pub struct PaymentOptions {
+pub struct OldPaymentOptions {
     pub default: ResourcePile,
     pub gold_left: u32,
     pub discount_left: u32,
 }
 
-impl PaymentOptions {
+impl OldPaymentOptions {
     #[must_use]
     pub fn new(default: ResourcePile, gold_left: u32, discount_left: u32) -> Self {
         Self {
@@ -438,7 +449,7 @@ impl PaymentOptions {
 
 #[cfg(test)]
 mod tests {
-    use super::{CostWithDiscount, PaymentOptions, ResourcePile};
+    use super::{CostWithDiscount, OldPaymentOptions, ResourcePile};
     use crate::payment::PaymentModel;
 
     fn assert_can_afford(name: &str, cost: &ResourcePile, discount: u32) {
@@ -459,7 +470,7 @@ mod tests {
         name: &str,
         cost: &ResourcePile,
         discount: u32,
-        want: &PaymentOptions,
+        want: &OldPaymentOptions,
     ) {
         let budget = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
         let c = CostWithDiscount {
@@ -527,19 +538,19 @@ mod tests {
             "no gold use",
             &ResourcePile::new(1, 1, 3, 2, 0, 2, 4),
             0,
-            &(PaymentOptions::new(ResourcePile::new(1, 1, 3, 2, 0, 2, 4), 5, 0)),
+            &(OldPaymentOptions::new(ResourcePile::new(1, 1, 3, 2, 0, 2, 4), 5, 0)),
         );
         assert_payment_options(
             "use some gold",
             &ResourcePile::new(2, 2, 3, 5, 2, 0, 0),
             0,
-            &(PaymentOptions::new(ResourcePile::new(1, 2, 3, 4, 4, 0, 0), 1, 0)),
+            &(OldPaymentOptions::new(ResourcePile::new(1, 2, 3, 4, 4, 0, 0), 1, 0)),
         );
         assert_payment_options(
             "jokers",
             &(ResourcePile::ore(4) + ResourcePile::ideas(4)),
             3,
-            &(PaymentOptions::new(ResourcePile::ore(3) + ResourcePile::ideas(4), 5, 2)),
+            &(OldPaymentOptions::new(ResourcePile::ore(3) + ResourcePile::ideas(4), 5, 2)),
         );
     }
 

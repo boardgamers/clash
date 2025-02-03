@@ -22,7 +22,7 @@ pub fn get_all() -> Vec<Wonder> {
         Wonder::builder(
             "Great Gardens",
             "The city with this wonder may Collect any type of resource from Grassland spaces including ideas and gold.",
-            PaymentModel::resources_with_discount(ResourcePile::new(5, 5, 2, 0, 0, 0, 5), 0),
+            PaymentModel::resources(ResourcePile::new(5, 5, 2, 0, 0, 0, 5)),
             vec![IRRIGATION],
         )
             .add_player_event_listener(
