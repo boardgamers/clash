@@ -1,9 +1,9 @@
 use crate::resource::ResourceType;
 use crate::resource_pile::{CostWithDiscount, ResourcePile};
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::ops::{Add, SubAssign};
-use itertools::Itertools;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct PaymentConversion {
@@ -21,28 +21,35 @@ pub struct PaymentOptions {
 impl PaymentOptions {
     #[must_use]
     pub fn first_valid_payment(&self, available: &ResourcePile) -> Option<ResourcePile> {
-        let discount_needed = self.conversions.iter().filter_map(|c| if c.to.is_empty() {c.limit} else { None }).sum::<u32>();
+        let discount_needed = self
+            .conversions
+            .iter()
+            .filter_map(|c| if c.to.is_empty() { c.limit } else { None })
+            .sum::<u32>();
         if discount_needed == 0 && available.has_at_least(&self.default, 1) {
             return Some(self.default.clone());
         }
-        
-        self.conversions.iter().permutations(self.conversions.len()).find_map(|conversions| {
-            can_convert(available, &self.default, &conversions, 0, discount_needed)
-        })
+
+        self.conversions
+            .iter()
+            .permutations(self.conversions.len())
+            .find_map(|conversions| {
+                can_convert(available, &self.default, &conversions, 0, discount_needed)
+            })
     }
 
     #[must_use]
     pub fn is_valid_payment(&self, payment: &ResourcePile) -> bool {
         self.first_valid_payment(payment).is_some()
     }
-    
+
     #[must_use]
     pub fn free() -> Self {
         Self::resources(ResourcePile::empty())
     }
 
     #[must_use]
-    pub fn sum(cost: u32, types_by_preference: Vec<ResourceType>) -> Self {
+    pub fn sum(cost: u32, types_by_preference: &[ResourceType]) -> Self {
         let mut conversions = vec![];
         types_by_preference.windows(2).for_each(|pair| {
             conversions.push(PaymentConversion {
@@ -59,13 +66,16 @@ impl PaymentOptions {
 
     #[must_use]
     pub fn resources_with_discount(cost: ResourcePile, discount: u32) -> Self {
-        let mut conversions = vec![
-            PaymentConversion {
-                from: vec![ResourcePile::food(1), ResourcePile::wood(1), ResourcePile::ore(1), ResourcePile::ideas(1)],
-                to: ResourcePile::gold(1),
-                limit: None,
-            },
-        ];
+        let mut conversions = vec![PaymentConversion {
+            from: vec![
+                ResourcePile::food(1),
+                ResourcePile::wood(1),
+                ResourcePile::ore(1),
+                ResourcePile::ideas(1),
+            ],
+            to: ResourcePile::gold(1),
+            limit: None,
+        }];
         if discount > 0 {
             conversions.push(PaymentConversion {
                 from: vec![cost.clone()],
@@ -78,7 +88,7 @@ impl PaymentOptions {
             conversions,
         }
     }
-    
+
     #[must_use]
     pub fn resources(cost: ResourcePile) -> Self {
         Self::resources_with_discount(cost, 0)
@@ -86,7 +96,7 @@ impl PaymentOptions {
 
     #[must_use]
     pub fn can_afford(&self, available: &ResourcePile) -> bool {
-       self.first_valid_payment(available).is_some()
+        self.first_valid_payment(available).is_some()
     }
 
     #[must_use]
@@ -105,7 +115,7 @@ impl PaymentOptions {
 
     #[must_use]
     pub fn default_payment(&self) -> ResourcePile {
-       self.default.clone()
+        self.default.clone()
     }
 }
 
@@ -126,7 +136,7 @@ impl SumPaymentOptions {
     }
 }
 
-#[must_use] 
+#[must_use]
 pub fn can_convert(
     available: &ResourcePile,
     current: &ResourcePile,
@@ -137,12 +147,12 @@ pub fn can_convert(
     if available.has_at_least(current, 1) && discount_needed == 0 {
         return Some(current.clone());
     }
-    
+
     if conversions.is_empty() {
         return None;
     }
     let conversion = &conversions[0];
-    if skip_from >= conversion.from.len()  {
+    if skip_from >= conversion.from.len() {
         return can_convert(available, current, &conversions[1..], 0, discount_needed);
     }
     let from = &conversion.from[skip_from];
@@ -150,7 +160,13 @@ pub fn can_convert(
     let upper_limit = conversion.limit.unwrap_or(u32::MAX);
     for amount in 1..=upper_limit {
         if !current.has_at_least(from, amount) {
-            return can_convert(available, current, conversions, skip_from + 1, discount_needed);
+            return can_convert(
+                available,
+                current,
+                conversions,
+                skip_from + 1,
+                discount_needed,
+            );
         }
 
         let mut current = current.clone();
@@ -158,9 +174,19 @@ pub fn can_convert(
             current -= from.clone();
             current += conversion.to.clone();
         }
-        let new_discount_needed = if conversion.to.is_empty() { discount_needed - amount } else { discount_needed };
-     
-        let can = can_convert(available, &current, conversions, skip_from + 1, new_discount_needed);
+        let new_discount_needed = if conversion.to.is_empty() {
+            discount_needed - amount
+        } else {
+            discount_needed
+        };
+
+        let can = can_convert(
+            available,
+            &current,
+            conversions,
+            skip_from + 1,
+            new_discount_needed,
+        );
         if can.is_some() {
             return can;
         }
@@ -192,7 +218,7 @@ impl PaymentModel {
     pub const fn resources_with_discount(cost: ResourcePile, discount: u32) -> Self {
         PaymentModel::Resources(CostWithDiscount { cost, discount })
     }
-    
+
     #[must_use]
     pub const fn resources(cost: ResourcePile) -> Self {
         Self::resources_with_discount(cost, 0)
@@ -328,7 +354,7 @@ impl SubAssign for PaymentModel {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::resource::ResourceType;
+    
 
     struct ValidPaymentTestCase {
         name: String,
@@ -348,7 +374,10 @@ mod tests {
             }],
         };
         let available = ResourcePile::wood(1) + ResourcePile::ore(1);
-        assert_eq!(Some(ResourcePile::wood(1)), options.first_valid_payment(&available));
+        assert_eq!(
+            Some(ResourcePile::wood(1)),
+            options.first_valid_payment(&available)
+        );
     }
 
     #[test]
@@ -419,9 +448,7 @@ mod tests {
                         limit: Some(2),
                     }],
                 },
-                valid: vec![
-                    ResourcePile::food(1),
-                ],
+                valid: vec![ResourcePile::food(1)],
                 invalid: vec![ResourcePile::food(2)],
             },
             ValidPaymentTestCase {
@@ -502,7 +529,7 @@ mod tests {
             for (i, valid) in test_case.valid.iter().enumerate() {
                 assert_eq!(
                     Some(valid.clone()),
-                    test_case.options.first_valid_payment(&valid),
+                    test_case.options.first_valid_payment(valid),
                     "{} valid {}",
                     test_case.name,
                     i
@@ -511,7 +538,7 @@ mod tests {
             for (i, invalid) in test_case.invalid.iter().enumerate() {
                 assert_ne!(
                     Some(invalid.clone()),
-                    test_case.options.first_valid_payment(&invalid),
+                    test_case.options.first_valid_payment(invalid),
                     "{} invalid {}",
                     test_case.name,
                     i

@@ -79,7 +79,7 @@ impl ResourcePile {
             ResourceType::CultureTokens => self.culture_tokens,
         }
     }
-    
+
     #[must_use]
     pub fn has_at_least(&self, other: &ResourcePile, times: u32) -> bool {
         self.food >= other.food * times
