@@ -131,6 +131,7 @@ pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) 
     payment_dialog(
         rc,
         &h.payment,
+        true,
         |payment| {
             ActiveDialog::IncreaseHappiness(IncreaseHappinessConfig {
                 steps: h.steps.clone(),

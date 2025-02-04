@@ -267,6 +267,7 @@ pub(crate) fn move_payment_dialog(rc: &RenderContext, mp: &MovePayment) -> State
     payment_dialog(
         rc,
         &mp.payment.clone(),
+        true,
         |p| {
             let mut new = mp.clone();
             new.payment = p;

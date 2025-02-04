@@ -180,6 +180,25 @@ fn construction() -> Vec<Advance> {
             )
                 .add_one_time_ability_initializer(Game::draw_wonder_card)
                 .add_custom_action(ConstructWonder),
+            Advance::builder(
+                "Sanitation",
+                "When Recruiting, you may spend 1 mood token to pay for 1 Settler.")
+                .with_advance_bonus(MoodToken)
+                .add_player_event_listener(
+                    |event| &mut event.recruit_cost,
+                    |cost, (), ()| {
+                        if cost.units.settlers > 0 {
+                            cost.units.settlers -= 1;
+                            // insert at beginning so that it's preferred over gold
+                            cost.cost.conversions.insert(0, PaymentConversion {
+                                from: vec![UnitType::cost(&UnitType::Settler)],
+                                to: ResourcePile::mood_tokens(1),
+                                limit: Some(1),
+                            });
+                        }
+                    },
+                    0,
+                ),
             Advance::builder(ROADS, "When moving from or to a city, you may pay 1 food and 1 ore to extend the range of a group of land units by 1 and ignore terrain effects. May not be used to embark, disembark, or explore")
         ],
     )
@@ -398,6 +417,7 @@ fn warfare() -> Vec<Advance> {
             Advance::builder(
                 "Draft",
                 "When Recruiting, you may spend 1 mood token to pay for 1 Infantry Army Unit.")
+                .with_advance_bonus(CultureToken)
                 .add_player_event_listener(
                     |event| &mut event.recruit_cost,
                     |cost, (), ()| {

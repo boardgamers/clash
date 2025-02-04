@@ -103,6 +103,7 @@ impl Payment {
 pub fn payment_dialog(
     rc: &RenderContext,
     payment: &Payment,
+    may_cancel: bool,
     to_dialog: impl FnOnce(Payment) -> ActiveDialog,
     execute_action: impl FnOnce(ResourcePile) -> StateUpdate,
 ) -> StateUpdate {
@@ -110,7 +111,7 @@ pub fn payment_dialog(
         rc,
         &[payment.clone()],
         |v| to_dialog(v[0].clone()),
-        payment.optional,
+        may_cancel,
         |v| execute_action(v[0].clone()),
     )
 }

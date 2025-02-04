@@ -8,6 +8,7 @@ pub fn reward_dialog(rc: &RenderContext, payment: &Payment) -> StateUpdate {
     payment_dialog(
         rc,
         payment,
+        false,
         |p| ActiveDialog::CustomPhaseRewardRequest(p.clone()),
         |p| {
             StateUpdate::Execute(Action::CustomPhaseEvent(CustomPhaseEventAction::Reward(

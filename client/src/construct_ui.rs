@@ -38,6 +38,7 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
     payment_dialog(
         rc,
         &cp.payment.clone(),
+        true,
         |p| {
             let mut new = cp.clone();
             new.payment = p;
