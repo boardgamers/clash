@@ -521,7 +521,7 @@ impl State {
                         .collect(),
                 ),
                 CustomPhaseRequest::Reward(r) => {
-                    ActiveDialog::CustomPhaseRewardRequest(Payment::new_gain(&r.options, &r.name))
+                    ActiveDialog::CustomPhaseRewardRequest(Payment::new_gain(&r.reward, &r.name))
                 }
             };
         }

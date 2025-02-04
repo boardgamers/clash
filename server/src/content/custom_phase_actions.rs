@@ -27,7 +27,7 @@ pub struct CustomPhasePaymentRequest {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CustomPhaseRewardRequest {
-    pub options: PaymentOptions,
+    pub reward: PaymentOptions,
     pub name: String,
 }
 

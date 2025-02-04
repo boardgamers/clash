@@ -533,7 +533,7 @@ fn trade_routes() -> AdvanceBuilder {
             |game, _player_index| {
                 trade_route_reward(game).map(|(reward, _routes)| {
                     CustomPhaseRewardRequest {
-                        options: reward,
+                        reward,
                         name: "Collect trade routes reward".to_string(),
                     }
                 })
