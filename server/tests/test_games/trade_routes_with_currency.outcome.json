@@ -9,7 +9,7 @@
       "player_index": 1,
       "request": {
         "Reward": {
-          "options": {
+          "reward": {
             "default": {
               "gold": 2
             },
