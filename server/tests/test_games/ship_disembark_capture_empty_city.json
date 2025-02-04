@@ -81,22 +81,6 @@
         },
         {
           "player_index": 0,
-          "position": "C3",
-          "unit_type": "Cavalry",
-          "movement_restriction": "None",
-          "id": 1,
-          "carrier_id": 8
-        },
-        {
-          "player_index": 0,
-          "position": "C3",
-          "unit_type": "Elephant",
-          "movement_restriction": "None",
-          "id": 2,
-          "carrier_id": 7
-        },
-        {
-          "player_index": 0,
           "position": "B3",
           "unit_type": "Settler",
           "movement_restriction": "None",
@@ -128,14 +112,32 @@
           "position": "C3",
           "unit_type": "Ship",
           "movement_restriction": "None",
-          "id": 7
+          "id": 7,
+          "carried_units": [
+            {
+              "player_index": 0,
+              "position": "C3",
+              "unit_type": "Elephant",
+              "movement_restriction": "None",
+              "id": 2
+            }
+          ]
         },
         {
           "player_index": 0,
           "position": "C3",
           "unit_type": "Ship",
           "movement_restriction": "None",
-          "id": 8
+          "id": 8,
+          "carried_units": [
+            {
+              "player_index": 0,
+              "position": "C3",
+              "unit_type": "Cavalry",
+              "movement_restriction": "None",
+              "id": 1
+            }
+          ]
         }
       ],
       "civilization": "test1",

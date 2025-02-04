@@ -80,28 +80,18 @@ pub fn possible_destinations(
     res
 }
 
-fn move_destination(
-    dest: &MoveDestination,
-    pos: Position,
-    unit: Option<u32>,
-) -> Option<(Position, Option<u32>, Option<PaymentOptions>)> {
-    match dest {
-        MoveDestination::Tile((p, cost)) if p == &pos => Some((*p, None, Some(cost.clone()))),
-        MoveDestination::Carrier(id) if unit.is_some_and(|u| u == *id) => {
-            Some((pos, Some(*id), None))
-        }
-        _ => None,
-    }
-}
-
 pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Vec2) -> StateUpdate {
     let game = rc.game;
     let p = game.get_player(s.player_index);
     let carrier = click_unit(rc, pos, mouse_pos, p, false);
-    if let Some((destination, embark_carrier_id, cost)) = s
-        .destinations
-        .iter()
-        .find_map(|d| move_destination(d, pos, carrier))
+    if let Some((destination, embark_carrier_id, cost)) =
+        s.clone().destinations.into_iter().find_map(|d| match d {
+            MoveDestination::Tile((p, cost)) if p == pos => Some((p, None, cost)),
+            MoveDestination::Carrier(id) if carrier.is_some_and(|u| u == id) => {
+                Some((pos, Some(id), PaymentOptions::free()))
+            }
+            _ => None,
+        })
     {
         let units = s.units.clone();
         let action = MovementAction::Move(MoveUnits {
@@ -111,7 +101,7 @@ pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Ve
             payment: ResourcePile::empty(),
         });
 
-        if let Some(cost) = cost {
+        if !cost.is_free() {
             return StateUpdate::OpenDialog(ActiveDialog::MovePayment(MovePayment {
                 action,
                 payment: rc.new_payment(&cost, "Move units", true),

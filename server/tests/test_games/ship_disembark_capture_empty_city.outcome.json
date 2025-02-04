@@ -371,7 +371,17 @@
     {
       "Movement": {
         "starting_position": "C3",
-        "movement_actions_left": 2
+        "movement_actions_left": 2,
+        "disembarked_units": [
+          {
+            "unit_id": 1,
+            "carrier_id": 8
+          },
+          {
+            "unit_id": 2,
+            "carrier_id": 7
+          }
+        ]
       }
     },
     {
