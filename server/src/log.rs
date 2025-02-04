@@ -178,7 +178,6 @@ fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -
     let units = &r.units;
     let payment = &r.payment;
     let replaced_units = &r.replaced_units;
-    let units_str = units.iter().cloned().collect::<Units>();
     let leader_str = leader_name.map_or(String::new(), |leader_name| {
         format!(
             " {} {} as their leader",
@@ -211,7 +210,7 @@ fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -
         "",
     );
     format!(
-        "{player_name} paid {payment} to recruit {units_str}{leader_str} in the city at {city_position}{mood}{replace_str}{replace_pos}"
+        "{player_name} paid {payment} to recruit {units}{leader_str} in the city at {city_position}{mood}{replace_str}{replace_pos}"
     )
 }
 
@@ -309,6 +308,7 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
             units,
             destination: _,
             embark_carrier_id: _,
+            payment: _,
         } if units.is_empty() => {
             format!("\t{player_name} used a movement actions but moved no units")
         }
@@ -316,6 +316,7 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
             units,
             destination,
             embark_carrier_id: _,
+            payment,
         } => {
             let units_str = units
                 .iter()
@@ -349,7 +350,12 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
             } else {
                 ("marched", " on roads")
             };
-            format!("\t{player_name} {verb} {units_str} from {start} to {destination}{suffix}",)
+            let cost = if payment.is_empty() {
+                String::new()
+            } else {
+                format!(" for {payment}")
+            };
+            format!("\t{player_name} {verb} {units_str} from {start} to {destination}{suffix}{cost}",)
         }
         MovementAction::Stop => format!("\t{player_name} ended the movement action"),
     }

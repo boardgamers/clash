@@ -2,6 +2,7 @@ use macroquad::math::{u32, Vec2};
 use macroquad::prelude::Texture2D;
 use server::action::Action;
 use server::game::{CurrentMove, Game, GameState};
+use server::payment::PaymentOptions;
 use server::player::Player;
 use server::position::Position;
 use server::unit::{MovementAction, Unit, UnitType};
@@ -56,7 +57,7 @@ pub fn possible_destinations(
         .move_units_destinations(game, units, start, None)
         .unwrap_or_default()
         .into_iter()
-        .map(|route| MoveDestination::Tile(route.destination))
+        .map(|route| MoveDestination::Tile((route.destination, route.cost)))
         .collect::<Vec<_>>();
 
     player.units.iter().for_each(|u| {
@@ -168,7 +169,7 @@ pub fn movable_units(
 
 #[derive(Clone, Debug)]
 pub enum MoveDestination {
-    Tile(Position),
+    Tile((Position, PaymentOptions)),
     Carrier(u32),
 }
 

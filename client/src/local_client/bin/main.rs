@@ -9,7 +9,7 @@ use server::game::{Game, GameData};
 use server::map::Terrain;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-use server::unit::UnitType;
+use server::unit::{UnitType, Units};
 use std::env;
 use std::fs::File;
 use std::io::BufReader;
@@ -75,13 +75,9 @@ pub fn setup_local_game() -> Game {
     game.round = 6;
     game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];
     let add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {
-        game.recruit(
-            player_index,
-            vec![unit_type],
-            Position::from_offset(pos),
-            None,
-            &[],
-        );
+        let mut units = Units::empty();
+        units += &unit_type;
+        game.recruit(player_index, units, Position::from_offset(pos), None, &[]);
     };
 
     let player_index1 = 0;

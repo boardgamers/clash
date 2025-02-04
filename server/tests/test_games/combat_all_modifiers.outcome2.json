@@ -47,7 +47,7 @@
       "request": {
         "Payment": [
           {
-            "options": {
+            "cost": {
               "default": {
                 "ore": 1
               },
@@ -452,7 +452,7 @@
           "request": {
             "Payment": [
               {
-                "options": {
+                "cost": {
                   "default": {
                     "ore": 1
                   },
@@ -492,7 +492,7 @@
           "request": {
             "Payment": [
               {
-                "options": {
+                "cost": {
                   "default": {
                     "wood": 2
                   },
@@ -513,7 +513,7 @@
                 "optional": true
               },
               {
-                "options": {
+                "cost": {
                   "default": {
                     "ore": 2
                   },

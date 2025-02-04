@@ -192,11 +192,9 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                         assert_eq!(requests.len(), payments.len());
                         for (request, payment) in requests.iter().zip(payments.iter()) {
                             let zero_payment = payment.is_empty() && request.optional;
-                            assert!(
-                                zero_payment || request.options.is_valid_payment(payment),
-                                "Invalid payment"
-                            );
-                            game.players[player_index].loose_resources(payment.clone());
+                            if !zero_payment {
+                                game.players[player_index].pay_cost(&request.cost, payment);
+                            }
                         }
                         gain_reward(game, player_index, player_name, &payments);
                         return;

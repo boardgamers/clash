@@ -144,7 +144,7 @@ impl ActiveDialog {
                 vec!["Click on a building to influence its culture".to_string()]
             }
             ActiveDialog::CulturalInfluenceResolution(c) => vec![format!(
-                "Pay {} culture tokens to influence {}",
+                "Pay {} to influence {}",
                 c.roll_boost_cost,
                 c.city_piece.name()
             )],
@@ -509,7 +509,7 @@ impl State {
                     r.iter()
                         .map(|p| {
                             Payment::new(
-                                &p.options,
+                                &p.cost,
                                 &game.get_player(game.active_player()).resources,
                                 &p.name,
                                 p.optional,

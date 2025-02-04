@@ -556,9 +556,9 @@
     {
       "Playing": {
         "Recruit": {
-          "units": [
-            "Settler"
-          ],
+          "units": {
+            "settlers": 1
+          },
           "city_position": "D1",
           "payment": {
             "food": 2
@@ -606,9 +606,9 @@
     {
       "Playing": {
         "Recruit": {
-          "units": [
-            "Settler"
-          ],
+          "units": {
+            "settlers": 1
+          },
           "city_position": "E7",
           "payment": {
             "food": 2

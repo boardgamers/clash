@@ -12,6 +12,7 @@ use crate::payment::{PaymentConversion, PaymentOptions};
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::position::Position;
 use crate::resource::ResourceType;
+use crate::unit::UnitType;
 use crate::{
     ability_initializer::AbilityInitializerSetup,
     advance::{Advance, Bonus::*},
@@ -20,6 +21,7 @@ use crate::{
     resource_pile::ResourcePile,
 };
 use std::collections::{HashMap, HashSet};
+use std::vec;
 // use crate::content::trade_routes::start_trade_routes;
 
 //names of advances that need special handling
@@ -314,12 +316,12 @@ fn warfare() -> Vec<Advance> {
                         {
                             Some(vec![
                                 CustomPhasePaymentRequest {
-                                    options: extra_die,
+                                    cost: extra_die,
                                     name: "Cancel fortress ability to add an extra die in the first round of combat".to_string(),
                                     optional: true,
                                 },
                                 CustomPhasePaymentRequest {
-                                    options: ignore_hit,
+                                    cost: ignore_hit,
                                     name: "Cancel fortress ability to ignore the first hit in the first round of combat".to_string(),
                                     optional: true,
                                 },
@@ -373,7 +375,7 @@ fn warfare() -> Vec<Advance> {
 
                         if player.can_afford(&cost) {
                             Some(vec![CustomPhasePaymentRequest {
-                                options: cost,
+                                cost: cost,
                                 name: "Use steel weapons".to_string(),
                                 optional: true,
                             }])
@@ -393,6 +395,24 @@ fn warfare() -> Vec<Advance> {
                     use_steel_weapons,
                     0,
                 ),
+            Advance::builder(
+                "Draft",
+                "When Recruiting, you may spend 1 mood token to pay for 1 Infantry Army Unit.")
+                .add_player_event_listener(
+                    |event| &mut event.recruit_cost,
+                    |cost, (), ()| {
+                        if cost.units.infantry > 0 {
+                            cost.units.infantry -= 1;
+                            // insert at beginning so that it's preferred over gold
+                            cost.cost.conversions.insert(0, PaymentConversion {
+                                from: vec![UnitType::cost(&UnitType::Infantry)],
+                                to: ResourcePile::mood_tokens(1),
+                                limit: Some(1),
+                            });
+                        }
+                    },
+                    0,
+                )
         ],
     )
 }
@@ -475,7 +495,7 @@ fn spirituality() -> Vec<Advance> {
                             ResourceType::Ideas,
                             ResourceType::Gold,
                         ] {
-                            cost.conversions.push(PaymentConversion::unlimited(vec![ResourcePile::mood_tokens(1)],ResourcePile::of(*r, 1)));
+                            cost.conversions.push(PaymentConversion::unlimited(vec![ResourcePile::mood_tokens(1)], ResourcePile::of(*r, 1)));
                         }
                     },
                     0,

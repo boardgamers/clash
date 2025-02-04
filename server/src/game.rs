@@ -12,9 +12,10 @@ use crate::events::EventMut;
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
 use crate::map::UnexploredBlock;
 use crate::movement::{has_movable_units, terrain_movement_restriction};
+use crate::payment::PaymentOptions;
 use crate::player_events::PlayerEvents;
 use crate::resource::check_for_waste;
-use crate::unit::{carried_units, get_current_move, MovementRestriction, UnitData};
+use crate::unit::{carried_units, get_current_move, MovementRestriction, UnitData, Units};
 use crate::utils::Rng;
 use crate::utils::Shuffle;
 use crate::{
@@ -503,7 +504,7 @@ impl Game {
                 };
                 self.execute_cultural_influence_resolution_action(
                     *action,
-                    c.roll_boost_cost,
+                    c.roll_boost_cost.clone(),
                     c.target_player_index,
                     c.target_city_position,
                     c.city_piece,
@@ -544,12 +545,12 @@ impl Game {
         mut move_state: MoveState,
     ) {
         let saved_state = move_state.clone();
-        let mut cost = None;
         let (starting_position, disembarked_units) = match action {
             Move {
                 units,
                 destination,
                 embark_carrier_id,
+                payment,
             } => {
                 if let Playing = self.state {
                     assert_ne!(self.actions_left, 0, "Illegal action");
@@ -584,9 +585,10 @@ impl Game {
                             .find(|route| route.destination == destination)
                             .expect("destination should be a valid destination")
                             .cost;
-                        if !c.is_empty() {
-                            self.players[player_index].loose_resources(c.clone());
-                            cost = Some(c.clone());
+                        if c.is_free() {
+                            assert_eq!(payment, ResourcePile::empty(), "payment should be empty");
+                        } else {
+                            self.players[player_index].pay_cost(c, &payment);
                         }
                     }
                     Err(e) => {
@@ -661,7 +663,6 @@ impl Game {
             starting_position,
             move_state: saved_state,
             disembarked_units,
-            cost,
         });
     }
 
@@ -738,7 +739,6 @@ impl Game {
             starting_position,
             move_state,
             disembarked_units,
-            cost,
         }) = self.undo_context_stack.pop()
         else {
             panic!("when undoing a movement action, the game should have stored movement context")
@@ -747,6 +747,7 @@ impl Game {
             units,
             destination: _,
             embark_carrier_id: _,
+            payment,
         } = action
         {
             self.undo_move_units(
@@ -756,9 +757,7 @@ impl Game {
                     "undo context should contain the starting position if units where moved",
                 ),
             );
-            if let Some(cost) = cost {
-                self.players[player_index].gain_resources(cost);
-            }
+            self.players[player_index].gain_resources(payment);
             for unit in disembarked_units {
                 self.players[player_index]
                     .get_unit_mut(unit.unit_id)
@@ -777,7 +776,7 @@ impl Game {
     fn execute_cultural_influence_resolution_action(
         &mut self,
         action: bool,
-        roll_boost_cost: u32,
+        roll_boost_cost: ResourcePile,
         target_player_index: usize,
         target_city_position: Position,
         city_piece: Building,
@@ -787,7 +786,7 @@ impl Game {
         if !action {
             return;
         }
-        self.players[player_index].loose_resources(ResourcePile::culture_tokens(roll_boost_cost));
+        self.players[player_index].loose_resources(roll_boost_cost);
         self.influence_culture(
             player_index,
             target_player_index,
@@ -806,12 +805,12 @@ impl Game {
                 "there should be a dice roll before a cultural influence resolution action",
             ) / 2
                 + 1;
-        let roll_boost_cost = 5 - roll as u32;
+        let roll_boost_cost = PlayingAction::roll_boost_cost(roll);
         let city_piece = c.city_piece;
         let target_player_index = c.target_player_index;
         let target_city_position = c.target_city_position;
         self.state = GameState::CulturalInfluenceResolution(CulturalInfluenceResolution {
-            roll_boost_cost,
+            roll_boost_cost: roll_boost_cost.clone(),
             target_player_index,
             target_city_position,
             city_piece,
@@ -819,8 +818,7 @@ impl Game {
         if !action {
             return;
         }
-        self.players[self.current_player_index]
-            .gain_resources(ResourcePile::culture_tokens(roll_boost_cost));
+        self.players[self.current_player_index].gain_resources(roll_boost_cost);
         self.undo_influence_culture(target_player_index, target_city_position, city_piece);
     }
 
@@ -1150,7 +1148,7 @@ impl Game {
     pub fn recruit(
         &mut self,
         player_index: usize,
-        units: Vec<UnitType>,
+        units: Units,
         city_position: Position,
         leader_name: Option<&String>,
         replaced_units: &[u32],
@@ -1187,8 +1185,9 @@ impl Game {
         });
         let player = &mut self.players[player_index];
         let mut ships = Vec::new();
-        player.units.reserve_exact(units.len());
-        for unit_type in units {
+        let vec = units.to_vec();
+        player.units.reserve_exact(vec.len());
+        for unit_type in vec {
             let city = player
                 .get_city(city_position)
                 .expect("player should have a city at the recruitment position");
@@ -1237,7 +1236,7 @@ impl Game {
     pub fn undo_recruit(
         &mut self,
         player_index: usize,
-        units: &[UnitType],
+        units: Units,
         city_position: Position,
         leader_name: Option<&String>,
     ) {
@@ -1264,7 +1263,7 @@ impl Game {
             self.players[player_index].active_leader = None;
         }
         let player = &mut self.players[player_index];
-        for _ in 0..units.len() {
+        for _ in 0..units.to_vec().len() {
             player
                 .units
                 .pop()
@@ -1490,13 +1489,13 @@ impl Game {
         target_player_index: usize,
         target_city_position: Position,
         city_piece: Building,
-    ) -> Option<ResourcePile> {
+    ) -> Option<PaymentOptions> {
         //todo allow cultural influence of barbarians
         let starting_city = self.get_city(player_index, starting_city_position);
         let range_boost = starting_city_position
             .distance(target_city_position)
             .saturating_sub(starting_city.size() as u32);
-        let range_boost_cost = ResourcePile::culture_tokens(range_boost);
+        let range_boost_cost = PaymentOptions::resources(ResourcePile::culture_tokens(range_boost));
         let self_influence = starting_city_position == target_city_position;
         let target_city = self.get_city(target_player_index, target_city_position);
         let target_city_owner = target_city.player_index;
@@ -1504,7 +1503,7 @@ impl Game {
         let player = &self.players[player_index];
         if matches!(city_piece, Building::Obelisk)
             || starting_city.player_index != player_index
-            || !player.can_afford_resources(&range_boost_cost)
+            || !player.can_afford(&range_boost_cost)
             || (starting_city.influenced() && !self_influence)
             || self.successful_cultural_influence
             || !player.is_building_available(city_piece, self)
@@ -1699,7 +1698,7 @@ pub struct GameData {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CulturalInfluenceResolution {
-    pub roll_boost_cost: u32,
+    pub roll_boost_cost: ResourcePile,
     pub target_player_index: usize,
     pub target_city_position: Position,
     pub city_piece: Building,
@@ -1826,9 +1825,6 @@ pub enum UndoContext {
         #[serde(default)]
         #[serde(skip_serializing_if = "Vec::is_empty")]
         disembarked_units: Vec<DisembarkUndoContext>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        cost: Option<ResourcePile>,
     },
     ExploreResolution(ExploreResolutionState),
     WastedResources {

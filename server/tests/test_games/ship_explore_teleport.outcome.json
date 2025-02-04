@@ -712,9 +712,9 @@
     {
       "Playing": {
         "Recruit": {
-          "units": [
-            "Ship"
-          ],
+          "units": {
+            "ships": 1
+          },
           "city_position": "E6",
           "payment": {
             "wood": 2

@@ -575,11 +575,7 @@
     {
       "Movement": {
         "starting_position": "F7",
-        "movement_actions_left": 2,
-        "cost": {
-          "wood": 1,
-          "ore": 1
-        }
+        "movement_actions_left": 2
       }
     },
     {

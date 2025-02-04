@@ -16,7 +16,6 @@ use server::player::Player;
 use server::playing_actions::{InfluenceCultureAttempt, PlayingAction};
 use server::position::Position;
 use server::resource::ResourceType;
-use server::resource_pile::ResourcePile;
 
 fn closest_city(player: &Player, position: Position) -> Position {
     player
@@ -32,8 +31,8 @@ pub fn cultural_influence_resolution_dialog(
     r: &CulturalInfluenceResolution,
 ) -> StateUpdate {
     let name = r.city_piece.name();
-    let pile = ResourcePile::culture_tokens(r.roll_boost_cost);
-    show_resource_pile(rc, &pile, &[ResourceType::CultureTokens]);
+    let pile = &r.roll_boost_cost;
+    show_resource_pile(rc, pile, &[ResourceType::CultureTokens]);
     if ok_button(rc, OkTooltip::Valid(format!("Influence {name} for {pile}"))) {
         return StateUpdate::Execute(Action::CulturalInfluenceResolution(true));
     }
@@ -77,7 +76,7 @@ fn show_city(rc: &RenderContext, mouse_pos: Vec2, city: &City) -> Option<StateUp
                 city.position,
                 *b,
             ) {
-                if player.can_afford_resources(&cost) {
+                if player.can_afford(&cost) {
                     let name = b.name();
                     let _ = rc.with_camera(CameraMode::World, |rc| {
                         draw_circle_lines(center.x, center.y, BUILDING_SIZE, 1., WHITE);
