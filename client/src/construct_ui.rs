@@ -122,9 +122,7 @@ impl ConstructionPayment {
                 .unwrap(),
         };
 
-        let available = &rc.shown_player.resources;
-        let payment = Payment::new(&cost, available, name, false);
-
+        let payment = rc.new_payment(&cost, name, false);
         ConstructionPayment {
             player_index: city.player_index,
             city_position: city.position,

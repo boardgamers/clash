@@ -4,8 +4,10 @@ use macroquad::camera::set_default_camera;
 use macroquad::math::{bool, Vec2};
 use macroquad::prelude::set_camera;
 use server::game::{Game, GameState};
+use server::payment::PaymentOptions;
 use server::player::Player;
 use server::playing_actions::PlayingActionType;
+use crate::payment_ui::Payment;
 
 pub struct RenderContext<'a> {
     pub game: &'a Game,
@@ -76,5 +78,10 @@ impl RenderContext<'_> {
 
     pub fn shown_player_is_active(&self) -> bool {
         self.game.active_player() == self.state.show_player
+    }
+    
+    pub fn new_payment(&self, cost: &PaymentOptions, name: &str, optional: bool) -> Payment {
+        let available = &self.shown_player.resources;
+        Payment::new(cost, available, name, optional)
     }
 }

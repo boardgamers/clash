@@ -5,10 +5,13 @@ use server::game::{CurrentMove, Game, GameState};
 use server::payment::PaymentOptions;
 use server::player::Player;
 use server::position::Position;
+use server::resource_pile::ResourcePile;
 use server::unit::{MovementAction, Unit, UnitType};
 
 use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::construct_ui::ConstructionProject;
 use crate::dialog_ui::cancel_button_with_tooltip;
+use crate::payment_ui::{payment_dialog, Payment};
 use crate::render_context::RenderContext;
 use crate::unit_ui::{click_unit, unit_selection_clicked};
 
@@ -17,6 +20,12 @@ pub enum MoveIntent {
     Land,
     Sea,
     Disembark,
+}
+
+#[derive(Clone)]
+pub struct MovePayment {
+    pub action: MovementAction,
+    pub payment: Payment,
 }
 
 impl MoveIntent {
@@ -76,10 +85,10 @@ fn move_destination(
     dest: &MoveDestination,
     pos: Position,
     unit: Option<u32>,
-) -> Option<(Position, Option<u32>)> {
+) -> Option<(Position, Option<u32>, Option<PaymentOptions>)> {
     match dest {
-        MoveDestination::Tile(p) if p == &pos => Some((*p, None)),
-        MoveDestination::Carrier(id) if unit.is_some_and(|u| u == *id) => Some((pos, Some(*id))),
+        MoveDestination::Tile((p, cost)) if p == &pos => Some((*p, None, Some(cost.clone()))),
+        MoveDestination::Carrier(id) if unit.is_some_and(|u| u == *id) => Some((pos, Some(*id), None)),
         _ => None,
     }
 }
@@ -88,17 +97,26 @@ pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Ve
     let game = rc.game;
     let p = game.get_player(s.player_index);
     let carrier = click_unit(rc, pos, mouse_pos, p, false);
-    if let Some((destination, embark_carrier_id)) = s
+    if let Some((destination, embark_carrier_id, cost)) = s
         .destinations
         .iter()
         .find_map(|d| move_destination(d, pos, carrier))
     {
         let units = s.units.clone();
-        StateUpdate::execute(Action::Movement(MovementAction::Move {
+        let action = MovementAction::Move {
             units,
             destination,
             embark_carrier_id,
-        }))
+            payment: ResourcePile::empty(),
+        };
+
+        if let Some(cost) = cost {
+            return StateUpdate::OpenDialog(ActiveDialog::MovePayment(MovePayment {
+                action,
+                payment: rc.new_payment(&cost, "Move units", true),
+            }));
+        }
+        StateUpdate::execute(Action::Movement(action))
     } else if s.start.is_some_and(|p| p != pos) {
         // first need to deselect units
         StateUpdate::None
@@ -242,4 +260,39 @@ pub(crate) fn move_units_dialog(rc: &RenderContext) -> StateUpdate {
         return StateUpdate::CloseDialog;
     }
     StateUpdate::None
+}
+
+pub(crate) fn move_payment_dialog(
+    rc: &RenderContext,
+    mp: &MovePayment,
+) -> StateUpdate {
+    payment_dialog(
+        rc,
+        &mp.payment.clone(),
+        |p| {
+            let mut new = mp.clone();
+            new.payment = p;
+            ActiveDialog::MovePayment(new)
+        },
+        |payment| {
+            if let MovementAction::Move {
+                units,
+                destination,
+                embark_carrier_id,
+                payment: _,
+            } = mp.action {
+                StateUpdate::execute(Action::Movement(MovementAction::Move {
+                    units,
+                    destination,
+                    embark_carrier_id,
+                    payment,
+                }))
+            } else {
+                panic!("Unexpected action");
+            }
+            let mut action = mp.action.clone();
+            action.payment = payment;
+            StateUpdate::execute(Action::Movement(action))
+        },
+    )
 }

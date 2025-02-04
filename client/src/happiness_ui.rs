@@ -40,8 +40,7 @@ impl IncreaseHappinessConfig {
             })
             .unwrap();
 
-        let available = &p.resources;
-        Payment::new(&payment, available, "Increase happiness", false)
+        Payment::new(&payment, &p.resources, "Increase happiness", false)
     }
 }
 
