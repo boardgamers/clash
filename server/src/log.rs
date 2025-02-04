@@ -304,21 +304,12 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
     let player = &game.players[game.active_player()];
     let player_name = player.get_name();
     match action {
-        MovementAction::Move {
-            units,
-            destination: _,
-            embark_carrier_id: _,
-            payment: _,
-        } if units.is_empty() => {
+        MovementAction::Move(m) if m.units.is_empty() => {
             format!("\t{player_name} used a movement actions but moved no units")
         }
-        MovementAction::Move {
-            units,
-            destination,
-            embark_carrier_id: _,
-            payment,
-        } => {
-            let units_str = units
+        MovementAction::Move(m) => {
+            let units_str = m
+                .units
                 .iter()
                 .map(|unit| {
                     player
@@ -329,13 +320,14 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
                 })
                 .collect::<Units>();
             let start = player
-                .get_unit(units[0])
+                .get_unit(m.units[0])
                 .expect("the player should have moved units")
                 .position;
             let start_is_water = game.map.is_water(start);
+            let dest = m.destination;
             let t = game
                 .map
-                .get(*destination)
+                .get(dest)
                 .expect("the destination position should be on the map");
             let (verb, suffix) = if start_is_water {
                 if t.is_unexplored() || t.is_water() {
@@ -345,17 +337,18 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
                 }
             } else if t.is_water() {
                 ("embarked", "")
-            } else if start.is_neighbor(*destination) {
+            } else if start.is_neighbor(dest) {
                 ("marched", "")
             } else {
                 ("marched", " on roads")
             };
+            let payment = &m.payment;
             let cost = if payment.is_empty() {
                 String::new()
             } else {
                 format!(" for {payment}")
             };
-            format!("\t{player_name} {verb} {units_str} from {start} to {destination}{suffix}{cost}",)
+            format!("\t{player_name} {verb} {units_str} from {start} to {dest}{suffix}{cost}",)
         }
         MovementAction::Stop => format!("\t{player_name} ended the movement action"),
     }

@@ -375,7 +375,7 @@ fn warfare() -> Vec<Advance> {
 
                         if player.can_afford(&cost) {
                             Some(vec![CustomPhasePaymentRequest {
-                                cost: cost,
+                                cost,
                                 name: "Use steel weapons".to_string(),
                                 optional: true,
                             }])

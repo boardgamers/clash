@@ -6,10 +6,9 @@ use server::payment::PaymentOptions;
 use server::player::Player;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-use server::unit::{MovementAction, Unit, UnitType};
+use server::unit::{MoveUnits, MovementAction, Unit, UnitType};
 
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::construct_ui::ConstructionProject;
 use crate::dialog_ui::cancel_button_with_tooltip;
 use crate::payment_ui::{payment_dialog, Payment};
 use crate::render_context::RenderContext;
@@ -88,7 +87,9 @@ fn move_destination(
 ) -> Option<(Position, Option<u32>, Option<PaymentOptions>)> {
     match dest {
         MoveDestination::Tile((p, cost)) if p == &pos => Some((*p, None, Some(cost.clone()))),
-        MoveDestination::Carrier(id) if unit.is_some_and(|u| u == *id) => Some((pos, Some(*id), None)),
+        MoveDestination::Carrier(id) if unit.is_some_and(|u| u == *id) => {
+            Some((pos, Some(*id), None))
+        }
         _ => None,
     }
 }
@@ -103,12 +104,12 @@ pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Ve
         .find_map(|d| move_destination(d, pos, carrier))
     {
         let units = s.units.clone();
-        let action = MovementAction::Move {
+        let action = MovementAction::Move(MoveUnits {
             units,
             destination,
             embark_carrier_id,
             payment: ResourcePile::empty(),
-        };
+        });
 
         if let Some(cost) = cost {
             return StateUpdate::OpenDialog(ActiveDialog::MovePayment(MovePayment {
@@ -262,10 +263,7 @@ pub(crate) fn move_units_dialog(rc: &RenderContext) -> StateUpdate {
     StateUpdate::None
 }
 
-pub(crate) fn move_payment_dialog(
-    rc: &RenderContext,
-    mp: &MovePayment,
-) -> StateUpdate {
+pub(crate) fn move_payment_dialog(rc: &RenderContext, mp: &MovePayment) -> StateUpdate {
     payment_dialog(
         rc,
         &mp.payment.clone(),
@@ -275,24 +273,12 @@ pub(crate) fn move_payment_dialog(
             ActiveDialog::MovePayment(new)
         },
         |payment| {
-            if let MovementAction::Move {
-                units,
-                destination,
-                embark_carrier_id,
-                payment: _,
-            } = mp.action {
-                StateUpdate::execute(Action::Movement(MovementAction::Move {
-                    units,
-                    destination,
-                    embark_carrier_id,
-                    payment,
-                }))
+            if let MovementAction::Move(mut m) = mp.action.clone() {
+                m.payment = payment;
+                StateUpdate::execute(Action::Movement(MovementAction::Move(m)))
             } else {
                 panic!("Unexpected action");
             }
-            let mut action = mp.action.clone();
-            action.payment = payment;
-            StateUpdate::execute(Action::Movement(action))
         },
     )
 }

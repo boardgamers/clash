@@ -1,14 +1,3 @@
-use macroquad::prelude::*;
-use server::ability_initializer::EventOrigin;
-use server::action::Action;
-use server::city::{City, MoodState};
-use server::combat::{active_attackers, active_defenders, CombatPhase};
-use server::content::advances::{NAVIGATION, ROADS};
-use server::content::custom_phase_actions::CustomPhaseRequest;
-use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
-use server::position::Position;
-use server::status_phase::{StatusPhaseAction, StatusPhaseState};
-use server::unit::MovementAction;
 use crate::assets::Assets;
 use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
@@ -23,6 +12,16 @@ use crate::payment_ui::Payment;
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use crate::render_context::RenderContext;
 use crate::status_phase_ui::ChooseAdditionalAdvances;
+use macroquad::prelude::*;
+use server::ability_initializer::EventOrigin;
+use server::action::Action;
+use server::city::{City, MoodState};
+use server::combat::{active_attackers, active_defenders, CombatPhase};
+use server::content::advances::{NAVIGATION, ROADS};
+use server::content::custom_phase_actions::CustomPhaseRequest;
+use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
+use server::position::Position;
+use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 #[derive(Clone)]
 pub enum ActiveDialog {
@@ -111,7 +110,9 @@ impl ActiveDialog {
                     "Click on a city to increase happiness".to_string(),
                 ]
             }
-            ActiveDialog::AdvancePayment(_) | ActiveDialog::ConstructionPayment(_) |ActiveDialog::MovePayment(_)=> {
+            ActiveDialog::AdvancePayment(_)
+            | ActiveDialog::ConstructionPayment(_)
+            | ActiveDialog::MovePayment(_) => {
                 vec!["Pay resources".to_string()]
             }
             ActiveDialog::CollectResources(collect) => collect.help_text(rc.game),

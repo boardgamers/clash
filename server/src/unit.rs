@@ -414,17 +414,20 @@ impl Display for Units {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub struct MoveUnits {
+    pub units: Vec<u32>,
+    pub destination: Position,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub embark_carrier_id: Option<u32>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "ResourcePile::is_empty")]
+    pub payment: ResourcePile,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum MovementAction {
-    Move {
-        units: Vec<u32>,
-        destination: Position,
-        #[serde(default)]
-        #[serde(skip_serializing_if = "Option::is_none")]
-        embark_carrier_id: Option<u32>,
-        #[serde(default)]
-        #[serde(skip_serializing_if = "ResourcePile::is_empty")]
-        payment: ResourcePile,
-    },
+    Move(MoveUnits),
     Stop,
 }
 

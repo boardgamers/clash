@@ -433,7 +433,7 @@ impl Player {
     ///
     /// Panics if player cannot afford the resources
     pub fn pay_cost(&mut self, cost: &PaymentOptions, payment: &ResourcePile) {
-        assert!(cost.can_afford(&payment), "invalid payment");
+        assert!(cost.can_afford(payment), "invalid payment");
         self.loose_resources(payment.clone());
     }
 

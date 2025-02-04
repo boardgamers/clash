@@ -7,7 +7,7 @@ use server::status_phase::{
 };
 
 use server::content::trade_routes::find_trade_routes;
-use server::unit::Units;
+use server::unit::{MoveUnits, Units};
 use server::{
     action::Action,
     city::{City, MoodState::*},
@@ -218,12 +218,12 @@ fn basic_actions() {
 }
 
 fn move_action(units: Vec<u32>, destination: Position) -> Action {
-    Action::Movement(Move {
+    Action::Movement(Move(MoveUnits {
         units,
         destination,
         embark_carrier_id: None,
         payment: ResourcePile::empty(),
-    })
+    }))
 }
 
 #[test]
@@ -623,9 +623,16 @@ fn test_movement() {
 
 #[test]
 fn test_movement_on_roads_from_city() {
+    let units = vec![0];
+    let destination = Position::from_offset("F7");
     test_action(
         "movement_on_roads_from_city",
-        move_action(vec![0], Position::from_offset("F7")),
+        Action::Movement(Move(MoveUnits {
+            units,
+            destination,
+            embark_carrier_id: None,
+            payment: ResourcePile::food(1) + ResourcePile::ore(1),
+        })),
         1,
         true,
         false,
@@ -634,9 +641,16 @@ fn test_movement_on_roads_from_city() {
 
 #[test]
 fn test_movement_on_roads_to_city() {
+    let units = vec![0];
+    let destination = Position::from_offset("D8");
     test_action(
         "movement_on_roads_to_city",
-        move_action(vec![0], Position::from_offset("D8")),
+        Action::Movement(Move(MoveUnits {
+            units,
+            destination,
+            embark_carrier_id: None,
+            payment: ResourcePile::food(1) + ResourcePile::ore(1),
+        })),
         1,
         true,
         false,
@@ -1290,12 +1304,12 @@ fn test_ship_transport_same_sea() {
 fn test_ship_embark() {
     test_action(
         "ship_embark",
-        Action::Movement(Move {
+        Action::Movement(Move(MoveUnits {
             units: vec![3, 4],
             destination: Position::from_offset("C3"),
             embark_carrier_id: Some(8),
             payment: ResourcePile::empty(),
-        }),
+        })),
         0,
         true,
         false,
@@ -1306,12 +1320,12 @@ fn test_ship_embark() {
 fn test_ship_embark_continue() {
     test_action(
         "ship_embark_continue",
-        Action::Movement(Move {
+        Action::Movement(Move(MoveUnits {
             units: vec![5, 6],
             destination: Position::from_offset("C3"),
             embark_carrier_id: Some(9),
             payment: ResourcePile::empty(),
-        }),
+        })),
         0,
         true,
         false,
