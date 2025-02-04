@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::iter;
 use std::{
@@ -191,11 +192,23 @@ pub enum MovementRestriction {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct Units {
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
     pub settlers: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
     pub infantry: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
     pub ships: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
     pub cavalry: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
     pub elephants: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
     pub leaders: u8,
 }
 
@@ -401,14 +414,20 @@ impl Display for Units {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub struct MoveUnits {
+    pub units: Vec<u32>,
+    pub destination: Position,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub embark_carrier_id: Option<u32>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "ResourcePile::is_empty")]
+    pub payment: ResourcePile,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum MovementAction {
-    Move {
-        units: Vec<u32>,
-        destination: Position,
-        #[serde(default)]
-        #[serde(skip_serializing_if = "Option::is_none")]
-        embark_carrier_id: Option<u32>,
-    },
+    Move(MoveUnits),
     Stop,
 }
 

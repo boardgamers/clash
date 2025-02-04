@@ -88,11 +88,14 @@ fn selectable_unit(
         units.get(&unit.unit_type)
     };
 
-    let max = if player.can_recruit_without_replaced(
-        all.to_vec().as_slice(),
-        city_position,
-        unit.leader_name.as_ref().or(leader_name),
-    ) {
+    let max = if player
+        .recruit_cost_without_replaced(
+            &all,
+            city_position,
+            unit.leader_name.as_ref().or(leader_name),
+        )
+        .is_some()
+    {
         u32::from(current + 1)
     } else {
         u32::from(current)
@@ -184,12 +187,16 @@ impl UnitSelection for RecruitSelection {
 
 impl ConfirmSelection for RecruitSelection {
     fn confirm(&self, game: &Game) -> OkTooltip {
-        if game.get_player(self.amount.player_index).can_recruit(
-            self.amount.units.clone().to_vec().as_slice(),
-            self.amount.city_position,
-            self.amount.leader_name.as_ref(),
-            self.replaced_units.as_slice(),
-        ) {
+        if game
+            .get_player(self.amount.player_index)
+            .recruit_cost(
+                &self.amount.units,
+                self.amount.city_position,
+                self.amount.leader_name.as_ref(),
+                self.replaced_units.as_slice(),
+            )
+            .is_some()
+        {
             OkTooltip::Valid("Recruit units".to_string())
         } else {
             OkTooltip::Invalid("Replace exact amount of units".to_string())

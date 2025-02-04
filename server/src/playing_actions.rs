@@ -7,7 +7,7 @@ use crate::city::MoodState;
 use crate::collect::{collect, undo_collect};
 use crate::game::{CulturalInfluenceResolution, GameState};
 use crate::payment::PaymentOptions;
-use crate::unit::Unit;
+use crate::unit::{Unit, Units};
 use crate::{
     city::City,
     city_pieces::Building::{self, *},
@@ -15,7 +15,6 @@ use crate::{
     game::{Game, UndoContext},
     position::Position,
     resource_pile::ResourcePile,
-    unit::UnitType,
 };
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
@@ -35,7 +34,7 @@ pub struct Collect {
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Recruit {
-    pub units: Vec<UnitType>,
+    pub units: Units,
     pub city_position: Position,
     pub payment: ResourcePile,
     #[serde(default)]
@@ -124,11 +123,7 @@ impl PlayingAction {
         match self {
             Advance { advance, payment } => {
                 let player = &mut game.players[player_index];
-                assert!(
-                    player.advance_cost(&advance).is_valid_payment(&payment),
-                    "Illegal action"
-                );
-                player.loose_resources(payment);
+                player.pay_cost(&player.advance_cost(&advance), &payment);
                 game.advance(&advance, player_index);
             }
             FoundCity { settler } => {
@@ -145,8 +140,7 @@ impl PlayingAction {
                 let city = player.get_city(c.city_position).expect("Illegal action");
                 let cost = player.construct_cost(c.city_piece, city);
                 assert!(
-                    city.can_construct(c.city_piece, player, game)
-                        && cost.is_valid_payment(&c.payment),
+                    city.can_construct(c.city_piece, player, game),
                     "Illegal action"
                 );
                 if matches!(c.city_piece, Port) {
@@ -170,7 +164,7 @@ impl PlayingAction {
                 } else if c.temple_bonus.is_some() {
                     panic!("Illegal action");
                 }
-                player_mut.loose_resources(c.payment);
+                player_mut.pay_cost(&cost, &c.payment);
                 player_mut.construct(c.city_piece, c.city_position, c.port_position);
             }
             Collect(c) => {
@@ -185,19 +179,18 @@ impl PlayingAction {
                 collect(game, player_index, &c);
             }
             Recruit(r) => {
-                let cost = PaymentOptions::resources(
-                    r.units.iter().map(UnitType::cost).sum::<ResourcePile>(),
-                );
                 let player = &mut game.players[player_index];
-                assert!(
-                    player.can_recruit(
-                        &r.units,
-                        r.city_position,
-                        r.leader_name.as_ref(),
-                        &r.replaced_units
-                    ) && cost.is_valid_payment(&r.payment)
+                let cost = player.recruit_cost(
+                    &r.units,
+                    r.city_position,
+                    r.leader_name.as_ref(),
+                    &r.replaced_units,
                 );
-                player.loose_resources(r.payment);
+                if let Some(cost) = cost {
+                    player.pay_cost(&cost, &r.payment);
+                } else {
+                    panic!("Cannot pay for units")
+                }
                 game.recruit(
                     player_index,
                     r.units,
@@ -226,7 +219,8 @@ impl PlayingAction {
 
                 let self_influence = starting_city_position == target_city_position;
 
-                game.players[player_index].loose_resources(range_boost_cost);
+                // currectly, there is no way to have different costs for this
+                game.players[player_index].loose_resources(range_boost_cost.default);
                 let roll = game.get_next_dice_roll().value;
                 let success = roll == 5 || roll == 6;
                 if success {
@@ -243,20 +237,21 @@ impl PlayingAction {
                     game.add_to_last_log_item(&format!(" and failed (rolled {roll})"));
                     return;
                 }
-                let roll_boost_cost = 5 - roll as u32;
-                if !game.players[player_index]
-                    .can_afford_resources(&ResourcePile::culture_tokens(roll_boost_cost))
+                if let Some(roll_boost_cost) =
+                    PaymentOptions::resources(Self::roll_boost_cost(roll))
+                        .first_valid_payment(&game.players[player_index].resources)
                 {
+                    game.add_to_last_log_item(&format!(" and rolled a {roll}. {} now has the option to pay {roll_boost_cost} to increase the dice roll and proceed with the cultural influence", game.players[player_index].get_name()));
+                    game.state =
+                        GameState::CulturalInfluenceResolution(CulturalInfluenceResolution {
+                            roll_boost_cost,
+                            target_player_index,
+                            target_city_position,
+                            city_piece,
+                        });
+                } else {
                     game.add_to_last_log_item(&format!(" but rolled a {roll} and has not enough culture tokens to increase the roll "));
-                    return;
                 }
-                game.state = GameState::CulturalInfluenceResolution(CulturalInfluenceResolution {
-                    roll_boost_cost,
-                    target_player_index,
-                    target_city_position,
-                    city_piece,
-                });
-                game.add_to_last_log_item(&format!(" and rolled a {roll}. {} now has the option to pay {} culture tokens to increase the dice roll and proceed with the cultural influence", game.players[player_index].get_name(), 5 - roll as u32));
             }
             Custom(custom_action) => {
                 let action = custom_action.custom_action_type();
@@ -277,6 +272,10 @@ impl PlayingAction {
             }
             EndTurn => game.next_turn(),
         }
+    }
+
+    pub(crate) fn roll_boost_cost(roll: u8) -> ResourcePile {
+        ResourcePile::culture_tokens(5 - roll as u32)
     }
 
     #[must_use]
@@ -357,7 +356,7 @@ impl PlayingAction {
                 game.players[player_index].gain_resources(r.payment);
                 game.undo_recruit(
                     player_index,
-                    &r.units,
+                    r.units,
                     r.city_position,
                     r.leader_name.as_ref(),
                 );
@@ -427,11 +426,7 @@ pub(crate) fn increase_happiness(game: &mut Game, player_index: usize, i: Increa
             city.increase_mood_state();
         }
     }
-    assert!(
-        total_cost.is_valid_payment(&i.payment.clone()),
-        "Illegal action"
-    );
-    player.loose_resources(i.payment);
+    player.pay_cost(&total_cost, &i.payment);
     game.push_undo_context(UndoContext::IncreaseHappiness { angry_activations });
 }
 

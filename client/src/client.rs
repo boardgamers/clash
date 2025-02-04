@@ -146,6 +146,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         }
         ActiveDialog::ExploreResolution(r) => explore_dialog(rc, r),
         ActiveDialog::MoveUnits(_) => move_ui::move_units_dialog(rc),
+        ActiveDialog::MovePayment(p) => move_ui::move_payment_dialog(rc, p),
 
         //status phase
         ActiveDialog::FreeAdvance => show_free_advance_menu(rc),

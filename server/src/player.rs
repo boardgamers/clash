@@ -5,6 +5,7 @@ use crate::game::GameState::Movement;
 use crate::movement::move_routes;
 use crate::movement::{is_valid_movement_type, MoveRoute};
 use crate::payment::PaymentOptions;
+use crate::player_events::RecruitCost;
 use crate::resource::ResourceType;
 use crate::unit::{carried_units, get_current_move, MovementRestriction, UnitData};
 use crate::{
@@ -422,11 +423,6 @@ impl Player {
     }
 
     #[must_use]
-    pub fn can_afford_resources(&self, cost: &ResourcePile) -> bool {
-        self.can_afford(&PaymentOptions::resources(cost.clone()))
-    }
-
-    #[must_use]
     pub fn can_afford(&self, cost: &PaymentOptions) -> bool {
         cost.can_afford(&self.resources)
     }
@@ -436,9 +432,19 @@ impl Player {
     /// # Panics
     ///
     /// Panics if player cannot afford the resources
+    pub fn pay_cost(&mut self, cost: &PaymentOptions, payment: &ResourcePile) {
+        assert!(cost.can_afford(payment), "invalid payment");
+        self.loose_resources(payment.clone());
+    }
+
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if player cannot afford the resources
     pub fn loose_resources(&mut self, resources: ResourcePile) {
         assert!(
-            self.can_afford_resources(&resources),
+            self.resources.has_at_least(&resources, 1),
             "player should be able to afford the resources"
         );
         self.resources -= resources;
@@ -582,11 +588,11 @@ impl Player {
 
     #[must_use]
     pub fn construct_cost(&self, building: Building, city: &City) -> PaymentOptions {
-        let mut cost = CONSTRUCT_COST;
+        let mut cost = PaymentOptions::resources(CONSTRUCT_COST);
         self.get_events()
             .construct_cost
             .trigger(&mut cost, city, &building);
-        PaymentOptions::resources(cost)
+        cost
     }
 
     #[must_use]
@@ -720,24 +726,19 @@ impl Player {
     ///
     /// Panics if city does not exist
     #[must_use]
-    pub fn can_recruit(
+    pub fn recruit_cost(
         &self,
-        units: &[UnitType],
+        units: &Units,
         city_position: Position,
         leader_name: Option<&String>,
         replaced_units: &[u32],
-    ) -> bool {
-        if !self.can_recruit_without_replaced(units, city_position, leader_name) {
-            return false;
-        }
-        let mut units_left = self.available_units();
-        let mut required_units = Units::empty();
-        for unit in units {
-            if !units_left.has_unit(unit) {
-                required_units += unit;
-                continue;
+    ) -> Option<PaymentOptions> {
+        let mut require_replace = units.clone();
+        for t in self.available_units().to_vec() {
+            let a = require_replace.get_mut(&t);
+            if *a > 0 {
+                *a -= 1;
             }
-            units_left -= unit;
         }
         let replaced_units = replaced_units
             .iter()
@@ -748,10 +749,10 @@ impl Player {
                     .clone()
             })
             .collect();
-        if required_units != replaced_units {
-            return false;
+        if require_replace != replaced_units {
+            return None;
         }
-        true
+        self.recruit_cost_without_replaced(units, city_position, leader_name)
     }
 
     ///
@@ -760,53 +761,61 @@ impl Player {
     ///
     /// Panics if city does not exist
     #[must_use]
-    pub fn can_recruit_without_replaced(
+    pub fn recruit_cost_without_replaced(
         &self,
-        units: &[UnitType],
+        units: &Units,
         city_position: Position,
         leader_name: Option<&String>,
-    ) -> bool {
+    ) -> Option<PaymentOptions> {
         let city = self
             .get_city(city_position)
             .expect("player should have a city at the recruitment position");
         if !city.can_activate() {
-            return false;
+            return None;
         }
-        let cost = PaymentOptions::resources(units.iter().map(UnitType::cost).sum());
-        if !self.can_afford(&cost) {
-            return false;
+        let vec = units.clone().to_vec();
+        let mut cost = RecruitCost {
+            cost: PaymentOptions::resources(vec.iter().map(UnitType::cost).sum()),
+            units: units.clone(),
+        };
+        self.get_events().recruit_cost.trigger(&mut cost, &(), &());
+        if !self.can_afford(&cost.cost) {
+            return None;
         }
-        if units.len() > city.mood_modified_size() {
-            return false;
+        if vec.len() > city.mood_modified_size() {
+            return None;
         }
-        if units.iter().any(|unit| matches!(unit, Cavalry | Elephant))
-            && city.pieces.market.is_none()
+        if vec.iter().any(|unit| matches!(unit, Cavalry | Elephant)) && city.pieces.market.is_none()
         {
-            return false;
+            return None;
         }
-        if units.iter().any(|unit| matches!(unit, Ship)) && city.pieces.port.is_none() {
-            return false;
+        if vec.iter().any(|unit| matches!(unit, Ship)) && city.pieces.port.is_none() {
+            return None;
         }
         if self
             .get_units(city_position)
             .iter()
             .filter(|unit| unit.unit_type.is_army_unit())
             .count()
-            + units.iter().filter(|unit| unit.is_army_unit()).count()
+            + vec.iter().filter(|unit| unit.is_army_unit()).count()
             > STACK_LIMIT
         {
-            return false;
+            return None;
         }
 
-        let leaders = units
+        let leaders = vec
             .iter()
             .filter(|unit| matches!(unit, UnitType::Leader))
             .count();
-        match leaders {
+        let match_leader = match leaders {
             0 => leader_name.is_none(),
             1 => leader_name.is_some_and(|n| self.available_leaders.contains(n)),
             _ => false,
+        };
+        if !match_leader {
+            return None;
         }
+        Some(cost.cost)
     }
 
     pub fn add_unit(&mut self, position: Position, unit_type: UnitType) {
@@ -890,7 +899,7 @@ impl Player {
             move_routes(start, self, unit_ids, game, embark_carrier_id)
                 .iter()
                 .filter(|route| {
-                    if !self.can_afford_resources(&route.cost) {
+                    if !self.can_afford(&route.cost) {
                         return false;
                     }
                     if movement_restrictions.contains(&&MovementRestriction::Battle) {

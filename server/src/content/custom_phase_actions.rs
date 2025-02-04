@@ -20,14 +20,14 @@ impl CustomPhaseEventType {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CustomPhasePaymentRequest {
-    pub options: PaymentOptions,
+    pub cost: PaymentOptions,
     pub name: String,
     pub optional: bool,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CustomPhaseRewardRequest {
-    pub options: PaymentOptions,
+    pub reward: PaymentOptions,
     pub name: String,
 }
 

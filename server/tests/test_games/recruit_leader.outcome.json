@@ -279,9 +279,9 @@
     {
       "Playing": {
         "Recruit": {
-          "units": [
-            "Leader"
-          ],
+          "units": {
+            "leaders": 1
+          },
           "city_position": "A1",
           "payment": {
             "mood_tokens": 1,

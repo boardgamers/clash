@@ -34,7 +34,7 @@ impl HasCountSelectableObject for ResourcePayment {
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Payment {
     pub name: String,
-    pub options: PaymentOptions,
+    pub cost: PaymentOptions,
     pub available: ResourcePile,
     pub optional: bool,
     pub current: Vec<ResourcePayment>,
@@ -43,23 +43,28 @@ pub struct Payment {
 impl Payment {
     #[must_use]
     pub fn new(
-        model: &PaymentOptions,
+        cost: &PaymentOptions,
         available: &ResourcePile,
         name: &str,
         optional: bool,
     ) -> Payment {
         Self {
             name: name.to_string(),
-            options: model.clone(),
+            cost: cost.clone(),
             available: available.clone(),
             optional,
-            current: resource_payment(model, available),
+            current: resource_payment(cost, available),
         }
     }
 
     #[must_use]
     pub fn new_gain(options: &PaymentOptions, name: &str) -> Payment {
-        Self::new(options, &options.default, name, false)
+        let a = options.default.resource_amount();
+        let mut available = ResourcePile::empty();
+        for r in options.possible_resource_types() {
+            available += ResourcePile::of(r, a);
+        }
+        Self::new(options, &available, name, false)
     }
 
     pub fn to_resource_pile(&self) -> ResourcePile {
@@ -98,6 +103,7 @@ impl Payment {
 pub fn payment_dialog(
     rc: &RenderContext,
     payment: &Payment,
+    may_cancel: bool,
     to_dialog: impl FnOnce(Payment) -> ActiveDialog,
     execute_action: impl FnOnce(ResourcePile) -> StateUpdate,
 ) -> StateUpdate {
@@ -105,7 +111,7 @@ pub fn payment_dialog(
         rc,
         &[payment.clone()],
         |v| to_dialog(v[0].clone()),
-        payment.optional,
+        may_cancel,
         |v| execute_action(v[0].clone()),
     )
 }
@@ -124,12 +130,12 @@ pub fn multi_payment_dialog(
 
     for (i, payment) in payments.iter().enumerate() {
         let name = &payment.name;
-        let options = payment.options.clone();
-        let types = options.possible_resource_types();
+        let cost = payment.cost.clone();
+        let types = cost.possible_resource_types();
         let offset = vec2(0., i as f32 * -100.);
         bottom_centered_text_with_offset(
             rc,
-            &format!("{name} for {options}"),
+            &format!("{name} for {cost}"),
             offset + vec2(0., -30.),
         );
         let result = select_ui::count_dialog(
@@ -185,17 +191,17 @@ fn ok_tooltip(payments: &[Payment], mut available: ResourcePile) -> OkTooltip {
     let mut invalid: Vec<String> = vec![];
 
     for payment in payments {
-        let options = &payment.options;
+        let cost = &payment.cost;
         let pile = payment.to_resource_pile();
         let name = &payment.name;
         let tooltip = if payment.optional && pile.is_empty() {
             OkTooltip::Valid(format!("Pay nothing for {name}"))
-        } else if options.can_afford(&available) && options.is_valid_payment(&pile) {
+        } else if available.has_at_least(&pile, 1) && cost.is_valid_payment(&pile) {
             // make sure that we can afford all the payments
             available -= payment.to_resource_pile();
             OkTooltip::Valid(format!("Pay {pile} for {name}"))
         } else {
-            OkTooltip::Invalid(format!("You don't have {:?} for {}", payment.options, name))
+            OkTooltip::Invalid(format!("You don't have {:?} for {}", payment.cost, name))
         };
         match tooltip {
             OkTooltip::Valid(v) => valid.push(v),
@@ -224,7 +230,8 @@ fn replace_updated_payment(payment: &Payment, all: &[Payment]) -> Vec<Payment> {
 
 #[must_use]
 fn resource_payment(options: &PaymentOptions, available: &ResourcePile) -> Vec<ResourcePayment> {
-    let mut resources: Vec<ResourcePayment> = new_resource_map(&options.default)
+    let d = options.first_valid_payment(available).unwrap();
+    let mut resources: Vec<ResourcePayment> = new_resource_map(&d)
         .into_iter()
         .map(|e| {
             let resource_type = e.0;

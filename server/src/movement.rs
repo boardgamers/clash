@@ -2,6 +2,7 @@ use crate::content::advances::{NAVIGATION, ROADS};
 use crate::game::Game;
 use crate::map::Map;
 use crate::map::Terrain::{Forest, Mountain};
+use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -11,7 +12,7 @@ use itertools::Itertools;
 #[derive(Debug, Clone)]
 pub struct MoveRoute {
     pub destination: Position,
-    pub cost: ResourcePile,
+    pub cost: PaymentOptions,
     pub stack_size_used: usize,
     pub ignore_terrain_movement_restrictions: bool,
 }
@@ -20,7 +21,7 @@ impl MoveRoute {
     fn simple(destination: Position) -> Self {
         Self {
             destination,
-            cost: ResourcePile::empty(),
+            cost: PaymentOptions::free(),
             stack_size_used: 0,
             ignore_terrain_movement_restrictions: false,
         }
@@ -125,7 +126,9 @@ fn reachable_with_roads(player: &Player, units: &[u32], game: &Game) -> Vec<Move
                         stack_sizes_used.iter().map(|&(_, s)| s).min().expect("min");
                     let route = MoveRoute {
                         destination,
-                        cost: ResourcePile::ore(1) + ResourcePile::food(1),
+                        cost: PaymentOptions::resources(
+                            ResourcePile::ore(1) + ResourcePile::food(1),
+                        ),
                         stack_size_used,
                         ignore_terrain_movement_restrictions: true,
                     };

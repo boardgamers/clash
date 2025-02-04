@@ -41,7 +41,7 @@
       "request": {
         "Payment": [
           {
-            "options": {
+            "cost": {
               "default": {
                 "ore": 1
               },

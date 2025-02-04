@@ -290,10 +290,10 @@
     {
       "Playing": {
         "Recruit": {
-          "units": [
-            "Settler",
-            "Infantry"
-          ],
+          "units": {
+            "settlers": 1,
+            "infantry": 1
+          },
           "city_position": "A1",
           "payment": {
             "food": 1,

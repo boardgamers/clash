@@ -29,10 +29,7 @@ pub enum AdvanceState {
 }
 
 fn new_advance_payment(rc: &RenderContext, name: &str) -> Payment {
-    let p = rc.shown_player;
-    let options = &p.advance_cost(name);
-    let available = &p.resources;
-    Payment::new(options, available, name, false)
+    rc.new_payment(&rc.shown_player.advance_cost(name), name, false)
 }
 
 pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
@@ -214,7 +211,7 @@ pub fn pay_advance_dialog(ap: &Payment, rc: &RenderContext) -> StateUpdate {
         // select a different advance
         return update;
     };
-    payment_dialog(rc, ap, ActiveDialog::AdvancePayment, |payment| {
+    payment_dialog(rc, ap, true, ActiveDialog::AdvancePayment, |payment| {
         StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
             advance: ap.name.to_string(),
             payment,

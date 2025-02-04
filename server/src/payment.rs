@@ -54,7 +54,8 @@ impl PaymentOptions {
 
     #[must_use]
     pub fn is_valid_payment(&self, payment: &ResourcePile) -> bool {
-        self.first_valid_payment(payment).is_some()
+        self.first_valid_payment(payment)
+            .is_some_and(|p| &p == payment)
     }
 
     #[must_use]
@@ -220,7 +221,7 @@ mod tests {
 
     #[test]
     fn test_find_valid_payment() {
-        let options = PaymentOptions {
+        let cost = PaymentOptions {
             default: ResourcePile::food(1),
             conversions: vec![PaymentConversion {
                 from: vec![ResourcePile::food(1)],
@@ -231,7 +232,7 @@ mod tests {
         let available = ResourcePile::wood(1) + ResourcePile::ore(1);
         assert_eq!(
             Some(ResourcePile::wood(1)),
-            options.first_valid_payment(&available)
+            cost.first_valid_payment(&available)
         );
     }
 
@@ -292,6 +293,25 @@ mod tests {
                     ResourcePile::wood(1) + ResourcePile::food(1),
                 ],
                 invalid: vec![ResourcePile::wood(2)],
+            },
+            ValidPaymentTestCase {
+                name: "3 infantry with draft".to_string(),
+                options: PaymentOptions {
+                    default: ResourcePile::food(3) + ResourcePile::ore(3),
+                    conversions: vec![PaymentConversion {
+                        from: vec![ResourcePile::food(1) + ResourcePile::ore(1)],
+                        to: ResourcePile::mood_tokens(1),
+                        limit: Some(1),
+                    }],
+                },
+                valid: vec![
+                    ResourcePile::food(3) + ResourcePile::ore(3),
+                    ResourcePile::food(2) + ResourcePile::ore(2) + ResourcePile::mood_tokens(1),
+                ],
+                invalid: vec![
+                    ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::mood_tokens(2),
+                    ResourcePile::mood_tokens(3),
+                ],
             },
             ValidPaymentTestCase {
                 name: "discount must be used".to_string(),

@@ -40,8 +40,7 @@ impl IncreaseHappinessConfig {
             })
             .unwrap();
 
-        let available = &p.resources;
-        Payment::new(&payment, available, "Increase happiness", false)
+        Payment::new(&payment, &p.resources, "Increase happiness", false)
     }
 }
 
@@ -132,6 +131,7 @@ pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) 
     payment_dialog(
         rc,
         &h.payment,
+        true,
         |payment| {
             ActiveDialog::IncreaseHappiness(IncreaseHappinessConfig {
                 steps: h.steps.clone(),

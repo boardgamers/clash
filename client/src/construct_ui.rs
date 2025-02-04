@@ -7,10 +7,8 @@ use server::city::City;
 use server::city_pieces::Building;
 use server::content::custom_actions::CustomAction;
 use server::map::Terrain;
-use server::payment::PaymentOptions;
 use server::playing_actions::{Construct, PlayingAction, Recruit};
 use server::position::Position;
-use server::unit::UnitType;
 
 pub fn new_building_positions(
     building: Building,
@@ -40,6 +38,7 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
     payment_dialog(
         rc,
         &cp.payment.clone(),
+        true,
         |p| {
             let mut new = cp.clone();
             new.payment = p;
@@ -69,7 +68,7 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
             ConstructionProject::Units(r) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Recruit(Recruit {
                     city_position: cp.city_position,
-                    units: r.amount.units.clone().to_vec(),
+                    units: r.amount.units.clone(),
                     payment,
                     replaced_units: r.replaced_units.clone(),
                     leader_name: r.amount.leader_name.clone(),
@@ -113,20 +112,18 @@ impl ConstructionPayment {
                 .unwrap()
                 .cost
                 .clone(),
-            ConstructionProject::Units(sel) => PaymentOptions::resources(
-                sel.amount
-                    .units
-                    .clone()
-                    .to_vec()
-                    .iter()
-                    .map(UnitType::cost)
-                    .sum(),
-            ),
+            ConstructionProject::Units(sel) => rc
+                .shown_player
+                .recruit_cost(
+                    &sel.amount.units,
+                    city.position,
+                    sel.amount.leader_name.as_ref(),
+                    &sel.replaced_units,
+                )
+                .unwrap(),
         };
 
-        let available = &rc.shown_player.resources;
-        let payment = Payment::new(&cost, available, name, false);
-
+        let payment = rc.new_payment(&cost, name, false);
         ConstructionPayment {
             player_index: city.player_index,
             city_position: city.position,

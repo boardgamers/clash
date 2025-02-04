@@ -7,6 +7,7 @@ use server::status_phase::{
 };
 
 use server::content::trade_routes::find_trade_routes;
+use server::unit::{MoveUnits, Units};
 use server::{
     action::Action,
     city::{City, MoodState::*},
@@ -19,7 +20,7 @@ use server::{
     playing_actions::PlayingAction::*,
     position::Position,
     resource_pile::ResourcePile,
-    unit::{MovementAction::*, UnitType::*},
+    unit::MovementAction::*,
 };
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::{
@@ -179,7 +180,7 @@ fn basic_actions() {
     let player = &mut game.players[0];
     player.gain_resources(ResourcePile::food(2));
     let recruit_action = Action::Playing(Recruit(server::playing_actions::Recruit {
-        units: vec![Settler],
+        units: Units::new(1, 0, 0, 0, 0, 0),
         city_position,
         payment: ResourcePile::food(2),
         leader_name: None,
@@ -217,11 +218,12 @@ fn basic_actions() {
 }
 
 fn move_action(units: Vec<u32>, destination: Position) -> Action {
-    Action::Movement(Move {
+    Action::Movement(Move(MoveUnits {
         units,
         destination,
         embark_carrier_id: None,
-    })
+        payment: ResourcePile::empty(),
+    }))
 }
 
 #[test]
@@ -250,7 +252,7 @@ fn cultural_influence() {
     assert_eq!(
         game.state,
         GameState::CulturalInfluenceResolution(CulturalInfluenceResolution {
-            roll_boost_cost: 2,
+            roll_boost_cost: ResourcePile::culture_tokens(2),
             target_player_index: 1,
             target_city_position: city1position,
             city_piece: Academy
@@ -621,9 +623,16 @@ fn test_movement() {
 
 #[test]
 fn test_movement_on_roads_from_city() {
+    let units = vec![0];
+    let destination = Position::from_offset("F7");
     test_action(
         "movement_on_roads_from_city",
-        move_action(vec![0], Position::from_offset("F7")),
+        Action::Movement(Move(MoveUnits {
+            units,
+            destination,
+            embark_carrier_id: None,
+            payment: ResourcePile::food(1) + ResourcePile::ore(1),
+        })),
         1,
         true,
         false,
@@ -632,9 +641,16 @@ fn test_movement_on_roads_from_city() {
 
 #[test]
 fn test_movement_on_roads_to_city() {
+    let units = vec![0];
+    let destination = Position::from_offset("D8");
     test_action(
         "movement_on_roads_to_city",
-        move_action(vec![0], Position::from_offset("D8")),
+        Action::Movement(Move(MoveUnits {
+            units,
+            destination,
+            embark_carrier_id: None,
+            payment: ResourcePile::food(1) + ResourcePile::ore(1),
+        })),
         1,
         true,
         false,
@@ -838,7 +854,7 @@ fn test_recruit() {
     test_action(
         "recruit",
         Action::Playing(Recruit(server::playing_actions::Recruit {
-            units: vec![Settler, Infantry],
+            units: Units::new(1, 1, 0, 0, 0, 0),
             city_position: Position::from_offset("A1"),
             payment: ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2),
             leader_name: None,
@@ -855,7 +871,7 @@ fn test_recruit_leader() {
     test_action(
         "recruit_leader",
         Action::Playing(Recruit(server::playing_actions::Recruit {
-            units: vec![Leader],
+            units: Units::new(0, 0, 0, 0, 0, 1),
             city_position: Position::from_offset("A1"),
             payment: ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
             leader_name: Some("Alexander".to_string()),
@@ -872,7 +888,7 @@ fn test_replace_leader() {
     test_action(
         "replace_leader",
         Action::Playing(Recruit(server::playing_actions::Recruit {
-            units: vec![Leader],
+            units: Units::new(0, 0, 0, 0, 0, 1),
             city_position: Position::from_offset("A1"),
             payment: ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
             leader_name: Some("Kleopatra".to_string()),
@@ -889,7 +905,7 @@ fn test_recruit_combat() {
     test_action(
         "recruit_combat",
         Action::Playing(Recruit(server::playing_actions::Recruit {
-            units: vec![Ship],
+            units: Units::new(0, 0, 1, 0, 0, 0),
             city_position: Position::from_offset("C2"),
             payment: ResourcePile::wood(2),
             leader_name: None,
@@ -1288,11 +1304,12 @@ fn test_ship_transport_same_sea() {
 fn test_ship_embark() {
     test_action(
         "ship_embark",
-        Action::Movement(Move {
+        Action::Movement(Move(MoveUnits {
             units: vec![3, 4],
             destination: Position::from_offset("C3"),
             embark_carrier_id: Some(8),
-        }),
+            payment: ResourcePile::empty(),
+        })),
         0,
         true,
         false,
@@ -1303,11 +1320,12 @@ fn test_ship_embark() {
 fn test_ship_embark_continue() {
     test_action(
         "ship_embark_continue",
-        Action::Movement(Move {
+        Action::Movement(Move(MoveUnits {
             units: vec![5, 6],
             destination: Position::from_offset("C3"),
             embark_carrier_id: Some(9),
-        }),
+            payment: ResourcePile::empty(),
+        })),
         0,
         true,
         false,
