@@ -60,7 +60,9 @@
       "id": 1,
       "resources": {
         "food": 1,
-        "mood_tokens": 3
+        "ideas": 1,
+        "mood_tokens": 3,
+        "culture_tokens": 1
       },
       "resource_limit": {
         "food": 7,
@@ -99,6 +101,7 @@
       "active_leader": null,
       "available_leaders": [],
       "advances": [
+        "Cartography",
         "Farming",
         "Fishing",
         "Irrigation",
@@ -113,7 +116,10 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "next_unit_id": 2
+      "next_unit_id": 2,
+      "event_info": {
+        "Cartography": "0"
+      }
     }
   ],
   "map": {
@@ -866,7 +872,7 @@
     "\tPlayer2 ended the movement action",
     "Player2 paid 2 food to get the Navigation advance",
     "Player2 used a move units action",
-    "\tPlayer2 sailed 1 ship from B5 to A7"
+    "\tPlayer2 sailed 1 ship from B5 to A7. Cartography gained 1 idea and 1 culture token (for using navigation)"
   ],
   "undo_limit": 48,
   "actions_left": 0,
@@ -1088,10 +1094,20 @@
       }
     },
     {
+      "Command": {
+        "info": {},
+        "gained_resources": {
+          "ideas": 1,
+          "culture_tokens": 1
+        }
+      }
+    },
+    {
       "Movement": {
         "starting_position": "B5",
         "movement_actions_left": 2
       }
-    }
+    },
+    "EndAction"
   ]
 }

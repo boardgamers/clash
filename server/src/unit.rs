@@ -24,7 +24,7 @@ pub struct Unit {
     pub carrier_id: Option<u32>,
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct UnitBaseData {
     pub unit_type: UnitType,
     #[serde(default)]
@@ -33,7 +33,7 @@ pub struct UnitBaseData {
     pub id: u32,
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct UnitData {
     pub position: Position,
     #[serde(flatten)]

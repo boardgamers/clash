@@ -13,7 +13,7 @@ use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_r
 use crate::map::UnexploredBlock;
 use crate::movement::{has_movable_units, terrain_movement_restriction};
 use crate::payment::PaymentOptions;
-use crate::player_events::PlayerEvents;
+use crate::player_events::{MoveInfo, PlayerCommands, PlayerEvents};
 use crate::resource::check_for_waste;
 use crate::unit::{carried_units, get_current_move, MovementRestriction, UnitData, Units};
 use crate::utils::Rng;
@@ -333,6 +333,35 @@ impl Game {
         request
     }
 
+    pub(crate) fn trigger_command_event<V>(
+        &mut self,
+        player_index: usize,
+        event: fn(&PlayerEvents) -> &EventMut<PlayerCommands, Game, V>,
+        details: &V,
+    ) {
+        let p = self.get_player(player_index);
+        let info = p.event_info.clone();
+        let mut commands = PlayerCommands::new(p.event_info.clone());
+
+        event(p.get_events()).trigger(&mut commands, self, details);
+
+        let p = self
+            .players
+            .get_mut(player_index)
+            .expect("player should exist");
+        for (k, v) in commands.info {
+            p.event_info.insert(k, v);
+        }
+        p.gain_resources(commands.gained_resources.clone());
+        for edit in commands.log_edits {
+            self.add_to_last_log_item(&edit);
+        }
+        self.push_undo_context(UndoContext::Command(CommandUndoContext {
+            info,
+            gained_resources: commands.gained_resources,
+        }));
+    }
+
     ///
     ///
     /// # Panics
@@ -445,6 +474,7 @@ impl Game {
         self.players[player_index].take_events(|events, player| {
             events.after_execute_action.trigger(player, action, &());
         });
+        self.push_undo_context(UndoContext::EndAction);
     }
 
     fn undo(&mut self, player_index: usize) {
@@ -666,6 +696,52 @@ impl Game {
         self.undo_context_stack.push(context);
     }
 
+    pub(crate) fn pop_undo_context(
+        &mut self,
+        pred: fn(&UndoContext) -> bool,
+    ) -> Option<UndoContext> {
+        loop {
+            let option = self.undo_context_stack.pop();
+            if let Some(ref context) = option {
+                match context {
+                    UndoContext::Command(c) => {
+                        self.players[self.current_player_index]
+                            .event_info
+                            .clone_from(&c.info);
+                        self.players[self.current_player_index]
+                            .gain_resources(c.gained_resources.clone());
+                    }
+                    UndoContext::EndAction => {
+                        return None;
+                    }
+                    _ => {
+                        // if pred(&context) {
+                        //     return option;
+                        // } else {
+                        //     panic!("unexpected undo context: {context:?}");
+                        // }
+                        return option;
+                    }
+                }
+                // if let UndoContext::Command(c) = context {
+                //     // they can appear anywhere
+                //
+                //     // let Some(UndoContext::Command(c)) = self.undo_context_stack.pop() else {
+                //     //     unreachable!()
+                //     // };
+                //     self.players[self.current_player_index].event_info.clone_from(&c.info);
+                //     self.players[self.current_player_index].gain_resources(c.gained_resources.clone());
+                // } else if pred(&context) {
+                //     return option;
+                // } else {
+                //     panic!("unexpected undo context: {context:?}");
+                // }
+            } else {
+                return None;
+            }
+        }
+    }
+
     fn move_to_defended_tile(
         &mut self,
         player_index: usize,
@@ -733,7 +809,7 @@ impl Game {
             starting_position,
             move_state,
             disembarked_units,
-        }) = self.undo_context_stack.pop()
+        }) = self.pop_undo_context(|context| matches!(context, UndoContext::Movement { .. }))
         else {
             panic!("when undoing a movement action, the game should have stored movement context")
         };
@@ -1548,16 +1624,16 @@ impl Game {
         &mut self,
         player_index: usize,
         units: &[u32],
-        destination: Position,
+        to: Position,
         embark_carrier_id: Option<u32>,
     ) {
-        self.players[player_index].take_events(|events, player| {
-            events
-                .before_move
-                .trigger(player, &units.to_vec(), &destination);
-        });
+        let p = self.get_player(player_index);
+        let from = p.get_unit(units[0]).expect("unit not found").position;
+        let info = MoveInfo::new(player_index, units.to_vec(), from, to);
+        self.trigger_command_event(player_index, |e| &e.before_move, &info);
+
         for unit_id in units {
-            self.move_unit(player_index, *unit_id, destination, embark_carrier_id);
+            self.move_unit(player_index, *unit_id, to, embark_carrier_id);
         }
     }
 
@@ -1786,13 +1862,19 @@ impl GameState {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct DisembarkUndoContext {
     unit_id: u32,
     carrier_id: u32,
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+pub struct CommandUndoContext {
+    pub info: HashMap<String, String>,
+    pub gained_resources: ResourcePile,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum UndoContext {
     FoundCity {
         settler: UnitData,
@@ -1823,6 +1905,8 @@ pub enum UndoContext {
         angry_activations: Vec<Position>,
     },
     CustomPhaseEvent(CustomPhaseEventState),
+    Command(CommandUndoContext),
+    EndAction,
 }
 
 #[derive(Serialize, Deserialize)]
