@@ -424,12 +424,6 @@
     },
     "StartAction",
     {
-      "Command": {
-        "info": {},
-        "gained_resources": {}
-      }
-    },
-    {
       "WastedResources": {
         "resources": {
           "gold": 3

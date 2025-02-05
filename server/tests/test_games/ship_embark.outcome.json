@@ -332,12 +332,6 @@
   "undo_context_stack": [
     "StartAction",
     {
-      "Command": {
-        "info": {},
-        "gained_resources": {}
-      }
-    },
-    {
       "Movement": {
         "starting_position": "B3",
         "movement_actions_left": 2

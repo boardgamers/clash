@@ -59,6 +59,7 @@ pub struct RecruitCost {
 pub struct MoveInfo {
     pub player: usize,
     pub units: Vec<u32>,
+    #[allow(dead_code)]
     pub from: Position,
     pub to: Position,
 }

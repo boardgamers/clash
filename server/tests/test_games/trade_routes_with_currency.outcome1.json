@@ -614,6 +614,7 @@
       }
     },
     "StartAction",
+    "StartAction",
     {
       "CustomPhaseEvent": {
         "event_used": [],

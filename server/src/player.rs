@@ -34,12 +34,12 @@ use crate::{
 };
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::{
     cmp::Ordering::{self, *},
     collections::HashSet,
     mem,
 };
-use std::collections::HashMap;
 
 pub struct Player {
     name: Option<String>,
@@ -1065,5 +1065,5 @@ pub struct PlayerData {
     played_once_per_turn_effects: Vec<String>,
     #[serde(default)]
     #[serde(skip_serializing_if = "HashMap::is_empty")]
-    event_info: HashMap<String, String>
+    event_info: HashMap<String, String>,
 }

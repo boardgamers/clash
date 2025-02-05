@@ -439,11 +439,11 @@ pub(crate) fn undo_increase_happiness(game: &mut Game, player_index: usize, i: I
     }
     player.gain_resources(i.payment);
 
-    if let Some(UndoContext::IncreaseHappiness { angry_activations }) =
-        game.pop_undo_context()
-    {
+    if let Some(UndoContext::IncreaseHappiness { angry_activations }) = game.pop_undo_context() {
         for city_position in angry_activations {
-            let city = &mut game.players[player_index].get_city_mut(city_position).expect("Illegal action");
+            let city = game.players[player_index]
+                .get_city_mut(city_position)
+                .expect("Illegal action");
             city.angry_activation = true;
         }
     } else {

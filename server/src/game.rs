@@ -508,11 +508,13 @@ impl Game {
         }
         self.action_log_index -= 1;
         self.log.remove(self.log.len() - 1);
-        if let Some(UndoContext::WastedResources { resources }) = self.maybe_pop_undo_context(|c|matches!(c, UndoContext::WastedResources { .. })) {
+        if let Some(UndoContext::WastedResources { resources }) =
+            self.maybe_pop_undo_context(|c| matches!(c, UndoContext::WastedResources { .. }))
+        {
             self.players[player_index].gain_resources(resources.clone());
         }
 
-        while self.maybe_pop_undo_context(|c|false).is_some() {
+        while self.maybe_pop_undo_context(|_| false).is_some() {
             // pop all undo contexts until action start
         }
     }
@@ -705,8 +707,11 @@ impl Game {
     pub(crate) fn pop_undo_context(&mut self) -> Option<UndoContext> {
         self.maybe_pop_undo_context(|_| true)
     }
-    
-    pub(crate) fn maybe_pop_undo_context(&mut self, pred: fn(&UndoContext) -> bool) -> Option<UndoContext> {
+
+    pub(crate) fn maybe_pop_undo_context(
+        &mut self,
+        pred: fn(&UndoContext) -> bool,
+    ) -> Option<UndoContext> {
         loop {
             let option = self.undo_context_stack.last();
             if let Some(context) = option {
@@ -726,9 +731,8 @@ impl Game {
                     _ => {
                         if pred(context) {
                             return self.undo_context_stack.pop();
-                        } else {
-                            return None;
                         }
+                        return None;
                     }
                 }
             } else {

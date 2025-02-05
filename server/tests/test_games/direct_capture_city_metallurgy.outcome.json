@@ -320,12 +320,6 @@
     },
     "StartAction",
     {
-      "Command": {
-        "info": {},
-        "gained_resources": {}
-      }
-    },
-    {
       "Movement": {
         "starting_position": "C2",
         "movement_actions_left": 2

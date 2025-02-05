@@ -255,7 +255,6 @@ fn cartography() -> AdvanceBuilder {
                 if player.info.get("Cartography").is_some_and(|info| info == &key) {
                     return;
                 }
-                
                 let mut ship = false;
                 let mut navigation = false;
                 for id in &i.units {
