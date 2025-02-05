@@ -7,6 +7,7 @@ use crate::render_context::RenderContext;
 use server::action::Action;
 use server::content::advances::get_advance_by_name;
 use server::content::custom_actions::{CustomAction, CustomActionType};
+use server::game::GameState;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::resource::ResourceType;
 
@@ -104,10 +105,11 @@ pub fn base_or_custom_available(
     custom: &CustomActionType,
 ) -> bool {
     rc.can_play_action(action)
-        || rc
-            .game
-            .get_available_custom_actions(rc.shown_player.index)
-            .contains(custom)
+        || (rc.game.state == GameState::Playing
+            && rc
+                .game
+                .get_available_custom_actions(rc.shown_player.index)
+                .contains(custom))
 }
 
 pub fn base_or_custom_action(
