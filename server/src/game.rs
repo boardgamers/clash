@@ -377,6 +377,8 @@ impl Game {
             self.undo(player_index);
             return;
         }
+        
+        self.push_undo_context(UndoContext::StartAction);
 
         if matches!(action, Action::Redo) {
             assert!(self.can_redo(), "no action can be redone");
@@ -474,7 +476,6 @@ impl Game {
         self.players[player_index].take_events(|events, player| {
             events.after_execute_action.trigger(player, action, &());
         });
-        self.push_undo_context(UndoContext::EndAction);
     }
 
     fn undo(&mut self, player_index: usize) {
@@ -508,6 +509,10 @@ impl Game {
         if let Some(UndoContext::WastedResources { resources }) = self.undo_context_stack.last() {
             self.players[player_index].gain_resources(resources.clone());
             self.undo_context_stack.pop();
+        }
+
+        while self.pop_undo_context().is_some() {
+            // pop all undo contexts until action start
         }
     }
 
@@ -696,10 +701,7 @@ impl Game {
         self.undo_context_stack.push(context);
     }
 
-    pub(crate) fn pop_undo_context(
-        &mut self,
-        pred: fn(&UndoContext) -> bool,
-    ) -> Option<UndoContext> {
+    pub(crate) fn pop_undo_context(&mut self) -> Option<UndoContext> {
         loop {
             let option = self.undo_context_stack.pop();
             if let Some(ref context) = option {
@@ -709,33 +711,15 @@ impl Game {
                             .event_info
                             .clone_from(&c.info);
                         self.players[self.current_player_index]
-                            .gain_resources(c.gained_resources.clone());
+                            .loose_resources(c.gained_resources.clone());
                     }
-                    UndoContext::EndAction => {
+                    UndoContext::StartAction => {
                         return None;
                     }
                     _ => {
-                        // if pred(&context) {
-                        //     return option;
-                        // } else {
-                        //     panic!("unexpected undo context: {context:?}");
-                        // }
                         return option;
                     }
                 }
-                // if let UndoContext::Command(c) = context {
-                //     // they can appear anywhere
-                //
-                //     // let Some(UndoContext::Command(c)) = self.undo_context_stack.pop() else {
-                //     //     unreachable!()
-                //     // };
-                //     self.players[self.current_player_index].event_info.clone_from(&c.info);
-                //     self.players[self.current_player_index].gain_resources(c.gained_resources.clone());
-                // } else if pred(&context) {
-                //     return option;
-                // } else {
-                //     panic!("unexpected undo context: {context:?}");
-                // }
             } else {
                 return None;
             }
@@ -809,7 +793,7 @@ impl Game {
             starting_position,
             move_state,
             disembarked_units,
-        }) = self.pop_undo_context(|context| matches!(context, UndoContext::Movement { .. }))
+        }) = self.pop_undo_context()
         else {
             panic!("when undoing a movement action, the game should have stored movement context")
         };
@@ -1906,7 +1890,7 @@ pub enum UndoContext {
     },
     CustomPhaseEvent(CustomPhaseEventState),
     Command(CommandUndoContext),
-    EndAction,
+    StartAction,
 }
 
 #[derive(Serialize, Deserialize)]
