@@ -81,7 +81,7 @@ fn global_move(rc: &RenderContext) -> StateUpdate {
 fn custom_action_tooltip(custom_action_type: &CustomActionType) -> String {
     match custom_action_type {
         CustomActionType::ConstructWonder => "Construct a wonder".to_string(),
-        CustomActionType::ForcedLabor => get_advance_by_name("Absolute Power").description,
+        CustomActionType::AbsolutePower => get_advance_by_name("Absolute Power").description,
         CustomActionType::VotingIncreaseHappiness => get_advance_by_name("Voting").description,
         CustomActionType::FreeEconomyCollect => get_advance_by_name("Free Economy").description,
     }
@@ -95,7 +95,7 @@ fn generic_custom_action(custom_action_type: &CustomActionType) -> Option<Custom
             // handled explicitly
             None
         }
-        CustomActionType::ForcedLabor => Some(CustomAction::ForcedLabor),
+        CustomActionType::AbsolutePower => Some(CustomAction::ForcedLabor),
     }
 }
 

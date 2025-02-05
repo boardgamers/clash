@@ -706,7 +706,7 @@ fn autocracy() -> Vec<Advance> {
                 .leading_government_advance("Autocracy")
                 .with_contradicting_advance(&["Voting", "Dogma"])
             , Advance::builder("Absolute Power", "Once per turn, as a free action, you may spend 2 mood tokens to get an additional action")
-                .add_custom_action(ForcedLabor)
+                .add_custom_action(AbsolutePower)
             , ],
     )
 }

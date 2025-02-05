@@ -27,7 +27,7 @@ pub enum CustomAction {
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash)]
 pub enum CustomActionType {
     ConstructWonder,
-    ForcedLabor,
+    AbsolutePower,
     VotingIncreaseHappiness,
     FreeEconomyCollect,
 }
@@ -61,7 +61,7 @@ impl CustomAction {
     pub fn custom_action_type(&self) -> CustomActionType {
         match self {
             CustomAction::ConstructWonder { .. } => CustomActionType::ConstructWonder,
-            CustomAction::ForcedLabor => CustomActionType::ForcedLabor,
+            CustomAction::ForcedLabor => CustomActionType::AbsolutePower,
             CustomAction::VotingIncreaseHappiness(_) => CustomActionType::VotingIncreaseHappiness,
             CustomAction::FreeEconomyCollect(_) => CustomActionType::FreeEconomyCollect,
         }
@@ -114,7 +114,7 @@ impl CustomActionType {
     pub fn action_type(&self) -> ActionType {
         match self {
             CustomActionType::ConstructWonder => ActionType::default(),
-            CustomActionType::ForcedLabor => {
+            CustomActionType::AbsolutePower => {
                 ActionType::free_and_once_per_turn(ResourcePile::mood_tokens(2))
             }
             CustomActionType::VotingIncreaseHappiness => {
