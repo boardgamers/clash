@@ -200,6 +200,7 @@ fn construction() -> Vec<Advance> {
                     0,
                 ),
             Advance::builder(ROADS, "When moving from or to a city, you may pay 1 food and 1 ore to extend the range of a group of land units by 1 and ignore terrain effects. May not be used to embark, disembark, or explore")
+                .with_advance_bonus(CultureToken)
         ],
     )
 }
@@ -215,9 +216,62 @@ fn seafaring() -> Vec<Advance> {
             Advance::builder(
                 NAVIGATION,
                 "Ships may leave the map and return at the next sea space",
-            ),
+            )
+            .with_advance_bonus(CultureToken),
+            war_ships(),
+            cartography(),
         ],
     )
+}
+
+fn war_ships() -> AdvanceBuilder {
+    Advance::builder(
+        "War Ships",
+        "Ignore the first hit it the first round of combat when attacking with Ships or disembarking from Ships")
+        .add_player_event_listener(
+            |event| &mut event.on_combat_round,
+            |s, c, g| {
+                let attacker = s.attacker && g.map.is_water(c.attacker_position);
+                let defender = !s.attacker && g.map.is_water(c.defender_position);
+                if c.round == 1 && (attacker || defender) {
+                    s.hit_cancels += 1;
+                    s.roll_log.push("War Ships ignore the first hit in the first round of combat".to_string());
+                }
+            },
+            0,
+        )
+}
+
+fn cartography() -> AdvanceBuilder {
+    Advance::builder(
+        "Cartography",
+        "Gain 1 idea after a move action where you moved a Ship. If you used navigation, gain an additional 1 culture token.", )
+        .with_advance_bonus(CultureToken)
+        .add_player_event_listener(
+            |event| &mut event.before_move,
+            |player, units, destination| {
+                //todo only for first move
+                //todo undo
+                let mut ship = false;
+                let mut navigation = false;
+                for id in units {
+                    let unit = player.get_unit(*id).expect("unit should exist");
+                    if unit.unit_type.is_ship() {
+                        ship = true;
+                        if !unit.position.is_neighbor(*destination) {
+                            navigation = true;
+                        }
+                    }
+                }
+                if ship {
+                    player.gain_resources(ResourcePile::ideas(1));
+                    if navigation {
+                        player.gain_resources(ResourcePile::culture_tokens(1));
+                    }
+                }
+            },
+            0,
+        )
 }
 
 fn fishing_collect(
@@ -457,7 +511,7 @@ fn steel_weapons_cost(game: &Game, combat: &Combat, player_index: usize) -> Paym
 }
 
 fn fortress(s: &mut CombatStrength, c: &Combat, game: &Game) {
-    if s.attacker || !c.defender_fortress(game) {
+    if s.attacker || !c.defender_fortress(game) || c.round != 1 {
         return;
     }
 
@@ -546,7 +600,6 @@ fn trade_routes() -> AdvanceBuilder {
     Advance::builder(
         "Trade Routes",
         "At the beginning of your turn, you gain 1 food for every trade route you can make, to a maximum of 4. A trade route is made between one of your Settlers or Ships and a non-Angry enemy player city within 2 spaces (without counting through unrevealed Regions). Each Settler or Ship can only be paired with one enemy player city. Likewise, each enemy player city must be paired with a different Settler or Ship. In other words, to gain X food you must have at least X Units (Settlers or Ships), each paired with X different enemy cities.")
-        .with_advance_bonus(MoodToken)
         .add_reward_request_listener(
             |event| &mut event.on_turn_start,
             0,

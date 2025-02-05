@@ -59,6 +59,7 @@ pub(crate) fn move_routes(
     let mut base: Vec<MoveRoute> = starting
         .neighbors()
         .iter()
+        .filter(|&n| game.map.is_inside(*n))
         .map(|&n| MoveRoute::simple(n))
         .collect();
     if player.has_advance(NAVIGATION) {

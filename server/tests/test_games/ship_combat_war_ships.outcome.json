@@ -1,12 +1,32 @@
 {
   "state": {
-    "PlaceSettler": {
-      "player_index": 1,
-      "movement_actions_left": 1,
-      "moved_units": [
-        1,
-        2
-      ]
+    "Combat": {
+      "initiation": {
+        "Movement": {
+          "movement_actions_left": 1,
+          "moved_units": [
+            7,
+            8
+          ]
+        }
+      },
+      "round": 1,
+      "phase": {
+        "RemoveCasualties": {
+          "player": 1,
+          "casualties": 1,
+          "defender_hits": 1
+        }
+      },
+      "defender": 1,
+      "defender_position": "D2",
+      "attacker": 0,
+      "attacker_position": "C3",
+      "attackers": [
+        7,
+        8
+      ],
+      "can_retreat": true
     }
   },
   "players": [
@@ -68,16 +88,6 @@
           "activations": 4,
           "angry_activation": true,
           "position": "B3"
-        },
-        {
-          "city_pieces": {
-            "port": 0
-          },
-          "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "B2",
-          "port_position": "C3"
         }
       ],
       "units": [
@@ -109,13 +119,13 @@
         {
           "position": "C3",
           "unit_type": "Ship",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 7,
           "carried_units": [
             {
               "unit_type": "Elephant",
-              "movement_restrictions": [
-                "Battle"
-              ],
               "id": 2
             }
           ]
@@ -123,13 +133,13 @@
         {
           "position": "C3",
           "unit_type": "Ship",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 8,
           "carried_units": [
             {
               "unit_type": "Cavalry",
-              "movement_restrictions": [
-                "Battle"
-              ],
               "id": 1
             }
           ]
@@ -143,7 +153,8 @@
         "Free Economy",
         "Mining",
         "Tactics",
-        "Voting"
+        "Voting",
+        "War Ships"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
@@ -182,17 +193,27 @@
           "activations": 2,
           "angry_activation": false,
           "position": "C1"
+        },
+        {
+          "city_pieces": {
+            "port": 1
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B2",
+          "port_position": "C3"
         }
       ],
       "units": [
         {
-          "position": "C1",
-          "unit_type": "Infantry",
+          "position": "D2",
+          "unit_type": "Ship",
           "id": 0
         },
         {
-          "position": "C1",
-          "unit_type": "Infantry",
+          "position": "D2",
+          "unit_type": "Ship",
           "id": 1
         }
       ],
@@ -201,7 +222,8 @@
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Mining"
+        "Mining",
+        "War Ships"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
@@ -296,24 +318,53 @@
       "Movement": {
         "Move": {
           "units": [
-            1,
-            2
+            7,
+            8
           ],
-          "destination": "B2"
+          "destination": "C4"
+        }
+      }
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            7,
+            8
+          ],
+          "destination": "C3"
+        }
+      }
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            7,
+            8
+          ],
+          "destination": "D2"
         }
       }
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 4,
   "log": [
     "The game has started",
     "Age 1 has started",
     "Round 1/3",
     "Player1 paid 2 ideas to get the Tactics advance",
     "Player1 used a move units action",
-    "\tPlayer1 disembarked 1 cavalry and 1 elephant from C3 to B2 and captured Player2's city at B2. Could not store 2 gold"
+    "\tPlayer1 sailed 2 ships from C3 to C4",
+    "\tPlayer1 sailed 2 ships from C4 to C3",
+    "\tPlayer1 sailed 2 ships from C3 to D2",
+    "\nCombat round 1",
+    "\tPlayer1 rolled 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units. Player2 rolled 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 12 and gets 1 hits against attacking units.",
+    ". Player1 used the following combat modifiers: War Ships ignore the first hit in the first round of combat",
+    ". Player2 used the following combat modifiers: War Ships ignore the first hit in the first round of combat",
+    "\tPlayer2 has to remove 1 of their defending units"
   ],
-  "undo_limit": 2,
+  "undo_limit": 4,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 6,
@@ -327,13 +378,14 @@
     10,
     10,
     10,
-    10,
+    10
+  ],
+  "dice_roll_log": [
     10,
     10,
     10,
     10
   ],
-  "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [],
   "wonder_amount_left": 1,
@@ -371,23 +423,24 @@
     {
       "Movement": {
         "starting_position": "C3",
-        "movement_actions_left": 2,
-        "disembarked_units": [
-          {
-            "unit_id": 1,
-            "carrier_id": 8
-          },
-          {
-            "unit_id": 2,
-            "carrier_id": 7
-          }
-        ]
+        "movement_actions_left": 2
       }
     },
     {
-      "WastedResources": {
-        "resources": {
-          "gold": 2
+      "Movement": {
+        "starting_position": "C4",
+        "movement_actions_left": 1,
+        "moved_units": [
+          7,
+          8
+        ],
+        "current_move": {
+          "Fleet": {
+            "units": [
+              7,
+              8
+            ]
+          }
         }
       }
     }

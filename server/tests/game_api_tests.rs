@@ -1432,6 +1432,31 @@ fn assert_navigate(game: &mut Game, from: Position, to: Position) {
     );
 }
 
+#[test]
+fn test_ship_combat() {
+    test_actions(
+        "ship_combat",
+        vec![
+            TestAction::not_undoable(0, move_action(vec![7, 8], Position::from_offset("D2"))),
+            TestAction::not_undoable(
+                0,
+                Action::Combat(CombatAction::RemoveCasualties(vec![7, 1])),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_ship_combat_war_ships() {
+    test_action(
+        "ship_combat_war_ships",
+        move_action(vec![7, 8], Position::from_offset("D2")),
+        0,
+        false,
+        false,
+    );
+}
+
 fn load_game(name: &str) -> Game {
     Game::from_data(
         serde_json::from_str(&read_game_str(name)).unwrap_or_else(|e| {

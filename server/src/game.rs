@@ -612,6 +612,7 @@ impl Game {
                     .map
                     .get(m.destination)
                     .expect("destination should be a valid tile");
+
                 if dest_terrain == &Unexplored {
                     if move_to_unexplored_tile(
                         self,
@@ -640,9 +641,8 @@ impl Game {
                     }
                 } else {
                     self.move_units(player_index, &m.units, m.destination, m.embark_carrier_id);
+                    self.back_to_move(&move_state, !starting_position.is_neighbor(m.destination));
                 }
-
-                self.back_to_move(&move_state, !starting_position.is_neighbor(m.destination));
 
                 if let Some(enemy) = enemy {
                     self.capture_position(enemy, m.destination, player_index);
@@ -698,8 +698,6 @@ impl Game {
                 unit.movement_restrictions.push(MovementRestriction::Battle);
                 military = true;
             }
-            // move to destination to apply movement restrictions, etc.
-            self.move_unit(player_index, *unit_id, destination, None);
         }
         assert!(military, "Need military units to attack");
         self.back_to_move(move_state, true);
@@ -894,13 +892,9 @@ impl Game {
             return custom_phase_event.player_index;
         }
         match &self.state {
-            Combat(c) => match c.phase {
-                CombatPhase::RemoveCasualties {
-                    player,
-                    casualties: _,
-                    defender_hits: _,
-                }
-                | CombatPhase::PlayActionCard(player) => player,
+            Combat(c) => match &c.phase {
+                CombatPhase::RemoveCasualties(r) => r.player,
+                CombatPhase::PlayActionCard(player) => *player,
                 CombatPhase::Retreat => c.attacker,
             },
             PlaceSettler(p) => p.player_index,
@@ -1557,6 +1551,11 @@ impl Game {
         destination: Position,
         embark_carrier_id: Option<u32>,
     ) {
+        self.players[player_index].take_events(|events, player| {
+            events
+                .before_move
+                .trigger(player, &units.to_vec(), &destination);
+        });
         for unit_id in units {
             self.move_unit(player_index, *unit_id, destination, embark_carrier_id);
         }

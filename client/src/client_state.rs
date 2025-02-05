@@ -22,6 +22,7 @@ use server::content::custom_phase_actions::CustomPhaseRequest;
 use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
 use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
+use server::unit::carried_units;
 
 #[derive(Clone)]
 pub enum ActiveDialog {
@@ -177,7 +178,11 @@ impl ActiveDialog {
             ActiveDialog::Retreat => vec!["Do you want to retreat?".to_string()],
             ActiveDialog::RemoveCasualties(r) => vec![format!(
                 "Remove {} units: click on a unit to remove it",
-                r.needed
+                if r.needed_carried > 0 {
+                    format!("{} ships and {} carried units", r.needed, r.needed_carried)
+                } else {
+                    r.needed.to_string()
+                }
             )],
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
             ActiveDialog::CustomPhaseRewardRequest(_) => {
@@ -545,17 +550,22 @@ impl State {
                 StatusPhaseState::DetermineFirstPlayer => ActiveDialog::DetermineFirstPlayer,
             },
             GameState::PlaceSettler { .. } => ActiveDialog::PlaceSettler,
-            GameState::Combat(c) => match c.phase {
+            GameState::Combat(c) => match &c.phase {
                 CombatPhase::PlayActionCard(_) => ActiveDialog::PlayActionCard,
-                CombatPhase::RemoveCasualties {
-                    player, casualties, ..
-                } => {
-                    let (position, selectable) = if player == c.attacker {
+                CombatPhase::RemoveCasualties(r) => {
+                    let (position, selectable) = if r.player == c.attacker {
                         (
                             c.attacker_position,
-                            active_attackers(game, c.attacker, &c.attackers, c.defender_position),
+                            active_attackers(game, c.attacker, &c.attackers, c.defender_position)
+                                .clone()
+                                .into_iter()
+                                .chain(c.attackers.iter().flat_map(|a| {
+                                    let units = carried_units(*a, game.get_player(r.player));
+                                    units
+                                }))
+                                .collect(),
                         )
-                    } else if player == c.defender {
+                    } else if r.player == c.defender {
                         (
                             c.defender_position,
                             active_defenders(game, c.defender, c.defender_position),
@@ -564,7 +574,11 @@ impl State {
                         panic!("player should be either defender or attacker")
                     };
                     ActiveDialog::RemoveCasualties(RemoveCasualtiesSelection::new(
-                        position, casualties, selectable,
+                        r.player,
+                        position,
+                        r.casualties,
+                        r.carried_units_casualties,
+                        selectable,
                     ))
                 }
                 CombatPhase::Retreat => ActiveDialog::Retreat,

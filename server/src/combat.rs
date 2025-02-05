@@ -1,12 +1,14 @@
 use crate::action::{CombatAction, PlayActionCard};
+use crate::consts::SHIP_CAPACITY;
 use crate::content::custom_phase_actions::CustomPhaseEventType;
-use crate::game::GameState::Playing;
 use crate::game::{Game, GameState};
 use crate::position::Position;
-use crate::unit::UnitType::{Cavalry, Elephant, Infantry, Leader, Ship};
-use crate::unit::{UnitType, Units};
+use crate::unit::UnitType::{Cavalry, Elephant, Infantry, Leader};
+use crate::unit::{Unit, UnitType, Units};
 use itertools::Itertools;
+use num::Zero;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::mem;
 
 #[derive(Clone, PartialEq)]
@@ -34,13 +36,21 @@ impl CombatStrength {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct RemoveCasualties {
+    pub player: usize,
+    pub casualties: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub carried_units_casualties: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub defender_hits: Option<u8>,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum CombatPhase {
     PlayActionCard(usize),
-    RemoveCasualties {
-        player: usize,
-        casualties: u8,
-        defender_hits: Option<u8>,
-    },
+    RemoveCasualties(RemoveCasualties),
     Retreat,
 }
 
@@ -49,7 +59,7 @@ impl CombatPhase {
     pub fn is_compatible_action(&self, action: &CombatAction) -> bool {
         match self {
             CombatPhase::PlayActionCard(_) => matches!(action, CombatAction::PlayActionCard(_)),
-            CombatPhase::RemoveCasualties { .. } => {
+            CombatPhase::RemoveCasualties(_) => {
                 matches!(action, CombatAction::RemoveCasualties(_))
             }
             CombatPhase::Retreat => matches!(action, CombatAction::Retreat(_)),
@@ -119,6 +129,11 @@ impl Combat {
             .get_city(self.defender_position)
             .is_some_and(|city| city.pieces.fortress.is_some() && self.round == 1)
     }
+
+    #[must_use]
+    pub fn is_sea_battle(&self, game: &Game) -> bool {
+        game.map.is_water(self.defender_position)
+    }
 }
 
 enum CombatControl {
@@ -137,7 +152,7 @@ pub fn initiate_combat(
     next_game_state: Option<GameState>,
 ) {
     let initiation = next_game_state.map_or_else(
-        || Box::new(mem::replace(&mut game.state, Playing)),
+        || Box::new(mem::replace(&mut game.state, GameState::Playing)),
         Box::new,
     );
     let combat = Combat::new(
@@ -160,7 +175,7 @@ pub(crate) fn start_combat(game: &mut Game, combat: Combat) {
     let attacker = combat.attacker;
     let defender = combat.defender;
 
-    if let Playing = game.state {
+    if let GameState::Playing = game.state {
         // event listener needs to find the correct state to get the combat position
         game.state = GameState::Combat(combat);
     }
@@ -216,17 +231,12 @@ pub fn execute_combat_action(game: &mut Game, action: CombatAction, mut c: Comba
     combat_loop(game, c);
 }
 
-fn remove_casualties(game: &mut Game, c: &mut Combat, units: Vec<u32>) -> CombatControl {
-    let CombatPhase::RemoveCasualties {
-        player,
-        casualties,
-        defender_hits,
-    } = c.phase
-    else {
+fn remove_casualties(game: &mut Game, c: &mut Combat, killed_unit_ids: Vec<u32>) -> CombatControl {
+    let CombatPhase::RemoveCasualties(r) = &c.phase else {
         panic!("Illegal action");
     };
-    assert_eq!(casualties, units.len() as u8, "Illegal action");
-    let (fighting_units, opponent) = if player == c.defender {
+    let player = r.player;
+    let (fighting_units, killer, pos) = if player == c.defender {
         (
             game.players[player]
                 .get_units(c.defender_position)
@@ -234,46 +244,105 @@ fn remove_casualties(game: &mut Game, c: &mut Combat, units: Vec<u32>) -> Combat
                 .map(|unit| unit.id)
                 .collect(),
             c.attacker,
+            c.defender_position,
         )
     } else if player == c.attacker {
-        (c.attackers.clone(), c.defender)
+        (c.attackers.clone(), c.defender, c.attacker_position)
     } else {
         panic!("Illegal action")
     };
-    assert!(
-        units.iter().all(|unit| fighting_units.contains(unit)),
-        "Illegal action"
-    );
-    for unit in units {
-        game.kill_unit(unit, player, opponent);
+    let units: Vec<&Unit> = killed_unit_ids
+        .iter()
+        .map(|id| game.players[player].get_unit(*id).expect("unit not found"))
+        .collect();
+    let ships: Vec<&Unit> = units
+        .clone()
+        .into_iter()
+        .filter(|u| u.unit_type.is_ship())
+        .collect();
+    let land_units = units.len() as u8 - ships.len() as u8;
+    let casualties = r.casualties;
+    if game.map.is_water(c.defender_position) {
+        assert!(
+            ships.iter().all(|unit| fighting_units.contains(&unit.id)),
+            "Illegal action"
+        );
+        assert_eq!(
+            r.carried_units_casualties, land_units,
+            "Illegal carried units"
+        );
+        assert_eq!(casualties, ships.len() as u8, "Illegal action");
+
+        save_carried_units(&killed_unit_ids, game, player, pos);
+    } else {
+        assert!(
+            killed_unit_ids
+                .iter()
+                .all(|unit| fighting_units.contains(unit)),
+            "Illegal action"
+        );
+        assert_eq!(land_units, killed_unit_ids.len() as u8, "Illegal units");
+        assert_eq!(casualties, land_units, "Illegal action");
+    }
+
+    for unit in killed_unit_ids {
+        game.kill_unit(unit, player, killer);
         if player == c.attacker {
             c.attackers.retain(|id| *id != unit);
         }
     }
-    if let Some(defender_hits) = defender_hits {
-        if defender_hits < c.attackers.len() as u8 && defender_hits > 0 {
-            game.add_info_log_item(format!(
-                "\t{} has to remove {} of their attacking units",
-                game.players[c.attacker].get_name(),
-                defender_hits
-            ));
-            game.state = GameState::Combat(Combat {
-                phase: CombatPhase::RemoveCasualties {
-                    player: c.defender,
-                    casualties: defender_hits,
-                    defender_hits: None,
-                },
-                ..c.clone()
-            });
-            return CombatControl::Exit;
-        }
-        if defender_hits >= c.attackers.len() as u8 {
-            for id in mem::take(&mut c.attackers) {
-                game.kill_unit(id, c.attacker, c.defender);
+
+    if let Some(defender_hits) = r.defender_hits {
+        if defender_hits > 0 {
+            if defender_hits < c.attackers.len() as u8 {
+                game.add_info_log_item(format!(
+                    "\t{} has to remove {} of their attacking units",
+                    game.players[c.attacker].get_name(),
+                    defender_hits
+                ));
+                to_remove_casualties(game, c.defender, c.clone(), defender_hits, None);
+                return CombatControl::Exit;
             }
+            kill_all_attackers(game, c);
         }
     }
     resolve_combat(game, c)
+}
+
+fn save_carried_units(killed_unit_ids: &[u32], game: &mut Game, player: usize, pos: Position) {
+    let mut carried_units: HashMap<u32, u8> = HashMap::new();
+
+    for unit in game.get_player(player).clone().get_units(pos) {
+        if killed_unit_ids.contains(&unit.id) {
+            continue;
+        }
+        if let Some(carrier) = unit.carrier_id {
+            carried_units
+                .entry(carrier)
+                .and_modify(|e| *e += 1)
+                .or_insert(1);
+        } else {
+            carried_units.entry(unit.id).or_insert(0);
+        }
+    }
+
+    // embark to surviving ships
+    for unit in game.get_player(player).clone().get_units(pos) {
+        let unit = game.players[player]
+            .get_unit_mut(unit.id)
+            .expect("unit not found");
+        if unit
+            .carrier_id
+            .is_some_and(|id| killed_unit_ids.contains(&id))
+        {
+            let (&carrier_id, &carried) = carried_units
+                .iter()
+                .find(|(_carrier_id, carried)| **carried < SHIP_CAPACITY)
+                .expect("no carrier found to save carried units");
+            carried_units.insert(carrier_id, carried + 1);
+            unit.carrier_id = Some(carrier_id);
+        }
+    }
 }
 
 ///
@@ -343,14 +412,21 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
             ));
         }
         if attacker_hits < active_defenders.len() as u8 && attacker_hits > 0 {
-            kill_some_defenders(game, c, attacker_hits, defender_hits);
+            kill_some_units(
+                game,
+                c.defender,
+                c,
+                attacker_hits,
+                "defending",
+                Some(defender_hits),
+            );
             return;
         }
         if attacker_hits >= active_defenders.len() as u8 {
             kill_all_defenders(game, &mut c);
         }
         if defender_hits < active_attackers.len() as u8 && defender_hits > 0 {
-            kill_some_attackers(game, c, defender_hits);
+            kill_some_units(game, c.attacker, c, defender_hits, "attacking", None);
             return;
         }
         if defender_hits >= active_attackers.len() as u8 {
@@ -377,18 +453,50 @@ fn kill_all_attackers(game: &mut Game, c: &mut Combat) {
     c.attackers = vec![];
 }
 
-fn kill_some_attackers(game: &mut Game, c: Combat, defender_hits: u8) {
+fn kill_some_units(
+    game: &mut Game,
+    player: usize,
+    c: Combat,
+    casualties: u8,
+    role: &str,
+    defender_hits: Option<u8>,
+) {
     game.add_info_log_item(format!(
-        "\t{} has to remove {} of their attacking units",
-        game.players[c.attacker].get_name(),
-        defender_hits
+        "\t{} has to remove {casualties} of their {role} units",
+        game.players[player].get_name(),
     ));
+    to_remove_casualties(game, player, c, casualties, defender_hits);
+}
+
+fn to_remove_casualties(
+    game: &mut Game,
+    player: usize,
+    c: Combat,
+    casualties: u8,
+    defender_hits: Option<u8>,
+) {
+    let carried_units_casualties = if c.is_sea_battle(game) {
+        let home_position = if player == c.attacker {
+            c.attacker_position
+        } else {
+            c.defender_position
+        };
+        let units = game.players[player].get_units(home_position);
+        let carried_units = units.iter().filter(|u| u.carrier_id.is_some()).count() as u8;
+        let carrier_capacity_left =
+            (units.len() as u8 - carried_units - casualties) * SHIP_CAPACITY;
+        carried_units.saturating_sub(carrier_capacity_left)
+    } else {
+        0
+    };
+
     game.state = GameState::Combat(Combat {
-        phase: CombatPhase::RemoveCasualties {
-            player: c.attacker,
-            casualties: defender_hits,
-            defender_hits: None,
-        },
+        phase: CombatPhase::RemoveCasualties(RemoveCasualties {
+            player,
+            casualties,
+            carried_units_casualties,
+            defender_hits,
+        }),
         ..c
     });
 }
@@ -402,22 +510,6 @@ fn kill_all_defenders(game: &mut Game, c: &mut Combat) {
     for id in defender_units {
         game.kill_unit(id, c.defender, c.attacker);
     }
-}
-
-fn kill_some_defenders(game: &mut Game, c: Combat, attacker_hits: u8, defender_hits: u8) {
-    game.add_info_log_item(format!(
-        "\t{} has to remove {} of their defending units",
-        game.players[c.defender].get_name(),
-        attacker_hits
-    ));
-    game.state = GameState::Combat(Combat {
-        phase: CombatPhase::RemoveCasualties {
-            player: c.defender,
-            casualties: attacker_hits,
-            defender_hits: Some(defender_hits),
-        },
-        ..c
-    });
 }
 
 fn resolve_combat(game: &mut Game, c: &mut Combat) -> CombatControl {
@@ -454,15 +546,9 @@ fn attacker_wins(game: &mut Game, c: &mut Combat) -> CombatControl {
         "\t{} killed all defending units",
         game.players[c.attacker].get_name()
     ));
-    for unit in &c.attackers {
-        let unit = game.players[c.attacker]
-            .get_unit_mut(*unit)
-            .expect("attacker should have all attacking units");
-        unit.position = c.defender_position;
-    }
+    game.move_units(c.attacker, &c.attackers, c.defender_position, None);
     let control = end_combat(game, c);
     game.capture_position(c.defender, c.defender_position, c.attacker);
-    //todo attacker wins
     control
 }
 
@@ -471,20 +557,17 @@ fn defender_wins(game: &mut Game, c: &mut Combat) -> CombatControl {
         "\t{} killed all attacking units",
         game.players[c.defender].get_name()
     ));
-    //todo defender wins
     end_combat(game, c)
 }
 
 fn draw(game: &mut Game, c: &mut Combat) -> CombatControl {
     if c.defender_fortress(game) {
         game.add_info_log_item(format!("\tAll attacking and defending units where eliminated. {} wins the battle because he has a defending fortress", game.players[c.defender].get_name()));
-        //todo defender wins
         return end_combat(game, c);
     }
     game.add_info_log_item(String::from(
         "\tAll attacking and defending units where eliminated, ending the battle in a draw",
     ));
-    //todo draw
     end_combat(game, c)
 }
 
@@ -634,7 +717,7 @@ pub fn active_attackers(
         .iter()
         .copied()
         .filter(|u| {
-            can_fight(
+            can_remove_after_combat(
                 on_water,
                 &player
                     .get_unit(*u)
@@ -651,15 +734,16 @@ pub fn active_defenders(game: &Game, defender: usize, defender_position: Positio
     let on_water = game.map.is_water(defender_position);
     p.get_units(defender_position)
         .iter()
-        .filter(|u| can_fight(on_water, &u.unit_type))
+        .filter(|u| can_remove_after_combat(on_water, &u.unit_type))
         .map(|u| u.id)
         .collect_vec()
 }
 
 #[must_use]
-pub fn can_fight(on_water: bool, unit_type: &UnitType) -> bool {
+pub fn can_remove_after_combat(on_water: bool, unit_type: &UnitType) -> bool {
     if on_water {
-        matches!(unit_type, Ship)
+        // carried units may also have to be removed
+        true
     } else {
         unit_type.is_army_unit()
     }
