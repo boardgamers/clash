@@ -377,7 +377,7 @@ impl Game {
             self.undo(player_index);
             return;
         }
-        
+
         self.push_undo_context(UndoContext::StartAction);
 
         if matches!(action, Action::Redo) {
@@ -506,9 +506,8 @@ impl Game {
         }
         self.action_log_index -= 1;
         self.log.remove(self.log.len() - 1);
-        if let Some(UndoContext::WastedResources { resources }) = self.undo_context_stack.last() {
+        if let Some(UndoContext::WastedResources { resources }) = self.pop_undo_context() {
             self.players[player_index].gain_resources(resources.clone());
-            self.undo_context_stack.pop();
         }
 
         while self.pop_undo_context().is_some() {
@@ -1321,8 +1320,9 @@ impl Game {
         if let Some(UndoContext::Recruit {
             replaced_units,
             replaced_leader,
-        }) = self.undo_context_stack.pop()
+        }) = self.pop_undo_context()
         {
+            let player = &mut self.players[player_index];
             for unit in replaced_units {
                 player.units.extend(Unit::from_data(player_index, unit));
             }

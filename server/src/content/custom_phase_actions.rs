@@ -85,7 +85,7 @@ impl CustomPhaseEventAction {
                 player.loose_resources(r);
             }
         }
-        let Some(UndoContext::CustomPhaseEvent(e)) = game.undo_context_stack.pop() else {
+        let Some(UndoContext::CustomPhaseEvent(e)) = game.pop_undo_context() else {
             panic!("when undoing custom phase event, the undo context stack should have a custom phase event")
         };
         game.custom_phase_state = e;

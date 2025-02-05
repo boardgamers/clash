@@ -284,7 +284,7 @@ pub(crate) fn explore_resolution(game: &mut Game, r: &ExploreResolutionState, ro
 }
 
 pub(crate) fn undo_explore_resolution(game: &mut Game, player_index: usize) {
-    let Some(UndoContext::ExploreResolution(s)) = game.undo_context_stack.pop() else {
+    let Some(UndoContext::ExploreResolution(s)) = game.pop_undo_context() else {
         panic!("when undoing explore resolution, the undo context stack should have an explore resolution")
     };
 

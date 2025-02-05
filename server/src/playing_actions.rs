@@ -323,8 +323,7 @@ impl PlayingAction {
                 game.undo_advance(&advance, player_index);
             }
             FoundCity { settler: _ } => {
-                let settler = game.undo_context_stack.pop();
-                let Some(UndoContext::FoundCity { settler }) = settler else {
+                let Some(UndoContext::FoundCity { settler }) = game.pop_undo_context() else {
                     panic!("Settler context should be stored in undo context");
                 };
                 let player = &mut game.players[player_index];
@@ -441,10 +440,10 @@ pub(crate) fn undo_increase_happiness(game: &mut Game, player_index: usize, i: I
     player.gain_resources(i.payment);
 
     if let Some(UndoContext::IncreaseHappiness { angry_activations }) =
-        game.undo_context_stack.pop()
+        game.pop_undo_context()
     {
         for city_position in angry_activations {
-            let city = player.get_city_mut(city_position).expect("Illegal action");
+            let city = &mut game.players[player_index].get_city_mut(city_position).expect("Illegal action");
             city.angry_activation = true;
         }
     } else {
