@@ -25,20 +25,35 @@ fn retreat(retreat: bool) -> StateUpdate {
 
 #[derive(Clone)]
 pub struct RemoveCasualtiesSelection {
+    pub player: usize,
     pub position: Position,
     pub needed: u8,
+    pub needed_carried: u8,
     pub selectable: Vec<u32>,
     pub units: Vec<u32>,
 }
 
 impl RemoveCasualtiesSelection {
-    pub fn new(position: Position, needed: u8, selectable: Vec<u32>) -> Self {
+    pub fn new(
+        player: usize,
+        position: Position,
+        needed: u8,
+        needed_carried: u8,
+        selectable: Vec<u32>,
+    ) -> Self {
         RemoveCasualtiesSelection {
+            player,
             position,
             needed,
+            needed_carried,
             units: Vec::new(),
             selectable,
         }
+    }
+
+    #[must_use]
+    pub fn total_needed(&self) -> u8 {
+        self.needed + self.needed_carried
     }
 }
 
@@ -57,13 +72,19 @@ impl ConfirmSelection for RemoveCasualtiesSelection {
         None
     }
 
-    fn confirm(&self, _game: &Game) -> OkTooltip {
-        if self.needed == self.units.len() as u8 {
+    fn confirm(&self, game: &Game) -> OkTooltip {
+        let units = self
+            .units
+            .iter()
+            .map(|id| game.get_player(self.player).get_unit(*id).unwrap());
+        let carried = units.filter(|u| u.carrier_id.is_some()).count() as u8;
+
+        if carried == self.needed_carried && self.units.len() as u8 == self.total_needed() {
             OkTooltip::Valid("Remove casualties".to_string())
         } else {
             OkTooltip::Invalid(format!(
                 "Need to select {} units",
-                self.needed - self.units.len() as u8
+                self.total_needed() - self.units.len() as u8
             ))
         }
     }

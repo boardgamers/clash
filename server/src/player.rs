@@ -1,4 +1,5 @@
 use crate::advance::Advance;
+use crate::consts::SHIP_CAPACITY;
 use crate::content::advances::get_advance_by_name;
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
@@ -853,11 +854,12 @@ impl Player {
             .collect::<Vec<_>>();
 
         if units.is_empty() {
-            return Err("noun units to move".to_string());
+            return Err("no units to move".to_string());
         }
         if embark_carrier_id.is_some_and(|id| {
             let player_index = self.index;
-            carried_units(id, &game.players[player_index]).len() + units.len() > 2
+            (carried_units(id, &game.players[player_index]).len() + units.len()) as u8
+                > SHIP_CAPACITY
         }) {
             return Err("carrier capacity exceeded".to_string());
         }
@@ -907,7 +909,7 @@ impl Player {
                     }
                     let dest = route.destination;
                     let attack = game.enemy_player(self.index, dest).is_some();
-                    if attack && stack_size == 0 {
+                    if attack && game.map.is_land(dest) && stack_size == 0 {
                         return false;
                     }
 

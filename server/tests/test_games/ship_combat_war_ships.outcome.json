@@ -1,0 +1,448 @@
+{
+  "state": {
+    "Combat": {
+      "initiation": {
+        "Movement": {
+          "movement_actions_left": 1,
+          "moved_units": [
+            7,
+            8
+          ]
+        }
+      },
+      "round": 1,
+      "phase": {
+        "RemoveCasualties": {
+          "player": 1,
+          "casualties": 1,
+          "defender_hits": 1
+        }
+      },
+      "defender": 1,
+      "defender_position": "D2",
+      "attacker": 0,
+      "attacker_position": "C3",
+      "attackers": [
+        7,
+        8
+      ],
+      "can_retreat": true
+    }
+  },
+  "players": [
+    {
+      "name": null,
+      "id": 0,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 5,
+        "gold": 7,
+        "mood_tokens": 9,
+        "culture_tokens": 10
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "market": 1
+          },
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A1"
+        },
+        {
+          "city_pieces": {
+            "academy": 1,
+            "port": 1
+          },
+          "mood_state": "Angry",
+          "activations": 4,
+          "angry_activation": false,
+          "position": "C2",
+          "port_position": "C3"
+        },
+        {
+          "city_pieces": {
+            "obelisk": 1,
+            "observatory": 1,
+            "fortress": 1,
+            "temple": 1
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Angry",
+          "activations": 4,
+          "angry_activation": true,
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "B3",
+          "unit_type": "Settler",
+          "id": 3
+        },
+        {
+          "position": "B3",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "position": "B3",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "B3",
+          "unit_type": "Settler",
+          "id": 6
+        },
+        {
+          "position": "C3",
+          "unit_type": "Ship",
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 7,
+          "carried_units": [
+            {
+              "unit_type": "Elephant",
+              "id": 2
+            }
+          ]
+        },
+        {
+          "position": "C3",
+          "unit_type": "Ship",
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 8,
+          "carried_units": [
+            {
+              "unit_type": "Cavalry",
+              "id": 1
+            }
+          ]
+        }
+      ],
+      "civilization": "test1",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [
+        "Farming",
+        "Free Economy",
+        "Mining",
+        "Tactics",
+        "Voting",
+        "War Ships"
+      ],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "game_event_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [
+        "Pyramids"
+      ],
+      "next_unit_id": 9
+    },
+    {
+      "name": null,
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 9,
+        "culture_tokens": 9
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Angry",
+          "activations": 2,
+          "angry_activation": false,
+          "position": "C1"
+        },
+        {
+          "city_pieces": {
+            "port": 1
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B2",
+          "port_position": "C3"
+        }
+      ],
+      "units": [
+        {
+          "position": "D2",
+          "unit_type": "Ship",
+          "id": 0
+        },
+        {
+          "position": "D2",
+          "unit_type": "Ship",
+          "id": 1
+        }
+      ],
+      "civilization": "test0",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [
+        "Farming",
+        "Mining",
+        "War Ships"
+      ],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "game_event_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 2
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Water"
+      ],
+      [
+        "A3",
+        {
+          "Exhausted": "Forest"
+        }
+      ],
+      [
+        "A4",
+        "Mountain"
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "B4",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "C4",
+        "Water"
+      ],
+      [
+        "C5",
+        "Water"
+      ],
+      [
+        "D1",
+        "Fertile"
+      ],
+      [
+        "D2",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "Playing": {
+        "Advance": {
+          "advance": "Tactics",
+          "payment": {
+            "ideas": 2
+          }
+        }
+      }
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            7,
+            8
+          ],
+          "destination": "C4"
+        }
+      }
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            7,
+            8
+          ],
+          "destination": "C3"
+        }
+      }
+    },
+    {
+      "Movement": {
+        "Move": {
+          "units": [
+            7,
+            8
+          ],
+          "destination": "D2"
+        }
+      }
+    }
+  ],
+  "action_log_index": 4,
+  "log": [
+    "The game has started",
+    "Age 1 has started",
+    "Round 1/3",
+    "Player1 paid 2 ideas to get the Tactics advance",
+    "Player1 used a move units action",
+    "\tPlayer1 sailed 2 ships from C3 to C4",
+    "\tPlayer1 sailed 2 ships from C4 to C3",
+    "\tPlayer1 sailed 2 ships from C3 to D2",
+    "\nCombat round 1",
+    "\tPlayer1 rolled 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units. Player2 rolled 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 12 and gets 1 hits against attacking units.",
+    ". Player1 used the following combat modifiers: War Ships ignore the first hit in the first round of combat",
+    ". Player2 used the following combat modifiers: War Ships ignore the first hit in the first round of combat",
+    "\tPlayer2 has to remove 1 of their defending units"
+  ],
+  "undo_limit": 4,
+  "actions_left": 2,
+  "successful_cultural_influence": false,
+  "round": 6,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10
+  ],
+  "dice_roll_log": [
+    10,
+    10,
+    10,
+    10
+  ],
+  "dropped_players": [],
+  "wonders_left": [],
+  "wonder_amount_left": 1,
+  "undo_context_stack": [
+    {
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
+    },
+    {
+      "Recruit": {}
+    },
+    {
+      "Movement": {
+        "starting_position": "C3",
+        "movement_actions_left": 2
+      }
+    },
+    {
+      "Movement": {
+        "starting_position": "C4",
+        "movement_actions_left": 1,
+        "moved_units": [
+          7,
+          8
+        ],
+        "current_move": {
+          "Fleet": {
+            "units": [
+              7,
+              8
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

@@ -641,9 +641,8 @@ impl Game {
                     }
                 } else {
                     self.move_units(player_index, &m.units, m.destination, m.embark_carrier_id);
+                    self.back_to_move(&move_state, !starting_position.is_neighbor(m.destination));
                 }
-
-                self.back_to_move(&move_state, !starting_position.is_neighbor(m.destination));
 
                 if let Some(enemy) = enemy {
                     self.capture_position(enemy, m.destination, player_index);
@@ -893,13 +892,9 @@ impl Game {
             return custom_phase_event.player_index;
         }
         match &self.state {
-            Combat(c) => match c.phase {
-                CombatPhase::RemoveCasualties {
-                    player,
-                    casualties: _,
-                    defender_hits: _,
-                }
-                | CombatPhase::PlayActionCard(player) => player,
+            Combat(c) => match &c.phase {
+                CombatPhase::RemoveCasualties(r) => r.player,
+                CombatPhase::PlayActionCard(player) => *player,
                 CombatPhase::Retreat => c.attacker,
             },
             PlaceSettler(p) => p.player_index,
