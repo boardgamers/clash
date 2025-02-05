@@ -31,6 +31,7 @@ pub(crate) struct PlayerEvents {
     pub on_undo_construct_wonder: EventMut<Player, Position, Wonder>,
     pub on_advance: EventMut<Player, String, ()>,
     pub on_undo_advance: EventMut<Player, String, ()>,
+    pub before_move: EventMut<Player, Vec<u32>, Position>,
     pub after_execute_action: EventMut<Player, Action, ()>,
     pub before_undo_action: EventMut<Player, Action, ()>,
 

@@ -612,6 +612,7 @@ impl Game {
                     .map
                     .get(m.destination)
                     .expect("destination should be a valid tile");
+
                 if dest_terrain == &Unexplored {
                     if move_to_unexplored_tile(
                         self,
@@ -698,8 +699,6 @@ impl Game {
                 unit.movement_restrictions.push(MovementRestriction::Battle);
                 military = true;
             }
-            // move to destination to apply movement restrictions, etc.
-            self.move_unit(player_index, *unit_id, destination, None);
         }
         assert!(military, "Need military units to attack");
         self.back_to_move(move_state, true);
@@ -1557,6 +1556,11 @@ impl Game {
         destination: Position,
         embark_carrier_id: Option<u32>,
     ) {
+        self.players[player_index].take_events(|events, player| {
+            events
+                .before_move
+                .trigger(player, &units.to_vec(), &destination);
+        });
         for unit_id in units {
             self.move_unit(player_index, *unit_id, destination, embark_carrier_id);
         }

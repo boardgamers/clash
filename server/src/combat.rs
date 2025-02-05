@@ -454,15 +454,9 @@ fn attacker_wins(game: &mut Game, c: &mut Combat) -> CombatControl {
         "\t{} killed all defending units",
         game.players[c.attacker].get_name()
     ));
-    for unit in &c.attackers {
-        let unit = game.players[c.attacker]
-            .get_unit_mut(*unit)
-            .expect("attacker should have all attacking units");
-        unit.position = c.defender_position;
-    }
+    game.move_units(c.attacker, &c.attackers, c.defender_position, None);
     let control = end_combat(game, c);
     game.capture_position(c.defender, c.defender_position, c.attacker);
-    //todo attacker wins
     control
 }
 
@@ -471,20 +465,17 @@ fn defender_wins(game: &mut Game, c: &mut Combat) -> CombatControl {
         "\t{} killed all attacking units",
         game.players[c.defender].get_name()
     ));
-    //todo defender wins
     end_combat(game, c)
 }
 
 fn draw(game: &mut Game, c: &mut Combat) -> CombatControl {
     if c.defender_fortress(game) {
         game.add_info_log_item(format!("\tAll attacking and defending units where eliminated. {} wins the battle because he has a defending fortress", game.players[c.defender].get_name()));
-        //todo defender wins
         return end_combat(game, c);
     }
     game.add_info_log_item(String::from(
         "\tAll attacking and defending units where eliminated, ending the battle in a draw",
     ));
-    //todo draw
     end_combat(game, c)
 }
 
