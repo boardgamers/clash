@@ -1189,6 +1189,13 @@
           1
         ]
       }
+    },
+    "StartAction",
+    {
+      "Command": {
+        "info": {},
+        "gained_resources": {}
+      }
     }
   ]
 }

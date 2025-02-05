@@ -312,6 +312,13 @@
     {
       "Recruit": {}
     },
+    "StartAction",
+    {
+      "Command": {
+        "info": {},
+        "gained_resources": {}
+      }
+    },
     {
       "Movement": {
         "starting_position": "C2",

@@ -340,40 +340,11 @@
   "wonders_left": [],
   "wonder_amount_left": 1,
   "undo_context_stack": [
+    "StartAction",
     {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Movement": {
-        "starting_position": "C3",
-        "movement_actions_left": 2
+      "Command": {
+        "info": {},
+        "gained_resources": {}
       }
     },
     {

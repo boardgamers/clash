@@ -980,6 +980,13 @@
     },
     {
       "Recruit": {}
+    },
+    "StartAction",
+    {
+      "Command": {
+        "info": {},
+        "gained_resources": {}
+      }
     }
   ]
 }

@@ -448,6 +448,8 @@
         "movement_actions_left": 2
       }
     },
+    "StartAction",
+    "StartAction",
     {
       "CustomPhaseEvent": {
         "event_used": [],

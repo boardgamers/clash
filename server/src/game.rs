@@ -344,6 +344,12 @@ impl Game {
         let mut commands = PlayerCommands::new(p.event_info.clone());
 
         event(p.get_events()).trigger(&mut commands, self, details);
+        if info != commands.info || !commands.gained_resources.is_empty() {
+            self.push_undo_context(UndoContext::Command(CommandUndoContext {
+                info,
+                gained_resources: commands.gained_resources.clone(),
+            }));
+        }
 
         let p = self
             .players
@@ -352,14 +358,10 @@ impl Game {
         for (k, v) in commands.info {
             p.event_info.insert(k, v);
         }
-        p.gain_resources(commands.gained_resources.clone());
+        p.gain_resources(commands.gained_resources);
         for edit in commands.log_edits {
             self.add_to_last_log_item(&edit);
         }
-        self.push_undo_context(UndoContext::Command(CommandUndoContext {
-            info,
-            gained_resources: commands.gained_resources,
-        }));
     }
 
     ///
@@ -506,11 +508,11 @@ impl Game {
         }
         self.action_log_index -= 1;
         self.log.remove(self.log.len() - 1);
-        if let Some(UndoContext::WastedResources { resources }) = self.pop_undo_context() {
+        if let Some(UndoContext::WastedResources { resources }) = self.maybe_pop_undo_context(|c|matches!(c, UndoContext::WastedResources { .. })) {
             self.players[player_index].gain_resources(resources.clone());
         }
 
-        while self.pop_undo_context().is_some() {
+        while self.maybe_pop_undo_context(|c|false).is_some() {
             // pop all undo contexts until action start
         }
     }
@@ -701,9 +703,13 @@ impl Game {
     }
 
     pub(crate) fn pop_undo_context(&mut self) -> Option<UndoContext> {
+        self.maybe_pop_undo_context(|_| true)
+    }
+    
+    pub(crate) fn maybe_pop_undo_context(&mut self, pred: fn(&UndoContext) -> bool) -> Option<UndoContext> {
         loop {
-            let option = self.undo_context_stack.pop();
-            if let Some(ref context) = option {
+            let option = self.undo_context_stack.last();
+            if let Some(context) = option {
                 match context {
                     UndoContext::Command(c) => {
                         self.players[self.current_player_index]
@@ -711,12 +717,18 @@ impl Game {
                             .clone_from(&c.info);
                         self.players[self.current_player_index]
                             .loose_resources(c.gained_resources.clone());
+                        self.undo_context_stack.pop();
                     }
                     UndoContext::StartAction => {
+                        self.undo_context_stack.pop();
                         return None;
                     }
                     _ => {
-                        return option;
+                        if pred(context) {
+                            return self.undo_context_stack.pop();
+                        } else {
+                            return None;
+                        }
                     }
                 }
             } else {

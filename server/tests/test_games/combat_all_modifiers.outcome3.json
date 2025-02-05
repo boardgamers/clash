@@ -382,6 +382,8 @@
         "movement_actions_left": 2
       }
     },
+    "StartAction",
+    "StartAction",
     {
       "CustomPhaseEvent": {
         "event_used": [],
@@ -422,6 +424,7 @@
         }
       }
     },
+    "StartAction",
     {
       "CustomPhaseEvent": {
         "event_used": [],
@@ -483,6 +486,7 @@
         }
       }
     },
+    "StartAction",
     {
       "CustomPhaseEvent": {
         "event_used": [
@@ -523,6 +527,12 @@
             "Advance": "Steel Weapons"
           }
         }
+      }
+    },
+    {
+      "Command": {
+        "info": {},
+        "gained_resources": {}
       }
     },
     {

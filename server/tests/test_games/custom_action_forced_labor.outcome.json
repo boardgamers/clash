@@ -119,7 +119,7 @@
       ],
       "next_unit_id": 7,
       "played_once_per_turn_actions": [
-        "ForcedLabor"
+        "AbsolutePower"
       ]
     },
     {
@@ -371,50 +371,6 @@
   "wonders_left": [],
   "wonder_amount_left": 1,
   "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    }
+    "StartAction"
   ]
 }

@@ -368,6 +368,7 @@
     {
       "Recruit": {}
     },
+    "StartAction",
     {
       "Movement": {
         "starting_position": "C3",

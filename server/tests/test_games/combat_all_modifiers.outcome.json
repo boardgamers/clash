@@ -413,6 +413,7 @@
       "Movement": {
         "movement_actions_left": 2
       }
-    }
+    },
+    "StartAction"
   ]
 }

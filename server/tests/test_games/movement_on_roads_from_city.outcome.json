@@ -643,67 +643,11 @@
   ],
   "wonder_amount_left": 1,
   "undo_context_stack": [
+    "StartAction",
     {
-      "Movement": {
-        "starting_position": "D8",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "D1",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "F7",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
+      "Command": {
+        "info": {},
+        "gained_resources": {}
       }
     },
     {

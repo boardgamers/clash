@@ -1089,6 +1089,13 @@
         "starting_position": "B5",
         "movement_actions_left": 2
       }
+    },
+    "StartAction",
+    {
+      "Command": {
+        "info": {},
+        "gained_resources": {}
+      }
     }
   ]
 }
