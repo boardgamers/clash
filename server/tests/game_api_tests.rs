@@ -729,9 +729,9 @@ fn test_trade_routes_with_currency() {
 }
 
 #[test]
-fn test_cultural_influence_attempt() {
+fn test_cultural_influence_instant() {
     test_action(
-        "cultural_influence_attempt",
+        "cultural_influence_instant",
         Action::Playing(InfluenceCultureAttempt(
             playing_actions::InfluenceCultureAttempt {
                 starting_city_position: Position::from_offset("C1"),
@@ -747,13 +747,23 @@ fn test_cultural_influence_attempt() {
 }
 
 #[test]
-fn test_cultural_influence_resolution() {
-    test_action(
-        "cultural_influence_resolution",
-        Action::CulturalInfluenceResolution(true),
-        1,
-        true,
-        false,
+fn test_cultural_influence() {
+    test_actions(
+        "cultural_influence",
+        vec![
+            TestAction::not_undoable(
+                1,
+                Action::Playing(InfluenceCultureAttempt(
+                    playing_actions::InfluenceCultureAttempt {
+                        starting_city_position: Position::from_offset("C1"),
+                        target_player_index: 0,
+                        target_city_position: Position::from_offset("C2"),
+                        city_piece: Fortress,
+                    },
+                )),
+            ),
+            TestAction::undoable(1, Action::CulturalInfluenceResolution(true)),
+        ],
     );
 }
 

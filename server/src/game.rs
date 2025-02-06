@@ -852,7 +852,7 @@ impl Game {
     }
 
     fn undo_cultural_influence_resolution_action(&mut self, action: bool) {
-        let cultural_influence_attempt_action = self.action_log[self.action_log_index - 2].action.playing_ref().expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
+        let cultural_influence_attempt_action = self.action_log[self.action_log_index - 1].action.playing_ref().expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
         let PlayingAction::InfluenceCultureAttempt(c) = cultural_influence_attempt_action else {
             panic!("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
         };

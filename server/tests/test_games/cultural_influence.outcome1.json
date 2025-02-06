@@ -1,14 +1,5 @@
 {
-  "state": {
-    "CulturalInfluenceResolution": {
-      "roll_boost_cost": {
-        "culture_tokens": 4
-      },
-      "target_player_index": 0,
-      "target_city_position": "C2",
-      "city_piece": "Fortress"
-    }
-  },
+  "state": "Playing",
   "players": [
     {
       "name": null,
@@ -41,7 +32,7 @@
         },
         {
           "city_pieces": {
-            "fortress": 0
+            "fortress": 1
           },
           "mood_state": "Angry",
           "activations": 0,
@@ -118,7 +109,7 @@
         "ideas": 7,
         "gold": 7,
         "mood_tokens": 7,
-        "culture_tokens": 7
+        "culture_tokens": 3
       },
       "resource_limit": {
         "food": 2,
@@ -213,8 +204,26 @@
   },
   "starting_player_index": 0,
   "current_player_index": 1,
-  "action_log": [],
-  "action_log_index": 0,
+  "action_log": [
+    {
+      "action": {
+        "Playing": {
+          "InfluenceCultureAttempt": {
+            "starting_city_position": "C1",
+            "target_player_index": 0,
+            "target_city_position": "C2",
+            "city_piece": "Fortress"
+          }
+        }
+      }
+    },
+    {
+      "action": {
+        "CulturalInfluenceResolution": true
+      }
+    }
+  ],
+  "action_log_index": 2,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -223,11 +232,12 @@
     "Player1 paid 1 food, 1 wood and 1 ore to construct a Fortress in the city at C2 making it Angry",
     "Player1 ended their turn with 1 actions left",
     "It's Player2's turn",
-    "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1and rolled a 1. Player2 now has the option to pay 4 culture tokens to increase the dice roll and proceed with the cultural influence"
+    "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1 and rolled a 1. Player2 now has the option to pay 4 culture tokens to increase the dice roll and proceed with the cultural influence",
+    "Player2 paid 1 culture tokens to increase the dice roll and proceed with the cultural influence"
   ],
-  "undo_limit": 0,
+  "undo_limit": 1,
   "actions_left": 2,
-  "successful_cultural_influence": false,
+  "successful_cultural_influence": true,
   "round": 1,
   "age": 1,
   "messages": [
@@ -236,7 +246,6 @@
   "dice_roll_outcomes": [
     1,
     1,
-    10,
     10,
     10,
     10,
@@ -252,6 +261,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": []
+  "wonder_amount_left": 1
 }
