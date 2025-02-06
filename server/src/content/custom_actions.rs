@@ -131,7 +131,7 @@ impl CustomActionType {
         match self {
             CustomActionType::FreeEconomyCollect => !current_turn_log(game)
                 .iter()
-                .any(|action| matches!(action, Action::Playing(PlayingAction::Collect(_)))),
+                .any(|item| matches!(item.action, Action::Playing(PlayingAction::Collect(_)))),
             _ => true,
         }
     }

@@ -168,9 +168,9 @@ impl PlayingAction {
                 player_mut.construct(c.city_piece, c.city_position, c.port_position);
             }
             Collect(c) => {
-                if game.action_log.iter().any(|a| {
+                if game.action_log.iter().any(|i| {
                     matches!(
-                        a,
+                        i.action,
                         Action::Playing(PlayingAction::Custom(CustomAction::FreeEconomyCollect(_)))
                     )
                 }) {

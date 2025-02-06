@@ -112,7 +112,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
 
                         let mut ctx = game.custom_phase_state.clone();
                         ctx.current.as_mut().expect("current missing").response = None;
-                        game.undo_context_stack
+                        game.action_log[game.action_log_index]
+                            .undo
                             .push(UndoContext::CustomPhaseEvent(ctx));
                         let r = c.request.clone();
                         let a = action.clone();
@@ -157,8 +158,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 let player_name = game.players[player_index].get_name();
                 let mut ctx = game.custom_phase_state.clone();
                 ctx.current.as_mut().expect("current missing").response = None;
-                game.undo_context_stack
-                    .push(UndoContext::CustomPhaseEvent(ctx));
+                game.push_undo_context(UndoContext::CustomPhaseEvent(ctx));
                 let r = state.request.clone();
                 let a = action.clone();
                 game.custom_phase_state = CustomPhaseEventState::new();

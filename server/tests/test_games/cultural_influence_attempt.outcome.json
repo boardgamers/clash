@@ -206,12 +206,14 @@
   "current_player_index": 1,
   "action_log": [
     {
-      "Playing": {
-        "InfluenceCultureAttempt": {
-          "starting_city_position": "C1",
-          "target_player_index": 0,
-          "target_city_position": "C2",
-          "city_piece": "Fortress"
+      "action": {
+        "Playing": {
+          "InfluenceCultureAttempt": {
+            "starting_city_position": "C1",
+            "target_player_index": 0,
+            "target_city_position": "C2",
+            "city_piece": "Fortress"
+          }
         }
       }
     }
@@ -253,38 +255,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    "StartAction"
-  ]
+  "wonder_amount_left": 1
 }

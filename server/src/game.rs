@@ -51,7 +51,7 @@ pub struct Game {
     pub map: Map,
     pub starting_player_index: usize,
     pub current_player_index: usize,
-    pub action_log: Vec<Action>,
+    pub action_log: Vec<ActionLogItem>,
     pub action_log_index: usize,
     pub log: Vec<String>,
     pub undo_limit: usize,
@@ -66,7 +66,6 @@ pub struct Game {
     pub dropped_players: Vec<usize>,
     pub wonders_left: Vec<Wonder>,
     pub wonder_amount_left: usize,
-    pub undo_context_stack: Vec<UndoContext>,
 }
 
 impl Clone for Game {
@@ -149,7 +148,6 @@ impl Game {
             dropped_players: Vec::new(),
             wonders_left: wonders,
             wonder_amount_left: wonder_amount,
-            undo_context_stack: Vec::new(),
         }
     }
 
@@ -188,7 +186,6 @@ impl Game {
                 })
                 .collect(),
             wonder_amount_left: data.wonder_amount_left,
-            undo_context_stack: data.undo_context_stack,
             custom_phase_state: data.state_change_event_state,
         };
         for player in data.players {
@@ -225,7 +222,6 @@ impl Game {
                 .map(|wonder| wonder.name)
                 .collect(),
             wonder_amount_left: self.wonder_amount_left,
-            undo_context_stack: self.undo_context_stack,
         }
     }
 
@@ -257,7 +253,6 @@ impl Game {
                 .map(|wonder| wonder.name.clone())
                 .collect(),
             wonder_amount_left: self.wonder_amount_left,
-            undo_context_stack: self.undo_context_stack.clone(),
         }
     }
 
@@ -291,7 +286,7 @@ impl Game {
         if self.action_log_index < self.action_log.len() {
             self.action_log.drain(self.action_log_index..);
         }
-        self.action_log.push(item);
+        self.action_log.push(ActionLogItem::new(item)); 
         self.action_log_index += 1;
     }
 
@@ -379,8 +374,6 @@ impl Game {
             self.undo(player_index);
             return;
         }
-
-        self.push_undo_context(UndoContext::StartAction);
 
         if matches!(action, Action::Redo) {
             assert!(self.can_redo(), "no action can be redone");
@@ -481,7 +474,9 @@ impl Game {
     }
 
     fn undo(&mut self, player_index: usize) {
-        let action = &self.action_log[self.action_log_index - 1];
+        self.action_log_index -= 1;
+        self.log.remove(self.log.len() - 1);
+        let action = &self.action_log[self.action_log_index].action;
 
         self.players[player_index].take_events(|events, player| {
             events.before_undo_action.trigger(player, action, &());
@@ -506,8 +501,6 @@ impl Game {
             Action::Undo => panic!("undo action can't be undone"),
             Action::Redo => panic!("redo action can't be undone"),
         }
-        self.action_log_index -= 1;
-        self.log.remove(self.log.len() - 1);
         if let Some(UndoContext::WastedResources { resources }) =
             self.maybe_pop_undo_context(|c| matches!(c, UndoContext::WastedResources { .. }))
         {
@@ -521,8 +514,8 @@ impl Game {
 
     fn redo(&mut self, player_index: usize) {
         let copy = self.action_log[self.action_log_index].clone();
-        self.add_string_log_item(&copy);
-        match &self.action_log[self.action_log_index] {
+        self.add_string_log_item(&copy.action);
+        match &self.action_log[self.action_log_index].action {
             Action::Playing(action) => action.clone().execute(self, player_index),
             Action::StatusPhase(_) => panic!("status phase actions can't be redone"),
             Action::Movement(action) => match &self.state {
@@ -562,7 +555,7 @@ impl Game {
             Action::Redo => panic!("redo action can't be redone"),
         }
         self.action_log_index += 1;
-        self.after_execute_or_redo(&copy, player_index);
+        self.after_execute_or_redo(&copy.action, player_index);
         check_for_waste(self, player_index);
     }
 
@@ -701,7 +694,7 @@ impl Game {
     }
 
     pub(crate) fn push_undo_context(&mut self, context: UndoContext) {
-        self.undo_context_stack.push(context);
+        self.action_log[self.action_log_index - 1].undo.push(context);
     }
 
     pub(crate) fn pop_undo_context(&mut self) -> Option<UndoContext> {
@@ -713,27 +706,20 @@ impl Game {
         pred: fn(&UndoContext) -> bool,
     ) -> Option<UndoContext> {
         loop {
-            let option = self.undo_context_stack.last();
+            let option = self.action_log[self.action_log_index].undo.last();
             if let Some(context) = option {
-                match context {
-                    UndoContext::Command(c) => {
-                        self.players[self.current_player_index]
-                            .event_info
-                            .clone_from(&c.info);
-                        self.players[self.current_player_index]
-                            .loose_resources(c.gained_resources.clone());
-                        self.undo_context_stack.pop();
+                if let UndoContext::Command(c) = context {
+                    self.players[self.current_player_index]
+                        .event_info
+                        .clone_from(&c.info);
+                    self.players[self.current_player_index]
+                        .loose_resources(c.gained_resources.clone());
+                    self.action_log[self.action_log_index].undo.pop();
+                } else {
+                    if pred(context) {
+                        return self.action_log[self.action_log_index].undo.pop();
                     }
-                    UndoContext::StartAction => {
-                        self.undo_context_stack.pop();
-                        return None;
-                    }
-                    _ => {
-                        if pred(context) {
-                            return self.undo_context_stack.pop();
-                        }
-                        return None;
-                    }
+                    return None;
                 }
             } else {
                 return None;
@@ -859,7 +845,7 @@ impl Game {
     }
 
     fn undo_cultural_influence_resolution_action(&mut self, action: bool) {
-        let cultural_influence_attempt_action = self.action_log[self.action_log_index - 2].playing_ref().expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
+        let cultural_influence_attempt_action = self.action_log[self.action_log_index - 2].action.playing_ref().expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
         let PlayingAction::InfluenceCultureAttempt(c) = cultural_influence_attempt_action else {
             panic!("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
         };
@@ -1739,7 +1725,7 @@ pub struct GameData {
     map: MapData,
     starting_player_index: usize,
     current_player_index: usize,
-    action_log: Vec<Action>,
+    action_log: Vec<ActionLogItem>,
     action_log_index: usize,
     log: Vec<String>,
     undo_limit: usize,
@@ -1758,7 +1744,6 @@ pub struct GameData {
     dropped_players: Vec<usize>,
     wonders_left: Vec<String>,
     wonder_amount_left: usize,
-    undo_context_stack: Vec<UndoContext>,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -1862,6 +1847,24 @@ impl GameState {
     }
 }
 
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub struct ActionLogItem {
+    pub action: Action,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub undo: Vec<UndoContext>,
+}
+
+impl ActionLogItem {
+    #[must_use]
+    pub fn new(action: Action) -> Self {
+        Self {
+            action,
+            undo: Vec::new(),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct DisembarkUndoContext {
     unit_id: u32,
@@ -1906,7 +1909,6 @@ pub enum UndoContext {
     },
     CustomPhaseEvent(CustomPhaseEventState),
     Command(CommandUndoContext),
-    StartAction,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -1969,7 +1971,6 @@ pub mod tests {
             dropped_players: Vec::new(),
             wonders_left: Vec::new(),
             wonder_amount_left: 0,
-            undo_context_stack: Vec::new(),
         }
     }
 
