@@ -248,63 +248,7 @@
   },
   "starting_player_index": 1,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "StatusPhase": {
-        "FreeAdvance": "Math"
-      }
-    },
-    {
-      "StatusPhase": {
-        "FreeAdvance": "Math"
-      }
-    },
-    {
-      "StatusPhase": {
-        "RazeSize1City": "None"
-      }
-    },
-    {
-      "StatusPhase": {
-        "RazeSize1City": "None"
-      }
-    },
-    {
-      "StatusPhase": {
-        "ChangeGovernmentType": {
-          "ChangeGovernment": {
-            "new_government": "Autocracy",
-            "additional_advances": [
-              "Absolute Power"
-            ]
-          }
-        }
-      }
-    },
-    {
-      "StatusPhase": {
-        "DetermineFirstPlayer": 1
-      }
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Movement": "Stop"
-    }
-  ],
+  "action_log": [],
   "action_log_index": 12,
   "log": [
     "The game has started",

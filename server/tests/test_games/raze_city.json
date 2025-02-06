@@ -333,18 +333,7 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "StatusPhase": {
-        "FreeAdvance": "Fishing"
-      }
-    },
-    {
-      "StatusPhase": {
-        "FreeAdvance": "Philosophy"
-      }
-    }
-  ],
+  "action_log": [],
   "action_log_index": 2,
   "log": [
     "The game has started",

@@ -288,47 +288,7 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Husbandry",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Custom": {
-          "VotingIncreaseHappiness": {
-            "happiness_increases": [
-              [
-                "A1",
-                0
-              ],
-              [
-                "C2",
-                0
-              ],
-              [
-                "B1",
-                0
-              ],
-              [
-                "B3",
-                2
-              ]
-            ],
-            "payment": {
-              "mood_tokens": 2
-            }
-          }
-        }
-      }
-    }
-  ],
+  "action_log": [],
   "action_log_index": 2,
   "log": [
     "The game has started",

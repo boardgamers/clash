@@ -206,58 +206,7 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "Playing": {
-        "IncreaseHappiness": {
-          "happiness_increases": [
-            [
-              "A1",
-              0
-            ],
-            [
-              "C2",
-              1
-            ]
-          ],
-          "payment": {
-            "mood_tokens": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Math",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Construct": {
-          "city_position": "C2",
-          "city_piece": "Observatory",
-          "payment": {
-            "food": 1,
-            "wood": 1,
-            "ore": 1
-          },
-          "port_position": null,
-          "temple_bonus": null
-        }
-      }
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
-    }
-  ],
+  "action_log": [],
   "action_log_index": 5,
   "log": [
     "The game has started",

@@ -297,71 +297,7 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Tactics",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Siegecraft",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5
-          ],
-          "destination": "C1"
-        }
-      }
-    },
-    {
-      "CustomPhaseEvent": {
-        "Payment": [
-          {
-            "ore": 1
-          }
-        ]
-      }
-    },
-    {
-      "CustomPhaseEvent": {
-        "Payment": [
-          {},
-          {
-            "ore": 2
-          }
-        ]
-      }
-    }
-  ],
+  "action_log": [],
   "action_log_index": 8,
   "log": [
     "The game has started",

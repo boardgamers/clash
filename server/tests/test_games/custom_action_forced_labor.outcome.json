@@ -253,63 +253,10 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "StatusPhase": {
-        "FreeAdvance": "Math"
-      }
-    },
-    {
-      "StatusPhase": {
-        "FreeAdvance": "Math"
-      }
-    },
-    {
-      "StatusPhase": {
-        "RazeSize1City": "None"
-      }
-    },
-    {
-      "StatusPhase": {
-        "RazeSize1City": "None"
-      }
-    },
-    {
-      "StatusPhase": {
-        "ChangeGovernmentType": {
-          "ChangeGovernment": {
-            "new_government": "Autocracy",
-            "additional_advances": [
-              "Absolute Power"
-            ]
-          }
+      "action": {
+        "Playing": {
+          "Custom": "ForcedLabor"
         }
-      }
-    },
-    {
-      "StatusPhase": {
-        "DetermineFirstPlayer": 1
-      }
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Playing": {
-        "Custom": "ForcedLabor"
       }
     }
   ],
@@ -369,8 +316,5 @@
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    "StartAction"
-  ]
+  "wonder_amount_left": 1
 }

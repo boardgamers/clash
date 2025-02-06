@@ -393,19 +393,7 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "CustomPhaseEvent": {
-        "Reward": {
-          "food": 1,
-          "gold": 1
-        }
-      }
-    }
-  ],
+  "action_log": [],
   "action_log_index": 2,
   "log": [
     "The game has started",

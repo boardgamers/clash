@@ -261,54 +261,26 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "Playing": {
-        "Advance": {
-          "advance": "Tactics",
-          "payment": {
-            "ideas": 2
+      "action": {
+        "Movement": {
+          "Move": {
+            "units": [
+              7,
+              8
+            ],
+            "destination": "D2"
           }
         }
       }
     },
     {
-      "Movement": {
-        "Move": {
-          "units": [
+      "action": {
+        "Combat": {
+          "RemoveCasualties": [
             7,
-            8
-          ],
-          "destination": "C4"
+            1
+          ]
         }
-      }
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            7,
-            8
-          ],
-          "destination": "C3"
-        }
-      }
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            7,
-            8
-          ],
-          "destination": "D2"
-        }
-      }
-    },
-    {
-      "Combat": {
-        "RemoveCasualties": [
-          7,
-          1
-        ]
       }
     }
   ],
@@ -352,63 +324,5 @@
   ],
   "dropped_players": [],
   "wonders_left": [],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Movement": {
-        "starting_position": "C3",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "C4",
-        "movement_actions_left": 1,
-        "moved_units": [
-          7,
-          8
-        ],
-        "current_move": {
-          "Fleet": {
-            "units": [
-              7,
-              8
-            ]
-          }
-        }
-      }
-    },
-    "StartAction",
-    "StartAction"
-  ]
+  "wonder_amount_left": 1
 }

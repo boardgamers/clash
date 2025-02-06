@@ -267,29 +267,7 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Tactics",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            1,
-            2
-          ],
-          "destination": "B3"
-        }
-      }
-    }
-  ],
+  "action_log": [],
   "action_log_index": 2,
   "log": [
     "The game has started",

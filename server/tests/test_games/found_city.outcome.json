@@ -205,28 +205,7 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            4
-          ],
-          "destination": "B2"
-        }
-      }
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Playing": {
-        "FoundCity": {
-          "settler": 4
-        }
-      }
-    }
-  ],
+  "action_log": [],
   "action_log_index": 3,
   "log": [
     "The game has started",

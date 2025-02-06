@@ -192,39 +192,7 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Tactics",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0,
-            1,
-            2,
-            3
-          ],
-          "destination": "C1"
-        }
-      }
-    },
-    {
-      "Combat": {
-        "RemoveCasualties": [
-          0,
-          1
-        ]
-      }
-    }
-  ],
+  "action_log": [],
   "action_log_index": 4,
   "log": [
     "The game has started",

@@ -210,62 +210,19 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "Playing": {
-        "IncreaseHappiness": {
-          "happiness_increases": [
-            [
-              "A1",
-              0
-            ],
-            [
-              "C2",
-              1
-            ]
-          ],
-          "payment": {
-            "mood_tokens": 2
+      "action": {
+        "Playing": {
+          "Construct": {
+            "city_position": "A1",
+            "city_piece": "Port",
+            "payment": {
+              "food": 1,
+              "wood": 1,
+              "ore": 1
+            },
+            "port_position": "A2",
+            "temple_bonus": null
           }
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Math",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Fishing",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": {
-        "Construct": {
-          "city_position": "A1",
-          "city_piece": "Port",
-          "payment": {
-            "food": 1,
-            "wood": 1,
-            "ore": 1
-          },
-          "port_position": "A2",
-          "temple_bonus": null
         }
       }
     }
@@ -310,8 +267,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    "StartAction"
-  ]
+  "wonder_amount_left": 1
 }

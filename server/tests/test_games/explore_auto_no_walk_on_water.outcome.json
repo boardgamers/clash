@@ -363,25 +363,14 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "Movement": {
-        "Move": {
-          "units": [
-            0
-          ],
-          "destination": "C2"
-        }
-      }
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0
-          ],
-          "destination": "B2"
+      "action": {
+        "Movement": {
+          "Move": {
+            "units": [
+              0
+            ],
+            "destination": "B2"
+          }
         }
       }
     }
@@ -612,22 +601,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Movement": {
-        "starting_position": "D1",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    "StartAction"
-  ]
+  "wonder_amount_left": 1
 }

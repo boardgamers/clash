@@ -208,46 +208,19 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "Playing": {
-        "IncreaseHappiness": {
-          "happiness_increases": [
-            [
-              "A1",
-              0
-            ],
-            [
-              "C2",
-              1
-            ]
-          ],
-          "payment": {
-            "mood_tokens": 2
+      "action": {
+        "Playing": {
+          "Construct": {
+            "city_position": "C2",
+            "city_piece": "Observatory",
+            "payment": {
+              "food": 1,
+              "wood": 1,
+              "ore": 1
+            },
+            "port_position": null,
+            "temple_bonus": null
           }
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Math",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Construct": {
-          "city_position": "C2",
-          "city_piece": "Observatory",
-          "payment": {
-            "food": 1,
-            "wood": 1,
-            "ore": 1
-          },
-          "port_position": null,
-          "temple_bonus": null
         }
       }
     }
@@ -286,8 +259,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    "StartAction"
-  ]
+  "wonder_amount_left": 1
 }

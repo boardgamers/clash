@@ -202,46 +202,7 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Fishing",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Construct": {
-          "city_position": "C2",
-          "city_piece": "Port",
-          "payment": {
-            "food": 1,
-            "wood": 1,
-            "ore": 1
-          },
-          "port_position": "C3",
-          "temple_bonus": null
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Recruit": {
-          "units": {
-            "ships": 1
-          },
-          "city_position": "C2",
-          "payment": {
-            "wood": 2
-          }
-        }
-      }
-    }
-  ],
+  "action_log": [],
   "action_log_index": 3,
   "log": [
     "The game has started",

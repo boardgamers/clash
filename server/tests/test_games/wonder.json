@@ -206,18 +206,7 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Engineering",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    }
-  ],
+  "action_log": [],
   "action_log_index": 1,
   "log": [
     "The game has started",

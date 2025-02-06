@@ -201,30 +201,10 @@
   "current_player_index": 1,
   "action_log": [
     {
-      "StatusPhase": {
-        "FreeAdvance": "Fishing"
-      }
-    },
-    {
-      "StatusPhase": {
-        "FreeAdvance": "Philosophy"
-      }
-    },
-    {
-      "StatusPhase": {
-        "RazeSize1City": {
-          "Position": "A1"
+      "action": {
+        "StatusPhase": {
+          "DetermineFirstPlayer": 1
         }
-      }
-    },
-    {
-      "StatusPhase": {
-        "RazeSize1City": "None"
-      }
-    },
-    {
-      "StatusPhase": {
-        "DetermineFirstPlayer": 1
       }
     }
   ],
@@ -290,38 +270,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    "StartAction"
-  ]
+  "wonder_amount_left": 1
 }

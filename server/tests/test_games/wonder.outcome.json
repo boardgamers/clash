@@ -211,26 +211,18 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "Playing": {
-        "Advance": {
-          "advance": "Engineering",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Custom": {
-          "ConstructWonder": {
-            "city_position": "A1",
-            "wonder": "Pyramids",
-            "payment": {
-              "food": 2,
-              "wood": 3,
-              "ore": 3,
-              "culture_tokens": 4
+      "action": {
+        "Playing": {
+          "Custom": {
+            "ConstructWonder": {
+              "city_position": "A1",
+              "wonder": "Pyramids",
+              "payment": {
+                "food": 2,
+                "wood": 3,
+                "ore": 3,
+                "culture_tokens": 4
+              }
             }
           }
         }
@@ -268,8 +260,5 @@
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [],
-  "wonder_amount_left": 0,
-  "undo_context_stack": [
-      "StartAction"
-  ]
+  "wonder_amount_left": 0
 }

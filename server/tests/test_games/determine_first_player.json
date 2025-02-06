@@ -324,30 +324,7 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "StatusPhase": {
-        "FreeAdvance": "Fishing"
-      }
-    },
-    {
-      "StatusPhase": {
-        "FreeAdvance": "Philosophy"
-      }
-    },
-    {
-      "StatusPhase": {
-        "RazeSize1City": {
-          "Position": "A1"
-        }
-      }
-    },
-    {
-      "StatusPhase": {
-        "RazeSize1City": "None"
-      }
-    }
-  ],
+  "action_log": [],
   "action_log_index": 4,
   "log": [
     "The game has started",

@@ -273,41 +273,7 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "Playing": {
-        "Recruit": {
-          "units": {
-            "leaders": 1
-          },
-          "city_position": "A1",
-          "payment": {
-            "mood_tokens": 1,
-            "culture_tokens": 1
-          },
-          "leader_name": "Alexander"
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Recruit": {
-          "units": {
-            "leaders": 1
-          },
-          "city_position": "A1",
-          "payment": {
-            "mood_tokens": 1,
-            "culture_tokens": 1
-          },
-          "leader_name": "Kleopatra",
-          "replaced_units": [
-            10
-          ]
-        }
-      }
-    }
-  ],
+  "action_log": [],
   "action_log_index": 2,
   "log": [
     "The game has started",
