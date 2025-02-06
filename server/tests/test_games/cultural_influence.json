@@ -24,61 +24,78 @@
       },
       "cities": [
         {
-          "city_pieces": {},
+          "city_pieces": {
+
+          },
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "position": "A1"
-        },
+          "player_index": 0,
+          "position": "A1"},
         {
           "city_pieces": {
-            "fortress": 1
-          },
+            "fortress": 0},
           "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
-          "position": "C2"
-        }
+          "player_index": 0,
+          "position": "C2"}
       ],
       "units": [
         {
+          "player_index": 0,
           "position": "C2",
           "unit_type": "Infantry",
+          "movement_restriction": "None",
           "id": 0
         },
         {
+          "player_index": 0,
           "position": "C2",
           "unit_type": "Cavalry",
+          "movement_restriction": "None",
           "id": 1
         },
         {
+          "player_index": 0,
           "position": "C2",
           "unit_type": "Leader",
+          "movement_restriction": "None",
           "id": 2
         },
         {
+          "player_index": 0,
           "position": "C2",
           "unit_type": "Elephant",
+          "movement_restriction": "None",
           "id": 3
         },
         {
+          "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
+          "movement_restriction": "None",
           "id": 4
         },
         {
+          "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
+          "movement_restriction": "None",
           "id": 5
         },
         {
+          "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
+          "movement_restriction": "None",
           "id": 6
         },
         {
+          "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
+          "movement_restriction": "None",
           "id": 7
         }
       ],
@@ -97,6 +114,50 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
+      "collect_options": [
+        [
+          "Mountain",
+          [
+            {
+              "food": 0,
+              "wood": 0,
+              "ore": 1,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
+            }
+          ]
+        ],
+        [
+          "Fertile",
+          [
+            {
+              "food": 1,
+              "wood": 0,
+              "ore": 0,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
+            }
+          ]
+        ],
+        [
+          "Forest",
+          [
+            {
+              "food": 0,
+              "wood": 1,
+              "ore": 0,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
+            }
+          ]
+        ]
+      ],
       "next_unit_id": 8
     },
     {
@@ -122,22 +183,28 @@
       },
       "cities": [
         {
-          "city_pieces": {},
+          "city_pieces": {
+
+          },
           "mood_state": "Angry",
           "activations": 2,
           "angry_activation": false,
-          "position": "C1"
-        }
+          "player_index": 1,
+          "position": "C1"}
       ],
       "units": [
         {
+          "player_index": 1,
           "position": "C1",
           "unit_type": "Infantry",
+          "movement_restriction": "None",
           "id": 0
         },
         {
+          "player_index": 1,
           "position": "C1",
           "unit_type": "Infantry",
+          "movement_restriction": "None",
           "id": 1
         }
       ],
@@ -155,6 +222,50 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
+      "collect_options": [
+        [
+          "Mountain",
+          [
+            {
+              "food": 0,
+              "wood": 0,
+              "ore": 1,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
+            }
+          ]
+        ],
+        [
+          "Fertile",
+          [
+            {
+              "food": 1,
+              "wood": 0,
+              "ore": 0,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
+            }
+          ]
+        ],
+        [
+          "Forest",
+          [
+            {
+              "food": 0,
+              "wood": 1,
+              "ore": 0,
+              "ideas": 0,
+              "gold": 0,
+              "mood_tokens": 0,
+              "culture_tokens": 0
+            }
+          ]
+        ]
+      ],
       "next_unit_id": 2
     }
   ],
@@ -204,19 +315,8 @@
   },
   "starting_player_index": 0,
   "current_player_index": 1,
-  "action_log": [
-    {
-      "Playing": {
-        "InfluenceCultureAttempt": {
-          "starting_city_position": "C1",
-          "target_player_index": 0,
-          "target_city_position": "C2",
-          "city_piece": "Fortress"
-        }
-      }
-    }
-  ],
-  "action_log_index": 1,
+  "action_log": [],
+  "action_log_index": 0,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -224,12 +324,11 @@
     "Player1 paid 2 ideas to get the Tactics advance",
     "Player1 paid 1 food, 1 wood and 1 ore to construct a Fortress in the city at C2 making it Angry",
     "Player1 ended their turn with 1 actions left",
-    "It's Player2's turn",
-    "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1 and succeeded (rolled 6)"
+    "It's Player2's turn"
   ],
-  "undo_limit": 1,
-  "actions_left": 2,
-  "successful_cultural_influence": true,
+  "undo_limit": 0,
+  "actions_left": 3,
+  "successful_cultural_influence": false,
   "round": 1,
   "age": 1,
   "messages": [
@@ -244,11 +343,10 @@
     10,
     10,
     10,
-    10
+    10,
+    1
   ],
-  "dice_roll_log": [
-    10
-  ],
+  "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [
     "Pyramids"
@@ -256,34 +354,64 @@
   "wonder_amount_left": 1,
   "undo_context_stack": [
     {
-      "Recruit": {}
+      "Recruit": {
+
+
+      }
     },
     {
-      "Recruit": {}
+      "Recruit": {
+
+
+      }
     },
     {
-      "Recruit": {}
+      "Recruit": {
+
+
+      }
     },
     {
-      "Recruit": {}
+      "Recruit": {
+
+
+      }
     },
     {
-      "Recruit": {}
+      "Recruit": {
+
+
+      }
     },
     {
-      "Recruit": {}
+      "Recruit": {
+
+
+      }
     },
     {
-      "Recruit": {}
+      "Recruit": {
+
+
+      }
     },
     {
-      "Recruit": {}
+      "Recruit": {
+
+
+      }
     },
     {
-      "Recruit": {}
+      "Recruit": {
+
+
+      }
     },
     {
-      "Recruit": {}
+      "Recruit": {
+
+
+      }
     }
   ]
 }

@@ -395,15 +395,58 @@
   "current_player_index": 1,
   "action_log": [
     {
-      "Playing": "EndTurn"
+      "action": {
+        "Playing": "EndTurn"
+      }
     },
     {
-      "CustomPhaseEvent": {
-        "Reward": {
-          "food": 1,
-          "gold": 1
+      "action": {
+        "CustomPhaseEvent": {
+          "Reward": {
+            "food": 1,
+            "gold": 1
+          }
         }
-      }
+      },
+      "undo": [
+        {
+          "CustomPhaseEvent": {
+            "event_used": [],
+            "last_priority_used": 0,
+            "current": {
+              "event_type": "TurnStart",
+              "priority": 0,
+              "player_index": 1,
+              "request": {
+                "Reward": {
+                  "reward": {
+                    "default": {
+                      "gold": 2
+                    },
+                    "conversions": [
+                      {
+                        "from": [
+                          {
+                            "gold": 1
+                          }
+                        ],
+                        "to": {
+                          "food": 1
+                        }
+                      }
+                    ]
+                  },
+                  "name": "Collect trade routes reward"
+                }
+              },
+              "response": null,
+              "origin": {
+                "Advance": "Trade Routes"
+              }
+            }
+          }
+        }
+      ]
     }
   ],
   "action_log_index": 2,
@@ -496,159 +539,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Movement": {
-        "starting_position": "D8",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "D1",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "F7",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "C8",
-        "movement_actions_left": 2,
-        "moved_units": [
-          4
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 1,
-        "moved_units": [
-          4,
-          3
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "D7",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "C7",
-        "movement_actions_left": 2,
-        "moved_units": [
-          3
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 1,
-        "moved_units": [
-          3,
-          4
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "CustomPhaseEvent": {
-        "event_used": [],
-        "last_priority_used": 0,
-        "current": {
-          "event_type": "TurnStart",
-          "priority": 0,
-          "player_index": 1,
-          "request": {
-            "Reward": {
-              "reward": {
-                "default": {
-                  "gold": 2
-                },
-                "conversions": [
-                  {
-                    "from": [
-                      {
-                        "gold": 1
-                      }
-                    ],
-                    "to": {
-                      "food": 1
-                    }
-                  }
-                ]
-              },
-              "name": "Collect trade routes reward"
-            }
-          },
-          "response": null,
-          "origin": {
-            "Advance": "Trade Routes"
-          }
-        }
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

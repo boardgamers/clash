@@ -213,77 +213,21 @@
   "current_player_index": 1,
   "action_log": [
     {
-      "Playing": {
-        "Advance": {
-          "advance": "Voting",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Free Economy",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "StatusPhase": {
-        "FreeAdvance": "Fishing"
-      }
-    },
-    {
-      "StatusPhase": {
-        "FreeAdvance": "Engineering"
-      }
-    },
-    {
-      "StatusPhase": {
-        "RazeSize1City": "None"
-      }
-    },
-    {
-      "StatusPhase": {
-        "RazeSize1City": "None"
-      }
-    },
-    {
-      "StatusPhase": {
-        "ChangeGovernmentType": {
-          "ChangeGovernment": {
-            "new_government": "Theocracy",
-            "additional_advances": [
-              "Theocracy 2"
-            ]
+      "action": {
+        "StatusPhase": {
+          "ChangeGovernmentType": {
+            "ChangeGovernment": {
+              "new_government": "Theocracy",
+              "additional_advances": [
+                "Theocracy 2"
+              ]
+            }
           }
         }
       }
     }
   ],
-  "action_log_index": 13,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -316,7 +260,7 @@
     "Player1 changed their government from Democracy to Theocracy - additional advances: Theocracy 2",
     "It's Player2's turn"
   ],
-  "undo_limit": 13,
+  "undo_limit": 1,
   "actions_left": 3,
   "successful_cultural_influence": false,
   "round": 1,
@@ -339,37 +283,5 @@
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [],
-  "wonder_amount_left": 0,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    }
-  ]
+  "wonder_amount_left": 0
 }

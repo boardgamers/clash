@@ -293,51 +293,24 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "Playing": {
-        "Advance": {
-          "advance": "Tactics",
-          "payment": {
-            "ideas": 2
+      "action": {
+        "Movement": {
+          "Move": {
+            "units": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "destination": "C1"
           }
-        }
-      }
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Siegecraft",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5
-          ],
-          "destination": "C1"
         }
       }
     }
   ],
-  "action_log_index": 6,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -353,7 +326,7 @@
     "Round 2/3",
     "\tPlayer1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1"
   ],
-  "undo_limit": 6,
+  "undo_limit": 1,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 2,
@@ -377,42 +350,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

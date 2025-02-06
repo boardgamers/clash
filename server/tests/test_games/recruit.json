@@ -211,80 +211,8 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "Playing": {
-        "IncreaseHappiness": {
-          "happiness_increases": [
-            [
-              "A1",
-              0
-            ],
-            [
-              "C2",
-              1
-            ]
-          ],
-          "payment": {
-            "mood_tokens": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Math",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Construct": {
-          "city_position": "C2",
-          "city_piece": "Observatory",
-          "payment": {
-            "food": 1,
-            "wood": 1,
-            "ore": 1
-          },
-          "port_position": null,
-          "temple_bonus": null
-        }
-      }
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": {
-        "Collect": {
-          "city_position": "C2",
-          "collections": [
-            [
-              "B2",
-              {
-                "wood": 1
-              }
-            ],
-            [
-              "B1",
-              {
-                "ore": 1
-              }
-            ]
-          ]
-        }
-      }
-    }
-  ],
-  "action_log_index": 6,
+  "action_log": [],
+  "action_log_index": 0,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -299,7 +227,7 @@
     "Round 2/3",
     "Player1 collects 1 wood and 1 ore in the city at C2"
   ],
-  "undo_limit": 5,
+  "undo_limit": 0,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 2,
@@ -324,37 +252,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    }
-  ]
+  "wonder_amount_left": 1
 }

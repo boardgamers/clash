@@ -210,67 +210,24 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "Playing": {
-        "IncreaseHappiness": {
-          "happiness_increases": [
-            [
-              "A1",
-              0
-            ],
-            [
-              "C2",
-              1
-            ]
-          ],
-          "payment": {
-            "mood_tokens": 2
+      "action": {
+        "Playing": {
+          "Construct": {
+            "city_position": "A1",
+            "city_piece": "Port",
+            "payment": {
+              "food": 1,
+              "wood": 1,
+              "ore": 1
+            },
+            "port_position": "A2",
+            "temple_bonus": null
           }
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Math",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Fishing",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": {
-        "Construct": {
-          "city_position": "A1",
-          "city_piece": "Port",
-          "payment": {
-            "food": 1,
-            "wood": 1,
-            "ore": 1
-          },
-          "port_position": "A2",
-          "temple_bonus": null
         }
       }
     }
   ],
-  "action_log_index": 6,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -285,7 +242,7 @@
     "Round 2/3",
     "Player1 paid 1 food, 1 wood and 1 ore to construct a Port in the city at A1"
   ],
-  "undo_limit": 5,
+  "undo_limit": 0,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 2,
@@ -310,37 +267,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    }
-  ]
+  "wonder_amount_left": 1
 }

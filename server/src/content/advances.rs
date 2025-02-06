@@ -249,24 +249,30 @@ fn cartography() -> AdvanceBuilder {
         .with_advance_bonus(CultureToken)
         .add_player_event_listener(
             |event| &mut event.before_move,
-            |player, units, destination| {
-                //todo only for first move
-                //todo undo
+            |player, g, i| {
+                // info is the action that we last used this ability for
+                let key = g.actions_left.to_string();
+                if player.info.get("Cartography").is_some_and(|info| info == &key) {
+                    return;
+                }
                 let mut ship = false;
                 let mut navigation = false;
-                for id in units {
-                    let unit = player.get_unit(*id).expect("unit should exist");
+                for id in &i.units {
+                    let unit = g.get_player(i.player).get_unit(*id).expect("unit should exist");
                     if unit.unit_type.is_ship() {
                         ship = true;
-                        if !unit.position.is_neighbor(*destination) {
+                        if !unit.position.is_neighbor(i.to) {
                             navigation = true;
                         }
                     }
                 }
                 if ship {
+                    player.info.insert("Cartography".to_string(), key);
                     player.gain_resources(ResourcePile::ideas(1));
+                    player.add_to_last_log_item(". Cartography gained 1 idea");
                     if navigation {
                         player.gain_resources(ResourcePile::culture_tokens(1));
+                        player.add_to_last_log_item(" and 1 culture token (for using navigation)");
                     }
                 }
             },
@@ -706,7 +712,7 @@ fn autocracy() -> Vec<Advance> {
                 .leading_government_advance("Autocracy")
                 .with_contradicting_advance(&["Voting", "Dogma"])
             , Advance::builder("Absolute Power", "Once per turn, as a free action, you may spend 2 mood tokens to get an additional action")
-                .add_custom_action(ForcedLabor)
+                .add_custom_action(AbsolutePower)
             , ],
     )
 }

@@ -299,70 +299,152 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "Playing": {
-        "Advance": {
-          "advance": "Tactics",
-          "payment": {
-            "ideas": 2
+      "action": {
+        "Movement": {
+          "Move": {
+            "units": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "destination": "C1"
           }
         }
       }
     },
     {
-      "Movement": "Stop"
-    },
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Siegecraft",
-          "payment": {
-            "ideas": 2
+      "action": {
+        "CustomPhaseEvent": {
+          "Payment": [
+            {
+              "ore": 1
+            }
+          ]
+        }
+      },
+      "undo": [
+        {
+          "CustomPhaseEvent": {
+            "event_used": [],
+            "last_priority_used": 1,
+            "current": {
+              "event_type": "StartCombatAttacker",
+              "priority": 1,
+              "player_index": 0,
+              "request": {
+                "Payment": [
+                  {
+                    "cost": {
+                      "default": {
+                        "ore": 1
+                      },
+                      "conversions": [
+                        {
+                          "from": [
+                            {
+                              "ore": 1
+                            }
+                          ],
+                          "to": {
+                            "gold": 1
+                          }
+                        }
+                      ]
+                    },
+                    "name": "Use steel weapons",
+                    "optional": true
+                  }
+                ]
+              },
+              "response": null,
+              "origin": {
+                "Advance": "Steel Weapons"
+              }
+            }
           }
         }
-      }
+      ]
     },
     {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5
-          ],
-          "destination": "C1"
+      "action": {
+        "CustomPhaseEvent": {
+          "Payment": [
+            {},
+            {
+              "ore": 2
+            }
+          ]
         }
-      }
-    },
-    {
-      "CustomPhaseEvent": {
-        "Payment": [
-          {
-            "ore": 1
+      },
+      "undo": [
+        {
+          "CustomPhaseEvent": {
+            "event_used": [],
+            "last_priority_used": 0,
+            "current": {
+              "event_type": "StartCombatAttacker",
+              "priority": 0,
+              "player_index": 0,
+              "request": {
+                "Payment": [
+                  {
+                    "cost": {
+                      "default": {
+                        "wood": 2
+                      },
+                      "conversions": [
+                        {
+                          "from": [
+                            {
+                              "wood": 1
+                            }
+                          ],
+                          "to": {
+                            "gold": 1
+                          }
+                        }
+                      ]
+                    },
+                    "name": "Cancel fortress ability to add an extra die in the first round of combat",
+                    "optional": true
+                  },
+                  {
+                    "cost": {
+                      "default": {
+                        "ore": 2
+                      },
+                      "conversions": [
+                        {
+                          "from": [
+                            {
+                              "ore": 1
+                            }
+                          ],
+                          "to": {
+                            "gold": 1
+                          }
+                        }
+                      ]
+                    },
+                    "name": "Cancel fortress ability to ignore the first hit in the first round of combat",
+                    "optional": true
+                  }
+                ]
+              },
+              "response": null,
+              "origin": {
+                "Advance": "Siegecraft"
+              }
+            }
           }
-        ]
-      }
-    },
-    {
-      "CustomPhaseEvent": {
-        "Payment": [
-          {},
-          {
-            "ore": 2
-          }
-        ]
-      }
+        }
+      ]
     }
   ],
-  "action_log_index": 8,
+  "action_log_index": 3,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -380,7 +462,7 @@
     "Player1 paid for steel weapons: 1 ore",
     "Player1 paid for siegecraft: 2 ore to cancel the fortress ability to ignore a hit"
   ],
-  "undo_limit": 8,
+  "undo_limit": 3,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 2,
@@ -404,143 +486,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "CustomPhaseEvent": {
-        "event_used": [],
-        "last_priority_used": 1,
-        "current": {
-          "event_type": "StartCombatAttacker",
-          "priority": 1,
-          "player_index": 0,
-          "request": {
-            "Payment": [
-              {
-                "cost": {
-                  "default": {
-                    "ore": 1
-                  },
-                  "conversions": [
-                    {
-                      "from": [
-                        {
-                          "ore": 1
-                        }
-                      ],
-                      "to": {
-                        "gold": 1
-                      }
-                    }
-                  ]
-                },
-                "name": "Use steel weapons",
-                "optional": true
-              }
-            ]
-          },
-          "response": null,
-          "origin": {
-            "Advance": "Steel Weapons"
-          }
-        }
-      }
-    },
-    {
-      "CustomPhaseEvent": {
-        "event_used": [],
-        "last_priority_used": 0,
-        "current": {
-          "event_type": "StartCombatAttacker",
-          "priority": 0,
-          "player_index": 0,
-          "request": {
-            "Payment": [
-              {
-                "cost": {
-                  "default": {
-                    "wood": 2
-                  },
-                  "conversions": [
-                    {
-                      "from": [
-                        {
-                          "wood": 1
-                        }
-                      ],
-                      "to": {
-                        "gold": 1
-                      }
-                    }
-                  ]
-                },
-                "name": "Cancel fortress ability to add an extra die in the first round of combat",
-                "optional": true
-              },
-              {
-                "cost": {
-                  "default": {
-                    "ore": 2
-                  },
-                  "conversions": [
-                    {
-                      "from": [
-                        {
-                          "ore": 1
-                        }
-                      ],
-                      "to": {
-                        "gold": 1
-                      }
-                    }
-                  ]
-                },
-                "name": "Cancel fortress ability to ignore the first hit in the first round of combat",
-                "optional": true
-              }
-            ]
-          },
-          "response": null,
-          "origin": {
-            "Advance": "Siegecraft"
-          }
-        }
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

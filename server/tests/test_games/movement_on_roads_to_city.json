@@ -352,149 +352,8 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Roads",
-          "payment": {
-            "food": 2
-          }
-        }
-      }
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0
-          ],
-          "destination": "E8"
-        }
-      }
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0
-          ],
-          "destination": "F7"
-        }
-      }
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": {
-        "Collect": {
-          "city_position": "D1",
-          "collections": [
-            [
-              "C2",
-              {
-                "wood": 1
-              }
-            ],
-            [
-              "E2",
-              {
-                "ore": 1
-              }
-            ]
-          ]
-        }
-      }
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0
-          ],
-          "destination": "D2"
-        }
-      }
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0
-          ],
-          "destination": "D3"
-        }
-      }
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": {
-        "Collect": {
-          "city_position": "D8",
-          "collections": [
-            [
-              "C8",
-              {
-                "ore": 1
-              }
-            ],
-            [
-              "E8",
-              {
-                "wood": 1
-              }
-            ]
-          ]
-        }
-      }
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Playing": {
-        "Collect": {
-          "city_position": "D8",
-          "collections": [
-            [
-              "E8",
-              {
-                "wood": 1
-              }
-            ],
-            [
-              "C8",
-              {
-                "ore": 1
-              }
-            ]
-          ]
-        }
-      }
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
-    }
-  ],
-  "action_log_index": 17,
+  "action_log": [],
+  "action_log_index": 0,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -529,7 +388,7 @@
     "Round 3/3",
     "Player2 used a move units action"
   ],
-  "undo_limit": 16,
+  "undo_limit": 0,
   "actions_left": 0,
   "successful_cultural_influence": false,
   "round": 3,
@@ -545,56 +404,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Movement": {
-        "starting_position": "D8",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "D1",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

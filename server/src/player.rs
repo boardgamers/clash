@@ -34,6 +34,7 @@ use crate::{
 };
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::{
     cmp::Ordering::{self, *},
     collections::HashSet,
@@ -65,6 +66,7 @@ pub struct Player {
     pub next_unit_id: u32,
     pub played_once_per_turn_actions: Vec<CustomActionType>,
     pub played_once_per_turn_effects: Vec<String>,
+    pub event_info: HashMap<String, String>,
 }
 
 impl Clone for Player {
@@ -218,6 +220,7 @@ impl Player {
             next_unit_id: data.next_unit_id,
             played_once_per_turn_actions: data.played_once_per_turn_actions,
             played_once_per_turn_effects: data.played_once_per_turn_effects,
+            event_info: data.event_info,
         };
         player
     }
@@ -257,6 +260,7 @@ impl Player {
             next_unit_id: self.next_unit_id,
             played_once_per_turn_actions: self.played_once_per_turn_actions,
             played_once_per_turn_effects: self.played_once_per_turn_effects,
+            event_info: self.event_info,
         }
     }
 
@@ -299,6 +303,7 @@ impl Player {
             next_unit_id: self.next_unit_id,
             played_once_per_turn_actions: self.played_once_per_turn_actions.clone(),
             played_once_per_turn_effects: self.played_once_per_turn_effects.clone(),
+            event_info: self.event_info.clone(),
         }
     }
 
@@ -338,6 +343,7 @@ impl Player {
             next_unit_id: 0,
             played_once_per_turn_actions: Vec::new(),
             played_once_per_turn_effects: Vec::new(),
+            event_info: HashMap::new(),
         }
     }
 
@@ -392,6 +398,8 @@ impl Player {
             unit.movement_restrictions = vec![];
         }
         self.played_once_per_turn_actions.clear();
+        self.played_once_per_turn_effects.clear();
+        self.event_info.clear();
     }
 
     pub fn set_name(&mut self, name: String) {
@@ -1055,4 +1063,7 @@ pub struct PlayerData {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     played_once_per_turn_effects: Vec<String>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "HashMap::is_empty")]
+    event_info: HashMap<String, String>,
 }

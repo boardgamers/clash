@@ -17,12 +17,6 @@ use std::collections::{HashMap, HashSet};
 
 type CustomPhaseEvent = EventMut<Game, usize, CustomPhaseEventType>;
 
-#[derive(Clone, PartialEq)]
-pub struct RecruitCost {
-    pub cost: PaymentOptions,
-    pub units: Units,
-}
-
 #[derive(Default)]
 pub(crate) struct PlayerEvents {
     pub on_construct: EventMut<Player, Position, Building>,
@@ -31,7 +25,7 @@ pub(crate) struct PlayerEvents {
     pub on_undo_construct_wonder: EventMut<Player, Position, Wonder>,
     pub on_advance: EventMut<Player, String, ()>,
     pub on_undo_advance: EventMut<Player, String, ()>,
-    pub before_move: EventMut<Player, Vec<u32>, Position>,
+    pub before_move: EventMut<PlayerCommands, Game, MoveInfo>,
     pub after_execute_action: EventMut<Player, Action, ()>,
     pub before_undo_action: EventMut<Player, Action, ()>,
 
@@ -53,5 +47,55 @@ pub(crate) struct PlayerEvents {
 impl PlayerEvents {
     pub fn new() -> PlayerEvents {
         Self::default()
+    }
+}
+
+#[derive(Clone, PartialEq)]
+pub struct RecruitCost {
+    pub cost: PaymentOptions,
+    pub units: Units,
+}
+
+pub struct MoveInfo {
+    pub player: usize,
+    pub units: Vec<u32>,
+    #[allow(dead_code)]
+    pub from: Position,
+    pub to: Position,
+}
+
+impl MoveInfo {
+    pub fn new(player: usize, units: Vec<u32>, from: Position, to: Position) -> MoveInfo {
+        MoveInfo {
+            player,
+            units,
+            from,
+            to,
+        }
+    }
+}
+
+#[derive(Clone, PartialEq)]
+pub struct PlayerCommands {
+    pub info: HashMap<String, String>,
+    pub log_edits: Vec<String>,
+    pub gained_resources: ResourcePile,
+}
+
+impl PlayerCommands {
+    pub fn new(info: HashMap<String, String>) -> PlayerCommands {
+        PlayerCommands {
+            info,
+            log_edits: Vec::new(),
+            gained_resources: ResourcePile::default(),
+        }
+    }
+
+    pub fn gain_resources(&mut self, resources: ResourcePile) {
+        self.gained_resources += resources;
+    }
+
+    pub fn add_to_last_log_item(&mut self, edit: &str) {
+        self.log_edits.push(edit.to_string());
     }
 }

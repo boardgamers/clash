@@ -209,8 +209,10 @@
   "current_player_index": 1,
   "action_log": [
     {
-      "StatusPhase": {
-        "FreeAdvance": "Storage"
+      "action": {
+        "StatusPhase": {
+          "FreeAdvance": "Storage"
+        }
       }
     }
   ],
@@ -266,37 +268,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    }
-  ]
+  "wonder_amount_left": 1
 }

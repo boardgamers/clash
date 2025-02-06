@@ -296,50 +296,20 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "Playing": {
-        "Advance": {
-          "advance": "Tactics",
-          "payment": {
-            "ideas": 2
+      "action": {
+        "Movement": {
+          "Move": {
+            "units": [
+              7,
+              8
+            ],
+            "destination": "D2"
           }
-        }
-      }
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            7,
-            8
-          ],
-          "destination": "C4"
-        }
-      }
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            7,
-            8
-          ],
-          "destination": "C3"
-        }
-      }
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            7,
-            8
-          ],
-          "destination": "D2"
         }
       }
     }
   ],
-  "action_log_index": 4,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -353,7 +323,7 @@
     "\tPlayer1 rolled 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 12 and gets 2 hits against defending units. Player2 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units.",
     "\tPlayer1 has to remove 1 of their attacking units"
   ],
-  "undo_limit": 4,
+  "undo_limit": 1,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 6,
@@ -377,61 +347,5 @@
   ],
   "dropped_players": [],
   "wonders_left": [],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Movement": {
-        "starting_position": "C3",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "C4",
-        "movement_actions_left": 1,
-        "moved_units": [
-          7,
-          8
-        ],
-        "current_move": {
-          "Fleet": {
-            "units": [
-              7,
-              8
-            ]
-          }
-        }
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

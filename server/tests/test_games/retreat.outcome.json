@@ -227,32 +227,14 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "Playing": {
-        "Advance": {
-          "advance": "Tactics",
-          "payment": {
-            "ideas": 2
-          }
+      "action": {
+        "Combat": {
+          "Retreat": true
         }
-      }
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0
-          ],
-          "destination": "C1"
-        }
-      }
-    },
-    {
-      "Combat": {
-        "Retreat": true
       }
     }
   ],
-  "action_log_index": 4,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -265,7 +247,7 @@
     "\tPlayer1 may retreat",
     "Player1 retreated ending the battle in a draw"
   ],
-  "undo_limit": 4,
+  "undo_limit": 1,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,
@@ -290,37 +272,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    }
-  ]
+  "wonder_amount_left": 1
 }

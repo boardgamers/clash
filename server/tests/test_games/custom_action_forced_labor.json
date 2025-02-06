@@ -248,64 +248,8 @@
   },
   "starting_player_index": 1,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "StatusPhase": {
-        "FreeAdvance": "Math"
-      }
-    },
-    {
-      "StatusPhase": {
-        "FreeAdvance": "Math"
-      }
-    },
-    {
-      "StatusPhase": {
-        "RazeSize1City": "None"
-      }
-    },
-    {
-      "StatusPhase": {
-        "RazeSize1City": "None"
-      }
-    },
-    {
-      "StatusPhase": {
-        "ChangeGovernmentType": {
-          "ChangeGovernment": {
-            "new_government": "Autocracy",
-            "additional_advances": [
-              "Absolute Power"
-            ]
-          }
-        }
-      }
-    },
-    {
-      "StatusPhase": {
-        "DetermineFirstPlayer": 1
-      }
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Movement": "Stop"
-    }
-  ],
-  "action_log_index": 12,
+  "action_log": [],
+  "action_log_index": 0,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -337,7 +281,7 @@
     "Player1 used a move units action",
     "\tPlayer1 ended the movement action"
   ],
-  "undo_limit": 9,
+  "undo_limit": 0,
   "actions_left": 0,
   "successful_cultural_influence": false,
   "round": 1,
@@ -360,52 +304,5 @@
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

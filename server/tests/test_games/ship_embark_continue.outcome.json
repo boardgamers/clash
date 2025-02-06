@@ -286,31 +286,39 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "Movement": {
-        "Move": {
-          "units": [
-            3,
-            4
-          ],
-          "destination": "C3",
-          "embark_carrier_id": 8
+      "action": {
+        "Movement": {
+          "Move": {
+            "units": [
+              5,
+              6
+            ],
+            "destination": "C3",
+            "embark_carrier_id": 9
+          }
         }
-      }
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            5,
-            6
-          ],
-          "destination": "C3",
-          "embark_carrier_id": 9
+      },
+      "undo": [
+        {
+          "Movement": {
+            "starting_position": "B3",
+            "movement_actions_left": 2,
+            "moved_units": [
+              3,
+              4
+            ],
+            "current_move": {
+              "Embark": {
+                "source": "B3",
+                "destination": "C3"
+              }
+            }
+          }
         }
-      }
+      ]
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -343,65 +351,5 @@
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Movement": {
-        "starting_position": "B3",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "B3",
-        "movement_actions_left": 2,
-        "moved_units": [
-          3,
-          4
-        ],
-        "current_move": {
-          "Embark": {
-            "source": "B3",
-            "destination": "C3"
-          }
-        }
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

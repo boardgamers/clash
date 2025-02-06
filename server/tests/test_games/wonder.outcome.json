@@ -211,33 +211,25 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "Playing": {
-        "Advance": {
-          "advance": "Engineering",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": {
-        "Custom": {
-          "ConstructWonder": {
-            "city_position": "A1",
-            "wonder": "Pyramids",
-            "payment": {
-              "food": 2,
-              "wood": 3,
-              "ore": 3,
-              "culture_tokens": 4
+      "action": {
+        "Playing": {
+          "Custom": {
+            "ConstructWonder": {
+              "city_position": "A1",
+              "wonder": "Pyramids",
+              "payment": {
+                "food": 2,
+                "wood": 3,
+                "ore": 3,
+                "culture_tokens": 4
+              }
             }
           }
         }
       }
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -245,7 +237,7 @@
     "Player1 paid 2 ideas to get the Engineering advance",
     "Player1 paid 2 food, 3 wood, 3 ore and 4 culture tokens to construct the Pyramids wonder in the city at A1"
   ],
-  "undo_limit": 1,
+  "undo_limit": 0,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,
@@ -268,37 +260,5 @@
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [],
-  "wonder_amount_left": 0,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    }
-  ]
+  "wonder_amount_left": 0
 }

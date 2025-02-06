@@ -4,6 +4,7 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 use crate::action::PlayActionCard;
+use crate::game::ActionLogItem;
 use crate::player::Player;
 use crate::playing_actions::{
     Collect, Construct, IncreaseHappiness, InfluenceCultureAttempt, Recruit,
@@ -454,14 +455,14 @@ fn format_combat_action_log_item(action: &CombatAction, game: &Game) -> String {
 }
 
 #[must_use]
-pub fn current_turn_log(game: &Game) -> Vec<Action> {
+pub fn current_turn_log(game: &Game) -> Vec<ActionLogItem> {
     let from = game.action_log[0..game.action_log_index]
         .iter()
-        .rposition(|action| matches!(action, Action::Playing(PlayingAction::EndTurn)))
+        .rposition(|item| matches!(item.action, Action::Playing(PlayingAction::EndTurn)))
         .unwrap_or(0);
     game.action_log[from..game.action_log_index]
         .iter()
-        .filter(|action| !matches!(action, Action::StatusPhase(_)))
+        .filter(|item| !matches!(item.action, Action::StatusPhase(_)))
         .cloned()
         .collect()
 }

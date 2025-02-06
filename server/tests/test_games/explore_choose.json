@@ -487,22 +487,8 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0
-          ],
-          "destination": "D7"
-        }
-      }
-    },
-    {
-      "Movement": "Stop"
-    }
-  ],
-  "action_log_index": 4,
+  "action_log": [],
+  "action_log_index": 0,
   "log": [
     "The game has started",
     "Age 1 has started",

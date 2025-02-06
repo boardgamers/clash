@@ -275,38 +275,8 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Tactics",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Movement": "Stop"
-    },
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Siegecraft",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Playing": "EndTurn"
-    },
-    {
-      "Playing": "EndTurn"
-    }
-  ],
-  "action_log_index": 5,
+  "action_log": [],
+  "action_log_index": 0,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -321,7 +291,7 @@
     "It's Player1's turn",
     "Round 2/3"
   ],
-  "undo_limit": 5,
+  "undo_limit": 0,
   "actions_left": 3,
   "successful_cultural_influence": false,
   "round": 2,

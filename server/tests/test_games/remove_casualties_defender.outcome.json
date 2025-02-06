@@ -203,34 +203,16 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "Playing": {
-        "Advance": {
-          "advance": "Tactics",
-          "payment": {
-            "ideas": 2
-          }
-        }
-      }
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
+      "action": {
+        "Combat": {
+          "RemoveCasualties": [
             0
-          ],
-          "destination": "C1"
+          ]
         }
-      }
-    },
-    {
-      "Combat": {
-        "RemoveCasualties": [
-          0
-        ]
       }
     }
   ],
-  "action_log_index": 4,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -244,7 +226,7 @@
     "Player2 removed 1 infantry",
     "\tPlayer2 killed all attacking units"
   ],
-  "undo_limit": 4,
+  "undo_limit": 1,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,
@@ -266,37 +248,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    }
-  ]
+  "wonder_amount_left": 1
 }

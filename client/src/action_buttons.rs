@@ -7,6 +7,7 @@ use crate::render_context::RenderContext;
 use server::action::Action;
 use server::content::advances::get_advance_by_name;
 use server::content::custom_actions::{CustomAction, CustomActionType};
+use server::game::GameState;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::resource::ResourceType;
 
@@ -80,7 +81,7 @@ fn global_move(rc: &RenderContext) -> StateUpdate {
 fn custom_action_tooltip(custom_action_type: &CustomActionType) -> String {
     match custom_action_type {
         CustomActionType::ConstructWonder => "Construct a wonder".to_string(),
-        CustomActionType::ForcedLabor => get_advance_by_name("Absolute Power").description,
+        CustomActionType::AbsolutePower => get_advance_by_name("Absolute Power").description,
         CustomActionType::VotingIncreaseHappiness => get_advance_by_name("Voting").description,
         CustomActionType::FreeEconomyCollect => get_advance_by_name("Free Economy").description,
     }
@@ -94,7 +95,7 @@ fn generic_custom_action(custom_action_type: &CustomActionType) -> Option<Custom
             // handled explicitly
             None
         }
-        CustomActionType::ForcedLabor => Some(CustomAction::ForcedLabor),
+        CustomActionType::AbsolutePower => Some(CustomAction::ForcedLabor),
     }
 }
 
@@ -104,10 +105,11 @@ pub fn base_or_custom_available(
     custom: &CustomActionType,
 ) -> bool {
     rc.can_play_action(action)
-        || rc
-            .game
-            .get_available_custom_actions(rc.shown_player.index)
-            .contains(custom)
+        || (rc.game.state == GameState::Playing
+            && rc
+                .game
+                .get_available_custom_actions(rc.shown_player.index)
+                .contains(custom))
 }
 
 pub fn base_or_custom_action(

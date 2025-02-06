@@ -345,35 +345,8 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "Playing": {
-        "Advance": {
-          "advance": "Tactics",
-          "payment": {
-            "food": 0,
-            "wood": 0,
-            "ore": 0,
-            "ideas": 2,
-            "gold": 0,
-            "mood_tokens": 0,
-            "culture_tokens": 0
-          }
-        }
-      }
-    },
-    {
-      "Movement": {
-        "Move": {
-          "units": [
-            0
-          ],
-          "destination": "C1"
-        }
-      }
-    }
-  ],
-  "action_log_index": 3,
+  "action_log": [],
+  "action_log_index": 0,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -385,7 +358,7 @@
     "\tPlayer1 rolled a combined combat value of 6 and gets 1 hits against defending units. Player2 rolled a combined combat value of 12 and gets 2 hits against attacking units.",
     "\tPlayer2 has to remove 1 of their defending units"
   ],
-  "undo_limit": 3,
+  "undo_limit": 0,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,
