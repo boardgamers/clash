@@ -215,8 +215,43 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [],
-  "action_log_index": 7,
+  "action_log": [
+    {
+      "action": {
+        "Playing": {
+          "Recruit": {
+            "units": {
+              "settlers": 1,
+              "infantry": 1
+            },
+            "city_position": "A1",
+            "payment": {
+              "food": 1,
+              "ore": 1,
+              "gold": 2
+            },
+            "replaced_units": [
+              4
+            ]
+          }
+        }
+      },
+      "undo": [
+        {
+          "Recruit": {
+            "replaced_units": [
+              {
+                "position": "C2",
+                "unit_type": "Settler",
+                "id": 4
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -232,7 +267,7 @@
     "Player1 collects 1 wood and 1 ore in the city at C2",
     "Player1 paid 1 food, 1 ore and 2 gold to recruit 1 settler and 1 infantry in the city at A1 and replaces the unit at C2"
   ],
-  "undo_limit": 5,
+  "undo_limit": 0,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 2,
@@ -257,19 +292,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    "StartAction",
-    {
-      "Recruit": {
-        "replaced_units": [
-          {
-            "position": "C2",
-            "unit_type": "Settler",
-            "id": 4
-          }
-        ]
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

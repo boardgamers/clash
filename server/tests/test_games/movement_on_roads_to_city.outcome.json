@@ -345,8 +345,33 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [],
-  "action_log_index": 18,
+  "action_log": [
+    {
+      "action": {
+        "Movement": {
+          "Move": {
+            "units": [
+              0
+            ],
+            "destination": "D8",
+            "payment": {
+              "food": 1,
+              "ore": 1
+            }
+          }
+        }
+      },
+      "undo": [
+        {
+          "Movement": {
+            "starting_position": "F7",
+            "movement_actions_left": 2
+          }
+        }
+      ]
+    }
+  ],
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -382,7 +407,7 @@
     "Player2 used a move units action",
     "\tPlayer2 marched 1 settler from F7 to D8 on roads for 1 food and 1 ore"
   ],
-  "undo_limit": 16,
+  "undo_limit": 0,
   "actions_left": 0,
   "successful_cultural_influence": false,
   "round": 3,
@@ -398,14 +423,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    "StartAction",
-    {
-      "Movement": {
-        "starting_position": "F7",
-        "movement_actions_left": 2
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

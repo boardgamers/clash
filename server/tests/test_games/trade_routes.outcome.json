@@ -391,8 +391,23 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [],
-  "action_log_index": 48,
+  "action_log": [
+    {
+      "action": {
+        "Playing": "EndTurn"
+      },
+      "undo": [
+        {
+          "WastedResources": {
+            "resources": {
+              "food": 1
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -465,7 +480,7 @@
     "It's Player2's turn. Ship at E7 traded with city at C6. Settler at E7 traded with city at E6. Total reward is 2 food",
     "Round 3/3. Could not store 1 food"
   ],
-  "undo_limit": 48,
+  "undo_limit": 1,
   "actions_left": 3,
   "successful_cultural_influence": false,
   "round": 3,
@@ -481,130 +496,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Movement": {
-        "starting_position": "D8",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "D1",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "F7",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "C8",
-        "movement_actions_left": 2,
-        "moved_units": [
-          4
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 1,
-        "moved_units": [
-          4,
-          3
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "D7",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "C7",
-        "movement_actions_left": 2,
-        "moved_units": [
-          3
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 1,
-        "moved_units": [
-          3,
-          4
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    },
-    "StartAction",
-    {
-      "WastedResources": {
-        "resources": {
-          "food": 1
-        }
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

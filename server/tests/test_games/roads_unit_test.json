@@ -463,7 +463,7 @@
   "starting_player_index": 1,
   "current_player_index": 1,
   "action_log": [],
-  "action_log_index": 45,
+  "action_log_index": 0,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -530,7 +530,7 @@
     "\tPlayer2 ended the movement action",
     "Player2 used a move units action"
   ],
-  "undo_limit": 40,
+  "undo_limit": 0,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 2,

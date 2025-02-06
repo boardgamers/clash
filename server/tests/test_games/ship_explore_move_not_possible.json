@@ -388,7 +388,7 @@
   "starting_player_index": 1,
   "current_player_index": 1,
   "action_log": [],
-  "action_log_index": 45,
+  "action_log_index": 0,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -466,7 +466,7 @@
     "Player2 used a move units action",
     "\tPlayer2 sailed 1 ship from D5 to E5"
   ],
-  "undo_limit": 45,
+  "undo_limit": 0,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 3,
@@ -482,6 +482,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": []
+  "wonder_amount_left": 1
 }

@@ -210,8 +210,43 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [],
-  "action_log_index": 6,
+  "action_log": [
+    {
+      "action": {
+        "Playing": {
+          "Custom": {
+            "FreeEconomyCollect": {
+              "city_position": "C2",
+              "collections": [
+                [
+                  "B1",
+                  {
+                    "ore": 1
+                  }
+                ],
+                [
+                  "B2",
+                  {
+                    "wood": 1
+                  }
+                ]
+              ]
+            }
+          }
+        }
+      },
+      "undo": [
+        {
+          "WastedResources": {
+            "resources": {
+              "ore": 1
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -226,7 +261,7 @@
     "Round 2/3",
     "Player1 collects 1 ore and 1 wood in the city at C2 using Free Economy. Could not store 1 ore"
   ],
-  "undo_limit": 5,
+  "undo_limit": 0,
   "actions_left": 3,
   "successful_cultural_influence": false,
   "round": 2,
@@ -251,45 +286,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    "StartAction",
-    {
-      "WastedResources": {
-        "resources": {
-          "ore": 1
-        }
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

@@ -291,8 +291,35 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [],
-  "action_log_index": 3,
+  "action_log": [
+    {
+      "action": {
+        "Playing": {
+          "Collect": {
+            "city_position": "B3",
+            "collections": [
+              [
+                "B5",
+                {
+                  "food": 1
+                }
+              ]
+            ]
+          }
+        }
+      },
+      "undo": [
+        {
+          "WastedResources": {
+            "resources": {
+              "food": 1
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -301,7 +328,7 @@
     "Player1 paid 2 mood tokens to increase happiness in the city at B3 by 2 steps, making it Happy using Voting",
     "Player1 collects 1 food in the city at B3 making it Neutral. Could not store 1 food"
   ],
-  "undo_limit": 1,
+  "undo_limit": 0,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 6,
@@ -327,58 +354,5 @@
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "IncreaseHappiness": {
-        "angry_activations": [
-          "B3"
-        ]
-      }
-    },
-    "StartAction",
-    {
-      "WastedResources": {
-        "resources": {
-          "food": 1
-        }
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

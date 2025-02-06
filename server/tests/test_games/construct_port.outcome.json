@@ -227,7 +227,7 @@
       }
     }
   ],
-  "action_log_index": 6,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -242,7 +242,7 @@
     "Round 2/3",
     "Player1 paid 1 food, 1 wood and 1 ore to construct a Port in the city at A1"
   ],
-  "undo_limit": 5,
+  "undo_limit": 0,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 2,

@@ -312,7 +312,7 @@
       }
     }
   ],
-  "action_log_index": 60,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -399,7 +399,7 @@
     "\tPlayer2 sailed 1 ship from B5 to B3",
     "\tPlayer2 sailed 1 ship from B3 to F2. Explored tiles E3=Fertile, F2=Forest, F3=Forest, G3=Water. Teleported ship from F2 to G3"
   ],
-  "undo_limit": 60,
+  "undo_limit": 1,
   "actions_left": 0,
   "successful_cultural_influence": false,
   "round": 3,

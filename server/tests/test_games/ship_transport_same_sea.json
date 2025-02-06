@@ -274,7 +274,7 @@
   "starting_player_index": 0,
   "current_player_index": 0,
   "action_log": [],
-  "action_log_index": 2,
+  "action_log_index": 0,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -283,7 +283,7 @@
     "Player1 used a move units action",
     "\tPlayer1 sailed 1 ship from C3 to D2"
   ],
-  "undo_limit": 1,
+  "undo_limit": 0,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 6,
@@ -306,6 +306,5 @@
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [],
-  "wonder_amount_left": 1,
-  "undo_context_stack": []
+  "wonder_amount_left": 1
 }

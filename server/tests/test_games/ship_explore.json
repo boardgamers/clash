@@ -520,7 +520,7 @@
   "starting_player_index": 1,
   "current_player_index": 1,
   "action_log": [],
-  "action_log_index": 50,
+  "action_log_index": 0,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -597,7 +597,7 @@
     "Round 3/3",
     "Player2 used a move units action"
   ],
-  "undo_limit": 49,
+  "undo_limit": 0,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 3,

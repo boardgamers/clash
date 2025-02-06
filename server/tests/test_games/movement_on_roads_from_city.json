@@ -359,7 +359,7 @@
   "starting_player_index": 1,
   "current_player_index": 1,
   "action_log": [],
-  "action_log_index": 26,
+  "action_log_index": 0,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -411,7 +411,7 @@
     "Player2 collects 1 ore in the city at D8",
     "Player2 used a move units action"
   ],
-  "undo_limit": 24,
+  "undo_limit": 0,
   "actions_left": 0,
   "successful_cultural_influence": false,
   "round": 1,
@@ -427,6 +427,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": []
+  "wonder_amount_left": 1
 }

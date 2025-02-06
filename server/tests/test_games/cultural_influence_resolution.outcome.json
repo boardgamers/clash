@@ -211,7 +211,7 @@
       }
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -223,7 +223,7 @@
     "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1and rolled a 1. Player2 now has the option to pay 4 culture tokens to increase the dice roll and proceed with the cultural influence",
     "Player2 paid 1 culture tokens to increase the dice roll and proceed with the cultural influence"
   ],
-  "undo_limit": 1,
+  "undo_limit": 0,
   "actions_left": 2,
   "successful_cultural_influence": true,
   "round": 1,

@@ -375,7 +375,7 @@
       }
     }
   ],
-  "action_log_index": 5,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -386,7 +386,7 @@
     "Player1 used a move units action",
     "\tPlayer1 marched 1 settler from C2 to B2. Explored tiles A3=Forest, B2=Mountain, B3=Water, C3=Fertile"
   ],
-  "undo_limit": 5,
+  "undo_limit": 1,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,

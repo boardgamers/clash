@@ -212,7 +212,7 @@
   "starting_player_index": 0,
   "current_player_index": 0,
   "action_log": [],
-  "action_log_index": 6,
+  "action_log_index": 0,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -227,7 +227,7 @@
     "Round 2/3",
     "Player1 collects 1 wood and 1 ore in the city at C2"
   ],
-  "undo_limit": 5,
+  "undo_limit": 0,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 2,
@@ -252,6 +252,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": []
+  "wonder_amount_left": 1
 }

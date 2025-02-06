@@ -339,8 +339,51 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [],
-  "action_log_index": 46,
+  "action_log": [
+    {
+      "action": {
+        "ExploreResolution": 3
+      },
+      "undo": [
+        {
+          "ExploreResolution": {
+            "movement_actions_left": 2,
+            "moved_units": [
+              1
+            ],
+            "current_move": {
+              "Fleet": {
+                "units": [
+                  1
+                ]
+              }
+            },
+            "block": {
+              "position": {
+                "top_tile": "F4",
+                "rotation": 0
+              },
+              "block": {
+                "terrain": [
+                  "Fertile",
+                  "Mountain",
+                  "Forest",
+                  "Fertile"
+                ]
+              }
+            },
+            "units": [
+              1
+            ],
+            "start": "D5",
+            "destination": "E5",
+            "ship_can_teleport": false
+          }
+        }
+      ]
+    }
+  ],
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -419,7 +462,7 @@
     "\tPlayer2 sailed 1 ship from D5 to E5",
     "Player2 chose the orientation of the newly explored tiles. Explored tiles E5=Forest, F4=Fertile, F5=Fertile, G5=Mountain. Ship can't move to the explored tile"
   ],
-  "undo_limit": 45,
+  "undo_limit": 0,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 3,
@@ -435,43 +478,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    "StartAction",
-    {
-      "ExploreResolution": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          1
-        ],
-        "current_move": {
-          "Fleet": {
-            "units": [
-              1
-            ]
-          }
-        },
-        "block": {
-          "position": {
-            "top_tile": "F4",
-            "rotation": 0
-          },
-          "block": {
-            "terrain": [
-              "Fertile",
-              "Mountain",
-              "Forest",
-              "Fertile"
-            ]
-          }
-        },
-        "units": [
-          1
-        ],
-        "start": "D5",
-        "destination": "E5",
-        "ship_can_teleport": false
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

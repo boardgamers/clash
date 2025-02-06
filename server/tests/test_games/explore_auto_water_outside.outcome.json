@@ -351,7 +351,7 @@
       }
     }
   ],
-  "action_log_index": 69,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -446,7 +446,7 @@
     "Player2 used a move units action",
     "\tPlayer2 marched 1 settler from E6 to F5. Explored tiles E5=Mountain, F4=Barren, F5=Mountain, G5=Water"
   ],
-  "undo_limit": 69,
+  "undo_limit": 1,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 3,

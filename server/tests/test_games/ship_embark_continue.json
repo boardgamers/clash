@@ -283,7 +283,7 @@
   "starting_player_index": 0,
   "current_player_index": 0,
   "action_log": [],
-  "action_log_index": 1,
+  "action_log_index": 0,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -315,6 +315,5 @@
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [],
-  "wonder_amount_left": 1,
-  "undo_context_stack": []
+  "wonder_amount_left": 1
 }

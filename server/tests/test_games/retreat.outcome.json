@@ -234,7 +234,7 @@
       }
     }
   ],
-  "action_log_index": 4,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -247,7 +247,7 @@
     "\tPlayer1 may retreat",
     "Player1 retreated ending the battle in a draw"
   ],
-  "undo_limit": 4,
+  "undo_limit": 1,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,

@@ -339,7 +339,7 @@
       }
     }
   ],
-  "action_log_index": 52,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -418,7 +418,7 @@
     "\tPlayer2 sailed 1 ship from D5 to C5. Explored tiles A5=Forest, B4=Forest, B5=Water, C5=Water",
     "\tPlayer2 sailed 1 ship from C5 to C4. Explored tiles C4=Forest, D3=Fertile, D4=Water, E4=Barren. Teleported ship from C4 to D4"
   ],
-  "undo_limit": 52,
+  "undo_limit": 1,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 3,

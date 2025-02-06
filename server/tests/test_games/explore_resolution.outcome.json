@@ -358,8 +358,44 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [],
-  "action_log_index": 4,
+  "action_log": [
+    {
+      "action": {
+        "ExploreResolution": 3
+      },
+      "undo": [
+        {
+          "ExploreResolution": {
+            "movement_actions_left": 2,
+            "moved_units": [
+              0
+            ],
+            "block": {
+              "position": {
+                "top_tile": "B6",
+                "rotation": 0
+              },
+              "block": {
+                "terrain": [
+                  "Water",
+                  "Fertile",
+                  "Fertile",
+                  "Barren"
+                ]
+              }
+            },
+            "units": [
+              0
+            ],
+            "start": "D7",
+            "destination": "C7",
+            "ship_can_teleport": false
+          }
+        }
+      ]
+    }
+  ],
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -371,7 +407,7 @@
     "\tPlayer2 moved 1 settler from D7 to C7",
     "Player2 chose the orientation of the newly explored tiles. Explored tiles A7=Fertile, B6=Barren, B7=Water, C7=Fertile"
   ],
-  "undo_limit": 3,
+  "undo_limit": 0,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,
@@ -586,36 +622,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    "StartAction",
-    {
-      "ExploreResolution": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ],
-        "block": {
-          "position": {
-            "top_tile": "B6",
-            "rotation": 0
-          },
-          "block": {
-            "terrain": [
-              "Water",
-              "Fertile",
-              "Fertile",
-              "Barren"
-            ]
-          }
-        },
-        "units": [
-          0
-        ],
-        "start": "D7",
-        "destination": "C7",
-        "ship_can_teleport": false
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

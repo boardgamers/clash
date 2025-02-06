@@ -316,7 +316,7 @@
   "starting_player_index": 0,
   "current_player_index": 0,
   "action_log": [],
-  "action_log_index": 7,
+  "action_log_index": 0,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -333,7 +333,7 @@
     "\tPlayer1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1",
     "Player1 paid for steel weapons: 1 ore"
   ],
-  "undo_limit": 7,
+  "undo_limit": 0,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 2,

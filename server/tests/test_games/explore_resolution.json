@@ -400,7 +400,7 @@
   "starting_player_index": 1,
   "current_player_index": 1,
   "action_log": [],
-  "action_log_index": 3,
+  "action_log_index": 0,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -411,7 +411,7 @@
     "Player2 used a move units action",
     "\tPlayer2 moved 1 settler from D7 to C7"
   ],
-  "undo_limit": 3,
+  "undo_limit": 0,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,
@@ -626,6 +626,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": []
+  "wonder_amount_left": 1
 }

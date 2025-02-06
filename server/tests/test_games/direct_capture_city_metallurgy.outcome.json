@@ -218,8 +218,39 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [],
-  "action_log_index": 2,
+  "action_log": [
+    {
+      "action": {
+        "Movement": {
+          "Move": {
+            "units": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "destination": "C1"
+          }
+        }
+      },
+      "undo": [
+        {
+          "Movement": {
+            "starting_position": "C2",
+            "movement_actions_left": 2
+          }
+        },
+        {
+          "WastedResources": {
+            "resources": {
+              "gold": 1
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -232,7 +263,7 @@
     ". Player1 used the following combat modifiers: steel weapons added 2 combat value",
     "\tPlayer1 killed all defending units and captured Player2's city at C1. Could not store 1 gold"
   ],
-  "undo_limit": 2,
+  "undo_limit": 1,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,
@@ -262,51 +293,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    "StartAction",
-    {
-      "Movement": {
-        "starting_position": "C2",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "WastedResources": {
-        "resources": {
-          "gold": 1
-        }
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

@@ -325,7 +325,7 @@
   "starting_player_index": 0,
   "current_player_index": 0,
   "action_log": [],
-  "action_log_index": 4,
+  "action_log_index": 0,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -357,7 +357,7 @@
     "Player2 did not rase a city",
     "It's Player1's turn"
   ],
-  "undo_limit": 4,
+  "undo_limit": 0,
   "actions_left": 3,
   "successful_cultural_influence": false,
   "round": 1,

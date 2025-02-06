@@ -260,7 +260,7 @@
       }
     }
   ],
-  "action_log_index": 13,
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -293,7 +293,7 @@
     "\tPlayer1 ended the movement action",
     "Player1 paid 2 mood tokens to get an extra action using Forced Labor"
   ],
-  "undo_limit": 9,
+  "undo_limit": 0,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,
