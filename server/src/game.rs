@@ -408,8 +408,9 @@ impl Game {
         self.after_execute_or_redo(&copy, player_index);
         // player can have changed, but we don't need waste check for turn end
         check_for_waste(self, self.current_player_index);
-        
-        self.action_log[self.action_log_index - 1].undo = std::mem::take(&mut self.undo_context_stack);
+
+        self.action_log[self.action_log_index - 1].undo =
+            std::mem::take(&mut self.undo_context_stack);
     }
 
     fn add_string_log_item(&mut self, action: &Action) {

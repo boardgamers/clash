@@ -4,6 +4,7 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 use crate::action::PlayActionCard;
+use crate::game::ActionLogItem;
 use crate::player::Player;
 use crate::playing_actions::{
     Collect, Construct, IncreaseHappiness, InfluenceCultureAttempt, Recruit,
@@ -19,7 +20,6 @@ use crate::{
     unit::{MovementAction, Units},
     utils,
 };
-use crate::game::ActionLogItem;
 
 #[derive(Serialize, Deserialize)]
 pub struct LogSliceOptions {
