@@ -427,8 +427,14 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [],
-  "action_log_index": 0,
+  "action_log": [
+    {
+      "action": {
+        "Playing": "EndTurn"
+      }
+    }
+  ],
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -501,7 +507,7 @@
     "It's Player2's turn",
     "Round 3/3"
   ],
-  "undo_limit": 0,
+  "undo_limit": 1,
   "actions_left": 3,
   "successful_cultural_influence": false,
   "round": 3,
