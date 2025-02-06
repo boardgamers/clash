@@ -112,8 +112,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
 
                         let mut ctx = game.custom_phase_state.clone();
                         ctx.current.as_mut().expect("current missing").response = None;
-                        game.action_log[game.action_log_index]
-                            .undo
+                        game.undo_context_stack
                             .push(UndoContext::CustomPhaseEvent(ctx));
                         let r = c.request.clone();
                         let a = action.clone();

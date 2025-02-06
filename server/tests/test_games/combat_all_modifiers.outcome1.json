@@ -315,8 +315,79 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [],
-  "action_log_index": 0,
+  "action_log": [
+    {
+      "action": {
+        "Movement": {
+          "Move": {
+            "units": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "destination": "C1"
+          }
+        }
+      }
+    },
+    {
+      "action": {
+        "CustomPhaseEvent": {
+          "Payment": [
+            {
+              "ore": 1
+            }
+          ]
+        }
+      },
+      "undo": [
+        {
+          "CustomPhaseEvent": {
+            "event_used": [],
+            "last_priority_used": 1,
+            "current": {
+              "event_type": "StartCombatAttacker",
+              "priority": 1,
+              "player_index": 0,
+              "request": {
+                "Payment": [
+                  {
+                    "cost": {
+                      "default": {
+                        "ore": 1
+                      },
+                      "conversions": [
+                        {
+                          "from": [
+                            {
+                              "ore": 1
+                            }
+                          ],
+                          "to": {
+                            "gold": 1
+                          }
+                        }
+                      ]
+                    },
+                    "name": "Use steel weapons",
+                    "optional": true
+                  }
+                ]
+              },
+              "response": null,
+              "origin": {
+                "Advance": "Steel Weapons"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "action_log_index": 2,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -333,7 +404,7 @@
     "\tPlayer1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1",
     "Player1 paid for steel weapons: 1 ore"
   ],
-  "undo_limit": 0,
+  "undo_limit": 2,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 2,
@@ -357,84 +428,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    },
-    "StartAction",
-    "StartAction",
-    {
-      "CustomPhaseEvent": {
-        "event_used": [],
-        "last_priority_used": 1,
-        "current": {
-          "event_type": "StartCombatAttacker",
-          "priority": 1,
-          "player_index": 0,
-          "request": {
-            "Payment": [
-              {
-                "cost": {
-                  "default": {
-                    "ore": 1
-                  },
-                  "conversions": [
-                    {
-                      "from": [
-                        {
-                          "ore": 1
-                        }
-                      ],
-                      "to": {
-                        "gold": 1
-                      }
-                    }
-                  ]
-                },
-                "name": "Use steel weapons",
-                "optional": true
-              }
-            ]
-          },
-          "response": null,
-          "origin": {
-            "Advance": "Steel Weapons"
-          }
-        }
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

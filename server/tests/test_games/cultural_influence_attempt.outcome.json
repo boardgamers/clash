@@ -204,8 +204,21 @@
   },
   "starting_player_index": 0,
   "current_player_index": 1,
-  "action_log": [],
-  "action_log_index": 0,
+  "action_log": [
+    {
+      "action": {
+        "Playing": {
+          "InfluenceCultureAttempt": {
+            "starting_city_position": "C1",
+            "target_player_index": 0,
+            "target_city_position": "C2",
+            "city_piece": "Fortress"
+          }
+        }
+      }
+    }
+  ],
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -216,7 +229,7 @@
     "It's Player2's turn",
     "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1 and succeeded (rolled 6)"
   ],
-  "undo_limit": 0,
+  "undo_limit": 1,
   "actions_left": 2,
   "successful_cultural_influence": true,
   "round": 1,

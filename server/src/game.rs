@@ -66,6 +66,7 @@ pub struct Game {
     pub dropped_players: Vec<usize>,
     pub wonders_left: Vec<Wonder>,
     pub wonder_amount_left: usize,
+    pub undo_context_stack: Vec<UndoContext>, // transient
 }
 
 impl Clone for Game {
@@ -148,6 +149,7 @@ impl Game {
             dropped_players: Vec::new(),
             wonders_left: wonders,
             wonder_amount_left: wonder_amount,
+            undo_context_stack: Vec::new(),
         }
     }
 
@@ -187,6 +189,7 @@ impl Game {
                 .collect(),
             wonder_amount_left: data.wonder_amount_left,
             custom_phase_state: data.state_change_event_state,
+            undo_context_stack: Vec::new(),
         };
         for player in data.players {
             Player::initialize_player(player, &mut game);
@@ -286,7 +289,7 @@ impl Game {
         if self.action_log_index < self.action_log.len() {
             self.action_log.drain(self.action_log_index..);
         }
-        self.action_log.push(ActionLogItem::new(item)); 
+        self.action_log.push(ActionLogItem::new(item));
         self.action_log_index += 1;
     }
 
@@ -405,6 +408,8 @@ impl Game {
         self.after_execute_or_redo(&copy, player_index);
         // player can have changed, but we don't need waste check for turn end
         check_for_waste(self, self.current_player_index);
+        
+        self.action_log[self.action_log_index - 1].undo = std::mem::take(&mut self.undo_context_stack);
     }
 
     fn add_string_log_item(&mut self, action: &Action) {
@@ -476,7 +481,9 @@ impl Game {
     fn undo(&mut self, player_index: usize) {
         self.action_log_index -= 1;
         self.log.remove(self.log.len() - 1);
-        let action = &self.action_log[self.action_log_index].action;
+        let item = &self.action_log[self.action_log_index];
+        self.undo_context_stack = item.undo.clone();
+        let action = &item.action;
 
         self.players[player_index].take_events(|events, player| {
             events.before_undo_action.trigger(player, action, &());
@@ -694,7 +701,7 @@ impl Game {
     }
 
     pub(crate) fn push_undo_context(&mut self, context: UndoContext) {
-        self.action_log[self.action_log_index - 1].undo.push(context);
+        self.undo_context_stack.push(context);
     }
 
     pub(crate) fn pop_undo_context(&mut self) -> Option<UndoContext> {
@@ -706,7 +713,7 @@ impl Game {
         pred: fn(&UndoContext) -> bool,
     ) -> Option<UndoContext> {
         loop {
-            let option = self.action_log[self.action_log_index].undo.last();
+            let option = self.undo_context_stack.last();
             if let Some(context) = option {
                 if let UndoContext::Command(c) = context {
                     self.players[self.current_player_index]
@@ -714,10 +721,10 @@ impl Game {
                         .clone_from(&c.info);
                     self.players[self.current_player_index]
                         .loose_resources(c.gained_resources.clone());
-                    self.action_log[self.action_log_index].undo.pop();
+                    self.undo_context_stack.pop();
                 } else {
                     if pred(context) {
-                        return self.action_log[self.action_log_index].undo.pop();
+                        return self.undo_context_stack.pop();
                     }
                     return None;
                 }
@@ -1971,6 +1978,7 @@ pub mod tests {
             dropped_players: Vec::new(),
             wonders_left: Vec::new(),
             wonder_amount_left: 0,
+            undo_context_stack: Vec::new(),
         }
     }
 

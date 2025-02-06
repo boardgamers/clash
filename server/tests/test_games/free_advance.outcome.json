@@ -207,8 +207,16 @@
   },
   "starting_player_index": 0,
   "current_player_index": 1,
-  "action_log": [],
-  "action_log_index": 0,
+  "action_log": [
+    {
+      "action": {
+        "StatusPhase": {
+          "FreeAdvance": "Storage"
+        }
+      }
+    }
+  ],
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -234,7 +242,7 @@
     "Player1 advanced Storage for free",
     "It's Player2's turn"
   ],
-  "undo_limit": 0,
+  "undo_limit": 1,
   "actions_left": 3,
   "successful_cultural_influence": false,
   "round": 1,

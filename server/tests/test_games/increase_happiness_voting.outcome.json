@@ -271,8 +271,42 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [],
-  "action_log_index": 0,
+  "action_log": [
+    {
+      "action": {
+        "Playing": {
+          "Custom": {
+            "VotingIncreaseHappiness": {
+              "happiness_increases": [
+                [
+                  "C2",
+                  1
+                ],
+                [
+                  "B3",
+                  2
+                ]
+              ],
+              "payment": {
+                "mood_tokens": 5
+              }
+            }
+          }
+        }
+      },
+      "undo": [
+        {
+          "IncreaseHappiness": {
+            "angry_activations": [
+              "C2",
+              "B3"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "action_log_index": 1,
   "log": [
     "The game has started",
     "Age 1 has started",
