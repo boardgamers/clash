@@ -40,7 +40,7 @@ impl PaymentOptions {
             .iter()
             .filter_map(|c| if c.to.is_empty() { c.limit } else { None })
             .sum::<u32>();
-        if discount_left == 0 && available.has_at_least(&self.default, 1) {
+        if discount_left == 0 && available.has_at_least(&self.default) {
             return Some(self.default.clone());
         }
 
@@ -156,7 +156,7 @@ pub fn can_convert(
     skip_from: usize,
     discount_left: u32,
 ) -> Option<ResourcePile> {
-    if available.has_at_least(current, 1) && discount_left == 0 {
+    if available.has_at_least(current) && discount_left == 0 {
         return Some(current.clone());
     }
 
@@ -171,7 +171,7 @@ pub fn can_convert(
 
     let upper_limit = conversion.limit.unwrap_or(u32::MAX);
     for amount in 1..=upper_limit {
-        if !current.has_at_least(from, amount)
+        if !current.has_at_least_times(from, amount)
             || (conversion.to.is_empty() && amount > discount_left)
         {
             return can_convert(

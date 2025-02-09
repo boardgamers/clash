@@ -11,47 +11,35 @@
       "resources": {
         "food": 1,
         "wood": 1,
-        "ore": 0,
-        "ideas": 0,
-        "gold": 0,
-        "mood_tokens": 1,
-        "culture_tokens": 0
+        "mood_tokens": 1
       },
       "resource_limit": {
         "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 0,
-        "culture_tokens": 0
+        "gold": 7
       },
       "cities": [
         {
-          "city_pieces": {
-          },
+          "city_pieces": {},
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "D1"
         },
         {
-          "city_pieces": {
-          },
+          "city_pieces": {},
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "C7"
         }
       ],
       "units": [
         {
-          "player_index": 0,
           "position": "E3",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 1
         }
       ],
@@ -70,76 +58,12 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "collect_options": [
-        [
-          "Mountain",
-          [
-            {
-              "food": 0,
-              "wood": 0,
-              "ore": 1,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
-        [
-          "Fertile",
-          [
-            {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
-        [
-          "Forest",
-          [
-            {
-              "food": 0,
-              "wood": 1,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
-        [
-          "Water",
-          [
-            {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ]
-      ],
       "next_unit_id": 2
     },
     {
       "name": null,
       "id": 1,
       "resources": {
-        "food": 0,
-        "wood": 0,
-        "ore": 0,
-        "ideas": 0,
-        "gold": 0,
-        "mood_tokens": 0,
         "culture_tokens": 1
       },
       "resource_limit": {
@@ -147,36 +71,28 @@
         "wood": 7,
         "ore": 7,
         "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 0,
-        "culture_tokens": 0
+        "gold": 7
       },
       "cities": [
         {
-          "city_pieces": {
-          },
+          "city_pieces": {},
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 1,
           "position": "D8"
         },
         {
-          "city_pieces": {
-          },
+          "city_pieces": {},
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 1,
           "position": "E7"
         }
       ],
       "units": [
         {
-          "player_index": 1,
           "position": "E6",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 1
         }
       ],
@@ -195,50 +111,6 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "collect_options": [
-        [
-          "Mountain",
-          [
-            {
-              "food": 0,
-              "wood": 0,
-              "ore": 1,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
-        [
-          "Fertile",
-          [
-            {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
-        [
-          "Forest",
-          [
-            {
-              "food": 0,
-              "wood": 1,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ]
-      ],
       "next_unit_id": 2
     }
   ],
@@ -790,233 +662,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Movement": {
-        "starting_position": "D1",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "C2",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "B2",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "C4",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "B4",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "C4",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "D5",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "C6",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "FoundCity": {
-        "settler": {
-          "player_index": 0,
-          "position": "C7",
-          "unit_type": "Settler",
-          "movement_restriction": {
-            "Attack": 2
-          },
-          "id": 0
-        }
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "D8",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "E8",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "FoundCity": {
-        "settler": {
-          "player_index": 1,
-          "position": "E7",
-          "unit_type": "Settler",
-          "movement_restriction": {
-            "Attack": 2
-          },
-          "id": 0
-        }
-      }
-    },
-    {
-      "Recruit": {
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "D1",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          1
-        ]
-      }
-    },
-    {
-      "Recruit": {
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "E7",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          1
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          1
-        ]
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

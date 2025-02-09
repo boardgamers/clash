@@ -26,78 +26,61 @@
       },
       "cities": [
         {
-          "city_pieces": {
-
-          },
+          "city_pieces": {},
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
-          "position": "A1"},
+          "position": "A1"
+        },
         {
           "city_pieces": {
-            "fortress": 1},
+            "fortress": 1
+          },
           "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
-          "position": "C2"}
+          "position": "C2"
+        }
       ],
       "units": [
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Infantry",
-          "movement_restriction": "None",
           "id": 0
         },
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Cavalry",
-          "movement_restriction": "None",
           "id": 1
         },
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Leader",
-          "movement_restriction": "None",
           "id": 2
         },
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Elephant",
-          "movement_restriction": "None",
           "id": 3
         },
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 4
         },
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 5
         },
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 6
         },
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 7
         }
       ],
@@ -117,64 +100,6 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "collect_options": [
-        [
-          "Mountain",
-          [
-            {
-              "food": 0,
-              "wood": 0,
-              "ore": 1,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
-        [
-          "Fertile",
-          [
-            {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
-        [
-          "Forest",
-          [
-            {
-              "food": 0,
-              "wood": 1,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
-        [
-          "Water",
-          [
-            {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ]
-      ],
       "next_unit_id": 8
     },
     {
@@ -200,28 +125,22 @@
       },
       "cities": [
         {
-          "city_pieces": {
-
-          },
+          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 1,
-          "position": "C1"}
+          "position": "C1"
+        }
       ],
       "units": [
         {
-          "player_index": 1,
           "position": "C1",
           "unit_type": "Infantry",
-          "movement_restriction": "None",
           "id": 0
         },
         {
-          "player_index": 1,
           "position": "C1",
           "unit_type": "Infantry",
-          "movement_restriction": "None",
           "id": 1
         }
       ],
@@ -240,50 +159,6 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "collect_options": [
-        [
-          "Mountain",
-          [
-            {
-              "food": 0,
-              "wood": 0,
-              "ore": 1,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
-        [
-          "Fertile",
-          [
-            {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
-        [
-          "Forest",
-          [
-            {
-              "food": 0,
-              "wood": 1,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ]
-      ],
       "next_unit_id": 2
     }
   ],
@@ -388,67 +263,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Recruit": {
-
-
-      }
-    },
-    {
-      "Recruit": {
-
-
-      }
-    },
-    {
-      "Recruit": {
-
-
-      }
-    },
-    {
-      "Recruit": {
-
-
-      }
-    },
-    {
-      "Recruit": {
-
-
-      }
-    },
-    {
-      "Recruit": {
-
-
-      }
-    },
-    {
-      "Recruit": {
-
-
-      }
-    },
-    {
-      "Recruit": {
-
-
-      }
-    },
-    {
-      "Recruit": {
-
-
-      }
-    },
-    {
-      "Recruit": {
-
-
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

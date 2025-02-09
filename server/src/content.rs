@@ -1,4 +1,16 @@
 pub mod advances;
+mod advances_agriculture;
+mod advances_autocracy;
+mod advances_construction;
+mod advances_culture;
+mod advances_democracy;
+mod advances_economy;
+mod advances_education;
+mod advances_science;
+mod advances_seafearing;
+mod advances_spirituality;
+mod advances_theocracy;
+mod advances_warfare;
 pub mod civilizations;
 pub mod custom_actions;
 pub mod custom_phase_actions;

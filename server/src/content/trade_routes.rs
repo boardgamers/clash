@@ -36,21 +36,22 @@ pub fn trade_route_reward(game: &Game) -> Option<(PaymentOptions, Vec<TradeRoute
     ))
 }
 
-pub(crate) fn gain_trade_route_reward(
-    game: &mut Game,
+pub(crate) fn trade_route_log(
+    game: &Game,
     player_index: usize,
     trade_routes: &[TradeRoute],
     reward: &ResourcePile,
     selected: bool,
-) {
+) -> String {
+    let mut log = String::new();
     if selected {
-        game.add_info_log_item(format!(
+        log += &format!(
             "{} selected trade routes",
             game.players[player_index].get_name(),
-        ));
+        );
     }
     for t in trade_routes {
-        game.add_to_last_log_item(&format!(
+        log += &format!(
             ". {:?} at {:?} traded with city at {:?}",
             game.players[player_index]
                 .get_unit(t.unit_id)
@@ -58,10 +59,10 @@ pub(crate) fn gain_trade_route_reward(
                 .unit_type,
             t.from,
             t.to,
-        ));
+        );
     }
-    game.add_to_last_log_item(&format!(". Total reward is {reward}"));
-    game.players[player_index].gain_resources(reward.clone());
+    log += &format!(". Total reward is {reward}");
+    log
 }
 
 #[must_use]

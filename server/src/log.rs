@@ -273,12 +273,7 @@ fn format_construct_log_item(
     let city_position = c.city_position;
 
     let mood = format_mood_change(player, city_position);
-    let temple = if let Some(temple_bonus) = &c.temple_bonus {
-        format!(" and chooses to get {temple_bonus}")
-    } else {
-        String::new()
-    };
-    format!("{player_name} paid {payment} to construct a {city_piece:?} in the city at {city_position}{port_pos}{mood}{temple}")
+    format!("{player_name} paid {payment} to construct a {city_piece:?} in the city at {city_position}{port_pos}{mood}")
 }
 
 fn format_mood_change(player: &Player, city_position: Position) -> String {

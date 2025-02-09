@@ -315,7 +315,8 @@
           "WastedResources": {
             "resources": {
               "gold": 2
-            }
+            },
+            "player_index": 0
           }
         }
       ]
@@ -328,7 +329,7 @@
     "Round 1/3",
     "Player1 paid 2 ideas to get the Tactics advance",
     "Player1 used a move units action",
-    "\tPlayer1 disembarked 1 cavalry and 1 elephant from C3 to B2 and captured Player2's city at B2. Could not store 2 gold"
+    "\tPlayer1 disembarked 1 cavalry and 1 elephant from C3 to B2 and captured Player2's city at B2. Player1 Could not store 2 gold"
   ],
   "undo_limit": 1,
   "actions_left": 2,

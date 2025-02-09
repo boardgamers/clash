@@ -24,7 +24,6 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "D6"
         },
         {
@@ -32,7 +31,6 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "C6"
         },
         {
@@ -40,13 +38,11 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "E6"
         }
       ],
       "units": [
         {
-          "player_index": 0,
           "position": "D3",
           "unit_type": "Settler",
           "id": 0
@@ -91,56 +87,46 @@
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 1,
           "position": "D8"
         }
       ],
       "units": [
         {
-          "player_index": 1,
           "position": "D8",
           "unit_type": "Infantry",
           "id": 0
         },
         {
-          "player_index": 1,
           "position": "D8",
           "unit_type": "Infantry",
           "id": 1
         },
         {
-          "player_index": 1,
           "position": "D8",
           "unit_type": "Infantry",
           "id": 2
         },
         {
-          "player_index": 1,
           "position": "C8",
           "unit_type": "Settler",
           "id": 3
         },
         {
-          "player_index": 1,
           "position": "C8",
           "unit_type": "Infantry",
           "id": 4
         },
         {
-          "player_index": 1,
           "position": "E7",
           "unit_type": "Settler",
-          "id": 5,
-          "carrier_id": 7
+          "id": 5
         },
         {
-          "player_index": 1,
           "position": "E8",
           "unit_type": "Infantry",
           "id": 6
         },
         {
-          "player_index": 1,
           "position": "E7",
           "unit_type": "Ship",
           "id": 7
@@ -492,126 +478,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Movement": {
-        "starting_position": "D8",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "D1",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "F7",
-        "movement_actions_left": 2,
-        "cost": {
-          "wood": 1,
-          "ore": 1
-        }
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "C8",
-        "movement_actions_left": 2,
-        "moved_units": [
-          4
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 1,
-        "moved_units": [
-          4,
-          3
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "D7",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "C7",
-        "movement_actions_left": 2,
-        "moved_units": [
-          3
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 1,
-        "moved_units": [
-          3,
-          4
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

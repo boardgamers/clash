@@ -244,7 +244,8 @@
           "WastedResources": {
             "resources": {
               "gold": 1
-            }
+            },
+            "player_index": 0
           }
         }
       ]
@@ -261,7 +262,7 @@
     "\nCombat round 1",
     "\tPlayer1 rolled 2 (Elephant, -1 hits, no combat value), 2 (Elephant, no bonus), 2 (Elephant, no bonus), 1 (Leader, re-roll), 1 (Leader, re-roll), 6 (Infantry, +1 combat value) for combined combat value of 13 and gets 2 hits against defending units. Player2 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 0 hits against attacking units.",
     ". Player1 used the following combat modifiers: steel weapons added 2 combat value",
-    "\tPlayer1 killed all defending units and captured Player2's city at C1. Could not store 1 gold"
+    "\tPlayer1 killed all defending units and captured Player2's city at C1. Player1 Could not store 1 gold"
   ],
   "undo_limit": 1,
   "actions_left": 1,

@@ -1,6 +1,9 @@
 use crate::ability_initializer::EventOrigin;
+use crate::action::Action;
+use crate::content::advances::get_advance_by_name;
 use crate::game::{Game, UndoContext};
 use crate::payment::PaymentOptions;
+use crate::playing_actions::PlayingAction;
 use crate::resource_pile::ResourcePile;
 use serde::{Deserialize, Serialize};
 
@@ -9,6 +12,8 @@ pub enum CustomPhaseEventType {
     StartCombatAttacker,
     StartCombatDefender,
     TurnStart,
+    OnAdvance,
+    OnConstruct,
 }
 
 impl CustomPhaseEventType {
@@ -26,21 +31,28 @@ pub struct CustomPhasePaymentRequest {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct CustomPhaseRewardRequest {
+pub struct CustomPhaseResourceRewardRequest {
     pub reward: PaymentOptions,
     pub name: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct CustomPhaseAdvanceRewardRequest {
+    pub choices: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum CustomPhaseRequest {
     Payment(Vec<CustomPhasePaymentRequest>),
-    Reward(CustomPhaseRewardRequest),
+    ResourceReward(CustomPhaseResourceRewardRequest),
+    AdvanceReward(CustomPhaseAdvanceRewardRequest),
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum CustomPhaseEventAction {
     Payment(Vec<ResourcePile>),
-    Reward(ResourcePile),
+    ResourceReward(ResourcePile),
+    AdvanceReward(String),
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -79,29 +91,37 @@ impl CustomPhaseEventState {
 impl CustomPhaseEventAction {
     pub(crate) fn undo(self, game: &mut Game, player_index: usize) {
         match self {
-            CustomPhaseEventAction::Payment(_) => todo!("undo payment"),
-            CustomPhaseEventAction::Reward(r) => {
+            CustomPhaseEventAction::Payment(p) => {
                 let player = &mut game.players[player_index];
-                player.loose_resources(r);
+                for p in p {
+                    player.gain_resources_in_undo(p);
+                }
+            }
+            CustomPhaseEventAction::ResourceReward(r) => {
+                game.players[player_index].lose_resources(r);
+            }
+            CustomPhaseEventAction::AdvanceReward(n) => {
+                game.undo_advance(&get_advance_by_name(&n), player_index, false);
             }
         }
         let Some(UndoContext::CustomPhaseEvent(e)) = game.pop_undo_context() else {
             panic!("when undoing custom phase event, the undo context stack should have a custom phase event")
         };
         game.custom_phase_state = e;
+        if let Some(action) = game.action_log.get(game.action_log_index - 1) {
+            // is there a better way to do this?
+            if let Action::Playing(PlayingAction::Advance { .. }) = action.action {
+                game.players[player_index].game_event_tokens += 1;
+            }
+        }
     }
 
     pub(crate) fn redo(self, game: &mut Game, player_index: usize) {
-        let Some(c) = &mut game.custom_phase_state.current else {
+        let Some(s) = &mut game.custom_phase_state.current else {
             panic!("current custom phase event should be set")
         };
-        let c = c.clone();
-
-        let events = game.players[player_index]
-            .events
-            .take()
-            .expect("events should be set");
-        events.redo_custom_phase_action.trigger(game, &c, &self);
-        game.players[player_index].events = Some(events);
+        s.response = Some(self.clone());
+        let event_type = s.event_type.clone();
+        game.execute_custom_phase_action(player_index, &event_type);
     }
 }

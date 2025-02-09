@@ -29,6 +29,7 @@ use std::{
     fs::{self, OpenOptions},
     io::Write,
     path::MAIN_SEPARATOR as SEPARATOR,
+    vec,
 };
 
 #[test]
@@ -86,7 +87,6 @@ fn basic_actions() {
         city_piece: Observatory,
         payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
         port_position: None,
-        temple_bonus: None,
     }));
     let game = game_api::execute_action(game, construct_action, 0);
     let player = &game.players[0];
@@ -393,10 +393,7 @@ fn assert_eq_game_json(
         return;
     }
     let expected_path = game_path(expected_name);
-    if env::var("UPDATE_EXPECTED")
-        .ok()
-        .is_some_and(|s| s == "true")
-    {
+    if update_expected() {
         write_result(actual, &expected_path);
         return;
     } else {
@@ -720,7 +717,7 @@ fn test_trade_routes_with_currency() {
             TestAction::not_undoable(0, Action::Playing(EndTurn)),
             TestAction::undoable(
                 1,
-                Action::CustomPhaseEvent(CustomPhaseEventAction::Reward(
+                Action::CustomPhaseEvent(CustomPhaseEventAction::ResourceReward(
                     ResourcePile::gold(1) + ResourcePile::food(1),
                 )),
             ),
@@ -987,7 +984,6 @@ fn test_construct() {
             city_piece: Observatory,
             payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
             port_position: None,
-            temple_bonus: None,
         })),
         0,
         true,
@@ -1004,11 +1000,32 @@ fn test_construct_port() {
             city_piece: Port,
             payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
             port_position: Some(Position::from_offset("A2")),
-            temple_bonus: None,
         })),
         0,
         true,
         false,
+    );
+}
+
+#[test]
+fn test_free_education() {
+    test_actions(
+        "free_education",
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Draft"),
+                    payment: ResourcePile::food(1) + ResourcePile::gold(1),
+                }),
+            ),
+            TestAction::undoable(
+                0,
+                Action::CustomPhaseEvent(CustomPhaseEventAction::Payment(vec![
+                    ResourcePile::ideas(1),
+                ])),
+            ),
+        ],
     );
 }
 
@@ -1078,7 +1095,7 @@ fn test_change_government() {
         Action::StatusPhase(StatusPhaseAction::ChangeGovernmentType(
             ChangeGovernmentType::ChangeGovernment(ChangeGovernment {
                 new_government: String::from("Theocracy"),
-                additional_advances: vec![String::from("Theocracy 2")],
+                additional_advances: vec![String::from("Dedication")],
             }),
         )),
         0,
@@ -1468,7 +1485,7 @@ fn test_ship_combat_war_ships() {
 }
 
 fn load_game(name: &str) -> Game {
-    Game::from_data(
+    let game = Game::from_data(
         serde_json::from_str(&read_game_str(name)).unwrap_or_else(|e| {
             panic!(
                 "the game file should be deserializable {}: {}",
@@ -1476,7 +1493,17 @@ fn load_game(name: &str) -> Game {
                 e
             )
         }),
-    )
+    );
+    if update_expected() {
+        write_result(&to_json(&game), &game_path(name));
+    }
+    game
+}
+
+fn update_expected() -> bool {
+    env::var("UPDATE_EXPECTED")
+        .ok()
+        .is_some_and(|s| s == "true")
 }
 
 #[test]
@@ -1509,5 +1536,42 @@ fn test_civ_maya_leader_pakal() {
         0,
         false,
         false,
+    );
+}
+
+#[test]
+fn test_dogma() {
+    test_actions(
+        "dogma",
+        vec![
+            TestAction::undoable(
+                1,
+                Action::Playing(Advance {
+                    advance: String::from("Dogma"),
+                    payment: ResourcePile::ideas(2),
+                }),
+            ),
+            TestAction::undoable(
+                1,
+                Action::Playing(Construct(playing_actions::Construct {
+                    city_position: Position::from_offset("C1"),
+                    city_piece: Temple,
+                    payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
+                    port_position: None,
+                })),
+            ),
+            TestAction::undoable(
+                1,
+                Action::CustomPhaseEvent(CustomPhaseEventAction::ResourceReward(
+                    ResourcePile::culture_tokens(1),
+                )),
+            ),
+            TestAction::undoable(
+                1,
+                Action::CustomPhaseEvent(CustomPhaseEventAction::AdvanceReward(
+                    "Fanaticism".to_string(),
+                )),
+            ),
+        ],
     );
 }

@@ -8,12 +8,12 @@ use crate::advance::Advance;
 use crate::combat::{self, start_combat, Combat, CombatDieRoll, CombatPhase, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, MOVEMENT_ACTIONS};
 use crate::content::custom_phase_actions::{CustomPhaseEventState, CustomPhaseEventType};
-use crate::events::EventMut;
+use crate::events::Event;
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
 use crate::map::UnexploredBlock;
 use crate::movement::{has_movable_units, terrain_movement_restriction};
 use crate::payment::PaymentOptions;
-use crate::player_events::{MoveInfo, PlayerCommands, PlayerEvents};
+use crate::player_events::{AdvanceInfo, CustomPhaseInfo, MoveInfo, PlayerCommands, PlayerEvents};
 use crate::resource::check_for_waste;
 use crate::unit::{carried_units, get_current_move, MovementRestriction, UnitData, Units};
 use crate::utils::Rng;
@@ -301,22 +301,22 @@ impl Game {
         self.undo_limit = self.action_log_index;
     }
 
-    pub(crate) fn trigger_custom_phase_event(
+    pub(crate) fn trigger_custom_phase_event<V>(
         &mut self,
         player_index: usize,
-        event: fn(&PlayerEvents) -> &EventMut<Game, usize, CustomPhaseEventType>,
+        event: fn(&mut PlayerEvents) -> &mut Event<Game, CustomPhaseInfo, V>,
         event_type: CustomPhaseEventType,
+        details: &V,
     ) -> bool {
         if self.custom_phase_state.event_used.contains(&event_type) {
             return false;
         }
 
-        let events = self.players[player_index]
-            .events
-            .take()
-            .expect("events should be set");
-        event(&events).trigger(self, &player_index, &event_type);
-        self.players[player_index].events = Some(events);
+        let info = CustomPhaseInfo {
+            event_type: event_type.clone(),
+            player: player_index,
+        };
+        self.trigger_event(player_index, event, &info, details);
 
         let request = self.custom_phase_state.current.is_some();
         if !request {
@@ -331,17 +331,43 @@ impl Game {
         request
     }
 
+    pub(crate) fn trigger_event<U, V>(
+        &mut self,
+        player_index: usize,
+        event: fn(&mut PlayerEvents) -> &mut Event<Game, U, V>,
+        info: &U,
+        details: &V,
+    ) {
+        let e = event(&mut self.players[player_index].events).take();
+        e.trigger(self, info, details);
+        event(&mut self.players[player_index].events).set(e);
+    }
+
     pub(crate) fn trigger_command_event<V>(
         &mut self,
         player_index: usize,
-        event: fn(&PlayerEvents) -> &EventMut<PlayerCommands, Game, V>,
+        event: fn(&mut PlayerEvents) -> &mut Event<PlayerCommands, Game, V>,
         details: &V,
+    ) {
+        let e = event(&mut self.players[player_index].events).take();
+        self.with_commands(player_index, false, |commands, game| {
+            e.trigger(commands, game, details);
+        });
+        event(&mut self.players[player_index].events).set(e);
+    }
+
+    pub(crate) fn with_commands(
+        &mut self,
+        player_index: usize,
+        new_log_entry: bool,
+        callback: impl FnOnce(&mut PlayerCommands, &mut Game),
     ) {
         let p = self.get_player(player_index);
         let info = p.event_info.clone();
-        let mut commands = PlayerCommands::new(p.event_info.clone());
+        let mut commands = PlayerCommands::new(player_index, p.get_name(), p.event_info.clone());
 
-        event(p.get_events()).trigger(&mut commands, self, details);
+        callback(&mut commands, self);
+
         if info != commands.info || !commands.gained_resources.is_empty() {
             self.push_undo_context(UndoContext::Command(CommandUndoContext {
                 info,
@@ -357,6 +383,9 @@ impl Game {
             p.event_info.insert(k, v);
         }
         p.gain_resources(commands.gained_resources);
+        if new_log_entry {
+            self.add_info_log_item(String::new());
+        }
         for edit in commands.log_edits {
             self.add_to_last_log_item(&edit);
         }
@@ -391,26 +420,44 @@ impl Game {
 
         if let Some(s) = &mut self.custom_phase_state.current {
             s.response = action.custom_phase_event();
-            match s.event_type {
-                CustomPhaseEventType::StartCombatAttacker
-                | CustomPhaseEventType::StartCombatDefender => {
-                    if let GameState::Combat(c) = mem::replace(&mut self.state, Playing) {
-                        start_combat(self, c);
-                    } else {
-                        panic!("game should be in combat state")
-                    }
-                }
-                CustomPhaseEventType::TurnStart => self.start_turn(),
-            }
+            let event_type = s.event_type.clone();
+            self.execute_custom_phase_action(player_index, &event_type);
         } else {
             self.execute_regular_action(action, player_index);
         }
         self.after_execute_or_redo(&copy, player_index);
         // player can have changed, but we don't need waste check for turn end
-        check_for_waste(self, self.current_player_index);
+
+        check_for_waste(self);
 
         self.action_log[self.action_log_index - 1].undo =
             std::mem::take(&mut self.undo_context_stack);
+    }
+
+    pub(crate) fn execute_custom_phase_action(
+        &mut self,
+        player_index: usize,
+        event_type: &CustomPhaseEventType,
+    ) {
+        match event_type {
+            CustomPhaseEventType::StartCombatAttacker
+            | CustomPhaseEventType::StartCombatDefender => {
+                if let GameState::Combat(c) = mem::replace(&mut self.state, Playing) {
+                    start_combat(self, c);
+                } else {
+                    panic!("game should be in combat state")
+                }
+            }
+            CustomPhaseEventType::TurnStart => self.start_turn(),
+            // name and payment is only for information - but not needed here
+            CustomPhaseEventType::OnAdvance => {
+                self.got_advance(player_index, ResourcePile::empty(), "");
+            }
+            CustomPhaseEventType::OnConstruct => {
+                // building is only for information - but not needed here
+                PlayingAction::on_construct(self, player_index, Temple);
+            }
+        }
     }
 
     fn add_string_log_item(&mut self, action: &Action) {
@@ -474,9 +521,11 @@ impl Game {
     }
 
     fn after_execute_or_redo(&mut self, action: &Action, player_index: usize) {
-        self.players[player_index].take_events(|events, player| {
-            events.after_execute_action.trigger(player, action, &());
-        });
+        self.players[player_index].trigger_player_event(
+            |events| &mut events.after_execute_action,
+            action,
+            &(),
+        );
     }
 
     fn undo(&mut self, player_index: usize) {
@@ -486,12 +535,18 @@ impl Game {
         self.undo_context_stack = item.undo.clone();
         let action = &item.action;
 
-        self.players[player_index].take_events(|events, player| {
-            events.before_undo_action.trigger(player, action, &());
-        });
+        self.players[player_index].trigger_player_event(
+            |events| &mut events.before_undo_action,
+            action,
+            &(),
+        );
+        let was_custom_phase = self.custom_phase_state.current.is_some();
+        if was_custom_phase {
+            self.custom_phase_state = CustomPhaseEventState::new();
+        }
 
         match action {
-            Action::Playing(action) => action.clone().undo(self, player_index),
+            Action::Playing(action) => action.clone().undo(self, player_index, was_custom_phase),
             Action::StatusPhase(_) => panic!("status phase actions can't be undone"),
             Action::Movement(action) => {
                 self.undo_movement_action(action.clone(), player_index);
@@ -509,10 +564,13 @@ impl Game {
             Action::Undo => panic!("undo action can't be undone"),
             Action::Redo => panic!("redo action can't be undone"),
         }
-        if let Some(UndoContext::WastedResources { resources }) =
-            self.maybe_pop_undo_context(|c| matches!(c, UndoContext::WastedResources { .. }))
+
+        if let Some(UndoContext::WastedResources {
+            resources,
+            player_index,
+        }) = self.maybe_pop_undo_context(|c| matches!(c, UndoContext::WastedResources { .. }))
         {
-            self.players[player_index].gain_resources(resources.clone());
+            self.players[player_index].gain_resources_in_undo(resources.clone());
         }
 
         while self.maybe_pop_undo_context(|_| false).is_some() {
@@ -564,7 +622,7 @@ impl Game {
         }
         self.action_log_index += 1;
         self.after_execute_or_redo(&copy.action, player_index);
-        check_for_waste(self, player_index);
+        check_for_waste(self);
     }
 
     #[must_use]
@@ -721,7 +779,7 @@ impl Game {
                         .event_info
                         .clone_from(&c.info);
                     self.players[self.current_player_index]
-                        .loose_resources(c.gained_resources.clone());
+                        .lose_resources(c.gained_resources.clone());
                     self.undo_context_stack.pop();
                 } else {
                     if pred(context) {
@@ -814,7 +872,7 @@ impl Game {
                     "undo context should contain the starting position if units where moved",
                 ),
             );
-            self.players[player_index].gain_resources(m.payment);
+            self.players[player_index].gain_resources_in_undo(m.payment);
             for unit in disembarked_units {
                 self.players[player_index]
                     .get_unit_mut(unit.unit_id)
@@ -843,7 +901,7 @@ impl Game {
         if !action {
             return;
         }
-        self.players[player_index].loose_resources(roll_boost_cost);
+        self.players[player_index].lose_resources(roll_boost_cost);
         self.influence_culture(
             player_index,
             target_player_index,
@@ -875,7 +933,7 @@ impl Game {
         if !action {
             return;
         }
-        self.players[self.current_player_index].gain_resources(roll_boost_cost);
+        self.players[self.current_player_index].gain_resources_in_undo(roll_boost_cost);
         self.undo_influence_culture(target_player_index, target_city_position, city_piece);
     }
 
@@ -934,8 +992,9 @@ impl Game {
     fn start_turn(&mut self) {
         self.trigger_custom_phase_event(
             self.current_player_index,
-            |e| &e.on_turn_start,
+            |e| &mut e.on_turn_start,
             CustomPhaseEventType::TurnStart,
+            &(),
         );
     }
 
@@ -1110,20 +1169,18 @@ impl Game {
     /// # Panics
     ///
     /// Panics if advance does not exist
-    pub fn advance(&mut self, advance: &str, player_index: usize) {
-        self.players[player_index].take_events(|events, player| {
-            events.on_advance.trigger(player, &advance.to_string(), &());
-        });
+    pub fn advance(&mut self, advance: &str, player_index: usize, payment: ResourcePile) {
+        self.trigger_command_event(player_index, |e| &mut e.on_advance, &advance.to_string());
         let advance = advances::get_advance_by_name(advance);
         (advance.player_initializer)(self, player_index);
         (advance.player_one_time_initializer)(self, player_index);
+        let name = advance.name.clone();
         for i in 0..self.players[player_index]
             .civilization
             .special_advances
             .len()
         {
-            if self.players[player_index].civilization.special_advances[i].required_advance
-                == advance.name
+            if self.players[player_index].civilization.special_advances[i].required_advance == name
             {
                 let special_advance = self.players[player_index]
                     .civilization
@@ -1137,11 +1194,35 @@ impl Game {
                 break;
             }
         }
-        let player = &mut self.players[player_index];
         if let Some(advance_bonus) = &advance.bonus {
-            player.gain_resources(advance_bonus.resources());
+            let pile = advance_bonus.resources();
+            self.add_to_last_log_item(&format!(" and gained {pile}"));
+            self.players[player_index].gain_resources(pile);
         }
+        let player = &mut self.players[player_index];
         player.advances.push(advance);
+
+        self.got_advance(player_index, payment, &name);
+    }
+
+    pub(crate) fn got_advance(
+        &mut self,
+        player_index: usize,
+        payment: ResourcePile,
+        advance: &str,
+    ) {
+        if self.trigger_custom_phase_event(
+            player_index,
+            |e| &mut e.on_advance_custom_phase,
+            CustomPhaseEventType::OnAdvance,
+            &AdvanceInfo {
+                name: advance.to_string(),
+                payment,
+            },
+        ) {
+            return;
+        }
+        let player = &mut self.players[player_index];
         player.game_event_tokens -= 1;
         if player.game_event_tokens == 0 {
             player.game_event_tokens = 3;
@@ -1149,46 +1230,16 @@ impl Game {
         }
     }
 
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if advance does not exist
-    pub fn undo_advance(&mut self, advance: &str, player_index: usize) {
-        self.players[player_index].take_events(|events, player| {
-            events
-                .on_undo_advance
-                .trigger(player, &advance.to_string(), &());
-        });
-        let advance = advances::get_advance_by_name(advance);
-        (advance.player_deinitializer)(self, player_index);
-        (advance.player_undo_deinitializer)(self, player_index);
-        for i in 0..self.players[player_index]
-            .civilization
-            .special_advances
-            .len()
-        {
-            if self.players[player_index].civilization.special_advances[i].required_advance
-                == advance.name
-            {
-                let special_advance = self.players[player_index]
-                    .civilization
-                    .special_advances
-                    .remove(i);
-                self.undo_unlock_special_advance(&special_advance, player_index);
-                self.players[player_index]
-                    .civilization
-                    .special_advances
-                    .insert(i, special_advance);
-                break;
-            }
+    pub(crate) fn undo_advance(
+        &mut self,
+        advance: &Advance,
+        player_index: usize,
+        was_custom_phase: bool,
+    ) {
+        self.remove_advance(advance, player_index);
+        if !was_custom_phase {
+            self.players[player_index].game_event_tokens += 1;
         }
-        let player = &mut self.players[player_index];
-        if let Some(advance_bonus) = &advance.bonus {
-            player.loose_resources(advance_bonus.resources());
-        }
-        player.advances.pop();
-        player.game_event_tokens += 1;
     }
 
     ///
@@ -1362,8 +1413,34 @@ impl Game {
     ///
     /// Panics if advance does not exist
     pub fn remove_advance(&mut self, advance: &Advance, player_index: usize) {
-        utils::remove_element(&mut self.players[player_index].advances, advance);
         (advance.player_deinitializer)(self, player_index);
+        (advance.player_undo_deinitializer)(self, player_index);
+
+        for i in 0..self.players[player_index]
+            .civilization
+            .special_advances
+            .len()
+        {
+            if self.players[player_index].civilization.special_advances[i].required_advance
+                == advance.name
+            {
+                let special_advance = self.players[player_index]
+                    .civilization
+                    .special_advances
+                    .remove(i);
+                self.undo_unlock_special_advance(&special_advance, player_index);
+                self.players[player_index]
+                    .civilization
+                    .special_advances
+                    .insert(i, special_advance);
+                break;
+            }
+        }
+        let player = &mut self.players[player_index];
+        if let Some(advance_bonus) = &advance.bonus {
+            player.lose_resources(advance_bonus.resources());
+        }
+        utils::remove_element(&mut self.players[player_index].advances, advance);
     }
 
     fn unlock_special_advance(&mut self, special_advance: &SpecialAdvance, player_index: usize) {
@@ -1492,11 +1569,11 @@ impl Game {
     ///
     /// Panics if city does not exist
     pub fn build_wonder(&mut self, wonder: Wonder, city_position: Position, player_index: usize) {
-        self.players[player_index].take_events(|events, player| {
-            events
-                .on_construct_wonder
-                .trigger(player, &city_position, &wonder);
-        });
+        self.players[player_index].trigger_player_event(
+            |events| &mut events.on_construct_wonder,
+            &city_position,
+            &wonder,
+        );
         let wonder = wonder;
         (wonder.player_initializer)(self, player_index);
         (wonder.player_one_time_initializer)(self, player_index);
@@ -1525,11 +1602,6 @@ impl Game {
             .wonders
             .pop()
             .expect("city should have a wonder");
-        self.players[player_index].take_events(|events, player| {
-            events
-                .on_undo_construct_wonder
-                .trigger(player, &city_position, &wonder);
-        });
         (wonder.player_deinitializer)(self, player_index);
         (wonder.player_undo_deinitializer)(self, player_index);
         wonder
@@ -1624,7 +1696,7 @@ impl Game {
         let p = self.get_player(player_index);
         let from = p.get_unit(units[0]).expect("unit not found").position;
         let info = MoveInfo::new(player_index, units.to_vec(), from, to);
-        self.trigger_command_event(player_index, |e| &e.before_move, &info);
+        self.trigger_command_event(player_index, |e| &mut e.before_move, &info);
 
         for unit_id in units {
             self.move_unit(player_index, *unit_id, to, embark_carrier_id);
@@ -1911,6 +1983,7 @@ pub enum UndoContext {
     ExploreResolution(ExploreResolutionState),
     WastedResources {
         resources: ResourcePile,
+        player_index: usize,
     },
     IncreaseHappiness {
         angry_activations: Vec<Position>,

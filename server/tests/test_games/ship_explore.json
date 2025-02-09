@@ -11,20 +11,15 @@
       "resources": {
         "food": 1,
         "wood": 2,
-        "ore": 0,
-        "ideas": 0,
         "gold": 1,
-        "mood_tokens": 2,
-        "culture_tokens": 0
+        "mood_tokens": 2
       },
       "resource_limit": {
         "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 0,
-        "culture_tokens": 0
+        "gold": 7
       },
       "cities": [
         {
@@ -32,7 +27,6 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "D1"
         },
         {
@@ -42,7 +36,6 @@
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "C3",
           "port_position": "B3"
         }
@@ -64,78 +57,6 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "collect_options": [
-        [
-          "Barren",
-          [
-            {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
-        [
-          "Mountain",
-          [
-            {
-              "food": 0,
-              "wood": 0,
-              "ore": 1,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
-        [
-          "Fertile",
-          [
-            {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
-        [
-          "Forest",
-          [
-            {
-              "food": 0,
-              "wood": 1,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
-        [
-          "Water",
-          [
-            {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ]
-      ],
       "next_unit_id": 1
     },
     {
@@ -143,21 +64,14 @@
       "id": 1,
       "resources": {
         "food": 3,
-        "wood": 0,
-        "ore": 0,
-        "ideas": 0,
-        "gold": 0,
-        "mood_tokens": 3,
-        "culture_tokens": 0
+        "mood_tokens": 3
       },
       "resource_limit": {
         "food": 7,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 0,
-        "culture_tokens": 0
+        "gold": 7
       },
       "cities": [
         {
@@ -165,7 +79,6 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 1,
           "position": "D8"
         },
         {
@@ -175,17 +88,14 @@
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 1,
           "position": "E6",
           "port_position": "D5"
         }
       ],
       "units": [
         {
-          "player_index": 1,
           "position": "D5",
           "unit_type": "Ship",
-          "movement_restriction": "None",
           "id": 1
         }
       ],
@@ -206,78 +116,6 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "collect_options": [
-        [
-          "Barren",
-          [
-            {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
-        [
-          "Mountain",
-          [
-            {
-              "food": 0,
-              "wood": 0,
-              "ore": 1,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
-        [
-          "Fertile",
-          [
-            {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
-        [
-          "Forest",
-          [
-            {
-              "food": 0,
-              "wood": 1,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ],
-        [
-          "Water",
-          [
-            {
-              "food": 1,
-              "wood": 0,
-              "ore": 0,
-              "ideas": 0,
-              "gold": 0,
-              "mood_tokens": 0,
-              "culture_tokens": 0
-            }
-          ]
-        ]
-      ],
       "next_unit_id": 2
     }
   ],
@@ -613,148 +451,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Movement": {
-        "starting_position": "D8",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "D1",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "E8",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "ExploreResolution": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ],
-        "block": {
-          "position": {
-            "top_tile": "B2",
-            "rotation": 0
-          },
-          "block": {
-            "terrain": [
-              "Water",
-              "Fertile",
-              "Fertile",
-              "Barren"
-            ]
-          }
-        },
-        "units": [
-          0
-        ],
-        "start": "C2",
-        "destination": "C3",
-        "ship_can_teleport": false
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "FoundCity": {
-        "settler": {
-          "player_index": 0,
-          "position": "C3",
-          "unit_type": "Settler",
-          "movement_restriction": "None",
-          "id": 0
-        }
-      }
-    },
-    {
-      "ExploreResolution": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ],
-        "block": {
-          "position": {
-            "top_tile": "D5",
-            "rotation": 0
-          },
-          "block": {
-            "terrain": [
-              "Water",
-              "Mountain",
-              "Mountain",
-              "Forest"
-            ]
-          }
-        },
-        "units": [
-          0
-        ],
-        "start": "E7",
-        "destination": "E6",
-        "ship_can_teleport": false
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "FoundCity": {
-        "settler": {
-          "player_index": 1,
-          "position": "E6",
-          "unit_type": "Settler",
-          "movement_restriction": {
-            "AllMovement": 0
-          },
-          "id": 0
-        }
-      }
-    },
-    {
-      "Recruit": {}
-    }
-  ]
+  "wonder_amount_left": 1
 }

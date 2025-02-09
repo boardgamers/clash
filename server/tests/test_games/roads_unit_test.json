@@ -28,16 +28,13 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "D1"
         }
       ],
       "units": [
         {
-          "player_index": 0,
           "position": "D3",
           "unit_type": "Settler",
-          "movement_restriction": "None",
           "id": 0
         }
       ],
@@ -56,32 +53,6 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "collect_options": [
-        [
-          "Mountain",
-          [
-            {
-              "ore": 1
-            }
-          ]
-        ],
-        [
-          "Fertile",
-          [
-            {
-              "food": 1
-            }
-          ]
-        ],
-        [
-          "Forest",
-          [
-            {
-              "wood": 1
-            }
-          ]
-        ]
-      ],
       "next_unit_id": 1
     },
     {
@@ -106,75 +77,48 @@
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 1,
           "position": "D8"
         }
       ],
       "units": [
         {
-          "player_index": 1,
           "position": "D8",
           "unit_type": "Infantry",
-          "movement_restriction": "None",
           "id": 0
         },
         {
-          "player_index": 1,
           "position": "D8",
           "unit_type": "Infantry",
-          "movement_restriction": "None",
           "id": 1
         },
         {
-          "player_index": 1,
           "position": "D8",
           "unit_type": "Infantry",
-          "movement_restriction": "None",
           "id": 2
         },
         {
-          "player_index": 1,
           "position": "C8",
           "unit_type": "Infantry",
-          "movement_restriction": {
-            "AllMovement": 0
-          },
           "id": 3
         },
         {
-          "player_index": 1,
           "position": "C8",
           "unit_type": "Infantry",
-          "movement_restriction": {
-            "AllMovement": 0
-          },
           "id": 4
         },
         {
-          "player_index": 1,
           "position": "E8",
           "unit_type": "Infantry",
-          "movement_restriction": {
-            "AllMovement": 0
-          },
           "id": 5
         },
         {
-          "player_index": 1,
           "position": "E8",
           "unit_type": "Infantry",
-          "movement_restriction": {
-            "AllMovement": 0
-          },
           "id": 6
         },
         {
-          "player_index": 1,
           "position": "E7",
           "unit_type": "Ship",
-          "movement_restriction": {
-            "AllMovement": 0
-          },
           "id": 7
         }
       ],
@@ -195,32 +139,6 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "collect_options": [
-        [
-          "Mountain",
-          [
-            {
-              "ore": 1
-            }
-          ]
-        ],
-        [
-          "Fertile",
-          [
-            {
-              "food": 1
-            }
-          ]
-        ],
-        [
-          "Forest",
-          [
-            {
-              "wood": 1
-            }
-          ]
-        ]
-      ],
       "next_unit_id": 1
     }
   ],
@@ -546,121 +464,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Movement": {
-        "starting_position": "D8",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "D1",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "F7",
-        "movement_actions_left": 2,
-        "cost": {
-          "wood": 1,
-          "ore": 1
-        }
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "C8",
-        "movement_actions_left": 2,
-        "moved_units": [
-          4
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 1,
-        "moved_units": [
-          4,
-          3
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "D7",
-        "movement_actions_left": 2
-      }
-    },
-    {
-      "Movement": {
-        "starting_position": "C7",
-        "movement_actions_left": 2,
-        "moved_units": [
-          3
-        ]
-      }
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 1,
-        "moved_units": [
-          3,
-          4
-        ]
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

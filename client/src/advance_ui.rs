@@ -89,18 +89,18 @@ pub fn show_advance_menu(
     let state = rc.state;
 
     for pass in 0..2 {
-        for (i, (group_name, advances)) in advances::get_groups().iter().enumerate() {
+        for (i, group) in advances::get_groups().iter().enumerate() {
             let pos =
                 vec2(i.rem(COLUMNS) as f32 * 140., (i / COLUMNS) as f32 * 180.) + vec2(20., 70.);
             if pass == 0 {
                 state.draw_text(
-                    group_name,
-                    pos.x + (140. - state.measure_text(group_name).width) / 2.,
+                    &group.name,
+                    pos.x + (140. - state.measure_text(&group.name).width) / 2.,
                     pos.y - 15.,
                 );
             }
 
-            for (i, a) in advances.iter().enumerate() {
+            for (i, a) in group.advances.iter().enumerate() {
                 let pos = pos + vec2(0., i as f32 * 35.);
                 let name = &a.name;
                 let advance_state = advance_state(a, p);

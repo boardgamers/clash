@@ -319,7 +319,8 @@
           "WastedResources": {
             "resources": {
               "gold": 3
-            }
+            },
+            "player_index": 0
           }
         }
       ]
@@ -336,7 +337,7 @@
     "\nCombat round 1",
     "\tPlayer1 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against defending units. Player2 rolled no dice for combined combat value of 0 and gets 0 hits against attacking units.",
     ". Player1 used the following combat modifiers: Kʼinich Janaab Pakal I ignores the first hit in a battle with an Obelisk",
-    "\tPlayer1 killed all defending units and captured Player2's city at B1. Could not store 3 gold"
+    "\tPlayer1 killed all defending units and captured Player2's city at B1. Player1 Could not store 3 gold"
   ],
   "undo_limit": 1,
   "actions_left": 0,
