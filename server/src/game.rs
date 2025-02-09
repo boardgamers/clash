@@ -363,26 +363,20 @@ impl Game {
         callback: impl FnOnce(&mut PlayerCommands, &mut Game),
     ) {
         let p = self.get_player(player_index);
-        let info = p.event_info.clone();
+        let info = CommandUndoInfo::new(p);
         let mut commands = PlayerCommands::new(player_index, p.get_name(), p.event_info.clone());
 
         callback(&mut commands, self);
 
-        if info != commands.info || !commands.gained_resources.is_empty() {
-            self.push_undo_context(UndoContext::Command(CommandUndoContext {
-                info,
+        info.apply(
+            self,
+            CommandUndoContext {
+                info: commands.info.clone(),
                 gained_resources: commands.gained_resources.clone(),
-            }));
-        }
+            },
+        );
+        self.players[player_index].gain_resources(commands.gained_resources);
 
-        let p = self
-            .players
-            .get_mut(player_index)
-            .expect("player should exist");
-        for (k, v) in commands.info {
-            p.event_info.insert(k, v);
-        }
-        p.gain_resources(commands.gained_resources);
         if new_log_entry {
             self.add_info_log_item(String::new());
         }
@@ -1955,6 +1949,34 @@ pub struct DisembarkUndoContext {
 pub struct CommandUndoContext {
     pub info: HashMap<String, String>,
     pub gained_resources: ResourcePile,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+pub struct CommandUndoInfo {
+    pub player: usize,
+    pub info: HashMap<String, String>,
+}
+
+impl CommandUndoInfo {
+    #[must_use]
+    pub fn new(player: &Player) -> Self {
+        Self {
+            info: player.event_info.clone(),
+            player: player.index,
+        }
+    }
+
+    pub fn apply(&self, game: &mut Game, mut undo: CommandUndoContext) {
+        let player = &mut game.players[self.player];
+        for (k, v) in undo.info.clone() {
+            player.event_info.insert(k, v);
+        }
+
+        if undo.info != self.info || !undo.gained_resources.is_empty() {
+            undo.info.clone_from(&self.info);
+            game.push_undo_context(UndoContext::Command(undo));
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]

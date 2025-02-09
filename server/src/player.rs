@@ -630,7 +630,10 @@ impl Player {
     }
 
     #[must_use]
-    pub fn advance_cost_for_execute(&self, advance: &str) -> (PaymentOptions, AdvanceCostInfo, Vec<String>) {
+    pub fn advance_cost_for_execute(
+        &self,
+        advance: &str,
+    ) -> (PaymentOptions, AdvanceCostInfo, Vec<String>) {
         let info = self.event_info.clone();
         let mut i = AdvanceCostInfo {
             name: advance.to_string(),
@@ -1024,7 +1027,8 @@ impl Player {
         value: &mut T,
         info: &U,
         details: &V,
-    ) -> Vec<String> where
+    ) -> Vec<String>
+    where
         T: Clone + PartialEq,
     {
         let e = event(&self.events);
