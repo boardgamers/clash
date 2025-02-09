@@ -3,32 +3,11 @@ use crate::content::custom_phase_actions::{
     CurrentCustomPhaseEvent, CustomPhaseAdvanceRewardRequest, CustomPhaseEventAction,
     CustomPhasePaymentRequest, CustomPhaseRequest, CustomPhaseResourceRewardRequest,
 };
-use crate::events::Event;
+use crate::events::{Event, EventOrigin};
 use crate::game::UndoContext;
 use crate::player_events::{CustomPhaseInfo, PlayerCommands};
 use crate::resource_pile::ResourcePile;
 use crate::{content::custom_actions::CustomActionType, game::Game, player_events::PlayerEvents};
-use serde::{Deserialize, Serialize};
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub enum EventOrigin {
-    Advance(String),
-    SpecialAdvance(String),
-    Leader(String),
-    Wonder(String),
-}
-
-impl EventOrigin {
-    #[must_use]
-    pub fn name(&self) -> &str {
-        match self {
-            EventOrigin::Advance(name)
-            | EventOrigin::SpecialAdvance(name)
-            | EventOrigin::Wonder(name)
-            | EventOrigin::Leader(name) => name,
-        }
-    }
-}
 
 pub(crate) type AbilityInitializer = Box<dyn Fn(&mut Game, usize)>;
 
@@ -60,9 +39,9 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 .inner
                 .as_mut()
                 .expect("events should be set")
-                .add_listener_mut(listener.clone(), priority, key.name().to_string());
+                .add_listener_mut(listener.clone(), priority, key.clone());
         };
-        let key = self.get_key().name().to_string();
+        let key = self.get_key().clone();
         let deinitializer = move |game: &mut Game, player_index: usize| {
             deinitialize_event(&mut game.players[player_index].events)
                 .inner

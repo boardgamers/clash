@@ -127,7 +127,11 @@ impl PlayingAction {
                 player.pay_cost(&options, &payment.clone());
                 game.advance(&advance, player_index, payment);
                 for m in modifiers {
-                    game.add_to_last_log_item(&format!(". {m} reduced the cost to {}", i.cost));
+                    game.add_to_last_log_item(&format!(
+                        ". {} reduced the cost to {}",
+                        m.name(),
+                        i.cost
+                    ));
                 }
                 info.apply(
                     game,

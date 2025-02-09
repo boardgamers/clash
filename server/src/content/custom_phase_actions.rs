@@ -1,6 +1,6 @@
-use crate::ability_initializer::EventOrigin;
 use crate::action::Action;
 use crate::content::advances::get_advance;
+use crate::events::EventOrigin;
 use crate::game::{Game, UndoContext};
 use crate::payment::PaymentOptions;
 use crate::playing_actions::PlayingAction;

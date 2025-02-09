@@ -1,7 +1,7 @@
 use crate::advance::Advance;
 use crate::consts::SHIP_CAPACITY;
 use crate::content::advances::get_advance;
-use crate::events::Event;
+use crate::events::{Event, EventOrigin};
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
 use crate::movement::move_routes;
@@ -633,7 +633,7 @@ impl Player {
     pub fn advance_cost_for_execute(
         &self,
         advance: &str,
-    ) -> (PaymentOptions, AdvanceCostInfo, Vec<String>) {
+    ) -> (PaymentOptions, AdvanceCostInfo, Vec<EventOrigin>) {
         let info = self.event_info.clone();
         let mut i = AdvanceCostInfo {
             name: advance.to_string(),
@@ -1027,7 +1027,7 @@ impl Player {
         value: &mut T,
         info: &U,
         details: &V,
-    ) -> Vec<String>
+    ) -> Vec<EventOrigin>
     where
         T: Clone + PartialEq,
     {

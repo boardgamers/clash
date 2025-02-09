@@ -4,8 +4,8 @@ use crate::{
     resource_pile::ResourcePile,
 };
 
-use crate::ability_initializer::EventOrigin;
 use crate::city_pieces::Building;
+use crate::events::EventOrigin;
 use Bonus::*;
 
 pub struct Advance {

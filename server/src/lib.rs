@@ -22,7 +22,7 @@ pub mod collect;
 pub mod combat;
 pub mod consts;
 pub mod content;
-mod events;
+pub mod events;
 mod explore;
 pub mod game;
 pub mod game_api;
