@@ -1,27 +1,5 @@
 {
   "state": "Playing",
-  "state_change_event_state": {
-    "event_used": [],
-    "last_priority_used": 0,
-    "current": {
-      "event_type": "OnConstruct",
-      "priority": 0,
-      "player_index": 1,
-      "request": {
-        "AdvanceReward": {
-          "choices": [
-            "Dedication",
-            "Conversion",
-            "Fanaticism"
-          ]
-        }
-      },
-      "response": null,
-      "origin": {
-        "Advance": "Dogma"
-      }
-    }
-  },
   "players": [
     {
       "name": null,
@@ -165,28 +143,26 @@
       "name": null,
       "id": 1,
       "resources": {
-        "food": 1,
-        "wood": 4,
-        "ore": 4,
-        "ideas": 2,
+        "food": 2,
+        "wood": 5,
+        "ore": 5,
+        "ideas": 6,
         "gold": 5,
         "mood_tokens": 9,
-        "culture_tokens": 10
+        "culture_tokens": 9
       },
       "resource_limit": {
         "food": 2,
         "wood": 7,
         "ore": 7,
-        "ideas": 2,
+        "ideas": 7,
         "gold": 7
       },
       "cities": [
         {
-          "city_pieces": {
-            "temple": 1
-          },
+          "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 1,
+          "activations": 0,
           "angry_activation": false,
           "position": "C1"
         },
@@ -220,7 +196,6 @@
         "Kleopatra"
       ],
       "advances": [
-        "Dogma",
         "Farming",
         "Fishing",
         "Mining",
@@ -228,7 +203,7 @@
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 2,
+      "game_event_tokens": 3,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -491,95 +466,9 @@
           "DetermineFirstPlayer": 1
         }
       }
-    },
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Dogma",
-            "payment": {
-              "ideas": 2
-            }
-          }
-        }
-      },
-      "undo": [
-        {
-          "WastedResources": {
-            "resources": {
-              "ideas": 2
-            },
-            "player_index": 1
-          }
-        }
-      ]
-    },
-    {
-      "action": {
-        "Playing": {
-          "Construct": {
-            "city_position": "C1",
-            "city_piece": "Temple",
-            "payment": {
-              "food": 1,
-              "wood": 1,
-              "ore": 1
-            },
-            "port_position": null
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "CustomPhaseEvent": {
-          "ResourceReward": {
-            "culture_tokens": 1
-          }
-        }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_used": [],
-            "last_priority_used": 1,
-            "current": {
-              "event_type": "OnConstruct",
-              "priority": 1,
-              "player_index": 1,
-              "request": {
-                "ResourceReward": {
-                  "reward": {
-                    "default": {
-                      "mood_tokens": 1
-                    },
-                    "conversions": [
-                      {
-                        "from": [
-                          {
-                            "mood_tokens": 1
-                          }
-                        ],
-                        "to": {
-                          "culture_tokens": 1
-                        }
-                      }
-                    ]
-                  },
-                  "name": "Select Temple bonus"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Advance": "Myths"
-              }
-            }
-          }
-        }
-      ]
     }
   ],
-  "action_log_index": 17,
+  "action_log_index": 14,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -608,13 +497,10 @@
     "It's Player1's turn",
     "Player1 choose Player2 as the new starting player",
     "Age 2 has started",
-    "Round 1/3",
-    "Player2 paid 2 ideas to get the Dogma advance. Player2 Could not store 2 ideas",
-    "Player2 paid 1 food, 1 wood and 1 ore to construct a Temple in the city at C1",
-    "Player2 selected 1 culture token as a reward for constructing a Temple"
+    "Round 1/3"
   ],
   "undo_limit": 14,
-  "actions_left": 1,
+  "actions_left": 3,
   "successful_cultural_influence": false,
   "round": 1,
   "age": 2,

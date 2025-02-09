@@ -122,7 +122,11 @@ impl PlayingAction {
         match self {
             Advance { advance, payment } => {
                 let player = &mut game.players[player_index];
-                player.pay_cost(&player.advance_cost(&advance), &payment.clone());
+                let (options, i) = player.advance_cost_for_execute(&advance);
+                for (k, v) in i.info {
+                    player.event_info.insert(k, v);
+                }
+                player.pay_cost(&options, &payment.clone());
                 game.advance(&advance, player_index, payment);
             }
             FoundCity { settler } => {

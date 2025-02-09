@@ -26,9 +26,9 @@ fn astronomy() -> AdvanceBuilder {
     )
     .add_player_event_listener(
         |event| &mut event.advance_cost,
-        |cost, advance, ()| {
-            if advance == "Navigation" || advance == "Cartography" {
-                *cost = 0;
+        |i, (), ()| {
+            if i.name == "Navigation" || i.name == "Cartography" {
+                i.cost = 0;
             }
         },
         0,
@@ -43,9 +43,9 @@ fn math() -> AdvanceBuilder {
     )
     .add_player_event_listener(
         |event| &mut event.advance_cost,
-        |cost, advance, ()| {
-            if advance == "Engineering" || advance == "Roads" {
-                *cost = 0;
+        |i, (), ()| {
+            if i.name == "Engineering" || i.name == "Roads" {
+                i.cost = 0;
             }
         },
         0,

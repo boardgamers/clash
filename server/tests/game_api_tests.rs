@@ -1575,3 +1575,26 @@ fn test_dogma() {
         ],
     );
 }
+
+#[test]
+fn test_priesthood() {
+    test_actions(
+        "priesthood",
+        vec![
+            TestAction::undoable(
+                1,
+                Action::Playing(Advance {
+                    advance: String::from("Math"),
+                    payment: ResourcePile::empty(),
+                }),
+            ),
+            TestAction::undoable(
+                1,
+                Action::Playing(Advance {
+                    advance: String::from("Astronomy"),
+                    payment: ResourcePile::ideas(2),
+                }),
+            ),
+        ],
+    );
+}

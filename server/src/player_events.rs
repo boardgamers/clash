@@ -26,7 +26,7 @@ pub(crate) struct PlayerEvents {
 
     pub construct_cost: Event<PaymentOptions, City, Building>,
     pub wonder_cost: Event<PaymentOptions, City, Wonder>,
-    pub advance_cost: Event<u32, String>,
+    pub advance_cost: Event<AdvanceCostInfo>,
     pub happiness_cost: Event<PaymentOptions>,
     pub recruit_cost: Event<RecruitCost>,
 
@@ -42,6 +42,13 @@ impl PlayerEvents {
     pub fn new() -> PlayerEvents {
         Self::default()
     }
+}
+
+#[derive(Clone, PartialEq)]
+pub struct AdvanceCostInfo {
+    pub name: String,
+    pub cost: u32,
+    pub info: HashMap<String, String>,
 }
 
 #[derive(Clone, PartialEq)]

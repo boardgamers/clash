@@ -7,7 +7,7 @@ use crate::game::GameState::Movement;
 use crate::movement::move_routes;
 use crate::movement::{is_valid_movement_type, MoveRoute};
 use crate::payment::PaymentOptions;
-use crate::player_events::RecruitCost;
+use crate::player_events::{AdvanceCostInfo, RecruitCost};
 use crate::resource::ResourceType;
 use crate::unit::{carried_units, get_current_move, MovementRestriction, UnitData};
 use crate::{
@@ -66,7 +66,7 @@ pub struct Player {
     pub wonder_cards: Vec<Wonder>,
     pub next_unit_id: u32,
     pub played_once_per_turn_actions: Vec<CustomActionType>,
-    pub played_once_per_turn_effects: Vec<String>,
+    pub played_once_per_turn_effects: Vec<String>, // use event_info instead
     pub event_info: HashMap<String, String>,
 }
 
@@ -626,11 +626,26 @@ impl Player {
 
     #[must_use]
     pub fn advance_cost(&self, advance: &str) -> PaymentOptions {
-        let mut cost = ADVANCE_COST;
-        self.trigger_event(|e| &e.advance_cost, &mut cost, &advance.to_string(), &());
-        PaymentOptions::sum(
-            cost,
-            &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
+        self.advance_cost_for_execute(advance).0
+    }
+
+    #[must_use]
+    pub fn advance_cost_for_execute(&self, advance: &str) -> (PaymentOptions, AdvanceCostInfo) {
+        let info = self.event_info.clone();
+        let mut i = AdvanceCostInfo {
+            name: advance.to_string(),
+            cost: ADVANCE_COST,
+            info,
+        };
+
+        self.trigger_event(|e| &e.advance_cost, &mut i, &(), &());
+
+        (
+            PaymentOptions::sum(
+                i.cost.clone(),
+                &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
+            ),
+            i,
         )
     }
 
