@@ -6,7 +6,6 @@ use crate::construct_ui::ConstructionPayment;
 use crate::event_ui::{custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
-use crate::log_ui::add_advance_help;
 use crate::map_ui::ExploreResolutionConfig;
 use crate::move_ui::{MoveDestination, MoveIntent, MovePayment, MoveSelection};
 use crate::payment_ui::Payment;
@@ -17,7 +16,6 @@ use macroquad::prelude::*;
 use server::action::Action;
 use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
-use server::content::advances::{NAVIGATION, ROADS};
 use server::content::custom_phase_actions::{CustomPhaseAdvanceRewardRequest, CustomPhaseRequest};
 use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
 use server::position::Position;
@@ -122,23 +120,25 @@ impl ActiveDialog {
             ActiveDialog::MoveUnits(m) => {
                 if m.start.is_some() {
                     let mut result = vec![];
-                    if m.destinations.is_empty() {
+                    let destinations = &m.destinations.list;
+                    if destinations.is_empty() {
                         result.push("No unit on this tile can move".to_string());
                     }
-                    if m.destinations
+                    if destinations
                         .iter()
                         .any(|d| matches!(d, MoveDestination::Tile(_)))
                     {
                         result.push("Click on a highlighted tile to move units".to_string());
                     };
-                    if m.destinations
+                    if destinations
                         .iter()
                         .any(|d| matches!(d, MoveDestination::Carrier(_)))
                     {
                         result.push("Click on a carrier to embark units".to_string());
                     };
-                    add_advance_help(rc, &mut result, NAVIGATION);
-                    add_advance_help(rc, &mut result, ROADS);
+                    m.destinations.modifiers.iter().for_each(|m| {
+                        result.extend(event_help(rc, m, true));
+                    });
                     result
                 } else {
                     vec!["Click on a unit to move".to_string()]

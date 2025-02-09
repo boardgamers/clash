@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum EventOrigin {
     Advance(String),
     SpecialAdvance(String),

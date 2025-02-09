@@ -149,7 +149,7 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
     let highlighted_units = match rc.state.active_dialog {
         ActiveDialog::MoveUnits(ref s) => {
             let mut h = highlight_primary(&s.units);
-            for d in &s.destinations {
+            for d in &s.destinations.list {
                 if let MoveDestination::Carrier(id) = d {
                     h.push(UnitHighlight {
                         unit: *id,

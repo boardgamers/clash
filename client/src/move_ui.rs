@@ -1,12 +1,14 @@
 use macroquad::math::{u32, Vec2};
 use macroquad::prelude::Texture2D;
 use server::action::Action;
+use server::events::EventOrigin;
 use server::game::{CurrentMove, Game, GameState};
 use server::payment::PaymentOptions;
 use server::player::Player;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::{MoveUnits, MovementAction, Unit, UnitType};
+use std::collections::HashSet;
 
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::cancel_button_with_tooltip;
@@ -58,14 +60,20 @@ pub fn possible_destinations(
     start: Position,
     player_index: usize,
     units: &[u32],
-) -> Vec<MoveDestination> {
+) -> MoveDestinations {
     let player = game.get_player(player_index);
+    let mut modifiers = HashSet::new();
 
     let mut res = player
         .move_units_destinations(game, units, start, None)
         .unwrap_or_default()
         .into_iter()
-        .map(|route| MoveDestination::Tile((route.destination, route.cost)))
+        .map(|route| {
+            if let Some(o) = &route.origin {
+                modifiers.insert(o.clone());
+            }
+            MoveDestination::Tile((route.destination, route.cost))
+        })
         .collect::<Vec<_>>();
 
     player.units.iter().for_each(|u| {
@@ -77,15 +85,22 @@ pub fn possible_destinations(
             res.push(MoveDestination::Carrier(u.id));
         }
     });
-    res
+    MoveDestinations {
+        list: res,
+        modifiers,
+    }
 }
 
 pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Vec2) -> StateUpdate {
     let game = rc.game;
     let p = game.get_player(s.player_index);
     let carrier = click_unit(rc, pos, mouse_pos, p, false);
-    if let Some((destination, embark_carrier_id, cost)) =
-        s.clone().destinations.into_iter().find_map(|d| match d {
+    if let Some((destination, embark_carrier_id, cost)) = s
+        .clone()
+        .destinations
+        .list
+        .into_iter()
+        .find_map(|d| match d {
             MoveDestination::Tile((p, cost)) if p == pos => Some((p, None, cost)),
             MoveDestination::Carrier(id) if carrier.is_some_and(|u| u == id) => {
                 Some((pos, Some(id), PaymentOptions::free()))
@@ -151,7 +166,7 @@ fn tile_clicked(pos: Position, s: &MoveSelection, game: &Game, p: &Player) -> St
 
 fn unit_selection_changed(pos: Position, game: &Game, mut new: MoveSelection) -> StateUpdate {
     if new.units.is_empty() {
-        new.destinations.clear();
+        new.destinations.list.clear();
         new.start = None;
     } else {
         new.destinations = possible_destinations(game, pos, new.player_index, &new.units);
@@ -170,10 +185,18 @@ pub fn movable_units(
         .filter(|u| {
             u.position == pos
                 && pred(u)
-                && !possible_destinations(game, pos, p.index, &[u.id]).is_empty()
+                && !possible_destinations(game, pos, p.index, &[u.id])
+                    .list
+                    .is_empty()
         })
         .map(|u| u.id)
         .collect()
+}
+
+#[derive(Clone, Debug)]
+pub struct MoveDestinations {
+    pub list: Vec<MoveDestination>,
+    pub modifiers: HashSet<EventOrigin>,
 }
 
 #[derive(Clone, Debug)]
@@ -187,7 +210,7 @@ pub struct MoveSelection {
     pub player_index: usize,
     pub units: Vec<u32>,
     pub start: Option<Position>,
-    pub destinations: Vec<MoveDestination>,
+    pub destinations: MoveDestinations,
 }
 
 impl MoveSelection {
@@ -239,7 +262,10 @@ impl MoveSelection {
             player_index,
             start: None,
             units: vec![],
-            destinations: vec![],
+            destinations: MoveDestinations {
+                list: vec![],
+                modifiers: HashSet::new(),
+            },
         }
     }
 }

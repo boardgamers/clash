@@ -635,11 +635,12 @@ impl Player {
             info,
         };
 
+        let m = self.trigger_event(|e| &e.advance_cost, &mut i, &(), &());
         let mut payment_options = PaymentOptions::sum(
             i.cost,
             &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
         );
-        payment_options.modifiers = self.trigger_event(|e| &e.advance_cost, &mut i, &(), &());
+        payment_options.modifiers = m;
 
         (payment_options, i)
     }

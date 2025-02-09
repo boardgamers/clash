@@ -1,4 +1,5 @@
 use crate::content::advances::{NAVIGATION, ROADS};
+use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::map::Map;
 use crate::map::Terrain::{Forest, Mountain};
@@ -15,15 +16,17 @@ pub struct MoveRoute {
     pub cost: PaymentOptions,
     pub stack_size_used: usize,
     pub ignore_terrain_movement_restrictions: bool,
+    pub origin: Option<EventOrigin>,
 }
 
 impl MoveRoute {
-    fn simple(destination: Position) -> Self {
+    fn free(destination: Position, origin: Option<EventOrigin>) -> Self {
         Self {
             destination,
             cost: PaymentOptions::free(),
             stack_size_used: 0,
             ignore_terrain_movement_restrictions: false,
+            origin,
         }
     }
 }
@@ -60,7 +63,7 @@ pub(crate) fn move_routes(
         .neighbors()
         .iter()
         .filter(|&n| game.map.is_inside(*n))
-        .map(|&n| MoveRoute::simple(n))
+        .map(|&n| MoveRoute::free(n, None))
         .collect();
     if player.has_advance(NAVIGATION) {
         base.extend(reachable_with_navigation(player, units, &game.map));
@@ -125,13 +128,16 @@ fn reachable_with_roads(player: &Player, units: &[u32], game: &Game) -> Vec<Move
                 {
                     let stack_size_used =
                         stack_sizes_used.iter().map(|&(_, s)| s).min().expect("min");
+                    let mut cost =
+                        PaymentOptions::resources(ResourcePile::ore(1) + ResourcePile::food(1));
+                    let origin = EventOrigin::Advance(ROADS.to_string());
+                    cost.modifiers = vec![origin.clone()];
                     let route = MoveRoute {
                         destination,
-                        cost: PaymentOptions::resources(
-                            ResourcePile::ore(1) + ResourcePile::food(1),
-                        ),
+                        cost,
                         stack_size_used,
                         ignore_terrain_movement_restrictions: true,
+                        origin: Some(origin),
                     };
                     Some(route)
                 } else {
@@ -170,7 +176,12 @@ fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<M
             return vec![first, last]
                 .into_iter()
                 .flatten()
-                .map(MoveRoute::simple)
+                .map(|destination| {
+                    MoveRoute::free(
+                        destination,
+                        Some(EventOrigin::Advance(NAVIGATION.to_string())),
+                    )
+                })
                 .collect();
         }
     }
