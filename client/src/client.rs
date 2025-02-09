@@ -56,13 +56,13 @@ fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
     if show_map {
         updates.add(rc.with_camera(CameraMode::World, draw_map));
     }
-    if !state.active_dialog.is_full_modal() {
+    if !state.active_dialog.is_modal() {
         show_top_left(rc);
     }
     if show_map {
         show_top_center(rc);
     }
-    if !state.active_dialog.is_full_modal() {
+    if !state.active_dialog.is_modal() {
         updates.add(player_select(rc));
         updates.add(show_global_controls(rc, features));
     }

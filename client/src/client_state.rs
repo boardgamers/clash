@@ -205,11 +205,6 @@ impl ActiveDialog {
     }
 
     #[must_use]
-    pub fn is_full_modal(&self) -> bool {
-        self.is_modal()
-    }
-
-    #[must_use]
     pub fn is_advance(&self) -> bool {
         matches!(
             self,
