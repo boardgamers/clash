@@ -138,7 +138,7 @@ pub fn multi_payment_dialog(
             payments
                 .iter()
                 .flat_map(|p| &p.cost.modifiers)
-                .flat_map(|o| event_help(o, false))
+                .flat_map(|o| event_help(rc, o, false))
                 .collect::<Vec<_>>()
         } else {
             vec![]

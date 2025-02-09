@@ -13,16 +13,26 @@ pub fn event_help(rc: &RenderContext, origin: &EventOrigin, do_break: bool) -> V
         EventOrigin::Leader(l) => {
             let l = rc.shown_player.get_leader(l).unwrap();
             // todo: leader should have a 2 event sources
-            format!("{}: {}, {}", l.name, l.first_ability_description, l.second_ability_description)
+            format!(
+                "{}, {}",
+                l.first_ability_description, l.second_ability_description
+            )
         }
         EventOrigin::SpecialAdvance(s) => {
-            let s = rc.shown_player.civilization.special_advances.iter().find(|sa| &sa.name == s).unwrap();
+            let s = rc
+                .shown_player
+                .civilization
+                .special_advances
+                .iter()
+                .find(|sa| &sa.name == s)
+                .unwrap();
             s.description.clone()
-        },
+        }
     };
+    let h = format!("{}: {}", origin.name(), h);
     if do_break {
         let mut result = vec![];
-        break_text(&format!("{origin:?}"), 30, &mut result);
+        break_text(&h, 30, &mut result);
         result
     } else {
         vec![h]
@@ -40,10 +50,10 @@ pub fn custom_phase_event_origin(rc: &RenderContext) -> EventOrigin {
         .clone()
 }
 
-pub fn pay_help(p: &Payment) -> Vec<String> {
+pub fn pay_help(rc: &RenderContext, p: &Payment) -> Vec<String> {
     let mut result = vec!["Pay resources".to_string()];
     for o in p.cost.modifiers.clone() {
-        result.extend(event_help(&o, true));
+        result.extend(event_help(rc, &o, true));
     }
     result
 }

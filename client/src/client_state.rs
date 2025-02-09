@@ -113,10 +113,10 @@ impl ActiveDialog {
                     "Click on a city to increase happiness".to_string(),
                 ]
             }
-            ActiveDialog::AdvancePayment(p) => pay_help(p),
-            ActiveDialog::ConstructionPayment(p) => pay_help(&p.payment),
-            ActiveDialog::MovePayment(p) => pay_help(&p.payment),
-            ActiveDialog::CollectResources(collect) => collect.help_text(rc.game),
+            ActiveDialog::AdvancePayment(p) => pay_help(rc, p),
+            ActiveDialog::ConstructionPayment(p) => pay_help(rc, &p.payment),
+            ActiveDialog::MovePayment(p) => pay_help(rc, &p.payment),
+            ActiveDialog::CollectResources(collect) => collect.help_text(rc),
             ActiveDialog::RecruitUnitSelection(_) => vec!["Click on a unit to recruit".to_string()],
             ActiveDialog::ReplaceUnits(_) => vec!["Click on a unit to replace".to_string()],
             ActiveDialog::MoveUnits(m) => {
@@ -188,7 +188,7 @@ impl ActiveDialog {
             ActiveDialog::CustomPhaseResourceRewardRequest(_)
             | ActiveDialog::CustomPhaseAdvanceRewardRequest(_)
             | ActiveDialog::CustomPhasePaymentRequest(_) => {
-                event_help(&custom_phase_event_origin(rc), true)
+                event_help(rc, &custom_phase_event_origin(rc), true)
             }
         }
     }

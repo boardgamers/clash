@@ -1034,7 +1034,7 @@ impl Player {
         details: &V,
     ) {
         let e = event(&mut self.events).take();
-        e.trigger(self, info, details);
+        let _ = e.trigger(self, info, details);
         event(&mut self.events).set(e);
     }
 }

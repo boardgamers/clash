@@ -56,6 +56,7 @@ where
         );
     }
 
+    #[must_use]
     pub(crate) fn trigger(&self, value: &mut T, info: &U, details: &V) -> Vec<EventOrigin> {
         let mut modifiers = Vec::new();
         for (listener, _, _, key) in &self.listeners {

@@ -181,16 +181,18 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
                 "Collect resources",
                 &[("Free Economy", CustomActionType::FreeEconomyCollect)],
                 |custom| {
+                    let (collections, modifiers) = possible_resource_collections(
+                        rc.game,
+                        city.position,
+                        city.player_index,
+                        &HashMap::new(),
+                    );
                     ActiveDialog::CollectResources(CollectResources::new(
                         city.player_index,
                         city.position,
-                        possible_resource_collections(
-                            rc.game,
-                            city.position,
-                            city.player_index,
-                            &HashMap::new(),
-                        ),
+                        collections,
                         custom,
+                        modifiers,
                     ))
                 },
             )

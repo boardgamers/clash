@@ -336,7 +336,7 @@ impl Game {
         details: &V,
     ) {
         let e = event(&mut self.players[player_index].events).take();
-        e.trigger(self, info, details);
+        let _ = e.trigger(self, info, details);
         event(&mut self.players[player_index].events).set(e);
     }
 
@@ -348,7 +348,7 @@ impl Game {
     ) {
         let e = event(&mut self.players[player_index].events).take();
         self.with_commands(player_index, false, |commands, game| {
-            e.trigger(commands, game, details);
+            let _ = e.trigger(commands, game, details);
         });
         event(&mut self.players[player_index].events).set(e);
     }
