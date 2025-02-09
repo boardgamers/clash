@@ -358,7 +358,7 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
         let attacker_name = game.players[c.attacker].get_name();
         let active_attackers = c.active_attackers(game);
         let mut attacker_strength = CombatStrength::new(c.attacker, true);
-        game.players[c.attacker]
+        let _ = game.players[c.attacker]
             .events
             .on_combat_round
             .get()
@@ -378,7 +378,7 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
         let defender_name = game.players[c.defender].get_name();
         let mut defender_log = vec![];
         let mut defender_strength = CombatStrength::new(c.defender, false);
-        game.players[c.defender]
+        let _ = game.players[c.defender]
             .events
             .on_combat_round
             .get()

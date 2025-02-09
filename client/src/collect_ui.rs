@@ -5,6 +5,7 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{
     cancel_button, ok_button, BaseOrCustomAction, BaseOrCustomDialog, OkTooltip,
 };
+use crate::event_ui::event_help;
 use crate::hex_ui;
 use crate::hex_ui::Point;
 use crate::layout_ui::{draw_scaled_icon, is_in_circle, left_mouse_button_pressed};
@@ -17,6 +18,7 @@ use macroquad::shapes::draw_circle;
 use server::action::Action;
 use server::collect::{get_total_collection, possible_resource_collections};
 use server::content::custom_actions::CustomAction;
+use server::events::EventOrigin;
 use server::game::Game;
 use server::playing_actions::{Collect, PlayingAction};
 use server::position::Position;
@@ -30,6 +32,7 @@ pub struct CollectResources {
     possible_collections: HashMap<Position, HashSet<ResourcePile>>,
     collections: Vec<(Position, ResourcePile)>,
     custom: BaseOrCustomDialog,
+    pub modifiers: Vec<EventOrigin>,
 }
 
 impl CollectResources {
@@ -38,6 +41,7 @@ impl CollectResources {
         city_position: Position,
         possible_collections: HashMap<Position, HashSet<ResourcePile>>,
         custom: BaseOrCustomDialog,
+        modifiers: Vec<EventOrigin>,
     ) -> CollectResources {
         CollectResources {
             player_index,
@@ -45,6 +49,7 @@ impl CollectResources {
             collections: vec![],
             possible_collections,
             custom,
+            modifiers,
         }
     }
 
@@ -55,13 +60,18 @@ impl CollectResources {
             .map(|(_, r)| r)
     }
 
-    pub fn help_text(&self, game: &Game) -> Vec<String> {
-        let extra = self.extra_resources(game);
-        vec![
+    pub fn help_text(&self, rc: &RenderContext) -> Vec<String> {
+        let extra = self.extra_resources(rc.game);
+        let mut r = vec![
             self.custom.title.clone(),
             "Click on a tile to collect resources".to_string(),
             format!("{extra} left"),
-        ]
+        ];
+        for o in self.modifiers.clone() {
+            let vec1 = event_help(rc, &o, true);
+            r.extend(vec1);
+        }
+        r
     }
 
     pub fn extra_resources(&self, game: &Game) -> i8 {
@@ -134,8 +144,9 @@ fn click_collect_option(
     }
 
     let used = new.collections.clone().into_iter().collect();
-    new.possible_collections =
-        possible_resource_collections(rc.game, col.city_position, col.player_index, &used);
+    let (c, m) = possible_resource_collections(rc.game, col.city_position, col.player_index, &used);
+    new.possible_collections = c;
+    new.modifiers = m;
 
     StateUpdate::OpenDialog(ActiveDialog::CollectResources(new))
 }

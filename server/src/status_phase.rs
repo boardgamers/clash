@@ -63,8 +63,7 @@ impl StatusPhaseAction {
             }
             StatusPhaseAction::FreeAdvance(ref advance) => {
                 assert!(
-                    game.players[player_index]
-                        .can_advance_free(&advances::get_advance_by_name(advance)),
+                    game.players[player_index].can_advance_free(&advances::get_advance(advance)),
                     "Illegal action"
                 );
                 game.advance(advance, player_index, ResourcePile::empty());
@@ -102,9 +101,9 @@ pub const CHANGE_GOVERNMENT_COST: ResourcePile = ResourcePile::new(0, 0, 0, 0, 0
 fn change_government_type(game: &mut Game, player_index: usize, new_government: &ChangeGovernment) {
     game.players[player_index].lose_resources(CHANGE_GOVERNMENT_COST);
     let government = &new_government.new_government;
-    let a = advances::get_leading_government_advance(government).expect("government should exist");
+    let a = advances::get_government(government).expect("government should exist");
     assert!(
-        game.players[player_index].can_advance_in_change_government(&a),
+        game.players[player_index].can_advance_in_change_government(&a.advances[0]),
         "Cannot advance in change government"
     );
 
@@ -112,6 +111,8 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
         .government()
         .expect("player should have a government");
     let player_government_advances = advances::get_government(&current_player_government)
+        .expect("player should have a government")
+        .advances
         .into_iter()
         .filter(|advance| game.players[player_index].has_advance(&advance.name))
         .collect_vec();
@@ -126,7 +127,9 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
         game.remove_advance(&advance, player_index);
     }
 
-    let new_government_advances = advances::get_government(government);
+    let new_government_advances = advances::get_government(government)
+        .expect("government should exist")
+        .advances;
     game.advance(
         &new_government_advances[0].name,
         player_index,
@@ -209,8 +212,9 @@ fn play_status_phase_for_player(
             let cost = &PaymentOptions::resources(CHANGE_GOVERNMENT_COST);
             player.can_afford(cost)
                 && player.government().is_some_and(|government| {
-                    advances::get_governments().iter().any(|(g, a)| {
-                        g != &government && player.can_advance_in_change_government(a)
+                    advances::get_governments().iter().any(|g| {
+                        g.government != Some(government.clone())
+                            && player.can_advance_in_change_government(&g.advances[0])
                     })
                 })
         }

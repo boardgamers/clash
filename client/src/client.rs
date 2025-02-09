@@ -13,6 +13,7 @@ use crate::client_state::{
 use crate::collect_ui::collect_dialog;
 use crate::construct_ui::pay_construction_dialog;
 use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
+use crate::event_ui::custom_phase_event_origin;
 use crate::happiness_ui::{increase_happiness_click, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
 use crate::layout_ui::{bottom_centered_text, icon_pos, top_right_texture};
@@ -55,13 +56,13 @@ fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
     if show_map {
         updates.add(rc.with_camera(CameraMode::World, draw_map));
     }
-    if !state.active_dialog.is_full_modal() {
+    if !state.active_dialog.is_modal() {
         show_top_left(rc);
     }
     if show_map {
         show_top_center(rc);
     }
-    if !state.active_dialog.is_full_modal() {
+    if !state.active_dialog.is_modal() {
         updates.add(player_select(rc));
         updates.add(show_global_controls(rc, features));
     }
@@ -169,7 +170,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
             custom_actions_ui::payment_reward_dialog(rc, p)
         }
         ActiveDialog::CustomPhaseAdvanceRewardRequest(r) => {
-            custom_actions_ui::advance_reward_dialog(rc, r, ActiveDialog::event_origin(rc).name())
+            custom_actions_ui::advance_reward_dialog(rc, r, custom_phase_event_origin(rc).name())
         }
     }
 }

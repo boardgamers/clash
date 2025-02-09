@@ -3,9 +3,9 @@ use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
 use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
+use crate::event_ui::{custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
-use crate::log_ui::{add_advance_help, advance_help};
 use crate::map_ui::ExploreResolutionConfig;
 use crate::move_ui::{MoveDestination, MoveIntent, MovePayment, MoveSelection};
 use crate::payment_ui::Payment;
@@ -13,11 +13,9 @@ use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use crate::render_context::RenderContext;
 use crate::status_phase_ui::ChooseAdditionalAdvances;
 use macroquad::prelude::*;
-use server::ability_initializer::EventOrigin;
 use server::action::Action;
 use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
-use server::content::advances::{NAVIGATION, ROADS};
 use server::content::custom_phase_actions::{CustomPhaseAdvanceRewardRequest, CustomPhaseRequest};
 use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
 use server::position::Position;
@@ -113,34 +111,34 @@ impl ActiveDialog {
                     "Click on a city to increase happiness".to_string(),
                 ]
             }
-            ActiveDialog::AdvancePayment(_)
-            | ActiveDialog::ConstructionPayment(_)
-            | ActiveDialog::MovePayment(_) => {
-                vec!["Pay resources".to_string()]
-            }
-            ActiveDialog::CollectResources(collect) => collect.help_text(rc.game),
+            ActiveDialog::AdvancePayment(p) => pay_help(rc, p),
+            ActiveDialog::ConstructionPayment(p) => pay_help(rc, &p.payment),
+            ActiveDialog::MovePayment(p) => pay_help(rc, &p.payment),
+            ActiveDialog::CollectResources(collect) => collect.help_text(rc),
             ActiveDialog::RecruitUnitSelection(_) => vec!["Click on a unit to recruit".to_string()],
             ActiveDialog::ReplaceUnits(_) => vec!["Click on a unit to replace".to_string()],
             ActiveDialog::MoveUnits(m) => {
                 if m.start.is_some() {
                     let mut result = vec![];
-                    if m.destinations.is_empty() {
+                    let destinations = &m.destinations.list;
+                    if destinations.is_empty() {
                         result.push("No unit on this tile can move".to_string());
                     }
-                    if m.destinations
+                    if destinations
                         .iter()
                         .any(|d| matches!(d, MoveDestination::Tile(_)))
                     {
                         result.push("Click on a highlighted tile to move units".to_string());
                     };
-                    if m.destinations
+                    if destinations
                         .iter()
                         .any(|d| matches!(d, MoveDestination::Carrier(_)))
                     {
                         result.push("Click on a carrier to embark units".to_string());
                     };
-                    add_advance_help(rc, &mut result, NAVIGATION);
-                    add_advance_help(rc, &mut result, ROADS);
+                    m.destinations.modifiers.iter().for_each(|m| {
+                        result.extend(event_help(rc, m, true));
+                    });
                     result
                 } else {
                     vec!["Click on a unit to move".to_string()]
@@ -189,27 +187,10 @@ impl ActiveDialog {
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
             ActiveDialog::CustomPhaseResourceRewardRequest(_)
             | ActiveDialog::CustomPhaseAdvanceRewardRequest(_)
-            | ActiveDialog::CustomPhasePaymentRequest(_) => Self::event_help(rc),
+            | ActiveDialog::CustomPhasePaymentRequest(_) => {
+                event_help(rc, &custom_phase_event_origin(rc), true)
+            }
         }
-    }
-
-    #[must_use]
-    pub fn event_help(rc: &RenderContext) -> Vec<String> {
-        match &Self::event_origin(rc) {
-            EventOrigin::Advance(a) => advance_help(rc, a),
-            _ => vec![], // TODO
-        }
-    }
-
-    #[must_use]
-    pub fn event_origin(rc: &RenderContext) -> EventOrigin {
-        rc.game
-            .custom_phase_state
-            .current
-            .as_ref()
-            .unwrap()
-            .origin
-            .clone()
     }
 
     #[must_use]
@@ -220,11 +201,6 @@ impl ActiveDialog {
     #[must_use]
     pub fn is_modal(&self) -> bool {
         matches!(self, ActiveDialog::Log) || self.is_advance()
-    }
-
-    #[must_use]
-    pub fn is_full_modal(&self) -> bool {
-        self.is_modal()
     }
 
     #[must_use]

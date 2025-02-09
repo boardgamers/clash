@@ -28,7 +28,7 @@ pub struct BaseOrCustomDialog {
 pub fn show_pending_update(update: &PendingUpdate, rc: &RenderContext) -> StateUpdate {
     let state = &rc.state;
     let t = if update.warning.is_empty() {
-        if state.active_dialog.is_full_modal() {
+        if state.active_dialog.is_modal() {
             &update.info.join(", ")
         } else {
             "Are you sure?"

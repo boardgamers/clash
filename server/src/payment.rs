@@ -1,3 +1,4 @@
+use crate::events::EventOrigin;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
@@ -30,6 +31,9 @@ pub struct PaymentOptions {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub conversions: Vec<PaymentConversion>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub modifiers: Vec<EventOrigin>,
 }
 
 impl PaymentOptions {
@@ -75,6 +79,7 @@ impl PaymentOptions {
         PaymentOptions {
             default: ResourcePile::of(types_by_preference[0], cost),
             conversions,
+            modifiers: vec![],
         }
     }
 
@@ -101,6 +106,7 @@ impl PaymentOptions {
         PaymentOptions {
             default: cost,
             conversions,
+            modifiers: vec![],
         }
     }
 
@@ -228,6 +234,7 @@ mod tests {
                 to: ResourcePile::wood(1),
                 limit: None,
             }],
+            modifiers: vec![],
         };
         let available = ResourcePile::wood(1) + ResourcePile::ore(1);
         assert_eq!(
@@ -244,6 +251,7 @@ mod tests {
                 options: PaymentOptions {
                     default: ResourcePile::food(1),
                     conversions: vec![],
+                    modifiers: vec![],
                 },
                 valid: vec![ResourcePile::food(1)],
                 invalid: vec![ResourcePile::food(2)],
@@ -257,6 +265,7 @@ mod tests {
                         to: ResourcePile::wood(1),
                         limit: None,
                     }],
+                    modifiers: vec![],
                 },
                 valid: vec![ResourcePile::food(1), ResourcePile::wood(1)],
                 invalid: vec![ResourcePile::food(2), ResourcePile::ore(1)],
@@ -270,6 +279,7 @@ mod tests {
                         to: ResourcePile::wood(1),
                         limit: None,
                     }],
+                    modifiers: vec![],
                 },
                 valid: vec![
                     ResourcePile::food(2),
@@ -287,6 +297,7 @@ mod tests {
                         to: ResourcePile::wood(1),
                         limit: Some(1),
                     }],
+                    modifiers: vec![],
                 },
                 valid: vec![
                     ResourcePile::food(2),
@@ -303,6 +314,7 @@ mod tests {
                         to: ResourcePile::mood_tokens(1),
                         limit: Some(1),
                     }],
+                    modifiers: vec![],
                 },
                 valid: vec![
                     ResourcePile::food(3) + ResourcePile::ore(3),
@@ -322,6 +334,7 @@ mod tests {
                         to: ResourcePile::empty(),
                         limit: Some(2),
                     }],
+                    modifiers: vec![],
                 },
                 valid: vec![ResourcePile::food(1)],
                 invalid: vec![ResourcePile::food(2)],
@@ -342,6 +355,7 @@ mod tests {
                             limit: None,
                         },
                     ],
+                    modifiers: vec![],
                 },
                 valid: vec![
                     ResourcePile::food(1),
@@ -366,6 +380,7 @@ mod tests {
                             limit: None,
                         },
                     ],
+                    modifiers: vec![],
                 },
                 valid: vec![
                     ResourcePile::food(1),
@@ -390,6 +405,7 @@ mod tests {
                         to: ResourcePile::gold(1),
                         limit: None,
                     }],
+                    modifiers: vec![],
                 },
                 valid: vec![
                     ResourcePile::food(1) + ResourcePile::wood(1) + ResourcePile::mood_tokens(1),

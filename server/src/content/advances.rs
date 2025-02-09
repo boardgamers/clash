@@ -23,15 +23,34 @@ pub const TACTICS: &str = "Tactics";
 pub const CURRENCY: &str = "Currency";
 pub const IRRIGATION: &str = "Irrigation";
 
-const GOVERNMENTS: [(&str, &str, &str); 3] = [
-    ("Democracy", "Voting", "Philosophy"),
-    ("Autocracy", "Nationalism", "Draft"),
-    ("Theocracy", "Dogma", "State Religion"),
+struct GovernmentInfo {
+    name: &'static str,
+    leading: &'static str,
+    requirement: &'static str,
+}
+
+const GOVERNMENTS: [GovernmentInfo; 3] = [
+    GovernmentInfo {
+        name: "Democracy",
+        leading: "Voting",
+        requirement: "Philosophy",
+    },
+    GovernmentInfo {
+        name: "Autocracy",
+        leading: "Nationalism",
+        requirement: "Draft",
+    },
+    GovernmentInfo {
+        name: "Theocracy",
+        leading: "Dogma",
+        requirement: "State Religion",
+    },
 ];
 
 pub struct AdvanceGroup {
     pub name: String,
     pub advances: Vec<Advance>,
+    pub government: Option<String>,
 }
 
 #[must_use]
@@ -60,26 +79,28 @@ pub fn get_groups() -> Vec<AdvanceGroup> {
 
 pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -> AdvanceGroup {
     let first = &advances[0].name.clone();
+    let government = GOVERNMENTS.into_iter().find(|i| first == i.leading);
     let a: Vec<Advance> = advances
         .into_iter()
         .enumerate()
         .map(|(index, builder)| {
+            let builder = if let Some(g) = &government {
+                builder.with_government(g.name)
+            } else {
+                builder
+            };
             if index > 0 {
                 assert_eq!(builder.required_advance, None);
                 builder.with_required_advance(first)
             } else {
                 // first advance in the group
-                if let Some((government, _leading, requirement)) = GOVERNMENTS
-                    .into_iter()
-                    .find(|(_government, leading, _requirement)| leading == first)
-                {
+                if let Some(i) = &government {
                     return builder
-                        .with_required_advance(requirement)
-                        .leading_government_advance(government)
+                        .with_required_advance(i.requirement)
                         .with_contradicting_advance(
                             &GOVERNMENTS
                                 .into_iter()
-                                .map(|(_government, leading, _requirement)| leading)
+                                .map(|i| i.leading)
                                 .collect::<Vec<&str>>(),
                         );
                 }
@@ -91,6 +112,7 @@ pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -
     AdvanceGroup {
         name: name.to_string(),
         advances: a,
+        government: government.map(|i| i.name.to_string()),
     }
 }
 
@@ -99,7 +121,7 @@ pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -
 ///
 /// Panics if advance with name doesn't exist
 #[must_use]
-pub fn get_advance_by_name(name: &str) -> Advance {
+pub fn get_advance(name: &str) -> Advance {
     get_all()
         .into_iter()
         .find(|advance| advance.name == name)
@@ -108,34 +130,19 @@ pub fn get_advance_by_name(name: &str) -> Advance {
         })
 }
 
-pub(crate) fn get_advances_by_group(group: &str) -> Vec<Advance> {
+pub(crate) fn get_group(group: &str) -> AdvanceGroup {
     get_groups()
         .into_iter()
         .find(|g| g.name == group)
-        .map_or_else(
-            || {
-                panic!("Group with name {group} not found");
-            },
-            |g| g.advances,
-        )
+        .expect("Group not found")
 }
 
 #[must_use]
-pub fn get_leading_government_advance(government: &str) -> Option<Advance> {
-    get_all().into_iter().find(|advance| {
-        advance
-            .government
-            .as_ref()
-            .is_some_and(|value| value.as_str() == government)
-    })
-}
-
-#[must_use]
-pub fn get_governments() -> Vec<(String, Advance)> {
-    get_all()
+pub fn get_governments() -> Vec<AdvanceGroup> {
+    get_groups()
         .into_iter()
-        .filter_map(|advance| advance.government.clone().map(|g| (g.clone(), advance)))
-        .collect()
+        .filter(|g| g.government.is_some())
+        .collect::<Vec<AdvanceGroup>>()
 }
 
 ///
@@ -144,19 +151,10 @@ pub fn get_governments() -> Vec<(String, Advance)> {
 ///
 /// Panics if government doesn't have a leading government advance or if some of the government advances do no have their government tier specified
 #[must_use]
-pub fn get_government(government: &str) -> Vec<Advance> {
-    let leading_government =
-        get_leading_government_advance(government).expect("government should exist");
-    let mut government_advances = get_all()
-        .into_iter()
-        .filter(|advance| {
-            advance
-                .required
-                .as_ref()
-                .is_some_and(|required_advance| required_advance == &leading_government.name)
-        })
-        .collect::<Vec<Advance>>();
-    government_advances.push(leading_government);
-    government_advances.reverse();
-    government_advances
+pub fn get_government(government: &str) -> Option<AdvanceGroup> {
+    get_groups().into_iter().find(|g| {
+        g.government
+            .as_ref()
+            .is_some_and(|value| value.as_str() == government)
+    })
 }

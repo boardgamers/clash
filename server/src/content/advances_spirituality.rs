@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::city_pieces::Building::Temple;
-use crate::content::advances::{advance_group_builder, AdvanceGroup};
+use crate::content::advances::{advance_group_builder, get_group, AdvanceGroup};
 use crate::content::custom_phase_actions::CustomPhaseResourceRewardRequest;
 use crate::payment::{PaymentConversion, PaymentOptions};
 use crate::resource::ResourceType;
@@ -15,7 +15,8 @@ pub(crate) fn spirituality() -> AdvanceGroup {
         vec![
             myths(),
             rituals(),
-            Advance::builder("State Religion", "not implemented"),
+            priesthood(),
+            Advance::builder("State Religion", "not implemented").with_advance_bonus(MoodToken),
         ],
     )
 }
@@ -56,6 +57,25 @@ fn rituals() -> AdvanceBuilder {
                     ResourceType::Gold,
                 ] {
                     cost.conversions.push(PaymentConversion::unlimited(vec![ResourcePile::mood_tokens(1)], ResourcePile::of(*r, 1)));
+                }
+            },
+            0,
+        )
+}
+
+fn priesthood() -> AdvanceBuilder {
+    Advance::builder("Priesthood", "Once per turn, a science advance is free")
+        .add_player_event_listener(
+            |event| &mut event.advance_cost,
+            |i, (), ()| {
+                if !i.info.contains_key("Priesthood")
+                    && get_group("Science")
+                        .advances
+                        .iter()
+                        .any(|a| a.name == i.name)
+                {
+                    i.set_cost(0);
+                    i.info.insert("Priesthood".to_string(), "used".to_string());
                 }
             },
             0,

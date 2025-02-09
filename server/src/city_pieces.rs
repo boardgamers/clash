@@ -34,10 +34,7 @@ impl CityPieces {
             wonders: data
                 .wonders
                 .iter()
-                .map(|wonder| {
-                    wonders::get_wonder_by_name(wonder)
-                        .expect("city piece data should contain a valid wonder")
-                })
+                .map(|wonder| wonders::get_wonder(wonder))
                 .collect(),
         }
     }

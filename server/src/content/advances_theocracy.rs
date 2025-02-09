@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::city_pieces::Building::Temple;
-use crate::content::advances::{advance_group_builder, get_advances_by_group, AdvanceGroup};
+use crate::content::advances::{advance_group_builder, get_group, AdvanceGroup};
 use crate::content::custom_phase_actions::CustomPhaseAdvanceRewardRequest;
 use crate::resource_pile::ResourcePile;
 
@@ -36,7 +36,7 @@ fn dogma() -> AdvanceBuilder {
             |game, player_index, building| {
                 if matches!(building, Temple) {
                     let player = game.get_player(player_index);
-                    let choices: Vec<String> = get_advances_by_group("Theocracy")
+                    let choices: Vec<String> = get_group("Theocracy").advances
                         .iter()
                         .filter(|a| player.can_advance_free(a))
                         .map(|a| a.name.clone())

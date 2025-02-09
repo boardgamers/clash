@@ -1,3 +1,4 @@
+use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::map::Terrain;
 use crate::map::Terrain::{Fertile, Forest, Mountain};
@@ -24,7 +25,8 @@ pub fn get_total_collection(
     if city.mood_modified_size() < collections.len() || city.player_index != player_index {
         return None;
     }
-    let choices = possible_resource_collections(game, city_position, player_index, &HashMap::new());
+    let (choices, _modifiers) =
+        possible_resource_collections(game, city_position, player_index, &HashMap::new());
     let possible = collections.iter().all(|(position, collect)| {
         choices
             .get(position)
@@ -77,14 +79,14 @@ pub fn possible_resource_collections(
     city_pos: Position,
     player_index: usize,
     used: &HashMap<Position, ResourcePile>,
-) -> HashMap<Position, HashSet<ResourcePile>> {
+) -> (HashMap<Position, HashSet<ResourcePile>>, Vec<EventOrigin>) {
     let set = [
         (Mountain, HashSet::from([ResourcePile::ore(1)])),
         (Fertile, HashSet::from([ResourcePile::food(1)])),
         (Forest, HashSet::from([ResourcePile::wood(1)])),
     ];
     let mut terrain_options = HashMap::from(set);
-    game.players[player_index]
+    let mut modifiers = game.players[player_index]
         .events
         .terrain_collect_options
         .get()
@@ -104,20 +106,22 @@ pub fn possible_resource_collections(
         })
         .collect();
 
-    game.players[player_index]
-        .events
-        .collect_options
-        .get()
-        .trigger(
-            &mut collect_options,
-            &CollectContext {
-                player_index,
-                city_position: city_pos,
-                used: used.clone(),
-                terrain_options,
-            },
-            game,
-        );
+    modifiers.extend(
+        game.players[player_index]
+            .events
+            .collect_options
+            .get()
+            .trigger(
+                &mut collect_options,
+                &CollectContext {
+                    player_index,
+                    city_position: city_pos,
+                    used: used.clone(),
+                    terrain_options,
+                },
+                game,
+            ),
+    );
     for (pos, pile) in used {
         collect_options
             .entry(*pos)
@@ -130,5 +134,5 @@ pub fn possible_resource_collections(
         game.get_any_city(*p).is_none_or(|c| c.position == city_pos)
             && game.enemy_player(player_index, *p).is_none()
     });
-    collect_options
+    (collect_options, modifiers)
 }

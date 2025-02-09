@@ -1,6 +1,6 @@
-use crate::ability_initializer::EventOrigin;
 use crate::action::Action;
-use crate::content::advances::get_advance_by_name;
+use crate::content::advances::get_advance;
+use crate::events::EventOrigin;
 use crate::game::{Game, UndoContext};
 use crate::payment::PaymentOptions;
 use crate::playing_actions::PlayingAction;
@@ -101,7 +101,7 @@ impl CustomPhaseEventAction {
                 game.players[player_index].lose_resources(r);
             }
             CustomPhaseEventAction::AdvanceReward(n) => {
-                game.undo_advance(&get_advance_by_name(&n), player_index, false);
+                game.undo_advance(&get_advance(&n), player_index, false);
             }
         }
         let Some(UndoContext::CustomPhaseEvent(e)) = game.pop_undo_context() else {

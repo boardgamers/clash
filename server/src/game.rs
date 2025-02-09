@@ -182,10 +182,7 @@ impl Game {
             wonders_left: data
                 .wonders_left
                 .into_iter()
-                .map(|wonder| {
-                    wonders::get_wonder_by_name(&wonder)
-                        .expect("wonder data should have valid wonder names")
-                })
+                .map(|wonder| wonders::get_wonder(&wonder))
                 .collect(),
             wonder_amount_left: data.wonder_amount_left,
             custom_phase_state: data.state_change_event_state,
@@ -339,7 +336,7 @@ impl Game {
         details: &V,
     ) {
         let e = event(&mut self.players[player_index].events).take();
-        e.trigger(self, info, details);
+        let _ = e.trigger(self, info, details);
         event(&mut self.players[player_index].events).set(e);
     }
 
@@ -351,7 +348,7 @@ impl Game {
     ) {
         let e = event(&mut self.players[player_index].events).take();
         self.with_commands(player_index, false, |commands, game| {
-            e.trigger(commands, game, details);
+            let _ = e.trigger(commands, game, details);
         });
         event(&mut self.players[player_index].events).set(e);
     }
@@ -363,26 +360,20 @@ impl Game {
         callback: impl FnOnce(&mut PlayerCommands, &mut Game),
     ) {
         let p = self.get_player(player_index);
-        let info = p.event_info.clone();
+        let info = CommandUndoInfo::new(p);
         let mut commands = PlayerCommands::new(player_index, p.get_name(), p.event_info.clone());
 
         callback(&mut commands, self);
 
-        if info != commands.info || !commands.gained_resources.is_empty() {
-            self.push_undo_context(UndoContext::Command(CommandUndoContext {
-                info,
+        info.apply(
+            self,
+            CommandUndoContext {
+                info: commands.info.clone(),
                 gained_resources: commands.gained_resources.clone(),
-            }));
-        }
+            },
+        );
+        self.players[player_index].gain_resources(commands.gained_resources);
 
-        let p = self
-            .players
-            .get_mut(player_index)
-            .expect("player should exist");
-        for (k, v) in commands.info {
-            p.event_info.insert(k, v);
-        }
-        p.gain_resources(commands.gained_resources);
         if new_log_entry {
             self.add_info_log_item(String::new());
         }
@@ -1171,7 +1162,7 @@ impl Game {
     /// Panics if advance does not exist
     pub fn advance(&mut self, advance: &str, player_index: usize, payment: ResourcePile) {
         self.trigger_command_event(player_index, |e| &mut e.on_advance, &advance.to_string());
-        let advance = advances::get_advance_by_name(advance);
+        let advance = advances::get_advance(advance);
         (advance.player_initializer)(self, player_index);
         (advance.player_one_time_initializer)(self, player_index);
         let name = advance.name.clone();
@@ -1955,6 +1946,34 @@ pub struct DisembarkUndoContext {
 pub struct CommandUndoContext {
     pub info: HashMap<String, String>,
     pub gained_resources: ResourcePile,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+pub struct CommandUndoInfo {
+    pub player: usize,
+    pub info: HashMap<String, String>,
+}
+
+impl CommandUndoInfo {
+    #[must_use]
+    pub fn new(player: &Player) -> Self {
+        Self {
+            info: player.event_info.clone(),
+            player: player.index,
+        }
+    }
+
+    pub fn apply(&self, game: &mut Game, mut undo: CommandUndoContext) {
+        let player = &mut game.players[self.player];
+        for (k, v) in undo.info.clone() {
+            player.event_info.insert(k, v);
+        }
+
+        if undo.info != self.info || !undo.gained_resources.is_empty() {
+            undo.info.clone_from(&self.info);
+            game.push_undo_context(UndoContext::Command(undo));
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]

@@ -42,9 +42,15 @@ pub fn get_all() -> Vec<Wonder> {
     ]
 }
 
+///
+/// # Panics
+/// Panics if wonder does not exist
 #[must_use]
-pub fn get_wonder_by_name(name: &str) -> Option<Wonder> {
-    get_all().into_iter().find(|wonder| wonder.name == name)
+pub fn get_wonder(name: &str) -> Wonder {
+    get_all()
+        .into_iter()
+        .find(|wonder| wonder.name == name)
+        .expect("wonder not found")
 }
 
 ///

@@ -4,8 +4,7 @@ use crate::dialog_ui::{cancel_button, cancel_button_with_tooltip, ok_button, OkT
 use crate::layout_ui::bottom_centered_text;
 use crate::render_context::RenderContext;
 use server::action::Action;
-use server::content::advances;
-use server::content::advances::{get_government, get_leading_government_advance};
+use server::content::advances::{get_government, get_governments};
 use server::position::Position;
 use server::status_phase::{
     ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction,
@@ -61,11 +60,10 @@ pub fn change_government_type_dialog(rc: &RenderContext) -> StateUpdate {
         rc,
         "Change government - or click cancel",
         |a, p| {
-            if p.can_advance_in_change_government(a)
-                && a.government.as_ref().is_some_and(|g| {
-                    get_leading_government_advance(g).is_some_and(|l| &l == a)
-                        && g.as_str() != p.government().as_ref().expect("should have government")
-                })
+            if get_governments()
+                .iter()
+                .find(|g| g.advances[0].name == a.name)
+                .is_some_and(|_| p.can_advance_in_change_government(a))
             {
                 AdvanceState::Available
             } else if a.government.as_ref().is_some_and(|g| g == &current) {
@@ -76,12 +74,16 @@ pub fn change_government_type_dialog(rc: &RenderContext) -> StateUpdate {
         },
         |a| {
             let g = a.government.as_ref().expect("should have government");
-            let additional = advances::get_government(g)
+            let additional = get_government(g)
+                .unwrap()
+                .advances
                 .iter()
                 .skip(1) // the government advance itself is always chosen
                 .map(|a| a.name.clone())
                 .collect::<Vec<_>>();
             let needed = get_government(&rc.shown_player.government().unwrap())
+                .unwrap()
+                .advances
                 .iter()
                 .filter(|a| rc.shown_player.has_advance(&a.name))
                 .count()

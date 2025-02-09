@@ -5,9 +5,9 @@ use PlayingAction::*;
 use crate::action::Action;
 use crate::city::MoodState;
 use crate::collect::{collect, undo_collect};
-use crate::content::advances::get_advance_by_name;
+use crate::content::advances::get_advance;
 use crate::content::custom_phase_actions::CustomPhaseEventType;
-use crate::game::{CulturalInfluenceResolution, GameState};
+use crate::game::{CommandUndoContext, CommandUndoInfo, CulturalInfluenceResolution, GameState};
 use crate::payment::PaymentOptions;
 use crate::unit::{Unit, Units};
 use crate::{
@@ -79,7 +79,7 @@ impl PlayingActionType {
     pub fn is_available(&self, game: &Game, player_index: usize) -> bool {
         let mut possible = true;
         let p = &game.players[player_index];
-        p.trigger_event(|e| &e.is_playing_action_available, &mut possible, self, p);
+        let _ = p.trigger_event(|e| &e.is_playing_action_available, &mut possible, self, p);
         possible
     }
 }
@@ -122,8 +122,25 @@ impl PlayingAction {
         match self {
             Advance { advance, payment } => {
                 let player = &mut game.players[player_index];
-                player.pay_cost(&player.advance_cost(&advance), &payment.clone());
+                let info = CommandUndoInfo::new(player);
+                let i = player.advance_cost_for_execute(&advance);
+                let options = &i.cost;
+                player.pay_cost(options, &payment.clone());
                 game.advance(&advance, player_index, payment);
+                for m in &options.modifiers {
+                    game.add_to_last_log_item(&format!(
+                        ". {} reduced the cost to {}",
+                        m.name(),
+                        i.cost.default.resource_amount(),
+                    ));
+                }
+                info.apply(
+                    game,
+                    CommandUndoContext {
+                        info: i.info.clone(),
+                        gained_resources: ResourcePile::empty(),
+                    },
+                );
             }
             FoundCity { settler } => {
                 let settler = game.players[player_index].remove_unit(settler);
@@ -319,11 +336,7 @@ impl PlayingAction {
             Advance { advance, payment } => {
                 let player = &mut game.players[player_index];
                 player.gain_resources_in_undo(payment);
-                game.undo_advance(
-                    &get_advance_by_name(&advance),
-                    player_index,
-                    was_custom_phase,
-                );
+                game.undo_advance(&get_advance(&advance), player_index, was_custom_phase);
             }
             FoundCity { settler: _ } => {
                 let Some(UndoContext::FoundCity { settler }) = game.pop_undo_context() else {

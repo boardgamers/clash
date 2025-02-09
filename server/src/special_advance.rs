@@ -1,4 +1,4 @@
-use crate::ability_initializer::EventOrigin;
+use crate::events::EventOrigin;
 use crate::{
     ability_initializer::{self, AbilityInitializer, AbilityInitializerSetup},
     game::Game,

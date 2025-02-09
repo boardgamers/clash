@@ -1,6 +1,28 @@
 #![allow(dead_code)]
 
-type Listener<T, U, V> = (Box<dyn Fn(&mut T, &U, &V)>, i32, usize, String);
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
+pub enum EventOrigin {
+    Advance(String),
+    SpecialAdvance(String),
+    Leader(String),
+    Wonder(String),
+}
+
+impl EventOrigin {
+    #[must_use]
+    pub fn name(&self) -> &str {
+        match self {
+            EventOrigin::Advance(name)
+            | EventOrigin::SpecialAdvance(name)
+            | EventOrigin::Wonder(name)
+            | EventOrigin::Leader(name) => name,
+        }
+    }
+}
+
+use serde::{Deserialize, Serialize};
+
+type Listener<T, U, V> = (Box<dyn Fn(&mut T, &U, &V)>, i32, usize, EventOrigin);
 
 pub struct EventMut<T, U = (), V = ()> {
     listeners: Vec<Listener<T, U, V>>,
@@ -12,7 +34,7 @@ where
     T: Clone + PartialEq,
 {
     //return the id of the listener witch can be used to remove the listener later
-    pub fn add_listener_mut<F>(&mut self, new_listener: F, priority: i32, key: String) -> usize
+    pub fn add_listener_mut<F>(&mut self, new_listener: F, priority: i32, key: EventOrigin) -> usize
     where
         F: Fn(&mut T, &U, &V) + 'static,
     {
@@ -25,7 +47,7 @@ where
         id
     }
 
-    pub fn remove_listener_mut_by_key(&mut self, key: &str) {
+    pub(crate) fn remove_listener_mut_by_key(&mut self, key: &EventOrigin) {
         let _ = self.listeners.remove(
             self.listeners
                 .iter()
@@ -34,7 +56,8 @@ where
         );
     }
 
-    pub fn trigger(&self, value: &mut T, info: &U, details: &V) -> Vec<String> {
+    #[must_use]
+    pub(crate) fn trigger(&self, value: &mut T, info: &U, details: &V) -> Vec<EventOrigin> {
         let mut modifiers = Vec::new();
         for (listener, _, _, key) in &self.listeners {
             let previous_value = value.clone();
@@ -61,15 +84,15 @@ pub struct Event<T, U = (), V = ()> {
 }
 
 impl<T, U, V> Event<T, U, V> {
-    pub fn get(&self) -> &EventMut<T, U, V> {
+    pub(crate) fn get(&self) -> &EventMut<T, U, V> {
         self.inner.as_ref().expect("Event should be initialized")
     }
 
-    pub fn take(&mut self) -> EventMut<T, U, V> {
+    pub(crate) fn take(&mut self) -> EventMut<T, U, V> {
         self.inner.take().expect("Event should be initialized")
     }
 
-    pub fn set(&mut self, event: EventMut<T, U, V>) {
+    pub(crate) fn set(&mut self, event: EventMut<T, U, V>) {
         self.inner = Some(event);
     }
 }
@@ -84,7 +107,7 @@ impl<T, U, V> Default for Event<T, U, V> {
 
 #[cfg(test)]
 mod tests {
-    use super::EventMut;
+    use super::{EventMut, EventOrigin};
 
     #[test]
     fn mutable_event() {
@@ -92,12 +115,12 @@ mod tests {
         event.add_listener_mut(
             |item, constant, _| *item += constant,
             0,
-            String::from("add constant"),
+            EventOrigin::Advance("add constant".to_string()),
         );
         event.add_listener_mut(
             |item, _, multiplier| *item *= multiplier,
             -1,
-            String::from("multiply value"),
+            EventOrigin::Advance("multiply value".to_string()),
         );
         event.add_listener_mut(
             |item, _, _| {
@@ -105,7 +128,7 @@ mod tests {
                 *item -= 1;
             },
             0,
-            String::from("no change"),
+            EventOrigin::Advance("no change".to_string()),
         );
 
         let mut item = 0;
@@ -114,15 +137,21 @@ mod tests {
         let modifiers = event.trigger(&mut item, &addend, &multiplier);
         assert_eq!(6, item);
         assert_eq!(
-            vec![String::from("add constant"), String::from("multiply value")],
+            vec![
+                EventOrigin::Advance("add constant".to_string()),
+                EventOrigin::Advance("multiply value".to_string())
+            ],
             modifiers
         );
 
-        event.remove_listener_mut_by_key("multiply value");
+        event.remove_listener_mut_by_key(&EventOrigin::Advance("multiply value".to_string()));
         let mut item = 0;
         let addend = 3;
         let modifiers = event.trigger(&mut item, &addend, &0);
         assert_eq!(3, item);
-        assert_eq!(vec![String::from("add constant")], modifiers);
+        assert_eq!(
+            vec![EventOrigin::Advance("add constant".to_string())],
+            modifiers
+        );
     }
 }
