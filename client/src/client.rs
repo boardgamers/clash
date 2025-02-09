@@ -13,6 +13,7 @@ use crate::client_state::{
 use crate::collect_ui::collect_dialog;
 use crate::construct_ui::pay_construction_dialog;
 use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
+use crate::event_ui::custom_phase_event_origin;
 use crate::happiness_ui::{increase_happiness_click, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
 use crate::layout_ui::{bottom_centered_text, icon_pos, top_right_texture};
@@ -169,7 +170,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
             custom_actions_ui::payment_reward_dialog(rc, p)
         }
         ActiveDialog::CustomPhaseAdvanceRewardRequest(r) => {
-            custom_actions_ui::advance_reward_dialog(rc, r, ActiveDialog::event_origin(rc).name())
+            custom_actions_ui::advance_reward_dialog(rc, r, custom_phase_event_origin(rc).name())
         }
     }
 }

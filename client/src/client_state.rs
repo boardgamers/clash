@@ -3,9 +3,10 @@ use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
 use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
+use crate::event_ui::{custom_phase_event_origin, event_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
-use crate::log_ui::{add_advance_help, advance_help};
+use crate::log_ui::add_advance_help;
 use crate::map_ui::ExploreResolutionConfig;
 use crate::move_ui::{MoveDestination, MoveIntent, MovePayment, MoveSelection};
 use crate::payment_ui::Payment;
@@ -18,7 +19,6 @@ use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
 use server::content::advances::{NAVIGATION, ROADS};
 use server::content::custom_phase_actions::{CustomPhaseAdvanceRewardRequest, CustomPhaseRequest};
-use server::events::EventOrigin;
 use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
 use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
@@ -113,9 +113,8 @@ impl ActiveDialog {
                     "Click on a city to increase happiness".to_string(),
                 ]
             }
-            ActiveDialog::AdvancePayment(_)
-            | ActiveDialog::ConstructionPayment(_)
-            | ActiveDialog::MovePayment(_) => {
+            ActiveDialog::AdvancePayment(p) => pay_help(rc, p),
+            ActiveDialog::ConstructionPayment(_) | ActiveDialog::MovePayment(_) => {
                 vec!["Pay resources".to_string()]
             }
             ActiveDialog::CollectResources(collect) => collect.help_text(rc.game),
@@ -189,27 +188,10 @@ impl ActiveDialog {
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
             ActiveDialog::CustomPhaseResourceRewardRequest(_)
             | ActiveDialog::CustomPhaseAdvanceRewardRequest(_)
-            | ActiveDialog::CustomPhasePaymentRequest(_) => Self::event_help(rc),
+            | ActiveDialog::CustomPhasePaymentRequest(_) => {
+                event_help(rc, &custom_phase_event_origin(rc))
+            }
         }
-    }
-
-    #[must_use]
-    pub fn event_help(rc: &RenderContext) -> Vec<String> {
-        match &Self::event_origin(rc) {
-            EventOrigin::Advance(a) => advance_help(rc, a),
-            _ => vec![], // TODO
-        }
-    }
-
-    #[must_use]
-    pub fn event_origin(rc: &RenderContext) -> EventOrigin {
-        rc.game
-            .custom_phase_state
-            .current
-            .as_ref()
-            .unwrap()
-            .origin
-            .clone()
     }
 
     #[must_use]
@@ -239,6 +221,14 @@ impl ActiveDialog {
                 | ActiveDialog::CustomPhaseAdvanceRewardRequest(_)
         )
     }
+}
+
+fn pay_help(rc: &RenderContext, p: &Payment) -> Vec<String> {
+    let mut result = vec!["Pay resources".to_string()];
+    for o in p.cost.modifiers.clone() {
+        result.extend(event_help(rc, &o));
+    }
+    result
 }
 
 pub struct PendingUpdate {

@@ -630,10 +630,7 @@ impl Player {
     }
 
     #[must_use]
-    pub fn advance_cost_for_execute(
-        &self,
-        advance: &str,
-    ) -> (PaymentOptions, AdvanceCostInfo, Vec<EventOrigin>) {
+    pub fn advance_cost_for_execute(&self, advance: &str) -> (PaymentOptions, AdvanceCostInfo) {
         let info = self.event_info.clone();
         let mut i = AdvanceCostInfo {
             name: advance.to_string(),
@@ -642,15 +639,13 @@ impl Player {
         };
 
         let modifiers = self.trigger_event(|e| &e.advance_cost, &mut i, &(), &());
+        let mut payment_options = PaymentOptions::sum(
+            i.cost,
+            &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
+        );
+        payment_options.modifiers = modifiers;
 
-        (
-            PaymentOptions::sum(
-                i.cost,
-                &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
-            ),
-            i,
-            modifiers,
-        )
+        (payment_options, i)
     }
 
     #[must_use]
