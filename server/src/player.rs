@@ -642,7 +642,7 @@ impl Player {
 
         (
             PaymentOptions::sum(
-                i.cost.clone(),
+                i.cost,
                 &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
             ),
             i,

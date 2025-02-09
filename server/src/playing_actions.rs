@@ -7,7 +7,7 @@ use crate::city::MoodState;
 use crate::collect::{collect, undo_collect};
 use crate::content::advances::get_advance;
 use crate::content::custom_phase_actions::CustomPhaseEventType;
-use crate::game::{CulturalInfluenceResolution, GameState};
+use crate::game::{CommandUndoContext, CulturalInfluenceResolution, GameState};
 use crate::payment::PaymentOptions;
 use crate::unit::{Unit, Units};
 use crate::{
@@ -122,12 +122,20 @@ impl PlayingAction {
         match self {
             Advance { advance, payment } => {
                 let player = &mut game.players[player_index];
+                let info = player.event_info.clone();
                 let (options, i) = player.advance_cost_for_execute(&advance);
-                for (k, v) in i.info {
+                for (k, v) in i.info.clone() {
                     player.event_info.insert(k, v);
                 }
                 player.pay_cost(&options, &payment.clone());
                 game.advance(&advance, player_index, payment);
+
+                if info != i.info {
+                    game.push_undo_context(UndoContext::Command(CommandUndoContext {
+                        info,
+                        gained_resources: ResourcePile::empty(),
+                    }));
+                }
             }
             FoundCity { settler } => {
                 let settler = game.players[player_index].remove_unit(settler);

@@ -493,7 +493,15 @@
             "payment": {}
           }
         }
-      }
+      },
+      "undo": [
+        {
+          "Command": {
+            "info": {},
+            "gained_resources": {}
+          }
+        }
+      ]
     }
   ],
   "action_log_index": 16,

@@ -1592,7 +1592,14 @@ fn test_priesthood() {
                 1,
                 Action::Playing(Advance {
                     advance: String::from("Astronomy"),
-                    payment: ResourcePile::ideas(2),
+                    payment: ResourcePile::gold(2),
+                }),
+            ),
+            TestAction::illegal(
+                1,
+                Action::Playing(Advance {
+                    advance: String::from("Astronomy"),
+                    payment: ResourcePile::empty(),
                 }),
             ),
         ],

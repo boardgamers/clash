@@ -143,13 +143,12 @@
       "name": null,
       "id": 1,
       "resources": {
-        "food": 2,
+        "food": 1,
         "wood": 5,
         "ore": 5,
-        "ideas": 6,
-        "gold": 5,
+        "gold": 3,
         "mood_tokens": 9,
-        "culture_tokens": 9
+        "culture_tokens": 11
       },
       "resource_limit": {
         "food": 2,
@@ -196,19 +195,26 @@
         "Kleopatra"
       ],
       "advances": [
+        "Astronomy",
+        "Dogma",
         "Farming",
         "Fishing",
+        "Math",
         "Mining",
-        "Myths"
+        "Myths",
+        "Priesthood"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 3,
+      "game_event_tokens": 1,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "next_unit_id": 2
+      "next_unit_id": 2,
+      "event_info": {
+        "Priesthood": "used"
+      }
     }
   ],
   "map": {
@@ -466,9 +472,52 @@
           "DetermineFirstPlayer": 1
         }
       }
+    },
+    {
+      "action": {
+        "Playing": {
+          "Advance": {
+            "advance": "Priesthood",
+            "payment": {
+              "food": 1,
+              "ideas": 1
+            }
+          }
+        }
+      }
+    },
+    {
+      "action": {
+        "Playing": {
+          "Advance": {
+            "advance": "Math",
+            "payment": {}
+          }
+        }
+      },
+      "undo": [
+        {
+          "Command": {
+            "info": {},
+            "gained_resources": {}
+          }
+        }
+      ]
+    },
+    {
+      "action": {
+        "Playing": {
+          "Advance": {
+            "advance": "Astronomy",
+            "payment": {
+              "gold": 2
+            }
+          }
+        }
+      }
     }
   ],
-  "action_log_index": 14,
+  "action_log_index": 17,
   "log": [
     "The game has started",
     "Age 1 has started",
@@ -497,10 +546,13 @@
     "It's Player1's turn",
     "Player1 choose Player2 as the new starting player",
     "Age 2 has started",
-    "Round 1/3"
+    "Round 1/3",
+    "Player2 paid 1 food and 1 idea to get the Priesthood advance",
+    "Player2 paid nothing to get the Math advance and gained 1 culture token",
+    "Player2 paid 2 gold to get the Astronomy advance and gained 1 culture token"
   ],
   "undo_limit": 14,
-  "actions_left": 3,
+  "actions_left": 0,
   "successful_cultural_influence": false,
   "round": 1,
   "age": 2,
