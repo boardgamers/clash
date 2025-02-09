@@ -34,9 +34,7 @@ impl CityPieces {
             wonders: data
                 .wonders
                 .iter()
-                .map(|wonder| {
-                    wonders::get_wonder(wonder)
-                })
+                .map(|wonder| wonders::get_wonder(wonder))
                 .collect(),
         }
     }

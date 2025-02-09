@@ -79,7 +79,7 @@ impl PlayingActionType {
     pub fn is_available(&self, game: &Game, player_index: usize) -> bool {
         let mut possible = true;
         let p = &game.players[player_index];
-        p.trigger_event(|e| &e.is_playing_action_available, &mut possible, self, p);
+        let _ = p.trigger_event(|e| &e.is_playing_action_available, &mut possible, self, p);
         possible
     }
 }

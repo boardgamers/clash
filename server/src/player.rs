@@ -209,9 +209,7 @@ impl Player {
             wonder_cards: data
                 .wonder_cards
                 .iter()
-                .map(|wonder| {
-                    wonders::get_wonder(wonder)
-                })
+                .map(|wonder| wonders::get_wonder(wonder))
                 .collect(),
             next_unit_id: data.next_unit_id,
             played_once_per_turn_actions: data.played_once_per_turn_actions,
@@ -599,14 +597,14 @@ impl Player {
     #[must_use]
     pub fn construct_cost(&self, building: Building, city: &City) -> PaymentOptions {
         let mut cost = PaymentOptions::resources(CONSTRUCT_COST);
-        self.trigger_event(|e| &e.construct_cost, &mut cost, city, &building);
+        cost.modifiers = self.trigger_event(|e| &e.construct_cost, &mut cost, city, &building);
         cost
     }
 
     #[must_use]
     pub fn wonder_cost(&self, wonder: &Wonder, city: &City) -> PaymentOptions {
         let mut cost = wonder.cost.clone();
-        self.trigger_event(|e| &e.wonder_cost, &mut cost, city, wonder);
+        cost.modifiers = self.trigger_event(|e| &e.wonder_cost, &mut cost, city, wonder);
         cost
     }
 
@@ -618,7 +616,7 @@ impl Player {
             None
         } else {
             let mut options = PaymentOptions::sum(cost, &[ResourceType::MoodTokens]);
-            self.trigger_event(|e| &e.happiness_cost, &mut options, &(), &());
+            options.modifiers = self.trigger_event(|e| &e.happiness_cost, &mut options, &(), &());
             Some(options)
         }
     }
@@ -637,12 +635,11 @@ impl Player {
             info,
         };
 
-        let modifiers = self.trigger_event(|e| &e.advance_cost, &mut i, &(), &());
         let mut payment_options = PaymentOptions::sum(
             i.cost,
             &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
         );
-        payment_options.modifiers = modifiers;
+        payment_options.modifiers = self.trigger_event(|e| &e.advance_cost, &mut i, &(), &());
 
         (payment_options, i)
     }
@@ -784,7 +781,7 @@ impl Player {
             cost: PaymentOptions::resources(vec.iter().map(UnitType::cost).sum()),
             units: units.clone(),
         };
-        self.trigger_event(|e| &e.recruit_cost, &mut cost, &(), &());
+        cost.cost.modifiers = self.trigger_event(|e| &e.recruit_cost, &mut cost, &(), &());
         if !self.can_afford(&cost.cost) {
             return None;
         }
@@ -1015,6 +1012,7 @@ impl Player {
             .collect()
     }
 
+    #[must_use]
     pub(crate) fn trigger_event<T, U, V>(
         &self,
         event: fn(&PlayerEvents) -> &Event<T, U, V>,
