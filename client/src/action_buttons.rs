@@ -5,7 +5,7 @@ use crate::layout_ui::{bottom_left_texture, icon_pos};
 use crate::move_ui::MoveIntent;
 use crate::render_context::RenderContext;
 use server::action::Action;
-use server::content::advances::get_advance_by_name;
+use server::content::advances::get_advance;
 use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::game::GameState;
 use server::playing_actions::{PlayingAction, PlayingActionType};
@@ -81,9 +81,9 @@ fn global_move(rc: &RenderContext) -> StateUpdate {
 fn custom_action_tooltip(custom_action_type: &CustomActionType) -> String {
     match custom_action_type {
         CustomActionType::ConstructWonder => "Construct a wonder".to_string(),
-        CustomActionType::AbsolutePower => get_advance_by_name("Absolute Power").description,
-        CustomActionType::VotingIncreaseHappiness => get_advance_by_name("Voting").description,
-        CustomActionType::FreeEconomyCollect => get_advance_by_name("Free Economy").description,
+        CustomActionType::AbsolutePower => get_advance("Absolute Power").description,
+        CustomActionType::VotingIncreaseHappiness => get_advance("Voting").description,
+        CustomActionType::FreeEconomyCollect => get_advance("Free Economy").description,
     }
 }
 

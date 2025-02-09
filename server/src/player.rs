@@ -1,6 +1,6 @@
 use crate::advance::Advance;
 use crate::consts::SHIP_CAPACITY;
-use crate::content::advances::get_advance_by_name;
+use crate::content::advances::get_advance;
 use crate::events::Event;
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
@@ -198,11 +198,7 @@ impl Player {
                 .expect("player data should have a valid civilization"),
             active_leader: data.active_leader,
             available_leaders: data.available_leaders,
-            advances: data
-                .advances
-                .iter()
-                .map(|a| get_advance_by_name(a))
-                .collect(),
+            advances: data.advances.iter().map(|a| get_advance(a)).collect(),
             unlocked_special_advances: data.unlocked_special_advance,
             wonders_build: data.wonders_build,
             game_event_tokens: data.game_event_tokens,
@@ -330,8 +326,8 @@ impl Player {
                 .collect(),
             civilization,
             advances: vec![
-                advances::get_advance_by_name("Farming"),
-                advances::get_advance_by_name("Mining"),
+                advances::get_advance("Farming"),
+                advances::get_advance("Mining"),
             ],
             unlocked_special_advances: Vec::new(),
             game_event_tokens: 3,

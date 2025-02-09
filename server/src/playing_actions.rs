@@ -5,7 +5,7 @@ use PlayingAction::*;
 use crate::action::Action;
 use crate::city::MoodState;
 use crate::collect::{collect, undo_collect};
-use crate::content::advances::get_advance_by_name;
+use crate::content::advances::get_advance;
 use crate::content::custom_phase_actions::CustomPhaseEventType;
 use crate::game::{CulturalInfluenceResolution, GameState};
 use crate::payment::PaymentOptions;
@@ -319,11 +319,7 @@ impl PlayingAction {
             Advance { advance, payment } => {
                 let player = &mut game.players[player_index];
                 player.gain_resources_in_undo(payment);
-                game.undo_advance(
-                    &get_advance_by_name(&advance),
-                    player_index,
-                    was_custom_phase,
-                );
+                game.undo_advance(&get_advance(&advance), player_index, was_custom_phase);
             }
             FoundCity { settler: _ } => {
                 let Some(UndoContext::FoundCity { settler }) = game.pop_undo_context() else {

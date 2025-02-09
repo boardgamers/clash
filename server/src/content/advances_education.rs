@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::city_pieces::Building::Academy;
-use crate::content::advances::{advance_group_builder, get_advances_by_group, AdvanceGroup};
+use crate::content::advances::{advance_group_builder, get_group, AdvanceGroup};
 use crate::content::custom_phase_actions::CustomPhasePaymentRequest;
 use crate::payment::PaymentOptions;
 use crate::resource_pile::ResourcePile;
@@ -34,7 +34,8 @@ fn philosophy() -> AdvanceBuilder {
     .add_player_event_listener(
         |event| &mut event.on_advance,
         |player, _, advance| {
-            if get_advances_by_group("Science")
+            if get_group("Science")
+                .advances
                 .iter()
                 .any(|a| &a.name == advance)
             {

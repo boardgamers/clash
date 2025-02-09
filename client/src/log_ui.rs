@@ -1,7 +1,7 @@
 use crate::client_state::StateUpdate;
 use crate::render_context::RenderContext;
 use macroquad::math::vec2;
-use server::content::advances::get_advance_by_name;
+use server::content::advances::get_advance;
 
 pub fn show_log(rc: &RenderContext) -> StateUpdate {
     let state = rc.state;
@@ -49,7 +49,7 @@ pub fn advance_help(rc: &RenderContext, advance: &str) -> Vec<String> {
 pub fn add_advance_help(rc: &RenderContext, result: &mut Vec<String>, advance: &str) {
     if rc.shown_player.has_advance(advance) {
         break_text(
-            &format!("{}: {}", advance, get_advance_by_name(advance).description),
+            &format!("{}: {}", advance, get_advance(advance).description),
             30,
             result,
         );

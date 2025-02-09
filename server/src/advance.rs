@@ -94,7 +94,7 @@ impl AdvanceBuilder {
     }
 
     #[must_use]
-    pub fn leading_government_advance(mut self, government: &str) -> Self {
+    pub fn with_government(mut self, government: &str) -> Self {
         self.government = Some(government.to_string());
         self
     }

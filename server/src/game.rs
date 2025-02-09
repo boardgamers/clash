@@ -1171,7 +1171,7 @@ impl Game {
     /// Panics if advance does not exist
     pub fn advance(&mut self, advance: &str, player_index: usize, payment: ResourcePile) {
         self.trigger_command_event(player_index, |e| &mut e.on_advance, &advance.to_string());
-        let advance = advances::get_advance_by_name(advance);
+        let advance = advances::get_advance(advance);
         (advance.player_initializer)(self, player_index);
         (advance.player_one_time_initializer)(self, player_index);
         let name = advance.name.clone();
