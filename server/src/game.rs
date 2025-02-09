@@ -183,8 +183,7 @@ impl Game {
                 .wonders_left
                 .into_iter()
                 .map(|wonder| {
-                    wonders::get_wonder_by_name(&wonder)
-                        .expect("wonder data should have valid wonder names")
+                    wonders::get_wonder(&wonder)
                 })
                 .collect(),
             wonder_amount_left: data.wonder_amount_left,

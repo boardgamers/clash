@@ -210,8 +210,7 @@ impl Player {
                 .wonder_cards
                 .iter()
                 .map(|wonder| {
-                    wonders::get_wonder_by_name(wonder)
-                        .expect("player data should have valid wonder cards")
+                    wonders::get_wonder(wonder)
                 })
                 .collect(),
             next_unit_id: data.next_unit_id,
