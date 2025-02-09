@@ -123,14 +123,15 @@ impl PlayingAction {
             Advance { advance, payment } => {
                 let player = &mut game.players[player_index];
                 let info = CommandUndoInfo::new(player);
-                let (options, i) = player.advance_cost_for_execute(&advance);
-                player.pay_cost(&options, &payment.clone());
+                let i = player.advance_cost_for_execute(&advance);
+                let options = &i.cost;
+                player.pay_cost(options, &payment.clone());
                 game.advance(&advance, player_index, payment);
-                for m in options.modifiers {
+                for m in &options.modifiers {
                     game.add_to_last_log_item(&format!(
                         ". {} reduced the cost to {}",
                         m.name(),
-                        i.cost
+                        i.cost.default.resource_amount(),
                     ));
                 }
                 info.apply(

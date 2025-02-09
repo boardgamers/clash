@@ -47,8 +47,14 @@ impl PlayerEvents {
 #[derive(Clone, PartialEq)]
 pub struct AdvanceCostInfo {
     pub name: String,
-    pub cost: u32,
+    pub cost: PaymentOptions,
     pub info: HashMap<String, String>,
+}
+
+impl AdvanceCostInfo {
+    pub fn set_cost(&mut self, cost: u32) {
+        self.cost.default.ideas = cost;
+    }
 }
 
 #[derive(Clone, PartialEq)]

@@ -596,16 +596,18 @@ impl Player {
 
     #[must_use]
     pub fn construct_cost(&self, building: Building, city: &City) -> PaymentOptions {
-        let mut cost = PaymentOptions::resources(CONSTRUCT_COST);
-        cost.modifiers = self.trigger_event(|e| &e.construct_cost, &mut cost, city, &building);
-        cost
+        self.trigger_cost_event(
+            |e| &e.construct_cost,
+            PaymentOptions::resources(CONSTRUCT_COST),
+            city,
+            &building,
+            |o| o,
+        )
     }
 
     #[must_use]
     pub fn wonder_cost(&self, wonder: &Wonder, city: &City) -> PaymentOptions {
-        let mut cost = wonder.cost.clone();
-        cost.modifiers = self.trigger_event(|e| &e.wonder_cost, &mut cost, city, wonder);
-        cost
+        self.trigger_cost_event(|e| &e.wonder_cost, wonder.cost.clone(), city, wonder, |o| o)
     }
 
     #[must_use]
@@ -615,34 +617,37 @@ impl Player {
         if steps > max_steps {
             None
         } else {
-            let mut options = PaymentOptions::sum(cost, &[ResourceType::MoodTokens]);
-            options.modifiers = self.trigger_event(|e| &e.happiness_cost, &mut options, &(), &());
-            Some(options)
+            Some(self.trigger_cost_event(
+                |e| &e.happiness_cost,
+                PaymentOptions::sum(cost, &[ResourceType::MoodTokens]),
+                &(),
+                &(),
+                |o| o,
+            ))
         }
     }
 
     #[must_use]
     pub fn advance_cost(&self, advance: &str) -> PaymentOptions {
-        self.advance_cost_for_execute(advance).0
+        self.advance_cost_for_execute(advance).cost
     }
 
     #[must_use]
-    pub fn advance_cost_for_execute(&self, advance: &str) -> (PaymentOptions, AdvanceCostInfo) {
-        let info = self.event_info.clone();
-        let mut i = AdvanceCostInfo {
-            name: advance.to_string(),
-            cost: ADVANCE_COST,
-            info,
-        };
-
-        let m = self.trigger_event(|e| &e.advance_cost, &mut i, &(), &());
-        let mut payment_options = PaymentOptions::sum(
-            i.cost,
-            &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
-        );
-        payment_options.modifiers = m;
-
-        (payment_options, i)
+    pub fn advance_cost_for_execute(&self, advance: &str) -> AdvanceCostInfo {
+        self.trigger_cost_event(
+            |e| &e.advance_cost,
+            AdvanceCostInfo {
+                name: advance.to_string(),
+                cost: PaymentOptions::sum(
+                    ADVANCE_COST,
+                    &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
+                ),
+                info: self.event_info.clone(),
+            },
+            &(),
+            &(),
+            |i| &mut i.cost,
+        )
     }
 
     #[must_use]
@@ -778,11 +783,16 @@ impl Player {
             return None;
         }
         let vec = units.clone().to_vec();
-        let mut cost = RecruitCost {
-            cost: PaymentOptions::resources(vec.iter().map(UnitType::cost).sum()),
-            units: units.clone(),
-        };
-        cost.cost.modifiers = self.trigger_event(|e| &e.recruit_cost, &mut cost, &(), &());
+        let cost = self.trigger_cost_event(
+            |e| &e.recruit_cost,
+            RecruitCost {
+                cost: PaymentOptions::resources(vec.iter().map(UnitType::cost).sum()),
+                units: units.clone(),
+            },
+            &(),
+            &(),
+            |o| &mut o.cost,
+        );
         if !self.can_afford(&cost.cost) {
             return None;
         }
@@ -1026,6 +1036,23 @@ impl Player {
     {
         let e = event(&self.events);
         e.get().trigger(value, info, details)
+    }
+
+    pub(crate) fn trigger_cost_event<T, U, V>(
+        &self,
+        event: fn(&PlayerEvents) -> &Event<T, U, V>,
+        mut value: T,
+        info: &U,
+        details: &V,
+        get_payment_options: fn(&mut T) -> &mut PaymentOptions,
+    ) -> T
+    where
+        T: Clone + PartialEq,
+    {
+        let modifiers = self.trigger_event(event, &mut value, info, details);
+        let options = get_payment_options(&mut value);
+        options.modifiers = modifiers;
+        value
     }
 
     pub(crate) fn trigger_player_event<U, V>(

@@ -28,7 +28,7 @@ fn astronomy() -> AdvanceBuilder {
         |event| &mut event.advance_cost,
         |i, (), ()| {
             if i.name == "Navigation" || i.name == "Cartography" {
-                i.cost = 0;
+                i.set_cost(0);
             }
         },
         0,
@@ -45,7 +45,7 @@ fn math() -> AdvanceBuilder {
         |event| &mut event.advance_cost,
         |i, (), ()| {
             if i.name == "Engineering" || i.name == "Roads" {
-                i.cost = 0;
+                i.set_cost(0);
             }
         },
         0,

@@ -74,9 +74,7 @@ fn priesthood() -> AdvanceBuilder {
                         .iter()
                         .any(|a| a.name == i.name)
                 {
-                    i.cost = 0;
-                    // todo generate from modifier
-                    // player.add_to_last_log_item("Priesthood made the Science advance free.");
+                    i.set_cost(0);
                     i.info.insert("Priesthood".to_string(), "used".to_string());
                 }
             },
