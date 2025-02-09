@@ -28,7 +28,6 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "A1"
         },
         {
@@ -36,55 +35,46 @@
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 0,
           "position": "C2"
         }
       ],
       "units": [
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Infantry",
           "id": 0
         },
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Cavalry",
           "id": 1
         },
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Leader",
           "id": 2
         },
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Elephant",
           "id": 3
         },
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
           "id": 4
         },
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
           "id": 5
         },
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
           "id": 6
         },
         {
-          "player_index": 0,
           "position": "C2",
           "unit_type": "Settler",
           "id": 7
@@ -97,8 +87,8 @@
         "Farming",
         "Mining",
         "Siegecraft",
-        "Tactics",
-        "Steel Weapons"
+        "Steel Weapons",
+        "Tactics"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
@@ -107,32 +97,6 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "collect_options": [
-        [
-          "Mountain",
-          [
-            {
-              "ore": 1
-            }
-          ]
-        ],
-        [
-          "Fertile",
-          [
-            {
-              "food": 1
-            }
-          ]
-        ],
-        [
-          "Forest",
-          [
-            {
-              "wood": 1
-            }
-          ]
-        ]
-      ],
       "next_unit_id": 8
     },
     {
@@ -164,19 +128,16 @@
           "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
-          "player_index": 1,
           "position": "C1"
         }
       ],
       "units": [
         {
-          "player_index": 1,
           "position": "C1",
           "unit_type": "Infantry",
           "id": 0
         },
         {
-          "player_index": 1,
           "position": "C1",
           "unit_type": "Infantry",
           "id": 1
@@ -188,8 +149,8 @@
       "advances": [
         "Farming",
         "Mining",
-        "Tactics",
-        "Steel Weapons"
+        "Steel Weapons",
+        "Tactics"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
@@ -198,32 +159,6 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "collect_options": [
-        [
-          "Mountain",
-          [
-            {
-              "ore": 1
-            }
-          ]
-        ],
-        [
-          "Fertile",
-          [
-            {
-              "food": 1
-            }
-          ]
-        ],
-        [
-          "Forest",
-          [
-            {
-              "wood": 1
-            }
-          ]
-        ]
-      ],
       "next_unit_id": 2
     }
   ],
@@ -315,42 +250,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "undo_context_stack": [
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Recruit": {}
-    },
-    {
-      "Movement": {
-        "movement_actions_left": 2
-      }
-    }
-  ]
+  "wonder_amount_left": 1
 }

@@ -67,7 +67,7 @@ impl StatusPhaseAction {
                         .can_advance_free(&advances::get_advance_by_name(advance)),
                     "Illegal action"
                 );
-                game.advance(advance, player_index);
+                game.advance(advance, player_index, ResourcePile::empty());
             }
             StatusPhaseAction::RazeSize1City(ref city) => {
                 if let RazeSize1City::Position(city) = *city {
@@ -100,7 +100,7 @@ impl StatusPhaseAction {
 pub const CHANGE_GOVERNMENT_COST: ResourcePile = ResourcePile::new(0, 0, 0, 0, 0, 1, 1);
 
 fn change_government_type(game: &mut Game, player_index: usize, new_government: &ChangeGovernment) {
-    game.players[player_index].loose_resources(CHANGE_GOVERNMENT_COST);
+    game.players[player_index].lose_resources(CHANGE_GOVERNMENT_COST);
     let government = &new_government.new_government;
     let a = advances::get_leading_government_advance(government).expect("government should exist");
     assert!(
@@ -127,7 +127,11 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
     }
 
     let new_government_advances = advances::get_government(government);
-    game.advance(&new_government_advances[0].name, player_index);
+    game.advance(
+        &new_government_advances[0].name,
+        player_index,
+        ResourcePile::empty(),
+    );
     for advance in &new_government.additional_advances {
         let (pos, advance) = new_government_advances
             .iter()
@@ -139,7 +143,7 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
             pos > 0,
             "Additional advances should not include the leading government advance"
         );
-        game.advance(&advance.name, player_index);
+        game.advance(&advance.name, player_index, ResourcePile::empty());
     }
 }
 

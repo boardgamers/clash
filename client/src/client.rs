@@ -165,7 +165,12 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::CustomPhasePaymentRequest(c) => {
             custom_actions_ui::custom_phase_payment_dialog(rc, c)
         }
-        ActiveDialog::CustomPhaseRewardRequest(p) => custom_actions_ui::reward_dialog(rc, p),
+        ActiveDialog::CustomPhaseResourceRewardRequest(p) => {
+            custom_actions_ui::payment_reward_dialog(rc, p)
+        }
+        ActiveDialog::CustomPhaseAdvanceRewardRequest(r) => {
+            custom_actions_ui::advance_reward_dialog(rc, r, ActiveDialog::event_origin(rc).name())
+        }
     }
 }
 

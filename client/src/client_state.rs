@@ -18,7 +18,7 @@ use server::action::Action;
 use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
 use server::content::advances::{NAVIGATION, ROADS};
-use server::content::custom_phase_actions::CustomPhaseRequest;
+use server::content::custom_phase_actions::{CustomPhaseAdvanceRewardRequest, CustomPhaseRequest};
 use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
 use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
@@ -59,7 +59,8 @@ pub enum ActiveDialog {
     Retreat,
     RemoveCasualties(RemoveCasualtiesSelection),
 
-    CustomPhaseRewardRequest(Payment),
+    CustomPhaseResourceRewardRequest(Payment),
+    CustomPhaseAdvanceRewardRequest(CustomPhaseAdvanceRewardRequest),
     CustomPhasePaymentRequest(Vec<Payment>),
 }
 
@@ -93,7 +94,8 @@ impl ActiveDialog {
             ActiveDialog::PlaceSettler => "place settler",
             ActiveDialog::Retreat => "retreat",
             ActiveDialog::RemoveCasualties(_) => "remove casualties",
-            ActiveDialog::CustomPhaseRewardRequest(_) => "trade route selection",
+            ActiveDialog::CustomPhaseResourceRewardRequest(_) => "trade route selection",
+            ActiveDialog::CustomPhaseAdvanceRewardRequest(_) => "advance selection",
             ActiveDialog::CustomPhasePaymentRequest(_) => "custom phase payment request",
         }
     }
@@ -185,16 +187,29 @@ impl ActiveDialog {
                 }
             )],
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
-            ActiveDialog::CustomPhaseRewardRequest(_) => {
-                vec!["Select trade route reward".to_string()]
-            }
-            ActiveDialog::CustomPhasePaymentRequest(_r) => {
-                match &rc.game.custom_phase_state.current.as_ref().unwrap().origin {
-                    EventOrigin::Advance(a) => advance_help(rc, a),
-                    _ => vec![], // TODO
-                }
-            }
+            ActiveDialog::CustomPhaseResourceRewardRequest(_)
+            | ActiveDialog::CustomPhaseAdvanceRewardRequest(_)
+            | ActiveDialog::CustomPhasePaymentRequest(_) => Self::event_help(rc),
         }
+    }
+
+    #[must_use]
+    pub fn event_help(rc: &RenderContext) -> Vec<String> {
+        match &Self::event_origin(rc) {
+            EventOrigin::Advance(a) => advance_help(rc, a),
+            _ => vec![], // TODO
+        }
+    }
+
+    #[must_use]
+    pub fn event_origin(rc: &RenderContext) -> EventOrigin {
+        rc.game
+            .custom_phase_state
+            .current
+            .as_ref()
+            .unwrap()
+            .origin
+            .clone()
     }
 
     #[must_use]
@@ -221,6 +236,7 @@ impl ActiveDialog {
                 | ActiveDialog::AdvancePayment(_)
                 | ActiveDialog::ChangeGovernmentType
                 | ActiveDialog::ChooseAdditionalAdvances(_)
+                | ActiveDialog::CustomPhaseAdvanceRewardRequest(_)
         )
     }
 }
@@ -525,8 +541,13 @@ impl State {
                         })
                         .collect(),
                 ),
-                CustomPhaseRequest::Reward(r) => {
-                    ActiveDialog::CustomPhaseRewardRequest(Payment::new_gain(&r.reward, &r.name))
+                CustomPhaseRequest::ResourceReward(r) => {
+                    ActiveDialog::CustomPhaseResourceRewardRequest(Payment::new_gain(
+                        &r.reward, &r.name,
+                    ))
+                }
+                CustomPhaseRequest::AdvanceReward(r) => {
+                    ActiveDialog::CustomPhaseAdvanceRewardRequest(r.clone())
                 }
             };
         }

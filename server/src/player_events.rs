@@ -1,53 +1,59 @@
 use crate::action::Action;
 use crate::collect::CollectContext;
 use crate::combat::{Combat, CombatStrength};
-use crate::content::custom_phase_actions::{
-    CurrentCustomPhaseEvent, CustomPhaseEventAction, CustomPhaseEventType,
-};
+use crate::content::custom_phase_actions::CustomPhaseEventType;
+use crate::events::Event;
 use crate::game::Game;
 use crate::map::Terrain;
 use crate::payment::PaymentOptions;
 use crate::playing_actions::PlayingActionType;
 use crate::unit::Units;
 use crate::{
-    city::City, city_pieces::Building, events::EventMut, player::Player, position::Position,
+    city::City, city_pieces::Building, player::Player, position::Position,
     resource_pile::ResourcePile, wonder::Wonder,
 };
 use std::collections::{HashMap, HashSet};
 
-type CustomPhaseEvent = EventMut<Game, usize, CustomPhaseEventType>;
-
 #[derive(Default)]
 pub(crate) struct PlayerEvents {
-    pub on_construct: EventMut<Player, Position, Building>,
-    pub on_undo_construct: EventMut<Player, Position, Building>,
-    pub on_construct_wonder: EventMut<Player, Position, Wonder>,
-    pub on_undo_construct_wonder: EventMut<Player, Position, Wonder>,
-    pub on_advance: EventMut<Player, String, ()>,
-    pub on_undo_advance: EventMut<Player, String, ()>,
-    pub before_move: EventMut<PlayerCommands, Game, MoveInfo>,
-    pub after_execute_action: EventMut<Player, Action, ()>,
-    pub before_undo_action: EventMut<Player, Action, ()>,
+    pub on_construct: Event<Game, CustomPhaseInfo, Building>,
+    pub on_construct_wonder: Event<Player, Position, Wonder>,
+    pub on_advance: Event<PlayerCommands, Game, String>,
+    pub on_advance_custom_phase: Event<Game, CustomPhaseInfo, AdvanceInfo>,
+    pub before_move: Event<PlayerCommands, Game, MoveInfo>,
+    pub after_execute_action: Event<Player, Action>,
+    pub before_undo_action: Event<Player, Action>,
 
-    pub construct_cost: EventMut<PaymentOptions, City, Building>,
-    pub wonder_cost: EventMut<PaymentOptions, City, Wonder>,
-    pub advance_cost: EventMut<u32, String>,
-    pub happiness_cost: EventMut<PaymentOptions, (), ()>,
-    pub recruit_cost: EventMut<RecruitCost, (), ()>,
+    pub construct_cost: Event<PaymentOptions, City, Building>,
+    pub wonder_cost: Event<PaymentOptions, City, Wonder>,
+    pub advance_cost: Event<u32, String>,
+    pub happiness_cost: Event<PaymentOptions>,
+    pub recruit_cost: Event<RecruitCost>,
 
-    pub is_playing_action_available: EventMut<bool, PlayingActionType, Player>,
-    pub terrain_collect_options: EventMut<HashMap<Terrain, HashSet<ResourcePile>>, (), ()>,
-    pub collect_options: EventMut<HashMap<Position, HashSet<ResourcePile>>, CollectContext, Game>,
-    pub on_turn_start: CustomPhaseEvent,
-    pub on_combat_start: CustomPhaseEvent,
-    pub on_combat_round: EventMut<CombatStrength, Combat, Game>,
-    pub redo_custom_phase_action: EventMut<Game, CurrentCustomPhaseEvent, CustomPhaseEventAction>,
+    pub is_playing_action_available: Event<bool, PlayingActionType, Player>,
+    pub terrain_collect_options: Event<HashMap<Terrain, HashSet<ResourcePile>>>,
+    pub collect_options: Event<HashMap<Position, HashSet<ResourcePile>>, CollectContext, Game>,
+    pub on_turn_start: Event<Game, CustomPhaseInfo>,
+    pub on_combat_start: Event<Game, CustomPhaseInfo>,
+    pub on_combat_round: Event<CombatStrength, Combat, Game>,
 }
 
 impl PlayerEvents {
     pub fn new() -> PlayerEvents {
         Self::default()
     }
+}
+
+#[derive(Clone, PartialEq)]
+pub struct AdvanceInfo {
+    pub name: String,
+    pub payment: ResourcePile,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct CustomPhaseInfo {
+    pub event_type: CustomPhaseEventType,
+    pub player: usize,
 }
 
 #[derive(Clone, PartialEq)]
@@ -77,14 +83,18 @@ impl MoveInfo {
 
 #[derive(Clone, PartialEq)]
 pub struct PlayerCommands {
+    pub name: String,
+    pub index: usize,
     pub info: HashMap<String, String>,
     pub log_edits: Vec<String>,
     pub gained_resources: ResourcePile,
 }
 
 impl PlayerCommands {
-    pub fn new(info: HashMap<String, String>) -> PlayerCommands {
+    pub fn new(player_index: usize, name: String, info: HashMap<String, String>) -> PlayerCommands {
         PlayerCommands {
+            name,
+            index: player_index,
             info,
             log_edits: Vec::new(),
             gained_resources: ResourcePile::default(),

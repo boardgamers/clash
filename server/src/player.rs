@@ -1,6 +1,7 @@
 use crate::advance::Advance;
 use crate::consts::SHIP_CAPACITY;
 use crate::content::advances::get_advance_by_name;
+use crate::events::Event;
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
 use crate::movement::move_routes;
@@ -48,7 +49,7 @@ pub struct Player {
     pub resource_limit: ResourcePile,
     // transient, only for the current turn, only the active player can gain resources
     pub wasted_resources: ResourcePile,
-    pub(crate) events: Option<PlayerEvents>,
+    pub(crate) events: PlayerEvents,
     pub cities: Vec<City>,
     pub units: Vec<Unit>,
     pub civilization: Civilization,
@@ -186,7 +187,7 @@ impl Player {
             resources: data.resources,
             resource_limit: data.resource_limit,
             wasted_resources: ResourcePile::empty(),
-            events: Some(PlayerEvents::default()),
+            events: PlayerEvents::new(),
             cities: data
                 .cities
                 .into_iter()
@@ -318,7 +319,7 @@ impl Player {
             resources: ResourcePile::food(2),
             resource_limit: ResourcePile::new(2, 7, 7, 7, 7, 0, 0),
             wasted_resources: ResourcePile::empty(),
-            events: Some(PlayerEvents::new()),
+            events: PlayerEvents::new(),
             cities: Vec::new(),
             units: Vec::new(),
             active_leader: None,
@@ -425,6 +426,11 @@ impl Player {
             .find_map(|advance| advance.government.clone())
     }
 
+    pub fn gain_resources_in_undo(&mut self, resources: ResourcePile) {
+        // resource limit may be adjusted later
+        self.resources += resources;
+    }
+
     pub fn gain_resources(&mut self, resources: ResourcePile) {
         self.resources += resources;
         let waste = self.resources.apply_resource_limit(&self.resource_limit);
@@ -443,7 +449,7 @@ impl Player {
     /// Panics if player cannot afford the resources
     pub fn pay_cost(&mut self, cost: &PaymentOptions, payment: &ResourcePile) {
         assert!(cost.can_afford(payment), "invalid payment");
-        self.loose_resources(payment.clone());
+        self.lose_resources(payment.clone());
     }
 
     ///
@@ -451,9 +457,9 @@ impl Player {
     /// # Panics
     ///
     /// Panics if player cannot afford the resources
-    pub fn loose_resources(&mut self, resources: ResourcePile) {
+    pub fn lose_resources(&mut self, resources: ResourcePile) {
         assert!(
-            self.resources.has_at_least(&resources, 1),
+            self.resources.has_at_least(&resources),
             "player should be able to afford the resources"
         );
         self.resources -= resources;
@@ -598,18 +604,14 @@ impl Player {
     #[must_use]
     pub fn construct_cost(&self, building: Building, city: &City) -> PaymentOptions {
         let mut cost = PaymentOptions::resources(CONSTRUCT_COST);
-        self.get_events()
-            .construct_cost
-            .trigger(&mut cost, city, &building);
+        self.trigger_event(|e| &e.construct_cost, &mut cost, city, &building);
         cost
     }
 
     #[must_use]
     pub fn wonder_cost(&self, wonder: &Wonder, city: &City) -> PaymentOptions {
         let mut cost = wonder.cost.clone();
-        self.get_events()
-            .wonder_cost
-            .trigger(&mut cost, city, wonder);
+        self.trigger_event(|e| &e.wonder_cost, &mut cost, city, wonder);
         cost
     }
 
@@ -621,9 +623,7 @@ impl Player {
             None
         } else {
             let mut options = PaymentOptions::sum(cost, &[ResourceType::MoodTokens]);
-            self.get_events()
-                .happiness_cost
-                .trigger(&mut options, &(), &());
+            self.trigger_event(|e| &e.happiness_cost, &mut options, &(), &());
             Some(options)
         }
     }
@@ -631,9 +631,7 @@ impl Player {
     #[must_use]
     pub fn advance_cost(&self, advance: &str) -> PaymentOptions {
         let mut cost = ADVANCE_COST;
-        self.get_events()
-            .advance_cost
-            .trigger(&mut cost, &advance.to_string(), &());
+        self.trigger_event(|e| &e.advance_cost, &mut cost, &advance.to_string(), &());
         PaymentOptions::sum(
             cost,
             &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
@@ -686,11 +684,6 @@ impl Player {
         city_position: Position,
         port_position: Option<Position>,
     ) {
-        self.take_events(|events, player| {
-            events
-                .on_construct
-                .trigger(player, &city_position, &building);
-        });
         let index = self.index;
         let city = self
             .get_city_mut(city_position)
@@ -711,11 +704,6 @@ impl Player {
     ///
     /// Panics if city does not exist
     pub fn undo_construct(&mut self, building: Building, city_position: Position) {
-        self.take_events(|events, player| {
-            events
-                .on_undo_construct
-                .trigger(player, &city_position, &building);
-        });
         let city = self
             .get_city_mut(city_position)
             .expect("player should have city");
@@ -725,7 +713,7 @@ impl Player {
             city.port_position = None;
         }
         if matches!(building, Academy) {
-            self.loose_resources(ResourcePile::ideas(2));
+            self.lose_resources(ResourcePile::ideas(2));
         }
     }
 
@@ -787,7 +775,7 @@ impl Player {
             cost: PaymentOptions::resources(vec.iter().map(UnitType::cost).sum()),
             units: units.clone(),
         };
-        self.get_events().recruit_cost.trigger(&mut cost, &(), &());
+        self.trigger_event(|e| &e.recruit_cost, &mut cost, &(), &());
         if !self.can_afford(&cost.cost) {
             return None;
         }
@@ -1018,22 +1006,28 @@ impl Player {
             .collect()
     }
 
-    pub(crate) fn get_events(&self) -> &PlayerEvents {
-        self.events.as_ref().expect("events should be set")
+    pub(crate) fn trigger_event<T, U, V>(
+        &self,
+        event: fn(&PlayerEvents) -> &Event<T, U, V>,
+        value: &mut T,
+        info: &U,
+        details: &V,
+    ) where
+        T: Clone + PartialEq,
+    {
+        let e = event(&self.events);
+        e.get().trigger(value, info, details);
     }
 
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if 'events' is set to None
-    pub(crate) fn take_events<F>(&mut self, action: F)
-    where
-        F: FnOnce(&PlayerEvents, &mut Player),
-    {
-        let events = self.events.take().expect("events should be set");
-        action(&events, self);
-        self.events = Some(events);
+    pub(crate) fn trigger_player_event<U, V>(
+        &mut self,
+        event: fn(&mut PlayerEvents) -> &mut Event<Player, U, V>,
+        info: &U,
+        details: &V,
+    ) {
+        let e = event(&mut self.events).take();
+        e.trigger(self, info, details);
+        event(&mut self.events).set(e);
     }
 }
 

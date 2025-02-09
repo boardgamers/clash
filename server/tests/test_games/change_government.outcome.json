@@ -10,7 +10,7 @@
         "food": 2,
         "wood": 7,
         "ore": 7,
-        "ideas": 3,
+        "ideas": 2,
         "gold": 7,
         "mood_tokens": 6,
         "culture_tokens": 6
@@ -19,7 +19,7 @@
         "food": 2,
         "wood": 7,
         "ore": 7,
-        "ideas": 7,
+        "ideas": 2,
         "gold": 7,
         "mood_tokens": 7,
         "culture_tokens": 7
@@ -86,11 +86,12 @@
       "active_leader": null,
       "available_leaders": [],
       "advances": [
+        "Dedication",
         "Dogma",
         "Farming",
         "Fishing",
         "Mining",
-        "Theocracy 2"
+        "State Religion"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
@@ -219,12 +220,22 @@
             "ChangeGovernment": {
               "new_government": "Theocracy",
               "additional_advances": [
-                "Theocracy 2"
+                "Dedication"
               ]
             }
           }
         }
-      }
+      },
+      "undo": [
+        {
+          "WastedResources": {
+            "resources": {
+              "ideas": 1
+            },
+            "player_index": 0
+          }
+        }
+      ]
     }
   ],
   "action_log_index": 1,
@@ -257,8 +268,8 @@
     "It's Player2's turn",
     "Player2 did not rase a city",
     "It's Player1's turn",
-    "Player1 changed their government from Democracy to Theocracy - additional advances: Theocracy 2",
-    "It's Player2's turn"
+    "Player1 changed their government from Democracy to Theocracy - additional advances: Dedication",
+    "It's Player2's turn. Player1 Could not store 1 idea"
   ],
   "undo_limit": 1,
   "actions_left": 3,

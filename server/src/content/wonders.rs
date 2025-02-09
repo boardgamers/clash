@@ -74,7 +74,7 @@ pub fn construct_wonder(
         city.can_build_wonder(&wonder, &game.players[player_index], game),
         "Illegal action"
     );
-    game.players[player_index].loose_resources(payment);
+    game.players[player_index].lose_resources(payment);
 
     game.build_wonder(wonder, city_position, player_index);
 }

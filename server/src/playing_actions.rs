@@ -5,6 +5,8 @@ use PlayingAction::*;
 use crate::action::Action;
 use crate::city::MoodState;
 use crate::collect::{collect, undo_collect};
+use crate::content::advances::get_advance_by_name;
+use crate::content::custom_phase_actions::CustomPhaseEventType;
 use crate::game::{CulturalInfluenceResolution, GameState};
 use crate::payment::PaymentOptions;
 use crate::unit::{Unit, Units};
@@ -23,7 +25,6 @@ pub struct Construct {
     pub city_piece: Building,
     pub payment: ResourcePile,
     pub port_position: Option<Position>,
-    pub temple_bonus: Option<ResourcePile>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
@@ -78,9 +79,7 @@ impl PlayingActionType {
     pub fn is_available(&self, game: &Game, player_index: usize) -> bool {
         let mut possible = true;
         let p = &game.players[player_index];
-        p.get_events()
-            .is_playing_action_available
-            .trigger(&mut possible, self, p);
+        p.trigger_event(|e| &e.is_playing_action_available, &mut possible, self, p);
         possible
     }
 }
@@ -118,13 +117,13 @@ impl PlayingAction {
             assert_ne!(game.actions_left, 0, "Illegal action");
             game.actions_left -= 1;
         }
-        game.players[player_index].loose_resources(self.action_type().cost);
+        game.players[player_index].lose_resources(self.action_type().cost);
 
         match self {
             Advance { advance, payment } => {
                 let player = &mut game.players[player_index];
-                player.pay_cost(&player.advance_cost(&advance), &payment);
-                game.advance(&advance, player_index);
+                player.pay_cost(&player.advance_cost(&advance), &payment.clone());
+                game.advance(&advance, player_index, payment);
             }
             FoundCity { settler } => {
                 let settler = game.players[player_index].remove_unit(settler);
@@ -153,19 +152,10 @@ impl PlayingAction {
                     panic!("Illegal action");
                 }
                 let player_mut = &mut game.players[player_index];
-                if matches!(c.city_piece, Temple) {
-                    let building_bonus = c.temple_bonus.expect("Illegal action");
-                    assert!(
-                        building_bonus == ResourcePile::mood_tokens(1)
-                            || building_bonus == ResourcePile::culture_tokens(1),
-                        "Illegal action"
-                    );
-                    player_mut.gain_resources(building_bonus);
-                } else if c.temple_bonus.is_some() {
-                    panic!("Illegal action");
-                }
+
                 player_mut.pay_cost(&cost, &c.payment);
                 player_mut.construct(c.city_piece, c.city_position, c.port_position);
+                Self::on_construct(game, player_index, c.city_piece);
             }
             Collect(c) => {
                 if game.action_log.iter().any(|i| {
@@ -220,7 +210,7 @@ impl PlayingAction {
                 let self_influence = starting_city_position == target_city_position;
 
                 // currectly, there is no way to have different costs for this
-                game.players[player_index].loose_resources(range_boost_cost.default);
+                game.players[player_index].lose_resources(range_boost_cost.default);
                 let roll = game.get_next_dice_roll().value;
                 let success = roll == 5 || roll == 6;
                 if success {
@@ -274,6 +264,15 @@ impl PlayingAction {
         }
     }
 
+    pub(crate) fn on_construct(game: &mut Game, player_index: usize, building: Building) {
+        game.trigger_custom_phase_event(
+            player_index,
+            |e| &mut e.on_construct,
+            CustomPhaseEventType::OnConstruct,
+            &building,
+        );
+    }
+
     pub(crate) fn roll_boost_cost(roll: u8) -> ResourcePile {
         ResourcePile::culture_tokens(5 - roll as u32)
     }
@@ -309,18 +308,22 @@ impl PlayingAction {
     /// # Panics
     ///
     /// Panics if no temple bonus is given when undoing a construct temple action
-    pub fn undo(self, game: &mut Game, player_index: usize) {
+    pub fn undo(self, game: &mut Game, player_index: usize, was_custom_phase: bool) {
         let free_action = self.action_type().free;
         if !free_action {
             game.actions_left += 1;
         }
-        game.players[player_index].gain_resources(self.action_type().cost);
+        game.players[player_index].gain_resources_in_undo(self.action_type().cost);
 
         match self {
             Advance { advance, payment } => {
                 let player = &mut game.players[player_index];
-                player.gain_resources(payment);
-                game.undo_advance(&advance, player_index);
+                player.gain_resources_in_undo(payment);
+                game.undo_advance(
+                    &get_advance_by_name(&advance),
+                    player_index,
+                    was_custom_phase,
+                );
             }
             FoundCity { settler: _ } => {
                 let Some(UndoContext::FoundCity { settler }) = game.pop_undo_context() else {
@@ -342,17 +345,11 @@ impl PlayingAction {
             Construct(c) => {
                 let player = &mut game.players[player_index];
                 player.undo_construct(c.city_piece, c.city_position);
-                player.gain_resources(c.payment);
-                if matches!(c.city_piece, Temple) {
-                    player.loose_resources(
-                        c.temple_bonus
-                            .expect("build data should contain temple bonus"),
-                    );
-                }
+                player.gain_resources_in_undo(c.payment);
             }
             Collect(c) => undo_collect(game, player_index, c),
             Recruit(r) => {
-                game.players[player_index].gain_resources(r.payment);
+                game.players[player_index].gain_resources_in_undo(r.payment);
                 game.undo_recruit(
                     player_index,
                     r.units,
@@ -437,7 +434,7 @@ pub(crate) fn undo_increase_happiness(game: &mut Game, player_index: usize, i: I
             city.decrease_mood_state();
         }
     }
-    player.gain_resources(i.payment);
+    player.gain_resources_in_undo(i.payment);
 
     if let Some(UndoContext::IncreaseHappiness { angry_activations }) = game.pop_undo_context() {
         for city_position in angry_activations {

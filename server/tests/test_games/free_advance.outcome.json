@@ -239,7 +239,7 @@
     "Player2 ended their turn with 3 actions left",
     "It's Player1's turn",
     "The game has entered the 1st status phase",
-    "Player1 advanced Storage for free",
+    "Player1 advanced Storage for free and gained 1 mood token",
     "It's Player2's turn"
   ],
   "undo_limit": 1,

@@ -220,8 +220,7 @@
               "wood": 1,
               "ore": 1
             },
-            "port_position": "A2",
-            "temple_bonus": null
+            "port_position": "A2"
           }
         }
       }

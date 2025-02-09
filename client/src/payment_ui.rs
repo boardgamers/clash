@@ -196,7 +196,7 @@ fn ok_tooltip(payments: &[Payment], mut available: ResourcePile) -> OkTooltip {
         let name = &payment.name;
         let tooltip = if payment.optional && pile.is_empty() {
             OkTooltip::Valid(format!("Pay nothing for {name}"))
-        } else if available.has_at_least(&pile, 1) && cost.is_valid_payment(&pile) {
+        } else if available.has_at_least(&pile) && cost.is_valid_payment(&pile) {
             // make sure that we can afford all the payments
             available -= payment.to_resource_pile();
             OkTooltip::Valid(format!("Pay {pile} for {name}"))

@@ -51,7 +51,6 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
                     city_piece: *b,
                     payment,
                     port_position: *pos,
-                    temple_bonus: None,
                 })),
                 vec![],
                 city,

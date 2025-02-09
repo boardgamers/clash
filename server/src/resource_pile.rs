@@ -76,7 +76,12 @@ impl ResourcePile {
     }
 
     #[must_use]
-    pub fn has_at_least(&self, other: &ResourcePile, times: u32) -> bool {
+    pub fn has_at_least(&self, other: &ResourcePile) -> bool {
+        self.has_at_least_times(other, 1)
+    }
+
+    #[must_use]
+    pub fn has_at_least_times(&self, other: &ResourcePile, times: u32) -> bool {
         self.food >= other.food * times
             && self.wood >= other.wood * times
             && self.ore >= other.ore * times

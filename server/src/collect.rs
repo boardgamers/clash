@@ -58,7 +58,7 @@ pub(crate) fn undo_collect(game: &mut Game, player_index: usize, c: Collect) {
         .expect("city should be owned by the player")
         .undo_activate();
     let total_collect = c.collections.into_iter().map(|(_, collect)| collect).sum();
-    game.players[player_index].loose_resources(total_collect);
+    game.players[player_index].lose_resources(total_collect);
 }
 
 pub(crate) struct CollectContext {
@@ -86,9 +86,8 @@ pub fn possible_resource_collections(
     let mut terrain_options = HashMap::from(set);
     game.players[player_index]
         .events
-        .as_ref()
-        .expect("events should be set")
         .terrain_collect_options
+        .get()
         .trigger(&mut terrain_options, &(), &());
 
     let mut collect_options = city_pos
@@ -107,9 +106,8 @@ pub fn possible_resource_collections(
 
     game.players[player_index]
         .events
-        .as_ref()
-        .expect("events should be set")
         .collect_options
+        .get()
         .trigger(
             &mut collect_options,
             &CollectContext {

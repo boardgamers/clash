@@ -80,7 +80,7 @@ impl CustomAction {
                 wonder: _,
                 payment,
             } => {
-                game.players[player_index].gain_resources(payment);
+                game.players[player_index].gain_resources_in_undo(payment);
                 let wonder = game.undo_build_wonder(city_position, player_index);
                 game.players[player_index].wonder_cards.push(wonder);
             }

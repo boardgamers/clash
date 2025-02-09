@@ -402,7 +402,7 @@
     {
       "action": {
         "CustomPhaseEvent": {
-          "Reward": {
+          "ResourceReward": {
             "food": 1,
             "gold": 1
           }
@@ -418,7 +418,7 @@
               "priority": 0,
               "player_index": 1,
               "request": {
-                "Reward": {
+                "ResourceReward": {
                   "reward": {
                     "default": {
                       "gold": 2

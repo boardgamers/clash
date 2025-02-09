@@ -181,15 +181,17 @@ pub(crate) fn start_combat(game: &mut Game, combat: Combat) {
     }
     if game.trigger_custom_phase_event(
         attacker,
-        |events| &events.on_combat_start,
+        |events| &mut events.on_combat_start,
         CustomPhaseEventType::StartCombatAttacker,
+        &(),
     ) {
         return;
     }
     if game.trigger_custom_phase_event(
         defender,
-        |events| &events.on_combat_start,
+        |events| &mut events.on_combat_start,
         CustomPhaseEventType::StartCombatDefender,
+        &(),
     ) {
         return;
     }
@@ -358,9 +360,8 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
         let mut attacker_strength = CombatStrength::new(c.attacker, true);
         game.players[c.attacker]
             .events
-            .as_ref()
-            .expect("events should be set")
             .on_combat_round
+            .get()
             .trigger(&mut attacker_strength, &c, game);
         let mut attacker_log = vec![];
         let attacker_rolls = roll(
@@ -379,9 +380,8 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
         let mut defender_strength = CombatStrength::new(c.defender, false);
         game.players[c.defender]
             .events
-            .as_ref()
-            .expect("events should be set")
             .on_combat_round
+            .get()
             .trigger(&mut defender_strength, &c, game);
         let defender_rolls = roll(
             game,
