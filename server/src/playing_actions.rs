@@ -123,12 +123,15 @@ impl PlayingAction {
             Advance { advance, payment } => {
                 let player = &mut game.players[player_index];
                 let info = player.event_info.clone();
-                let (options, i) = player.advance_cost_for_execute(&advance);
+                let (options, i, modifiers) = player.advance_cost_for_execute(&advance);
                 for (k, v) in i.info.clone() {
                     player.event_info.insert(k, v);
                 }
                 player.pay_cost(&options, &payment.clone());
                 game.advance(&advance, player_index, payment);
+                for m in modifiers {
+                    game.add_to_last_log_item(&format!(". {m} reduced the cost to {}", i.cost));
+                }
 
                 if info != i.info {
                     game.push_undo_context(UndoContext::Command(CommandUndoContext {

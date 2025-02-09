@@ -630,7 +630,7 @@ impl Player {
     }
 
     #[must_use]
-    pub fn advance_cost_for_execute(&self, advance: &str) -> (PaymentOptions, AdvanceCostInfo) {
+    pub fn advance_cost_for_execute(&self, advance: &str) -> (PaymentOptions, AdvanceCostInfo, Vec<String>) {
         let info = self.event_info.clone();
         let mut i = AdvanceCostInfo {
             name: advance.to_string(),
@@ -638,7 +638,7 @@ impl Player {
             info,
         };
 
-        self.trigger_event(|e| &e.advance_cost, &mut i, &(), &());
+        let modifiers = self.trigger_event(|e| &e.advance_cost, &mut i, &(), &());
 
         (
             PaymentOptions::sum(
@@ -646,6 +646,7 @@ impl Player {
                 &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
             ),
             i,
+            modifiers,
         )
     }
 
@@ -1023,11 +1024,11 @@ impl Player {
         value: &mut T,
         info: &U,
         details: &V,
-    ) where
+    ) -> Vec<String> where
         T: Clone + PartialEq,
     {
         let e = event(&self.events);
-        e.get().trigger(value, info, details);
+        e.get().trigger(value, info, details)
     }
 
     pub(crate) fn trigger_player_event<U, V>(
