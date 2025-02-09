@@ -1,5 +1,6 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::OkTooltip;
+use crate::event_ui::event_help;
 use crate::layout_ui::{bottom_centered_text_with_offset, draw_icon};
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name};
@@ -133,9 +134,23 @@ pub fn multi_payment_dialog(
         let cost = payment.cost.clone();
         let types = cost.possible_resource_types();
         let offset = vec2(0., i as f32 * -100.);
+        let suffix: Vec<String> = if rc.state.active_dialog.is_modal() {
+            payments
+                .iter()
+                .flat_map(|p| &p.cost.modifiers)
+                .flat_map(|o| event_help(o, false))
+                .collect::<Vec<_>>()
+        } else {
+            vec![]
+        };
+        let suffix = if suffix.is_empty() {
+            ""
+        } else {
+            &format!(" (Modifiers: {})", suffix.join(", "))
+        };
         bottom_centered_text_with_offset(
             rc,
-            &format!("{name} for {cost}"),
+            &format!("{name} for {cost}{suffix}"),
             offset + vec2(0., -30.),
         );
         let result = select_ui::count_dialog(

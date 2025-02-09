@@ -3,7 +3,7 @@ use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
 use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
-use crate::event_ui::{custom_phase_event_origin, event_help};
+use crate::event_ui::{custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
 use crate::log_ui::add_advance_help;
@@ -113,10 +113,9 @@ impl ActiveDialog {
                     "Click on a city to increase happiness".to_string(),
                 ]
             }
-            ActiveDialog::AdvancePayment(p) => pay_help(rc, p),
-            ActiveDialog::ConstructionPayment(_) | ActiveDialog::MovePayment(_) => {
-                vec!["Pay resources".to_string()]
-            }
+            ActiveDialog::AdvancePayment(p) => pay_help(p),
+            ActiveDialog::ConstructionPayment(p) => pay_help(&p.payment),
+            ActiveDialog::MovePayment(p) => pay_help(&p.payment),
             ActiveDialog::CollectResources(collect) => collect.help_text(rc.game),
             ActiveDialog::RecruitUnitSelection(_) => vec!["Click on a unit to recruit".to_string()],
             ActiveDialog::ReplaceUnits(_) => vec!["Click on a unit to replace".to_string()],
@@ -189,7 +188,7 @@ impl ActiveDialog {
             ActiveDialog::CustomPhaseResourceRewardRequest(_)
             | ActiveDialog::CustomPhaseAdvanceRewardRequest(_)
             | ActiveDialog::CustomPhasePaymentRequest(_) => {
-                event_help(rc, &custom_phase_event_origin(rc))
+                event_help(&custom_phase_event_origin(rc), true)
             }
         }
     }
@@ -216,14 +215,6 @@ impl ActiveDialog {
                 | ActiveDialog::CustomPhaseAdvanceRewardRequest(_)
         )
     }
-}
-
-fn pay_help(rc: &RenderContext, p: &Payment) -> Vec<String> {
-    let mut result = vec!["Pay resources".to_string()];
-    for o in p.cost.modifiers.clone() {
-        result.extend(event_help(rc, &o));
-    }
-    result
 }
 
 pub struct PendingUpdate {
