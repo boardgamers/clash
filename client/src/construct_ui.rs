@@ -103,14 +103,12 @@ impl ConstructionPayment {
     ) -> ConstructionPayment {
         let p = rc.game.get_player(city.player_index);
         let cost = match &project {
-            ConstructionProject::Building(b, _) => p.construct_cost(*b, city),
-            ConstructionProject::Wonder(name) => p
-                .wonder_cards
-                .iter()
-                .find(|w| w.name == *name)
-                .unwrap()
-                .cost
-                .clone(),
+            ConstructionProject::Building(b, _) => p.construct_cost(*b, city, None),
+            ConstructionProject::Wonder(name) => p.wonder_cost(
+                p.wonder_cards.iter().find(|w| w.name == *name).unwrap(),
+                city,
+                None,
+            ),
             ConstructionProject::Units(sel) => rc
                 .shown_player
                 .recruit_cost(
@@ -118,9 +116,11 @@ impl ConstructionPayment {
                     city.position,
                     sel.amount.leader_name.as_ref(),
                     &sel.replaced_units,
+                    None,
                 )
                 .unwrap(),
-        };
+        }
+        .cost;
 
         let payment = rc.new_payment(&cost, name, false);
         ConstructionPayment {

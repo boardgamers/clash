@@ -38,17 +38,19 @@ fn sanitation() -> AdvanceBuilder {
     .with_advance_bonus(MoodToken)
     .add_player_event_listener(
         |event| &mut event.recruit_cost,
-        |cost, (), ()| {
-            if cost.units.settlers > 0 {
-                cost.units.settlers -= 1;
+        |cost, units, ()| {
+            if units.settlers > 0 {
                 // insert at beginning so that it's preferred over gold
+                cost.log
+                    .push(". Sanitation reduced the cost of 1 Settler to 1 mood token".to_string());
+
                 cost.cost.conversions.insert(
                     0,
-                    PaymentConversion {
-                        from: vec![UnitType::cost(&UnitType::Settler)],
-                        to: ResourcePile::mood_tokens(1),
-                        limit: Some(1),
-                    },
+                    PaymentConversion::limited(
+                        vec![UnitType::cost(&UnitType::Settler)],
+                        ResourcePile::mood_tokens(1),
+                        1,
+                    ),
                 );
             }
         },

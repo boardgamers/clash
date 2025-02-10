@@ -26,9 +26,10 @@ fn astronomy() -> AdvanceBuilder {
     )
     .add_player_event_listener(
         |event| &mut event.advance_cost,
-        |i, (), ()| {
-            if i.name == "Navigation" || i.name == "Cartography" {
-                i.set_cost(0);
+        |i, a, ()| {
+            if a.name == "Navigation" || a.name == "Cartography" {
+                i.set_zero();
+                i.log.push(". Astronomy reduced the cost to 0".to_string());
             }
         },
         0,
@@ -43,9 +44,10 @@ fn math() -> AdvanceBuilder {
     )
     .add_player_event_listener(
         |event| &mut event.advance_cost,
-        |i, (), ()| {
-            if i.name == "Engineering" || i.name == "Roads" {
-                i.set_cost(0);
+        |i, a, ()| {
+            if a.name == "Engineering" || a.name == "Roads" {
+                i.log.push(". Math reduced the cost to 0".to_string());
+                i.set_zero();
             }
         },
         0,

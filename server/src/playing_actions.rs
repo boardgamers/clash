@@ -7,8 +7,9 @@ use crate::city::MoodState;
 use crate::collect::{collect, undo_collect};
 use crate::content::advances::get_advance;
 use crate::content::custom_phase_actions::CustomPhaseEventType;
-use crate::game::{CommandUndoContext, CommandUndoInfo, CulturalInfluenceResolution, GameState};
+use crate::game::{CulturalInfluenceResolution, GameState};
 use crate::payment::PaymentOptions;
+use crate::player_events::CostInfo;
 use crate::unit::{Unit, Units};
 use crate::{
     city::City,
@@ -121,26 +122,10 @@ impl PlayingAction {
 
         match self {
             Advance { advance, payment } => {
-                let player = &mut game.players[player_index];
-                let info = CommandUndoInfo::new(player);
-                let i = player.advance_cost_for_execute(&advance);
-                let options = &i.cost;
-                player.pay_cost(options, &payment.clone());
+                game.get_player(player_index)
+                    .advance_cost(&get_advance(&advance), Some(payment.clone()))
+                    .execute(game, &payment);
                 game.advance(&advance, player_index, payment);
-                for m in &options.modifiers {
-                    game.add_to_last_log_item(&format!(
-                        ". {} reduced the cost to {}",
-                        m.name(),
-                        i.cost.default.resource_amount(),
-                    ));
-                }
-                info.apply(
-                    game,
-                    CommandUndoContext {
-                        info: i.info.clone(),
-                        gained_resources: ResourcePile::empty(),
-                    },
-                );
             }
             FoundCity { settler } => {
                 let settler = game.players[player_index].remove_unit(settler);
@@ -154,7 +139,7 @@ impl PlayingAction {
             Construct(c) => {
                 let player = &game.players[player_index];
                 let city = player.get_city(c.city_position).expect("Illegal action");
-                let cost = player.construct_cost(c.city_piece, city);
+                let cost = player.construct_cost(c.city_piece, city, Some(c.payment.clone()));
                 assert!(
                     city.can_construct(c.city_piece, player, game),
                     "Illegal action"
@@ -168,10 +153,12 @@ impl PlayingAction {
                 } else if c.port_position.is_some() {
                     panic!("Illegal action");
                 }
-                let player_mut = &mut game.players[player_index];
-
-                player_mut.pay_cost(&cost, &c.payment);
-                player_mut.construct(c.city_piece, c.city_position, c.port_position);
+                game.players[player_index].construct(
+                    c.city_piece,
+                    c.city_position,
+                    c.port_position,
+                );
+                cost.execute(game, &c.payment);
                 Self::on_construct(game, player_index, c.city_piece);
             }
             Collect(c) => {
@@ -187,14 +174,14 @@ impl PlayingAction {
             }
             Recruit(r) => {
                 let player = &mut game.players[player_index];
-                let cost = player.recruit_cost(
+                if let Some(cost) = player.recruit_cost(
                     &r.units,
                     r.city_position,
                     r.leader_name.as_ref(),
                     &r.replaced_units,
-                );
-                if let Some(cost) = cost {
-                    player.pay_cost(&cost, &r.payment);
+                    Some(r.payment.clone()),
+                ) {
+                    cost.execute(game, &r.payment);
                 } else {
                     panic!("Cannot pay for units")
                 }
@@ -412,12 +399,12 @@ impl ActionType {
 
 pub(crate) fn increase_happiness(game: &mut Game, player_index: usize, i: IncreaseHappiness) {
     let player = &mut game.players[player_index];
-    let mut total_cost = PaymentOptions::free();
+    let mut total_cost: Option<CostInfo> = None;
     let mut angry_activations = vec![];
     for (city_position, steps) in i.happiness_increases {
         let city = player.get_city(city_position).expect("Illegal action");
         let cost = player
-            .increase_happiness_cost(city, steps)
+            .increase_happiness_cost(city, steps, None)
             .expect("Illegal action");
         if steps == 0 {
             continue;
@@ -425,17 +412,19 @@ pub(crate) fn increase_happiness(game: &mut Game, player_index: usize, i: Increa
         if city.mood_state == MoodState::Angry {
             angry_activations.push(city_position);
         }
-        if total_cost.is_free() {
-            total_cost = cost;
+        if let Some(ref mut total_cost) = total_cost {
+            total_cost.cost.default += cost.cost.default;
         } else {
-            total_cost.default += cost.default;
+            total_cost = Some(cost);
         }
         let city = player.get_city_mut(city_position).expect("Illegal action");
         for _ in 0..steps {
             city.increase_mood_state();
         }
     }
-    player.pay_cost(&total_cost, &i.payment);
+    total_cost
+        .expect("cost should be set")
+        .execute(game, &i.payment);
     game.push_undo_context(UndoContext::IncreaseHappiness { angry_activations });
 }
 

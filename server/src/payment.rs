@@ -23,6 +23,15 @@ impl PaymentConversion {
             limit: None,
         }
     }
+
+    #[must_use]
+    pub fn limited(from: Vec<ResourcePile>, to: ResourcePile, limit: u32) -> Self {
+        PaymentConversion {
+            from,
+            to,
+            limit: Some(limit),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -97,11 +106,11 @@ impl PaymentOptions {
             limit: None,
         }];
         if discount > 0 {
-            conversions.push(PaymentConversion {
-                from: base_resources.clone(),
-                to: ResourcePile::empty(),
-                limit: Some(discount),
-            });
+            conversions.push(PaymentConversion::limited(
+                base_resources.clone(),
+                ResourcePile::empty(),
+                discount,
+            ));
         }
         PaymentOptions {
             default: cost,

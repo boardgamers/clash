@@ -5,12 +5,13 @@
       "name": null,
       "id": 0,
       "resources": {
-        "food": 6,
+        "food": 7,
         "wood": 5,
         "ore": 5,
-        "gold": 4,
-        "mood_tokens": 12,
-        "culture_tokens": 11
+        "ideas": 1,
+        "gold": 5,
+        "mood_tokens": 11,
+        "culture_tokens": 10
       },
       "resource_limit": {
         "food": 7,
@@ -69,16 +70,6 @@
         {
           "position": "B3",
           "unit_type": "Settler",
-          "id": 3
-        },
-        {
-          "position": "B3",
-          "unit_type": "Settler",
-          "id": 4
-        },
-        {
-          "position": "B3",
-          "unit_type": "Settler",
           "id": 5
         },
         {
@@ -123,13 +114,14 @@
         "Free Economy",
         "Free Education",
         "Mining",
+        "Sanitation",
         "Storage",
         "Voting",
         "Writing"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 1,
+      "game_event_tokens": 2,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -350,103 +342,18 @@
           }
         }
       }
-    },
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Draft",
-            "payment": {
-              "food": 1,
-              "gold": 1
-            }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "CustomPhaseEvent": {
-          "Payment": [
-            {
-              "ideas": 1
-            }
-          ]
-        }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_used": [],
-            "last_priority_used": 1,
-            "current": {
-              "event_type": "OnAdvance",
-              "priority": 1,
-              "player_index": 0,
-              "request": {
-                "Payment": [
-                  {
-                    "cost": {
-                      "default": {
-                        "ideas": 1
-                      },
-                      "conversions": [
-                        {
-                          "from": [
-                            {
-                              "food": 1
-                            },
-                            {
-                              "wood": 1
-                            },
-                            {
-                              "ore": 1
-                            },
-                            {
-                              "ideas": 1
-                            }
-                          ],
-                          "to": {
-                            "gold": 1
-                          }
-                        }
-                      ]
-                    },
-                    "name": "Pay extra 1 idea for a mood token",
-                    "optional": true
-                  }
-                ]
-              },
-              "response": null,
-              "origin": {
-                "Advance": "Free Education"
-              }
-            }
-          }
-        },
-        {
-          "Command": {
-            "info": {},
-            "gained_resources": {
-              "mood_tokens": 1
-            }
-          }
-        }
-      ]
     }
   ],
-  "action_log_index": 4,
+  "action_log_index": 2,
   "log": [
     "The game has started",
     "Age 1 has started",
     "Round 1/3",
     "Player1 paid 2 ideas to get the Writing advance",
-    "Player1 paid 2 ideas to get the Free Education advance",
-    "Player1 paid 1 food and 1 gold to get the Draft advance. Player gained 1 culture token as advance bonus",
-    "Player1 paid 1 idea for free education to gain 1 mood token"
+    "Player1 paid 2 ideas to get the Free Education advance"
   ],
   "undo_limit": 0,
-  "actions_left": 0,
+  "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 6,
   "age": 1,

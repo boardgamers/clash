@@ -134,7 +134,7 @@ impl City {
         if !player.is_building_available(building, game) {
             return false;
         }
-        player.can_afford(&player.construct_cost(building, self))
+        player.can_afford(&player.construct_cost(building, self, None).cost)
     }
 
     #[must_use]
@@ -151,7 +151,7 @@ impl City {
         if !matches!(self.mood_state, Happy) {
             return false;
         }
-        if !player.can_afford(&player.wonder_cost(wonder, self)) {
+        if !player.can_afford(&player.wonder_cost(wonder, self, None).cost) {
             return false;
         }
         for advance in &wonder.required_advances {

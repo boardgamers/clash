@@ -122,7 +122,7 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
                 "Built {}{} for {}",
                 name,
                 pos.map_or(String::new(), |p| format!(" at {p}")),
-                owner.construct_cost(b, city),
+                owner.construct_cost(b, city, None).cost,
             );
             let a: IconAction<'a> = (
                 &rc.assets().buildings[&b],

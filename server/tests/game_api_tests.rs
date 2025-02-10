@@ -874,6 +874,41 @@ fn test_recruit() {
 }
 
 #[test]
+fn test_overpay() {
+    test_action(
+        "sanitation_and_draft",
+        Action::Playing(Recruit(server::playing_actions::Recruit {
+            units: Units::new(0, 1, 0, 0, 0, 0),
+            city_position: Position::from_offset("A1"),
+            payment: ResourcePile::mood_tokens(1) + ResourcePile::gold(2), //paid too much
+            leader_name: None,
+            replaced_units: vec![],
+        })),
+        0,
+        true,
+        true,
+    );
+}
+
+#[test]
+fn test_sanitation_and_draft() {
+    // we should figure out that sanitation or draft are used, but not both
+    test_action(
+        "sanitation_and_draft",
+        Action::Playing(Recruit(server::playing_actions::Recruit {
+            units: Units::new(1, 1, 0, 0, 0, 0),
+            city_position: Position::from_offset("A1"),
+            payment: ResourcePile::mood_tokens(1) + ResourcePile::gold(2),
+            leader_name: None,
+            replaced_units: vec![],
+        })),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
 fn test_recruit_leader() {
     test_action(
         "recruit_leader",
@@ -1556,7 +1591,7 @@ fn test_dogma() {
                 Action::Playing(Construct(playing_actions::Construct {
                     city_position: Position::from_offset("C1"),
                     city_piece: Temple,
-                    payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
+                    payment: ResourcePile::new(0, 1, 1, 0, 0, 0, 0),
                     port_position: None,
                 })),
             ),
