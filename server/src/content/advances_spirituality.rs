@@ -12,12 +12,7 @@ use crate::resource_pile::ResourcePile;
 pub(crate) fn spirituality() -> AdvanceGroup {
     advance_group_builder(
         "Spirituality",
-        vec![
-            myths(),
-            rituals(),
-            priesthood(),
-            Advance::builder("State Religion", "not implemented").with_advance_bonus(MoodToken),
-        ],
+        vec![myths(), rituals(), priesthood(), stata_religion()],
     )
 }
 
@@ -38,7 +33,7 @@ fn myths() -> AdvanceBuilder {
                 None
             },
             |_game, _player_index, player_name, p, _selected| {
-                format!("{player_name} selected {p} as a reward for constructing a Temple",)
+                format!("{player_name} selected {p} as a reward for constructing a Temple")
             },
         )
 }
@@ -56,7 +51,8 @@ fn rituals() -> AdvanceBuilder {
                     ResourceType::Ideas,
                     ResourceType::Gold,
                 ] {
-                    cost.conversions.push(PaymentConversion::unlimited(vec![ResourcePile::mood_tokens(1)], ResourcePile::of(*r, 1)));
+                    cost.log.push(". Rituals allows spending any resource as a substitute for mood tokens".to_string());
+                    cost.cost.conversions.push(PaymentConversion::unlimited(vec![ResourcePile::mood_tokens(1)], ResourcePile::of(*r, 1)));
                 }
             },
             0,
@@ -64,20 +60,44 @@ fn rituals() -> AdvanceBuilder {
 }
 
 fn priesthood() -> AdvanceBuilder {
-    Advance::builder("Priesthood", "Once per turn, a science advance is free")
-        .add_player_event_listener(
-            |event| &mut event.advance_cost,
-            |i, (), ()| {
-                if !i.info.contains_key("Priesthood")
-                    && get_group("Science")
-                        .advances
-                        .iter()
-                        .any(|a| a.name == i.name)
-                {
-                    i.set_cost(0);
-                    i.info.insert("Priesthood".to_string(), "used".to_string());
-                }
-            },
-            0,
-        )
+    let name = "Priesthood";
+    Advance::builder(name, "Once per turn, a science advance is free").add_player_event_listener(
+        |event| &mut event.advance_cost,
+        |i, advance, ()| {
+            if !i.info.contains_key(name)
+                && get_group("Science").advances.iter().any(|a| a == advance)
+            {
+                i.set_zero();
+                i.log.push(". Priesthood reduced the cost to 0".to_string());
+                i.info.insert(name.to_string(), "used".to_string());
+            }
+        },
+        0,
+    )
+}
+
+fn stata_religion() -> AdvanceBuilder {
+    let name = "State Religion";
+    Advance::builder(
+        name,
+        "Once per turn, when constructing a Temple,
+            do not pay any Food.",
+    )
+    .with_advance_bonus(MoodToken)
+    .add_player_event_listener(
+        |event| &mut event.construct_cost,
+        |i, _city, b| {
+            if !i.info.contains_key(name) && matches!(b, Temple) {
+                i.cost.conversions.push(PaymentConversion::limited(
+                    vec![ResourcePile::of(ResourceType::Food, 1)],
+                    ResourcePile::empty(),
+                    1,
+                ));
+                i.info.insert(name.to_string(), "used".to_string());
+                i.log
+                    .push(". State Religion reduced the food cost to 0".to_string());
+            }
+        },
+        0,
+    )
 }

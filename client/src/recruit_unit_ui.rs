@@ -93,6 +93,7 @@ fn selectable_unit(
             &all,
             city_position,
             unit.leader_name.as_ref().or(leader_name),
+            None,
         )
         .is_some()
     {
@@ -194,6 +195,7 @@ impl ConfirmSelection for RecruitSelection {
                 self.amount.city_position,
                 self.amount.leader_name.as_ref(),
                 self.replaced_units.as_slice(),
+                None,
             )
             .is_some()
         {

@@ -1187,7 +1187,7 @@ impl Game {
         }
         if let Some(advance_bonus) = &advance.bonus {
             let pile = advance_bonus.resources();
-            self.add_to_last_log_item(&format!(" and gained {pile}"));
+            self.add_to_last_log_item(&format!(". Player gained {pile} as advance bonus"));
             self.players[player_index].gain_resources(pile);
         }
         let player = &mut self.players[player_index];

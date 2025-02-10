@@ -28,8 +28,8 @@ pub enum AdvanceState {
     Unavailable,
 }
 
-fn new_advance_payment(rc: &RenderContext, name: &str) -> Payment {
-    rc.new_payment(&rc.shown_player.advance_cost(name), name, false)
+fn new_advance_payment(rc: &RenderContext, a: &Advance) -> Payment {
+    rc.new_payment(&rc.shown_player.advance_cost(a, None).cost, &a.name, false)
 }
 
 pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
@@ -47,12 +47,7 @@ pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
                 AdvanceState::Unavailable
             }
         },
-        |a| {
-            StateUpdate::OpenDialog(ActiveDialog::AdvancePayment(new_advance_payment(
-                rc,
-                a.name.as_str(),
-            )))
-        },
+        |a| StateUpdate::OpenDialog(ActiveDialog::AdvancePayment(new_advance_payment(rc, a))),
     )
 }
 
@@ -173,13 +168,12 @@ fn border_color(a: &Advance) -> Color {
 }
 
 fn description(p: &Player, a: &Advance) -> Vec<String> {
-    let name = &a.name;
     let desc = &a.description;
 
     let mut parts: Vec<String> = vec![];
-    parts.push(name.clone());
+    parts.push(a.name.clone());
     break_text(desc, 70, &mut parts);
-    parts.push(format!("Cost: {}", p.advance_cost(name)));
+    parts.push(format!("Cost: {}", p.advance_cost(a, None).cost));
     if let Some(r) = &a.required {
         parts.push(format!("Required: {r}"));
     }

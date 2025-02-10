@@ -1,13 +1,13 @@
 use crate::advance::Advance;
 use crate::consts::SHIP_CAPACITY;
 use crate::content::advances::get_advance;
-use crate::events::{Event, EventOrigin};
+use crate::events::{find_minimal_modifiers, Event, EventOrigin};
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
 use crate::movement::move_routes;
 use crate::movement::{is_valid_movement_type, MoveRoute};
 use crate::payment::PaymentOptions;
-use crate::player_events::{AdvanceCostInfo, RecruitCost};
+use crate::player_events::CostInfo;
 use crate::resource::ResourceType;
 use crate::unit::{carried_units, get_current_move, MovementRestriction, UnitData};
 use crate::{
@@ -442,6 +442,7 @@ impl Player {
     /// Panics if player cannot afford the resources
     pub fn pay_cost(&mut self, cost: &PaymentOptions, payment: &ResourcePile) {
         assert!(cost.can_afford(payment), "invalid payment");
+        assert!(cost.is_valid_payment(payment), "Invalid payment");
         self.lose_resources(payment.clone());
     }
 
@@ -483,7 +484,7 @@ impl Player {
 
     #[must_use]
     pub fn can_advance(&self, advance: &Advance) -> bool {
-        self.can_afford(&self.advance_cost(&advance.name)) && self.can_advance_free(advance)
+        self.can_afford(&self.advance_cost(advance, None).cost) && self.can_advance_free(advance)
     }
 
     #[must_use]
@@ -595,23 +596,44 @@ impl Player {
     }
 
     #[must_use]
-    pub fn construct_cost(&self, building: Building, city: &City) -> PaymentOptions {
+    pub fn construct_cost(
+        &self,
+        building: Building,
+        city: &City,
+        execute: Option<ResourcePile>,
+    ) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.construct_cost,
-            PaymentOptions::resources(CONSTRUCT_COST),
+            &PaymentOptions::resources(CONSTRUCT_COST),
             city,
             &building,
-            |o| o,
+            execute,
         )
     }
 
     #[must_use]
-    pub fn wonder_cost(&self, wonder: &Wonder, city: &City) -> PaymentOptions {
-        self.trigger_cost_event(|e| &e.wonder_cost, wonder.cost.clone(), city, wonder, |o| o)
+    pub fn wonder_cost(
+        &self,
+        wonder: &Wonder,
+        city: &City,
+        execute: Option<ResourcePile>,
+    ) -> CostInfo {
+        self.trigger_cost_event(
+            |e| &e.wonder_cost,
+            &wonder.cost.clone(),
+            city,
+            wonder,
+            execute,
+        )
     }
 
     #[must_use]
-    pub fn increase_happiness_cost(&self, city: &City, steps: u32) -> Option<PaymentOptions> {
+    pub fn increase_happiness_cost(
+        &self,
+        city: &City,
+        steps: u32,
+        execute: Option<ResourcePile>,
+    ) -> Option<CostInfo> {
         let max_steps = 2 - city.mood_state.clone() as u32;
         let cost = city.size() as u32 * steps;
         if steps > max_steps {
@@ -619,34 +641,25 @@ impl Player {
         } else {
             Some(self.trigger_cost_event(
                 |e| &e.happiness_cost,
-                PaymentOptions::sum(cost, &[ResourceType::MoodTokens]),
+                &PaymentOptions::sum(cost, &[ResourceType::MoodTokens]),
                 &(),
                 &(),
-                |o| o,
+                execute,
             ))
         }
     }
 
     #[must_use]
-    pub fn advance_cost(&self, advance: &str) -> PaymentOptions {
-        self.advance_cost_for_execute(advance).cost
-    }
-
-    #[must_use]
-    pub fn advance_cost_for_execute(&self, advance: &str) -> AdvanceCostInfo {
+    pub fn advance_cost(&self, advance: &Advance, execute: Option<ResourcePile>) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
-            AdvanceCostInfo {
-                name: advance.to_string(),
-                cost: PaymentOptions::sum(
-                    ADVANCE_COST,
-                    &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
-                ),
-                info: self.event_info.clone(),
-            },
+            &PaymentOptions::sum(
+                ADVANCE_COST,
+                &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
+            ),
+            advance,
             &(),
-            &(),
-            |i| &mut i.cost,
+            execute,
         )
     }
 
@@ -741,7 +754,8 @@ impl Player {
         city_position: Position,
         leader_name: Option<&String>,
         replaced_units: &[u32],
-    ) -> Option<PaymentOptions> {
+        execute: Option<ResourcePile>,
+    ) -> Option<CostInfo> {
         let mut require_replace = units.clone();
         for t in self.available_units().to_vec() {
             let a = require_replace.get_mut(&t);
@@ -761,7 +775,7 @@ impl Player {
         if require_replace != replaced_units {
             return None;
         }
-        self.recruit_cost_without_replaced(units, city_position, leader_name)
+        self.recruit_cost_without_replaced(units, city_position, leader_name, execute)
     }
 
     ///
@@ -775,7 +789,8 @@ impl Player {
         units: &Units,
         city_position: Position,
         leader_name: Option<&String>,
-    ) -> Option<PaymentOptions> {
+        execute: Option<ResourcePile>,
+    ) -> Option<CostInfo> {
         let city = self
             .get_city(city_position)
             .expect("player should have a city at the recruitment position");
@@ -785,13 +800,10 @@ impl Player {
         let vec = units.clone().to_vec();
         let cost = self.trigger_cost_event(
             |e| &e.recruit_cost,
-            RecruitCost {
-                cost: PaymentOptions::resources(vec.iter().map(UnitType::cost).sum()),
-                units: units.clone(),
-            },
+            &PaymentOptions::resources(vec.iter().map(UnitType::cost).sum()),
+            units,
             &(),
-            &(),
-            |o| &mut o.cost,
+            execute,
         );
         if !self.can_afford(&cost.cost) {
             return None;
@@ -829,7 +841,7 @@ impl Player {
         if !match_leader {
             return None;
         }
-        Some(cost.cost)
+        Some(cost)
     }
 
     pub fn add_unit(&mut self, position: Position, unit_type: UnitType) {
@@ -1038,21 +1050,39 @@ impl Player {
         e.get().trigger(value, info, details)
     }
 
-    pub(crate) fn trigger_cost_event<T, U, V>(
+    pub(crate) fn trigger_cost_event<U, V>(
         &self,
-        event: fn(&PlayerEvents) -> &Event<T, U, V>,
-        mut value: T,
+        get_event: fn(&PlayerEvents) -> &Event<CostInfo, U, V>,
+        value: &PaymentOptions,
         info: &U,
         details: &V,
-        get_payment_options: fn(&mut T) -> &mut PaymentOptions,
-    ) -> T
-    where
-        T: Clone + PartialEq,
-    {
-        let modifiers = self.trigger_event(event, &mut value, info, details);
-        let options = get_payment_options(&mut value);
-        options.modifiers = modifiers;
-        value
+        execute: Option<ResourcePile>,
+    ) -> CostInfo {
+        let event = get_event(&self.events);
+        let mut cost_info = CostInfo::new(self, value.clone());
+        let initial_modifiers = self.trigger_event(get_event, &mut cost_info, info, details);
+
+        if let Some(available) = execute {
+            if cost_info.cost.is_valid_payment(&available) {
+                return find_minimal_modifiers(&initial_modifiers, |try_modifiers| {
+                    let mut i = CostInfo::new(self, value.clone());
+                    let mut exclude = initial_modifiers.clone();
+                    exclude.retain(|origin| !try_modifiers.contains(&origin));
+                    let m = event
+                        .get()
+                        .trigger_with_exclude(&mut i, info, details, &exclude);
+                    if i.cost.is_valid_payment(&available) {
+                        i.cost.modifiers = m;
+                        Some(i)
+                    } else {
+                        None
+                    }
+                })
+                .expect("should be able to find minimal modifiers");
+            }
+        }
+        cost_info.cost.modifiers = initial_modifiers;
+        cost_info
     }
 
     pub(crate) fn trigger_player_event<U, V>(

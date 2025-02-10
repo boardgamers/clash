@@ -20,6 +20,7 @@ impl EventOrigin {
     }
 }
 
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 type Listener<T, U, V> = (Box<dyn Fn(&mut T, &U, &V)>, i32, usize, EventOrigin);
@@ -58,8 +59,22 @@ where
 
     #[must_use]
     pub(crate) fn trigger(&self, value: &mut T, info: &U, details: &V) -> Vec<EventOrigin> {
+        self.trigger_with_exclude(value, info, details, &[])
+    }
+
+    #[must_use]
+    pub(crate) fn trigger_with_exclude(
+        &self,
+        value: &mut T,
+        info: &U,
+        details: &V,
+        exclude: &[EventOrigin],
+    ) -> Vec<EventOrigin> {
         let mut modifiers = Vec::new();
         for (listener, _, _, key) in &self.listeners {
+            if exclude.contains(key) {
+                continue;
+            }
             let previous_value = value.clone();
             listener(value, info, details);
             if *value != previous_value {
@@ -103,6 +118,13 @@ impl<T, U, V> Default for Event<T, U, V> {
             inner: Some(EventMut::default()),
         }
     }
+}
+
+pub(crate) fn find_minimal_modifiers<T>(
+    modifiers: &[EventOrigin],
+    is_ok: impl Fn(&[&EventOrigin]) -> Option<T>,
+) -> Option<T> {
+    modifiers.iter().powerset().find_map(|p| is_ok(&p))
 }
 
 #[cfg(test)]
@@ -153,5 +175,26 @@ mod tests {
             vec![EventOrigin::Advance("add constant".to_string())],
             modifiers
         );
+    }
+
+    #[test]
+    fn find_minimal_modifiers() {
+        let modifiers = vec![
+            EventOrigin::Advance("A".to_string()),
+            EventOrigin::Advance("B".to_string()),
+            EventOrigin::Advance("C".to_string()),
+        ];
+        let is_ok = |modifiers: &[&EventOrigin]| {
+            if modifiers.len() == 2
+                && modifiers.contains(&&EventOrigin::Advance("A".to_string()))
+                && modifiers.contains(&&EventOrigin::Advance("C".to_string()))
+            {
+                Some("OK")
+            } else {
+                None
+            }
+        };
+        let minimal_modifiers = super::find_minimal_modifiers(&modifiers, is_ok);
+        assert_eq!(Some("OK"), minimal_modifiers);
     }
 }
