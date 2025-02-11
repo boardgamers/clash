@@ -333,7 +333,6 @@
       "undo": [
         {
           "Command": {
-            "info": {},
             "gained_resources": {
               "ideas": 1,
               "culture_tokens": 1

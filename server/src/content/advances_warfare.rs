@@ -49,7 +49,8 @@ fn draft() -> AdvanceBuilder {
         |cost, units, ()| {
             if units.infantry > 0 {
                 // insert at beginning so that it's preferred over gold
-                cost.log
+                cost.info
+                    .log
                     .push(". Draft reduced the cost of 1 Infantry to 1 mood token".to_string());
 
                 cost.cost.conversions.insert(

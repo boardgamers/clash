@@ -407,8 +407,6 @@ impl Game {
         self.add_string_log_item(&action);
         self.add_action_log_item(action.clone());
 
-        let copy = action.clone();
-
         if let Some(s) = &mut self.custom_phase_state.current {
             s.response = action.custom_phase_event();
             let event_type = s.event_type.clone();
@@ -416,9 +414,7 @@ impl Game {
         } else {
             self.execute_regular_action(action, player_index);
         }
-        self.after_execute_or_redo(&copy, player_index);
         // player can have changed, but we don't need waste check for turn end
-
         check_for_waste(self);
 
         self.action_log[self.action_log_index - 1].undo =
@@ -511,14 +507,6 @@ impl Game {
         }
     }
 
-    fn after_execute_or_redo(&mut self, action: &Action, player_index: usize) {
-        self.players[player_index].trigger_player_event(
-            |events| &mut events.after_execute_action,
-            action,
-            &(),
-        );
-    }
-
     fn undo(&mut self, player_index: usize) {
         self.action_log_index -= 1;
         self.log.remove(self.log.len() - 1);
@@ -526,11 +514,6 @@ impl Game {
         self.undo_context_stack = item.undo.clone();
         let action = &item.action;
 
-        self.players[player_index].trigger_player_event(
-            |events| &mut events.before_undo_action,
-            action,
-            &(),
-        );
         let was_custom_phase = self.custom_phase_state.current.is_some();
         if was_custom_phase {
             self.custom_phase_state = CustomPhaseEventState::new();
@@ -612,7 +595,6 @@ impl Game {
             Action::Redo => panic!("redo action can't be redone"),
         }
         self.action_log_index += 1;
-        self.after_execute_or_redo(&copy.action, player_index);
         check_for_waste(self);
     }
 
@@ -1944,7 +1926,11 @@ pub struct DisembarkUndoContext {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct CommandUndoContext {
+    #[serde(default)]
+    #[serde(skip_serializing_if = "HashMap::is_empty")]
     pub info: HashMap<String, String>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "ResourcePile::is_empty")]
     pub gained_resources: ResourcePile,
 }
 
