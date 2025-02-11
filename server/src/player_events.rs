@@ -1,6 +1,5 @@
-use crate::action::Action;
 use crate::advance::Advance;
-use crate::collect::CollectContext;
+use crate::collect::{CollectContext, CollectOptionsInfo};
 use crate::combat::{Combat, CombatStrength};
 use crate::content::custom_phase_actions::CustomPhaseEventType;
 use crate::events::Event;
@@ -23,8 +22,6 @@ pub(crate) struct PlayerEvents {
     pub on_advance: Event<PlayerCommands, Game, String>,
     pub on_advance_custom_phase: Event<Game, CustomPhaseInfo, AdvanceInfo>,
     pub before_move: Event<PlayerCommands, Game, MoveInfo>,
-    pub after_execute_action: Event<Player, Action>,
-    pub before_undo_action: Event<Player, Action>,
 
     pub construct_cost: Event<CostInfo, City, Building>,
     pub wonder_cost: Event<CostInfo, City, Wonder>,
@@ -34,7 +31,7 @@ pub(crate) struct PlayerEvents {
 
     pub is_playing_action_available: Event<bool, PlayingActionType, Player>,
     pub terrain_collect_options: Event<HashMap<Terrain, HashSet<ResourcePile>>>,
-    pub collect_options: Event<HashMap<Position, HashSet<ResourcePile>>, CollectContext, Game>,
+    pub collect_options: Event<CollectOptionsInfo, CollectContext, Game>,
     pub on_turn_start: Event<Game, CustomPhaseInfo>,
     pub on_combat_start: Event<Game, CustomPhaseInfo>,
     pub on_combat_round: Event<CombatStrength, Combat, Game>,
@@ -47,29 +44,22 @@ impl PlayerEvents {
 }
 
 #[derive(Clone, PartialEq)]
-pub struct CostInfo {
+pub(crate) struct ActionInfo {
     pub(crate) undo: CommandUndoInfo,
-    pub cost: PaymentOptions,
     pub(crate) info: HashMap<String, String>,
     pub(crate) log: Vec<String>,
 }
 
-impl CostInfo {
-    pub(crate) fn new(player: &Player, cost: PaymentOptions) -> CostInfo {
-        CostInfo {
+impl ActionInfo {
+    pub(crate) fn new(player: &Player) -> ActionInfo {
+        ActionInfo {
             undo: CommandUndoInfo::new(player),
-            cost,
             info: player.event_info.clone(),
             log: Vec::new(),
         }
     }
 
-    pub(crate) fn set_zero(&mut self) {
-        self.cost.default = ResourcePile::empty();
-    }
-
-    pub(crate) fn execute(&self, game: &mut Game, payment: &ResourcePile) {
-        game.players[self.undo.player].pay_cost(&self.cost, payment);
+    pub(crate) fn execute(&self, game: &mut Game) {
         for l in self.log.iter().unique() {
             game.add_to_last_log_item(l);
         }
@@ -80,6 +70,30 @@ impl CostInfo {
                 gained_resources: ResourcePile::empty(),
             },
         );
+    }
+}
+
+#[derive(Clone, PartialEq)]
+pub struct CostInfo {
+    pub cost: PaymentOptions,
+    pub(crate) info: ActionInfo,
+}
+
+impl CostInfo {
+    pub(crate) fn new(player: &Player, cost: PaymentOptions) -> CostInfo {
+        CostInfo {
+            cost,
+            info: ActionInfo::new(player),
+        }
+    }
+
+    pub(crate) fn set_zero(&mut self) {
+        self.cost.default = ResourcePile::empty();
+    }
+
+    pub(crate) fn execute(&self, game: &mut Game, payment: &ResourcePile) {
+        game.players[self.info.undo.player].pay_cost(&self.cost, payment);
+        self.info.execute(game);
     }
 }
 

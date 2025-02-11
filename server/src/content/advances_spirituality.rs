@@ -51,7 +51,7 @@ fn rituals() -> AdvanceBuilder {
                     ResourceType::Ideas,
                     ResourceType::Gold,
                 ] {
-                    cost.log.push(". Rituals allows spending any resource as a substitute for mood tokens".to_string());
+                    cost.info.log.push(". Rituals allows spending any resource as a substitute for mood tokens".to_string());
                     cost.cost.conversions.push(PaymentConversion::unlimited(vec![ResourcePile::mood_tokens(1)], ResourcePile::of(*r, 1)));
                 }
             },
@@ -64,12 +64,14 @@ fn priesthood() -> AdvanceBuilder {
     Advance::builder(name, "Once per turn, a science advance is free").add_player_event_listener(
         |event| &mut event.advance_cost,
         |i, advance, ()| {
-            if !i.info.contains_key(name)
+            if !i.info.info.contains_key(name)
                 && get_group("Science").advances.iter().any(|a| a == advance)
             {
                 i.set_zero();
-                i.log.push(". Priesthood reduced the cost to 0".to_string());
-                i.info.insert(name.to_string(), "used".to_string());
+                i.info
+                    .log
+                    .push(". Priesthood reduced the cost to 0".to_string());
+                i.info.info.insert(name.to_string(), "used".to_string());
             }
         },
         0,
@@ -87,14 +89,15 @@ fn stata_religion() -> AdvanceBuilder {
     .add_player_event_listener(
         |event| &mut event.construct_cost,
         |i, _city, b| {
-            if !i.info.contains_key(name) && matches!(b, Temple) {
+            if !i.info.info.contains_key(name) && matches!(b, Temple) {
                 i.cost.conversions.push(PaymentConversion::limited(
                     vec![ResourcePile::of(ResourceType::Food, 1)],
                     ResourcePile::empty(),
                     1,
                 ));
-                i.info.insert(name.to_string(), "used".to_string());
-                i.log
+                i.info.info.insert(name.to_string(), "used".to_string());
+                i.info
+                    .log
                     .push(". State Religion reduced the food cost to 0".to_string());
             }
         },

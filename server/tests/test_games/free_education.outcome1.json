@@ -426,7 +426,6 @@
         },
         {
           "Command": {
-            "info": {},
             "gained_resources": {
               "mood_tokens": 1
             }

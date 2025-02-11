@@ -2,12 +2,11 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::city_pieces::Building::Port;
-use crate::collect::CollectContext;
+use crate::collect::{CollectContext, CollectOptionsInfo};
 use crate::content::advances::{advance_group_builder, AdvanceGroup, NAVIGATION};
 use crate::game::Game;
-use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 pub(crate) fn seafaring() -> AdvanceGroup {
     advance_group_builder(
@@ -84,11 +83,7 @@ fn cartography() -> AdvanceBuilder {
         )
 }
 
-fn fishing_collect(
-    options: &mut HashMap<Position, HashSet<ResourcePile>>,
-    c: &CollectContext,
-    game: &Game,
-) {
+fn fishing_collect(i: &mut CollectOptionsInfo, c: &CollectContext, game: &Game) {
     let city = game
         .get_any_city(c.city_position)
         .expect("city should exist");
@@ -101,7 +96,7 @@ fn fishing_collect(
                 })
             })
     {
-        options.insert(
+        i.choices.insert(
             position,
             if Some(position) == port {
                 HashSet::from([

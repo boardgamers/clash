@@ -1,15 +1,12 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action::Action;
 use crate::advance::Bonus::MoodToken;
 use crate::advance::{Advance, AdvanceBuilder};
-use crate::collect::CollectContext;
+use crate::collect::{CollectContext, CollectOptionsInfo};
 use crate::content::advances::{advance_group_builder, AdvanceGroup, IRRIGATION, ROADS};
 use crate::game::Game;
 use crate::map::Terrain::Barren;
-use crate::playing_actions::PlayingAction;
-use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 pub(crate) fn agriculture() -> AdvanceGroup {
     advance_group_builder(
@@ -37,7 +34,6 @@ fn husbandry() -> AdvanceBuilder {
             husbandry_collect,
             0,
         )
-        .add_once_per_turn_effect("Husbandry", is_husbandry_action)
 }
 
 fn irrigation() -> AdvanceBuilder {
@@ -69,32 +65,12 @@ fn storage() -> AdvanceBuilder {
     .with_advance_bonus(MoodToken)
 }
 
-fn is_husbandry_action(action: &Action) -> bool {
-    match action {
-        Action::Playing(PlayingAction::Collect(collect)) => collect
-            .collections
-            .iter()
-            .any(|c| c.0.distance(collect.city_position) > 1),
-        _ => false,
+fn husbandry_collect(i: &mut CollectOptionsInfo, c: &CollectContext, game: &Game) {
+    if i.info.info.contains_key("Husbandry") {
+        return;
     }
-}
-
-fn husbandry_collect(
-    options: &mut HashMap<Position, HashSet<ResourcePile>>,
-    c: &CollectContext,
-    game: &Game,
-) {
     let player = &game.players[c.player_index];
-    let allowed = if player
-        .played_once_per_turn_effects
-        .contains(&"Husbandry".to_string())
-    {
-        0
-    } else if player.has_advance(ROADS) {
-        2
-    } else {
-        1
-    };
+    let allowed = if player.has_advance(ROADS) { 2 } else { 1 };
 
     if c.used
         .iter()
@@ -105,11 +81,19 @@ fn husbandry_collect(
         return;
     }
 
+    i.info.log.push(format!(
+        ". Husbandry allows collecting {allowed} resources from 2 land spaces away"
+    ));
+    i.info
+        .info
+        .insert("Husbandry".to_string(), "used".to_string());
+
     game.map
         .tiles
         .iter()
         .filter(|(pos, t)| pos.distance(c.city_position) == 2 && t.is_land())
         .for_each(|(pos, t)| {
-            options.insert(*pos, c.terrain_options.get(t).cloned().unwrap_or_default());
+            i.choices
+                .insert(*pos, c.terrain_options.get(t).cloned().unwrap_or_default());
         });
 }

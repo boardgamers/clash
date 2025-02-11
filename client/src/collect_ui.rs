@@ -1,6 +1,3 @@
-use std::collections::HashMap;
-use std::collections::HashSet;
-
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{
     cancel_button, ok_button, BaseOrCustomAction, BaseOrCustomDialog, OkTooltip,
@@ -16,9 +13,8 @@ use macroquad::math::vec2;
 use macroquad::prelude::WHITE;
 use macroquad::shapes::draw_circle;
 use server::action::Action;
-use server::collect::{get_total_collection, possible_resource_collections};
+use server::collect::{get_total_collection, possible_resource_collections, CollectOptionsInfo};
 use server::content::custom_actions::CustomAction;
-use server::events::EventOrigin;
 use server::game::Game;
 use server::playing_actions::{Collect, PlayingAction};
 use server::position::Position;
@@ -29,27 +25,24 @@ use server::resource_pile::ResourcePile;
 pub struct CollectResources {
     player_index: usize,
     city_position: Position,
-    possible_collections: HashMap<Position, HashSet<ResourcePile>>,
     collections: Vec<(Position, ResourcePile)>,
     custom: BaseOrCustomDialog,
-    pub modifiers: Vec<EventOrigin>,
+    pub info: CollectOptionsInfo,
 }
 
 impl CollectResources {
     pub fn new(
         player_index: usize,
         city_position: Position,
-        possible_collections: HashMap<Position, HashSet<ResourcePile>>,
         custom: BaseOrCustomDialog,
-        modifiers: Vec<EventOrigin>,
+        info: CollectOptionsInfo,
     ) -> CollectResources {
         CollectResources {
             player_index,
             city_position,
             collections: vec![],
-            possible_collections,
             custom,
-            modifiers,
+            info,
         }
     }
 
@@ -67,7 +60,7 @@ impl CollectResources {
             "Click on a tile to collect resources".to_string(),
             format!("{extra} left"),
         ];
-        for o in self.modifiers.clone() {
+        for o in self.info.modifiers.clone() {
             let vec1 = event_help(rc, &o, true);
             r.extend(vec1);
         }
@@ -98,7 +91,7 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
     )
     .map_or(
         OkTooltip::Invalid("Too many resources selected".to_string()),
-        |p| OkTooltip::Valid(format!("Collect {p}")),
+        |(_, p)| OkTooltip::Valid(format!("Collect {p}")),
     );
     if ok_button(rc, tooltip) {
         let extra = collect.extra_resources(game);
@@ -144,17 +137,15 @@ fn click_collect_option(
     }
 
     let used = new.collections.clone().into_iter().collect();
-    let (c, m) = possible_resource_collections(rc.game, col.city_position, col.player_index, &used);
-    new.possible_collections = c;
-    new.modifiers = m;
-
+    let i = possible_resource_collections(rc.game, col.city_position, col.player_index, &used, &[]);
+    new.info = i;
     StateUpdate::OpenDialog(ActiveDialog::CollectResources(new))
 }
 
 pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpdate {
     let state = &rc.state;
     if let ActiveDialog::CollectResources(collect) = &state.active_dialog {
-        if let Some(possible) = collect.possible_collections.get(&pos) {
+        if let Some(possible) = collect.info.choices.get(&pos) {
             let col = collect.get_collection(pos);
 
             let c = hex_ui::center(pos);

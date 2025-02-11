@@ -1,4 +1,3 @@
-use crate::action::Action;
 use crate::content::custom_phase_actions::{
     CurrentCustomPhaseEvent, CustomPhaseAdvanceRewardRequest, CustomPhaseEventAction,
     CustomPhasePaymentRequest, CustomPhaseRequest, CustomPhaseResourceRewardRequest,
@@ -274,33 +273,6 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 }
                 panic!("Invalid state");
             },
-        )
-    }
-
-    fn add_once_per_turn_effect<P>(self, name: &str, pred: P) -> Self
-    where
-        P: Fn(&Action) -> bool + 'static + Clone,
-    {
-        let pred2 = pred.clone();
-        let name2 = name.to_string();
-        let name3 = name.to_string();
-        self.add_player_event_listener(
-            |event| &mut event.after_execute_action,
-            move |player, action, ()| {
-                if pred2(action) {
-                    player.played_once_per_turn_effects.push(name2.to_string());
-                }
-            },
-            0,
-        )
-        .add_player_event_listener(
-            |event| &mut event.before_undo_action,
-            move |player, action, ()| {
-                if pred(action) {
-                    player.played_once_per_turn_effects.retain(|a| a != &name3);
-                }
-            },
-            0,
         )
     }
 

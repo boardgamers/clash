@@ -1,7 +1,7 @@
 use crate::advance::Advance;
 use crate::consts::SHIP_CAPACITY;
 use crate::content::advances::get_advance;
-use crate::events::{find_minimal_modifiers, Event, EventOrigin};
+use crate::events::{Event, EventOrigin};
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
 use crate::movement::move_routes;
@@ -66,7 +66,6 @@ pub struct Player {
     pub wonder_cards: Vec<Wonder>,
     pub next_unit_id: u32,
     pub played_once_per_turn_actions: Vec<CustomActionType>,
-    pub played_once_per_turn_effects: Vec<String>, // use event_info instead
     pub event_info: HashMap<String, String>,
 }
 
@@ -213,7 +212,6 @@ impl Player {
                 .collect(),
             next_unit_id: data.next_unit_id,
             played_once_per_turn_actions: data.played_once_per_turn_actions,
-            played_once_per_turn_effects: data.played_once_per_turn_effects,
             event_info: data.event_info,
         };
         player
@@ -253,7 +251,6 @@ impl Player {
                 .collect(),
             next_unit_id: self.next_unit_id,
             played_once_per_turn_actions: self.played_once_per_turn_actions,
-            played_once_per_turn_effects: self.played_once_per_turn_effects,
             event_info: self.event_info,
         }
     }
@@ -296,7 +293,6 @@ impl Player {
                 .collect(),
             next_unit_id: self.next_unit_id,
             played_once_per_turn_actions: self.played_once_per_turn_actions.clone(),
-            played_once_per_turn_effects: self.played_once_per_turn_effects.clone(),
             event_info: self.event_info.clone(),
         }
     }
@@ -336,7 +332,6 @@ impl Player {
             wonders_build: Vec::new(),
             next_unit_id: 0,
             played_once_per_turn_actions: Vec::new(),
-            played_once_per_turn_effects: Vec::new(),
             event_info: HashMap::new(),
         }
     }
@@ -392,7 +387,6 @@ impl Player {
             unit.movement_restrictions = vec![];
         }
         self.played_once_per_turn_actions.clear();
-        self.played_once_per_turn_effects.clear();
         self.event_info.clear();
     }
 
@@ -600,7 +594,7 @@ impl Player {
         &self,
         building: Building,
         city: &City,
-        execute: Option<ResourcePile>,
+        execute: Option<&ResourcePile>,
     ) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.construct_cost,
@@ -616,7 +610,7 @@ impl Player {
         &self,
         wonder: &Wonder,
         city: &City,
-        execute: Option<ResourcePile>,
+        execute: Option<&ResourcePile>,
     ) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.wonder_cost,
@@ -628,29 +622,33 @@ impl Player {
     }
 
     #[must_use]
-    pub fn increase_happiness_cost(
-        &self,
-        city: &City,
-        steps: u32,
-        execute: Option<ResourcePile>,
-    ) -> Option<CostInfo> {
+    pub fn increase_happiness_cost(&self, city: &City, steps: u32) -> Option<CostInfo> {
         let max_steps = 2 - city.mood_state.clone() as u32;
         let cost = city.size() as u32 * steps;
         if steps > max_steps {
             None
         } else {
-            Some(self.trigger_cost_event(
-                |e| &e.happiness_cost,
-                &PaymentOptions::sum(cost, &[ResourceType::MoodTokens]),
-                &(),
-                &(),
-                execute,
-            ))
+            Some(self.increase_happiness_total_cost(cost, None))
         }
     }
 
     #[must_use]
-    pub fn advance_cost(&self, advance: &Advance, execute: Option<ResourcePile>) -> CostInfo {
+    pub(crate) fn increase_happiness_total_cost(
+        &self,
+        cost: u32,
+        execute: Option<&ResourcePile>,
+    ) -> CostInfo {
+        self.trigger_cost_event(
+            |e| &e.happiness_cost,
+            &PaymentOptions::sum(cost, &[ResourceType::MoodTokens]),
+            &(),
+            &(),
+            execute,
+        )
+    }
+
+    #[must_use]
+    pub fn advance_cost(&self, advance: &Advance, execute: Option<&ResourcePile>) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
             &PaymentOptions::sum(
@@ -754,7 +752,7 @@ impl Player {
         city_position: Position,
         leader_name: Option<&String>,
         replaced_units: &[u32],
-        execute: Option<ResourcePile>,
+        execute: Option<&ResourcePile>,
     ) -> Option<CostInfo> {
         let mut require_replace = units.clone();
         for t in self.available_units().to_vec() {
@@ -789,7 +787,7 @@ impl Player {
         units: &Units,
         city_position: Position,
         leader_name: Option<&String>,
-        execute: Option<ResourcePile>,
+        execute: Option<&ResourcePile>,
     ) -> Option<CostInfo> {
         let city = self
             .get_city(city_position)
@@ -1056,33 +1054,17 @@ impl Player {
         value: &PaymentOptions,
         info: &U,
         details: &V,
-        execute: Option<ResourcePile>,
+        execute: Option<&ResourcePile>,
     ) -> CostInfo {
-        let event = get_event(&self.events);
-        let mut cost_info = CostInfo::new(self, value.clone());
-        let initial_modifiers = self.trigger_event(get_event, &mut cost_info, info, details);
-
-        if let Some(available) = execute {
-            if cost_info.cost.is_valid_payment(&available) {
-                return find_minimal_modifiers(&initial_modifiers, |try_modifiers| {
-                    let mut i = CostInfo::new(self, value.clone());
-                    let mut exclude = initial_modifiers.clone();
-                    exclude.retain(|origin| !try_modifiers.contains(&origin));
-                    let m = event
-                        .get()
-                        .trigger_with_exclude(&mut i, info, details, &exclude);
-                    if i.cost.is_valid_payment(&available) {
-                        i.cost.modifiers = m;
-                        Some(i)
-                    } else {
-                        None
-                    }
-                })
-                .expect("should be able to find minimal modifiers");
-            }
-        }
-        cost_info.cost.modifiers = initial_modifiers;
-        cost_info
+        get_event(&self.events)
+            .get()
+            .trigger_with_minimal_modifiers(
+                &CostInfo::new(self, value.clone()),
+                info,
+                details,
+                |i| execute.as_ref().is_none_or(|r| i.cost.is_valid_payment(r)),
+                |i, m| i.cost.modifiers = m,
+            )
     }
 
     pub(crate) fn trigger_player_event<U, V>(
@@ -1120,9 +1102,6 @@ pub struct PlayerData {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     played_once_per_turn_actions: Vec<CustomActionType>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    played_once_per_turn_effects: Vec<String>,
     #[serde(default)]
     #[serde(skip_serializing_if = "HashMap::is_empty")]
     event_info: HashMap<String, String>,

@@ -513,10 +513,7 @@
       },
       "undo": [
         {
-          "Command": {
-            "info": {},
-            "gained_resources": {}
-          }
+          "Command": {}
         }
       ]
     },

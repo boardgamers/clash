@@ -9,7 +9,6 @@ use crate::content::advances::get_advance;
 use crate::content::custom_phase_actions::CustomPhaseEventType;
 use crate::game::{CulturalInfluenceResolution, GameState};
 use crate::payment::PaymentOptions;
-use crate::player_events::CostInfo;
 use crate::unit::{Unit, Units};
 use crate::{
     city::City,
@@ -123,7 +122,7 @@ impl PlayingAction {
         match self {
             Advance { advance, payment } => {
                 game.get_player(player_index)
-                    .advance_cost(&get_advance(&advance), Some(payment.clone()))
+                    .advance_cost(&get_advance(&advance), Some(&payment))
                     .execute(game, &payment);
                 game.advance(&advance, player_index, payment);
             }
@@ -139,7 +138,7 @@ impl PlayingAction {
             Construct(c) => {
                 let player = &game.players[player_index];
                 let city = player.get_city(c.city_position).expect("Illegal action");
-                let cost = player.construct_cost(c.city_piece, city, Some(c.payment.clone()));
+                let cost = player.construct_cost(c.city_piece, city, Some(&c.payment));
                 assert!(
                     city.can_construct(c.city_piece, player, game),
                     "Illegal action"
@@ -179,7 +178,7 @@ impl PlayingAction {
                     r.city_position,
                     r.leader_name.as_ref(),
                     &r.replaced_units,
-                    Some(r.payment.clone()),
+                    Some(&r.payment),
                 ) {
                     cost.execute(game, &r.payment);
                 } else {
@@ -399,32 +398,29 @@ impl ActionType {
 
 pub(crate) fn increase_happiness(game: &mut Game, player_index: usize, i: IncreaseHappiness) {
     let player = &mut game.players[player_index];
-    let mut total_cost: Option<CostInfo> = None;
     let mut angry_activations = vec![];
+    let mut count = 0;
     for (city_position, steps) in i.happiness_increases {
         let city = player.get_city(city_position).expect("Illegal action");
-        let cost = player
-            .increase_happiness_cost(city, steps, None)
-            .expect("Illegal action");
         if steps == 0 {
             continue;
         }
+
+        count += steps * city.size() as u32;
+
         if city.mood_state == MoodState::Angry {
             angry_activations.push(city_position);
-        }
-        if let Some(ref mut total_cost) = total_cost {
-            total_cost.cost.default += cost.cost.default;
-        } else {
-            total_cost = Some(cost);
         }
         let city = player.get_city_mut(city_position).expect("Illegal action");
         for _ in 0..steps {
             city.increase_mood_state();
         }
     }
-    total_cost
-        .expect("cost should be set")
-        .execute(game, &i.payment);
+
+    let r = i.payment;
+    player
+        .increase_happiness_total_cost(count, Some(&r))
+        .execute(game, &r);
     game.push_undo_context(UndoContext::IncreaseHappiness { angry_activations });
 }
 

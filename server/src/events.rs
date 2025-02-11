@@ -83,6 +83,41 @@ where
         }
         modifiers
     }
+
+    pub(crate) fn trigger_with_minimal_modifiers(
+        &self,
+        value: &T,
+        info: &U,
+        details: &V,
+        is_ok: impl Fn(&T) -> bool,
+        set_modifiers: impl Fn(&mut T, Vec<EventOrigin>),
+    ) -> T
+    where
+        T: Clone + PartialEq,
+    {
+        let mut initial_value = value.clone();
+        let initial_modifiers = self.trigger(&mut initial_value, info, details);
+
+        initial_modifiers
+            .iter()
+            .powerset()
+            .find_map(|try_modifiers| {
+                let mut v = value.clone();
+                let mut exclude = initial_modifiers.clone();
+                exclude.retain(|origin| !try_modifiers.contains(&origin));
+                let m = self.trigger_with_exclude(&mut v, info, details, &exclude);
+                if is_ok(&v) {
+                    set_modifiers(&mut v, m);
+                    Some(v)
+                } else {
+                    None
+                }
+            })
+            .unwrap_or_else(|| {
+                set_modifiers(&mut initial_value, initial_modifiers);
+                initial_value
+            })
+    }
 }
 
 impl<T, U, V> Default for EventMut<T, U, V> {
@@ -118,13 +153,6 @@ impl<T, U, V> Default for Event<T, U, V> {
             inner: Some(EventMut::default()),
         }
     }
-}
-
-pub(crate) fn find_minimal_modifiers<T>(
-    modifiers: &[EventOrigin],
-    is_ok: impl Fn(&[&EventOrigin]) -> Option<T>,
-) -> Option<T> {
-    modifiers.iter().powerset().find_map(|p| is_ok(&p))
 }
 
 #[cfg(test)]
@@ -179,22 +207,46 @@ mod tests {
 
     #[test]
     fn find_minimal_modifiers() {
-        let modifiers = vec![
+        #[derive(Clone, PartialEq)]
+        struct Info {
+            pub value: i32,
+            pub modifiers: Vec<EventOrigin>,
+        }
+
+        let mut event = EventMut::default();
+        event.add_listener_mut(
+            |value: &mut Info, (), ()| value.value += 1,
+            0,
             EventOrigin::Advance("A".to_string()),
+        );
+        event.add_listener_mut(
+            |value: &mut Info, (), ()| value.value += 2,
+            0,
             EventOrigin::Advance("B".to_string()),
+        );
+        event.add_listener_mut(
+            |value: &mut Info, (), ()| value.value += 4,
+            0,
             EventOrigin::Advance("C".to_string()),
-        ];
-        let is_ok = |modifiers: &[&EventOrigin]| {
-            if modifiers.len() == 2
-                && modifiers.contains(&&EventOrigin::Advance("A".to_string()))
-                && modifiers.contains(&&EventOrigin::Advance("C".to_string()))
-            {
-                Some("OK")
-            } else {
-                None
-            }
-        };
-        let minimal_modifiers = super::find_minimal_modifiers(&modifiers, is_ok);
-        assert_eq!(Some("OK"), minimal_modifiers);
+        );
+
+        assert_eq!(
+            vec![
+                EventOrigin::Advance("C".to_string()),
+                EventOrigin::Advance("A".to_string())
+            ],
+            event
+                .trigger_with_minimal_modifiers(
+                    &Info {
+                        value: 0,
+                        modifiers: Vec::new(),
+                    },
+                    &(),
+                    &(),
+                    |i| i.value == 5,
+                    |v, m| v.modifiers = m
+                )
+                .modifiers
+        );
     }
 }

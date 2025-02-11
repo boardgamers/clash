@@ -32,7 +32,7 @@ impl IncreaseHappinessConfig {
             .iter()
             .map(|(pos, steps)| {
                 let city = p.get_city(*pos).unwrap();
-                p.increase_happiness_cost(city, *steps, None).unwrap().cost
+                p.increase_happiness_cost(city, *steps).unwrap().cost
             })
             .reduce(|mut a, b| {
                 a.default += b.default;
@@ -123,7 +123,7 @@ fn increase_happiness_steps(rc: &RenderContext, city: &City, old_steps: u32) -> 
 
 fn increase_happiness_new_steps(rc: &RenderContext, city: &City, new_steps: u32) -> Option<u32> {
     rc.shown_player
-        .increase_happiness_cost(city, new_steps, None)
+        .increase_happiness_cost(city, new_steps)
         .map(|_| new_steps)
 }
 
