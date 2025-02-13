@@ -917,7 +917,18 @@ fn test_increase_happiness_voting_rituals() {
 fn test_custom_action_forced_labor() {
     test_action(
         "custom_action_forced_labor",
-        Action::Playing(Custom(AbsolutePower {})),
+        Action::Playing(Custom(AbsolutePower)),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
+fn test_civil_rights() {
+    test_action(
+        "civil_rights",
+        Action::Playing(Custom(CivilRights)),
         0,
         true,
         false,

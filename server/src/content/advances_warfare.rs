@@ -46,7 +46,7 @@ fn draft() -> AdvanceBuilder {
     .with_advance_bonus(CultureToken)
     .add_player_event_listener(
         |event| &mut event.recruit_cost,
-        |cost, units, ()| {
+        |cost, units, player| {
             if units.infantry > 0 {
                 // insert at beginning so that it's preferred over gold
                 cost.info
@@ -57,7 +57,11 @@ fn draft() -> AdvanceBuilder {
                     0,
                     PaymentConversion::limited(
                         UnitType::cost(&UnitType::Infantry),
-                        ResourcePile::mood_tokens(1),
+                        ResourcePile::mood_tokens(if player.has_advance("Civil Rights") {
+                            2
+                        } else {
+                            1
+                        }),
                         1,
                     ),
                 );

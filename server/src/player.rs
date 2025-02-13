@@ -794,7 +794,7 @@ impl Player {
             |e| &e.recruit_cost,
             &PaymentOptions::resources(vec.iter().map(UnitType::cost).sum()),
             units,
-            &(),
+            self,
             execute,
         );
         if !self.can_afford(&cost.cost) {

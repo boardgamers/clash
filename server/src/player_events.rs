@@ -28,7 +28,7 @@ pub(crate) struct PlayerEvents {
     pub wonder_cost: Event<CostInfo, City, Wonder>,
     pub advance_cost: Event<CostInfo, Advance>,
     pub happiness_cost: Event<CostInfo>,
-    pub recruit_cost: Event<CostInfo, Units>,
+    pub recruit_cost: Event<CostInfo, Units, Player>,
 
     pub is_playing_action_available: Event<bool, PlayingActionType, Player>,
     pub terrain_collect_options: Event<HashMap<Terrain, HashSet<ResourcePile>>>,
@@ -46,6 +46,7 @@ impl PlayerEvents {
 
 #[derive(Clone, PartialEq)]
 pub(crate) struct ActionInfo {
+    pub(crate) player: usize,
     pub(crate) undo: CommandUndoInfo,
     pub(crate) info: HashMap<String, String>,
     pub(crate) log: Vec<String>,
@@ -54,6 +55,7 @@ pub(crate) struct ActionInfo {
 impl ActionInfo {
     pub(crate) fn new(player: &Player) -> ActionInfo {
         ActionInfo {
+            player: player.index,
             undo: CommandUndoInfo::new(player),
             info: player.event_info.clone(),
             log: Vec::new(),

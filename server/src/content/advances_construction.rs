@@ -38,7 +38,7 @@ fn sanitation() -> AdvanceBuilder {
     .with_advance_bonus(MoodToken)
     .add_player_event_listener(
         |event| &mut event.recruit_cost,
-        |cost, units, ()| {
+        |cost, units, _| {
             if units.settlers > 0 {
                 // insert at beginning so that it's preferred over gold
                 cost.info
