@@ -29,8 +29,9 @@ fn husbandry() -> AdvanceBuilder {
         "During a Collect Resources Action, you may collect from a Land space that is 2 Land spaces away, rather than 1. If you have the Roads Advance you may collect from two Land spaces that are 2 Land spaces away. This Advance can only be used once per turn.",
     )
         .with_advance_bonus(MoodToken)
-        .add_player_event_listener(
+        .add_once_per_turn_listener(
             |event| &mut event.collect_options,
+            |i| &mut i.info.info,
             husbandry_collect,
             0,
         )
@@ -66,9 +67,6 @@ fn storage() -> AdvanceBuilder {
 }
 
 fn husbandry_collect(i: &mut CollectOptionsInfo, c: &CollectContext, game: &Game) {
-    if i.info.info.contains_key("Husbandry") {
-        return;
-    }
     let player = &game.players[c.player_index];
     let allowed = if player.has_advance(ROADS) { 2 } else { 1 };
 
@@ -82,11 +80,8 @@ fn husbandry_collect(i: &mut CollectOptionsInfo, c: &CollectContext, game: &Game
     }
 
     i.info.log.push(format!(
-        ". Husbandry allows collecting {allowed} resources from 2 land spaces away"
+        "Husbandry allows collecting {allowed} resources from 2 land spaces away"
     ));
-    i.info
-        .info
-        .insert("Husbandry".to_string(), "used".to_string());
 
     game.map
         .tiles

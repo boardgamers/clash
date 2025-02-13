@@ -4,6 +4,7 @@ use crate::tooltip;
 use macroquad::color::WHITE;
 use macroquad::math::{f32, vec2, Vec2};
 use macroquad::prelude::*;
+use crate::log_ui::break_text;
 
 pub const ICON_SIZE: f32 = 30.;
 
@@ -114,7 +115,9 @@ pub fn draw_scaled_icon(
 
     let rect = Rect::new(origin.x, origin.y, size, size);
     if !tooltip.is_empty() {
-        tooltip::show_tooltip_for_rect(rc, &[tooltip.to_string()], rect);
+        let mut parts: Vec<String> = vec![];
+        break_text(tooltip, 70, &mut parts);
+        tooltip::show_tooltip_for_rect(rc, &parts, rect);
     }
     left_mouse_button_pressed_in_rect(rect, rc)
 }

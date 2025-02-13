@@ -328,16 +328,17 @@
   ],
   "action_log_index": 1,
   "log": [
-    "The game has started",
-    "Age 1 has started",
-    "Round 1/3",
-    "Player1 paid 1 mood token and 1 culture token to recruit a leader getting Kʼinich Janaab Pakal I as their leader in the city at A1",
-    "Player1 paid 2 ideas to get the Tactics advance",
-    "\tPlayer1 marched a leader from A1 to B1",
-    "\nCombat round 1",
-    "\tPlayer1 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against defending units. Player2 rolled no dice for combined combat value of 0 and gets 0 hits against attacking units.",
-    ". Player1 used the following combat modifiers: Kʼinich Janaab Pakal I ignores the first hit in a battle with an Obelisk",
-    "\tPlayer1 killed all defending units and captured Player2's city at B1. Player1 Could not store 3 gold"
+    [
+      "Player1 marched a leader from A1 to B1"
+    ],
+    [
+      "Combat round 1",
+      "Player1 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against defending units.",
+      "Player2 rolled no dice for combined combat value of 0 and gets 0 hits against attacking units.",
+      "Player1 used the following combat modifiers: Kʼinich Janaab Pakal I ignores the first hit in a battle with an Obelisk",
+      "Player1 killed all defending units and captured Player2's city at B1",
+      "Player1 Could not store 3 gold"
+    ]
   ],
   "undo_limit": 1,
   "actions_left": 0,

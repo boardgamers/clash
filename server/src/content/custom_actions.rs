@@ -2,11 +2,19 @@ use serde::{Deserialize, Serialize};
 
 use crate::action::Action;
 use crate::collect::{collect, undo_collect};
+use crate::content::advances_culture::{
+    execute_sports, execute_theaters, undo_sports, undo_theaters,
+};
+use crate::content::advances_economy::collect_taxes;
 use crate::content::wonders::construct_wonder;
-use crate::log::{current_turn_log, format_collect_log_item, format_happiness_increase};
+use crate::log::{
+    current_turn_log, format_city_happiness_increase, format_collect_log_item,
+    format_cultural_influence_attempt_log_item, format_happiness_increase,
+};
 use crate::player::Player;
 use crate::playing_actions::{
-    increase_happiness, undo_increase_happiness, Collect, IncreaseHappiness, PlayingAction,
+    increase_happiness, influence_culture_attempt, undo_increase_happiness, Collect,
+    IncreaseHappiness, InfluenceCultureAttempt, PlayingAction,
 };
 use crate::{
     game::Game, playing_actions::ActionType, position::Position, resource_pile::ResourcePile,
@@ -19,17 +27,28 @@ pub enum CustomAction {
         wonder: String,
         payment: ResourcePile,
     },
-    ForcedLabor,
+    AbsolutePower,
+    ArtsInfluenceCultureAttempt(InfluenceCultureAttempt),
     VotingIncreaseHappiness(IncreaseHappiness),
     FreeEconomyCollect(Collect),
+    Sports {
+        city_position: Position,
+        payment: ResourcePile,
+    },
+    Taxes(ResourcePile),
+    Theaters(ResourcePile),
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash)]
 pub enum CustomActionType {
     ConstructWonder,
     AbsolutePower,
+    ArtsInfluenceCultureAttempt,
     VotingIncreaseHappiness,
     FreeEconomyCollect,
+    Sports,
+    Taxes,
+    Theaters,
 }
 
 impl CustomAction {
@@ -45,15 +64,22 @@ impl CustomAction {
                 wonder,
                 payment,
             } => construct_wonder(game, player_index, city_position, &wonder, payment),
-            CustomAction::ForcedLabor => {
-                game.actions_left += 1;
+            CustomAction::AbsolutePower => game.actions_left += 1,
+            CustomAction::ArtsInfluenceCultureAttempt(c) => {
+                influence_culture_attempt(game, player_index, &c);
             }
             CustomAction::VotingIncreaseHappiness(i) => {
-                increase_happiness(game, player_index, i);
+                increase_happiness(game, player_index, &i.happiness_increases, Some(i.payment));
             }
-            CustomAction::FreeEconomyCollect(c) => {
-                collect(game, player_index, &c);
+            CustomAction::FreeEconomyCollect(c) => collect(game, player_index, &c),
+            CustomAction::Sports {
+                city_position,
+                payment,
+            } => {
+                execute_sports(game, player_index, city_position, &payment);
             }
+            CustomAction::Taxes(r) => collect_taxes(game, player_index, r),
+            CustomAction::Theaters(r) => execute_theaters(game, player_index, &r),
         }
     }
 
@@ -61,13 +87,19 @@ impl CustomAction {
     pub fn custom_action_type(&self) -> CustomActionType {
         match self {
             CustomAction::ConstructWonder { .. } => CustomActionType::ConstructWonder,
-            CustomAction::ForcedLabor => CustomActionType::AbsolutePower,
+            CustomAction::AbsolutePower => CustomActionType::AbsolutePower,
+            CustomAction::ArtsInfluenceCultureAttempt(_) => {
+                CustomActionType::ArtsInfluenceCultureAttempt
+            }
             CustomAction::VotingIncreaseHappiness(_) => CustomActionType::VotingIncreaseHappiness,
             CustomAction::FreeEconomyCollect(_) => CustomActionType::FreeEconomyCollect,
+            CustomAction::Sports { .. } => CustomActionType::Sports,
+            CustomAction::Taxes(_) => CustomActionType::Taxes,
+            CustomAction::Theaters(_) => CustomActionType::Theaters,
         }
     }
 
-    pub fn undo(self, game: &mut Game, player_index: usize) {
+    pub(crate) fn undo(self, game: &mut Game, player_index: usize) {
         let action = self.custom_action_type();
         if action.action_type().once_per_turn {
             game.players[player_index]
@@ -84,27 +116,52 @@ impl CustomAction {
                 let wonder = game.undo_build_wonder(city_position, player_index);
                 game.players[player_index].wonder_cards.push(wonder);
             }
-            CustomAction::ForcedLabor => game.actions_left -= 1,
+            CustomAction::AbsolutePower => game.actions_left -= 1,
+            CustomAction::ArtsInfluenceCultureAttempt(_) => panic!("Action can't be undone"),
             CustomAction::VotingIncreaseHappiness(i) => {
-                undo_increase_happiness(game, player_index, i);
+                undo_increase_happiness(
+                    game,
+                    player_index,
+                    &i.happiness_increases,
+                    Some(i.payment),
+                );
             }
             CustomAction::FreeEconomyCollect(c) => undo_collect(game, player_index, c),
+            CustomAction::Taxes(r) => {
+                game.players[player_index].lose_resources(r);
+            }
+            CustomAction::Theaters(r) => {
+                undo_theaters(game, player_index, &r);
+            }
+            CustomAction::Sports {
+                city_position,
+                payment,
+            } => {
+                undo_sports(game, player_index, city_position, &payment);
+            }
         }
     }
 
     #[must_use]
-    pub fn format_log_item(&self, _game: &Game, player: &Player, player_name: &str) -> String {
+    pub fn format_log_item(&self, game: &Game, player: &Player, player_name: &str) -> String {
         match self {
-            CustomAction::ConstructWonder { city_position, wonder, payment } => format!("{player_name} paid {payment} to construct the {wonder} wonder in the city at {city_position}"),
-            CustomAction::ForcedLabor => format!("{player_name} paid 2 mood tokens to get an extra action using Forced Labor"),
-            CustomAction::VotingIncreaseHappiness(i) => format!("{} using Voting", format_happiness_increase(
-                player,
-                player_name,i
-            )),
-            CustomAction::FreeEconomyCollect(c) => format!("{} using Free Economy", format_collect_log_item(
-                            player,
-                            player_name,c
-                        )),
+            CustomAction::ConstructWonder { city_position, wonder, payment } =>
+                format!("{player_name} paid {payment} to construct the {wonder} wonder in the city at {city_position}"),
+            CustomAction::AbsolutePower =>
+                format!("{player_name} paid 2 mood tokens to get an extra action using Forced Labor"),
+            CustomAction::ArtsInfluenceCultureAttempt(c) =>
+                format!("{} using Arts", format_cultural_influence_attempt_log_item(game, player_name, c)),
+            CustomAction::VotingIncreaseHappiness(i) =>
+                format!("{} using Voting", format_happiness_increase(player, player_name, i)),
+            CustomAction::FreeEconomyCollect(c) =>
+                format!("{} using Free Economy", format_collect_log_item(player, player_name, c)),
+            CustomAction::Sports { city_position, payment } =>
+                format!("{player_name} paid {payment} to increase the happiness in {} using Sports",
+                    format_city_happiness_increase(player, *city_position, payment.resource_amount())),
+            CustomAction::Taxes(r) =>
+                format!("{player_name} paid 1 mood token to collect {r} using Taxes"),
+            CustomAction::Theaters(r) =>
+                format!("{player_name} paid {r} to convert resources using Theaters"),
         }
     }
 }
@@ -117,12 +174,18 @@ impl CustomActionType {
             CustomActionType::AbsolutePower => {
                 ActionType::free_and_once_per_turn(ResourcePile::mood_tokens(2))
             }
+            CustomActionType::ArtsInfluenceCultureAttempt => {
+                ActionType::free_and_once_per_turn(ResourcePile::culture_tokens(1))
+            }
             CustomActionType::VotingIncreaseHappiness => {
                 ActionType::free(ResourcePile::mood_tokens(1))
             }
             CustomActionType::FreeEconomyCollect => {
                 ActionType::free_and_once_per_turn(ResourcePile::mood_tokens(1))
             }
+            CustomActionType::Sports => ActionType::new(false, false, ResourcePile::empty()),
+            CustomActionType::Taxes => ActionType::once_per_turn(ResourcePile::mood_tokens(1)),
+            CustomActionType::Theaters => ActionType::free_and_once_per_turn(ResourcePile::empty()),
         }
     }
 

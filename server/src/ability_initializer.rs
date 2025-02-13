@@ -7,6 +7,7 @@ use crate::game::UndoContext;
 use crate::player_events::{CustomPhaseInfo, PlayerCommands};
 use crate::resource_pile::ResourcePile;
 use crate::{content::custom_actions::CustomActionType, game::Game, player_events::PlayerEvents};
+use std::collections::HashMap;
 
 pub(crate) type AbilityInitializer = Box<dyn Fn(&mut Game, usize)>;
 
@@ -50,6 +51,31 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         };
         self.add_ability_initializer(initializer)
             .add_ability_deinitializer(deinitializer)
+    }
+
+    fn add_once_per_turn_listener<T, U, V, E, F>(
+        self,
+        event: E,
+        get_info: impl Fn(&mut T) -> &mut HashMap<String, String> + 'static + Clone,
+        listener: F,
+        priority: i32,
+    ) -> Self
+    where
+        T: Clone + PartialEq,
+        E: Fn(&mut PlayerEvents) -> &mut Event<T, U, V> + 'static + Clone,
+        F: Fn(&mut T, &U, &V) + 'static + Clone,
+    {
+        let name = self.get_key().name().to_string();
+        self.add_player_event_listener(
+            event,
+            move |value, u, v| {
+                if !get_info(value).contains_key(&name) {
+                    listener(value, u, v);
+                    get_info(value).insert(name.clone(), "used".to_string());
+                }
+            },
+            priority,
+        )
     }
 
     fn add_state_change_event_listener<E, V>(
@@ -137,7 +163,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             priority,
             request,
             move |game, player_index, _player_name, payments| {
-                game.with_commands(player_index, true, |commands, game| {
+                game.with_commands(player_index, |commands, game| {
                     gain_reward(commands, game, payments);
                 });
             },
@@ -203,7 +229,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                     if r.reward.possible_resource_types().len() == 1 {
                         let player_name = game.players[player_index].get_name();
                         let r = r.reward.default_payment();
-                        game.add_to_last_log_item(&g(game, player_index, &player_name, &r, false));
+                        game.add_info_log_item(&g(game, player_index, &player_name, &r, false));
                         game.players[player_index].gain_resources(r);
                         return None;
                     }
@@ -214,7 +240,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 if let CustomPhaseRequest::ResourceReward(request) = &request {
                     if let CustomPhaseEventAction::ResourceReward(reward) = action {
                         assert!(request.reward.is_valid_payment(&reward), "Invalid payment");
-                        game.add_info_log_item(gain_reward_log(
+                        game.add_info_log_item(&gain_reward_log(
                             game,
                             player_index,
                             player_name,
@@ -278,9 +304,10 @@ pub(crate) trait AbilityInitializerSetup: Sized {
 
     fn add_custom_action(self, action: CustomActionType) -> Self {
         let deinitializer_action = action.clone();
+        let key = self.get_key().clone();
         self.add_ability_initializer(move |game, player_index| {
             let player = &mut game.players[player_index];
-            player.custom_actions.insert(action.clone());
+            player.custom_actions.insert(action.clone(), key.clone());
         })
         .add_ability_deinitializer(move |game, player_index| {
             let player = &mut game.players[player_index];

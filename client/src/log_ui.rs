@@ -7,11 +7,13 @@ pub fn show_log(rc: &RenderContext) -> StateUpdate {
     let mut y = state.log_scroll;
 
     for l in &rc.game.log {
-        multiline_label(l, 90, |label: &str| {
-            let p = vec2(30., y * 25. + 20.);
-            y += 1.;
-            state.draw_text(label, p.x, p.y);
-        });
+        for e in l {
+            multiline_label(e, 90, |label: &str| {
+                let p = vec2(30., y * 25. + 20.);
+                y += 1.;
+                state.draw_text(label, p.x, p.y);
+            });
+        }
     }
     StateUpdate::None
 }

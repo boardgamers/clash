@@ -52,7 +52,7 @@ pub(crate) fn trade_route_log(
     }
     for t in trade_routes {
         log += &format!(
-            ". {:?} at {:?} traded with city at {:?}",
+            "{:?} at {:?} traded with city at {:?}",
             game.players[player_index]
                 .get_unit(t.unit_id)
                 .expect("unit should exist")
@@ -61,7 +61,7 @@ pub(crate) fn trade_route_log(
             t.to,
         );
     }
-    log += &format!(". Total reward is {reward}");
+    log += &format!(" - Total reward is {reward}");
     log
 }
 

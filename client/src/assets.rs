@@ -216,10 +216,26 @@ impl Assets {
     }
 
     fn custom_actions() -> HashMap<CustomActionType, Texture2D> {
-        [(
-            CustomActionType::AbsolutePower,
-            load_png(include_bytes!("../assets/slavery-whip-svgrepo-com.png")),
-        )]
+        [
+            (
+                CustomActionType::AbsolutePower,
+                load_png(include_bytes!("../assets/slavery-whip-svgrepo-com.png")),
+            ),
+            (
+                CustomActionType::Taxes,
+                load_png(include_bytes!("../assets/tax-svgrepo-com.png")),
+            ),
+            (
+                CustomActionType::Theaters,
+                load_png(include_bytes!(
+                    "../assets/temple-building-with-columns-svgrepo-com.png"
+                )),
+            ),
+            (
+                CustomActionType::Sports,
+                load_png(include_bytes!("../assets/stadium-svgrepo-com.png")),
+            ),
+        ]
         .iter()
         .cloned()
         .collect()

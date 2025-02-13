@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::content::advances::IRRIGATION;
 use crate::game::Game;
 use crate::map::Terrain::Fertile;
-use crate::payment::PaymentOptions;
+use crate::payment::{PaymentConversionType, PaymentOptions};
 use crate::position::Position;
 use crate::{resource_pile::ResourcePile, wonder::Wonder};
 use std::collections::HashSet;
@@ -14,7 +14,7 @@ pub fn get_all() -> Vec<Wonder> {
         Wonder::builder(
             "Pyramids",
             "todo",
-            PaymentOptions::resources_with_discount(ResourcePile::new(3, 3, 3, 0, 0, 0, 4), 1),
+            PaymentOptions::resources_with_discount(ResourcePile::new(3, 3, 3, 0, 0, 0, 4), PaymentConversionType::Mandatory(1)),
             vec![],
         )
         .build(),

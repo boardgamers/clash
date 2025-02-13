@@ -62,6 +62,7 @@ pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) {
     city.activate();
     game.players[player_index].gain_resources(total_collect);
     i.execute(game);
+    game.trigger_command_event(player_index, |e| &mut e.on_collect, &c.city_position);
 }
 
 pub(crate) fn undo_collect(game: &mut Game, player_index: usize, c: Collect) {

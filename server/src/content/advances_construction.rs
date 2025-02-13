@@ -43,12 +43,12 @@ fn sanitation() -> AdvanceBuilder {
                 // insert at beginning so that it's preferred over gold
                 cost.info
                     .log
-                    .push(". Sanitation reduced the cost of 1 Settler to 1 mood token".to_string());
+                    .push("Sanitation reduced the cost of 1 Settler to 1 mood token".to_string());
 
                 cost.cost.conversions.insert(
                     0,
                     PaymentConversion::limited(
-                        vec![UnitType::cost(&UnitType::Settler)],
+                        UnitType::cost(&UnitType::Settler),
                         ResourcePile::mood_tokens(1),
                         1,
                     ),

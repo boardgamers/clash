@@ -231,11 +231,9 @@
   ],
   "action_log_index": 1,
   "log": [
-    "The game has started",
-    "Age 1 has started",
-    "Round 1/3",
-    "Player1 paid 2 ideas to get the Engineering advance",
-    "Player1 paid 2 food, 3 wood, 3 ore and 4 culture tokens to construct the Pyramids wonder in the city at A1"
+    [
+      "Player1 paid 2 food, 3 wood, 3 ore and 4 culture tokens to construct the Pyramids wonder in the city at A1"
+    ]
   ],
   "undo_limit": 0,
   "actions_left": 1,

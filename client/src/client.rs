@@ -129,7 +129,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
     match &state.active_dialog {
         ActiveDialog::None
         | ActiveDialog::WaitingForUpdate
-        | ActiveDialog::CulturalInfluence
+        | ActiveDialog::CulturalInfluence(_)
         | ActiveDialog::PlaceSettler => StateUpdate::None,
         ActiveDialog::DialogChooser(d) => dialog_chooser(rc, d),
         ActiveDialog::Log => show_log(rc),
@@ -163,6 +163,10 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::Retreat => combat_ui::retreat_dialog(rc),
         ActiveDialog::RemoveCasualties(s) => combat_ui::remove_casualties_dialog(rc, s),
 
+        ActiveDialog::Sports((p, pos)) => custom_actions_ui::sports(rc, p, *pos),
+        ActiveDialog::Taxes(p) => custom_actions_ui::taxes(rc, p),
+        ActiveDialog::Theaters(p) => custom_actions_ui::theaters(rc, p),
+
         ActiveDialog::CustomPhasePaymentRequest(c) => {
             custom_actions_ui::custom_phase_payment_dialog(rc, c)
         }
@@ -193,8 +197,8 @@ pub fn try_click(rc: &RenderContext) -> StateUpdate {
     let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));
 
     if rc.can_control() {
-        if let ActiveDialog::CulturalInfluence = state.active_dialog {
-            return influence_ui::hover(rc, mouse_pos);
+        if let ActiveDialog::CulturalInfluence(b) = &state.active_dialog {
+            return influence_ui::hover(rc, mouse_pos, b);
         }
     }
 

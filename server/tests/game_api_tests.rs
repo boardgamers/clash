@@ -692,6 +692,28 @@ fn get_destinations(game: &Game, units: &[u32], position: &str) -> Vec<String> {
 }
 
 #[test]
+fn test_theaters() {
+    test_action(
+        "theaters",
+        Action::Playing(Custom(Theaters(ResourcePile::culture_tokens(1)))),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
+fn test_taxes() {
+    test_action(
+        "taxes",
+        Action::Playing(Custom(Taxes(ResourcePile::new(1, 1, 1, 0, 1, 0, 0)))),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
 fn test_trade_route_coordinates() {
     let game = &load_game("trade_routes_unit_test");
     // trading cities are C6, D6, E6
@@ -737,6 +759,24 @@ fn test_cultural_influence_instant() {
                 city_piece: Fortress,
             },
         )),
+        1,
+        false,
+        false,
+    );
+}
+
+#[test]
+fn test_cultural_influence_instant_with_arts() {
+    test_action(
+        "cultural_influence_instant_with_arts",
+        Action::Playing(Custom(ArtsInfluenceCultureAttempt(
+            playing_actions::InfluenceCultureAttempt {
+                starting_city_position: Position::from_offset("C1"),
+                target_player_index: 0,
+                target_city_position: Position::from_offset("C2"),
+                city_piece: Fortress,
+            },
+        ))),
         1,
         false,
         false,
@@ -808,10 +848,38 @@ fn test_increase_happiness() {
 }
 
 #[test]
+fn test_increase_happiness_sports() {
+    test_action(
+        "increase_happiness_sports",
+        Action::Playing(Custom(Sports {
+            payment: ResourcePile::culture_tokens(1),
+            city_position: Position::from_offset("C2"),
+        })),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
+fn test_increase_happiness_sports2() {
+    test_action(
+        "increase_happiness_sports2",
+        Action::Playing(Custom(Sports {
+            payment: ResourcePile::culture_tokens(2),
+            city_position: Position::from_offset("C2"),
+        })),
+        0,
+        true,
+        false,
+    );
+}
+
+#[test]
 fn test_increase_happiness_voting() {
     test_action(
         "increase_happiness_voting",
-        Action::Playing(Custom(CustomAction::VotingIncreaseHappiness(
+        Action::Playing(Custom(VotingIncreaseHappiness(
             playing_actions::IncreaseHappiness {
                 happiness_increases: vec![
                     (Position::from_offset("C2"), 1),
@@ -849,7 +917,7 @@ fn test_increase_happiness_voting_rituals() {
 fn test_custom_action_forced_labor() {
     test_action(
         "custom_action_forced_labor",
-        Action::Playing(Custom(ForcedLabor {})),
+        Action::Playing(Custom(AbsolutePower {})),
         0,
         true,
         false,

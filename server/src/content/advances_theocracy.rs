@@ -56,7 +56,7 @@ fn dogma() -> AdvanceBuilder {
                 } else {
                     "got"
                 };
-                game.add_info_log_item(format!(
+                game.add_info_log_item(&format!(
                     "{player_name} {verb} {name} as a reward for constructing a Temple",
                 ));
                 game.advance(name, player_index, ResourcePile::empty());

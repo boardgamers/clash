@@ -408,7 +408,8 @@
                           ],
                           "to": {
                             "gold": 1
-                          }
+                          },
+                          "type": "Unlimited"
                         }
                       ]
                     },
@@ -436,13 +437,13 @@
   ],
   "action_log_index": 4,
   "log": [
-    "The game has started",
-    "Age 1 has started",
-    "Round 1/3",
-    "Player1 paid 2 ideas to get the Writing advance",
-    "Player1 paid 2 ideas to get the Free Education advance",
-    "Player1 paid 1 food and 1 gold to get the Draft advance. Player gained 1 culture token as advance bonus",
-    "Player1 paid 1 idea for free education to gain 1 mood token"
+    [
+      "Player1 paid 1 food and 1 gold to get the Draft advance",
+      "Player gained 1 culture token as advance bonus"
+    ],
+    [
+      "Player1 paid 1 idea for free education to gain 1 mood token"
+    ]
   ],
   "undo_limit": 0,
   "actions_left": 0,

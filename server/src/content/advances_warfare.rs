@@ -51,12 +51,12 @@ fn draft() -> AdvanceBuilder {
                 // insert at beginning so that it's preferred over gold
                 cost.info
                     .log
-                    .push(". Draft reduced the cost of 1 Infantry to 1 mood token".to_string());
+                    .push("Draft reduced the cost of 1 Infantry to 1 mood token".to_string());
 
                 cost.cost.conversions.insert(
                     0,
                     PaymentConversion::limited(
-                        vec![UnitType::cost(&UnitType::Infantry)],
+                        UnitType::cost(&UnitType::Infantry),
                         ResourcePile::mood_tokens(1),
                         1,
                     ),
@@ -100,7 +100,7 @@ fn steel_weapons() -> AdvanceBuilder {
                 let GameState::Combat(c) = &mut game.state else { panic!("Invalid state") };
                 add_steel_weapons(player_index, c);
                 game.add_info_log_item(
-                    format!("{player_name} paid for steel weapons: {}", payment[0]));
+                    &format!("{player_name} paid for steel weapons: {}", payment[0]));
             },
         )
 }
@@ -143,7 +143,7 @@ fn siegecraft() -> AdvanceBuilder {
             },
             |game, _player_index, player_name, payment| {
                 game.add_info_log_item(
-                    format!("{player_name} paid for siegecraft: "));
+                    &format!("{player_name} paid for siegecraft: "));
                 let mut paid = false;
                 let mut modifiers: Vec<CombatModifier> = Vec::new();
                 if !payment[0].is_empty() {

@@ -159,15 +159,13 @@ fn move_to_explored_tile(
         if ship_can_teleport || used_navigation {
             for (p, t) in block.block.tiles(&block.position, rotation) {
                 if t.is_water() {
-                    game.add_to_last_log_item(&format!(
-                        ". Teleported ship from {destination} to {p}"
-                    ));
+                    game.add_info_log_item(&format!("Teleported ship from {destination} to {p}"));
                     game.move_units(player_index, units, p, None);
                     return;
                 }
             }
         }
-        game.add_to_last_log_item(". Ship can't move to the explored tile");
+        game.add_info_log_item("Ship can't move to the explored tile");
         return;
     }
     game.move_units(player_index, units, destination, None);
@@ -260,7 +258,7 @@ fn add_block_tiles_with_log(
         .sorted()
         .join(", ");
 
-    game.add_to_last_log_item(&format!(". Explored tiles {s}"));
+    game.add_info_log_item(&format!("Explored tiles {s}"));
     game.map.add_block_tiles(pos, block, rotation);
 }
 

@@ -6,30 +6,41 @@ use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub enum PaymentConversionType {
+    Unlimited,
+    Optional(u32),
+    Mandatory(u32),
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct PaymentConversion {
     pub from: Vec<ResourcePile>, // alternatives
     pub to: ResourcePile,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub limit: Option<u32>,
+    #[serde(rename = "type")]
+    pub payment_conversion_type: PaymentConversionType,
 }
 
 impl PaymentConversion {
     #[must_use]
-    pub fn unlimited(from: Vec<ResourcePile>, to: ResourcePile) -> Self {
-        PaymentConversion {
-            from,
-            to,
-            limit: None,
-        }
+    pub fn unlimited(from: ResourcePile, to: ResourcePile) -> Self {
+        PaymentConversion::new(vec![from], to, PaymentConversionType::Unlimited)
     }
 
     #[must_use]
-    pub fn limited(from: Vec<ResourcePile>, to: ResourcePile, limit: u32) -> Self {
+    pub fn limited(from: ResourcePile, to: ResourcePile, limit: u32) -> Self {
+        PaymentConversion::new(vec![from], to, PaymentConversionType::Mandatory(limit))
+    }
+
+    #[must_use]
+    pub fn new(
+        from: Vec<ResourcePile>,
+        to: ResourcePile,
+        payment_conversion_type: PaymentConversionType,
+    ) -> Self {
         PaymentConversion {
             from,
             to,
-            limit: Some(limit),
+            payment_conversion_type,
         }
     }
 }
@@ -51,17 +62,40 @@ impl PaymentOptions {
         let discount_left = self
             .conversions
             .iter()
-            .filter_map(|c| if c.to.is_empty() { c.limit } else { None })
+            .filter_map(|c| {
+                if c.to.is_empty() {
+                    match c.payment_conversion_type {
+                        PaymentConversionType::Unlimited => None,
+                        PaymentConversionType::Optional(i)
+                        | PaymentConversionType::Mandatory(i) => Some(i),
+                    }
+                } else {
+                    None
+                }
+            })
             .sum::<u32>();
         if discount_left == 0 && available.has_at_least(&self.default) {
             return Some(self.default.clone());
         }
+        let may_overpay = self.conversions.iter().any(|c| {
+            matches!(
+                c.payment_conversion_type,
+                PaymentConversionType::Optional(_)
+            )
+        });
 
         self.conversions
             .iter()
             .permutations(self.conversions.len())
             .find_map(|conversions| {
-                can_convert(available, &self.default, &conversions, 0, discount_left)
+                can_convert(
+                    available,
+                    &self.default,
+                    &conversions,
+                    0,
+                    discount_left,
+                    may_overpay,
+                )
             })
     }
 
@@ -81,7 +115,7 @@ impl PaymentOptions {
         let mut conversions = vec![];
         types_by_preference.windows(2).for_each(|pair| {
             conversions.push(PaymentConversion::unlimited(
-                vec![ResourcePile::of(pair[0], 1)],
+                ResourcePile::of(pair[0], 1),
                 ResourcePile::of(pair[1], 1),
             ));
         });
@@ -93,25 +127,30 @@ impl PaymentOptions {
     }
 
     #[must_use]
-    pub fn resources_with_discount(cost: ResourcePile, discount: u32) -> Self {
+    pub fn resources_with_discount(
+        cost: ResourcePile,
+        discount_type: PaymentConversionType,
+    ) -> Self {
         let base_resources = vec![
             ResourcePile::food(1),
             ResourcePile::wood(1),
             ResourcePile::ore(1),
             ResourcePile::ideas(1),
         ];
+
         let mut conversions = vec![PaymentConversion {
             from: base_resources.clone(),
             to: ResourcePile::gold(1),
-            limit: None,
+            payment_conversion_type: PaymentConversionType::Unlimited,
         }];
-        if discount > 0 {
-            conversions.push(PaymentConversion::limited(
+        if !matches!(discount_type, PaymentConversionType::Unlimited) {
+            conversions.push(PaymentConversion::new(
                 base_resources.clone(),
                 ResourcePile::empty(),
-                discount,
+                discount_type,
             ));
         }
+
         PaymentOptions {
             default: cost,
             conversions,
@@ -121,7 +160,7 @@ impl PaymentOptions {
 
     #[must_use]
     pub fn resources(cost: ResourcePile) -> Self {
-        Self::resources_with_discount(cost, 0)
+        Self::resources_with_discount(cost, PaymentConversionType::Unlimited)
     }
 
     #[must_use]
@@ -154,10 +193,20 @@ impl Display for PaymentOptions {
         write!(f, "{}", self.default)?;
         // this is a bit ugly, make it nicer
         for conversion in &self.conversions {
-            write!(f, " > {}", conversion.to.types().first().expect("no type"))?;
-            if let Some(limit) = conversion.limit {
-                write!(f, " (limit: {limit})")?;
+            if let Some(to) = conversion.to.types().first() {
+                write!(f, " > {to}")?;
+            } else {
+                write!(f, " > may reduce payment")?;
             }
+            match conversion.payment_conversion_type {
+                PaymentConversionType::Unlimited => {}
+                PaymentConversionType::Optional(i) => {
+                    write!(f, " (up to: {i})")?;
+                }
+                PaymentConversionType::Mandatory(i) => {
+                    write!(f, " (limit: {i})")?;
+                }
+            };
         }
         Ok(())
     }
@@ -170,8 +219,9 @@ pub fn can_convert(
     conversions: &[&PaymentConversion],
     skip_from: usize,
     discount_left: u32,
+    may_overpay: bool,
 ) -> Option<ResourcePile> {
-    if available.has_at_least(current) && discount_left == 0 {
+    if available.has_at_least(current) && (discount_left == 0 || may_overpay) {
         return Some(current.clone());
     }
 
@@ -180,11 +230,22 @@ pub fn can_convert(
     }
     let conversion = &conversions[0];
     if skip_from >= conversion.from.len() {
-        return can_convert(available, current, &conversions[1..], 0, discount_left);
+        return can_convert(
+            available,
+            current,
+            &conversions[1..],
+            0,
+            discount_left,
+            may_overpay,
+        );
     }
     let from = &conversion.from[skip_from];
 
-    let upper_limit = conversion.limit.unwrap_or(u32::MAX);
+    let upper_limit = match conversion.payment_conversion_type {
+        PaymentConversionType::Unlimited => u32::MAX,
+        PaymentConversionType::Optional(i) | PaymentConversionType::Mandatory(i) => i,
+    };
+
     for amount in 1..=upper_limit {
         if !current.has_at_least_times(from, amount)
             || (conversion.to.is_empty() && amount > discount_left)
@@ -195,6 +256,7 @@ pub fn can_convert(
                 conversions,
                 skip_from + 1,
                 discount_left,
+                may_overpay,
             );
         }
 
@@ -215,6 +277,7 @@ pub fn can_convert(
             conversions,
             skip_from + 1,
             new_discount_left,
+            may_overpay,
         );
         if can.is_some() {
             return can;
@@ -241,7 +304,7 @@ mod tests {
             conversions: vec![PaymentConversion {
                 from: vec![ResourcePile::food(1)],
                 to: ResourcePile::wood(1),
-                limit: None,
+                payment_conversion_type: PaymentConversionType::Unlimited,
             }],
             modifiers: vec![],
         };
@@ -272,7 +335,7 @@ mod tests {
                     conversions: vec![PaymentConversion {
                         from: vec![ResourcePile::food(1)],
                         to: ResourcePile::wood(1),
-                        limit: None,
+                        payment_conversion_type: PaymentConversionType::Unlimited,
                     }],
                     modifiers: vec![],
                 },
@@ -286,7 +349,7 @@ mod tests {
                     conversions: vec![PaymentConversion {
                         from: vec![ResourcePile::food(1)],
                         to: ResourcePile::wood(1),
-                        limit: None,
+                        payment_conversion_type: PaymentConversionType::Unlimited,
                     }],
                     modifiers: vec![],
                 },
@@ -304,7 +367,7 @@ mod tests {
                     conversions: vec![PaymentConversion {
                         from: vec![ResourcePile::food(1)],
                         to: ResourcePile::wood(1),
-                        limit: Some(1),
+                        payment_conversion_type: PaymentConversionType::Mandatory(1),
                     }],
                     modifiers: vec![],
                 },
@@ -321,7 +384,7 @@ mod tests {
                     conversions: vec![PaymentConversion {
                         from: vec![ResourcePile::food(1) + ResourcePile::ore(1)],
                         to: ResourcePile::mood_tokens(1),
-                        limit: Some(1),
+                        payment_conversion_type: PaymentConversionType::Mandatory(1),
                     }],
                     modifiers: vec![],
                 },
@@ -341,12 +404,30 @@ mod tests {
                     conversions: vec![PaymentConversion {
                         from: vec![ResourcePile::food(1)],
                         to: ResourcePile::empty(),
-                        limit: Some(2),
+                        payment_conversion_type: PaymentConversionType::Mandatory(2),
                     }],
                     modifiers: vec![],
                 },
                 valid: vec![ResourcePile::food(1)],
                 invalid: vec![ResourcePile::food(2)],
+            },
+            ValidPaymentTestCase {
+                name: "discount with overpay".to_string(),
+                options: PaymentOptions {
+                    default: ResourcePile::food(3),
+                    conversions: vec![PaymentConversion {
+                        from: vec![ResourcePile::food(1)],
+                        to: ResourcePile::empty(),
+                        payment_conversion_type: PaymentConversionType::Optional(2),
+                    }],
+                    modifiers: vec![],
+                },
+                valid: vec![
+                    ResourcePile::food(1),
+                    ResourcePile::food(2),
+                    ResourcePile::food(3),
+                ],
+                invalid: vec![ResourcePile::food(0)],
             },
             ValidPaymentTestCase {
                 name: "food to wood to ore".to_string(),
@@ -356,12 +437,12 @@ mod tests {
                         PaymentConversion {
                             from: vec![ResourcePile::food(1)],
                             to: ResourcePile::wood(1),
-                            limit: None,
+                            payment_conversion_type: PaymentConversionType::Unlimited,
                         },
                         PaymentConversion {
                             from: vec![ResourcePile::wood(1)],
                             to: ResourcePile::ore(1),
-                            limit: None,
+                            payment_conversion_type: PaymentConversionType::Unlimited,
                         },
                     ],
                     modifiers: vec![],
@@ -381,12 +462,12 @@ mod tests {
                         PaymentConversion {
                             from: vec![ResourcePile::wood(1)],
                             to: ResourcePile::ore(1),
-                            limit: None,
+                            payment_conversion_type: PaymentConversionType::Unlimited,
                         },
                         PaymentConversion {
                             from: vec![ResourcePile::food(1)],
                             to: ResourcePile::wood(1),
-                            limit: None,
+                            payment_conversion_type: PaymentConversionType::Unlimited,
                         },
                     ],
                     modifiers: vec![],
@@ -412,7 +493,7 @@ mod tests {
                             ResourcePile::ideas(1),
                         ],
                         to: ResourcePile::gold(1),
-                        limit: None,
+                        payment_conversion_type: PaymentConversionType::Unlimited,
                     }],
                     modifiers: vec![],
                 },
