@@ -122,9 +122,10 @@ fn generic_custom_action(
     if let Some(city) = city {
         if matches!(custom_action_type, CustomActionType::Sports) {
             if let Some(options) = sports_options(city) {
-                return Some(StateUpdate::OpenDialog(ActiveDialog::Sports(
-                    (Payment::new_gain(&options, "Increase happiness using sports"), city.position),
-                )));
+                return Some(StateUpdate::OpenDialog(ActiveDialog::Sports((
+                    Payment::new_gain(&options, "Increase happiness using sports"),
+                    city.position,
+                ))));
             }
         }
     }
@@ -159,7 +160,7 @@ pub fn base_or_custom_available(
         || (rc.game.state == GameState::Playing
             && rc
                 .game
-        .is_custom_action_available(rc.shown_player.index, custom))
+                .is_custom_action_available(rc.shown_player.index, custom))
 }
 
 pub fn base_or_custom_action(
@@ -178,13 +179,14 @@ pub fn base_or_custom_action(
         None
     };
 
-    let special = 
-        custom.iter().find(|(_, a)| rc.game.is_custom_action_available(rc.shown_player.index, a))
+    let special = custom
+        .iter()
+        .find(|(_, a)| rc.game.is_custom_action_available(rc.shown_player.index, a))
         .map(|(advance, a)| {
             let dialog = execute(BaseOrCustomDialog {
                 custom: BaseOrCustomAction::Custom {
                     custom: a.clone(),
-                    advance: advance.to_string(),
+                    advance: (*advance).to_string(),
                 },
                 title: format!("{title} with {advance}"),
             });

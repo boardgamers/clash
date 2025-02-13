@@ -216,7 +216,10 @@ fn ok_tooltip(payments: &[Payment], mut available: ResourcePile) -> OkTooltip {
             available -= payment.to_resource_pile();
             OkTooltip::Valid(format!("Pay {pile} for {name}"))
         } else {
-            OkTooltip::Invalid(format!("You don't have {} for {}", payment.cost.default, name))
+            OkTooltip::Invalid(format!(
+                "You don't have {} for {}",
+                payment.cost.default, name
+            ))
         };
         match tooltip {
             OkTooltip::Valid(v) => valid.push(v),

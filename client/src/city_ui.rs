@@ -167,11 +167,13 @@ fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconActio
 }
 
 fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
-    if !city.can_activate() || !base_or_custom_available(
-        rc,
-        PlayingActionType::Collect,
-        &CustomActionType::FreeEconomyCollect,
-    ) {
+    if !city.can_activate()
+        || !base_or_custom_available(
+            rc,
+            PlayingActionType::Collect,
+            &CustomActionType::FreeEconomyCollect,
+        )
+    {
         return None;
     }
     Some((
