@@ -1,19 +1,20 @@
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::mem;
+use std::{mem, vec};
 use GameState::*;
 
 use crate::advance::Advance;
 use crate::combat::{self, start_combat, Combat, CombatDieRoll, CombatPhase, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, MOVEMENT_ACTIONS};
 use crate::content::custom_phase_actions::{CustomPhaseEventState, CustomPhaseEventType};
-use crate::events::Event;
+use crate::events::{Event, EventOrigin};
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
 use crate::map::UnexploredBlock;
 use crate::movement::{has_movable_units, terrain_movement_restriction};
 use crate::payment::PaymentOptions;
 use crate::player_events::{AdvanceInfo, CustomPhaseInfo, MoveInfo, PlayerCommands, PlayerEvents};
+use crate::playing_actions::roll_boost_cost;
 use crate::resource::check_for_waste;
 use crate::unit::{carried_units, get_current_move, MovementRestriction, UnitData, Units};
 use crate::utils::Rng;
@@ -53,7 +54,7 @@ pub struct Game {
     pub current_player_index: usize,
     pub action_log: Vec<ActionLogItem>,
     pub action_log_index: usize,
-    pub log: Vec<String>,
+    pub log: Vec<Vec<String>>,
     pub undo_limit: usize,
     pub actions_left: u32,
     pub successful_cultural_influence: bool,
@@ -132,11 +133,14 @@ impl Game {
             current_player_index: starting_player,
             action_log: Vec::new(),
             action_log_index: 0,
-            log: vec![
+            log: [
                 String::from("The game has started"),
                 String::from("Age 1 has started"),
                 String::from("Round 1/3"),
-            ],
+            ]
+            .iter()
+            .map(|s| vec![s.clone()])
+            .collect(),
             undo_limit: 0,
             actions_left: ACTIONS,
             successful_cultural_influence: false,
@@ -290,10 +294,6 @@ impl Game {
         self.action_log_index += 1;
     }
 
-    pub fn add_info_log_item(&mut self, info: String) {
-        self.log.push(info);
-    }
-
     pub fn lock_undo(&mut self) {
         self.undo_limit = self.action_log_index;
     }
@@ -347,7 +347,7 @@ impl Game {
         details: &V,
     ) {
         let e = event(&mut self.players[player_index].events).take();
-        self.with_commands(player_index, false, |commands, game| {
+        self.with_commands(player_index, |commands, game| {
             let _ = e.trigger(commands, game, details);
         });
         event(&mut self.players[player_index].events).set(e);
@@ -356,7 +356,6 @@ impl Game {
     pub(crate) fn with_commands(
         &mut self,
         player_index: usize,
-        new_log_entry: bool,
         callback: impl FnOnce(&mut PlayerCommands, &mut Game),
     ) {
         let p = self.get_player(player_index);
@@ -374,11 +373,8 @@ impl Game {
         );
         self.players[player_index].gain_resources(commands.gained_resources);
 
-        if new_log_entry {
-            self.add_info_log_item(String::new());
-        }
-        for edit in commands.log_edits {
-            self.add_to_last_log_item(&edit);
+        for edit in commands.log {
+            self.add_info_log_item(&edit);
         }
     }
 
@@ -448,11 +444,7 @@ impl Game {
     }
 
     fn add_string_log_item(&mut self, action: &Action) {
-        let log_item = log::format_action_log_item(action, self);
-        if log_item.is_empty() {
-            return;
-        }
-        self.log.push(log_item);
+        self.log.push(log::format_action_log_item(action, self));
     }
 
     fn execute_regular_action(&mut self, action: Action, player_index: usize) {
@@ -893,7 +885,7 @@ impl Game {
                 "there should be a dice roll before a cultural influence resolution action",
             ) / 2
                 + 1;
-        let roll_boost_cost = PlayingAction::roll_boost_cost(roll);
+        let roll_boost_cost = roll_boost_cost(roll);
         let city_piece = c.city_piece;
         let target_player_index = c.target_player_index;
         let target_city_position = c.target_city_position;
@@ -943,9 +935,20 @@ impl Game {
         })
     }
 
+    pub fn add_info_log_group(&mut self, info: String) {
+        self.log.push(vec![info]);
+    }
+
+    pub fn add_info_log_item(&mut self, info: &str) {
+        let last_item_index = self.log.len() - 1;
+        self.log[last_item_index].push(info.to_string());
+    }
+
     pub fn add_to_last_log_item(&mut self, edit: &str) {
         let last_item_index = self.log.len() - 1;
-        self.log[last_item_index] += edit;
+        let vec = &mut self.log[last_item_index];
+        let l = vec.len() - 1;
+        vec[l] += edit;
     }
 
     ///
@@ -953,7 +956,7 @@ impl Game {
     /// Panics if the player does not have events
     pub fn next_player(&mut self) {
         self.increment_player_index();
-        self.add_info_log_item(format!(
+        self.add_info_log_group(format!(
             "It's {}'s turn",
             self.players[self.current_player_index].get_name()
         ));
@@ -1022,14 +1025,14 @@ impl Game {
             self.enter_status_phase();
             return;
         }
-        self.add_info_log_item(format!("Round {}/3", self.round));
+        self.add_info_log_group(format!("Round {}/3", self.round));
     }
 
     fn enter_status_phase(&mut self) {
         if self.players.iter().any(|player| player.cities.is_empty()) {
             self.end_game();
         }
-        self.add_info_log_item(format!(
+        self.add_info_log_group(format!(
             "The game has entered the {} status phase",
             utils::ordinal_number(self.age)
         ));
@@ -1049,8 +1052,8 @@ impl Game {
             self.end_game();
             return;
         }
-        self.add_info_log_item(format!("Age {} has started", self.age));
-        self.add_info_log_item(String::from("Round 1/3"));
+        self.add_info_log_group(format!("Age {} has started", self.age));
+        self.add_info_log_group(String::from("Round 1/3"));
     }
 
     fn end_game(&mut self) {
@@ -1063,7 +1066,7 @@ impl Game {
             .expect("there should be at least one player in the game")
             .0;
         let winner_name = self.players[winner_player_index].get_name();
-        self.add_info_log_item(format!("The game has ended\n{winner_name} has won"));
+        self.add_info_log_group(format!("The game has ended. {winner_name} has won"));
         self.add_message("The game has ended");
     }
 
@@ -1101,19 +1104,33 @@ impl Game {
     }
 
     #[must_use]
-    pub fn get_available_custom_actions(&self, player_index: usize) -> Vec<CustomActionType> {
-        let custom_actions = &self.players[self.current_player_index].custom_actions;
-        custom_actions
-            .iter()
-            .filter(|&action| {
+    pub fn get_available_custom_actions(
+        &self,
+        player_index: usize,
+    ) -> Vec<(CustomActionType, EventOrigin)> {
+        self.players[self.current_player_index]
+            .custom_actions
+            .clone()
+            .into_iter()
+            .filter(|(action, _)| {
                 !self
                     .get_player(player_index)
                     .played_once_per_turn_actions
                     .contains(action)
                     && action.is_available(self, player_index)
             })
-            .cloned()
             .collect()
+    }
+
+    #[must_use]
+    pub fn is_custom_action_available(
+        &self,
+        player_index: usize,
+        action: &CustomActionType,
+    ) -> bool {
+        self.get_available_custom_actions(player_index)
+            .iter()
+            .any(|(a, _)| a == action)
     }
 
     pub fn draw_wonder_card(&mut self, player_index: usize) {
@@ -1169,7 +1186,7 @@ impl Game {
         }
         if let Some(advance_bonus) = &advance.bonus {
             let pile = advance_bonus.resources();
-            self.add_to_last_log_item(&format!(". Player gained {pile} as advance bonus"));
+            self.add_info_log_item(&format!("Player gained {pile} as advance bonus"));
             self.players[player_index].gain_resources(pile);
         }
         let player = &mut self.players[player_index];
@@ -1780,7 +1797,7 @@ pub struct GameData {
     current_player_index: usize,
     action_log: Vec<ActionLogItem>,
     action_log_index: usize,
-    log: Vec<String>,
+    log: Vec<Vec<String>>,
     undo_limit: usize,
     actions_left: u32,
     successful_cultural_influence: bool,
@@ -2040,11 +2057,14 @@ pub mod tests {
             current_player_index: 0,
             action_log: Vec::new(),
             action_log_index: 0,
-            log: vec![
+            log: [
                 String::from("The game has started"),
                 String::from("Age 1 has started"),
                 String::from("Round 1/3"),
-            ],
+            ]
+            .iter()
+            .map(|s| vec![s.to_string()])
+            .collect(),
             undo_limit: 0,
             actions_left: 3,
             successful_cultural_influence: false,

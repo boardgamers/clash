@@ -286,19 +286,19 @@
   ],
   "action_log_index": 2,
   "log": [
-    "The game has started",
-    "Age 1 has started",
-    "Round 1/3",
-    "Player1 paid 2 ideas to get the Tactics advance",
-    "Player1 used a move units action",
-    "\tPlayer1 sailed 2 ships from C3 to C4",
-    "\tPlayer1 sailed 2 ships from C4 to C3",
-    "\tPlayer1 sailed 2 ships from C3 to D2",
-    "\nCombat round 1",
-    "\tPlayer1 rolled 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 12 and gets 2 hits against defending units. Player2 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units.",
-    "\tPlayer1 has to remove 1 of their attacking units",
-    "Player1 removed 1 ship and 1 cavalry",
-    "\tPlayer1 killed all defending units"
+    [
+      "Player1 sailed 2 ships from C3 to D2"
+    ],
+    [
+      "Combat round 1",
+      "Player1 rolled 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 12 and gets 2 hits against defending units.",
+      "Player2 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units.",
+      "Player1 has to remove 1 of their attacking units"
+    ],
+    [
+      "Player1 removed 1 ship and 1 cavalry",
+      "Player1 killed all defending units"
+    ]
   ],
   "undo_limit": 2,
   "actions_left": 2,

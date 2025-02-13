@@ -1,11 +1,18 @@
+use crate::city_ui::{IconAction, IconActionVec};
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
-use crate::happiness_ui::{can_play_increase_happiness, open_increase_happiness_dialog};
+use crate::event_ui::event_help;
+use crate::happiness_ui::{
+    can_play_increase_happiness, can_play_influence_culture, open_increase_happiness_dialog,
+};
 use crate::layout_ui::{bottom_left_texture, icon_pos};
 use crate::move_ui::MoveIntent;
+use crate::payment_ui::Payment;
 use crate::render_context::RenderContext;
 use server::action::Action;
-use server::content::advances::get_advance;
+use server::city::City;
+use server::content::advances_culture::{sports_options, theaters_options};
+use server::content::advances_economy::tax_options;
 use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::game::GameState;
 use server::playing_actions::{PlayingAction, PlayingActionType};
@@ -36,7 +43,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     }
-    if rc.can_play_action(PlayingActionType::InfluenceCultureAttempt)
+    if can_play_influence_culture(rc)
         && bottom_left_texture(
             rc,
             &assets.resources[&ResourceType::CultureTokens],
@@ -44,25 +51,54 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
             "Cultural Influence",
         )
     {
-        return StateUpdate::OpenDialog(ActiveDialog::CulturalInfluence);
+        return base_or_custom_action(
+            rc,
+            PlayingActionType::InfluenceCultureAttempt,
+            "Influence culture",
+            &[("Arts", CustomActionType::ArtsInfluenceCultureAttempt)],
+            ActiveDialog::CulturalInfluence,
+        );
     }
-    for (i, a) in game
-        .get_available_custom_actions(rc.shown_player.index)
-        .iter()
-        .enumerate()
-    {
-        if let Some(action) = generic_custom_action(a) {
+    let mut i = 0;
+    for (a, origin) in &game.get_available_custom_actions(rc.shown_player.index) {
+        if let Some(action) = generic_custom_action(rc, a, None) {
             if bottom_left_texture(
                 rc,
                 &assets.custom_actions[a],
                 icon_pos(i as i8, -1),
-                &custom_action_tooltip(a),
+                &event_help(rc, origin, false)[0],
             ) {
-                return StateUpdate::execute(Action::Playing(PlayingAction::Custom(action)));
+                return action;
             }
+            i += 1;
+        }
+    }
+    for (i, (icon, tooltip, action)) in custom_action_buttons(rc, None).iter().enumerate() {
+        if bottom_left_texture(rc, icon, icon_pos(i as i8, -1), tooltip) {
+            return action();
         }
     }
     StateUpdate::None
+}
+
+pub fn custom_action_buttons<'a>(
+    rc: &'a RenderContext,
+    city: Option<&'a City>,
+) -> IconActionVec<'a> {
+    rc.game
+        .get_available_custom_actions(rc.shown_player.index)
+        .into_iter()
+        .filter_map(|(a, origin)| {
+            generic_custom_action(rc, &a, city).map(|action| {
+                let a: IconAction<'a> = (
+                    &rc.assets().custom_actions[&a],
+                    event_help(rc, &origin, false)[0].clone(),
+                    Box::new(move || action.clone()),
+                );
+                a
+            })
+        })
+        .collect()
 }
 
 fn global_move(rc: &RenderContext) -> StateUpdate {
@@ -78,24 +114,40 @@ fn global_move(rc: &RenderContext) -> StateUpdate {
     )
 }
 
-fn custom_action_tooltip(custom_action_type: &CustomActionType) -> String {
-    match custom_action_type {
-        CustomActionType::ConstructWonder => "Construct a wonder".to_string(),
-        CustomActionType::AbsolutePower => get_advance("Absolute Power").description,
-        CustomActionType::VotingIncreaseHappiness => get_advance("Voting").description,
-        CustomActionType::FreeEconomyCollect => get_advance("Free Economy").description,
+fn generic_custom_action(
+    rc: &RenderContext,
+    custom_action_type: &CustomActionType,
+    city: Option<&City>,
+) -> Option<StateUpdate> {
+    if let Some(city) = city {
+        if matches!(custom_action_type, CustomActionType::Sports) {
+            if let Some(options) = sports_options(city) {
+                return Some(StateUpdate::OpenDialog(ActiveDialog::Sports((
+                    Payment::new_gain(&options, "Increase happiness using sports"),
+                    city.position,
+                ))));
+            }
+        }
     }
-}
 
-fn generic_custom_action(custom_action_type: &CustomActionType) -> Option<CustomAction> {
     match custom_action_type {
         CustomActionType::ConstructWonder
+        | CustomActionType::ArtsInfluenceCultureAttempt
         | CustomActionType::VotingIncreaseHappiness
-        | CustomActionType::FreeEconomyCollect => {
+        | CustomActionType::FreeEconomyCollect
+        | CustomActionType::Sports => {
             // handled explicitly
             None
         }
-        CustomActionType::AbsolutePower => Some(CustomAction::ForcedLabor),
+        CustomActionType::AbsolutePower => Some(StateUpdate::execute(Action::Playing(
+            PlayingAction::Custom(CustomAction::AbsolutePower),
+        ))),
+        CustomActionType::Taxes => Some(StateUpdate::OpenDialog(ActiveDialog::Taxes(
+            Payment::new_gain(&tax_options(rc.shown_player), "Collect taxes"),
+        ))),
+        CustomActionType::Theaters => Some(StateUpdate::OpenDialog(ActiveDialog::Theaters(
+            Payment::new_gain(&theaters_options(), "Convert Resources"),
+        ))),
     }
 }
 
@@ -108,8 +160,7 @@ pub fn base_or_custom_available(
         || (rc.game.state == GameState::Playing
             && rc
                 .game
-                .get_available_custom_actions(rc.shown_player.index)
-                .contains(custom))
+                .is_custom_action_available(rc.shown_player.index, custom))
 }
 
 pub fn base_or_custom_action(
@@ -128,17 +179,14 @@ pub fn base_or_custom_action(
         None
     };
 
-    let special = rc
-        .game
-        .get_available_custom_actions(rc.shown_player.index)
+    let special = custom
         .iter()
-        .find(|a| custom.iter().any(|(_, b)| **a == *b))
-        .map(|a| {
-            let advance = custom.iter().find(|(_, b)| *b == *a).unwrap().0;
+        .find(|(_, a)| rc.game.is_custom_action_available(rc.shown_player.index, a))
+        .map(|(advance, a)| {
             let dialog = execute(BaseOrCustomDialog {
                 custom: BaseOrCustomAction::Custom {
                     custom: a.clone(),
-                    advance: advance.to_string(),
+                    advance: (*advance).to_string(),
                 },
                 title: format!("{title} with {advance}"),
             });

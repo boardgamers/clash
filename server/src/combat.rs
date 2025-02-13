@@ -297,8 +297,8 @@ fn remove_casualties(game: &mut Game, c: &mut Combat, killed_unit_ids: Vec<u32>)
     if let Some(defender_hits) = r.defender_hits {
         if defender_hits > 0 {
             if defender_hits < c.attackers.len() as u8 {
-                game.add_info_log_item(format!(
-                    "\t{} has to remove {} of their attacking units",
+                game.add_info_log_item(&format!(
+                    "{} has to remove {} of their attacking units",
                     game.players[c.attacker].get_name(),
                     defender_hits
                 ));
@@ -352,7 +352,7 @@ fn save_carried_units(killed_unit_ids: &[u32], game: &mut Game, player: usize, p
 /// Panics if events are not set
 pub fn combat_loop(game: &mut Game, mut c: Combat) {
     loop {
-        game.add_info_log_item(format!("\nCombat round {}", c.round));
+        game.add_info_log_group(format!("Combat round {}", c.round));
         //todo: go into tactics phase if either player has tactics card (also if they can not play it unless otherwise specified via setting)
 
         let attacker_name = game.players[c.attacker].get_name();
@@ -398,16 +398,17 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
         let defender_hit_cancels = defender_rolls.hit_cancels + defender_strength.hit_cancels;
         let attacker_hits = (attacker_combat_value / 5).saturating_sub(defender_hit_cancels);
         let defender_hits = (defender_combat_value / 5).saturating_sub(attacker_hit_cancels);
-        game.add_info_log_item(format!("\t{attacker_name} rolled {attacker_log_str} for combined combat value of {attacker_combat_value} and gets {attacker_hits} hits against defending units. {defender_name} rolled {defender_log_str} for combined combat value of {defender_combat_value} and gets {defender_hits} hits against attacking units."));
+        game.add_info_log_item(&format!("{attacker_name} rolled {attacker_log_str} for combined combat value of {attacker_combat_value} and gets {attacker_hits} hits against defending units."));
+        game.add_info_log_item(&format!("{defender_name} rolled {defender_log_str} for combined combat value of {defender_combat_value} and gets {defender_hits} hits against attacking units."));
         if !attacker_strength.roll_log.is_empty() {
-            game.add_info_log_item(format!(
-                ". {attacker_name} used the following combat modifiers: {}",
+            game.add_info_log_item(&format!(
+                "{attacker_name} used the following combat modifiers: {}",
                 attacker_strength.roll_log.join(", ")
             ));
         }
         if !defender_strength.roll_log.is_empty() {
-            game.add_info_log_item(format!(
-                ". {defender_name} used the following combat modifiers: {}",
+            game.add_info_log_item(&format!(
+                "{defender_name} used the following combat modifiers: {}",
                 defender_strength.roll_log.join(", ")
             ));
         }
@@ -461,8 +462,8 @@ fn kill_some_units(
     role: &str,
     defender_hits: Option<u8>,
 ) {
-    game.add_info_log_item(format!(
-        "\t{} has to remove {casualties} of their {role} units",
+    game.add_info_log_item(&format!(
+        "{} has to remove {casualties} of their {role} units",
         game.players[player].get_name(),
     ));
     to_remove_casualties(game, player, c, casualties, defender_hits);
@@ -530,8 +531,8 @@ fn resolve_combat(game: &mut Game, c: &mut Combat) -> CombatControl {
 }
 
 fn offer_retreat(game: &mut Game, c: &mut Combat) -> CombatControl {
-    game.add_info_log_item(format!(
-        "\t{} may retreat",
+    game.add_info_log_item(&format!(
+        "{} may retreat",
         game.players[c.attacker].get_name()
     ));
     game.state = GameState::Combat(Combat {
@@ -542,8 +543,8 @@ fn offer_retreat(game: &mut Game, c: &mut Combat) -> CombatControl {
 }
 
 fn attacker_wins(game: &mut Game, c: &mut Combat) -> CombatControl {
-    game.add_info_log_item(format!(
-        "\t{} killed all defending units",
+    game.add_info_log_item(&format!(
+        "{} killed all defending units",
         game.players[c.attacker].get_name()
     ));
     game.move_units(c.attacker, &c.attackers, c.defender_position, None);
@@ -553,8 +554,8 @@ fn attacker_wins(game: &mut Game, c: &mut Combat) -> CombatControl {
 }
 
 fn defender_wins(game: &mut Game, c: &mut Combat) -> CombatControl {
-    game.add_info_log_item(format!(
-        "\t{} killed all attacking units",
+    game.add_info_log_item(&format!(
+        "{} killed all attacking units",
         game.players[c.defender].get_name()
     ));
     end_combat(game, c)
@@ -562,12 +563,12 @@ fn defender_wins(game: &mut Game, c: &mut Combat) -> CombatControl {
 
 fn draw(game: &mut Game, c: &mut Combat) -> CombatControl {
     if c.defender_fortress(game) {
-        game.add_info_log_item(format!("\tAll attacking and defending units where eliminated. {} wins the battle because he has a defending fortress", game.players[c.defender].get_name()));
+        game.add_info_log_item(&format!("All attacking and defending units where eliminated. {} wins the battle because he has a defending fortress", game.players[c.defender].get_name()));
         return end_combat(game, c);
     }
-    game.add_info_log_item(String::from(
-        "\tAll attacking and defending units where eliminated, ending the battle in a draw",
-    ));
+    game.add_info_log_item(
+        "All attacking and defending units where eliminated, ending the battle in a draw",
+    );
     end_combat(game, c)
 }
 

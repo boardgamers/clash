@@ -72,10 +72,10 @@ fn cartography() -> AdvanceBuilder {
                 if ship {
                     player.info.insert("Cartography".to_string(), key);
                     player.gain_resources(ResourcePile::ideas(1));
-                    player.add_to_last_log_item(". Cartography gained 1 idea");
+                    player.add_info_log_item("Cartography gained 1 idea");
                     if navigation {
                         player.gain_resources(ResourcePile::culture_tokens(1));
-                        player.add_to_last_log_item(" and 1 culture token (for using navigation)");
+                        player.add_info_log_item(" and 1 culture token (for using navigation)");
                     }
                 }
             },

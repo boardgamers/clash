@@ -57,7 +57,8 @@
                   ],
                   "to": {
                     "gold": 1
-                  }
+                  },
+                  "type": "Unlimited"
                 }
               ]
             },
@@ -78,7 +79,8 @@
                   ],
                   "to": {
                     "gold": 1
-                  }
+                  },
+                  "type": "Unlimited"
                 }
               ]
             },
@@ -368,7 +370,8 @@
                           ],
                           "to": {
                             "gold": 1
-                          }
+                          },
+                          "type": "Unlimited"
                         }
                       ]
                     },
@@ -389,20 +392,12 @@
   ],
   "action_log_index": 2,
   "log": [
-    "The game has started",
-    "Age 1 has started",
-    "Round 1/3",
-    "Player1 paid 2 ideas to get the Tactics advance",
-    "Player1 used a move units action",
-    "\tPlayer1 ended the movement action",
-    "Player1 paid 2 ideas to get the Siegecraft advance",
-    "Player1 ended their turn",
-    "It's Player2's turn",
-    "Player2 ended their turn with 3 actions left",
-    "It's Player1's turn",
-    "Round 2/3",
-    "\tPlayer1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1",
-    "Player1 paid for steel weapons: 1 ore"
+    [
+      "Player1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1"
+    ],
+    [
+      "Player1 paid for steel weapons: 1 ore"
+    ]
   ],
   "undo_limit": 2,
   "actions_left": 2,

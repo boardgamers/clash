@@ -63,7 +63,7 @@ where
     }
 
     #[must_use]
-    pub(crate) fn trigger_with_exclude(
+    fn trigger_with_exclude(
         &self,
         value: &mut T,
         info: &U,

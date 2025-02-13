@@ -3,6 +3,7 @@ use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
 use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
+use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
 use crate::event_ui::{custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
@@ -17,6 +18,7 @@ use server::action::Action;
 use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
 use server::content::custom_phase_actions::{CustomPhaseAdvanceRewardRequest, CustomPhaseRequest};
+use server::events::EventOrigin;
 use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
 use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
@@ -39,7 +41,7 @@ pub enum ActiveDialog {
     ReplaceUnits(RecruitSelection),
     MoveUnits(MoveSelection),
     MovePayment(MovePayment),
-    CulturalInfluence,
+    CulturalInfluence(BaseOrCustomDialog),
     CulturalInfluenceResolution(CulturalInfluenceResolution),
     ExploreResolution(ExploreResolutionConfig),
 
@@ -57,6 +59,10 @@ pub enum ActiveDialog {
     Retreat,
     RemoveCasualties(RemoveCasualtiesSelection),
 
+    // custom
+    Sports((Payment, Position)),
+    Theaters(Payment),
+    Taxes(Payment),
     CustomPhaseResourceRewardRequest(Payment),
     CustomPhaseAdvanceRewardRequest(CustomPhaseAdvanceRewardRequest),
     CustomPhasePaymentRequest(Vec<Payment>),
@@ -79,7 +85,7 @@ impl ActiveDialog {
             ActiveDialog::ReplaceUnits(_) => "replace units",
             ActiveDialog::MoveUnits(_) => "move units",
             ActiveDialog::MovePayment(_) => "move payment",
-            ActiveDialog::CulturalInfluence => "cultural influence",
+            ActiveDialog::CulturalInfluence(_) => "cultural influence",
             ActiveDialog::CulturalInfluenceResolution(_) => "cultural influence resolution",
             ActiveDialog::ExploreResolution(_) => "explore resolution",
             ActiveDialog::FreeAdvance => "free advance",
@@ -92,6 +98,9 @@ impl ActiveDialog {
             ActiveDialog::PlaceSettler => "place settler",
             ActiveDialog::Retreat => "retreat",
             ActiveDialog::RemoveCasualties(_) => "remove casualties",
+            ActiveDialog::Sports(_) => "sports",
+            ActiveDialog::Theaters(_) => "theaters",
+            ActiveDialog::Taxes(_) => "collect taxes",
             ActiveDialog::CustomPhaseResourceRewardRequest(_) => "trade route selection",
             ActiveDialog::CustomPhaseAdvanceRewardRequest(_) => "advance selection",
             ActiveDialog::CustomPhasePaymentRequest(_) => "custom phase payment request",
@@ -117,35 +126,14 @@ impl ActiveDialog {
             ActiveDialog::CollectResources(collect) => collect.help_text(rc),
             ActiveDialog::RecruitUnitSelection(_) => vec!["Click on a unit to recruit".to_string()],
             ActiveDialog::ReplaceUnits(_) => vec!["Click on a unit to replace".to_string()],
-            ActiveDialog::MoveUnits(m) => {
-                if m.start.is_some() {
-                    let mut result = vec![];
-                    let destinations = &m.destinations.list;
-                    if destinations.is_empty() {
-                        result.push("No unit on this tile can move".to_string());
-                    }
-                    if destinations
-                        .iter()
-                        .any(|d| matches!(d, MoveDestination::Tile(_)))
-                    {
-                        result.push("Click on a highlighted tile to move units".to_string());
-                    };
-                    if destinations
-                        .iter()
-                        .any(|d| matches!(d, MoveDestination::Carrier(_)))
-                    {
-                        result.push("Click on a carrier to embark units".to_string());
-                    };
-                    m.destinations.modifiers.iter().for_each(|m| {
-                        result.extend(event_help(rc, m, true));
-                    });
-                    result
-                } else {
-                    vec!["Click on a unit to move".to_string()]
+            ActiveDialog::MoveUnits(m) => Self::move_units_help(rc, m),
+            ActiveDialog::CulturalInfluence(b) => {
+                let v = vec!["Click on a building to influence its culture".to_string()];
+                if let BaseOrCustomAction::Custom { advance, custom: _ } = &b.custom {
+                    let mut r = v.clone();
+                    r.extend(event_help(rc, &EventOrigin::Advance(advance.clone()), true));
                 }
-            }
-            ActiveDialog::CulturalInfluence => {
-                vec!["Click on a building to influence its culture".to_string()]
+                v
             }
             ActiveDialog::CulturalInfluenceResolution(c) => vec![format!(
                 "Pay {} to influence {}",
@@ -185,11 +173,48 @@ impl ActiveDialog {
                 }
             )],
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
+            ActiveDialog::Sports(_) => {
+                event_help(rc, &EventOrigin::Advance("Sports".to_string()), true)
+            }
+            ActiveDialog::Taxes(_) => {
+                event_help(rc, &EventOrigin::Advance("Taxes".to_string()), true)
+            }
+            ActiveDialog::Theaters(_) => {
+                event_help(rc, &EventOrigin::Advance("Theaters".to_string()), true)
+            }
             ActiveDialog::CustomPhaseResourceRewardRequest(_)
             | ActiveDialog::CustomPhaseAdvanceRewardRequest(_)
             | ActiveDialog::CustomPhasePaymentRequest(_) => {
                 event_help(rc, &custom_phase_event_origin(rc), true)
             }
+        }
+    }
+
+    fn move_units_help(rc: &RenderContext, m: &MoveSelection) -> Vec<String> {
+        if m.start.is_some() {
+            let mut result = vec![];
+            let destinations = &m.destinations.list;
+            if destinations.is_empty() {
+                result.push("No unit on this tile can move".to_string());
+            }
+            if destinations
+                .iter()
+                .any(|d| matches!(d, MoveDestination::Tile(_)))
+            {
+                result.push("Click on a highlighted tile to move units".to_string());
+            };
+            if destinations
+                .iter()
+                .any(|d| matches!(d, MoveDestination::Carrier(_)))
+            {
+                result.push("Click on a carrier to embark units".to_string());
+            };
+            m.destinations.modifiers.iter().for_each(|m| {
+                result.extend(event_help(rc, m, true));
+            });
+            result
+        } else {
+            vec!["Click on a unit to move".to_string()]
         }
     }
 
@@ -217,6 +242,7 @@ impl ActiveDialog {
     }
 }
 
+#[derive(Clone)]
 pub struct PendingUpdate {
     pub action: Action,
     pub warning: Vec<String>,
@@ -231,6 +257,7 @@ pub struct DialogChooser {
 }
 
 #[must_use]
+#[derive(Clone)]
 pub enum StateUpdate {
     None,
     OpenDialog(ActiveDialog),

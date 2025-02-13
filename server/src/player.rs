@@ -38,7 +38,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::{
     cmp::Ordering::{self, *},
-    collections::HashSet,
     mem,
 };
 
@@ -62,7 +61,7 @@ pub struct Player {
     pub completed_objectives: Vec<String>,
     pub captured_leaders: Vec<String>,
     pub event_victory_points: f32,
-    pub custom_actions: HashSet<CustomActionType>,
+    pub custom_actions: HashMap<CustomActionType, EventOrigin>,
     pub wonder_cards: Vec<Wonder>,
     pub next_unit_id: u32,
     pub played_once_per_turn_actions: Vec<CustomActionType>,
@@ -204,7 +203,7 @@ impl Player {
             completed_objectives: data.completed_objectives,
             captured_leaders: data.captured_leaders,
             event_victory_points: data.event_victory_points,
-            custom_actions: HashSet::new(),
+            custom_actions: HashMap::new(),
             wonder_cards: data
                 .wonder_cards
                 .iter()
@@ -327,7 +326,7 @@ impl Player {
             completed_objectives: Vec::new(),
             captured_leaders: Vec::new(),
             event_victory_points: 0.0,
-            custom_actions: HashSet::new(),
+            custom_actions: HashMap::new(),
             wonder_cards: Vec::new(),
             wonders_build: Vec::new(),
             next_unit_id: 0,
@@ -413,7 +412,7 @@ impl Player {
             .find_map(|advance| advance.government.clone())
     }
 
-    pub fn gain_resources_in_undo(&mut self, resources: ResourcePile) {
+    pub(crate) fn gain_resources_in_undo(&mut self, resources: ResourcePile) {
         // resource limit may be adjusted later
         self.resources += resources;
     }
@@ -429,12 +428,7 @@ impl Player {
         cost.can_afford(&self.resources)
     }
 
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if player cannot afford the resources
-    pub fn pay_cost(&mut self, cost: &PaymentOptions, payment: &ResourcePile) {
+    pub(crate) fn pay_cost(&mut self, cost: &PaymentOptions, payment: &ResourcePile) {
         assert!(cost.can_afford(payment), "invalid payment");
         assert!(cost.is_valid_payment(payment), "Invalid payment");
         self.lose_resources(payment.clone());
@@ -445,7 +439,7 @@ impl Player {
     /// # Panics
     ///
     /// Panics if player cannot afford the resources
-    pub fn lose_resources(&mut self, resources: ResourcePile) {
+    pub(crate) fn lose_resources(&mut self, resources: ResourcePile) {
         assert!(
             self.resources.has_at_least(&resources),
             "player should be able to afford the resources"

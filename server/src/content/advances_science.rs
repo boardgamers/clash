@@ -31,7 +31,7 @@ fn astronomy() -> AdvanceBuilder {
                 i.set_zero();
                 i.info
                     .log
-                    .push(". Astronomy reduced the cost to 0".to_string());
+                    .push("Astronomy reduced the cost to 0".to_string());
             }
         },
         0,
@@ -48,7 +48,7 @@ fn math() -> AdvanceBuilder {
         |event| &mut event.advance_cost,
         |i, a, ()| {
             if a.name == "Engineering" || a.name == "Roads" {
-                i.info.log.push(". Math reduced the cost to 0".to_string());
+                i.info.log.push("Math reduced the cost to 0".to_string());
                 i.set_zero();
             }
         },

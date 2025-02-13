@@ -54,7 +54,7 @@ pub fn log_length(game: &Game) -> usize {
 }
 
 #[must_use]
-pub fn log_slice(game: &Game, options: &LogSliceOptions) -> Vec<String> {
+pub fn log_slice(game: &Game, options: &LogSliceOptions) -> Vec<Vec<String>> {
     match options.end {
         Some(end) => &game.log[options.start..=end],
         None => &game.log[options.start..],

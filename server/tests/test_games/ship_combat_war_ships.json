@@ -286,15 +286,7 @@
   "current_player_index": 0,
   "action_log": [],
   "action_log_index": 0,
-  "log": [
-    "The game has started",
-    "Age 1 has started",
-    "Round 1/3",
-    "Player1 paid 2 ideas to get the Tactics advance",
-    "Player1 used a move units action",
-    "\tPlayer1 sailed 2 ships from C3 to C4",
-    "\tPlayer1 sailed 2 ships from C4 to C3"
-  ],
+  "log": [],
   "undo_limit": 0,
   "actions_left": 2,
   "successful_cultural_influence": false,

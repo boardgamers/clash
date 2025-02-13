@@ -14,9 +14,29 @@ pub(crate) fn education() -> AdvanceGroup {
             Advance::builder("Writing", "todo")
                 .with_advance_bonus(CultureToken)
                 .with_unlocked_building(Academy),
+            public_education(),
             free_education(),
             philosophy(),
         ],
+    )
+}
+
+fn public_education() -> AdvanceBuilder {
+    Advance::builder(
+        "Public Education",
+        "Once per turn, when you collect resources in a city with an Academy, gain 1 idea",
+    )
+    .with_advance_bonus(MoodToken)
+    .add_once_per_turn_listener(
+        |event| &mut event.on_collect,
+        |e| &mut e.info,
+        |player, game, pos| {
+            if game.get_city(player.index, *pos).pieces.academy.is_some() {
+                player.gain_resources(ResourcePile::ideas(1));
+                player.add_info_log_item("Public Education gained 1 idea");
+            }
+        },
+        0,
     )
 }
 
@@ -40,7 +60,7 @@ fn philosophy() -> AdvanceBuilder {
                 .any(|a| &a.name == advance)
             {
                 player.gain_resources(ResourcePile::ideas(1));
-                player.add_to_last_log_item(". Philosophy gained 1 idea.");
+                player.add_info_log_item("Philosophy gained 1 idea");
             }
         },
         0,
@@ -74,7 +94,7 @@ fn free_education() -> AdvanceBuilder {
             }
         },
         |c, _game, payment| {
-            c.add_to_last_log_item(&format!(
+            c.add_info_log_item(&format!(
                 "{} paid {} for free education to gain 1 mood token",
                 c.name, payment[0]
             ));

@@ -36,20 +36,20 @@ pub struct LogSliceOptions {
 ///
 /// this is called before the action is executed
 #[must_use]
-pub fn format_action_log_item(action: &Action, game: &Game) -> String {
+pub fn format_action_log_item(action: &Action, game: &Game) -> Vec<String> {
     match action {
-        Action::Playing(action) => format_playing_action_log_item(action, game),
+        Action::Playing(action) => vec![format_playing_action_log_item(action, game)],
         Action::StatusPhase(action) => format_status_phase_action_log_item(action, game),
-        Action::Movement(action) => format_movement_action_log_item(action, game),
+        Action::Movement(action) => vec![format_movement_action_log_item(action, game)],
         Action::CulturalInfluenceResolution(action) => {
-            format_cultural_influence_resolution_log_item(game, *action)
+            vec![format_cultural_influence_resolution_log_item(game, *action)]
         }
-        Action::Combat(action) => format_combat_action_log_item(action, game),
-        Action::PlaceSettler(position) => format_place_settler_log_item(game, *position),
-        Action::ExploreResolution(_rotation) => format_explore_action_log_item(game),
+        Action::Combat(action) => vec![format_combat_action_log_item(action, game)],
+        Action::PlaceSettler(position) => vec![format_place_settler_log_item(game, *position)],
+        Action::ExploreResolution(_rotation) => vec![format_explore_action_log_item(game)],
         Action::CustomPhaseEvent(_) => {
             // is done in the event handler itself
-            String::new()
+            vec![]
         }
         Action::Undo | Action::Redo => {
             panic!("undoing or redoing actions should not be written to the log")
@@ -115,9 +115,9 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
     }
 }
 
-fn format_cultural_influence_attempt_log_item(
+pub(crate) fn format_cultural_influence_attempt_log_item(
     game: &Game,
-    player_name: &String,
+    player_name: &str,
     c: &InfluenceCultureAttempt,
 ) -> String {
     let target_player_index = c.target_player_index;
@@ -152,15 +152,7 @@ pub fn format_happiness_increase(
         .iter()
         .filter_map(|(position, steps)| {
             if *steps > 0 {
-                Some(format!(
-                    "the city at {position} by {steps} steps, making it {:?}",
-                    player
-                        .get_city(*position)
-                        .expect("player should have a city at this position")
-                        .mood_state
-                        .clone()
-                        + *steps
-                ))
+                Some(format_city_happiness_increase(player, *position, *steps))
             } else {
                 None
             }
@@ -170,6 +162,22 @@ pub fn format_happiness_increase(
         "{player_name} paid {} to increase happiness in {}",
         i.payment,
         utils::format_list(&happiness_increases, "no city")
+    )
+}
+
+pub(crate) fn format_city_happiness_increase(
+    player: &Player,
+    position: Position,
+    steps: u32,
+) -> String {
+    format!(
+        "the city at {position} by {steps} steps, making it {:?}",
+        player
+            .get_city(position)
+            .expect("player should have a city at this position")
+            .mood_state
+            .clone()
+            + steps
     )
 }
 
@@ -301,7 +309,7 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
     let player_name = player.get_name();
     match action {
         MovementAction::Move(m) if m.units.is_empty() => {
-            format!("\t{player_name} used a movement actions but moved no units")
+            format!("{player_name} used a movement actions but moved no units")
         }
         MovementAction::Move(m) => {
             let units_str = m
@@ -344,53 +352,57 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
             } else {
                 format!(" for {payment}")
             };
-            format!("\t{player_name} {verb} {units_str} from {start} to {dest}{suffix}{cost}",)
+            format!("{player_name} {verb} {units_str} from {start} to {dest}{suffix}{cost}",)
         }
-        MovementAction::Stop => format!("\t{player_name} ended the movement action"),
+        MovementAction::Stop => format!("{player_name} ended the movement action"),
     }
 }
 
-fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) -> String {
+pub(crate) fn format_status_phase_action_log_item(
+    action: &StatusPhaseAction,
+    game: &Game,
+) -> Vec<String> {
     let player_name = game.players[game.active_player()].get_name();
     match action {
         StatusPhaseAction::CompleteObjectives(completed_objectives) => {
-            format!(
+            vec![format!(
                 "{player_name} completed {}",
                 utils::format_list(completed_objectives, "no objectives")
-            )
+            )]
         }
         StatusPhaseAction::FreeAdvance(advance) => {
-            format!("{player_name} advanced {advance} for free")
+            vec![format!("{player_name} advanced {advance} for free")]
         }
         StatusPhaseAction::RazeSize1City(city) => {
-            format!(
+            vec![format!(
                 "{player_name} {}",
                 match city {
                     RazeSize1City::Position(city) =>
                         format!("razed the city at {city} and gained 1 gold"),
                     RazeSize1City::None => String::from("did not rase a city"),
                 }
-            )
+            )]
         }
-        StatusPhaseAction::ChangeGovernmentType(new_government) => {
-            format!(
-                "{player_name} {}",
-                match new_government {
-                    ChangeGovernmentType::ChangeGovernment(new_government_advance) => format!(
-                        "changed their government from {} to {} - additional advances: {}",
-                        game.players[game.active_player()]
-                            .government()
-                            .expect("player should have a government before changing it"),
-                        new_government_advance.new_government,
-                        new_government_advance.additional_advances.join(", ")
-                    ),
-                    ChangeGovernmentType::KeepGovernment =>
-                        String::from("did not change their government"),
-                }
-            )
-        }
+        StatusPhaseAction::ChangeGovernmentType(new_government) => match new_government {
+            ChangeGovernmentType::ChangeGovernment(new_government_advance) => vec![
+                format!(
+                    "{player_name} changed their government from {} to {}",
+                    game.players[game.active_player()]
+                        .government()
+                        .expect("player should have a government before changing it"),
+                    new_government_advance.new_government
+                ),
+                format!(
+                    "Additional advances: {}",
+                    new_government_advance.additional_advances.join(", ")
+                ),
+            ],
+            ChangeGovernmentType::KeepGovernment => {
+                vec![format!("{player_name} did not change their government")]
+            }
+        },
         StatusPhaseAction::DetermineFirstPlayer(player_index) => {
-            format!(
+            vec![format!(
                 "{player_name} choose {}",
                 if *player_index == game.starting_player_index {
                     format!(
@@ -411,7 +423,7 @@ fn format_status_phase_action_log_item(action: &StatusPhaseAction, game: &Game) 
                         }
                     )
                 }
-            )
+            )]
         }
     }
 }

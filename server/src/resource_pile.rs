@@ -378,19 +378,25 @@ impl CostWithDiscount {
 #[cfg(test)]
 mod tests {
     use super::ResourcePile;
-    use crate::payment::PaymentOptions;
+    use crate::payment::{PaymentConversionType, PaymentOptions};
 
     fn assert_can_afford(name: &str, cost: &ResourcePile, discount: u32) {
         let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
-        let can_afford =
-            PaymentOptions::resources_with_discount(cost.clone(), discount).can_afford(&player_has);
+        let can_afford = PaymentOptions::resources_with_discount(
+            cost.clone(),
+            PaymentConversionType::Mandatory(discount),
+        )
+        .can_afford(&player_has);
         assert!(can_afford, "{name}");
     }
 
     fn assert_cannot_afford(name: &str, cost: &ResourcePile, discount: u32) {
         let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
-        let can_afford =
-            PaymentOptions::resources_with_discount(cost.clone(), discount).can_afford(&player_has);
+        let can_afford = PaymentOptions::resources_with_discount(
+            cost.clone(),
+            PaymentConversionType::Mandatory(discount),
+        )
+        .can_afford(&player_has);
         assert!(!can_afford, "{name}");
     }
 

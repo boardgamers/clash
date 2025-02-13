@@ -44,6 +44,13 @@ impl IncreaseHappinessConfig {
     }
 }
 
+pub fn can_play_influence_culture(rc: &RenderContext) -> bool {
+    base_or_custom_available(
+        rc,
+        PlayingActionType::InfluenceCultureAttempt,
+        &CustomActionType::ArtsInfluenceCultureAttempt,
+    )
+}
 pub fn can_play_increase_happiness(rc: &RenderContext) -> bool {
     base_or_custom_available(
         rc,

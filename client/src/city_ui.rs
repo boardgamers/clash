@@ -1,4 +1,6 @@
-use crate::action_buttons::{base_or_custom_action, base_or_custom_available};
+use crate::action_buttons::{
+    base_or_custom_action, base_or_custom_available, custom_action_buttons,
+};
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
@@ -42,6 +44,7 @@ pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate 
         move_units_buttons(rc, city.position),
         building_icons(rc, city),
         wonder_icons(rc, city),
+        custom_action_buttons(rc, Some(city)),
     ]
     .into_iter()
     .flatten()
@@ -70,7 +73,7 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
 }
 
 fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> {
-    if !rc.can_play_action(PlayingActionType::Construct) {
+    if !city.can_activate() || !rc.can_play_action(PlayingActionType::Construct) {
         // is this the right thing to check?
         return vec![];
     }
@@ -102,7 +105,7 @@ fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> 
 }
 
 fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> {
-    if !rc.can_play_action(PlayingActionType::Construct) {
+    if !city.can_activate() || !rc.can_play_action(PlayingActionType::Construct) {
         return vec![];
     }
     let owner = rc.shown_player;
@@ -144,7 +147,7 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
 }
 
 fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
-    if !rc.can_play_action(PlayingActionType::Recruit) {
+    if !city.can_activate() || !rc.can_play_action(PlayingActionType::Recruit) {
         return None;
     }
     Some((
@@ -164,11 +167,13 @@ fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconActio
 }
 
 fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
-    if !base_or_custom_available(
-        rc,
-        PlayingActionType::Collect,
-        &CustomActionType::FreeEconomyCollect,
-    ) {
+    if !city.can_activate()
+        || !base_or_custom_available(
+            rc,
+            PlayingActionType::Collect,
+            &CustomActionType::FreeEconomyCollect,
+        )
+    {
         return None;
     }
     Some((
@@ -291,7 +296,7 @@ pub fn draw_city(rc: &RenderContext, city: &City) {
                 BUILDING_SIZE,
                 player_ui::player_color(player_index),
             );
-            let tooltip = if matches!(state.active_dialog, ActiveDialog::CulturalInfluence) {
+            let tooltip = if matches!(state.active_dialog, ActiveDialog::CulturalInfluence(_)) {
                 ""
             } else {
                 b.name()

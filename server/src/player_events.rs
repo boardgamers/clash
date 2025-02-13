@@ -19,6 +19,7 @@ use std::collections::{HashMap, HashSet};
 pub(crate) struct PlayerEvents {
     pub on_construct: Event<Game, CustomPhaseInfo, Building>,
     pub on_construct_wonder: Event<Player, Position, Wonder>,
+    pub on_collect: Event<PlayerCommands, Game, Position>,
     pub on_advance: Event<PlayerCommands, Game, String>,
     pub on_advance_custom_phase: Event<Game, CustomPhaseInfo, AdvanceInfo>,
     pub before_move: Event<PlayerCommands, Game, MoveInfo>,
@@ -61,7 +62,7 @@ impl ActionInfo {
 
     pub(crate) fn execute(&self, game: &mut Game) {
         for l in self.log.iter().unique() {
-            game.add_to_last_log_item(l);
+            game.add_info_log_item(l);
         }
         self.undo.apply(
             game,
@@ -91,7 +92,7 @@ impl CostInfo {
         self.cost.default = ResourcePile::empty();
     }
 
-    pub(crate) fn execute(&self, game: &mut Game, payment: &ResourcePile) {
+    pub(crate) fn pay(&self, game: &mut Game, payment: &ResourcePile) {
         game.players[self.info.undo.player].pay_cost(&self.cost, payment);
         self.info.execute(game);
     }
@@ -133,7 +134,7 @@ pub struct PlayerCommands {
     pub name: String,
     pub index: usize,
     pub info: HashMap<String, String>,
-    pub log_edits: Vec<String>,
+    pub log: Vec<String>,
     pub gained_resources: ResourcePile,
 }
 
@@ -143,7 +144,7 @@ impl PlayerCommands {
             name,
             index: player_index,
             info,
-            log_edits: Vec::new(),
+            log: Vec::new(),
             gained_resources: ResourcePile::default(),
         }
     }
@@ -152,7 +153,7 @@ impl PlayerCommands {
         self.gained_resources += resources;
     }
 
-    pub fn add_to_last_log_item(&mut self, edit: &str) {
-        self.log_edits.push(edit.to_string());
+    pub fn add_info_log_item(&mut self, edit: &str) {
+        self.log.push(edit.to_string());
     }
 }

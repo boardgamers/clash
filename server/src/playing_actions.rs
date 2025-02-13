@@ -123,7 +123,7 @@ impl PlayingAction {
             Advance { advance, payment } => {
                 game.get_player(player_index)
                     .advance_cost(&get_advance(&advance), Some(&payment))
-                    .execute(game, &payment);
+                    .pay(game, &payment);
                 game.advance(&advance, player_index, payment);
             }
             FoundCity { settler } => {
@@ -157,7 +157,7 @@ impl PlayingAction {
                     c.city_position,
                     c.port_position,
                 );
-                cost.execute(game, &c.payment);
+                cost.pay(game, &c.payment);
                 Self::on_construct(game, player_index, c.city_piece);
             }
             Collect(c) => {
@@ -180,7 +180,7 @@ impl PlayingAction {
                     &r.replaced_units,
                     Some(&r.payment),
                 ) {
-                    cost.execute(game, &r.payment);
+                    cost.pay(game, &r.payment);
                 } else {
                     panic!("Cannot pay for units")
                 }
@@ -193,60 +193,17 @@ impl PlayingAction {
                 );
             }
             IncreaseHappiness(i) => {
-                increase_happiness(game, player_index, i);
+                increase_happiness(game, player_index, &i.happiness_increases, Some(i.payment));
             }
-            InfluenceCultureAttempt(c) => {
-                let starting_city_position = c.starting_city_position;
-                let target_player_index = c.target_player_index;
-                let target_city_position = c.target_city_position;
-                let city_piece = c.city_piece;
-                let range_boost_cost = game
-                    .influence_culture_boost_cost(
-                        player_index,
-                        starting_city_position,
-                        target_player_index,
-                        target_city_position,
-                        city_piece,
-                    )
-                    .expect("Illegal action");
-
-                let self_influence = starting_city_position == target_city_position;
-
-                // currectly, there is no way to have different costs for this
-                game.players[player_index].lose_resources(range_boost_cost.default);
-                let roll = game.get_next_dice_roll().value;
-                let success = roll == 5 || roll == 6;
-                if success {
-                    game.influence_culture(
-                        player_index,
-                        target_player_index,
-                        target_city_position,
-                        city_piece,
-                    );
-                    game.add_to_last_log_item(&format!(" and succeeded (rolled {roll})"));
-                    return;
-                }
-                if self_influence {
-                    game.add_to_last_log_item(&format!(" and failed (rolled {roll})"));
-                    return;
-                }
-                if let Some(roll_boost_cost) =
-                    PaymentOptions::resources(Self::roll_boost_cost(roll))
-                        .first_valid_payment(&game.players[player_index].resources)
-                {
-                    game.add_to_last_log_item(&format!(" and rolled a {roll}. {} now has the option to pay {roll_boost_cost} to increase the dice roll and proceed with the cultural influence", game.players[player_index].get_name()));
-                    game.state =
-                        GameState::CulturalInfluenceResolution(CulturalInfluenceResolution {
-                            roll_boost_cost,
-                            target_player_index,
-                            target_city_position,
-                            city_piece,
-                        });
-                } else {
-                    game.add_to_last_log_item(&format!(" but rolled a {roll} and has not enough culture tokens to increase the roll "));
-                }
-            }
+            InfluenceCultureAttempt(c) => influence_culture_attempt(game, player_index, &c),
             Custom(custom_action) => {
+                assert!(
+                    game.is_custom_action_available(
+                        player_index,
+                        &custom_action.custom_action_type()
+                    ),
+                    "Illegal action"
+                );
                 let action = custom_action.custom_action_type();
                 assert!(
                     !game
@@ -274,10 +231,6 @@ impl PlayingAction {
             CustomPhaseEventType::OnConstruct,
             &building,
         );
-    }
-
-    pub(crate) fn roll_boost_cost(roll: u8) -> ResourcePile {
-        ResourcePile::culture_tokens(5 - roll as u32)
     }
 
     #[must_use]
@@ -356,7 +309,14 @@ impl PlayingAction {
                     r.leader_name.as_ref(),
                 );
             }
-            IncreaseHappiness(i) => undo_increase_happiness(game, player_index, i),
+            IncreaseHappiness(i) => {
+                undo_increase_happiness(
+                    game,
+                    player_index,
+                    &i.happiness_increases,
+                    Some(i.payment),
+                );
+            }
             Custom(custom_action) => custom_action.undo(game, player_index),
             InfluenceCultureAttempt(_) | EndTurn => panic!("Action can't be undone"),
         }
@@ -387,7 +347,7 @@ impl ActionType {
     }
 
     #[must_use]
-    fn new(free: bool, once_per_turn: bool, cost: ResourcePile) -> Self {
+    pub fn new(free: bool, once_per_turn: bool, cost: ResourcePile) -> Self {
         Self {
             free,
             once_per_turn,
@@ -396,11 +356,16 @@ impl ActionType {
     }
 }
 
-pub(crate) fn increase_happiness(game: &mut Game, player_index: usize, i: IncreaseHappiness) {
+pub(crate) fn increase_happiness(
+    game: &mut Game,
+    player_index: usize,
+    happiness_increases: &[(Position, u32)],
+    payment: Option<ResourcePile>,
+) {
     let player = &mut game.players[player_index];
     let mut angry_activations = vec![];
     let mut count = 0;
-    for (city_position, steps) in i.happiness_increases {
+    for &(city_position, steps) in happiness_increases {
         let city = player.get_city(city_position).expect("Illegal action");
         if steps == 0 {
             continue;
@@ -417,22 +382,30 @@ pub(crate) fn increase_happiness(game: &mut Game, player_index: usize, i: Increa
         }
     }
 
-    let r = i.payment;
-    player
-        .increase_happiness_total_cost(count, Some(&r))
-        .execute(game, &r);
+    if let Some(r) = payment {
+        player
+            .increase_happiness_total_cost(count, Some(&r))
+            .pay(game, &r);
+    }
     game.push_undo_context(UndoContext::IncreaseHappiness { angry_activations });
 }
 
-pub(crate) fn undo_increase_happiness(game: &mut Game, player_index: usize, i: IncreaseHappiness) {
+pub(crate) fn undo_increase_happiness(
+    game: &mut Game,
+    player_index: usize,
+    happiness_increases: &[(Position, u32)],
+    payment: Option<ResourcePile>,
+) {
     let player = &mut game.players[player_index];
-    for (city_position, steps) in i.happiness_increases {
+    for &(city_position, steps) in happiness_increases {
         let city = player.get_city_mut(city_position).expect("Illegal action");
         for _ in 0..steps {
             city.decrease_mood_state();
         }
     }
-    player.gain_resources_in_undo(i.payment);
+    if let Some(r) = payment {
+        player.gain_resources_in_undo(r);
+    }
 
     if let Some(UndoContext::IncreaseHappiness { angry_activations }) = game.pop_undo_context() {
         for city_position in angry_activations {
@@ -444,4 +417,65 @@ pub(crate) fn undo_increase_happiness(game: &mut Game, player_index: usize, i: I
     } else {
         panic!("Increase happiness context should be stored in undo context")
     }
+}
+
+pub(crate) fn influence_culture_attempt(
+    game: &mut Game,
+    player_index: usize,
+    c: &InfluenceCultureAttempt,
+) {
+    let starting_city_position = c.starting_city_position;
+    let target_player_index = c.target_player_index;
+    let target_city_position = c.target_city_position;
+    let city_piece = c.city_piece;
+    let range_boost_cost = game
+        .influence_culture_boost_cost(
+            player_index,
+            starting_city_position,
+            target_player_index,
+            target_city_position,
+            city_piece,
+        )
+        .expect("Illegal action");
+
+    let self_influence = starting_city_position == target_city_position;
+
+    // currectly, there is no way to have different costs for this
+    game.players[player_index].lose_resources(range_boost_cost.default);
+    let roll = game.get_next_dice_roll().value;
+    let success = roll == 5 || roll == 6;
+    if success {
+        game.influence_culture(
+            player_index,
+            target_player_index,
+            target_city_position,
+            city_piece,
+        );
+        game.add_to_last_log_item(&format!(" and succeeded (rolled {roll})"));
+        return;
+    }
+    if self_influence {
+        game.add_to_last_log_item(&format!(" and failed (rolled {roll})"));
+        return;
+    }
+    if let Some(roll_boost_cost) = PaymentOptions::resources(roll_boost_cost(roll))
+        .first_valid_payment(&game.players[player_index].resources)
+    {
+        game.add_to_last_log_item(&format!(" and rolled a {roll}"));
+        game.add_info_log_item(&format!("{} now has the option to pay {roll_boost_cost} to increase the dice roll and proceed with the cultural influence", game.players[player_index].get_name()));
+        game.state = GameState::CulturalInfluenceResolution(CulturalInfluenceResolution {
+            roll_boost_cost,
+            target_player_index,
+            target_city_position,
+            city_piece,
+        });
+    } else {
+        game.add_to_last_log_item(&format!(
+            " but rolled a {roll} and has not enough culture tokens to increase the roll "
+        ));
+    }
+}
+
+pub(crate) fn roll_boost_cost(roll: u8) -> ResourcePile {
+    ResourcePile::culture_tokens(5 - roll as u32)
 }
