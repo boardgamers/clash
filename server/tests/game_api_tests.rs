@@ -926,12 +926,22 @@ fn test_custom_action_forced_labor() {
 
 #[test]
 fn test_civil_rights() {
-    test_action(
+    test_actions(
         "civil_rights",
-        Action::Playing(Custom(CivilRights)),
-        0,
-        true,
-        false,
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(Custom(CivilRights)),
+        ),
+        TestAction::undoable(
+            0,
+            Action::Playing(Recruit(server::playing_actions::Recruit {
+                        units: Units::new(0, 1, 0, 0, 0, 0),
+                        city_position: Position::from_offset("A1"),
+                        payment: ResourcePile::mood_tokens(2),
+                        leader_name: None,
+                        replaced_units: vec![],
+                    })),
+        )],
     );
 }
 

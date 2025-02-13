@@ -49,19 +49,20 @@ fn draft() -> AdvanceBuilder {
         |cost, units, player| {
             if units.infantry > 0 {
                 // insert at beginning so that it's preferred over gold
+
+                let pile = ResourcePile::mood_tokens(if player.has_advance("Civil Rights") {
+                    2
+                } else {
+                    1
+                });
                 cost.info
                     .log
-                    .push("Draft reduced the cost of 1 Infantry to 1 mood token".to_string());
-
+                    .push(format!("Draft reduced the cost of 1 Infantry to {pile}"));
                 cost.cost.conversions.insert(
                     0,
                     PaymentConversion::limited(
                         UnitType::cost(&UnitType::Infantry),
-                        ResourcePile::mood_tokens(if player.has_advance("Civil Rights") {
-                            2
-                        } else {
-                            1
-                        }),
+                        pile,
                         1,
                     ),
                 );
