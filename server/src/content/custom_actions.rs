@@ -201,7 +201,7 @@ impl CustomActionType {
             CustomActionType::ArtsInfluenceCultureAttempt => {
                 ActionType::free_and_once_per_turn(ResourcePile::culture_tokens(1))
             }
-            CustomActionType::VotingIncreaseHappiness  => {
+            CustomActionType::VotingIncreaseHappiness => {
                 ActionType::free(ResourcePile::mood_tokens(1))
             }
             CustomActionType::FreeEconomyCollect | CustomActionType::ForcedLabor => {

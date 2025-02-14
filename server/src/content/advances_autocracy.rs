@@ -4,7 +4,10 @@ use crate::content::advances::{advance_group_builder, AdvanceGroup};
 use crate::content::custom_actions::CustomActionType::{AbsolutePower, ForcedLabor};
 
 pub(crate) fn autocracy() -> AdvanceGroup {
-    advance_group_builder("Autocracy", vec![nationalism(), absolute_power(), forced_labor()])
+    advance_group_builder(
+        "Autocracy",
+        vec![nationalism(), absolute_power(), forced_labor()],
+    )
 }
 
 fn nationalism() -> AdvanceBuilder {

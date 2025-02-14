@@ -25,7 +25,7 @@
           "city_pieces": {
             "market": 1
           },
-          "mood_state": "Happy",
+          "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
           "position": "A1"
@@ -200,7 +200,7 @@
       ],
       [
         "A2",
-        "Water"
+        "Forest"
       ],
       [
         "A3",
@@ -252,7 +252,7 @@
   "action_log_index": 0,
   "log": [],
   "undo_limit": 0,
-  "actions_left": 0,
+  "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,
   "age": 2,

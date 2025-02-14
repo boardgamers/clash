@@ -26,8 +26,8 @@
             "market": 1
           },
           "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
+          "activations": 1,
+          "angry_activation": true,
           "position": "A1"
         },
         {
@@ -258,16 +258,54 @@
           "Custom": "ForcedLabor"
         }
       }
+    },
+    {
+      "action": {
+        "Playing": {
+          "Collect": {
+            "city_position": "A1",
+            "collections": [
+              [
+                "A1",
+                {
+                  "food": 1
+                }
+              ],
+              [
+                "A2",
+                {
+                  "wood": 1
+                }
+              ]
+            ]
+          }
+        }
+      },
+      "undo": [
+        {
+          "WastedResources": {
+            "resources": {
+              "food": 1,
+              "wood": 1
+            },
+            "player_index": 0
+          }
+        }
+      ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
       "Player1 paid 1 mood token to treat Angry cities as neutral"
+    ],
+    [
+      "Player1 collects 1 food and 1 wood in the city at A1",
+      "Player1 Could not store 1 food and 1 wood"
     ]
   ],
   "undo_limit": 0,
-  "actions_left": 1,
+  "actions_left": 0,
   "successful_cultural_influence": false,
   "round": 1,
   "age": 2,

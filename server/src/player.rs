@@ -800,7 +800,7 @@ impl Player {
         if !self.can_afford(&cost.cost) {
             return None;
         }
-        if vec.len() > city.mood_modified_size() {
+        if vec.len() > city.mood_modified_size(self) {
             return None;
         }
         if vec.iter().any(|unit| matches!(unit, Cavalry | Elephant)) && city.pieces.market.is_none()

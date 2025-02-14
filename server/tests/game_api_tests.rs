@@ -158,7 +158,7 @@ fn basic_actions() {
         player
             .get_city(city_position)
             .expect("player should have a city at this position")
-            .mood_modified_size()
+            .mood_modified_size(player)
     );
     assert_eq!(1, game.actions_left);
 
@@ -950,12 +950,21 @@ fn test_absolute_power() {
 
 #[test]
 fn test_forced_labor() {
-    test_action(
+    test_actions(
         "forced_labor",
-        Action::Playing(Custom(ForcedLabor)),
-        0,
-        true,
-        false,
+        vec![
+            TestAction::undoable(0, Action::Playing(Custom(ForcedLabor))),
+            TestAction::undoable(
+                0,
+                Action::Playing(Collect(playing_actions::Collect {
+                    city_position: Position::from_offset("A1"),
+                    collections: vec![
+                        (Position::from_offset("A1"), ResourcePile::food(1)),
+                        (Position::from_offset("A2"), ResourcePile::wood(1)),
+                    ],
+                })),
+            ),
+        ],
     );
 }
 

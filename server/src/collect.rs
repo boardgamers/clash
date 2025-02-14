@@ -23,7 +23,7 @@ pub fn get_total_collection(
 ) -> Option<(CollectOptionsInfo, ResourcePile)> {
     let player = &game.players[player_index];
     let city = player.get_city(city_position)?;
-    if city.mood_modified_size() < collections.len() || city.player_index != player_index {
+    if city.mood_modified_size(player) < collections.len() || city.player_index != player_index {
         return None;
     }
     let i = possible_resource_collections(

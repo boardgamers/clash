@@ -1472,8 +1472,8 @@ impl Game {
             " and captured {}'s city at {position}",
             self.players[old_player_index].get_name()
         ));
-        self.players[new_player_index]
-            .gain_resources(ResourcePile::gold(city.mood_modified_size() as u32));
+        let size = city.mood_modified_size(&self.players[new_player_index]);
+        self.players[new_player_index].gain_resources(ResourcePile::gold(size as u32));
         let take_over = self.players[new_player_index].is_city_available();
 
         if take_over {
