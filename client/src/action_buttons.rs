@@ -143,6 +143,9 @@ fn generic_custom_action(
         CustomActionType::AbsolutePower => Some(StateUpdate::execute(Action::Playing(
             PlayingAction::Custom(CustomAction::AbsolutePower),
         ))),
+        CustomActionType::ForcedLabor => Some(StateUpdate::execute(Action::Playing(
+            PlayingAction::Custom(CustomAction::ForcedLabor),
+        ))),
         CustomActionType::CivilRights => Some(StateUpdate::execute(Action::Playing(
             PlayingAction::Custom(CustomAction::CivilRights),
         ))),

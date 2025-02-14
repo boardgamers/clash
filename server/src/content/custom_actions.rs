@@ -28,6 +28,7 @@ pub enum CustomAction {
         payment: ResourcePile,
     },
     AbsolutePower,
+    ForcedLabor,
     CivilRights,
     ArtsInfluenceCultureAttempt(InfluenceCultureAttempt),
     VotingIncreaseHappiness(IncreaseHappiness),
@@ -44,6 +45,7 @@ pub enum CustomAction {
 pub enum CustomActionType {
     ConstructWonder,
     AbsolutePower,
+    ForcedLabor,
     CivilRights,
     ArtsInfluenceCultureAttempt,
     VotingIncreaseHappiness,
@@ -67,6 +69,9 @@ impl CustomAction {
                 payment,
             } => construct_wonder(game, player_index, city_position, &wonder, payment),
             CustomAction::AbsolutePower => game.actions_left += 1,
+            CustomAction::ForcedLabor => {
+                // we check that the action was played
+            }
             CustomAction::CivilRights => {
                 game.players[player_index].gain_resources(ResourcePile::mood_tokens(3));
             }
@@ -93,6 +98,7 @@ impl CustomAction {
         match self {
             CustomAction::ConstructWonder { .. } => CustomActionType::ConstructWonder,
             CustomAction::AbsolutePower => CustomActionType::AbsolutePower,
+            CustomAction::ForcedLabor => CustomActionType::ForcedLabor,
             CustomAction::CivilRights => CustomActionType::CivilRights,
             CustomAction::ArtsInfluenceCultureAttempt(_) => {
                 CustomActionType::ArtsInfluenceCultureAttempt
@@ -123,6 +129,9 @@ impl CustomAction {
                 game.players[player_index].wonder_cards.push(wonder);
             }
             CustomAction::AbsolutePower => game.actions_left -= 1,
+            CustomAction::ForcedLabor => {
+                // we check that the action was played
+            }
             CustomAction::CivilRights => {
                 game.players[player_index].lose_resources(ResourcePile::mood_tokens(3));
             }
@@ -158,6 +167,8 @@ impl CustomAction {
                 format!("{player_name} paid {payment} to construct the {wonder} wonder in the city at {city_position}"),
             CustomAction::AbsolutePower =>
                 format!("{player_name} paid 2 mood tokens to get an extra action using Forced Labor"),
+            CustomAction::ForcedLabor =>
+                format!("{player_name} paid 1 mood token to treat Angry cities as neutral"),
             CustomAction::CivilRights =>
                 format!("{player_name} gained 3 mood tokens using Civil Rights"),
             CustomAction::ArtsInfluenceCultureAttempt(c) =>
@@ -190,10 +201,10 @@ impl CustomActionType {
             CustomActionType::ArtsInfluenceCultureAttempt => {
                 ActionType::free_and_once_per_turn(ResourcePile::culture_tokens(1))
             }
-            CustomActionType::VotingIncreaseHappiness => {
+            CustomActionType::VotingIncreaseHappiness  => {
                 ActionType::free(ResourcePile::mood_tokens(1))
             }
-            CustomActionType::FreeEconomyCollect => {
+            CustomActionType::FreeEconomyCollect | CustomActionType::ForcedLabor => {
                 ActionType::free_and_once_per_turn(ResourcePile::mood_tokens(1))
             }
             CustomActionType::Taxes => ActionType::once_per_turn(ResourcePile::mood_tokens(1)),

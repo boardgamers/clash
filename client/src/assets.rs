@@ -219,6 +219,10 @@ impl Assets {
         [
             (
                 CustomActionType::AbsolutePower,
+                load_png(include_bytes!("../assets/crown-svgrepo-com.png")),
+            ),
+            (
+                CustomActionType::ForcedLabor,
                 load_png(include_bytes!("../assets/slavery-whip-svgrepo-com.png")),
             ),
             (
