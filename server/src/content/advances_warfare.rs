@@ -60,11 +60,7 @@ fn draft() -> AdvanceBuilder {
                     .push(format!("Draft reduced the cost of 1 Infantry to {pile}"));
                 cost.cost.conversions.insert(
                     0,
-                    PaymentConversion::limited(
-                        UnitType::cost(&UnitType::Infantry),
-                        pile,
-                        1,
-                    ),
+                    PaymentConversion::limited(UnitType::cost(&UnitType::Infantry), pile, 1),
                 );
             }
         },

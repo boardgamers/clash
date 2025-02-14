@@ -7,6 +7,7 @@ use server::status_phase::{
 };
 
 use server::content::trade_routes::find_trade_routes;
+use server::events::EventOrigin;
 use server::unit::{MoveUnits, Units};
 use server::{
     action::Action,
@@ -427,39 +428,49 @@ fn game_path(name: &str) -> String {
     format!("tests{SEPARATOR}test_games{SEPARATOR}{name}.json")
 }
 
+type TestAssert = Vec<Box<dyn FnOnce(&Game)>>;
+
 struct TestAction {
     action: Action,
     undoable: bool,
     illegal_action_test: bool,
     player_index: usize,
+    pre_asserts: TestAssert,
+    post_asserts: TestAssert,
 }
 
 impl TestAction {
-    fn illegal(player_index: usize, action: Action) -> Self {
+    fn new(action: Action, undoable: bool, illegal_action_test: bool, player_index: usize) -> Self {
         Self {
             action,
-            undoable: false,
-            illegal_action_test: true,
+            undoable,
+            illegal_action_test,
             player_index,
+            pre_asserts: vec![],
+            post_asserts: vec![],
         }
+    }
+    fn illegal(player_index: usize, action: Action) -> Self {
+        Self::new(action, false, true, player_index)
     }
 
     fn undoable(player_index: usize, action: Action) -> Self {
-        Self {
-            action,
-            undoable: true,
-            illegal_action_test: false,
-            player_index,
-        }
+        Self::new(action, true, false, player_index)
     }
 
     fn not_undoable(player_index: usize, action: Action) -> Self {
-        Self {
-            action,
-            undoable: false,
-            illegal_action_test: false,
-            player_index,
-        }
+        Self::new(action, false, false, player_index)
+    }
+
+    fn with_pre_assert(mut self, pre_assert: impl FnOnce(&Game) + 'static) -> Self {
+        self.pre_asserts.push(Box::new(pre_assert));
+        self
+    }
+
+    #[allow(dead_code)]
+    fn with_post_assert(mut self, post_assert: impl FnOnce(&Game) + 'static) -> Self {
+        self.post_asserts.push(Box::new(post_assert));
+        self
     }
 }
 
@@ -485,6 +496,8 @@ fn test_actions(name: &str, actions: Vec<TestAction>) {
                 action.player_index,
                 action.undoable,
                 action.illegal_action_test,
+                action.pre_asserts,
+                action.post_asserts,
             );
         }));
         assert!(err.is_ok(), "test action {} should not panic", i);
@@ -506,9 +519,12 @@ fn test_action(
         player_index,
         undoable,
         illegal_action_test,
+        vec![],
+        vec![],
     );
 }
 
+#[allow(clippy::too_many_arguments)]
 fn test_action_internal(
     name: &str,
     outcome: &str,
@@ -516,10 +532,15 @@ fn test_action_internal(
     player_index: usize,
     undoable: bool,
     illegal_action_test: bool,
+    pre_asserts: TestAssert,
+    post_asserts: TestAssert,
 ) {
     let a = serde_json::to_string(&action).expect("action should be serializable");
     let a2 = serde_json::from_str(&a).expect("action should be deserializable");
     let game = load_game(name);
+    for pre_assert in pre_asserts {
+        pre_assert(&game);
+    }
 
     if illegal_action_test {
         let err = catch_unwind(AssertUnwindSafe(|| {
@@ -540,6 +561,9 @@ fn test_action_internal(
     if !undoable {
         assert!(!game.can_undo(), "should not be able to undo");
         return;
+    }
+    for post_assert in post_asserts {
+        post_assert(&game);
     }
     undo_redo(
         name,
@@ -928,20 +952,19 @@ fn test_custom_action_forced_labor() {
 fn test_civil_rights() {
     test_actions(
         "civil_rights",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(Custom(CivilRights)),
-        ),
-        TestAction::undoable(
-            0,
-            Action::Playing(Recruit(server::playing_actions::Recruit {
-                        units: Units::new(0, 1, 0, 0, 0, 0),
-                        city_position: Position::from_offset("A1"),
-                        payment: ResourcePile::mood_tokens(2),
-                        leader_name: None,
-                        replaced_units: vec![],
-                    })),
-        )],
+        vec![
+            TestAction::undoable(0, Action::Playing(Custom(CivilRights))),
+            TestAction::undoable(
+                0,
+                Action::Playing(Recruit(server::playing_actions::Recruit {
+                    units: Units::new(0, 1, 0, 0, 0, 0),
+                    city_position: Position::from_offset("A1"),
+                    payment: ResourcePile::mood_tokens(2),
+                    leader_name: None,
+                    replaced_units: vec![],
+                })),
+            ),
+        ],
     );
 }
 
@@ -982,18 +1005,36 @@ fn test_overpay() {
 #[test]
 fn test_sanitation_and_draft() {
     // we should figure out that sanitation or draft are used, but not both
-    test_action(
+    let units = Units::new(1, 1, 0, 0, 0, 0);
+    let city_position = Position::from_offset("A1");
+    test_actions(
         "sanitation_and_draft",
-        Action::Playing(Recruit(server::playing_actions::Recruit {
-            units: Units::new(1, 1, 0, 0, 0, 0),
-            city_position: Position::from_offset("A1"),
-            payment: ResourcePile::mood_tokens(1) + ResourcePile::gold(2),
-            leader_name: None,
-            replaced_units: vec![],
-        })),
-        0,
-        true,
-        false,
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(Recruit(server::playing_actions::Recruit {
+                units: units.clone(),
+                city_position,
+                payment: ResourcePile::mood_tokens(1) + ResourcePile::gold(2),
+                leader_name: None,
+                replaced_units: vec![],
+            })),
+        )
+        .with_pre_assert(move |game| {
+            let options = game.players[0]
+                .recruit_cost_without_replaced(&units, city_position, None, None)
+                .unwrap()
+                .cost;
+            assert_eq!(3, options.conversions.len());
+            assert_eq!(ResourcePile::mood_tokens(1), options.conversions[0].to);
+            assert_eq!(ResourcePile::mood_tokens(1), options.conversions[1].to);
+            assert_eq!(
+                vec![
+                    EventOrigin::Advance("Sanitation".to_string()),
+                    EventOrigin::Advance("Draft".to_string())
+                ],
+                options.modifiers
+            );
+        })],
     );
 }
 

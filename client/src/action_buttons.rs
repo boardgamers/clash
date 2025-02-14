@@ -128,6 +128,7 @@ fn generic_custom_action(
                 ))));
             }
         }
+        return None;
     }
 
     match custom_action_type {
