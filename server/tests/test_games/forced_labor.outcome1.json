@@ -1,0 +1,331 @@
+{
+  "state": "Playing",
+  "players": [
+    {
+      "name": null,
+      "id": 0,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 8,
+        "culture_tokens": 10
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "market": 1
+          },
+          "mood_state": "Angry",
+          "activations": 1,
+          "angry_activation": true,
+          "position": "A1"
+        },
+        {
+          "city_pieces": {
+            "academy": 1,
+            "port": 1
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C2",
+          "port_position": "C3"
+        },
+        {
+          "city_pieces": {
+            "obelisk": 1,
+            "observatory": 1,
+            "fortress": 1,
+            "temple": 1
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "C2",
+          "unit_type": "Cavalry",
+          "id": 1
+        },
+        {
+          "position": "C2",
+          "unit_type": "Elephant",
+          "id": 2
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 3
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "B3",
+          "unit_type": "Settler",
+          "id": 6
+        }
+      ],
+      "civilization": "test1",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [
+        "Farming",
+        "Forced Labor",
+        "Math",
+        "Mining",
+        "Nationalism"
+      ],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "game_event_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [
+        "Pyramids"
+      ],
+      "next_unit_id": 7,
+      "played_once_per_turn_actions": [
+        "ForcedLabor"
+      ]
+    },
+    {
+      "name": null,
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 9,
+        "culture_tokens": 10
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Angry",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C1"
+        },
+        {
+          "city_pieces": {
+            "port": 1
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B2",
+          "port_position": "C3"
+        }
+      ],
+      "units": [
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 1
+        },
+        {
+          "position": "C3",
+          "unit_type": "Ship",
+          "id": 2
+        }
+      ],
+      "civilization": "test0",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [
+        "Farming",
+        "Math",
+        "Mining"
+      ],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "game_event_tokens": 2,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 3
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Forest"
+      ],
+      [
+        "A3",
+        {
+          "Exhausted": "Forest"
+        }
+      ],
+      [
+        "A4",
+        "Mountain"
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "B4",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "D2",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 1,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "action": {
+        "Playing": {
+          "Custom": "ForcedLabor"
+        }
+      }
+    },
+    {
+      "action": {
+        "Playing": {
+          "Collect": {
+            "city_position": "A1",
+            "collections": [
+              [
+                "A1",
+                {
+                  "food": 1
+                }
+              ],
+              [
+                "A2",
+                {
+                  "wood": 1
+                }
+              ]
+            ]
+          }
+        }
+      },
+      "undo": [
+        {
+          "WastedResources": {
+            "resources": {
+              "food": 1,
+              "wood": 1
+            },
+            "player_index": 0
+          }
+        }
+      ]
+    }
+  ],
+  "action_log_index": 2,
+  "log": [
+    [
+      "Player1 paid 1 mood token to treat Angry cities as neutral"
+    ],
+    [
+      "Player1 collects 1 food and 1 wood in the city at A1",
+      "Player1 Could not store 1 food and 1 wood"
+    ]
+  ],
+  "undo_limit": 0,
+  "actions_left": 0,
+  "successful_cultural_influence": false,
+  "round": 1,
+  "age": 2,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+  ],
+  "dice_roll_log": [],
+  "dropped_players": [],
+  "wonders_left": [],
+  "wonder_amount_left": 1
+}

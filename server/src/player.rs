@@ -794,13 +794,13 @@ impl Player {
             |e| &e.recruit_cost,
             &PaymentOptions::resources(vec.iter().map(UnitType::cost).sum()),
             units,
-            &(),
+            self,
             execute,
         );
         if !self.can_afford(&cost.cost) {
             return None;
         }
-        if vec.len() > city.mood_modified_size() {
+        if vec.len() > city.mood_modified_size(self) {
             return None;
         }
         if vec.iter().any(|unit| matches!(unit, Cavalry | Elephant)) && city.pieces.market.is_none()
@@ -1050,15 +1050,21 @@ impl Player {
         details: &V,
         execute: Option<&ResourcePile>,
     ) -> CostInfo {
-        get_event(&self.events)
-            .get()
-            .trigger_with_minimal_modifiers(
-                &CostInfo::new(self, value.clone()),
+        let event = get_event(&self.events).get();
+        let mut cost_info = CostInfo::new(self, value.clone());
+        if let Some(execute) = execute {
+            event.trigger_with_minimal_modifiers(
+                &cost_info,
                 info,
                 details,
-                |i| execute.as_ref().is_none_or(|r| i.cost.is_valid_payment(r)),
+                |i| i.cost.is_valid_payment(execute),
                 |i, m| i.cost.modifiers = m,
             )
+        } else {
+            let m = event.trigger(&mut cost_info, info, details);
+            cost_info.cost.modifiers = m;
+            cost_info
+        }
     }
 
     pub(crate) fn trigger_player_event<U, V>(

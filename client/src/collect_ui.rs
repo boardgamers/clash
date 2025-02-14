@@ -69,7 +69,8 @@ impl CollectResources {
 
     pub fn extra_resources(&self, game: &Game) -> i8 {
         let city = game.get_city(self.player_index, self.city_position);
-        city.mood_modified_size() as i8 - self.collections.len() as i8
+        city.mood_modified_size(game.get_player(self.player_index)) as i8
+            - self.collections.len() as i8
     }
 
     pub fn collected(&self) -> ResourcePile {

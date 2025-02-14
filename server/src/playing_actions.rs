@@ -347,6 +347,11 @@ impl ActionType {
     }
 
     #[must_use]
+    pub fn regular(cost: ResourcePile) -> Self {
+        Self::new(false, false, cost)
+    }
+
+    #[must_use]
     pub fn new(free: bool, once_per_turn: bool, cost: ResourcePile) -> Self {
         Self {
             free,

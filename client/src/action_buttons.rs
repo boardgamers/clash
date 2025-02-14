@@ -128,6 +128,7 @@ fn generic_custom_action(
                 ))));
             }
         }
+        return None;
     }
 
     match custom_action_type {
@@ -141,6 +142,12 @@ fn generic_custom_action(
         }
         CustomActionType::AbsolutePower => Some(StateUpdate::execute(Action::Playing(
             PlayingAction::Custom(CustomAction::AbsolutePower),
+        ))),
+        CustomActionType::ForcedLabor => Some(StateUpdate::execute(Action::Playing(
+            PlayingAction::Custom(CustomAction::ForcedLabor),
+        ))),
+        CustomActionType::CivilRights => Some(StateUpdate::execute(Action::Playing(
+            PlayingAction::Custom(CustomAction::CivilRights),
         ))),
         CustomActionType::Taxes => Some(StateUpdate::OpenDialog(ActiveDialog::Taxes(
             Payment::new_gain(&tax_options(rc.shown_player), "Collect taxes"),

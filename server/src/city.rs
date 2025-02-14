@@ -3,6 +3,7 @@ use std::ops::{Add, Sub};
 use serde::{Deserialize, Serialize};
 
 use crate::consts::MAX_CITY_SIZE;
+use crate::content::custom_actions::CustomActionType::ForcedLabor;
 use crate::{
     city_pieces::{Building, CityPieces, CityPiecesData},
     game::Game,
@@ -187,11 +188,17 @@ impl City {
     }
 
     #[must_use]
-    pub fn mood_modified_size(&self) -> usize {
+    pub fn mood_modified_size(&self, player: &Player) -> usize {
         match self.mood_state {
             Happy => self.size() + 1,
             Neutral => self.size(),
-            Angry => 1,
+            Angry => {
+                if player.played_once_per_turn_actions.contains(&ForcedLabor) {
+                    self.size()
+                } else {
+                    1
+                }
+            }
         }
     }
 
