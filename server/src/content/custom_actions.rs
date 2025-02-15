@@ -172,7 +172,7 @@ impl CustomAction {
             CustomAction::CivilRights =>
                 format!("{player_name} gained 3 mood tokens using Civil Rights"),
             CustomAction::ArtsInfluenceCultureAttempt(c) =>
-                format!("{} using Arts", format_cultural_influence_attempt_log_item(game, player_name, c)),
+                format!("{} using Arts", format_cultural_influence_attempt_log_item(game, player.index, player_name, c)),
             CustomAction::VotingIncreaseHappiness(i) =>
                 format!("{} using Voting", format_happiness_increase(player, player_name, i)),
             CustomAction::FreeEconomyCollect(c) =>

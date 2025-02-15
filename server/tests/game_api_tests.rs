@@ -1,7 +1,6 @@
 use server::action::CombatAction;
 use server::content::custom_actions::CustomAction;
 use server::content::custom_phase_actions::CustomPhaseEventAction;
-use server::game::{CulturalInfluenceResolution, GameState};
 use server::status_phase::{
     ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction,
 };
@@ -227,83 +226,6 @@ fn move_action(units: Vec<u32>, destination: Position) -> Action {
     }))
 }
 
-#[test]
-fn cultural_influence() {
-    let mut game = Game::new(2, String::new(), false);
-    game.dice_roll_outcomes = vec![10, 6, 8, 4];
-    game.set_player_index(0);
-    game.players[0].gain_resources(ResourcePile::culture_tokens(4));
-    game.players[1].gain_resources(ResourcePile::culture_tokens(1));
-    let city0position = Position::new(0, 0);
-    let city1position = Position::new(2, 0);
-    assert_eq!(city0position.distance(city1position), 2);
-    game.players[0].cities.push(City::new(0, city0position));
-    game.players[1].cities.push(City::new(1, city1position));
-    game.players[1].construct(Academy, city1position, None);
-    let influence_action = Action::Playing(InfluenceCultureAttempt(
-        playing_actions::InfluenceCultureAttempt {
-            starting_city_position: city0position,
-            target_player_index: 1,
-            target_city_position: city1position,
-            city_piece: Academy,
-        },
-    ));
-    let game = game_api::execute_action(game, influence_action, 0);
-    assert!(!game.players[1].cities[0].influenced());
-    assert_eq!(
-        game.state,
-        GameState::CulturalInfluenceResolution(CulturalInfluenceResolution {
-            roll_boost_cost: ResourcePile::culture_tokens(2),
-            target_player_index: 1,
-            target_city_position: city1position,
-            city_piece: Academy
-        })
-    );
-    let influence_resolution_decline_action = Action::CulturalInfluenceResolution(false);
-    let game = game_api::execute_action(game, influence_resolution_decline_action, 0);
-    assert!(!game.players[1].cities[0].influenced());
-    assert_eq!(game.state, GameState::Playing);
-    assert!(!game.successful_cultural_influence);
-    let influence_action = Action::Playing(InfluenceCultureAttempt(
-        playing_actions::InfluenceCultureAttempt {
-            starting_city_position: city0position,
-            target_player_index: 1,
-            target_city_position: city1position,
-            city_piece: Academy,
-        },
-    ));
-    let game = game_api::execute_action(game, influence_action, 0);
-    assert!(game.players[1].cities[0].influenced());
-    assert_eq!(game.state, GameState::Playing);
-    assert!(game.successful_cultural_influence);
-    let game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
-    assert_eq!(game.active_player(), 1);
-    let influence_action = Action::Playing(InfluenceCultureAttempt(
-        playing_actions::InfluenceCultureAttempt {
-            starting_city_position: city1position,
-            target_player_index: 1,
-            target_city_position: city1position,
-            city_piece: Academy,
-        },
-    ));
-    let game = game_api::execute_action(game, influence_action, 1);
-    assert!(game.players[1].cities[0].influenced());
-    assert_eq!(game.state, GameState::Playing);
-    assert!(!game.successful_cultural_influence);
-    let influence_action = Action::Playing(InfluenceCultureAttempt(
-        playing_actions::InfluenceCultureAttempt {
-            starting_city_position: city1position,
-            target_player_index: 1,
-            target_city_position: city1position,
-            city_piece: Academy,
-        },
-    ));
-    let game = game_api::execute_action(game, influence_action, 1);
-    assert!(!game.players[1].cities[0].influenced());
-    assert_eq!(game.state, GameState::Playing);
-    assert!(game.successful_cultural_influence);
-}
-
 fn assert_undo(
     game: &Game,
     can_undo: bool,
@@ -489,16 +411,7 @@ fn test_actions(name: &str, actions: Vec<TestAction>) {
             outcome(name, i - 1)
         };
         let err = catch_unwind(AssertUnwindSafe(|| {
-            test_action_internal(
-                &from,
-                outcome(name, i).as_str(),
-                action.action,
-                action.player_index,
-                action.undoable,
-                action.illegal_action_test,
-                action.pre_asserts,
-                action.post_asserts,
-            );
+            test_action_internal(&from, outcome(name, i).as_str(), action);
         }));
         assert!(err.is_ok(), "test action {} should not panic", i);
     }
@@ -515,41 +428,24 @@ fn test_action(
     test_action_internal(
         name,
         &outcome,
-        action,
-        player_index,
-        undoable,
-        illegal_action_test,
-        vec![],
-        vec![],
+        TestAction::new(action, undoable, illegal_action_test, player_index),
     );
 }
 
-#[allow(clippy::too_many_arguments)]
-fn test_action_internal(
-    name: &str,
-    outcome: &str,
-    action: Action,
-    player_index: usize,
-    undoable: bool,
-    illegal_action_test: bool,
-    pre_asserts: TestAssert,
-    post_asserts: TestAssert,
-) {
+fn test_action_internal(name: &str, outcome: &str, test: TestAction) {
+    let action = test.action;
     let a = serde_json::to_string(&action).expect("action should be serializable");
     let a2 = serde_json::from_str(&a).expect("action should be deserializable");
     let game = load_game(name);
-    for pre_assert in pre_asserts {
+    for pre_assert in test.pre_asserts {
         pre_assert(&game);
     }
 
-    if illegal_action_test {
-        let err = catch_unwind(AssertUnwindSafe(|| {
-            let _ = game_api::execute_action(game, a2, player_index);
-        }));
-        assert!(err.is_err(), "execute action should panic");
+    if test.illegal_action_test {
+        assert_illegal_action(game, test.player_index, a2);
         return;
     }
-    let game = game_api::execute_action(game, a2, player_index);
+    let game = game_api::execute_action(game, a2, test.player_index);
     let expected_game = read_game_str(outcome);
     assert_eq_game_json(
         &expected_game,
@@ -558,22 +454,53 @@ fn test_action_internal(
         outcome,
         &format!("EXECUTE: the game did not match the expectation after the initial {name} action"),
     );
-    if !undoable {
+    if !test.undoable {
         assert!(!game.can_undo(), "should not be able to undo");
         return;
     }
-    for post_assert in post_asserts {
+    for post_assert in test.post_asserts {
         post_assert(&game);
     }
     undo_redo(
         name,
-        player_index,
+        test.player_index,
         &read_game_str(name),
         game,
         outcome,
-        &expected_game,
+        &read_game_str(outcome),
         0,
     );
+}
+
+struct IllegalActionTest {
+    fail: bool,
+    setup_done: bool,
+}
+
+fn illegal_action_test(run: impl Fn(&mut IllegalActionTest)) {
+    run(&mut IllegalActionTest {
+        fail: false,
+        setup_done: false,
+    }); // should not panic
+    let mut test = IllegalActionTest {
+        fail: true,
+        setup_done: false,
+    };
+    let err = catch_unwind(AssertUnwindSafe(|| {
+        run(&mut test);
+    }));
+    assert!(
+        test.setup_done,
+        "illegal action test should run setup before panic"
+    );
+    assert!(err.is_err(), "illegal action test should panic");
+}
+
+fn assert_illegal_action(game: Game, player: usize, action: Action) {
+    let err = catch_unwind(AssertUnwindSafe(|| {
+        let _ = game_api::execute_action(game, action, player);
+    }));
+    assert!(err.is_err(), "execute action should panic");
 }
 
 fn to_json(game: &Game) -> String {
@@ -808,24 +735,124 @@ fn test_cultural_influence_instant_with_arts() {
 }
 
 #[test]
+fn test_cultural_influence_with_conversion() {
+    test_actions(
+        "cultural_influence_with_conversion",
+        vec![
+            TestAction::not_undoable(1, influence_action()),
+            TestAction::undoable(1, Action::CulturalInfluenceResolution(true)),
+        ],
+    );
+}
+
+#[test]
 fn test_cultural_influence() {
     test_actions(
         "cultural_influence",
         vec![
-            TestAction::not_undoable(
-                1,
-                Action::Playing(InfluenceCultureAttempt(
-                    playing_actions::InfluenceCultureAttempt {
-                        starting_city_position: Position::from_offset("C1"),
-                        target_player_index: 0,
-                        target_city_position: Position::from_offset("C2"),
-                        city_piece: Fortress,
-                    },
-                )),
-            ),
+            TestAction::not_undoable(1, influence_action()),
             TestAction::undoable(1, Action::CulturalInfluenceResolution(true)),
         ],
     );
+}
+
+#[test]
+fn test_separation_of_power() {
+    illegal_action_test(|test| {
+        let mut game = load_game("cultural_influence");
+        game.execute_action(Action::Playing(EndTurn), 1);
+        if test.fail {
+            game.execute_action(
+                Action::Playing(Advance {
+                    advance: String::from("Separation of Power"),
+                    payment: ResourcePile::food(1) + ResourcePile::gold(1),
+                }),
+                0,
+            );
+        }
+        game.execute_action(Action::Playing(EndTurn), 0);
+        test.setup_done = true;
+        game.execute_action(influence_action(), 1);
+    });
+}
+
+#[test]
+fn test_devotion() {
+    illegal_action_test(|test| {
+        let mut game = load_game("cultural_influence");
+        game.execute_action(Action::Playing(EndTurn), 1);
+        if test.fail {
+            game.execute_action(
+                Action::Playing(Advance {
+                    advance: String::from("Devotion"),
+                    payment: ResourcePile::food(1) + ResourcePile::gold(1),
+                }),
+                0,
+            );
+        }
+        game.execute_action(Action::Playing(EndTurn), 0);
+        test.setup_done = true;
+        game.execute_action(influence_action(), 1);
+    });
+}
+
+#[test]
+fn test_totalitarianism() {
+    illegal_action_test(|test| {
+        let mut game = load_game("cultural_influence");
+        game.execute_action(Action::Playing(EndTurn), 1);
+        if test.fail {
+            game.execute_action(
+                Action::Playing(Advance {
+                    advance: String::from("Totalitarianism"),
+                    payment: ResourcePile::food(1) + ResourcePile::gold(1),
+                }),
+                0,
+            );
+        }
+        game.execute_action(Action::Playing(EndTurn), 0);
+        test.setup_done = true;
+        game.execute_action(influence_action(), 1);
+    });
+}
+
+#[test]
+fn test_monuments() {
+    illegal_action_test(|test| {
+        let mut game = load_game("cultural_influence");
+        game.execute_action(Action::Playing(EndTurn), 1);
+        if test.fail {
+            game.execute_action(
+                Action::Playing(Advance {
+                    advance: String::from("Monuments"),
+                    payment: ResourcePile::food(1) + ResourcePile::gold(1),
+                }),
+                0,
+            );
+        }
+        game.execute_action(
+            Action::Playing(Custom(ConstructWonder {
+                city_position: Position::from_offset("C2"),
+                wonder: String::from("Pyramids"),
+                payment: ResourcePile::new(2, 3, 3, 0, 0, 0, 4),
+            })),
+            0,
+        );
+        game.execute_action(Action::Playing(EndTurn), 0);
+        test.setup_done = true;
+        game.execute_action(influence_action(), 1);
+    });
+}
+
+fn influence_action() -> Action {
+    Action::Playing(InfluenceCultureAttempt(
+        playing_actions::InfluenceCultureAttempt {
+            starting_city_position: Position::from_offset("B3"),
+            target_player_index: 0,
+            target_city_position: Position::from_offset("C2"),
+            city_piece: Temple,
+        },
+    ))
 }
 
 #[test]
@@ -1280,7 +1307,7 @@ fn test_change_government() {
         Action::StatusPhase(StatusPhaseAction::ChangeGovernmentType(
             ChangeGovernmentType::ChangeGovernment(ChangeGovernment {
                 new_government: String::from("Theocracy"),
-                additional_advances: vec![String::from("Dedication")],
+                additional_advances: vec![String::from("Devotion")],
             }),
         )),
         0,

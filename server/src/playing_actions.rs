@@ -9,6 +9,7 @@ use crate::content::advances::get_advance;
 use crate::content::custom_phase_actions::CustomPhaseEventType;
 use crate::game::{CulturalInfluenceResolution, GameState};
 use crate::payment::PaymentOptions;
+use crate::player_events::InfluenceCulturePossible;
 use crate::unit::{Unit, Units};
 use crate::{
     city::City,
@@ -121,8 +122,13 @@ impl PlayingAction {
 
         match self {
             Advance { advance, payment } => {
+                let a = get_advance(&advance);
+                assert!(
+                    game.get_player(player_index).can_advance(&a),
+                    "Illegal action"
+                );
                 game.get_player(player_index)
-                    .advance_cost(&get_advance(&advance), Some(&payment))
+                    .advance_cost(&a, Some(&payment))
                     .pay(game, &payment);
                 game.advance(&advance, player_index, payment);
             }
@@ -433,40 +439,45 @@ pub(crate) fn influence_culture_attempt(
     let target_player_index = c.target_player_index;
     let target_city_position = c.target_city_position;
     let city_piece = c.city_piece;
-    let range_boost_cost = game
-        .influence_culture_boost_cost(
-            player_index,
-            starting_city_position,
-            target_player_index,
-            target_city_position,
-            city_piece,
-        )
-        .expect("Illegal action");
+    let info = game.influence_culture_boost_cost(
+        player_index,
+        starting_city_position,
+        target_player_index,
+        target_city_position,
+        city_piece,
+    );
+    if matches!(info.possible, InfluenceCulturePossible::Impossible) {
+        panic!("Impossible to influence culture");
+    }
 
     let self_influence = starting_city_position == target_city_position;
 
     // currectly, there is no way to have different costs for this
-    game.players[player_index].lose_resources(range_boost_cost.default);
-    let roll = game.get_next_dice_roll().value;
-    let success = roll == 5 || roll == 6;
+    game.players[player_index].lose_resources(info.range_boost_cost.default);
+    let roll = game.get_next_dice_roll().value + info.roll_boost;
+    let success = roll >= 5;
     if success {
+        game.add_to_last_log_item(&format!(" and succeeded (rolled {roll})"));
+        info.info.execute(game);
         game.influence_culture(
             player_index,
             target_player_index,
             target_city_position,
             city_piece,
         );
-        game.add_to_last_log_item(&format!(" and succeeded (rolled {roll})"));
         return;
     }
-    if self_influence {
+
+    if self_influence || matches!(info.possible, InfluenceCulturePossible::NoBoost) {
         game.add_to_last_log_item(&format!(" and failed (rolled {roll})"));
+        info.info.execute(game);
         return;
     }
     if let Some(roll_boost_cost) = PaymentOptions::resources(roll_boost_cost(roll))
         .first_valid_payment(&game.players[player_index].resources)
     {
         game.add_to_last_log_item(&format!(" and rolled a {roll}"));
+        info.info.execute(game);
         game.add_info_log_item(&format!("{} now has the option to pay {roll_boost_cost} to increase the dice roll and proceed with the cultural influence", game.players[player_index].get_name()));
         game.state = GameState::CulturalInfluenceResolution(CulturalInfluenceResolution {
             roll_boost_cost,
@@ -478,6 +489,7 @@ pub(crate) fn influence_culture_attempt(
         game.add_to_last_log_item(&format!(
             " but rolled a {roll} and has not enough culture tokens to increase the roll "
         ));
+        info.info.execute(game);
     }
 }
 

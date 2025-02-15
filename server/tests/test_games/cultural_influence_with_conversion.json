@@ -39,7 +39,7 @@
         },
         {
           "city_pieces": {
-            "temple": 1
+            "temple": 0
           },
           "mood_state": "Happy",
           "activations": 0,
@@ -124,7 +124,7 @@
         "ideas": 7,
         "gold": 7,
         "mood_tokens": 7,
-        "culture_tokens": 2
+        "culture_tokens": 7
       },
       "resource_limit": {
         "food": 2,
@@ -160,6 +160,7 @@
       "active_leader": null,
       "available_leaders": [],
       "advances": [
+        "Conversion",
         "Farming",
         "Mining"
       ],
@@ -219,47 +220,12 @@
   },
   "starting_player_index": 0,
   "current_player_index": 1,
-  "action_log": [
-    {
-      "action": {
-        "Playing": {
-          "InfluenceCultureAttempt": {
-            "starting_city_position": "B3",
-            "target_player_index": 0,
-            "target_city_position": "C2",
-            "city_piece": "Temple"
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "CulturalInfluenceResolution": true
-      },
-      "undo": [
-        {
-          "InfluenceCultureResolution": {
-            "roll_boost_cost": {
-              "culture_tokens": 4
-            }
-          }
-        }
-      ]
-    }
-  ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player2 tried to influence culture the Temple in the city at C2 by Player1 with the city at B3 and paid 1 culture token to boost the range and rolled a 1",
-      "Player2 now has the option to pay 4 culture tokens to increase the dice roll and proceed with the cultural influence"
-    ],
-    [
-      "Player2 paid 1 culture tokens to increase the dice roll and proceed with the cultural influence"
-    ]
-  ],
-  "undo_limit": 1,
-  "actions_left": 2,
-  "successful_cultural_influence": true,
+  "action_log": [],
+  "action_log_index": 0,
+  "log": [],
+  "undo_limit": 0,
+  "actions_left": 3,
+  "successful_cultural_influence": false,
   "round": 1,
   "age": 1,
   "messages": [
@@ -274,11 +240,10 @@
     10,
     10,
     10,
-    10
-  ],
-  "dice_roll_log": [
+    10,
     1
   ],
+  "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [
     "Pyramids"

@@ -102,7 +102,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         PlayingAction::Recruit(r) => format_recruit_log_item(player, &player_name, r),
         PlayingAction::IncreaseHappiness(i) => format_happiness_increase(player, &player_name, i),
         PlayingAction::InfluenceCultureAttempt(c) => {
-            format_cultural_influence_attempt_log_item(game, &player_name, c)
+            format_cultural_influence_attempt_log_item(game, player.index, &player_name, c)
         }
         PlayingAction::Custom(action) => action.format_log_item(game, player, &player_name),
         PlayingAction::EndTurn => format!(
@@ -117,6 +117,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
 
 pub(crate) fn format_cultural_influence_attempt_log_item(
     game: &Game,
+    player_index: usize,
     player_name: &str,
     c: &InfluenceCultureAttempt,
 ) -> String {
@@ -134,7 +135,22 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     } else {
         String::new()
     };
-    format!("{player_name} tried to influence culture the {city_piece:?} in the city at {target_city_position} by {player}{city}")
+    let range_boost_cost = game
+        .influence_culture_boost_cost(
+            player_index,
+            starting_city_position,
+            target_player_index,
+            target_city_position,
+            city_piece,
+        )
+        .range_boost_cost;
+    // this cost can't be changed by the player
+    let cost = if !range_boost_cost.is_free() {
+        format!(" and paid {} to boost the range", range_boost_cost.default)
+    } else {
+        String::new()
+    };
+    format!("{player_name} tried to influence culture the {city_piece:?} in the city at {target_city_position} by {player}{city}{cost}")
 }
 
 ///

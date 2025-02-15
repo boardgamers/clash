@@ -584,7 +584,7 @@
               "request": {
                 "AdvanceReward": {
                   "choices": [
-                    "Dedication",
+                    "Devotion",
                     "Conversion",
                     "Fanaticism"
                   ]

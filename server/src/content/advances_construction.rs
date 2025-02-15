@@ -24,7 +24,7 @@ pub(crate) fn construction() -> AdvanceGroup {
 fn engineering() -> AdvanceBuilder {
     Advance::builder(
         "Engineering",
-        "Immediately draw 1 wonder, May Construct wonder happy cities",
+        "Immediately draw 1 wonder card. May Construct wonders in happy cities",
     )
     .add_one_time_ability_initializer(Game::draw_wonder_card)
     .add_custom_action(ConstructWonder)

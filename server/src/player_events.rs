@@ -22,6 +22,8 @@ pub(crate) struct PlayerEvents {
     pub on_collect: Event<PlayerCommands, Game, Position>,
     pub on_advance: Event<PlayerCommands, Game, String>,
     pub on_advance_custom_phase: Event<Game, CustomPhaseInfo, AdvanceInfo>,
+    pub on_influence_culture_attempt: Event<InfluenceCultureInfo, City, Game>,
+    pub on_influence_culture_success: Event<PlayerCommands, Game>,
     pub before_move: Event<PlayerCommands, Game, MoveInfo>,
 
     pub construct_cost: Event<CostInfo, City, Building>,
@@ -121,6 +123,7 @@ pub struct MoveInfo {
 }
 
 impl MoveInfo {
+    #[must_use]
     pub fn new(player: usize, units: Vec<u32>, from: Position, to: Position) -> MoveInfo {
         MoveInfo {
             player,
@@ -128,6 +131,55 @@ impl MoveInfo {
             from,
             to,
         }
+    }
+}
+
+#[derive(Clone, PartialEq)]
+pub enum InfluenceCulturePossible {
+    NoRestrictions,
+    NoBoost,
+    Impossible,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct InfluenceCultureInfo {
+    pub is_defender: bool,
+    pub possible: InfluenceCulturePossible,
+    pub range_boost_cost: PaymentOptions,
+    pub(crate) info: ActionInfo,
+    pub roll_boost: u8,
+}
+
+impl InfluenceCultureInfo {
+    #[must_use]
+    pub(crate) fn new(range_boost_cost: PaymentOptions, info: ActionInfo) -> InfluenceCultureInfo {
+        InfluenceCultureInfo {
+            possible: InfluenceCulturePossible::NoRestrictions,
+            range_boost_cost,
+            info,
+            roll_boost: 0,
+            is_defender: false,
+        }
+    }
+
+    #[must_use]
+    pub fn is_possible(&self, range_boost: u32) -> bool {
+        match self.possible {
+            InfluenceCulturePossible::NoRestrictions => true,
+            InfluenceCulturePossible::NoBoost => range_boost == 0,
+            InfluenceCulturePossible::Impossible => false,
+        }
+    }
+
+    pub fn set_impossible(&mut self) {
+        self.possible = InfluenceCulturePossible::Impossible;
+    }
+
+    pub fn set_no_boost(&mut self) {
+        if matches!(self.possible, InfluenceCulturePossible::Impossible) {
+            return;
+        }
+        self.possible = InfluenceCulturePossible::NoBoost;
     }
 }
 
@@ -141,6 +193,7 @@ pub struct PlayerCommands {
 }
 
 impl PlayerCommands {
+    #[must_use]
     pub fn new(player_index: usize, name: String, info: HashMap<String, String>) -> PlayerCommands {
         PlayerCommands {
             name,

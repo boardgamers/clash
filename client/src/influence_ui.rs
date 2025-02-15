@@ -16,6 +16,7 @@ use server::city::City;
 use server::content::custom_actions::CustomAction;
 use server::game::CulturalInfluenceResolution;
 use server::player::Player;
+use server::player_events::InfluenceCulturePossible;
 use server::playing_actions::{InfluenceCultureAttempt, PlayingAction};
 use server::position::Position;
 use server::resource::ResourceType;
@@ -77,46 +78,43 @@ fn show_city(
                 closest_city_pos
             };
 
-            if let Some(cost) = rc.game.influence_culture_boost_cost(
+            let info = rc.game.influence_culture_boost_cost(
                 player.index,
                 start_position,
                 city.player_index,
                 city.position,
                 *b,
-            ) {
-                if player.can_afford(&cost) {
-                    let name = b.name();
-                    let _ = rc.with_camera(CameraMode::World, |rc| {
-                        draw_circle_lines(center.x, center.y, BUILDING_SIZE, 1., WHITE);
-                        show_tooltip_for_circle(
-                            rc,
-                            &format!("Attempt Influence {name} for {cost}"),
-                            center.to_vec2(),
-                            BUILDING_SIZE,
-                        );
-                        StateUpdate::None
-                    });
+            );
+            if !matches!(info.possible, InfluenceCulturePossible::Impossible) {
+                let name = b.name();
+                let _ = rc.with_camera(CameraMode::World, |rc| {
+                    draw_circle_lines(center.x, center.y, BUILDING_SIZE, 1., WHITE);
+                    show_tooltip_for_circle(
+                        rc,
+                        &format!("Attempt Influence {name} for {}", info.range_boost_cost),
+                        center.to_vec2(),
+                        BUILDING_SIZE,
+                    );
+                    StateUpdate::None
+                });
 
-                    if is_in_circle(mouse_pos, center, BUILDING_SIZE)
-                        && is_mouse_button_pressed(MouseButton::Left)
-                    {
-                        let attempt = InfluenceCultureAttempt {
-                            starting_city_position: start_position,
-                            target_player_index: city.player_index,
-                            target_city_position: city.position,
-                            city_piece: *b,
-                        };
-                        let action = match custom.custom {
-                            BaseOrCustomAction::Base => {
-                                PlayingAction::InfluenceCultureAttempt(attempt)
-                            }
-                            BaseOrCustomAction::Custom { .. } => PlayingAction::Custom(
-                                CustomAction::ArtsInfluenceCultureAttempt(attempt),
-                            ),
-                        };
+                if is_in_circle(mouse_pos, center, BUILDING_SIZE)
+                    && is_mouse_button_pressed(MouseButton::Left)
+                {
+                    let attempt = InfluenceCultureAttempt {
+                        starting_city_position: start_position,
+                        target_player_index: city.player_index,
+                        target_city_position: city.position,
+                        city_piece: *b,
+                    };
+                    let action = match custom.custom {
+                        BaseOrCustomAction::Base => PlayingAction::InfluenceCultureAttempt(attempt),
+                        BaseOrCustomAction::Custom { .. } => PlayingAction::Custom(
+                            CustomAction::ArtsInfluenceCultureAttempt(attempt),
+                        ),
+                    };
 
-                        return Some(StateUpdate::Execute(Action::Playing(action)));
-                    }
+                    return Some(StateUpdate::Execute(Action::Playing(action)));
                 }
             }
 

@@ -124,7 +124,7 @@
         "ideas": 7,
         "gold": 7,
         "mood_tokens": 7,
-        "culture_tokens": 2
+        "culture_tokens": 4
       },
       "resource_limit": {
         "food": 2,
@@ -160,6 +160,7 @@
       "active_leader": null,
       "available_leaders": [],
       "advances": [
+        "Conversion",
         "Farming",
         "Mining"
       ],
@@ -240,7 +241,14 @@
         {
           "InfluenceCultureResolution": {
             "roll_boost_cost": {
-              "culture_tokens": 4
+              "culture_tokens": 3
+            }
+          }
+        },
+        {
+          "Command": {
+            "gained_resources": {
+              "culture_tokens": 1
             }
           }
         }
@@ -250,11 +258,13 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player2 tried to influence culture the Temple in the city at C2 by Player1 with the city at B3 and paid 1 culture token to boost the range and rolled a 1",
-      "Player2 now has the option to pay 4 culture tokens to increase the dice roll and proceed with the cultural influence"
+      "Player2 tried to influence culture the Temple in the city at C2 by Player1 with the city at B3 and paid 1 culture token to boost the range and rolled a 2",
+      "Player gets +1 to Influence Culture roll for Conversion Advance",
+      "Player2 now has the option to pay 3 culture tokens to increase the dice roll and proceed with the cultural influence"
     ],
     [
-      "Player2 paid 1 culture tokens to increase the dice roll and proceed with the cultural influence"
+      "Player2 paid 1 culture tokens to increase the dice roll and proceed with the cultural influence",
+      "Player gained 1 culture token for a successful Influence Culture attempt for Conversion Advance"
     ]
   ],
   "undo_limit": 1,
