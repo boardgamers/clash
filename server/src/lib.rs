@@ -33,7 +33,7 @@ pub mod map;
 mod movement;
 pub mod payment;
 pub mod player;
-mod player_events;
+pub mod player_events;
 pub mod playing_actions;
 pub mod position;
 pub mod resource;

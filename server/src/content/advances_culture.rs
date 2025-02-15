@@ -14,7 +14,7 @@ use crate::resource_pile::ResourcePile;
 use std::vec;
 
 pub(crate) fn culture() -> AdvanceGroup {
-    advance_group_builder("Culture", vec![arts(), sports(), theaters()])
+    advance_group_builder("Culture", vec![arts(), sports(), monuments(), theaters()])
 }
 
 fn arts() -> AdvanceBuilder {
@@ -28,6 +28,21 @@ fn sports() -> AdvanceBuilder {
     Advance::builder("Sports", "As an action, you may spend 1 or 2 culture tokens to increase the happiness of a city by 1 or 2, respectively")
         .with_advance_bonus(MoodToken)
         .add_custom_action(CustomActionType::Sports)
+}
+
+fn monuments() -> AdvanceBuilder {
+    Advance::builder("Monuments", "Immediately draw 1 wonder card. Your cities with wonders may not be the target of influence culture attempts")
+        .add_one_time_ability_initializer(Game::draw_wonder_card)
+        .with_advance_bonus(CultureToken)
+        .add_player_event_listener(
+            |event| &mut event.on_influence_culture_attempt,
+            |info, city, _| {
+                if info.is_defender && !city.pieces.wonders.is_empty() {
+                    info.set_impossible();
+                }
+            },
+            1,
+        )
 }
 
 fn theaters() -> AdvanceBuilder {

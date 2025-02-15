@@ -86,7 +86,7 @@
       "active_leader": null,
       "available_leaders": [],
       "advances": [
-        "Dedication",
+        "Devotion",
         "Dogma",
         "Farming",
         "Fishing",
@@ -220,7 +220,7 @@
             "ChangeGovernment": {
               "new_government": "Theocracy",
               "additional_advances": [
-                "Dedication"
+                "Devotion"
               ]
             }
           }
@@ -242,7 +242,7 @@
   "log": [
     [
       "Player1 changed their government from Democracy to Theocracy",
-      "Additional advances: Dedication"
+      "Additional advances: Devotion"
     ],
     [
       "It's Player2's turn",

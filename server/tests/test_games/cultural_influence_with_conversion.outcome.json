@@ -1,5 +1,14 @@
 {
-  "state": "Playing",
+  "state": {
+    "CulturalInfluenceResolution": {
+      "roll_boost_cost": {
+        "culture_tokens": 3
+      },
+      "target_player_index": 0,
+      "target_city_position": "C2",
+      "city_piece": "Temple"
+    }
+  },
   "players": [
     {
       "name": null,
@@ -39,7 +48,7 @@
         },
         {
           "city_pieces": {
-            "temple": 1
+            "temple": 0
           },
           "mood_state": "Happy",
           "activations": 0,
@@ -124,7 +133,7 @@
         "ideas": 7,
         "gold": 7,
         "mood_tokens": 7,
-        "culture_tokens": 2
+        "culture_tokens": 6
       },
       "resource_limit": {
         "food": 2,
@@ -160,6 +169,7 @@
       "active_leader": null,
       "available_leaders": [],
       "advances": [
+        "Conversion",
         "Farming",
         "Mining"
       ],
@@ -231,35 +241,19 @@
           }
         }
       }
-    },
-    {
-      "action": {
-        "CulturalInfluenceResolution": true
-      },
-      "undo": [
-        {
-          "InfluenceCultureResolution": {
-            "roll_boost_cost": {
-              "culture_tokens": 4
-            }
-          }
-        }
-      ]
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 1,
   "log": [
     [
-      "Player2 tried to influence culture the Temple in the city at C2 by Player1 with the city at B3 and paid 1 culture token to boost the range and rolled a 1",
-      "Player2 now has the option to pay 4 culture tokens to increase the dice roll and proceed with the cultural influence"
-    ],
-    [
-      "Player2 paid 1 culture tokens to increase the dice roll and proceed with the cultural influence"
+      "Player2 tried to influence culture the Temple in the city at C2 by Player1 with the city at B3 and paid 1 culture token to boost the range and rolled a 2",
+      "Player gets +1 to Influence Culture roll for Conversion Advance",
+      "Player2 now has the option to pay 3 culture tokens to increase the dice roll and proceed with the cultural influence"
     ]
   ],
   "undo_limit": 1,
   "actions_left": 2,
-  "successful_cultural_influence": true,
+  "successful_cultural_influence": false,
   "round": 1,
   "age": 1,
   "messages": [

@@ -1,5 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::{Advance, AdvanceBuilder};
+use crate::city::MoodState;
 use crate::content::advances::{advance_group_builder, AdvanceGroup};
 use crate::content::custom_actions::CustomActionType::{
     CivilRights, FreeEconomyCollect, VotingIncreaseHappiness,
@@ -7,7 +8,15 @@ use crate::content::custom_actions::CustomActionType::{
 use crate::playing_actions::PlayingActionType;
 
 pub(crate) fn democracy() -> AdvanceGroup {
-    advance_group_builder("Democracy", vec![voting(), civil_rights(), free_economy()])
+    advance_group_builder(
+        "Democracy",
+        vec![
+            voting(),
+            separation_of_power(),
+            civil_rights(),
+            free_economy(),
+        ],
+    )
 }
 
 fn voting() -> AdvanceBuilder {
@@ -16,6 +25,22 @@ fn voting() -> AdvanceBuilder {
         "As a free action, you may spend 1 mood token to gain an action 'Increase happiness'",
     )
     .add_custom_action(VotingIncreaseHappiness)
+}
+
+fn separation_of_power() -> AdvanceBuilder {
+    Advance::builder(
+        "Separation of Power",
+        "Attempts to influence your happy cities may not be boosted by culture tokens",
+    )
+    .add_player_event_listener(
+        |event| &mut event.on_influence_culture_attempt,
+        |info, city, _| {
+            if matches!(city.mood_state, MoodState::Happy) {
+                info.set_no_boost();
+            }
+        },
+        0,
+    )
 }
 
 fn civil_rights() -> AdvanceBuilder {

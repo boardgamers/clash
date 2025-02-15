@@ -13,8 +13,10 @@ use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_r
 use crate::map::UnexploredBlock;
 use crate::movement::{has_movable_units, terrain_movement_restriction};
 use crate::payment::PaymentOptions;
-use crate::player_events::{AdvanceInfo, CustomPhaseInfo, MoveInfo, PlayerCommands, PlayerEvents};
-use crate::playing_actions::roll_boost_cost;
+use crate::player_events::{
+    ActionInfo, AdvanceInfo, CustomPhaseInfo, InfluenceCultureInfo, MoveInfo, PlayerCommands,
+    PlayerEvents,
+};
 use crate::resource::check_for_waste;
 use crate::unit::{carried_units, get_current_move, MovementRestriction, UnitData, Units};
 use crate::utils::Rng;
@@ -313,7 +315,7 @@ impl Game {
             event_type: event_type.clone(),
             player: player_index,
         };
-        self.trigger_event(player_index, event, &info, details);
+        self.trigger_event_with_game_value(player_index, event, &info, details);
 
         let request = self.custom_phase_state.current.is_some();
         if !request {
@@ -328,7 +330,7 @@ impl Game {
         request
     }
 
-    pub(crate) fn trigger_event<U, V>(
+    pub(crate) fn trigger_event_with_game_value<U, V>(
         &mut self,
         player_index: usize,
         event: fn(&mut PlayerEvents) -> &mut Event<Game, U, V>,
@@ -866,7 +868,8 @@ impl Game {
         if !action {
             return;
         }
-        self.players[player_index].lose_resources(roll_boost_cost);
+        self.players[player_index].lose_resources(roll_boost_cost.clone());
+        self.push_undo_context(UndoContext::InfluenceCultureResolution { roll_boost_cost });
         self.influence_culture(
             player_index,
             target_player_index,
@@ -880,15 +883,17 @@ impl Game {
         let PlayingAction::InfluenceCultureAttempt(c) = cultural_influence_attempt_action else {
             panic!("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
         };
-        let roll =
-            self.dice_roll_log.last().expect(
-                "there should be a dice roll before a cultural influence resolution action",
-            ) / 2
-                + 1;
-        let roll_boost_cost = roll_boost_cost(roll);
+
         let city_piece = c.city_piece;
         let target_player_index = c.target_player_index;
         let target_city_position = c.target_city_position;
+
+        let Some(UndoContext::InfluenceCultureResolution { roll_boost_cost }) =
+            self.pop_undo_context()
+        else {
+            panic!("when undoing a cultural influence resolution action, the game should have stored influence culture resolution context")
+        };
+
         self.state = GameState::CulturalInfluenceResolution(CulturalInfluenceResolution {
             roll_boost_cost: roll_boost_cost.clone(),
             target_player_index,
@@ -1597,6 +1602,30 @@ impl Game {
         wonder
     }
 
+    fn influence_distance(
+        &self,
+        src: Position,
+        dst: Position,
+        visited: &[Position],
+        len: u32,
+    ) -> u32 {
+        if visited.contains(&src) {
+            return u32::MAX;
+        }
+        let mut visited = visited.to_vec();
+        visited.push(src);
+
+        if src == dst {
+            return len;
+        }
+        src.neighbors()
+            .into_iter()
+            .filter(|&p| self.map.is_water(p) || self.map.is_land(p))
+            .map(|n| self.influence_distance(n, dst, &visited, len + 1))
+            .min()
+            .expect("there should be a path")
+    }
+
     #[must_use]
     pub fn influence_culture_boost_cost(
         &self,
@@ -1605,31 +1634,52 @@ impl Game {
         target_player_index: usize,
         target_city_position: Position,
         city_piece: Building,
-    ) -> Option<PaymentOptions> {
+    ) -> InfluenceCultureInfo {
         //todo allow cultural influence of barbarians
         let starting_city = self.get_city(player_index, starting_city_position);
-        let range_boost = starting_city_position
-            .distance(target_city_position)
+
+        let range_boost = self
+            .influence_distance(starting_city_position, target_city_position, &[], 0)
             .saturating_sub(starting_city.size() as u32);
-        let range_boost_cost = PaymentOptions::resources(ResourcePile::culture_tokens(range_boost));
+
         let self_influence = starting_city_position == target_city_position;
         let target_city = self.get_city(target_player_index, target_city_position);
         let target_city_owner = target_city.player_index;
-        let target_building_owner = target_city.pieces.building_owner(city_piece)?;
-        let player = &self.players[player_index];
-        if matches!(city_piece, Building::Obelisk)
-            || starting_city.player_index != player_index
-            || !player.can_afford(&range_boost_cost)
-            || (starting_city.influenced() && !self_influence)
-            || self.successful_cultural_influence
-            || !player.is_building_available(city_piece, self)
-            || target_city_owner != target_player_index
-            || target_building_owner == player_index
+        let target_building_owner = target_city.pieces.building_owner(city_piece);
+        let attacker = &self.players[player_index];
+        let defender = &self.players[target_player_index];
+        let start_city_is_eligible = !starting_city.influenced() || self_influence;
+
+        let mut info = InfluenceCultureInfo::new(
+            PaymentOptions::resources(ResourcePile::culture_tokens(range_boost)),
+            ActionInfo::new(attacker),
+        );
+        let _ = attacker.events.on_influence_culture_attempt.get().trigger(
+            &mut info,
+            target_city,
+            self,
+        );
+        info.is_defender = true;
+        let _ = defender.events.on_influence_culture_attempt.get().trigger(
+            &mut info,
+            target_city,
+            self,
+        );
+
+        if !matches!(city_piece, Building::Obelisk)
+            && starting_city.player_index == player_index
+            && info.is_possible(range_boost)
+            && attacker.can_afford(&info.range_boost_cost)
+            && start_city_is_eligible
+            && !self.successful_cultural_influence
+            && attacker.is_building_available(city_piece, self)
+            && target_city_owner == target_player_index
+            && target_building_owner.is_some_and(|o| o != player_index)
         {
-            None
-        } else {
-            Some(range_boost_cost)
+            return info;
         }
+        info.set_impossible();
+        info
     }
 
     ///
@@ -1651,6 +1701,12 @@ impl Game {
             .pieces
             .set_building(building, influencer_index);
         self.successful_cultural_influence = true;
+
+        self.trigger_command_event(
+            influencer_index,
+            |e| &mut e.on_influence_culture_success,
+            &(),
+        );
     }
 
     ///
@@ -2009,6 +2065,9 @@ pub enum UndoContext {
     },
     IncreaseHappiness {
         angry_activations: Vec<Position>,
+    },
+    InfluenceCultureResolution {
+        roll_boost_cost: ResourcePile,
     },
     CustomPhaseEvent(CustomPhaseEventState),
     Command(CommandUndoContext),

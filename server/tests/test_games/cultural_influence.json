@@ -5,7 +5,7 @@
       "name": null,
       "id": 0,
       "resources": {
-        "food": 1,
+        "food": 5,
         "wood": 6,
         "ore": 6,
         "ideas": 5,
@@ -31,10 +31,17 @@
           "position": "A1"
         },
         {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A3"
+        },
+        {
           "city_pieces": {
-            "fortress": 0
+            "temple": 0
           },
-          "mood_state": "Angry",
+          "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "position": "C2"
@@ -86,9 +93,15 @@
       "active_leader": null,
       "available_leaders": [],
       "advances": [
+        "Arts",
+        "Dogma",
+        "Engineering",
         "Farming",
         "Mining",
-        "Tactics"
+        "Myths",
+        "Nationalism",
+        "Tactics",
+        "Voting"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
@@ -96,7 +109,9 @@
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
-      "wonder_cards": [],
+      "wonder_cards": [
+        "Pyramids"
+      ],
       "next_unit_id": 8
     },
     {
@@ -126,7 +141,7 @@
           "mood_state": "Angry",
           "activations": 2,
           "angry_activation": false,
-          "position": "C1"
+          "position": "B3"
         }
       ],
       "units": [

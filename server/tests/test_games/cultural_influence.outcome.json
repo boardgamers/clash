@@ -6,7 +6,7 @@
       },
       "target_player_index": 0,
       "target_city_position": "C2",
-      "city_piece": "Fortress"
+      "city_piece": "Temple"
     }
   },
   "players": [
@@ -14,7 +14,7 @@
       "name": null,
       "id": 0,
       "resources": {
-        "food": 1,
+        "food": 5,
         "wood": 6,
         "ore": 6,
         "ideas": 5,
@@ -40,10 +40,17 @@
           "position": "A1"
         },
         {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A3"
+        },
+        {
           "city_pieces": {
-            "fortress": 0
+            "temple": 0
           },
-          "mood_state": "Angry",
+          "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "position": "C2"
@@ -95,9 +102,15 @@
       "active_leader": null,
       "available_leaders": [],
       "advances": [
+        "Arts",
+        "Dogma",
+        "Engineering",
         "Farming",
         "Mining",
-        "Tactics"
+        "Myths",
+        "Nationalism",
+        "Tactics",
+        "Voting"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
@@ -105,7 +118,9 @@
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
-      "wonder_cards": [],
+      "wonder_cards": [
+        "Pyramids"
+      ],
       "next_unit_id": 8
     },
     {
@@ -118,7 +133,7 @@
         "ideas": 7,
         "gold": 7,
         "mood_tokens": 7,
-        "culture_tokens": 7
+        "culture_tokens": 6
       },
       "resource_limit": {
         "food": 2,
@@ -135,7 +150,7 @@
           "mood_state": "Angry",
           "activations": 2,
           "angry_activation": false,
-          "position": "C1"
+          "position": "B3"
         }
       ],
       "units": [
@@ -218,10 +233,10 @@
       "action": {
         "Playing": {
           "InfluenceCultureAttempt": {
-            "starting_city_position": "C1",
+            "starting_city_position": "B3",
             "target_player_index": 0,
             "target_city_position": "C2",
-            "city_piece": "Fortress"
+            "city_piece": "Temple"
           }
         }
       }
@@ -230,7 +245,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1 and rolled a 1",
+      "Player2 tried to influence culture the Temple in the city at C2 by Player1 with the city at B3 and paid 1 culture token to boost the range and rolled a 1",
       "Player2 now has the option to pay 4 culture tokens to increase the dice roll and proceed with the cultural influence"
     ]
   ],
