@@ -15,6 +15,7 @@ pub struct SpecialAdvance {
 }
 
 impl SpecialAdvance {
+    #[must_use]
     pub fn builder(name: &str, required_advance: &str) -> SpecialAdvanceBuilder {
         SpecialAdvanceBuilder::new(name.to_string(), required_advance.to_string())
     }
@@ -61,11 +62,6 @@ impl SpecialAdvanceBuilder {
             player_one_time_initializers: Vec::new(),
             player_undo_deinitializer: Vec::new(),
         }
-    }
-
-    pub fn add_description(mut self, description: &str) -> Self {
-        self.descriptions.push(description.to_string());
-        self
     }
 
     pub fn build(self) -> SpecialAdvance {

@@ -3,6 +3,7 @@ use macroquad::prelude::clear_background;
 use macroquad::prelude::*;
 
 use server::action::Action;
+use server::content::custom_phase_actions::CustomPhaseEventAction;
 use server::game::Game;
 use server::position::Position;
 
@@ -130,7 +131,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::None
         | ActiveDialog::WaitingForUpdate
         | ActiveDialog::CulturalInfluence(_)
-        | ActiveDialog::PlaceSettler => StateUpdate::None,
+        | ActiveDialog::CustomPhasePositionRequest(_) => StateUpdate::None,
         ActiveDialog::DialogChooser(d) => dialog_chooser(rc, d),
         ActiveDialog::Log => show_log(rc),
 
@@ -230,9 +231,11 @@ fn controlling_player_click(rc: &RenderContext, mouse_pos: Vec2, pos: Position) 
             StateUpdate::OpenDialog(ActiveDialog::ReplaceUnits(new.clone()))
         }),
         ActiveDialog::RazeSize1City => raze_city_confirm_dialog(rc, pos),
-        ActiveDialog::PlaceSettler => {
-            if rc.shown_player.get_city(pos).is_some() {
-                StateUpdate::Execute(Action::PlaceSettler(pos))
+        ActiveDialog::CustomPhasePositionRequest(choices) => {
+            if choices.contains(&pos) {
+                StateUpdate::Execute(Action::CustomPhaseEvent(
+                    CustomPhaseEventAction::SelectPosition(pos),
+                ))
             } else {
                 StateUpdate::None
             }

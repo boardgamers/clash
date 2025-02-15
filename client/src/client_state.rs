@@ -55,7 +55,6 @@ pub enum ActiveDialog {
 
     // combat
     PlayActionCard,
-    PlaceSettler,
     Retreat,
     RemoveCasualties(RemoveCasualtiesSelection),
 
@@ -66,6 +65,7 @@ pub enum ActiveDialog {
     CustomPhaseResourceRewardRequest(Payment),
     CustomPhaseAdvanceRewardRequest(CustomPhaseAdvanceRewardRequest),
     CustomPhasePaymentRequest(Vec<Payment>),
+    CustomPhasePositionRequest(Vec<Position>),
 }
 
 impl ActiveDialog {
@@ -95,7 +95,6 @@ impl ActiveDialog {
             ActiveDialog::ChangeGovernmentType => "change government type",
             ActiveDialog::ChooseAdditionalAdvances(_) => "choose additional advances",
             ActiveDialog::PlayActionCard => "play action card",
-            ActiveDialog::PlaceSettler => "place settler",
             ActiveDialog::Retreat => "retreat",
             ActiveDialog::RemoveCasualties(_) => "remove casualties",
             ActiveDialog::Sports(_) => "sports",
@@ -104,6 +103,7 @@ impl ActiveDialog {
             ActiveDialog::CustomPhaseResourceRewardRequest(_) => "trade route selection",
             ActiveDialog::CustomPhaseAdvanceRewardRequest(_) => "advance selection",
             ActiveDialog::CustomPhasePaymentRequest(_) => "custom phase payment request",
+            ActiveDialog::CustomPhasePositionRequest(_) => "custom phase position request",
         }
     }
 
@@ -162,7 +162,6 @@ impl ActiveDialog {
                 vec!["Click on an advance to choose it".to_string()]
             }
             ActiveDialog::PlayActionCard => vec!["Click on an action card to play it".to_string()],
-            ActiveDialog::PlaceSettler => vec!["Click on a tile to place a settler".to_string()],
             ActiveDialog::Retreat => vec!["Do you want to retreat?".to_string()],
             ActiveDialog::RemoveCasualties(r) => vec![format!(
                 "Remove {} units: click on a unit to remove it",
@@ -184,7 +183,8 @@ impl ActiveDialog {
             }
             ActiveDialog::CustomPhaseResourceRewardRequest(_)
             | ActiveDialog::CustomPhaseAdvanceRewardRequest(_)
-            | ActiveDialog::CustomPhasePaymentRequest(_) => {
+            | ActiveDialog::CustomPhasePaymentRequest(_)
+            | ActiveDialog::CustomPhasePositionRequest(_) => {
                 event_help(rc, &custom_phase_event_origin(rc), true)
             }
         }
@@ -552,6 +552,9 @@ impl State {
                 CustomPhaseRequest::AdvanceReward(r) => {
                     ActiveDialog::CustomPhaseAdvanceRewardRequest(r.clone())
                 }
+                CustomPhaseRequest::SelectPosition(r) => {
+                    ActiveDialog::CustomPhasePositionRequest(r.choices.clone())
+                }
             };
         }
         match &game.state {
@@ -573,7 +576,6 @@ impl State {
                 StatusPhaseState::ChangeGovernmentType => ActiveDialog::ChangeGovernmentType,
                 StatusPhaseState::DetermineFirstPlayer => ActiveDialog::DetermineFirstPlayer,
             },
-            GameState::PlaceSettler { .. } => ActiveDialog::PlaceSettler,
             GameState::Combat(c) => match &c.phase {
                 CombatPhase::PlayActionCard(_) => ActiveDialog::PlayActionCard,
                 CombatPhase::RemoveCasualties(r) => {

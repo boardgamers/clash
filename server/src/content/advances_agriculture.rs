@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::MoodToken;
 use crate::advance::{Advance, AdvanceBuilder};
-use crate::collect::{CollectContext, CollectOptionsInfo};
+use crate::collect::{CollectContext, CollectInfo};
 use crate::content::advances::{advance_group_builder, AdvanceGroup, IRRIGATION, ROADS};
 use crate::game::Game;
 use crate::map::Terrain::Barren;
@@ -11,30 +11,29 @@ use std::collections::HashSet;
 pub(crate) fn agriculture() -> AdvanceGroup {
     advance_group_builder(
         "Agriculture",
-        vec![
-            Advance::builder(
-                "Farming",
-                "Your cities may Collect food from Grassland and wood from Forest spaces",
-            ),
-            storage(),
-            irrigation(),
-            husbandry(),
-        ],
+        vec![farming(), storage(), irrigation(), husbandry()],
     )
 }
 
-fn husbandry() -> AdvanceBuilder {
+fn farming() -> AdvanceBuilder {
     Advance::builder(
-        "Husbandry",
-        "During a Collect Resources Action, you may collect from a Land space that is 2 Land spaces away, rather than 1. If you have the Roads Advance you may collect from two Land spaces that are 2 Land spaces away. This Advance can only be used once per turn.",
+        "Farming",
+        "Your cities may Collect food from Grassland and wood from Forest spaces",
     )
-        .with_advance_bonus(MoodToken)
-        .add_once_per_turn_listener(
-            |event| &mut event.collect_options,
-            |i| &mut i.info.info,
-            husbandry_collect,
-            0,
-        )
+}
+
+fn storage() -> AdvanceBuilder {
+    Advance::builder(
+        "Storage",
+        "Your maximum food limit is increased from 2 to 7",
+    )
+    .add_one_time_ability_initializer(|game, player_index| {
+        game.players[player_index].resource_limit.food = 7;
+    })
+    .add_ability_undo_deinitializer(|game, player_index| {
+        game.players[player_index].resource_limit.food = 2;
+    })
+    .with_advance_bonus(MoodToken)
 }
 
 fn irrigation() -> AdvanceBuilder {
@@ -52,21 +51,21 @@ fn irrigation() -> AdvanceBuilder {
     .with_advance_bonus(MoodToken)
 }
 
-fn storage() -> AdvanceBuilder {
+fn husbandry() -> AdvanceBuilder {
     Advance::builder(
-        "Storage",
-        "Your maximum food limit is increased from 2 to 7",
+        "Husbandry",
+        "During a Collect Resources Action, you may collect from a Land space that is 2 Land spaces away, rather than 1. If you have the Roads Advance you may collect from two Land spaces that are 2 Land spaces away. This Advance can only be used once per turn.",
     )
-    .add_one_time_ability_initializer(|game, player_index| {
-        game.players[player_index].resource_limit.food = 7;
-    })
-    .add_ability_undo_deinitializer(|game, player_index| {
-        game.players[player_index].resource_limit.food = 2;
-    })
-    .with_advance_bonus(MoodToken)
+        .with_advance_bonus(MoodToken)
+        .add_once_per_turn_listener(
+            |event| &mut event.collect_options,
+            |i| &mut i.info.info,
+            husbandry_collect,
+            0,
+        )
 }
 
-fn husbandry_collect(i: &mut CollectOptionsInfo, c: &CollectContext, game: &Game) {
+fn husbandry_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
     let player = &game.players[c.player_index];
     let allowed = if player.has_advance(ROADS) { 2 } else { 1 };
 

@@ -11,6 +11,7 @@ mod advances_seafearing;
 mod advances_spirituality;
 mod advances_theocracy;
 mod advances_warfare;
+pub mod builtin;
 pub mod civilizations;
 pub mod custom_actions;
 pub mod custom_phase_actions;

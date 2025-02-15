@@ -1121,18 +1121,32 @@ fn test_replace_leader() {
 
 #[test]
 fn test_recruit_combat() {
-    test_action(
+    test_actions(
         "recruit_combat",
-        Action::Playing(Recruit(server::playing_actions::Recruit {
-            units: Units::new(0, 0, 1, 0, 0, 0),
-            city_position: Position::from_offset("C2"),
-            payment: ResourcePile::wood(2),
-            leader_name: None,
-            replaced_units: vec![],
-        })),
-        0,
-        false,
-        false,
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(Recruit(server::playing_actions::Recruit {
+                    units: Units::new(0, 0, 1, 0, 0, 0),
+                    city_position: Position::from_offset("C2"),
+                    payment: ResourcePile::wood(1) + ResourcePile::gold(1),
+                    leader_name: None,
+                    replaced_units: vec![],
+                })),
+            ),
+            TestAction::undoable(
+                0,
+                Action::CustomPhaseEvent(CustomPhaseEventAction::ResourceReward(
+                    ResourcePile::mood_tokens(1),
+                )),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::CustomPhaseEvent(CustomPhaseEventAction::ResourceReward(
+                    ResourcePile::gold(1),
+                )),
+            ),
+        ],
     );
 }
 
@@ -1177,7 +1191,7 @@ fn test_collect_free_economy() {
                 city_position: Position::from_offset("C2"),
                 collections: vec![
                     (Position::from_offset("B1"), ResourcePile::ore(1)),
-                    (Position::from_offset("B2"), ResourcePile::wood(1)),
+                    (Position::from_offset("B2"), ResourcePile::ore(1)),
                 ],
             },
         ))),
@@ -1435,6 +1449,17 @@ fn test_combat_all_modifiers() {
                 )])),
             ),
         ],
+    );
+}
+
+#[test]
+fn test_combat_fanaticism() {
+    test_actions(
+        "combat_fanaticism",
+        vec![TestAction::not_undoable(
+            0,
+            move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
+        )],
     );
 }
 
@@ -1742,12 +1767,17 @@ fn test_ship_navigate_explore_not_move() {
 
 #[test]
 fn test_civ_maya_leader_pakal() {
-    test_action(
+    test_actions(
         "civ_maya_leader_pakal",
-        move_action(vec![10], Position::from_offset("B1")),
-        0,
-        false,
-        false,
+        vec![
+            TestAction::not_undoable(0, move_action(vec![10], Position::from_offset("B1"))),
+            TestAction::not_undoable(
+                1,
+                Action::CustomPhaseEvent(CustomPhaseEventAction::SelectPosition(
+                    Position::from_offset("B2"),
+                )),
+            ),
+        ],
     );
 }
 

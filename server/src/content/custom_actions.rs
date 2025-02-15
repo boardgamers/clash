@@ -144,7 +144,7 @@ impl CustomAction {
                     Some(i.payment),
                 );
             }
-            CustomAction::FreeEconomyCollect(c) => undo_collect(game, player_index, c),
+            CustomAction::FreeEconomyCollect(c) => undo_collect(game, player_index, &c),
             CustomAction::Taxes(r) => {
                 game.players[player_index].lose_resources(r);
             }

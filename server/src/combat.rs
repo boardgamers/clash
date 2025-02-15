@@ -36,6 +36,46 @@ impl CombatStrength {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub enum CombatResult {
+    AttackerWins,
+    DefenderWins,
+    Draw,
+    Retreat,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct CombatResultInfo {
+    pub result: CombatResult,
+    pub defender_position: Position,
+    pub attacker: usize,
+}
+
+impl CombatResultInfo {
+    #[must_use]
+    pub fn new(result: CombatResult, attacker: usize, defender_position: Position) -> Self {
+        Self {
+            result,
+            defender_position,
+            attacker,
+        }
+    }
+
+    #[must_use]
+    pub fn is_defender(&self, player: usize) -> bool {
+        self.attacker != player
+    }
+
+    #[must_use]
+    pub fn is_loser(&self, player: usize) -> bool {
+        if self.attacker == player {
+            self.result == CombatResult::DefenderWins
+        } else {
+            self.result == CombatResult::AttackerWins
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct RemoveCasualties {
     pub player: usize,
     pub casualties: u8,
@@ -89,6 +129,9 @@ pub struct Combat {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub modifiers: Vec<CombatModifier>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub result: Option<CombatResult>,
 }
 
 impl Combat {
@@ -115,6 +158,7 @@ impl Combat {
             attackers,
             can_retreat,
             modifiers: vec![],
+            result: None,
         }
     }
 
@@ -127,18 +171,20 @@ impl Combat {
     pub fn defender_fortress(&self, game: &Game) -> bool {
         game.players[self.defender]
             .get_city(self.defender_position)
-            .is_some_and(|city| city.pieces.fortress.is_some() && self.round == 1)
+            .is_some_and(|city| city.pieces.fortress.is_some())
+    }
+
+    #[must_use]
+    pub fn defender_temple(&self, game: &Game) -> bool {
+        game.players[self.defender]
+            .get_city(self.defender_position)
+            .is_some_and(|city| city.pieces.temple.is_some())
     }
 
     #[must_use]
     pub fn is_sea_battle(&self, game: &Game) -> bool {
         game.map.is_water(self.defender_position)
     }
-}
-
-enum CombatControl {
-    Exit,     // exit to player, doesn't mean the combat has ended
-    Continue, // continue to combat loop
 }
 
 pub fn initiate_combat(
@@ -218,13 +264,16 @@ pub fn execute_combat_action(game: &mut Game, action: CombatAction, mut c: Comba
             return;
         }
         CombatAction::RemoveCasualties(units) => {
-            if matches!(remove_casualties(game, &mut c, units), CombatControl::Exit) {
+            if let Some(r) = remove_casualties(game, c, units) {
+                c = r;
+            } else {
                 return;
             }
         }
         CombatAction::Retreat(action) => {
             if action {
-                //todo draw
+                c.result = Some(CombatResult::Retreat);
+                end_combat(game, c);
                 return;
             }
             c.round += 1;
@@ -233,7 +282,7 @@ pub fn execute_combat_action(game: &mut Game, action: CombatAction, mut c: Comba
     combat_loop(game, c);
 }
 
-fn remove_casualties(game: &mut Game, c: &mut Combat, killed_unit_ids: Vec<u32>) -> CombatControl {
+fn remove_casualties(game: &mut Game, mut c: Combat, killed_unit_ids: Vec<u32>) -> Option<Combat> {
     let CombatPhase::RemoveCasualties(r) = &c.phase else {
         panic!("Illegal action");
     };
@@ -303,9 +352,9 @@ fn remove_casualties(game: &mut Game, c: &mut Combat, killed_unit_ids: Vec<u32>)
                     defender_hits
                 ));
                 to_remove_casualties(game, c.defender, c.clone(), defender_hits, None);
-                return CombatControl::Exit;
+                return None;
             }
-            kill_all_attackers(game, c);
+            kill_all_attackers(game, &mut c);
         }
     }
     resolve_combat(game, c)
@@ -434,7 +483,9 @@ pub fn combat_loop(game: &mut Game, mut c: Combat) {
             kill_all_attackers(game, &mut c);
         }
 
-        if matches!(resolve_combat(game, &mut c), CombatControl::Exit) {
+        if let Some(r) = resolve_combat(game, c) {
+            c = r;
+        } else {
             return;
         }
     }
@@ -513,7 +564,7 @@ fn kill_all_defenders(game: &mut Game, c: &mut Combat) {
     }
 }
 
-fn resolve_combat(game: &mut Game, c: &mut Combat) -> CombatControl {
+fn resolve_combat(game: &mut Game, mut c: Combat) -> Option<Combat> {
     let active_attackers = c.active_attackers(game);
     let defenders_left = game.players[c.defender].get_units(c.defender_position);
     if active_attackers.is_empty() && defenders_left.is_empty() {
@@ -526,55 +577,95 @@ fn resolve_combat(game: &mut Game, c: &mut Combat) -> CombatControl {
         offer_retreat(game, c)
     } else {
         c.round += 1;
-        CombatControl::Continue
+        Some(c)
     }
 }
 
-fn offer_retreat(game: &mut Game, c: &mut Combat) -> CombatControl {
+fn offer_retreat(game: &mut Game, c: Combat) -> Option<Combat> {
     game.add_info_log_item(&format!(
         "{} may retreat",
         game.players[c.attacker].get_name()
     ));
     game.state = GameState::Combat(Combat {
         phase: CombatPhase::Retreat,
-        ..c.clone()
+        ..c
     });
-    CombatControl::Exit
+    None
 }
 
-fn attacker_wins(game: &mut Game, c: &mut Combat) -> CombatControl {
+fn attacker_wins(game: &mut Game, mut c: Combat) -> Option<Combat> {
     game.add_info_log_item(&format!(
         "{} killed all defending units",
         game.players[c.attacker].get_name()
     ));
     game.move_units(c.attacker, &c.attackers, c.defender_position, None);
-    let control = end_combat(game, c);
     game.capture_position(c.defender, c.defender_position, c.attacker);
-    control
+    c.result = Some(CombatResult::AttackerWins);
+    end_combat(game, c)
 }
 
-fn defender_wins(game: &mut Game, c: &mut Combat) -> CombatControl {
+fn defender_wins(game: &mut Game, mut c: Combat) -> Option<Combat> {
     game.add_info_log_item(&format!(
         "{} killed all attacking units",
         game.players[c.defender].get_name()
     ));
+    c.result = Some(CombatResult::DefenderWins);
     end_combat(game, c)
 }
 
-fn draw(game: &mut Game, c: &mut Combat) -> CombatControl {
-    if c.defender_fortress(game) {
+pub(crate) fn draw(game: &mut Game, mut c: Combat) -> Option<Combat> {
+    if c.defender_fortress(game) && c.round == 1 {
         game.add_info_log_item(&format!("All attacking and defending units where eliminated. {} wins the battle because he has a defending fortress", game.players[c.defender].get_name()));
+        // only relevant for event listeners
+        c.result = Some(CombatResult::DefenderWins);
         return end_combat(game, c);
     }
     game.add_info_log_item(
         "All attacking and defending units where eliminated, ending the battle in a draw",
     );
+    c.result = Some(CombatResult::Draw);
     end_combat(game, c)
 }
 
-fn end_combat(game: &mut Game, c: &Combat) -> CombatControl {
-    game.state = *c.initiation.clone();
-    CombatControl::Exit
+pub(crate) fn end_combat(game: &mut Game, combat: Combat) -> Option<Combat> {
+    game.lock_undo();
+    let attacker = combat.attacker;
+    let defender = combat.defender;
+    let defender_position = combat.defender_position;
+    let info = CombatResultInfo::new(
+        combat
+            .result
+            .clone()
+            .expect("Combat result should be set when ending combat"),
+        attacker,
+        defender_position,
+    );
+
+    // set state back to combat for event listeners
+    game.state = GameState::Combat(combat);
+
+    if game.trigger_custom_phase_event(
+        attacker,
+        |events| &mut events.on_combat_end,
+        CustomPhaseEventType::EndCombatAttacker,
+        &info,
+    ) {
+        return None;
+    }
+    if game.trigger_custom_phase_event(
+        defender,
+        |events| &mut events.on_combat_end,
+        CustomPhaseEventType::EndCombatDefender,
+        &info,
+    ) {
+        return None;
+    }
+
+    let GameState::Combat(c) = mem::replace(&mut game.state, GameState::Playing) else {
+        panic!("Illegal state");
+    };
+    game.state = *c.initiation;
+    None
 }
 
 struct CombatRolls {

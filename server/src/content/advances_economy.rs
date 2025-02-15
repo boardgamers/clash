@@ -15,19 +15,22 @@ use crate::resource_pile::ResourcePile;
 pub(crate) fn economy() -> AdvanceGroup {
     advance_group_builder(
         "Economy",
-        vec![
-            Advance::builder("Bartering", "todo")
-                .with_advance_bonus(MoodToken)
-                .with_unlocked_building(Market),
-            trade_routes(),
-            taxes(),
-            Advance::builder(
-                CURRENCY,
-                "You may collect gold instead of food for Trade Routes and Taxes",
-            )
-            .with_advance_bonus(CultureToken),
-        ],
+        vec![bartering(), trade_routes(), taxes(), currency()],
     )
+}
+
+fn currency() -> AdvanceBuilder {
+    Advance::builder(
+        CURRENCY,
+        "You may collect gold instead of food for Trade Routes and Taxes",
+    )
+    .with_advance_bonus(CultureToken)
+}
+
+fn bartering() -> AdvanceBuilder {
+    Advance::builder("Bartering", "todo")
+        .with_advance_bonus(MoodToken)
+        .with_unlocked_building(Market)
 }
 
 fn taxes() -> AdvanceBuilder {

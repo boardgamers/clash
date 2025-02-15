@@ -11,14 +11,18 @@ pub(crate) fn education() -> AdvanceGroup {
     advance_group_builder(
         "Education",
         vec![
-            Advance::builder("Writing", "todo")
-                .with_advance_bonus(CultureToken)
-                .with_unlocked_building(Academy),
+            writing(),
             public_education(),
             free_education(),
             philosophy(),
         ],
     )
+}
+
+fn writing() -> AdvanceBuilder {
+    Advance::builder("Writing", "todo")
+        .with_advance_bonus(CultureToken)
+        .with_unlocked_building(Academy)
 }
 
 fn public_education() -> AdvanceBuilder {
@@ -29,7 +33,7 @@ fn public_education() -> AdvanceBuilder {
     .with_advance_bonus(MoodToken)
     .add_once_per_turn_listener(
         |event| &mut event.on_collect,
-        |e| &mut e.info,
+        |e| &mut e.content.info,
         |player, game, pos| {
             if game.get_city(player.index, *pos).pieces.academy.is_some() {
                 player.gain_resources(ResourcePile::ideas(1));
@@ -38,34 +42,6 @@ fn public_education() -> AdvanceBuilder {
         },
         0,
     )
-}
-
-fn philosophy() -> AdvanceBuilder {
-    Advance::builder(
-        "Philosophy",
-        "Immediately gain 1 idea after getting a Science advance",
-    )
-    .add_one_time_ability_initializer(|game, player_index| {
-        game.players[player_index].gain_resources(ResourcePile::ideas(1));
-    })
-    .add_ability_undo_deinitializer(|game, player_index| {
-        game.players[player_index].lose_resources(ResourcePile::ideas(1));
-    })
-    .add_player_event_listener(
-        |event| &mut event.on_advance,
-        |player, _, advance| {
-            if get_group("Science")
-                .advances
-                .iter()
-                .any(|a| &a.name == advance)
-            {
-                player.gain_resources(ResourcePile::ideas(1));
-                player.add_info_log_item("Philosophy gained 1 idea");
-            }
-        },
-        0,
-    )
-    .with_advance_bonus(MoodToken)
 }
 
 fn free_education() -> AdvanceBuilder {
@@ -101,4 +77,32 @@ fn free_education() -> AdvanceBuilder {
             c.gain_resources(ResourcePile::mood_tokens(1));
         },
     )
+}
+
+fn philosophy() -> AdvanceBuilder {
+    Advance::builder(
+        "Philosophy",
+        "Immediately gain 1 idea after getting a Science advance",
+    )
+    .add_one_time_ability_initializer(|game, player_index| {
+        game.players[player_index].gain_resources(ResourcePile::ideas(1));
+    })
+    .add_ability_undo_deinitializer(|game, player_index| {
+        game.players[player_index].lose_resources(ResourcePile::ideas(1));
+    })
+    .add_player_event_listener(
+        |event| &mut event.on_advance,
+        |player, _, advance| {
+            if get_group("Science")
+                .advances
+                .iter()
+                .any(|a| &a.name == advance)
+            {
+                player.gain_resources(ResourcePile::ideas(1));
+                player.add_info_log_item("Philosophy gained 1 idea");
+            }
+        },
+        0,
+    )
+    .with_advance_bonus(MoodToken)
 }

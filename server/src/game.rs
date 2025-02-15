@@ -14,8 +14,8 @@ use crate::map::UnexploredBlock;
 use crate::movement::{has_movable_units, terrain_movement_restriction};
 use crate::payment::PaymentOptions;
 use crate::player_events::{
-    ActionInfo, AdvanceInfo, CustomPhaseInfo, InfluenceCultureInfo, MoveInfo, PlayerCommands,
-    PlayerEvents,
+    ActionInfo, AdvanceInfo, CustomPhaseEvent, CustomPhaseInfo, InfluenceCultureInfo, MoveInfo,
+    PlayerCommandEvent, PlayerCommands, PlayerEvents,
 };
 use crate::resource::check_for_waste;
 use crate::unit::{carried_units, get_current_move, MovementRestriction, UnitData, Units};
@@ -303,7 +303,7 @@ impl Game {
     pub(crate) fn trigger_custom_phase_event<V>(
         &mut self,
         player_index: usize,
-        event: fn(&mut PlayerEvents) -> &mut Event<Game, CustomPhaseInfo, V>,
+        event: fn(&mut PlayerEvents) -> &mut CustomPhaseEvent<V>,
         event_type: CustomPhaseEventType,
         details: &V,
     ) -> bool {
@@ -345,7 +345,7 @@ impl Game {
     pub(crate) fn trigger_command_event<V>(
         &mut self,
         player_index: usize,
-        event: fn(&mut PlayerEvents) -> &mut Event<PlayerCommands, Game, V>,
+        event: fn(&mut PlayerEvents) -> &mut PlayerCommandEvent<V>,
         details: &V,
     ) {
         let e = event(&mut self.players[player_index].events).take();
@@ -366,17 +366,14 @@ impl Game {
 
         callback(&mut commands, self);
 
-        info.apply(
-            self,
-            CommandUndoContext {
-                info: commands.info.clone(),
-                gained_resources: commands.gained_resources.clone(),
-            },
-        );
-        self.players[player_index].gain_resources(commands.gained_resources);
+        info.apply(self, commands.content.clone());
+        self.players[player_index].gain_resources(commands.content.gained_resources);
 
         for edit in commands.log {
             self.add_info_log_item(&edit);
+        }
+        for (unit, pos) in commands.content.gained_units {
+            self.players[player_index].add_unit(pos, unit);
         }
     }
 
@@ -433,14 +430,24 @@ impl Game {
                     panic!("game should be in combat state")
                 }
             }
+            CustomPhaseEventType::EndCombatAttacker | CustomPhaseEventType::EndCombatDefender => {
+                if let GameState::Combat(c) = mem::replace(&mut self.state, Playing) {
+                    combat::end_combat(self, c);
+                } else {
+                    panic!("game should be in combat state")
+                }
+            }
             CustomPhaseEventType::TurnStart => self.start_turn(),
             // name and payment is only for information - but not needed here
             CustomPhaseEventType::OnAdvance => {
-                self.got_advance(player_index, ResourcePile::empty(), "");
+                self.on_advance(player_index, ResourcePile::empty(), "");
             }
             CustomPhaseEventType::OnConstruct => {
                 // building is only for information - but not needed here
                 PlayingAction::on_construct(self, player_index, Temple);
+            }
+            CustomPhaseEventType::OnRecruit => {
+                self.on_recruit(player_index);
             }
         }
     }
@@ -490,7 +497,6 @@ impl Game {
                 let action = action.combat().expect("action should be a combat action");
                 combat::execute_combat_action(self, action, c);
             }
-            PlaceSettler(p) => self.place_settler(action, player_index, &p),
             ExploreResolution(r) => {
                 let rotation = action
                     .explore_resolution()
@@ -506,7 +512,7 @@ impl Game {
         self.log.remove(self.log.len() - 1);
         let item = &self.action_log[self.action_log_index];
         self.undo_context_stack = item.undo.clone();
-        let action = &item.action;
+        let action = item.action.clone();
 
         let was_custom_phase = self.custom_phase_state.current.is_some();
         if was_custom_phase {
@@ -520,11 +526,9 @@ impl Game {
                 self.undo_movement_action(action.clone(), player_index);
             }
             Action::CulturalInfluenceResolution(action) => {
-                self.undo_cultural_influence_resolution_action(*action);
+                self.undo_cultural_influence_resolution_action(action);
             }
-            // todo: can remove casualties be undone?
-            Action::Combat(_action) => unimplemented!("retreat can't yet be undone"),
-            Action::PlaceSettler(_action) => panic!("placing a settler can't be undone"),
+            Action::Combat(_action) => unimplemented!("combat actions can't be undone"),
             Action::ExploreResolution(_rotation) => {
                 undo_explore_resolution(self, player_index);
             }
@@ -577,7 +581,6 @@ impl Game {
                 );
             }
             Action::Combat(_) => unimplemented!("retreat can't yet be redone"),
-            Action::PlaceSettler(_) => panic!("place settler actions can't be redone"),
             Action::ExploreResolution(rotation) => {
                 let ExploreResolution(r) = &self.state else {
                     panic!("explore resolution actions can only be redone if the game is in a explore resolution state");
@@ -739,15 +742,12 @@ impl Game {
         pred: fn(&UndoContext) -> bool,
     ) -> Option<UndoContext> {
         loop {
-            let option = self.undo_context_stack.last();
-            if let Some(context) = option {
-                if let UndoContext::Command(c) = context {
-                    self.players[self.current_player_index]
-                        .event_info
-                        .clone_from(&c.info);
-                    self.players[self.current_player_index]
-                        .lose_resources(c.gained_resources.clone());
-                    self.undo_context_stack.pop();
+            if let Some(context) = &self.undo_context_stack.last() {
+                if let UndoContext::Command(_) = context {
+                    let Some(UndoContext::Command(c)) = self.undo_context_stack.pop() else {
+                        panic!("when popping a command undo context, the undo context stack should have a command undo context")
+                    };
+                    self.undo_commands(&c);
                 } else {
                     if pred(context) {
                         return self.undo_context_stack.pop();
@@ -757,6 +757,15 @@ impl Game {
             } else {
                 return None;
             }
+        }
+    }
+
+    fn undo_commands(&mut self, c: &CommandUndoContext) {
+        let p = self.current_player_index;
+        self.players[p].event_info.clone_from(&c.info);
+        self.players[p].lose_resources(c.gained_resources.clone());
+        for (u, _pos) in &c.gained_units {
+            self.undo_recruit_without_activate(p, &[u.clone()], None);
         }
     }
 
@@ -907,16 +916,6 @@ impl Game {
         self.undo_influence_culture(target_player_index, target_city_position, city_piece);
     }
 
-    fn place_settler(&mut self, action: Action, player_index: usize, p: &PlaceSettlerState) {
-        let action = action
-            .place_settler()
-            .expect("action should be place_settler action");
-        let player = &mut self.players[player_index];
-        assert!(player.get_city(action).is_some(), "Illegal action");
-        player.add_unit(action, UnitType::Settler);
-        self.back_to_move(&p.move_state, true);
-    }
-
     pub(crate) fn back_to_move(&mut self, move_state: &MoveState, stop_current_move: bool) {
         let mut state = move_state.clone();
         if stop_current_move {
@@ -1006,7 +1005,6 @@ impl Game {
                 CombatPhase::PlayActionCard(player) => *player,
                 CombatPhase::Retreat => c.attacker,
             },
-            PlaceSettler(p) => p.player_index,
             _ => self.current_player_index,
         }
     }
@@ -1197,15 +1195,10 @@ impl Game {
         let player = &mut self.players[player_index];
         player.advances.push(advance);
 
-        self.got_advance(player_index, payment, &name);
+        self.on_advance(player_index, payment, &name);
     }
 
-    pub(crate) fn got_advance(
-        &mut self,
-        player_index: usize,
-        payment: ResourcePile,
-        advance: &str,
-    ) {
+    pub(crate) fn on_advance(&mut self, player_index: usize, payment: ResourcePile, advance: &str) {
         if self.trigger_custom_phase_event(
             player_index,
             |e| &mut e.on_advance_custom_phase,
@@ -1283,7 +1276,6 @@ impl Game {
             replaced_leader,
         });
         let player = &mut self.players[player_index];
-        let mut ships = Vec::new();
         let vec = units.to_vec();
         player.units.reserve_exact(vec.len());
         for unit_type in vec {
@@ -1291,11 +1283,9 @@ impl Game {
                 .get_city(city_position)
                 .expect("player should have a city at the recruitment position");
             let position = match &unit_type {
-                UnitType::Ship => {
-                    ships.push(player.next_unit_id);
-                    city.port_position
-                        .expect("there should be a port in the city")
-                }
+                UnitType::Ship => city
+                    .port_position
+                    .expect("there should be a port in the city"),
                 _ => city_position,
             };
             player.add_unit(position, unit_type);
@@ -1304,25 +1294,60 @@ impl Game {
             .get_city_mut(city_position)
             .expect("player should have a city at the recruitment position");
         city.activate();
-        if !ships.is_empty() {
-            let port_position = self.players[player_index]
-                .get_city(city_position)
-                .and_then(|city| city.port_position)
-                .expect("there should be a port");
-            if let Some(defender) = self.enemy_player(player_index, port_position) {
-                for ship in self.players[player_index].get_units_mut(port_position) {
-                    ship.position = city_position;
+        self.on_recruit(player_index);
+    }
+
+    fn find_last_action(&self, pred: fn(&Action) -> bool) -> Option<Action> {
+        self.action_log
+            .iter()
+            .rev()
+            .find(|item| pred(&item.action))
+            .map(|item| item.action.clone())
+    }
+
+    fn on_recruit(&mut self, player_index: usize) {
+        let Some(Action::Playing(PlayingAction::Recruit(r))) = self.find_last_action(|action| {
+            matches!(action, Action::Playing(PlayingAction::Recruit(_)))
+        }) else {
+            panic!("last action should be a recruit action")
+        };
+
+        if self.trigger_custom_phase_event(
+            player_index,
+            |events| &mut events.on_recruit,
+            CustomPhaseEventType::OnRecruit,
+            &r,
+        ) {
+            return;
+        }
+        let city_position = r.city_position;
+
+        if let Some(port_position) = self.players[player_index]
+            .get_city(city_position)
+            .and_then(|city| city.port_position)
+        {
+            let ships = self.players[player_index]
+                .get_units(port_position)
+                .iter()
+                .filter(|unit| unit.unit_type.is_ship())
+                .map(|unit| unit.id)
+                .collect::<Vec<_>>();
+            if !ships.is_empty() {
+                if let Some(defender) = self.enemy_player(player_index, port_position) {
+                    for ship in self.players[player_index].get_units_mut(port_position) {
+                        ship.position = city_position;
+                    }
+                    combat::initiate_combat(
+                        self,
+                        defender,
+                        port_position,
+                        player_index,
+                        city_position,
+                        ships,
+                        false,
+                        Some(Playing),
+                    );
                 }
-                combat::initiate_combat(
-                    self,
-                    defender,
-                    port_position,
-                    player_index,
-                    city_position,
-                    ships,
-                    false,
-                    Some(Playing),
-                );
             }
         }
     }
@@ -1337,6 +1362,41 @@ impl Game {
         player_index: usize,
         units: Units,
         city_position: Position,
+        leader_name: Option<&String>,
+    ) {
+        self.undo_recruit_without_activate(player_index, &units.to_vec(), leader_name);
+        self.players[player_index]
+            .get_city_mut(city_position)
+            .expect("player should have a city a recruitment position")
+            .undo_activate();
+        if let Some(UndoContext::Recruit {
+            replaced_units,
+            replaced_leader,
+        }) = self.pop_undo_context()
+        {
+            let player = &mut self.players[player_index];
+            for unit in replaced_units {
+                player.units.extend(Unit::from_data(player_index, unit));
+            }
+            if let Some(replaced_leader) = replaced_leader {
+                player.active_leader = Some(replaced_leader.clone());
+                Player::with_leader(
+                    &replaced_leader,
+                    self,
+                    player_index,
+                    |game, replaced_leader| {
+                        (replaced_leader.player_initializer)(game, player_index);
+                        (replaced_leader.player_one_time_initializer)(game, player_index);
+                    },
+                );
+            }
+        }
+    }
+
+    fn undo_recruit_without_activate(
+        &mut self,
+        player_index: usize,
+        units: &[UnitType],
         leader_name: Option<&String>,
     ) {
         if let Some(leader_name) = leader_name {
@@ -1362,38 +1422,12 @@ impl Game {
             self.players[player_index].active_leader = None;
         }
         let player = &mut self.players[player_index];
-        for _ in 0..units.to_vec().len() {
+        for _ in 0..units.len() {
             player
                 .units
                 .pop()
                 .expect("the player should have the recruited units when undoing");
             player.next_unit_id -= 1;
-        }
-        player
-            .get_city_mut(city_position)
-            .expect("player should have a city a recruitment position")
-            .undo_activate();
-        if let Some(UndoContext::Recruit {
-            replaced_units,
-            replaced_leader,
-        }) = self.pop_undo_context()
-        {
-            let player = &mut self.players[player_index];
-            for unit in replaced_units {
-                player.units.extend(Unit::from_data(player_index, unit));
-            }
-            if let Some(replaced_leader) = replaced_leader {
-                player.active_leader = Some(replaced_leader.clone());
-                Player::with_leader(
-                    &replaced_leader,
-                    self,
-                    player_index,
-                    |game, replaced_leader| {
-                        (replaced_leader.player_initializer)(game, player_index);
-                        (replaced_leader.player_one_time_initializer)(game, player_index);
-                    },
-                );
-            }
         }
     }
 
@@ -1511,17 +1545,6 @@ impl Game {
         } else {
             self.players[new_player_index].gain_resources(ResourcePile::gold(city.size() as u32));
             city.raze(self, old_player_index);
-        }
-        let old_player = &mut self.players[old_player_index];
-        if old_player.available_units().settlers > 0 && !old_player.cities.is_empty() {
-            let state = mem::replace(&mut self.state, Playing);
-            let Movement(m) = state else {
-                panic!("conquering a city should only happen in a movement action")
-            };
-            self.state = PlaceSettler(PlaceSettlerState {
-                player_index: old_player_index,
-                move_state: m,
-            });
         }
     }
 
@@ -1929,13 +1952,6 @@ impl MoveState {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct PlaceSettlerState {
-    pub player_index: usize,
-    #[serde(flatten)]
-    pub move_state: MoveState,
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct ExploreResolutionState {
     #[serde(flatten)]
     pub move_state: MoveState,
@@ -1953,20 +1969,11 @@ pub enum GameState {
     Movement(MoveState),
     CulturalInfluenceResolution(CulturalInfluenceResolution),
     Combat(Combat),
-    PlaceSettler(PlaceSettlerState),
     ExploreResolution(ExploreResolutionState),
     Finished,
 }
 
 impl GameState {
-    #[must_use]
-    pub fn settler_placer(&self) -> Option<usize> {
-        match self {
-            PlaceSettler(p) => Some(p.player_index),
-            _ => None,
-        }
-    }
-
     #[must_use]
     pub fn is_playing(&self) -> bool {
         matches!(self, Playing)
@@ -2005,6 +2012,20 @@ pub struct CommandUndoContext {
     #[serde(default)]
     #[serde(skip_serializing_if = "ResourcePile::is_empty")]
     pub gained_resources: ResourcePile,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub gained_units: Vec<(UnitType, Position)>,
+}
+
+impl CommandUndoContext {
+    #[must_use]
+    pub fn new(info: HashMap<String, String>) -> Self {
+        Self {
+            info,
+            gained_resources: ResourcePile::empty(),
+            gained_units: Vec::new(),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
@@ -2028,7 +2049,10 @@ impl CommandUndoInfo {
             player.event_info.insert(k, v);
         }
 
-        if undo.info != self.info || !undo.gained_resources.is_empty() {
+        if undo.info != self.info
+            || !undo.gained_resources.is_empty()
+            || !undo.gained_units.is_empty()
+        {
             undo.info.clone_from(&self.info);
             game.push_undo_context(UndoContext::Command(undo));
         }

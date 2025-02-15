@@ -45,7 +45,6 @@ pub fn format_action_log_item(action: &Action, game: &Game) -> Vec<String> {
             vec![format_cultural_influence_resolution_log_item(game, *action)]
         }
         Action::Combat(action) => vec![format_combat_action_log_item(action, game)],
-        Action::PlaceSettler(position) => vec![format_place_settler_log_item(game, *position)],
         Action::ExploreResolution(_rotation) => vec![format_explore_action_log_item(game)],
         Action::CustomPhaseEvent(_) => {
             // is done in the event handler itself
@@ -60,15 +59,6 @@ pub fn format_action_log_item(action: &Action, game: &Game) -> Vec<String> {
 fn format_explore_action_log_item(game: &Game) -> String {
     let player = game.players[game.active_player()].get_name();
     format!("{player} chose the orientation of the newly explored tiles")
-}
-
-fn format_place_settler_log_item(game: &Game, position: Position) -> String {
-    let player = game.players[game
-        .state
-        .settler_placer()
-        .expect("the game should be in the place settler state")]
-    .get_name();
-    format!("{player} placed a settler in the city at {position}")
 }
 
 fn format_cultural_influence_resolution_log_item(game: &Game, success: bool) -> String {

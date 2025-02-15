@@ -310,7 +310,11 @@
       },
       "undo": [
         {
-          "Command": {}
+          "Command": {
+            "gained_resources": {
+              "food": 1
+            }
+          }
         },
         {
           "WastedResources": {

@@ -1,6 +1,7 @@
 use crate::advance::Advance;
 use crate::consts::SHIP_CAPACITY;
 use crate::content::advances::get_advance;
+use crate::content::builtin;
 use crate::events::{Event, EventOrigin};
 use crate::game::CurrentMove;
 use crate::game::GameState::Movement;
@@ -124,6 +125,10 @@ impl Player {
         let player = Self::from_data(data);
         let player_index = player.index;
         game.players.push(player);
+        let builtin = builtin::get_all();
+        for b in builtin {
+            (b.player_initializer)(game, player_index);
+        }
         let advances = mem::take(&mut game.players[player_index].advances);
         for advance in &advances {
             (advance.player_initializer)(game, player_index);

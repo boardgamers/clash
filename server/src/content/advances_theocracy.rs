@@ -1,42 +1,20 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::city_pieces::Building::Temple;
+use crate::consts::STACK_LIMIT;
 use crate::content::advances::{advance_group_builder, get_group, AdvanceGroup};
-use crate::content::custom_phase_actions::CustomPhaseAdvanceRewardRequest;
+use crate::content::custom_phase_actions::{
+    CustomPhaseAdvanceRewardRequest, CustomPhasePositionRequest,
+};
+use crate::position::Position;
 use crate::resource_pile::ResourcePile;
+use crate::unit::UnitType;
 
 pub(crate) fn theocracy() -> AdvanceGroup {
     advance_group_builder(
         "Theocracy",
-        vec![
-            dogma(),
-            devotion(),
-            conversion(),
-            Advance::builder("Fanaticism", "todo"),
-        ],
+        vec![dogma(), devotion(), conversion(), fanaticism()],
     )
-}
-
-fn conversion() -> AdvanceBuilder {
-    Advance::builder("Conversion", "You add +1 to your Influence Culture roll and gain 1 culture token when you make a successful Influence Culture attempt.")
-        .add_player_event_listener(
-            |event| &mut event.on_influence_culture_attempt,
-            |info, _, _| {
-                if !info.is_defender {
-                    info.roll_boost += 1;
-                    info.info.log.push("Player gets +1 to Influence Culture roll for Conversion Advance".to_string());
-                }
-            },
-            0,
-        )
-        .add_player_event_listener(
-            |event| &mut event.on_influence_culture_success,
-            |c, _, ()| {
-                c.gain_resources(ResourcePile::culture_tokens(1));
-                c.add_info_log_item("Player gained 1 culture token for a successful Influence Culture attempt for Conversion Advance");
-            },
-            0,
-        )
 }
 
 fn dogma() -> AdvanceBuilder {
@@ -100,4 +78,70 @@ fn devotion() -> AdvanceBuilder {
         },
         0,
     )
+}
+
+fn conversion() -> AdvanceBuilder {
+    Advance::builder("Conversion", "You add +1 to your Influence Culture roll and gain 1 culture token when you make a successful Influence Culture attempt.")
+        .add_player_event_listener(
+            |event| &mut event.on_influence_culture_attempt,
+            |info, _, _| {
+                if !info.is_defender {
+                    info.roll_boost += 1;
+                    info.info.log.push("Player gets +1 to Influence Culture roll for Conversion Advance".to_string());
+                }
+            },
+            0,
+        )
+        .add_player_event_listener(
+            |event| &mut event.on_influence_culture_success,
+            |c, _, ()| {
+                c.gain_resources(ResourcePile::culture_tokens(1));
+                c.add_info_log_item("Player gained 1 culture token for a successful Influence Culture attempt for Conversion Advance");
+            },
+            0,
+        )
+}
+
+fn fanaticism() -> AdvanceBuilder {
+    Advance::builder("Fanaticism", "During a battle in a city with a Temple, whether you are the attacker or defender, you add +2 combat value to your first combat roll. If you lose the battle, you get 1 free Infantry Unit after the battle and place it in one of your cities.")
+        .add_player_event_listener(
+            |event| &mut event.on_combat_round,
+            |s, c, game| {
+                if c.round == 1 && c.defender_temple(game) {
+                    s.extra_combat_value += 2;
+                    s.roll_log.push("Player gets +2 combat value for Fanaticism Advance".to_string());
+                }
+            },
+            0,
+        )
+        .add_position_reward_request_listener(
+            |event| &mut event.on_combat_end,
+            0,
+            |game, player_index, i| {
+                if i.is_loser(player_index)
+                    && !game.get_player(player_index).cities.is_empty()
+                    && game.get_player(player_index).available_units().infantry > 0 {
+                    let p = game.get_player(player_index);
+                    let choices: Vec<Position> = p.cities.iter()
+                        .filter(|c| p.get_units(c.position).iter().filter(|u| u.unit_type.is_army_unit()).count() < STACK_LIMIT)
+                        .map(|c| c.position)
+                        .collect();
+                    if choices.is_empty() {
+                        return None;
+                    }
+                    Some(CustomPhasePositionRequest {
+                        choices
+                    })
+                } else {
+                    None
+                }
+            },
+            |c, _game, pos| {
+                c.add_info_log_item(&format!(
+                    "{} gained 1 free Infantry Unit at {pos} for Fanaticism Advance",
+                    c.name,
+                ));
+                c.gain_unit(UnitType::Infantry, *pos);
+            },
+        )
 }

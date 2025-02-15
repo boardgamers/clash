@@ -6,7 +6,7 @@
       "id": 0,
       "resources": {
         "food": 1,
-        "wood": 7,
+        "wood": 6,
         "ore": 7,
         "ideas": 5,
         "gold": 7,
@@ -89,6 +89,7 @@
         "Farming",
         "Free Economy",
         "Math",
+        "Metallurgy",
         "Mining"
       ],
       "unlocked_special_advance": [],
@@ -184,7 +185,7 @@
       ],
       [
         "B2",
-        "Forest"
+        "Mountain"
       ],
       [
         "B3",
@@ -227,7 +228,7 @@
                 [
                   "B2",
                   {
-                    "wood": 1
+                    "ore": 1
                   }
                 ]
               ]
@@ -237,9 +238,18 @@
       },
       "undo": [
         {
+          "Command": {
+            "gained_resources": {
+              "ore": 1,
+              "gold": 1
+            }
+          }
+        },
+        {
           "WastedResources": {
             "resources": {
-              "ore": 1
+              "ore": 1,
+              "gold": 1
             },
             "player_index": 0
           }
@@ -250,8 +260,9 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 collects 1 ore and 1 wood in the city at C2 using Free Economy",
-      "Player1 Could not store 1 ore"
+      "Player1 collects 1 ore and 1 ore for a total of 2 ore in the city at C2 using Free Economy",
+      "Metallurgy converted 1 ore to 1 gold",
+      "Player1 Could not store 1 ore and 1 gold"
     ]
   ],
   "undo_limit": 0,

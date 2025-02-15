@@ -1,13 +1,13 @@
 use crate::advance::Advance;
-use crate::collect::{CollectContext, CollectOptionsInfo};
-use crate::combat::{Combat, CombatStrength};
+use crate::collect::{CollectContext, CollectInfo};
+use crate::combat::{Combat, CombatResultInfo, CombatStrength};
 use crate::content::custom_phase_actions::CustomPhaseEventType;
 use crate::events::Event;
 use crate::game::{CommandUndoContext, CommandUndoInfo, Game};
 use crate::map::Terrain;
 use crate::payment::PaymentOptions;
-use crate::playing_actions::PlayingActionType;
-use crate::unit::Units;
+use crate::playing_actions::{PlayingActionType, Recruit};
+use crate::unit::{UnitType, Units};
 use crate::{
     city::City, city_pieces::Building, player::Player, position::Position,
     resource_pile::ResourcePile, wonder::Wonder,
@@ -15,16 +15,21 @@ use crate::{
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
 
+pub(crate) type CustomPhaseEvent<V = ()> = Event<Game, CustomPhaseInfo, V>;
+
+pub(crate) type PlayerCommandEvent<V = ()> = Event<PlayerCommands, Game, V>;
+
 #[derive(Default)]
 pub(crate) struct PlayerEvents {
-    pub on_construct: Event<Game, CustomPhaseInfo, Building>,
+    pub on_construct: CustomPhaseEvent<Building>,
     pub on_construct_wonder: Event<Player, Position, Wonder>,
-    pub on_collect: Event<PlayerCommands, Game, Position>,
-    pub on_advance: Event<PlayerCommands, Game, String>,
-    pub on_advance_custom_phase: Event<Game, CustomPhaseInfo, AdvanceInfo>,
+    pub on_collect: PlayerCommandEvent<Position>,
+    pub on_advance: PlayerCommandEvent<String>,
+    pub on_advance_custom_phase: CustomPhaseEvent<AdvanceInfo>,
+    pub on_recruit: CustomPhaseEvent<Recruit>,
     pub on_influence_culture_attempt: Event<InfluenceCultureInfo, City, Game>,
-    pub on_influence_culture_success: Event<PlayerCommands, Game>,
-    pub before_move: Event<PlayerCommands, Game, MoveInfo>,
+    pub on_influence_culture_success: PlayerCommandEvent,
+    pub before_move: PlayerCommandEvent<MoveInfo>,
 
     pub construct_cost: Event<CostInfo, City, Building>,
     pub wonder_cost: Event<CostInfo, City, Wonder>,
@@ -33,11 +38,15 @@ pub(crate) struct PlayerEvents {
     pub recruit_cost: Event<CostInfo, Units, Player>,
 
     pub is_playing_action_available: Event<bool, PlayingActionType, Player>,
+
     pub terrain_collect_options: Event<HashMap<Terrain, HashSet<ResourcePile>>>,
-    pub collect_options: Event<CollectOptionsInfo, CollectContext, Game>,
-    pub on_turn_start: Event<Game, CustomPhaseInfo>,
-    pub on_combat_start: Event<Game, CustomPhaseInfo>,
+    pub collect_options: Event<CollectInfo, CollectContext, Game>,
+    pub collect_total: Event<CollectInfo>,
+
+    pub on_turn_start: CustomPhaseEvent,
+    pub on_combat_start: CustomPhaseEvent,
     pub on_combat_round: Event<CombatStrength, Combat, Game>,
+    pub on_combat_end: CustomPhaseEvent<CombatResultInfo>,
 }
 
 impl PlayerEvents {
@@ -65,16 +74,20 @@ impl ActionInfo {
     }
 
     pub(crate) fn execute(&self, game: &mut Game) {
+        self.execute_with_options(game, |_| {});
+    }
+
+    pub(crate) fn execute_with_options(
+        &self,
+        game: &mut Game,
+        c: impl Fn(&mut CommandUndoContext),
+    ) {
         for l in self.log.iter().unique() {
             game.add_info_log_item(l);
         }
-        self.undo.apply(
-            game,
-            CommandUndoContext {
-                info: self.info.clone(),
-                gained_resources: ResourcePile::empty(),
-            },
-        );
+        let mut context = CommandUndoContext::new(self.info.clone());
+        c(&mut context);
+        self.undo.apply(game, context);
     }
 }
 
@@ -184,12 +197,11 @@ impl InfluenceCultureInfo {
 }
 
 #[derive(Clone, PartialEq)]
-pub struct PlayerCommands {
+pub(crate) struct PlayerCommands {
     pub name: String,
     pub index: usize,
-    pub info: HashMap<String, String>,
     pub log: Vec<String>,
-    pub gained_resources: ResourcePile,
+    pub content: CommandUndoContext,
 }
 
 impl PlayerCommands {
@@ -198,14 +210,17 @@ impl PlayerCommands {
         PlayerCommands {
             name,
             index: player_index,
-            info,
             log: Vec::new(),
-            gained_resources: ResourcePile::default(),
+            content: CommandUndoContext::new(info),
         }
     }
 
     pub fn gain_resources(&mut self, resources: ResourcePile) {
-        self.gained_resources += resources;
+        self.content.gained_resources += resources;
+    }
+
+    pub fn gain_unit(&mut self, unit: UnitType, pos: Position) {
+        self.content.gained_units.push((unit, pos));
     }
 
     pub fn add_info_log_item(&mut self, edit: &str) {
