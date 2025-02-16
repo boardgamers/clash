@@ -1,3 +1,4 @@
+use crate::content::civilizations::BARBARIANS;
 use crate::{leader::Leader, special_advance::SpecialAdvance};
 
 //todo add optional special starting tile
@@ -14,5 +15,14 @@ impl Civilization {
             special_advances,
             leaders,
         }
+    }
+
+    // Barbarians have the highest player index
+    pub fn is_barbarian(&self) -> bool {
+        self.name == BARBARIANS
+    }
+
+    pub fn is_human(&self) -> bool {
+        !self.is_barbarian()
     }
 }

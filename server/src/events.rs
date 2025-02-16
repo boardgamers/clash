@@ -7,21 +7,36 @@ pub enum EventOrigin {
     Leader(String),
     Wonder(String),
     Builtin(String),
+    Incident(u8),
 }
 
 impl EventOrigin {
     #[must_use]
-    pub fn name(&self) -> &str {
+    pub fn id(&self) -> String {
         match self {
             EventOrigin::Advance(name)
             | EventOrigin::SpecialAdvance(name)
             | EventOrigin::Wonder(name)
             | EventOrigin::Leader(name)
-            | EventOrigin::Builtin(name) => name,
+            | EventOrigin::Builtin(name) => name.to_string(),
+            EventOrigin::Incident(id) => id.to_string(),
+        }
+    }
+
+    #[must_use]
+    pub fn name(&self) -> String {
+        match self {
+            EventOrigin::Advance(name)
+            | EventOrigin::SpecialAdvance(name)
+            | EventOrigin::Wonder(name)
+            | EventOrigin::Leader(name)
+            | EventOrigin::Builtin(name) => name.to_string(),
+            EventOrigin::Incident(id) => incidents::get_incident(*id).name,
         }
     }
 }
 
+use crate::content::incidents;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 

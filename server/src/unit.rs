@@ -94,7 +94,7 @@ impl Unit {
         UnitData {
             position: self.position,
             data: UnitBaseData {
-                unit_type: self.unit_type.clone(),
+                unit_type: self.unit_type,
                 movement_restrictions: self.movement_restrictions.clone(),
                 id: self.id,
             },
@@ -103,7 +103,7 @@ impl Unit {
                 .map(|id| {
                     let unit = player.get_unit(*id).expect("unit not found");
                     UnitBaseData {
-                        unit_type: unit.unit_type.clone(),
+                        unit_type: unit.unit_type,
                         movement_restrictions: unit.movement_restrictions.clone(),
                         id: unit.id,
                     }
@@ -137,7 +137,7 @@ impl Unit {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, Debug, Copy)]
 pub enum UnitType {
     Settler,
     Infantry,
@@ -353,12 +353,12 @@ impl Iterator for UnitsIntoIterator {
         self.index += 1;
         let u = &self.units;
         match index {
-            0 => Some((Settler.clone(), u.settlers)),
-            1 => Some((Infantry.clone(), u.infantry)),
-            2 => Some((Ship.clone(), u.ships)),
-            3 => Some((Cavalry.clone(), u.cavalry)),
-            4 => Some((Elephant.clone(), u.elephants)),
-            5 => Some((Leader.clone(), u.leaders)),
+            0 => Some((Settler, u.settlers)),
+            1 => Some((Infantry, u.infantry)),
+            2 => Some((Ship, u.ships)),
+            3 => Some((Cavalry, u.cavalry)),
+            4 => Some((Elephant, u.elephants)),
+            5 => Some((Leader, u.leaders)),
             _ => None,
         }
     }

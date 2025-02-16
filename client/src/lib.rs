@@ -19,6 +19,7 @@ mod collect_ui;
 mod combat_ui;
 mod construct_ui;
 mod custom_actions_ui;
+mod custom_phase_ui;
 mod dialog_ui;
 mod event_ui;
 mod happiness_ui;

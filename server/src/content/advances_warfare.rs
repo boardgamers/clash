@@ -151,7 +151,7 @@ fn draft() -> AdvanceBuilder {
             if units.infantry > 0 {
                 // insert at beginning so that it's preferred over gold
 
-                let pile = ResourcePile::mood_tokens(if player.has_advance("Civil Rights") {
+                let pile = ResourcePile::mood_tokens(if player.has_advance("Civil Liberties") {
                     2
                 } else {
                     1

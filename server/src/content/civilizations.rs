@@ -5,9 +5,12 @@ use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
 use crate::{civilization::Civilization, leader::Leader};
 
+pub const BARBARIANS: &str = "Barbarians";
+
 #[must_use]
 pub fn get_all() -> Vec<Civilization> {
     vec![
+        Civilization::new(BARBARIANS, vec![], vec![]),
         Civilization::new(
             "test0",
             vec![],
@@ -57,7 +60,7 @@ pub fn get_all() -> Vec<Civilization> {
 }
 
 #[must_use]
-pub fn get_civilization_by_name(name: &str) -> Option<Civilization> {
+pub fn get_civilization(name: &str) -> Option<Civilization> {
     get_all()
         .into_iter()
         .find(|civilization| civilization.name == name)

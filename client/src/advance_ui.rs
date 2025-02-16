@@ -2,7 +2,6 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::layout_ui::{left_mouse_button_pressed_in_rect, top_centered_text};
 use crate::log_ui::break_text;
 use crate::payment_ui::{payment_dialog, Payment};
-use crate::player_ui::player_color;
 use crate::render_context::RenderContext;
 use crate::tooltip::show_tooltip_for_rect;
 use macroquad::color::Color;
@@ -107,7 +106,7 @@ pub fn show_advance_menu(
                         rect.y,
                         rect.w,
                         rect.h,
-                        fill_color(p, &advance_state),
+                        fill_color(rc, p, &advance_state),
                     );
                     state.draw_text(name, pos.x + 10., pos.y + 22.);
 
@@ -148,9 +147,9 @@ pub fn show_advance_menu(
     StateUpdate::None
 }
 
-fn fill_color(p: &Player, advance_state: &AdvanceState) -> Color {
+fn fill_color(rc: &RenderContext, p: &Player, advance_state: &AdvanceState) -> Color {
     match advance_state {
-        AdvanceState::Owned | AdvanceState::Removable => player_color(p.index),
+        AdvanceState::Owned | AdvanceState::Removable => rc.player_color(p.index),
         AdvanceState::Available => WHITE,
         AdvanceState::Unavailable => GRAY,
     }

@@ -59,7 +59,7 @@ fn dogma() -> AdvanceBuilder {
                 game.add_info_log_item(&format!(
                     "{player_name} {verb} {name} as a reward for constructing a Temple",
                 ));
-                game.advance(name, player_index, ResourcePile::empty());
+                game.advance_with_incident_token(name, player_index, ResourcePile::empty());
             },
         )
 }
@@ -126,12 +126,7 @@ fn fanaticism() -> AdvanceBuilder {
                         .filter(|c| p.get_units(c.position).iter().filter(|u| u.unit_type.is_army_unit()).count() < STACK_LIMIT)
                         .map(|c| c.position)
                         .collect();
-                    if choices.is_empty() {
-                        return None;
-                    }
-                    Some(CustomPhasePositionRequest {
-                        choices
-                    })
+                    Some(CustomPhasePositionRequest::new(choices, None))
                 } else {
                     None
                 }
@@ -141,7 +136,7 @@ fn fanaticism() -> AdvanceBuilder {
                     "{} gained 1 free Infantry Unit at {pos} for Fanaticism Advance",
                     c.name,
                 ));
-                c.gain_unit(UnitType::Infantry, *pos);
+                c.gain_unit(c.index, UnitType::Infantry, *pos);
             },
         )
 }

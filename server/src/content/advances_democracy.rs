@@ -3,7 +3,7 @@ use crate::advance::{Advance, AdvanceBuilder};
 use crate::city::MoodState;
 use crate::content::advances::{advance_group_builder, AdvanceGroup};
 use crate::content::custom_actions::CustomActionType::{
-    CivilRights, FreeEconomyCollect, VotingIncreaseHappiness,
+    CivilLiberties, FreeEconomyCollect, VotingIncreaseHappiness,
 };
 use crate::playing_actions::PlayingActionType;
 
@@ -13,7 +13,7 @@ pub(crate) fn democracy() -> AdvanceGroup {
         vec![
             voting(),
             separation_of_power(),
-            civil_rights(),
+            civil_liberties(),
             free_economy(),
         ],
     )
@@ -43,12 +43,12 @@ fn separation_of_power() -> AdvanceBuilder {
     )
 }
 
-fn civil_rights() -> AdvanceBuilder {
+fn civil_liberties() -> AdvanceBuilder {
     Advance::builder(
-        "Civil Rights",
+        "Civil Liberties",
         "As a free action, you may gain 3 mood tokens. The cost of Draft is increased to 2 mood token",
     )
-        .add_custom_action(CivilRights)
+        .add_custom_action(CivilLiberties)
 }
 
 fn free_economy() -> AdvanceBuilder {

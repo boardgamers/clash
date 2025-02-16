@@ -66,7 +66,7 @@ impl StatusPhaseAction {
                     game.players[player_index].can_advance_free(&advances::get_advance(advance)),
                     "Illegal action"
                 );
-                game.advance(advance, player_index, ResourcePile::empty());
+                game.advance_with_incident_token(advance, player_index, ResourcePile::empty());
             }
             StatusPhaseAction::RazeSize1City(ref city) => {
                 if let RazeSize1City::Position(city) = *city {
@@ -91,6 +91,12 @@ impl StatusPhaseAction {
                 return;
             }
         }
+        if game.custom_phase_state.is_empty() {
+            Self::action_done(game);
+        }
+    }
+
+    pub(crate) fn action_done(game: &mut Game) {
         game.next_player();
         skip_status_phase_players(game);
     }
@@ -130,11 +136,7 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
     let new_government_advances = advances::get_government(government)
         .expect("government should exist")
         .advances;
-    game.advance(
-        &new_government_advances[0].name,
-        player_index,
-        ResourcePile::empty(),
-    );
+    game.advance(&new_government_advances[0].name, player_index);
     for advance in &new_government.additional_advances {
         let (pos, advance) = new_government_advances
             .iter()
@@ -146,7 +148,7 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
             pos > 0,
             "Additional advances should not include the leading government advance"
         );
-        game.advance(&advance.name, player_index, ResourcePile::empty());
+        game.advance(&advance.name, player_index);
     }
 }
 

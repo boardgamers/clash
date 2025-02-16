@@ -7,7 +7,7 @@ use server::status_phase::{
 
 use server::content::trade_routes::find_trade_routes;
 use server::events::EventOrigin;
-use server::unit::{MoveUnits, Units};
+use server::unit::{MoveUnits, UnitType, Units};
 use server::{
     action::Action,
     city::{City, MoodState::*},
@@ -996,9 +996,9 @@ fn test_forced_labor() {
 }
 
 #[test]
-fn test_civil_rights() {
+fn test_civil_liberties() {
     test_actions(
-        "civil_rights",
+        "civil_liberties",
         vec![
             TestAction::undoable(0, Action::Playing(Custom(CivilRights))),
             TestAction::undoable(
@@ -1269,13 +1269,25 @@ fn test_wrong_status_phase_action() {
 // status phase
 
 #[test]
-fn test_free_advance() {
-    test_action(
-        "free_advance",
-        Action::StatusPhase(StatusPhaseAction::FreeAdvance(String::from("Storage"))),
-        0,
-        false,
-        false,
+fn test_free_advance_with_incident() {
+    test_actions(
+        "free_advance_with_incident",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::StatusPhase(StatusPhaseAction::FreeAdvance(String::from("Storage"))),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::CustomPhaseEvent(CustomPhaseEventAction::SelectPosition(
+                    Position::from_offset("B3"),
+                )),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::CustomPhaseEvent(CustomPhaseEventAction::SelectUnit(UnitType::Elephant)),
+            ),
+        ],
     );
 }
 

@@ -7,17 +7,20 @@ use GameState::*;
 use crate::advance::Advance;
 use crate::combat::{self, start_combat, Combat, CombatDieRoll, CombatPhase, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, MOVEMENT_ACTIONS};
+use crate::content::civilizations::BARBARIANS;
 use crate::content::custom_phase_actions::{CustomPhaseEventState, CustomPhaseEventType};
+use crate::content::incidents;
 use crate::events::{Event, EventOrigin};
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
 use crate::map::UnexploredBlock;
 use crate::movement::{has_movable_units, terrain_movement_restriction};
 use crate::payment::PaymentOptions;
 use crate::player_events::{
-    ActionInfo, AdvanceInfo, CustomPhaseEvent, CustomPhaseInfo, InfluenceCultureInfo, MoveInfo,
-    PlayerCommandEvent, PlayerCommands, PlayerEvents,
+    ActionInfo, AdvanceInfo, CustomPhaseEvent, CustomPhaseInfo, IncidentInfo, InfluenceCultureInfo,
+    MoveInfo, PlayerCommandEvent, PlayerCommands, PlayerEvents,
 };
 use crate::resource::check_for_waste;
+use crate::status_phase::StatusPhaseAction;
 use crate::unit::{carried_units, get_current_move, MovementRestriction, UnitData, Units};
 use crate::utils::Rng;
 use crate::utils::Shuffle;
@@ -50,6 +53,7 @@ use crate::{
 pub struct Game {
     pub state: GameState,
     pub custom_phase_state: CustomPhaseEventState,
+    // in turn order starting from starting_player_index and wrapping around
     pub players: Vec<Player>,
     pub map: Map,
     pub starting_player_index: usize,
@@ -69,6 +73,7 @@ pub struct Game {
     pub dropped_players: Vec<usize>,
     pub wonders_left: Vec<Wonder>,
     pub wonder_amount_left: usize,
+    pub incidents_left: Vec<u8>,
     pub undo_context_stack: Vec<UndoContext>, // transient
 }
 
@@ -111,11 +116,17 @@ impl Game {
         let mut players = Vec::new();
         let mut civilizations = civilizations::get_all();
         for i in 0..player_amount {
-            let civilization = rng.range(0, civilizations.len());
+            // exclude barbarians
+            let civilization = rng.range(1, civilizations.len());
             players.push(Player::new(civilizations.remove(civilization), i));
         }
 
         let starting_player = rng.range(0, players.len());
+
+        players.push(Player::new(
+            civilizations::get_civilization(BARBARIANS).expect("civ not found"),
+            players.len(),
+        ));
 
         let mut wonders = wonders::get_all();
         wonders.shuffle(&mut rng);
@@ -126,6 +137,7 @@ impl Game {
         } else {
             Map::new(HashMap::new())
         };
+
         Self {
             state: Playing,
             custom_phase_state: CustomPhaseEventState::new(),
@@ -155,6 +167,7 @@ impl Game {
             dropped_players: Vec::new(),
             wonders_left: wonders,
             wonder_amount_left: wonder_amount,
+            incidents_left: Vec::new(),
             undo_context_stack: Vec::new(),
         }
     }
@@ -191,6 +204,7 @@ impl Game {
                 .map(|wonder| wonders::get_wonder(&wonder))
                 .collect(),
             wonder_amount_left: data.wonder_amount_left,
+            incidents_left: data.incidents_left,
             custom_phase_state: data.state_change_event_state,
             undo_context_stack: Vec::new(),
         };
@@ -228,6 +242,7 @@ impl Game {
                 .map(|wonder| wonder.name)
                 .collect(),
             wonder_amount_left: self.wonder_amount_left,
+            incidents_left: self.incidents_left,
         }
     }
 
@@ -259,6 +274,7 @@ impl Game {
                 .map(|wonder| wonder.name.clone())
                 .collect(),
             wonder_amount_left: self.wonder_amount_left,
+            incidents_left: self.incidents_left.clone(),
         }
     }
 
@@ -302,32 +318,30 @@ impl Game {
 
     pub(crate) fn trigger_custom_phase_event<V>(
         &mut self,
-        player_index: usize,
+        players: &[usize],
         event: fn(&mut PlayerEvents) -> &mut CustomPhaseEvent<V>,
-        event_type: CustomPhaseEventType,
+        event_type: &CustomPhaseEventType,
         details: &V,
     ) -> bool {
-        if self.custom_phase_state.event_used.contains(&event_type) {
-            return false;
-        }
+        let remaining: Vec<_> = players
+            .iter()
+            .filter(|&p| !self.custom_phase_state.players_used.contains(p))
+            .collect();
 
-        let info = CustomPhaseInfo {
-            event_type: event_type.clone(),
-            player: player_index,
-        };
-        self.trigger_event_with_game_value(player_index, event, &info, details);
-
-        let request = self.custom_phase_state.current.is_some();
-        if !request {
-            if event_type.is_last_type_for_event() {
-                self.custom_phase_state = CustomPhaseEventState::new();
-            } else {
-                self.custom_phase_state.event_used.push(event_type);
-                self.custom_phase_state.last_priority_used = None;
-                self.custom_phase_state.current = None;
+        for &player_index in remaining {
+            let info = CustomPhaseInfo {
+                event_type: event_type.clone(),
+                player: player_index,
+            };
+            self.trigger_event_with_game_value(player_index, event, &info, details);
+            if self.custom_phase_state.current.is_some() {
+                return true;
             }
+            self.custom_phase_state.players_used.push(player_index);
+            self.custom_phase_state.last_priority_used = None;
         }
-        request
+        self.custom_phase_state = CustomPhaseEventState::new();
+        false
     }
 
     pub(crate) fn trigger_event_with_game_value<U, V>(
@@ -372,8 +386,13 @@ impl Game {
         for edit in commands.log {
             self.add_info_log_item(&edit);
         }
-        for (unit, pos) in commands.content.gained_units {
-            self.players[player_index].add_unit(pos, unit);
+        for u in commands.content.gained_units {
+            self.players[u.player].add_unit(u.position, u.unit_type);
+        }
+        for city in commands.content.gained_cities {
+            self.players[city.player]
+                .cities
+                .push(City::new(city.player, city.position));
         }
     }
 
@@ -409,7 +428,6 @@ impl Game {
         } else {
             self.execute_regular_action(action, player_index);
         }
-        // player can have changed, but we don't need waste check for turn end
         check_for_waste(self);
 
         self.action_log[self.action_log_index - 1].undo =
@@ -422,15 +440,14 @@ impl Game {
         event_type: &CustomPhaseEventType,
     ) {
         match event_type {
-            CustomPhaseEventType::StartCombatAttacker
-            | CustomPhaseEventType::StartCombatDefender => {
+            CustomPhaseEventType::StartCombat => {
                 if let GameState::Combat(c) = mem::replace(&mut self.state, Playing) {
                     start_combat(self, c);
                 } else {
                     panic!("game should be in combat state")
                 }
             }
-            CustomPhaseEventType::EndCombatAttacker | CustomPhaseEventType::EndCombatDefender => {
+            CustomPhaseEventType::EndCombat => {
                 if let GameState::Combat(c) = mem::replace(&mut self.state, Playing) {
                     combat::end_combat(self, c);
                 } else {
@@ -448,6 +465,9 @@ impl Game {
             }
             CustomPhaseEventType::OnRecruit => {
                 self.on_recruit(player_index);
+            }
+            CustomPhaseEventType::Incident => {
+                self.trigger_incident(player_index);
             }
         }
     }
@@ -760,13 +780,14 @@ impl Game {
         }
     }
 
-    fn undo_commands(&mut self, c: &CommandUndoContext) {
+    fn undo_commands(&mut self, c: &CommandContext) {
         let p = self.current_player_index;
         self.players[p].event_info.clone_from(&c.info);
         self.players[p].lose_resources(c.gained_resources.clone());
-        for (u, _pos) in &c.gained_units {
-            self.undo_recruit_without_activate(p, &[u.clone()], None);
+        for u in &c.gained_units {
+            self.undo_recruit_without_activate(u.player, &[u.unit_type], None);
         }
+        // gained_cities is only for Barbarians
     }
 
     fn move_to_defended_tile(
@@ -959,6 +980,7 @@ impl Game {
     /// # Panics
     /// Panics if the player does not have events
     pub fn next_player(&mut self) {
+        check_for_waste(self);
         self.increment_player_index();
         self.add_info_log_group(format!(
             "It's {}'s turn",
@@ -971,15 +993,15 @@ impl Game {
 
     fn start_turn(&mut self) {
         self.trigger_custom_phase_event(
-            self.current_player_index,
+            &[self.current_player_index],
             |e| &mut e.on_turn_start,
-            CustomPhaseEventType::TurnStart,
+            &CustomPhaseEventType::TurnStart,
             &(),
         );
     }
 
     pub fn skip_dropped_players(&mut self) {
-        if self.players.is_empty() {
+        if self.human_players().is_empty() {
             return;
         }
         while self.dropped_players.contains(&self.current_player_index)
@@ -990,8 +1012,9 @@ impl Game {
     }
 
     pub fn increment_player_index(&mut self) {
+        // Barbarians have the highest player index
         self.current_player_index += 1;
-        self.current_player_index %= self.players.len();
+        self.current_player_index %= self.human_players().len();
     }
 
     #[must_use]
@@ -1007,6 +1030,21 @@ impl Game {
             },
             _ => self.current_player_index,
         }
+    }
+
+    #[must_use]
+    pub fn human_players(&self) -> Vec<usize> {
+        self.players
+            .iter()
+            .enumerate()
+            .filter_map(|(i, p)| {
+                if p.civilization.is_human() {
+                    Some(i)
+                } else {
+                    None
+                }
+            })
+            .collect()
     }
 
     pub fn next_turn(&mut self) {
@@ -1032,7 +1070,12 @@ impl Game {
     }
 
     fn enter_status_phase(&mut self) {
-        if self.players.iter().any(|player| player.cities.is_empty()) {
+        if self
+            .players
+            .iter()
+            .filter(|player| player.is_human())
+            .any(|player| player.cities.is_empty())
+        {
             self.end_game();
         }
         self.add_info_log_group(format!(
@@ -1151,10 +1194,20 @@ impl Game {
             .available_leaders
             .retain(|name| name != &leader_name);
         Player::with_leader(&leader_name, self, player_index, |game, leader| {
-            (leader.player_initializer)(game, player_index);
-            (leader.player_one_time_initializer)(game, player_index);
+            (leader.listeners.initializer)(game, player_index);
+            (leader.listeners.one_time_initializer)(game, player_index);
         });
         self.players[player_index].active_leader = Some(leader_name);
+    }
+
+    pub(crate) fn advance_with_incident_token(
+        &mut self,
+        advance: &str,
+        player_index: usize,
+        payment: ResourcePile,
+    ) {
+        self.advance(advance, player_index);
+        self.on_advance(player_index, payment, advance);
     }
 
     ///
@@ -1162,11 +1215,11 @@ impl Game {
     /// # Panics
     ///
     /// Panics if advance does not exist
-    pub fn advance(&mut self, advance: &str, player_index: usize, payment: ResourcePile) {
+    pub fn advance(&mut self, advance: &str, player_index: usize) {
         self.trigger_command_event(player_index, |e| &mut e.on_advance, &advance.to_string());
         let advance = advances::get_advance(advance);
-        (advance.player_initializer)(self, player_index);
-        (advance.player_one_time_initializer)(self, player_index);
+        (advance.listeners.initializer)(self, player_index);
+        (advance.listeners.one_time_initializer)(self, player_index);
         let name = advance.name.clone();
         for i in 0..self.players[player_index]
             .civilization
@@ -1194,15 +1247,13 @@ impl Game {
         }
         let player = &mut self.players[player_index];
         player.advances.push(advance);
-
-        self.on_advance(player_index, payment, &name);
     }
 
     pub(crate) fn on_advance(&mut self, player_index: usize, payment: ResourcePile, advance: &str) {
         if self.trigger_custom_phase_event(
-            player_index,
+            &[player_index],
             |e| &mut e.on_advance_custom_phase,
-            CustomPhaseEventType::OnAdvance,
+            &CustomPhaseEventType::OnAdvance,
             &AdvanceInfo {
                 name: advance.to_string(),
                 payment,
@@ -1211,10 +1262,10 @@ impl Game {
             return;
         }
         let player = &mut self.players[player_index];
-        player.game_event_tokens -= 1;
-        if player.game_event_tokens == 0 {
-            player.game_event_tokens = 3;
-            self.trigger_game_event(player_index);
+        player.incident_tokens -= 1;
+        if player.incident_tokens == 0 {
+            player.incident_tokens = 3;
+            self.trigger_incident(player_index);
         }
     }
 
@@ -1226,7 +1277,7 @@ impl Game {
     ) {
         self.remove_advance(advance, player_index);
         if !was_custom_phase {
-            self.players[player_index].game_event_tokens += 1;
+            self.players[player_index].incident_tokens += 1;
         }
     }
 
@@ -1253,7 +1304,7 @@ impl Game {
                     self,
                     player_index,
                     |game, previous_leader| {
-                        (previous_leader.player_deinitializer)(game, player_index);
+                        (previous_leader.listeners.deinitializer)(game, player_index);
                     },
                 );
                 replaced_leader = Some(previous_leader);
@@ -1313,9 +1364,9 @@ impl Game {
         };
 
         if self.trigger_custom_phase_event(
-            player_index,
+            &[player_index],
             |events| &mut events.on_recruit,
-            CustomPhaseEventType::OnRecruit,
+            &CustomPhaseEventType::OnRecruit,
             &r,
         ) {
             return;
@@ -1385,8 +1436,8 @@ impl Game {
                     self,
                     player_index,
                     |game, replaced_leader| {
-                        (replaced_leader.player_initializer)(game, player_index);
-                        (replaced_leader.player_one_time_initializer)(game, player_index);
+                        (replaced_leader.listeners.initializer)(game, player_index);
+                        (replaced_leader.listeners.one_time_initializer)(game, player_index);
                     },
                 );
             }
@@ -1409,8 +1460,8 @@ impl Game {
                 self,
                 player_index,
                 |game, current_leader| {
-                    (current_leader.player_deinitializer)(game, player_index);
-                    (current_leader.player_undo_deinitializer)(game, player_index);
+                    (current_leader.listeners.deinitializer)(game, player_index);
+                    (current_leader.listeners.undo_deinitializer)(game, player_index);
                 },
             );
 
@@ -1431,9 +1482,45 @@ impl Game {
         }
     }
 
-    fn trigger_game_event(&mut self, _player_index: usize) {
+    fn trigger_incident(&mut self, player_index: usize) {
         self.lock_undo();
-        //todo
+
+        if self.incidents_left.is_empty() {
+            self.incidents_left = incidents::get_all().iter().map(|i| i.id).collect_vec();
+            self.incidents_left.shuffle(&mut self.rng);
+        }
+
+        let id = *self.incidents_left.first().expect("incident should exist");
+        for p in &self.human_players() {
+            (incidents::get_incident(id).listeners.initializer)(self, *p);
+        }
+
+        let i = self
+            .human_players()
+            .iter()
+            .position(|&p| p == player_index)
+            .expect("player should exist");
+        let mut players: Vec<_> = self.human_players();
+        players.rotate_left(i);
+
+        self.trigger_custom_phase_event(
+            &players,
+            |events| &mut events.on_incident,
+            &CustomPhaseEventType::Incident,
+            &IncidentInfo::new(player_index),
+        );
+
+        for p in &players {
+            (incidents::get_incident(id).listeners.deinitializer)(self, *p);
+        }
+
+        if self.custom_phase_state.is_empty() {
+            self.incidents_left.remove(0);
+
+            if matches!(self.state, GameState::StatusPhase(_)) {
+                StatusPhaseAction::action_done(self);
+            }
+        }
     }
 
     ///
@@ -1442,8 +1529,8 @@ impl Game {
     ///
     /// Panics if advance does not exist
     pub fn remove_advance(&mut self, advance: &Advance, player_index: usize) {
-        (advance.player_deinitializer)(self, player_index);
-        (advance.player_undo_deinitializer)(self, player_index);
+        (advance.listeners.deinitializer)(self, player_index);
+        (advance.listeners.undo_deinitializer)(self, player_index);
 
         for i in 0..self.players[player_index]
             .civilization
@@ -1473,8 +1560,8 @@ impl Game {
     }
 
     fn unlock_special_advance(&mut self, special_advance: &SpecialAdvance, player_index: usize) {
-        (special_advance.player_initializer)(self, player_index);
-        (special_advance.player_one_time_initializer)(self, player_index);
+        (special_advance.listeners.initializer)(self, player_index);
+        (special_advance.listeners.one_time_initializer)(self, player_index);
         self.players[player_index]
             .unlocked_special_advances
             .push(special_advance.name.clone());
@@ -1485,8 +1572,8 @@ impl Game {
         special_advance: &SpecialAdvance,
         player_index: usize,
     ) {
-        (special_advance.player_deinitializer)(self, player_index);
-        (special_advance.player_undo_deinitializer)(self, player_index);
+        (special_advance.listeners.deinitializer)(self, player_index);
+        (special_advance.listeners.undo_deinitializer)(self, player_index);
         self.players[player_index].unlocked_special_advances.pop();
     }
 
@@ -1517,8 +1604,8 @@ impl Game {
 
         if take_over {
             for wonder in &city.pieces.wonders {
-                (wonder.player_deinitializer)(self, old_player_index);
-                (wonder.player_initializer)(self, new_player_index);
+                (wonder.listeners.deinitializer)(self, old_player_index);
+                (wonder.listeners.initializer)(self, new_player_index);
             }
             city.player_index = new_player_index;
             city.mood_state = Angry;
@@ -1593,8 +1680,8 @@ impl Game {
             &wonder,
         );
         let wonder = wonder;
-        (wonder.player_initializer)(self, player_index);
-        (wonder.player_one_time_initializer)(self, player_index);
+        (wonder.listeners.initializer)(self, player_index);
+        (wonder.listeners.one_time_initializer)(self, player_index);
         let player = &mut self.players[player_index];
         player.wonders_build.push(wonder.name.clone());
         player
@@ -1620,8 +1707,8 @@ impl Game {
             .wonders
             .pop()
             .expect("city should have a wonder");
-        (wonder.player_deinitializer)(self, player_index);
-        (wonder.player_undo_deinitializer)(self, player_index);
+        (wonder.listeners.deinitializer)(self, player_index);
+        (wonder.listeners.undo_deinitializer)(self, player_index);
         wonder
     }
 
@@ -1848,7 +1935,7 @@ impl Game {
                 .take()
                 .expect("A player should have an active leader when having a leader unit");
             Player::with_leader(&leader, self, player_index, |game, leader| {
-                (leader.player_deinitializer)(game, player_index);
+                (leader.listeners.deinitializer)(game, player_index);
             });
             self.players[killer].captured_leaders.push(leader);
         }
@@ -1893,6 +1980,9 @@ pub struct GameData {
     dropped_players: Vec<usize>,
     wonders_left: Vec<String>,
     wonder_amount_left: usize,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    incidents_left: Vec<u8>,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -2005,7 +2095,38 @@ pub struct DisembarkUndoContext {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
-pub struct CommandUndoContext {
+pub struct GainUnitContext {
+    unit_type: UnitType,
+    position: Position,
+    player: usize,
+}
+
+impl GainUnitContext {
+    #[must_use]
+    pub fn new(unit_type: UnitType, position: Position, player: usize) -> Self {
+        Self {
+            unit_type,
+            position,
+            player,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+pub struct GainCityContext {
+    position: Position,
+    player: usize,
+}
+
+impl GainCityContext {
+    #[must_use]
+    pub fn new(position: Position, player: usize) -> Self {
+        Self { position, player }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+pub struct CommandContext {
     #[serde(default)]
     #[serde(skip_serializing_if = "HashMap::is_empty")]
     pub info: HashMap<String, String>,
@@ -2014,16 +2135,20 @@ pub struct CommandUndoContext {
     pub gained_resources: ResourcePile,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub gained_units: Vec<(UnitType, Position)>,
+    pub gained_units: Vec<GainUnitContext>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub gained_cities: Vec<GainCityContext>,
 }
 
-impl CommandUndoContext {
+impl CommandContext {
     #[must_use]
     pub fn new(info: HashMap<String, String>) -> Self {
         Self {
             info,
             gained_resources: ResourcePile::empty(),
             gained_units: Vec::new(),
+            gained_cities: Vec::new(),
         }
     }
 }
@@ -2043,7 +2168,7 @@ impl CommandUndoInfo {
         }
     }
 
-    pub fn apply(&self, game: &mut Game, mut undo: CommandUndoContext) {
+    pub fn apply(&self, game: &mut Game, mut undo: CommandContext) {
         let player = &mut game.players[self.player];
         for (k, v) in undo.info.clone() {
             player.event_info.insert(k, v);
@@ -2052,6 +2177,7 @@ impl CommandUndoInfo {
         if undo.info != self.info
             || !undo.gained_resources.is_empty()
             || !undo.gained_units.is_empty()
+            || !undo.gained_cities.is_empty()
         {
             undo.info.clone_from(&self.info);
             game.push_undo_context(UndoContext::Command(undo));
@@ -2094,7 +2220,7 @@ pub enum UndoContext {
         roll_boost_cost: ResourcePile,
     },
     CustomPhaseEvent(CustomPhaseEventState),
-    Command(CommandUndoContext),
+    Command(CommandContext),
 }
 
 #[derive(Serialize, Deserialize)]
@@ -2160,6 +2286,7 @@ pub mod tests {
             dropped_players: Vec::new(),
             wonders_left: Vec::new(),
             wonder_amount_left: 0,
+            incidents_left: Vec::new(),
             undo_context_stack: Vec::new(),
         }
     }

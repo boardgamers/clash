@@ -116,7 +116,7 @@
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 1,
+      "incident_tokens": 1,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -176,7 +176,7 @@
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 3,
+      "incident_tokens": 3,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -253,20 +253,22 @@
         {
           "Command": {
             "gained_units": [
-              [
-                "Infantry",
-                "C2"
-              ]
+              {
+                "unit_type": "Infantry",
+                "position": "C2",
+                "player": 1
+              }
             ]
           }
         },
         {
           "Command": {
             "gained_units": [
-              [
-                "Settler",
-                "C2"
-              ]
+              {
+                "unit_type": "Settler",
+                "position": "C2",
+                "player": 1
+              }
             ]
           }
         },

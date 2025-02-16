@@ -63,7 +63,8 @@ impl Map {
 
     #[must_use]
     pub fn random_map(players: &mut [Player], rng: &mut Rng) -> Self {
-        let setup = get_map_setup(players.len());
+        // exclude barbarians
+        let setup = get_map_setup(players.len() - 1);
 
         let blocks = &mut BLOCKS.to_vec();
         blocks.shuffle(rng);

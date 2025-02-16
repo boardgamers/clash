@@ -42,6 +42,12 @@ use std::{
     mem,
 };
 
+#[derive(Serialize, Deserialize, PartialEq, Eq)]
+pub enum PlayerType {
+    Human,
+    Barbarian,
+}
+
 pub struct Player {
     name: Option<String>,
     pub index: usize,
@@ -58,7 +64,7 @@ pub struct Player {
     pub advances: Vec<Advance>,
     pub unlocked_special_advances: Vec<String>,
     pub wonders_build: Vec<String>,
-    pub game_event_tokens: u8,
+    pub incident_tokens: u8,
     pub completed_objectives: Vec<String>,
     pub captured_leaders: Vec<String>,
     pub event_victory_points: f32,
@@ -102,7 +108,7 @@ impl PartialEq for Player {
             && self.advances == other.advances
             && self.unlocked_special_advances == other.unlocked_special_advances
             && self.wonders_build == other.wonders_build
-            && self.game_event_tokens == other.game_event_tokens
+            && self.incident_tokens == other.incident_tokens
             && self.completed_objectives == other.completed_objectives
             && self.captured_leaders == other.captured_leaders
             && self.event_victory_points == other.event_victory_points
@@ -127,11 +133,11 @@ impl Player {
         game.players.push(player);
         let builtin = builtin::get_all();
         for b in builtin {
-            (b.player_initializer)(game, player_index);
+            (b.listeners.initializer)(game, player_index);
         }
         let advances = mem::take(&mut game.players[player_index].advances);
         for advance in &advances {
-            (advance.player_initializer)(game, player_index);
+            (advance.listeners.initializer)(game, player_index);
             for i in 0..game.players[player_index]
                 .civilization
                 .special_advances
@@ -144,7 +150,7 @@ impl Player {
                         .civilization
                         .special_advances
                         .remove(i);
-                    (special_advance.player_initializer)(game, player_index);
+                    (special_advance.listeners.initializer)(game, player_index);
                     game.players[player_index]
                         .civilization
                         .special_advances
@@ -155,13 +161,13 @@ impl Player {
         }
         if let Some(leader) = leader {
             Self::with_leader(&leader, game, player_index, |game, leader| {
-                (leader.player_initializer)(game, player_index);
+                (leader.listeners.initializer)(game, player_index);
             });
         }
         let mut cities = mem::take(&mut game.players[player_index].cities);
         for city in &mut cities {
             for wonder in &city.pieces.wonders {
-                (wonder.player_initializer)(game, player_index);
+                (wonder.listeners.initializer)(game, player_index);
             }
         }
         game.players[player_index].cities = cities;
@@ -197,14 +203,14 @@ impl Player {
                 .map(|d| City::from_data(d, data.id))
                 .collect(),
             units,
-            civilization: civilizations::get_civilization_by_name(&data.civilization)
+            civilization: civilizations::get_civilization(&data.civilization)
                 .expect("player data should have a valid civilization"),
             active_leader: data.active_leader,
             available_leaders: data.available_leaders,
             advances: data.advances.iter().map(|a| get_advance(a)).collect(),
             unlocked_special_advances: data.unlocked_special_advance,
             wonders_build: data.wonders_build,
-            game_event_tokens: data.game_event_tokens,
+            incident_tokens: data.incident_tokens,
             completed_objectives: data.completed_objectives,
             captured_leaders: data.captured_leaders,
             event_victory_points: data.event_victory_points,
@@ -244,7 +250,7 @@ impl Player {
             advances: self.advances.into_iter().map(|a| a.name).sorted().collect(),
             unlocked_special_advance: self.unlocked_special_advances,
             wonders_build: self.wonders_build,
-            game_event_tokens: self.game_event_tokens,
+            incident_tokens: self.incident_tokens,
             completed_objectives: self.completed_objectives,
             captured_leaders: self.captured_leaders,
             event_victory_points: self.event_victory_points,
@@ -286,7 +292,7 @@ impl Player {
                 .collect(),
             unlocked_special_advance: self.unlocked_special_advances.clone(),
             wonders_build: self.wonders_build.clone(),
-            game_event_tokens: self.game_event_tokens,
+            incident_tokens: self.incident_tokens,
             completed_objectives: self.completed_objectives.clone(),
             captured_leaders: self.captured_leaders.clone(),
             event_victory_points: self.event_victory_points,
@@ -327,7 +333,7 @@ impl Player {
                 advances::get_advance("Mining"),
             ],
             unlocked_special_advances: Vec::new(),
-            game_event_tokens: 3,
+            incident_tokens: 3,
             completed_objectives: Vec::new(),
             captured_leaders: Vec::new(),
             event_victory_points: 0.0,
@@ -400,9 +406,13 @@ impl Player {
 
     #[must_use]
     pub fn get_name(&self) -> String {
-        self.name
-            .clone()
-            .unwrap_or(format!("Player{}", self.index + 1))
+        if self.is_human() {
+            self.name
+                .clone()
+                .unwrap_or(format!("Player{}", self.index + 1))
+        } else {
+            self.civilization.name.clone()
+        }
     }
 
     /// Returns the government of this [`Player`].
@@ -537,6 +547,11 @@ impl Player {
     }
 
     #[must_use]
+    pub fn is_human(&self) -> bool {
+        self.civilization.is_human()
+    }
+
+    #[must_use]
     pub fn available_units(&self) -> Units {
         let mut units = UNIT_LIMIT.clone();
         for u in &self.units {
@@ -550,8 +565,8 @@ impl Player {
     }
 
     #[must_use]
-    pub fn game_event_tokens(&self) -> u8 {
-        self.game_event_tokens
+    pub fn incident_tokens(&self) -> u8 {
+        self.incident_tokens
     }
 
     pub fn strip_secret(&mut self) {
@@ -715,9 +730,6 @@ impl Player {
         if let Some(port_position) = port_position {
             city.port_position = Some(port_position);
         }
-        if matches!(building, Academy) {
-            self.gain_resources(ResourcePile::ideas(2));
-        }
     }
 
     ///
@@ -766,7 +778,6 @@ impl Player {
                 self.get_unit(*id)
                     .expect("player should have units to be replaced")
                     .unit_type
-                    .clone()
             })
             .collect();
         if require_replace != replaced_units {
@@ -1098,7 +1109,7 @@ pub struct PlayerData {
     advances: Vec<String>,
     unlocked_special_advance: Vec<String>,
     wonders_build: Vec<String>,
-    game_event_tokens: u8,
+    incident_tokens: u8,
     completed_objectives: Vec<String>,
     captured_leaders: Vec<String>,
     event_victory_points: f32,
