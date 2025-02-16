@@ -305,7 +305,7 @@ impl PlayingAction {
                 player.undo_construct(c.city_piece, c.city_position);
                 player.gain_resources_in_undo(c.payment);
             }
-            Collect(c) => undo_collect(game, player_index, c),
+            Collect(c) => undo_collect(game, player_index, &c),
             Recruit(r) => {
                 game.players[player_index].gain_resources_in_undo(r.payment);
                 game.undo_recruit(

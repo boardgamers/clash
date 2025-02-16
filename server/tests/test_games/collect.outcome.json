@@ -237,6 +237,14 @@
         {
           "Command": {
             "gained_resources": {
+              "wood": 1,
+              "ore": 1
+            }
+          }
+        },
+        {
+          "Command": {
+            "gained_resources": {
               "ideas": 1
             }
           }

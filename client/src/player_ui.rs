@@ -254,7 +254,6 @@ fn move_state(state: &GameState) -> Option<&MoveState> {
         GameState::Combat(c) => move_state(&c.initiation),
         GameState::ExploreResolution(r) => Some(&r.move_state),
         GameState::Movement(m) => Some(m),
-        GameState::PlaceSettler(p) => Some(&p.move_state),
         _ => None,
     }
 }

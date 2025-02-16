@@ -1,11 +1,48 @@
 {
   "state": {
-    "PlaceSettler": {
-      "player_index": 1,
-      "movement_actions_left": 2,
-      "moved_units": [
+    "Combat": {
+      "initiation": {
+        "Movement": {
+          "movement_actions_left": 2,
+          "moved_units": [
+            10
+          ]
+        }
+      },
+      "round": 1,
+      "phase": "Retreat",
+      "defender": 1,
+      "defender_position": "B1",
+      "attacker": 0,
+      "attacker_position": "A1",
+      "attackers": [
         10
-      ]
+      ],
+      "can_retreat": true,
+      "result": "AttackerWins"
+    }
+  },
+  "state_change_event_state": {
+    "event_used": [
+      "EndCombatAttacker"
+    ],
+    "last_priority_used": 0,
+    "current": {
+      "event_type": "EndCombatDefender",
+      "priority": 0,
+      "player_index": 1,
+      "request": {
+        "SelectPosition": {
+          "choices": [
+            "C1",
+            "B2"
+          ]
+        }
+      },
+      "response": null,
+      "origin": {
+        "Builtin": "Place Settler"
+      }
     }
   },
   "players": [

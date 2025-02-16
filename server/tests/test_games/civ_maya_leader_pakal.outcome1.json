@@ -1,10 +1,9 @@
 {
   "state": {
     "Movement": {
-      "movement_actions_left": 1,
+      "movement_actions_left": 2,
       "moved_units": [
-        1,
-        2
+        10
       ]
     }
   },
@@ -13,16 +12,16 @@
       "name": null,
       "id": 0,
       "resources": {
-        "food": 2,
-        "wood": 7,
-        "ore": 7,
-        "ideas": 5,
+        "food": 7,
+        "wood": 5,
+        "ore": 5,
+        "ideas": 3,
         "gold": 7,
         "mood_tokens": 9,
-        "culture_tokens": 10
+        "culture_tokens": 9
       },
       "resource_limit": {
-        "food": 2,
+        "food": 7,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -34,7 +33,7 @@
             "market": 1
           },
           "mood_state": "Happy",
-          "activations": 0,
+          "activations": 1,
           "angry_activation": false,
           "position": "A1"
         },
@@ -44,22 +43,10 @@
             "port": 1
           },
           "mood_state": "Angry",
-          "activations": 4,
-          "angry_activation": false,
+          "activations": 6,
+          "angry_activation": true,
           "position": "C2",
           "port_position": "C3"
-        },
-        {
-          "city_pieces": {
-            "obelisk": 1,
-            "observatory": 1,
-            "fortress": 1,
-            "temple": 1
-          },
-          "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "B1"
         },
         {
           "city_pieces": {},
@@ -70,13 +57,15 @@
         },
         {
           "city_pieces": {
-            "port": 0
+            "obelisk": 1,
+            "observatory": 0,
+            "fortress": 0,
+            "temple": 0
           },
           "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
-          "position": "B2",
-          "port_position": "C3"
+          "position": "B1"
         }
       ],
       "units": [
@@ -84,6 +73,16 @@
           "position": "C2",
           "unit_type": "Infantry",
           "id": 0
+        },
+        {
+          "position": "C3",
+          "unit_type": "Cavalry",
+          "id": 1
+        },
+        {
+          "position": "C3",
+          "unit_type": "Elephant",
+          "id": 2
         },
         {
           "position": "B3",
@@ -108,62 +107,59 @@
         {
           "position": "C3",
           "unit_type": "Ship",
-          "id": 7,
-          "carried_units": [
-            {
-              "unit_type": "Elephant",
-              "movement_restrictions": [
-                "Battle"
-              ],
-              "id": 2
-            }
-          ]
+          "id": 7
         },
         {
           "position": "C3",
           "unit_type": "Ship",
-          "id": 8,
-          "carried_units": [
-            {
-              "unit_type": "Cavalry",
-              "movement_restrictions": [
-                "Battle"
-              ],
-              "id": 1
-            }
-          ]
+          "id": 8
+        },
+        {
+          "position": "C3",
+          "unit_type": "Ship",
+          "id": 9
+        },
+        {
+          "position": "A1",
+          "unit_type": "Leader",
+          "movement_restrictions": [
+            "Battle",
+            "Mountain"
+          ],
+          "id": 10
         }
       ],
-      "civilization": "test1",
-      "active_leader": null,
+      "civilization": "Maya",
+      "active_leader": "Kʼinich Janaab Pakal I",
       "available_leaders": [],
       "advances": [
         "Farming",
         "Free Economy",
         "Mining",
+        "Storage",
         "Tactics",
         "Voting"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 3,
+      "game_event_tokens": 2,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [
-        "Pyramids"
+        "Great Gardens"
       ],
-      "next_unit_id": 9
+      "next_unit_id": 11
     },
     {
       "name": null,
       "id": 1,
       "resources": {
         "food": 2,
-        "wood": 7,
-        "ore": 7,
-        "ideas": 7,
-        "gold": 7,
+        "wood": 5,
+        "ore": 5,
+        "ideas": 5,
+        "gold": 5,
         "mood_tokens": 9,
         "culture_tokens": 9
       },
@@ -181,6 +177,16 @@
           "activations": 2,
           "angry_activation": false,
           "position": "C1"
+        },
+        {
+          "city_pieces": {
+            "port": 1
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B2",
+          "port_position": "C3"
         }
       ],
       "units": [
@@ -193,11 +199,19 @@
           "position": "C1",
           "unit_type": "Infantry",
           "id": 1
+        },
+        {
+          "position": "B2",
+          "unit_type": "Settler",
+          "id": 2
         }
       ],
       "civilization": "test0",
       "active_leader": null,
-      "available_leaders": [],
+      "available_leaders": [
+        "Alexander",
+        "Kleopatra"
+      ],
       "advances": [
         "Farming",
         "Mining"
@@ -209,7 +223,7 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "next_unit_id": 2
+      "next_unit_id": 3
     }
   ],
   "map": {
@@ -249,6 +263,14 @@
         "Fertile"
       ],
       [
+        "B5",
+        "Fertile"
+      ],
+      [
+        "B6",
+        "Fertile"
+      ],
+      [
         "C1",
         "Barren"
       ],
@@ -275,6 +297,10 @@
       [
         "D2",
         "Water"
+      ],
+      [
+        "E2",
+        "Fertile"
       ]
     ]
   },
@@ -286,50 +312,87 @@
         "Movement": {
           "Move": {
             "units": [
-              1,
-              2
+              10
             ],
-            "destination": "B2"
+            "destination": "B1"
           }
         }
       },
       "undo": [
         {
-          "Movement": {
-            "starting_position": "C3",
-            "movement_actions_left": 2,
-            "disembarked_units": [
-              {
-                "unit_id": 1,
-                "carrier_id": 8
-              },
-              {
-                "unit_id": 2,
-                "carrier_id": 7
-              }
-            ]
-          }
-        },
-        {
           "WastedResources": {
             "resources": {
-              "gold": 2
+              "gold": 3
             },
             "player_index": 0
           }
         }
       ]
+    },
+    {
+      "action": {
+        "CustomPhaseEvent": {
+          "SelectPosition": "B2"
+        }
+      },
+      "undo": [
+        {
+          "CustomPhaseEvent": {
+            "event_used": [
+              "EndCombatAttacker"
+            ],
+            "last_priority_used": 0,
+            "current": {
+              "event_type": "EndCombatDefender",
+              "priority": 0,
+              "player_index": 1,
+              "request": {
+                "SelectPosition": {
+                  "choices": [
+                    "C1",
+                    "B2"
+                  ]
+                }
+              },
+              "response": null,
+              "origin": {
+                "Builtin": "Place Settler"
+              }
+            }
+          }
+        },
+        {
+          "Command": {
+            "gained_units": [
+              [
+                "Settler",
+                "B2"
+              ]
+            ]
+          }
+        }
+      ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
-      "Player1 disembarked 1 cavalry and 1 elephant from C3 to B2 and captured Player2's city at B2",
-      "Player1 Could not store 2 gold"
+      "Player1 marched a leader from A1 to B1"
+    ],
+    [
+      "Combat round 1",
+      "Player1 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against defending units.",
+      "Player2 rolled no dice for combined combat value of 0 and gets 0 hits against attacking units.",
+      "Player1 used the following combat modifiers: Kʼinich Janaab Pakal I ignores the first hit in a battle with an Obelisk",
+      "Player1 killed all defending units and captured Player2's city at B1",
+      "Player1 Could not store 3 gold"
+    ],
+    [
+      "Player2 gained 1 free Settler Unit at B2 for losing a city"
     ]
   ],
-  "undo_limit": 1,
-  "actions_left": 2,
+  "undo_limit": 2,
+  "actions_left": 0,
   "successful_cultural_influence": false,
   "round": 6,
   "age": 1,
@@ -345,11 +408,17 @@
     10,
     10,
     10,
-    10,
     10
   ],
-  "dice_roll_log": [],
+  "rng": {
+    "seed": 46312381643103681595563341886777350953
+  },
+  "dice_roll_log": [
+    10
+  ],
   "dropped_players": [],
-  "wonders_left": [],
-  "wonder_amount_left": 1
+  "wonders_left": [
+    "Pyramids"
+  ],
+  "wonder_amount_left": 2
 }

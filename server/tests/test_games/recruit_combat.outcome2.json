@@ -1,41 +1,5 @@
 {
   "state": "Playing",
-  "state_change_event_state": {
-    "event_used": [],
-    "last_priority_used": 1,
-    "current": {
-      "event_type": "OnRecruit",
-      "priority": 1,
-      "player_index": 0,
-      "request": {
-        "ResourceReward": {
-          "reward": {
-            "default": {
-              "mood_tokens": 1
-            },
-            "conversions": [
-              {
-                "from": [
-                  {
-                    "mood_tokens": 1
-                  }
-                ],
-                "to": {
-                  "culture_tokens": 1
-                },
-                "type": "Unlimited"
-              }
-            ]
-          },
-          "name": "Select token to gain"
-        }
-      },
-      "response": null,
-      "origin": {
-        "Advance": "Nationalism"
-      }
-    }
-  },
   "players": [
     {
       "name": null,
@@ -45,8 +9,8 @@
         "wood": 5,
         "ore": 6,
         "ideas": 5,
-        "gold": 6,
-        "mood_tokens": 7,
+        "gold": 7,
+        "mood_tokens": 8,
         "culture_tokens": 7
       },
       "resource_limit": {
@@ -117,11 +81,6 @@
           "position": "C2",
           "unit_type": "Settler",
           "id": 7
-        },
-        {
-          "position": "C3",
-          "unit_type": "Ship",
-          "id": 8
         }
       ],
       "civilization": "test0",
@@ -178,11 +137,6 @@
           "position": "C1",
           "unit_type": "Infantry",
           "id": 0
-        },
-        {
-          "position": "C3",
-          "unit_type": "Ship",
-          "id": 1
         }
       ],
       "civilization": "test1",
@@ -271,15 +225,125 @@
           "Recruit": {}
         }
       ]
+    },
+    {
+      "action": {
+        "CustomPhaseEvent": {
+          "ResourceReward": {
+            "mood_tokens": 1
+          }
+        }
+      },
+      "undo": [
+        {
+          "CustomPhaseEvent": {
+            "event_used": [],
+            "last_priority_used": 1,
+            "current": {
+              "event_type": "OnRecruit",
+              "priority": 1,
+              "player_index": 0,
+              "request": {
+                "ResourceReward": {
+                  "reward": {
+                    "default": {
+                      "mood_tokens": 1
+                    },
+                    "conversions": [
+                      {
+                        "from": [
+                          {
+                            "mood_tokens": 1
+                          }
+                        ],
+                        "to": {
+                          "culture_tokens": 1
+                        },
+                        "type": "Unlimited"
+                      }
+                    ]
+                  },
+                  "name": "Select token to gain"
+                }
+              },
+              "response": null,
+              "origin": {
+                "Advance": "Nationalism"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "action": {
+        "CustomPhaseEvent": {
+          "ResourceReward": {
+            "gold": 1
+          }
+        }
+      },
+      "undo": [
+        {
+          "CustomPhaseEvent": {
+            "event_used": [],
+            "last_priority_used": 0,
+            "current": {
+              "event_type": "OnRecruit",
+              "priority": 0,
+              "player_index": 0,
+              "request": {
+                "ResourceReward": {
+                  "reward": {
+                    "default": {
+                      "wood": 1
+                    },
+                    "conversions": [
+                      {
+                        "from": [
+                          {
+                            "wood": 1
+                          }
+                        ],
+                        "to": {
+                          "gold": 1
+                        },
+                        "type": "Unlimited"
+                      }
+                    ]
+                  },
+                  "name": "Select resource to gain back"
+                }
+              },
+              "response": null,
+              "origin": {
+                "Advance": "Medicine"
+              }
+            }
+          }
+        }
+      ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 3,
   "log": [
     [
       "Player1 paid 1 wood and 1 gold to recruit 1 ship in the city at C2 making it Angry"
+    ],
+    [
+      "Player1 selected 1 mood token for Nationalism Advance"
+    ],
+    [
+      "Player1 selected 1 gold for Medicine Advance"
+    ],
+    [
+      "Combat round 1",
+      "Player1 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against defending units.",
+      "Player2 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units.",
+      "All attacking and defending units where eliminated, ending the battle in a draw"
     ]
   ],
-  "undo_limit": 0,
+  "undo_limit": 3,
   "actions_left": 0,
   "successful_cultural_influence": false,
   "round": 1,
@@ -295,11 +359,12 @@
     10,
     10,
     10,
-    10,
+    10
+  ],
+  "dice_roll_log": [
     10,
     10
   ],
-  "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [
     "Pyramids"

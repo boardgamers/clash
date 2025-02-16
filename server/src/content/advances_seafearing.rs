@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::city_pieces::Building::Port;
-use crate::collect::{CollectContext, CollectOptionsInfo};
+use crate::collect::{CollectContext, CollectInfo};
 use crate::content::advances::{advance_group_builder, AdvanceGroup, NAVIGATION};
 use crate::game::Game;
 use crate::resource_pile::ResourcePile;
@@ -11,20 +11,23 @@ use std::collections::HashSet;
 pub(crate) fn seafaring() -> AdvanceGroup {
     advance_group_builder(
         "Seafaring",
-        vec![
-            Advance::builder("Fishing", "Your cities may Collect food from one Sea space")
-                .add_player_event_listener(|event| &mut event.collect_options, fishing_collect, 0)
-                .with_advance_bonus(MoodToken)
-                .with_unlocked_building(Port),
-            Advance::builder(
-                NAVIGATION,
-                "Ships may leave the map and return at the next sea space",
-            )
-            .with_advance_bonus(CultureToken),
-            war_ships(),
-            cartography(),
-        ],
+        vec![fishing(), navigation(), war_ships(), cartography()],
     )
+}
+
+fn fishing() -> AdvanceBuilder {
+    Advance::builder("Fishing", "Your cities may Collect food from one Sea space")
+        .add_player_event_listener(|event| &mut event.collect_options, fishing_collect, 0)
+        .with_advance_bonus(MoodToken)
+        .with_unlocked_building(Port)
+}
+
+fn navigation() -> AdvanceBuilder {
+    Advance::builder(
+        NAVIGATION,
+        "Ships may leave the map and return at the next sea space",
+    )
+    .with_advance_bonus(CultureToken)
 }
 
 fn war_ships() -> AdvanceBuilder {
@@ -55,7 +58,7 @@ fn cartography() -> AdvanceBuilder {
             |player, g, i| {
                 // info is the action that we last used this ability for
                 let key = g.actions_left.to_string();
-                if player.info.get("Cartography").is_some_and(|info| info == &key) {
+                if player.content.info.get("Cartography").is_some_and(|info| info == &key) {
                     return;
                 }
                 let mut ship = false;
@@ -70,7 +73,7 @@ fn cartography() -> AdvanceBuilder {
                     }
                 }
                 if ship {
-                    player.info.insert("Cartography".to_string(), key);
+                    player.content.info.insert("Cartography".to_string(), key);
                     player.gain_resources(ResourcePile::ideas(1));
                     player.add_info_log_item("Cartography gained 1 idea");
                     if navigation {
@@ -83,7 +86,7 @@ fn cartography() -> AdvanceBuilder {
         )
 }
 
-fn fishing_collect(i: &mut CollectOptionsInfo, c: &CollectContext, game: &Game) {
+fn fishing_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
     let city = game
         .get_any_city(c.city_position)
         .expect("city should exist");

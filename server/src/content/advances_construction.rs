@@ -11,14 +11,12 @@ use crate::unit::UnitType;
 pub(crate) fn construction() -> AdvanceGroup {
     advance_group_builder(
         "Construction",
-        vec![
-            Advance::builder("Mining", "Your cities may Collect ore from Mountain spaces"),
-            engineering(),
-            sanitation(),
-            Advance::builder(ROADS, "When moving from or to a city, you may pay 1 food and 1 ore to extend the range of a group of land units by 1 and ignore terrain effects. May not be used to embark, disembark, or explore")
-                .with_advance_bonus(CultureToken)
-        ],
+        vec![mining(), engineering(), sanitation(), roads()],
     )
+}
+
+fn mining() -> AdvanceBuilder {
+    Advance::builder("Mining", "Your cities may Collect ore from Mountain spaces")
 }
 
 fn engineering() -> AdvanceBuilder {
@@ -57,4 +55,9 @@ fn sanitation() -> AdvanceBuilder {
         },
         1,
     )
+}
+
+fn roads() -> AdvanceBuilder {
+    Advance::builder(ROADS, "When moving from or to a city, you may pay 1 food and 1 ore to extend the range of a group of land units by 1 and ignore terrain effects. May not be used to embark, disembark, or explore")
+        .with_advance_bonus(CultureToken)
 }

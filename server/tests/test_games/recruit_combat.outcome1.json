@@ -2,37 +2,37 @@
   "state": "Playing",
   "state_change_event_state": {
     "event_used": [],
-    "last_priority_used": 1,
+    "last_priority_used": 0,
     "current": {
       "event_type": "OnRecruit",
-      "priority": 1,
+      "priority": 0,
       "player_index": 0,
       "request": {
         "ResourceReward": {
           "reward": {
             "default": {
-              "mood_tokens": 1
+              "wood": 1
             },
             "conversions": [
               {
                 "from": [
                   {
-                    "mood_tokens": 1
+                    "wood": 1
                   }
                 ],
                 "to": {
-                  "culture_tokens": 1
+                  "gold": 1
                 },
                 "type": "Unlimited"
               }
             ]
           },
-          "name": "Select token to gain"
+          "name": "Select resource to gain back"
         }
       },
       "response": null,
       "origin": {
-        "Advance": "Nationalism"
+        "Advance": "Medicine"
       }
     }
   },
@@ -46,7 +46,7 @@
         "ore": 6,
         "ideas": 5,
         "gold": 6,
-        "mood_tokens": 7,
+        "mood_tokens": 8,
         "culture_tokens": 7
       },
       "resource_limit": {
@@ -271,12 +271,64 @@
           "Recruit": {}
         }
       ]
+    },
+    {
+      "action": {
+        "CustomPhaseEvent": {
+          "ResourceReward": {
+            "mood_tokens": 1
+          }
+        }
+      },
+      "undo": [
+        {
+          "CustomPhaseEvent": {
+            "event_used": [],
+            "last_priority_used": 1,
+            "current": {
+              "event_type": "OnRecruit",
+              "priority": 1,
+              "player_index": 0,
+              "request": {
+                "ResourceReward": {
+                  "reward": {
+                    "default": {
+                      "mood_tokens": 1
+                    },
+                    "conversions": [
+                      {
+                        "from": [
+                          {
+                            "mood_tokens": 1
+                          }
+                        ],
+                        "to": {
+                          "culture_tokens": 1
+                        },
+                        "type": "Unlimited"
+                      }
+                    ]
+                  },
+                  "name": "Select token to gain"
+                }
+              },
+              "response": null,
+              "origin": {
+                "Advance": "Nationalism"
+              }
+            }
+          }
+        }
+      ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
       "Player1 paid 1 wood and 1 gold to recruit 1 ship in the city at C2 making it Angry"
+    ],
+    [
+      "Player1 selected 1 mood token for Nationalism Advance"
     ]
   ],
   "undo_limit": 0,

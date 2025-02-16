@@ -13,7 +13,7 @@ use macroquad::math::vec2;
 use macroquad::prelude::WHITE;
 use macroquad::shapes::draw_circle;
 use server::action::Action;
-use server::collect::{get_total_collection, possible_resource_collections, CollectOptionsInfo};
+use server::collect::{get_total_collection, possible_resource_collections, CollectInfo};
 use server::content::custom_actions::CustomAction;
 use server::game::Game;
 use server::playing_actions::{Collect, PlayingAction};
@@ -27,7 +27,7 @@ pub struct CollectResources {
     city_position: Position,
     collections: Vec<(Position, ResourcePile)>,
     custom: BaseOrCustomDialog,
-    pub info: CollectOptionsInfo,
+    pub info: CollectInfo,
 }
 
 impl CollectResources {
@@ -35,7 +35,7 @@ impl CollectResources {
         player_index: usize,
         city_position: Position,
         custom: BaseOrCustomDialog,
-        info: CollectOptionsInfo,
+        info: CollectInfo,
     ) -> CollectResources {
         CollectResources {
             player_index,
@@ -92,7 +92,7 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
     )
     .map_or(
         OkTooltip::Invalid("Too many resources selected".to_string()),
-        |(_, p)| OkTooltip::Valid(format!("Collect {p}")),
+        |i| OkTooltip::Valid(format!("Collect {}", i.total)),
     );
     if ok_button(rc, tooltip) {
         let extra = collect.extra_resources(game);

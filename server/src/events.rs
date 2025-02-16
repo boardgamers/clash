@@ -6,6 +6,7 @@ pub enum EventOrigin {
     SpecialAdvance(String),
     Leader(String),
     Wonder(String),
+    Builtin(String),
 }
 
 impl EventOrigin {
@@ -15,7 +16,8 @@ impl EventOrigin {
             EventOrigin::Advance(name)
             | EventOrigin::SpecialAdvance(name)
             | EventOrigin::Wonder(name)
-            | EventOrigin::Leader(name) => name,
+            | EventOrigin::Leader(name)
+            | EventOrigin::Builtin(name) => name,
         }
     }
 }

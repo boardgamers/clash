@@ -19,91 +19,18 @@ use crate::unit::UnitType;
 pub(crate) fn warfare() -> AdvanceGroup {
     advance_group_builder(
         "Warfare",
-        vec![
-            Advance::builder(
-                TACTICS,
-                "May Move Army units, May use Tactics on Action Cards",
-            )
-            .with_advance_bonus(CultureToken)
-            .with_unlocked_building(Fortress)
-            .add_player_event_listener(|event| &mut event.on_combat_round, fortress, 1),
-            siegecraft(),
-            steel_weapons().add_player_event_listener(
-                |event| &mut event.on_combat_round,
-                use_steel_weapons,
-                0,
-            ),
-            draft(),
-        ],
+        vec![tactics(), siegecraft(), steel_weapons(), draft()],
     )
 }
 
-fn draft() -> AdvanceBuilder {
+fn tactics() -> AdvanceBuilder {
     Advance::builder(
-        "Draft",
-        "When Recruiting, you may spend 1 mood token to pay for 1 Infantry Army Unit.",
+        TACTICS,
+        "May Move Army units, May use Tactics on Action Cards",
     )
     .with_advance_bonus(CultureToken)
-    .add_player_event_listener(
-        |event| &mut event.recruit_cost,
-        |cost, units, player| {
-            if units.infantry > 0 {
-                // insert at beginning so that it's preferred over gold
-
-                let pile = ResourcePile::mood_tokens(if player.has_advance("Civil Rights") {
-                    2
-                } else {
-                    1
-                });
-                cost.info
-                    .log
-                    .push(format!("Draft reduced the cost of 1 Infantry to {pile}"));
-                cost.cost.conversions.insert(
-                    0,
-                    PaymentConversion::limited(UnitType::cost(&UnitType::Infantry), pile, 1),
-                );
-            }
-        },
-        0,
-    )
-}
-
-fn steel_weapons() -> AdvanceBuilder {
-    Advance::builder(
-        STEEL_WEAPONS,
-        "Immediately before a Land battle starts, you may pay 1 ore to get +2 combat value in every Combat Round against an enemy that does not have the Steel Weapons advance, but only +1 combat value against an enemy that does have it (regardless if they use it or not this battle).",
-    )
-        .add_payment_request_listener(
-            |e| &mut e.on_combat_start,
-            1,
-            |game, player_index, ()| {
-                let GameState::Combat(c) = &game.state else { panic!("Invalid state") };
-                let player = &game.players[player_index];
-
-                let cost = steel_weapons_cost(game, c, player_index);
-                if cost.is_free() {
-                    let GameState::Combat(c) = &mut game.state else { panic!("Invalid state") };
-                    add_steel_weapons(player_index, c);
-                    return None;
-                }
-
-                if player.can_afford(&cost) {
-                    Some(vec![CustomPhasePaymentRequest {
-                        cost,
-                        name: "Use steel weapons".to_string(),
-                        optional: true,
-                    }])
-                } else {
-                    None
-                }
-            },
-            |game, player_index, player_name, payment| {
-                let GameState::Combat(c) = &mut game.state else { panic!("Invalid state") };
-                add_steel_weapons(player_index, c);
-                game.add_info_log_item(
-                    &format!("{player_name} paid for steel weapons: {}", payment[0]));
-            },
-        )
+    .with_unlocked_building(Fortress)
+    .add_player_event_listener(|event| &mut event.on_combat_round, fortress, 1)
 }
 
 fn siegecraft() -> AdvanceBuilder {
@@ -167,6 +94,79 @@ fn siegecraft() -> AdvanceBuilder {
                 c.modifiers.extend(modifiers);
             },
         )
+}
+
+fn steel_weapons() -> AdvanceBuilder {
+    Advance::builder(
+        STEEL_WEAPONS,
+        "Immediately before a Land battle starts, you may pay 1 ore to get +2 combat value in every Combat Round against an enemy that does not have the Steel Weapons advance, but only +1 combat value against an enemy that does have it (regardless if they use it or not this battle).",
+    )
+        .add_payment_request_listener(
+            |e| &mut e.on_combat_start,
+            1,
+            |game, player_index, ()| {
+                let GameState::Combat(c) = &game.state else { panic!("Invalid state") };
+                let player = &game.players[player_index];
+
+                let cost = steel_weapons_cost(game, c, player_index);
+                if cost.is_free() {
+                    let GameState::Combat(c) = &mut game.state else { panic!("Invalid state") };
+                    add_steel_weapons(player_index, c);
+                    return None;
+                }
+
+                if player.can_afford(&cost) {
+                    Some(vec![CustomPhasePaymentRequest {
+                        cost,
+                        name: "Use steel weapons".to_string(),
+                        optional: true,
+                    }])
+                } else {
+                    None
+                }
+            },
+            |game, player_index, player_name, payment| {
+                let GameState::Combat(c) = &mut game.state else { panic!("Invalid state") };
+                add_steel_weapons(player_index, c);
+                game.add_info_log_item(
+                    &format!("{player_name} paid for steel weapons: {}", payment[0]));
+            },
+        )
+        .add_player_event_listener(
+            |event| &mut event.on_combat_round,
+            use_steel_weapons,
+            0,
+        )
+}
+
+fn draft() -> AdvanceBuilder {
+    Advance::builder(
+        "Draft",
+        "When Recruiting, you may spend 1 mood token to pay for 1 Infantry Army Unit.",
+    )
+    .with_advance_bonus(CultureToken)
+    .add_player_event_listener(
+        |event| &mut event.recruit_cost,
+        |cost, units, player| {
+            if units.infantry > 0 {
+                // insert at beginning so that it's preferred over gold
+
+                let pile = ResourcePile::mood_tokens(if player.has_advance("Civil Rights") {
+                    2
+                } else {
+                    1
+                });
+                cost.info
+                    .log
+                    .push(format!("Draft reduced the cost of 1 Infantry to {pile}"));
+                cost.cost.conversions.insert(
+                    0,
+                    PaymentConversion::limited(UnitType::cost(&UnitType::Infantry), pile, 1),
+                );
+            }
+        },
+        0,
+    )
 }
 
 fn add_steel_weapons(player_index: usize, c: &mut Combat) {

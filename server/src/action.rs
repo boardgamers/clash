@@ -1,7 +1,6 @@
 use crate::content::custom_phase_actions::CustomPhaseEventAction;
 use crate::map::Rotation;
 use crate::playing_actions::PlayingAction;
-use crate::position::Position;
 use crate::status_phase::StatusPhaseAction;
 use crate::unit::MovementAction;
 use serde::{Deserialize, Serialize};
@@ -13,7 +12,6 @@ pub enum Action {
     Movement(MovementAction),
     CulturalInfluenceResolution(bool),
     Combat(CombatAction),
-    PlaceSettler(Position),
     ExploreResolution(Rotation),
     CustomPhaseEvent(CustomPhaseEventAction),
     Undo,
@@ -69,15 +67,6 @@ impl Action {
     #[must_use]
     pub fn combat(self) -> Option<CombatAction> {
         if let Self::Combat(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-
-    #[must_use]
-    pub fn place_settler(self) -> Option<Position> {
-        if let Self::PlaceSettler(v) = self {
             Some(v)
         } else {
             None

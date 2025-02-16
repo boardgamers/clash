@@ -4,6 +4,7 @@ use crate::events::EventOrigin;
 use crate::game::{Game, UndoContext};
 use crate::payment::PaymentOptions;
 use crate::playing_actions::PlayingAction;
+use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use serde::{Deserialize, Serialize};
 
@@ -11,15 +12,21 @@ use serde::{Deserialize, Serialize};
 pub enum CustomPhaseEventType {
     StartCombatAttacker,
     StartCombatDefender,
+    EndCombatAttacker,
+    EndCombatDefender,
     TurnStart,
     OnAdvance,
     OnConstruct,
+    OnRecruit,
 }
 
 impl CustomPhaseEventType {
     #[must_use]
     pub fn is_last_type_for_event(&self) -> bool {
-        !matches!(self, CustomPhaseEventType::StartCombatAttacker)
+        !matches!(
+            self,
+            CustomPhaseEventType::StartCombatAttacker | CustomPhaseEventType::EndCombatAttacker
+        )
     }
 }
 
@@ -46,6 +53,7 @@ pub enum CustomPhaseRequest {
     Payment(Vec<CustomPhasePaymentRequest>),
     ResourceReward(CustomPhaseResourceRewardRequest),
     AdvanceReward(CustomPhaseAdvanceRewardRequest),
+    SelectPosition(CustomPhasePositionRequest),
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -53,6 +61,7 @@ pub enum CustomPhaseEventAction {
     Payment(Vec<ResourcePile>),
     ResourceReward(ResourcePile),
     AdvanceReward(String),
+    SelectPosition(Position),
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -88,6 +97,11 @@ impl CustomPhaseEventState {
     }
 }
 
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct CustomPhasePositionRequest {
+    pub choices: Vec<Position>,
+}
+
 impl CustomPhaseEventAction {
     pub(crate) fn undo(self, game: &mut Game, player_index: usize) {
         match self {
@@ -102,6 +116,9 @@ impl CustomPhaseEventAction {
             }
             CustomPhaseEventAction::AdvanceReward(n) => {
                 game.undo_advance(&get_advance(&n), player_index, false);
+            }
+            CustomPhaseEventAction::SelectPosition(_) => {
+                // done with payer commands
             }
         }
         let Some(UndoContext::CustomPhaseEvent(e)) = game.pop_undo_context() else {

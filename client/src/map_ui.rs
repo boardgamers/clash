@@ -138,6 +138,7 @@ pub fn pan_and_zoom(state: &mut State) {
 fn overlay_color(rc: &RenderContext, pos: Position) -> Color {
     let game = rc.game;
     let state = &rc.state;
+
     match &state.active_dialog {
         ActiveDialog::MoveUnits(s) => {
             if let Some(start) = s.start {
@@ -160,9 +161,7 @@ fn overlay_color(rc: &RenderContext, pos: Position) -> Color {
         ActiveDialog::RazeSize1City => {
             highlight_if(game.players[game.active_player()].can_raze_city(pos))
         }
-        ActiveDialog::PlaceSettler => {
-            highlight_if(game.players[game.active_player()].get_city(pos).is_some())
-        }
+        ActiveDialog::CustomPhasePositionRequest(choices) => highlight_if(choices.contains(&pos)),
         _ => {
             if let Some(p) = state.focused_tile {
                 highlight_if(p == pos)
