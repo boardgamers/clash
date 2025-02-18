@@ -8,8 +8,8 @@ use server::position::Position;
 use server::unit::{carried_units, MovementRestriction, Unit, UnitType};
 
 use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::hex_ui;
 use crate::select_ui::ConfirmSelection;
-use crate::{hex_ui, player_ui};
 
 use crate::dialog_ui::{cancel_button_with_tooltip, ok_button};
 use crate::hex_ui::Point;
@@ -58,26 +58,21 @@ pub fn draw_unit_type(
     rc: &RenderContext,
     unit_highlight_type: &UnitHighlightType,
     center: Point,
-    unit_type: &UnitType,
+    unit_type: UnitType,
     player_index: usize,
     tooltip: &str,
     size: f32,
-) {
+) -> bool {
     draw_circle(center.x, center.y, size, unit_highlight_type.color());
-    draw_circle(
-        center.x,
-        center.y,
-        size - 2.,
-        player_ui::player_color(player_index),
-    );
+    draw_circle(center.x, center.y, size - 2., rc.player_color(player_index));
     let icon_size = size * 1.1;
     draw_scaled_icon(
         rc,
-        &rc.assets().units[unit_type],
+        &rc.assets().units[&unit_type],
         tooltip,
         vec2(center.x - icon_size / 2., center.y - icon_size / 2.),
         icon_size,
-    );
+    )
 }
 
 fn carried_unit_place(carrier: &UnitPlace, index: usize) -> UnitPlace {
@@ -244,7 +239,7 @@ fn draw_unit(
             rc,
             &highlight,
             center,
-            &unit.unit_type,
+            unit.unit_type,
             unit.player_index,
             "",
             radius,

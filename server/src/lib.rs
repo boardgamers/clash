@@ -15,6 +15,7 @@
 pub mod ability_initializer;
 pub mod action;
 pub mod advance;
+mod barbarians;
 pub mod city;
 pub mod city_pieces;
 mod civilization;
@@ -27,6 +28,7 @@ mod explore;
 pub mod game;
 pub mod game_api;
 pub mod game_api_wrapper;
+pub mod incident;
 pub mod leader;
 pub mod log;
 pub mod map;

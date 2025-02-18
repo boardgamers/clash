@@ -1,19 +1,13 @@
+use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::content::custom_phase_actions::CustomPhasePositionRequest;
 use crate::events::EventOrigin;
 use crate::unit::UnitType;
-use crate::{
-    ability_initializer::{self, AbilityInitializer, AbilityInitializerSetup},
-    game::Game,
-    position::Position,
-};
+use crate::{ability_initializer::AbilityInitializerSetup, position::Position};
 
 pub struct Builtin {
     pub name: String,
     pub description: String,
-    pub player_initializer: AbilityInitializer,
-    pub player_deinitializer: AbilityInitializer,
-    pub player_one_time_initializer: AbilityInitializer,
-    pub player_undo_deinitializer: AbilityInitializer,
+    pub listeners: AbilityListeners,
 }
 
 impl Builtin {
@@ -25,79 +19,32 @@ impl Builtin {
 
 pub struct BuiltinBuilder {
     name: String,
-    descriptions: Vec<String>,
-    player_initializers: Vec<AbilityInitializer>,
-    player_deinitializers: Vec<AbilityInitializer>,
-    player_one_time_initializers: Vec<AbilityInitializer>,
-    player_undo_deinitializers: Vec<AbilityInitializer>,
+    descriptions: String,
+    builder: AbilityInitializerBuilder,
 }
 
 impl BuiltinBuilder {
     fn new(name: &str, description: &str) -> Self {
         Self {
             name: name.to_string(),
-            descriptions: vec![description.to_string()],
-            player_initializers: Vec::new(),
-            player_deinitializers: Vec::new(),
-            player_one_time_initializers: Vec::new(),
-            player_undo_deinitializers: Vec::new(),
+            descriptions: description.to_string(),
+            builder: AbilityInitializerBuilder::new(),
         }
     }
 
     #[must_use]
     pub fn build(self) -> Builtin {
-        let player_initializer =
-            ability_initializer::join_ability_initializers(self.player_initializers);
-        let player_deinitializer =
-            ability_initializer::join_ability_initializers(self.player_deinitializers);
-        let player_one_time_initializer =
-            ability_initializer::join_ability_initializers(self.player_one_time_initializers);
-        let player_undo_deinitializer =
-            ability_initializer::join_ability_initializers(self.player_undo_deinitializers);
         Builtin {
             name: self.name,
-            description: String::from("✦ ") + &self.descriptions.join("\n✦ "),
-            player_initializer,
-            player_deinitializer,
-            player_one_time_initializer,
-            player_undo_deinitializer,
+            description: self.descriptions,
+            listeners: self.builder.build(),
         }
     }
 }
 
 impl AbilityInitializerSetup for BuiltinBuilder {
-    fn add_ability_initializer<F>(mut self, initializer: F) -> Self
-    where
-        F: Fn(&mut Game, usize) + 'static,
-    {
-        self.player_initializers.push(Box::new(initializer));
-        self
-    }
-
-    fn add_ability_deinitializer<F>(mut self, deinitializer: F) -> Self
-    where
-        F: Fn(&mut Game, usize) + 'static,
-    {
-        self.player_deinitializers.push(Box::new(deinitializer));
-        self
-    }
-
-    fn add_one_time_ability_initializer<F>(mut self, initializer: F) -> Self
-    where
-        F: Fn(&mut Game, usize) + 'static,
-    {
-        self.player_one_time_initializers
-            .push(Box::new(initializer));
-        self
-    }
-
-    fn add_ability_undo_deinitializer<F>(mut self, deinitializer: F) -> Self
-    where
-        F: Fn(&mut Game, usize) + 'static,
-    {
-        self.player_undo_deinitializers
-            .push(Box::new(deinitializer));
-        self
+    fn builder(&mut self) -> &mut AbilityInitializerBuilder {
+        &mut self.builder
     }
 
     fn get_key(&self) -> EventOrigin {
@@ -123,7 +70,7 @@ pub fn get_all() -> Vec<Builtin> {
             {
                 let p = game.get_player(player_index);
                 let choices: Vec<Position> = p.cities.iter().map(|c| c.position).collect();
-                Some(CustomPhasePositionRequest { choices })
+                Some(CustomPhasePositionRequest::new(choices, None))
             } else {
                 None
             }
@@ -133,7 +80,7 @@ pub fn get_all() -> Vec<Builtin> {
                 "{} gained 1 free Settler Unit at {pos} for losing a city",
                 c.name,
             ));
-            c.gain_unit(UnitType::Settler, *pos);
+            c.gain_unit(c.index, UnitType::Settler, *pos);
         },
     )
     .build()]

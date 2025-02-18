@@ -95,7 +95,7 @@
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 1,
+      "incident_tokens": 3,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -154,7 +154,7 @@
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 2,
+      "incident_tokens": 2,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -242,11 +242,11 @@
   "log": [
     [
       "Player1 changed their government from Democracy to Theocracy",
-      "Additional advances: Devotion"
+      "Additional advances: Devotion",
+      "Player1 Could not store 1 idea"
     ],
     [
-      "It's Player2's turn",
-      "Player1 Could not store 1 idea"
+      "It's Player2's turn"
     ]
   ],
   "undo_limit": 1,

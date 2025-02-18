@@ -130,7 +130,7 @@ impl PlayingAction {
                 game.get_player(player_index)
                     .advance_cost(&a, Some(&payment))
                     .pay(game, &payment);
-                game.advance(&advance, player_index, payment);
+                game.advance_with_incident_token(&advance, player_index, payment);
             }
             FoundCity { settler } => {
                 let settler = game.players[player_index].remove_unit(settler);
@@ -163,6 +163,10 @@ impl PlayingAction {
                     c.city_position,
                     c.port_position,
                 );
+                if matches!(c.city_piece, Academy) {
+                    game.players[player_index].gain_resources(ResourcePile::ideas(2));
+                    game.add_info_log_item("Academy gained 2 ideas");
+                }
                 cost.pay(game, &c.payment);
                 Self::on_construct(game, player_index, c.city_piece);
             }
@@ -232,9 +236,9 @@ impl PlayingAction {
 
     pub(crate) fn on_construct(game: &mut Game, player_index: usize, building: Building) {
         game.trigger_custom_phase_event(
-            player_index,
+            &[player_index],
             |e| &mut e.on_construct,
-            CustomPhaseEventType::OnConstruct,
+            &CustomPhaseEventType::OnConstruct,
             &building,
         );
     }

@@ -2,8 +2,9 @@ use crate::assets::Assets;
 use crate::client_state::{CameraMode, State, StateUpdate};
 use crate::payment_ui::Payment;
 use macroquad::camera::set_default_camera;
+use macroquad::color::{Color, PINK, YELLOW};
 use macroquad::math::{bool, Vec2};
-use macroquad::prelude::set_camera;
+use macroquad::prelude::{set_camera, WHITE};
 use server::game::{Game, GameState};
 use server::payment::PaymentOptions;
 use server::player::Player;
@@ -83,5 +84,16 @@ impl RenderContext<'_> {
     pub fn new_payment(&self, cost: &PaymentOptions, name: &str, optional: bool) -> Payment {
         let available = &self.shown_player.resources;
         Payment::new(cost, available, name, optional)
+    }
+
+    pub fn player_color(&self, player_index: usize) -> Color {
+        if !self.game.get_player(player_index).is_human() {
+            return WHITE;
+        }
+        match player_index {
+            0 => YELLOW,
+            1 => PINK,
+            _ => panic!("unexpected player index"),
+        }
     }
 }

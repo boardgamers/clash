@@ -146,7 +146,7 @@ fn generic_custom_action(
         CustomActionType::ForcedLabor => Some(StateUpdate::execute(Action::Playing(
             PlayingAction::Custom(CustomAction::ForcedLabor),
         ))),
-        CustomActionType::CivilRights => Some(StateUpdate::execute(Action::Playing(
+        CustomActionType::CivilLiberties => Some(StateUpdate::execute(Action::Playing(
             PlayingAction::Custom(CustomAction::CivilRights),
         ))),
         CustomActionType::Taxes => Some(StateUpdate::OpenDialog(ActiveDialog::Taxes(

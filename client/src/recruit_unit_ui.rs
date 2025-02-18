@@ -110,7 +110,7 @@ fn selectable_unit(
     } else {
         Some(SelectableUnit {
             name: unit.name.to_string(),
-            unit_type: unit.unit_type.clone(),
+            unit_type: unit.unit_type,
             selectable: CountSelector {
                 current: u32::from(current),
                 min: 0,
@@ -217,7 +217,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
                 rc,
                 &UnitHighlightType::None,
                 Point::from_vec2(p),
-                &s.unit_type,
+                s.unit_type,
                 rc.shown_player.index,
                 &format!(
                     "{} ({} available with current resources)",

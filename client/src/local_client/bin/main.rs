@@ -240,9 +240,9 @@ pub fn setup_local_game() -> Game {
         .pieces
         .market = Some(1);
 
-    game.advance("Voting", player_index1, ResourcePile::empty());
-    game.advance("Free Economy", player_index1, ResourcePile::empty());
-    game.advance("Storage", player_index1, ResourcePile::empty());
+    game.advance("Voting", player_index1);
+    game.advance("Free Economy", player_index1);
+    game.advance("Storage", player_index1);
     game.players[player_index1].gain_resources(ResourcePile::food(5));
 
     game

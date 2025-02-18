@@ -2,6 +2,29 @@
   "state": {
     "StatusPhase": "FreeAdvance"
   },
+  "state_change_event_state": {
+    "players_used": [],
+    "last_priority_used": 100,
+    "current": {
+      "event_type": "Incident",
+      "priority": 100,
+      "player_index": 0,
+      "request": {
+        "SelectUnit": {
+          "choices": [
+            "Infantry",
+            "Cavalry",
+            "Elephant"
+          ],
+          "description": "Select a unit to reinforce the barbarians"
+        }
+      },
+      "response": null,
+      "origin": {
+        "Incident": 9
+      }
+    }
+  },
   "players": [
     {
       "name": null,
@@ -12,11 +35,11 @@
         "ore": 6,
         "ideas": 5,
         "gold": 7,
-        "mood_tokens": 7,
+        "mood_tokens": 8,
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 2,
+        "food": 7,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -90,11 +113,12 @@
       "advances": [
         "Farming",
         "Mining",
+        "Storage",
         "Tactics"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 2,
+      "incident_tokens": 3,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -152,12 +176,52 @@
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 3,
+      "incident_tokens": 3,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
       "next_unit_id": 2
+    },
+    {
+      "name": null,
+      "id": 2,
+      "resources": {},
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "B3",
+          "unit_type": "Infantry",
+          "id": 0
+        }
+      ],
+      "civilization": "Barbarians",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 1
     }
   ],
   "map": {
@@ -206,10 +270,76 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [],
-  "action_log_index": 0,
-  "log": [],
-  "undo_limit": 0,
+  "action_log": [
+    {
+      "action": {
+        "StatusPhase": {
+          "FreeAdvance": "Storage"
+        }
+      }
+    },
+    {
+      "action": {
+        "CustomPhaseEvent": {
+          "SelectPosition": "B3"
+        }
+      },
+      "undo": [
+        {
+          "CustomPhaseEvent": {
+            "players_used": [],
+            "last_priority_used": 102,
+            "current": {
+              "event_type": "Incident",
+              "priority": 102,
+              "player_index": 0,
+              "request": {
+                "SelectPosition": {
+                  "choices": [
+                    "A3",
+                    "B3"
+                  ],
+                  "description": "Select a position for the new city and infantry unit"
+                }
+              },
+              "response": null,
+              "origin": {
+                "Incident": 9
+              }
+            }
+          }
+        },
+        {
+          "Command": {
+            "gained_units": [
+              {
+                "unit_type": "Infantry",
+                "position": "B3",
+                "player": 2
+              }
+            ],
+            "gained_cities": [
+              {
+                "position": "B3",
+                "player": 2
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "action_log_index": 2,
+  "log": [
+    [
+      "Player1 advanced Storage for free",
+      "Player gained 1 mood token as advance bonus"
+    ],
+    [
+      "Barbarians spawned a new city and a new Infantry unit at B3"
+    ]
+  ],
+  "undo_limit": 2,
   "actions_left": 3,
   "successful_cultural_influence": false,
   "round": 1,
@@ -235,5 +365,8 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1
+  "wonder_amount_left": 1,
+  "incidents_left": [
+    9
+  ]
 }

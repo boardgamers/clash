@@ -4,7 +4,7 @@ use crate::collect_ui::CollectResources;
 use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
 use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
-use crate::event_ui::{custom_phase_event_origin, event_help, pay_help};
+use crate::event_ui::{custom_phase_event_help, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
 use crate::map_ui::ExploreResolutionConfig;
@@ -17,7 +17,10 @@ use macroquad::prelude::*;
 use server::action::Action;
 use server::city::{City, MoodState};
 use server::combat::{active_attackers, active_defenders, CombatPhase};
-use server::content::custom_phase_actions::{CustomPhaseAdvanceRewardRequest, CustomPhaseRequest};
+use server::content::custom_phase_actions::{
+    CustomPhaseAdvanceRewardRequest, CustomPhasePositionRequest, CustomPhaseRequest,
+    CustomPhaseUnitRequest,
+};
 use server::events::EventOrigin;
 use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
 use server::position::Position;
@@ -65,7 +68,8 @@ pub enum ActiveDialog {
     CustomPhaseResourceRewardRequest(Payment),
     CustomPhaseAdvanceRewardRequest(CustomPhaseAdvanceRewardRequest),
     CustomPhasePaymentRequest(Vec<Payment>),
-    CustomPhasePositionRequest(Vec<Position>),
+    CustomPhasePositionRequest(CustomPhasePositionRequest),
+    CustomPhaseUnitRequest(CustomPhaseUnitRequest),
 }
 
 impl ActiveDialog {
@@ -104,6 +108,7 @@ impl ActiveDialog {
             ActiveDialog::CustomPhaseAdvanceRewardRequest(_) => "advance selection",
             ActiveDialog::CustomPhasePaymentRequest(_) => "custom phase payment request",
             ActiveDialog::CustomPhasePositionRequest(_) => "custom phase position request",
+            ActiveDialog::CustomPhaseUnitRequest(_) => "custom phase unit request",
         }
     }
 
@@ -183,9 +188,12 @@ impl ActiveDialog {
             }
             ActiveDialog::CustomPhaseResourceRewardRequest(_)
             | ActiveDialog::CustomPhaseAdvanceRewardRequest(_)
-            | ActiveDialog::CustomPhasePaymentRequest(_)
-            | ActiveDialog::CustomPhasePositionRequest(_) => {
-                event_help(rc, &custom_phase_event_origin(rc), true)
+            | ActiveDialog::CustomPhasePaymentRequest(_) => custom_phase_event_help(rc, None),
+            ActiveDialog::CustomPhasePositionRequest(r) => {
+                custom_phase_event_help(rc, r.description.as_ref())
+            }
+            ActiveDialog::CustomPhaseUnitRequest(r) => {
+                custom_phase_event_help(rc, r.description.as_ref())
             }
         }
     }
@@ -553,7 +561,10 @@ impl State {
                     ActiveDialog::CustomPhaseAdvanceRewardRequest(r.clone())
                 }
                 CustomPhaseRequest::SelectPosition(r) => {
-                    ActiveDialog::CustomPhasePositionRequest(r.choices.clone())
+                    ActiveDialog::CustomPhasePositionRequest(r.clone())
+                }
+                CustomPhaseRequest::SelectUnit(r) => {
+                    ActiveDialog::CustomPhaseUnitRequest(r.clone())
                 }
             };
         }

@@ -226,17 +226,9 @@ pub(crate) fn start_combat(game: &mut Game, combat: Combat) {
         game.state = GameState::Combat(combat);
     }
     if game.trigger_custom_phase_event(
-        attacker,
+        &[attacker, defender],
         |events| &mut events.on_combat_start,
-        CustomPhaseEventType::StartCombatAttacker,
-        &(),
-    ) {
-        return;
-    }
-    if game.trigger_custom_phase_event(
-        defender,
-        |events| &mut events.on_combat_start,
-        CustomPhaseEventType::StartCombatDefender,
+        &CustomPhaseEventType::StartCombat,
         &(),
     ) {
         return;
@@ -645,17 +637,9 @@ pub(crate) fn end_combat(game: &mut Game, combat: Combat) -> Option<Combat> {
     game.state = GameState::Combat(combat);
 
     if game.trigger_custom_phase_event(
-        attacker,
+        &[attacker, defender],
         |events| &mut events.on_combat_end,
-        CustomPhaseEventType::EndCombatAttacker,
-        &info,
-    ) {
-        return None;
-    }
-    if game.trigger_custom_phase_event(
-        defender,
-        |events| &mut events.on_combat_end,
-        CustomPhaseEventType::EndCombatDefender,
+        &CustomPhaseEventType::EndCombat,
         &info,
     ) {
         return None;

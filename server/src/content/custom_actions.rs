@@ -46,7 +46,7 @@ pub enum CustomActionType {
     ConstructWonder,
     AbsolutePower,
     ForcedLabor,
-    CivilRights,
+    CivilLiberties,
     ArtsInfluenceCultureAttempt,
     VotingIncreaseHappiness,
     FreeEconomyCollect,
@@ -99,7 +99,7 @@ impl CustomAction {
             CustomAction::ConstructWonder { .. } => CustomActionType::ConstructWonder,
             CustomAction::AbsolutePower => CustomActionType::AbsolutePower,
             CustomAction::ForcedLabor => CustomActionType::ForcedLabor,
-            CustomAction::CivilRights => CustomActionType::CivilRights,
+            CustomAction::CivilRights => CustomActionType::CivilLiberties,
             CustomAction::ArtsInfluenceCultureAttempt(_) => {
                 CustomActionType::ArtsInfluenceCultureAttempt
             }
@@ -170,7 +170,7 @@ impl CustomAction {
             CustomAction::ForcedLabor =>
                 format!("{player_name} paid 1 mood token to treat Angry cities as neutral"),
             CustomAction::CivilRights =>
-                format!("{player_name} gained 3 mood tokens using Civil Rights"),
+                format!("{player_name} gained 3 mood tokens using Civil Liberties"),
             CustomAction::ArtsInfluenceCultureAttempt(c) =>
                 format!("{} using Arts", format_cultural_influence_attempt_log_item(game, player.index, player_name, c)),
             CustomAction::VotingIncreaseHappiness(i) =>
@@ -195,7 +195,7 @@ impl CustomActionType {
             CustomActionType::AbsolutePower => {
                 ActionType::free_and_once_per_turn(ResourcePile::mood_tokens(2))
             }
-            CustomActionType::CivilRights
+            CustomActionType::CivilLiberties
             | CustomActionType::Sports
             | CustomActionType::ConstructWonder => ActionType::default(),
             CustomActionType::ArtsInfluenceCultureAttempt => {

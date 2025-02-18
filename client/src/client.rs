@@ -25,8 +25,8 @@ use crate::render_context::RenderContext;
 use crate::status_phase_ui::raze_city_confirm_dialog;
 use crate::unit_ui::unit_selection_click;
 use crate::{
-    combat_ui, custom_actions_ui, dialog_ui, influence_ui, map_ui, move_ui, recruit_unit_ui,
-    status_phase_ui, tooltip,
+    combat_ui, custom_actions_ui, custom_phase_ui, dialog_ui, influence_ui, map_ui, move_ui,
+    recruit_unit_ui, status_phase_ui, tooltip,
 };
 
 fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
@@ -169,14 +169,15 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::Theaters(p) => custom_actions_ui::theaters(rc, p),
 
         ActiveDialog::CustomPhasePaymentRequest(c) => {
-            custom_actions_ui::custom_phase_payment_dialog(rc, c)
+            custom_phase_ui::custom_phase_payment_dialog(rc, c)
         }
         ActiveDialog::CustomPhaseResourceRewardRequest(p) => {
-            custom_actions_ui::payment_reward_dialog(rc, p)
+            custom_phase_ui::payment_reward_dialog(rc, p)
         }
         ActiveDialog::CustomPhaseAdvanceRewardRequest(r) => {
-            custom_actions_ui::advance_reward_dialog(rc, r, custom_phase_event_origin(rc).name())
+            custom_phase_ui::advance_reward_dialog(rc, r, &custom_phase_event_origin(rc).name())
         }
+        ActiveDialog::CustomPhaseUnitRequest(r) => custom_phase_ui::unit_request_dialog(rc, r),
     }
 }
 
@@ -231,8 +232,8 @@ fn controlling_player_click(rc: &RenderContext, mouse_pos: Vec2, pos: Position) 
             StateUpdate::OpenDialog(ActiveDialog::ReplaceUnits(new.clone()))
         }),
         ActiveDialog::RazeSize1City => raze_city_confirm_dialog(rc, pos),
-        ActiveDialog::CustomPhasePositionRequest(choices) => {
-            if choices.contains(&pos) {
+        ActiveDialog::CustomPhasePositionRequest(r) => {
+            if r.choices.contains(&pos) {
                 StateUpdate::Execute(Action::CustomPhaseEvent(
                     CustomPhaseEventAction::SelectPosition(pos),
                 ))

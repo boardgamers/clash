@@ -142,7 +142,7 @@
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 2,
+      "incident_tokens": 2,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -218,7 +218,7 @@
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 3,
+      "incident_tokens": 3,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -338,19 +338,19 @@
       "undo": [
         {
           "CustomPhaseEvent": {
-            "event_used": [
-              "EndCombatAttacker"
+            "players_used": [
+              0
             ],
             "last_priority_used": 0,
             "current": {
-              "event_type": "EndCombatDefender",
+              "event_type": "EndCombat",
               "priority": 0,
               "player_index": 1,
               "request": {
                 "SelectPosition": {
                   "choices": [
-                    "C1",
-                    "B2"
+                    "B2",
+                    "C1"
                   ]
                 }
               },
@@ -364,10 +364,11 @@
         {
           "Command": {
             "gained_units": [
-              [
-                "Settler",
-                "B2"
-              ]
+              {
+                "unit_type": "Settler",
+                "position": "B2",
+                "player": 1
+              }
             ]
           }
         }

@@ -23,11 +23,11 @@ use server::unit::MovementAction;
 pub fn player_select(rc: &RenderContext) -> StateUpdate {
     let game = rc.game;
     let i = game
-        .players
+        .human_players()
         .iter()
-        .position(|p| p.index == game.starting_player_index)
+        .position(|&p| p == game.starting_player_index)
         .unwrap();
-    let mut players: Vec<_> = game.players.iter().map(|p| p.index).collect();
+    let mut players: Vec<_> = game.human_players();
     players.rotate_left(i);
 
     let size = 40.;
@@ -39,7 +39,7 @@ pub fn player_select(rc: &RenderContext) -> StateUpdate {
         let screen = rc.state.screen_size;
         let pos = vec2(screen.x, screen.y / 2.0) + vec2(-size, y);
 
-        let color = player_color(pl.index);
+        let color = rc.player_color(pl.index);
 
         let w = if shown { size + 10. } else { size };
         let x = pos.x - w + size;
@@ -325,12 +325,4 @@ fn end_move(game: &Game) -> StateUpdate {
             vec![]
         },
     )
-}
-
-pub fn player_color(player_index: usize) -> Color {
-    match player_index {
-        0 => YELLOW,
-        1 => PINK,
-        _ => panic!("unexpected player index"),
-    }
 }

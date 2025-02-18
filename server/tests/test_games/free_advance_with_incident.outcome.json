@@ -1,5 +1,29 @@
 {
-  "state": "Playing",
+  "state": {
+    "StatusPhase": "FreeAdvance"
+  },
+  "state_change_event_state": {
+    "players_used": [],
+    "last_priority_used": 102,
+    "current": {
+      "event_type": "Incident",
+      "priority": 102,
+      "player_index": 0,
+      "request": {
+        "SelectPosition": {
+          "choices": [
+            "A3",
+            "B3"
+          ],
+          "description": "Select a position for the new city and infantry unit"
+        }
+      },
+      "response": null,
+      "origin": {
+        "Incident": 9
+      }
+    }
+  },
   "players": [
     {
       "name": null,
@@ -7,14 +31,14 @@
       "resources": {
         "food": 1,
         "wood": 6,
-        "ore": 7,
+        "ore": 6,
         "ideas": 5,
         "gold": 7,
-        "mood_tokens": 9,
+        "mood_tokens": 8,
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 2,
+        "food": 7,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -32,9 +56,9 @@
         },
         {
           "city_pieces": {
-            "academy": 0
+            "fortress": 1
           },
-          "mood_state": "Neutral",
+          "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
           "position": "C2"
@@ -86,16 +110,14 @@
       "active_leader": null,
       "available_leaders": [],
       "advances": [
-        "Civil Rights",
-        "Draft",
         "Farming",
-        "Math",
         "Mining",
-        "Public Education"
+        "Storage",
+        "Tactics"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 2,
+      "incident_tokens": 3,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -153,12 +175,38 @@
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 3,
+      "incident_tokens": 3,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
       "next_unit_id": 2
+    },
+    {
+      "name": null,
+      "id": 2,
+      "resources": {},
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [],
+      "units": [],
+      "civilization": "Barbarians",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 0
     }
   ],
   "map": {
@@ -173,9 +221,7 @@
       ],
       [
         "A3",
-        {
-          "Exhausted": "Forest"
-        }
+        "Mountain"
       ],
       [
         "B1",
@@ -212,8 +258,8 @@
   "action_log": [
     {
       "action": {
-        "Playing": {
-          "Custom": "CivilRights"
+        "StatusPhase": {
+          "FreeAdvance": "Storage"
         }
       }
     }
@@ -221,13 +267,14 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 gained 3 mood tokens using Civil Rights"
+      "Player1 advanced Storage for free",
+      "Player gained 1 mood token as advance bonus"
     ]
   ],
-  "undo_limit": 0,
-  "actions_left": 2,
+  "undo_limit": 1,
+  "actions_left": 3,
   "successful_cultural_influence": false,
-  "round": 2,
+  "round": 1,
   "age": 1,
   "messages": [
     "The game has started"
@@ -241,13 +288,17 @@
     10,
     10,
     10,
-    10,
     10
   ],
-  "dice_roll_log": [],
+  "dice_roll_log": [
+    10
+  ],
   "dropped_players": [],
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1
+  "wonder_amount_left": 1,
+  "incidents_left": [
+    9
+  ]
 }

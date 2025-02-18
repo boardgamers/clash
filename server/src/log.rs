@@ -326,7 +326,6 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
                         .get_unit(*unit)
                         .expect("the player should have moved units")
                         .unit_type
-                        .clone()
                 })
                 .collect::<Units>();
             let start = player
@@ -452,8 +451,7 @@ fn format_combat_action_log_item(action: &CombatAction, game: &Game) -> String {
                 .map(|unit| player
                     .get_unit(*unit)
                     .expect("the player should have units to be removed")
-                    .unit_type
-                    .clone())
+                    .unit_type)
                 .collect::<Units>()
         ),
         CombatAction::Retreat(action) => format!(

@@ -36,12 +36,12 @@
     }
   },
   "state_change_event_state": {
-    "event_used": [
-      "StartCombatAttacker"
+    "players_used": [
+      0
     ],
     "last_priority_used": 1,
     "current": {
-      "event_type": "StartCombatDefender",
+      "event_type": "StartCombat",
       "priority": 1,
       "player_index": 1,
       "request": {
@@ -180,7 +180,7 @@
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 1,
+      "incident_tokens": 1,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -243,7 +243,7 @@
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 3,
+      "incident_tokens": 3,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -330,10 +330,10 @@
       "undo": [
         {
           "CustomPhaseEvent": {
-            "event_used": [],
+            "players_used": [],
             "last_priority_used": 1,
             "current": {
-              "event_type": "StartCombatAttacker",
+              "event_type": "StartCombat",
               "priority": 1,
               "player_index": 0,
               "request": {
@@ -385,10 +385,10 @@
       "undo": [
         {
           "CustomPhaseEvent": {
-            "event_used": [],
+            "players_used": [],
             "last_priority_used": 0,
             "current": {
-              "event_type": "StartCombatAttacker",
+              "event_type": "StartCombat",
               "priority": 0,
               "player_index": 0,
               "request": {

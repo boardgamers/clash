@@ -226,7 +226,7 @@ impl Assets {
                 load_png(include_bytes!("../assets/slavery-whip-svgrepo-com.png")),
             ),
             (
-                CustomActionType::CivilRights,
+                CustomActionType::CivilLiberties,
                 load_png(include_bytes!("../assets/justice-hammer-svgrepo-com.png")),
             ),
             (

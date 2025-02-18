@@ -3,7 +3,7 @@ use crate::collect::{CollectContext, CollectInfo};
 use crate::combat::{Combat, CombatResultInfo, CombatStrength};
 use crate::content::custom_phase_actions::CustomPhaseEventType;
 use crate::events::Event;
-use crate::game::{CommandUndoContext, CommandUndoInfo, Game};
+use crate::game::{CommandContext, CommandUndoInfo, GainCityContext, GainUnitContext, Game};
 use crate::map::Terrain;
 use crate::payment::PaymentOptions;
 use crate::playing_actions::{PlayingActionType, Recruit};
@@ -44,6 +44,7 @@ pub(crate) struct PlayerEvents {
     pub collect_total: Event<CollectInfo>,
 
     pub on_turn_start: CustomPhaseEvent,
+    pub on_incident: CustomPhaseEvent<IncidentInfo>,
     pub on_combat_start: CustomPhaseEvent,
     pub on_combat_round: Event<CombatStrength, Combat, Game>,
     pub on_combat_end: CustomPhaseEvent<CombatResultInfo>,
@@ -77,17 +78,38 @@ impl ActionInfo {
         self.execute_with_options(game, |_| {});
     }
 
-    pub(crate) fn execute_with_options(
-        &self,
-        game: &mut Game,
-        c: impl Fn(&mut CommandUndoContext),
-    ) {
+    pub(crate) fn execute_with_options(&self, game: &mut Game, c: impl Fn(&mut CommandContext)) {
         for l in self.log.iter().unique() {
             game.add_info_log_item(l);
         }
-        let mut context = CommandUndoContext::new(self.info.clone());
+        let mut context = CommandContext::new(self.info.clone());
         c(&mut context);
         self.undo.apply(game, context);
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, Copy)]
+pub enum IncidentTarget {
+    ActivePlayer,
+    AllPlayers,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct IncidentInfo {
+    pub active_player: usize,
+}
+
+impl IncidentInfo {
+    #[must_use]
+    pub fn new(origin: usize) -> IncidentInfo {
+        IncidentInfo {
+            active_player: origin,
+        }
+    }
+
+    #[must_use]
+    pub fn is_active(&self, role: IncidentTarget, player: usize) -> bool {
+        role == IncidentTarget::AllPlayers || self.active_player == player
     }
 }
 
@@ -201,7 +223,7 @@ pub(crate) struct PlayerCommands {
     pub name: String,
     pub index: usize,
     pub log: Vec<String>,
-    pub content: CommandUndoContext,
+    pub content: CommandContext,
 }
 
 impl PlayerCommands {
@@ -211,7 +233,7 @@ impl PlayerCommands {
             name,
             index: player_index,
             log: Vec::new(),
-            content: CommandUndoContext::new(info),
+            content: CommandContext::new(info),
         }
     }
 
@@ -219,8 +241,16 @@ impl PlayerCommands {
         self.content.gained_resources += resources;
     }
 
-    pub fn gain_unit(&mut self, unit: UnitType, pos: Position) {
-        self.content.gained_units.push((unit, pos));
+    pub fn gain_unit(&mut self, player: usize, unit: UnitType, pos: Position) {
+        self.content
+            .gained_units
+            .push(GainUnitContext::new(unit, pos, player));
+    }
+
+    pub fn gain_city(&mut self, player: usize, pos: Position) {
+        self.content
+            .gained_cities
+            .push(GainCityContext::new(pos, player));
     }
 
     pub fn add_info_log_item(&mut self, edit: &str) {

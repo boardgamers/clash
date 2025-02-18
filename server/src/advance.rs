@@ -1,9 +1,6 @@
-use crate::{
-    ability_initializer::{self, AbilityInitializer, AbilityInitializerSetup},
-    game::Game,
-    resource_pile::ResourcePile,
-};
+use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile};
 
+use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::city_pieces::Building;
 use crate::events::EventOrigin;
 use Bonus::*;
@@ -16,10 +13,7 @@ pub struct Advance {
     pub contradicting: Vec<String>,
     pub unlocked_building: Option<Building>,
     pub government: Option<String>,
-    pub player_initializer: AbilityInitializer,
-    pub player_deinitializer: AbilityInitializer,
-    pub player_one_time_initializer: AbilityInitializer,
-    pub player_undo_deinitializer: AbilityInitializer,
+    pub listeners: AbilityListeners,
 }
 
 impl Advance {
@@ -43,10 +37,7 @@ pub(crate) struct AdvanceBuilder {
     contradicting_advance: Vec<String>,
     unlocked_building: Option<Building>,
     government: Option<String>,
-    player_initializers: Vec<AbilityInitializer>,
-    player_deinitializers: Vec<AbilityInitializer>,
-    player_one_time_initializers: Vec<AbilityInitializer>,
-    player_undo_deinitializers: Vec<AbilityInitializer>,
+    builder: AbilityInitializerBuilder,
 }
 
 impl AdvanceBuilder {
@@ -59,10 +50,7 @@ impl AdvanceBuilder {
             contradicting_advance: vec![],
             unlocked_building: None,
             government: None,
-            player_initializers: Vec::new(),
-            player_deinitializers: Vec::new(),
-            player_one_time_initializers: Vec::new(),
-            player_undo_deinitializers: Vec::new(),
+            builder: AbilityInitializerBuilder::new(),
         }
     }
 
@@ -101,14 +89,6 @@ impl AdvanceBuilder {
 
     #[must_use]
     pub fn build(self) -> Advance {
-        let player_initializer =
-            ability_initializer::join_ability_initializers(self.player_initializers);
-        let player_deinitializer =
-            ability_initializer::join_ability_initializers(self.player_deinitializers);
-        let player_one_time_initializer =
-            ability_initializer::join_ability_initializers(self.player_one_time_initializers);
-        let player_undo_deinitializer =
-            ability_initializer::join_ability_initializers(self.player_undo_deinitializers);
         Advance {
             name: self.name,
             description: self.description,
@@ -117,47 +97,14 @@ impl AdvanceBuilder {
             contradicting: self.contradicting_advance,
             unlocked_building: self.unlocked_building,
             government: self.government,
-            player_initializer,
-            player_deinitializer,
-            player_one_time_initializer,
-            player_undo_deinitializer,
+            listeners: self.builder.build(),
         }
     }
 }
 
 impl AbilityInitializerSetup for AdvanceBuilder {
-    fn add_ability_initializer<F>(mut self, initializer: F) -> Self
-    where
-        F: Fn(&mut Game, usize) + 'static,
-    {
-        self.player_initializers.push(Box::new(initializer));
-        self
-    }
-
-    fn add_ability_deinitializer<F>(mut self, deinitializer: F) -> Self
-    where
-        F: Fn(&mut Game, usize) + 'static,
-    {
-        self.player_deinitializers.push(Box::new(deinitializer));
-        self
-    }
-
-    fn add_one_time_ability_initializer<F>(mut self, initializer: F) -> Self
-    where
-        F: Fn(&mut Game, usize) + 'static,
-    {
-        self.player_one_time_initializers
-            .push(Box::new(initializer));
-        self
-    }
-
-    fn add_ability_undo_deinitializer<F>(mut self, deinitializer: F) -> Self
-    where
-        F: Fn(&mut Game, usize) + 'static,
-    {
-        self.player_undo_deinitializers
-            .push(Box::new(deinitializer));
-        self
+    fn builder(&mut self) -> &mut AbilityInitializerBuilder {
+        &mut self.builder
     }
 
     fn get_key(&self) -> EventOrigin {

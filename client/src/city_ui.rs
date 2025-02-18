@@ -7,12 +7,12 @@ use crate::construct_ui::{new_building_positions, ConstructionPayment, Construct
 use crate::happiness_ui::{
     add_increase_happiness, can_play_increase_happiness, open_increase_happiness_dialog,
 };
+use crate::hex_ui;
 use crate::hex_ui::Point;
 use crate::layout_ui::draw_scaled_icon;
 use crate::map_ui::{move_units_buttons, show_map_action_buttons};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::render_context::RenderContext;
-use crate::{hex_ui, player_ui};
 use macroquad::prelude::*;
 use server::city::{City, MoodState};
 use server::city_pieces::Building;
@@ -208,14 +208,19 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
 pub fn city_labels(game: &Game, city: &City) -> Vec<String> {
     [
         vec![format!(
-            "Size: {} Mood: {} Activated: {}",
+            "City: {}, {}, {} {}",
+            game.get_player(city.player_index).get_name(),
             city.size(),
             match city.mood_state {
                 MoodState::Happy => "Happy",
                 MoodState::Neutral => "Neutral",
                 MoodState::Angry => "Angry",
             },
-            city.is_activated()
+            if city.is_activated() {
+                " (activated)"
+            } else {
+                ""
+            },
         )],
         city.pieces
             .building_owners()
@@ -243,7 +248,7 @@ pub fn draw_city(rc: &RenderContext, city: &City) {
     if city.is_activated() {
         draw_circle(c.x, c.y, 18.0, WHITE);
     }
-    draw_circle(c.x, c.y, 15.0, player_ui::player_color(owner));
+    draw_circle(c.x, c.y, 15.0, rc.player_color(owner));
 
     let state = &rc.state;
     let mood = if let ActiveDialog::IncreaseHappiness(increase) = &state.active_dialog {
@@ -275,7 +280,7 @@ pub fn draw_city(rc: &RenderContext, city: &City) {
     let mut i = 0;
     city.pieces.wonders.iter().for_each(|w| {
         let p = hex_ui::rotate_around(c, 20.0, 90 * i);
-        draw_circle(p.x, p.y, 18.0, player_ui::player_color(owner));
+        draw_circle(p.x, p.y, 18.0, rc.player_color(owner));
         let size = 20.;
         draw_scaled_icon(
             rc,
@@ -290,12 +295,7 @@ pub fn draw_city(rc: &RenderContext, city: &City) {
     for player_index in 0..4 {
         for b in &city.pieces.buildings(Some(player_index)) {
             let p = building_position(city, c, i, *b);
-            draw_circle(
-                p.x,
-                p.y,
-                BUILDING_SIZE,
-                player_ui::player_color(player_index),
-            );
+            draw_circle(p.x, p.y, BUILDING_SIZE, rc.player_color(player_index));
             let tooltip = if matches!(state.active_dialog, ActiveDialog::CulturalInfluence(_)) {
                 ""
             } else {

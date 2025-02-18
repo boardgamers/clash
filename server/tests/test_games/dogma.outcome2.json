@@ -1,7 +1,7 @@
 {
   "state": "Playing",
   "state_change_event_state": {
-    "event_used": [],
+    "players_used": [],
     "last_priority_used": 0,
     "current": {
       "event_type": "OnConstruct",
@@ -152,7 +152,7 @@
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 3,
+      "incident_tokens": 3,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -229,7 +229,7 @@
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "game_event_tokens": 2,
+      "incident_tokens": 2,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -549,7 +549,7 @@
       "undo": [
         {
           "CustomPhaseEvent": {
-            "event_used": [],
+            "players_used": [],
             "last_priority_used": 1,
             "current": {
               "event_type": "OnConstruct",

@@ -1,12 +1,12 @@
 use std::{cmp::Ordering::*, mem};
 
+use crate::utils::Shuffle;
 use crate::{
     action::Action,
     game::{Game, GameState::*, Messages},
     log::LogSliceOptions,
     utils::Rng,
 };
-
 // Game API methods, see https://docs.boardgamers.space/guide/engine-api.html#required-methods
 
 #[must_use]
@@ -101,6 +101,7 @@ pub fn civilizations(game: Game) -> Vec<String> {
 
 #[must_use]
 pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
+    game.incidents_left.shuffle(&mut game.rng);
     game.rng = Rng::default();
     game.wonders_left = Vec::new();
     for (i, player) in game.players.iter_mut().enumerate() {
