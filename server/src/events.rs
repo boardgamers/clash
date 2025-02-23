@@ -62,9 +62,10 @@ where
         F: Fn(&mut T, &U, &V) + 'static,
     {
         let id = self.next_id;
-        assert!(!self.listeners.iter().any(|(_, p, _, _)| &priority == p), 
-                "Priority {priority} already used by listener with key {key:?}"
-            );
+        assert!(
+            !self.listeners.iter().any(|(_, p, _, _)| &priority == p),
+            "Priority {priority} already used by listener with key {key:?}"
+        );
         self.listeners
             .push((Box::new(new_listener), priority, id, key));
         self.listeners.sort_by_key(|(_, priority, _, _)| *priority);
