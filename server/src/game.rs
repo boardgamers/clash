@@ -1671,36 +1671,40 @@ impl Game {
             " and captured {}'s city at {position}",
             self.players[old_player_index].get_name()
         ));
+        let attacker_is_human = self.get_player(new_player_index).is_human();
         let size = city.mood_modified_size(&self.players[new_player_index]);
-        self.players[new_player_index].gain_resources(ResourcePile::gold(size as u32));
-        let take_over = self.players[new_player_index].is_city_available();
+        if attacker_is_human {
+            self.players[new_player_index].gain_resources(ResourcePile::gold(size as u32));
+        }
+        let take_over = self.get_player(new_player_index).is_city_available();
 
         if take_over {
-            for wonder in &city.pieces.wonders {
-                (wonder.listeners.deinitializer)(self, old_player_index);
-                (wonder.listeners.initializer)(self, new_player_index);
-            }
             city.player_index = new_player_index;
             city.mood_state = Angry;
+            if attacker_is_human {
+                for wonder in &city.pieces.wonders {
+                    (wonder.listeners.deinitializer)(self, old_player_index);
+                    (wonder.listeners.initializer)(self, new_player_index);
+                }
 
-            for (building, owner) in city.pieces.building_owners() {
-                if matches!(building, Obelisk) {
-                    continue;
-                }
-                let Some(owner) = owner else {
-                    continue;
-                };
-                if owner != old_player_index {
-                    continue;
-                }
-                city.pieces.set_building(building, new_player_index);
-                if !(self.players[new_player_index].is_building_available(building, self)) {
-                    city.pieces.remove_building(building);
-                    self.players[new_player_index].gain_resources(ResourcePile::gold(1));
+                for (building, owner) in city.pieces.building_owners() {
+                    if matches!(building, Obelisk) {
+                        continue;
+                    }
+                    let Some(owner) = owner else {
+                        continue;
+                    };
+                    if owner != old_player_index {
+                        continue;
+                    }
+                    if self.players[new_player_index].is_building_available(building, self) {
+                        city.pieces.set_building(building, new_player_index);
+                    } else {
+                        city.pieces.remove_building(building);
+                        self.players[new_player_index].gain_resources(ResourcePile::gold(1));
+                    }
                 }
             }
-        }
-        if take_over {
             self.players[new_player_index].cities.push(city);
         } else {
             self.players[new_player_index].gain_resources(ResourcePile::gold(city.size() as u32));

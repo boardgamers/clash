@@ -34,7 +34,7 @@
         },
         {
           "city_pieces": {
-            "fortress": 1
+            "fortress": 0
           },
           "mood_state": "Angry",
           "activations": 0,
