@@ -339,10 +339,7 @@ pub(crate) fn start_combat(game: &mut Game) {
 
 pub(crate) fn choose_fighter_casualties() -> Builtin {
     choose_casualties(
-        Builtin::builder(
-            "Choose Casualties",
-            "Choose which carried units to remove.",
-        ),
+        Builtin::builder("Choose Casualties", "Choose which carried units to remove."),
         1,
         |c| c.fighters,
         |game, player| get_combat(game).fighting_units(game, player),
@@ -487,8 +484,9 @@ fn kill_units(game: &mut Game, player: usize, killed_unit_ids: &[u32]) {
         "{} removed {}",
         p.get_name(),
         killed_unit_ids
-                .iter()
-                .map(|id| p.get_unit(*id).expect("unit not found").unit_type).collect::<Units>()
+            .iter()
+            .map(|id| p.get_unit(*id).expect("unit not found").unit_type)
+            .collect::<Units>()
     ));
 
     let mut c = take_combat(game);

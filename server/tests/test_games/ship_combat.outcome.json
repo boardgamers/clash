@@ -53,7 +53,7 @@
         },
         "response": null,
         "origin": {
-          "Builtin": "Choose Casualties - Carried Units"
+          "Builtin": "Choose Casualties (carried units)"
         }
       }
     }
