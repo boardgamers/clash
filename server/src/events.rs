@@ -52,17 +52,19 @@ where
     T: Clone + PartialEq,
 {
     //return the id of the listener witch can be used to remove the listener later
-    pub(crate) fn add_listener_mut<F>(&mut self, new_listener: F, priority: i32, key: EventOrigin) -> usize
+    pub(crate) fn add_listener_mut<F>(
+        &mut self,
+        new_listener: F,
+        priority: i32,
+        key: EventOrigin,
+    ) -> usize
     where
         F: Fn(&mut T, &U, &V) + 'static,
     {
         let id = self.next_id;
-        if let Some(_) = self.listeners.iter().find(|(_, p, _, _)| &priority == p) {
-            panic!(
-                "Priority {priority} already used by listener with key {:?}",
-                key
-            )
-        }
+        assert!(!self.listeners.iter().any(|(_, p, _, _)| &priority == p), 
+                "Priority {priority} already used by listener with key {key:?}"
+            );
         self.listeners
             .push((Box::new(new_listener), priority, id, key));
         self.listeners.sort_by_key(|(_, priority, _, _)| *priority);

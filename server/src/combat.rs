@@ -73,7 +73,7 @@ impl CombatResultInfo {
     pub fn is_attacker(&self, player: usize) -> bool {
         self.attacker == player
     }
-    
+
     #[must_use]
     pub fn is_defender(&self, player: usize) -> bool {
         self.attacker != player
@@ -96,7 +96,7 @@ impl CombatResultInfo {
             self.result == CombatResult::DefenderWins
         }
     }
-    
+
     #[must_use]
     pub fn opponent(&self, player: usize) -> usize {
         if self.is_attacker(player) {
@@ -105,10 +105,12 @@ impl CombatResultInfo {
             self.attacker
         }
     }
-    
+
     #[must_use]
     pub fn captured_city(&self, player: usize, game: &Game) -> bool {
-        self.is_attacker(player) && self.is_winner(player) && game.get_any_city(self.defender_position).is_some()     
+        self.is_attacker(player)
+            && self.is_winner(player)
+            && game.get_any_city(self.defender_position).is_some()
     }
 }
 

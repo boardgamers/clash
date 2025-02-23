@@ -1328,7 +1328,7 @@ fn test_barbarians_recapture_city() {
         "barbarians_recapture_city",
         vec![TestAction::not_undoable(
             0,
-            move_action(vec![5,6,7,8], Position::from_offset("C2")),
+            move_action(vec![5, 6, 7, 8], Position::from_offset("C2")),
         )],
     );
 }
