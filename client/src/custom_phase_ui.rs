@@ -1,19 +1,20 @@
 use crate::advance_ui::{show_advance_menu, AdvanceState};
 use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
 use crate::hex_ui::Point;
 use crate::layout_ui::{bottom_center_anchor, icon_pos};
 use crate::payment_ui::{multi_payment_dialog, payment_dialog, Payment};
 use crate::render_context::RenderContext;
+use crate::select_ui::ConfirmSelection;
 use crate::unit_ui;
 use crate::unit_ui::{draw_unit_type, UnitHighlightType, UnitSelection};
 use macroquad::math::vec2;
-use server::action::{Action, CombatAction, PlayActionCard};
-use server::content::custom_phase_actions::{AdvanceRewardRequest, CustomPhaseEventAction, UnitTypeRequest, CustomPhaseUnitsRequest};
+use server::action::Action;
+use server::content::custom_phase_actions::{
+    AdvanceRewardRequest, CustomPhaseEventAction, UnitTypeRequest,
+};
 use server::game::Game;
-use server::position::Position;
 use server::unit::Unit;
-use crate::dialog_ui::{cancel_button_with_tooltip, OkTooltip};
-use crate::select_ui::ConfirmSelection;
 
 pub fn custom_phase_payment_dialog(rc: &RenderContext, payments: &[Payment]) -> StateUpdate {
     multi_payment_dialog(
@@ -101,11 +102,7 @@ pub struct UnitsSelection {
 }
 
 impl UnitsSelection {
-    pub fn new(
-        needed: u8,
-        selectable: Vec<u32>,
-        description: Option<String>,
-    ) -> Self {
+    pub fn new(needed: u8, selectable: Vec<u32>, description: Option<String>) -> Self {
         UnitsSelection {
             needed,
             units: Vec::new(),
@@ -142,53 +139,26 @@ impl ConfirmSelection for UnitsSelection {
     }
 }
 
-pub fn select_units_dialog(
-    rc: &RenderContext,
-    sel: &UnitsSelection,
-) -> StateUpdate {
-    unit_ui::unit_selection_dialog::<UnitsSelection>(
-        rc,
-        sel,
-        |new: UnitsSelection| {
-            StateUpdate::Execute(Action::CustomPhaseEvent(
-                CustomPhaseEventAction::SelectUnits(new.units.clone()),
-            ))
-        },
-    )
+pub fn select_units_dialog(rc: &RenderContext, sel: &UnitsSelection) -> StateUpdate {
+    unit_ui::unit_selection_dialog::<UnitsSelection>(rc, sel, |new: UnitsSelection| {
+        StateUpdate::Execute(Action::CustomPhaseEvent(
+            CustomPhaseEventAction::SelectUnits(new.units.clone()),
+        ))
+    })
 }
 
-// 
-// pub fn remove_casualties_active_dialog(game: &Game, r: &CombatRoundResult, player: usize) -> ActiveDialog {
-//     let c = get_combat(game);
-// 
-//     let (position, casualties, selectable) = if player == c.attacker {
-//         (
-//             c.attacker_position,
-//             r.attacker_hits,
-//             active_attackers(game, c.attacker, &c.attackers, c.defender_position)
-//                 .clone()
-//                 .into_iter()
-//                 .chain(c.attackers.iter().flat_map(|a| {
-//                     let units = carried_units(*a, game.get_player(r.player));
-//                     units
-//                 }))
-//                 .collect(),
-//         )
-//     } else if player == c.defender {
-//         (
-//             c.defender_position,
-//             r.defender_hits,
-//             c.active_defenders(game, c.defender, c.defender_position),
-//         )
-//     } else {
-//         panic!("player should be either defender or attacker")
-//     };
-// 
-//     ActiveDialog::RemoveCasualties(RemoveCasualtiesSelection::new(
-//         player,
-//         position,
-//         casualties,
-//         c.carried_units_casualties(game, player, casualties),
-//         selectable,
-//     ))
-// }
+pub(crate) fn bool_request_dialog(rc: &RenderContext) -> StateUpdate {
+    if ok_button(rc, OkTooltip::Valid("OK".to_string())) {
+        return bool_answer(true);
+    }
+    if cancel_button_with_tooltip(rc, "Decline") {
+        return bool_answer(false);
+    }
+    StateUpdate::None
+}
+
+fn bool_answer(answer: bool) -> StateUpdate {
+    StateUpdate::Execute(Action::CustomPhaseEvent(CustomPhaseEventAction::Bool(
+        answer,
+    )))
+}

@@ -341,7 +341,7 @@ pub(crate) fn choose_fighter_casualties() -> Builtin {
     choose_casualties(
         Builtin::builder(
             "Choose Casualties",
-            "After each combat round, choose which units to remove.",
+            "Choose which carried units to remove.",
         ),
         1,
         |c| c.fighters,
@@ -353,8 +353,8 @@ pub(crate) fn choose_fighter_casualties() -> Builtin {
 pub(crate) fn choose_carried_units_casualties() -> Builtin {
     choose_casualties(
         Builtin::builder(
-            "Choose Casualties - Carried Units",
-            "After each combat round, choose which carried units to remove.",
+            "Choose Casualties (carried units)",
+            "Choose which carried units to remove.",
         ),
         2,
         |c| c.carried_units,
@@ -378,7 +378,7 @@ pub(crate) fn choose_carried_units_casualties() -> Builtin {
 }
 
 pub(crate) fn offer_retreat() -> Builtin {
-    Builtin::builder("Offer Retreat", "Offer retreat after each combat round")
+    Builtin::builder("Offer Retreat", "Do you want to retreat?")
         .add_bool_request(
             |event| &mut event.on_combat_round_end,
             0,
@@ -473,7 +473,7 @@ pub(crate) fn choose_casualties(
         .build()
 }
 
-#[must_use] 
+#[must_use]
 pub(crate) fn get_combat(game: &Game) -> &Combat {
     let GameState::Combat(c) = &game.state else {
         panic!("Invalid state")

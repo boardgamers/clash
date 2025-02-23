@@ -2,6 +2,7 @@ use crate::assets::Assets;
 use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::ConstructionPayment;
+use crate::custom_phase_ui::UnitsSelection;
 use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
 use crate::event_ui::{custom_phase_event_help, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
@@ -15,12 +16,13 @@ use crate::status_phase_ui::ChooseAdditionalAdvances;
 use macroquad::prelude::*;
 use server::action::Action;
 use server::city::{City, MoodState};
-use server::content::custom_phase_actions::{AdvanceRewardRequest, PositionRequest, CustomPhaseRequest, UnitTypeRequest, CustomPhaseUnitsRequest};
+use server::content::custom_phase_actions::{
+    AdvanceRewardRequest, CustomPhaseRequest, PositionRequest, UnitTypeRequest,
+};
 use server::events::EventOrigin;
 use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
 use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
-use crate::custom_phase_ui::UnitsSelection;
 
 #[derive(Clone)]
 pub enum ActiveDialog {
@@ -50,11 +52,6 @@ pub enum ActiveDialog {
     DetermineFirstPlayer,
     ChangeGovernmentType,
     ChooseAdditionalAdvances(ChooseAdditionalAdvances),
-
-    // combat
-    PlayActionCard,
-    Retreat,
-    // RemoveCasualties(RemoveCasualtiesSelection),
 
     // custom
     Sports((Payment, Position)),
@@ -95,8 +92,6 @@ impl ActiveDialog {
             ActiveDialog::DetermineFirstPlayer => "determine first player",
             ActiveDialog::ChangeGovernmentType => "change government type",
             ActiveDialog::ChooseAdditionalAdvances(_) => "choose additional advances",
-            ActiveDialog::PlayActionCard => "play action card",
-            ActiveDialog::Retreat => "retreat",
             ActiveDialog::Sports(_) => "sports",
             ActiveDialog::Theaters(_) => "theaters",
             ActiveDialog::Taxes(_) => "collect taxes",
@@ -106,6 +101,7 @@ impl ActiveDialog {
             ActiveDialog::PositionRequest(_) => "custom phase position request",
             ActiveDialog::UnitTypeRequest(_) => "custom phase unit request",
             ActiveDialog::UnitsRequest(_) => "custom phase units request",
+            ActiveDialog::BoolRequest => "custom phase bool request",
         }
     }
 
@@ -163,8 +159,6 @@ impl ActiveDialog {
             ActiveDialog::ChooseAdditionalAdvances(_) => {
                 vec!["Click on an advance to choose it".to_string()]
             }
-            ActiveDialog::PlayActionCard => vec!["Click on an action card to play it".to_string()],
-            ActiveDialog::Retreat => vec!["Do you want to retreat?".to_string()],
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
             ActiveDialog::Sports(_) => {
                 event_help(rc, &EventOrigin::Advance("Sports".to_string()), true)
@@ -177,16 +171,11 @@ impl ActiveDialog {
             }
             ActiveDialog::ResourceRewardRequest(_)
             | ActiveDialog::AdvanceRewardRequest(_)
-            | ActiveDialog::PaymentRequest(_) => custom_phase_event_help(rc, None),
-            ActiveDialog::PositionRequest(r) => {
-                custom_phase_event_help(rc, r.description.as_ref())
-            }
-            ActiveDialog::UnitTypeRequest(r) => {
-                custom_phase_event_help(rc, r.description.as_ref())
-            }
-            ActiveDialog::UnitsRequest(r) => {
-                custom_phase_event_help(rc, r.description.as_ref())
-            }
+            | ActiveDialog::PaymentRequest(_)
+            | ActiveDialog::BoolRequest => custom_phase_event_help(rc, None),
+            ActiveDialog::PositionRequest(r) => custom_phase_event_help(rc, r.description.as_ref()),
+            ActiveDialog::UnitTypeRequest(r) => custom_phase_event_help(rc, r.description.as_ref()),
+            ActiveDialog::UnitsRequest(r) => custom_phase_event_help(rc, r.description.as_ref()),
         }
     }
 
@@ -545,26 +534,17 @@ impl State {
                         .collect(),
                 ),
                 CustomPhaseRequest::ResourceReward(r) => {
-                    ActiveDialog::ResourceRewardRequest(Payment::new_gain(
-                        &r.reward, &r.name,
-                    ))
+                    ActiveDialog::ResourceRewardRequest(Payment::new_gain(&r.reward, &r.name))
                 }
                 CustomPhaseRequest::AdvanceReward(r) => {
                     ActiveDialog::AdvanceRewardRequest(r.clone())
                 }
-                CustomPhaseRequest::SelectPosition(r) => {
-                    ActiveDialog::PositionRequest(r.clone())
-                }
-                CustomPhaseRequest::SelectUnitType(r) => {
-                    ActiveDialog::UnitTypeRequest(r.clone())
-                }
-                CustomPhaseRequest::SelectUnits(r) => {
-                    ActiveDialog::UnitsRequest(UnitsSelection::new(
-                        r.needed,
-                        r.choices.clone(),
-                        r.description.clone(),
-                    ))
-                }
+                CustomPhaseRequest::SelectPosition(r) => ActiveDialog::PositionRequest(r.clone()),
+                CustomPhaseRequest::SelectUnitType(r) => ActiveDialog::UnitTypeRequest(r.clone()),
+                CustomPhaseRequest::SelectUnits(r) => ActiveDialog::UnitsRequest(
+                    UnitsSelection::new(r.needed, r.choices.clone(), r.description.clone()),
+                ),
+                CustomPhaseRequest::BoolRequest => ActiveDialog::BoolRequest,
             };
         }
         match &game.state {
@@ -586,7 +566,7 @@ impl State {
                 StatusPhaseState::ChangeGovernmentType => ActiveDialog::ChangeGovernmentType,
                 StatusPhaseState::DetermineFirstPlayer => ActiveDialog::DetermineFirstPlayer,
             },
-            GameState::Combat(c) => panic!("should be in custom phase"),
+            GameState::Combat(_) => panic!("should be in custom phase"),
             GameState::ExploreResolution(r) => {
                 ActiveDialog::ExploreResolution(ExploreResolutionConfig {
                     block: r.block.clone(),
@@ -619,4 +599,3 @@ impl State {
         );
     }
 }
-

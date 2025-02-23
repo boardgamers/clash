@@ -25,8 +25,8 @@ use crate::render_context::RenderContext;
 use crate::status_phase_ui::raze_city_confirm_dialog;
 use crate::unit_ui::unit_selection_click;
 use crate::{
-    combat_ui, custom_actions_ui, custom_phase_ui, dialog_ui, influence_ui, map_ui, move_ui,
-    recruit_unit_ui, status_phase_ui, tooltip, unit_ui,
+    custom_actions_ui, custom_phase_ui, dialog_ui, influence_ui, map_ui, move_ui, recruit_unit_ui,
+    status_phase_ui, tooltip,
 };
 
 fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
@@ -159,25 +159,19 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
             status_phase_ui::choose_additional_advances_dialog(rc, a)
         }
         ActiveDialog::DetermineFirstPlayer => status_phase_ui::determine_first_player_dialog(rc),
-        //combat
-        ActiveDialog::PlayActionCard => combat_ui::play_action_card_dialog(rc),
-        ActiveDialog::Retreat => combat_ui::retreat_dialog(rc),
 
         ActiveDialog::Sports((p, pos)) => custom_actions_ui::sports(rc, p, *pos),
         ActiveDialog::Taxes(p) => custom_actions_ui::taxes(rc, p),
         ActiveDialog::Theaters(p) => custom_actions_ui::theaters(rc, p),
 
-        ActiveDialog::PaymentRequest(c) => {
-            custom_phase_ui::custom_phase_payment_dialog(rc, c)
-        }
-        ActiveDialog::ResourceRewardRequest(p) => {
-            custom_phase_ui::payment_reward_dialog(rc, p)
-        }
+        ActiveDialog::PaymentRequest(c) => custom_phase_ui::custom_phase_payment_dialog(rc, c),
+        ActiveDialog::ResourceRewardRequest(p) => custom_phase_ui::payment_reward_dialog(rc, p),
         ActiveDialog::AdvanceRewardRequest(r) => {
             custom_phase_ui::advance_reward_dialog(rc, r, &custom_phase_event_origin(rc).name())
         }
         ActiveDialog::UnitTypeRequest(r) => custom_phase_ui::unit_request_dialog(rc, r),
         ActiveDialog::UnitsRequest(r) => custom_phase_ui::select_units_dialog(rc, r),
+        ActiveDialog::BoolRequest => custom_phase_ui::bool_request_dialog(rc),
     }
 }
 
@@ -238,11 +232,9 @@ fn controlling_player_click(rc: &RenderContext, mouse_pos: Vec2, pos: Position) 
                 StateUpdate::None
             }
         }
-        ActiveDialog::UnitsRequest(s) => {
-            unit_selection_click(rc, pos, mouse_pos, s, |new| {
-                StateUpdate::OpenDialog(ActiveDialog::UnitsRequest(new.clone()))
-            })
-        }
+        ActiveDialog::UnitsRequest(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
+            StateUpdate::OpenDialog(ActiveDialog::UnitsRequest(new.clone()))
+        }),
         ActiveDialog::IncreaseHappiness(h) => increase_happiness_click(rc, pos, h),
         _ => StateUpdate::SetFocusedTile(pos),
     }

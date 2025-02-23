@@ -16,7 +16,6 @@ mod city_ui;
 pub mod client;
 pub mod client_state;
 mod collect_ui;
-mod combat_ui;
 mod construct_ui;
 mod custom_actions_ui;
 mod custom_phase_ui;
