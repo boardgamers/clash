@@ -50,18 +50,30 @@ pub struct CombatResultInfo {
     pub result: CombatResult,
     pub defender_position: Position,
     pub attacker: usize,
+    pub defender: usize,
 }
 
 impl CombatResultInfo {
     #[must_use]
-    pub fn new(result: CombatResult, attacker: usize, defender_position: Position) -> Self {
+    pub fn new(
+        result: CombatResult,
+        attacker: usize,
+        defender: usize,
+        defender_position: Position,
+    ) -> Self {
         Self {
             result,
             defender_position,
             attacker,
+            defender,
         }
     }
 
+    #[must_use]
+    pub fn is_attacker(&self, player: usize) -> bool {
+        self.attacker == player
+    }
+    
     #[must_use]
     pub fn is_defender(&self, player: usize) -> bool {
         self.attacker != player
@@ -69,11 +81,34 @@ impl CombatResultInfo {
 
     #[must_use]
     pub fn is_loser(&self, player: usize) -> bool {
-        if self.attacker == player {
+        if self.is_attacker(player) {
             self.result == CombatResult::DefenderWins
         } else {
             self.result == CombatResult::AttackerWins
         }
+    }
+
+    #[must_use]
+    pub fn is_winner(&self, player: usize) -> bool {
+        if self.is_attacker(player) {
+            self.result == CombatResult::AttackerWins
+        } else {
+            self.result == CombatResult::DefenderWins
+        }
+    }
+    
+    #[must_use]
+    pub fn opponent(&self, player: usize) -> usize {
+        if self.is_attacker(player) {
+            self.defender
+        } else {
+            self.attacker
+        }
+    }
+    
+    #[must_use]
+    pub fn captured_city(&self, player: usize, game: &Game) -> bool {
+        self.is_attacker(player) && self.is_winner(player) && game.get_any_city(self.defender_position).is_some()     
     }
 }
 
@@ -708,6 +743,7 @@ pub(crate) fn end_combat(game: &mut Game, combat: Combat) -> Option<Combat> {
             .clone()
             .expect("Combat result should be set when ending combat"),
         attacker,
+        defender,
         defender_position,
     );
 
@@ -868,13 +904,14 @@ pub(crate) fn place_settler() -> Builtin {
         |event| &mut event.on_combat_end,
         0,
         |game, player_index, i| {
+            let p = game.get_player(player_index);
             if i.is_defender(player_index)
                 && i.is_loser(player_index)
                 && game.get_any_city(i.defender_position).is_some()
-                && !game.get_player(player_index).cities.is_empty()
-                && game.get_player(player_index).available_units().settlers > 0
+                && !p.cities.is_empty()
+                && p.available_units().settlers > 0
+                && p.is_human()
             {
-                let p = game.get_player(player_index);
                 let choices: Vec<Position> = p.cities.iter().map(|c| c.position).collect();
                 Some(PositionRequest::new(choices, None))
             } else {

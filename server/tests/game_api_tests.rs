@@ -1323,6 +1323,17 @@ fn test_barbarians_attack() {
 }
 
 #[test]
+fn test_barbarians_recapture_city() {
+    test_actions(
+        "barbarians_recapture_city",
+        vec![TestAction::not_undoable(
+            0,
+            move_action(vec![5,6,7,8], Position::from_offset("C2")),
+        )],
+    );
+}
+
+#[test]
 fn test_raze_city() {
     test_action(
         "raze_city",

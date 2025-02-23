@@ -1,5 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
+use crate::barbarians::barbarians_bonus;
 use crate::combat::{
     choose_carried_units_casualties, choose_fighter_casualties, offer_retreat, place_settler,
 };
@@ -60,6 +61,7 @@ pub fn get_all() -> Vec<Builtin> {
         choose_fighter_casualties(),
         choose_carried_units_casualties(),
         offer_retreat(),
+        barbarians_bonus(),
     ]
 }
 

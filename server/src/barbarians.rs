@@ -1,11 +1,17 @@
+use crate::ability_initializer::AbilityInitializerSetup;
 use crate::consts::STACK_LIMIT;
-use crate::content::custom_phase_actions::{PositionRequest, UnitTypeRequest};
+use crate::content::builtin::Builtin;
+use crate::content::custom_phase_actions::{
+    PositionRequest, ResourceRewardRequest, UnitTypeRequest,
+};
 use crate::game::Game;
 use crate::incident::{IncidentBuilder, BASE_EFFECT_PRIORITY};
 use crate::map::Terrain;
+use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
+use crate::resource::ResourceType;
 use crate::unit::{UnitType, Units};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -47,6 +53,37 @@ impl BarbariansEventState {
             move_units: false,
         }
     }
+}
+
+pub(crate) fn barbarians_bonus() -> Builtin {
+    Builtin::builder("Barbarians bonus", "-")
+        .add_resource_request(
+            |event| &mut event.on_combat_end,
+            0,
+            |game, player_index, i| {
+                if i.is_winner(player_index)
+                    && !game.get_player(i.opponent(player_index)).is_human()
+                {
+                    let sum = if i.captured_city(player_index, game) {
+                        2
+                    } else {
+                        1
+                    };
+                    Some(ResourceRewardRequest {
+                        reward: PaymentOptions::sum(sum, &[ResourceType::Gold]),
+                        name: "-".to_string(),
+                    })
+                } else {
+                    None
+                }
+            },
+            |_game, _player_index, player_name, resource, _selected| {
+                format!(
+                    "{player_name} gained {resource} for winning a combat against the Barbarians"
+                )
+            },
+        )
+        .build()
 }
 
 pub(crate) fn barbarians_spawn(mut builder: IncidentBuilder) -> IncidentBuilder {

@@ -57,7 +57,7 @@ pub(crate) fn check_for_waste(game: &mut Game) {
             mem::replace(&mut game.players[p].wasted_resources, ResourcePile::empty());
         if !wasted_resources.is_empty() {
             game.add_info_log_item(&format!(
-                "{} Could not store {wasted_resources}",
+                "{} could not store {wasted_resources}",
                 game.players[p].get_name()
             ));
             game.push_undo_context(UndoContext::WastedResources {
