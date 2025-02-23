@@ -30,7 +30,7 @@ fn tactics() -> AdvanceBuilder {
     )
     .with_advance_bonus(CultureToken)
     .with_unlocked_building(Fortress)
-    .add_player_event_listener(|event| &mut event.on_combat_round, fortress, 1)
+    .add_player_event_listener(|event| &mut event.on_combat_round, fortress, 3)
 }
 
 fn siegecraft() -> AdvanceBuilder {
@@ -135,7 +135,7 @@ fn steel_weapons() -> AdvanceBuilder {
         .add_player_event_listener(
             |event| &mut event.on_combat_round,
             use_steel_weapons,
-            0,
+            2,
         )
 }
 

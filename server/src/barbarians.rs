@@ -59,7 +59,7 @@ pub(crate) fn barbarians_bonus() -> Builtin {
     Builtin::builder("Barbarians bonus", "-")
         .add_resource_request(
             |event| &mut event.on_combat_end,
-            0,
+            5,
             |game, player_index, i| {
                 if i.is_winner(player_index)
                     && !game.get_player(i.opponent(player_index)).is_human()

@@ -110,11 +110,11 @@ fn fanaticism() -> AdvanceBuilder {
                     s.roll_log.push("Player gets +2 combat value for Fanaticism Advance".to_string());
                 }
             },
-            0,
+            1,
         )
         .add_position_request(
             |event| &mut event.on_combat_end,
-            0,
+            4,
             |game, player_index, i| {
                 if i.is_loser(player_index)
                     && !game.get_player(player_index).cities.is_empty()

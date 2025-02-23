@@ -72,7 +72,7 @@ fn priesthood() -> AdvanceBuilder {
                         .push("Priesthood reduced the cost to 0".to_string());
                 }
             },
-            0,
+            2,
         )
 }
 

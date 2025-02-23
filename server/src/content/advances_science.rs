@@ -27,7 +27,7 @@ fn math() -> AdvanceBuilder {
                 i.set_zero();
             }
         },
-        0,
+        1,
     )
     .with_advance_bonus(CultureToken)
     .with_unlocked_building(Observatory)
