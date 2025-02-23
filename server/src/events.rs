@@ -148,9 +148,17 @@ impl<T, U, V> Default for EventMut<T, U, V> {
 
 pub struct Event<T, U = (), V = ()> {
     pub inner: Option<EventMut<T, U, V>>,
+    pub name: String,
 }
 
 impl<T, U, V> Event<T, U, V> {
+    pub(crate) fn new(name: &str) -> Self {
+        Self {
+            inner: Some(EventMut::default()),
+            name: name.to_string(),
+        }
+    }
+
     pub(crate) fn get(&self) -> &EventMut<T, U, V> {
         self.inner.as_ref().expect("Event should be initialized")
     }
@@ -161,14 +169,6 @@ impl<T, U, V> Event<T, U, V> {
 
     pub(crate) fn set(&mut self, event: EventMut<T, U, V>) {
         self.inner = Some(event);
-    }
-}
-
-impl<T, U, V> Default for Event<T, U, V> {
-    fn default() -> Self {
-        Self {
-            inner: Some(EventMut::default()),
-        }
     }
 }
 

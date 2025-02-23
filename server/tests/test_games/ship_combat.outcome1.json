@@ -101,17 +101,7 @@
           "movement_restrictions": [
             "Battle"
           ],
-          "id": 8,
-          "carried_units": [
-            {
-              "unit_type": "Elephant",
-              "id": 2
-            },
-            {
-              "unit_type": "Settler",
-              "id": 22
-            }
-          ]
+          "id": 8
         }
       ],
       "civilization": "test1",
@@ -275,13 +265,39 @@
     },
     {
       "action": {
-        "Combat": {
-          "RemoveCasualties": [
-            7,
+        "CustomPhaseEvent": {
+          "SelectUnits": [
             1
           ]
         }
-      }
+      },
+      "undo": [
+        {
+          "CustomPhaseEvent": {
+            "event_type": "on_combat_round_end",
+            "last_priority_used": 2,
+            "current": {
+              "priority": 2,
+              "player_index": 0,
+              "request": {
+                "SelectUnits": {
+                  "choices": [
+                    2,
+                    22,
+                    1
+                  ],
+                  "needed": 1,
+                  "description": "Remove 1 attacking units"
+                }
+              },
+              "response": null,
+              "origin": {
+                "Builtin": "Choose Casualties - Carried Units"
+              }
+            }
+          }
+        }
+      ]
     }
   ],
   "action_log_index": 2,
@@ -291,13 +307,17 @@
     ],
     [
       "Combat round 1",
-      "Player1 rolled 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 12 and gets 2 hits against defending units.",
+      "Player1 rolled 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units.",
       "Player2 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units.",
       "Player1 has to remove 1 of their attacking units"
     ],
     [
-      "Player1 removed 1 ship and 1 cavalry",
-      "Player1 killed all defending units"
+      "Player1 removed 1 cavalry",
+      "Player1 has to remove 1 of their attacking units",
+      "Player1 removed 1 ship",
+      "Player2 has to remove all of their defending units",
+      "Player2 removed 1 ship",
+      "Attacker wins"
     ]
   ],
   "undo_limit": 2,

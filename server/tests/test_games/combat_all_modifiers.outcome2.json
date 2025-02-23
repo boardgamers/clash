@@ -15,7 +15,6 @@
         }
       },
       "round": 1,
-      "phase": "Retreat",
       "defender": 1,
       "defender_position": "C1",
       "attacker": 0,
@@ -35,47 +34,49 @@
       ]
     }
   },
-  "state_change_event_state": {
-    "players_used": [
-      0
-    ],
-    "last_priority_used": 1,
-    "current": {
-      "event_type": "StartCombat",
-      "priority": 1,
-      "player_index": 1,
-      "request": {
-        "Payment": [
-          {
-            "cost": {
-              "default": {
-                "ore": 1
+  "state_change_event_state": [
+    {
+      "event_type": "on_combat_start",
+      "players_used": [
+        0
+      ],
+      "last_priority_used": 1,
+      "current": {
+        "priority": 1,
+        "player_index": 1,
+        "request": {
+          "Payment": [
+            {
+              "cost": {
+                "default": {
+                  "ore": 1
+                },
+                "conversions": [
+                  {
+                    "from": [
+                      {
+                        "ore": 1
+                      }
+                    ],
+                    "to": {
+                      "gold": 1
+                    },
+                    "type": "Unlimited"
+                  }
+                ]
               },
-              "conversions": [
-                {
-                  "from": [
-                    {
-                      "ore": 1
-                    }
-                  ],
-                  "to": {
-                    "gold": 1
-                  },
-                  "type": "Unlimited"
-                }
-              ]
-            },
-            "name": "Use steel weapons",
-            "optional": true
-          }
-        ]
-      },
-      "response": null,
-      "origin": {
-        "Advance": "Steel Weapons"
+              "name": "Use steel weapons",
+              "optional": true
+            }
+          ]
+        },
+        "response": null,
+        "origin": {
+          "Advance": "Steel Weapons"
+        }
       }
     }
-  },
+  ],
   "players": [
     {
       "name": null,
@@ -330,10 +331,9 @@
       "undo": [
         {
           "CustomPhaseEvent": {
-            "players_used": [],
+            "event_type": "on_combat_start",
             "last_priority_used": 1,
             "current": {
-              "event_type": "StartCombat",
               "priority": 1,
               "player_index": 0,
               "request": {
@@ -385,10 +385,9 @@
       "undo": [
         {
           "CustomPhaseEvent": {
-            "players_used": [],
+            "event_type": "on_combat_start",
             "last_priority_used": 0,
             "current": {
-              "event_type": "StartCombat",
               "priority": 0,
               "player_index": 0,
               "request": {

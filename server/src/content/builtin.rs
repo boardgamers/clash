@@ -1,8 +1,9 @@
+use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
-use crate::content::custom_phase_actions::CustomPhasePositionRequest;
+use crate::combat::{
+    choose_carried_units_casualties, choose_fighter_casualties, offer_retreat, place_settler,
+};
 use crate::events::EventOrigin;
-use crate::unit::UnitType;
-use crate::{ability_initializer::AbilityInitializerSetup, position::Position};
 
 pub struct Builtin {
     pub name: String,
@@ -54,36 +55,12 @@ impl AbilityInitializerSetup for BuiltinBuilder {
 
 #[must_use]
 pub fn get_all() -> Vec<Builtin> {
-    vec![Builtin::builder(
-        "Place Settler",
-        "After losing a city, place a settler in another city.",
-    )
-    .add_position_reward_request_listener(
-        |event| &mut event.on_combat_end,
-        0,
-        |game, player_index, i| {
-            if i.is_defender(player_index)
-                && i.is_loser(player_index)
-                && game.get_any_city(i.defender_position).is_some()
-                && !game.get_player(player_index).cities.is_empty()
-                && game.get_player(player_index).available_units().settlers > 0
-            {
-                let p = game.get_player(player_index);
-                let choices: Vec<Position> = p.cities.iter().map(|c| c.position).collect();
-                Some(CustomPhasePositionRequest::new(choices, None))
-            } else {
-                None
-            }
-        },
-        |c, _game, pos| {
-            c.add_info_log_item(&format!(
-                "{} gained 1 free Settler Unit at {pos} for losing a city",
-                c.name,
-            ));
-            c.gain_unit(c.index, UnitType::Settler, *pos);
-        },
-    )
-    .build()]
+    vec![
+        place_settler(),
+        choose_fighter_casualties(),
+        choose_carried_units_casualties(),
+        offer_retreat(),
+    ]
 }
 
 ///

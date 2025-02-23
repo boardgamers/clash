@@ -1,14 +1,18 @@
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::{mem, vec};
+use std::vec;
 use GameState::*;
 
 use crate::advance::Advance;
-use crate::combat::{self, start_combat, Combat, CombatDieRoll, CombatPhase, COMBAT_DIE_SIDES};
+use crate::barbarians::BarbariansEventState;
+use crate::combat::{
+    self, combat_loop, combat_round_end, end_combat, start_combat, take_combat, Combat,
+    CombatDieRoll, COMBAT_DIE_SIDES,
+};
 use crate::consts::{ACTIONS, MOVEMENT_ACTIONS};
 use crate::content::civilizations::BARBARIANS;
-use crate::content::custom_phase_actions::{CustomPhaseEventState, CustomPhaseEventType};
+use crate::content::custom_phase_actions::{CurrentCustomPhaseEvent, CustomPhaseEventState};
 use crate::content::incidents;
 use crate::events::{Event, EventOrigin};
 use crate::explore::{explore_resolution, move_to_unexplored_tile, undo_explore_resolution};
@@ -21,7 +25,9 @@ use crate::player_events::{
 };
 use crate::resource::check_for_waste;
 use crate::status_phase::StatusPhaseAction;
-use crate::unit::{carried_units, get_current_move, MovementRestriction, UnitData, Units};
+use crate::unit::{
+    carried_units, get_current_move, MoveUnits, MovementRestriction, UnitData, Units,
+};
 use crate::utils::Rng;
 use crate::utils::Shuffle;
 use crate::{
@@ -52,7 +58,7 @@ use crate::{
 
 pub struct Game {
     pub state: GameState,
-    pub custom_phase_state: CustomPhaseEventState,
+    pub custom_phase_state: Vec<CustomPhaseEventState>,
     // in turn order starting from starting_player_index and wrapping around
     pub players: Vec<Player>,
     pub map: Map,
@@ -140,7 +146,7 @@ impl Game {
 
         Self {
             state: Playing,
-            custom_phase_state: CustomPhaseEventState::new(),
+            custom_phase_state: Vec::new(),
             players,
             map,
             starting_player_index: starting_player,
@@ -283,6 +289,11 @@ impl Game {
         &self.players[player_index]
     }
 
+    #[must_use]
+    pub fn get_player_mut(&mut self, player_index: usize) -> &mut Player {
+        &mut self.players[player_index]
+    }
+
     ///
     ///
     /// # Panics
@@ -312,35 +323,74 @@ impl Game {
         self.action_log_index += 1;
     }
 
-    pub fn lock_undo(&mut self) {
+    pub(crate) fn lock_undo(&mut self) {
         self.undo_limit = self.action_log_index;
+    }
+
+    #[must_use]
+    pub(crate) fn current_custom_phase(&self) -> &CustomPhaseEventState {
+        self.custom_phase_state.last().expect("state should exist")
+    }
+
+    #[must_use]
+    pub(crate) fn current_custom_phase_mut(&mut self) -> &mut CustomPhaseEventState {
+        self.custom_phase_state
+            .last_mut()
+            .expect("state should exist")
+    }
+
+    #[must_use]
+    pub fn current_custom_phase_event(&self) -> Option<&CurrentCustomPhaseEvent> {
+        self.custom_phase_state
+            .last()
+            .and_then(|s| s.current.as_ref())
+    }
+
+    pub fn current_custom_phase_event_mut(&mut self) -> Option<&mut CurrentCustomPhaseEvent> {
+        self.custom_phase_state
+            .last_mut()
+            .and_then(|s| s.current.as_mut())
     }
 
     pub(crate) fn trigger_custom_phase_event<V>(
         &mut self,
         players: &[usize],
         event: fn(&mut PlayerEvents) -> &mut CustomPhaseEvent<V>,
-        event_type: &CustomPhaseEventType,
         details: &V,
+        log: Option<&str>,
     ) -> bool {
+        let name = event(&mut self.players[0].events).name.clone();
+        if self
+            .custom_phase_state
+            .last()
+            .is_none_or(|s| s.event_type != name)
+        {
+            if let Some(log) = log {
+                self.add_info_log_group(log.to_string());
+            }
+            self.custom_phase_state
+                .push(CustomPhaseEventState::new(name));
+        }
+        let state = self.current_custom_phase();
+
         let remaining: Vec<_> = players
             .iter()
-            .filter(|&p| !self.custom_phase_state.players_used.contains(p))
+            .filter(|&p| !state.players_used.contains(p))
             .collect();
 
         for &player_index in remaining {
             let info = CustomPhaseInfo {
-                event_type: event_type.clone(),
                 player: player_index,
             };
             self.trigger_event_with_game_value(player_index, event, &info, details);
-            if self.custom_phase_state.current.is_some() {
+            if self.current_custom_phase().current.is_some() {
                 return true;
             }
-            self.custom_phase_state.players_used.push(player_index);
-            self.custom_phase_state.last_priority_used = None;
+            let state = self.current_custom_phase_mut();
+            state.players_used.push(player_index);
+            state.last_priority_used = None;
         }
-        self.custom_phase_state = CustomPhaseEventState::new();
+        self.custom_phase_state.pop();
         false
     }
 
@@ -394,6 +444,31 @@ impl Game {
                 .cities
                 .push(City::new(city.player, city.position));
         }
+        if let Some(mut p) = commands.content.barbarian_update {
+            if let Some(m) = p.move_request.take() {
+                let from = m.from;
+                let to = m.to;
+                let vec = self.get_player(m.player).get_units(from);
+                let units: Vec<u32> = vec.iter().map(|u| u.id).collect();
+                let unit_types = vec.iter().map(|u| u.unit_type).collect::<Units>();
+                self.add_info_log_item(&format!(
+                    "Barbarians move from {from} to {to}: {unit_types}"
+                ));
+                p.moved_units.extend(units.iter());
+                self.move_with_possible_combat(
+                    m.player,
+                    None,
+                    from,
+                    &MoveUnits {
+                        units,
+                        destination: to,
+                        embark_carrier_id: None,
+                        payment: ResourcePile::empty(),
+                    },
+                );
+            }
+            self.current_custom_phase_mut().barbarians = Some(p);
+        }
     }
 
     ///
@@ -418,12 +493,12 @@ impl Game {
             return;
         }
 
-        self.add_string_log_item(&action);
+        self.add_log_item_from_action(&action);
         self.add_action_log_item(action.clone());
 
-        if let Some(s) = &mut self.custom_phase_state.current {
+        if let Some(s) = &mut self.current_custom_phase_event_mut() {
             s.response = action.custom_phase_event();
-            let event_type = s.event_type.clone();
+            let event_type = self.current_custom_phase().event_type.clone();
             self.execute_custom_phase_action(player_index, &event_type);
         } else {
             self.execute_regular_action(action, player_index);
@@ -434,45 +509,41 @@ impl Game {
             std::mem::take(&mut self.undo_context_stack);
     }
 
-    pub(crate) fn execute_custom_phase_action(
-        &mut self,
-        player_index: usize,
-        event_type: &CustomPhaseEventType,
-    ) {
+    pub(crate) fn execute_custom_phase_action(&mut self, player_index: usize, event_type: &str) {
         match event_type {
-            CustomPhaseEventType::StartCombat => {
-                if let GameState::Combat(c) = mem::replace(&mut self.state, Playing) {
-                    start_combat(self, c);
-                } else {
-                    panic!("game should be in combat state")
+            "on_combat_start" => {
+                start_combat(self);
+            }
+            "on_combat_round_end" => {
+                self.lock_undo();
+                if let Some(c) = combat_round_end(self) {
+                    combat_loop(self, c);
                 }
             }
-            CustomPhaseEventType::EndCombat => {
-                if let GameState::Combat(c) = mem::replace(&mut self.state, Playing) {
-                    combat::end_combat(self, c);
-                } else {
-                    panic!("game should be in combat state")
-                }
+            "on_combat_end" => {
+                let c = take_combat(self);
+                end_combat(self, c);
             }
-            CustomPhaseEventType::TurnStart => self.start_turn(),
-            // name and payment is only for information - but not needed here
-            CustomPhaseEventType::OnAdvance => {
+            "on_turn_start" => self.start_turn(),
+            // name and payment is ignored here
+            "on_advance_custom_phase" => {
                 self.on_advance(player_index, ResourcePile::empty(), "");
             }
-            CustomPhaseEventType::OnConstruct => {
-                // building is only for information - but not needed here
+            "on_construct" => {
+                // building is ignored here
                 PlayingAction::on_construct(self, player_index, Temple);
             }
-            CustomPhaseEventType::OnRecruit => {
+            "on_recruit" => {
                 self.on_recruit(player_index);
             }
-            CustomPhaseEventType::Incident => {
+            "on_incident" => {
                 self.trigger_incident(player_index);
             }
+            _ => panic!("unknown custom phase event {event_type}"),
         }
     }
 
-    fn add_string_log_item(&mut self, action: &Action) {
+    fn add_log_item_from_action(&mut self, action: &Action) {
         self.log.push(log::format_action_log_item(action, self));
     }
 
@@ -513,9 +584,8 @@ impl Game {
                     player_index,
                 );
             }
-            Combat(c) => {
-                let action = action.combat().expect("action should be a combat action");
-                combat::execute_combat_action(self, action, c);
+            Combat(_) => {
+                panic!("actions can't be executed when the game is in a combat state");
             }
             ExploreResolution(r) => {
                 let rotation = action
@@ -534,9 +604,9 @@ impl Game {
         self.undo_context_stack = item.undo.clone();
         let action = item.action.clone();
 
-        let was_custom_phase = self.custom_phase_state.current.is_some();
+        let was_custom_phase = self.current_custom_phase_event().is_some();
         if was_custom_phase {
-            self.custom_phase_state = CustomPhaseEventState::new();
+            self.custom_phase_state.pop();
         }
 
         match action {
@@ -548,7 +618,6 @@ impl Game {
             Action::CulturalInfluenceResolution(action) => {
                 self.undo_cultural_influence_resolution_action(action);
             }
-            Action::Combat(_action) => unimplemented!("combat actions can't be undone"),
             Action::ExploreResolution(_rotation) => {
                 undo_explore_resolution(self, player_index);
             }
@@ -572,7 +641,7 @@ impl Game {
 
     fn redo(&mut self, player_index: usize) {
         let copy = self.action_log[self.action_log_index].clone();
-        self.add_string_log_item(&copy.action);
+        self.add_log_item_from_action(&copy.action);
         match &self.action_log[self.action_log_index].action {
             Action::Playing(action) => action.clone().execute(self, player_index),
             Action::StatusPhase(_) => panic!("status phase actions can't be redone"),
@@ -600,7 +669,6 @@ impl Game {
                     player_index,
                 );
             }
-            Action::Combat(_) => unimplemented!("retreat can't yet be redone"),
             Action::ExploreResolution(rotation) => {
                 let ExploreResolution(r) = &self.state else {
                     panic!("explore resolution actions can only be redone if the game is in a explore resolution state");
@@ -714,25 +782,13 @@ impl Game {
                     return;
                 }
 
-                let enemy = self.enemy_player(player_index, m.destination);
-                if let Some(defender) = enemy {
-                    if self.move_to_defended_tile(
-                        player_index,
-                        &mut move_state,
-                        &m.units,
-                        m.destination,
-                        starting_position,
-                        defender,
-                    ) {
-                        return;
-                    }
-                } else {
-                    self.move_units(player_index, &m.units, m.destination, m.embark_carrier_id);
-                    self.back_to_move(&move_state, !starting_position.is_neighbor(m.destination));
-                }
-
-                if let Some(enemy) = enemy {
-                    self.capture_position(enemy, m.destination, player_index);
+                if self.move_with_possible_combat(
+                    player_index,
+                    Some(&mut move_state),
+                    starting_position,
+                    &m,
+                ) {
+                    return;
                 }
 
                 (Some(starting_position), disembarked_units)
@@ -747,6 +803,38 @@ impl Game {
             move_state: saved_state,
             disembarked_units,
         });
+    }
+
+    fn move_with_possible_combat(
+        &mut self,
+        player_index: usize,
+        move_state: Option<&mut MoveState>,
+        starting_position: Position,
+        m: &MoveUnits,
+    ) -> bool {
+        let enemy = self.enemy_player(player_index, m.destination);
+        if let Some(defender) = enemy {
+            if self.move_to_defended_tile(
+                player_index,
+                move_state,
+                &m.units,
+                m.destination,
+                starting_position,
+                defender,
+            ) {
+                return true;
+            }
+        } else {
+            self.move_units(player_index, &m.units, m.destination, m.embark_carrier_id);
+            if let Some(move_state) = move_state {
+                self.back_to_move(move_state, !starting_position.is_neighbor(m.destination));
+            }
+        }
+
+        if let Some(enemy) = enemy {
+            self.capture_position(enemy, m.destination, player_index);
+        }
+        false
     }
 
     pub(crate) fn push_undo_context(&mut self, context: UndoContext) {
@@ -793,7 +881,7 @@ impl Game {
     fn move_to_defended_tile(
         &mut self,
         player_index: usize,
-        move_state: &mut MoveState,
+        move_state: Option<&mut MoveState>,
         units: &Vec<u32>,
         destination: Position,
         starting_position: Position,
@@ -824,7 +912,9 @@ impl Game {
             }
         }
         assert!(military, "Need military units to attack");
-        self.back_to_move(move_state, true);
+        if let Some(move_state) = move_state {
+            self.back_to_move(move_state, true);
+        }
 
         if has_defending_units || has_fortress {
             combat::initiate_combat(
@@ -834,20 +924,10 @@ impl Game {
                 player_index,
                 starting_position,
                 units.clone(),
-                true,
+                self.get_player(player_index).is_human(),
                 None,
             );
-            if !matches!(self.state, Movement(_)) {
-                for unit_id in units {
-                    // but the unit is still in the starting position until the attack is resolved
-                    // mostly to keep the logic clean
-                    self.players[player_index]
-                        .get_unit_mut(*unit_id)
-                        .expect("the player should have all units to move")
-                        .position = starting_position;
-                }
-                return true;
-            }
+            return true;
         }
         false
     }
@@ -995,8 +1075,8 @@ impl Game {
         self.trigger_custom_phase_event(
             &[self.current_player_index],
             |e| &mut e.on_turn_start,
-            &CustomPhaseEventType::TurnStart,
             &(),
+            None,
         );
     }
 
@@ -1019,17 +1099,10 @@ impl Game {
 
     #[must_use]
     pub fn active_player(&self) -> usize {
-        if let Some(custom_phase_event) = &self.custom_phase_state.current {
+        if let Some(custom_phase_event) = &self.current_custom_phase_event() {
             return custom_phase_event.player_index;
         }
-        match &self.state {
-            Combat(c) => match &c.phase {
-                CombatPhase::RemoveCasualties(r) => r.player,
-                CombatPhase::PlayActionCard(player) => *player,
-                CombatPhase::Retreat => c.attacker,
-            },
-            _ => self.current_player_index,
-        }
+        self.current_player_index
     }
 
     #[must_use]
@@ -1253,11 +1326,11 @@ impl Game {
         if self.trigger_custom_phase_event(
             &[player_index],
             |e| &mut e.on_advance_custom_phase,
-            &CustomPhaseEventType::OnAdvance,
             &AdvanceInfo {
                 name: advance.to_string(),
                 payment,
             },
+            None,
         ) {
             return;
         }
@@ -1366,8 +1439,8 @@ impl Game {
         if self.trigger_custom_phase_event(
             &[player_index],
             |events| &mut events.on_recruit,
-            &CustomPhaseEventType::OnRecruit,
             &r,
+            None,
         ) {
             return;
         }
@@ -1506,8 +1579,8 @@ impl Game {
         self.trigger_custom_phase_event(
             &players,
             |events| &mut events.on_incident,
-            &CustomPhaseEventType::Incident,
             &IncidentInfo::new(player_index),
+            Some("A new game event has been triggered: "),
         );
 
         for p in &players {
@@ -1643,7 +1716,7 @@ impl Game {
             .collect_vec();
         if !captured_settlers.is_empty() {
             self.add_to_last_log_item(&format!(
-                " and captured {} settlers of {}",
+                " and killed {} settlers of {}",
                 captured_settlers.len(),
                 self.players[old_player].get_name()
             ));
@@ -1955,8 +2028,8 @@ impl Game {
 pub struct GameData {
     state: GameState,
     #[serde(default)]
-    #[serde(skip_serializing_if = "CustomPhaseEventState::is_empty")]
-    state_change_event_state: CustomPhaseEventState,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    state_change_event_state: Vec<CustomPhaseEventState>,
     players: Vec<PlayerData>,
     map: MapData,
     starting_player_index: usize,
@@ -2139,6 +2212,9 @@ pub struct CommandContext {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub gained_cities: Vec<GainCityContext>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub barbarian_update: Option<BarbariansEventState>,
 }
 
 impl CommandContext {
@@ -2149,6 +2225,7 @@ impl CommandContext {
             gained_resources: ResourcePile::empty(),
             gained_units: Vec::new(),
             gained_cities: Vec::new(),
+            barbarian_update: None,
         }
     }
 }
@@ -2241,7 +2318,7 @@ pub mod tests {
     use std::collections::HashMap;
 
     use super::{Game, GameState::Playing};
-    use crate::content::custom_phase_actions::CustomPhaseEventState;
+
     use crate::payment::PaymentOptions;
     use crate::utils::tests::FloatEq;
     use crate::{
@@ -2259,7 +2336,7 @@ pub mod tests {
     pub fn test_game() -> Game {
         Game {
             state: Playing,
-            custom_phase_state: CustomPhaseEventState::new(),
+            custom_phase_state: Vec::new(),
             players: Vec::new(),
             map: Map::new(HashMap::new()),
             starting_player_index: 0,

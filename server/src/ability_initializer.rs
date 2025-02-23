@@ -1,7 +1,7 @@
 use crate::content::custom_phase_actions::{
-    CurrentCustomPhaseEvent, CustomPhaseAdvanceRewardRequest, CustomPhaseEventAction,
-    CustomPhasePaymentRequest, CustomPhasePositionRequest, CustomPhaseRequest,
-    CustomPhaseResourceRewardRequest, CustomPhaseUnitRequest,
+    AdvanceRewardRequest, CurrentCustomPhaseEvent, CustomPhaseEventAction, CustomPhaseRequest,
+    CustomPhaseUnitsRequest, PaymentRequest, PositionRequest, ResourceRewardRequest,
+    UnitTypeRequest,
 };
 use crate::events::{Event, EventOrigin};
 use crate::game::UndoContext;
@@ -186,28 +186,32 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 let player_index = i.player;
                 let player_name = game.players[player_index].get_name();
 
-                if let Some(c) = &game.custom_phase_state.current.as_ref() {
-                    if let Some(action) = &c.response {
-                        assert_eq!(c.event_type, i.event_type);
-                        if c.priority != priority {
-                            // not our request
-                            return;
+                if let Some(mut phase) = game.custom_phase_state.pop() {
+                    if let Some(ref c) = phase.current {
+                        if let Some(ref action) = c.response {
+                            if c.priority == priority {
+                                let mut ctx = phase.clone();
+                                ctx.current.as_mut().expect("current missing").response = None;
+                                game.undo_context_stack
+                                    .push(UndoContext::CustomPhaseEvent(ctx));
+                                let r = c.request.clone();
+                                let a = action.clone();
+                                phase.current = None;
+                                game.custom_phase_state.push(phase);
+                                end_custom_phase.clone()(game, player_index, &player_name, a, r);
+                                return;
+                            }
                         }
-
-                        let mut ctx = game.custom_phase_state.clone();
-                        ctx.current.as_mut().expect("current missing").response = None;
-                        game.undo_context_stack
-                            .push(UndoContext::CustomPhaseEvent(ctx));
-                        let r = c.request.clone();
-                        let a = action.clone();
-                        game.custom_phase_state.current = None;
-                        end_custom_phase.clone()(game, player_index, &player_name, a, r);
                     }
-                    return;
+                    let is_current = phase.current.is_some();
+                    game.custom_phase_state.push(phase);
+                    if is_current {
+                        return;
+                    }
                 }
 
                 if game
-                    .custom_phase_state
+                    .current_custom_phase()
                     .last_priority_used
                     .is_some_and(|last| last < priority)
                 {
@@ -217,10 +221,9 @@ pub(crate) trait AbilityInitializerSetup: Sized {
 
                 if let Some(request) = start_custom_phase(game, player_index, &player_name, details)
                 {
-                    let s = &mut game.custom_phase_state;
+                    let s = game.current_custom_phase_mut();
                     s.last_priority_used = Some(priority);
                     s.current = Some(CurrentCustomPhaseEvent {
-                        event_type: i.event_type.clone(),
                         priority,
                         player_index,
                         request: request.clone(),
@@ -237,9 +240,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &V) -> Option<Vec<CustomPhasePaymentRequest>>
-            + 'static
-            + Clone,
+        request: impl Fn(&mut Game, usize, &V) -> Option<Vec<PaymentRequest>> + 'static + Clone,
         gain_reward: impl Fn(&mut PlayerCommands, &Game, &Vec<ResourcePile>) + 'static + Clone,
     ) -> Self
     where
@@ -261,9 +262,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &V) -> Option<Vec<CustomPhasePaymentRequest>>
-            + 'static
-            + Clone,
+        request: impl Fn(&mut Game, usize, &V) -> Option<Vec<PaymentRequest>> + 'static + Clone,
         gain_reward: impl Fn(&mut Game, usize, &str, &Vec<ResourcePile>) + 'static + Clone,
     ) -> Self
     where
@@ -294,13 +293,11 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         )
     }
 
-    fn add_resource_reward_request_listener<E, V>(
+    fn add_resource_request<E, V>(
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &V) -> Option<CustomPhaseResourceRewardRequest>
-            + 'static
-            + Clone,
+        request: impl Fn(&mut Game, usize, &V) -> Option<ResourceRewardRequest> + 'static + Clone,
         gain_reward_log: impl Fn(&Game, usize, &str, &ResourcePile, bool) -> String + 'static + Clone,
     ) -> Self
     where
@@ -343,19 +340,45 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         )
     }
 
+    fn add_bool_request<E, V>(
+        self,
+        event: E,
+        priority: i32,
+        request: impl Fn(&mut Game, usize, &V) -> bool + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, usize, &str, bool) + 'static + Clone,
+    ) -> Self
+    where
+        E: Fn(&mut PlayerEvents) -> &mut CustomPhaseEvent<V> + 'static + Clone,
+    {
+        self.add_state_change_event_listener(
+            event,
+            priority,
+            move |game, player_index, _player_name, details| {
+                request(game, player_index, details).then_some(CustomPhaseRequest::BoolRequest)
+            },
+            move |game, player_index, player_name, action, request| {
+                if let CustomPhaseRequest::BoolRequest = &request {
+                    if let CustomPhaseEventAction::Bool(reward) = action {
+                        gain_reward(game, player_index, player_name, reward);
+                        return;
+                    }
+                }
+                panic!("Invalid state");
+            },
+        )
+    }
+
     fn add_advance_reward_request_listener<E, V>(
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &V) -> Option<CustomPhaseAdvanceRewardRequest>
-            + 'static
-            + Clone,
+        request: impl Fn(&mut Game, usize, &V) -> Option<AdvanceRewardRequest> + 'static + Clone,
         gain_reward: impl Fn(&mut Game, usize, &str, &String, bool) + 'static + Clone,
     ) -> Self
     where
         E: Fn(&mut PlayerEvents) -> &mut CustomPhaseEvent<V> + 'static + Clone,
     {
-        self.add_choice_reward_request_listener::<E, String, CustomPhaseAdvanceRewardRequest, V>(
+        self.add_choice_reward_request_listener::<E, String, AdvanceRewardRequest, V>(
             event,
             priority,
             |r| &r.choices,
@@ -373,17 +396,17 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         )
     }
 
-    fn add_position_reward_request_listener<E, V>(
+    fn add_position_request<E, V>(
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &V) -> Option<CustomPhasePositionRequest> + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &V) -> Option<PositionRequest> + 'static + Clone,
         gain_reward: impl Fn(&mut PlayerCommands, &Game, &Position) + 'static + Clone,
     ) -> Self
     where
         E: Fn(&mut PlayerEvents) -> &mut CustomPhaseEvent<V> + 'static + Clone,
     {
-        self.add_choice_reward_request_listener::<E, Position, CustomPhasePositionRequest, V>(
+        self.add_choice_reward_request_listener::<E, Position, PositionRequest, V>(
             event,
             priority,
             |r| &r.choices,
@@ -405,24 +428,24 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         )
     }
 
-    fn add_unit_reward_request_listener<E, V>(
+    fn add_unit_type_request<E, V>(
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &V) -> Option<CustomPhaseUnitRequest> + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &V) -> Option<UnitTypeRequest> + 'static + Clone,
         gain_reward: impl Fn(&mut PlayerCommands, &Game, &UnitType) + 'static + Clone,
     ) -> Self
     where
         E: Fn(&mut PlayerEvents) -> &mut CustomPhaseEvent<V> + 'static + Clone,
     {
-        self.add_choice_reward_request_listener::<E, UnitType, CustomPhaseUnitRequest, V>(
+        self.add_choice_reward_request_listener::<E, UnitType, UnitTypeRequest, V>(
             event,
             priority,
             |r| &r.choices,
-            CustomPhaseRequest::SelectUnit,
+            CustomPhaseRequest::SelectUnitType,
             |request, action| {
-                if let CustomPhaseRequest::SelectUnit(request) = &request {
-                    if let CustomPhaseEventAction::SelectUnit(reward) = action {
+                if let CustomPhaseRequest::SelectUnitType(request) = &request {
+                    if let CustomPhaseEventAction::SelectUnitType(reward) = action {
                         return (request.choices.clone(), reward);
                     }
                 }
@@ -433,6 +456,36 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 game.with_commands(player_index, |commands, game| {
                     gain_reward(commands, game, choice);
                 });
+            },
+        )
+    }
+
+    fn add_units_request<E, V>(
+        self,
+        event: E,
+        priority: i32,
+        request: impl Fn(&mut Game, usize, &V) -> Option<CustomPhaseUnitsRequest> + 'static + Clone,
+        units_selected: impl Fn(&mut Game, usize, &Vec<u32>) + 'static + Clone,
+    ) -> Self
+    where
+        E: Fn(&mut PlayerEvents) -> &mut CustomPhaseEvent<V> + 'static + Clone,
+    {
+        self.add_multi_choice_reward_request_listener::<E, u32, CustomPhaseUnitsRequest, V>(
+            event,
+            priority,
+            |r| &r.choices,
+            CustomPhaseRequest::SelectUnits,
+            |request, action| {
+                if let CustomPhaseRequest::SelectUnits(request) = &request {
+                    if let CustomPhaseEventAction::SelectUnits(choices) = action {
+                        return (request.choices.clone(), choices, request.needed);
+                    }
+                }
+                panic!("Invalid state");
+            },
+            request,
+            move |game, player_index, _player_name, choice| {
+                units_selected(game, player_index, choice);
             },
         )
     }
@@ -475,6 +528,47 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 let (choices, selected) = from_request(&request, action);
                 assert!(choices.contains(&selected), "Invalid choice");
                 gain_reward(game, player_index, player_name, &selected, true);
+            },
+        )
+    }
+
+    fn add_multi_choice_reward_request_listener<E, C, R, V>(
+        self,
+        event: E,
+        priority: i32,
+        get_possible: impl Fn(&R) -> &Vec<C> + 'static + Clone,
+        to_request: impl Fn(R) -> CustomPhaseRequest + 'static + Clone,
+        from_request: impl Fn(&CustomPhaseRequest, CustomPhaseEventAction) -> (Vec<C>, Vec<C>, u8)
+            + 'static
+            + Clone,
+        request: impl Fn(&mut Game, usize, &V) -> Option<R> + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, usize, &str, &Vec<C>) + 'static + Clone,
+    ) -> Self
+    where
+        C: Clone + PartialEq,
+        E: Fn(&mut PlayerEvents) -> &mut CustomPhaseEvent<V> + 'static + Clone,
+    {
+        self.add_state_change_event_listener(
+            event,
+            priority,
+            move |game, player_index, _player_name, details| {
+                if let Some(r) = request(game, player_index, details) {
+                    let choices = get_possible(&r);
+                    if choices.is_empty() {
+                        return None;
+                    }
+                    return Some(to_request(r));
+                }
+                None
+            },
+            move |game, player_index, player_name, action, request| {
+                let (choices, selected, needed) = from_request(&request, action);
+                assert!(
+                    selected.iter().all(|s| choices.contains(s)),
+                    "Invalid choice"
+                );
+                assert_eq!(selected.len() as u8, needed, "Invalid choice count");
+                gain_reward(game, player_index, player_name, &selected);
             },
         )
     }

@@ -2,29 +2,6 @@
   "state": {
     "StatusPhase": "FreeAdvance"
   },
-  "state_change_event_state": {
-    "players_used": [],
-    "last_priority_used": 100,
-    "current": {
-      "event_type": "Incident",
-      "priority": 100,
-      "player_index": 0,
-      "request": {
-        "SelectUnit": {
-          "choices": [
-            "Infantry",
-            "Cavalry",
-            "Elephant"
-          ],
-          "description": "Select a unit to reinforce the barbarians"
-        }
-      },
-      "response": null,
-      "origin": {
-        "Incident": 9
-      }
-    }
-  },
   "players": [
     {
       "name": null,
@@ -54,57 +31,13 @@
           "activations": 0,
           "angry_activation": false,
           "position": "A1"
-        },
-        {
-          "city_pieces": {
-            "fortress": 1
-          },
-          "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "C2"
         }
       ],
       "units": [
         {
-          "position": "C2",
-          "unit_type": "Infantry",
-          "id": 0
-        },
-        {
-          "position": "C2",
-          "unit_type": "Cavalry",
-          "id": 1
-        },
-        {
-          "position": "C2",
-          "unit_type": "Leader",
-          "id": 2
-        },
-        {
-          "position": "C2",
-          "unit_type": "Elephant",
-          "id": 3
-        },
-        {
-          "position": "C2",
+          "position": "A1",
           "unit_type": "Settler",
-          "id": 4
-        },
-        {
-          "position": "C2",
-          "unit_type": "Settler",
-          "id": 5
-        },
-        {
-          "position": "C2",
-          "unit_type": "Settler",
-          "id": 6
-        },
-        {
-          "position": "C2",
-          "unit_type": "Settler",
-          "id": 7
+          "id": 8
         }
       ],
       "civilization": "test0",
@@ -123,7 +56,7 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "next_unit_id": 8
+      "next_unit_id": 9
     },
     {
       "name": null,
@@ -186,7 +119,9 @@
     {
       "name": null,
       "id": 2,
-      "resources": {},
+      "resources": {
+        "gold": 1
+      },
       "resource_limit": {
         "food": 2,
         "wood": 7,
@@ -201,6 +136,15 @@
           "activations": 0,
           "angry_activation": false,
           "position": "B3"
+        },
+        {
+          "city_pieces": {
+            "fortress": 1
+          },
+          "mood_state": "Angry",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C2"
         }
       ],
       "units": [
@@ -208,6 +152,26 @@
           "position": "B3",
           "unit_type": "Infantry",
           "id": 0
+        },
+        {
+          "position": "B3",
+          "unit_type": "Infantry",
+          "id": 2
+        },
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 3
+        },
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 4
+        },
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 5
         }
       ],
       "civilization": "Barbarians",
@@ -221,7 +185,7 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "next_unit_id": 1
+      "next_unit_id": 6
     }
   ],
   "map": {
@@ -269,59 +233,22 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 0,
+  "current_player_index": 1,
   "action_log": [
     {
       "action": {
         "StatusPhase": {
           "FreeAdvance": "Storage"
         }
-      }
-    },
-    {
-      "action": {
-        "CustomPhaseEvent": {
-          "SelectPosition": "B3"
-        }
       },
       "undo": [
-        {
-          "CustomPhaseEvent": {
-            "players_used": [],
-            "last_priority_used": 102,
-            "current": {
-              "event_type": "Incident",
-              "priority": 102,
-              "player_index": 0,
-              "request": {
-                "SelectPosition": {
-                  "choices": [
-                    "A3",
-                    "B3"
-                  ],
-                  "description": "Select a position for the new city and infantry unit"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Incident": 9
-              }
-            }
-          }
-        },
         {
           "Command": {
             "gained_units": [
               {
-                "unit_type": "Infantry",
-                "position": "B3",
-                "player": 2
-              }
-            ],
-            "gained_cities": [
-              {
-                "position": "B3",
-                "player": 2
+                "unit_type": "Settler",
+                "position": "A1",
+                "player": 0
               }
             ]
           }
@@ -329,17 +256,32 @@
       ]
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 1,
   "log": [
     [
       "Player1 advanced Storage for free",
       "Player gained 1 mood token as advance bonus"
     ],
     [
-      "Barbarians spawned a new city and a new Infantry unit at B3"
+      "A new game event has been triggered: Barbarians move",
+      "Barbarians move from B2 to C2: 2 infantry and 1 elephant"
+    ],
+    [
+      "Combat round 1",
+      "Barbarians rolled 6 (Infantry, +1 combat value), 6 (Infantry, +1 combat value), 6 (Infantry, no bonus) for combined combat value of 20 and gets 0 hits against defending units.",
+      "Player1 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units.",
+      "Player1 used the following combat modifiers: fortress added one extra die, fortress cancelled one hit",
+      "Barbarians has to remove 1 of their attacking units",
+      "Barbarians removed 1 elephant",
+      "Attacker wins and killed 4 settlers of Player1 and captured Player1's city at C2",
+      "Player1 gained 1 free Settler Unit at A1 for losing a city",
+      "Barbarians spawned a new Infantry unit at C2"
+    ],
+    [
+      "It's Player2's turn"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 1,
   "actions_left": 3,
   "successful_cultural_influence": false,
   "round": 1,
@@ -352,21 +294,18 @@
     1,
     10,
     10,
-    10,
-    10,
-    10,
-    10,
     10
   ],
   "dice_roll_log": [
+    10,
+    10,
+    10,
+    10,
     10
   ],
   "dropped_players": [],
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "incidents_left": [
-    9
-  ]
+  "wonder_amount_left": 1
 }

@@ -3,7 +3,7 @@ use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::city_pieces::Building::Academy;
 use crate::content::advances::{advance_group_builder, get_group, AdvanceGroup};
-use crate::content::custom_phase_actions::CustomPhasePaymentRequest;
+use crate::content::custom_phase_actions::PaymentRequest;
 use crate::payment::PaymentOptions;
 use crate::resource_pile::ResourcePile;
 
@@ -60,7 +60,7 @@ fn free_education() -> AdvanceBuilder {
             } else if i.payment.has_at_least(&ResourcePile::gold(1))
                 || i.payment.has_at_least(&ResourcePile::ideas(1))
             {
-                Some(vec![CustomPhasePaymentRequest {
+                Some(vec![PaymentRequest {
                     cost: PaymentOptions::resources(ResourcePile::ideas(1)),
                     name: "Pay extra 1 idea for a mood token".to_string(),
                     optional: true,

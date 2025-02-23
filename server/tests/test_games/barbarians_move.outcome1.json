@@ -2,28 +2,6 @@
   "state": {
     "StatusPhase": "FreeAdvance"
   },
-  "state_change_event_state": {
-    "players_used": [],
-    "last_priority_used": 102,
-    "current": {
-      "event_type": "Incident",
-      "priority": 102,
-      "player_index": 0,
-      "request": {
-        "SelectPosition": {
-          "choices": [
-            "A3",
-            "B3"
-          ],
-          "description": "Select a position for the new city and infantry unit"
-        }
-      },
-      "response": null,
-      "origin": {
-        "Incident": 9
-      }
-    }
-  },
   "players": [
     {
       "name": null,
@@ -193,8 +171,47 @@
         "ideas": 7,
         "gold": 7
       },
-      "cities": [],
-      "units": [],
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "B2",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "A3",
+          "unit_type": "Elephant",
+          "id": 1
+        },
+        {
+          "position": "B2",
+          "unit_type": "Infantry",
+          "id": 2
+        },
+        {
+          "position": "A3",
+          "unit_type": "Infantry",
+          "id": 3
+        },
+        {
+          "position": "A3",
+          "unit_type": "Infantry",
+          "id": 4
+        },
+        {
+          "position": "B3",
+          "unit_type": "Infantry",
+          "id": 5
+        }
+      ],
       "civilization": "Barbarians",
       "active_leader": null,
       "available_leaders": [],
@@ -206,7 +223,7 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "next_unit_id": 0
+      "next_unit_id": 6
     }
   ],
   "map": {
@@ -254,7 +271,7 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 0,
+  "current_player_index": 1,
   "action_log": [
     {
       "action": {
@@ -262,16 +279,61 @@
           "FreeAdvance": "Storage"
         }
       }
+    },
+    {
+      "action": {
+        "CustomPhaseEvent": {
+          "SelectPosition": "B3"
+        }
+      },
+      "undo": [
+        {
+          "CustomPhaseEvent": {
+            "event_type": "on_incident",
+            "last_priority_used": 136,
+            "barbarians": {
+              "move_units": true
+            },
+            "current": {
+              "priority": 136,
+              "player_index": 0,
+              "request": {
+                "SelectPosition": {
+                  "choices": [
+                    "A3",
+                    "B3"
+                  ],
+                  "description": "Select a Barbarian Army to move next"
+                }
+              },
+              "response": null,
+              "origin": {
+                "Incident": 100
+              }
+            }
+          }
+        }
+      ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
       "Player1 advanced Storage for free",
       "Player gained 1 mood token as advance bonus"
+    ],
+    [
+      "A new game event has been triggered: Barbarians move"
+    ],
+    [
+      "Barbarians move from B3 to B2: 2 infantry",
+      "Barbarians spawned a new Infantry unit at B3"
+    ],
+    [
+      "It's Player2's turn"
     ]
   ],
-  "undo_limit": 1,
+  "undo_limit": 2,
   "actions_left": 3,
   "successful_cultural_influence": false,
   "round": 1,
@@ -297,8 +359,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "incidents_left": [
-    9
-  ]
+  "wonder_amount_left": 1
 }

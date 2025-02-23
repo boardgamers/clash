@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::content::advances::{advance_group_builder, AdvanceGroup};
 use crate::content::custom_actions::CustomActionType::{AbsolutePower, ForcedLabor};
-use crate::content::custom_phase_actions::CustomPhaseResourceRewardRequest;
+use crate::content::custom_phase_actions::ResourceRewardRequest;
 use crate::payment::PaymentOptions;
 use crate::resource::ResourceType;
 
@@ -23,7 +23,7 @@ fn nationalism() -> AdvanceBuilder {
         "Nationalism",
         "Gain 1 mood or culture token when you recruit an army or ship unit.",
     )
-    .add_resource_reward_request_listener(
+    .add_resource_request(
         |event| &mut event.on_recruit,
         1,
         |_game, _player_index, recruit| {
@@ -34,7 +34,7 @@ fn nationalism() -> AdvanceBuilder {
                 .iter()
                 .any(|u| u.is_army_unit() || u.is_ship())
             {
-                Some(CustomPhaseResourceRewardRequest {
+                Some(ResourceRewardRequest {
                     reward: PaymentOptions::sum(
                         1,
                         &[ResourceType::MoodTokens, ResourceType::CultureTokens],

@@ -26,7 +26,7 @@ use crate::status_phase_ui::raze_city_confirm_dialog;
 use crate::unit_ui::unit_selection_click;
 use crate::{
     combat_ui, custom_actions_ui, custom_phase_ui, dialog_ui, influence_ui, map_ui, move_ui,
-    recruit_unit_ui, status_phase_ui, tooltip,
+    recruit_unit_ui, status_phase_ui, tooltip, unit_ui,
 };
 
 fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
@@ -131,7 +131,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::None
         | ActiveDialog::WaitingForUpdate
         | ActiveDialog::CulturalInfluence(_)
-        | ActiveDialog::CustomPhasePositionRequest(_) => StateUpdate::None,
+        | ActiveDialog::PositionRequest(_) => StateUpdate::None,
         ActiveDialog::DialogChooser(d) => dialog_chooser(rc, d),
         ActiveDialog::Log => show_log(rc),
 
@@ -162,22 +162,22 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         //combat
         ActiveDialog::PlayActionCard => combat_ui::play_action_card_dialog(rc),
         ActiveDialog::Retreat => combat_ui::retreat_dialog(rc),
-        ActiveDialog::RemoveCasualties(s) => combat_ui::remove_casualties_dialog(rc, s),
 
         ActiveDialog::Sports((p, pos)) => custom_actions_ui::sports(rc, p, *pos),
         ActiveDialog::Taxes(p) => custom_actions_ui::taxes(rc, p),
         ActiveDialog::Theaters(p) => custom_actions_ui::theaters(rc, p),
 
-        ActiveDialog::CustomPhasePaymentRequest(c) => {
+        ActiveDialog::PaymentRequest(c) => {
             custom_phase_ui::custom_phase_payment_dialog(rc, c)
         }
-        ActiveDialog::CustomPhaseResourceRewardRequest(p) => {
+        ActiveDialog::ResourceRewardRequest(p) => {
             custom_phase_ui::payment_reward_dialog(rc, p)
         }
-        ActiveDialog::CustomPhaseAdvanceRewardRequest(r) => {
+        ActiveDialog::AdvanceRewardRequest(r) => {
             custom_phase_ui::advance_reward_dialog(rc, r, &custom_phase_event_origin(rc).name())
         }
-        ActiveDialog::CustomPhaseUnitRequest(r) => custom_phase_ui::unit_request_dialog(rc, r),
+        ActiveDialog::UnitTypeRequest(r) => custom_phase_ui::unit_request_dialog(rc, r),
+        ActiveDialog::UnitsRequest(r) => custom_phase_ui::select_units_dialog(rc, r),
     }
 }
 
@@ -225,14 +225,11 @@ fn controlling_player_click(rc: &RenderContext, mouse_pos: Vec2, pos: Position) 
     match &rc.state.active_dialog {
         ActiveDialog::CollectResources(_) => StateUpdate::None,
         ActiveDialog::MoveUnits(s) => move_ui::click(rc, pos, s, mouse_pos),
-        ActiveDialog::RemoveCasualties(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
-            StateUpdate::OpenDialog(ActiveDialog::RemoveCasualties(new.clone()))
-        }),
         ActiveDialog::ReplaceUnits(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
             StateUpdate::OpenDialog(ActiveDialog::ReplaceUnits(new.clone()))
         }),
         ActiveDialog::RazeSize1City => raze_city_confirm_dialog(rc, pos),
-        ActiveDialog::CustomPhasePositionRequest(r) => {
+        ActiveDialog::PositionRequest(r) => {
             if r.choices.contains(&pos) {
                 StateUpdate::Execute(Action::CustomPhaseEvent(
                     CustomPhaseEventAction::SelectPosition(pos),
@@ -240,6 +237,11 @@ fn controlling_player_click(rc: &RenderContext, mouse_pos: Vec2, pos: Position) 
             } else {
                 StateUpdate::None
             }
+        }
+        ActiveDialog::UnitsRequest(s) => {
+            unit_selection_click(rc, pos, mouse_pos, s, |new| {
+                StateUpdate::OpenDialog(ActiveDialog::UnitsRequest(new.clone()))
+            })
         }
         ActiveDialog::IncreaseHappiness(h) => increase_happiness_click(rc, pos, h),
         _ => StateUpdate::SetFocusedTile(pos),

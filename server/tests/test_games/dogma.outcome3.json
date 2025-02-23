@@ -528,10 +528,9 @@
       "undo": [
         {
           "CustomPhaseEvent": {
-            "players_used": [],
+            "event_type": "on_construct",
             "last_priority_used": 1,
             "current": {
-              "event_type": "OnConstruct",
               "priority": 1,
               "player_index": 1,
               "request": {
@@ -575,10 +574,9 @@
       "undo": [
         {
           "CustomPhaseEvent": {
-            "players_used": [],
+            "event_type": "on_construct",
             "last_priority_used": 0,
             "current": {
-              "event_type": "OnConstruct",
               "priority": 0,
               "player_index": 1,
               "request": {

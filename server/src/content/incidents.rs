@@ -1,12 +1,21 @@
-use crate::content::custom_phase_actions::CustomPhaseResourceRewardRequest;
+use crate::content::custom_phase_actions::ResourceRewardRequest;
 use crate::incident::{Incident, IncidentBaseEffect};
 use crate::payment::PaymentOptions;
 use crate::player_events::IncidentTarget;
 use crate::resource::ResourceType;
+use std::vec;
 
 #[must_use]
 pub fn get_all() -> Vec<Incident> {
-    vec![good_year()].into_iter().flatten().collect()
+    vec![good_year(), population_boom()]
+        .into_iter()
+        .flatten()
+        .collect()
+}
+
+fn population_boom() -> Vec<Incident> {
+    //todo add real effect
+    vec![Incident::builder(100, "test", "test", IncidentBaseEffect::BarbariansMove).build()]
 }
 
 fn good_year() -> Vec<Incident> {
@@ -17,11 +26,11 @@ fn good_year() -> Vec<Incident> {
             "Every player gains 1 food",
             IncidentBaseEffect::BarbariansSpawn,
         )
-        .add_incident_resource_listener(
+        .add_incident_resource_request(
             IncidentTarget::AllPlayers,
             1,
             |_game, _player_index, _incident| {
-                Some(CustomPhaseResourceRewardRequest {
+                Some(ResourceRewardRequest {
                     reward: PaymentOptions::sum(1, &[ResourceType::Food]),
                     name: "Gain 1 food".to_string(),
                 })
@@ -37,11 +46,11 @@ fn good_year() -> Vec<Incident> {
             "You gain 1 food",
             IncidentBaseEffect::BarbariansSpawn,
         )
-        .add_incident_resource_listener(
+        .add_incident_resource_request(
             IncidentTarget::ActivePlayer,
             1,
             |_game, _player_index, _incident| {
-                Some(CustomPhaseResourceRewardRequest {
+                Some(ResourceRewardRequest {
                     reward: PaymentOptions::sum(1, &[ResourceType::Food]),
                     name: "Gain 1 food".to_string(),
                 })

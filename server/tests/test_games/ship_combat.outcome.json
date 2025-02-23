@@ -11,13 +11,6 @@
         }
       },
       "round": 1,
-      "phase": {
-        "RemoveCasualties": {
-          "player": 0,
-          "casualties": 1,
-          "carried_units_casualties": 1
-        }
-      },
       "defender": 1,
       "defender_position": "D2",
       "attacker": 0,
@@ -26,9 +19,45 @@
         7,
         8
       ],
-      "can_retreat": true
+      "can_retreat": true,
+      "round_result": {
+        "attacker_casualties": {
+          "fighters": 1,
+          "carried_units": 1
+        },
+        "defender_casualties": {
+          "fighters": 1
+        },
+        "can_retreat": false,
+        "retreated": false
+      }
     }
   },
+  "state_change_event_state": [
+    {
+      "event_type": "on_combat_round_end",
+      "last_priority_used": 2,
+      "current": {
+        "priority": 2,
+        "player_index": 0,
+        "request": {
+          "SelectUnits": {
+            "choices": [
+              2,
+              22,
+              1
+            ],
+            "needed": 1,
+            "description": "Remove 1 attacking units"
+          }
+        },
+        "response": null,
+        "origin": {
+          "Builtin": "Choose Casualties - Carried Units"
+        }
+      }
+    }
+  ],
   "players": [
     {
       "name": null,
@@ -208,7 +237,13 @@
           "port_position": "C3"
         }
       ],
-      "units": [],
+      "units": [
+        {
+          "position": "D2",
+          "unit_type": "Ship",
+          "id": 1
+        }
+      ],
       "civilization": "test0",
       "active_leader": null,
       "available_leaders": [],
@@ -316,7 +351,7 @@
     ],
     [
       "Combat round 1",
-      "Player1 rolled 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 12 and gets 2 hits against defending units.",
+      "Player1 rolled 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units.",
       "Player2 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units.",
       "Player1 has to remove 1 of their attacking units"
     ]

@@ -1,47 +1,48 @@
 {
   "state": {
-    "Combat": {
-      "initiation": {
-        "Movement": {
-          "movement_actions_left": 2,
-          "moved_units": [
-            0
-          ]
-        }
-      },
-      "round": 2,
-      "phase": {
-        "RemoveCasualties": {
-          "player": 1,
-          "casualties": 1,
-          "defender_hits": 2
-        }
-      },
-      "defender": 1,
-      "defender_position": "C1",
-      "attacker": 0,
-      "attacker_position": "C2",
-      "attackers": [
-        0
-      ],
-      "can_retreat": true
-    }
+    "StatusPhase": "FreeAdvance"
   },
+  "state_change_event_state": [
+    {
+      "event_type": "on_incident",
+      "last_priority_used": 200,
+      "barbarians": {
+        "move_units": false
+      },
+      "current": {
+        "priority": 200,
+        "player_index": 0,
+        "request": {
+          "SelectPosition": {
+            "choices": [
+              "A3",
+              "B3"
+            ],
+            "description": "Select a position for the new city and infantry unit"
+          }
+        },
+        "response": null,
+        "origin": {
+          "Incident": 9
+        }
+      }
+    }
+  ],
   "players": [
     {
       "name": null,
       "id": 0,
       "resources": {
-        "food": 2,
-        "wood": 7,
-        "ore": 7,
+        "food": 1,
+        "wood": 6,
+        "ore": 6,
         "ideas": 5,
         "gold": 7,
-        "mood_tokens": 7,
+        "mood_tokens": 8,
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 2,
+        "food": 7,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -58,9 +59,11 @@
           "position": "A1"
         },
         {
-          "city_pieces": {},
-          "mood_state": "Neutral",
-          "activations": 8,
+          "city_pieces": {
+            "fortress": 1
+          },
+          "mood_state": "Angry",
+          "activations": 0,
           "angry_activation": false,
           "position": "C2"
         }
@@ -113,11 +116,12 @@
       "advances": [
         "Farming",
         "Mining",
+        "Storage",
         "Tactics"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "incident_tokens": 2,
+      "incident_tokens": 3,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -149,7 +153,7 @@
         {
           "city_pieces": {},
           "mood_state": "Angry",
-          "activations": 2,
+          "activations": 0,
           "angry_activation": false,
           "position": "C1"
         }
@@ -181,6 +185,32 @@
       "event_victory_points": 0.0,
       "wonder_cards": [],
       "next_unit_id": 2
+    },
+    {
+      "name": null,
+      "id": 2,
+      "resources": {},
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [],
+      "units": [],
+      "civilization": "Barbarians",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 0
     }
   ],
   "map": {
@@ -195,9 +225,7 @@
       ],
       [
         "A3",
-        {
-          "Exhausted": "Forest"
-        }
+        "Mountain"
       ],
       [
         "B1",
@@ -234,8 +262,8 @@
   "action_log": [
     {
       "action": {
-        "Combat": {
-          "Retreat": false
+        "StatusPhase": {
+          "FreeAdvance": "Storage"
         }
       }
     }
@@ -243,17 +271,15 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 decided not to retreat"
+      "Player1 advanced Storage for free",
+      "Player gained 1 mood token as advance bonus"
     ],
     [
-      "Combat round 2",
-      "Player1 rolled 6 (Infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
-      "Player2 rolled 6 (Infantry, +1 combat value), 6 (Infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against attacking units.",
-      "Player2 has to remove 1 of their defending units"
+      "A new game event has been triggered: Barbarians spawn"
     ]
   ],
   "undo_limit": 1,
-  "actions_left": 1,
+  "actions_left": 3,
   "successful_cultural_influence": false,
   "round": 1,
   "age": 1,
@@ -263,19 +289,23 @@
   "dice_roll_outcomes": [
     1,
     1,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
     10
   ],
   "dice_roll_log": [
-    1,
-    1,
-    1,
-    10,
-    10,
     10
   ],
   "dropped_players": [],
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1
+  "wonder_amount_left": 1,
+  "incidents_left": [
+    9
+  ]
 }

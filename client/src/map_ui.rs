@@ -161,7 +161,7 @@ fn overlay_color(rc: &RenderContext, pos: Position) -> Color {
         ActiveDialog::RazeSize1City => {
             highlight_if(game.players[game.active_player()].can_raze_city(pos))
         }
-        ActiveDialog::CustomPhasePositionRequest(r) => highlight_if(r.choices.contains(&pos)),
+        ActiveDialog::PositionRequest(r) => highlight_if(r.choices.contains(&pos)),
         _ => {
             if let Some(p) = state.focused_tile {
                 highlight_if(p == pos)

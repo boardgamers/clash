@@ -15,7 +15,6 @@
         }
       },
       "round": 1,
-      "phase": "Retreat",
       "defender": 1,
       "defender_position": "C1",
       "attacker": 0,
@@ -31,45 +30,46 @@
       "can_retreat": true
     }
   },
-  "state_change_event_state": {
-    "players_used": [],
-    "last_priority_used": 1,
-    "current": {
-      "event_type": "StartCombat",
-      "priority": 1,
-      "player_index": 0,
-      "request": {
-        "Payment": [
-          {
-            "cost": {
-              "default": {
-                "ore": 1
+  "state_change_event_state": [
+    {
+      "event_type": "on_combat_start",
+      "last_priority_used": 1,
+      "current": {
+        "priority": 1,
+        "player_index": 0,
+        "request": {
+          "Payment": [
+            {
+              "cost": {
+                "default": {
+                  "ore": 1
+                },
+                "conversions": [
+                  {
+                    "from": [
+                      {
+                        "ore": 1
+                      }
+                    ],
+                    "to": {
+                      "gold": 1
+                    },
+                    "type": "Unlimited"
+                  }
+                ]
               },
-              "conversions": [
-                {
-                  "from": [
-                    {
-                      "ore": 1
-                    }
-                  ],
-                  "to": {
-                    "gold": 1
-                  },
-                  "type": "Unlimited"
-                }
-              ]
-            },
-            "name": "Use steel weapons",
-            "optional": true
-          }
-        ]
-      },
-      "response": null,
-      "origin": {
-        "Advance": "Steel Weapons"
+              "name": "Use steel weapons",
+              "optional": true
+            }
+          ]
+        },
+        "response": null,
+        "origin": {
+          "Advance": "Steel Weapons"
+        }
       }
     }
-  },
+  ],
   "players": [
     {
       "name": null,

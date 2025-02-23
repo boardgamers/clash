@@ -11,7 +11,6 @@ pub enum Action {
     StatusPhase(StatusPhaseAction),
     Movement(MovementAction),
     CulturalInfluenceResolution(bool),
-    Combat(CombatAction),
     ExploreResolution(Rotation),
     CustomPhaseEvent(CustomPhaseEventAction),
     Undo,
@@ -65,15 +64,6 @@ impl Action {
     }
 
     #[must_use]
-    pub fn combat(self) -> Option<CombatAction> {
-        if let Self::Combat(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-
-    #[must_use]
     pub fn explore_resolution(self) -> Option<Rotation> {
         if let Self::ExploreResolution(v) = self {
             Some(v)
@@ -90,18 +80,4 @@ impl Action {
             None
         }
     }
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
-pub enum CombatAction {
-    PlayActionCard(PlayActionCard),
-    RemoveCasualties(Vec<u32>),
-    Retreat(bool),
-}
-
-// Can't use Option<String> because of mongo stips null values
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
-pub enum PlayActionCard {
-    None,
-    Card(String),
 }

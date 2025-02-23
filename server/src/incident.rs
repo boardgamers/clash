@@ -1,8 +1,8 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
-use crate::barbarians::barbarians_spawn;
+use crate::barbarians::{barbarians_move, barbarians_spawn};
 use crate::content::custom_phase_actions::{
-    CustomPhasePositionRequest, CustomPhaseResourceRewardRequest, CustomPhaseUnitRequest,
+    PositionRequest, ResourceRewardRequest, UnitTypeRequest,
 };
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -43,12 +43,14 @@ impl Incident {
 
 pub enum IncidentBaseEffect {
     BarbariansSpawn,
+    BarbariansMove,
 }
 
 impl std::fmt::Display for IncidentBaseEffect {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             IncidentBaseEffect::BarbariansSpawn => write!(f, "Barbarians spawn."),
+            IncidentBaseEffect::BarbariansMove => write!(f, "Barbarians move."),
         }
     }
 }
@@ -76,6 +78,7 @@ impl IncidentBuilder {
     pub fn build(self) -> Incident {
         Self::new_incident(match self.base_effect {
             IncidentBaseEffect::BarbariansSpawn => barbarians_spawn(self),
+            IncidentBaseEffect::BarbariansMove => barbarians_move(self),
         })
     }
 
@@ -90,7 +93,7 @@ impl IncidentBuilder {
     }
 
     #[must_use]
-    pub fn add_incident_listener<F>(self, role: IncidentTarget, listener: F) -> Self
+    pub fn add_incident_listener<F>(self, role: IncidentTarget, priority: i32, listener: F) -> Self
     where
         F: Fn(&mut Game, &CustomPhaseInfo, &IncidentInfo) + 'static + Clone,
     {
@@ -101,21 +104,19 @@ impl IncidentBuilder {
                     listener(game, p, i);
                 }
             },
-            1,
+            priority,
         )
     }
 
     #[must_use]
-    pub(crate) fn add_incident_position_listener(
+    pub(crate) fn add_incident_position_request(
         self,
         role: IncidentTarget,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<CustomPhasePositionRequest>
-            + 'static
-            + Clone,
+        request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<PositionRequest> + 'static + Clone,
         gain_reward: impl Fn(&mut PlayerCommands, &Game, &Position) + 'static + Clone,
     ) -> Self {
-        self.add_position_reward_request_listener(
+        self.add_position_request(
             |event| &mut event.on_incident,
             priority,
             move |game, player_index, i| {
@@ -130,16 +131,14 @@ impl IncidentBuilder {
     }
 
     #[must_use]
-    pub(crate) fn add_incident_unit_listener(
+    pub(crate) fn add_incident_unit_request(
         self,
         role: IncidentTarget,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<CustomPhaseUnitRequest>
-            + 'static
-            + Clone,
+        request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<UnitTypeRequest> + 'static + Clone,
         gain_reward: impl Fn(&mut PlayerCommands, &Game, &UnitType) + 'static + Clone,
     ) -> Self {
-        self.add_unit_reward_request_listener(
+        self.add_unit_type_request(
             |event| &mut event.on_incident,
             priority,
             move |game, player_index, i| {
@@ -154,16 +153,16 @@ impl IncidentBuilder {
     }
 
     #[must_use]
-    pub(crate) fn add_incident_resource_listener(
+    pub(crate) fn add_incident_resource_request(
         self,
         role: IncidentTarget,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<CustomPhaseResourceRewardRequest>
+        request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<ResourceRewardRequest>
             + 'static
             + Clone,
         gain_reward_log: impl Fn(&Game, usize, &str, &ResourcePile, bool) -> String + 'static + Clone,
     ) -> Self {
-        self.add_resource_reward_request_listener(
+        self.add_resource_request(
             |event| &mut event.on_incident,
             priority,
             move |game, player_index, i| {

@@ -1,15 +1,67 @@
 {
   "state": {
-    "Movement": {
-      "movement_actions_left": 2,
-      "moved_units": [
+    "Combat": {
+      "initiation": {
+        "Movement": {
+          "movement_actions_left": 1,
+          "moved_units": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      },
+      "round": 1,
+      "defender": 1,
+      "defender_position": "C1",
+      "attacker": 0,
+      "attacker_position": "C2",
+      "attackers": [
         0,
         1,
         2,
         3
-      ]
+      ],
+      "can_retreat": true,
+      "round_result": {
+        "attacker_casualties": {
+          "fighters": 2
+        },
+        "defender_casualties": {
+          "fighters": 2
+        },
+        "can_retreat": false,
+        "retreated": false
+      }
     }
   },
+  "state_change_event_state": [
+    {
+      "event_type": "on_combat_round_end",
+      "last_priority_used": 1,
+      "current": {
+        "priority": 1,
+        "player_index": 0,
+        "request": {
+          "SelectUnits": {
+            "choices": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "needed": 2,
+            "description": "Remove 2 attacking units"
+          }
+        },
+        "response": null,
+        "origin": {
+          "Builtin": "Choose Casualties"
+        }
+      }
+    }
+  ],
   "players": [
     {
       "name": null,
@@ -46,24 +98,39 @@
           "activations": 8,
           "angry_activation": false,
           "position": "C2"
-        },
-        {
-          "city_pieces": {},
-          "mood_state": "Angry",
-          "activations": 2,
-          "angry_activation": false,
-          "position": "C1"
         }
       ],
       "units": [
         {
-          "position": "C1",
+          "position": "C2",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 0
+        },
+        {
+          "position": "C2",
+          "unit_type": "Cavalry",
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 1
+        },
+        {
+          "position": "C2",
           "unit_type": "Leader",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 2
         },
         {
-          "position": "C1",
+          "position": "C2",
           "unit_type": "Elephant",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 3
         },
         {
@@ -125,8 +192,27 @@
         "mood_tokens": 7,
         "culture_tokens": 7
       },
-      "cities": [],
-      "units": [],
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Angry",
+          "activations": 2,
+          "angry_activation": false,
+          "position": "C1"
+        }
+      ],
+      "units": [
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 1
+        }
+      ],
       "civilization": "test1",
       "active_leader": null,
       "available_leaders": [],
@@ -195,31 +281,30 @@
   "action_log": [
     {
       "action": {
-        "Combat": {
-          "RemoveCasualties": [
-            0,
-            1
-          ]
-        }
-      },
-      "undo": [
-        {
-          "WastedResources": {
-            "resources": {
-              "gold": 1
-            },
-            "player_index": 0
+        "Movement": {
+          "Move": {
+            "units": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "destination": "C1"
           }
         }
-      ]
+      }
     }
   ],
   "action_log_index": 1,
   "log": [
     [
-      "Player1 removed 1 infantry and 1 cavalry",
-      "Player1 killed all defending units and captured Player2's city at C1",
-      "Player1 Could not store 1 gold"
+      "Player1 marched 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1"
+    ],
+    [
+      "Combat round 1",
+      "Player1 rolled 6 (Infantry, +1 combat value), 6 (Infantry, no bonus), 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 25 and gets 2 hits against defending units.",
+      "Player2 rolled 6 (Infantry, +1 combat value), 6 (Infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against attacking units.",
+      "Player1 has to remove 2 of their attacking units"
     ]
   ],
   "undo_limit": 1,

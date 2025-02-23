@@ -1,9 +1,5 @@
 {
-  "state": {
-    "Movement": {
-      "movement_actions_left": 2
-    }
-  },
+  "state": "Playing",
   "players": [
     {
       "name": null,
@@ -46,6 +42,9 @@
         {
           "position": "C2",
           "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 0
         },
         {
@@ -208,10 +207,60 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [],
-  "action_log_index": 0,
-  "log": [],
-  "undo_limit": 0,
+  "action_log": [
+    {
+      "action": {
+        "Movement": {
+          "Move": {
+            "units": [
+              0
+            ],
+            "destination": "C1"
+          }
+        }
+      }
+    },
+    {
+      "action": {
+        "CustomPhaseEvent": {
+          "Bool": true
+        }
+      },
+      "undo": [
+        {
+          "CustomPhaseEvent": {
+            "event_type": "on_combat_round_end",
+            "last_priority_used": 0,
+            "current": {
+              "priority": 0,
+              "player_index": 0,
+              "request": "BoolRequest",
+              "response": null,
+              "origin": {
+                "Builtin": "Offer Retreat"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "action_log_index": 2,
+  "log": [
+    [
+      "Player1 marched 1 infantry from C2 to C1"
+    ],
+    [
+      "Combat round 1",
+      "Player1 rolled 1 (Leader, no bonus) for combined combat value of 1 and gets 0 hits against defending units.",
+      "Player2 rolled 1 (Leader, no bonus), 1 (Leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
+      "Player1 can retreat"
+    ],
+    [
+      "Player1 retreats"
+    ]
+  ],
+  "undo_limit": 2,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,
@@ -225,13 +274,13 @@
     10,
     10,
     10,
-    10,
-    10,
-    10,
-    10,
     10
   ],
-  "dice_roll_log": [],
+  "dice_roll_log": [
+    1,
+    1,
+    1
+  ],
   "dropped_players": [],
   "wonders_left": [
     "Pyramids"

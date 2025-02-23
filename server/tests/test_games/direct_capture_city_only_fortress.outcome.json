@@ -234,12 +234,6 @@
       },
       "undo": [
         {
-          "Movement": {
-            "starting_position": "C2",
-            "movement_actions_left": 2
-          }
-        },
-        {
           "WastedResources": {
             "resources": {
               "gold": 1
@@ -257,10 +251,10 @@
     ],
     [
       "Combat round 1",
-      "Player1 rolled 6 (Infantry, +1 combat value), 6 (Infantry, no bonus), 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 25 and gets 4 hits against defending units.",
+      "Player1 rolled 6 (Infantry, +1 combat value), 6 (Infantry, no bonus), 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 25 and gets 0 hits against defending units.",
       "Player2 rolled 1 (Leader, no bonus) for combined combat value of 1 and gets 0 hits against attacking units.",
       "Player2 used the following combat modifiers: fortress added one extra die, fortress cancelled one hit",
-      "Player1 killed all defending units and captured Player2's city at C1",
+      "Attacker wins and captured Player2's city at C1",
       "Player1 Could not store 1 gold"
     ]
   ],
