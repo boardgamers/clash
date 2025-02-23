@@ -120,7 +120,7 @@
           "id": 9
         },
         {
-          "position": "A1",
+          "position": "B1",
           "unit_type": "Leader",
           "movement_restrictions": [
             "Battle",
@@ -338,12 +338,12 @@
       "undo": [
         {
           "CustomPhaseEvent": {
+            "event_type": "on_combat_end",
             "players_used": [
               0
             ],
             "last_priority_used": 0,
             "current": {
-              "event_type": "EndCombat",
               "priority": 0,
               "player_index": 1,
               "request": {
@@ -382,11 +382,11 @@
     ],
     [
       "Combat round 1",
-      "Player1 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against defending units.",
+      "Player1 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 0 hits against defending units.",
       "Player2 rolled no dice for combined combat value of 0 and gets 0 hits against attacking units.",
       "Player1 used the following combat modifiers: Kʼinich Janaab Pakal I ignores the first hit in a battle with an Obelisk",
-      "Player1 killed all defending units and captured Player2's city at B1",
-      "Player1 Could not store 3 gold"
+      "Attacker wins and captured Player2's city at B1",
+      "Player1 could not store 3 gold"
     ],
     [
       "Player2 gained 1 free Settler Unit at B2 for losing a city"

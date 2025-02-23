@@ -254,10 +254,9 @@
       "undo": [
         {
           "CustomPhaseEvent": {
-            "players_used": [],
+            "event_type": "on_combat_start",
             "last_priority_used": 1,
             "current": {
-              "event_type": "StartCombat",
               "priority": 1,
               "player_index": 0,
               "request": {
@@ -309,10 +308,9 @@
       "undo": [
         {
           "CustomPhaseEvent": {
-            "players_used": [],
+            "event_type": "on_combat_start",
             "last_priority_used": 0,
             "current": {
-              "event_type": "StartCombat",
               "priority": 0,
               "player_index": 0,
               "request": {
@@ -385,12 +383,12 @@
       "undo": [
         {
           "CustomPhaseEvent": {
+            "event_type": "on_combat_start",
             "players_used": [
               0
             ],
             "last_priority_used": 1,
             "current": {
-              "event_type": "StartCombat",
               "priority": 1,
               "player_index": 1,
               "request": {
@@ -453,12 +451,14 @@
     ],
     [
       "Combat round 1",
-      "Player1 rolled 6 (Infantry, +1 combat value), 6 (Infantry, no bonus), 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 26 and gets 5 hits against defending units.",
+      "Player1 rolled 6 (Infantry, +1 combat value), 6 (Infantry, no bonus), 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 26 and gets 2 hits against defending units.",
       "Player2 rolled 1 (Leader, no bonus), 1 (Leader, no bonus), 1 (Leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units.",
       "Player1 used the following combat modifiers: steel weapons added 1 combat value",
       "Player2 used the following combat modifiers: fortress added one extra die, steel weapons added 1 combat value",
-      "Player1 killed all defending units and captured Player2's city at C1",
-      "Player1 Could not store 1 gold"
+      "Player2 has to remove all of their defending units",
+      "Player2 removed 2 infantry",
+      "Attacker wins and captured Player2's city at C1",
+      "Player1 could not store 1 gold"
     ]
   ],
   "undo_limit": 4,

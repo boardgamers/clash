@@ -91,7 +91,7 @@ impl StatusPhaseAction {
                 return;
             }
         }
-        if game.custom_phase_state.is_empty() {
+        if game.custom_phase_state.is_empty() && player_index == game.current_player_index {
             Self::action_done(game);
         }
     }

@@ -155,7 +155,7 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
             h
         }
         ActiveDialog::ReplaceUnits(ref s) => highlight_primary(&s.replaced_units),
-        ActiveDialog::RemoveCasualties(ref s) => highlight_primary(&s.units),
+        ActiveDialog::UnitsRequest(ref s) => highlight_primary(&s.units),
         _ => vec![],
     };
 

@@ -3,9 +3,7 @@ use crate::advance::{Advance, AdvanceBuilder};
 use crate::city_pieces::Building::Temple;
 use crate::consts::STACK_LIMIT;
 use crate::content::advances::{advance_group_builder, get_group, AdvanceGroup};
-use crate::content::custom_phase_actions::{
-    CustomPhaseAdvanceRewardRequest, CustomPhasePositionRequest,
-};
+use crate::content::custom_phase_actions::{AdvanceRewardRequest, PositionRequest};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -44,7 +42,7 @@ fn dogma() -> AdvanceBuilder {
                     if choices.is_empty() {
                         return None;
                     }
-                    return Some(CustomPhaseAdvanceRewardRequest {
+                    return Some(AdvanceRewardRequest {
                         choices,
                     });
                 }
@@ -112,11 +110,11 @@ fn fanaticism() -> AdvanceBuilder {
                     s.roll_log.push("Player gets +2 combat value for Fanaticism Advance".to_string());
                 }
             },
-            0,
+            1,
         )
-        .add_position_reward_request_listener(
+        .add_position_request(
             |event| &mut event.on_combat_end,
-            0,
+            4,
             |game, player_index, i| {
                 if i.is_loser(player_index)
                     && !game.get_player(player_index).cities.is_empty()
@@ -126,7 +124,7 @@ fn fanaticism() -> AdvanceBuilder {
                         .filter(|c| p.get_units(c.position).iter().filter(|u| u.unit_type.is_army_unit()).count() < STACK_LIMIT)
                         .map(|c| c.position)
                         .collect();
-                    Some(CustomPhasePositionRequest::new(choices, None))
+                    Some(PositionRequest::new(choices, None))
                 } else {
                     None
                 }

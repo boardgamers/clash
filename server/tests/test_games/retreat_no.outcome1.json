@@ -1,24 +1,10 @@
 {
   "state": {
-    "Combat": {
-      "initiation": {
-        "Movement": {
-          "movement_actions_left": 1,
-          "moved_units": [
-            0
-          ]
-        }
-      },
-      "round": 1,
-      "phase": "Retreat",
-      "defender": 1,
-      "defender_position": "C1",
-      "attacker": 0,
-      "attacker_position": "C2",
-      "attackers": [
+    "Movement": {
+      "movement_actions_left": 1,
+      "moved_units": [
         0
-      ],
-      "can_retreat": true
+      ]
     }
   },
   "players": [
@@ -60,14 +46,6 @@
         }
       ],
       "units": [
-        {
-          "position": "C2",
-          "unit_type": "Infantry",
-          "movement_restrictions": [
-            "Battle"
-          ],
-          "id": 0
-        },
         {
           "position": "C2",
           "unit_type": "Cavalry",
@@ -155,11 +133,6 @@
         {
           "position": "C1",
           "unit_type": "Infantry",
-          "id": 0
-        },
-        {
-          "position": "C1",
-          "unit_type": "Infantry",
           "id": 1
         }
       ],
@@ -240,9 +213,33 @@
           }
         }
       }
+    },
+    {
+      "action": {
+        "CustomPhaseEvent": {
+          "Bool": false
+        }
+      },
+      "undo": [
+        {
+          "CustomPhaseEvent": {
+            "event_type": "on_combat_round_end",
+            "last_priority_used": 0,
+            "current": {
+              "priority": 0,
+              "player_index": 0,
+              "request": "BoolRequest",
+              "response": null,
+              "origin": {
+                "Builtin": "Offer Retreat"
+              }
+            }
+          }
+        }
+      ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
       "Player1 marched 1 infantry from C2 to C1"
@@ -251,10 +248,23 @@
       "Combat round 1",
       "Player1 rolled 1 (Leader, no bonus) for combined combat value of 1 and gets 0 hits against defending units.",
       "Player2 rolled 1 (Leader, no bonus), 1 (Leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
-      "Player1 may retreat"
+      "Player1 can retreat"
+    ],
+    [
+      "Player1 does not retreat"
+    ],
+    [
+      "Combat round 2",
+      "Player1 rolled 6 (Infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
+      "Player2 rolled 6 (Infantry, +1 combat value), 6 (Infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units.",
+      "Player1 has to remove all of their attacking units",
+      "Player1 removed 1 infantry",
+      "Player2 has to remove 1 of their defending units",
+      "Player2 removed 1 infantry",
+      "Defender wins"
     ]
   ],
-  "undo_limit": 1,
+  "undo_limit": 2,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,
@@ -265,15 +275,15 @@
   "dice_roll_outcomes": [
     1,
     1,
-    10,
-    10,
-    10,
     10
   ],
   "dice_roll_log": [
     1,
     1,
-    1
+    1,
+    10,
+    10,
+    10
   ],
   "dropped_players": [],
   "wonders_left": [

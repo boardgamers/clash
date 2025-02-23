@@ -1,7 +1,7 @@
 use crate::advance::Advance;
+use crate::barbarians::BarbariansEventState;
 use crate::collect::{CollectContext, CollectInfo};
 use crate::combat::{Combat, CombatResultInfo, CombatStrength};
-use crate::content::custom_phase_actions::CustomPhaseEventType;
 use crate::events::Event;
 use crate::game::{CommandContext, CommandUndoInfo, GainCityContext, GainUnitContext, Game};
 use crate::map::Terrain;
@@ -19,7 +19,6 @@ pub(crate) type CustomPhaseEvent<V = ()> = Event<Game, CustomPhaseInfo, V>;
 
 pub(crate) type PlayerCommandEvent<V = ()> = Event<PlayerCommands, Game, V>;
 
-#[derive(Default)]
 pub(crate) struct PlayerEvents {
     pub on_construct: CustomPhaseEvent<Building>,
     pub on_construct_wonder: Event<Player, Position, Wonder>,
@@ -47,12 +46,42 @@ pub(crate) struct PlayerEvents {
     pub on_incident: CustomPhaseEvent<IncidentInfo>,
     pub on_combat_start: CustomPhaseEvent,
     pub on_combat_round: Event<CombatStrength, Combat, Game>,
+    pub on_combat_round_end: CustomPhaseEvent,
     pub on_combat_end: CustomPhaseEvent<CombatResultInfo>,
 }
 
 impl PlayerEvents {
     pub fn new() -> PlayerEvents {
-        Self::default()
+        Self {
+            on_construct: Event::new("on_construct"),
+            on_construct_wonder: Event::new("on_construct_wonder"),
+            on_collect: Event::new("on_collect"),
+            on_advance: Event::new("on_advance"),
+            on_advance_custom_phase: Event::new("on_advance_custom_phase"),
+            on_recruit: Event::new("on_recruit"),
+            on_influence_culture_attempt: Event::new("on_influence_culture_attempt"),
+            on_influence_culture_success: Event::new("on_influence_culture_success"),
+            before_move: Event::new("before_move"),
+
+            construct_cost: Event::new("construct_cost"),
+            wonder_cost: Event::new("wonder_cost"),
+            advance_cost: Event::new("advance_cost"),
+            happiness_cost: Event::new("happiness_cost"),
+            recruit_cost: Event::new("recruit_cost"),
+
+            is_playing_action_available: Event::new("is_playing_action_available"),
+
+            terrain_collect_options: Event::new("terrain_collect_options"),
+            collect_options: Event::new("collect_options"),
+            collect_total: Event::new("collect_total"),
+
+            on_turn_start: Event::new("on_turn_start"),
+            on_incident: Event::new("on_incident"),
+            on_combat_start: Event::new("on_combat_start"),
+            on_combat_round: Event::new("on_combat_round"),
+            on_combat_round_end: Event::new("on_combat_round_end"),
+            on_combat_end: Event::new("on_combat_end"),
+        }
     }
 }
 
@@ -145,7 +174,6 @@ pub struct AdvanceInfo {
 
 #[derive(Clone, PartialEq)]
 pub struct CustomPhaseInfo {
-    pub event_type: CustomPhaseEventType,
     pub player: usize,
 }
 
@@ -251,6 +279,10 @@ impl PlayerCommands {
         self.content
             .gained_cities
             .push(GainCityContext::new(pos, player));
+    }
+
+    pub fn update_barbarian_info(&mut self, state: BarbariansEventState) {
+        self.content.barbarian_update = Some(state);
     }
 
     pub fn add_info_log_item(&mut self, edit: &str) {

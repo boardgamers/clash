@@ -1,4 +1,5 @@
 use crate::action::Action;
+use crate::barbarians::BarbariansEventState;
 use crate::content::advances::get_advance;
 use crate::events::EventOrigin;
 use crate::game::{Game, UndoContext};
@@ -10,41 +11,32 @@ use crate::unit::UnitType;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub enum CustomPhaseEventType {
-    StartCombat,
-    EndCombat,
-    TurnStart,
-    OnAdvance,
-    OnConstruct,
-    OnRecruit,
-    Incident,
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct CustomPhasePaymentRequest {
+pub struct PaymentRequest {
     pub cost: PaymentOptions,
     pub name: String,
     pub optional: bool,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct CustomPhaseResourceRewardRequest {
+pub struct ResourceRewardRequest {
     pub reward: PaymentOptions,
     pub name: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct CustomPhaseAdvanceRewardRequest {
+pub struct AdvanceRewardRequest {
     pub choices: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum CustomPhaseRequest {
-    Payment(Vec<CustomPhasePaymentRequest>),
-    ResourceReward(CustomPhaseResourceRewardRequest),
-    AdvanceReward(CustomPhaseAdvanceRewardRequest),
-    SelectPosition(CustomPhasePositionRequest),
-    SelectUnit(CustomPhaseUnitRequest),
+    Payment(Vec<PaymentRequest>),
+    ResourceReward(ResourceRewardRequest),
+    AdvanceReward(AdvanceRewardRequest),
+    SelectPosition(PositionRequest),
+    SelectUnitType(UnitTypeRequest),
+    SelectUnits(CustomPhaseUnitsRequest),
+    BoolRequest,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -53,12 +45,13 @@ pub enum CustomPhaseEventAction {
     ResourceReward(ResourcePile),
     AdvanceReward(String),
     SelectPosition(Position),
-    SelectUnit(UnitType),
+    SelectUnitType(UnitType),
+    SelectUnits(Vec<u32>),
+    Bool(bool),
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CurrentCustomPhaseEvent {
-    pub event_type: CustomPhaseEventType,
     pub priority: i32,
     pub player_index: usize,
     pub request: CustomPhaseRequest,
@@ -66,20 +59,32 @@ pub struct CurrentCustomPhaseEvent {
     pub origin: EventOrigin,
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Default)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CustomPhaseEventState {
+    pub event_type: String,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub players_used: Vec<usize>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_priority_used: Option<i32>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub barbarians: Option<BarbariansEventState>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub current: Option<CurrentCustomPhaseEvent>,
 }
 
 impl CustomPhaseEventState {
     #[must_use]
-    pub fn new() -> Self {
+    pub fn new(event_type: String) -> Self {
         Self {
             players_used: vec![],
             last_priority_used: None,
             current: None,
+            barbarians: None,
+            event_type,
         }
     }
 
@@ -90,14 +95,14 @@ impl CustomPhaseEventState {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct CustomPhasePositionRequest {
+pub struct PositionRequest {
     pub choices: Vec<Position>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>, // in case the description of the event origin is not enough
+    pub description: Option<String>,
 }
 
-impl CustomPhasePositionRequest {
+impl PositionRequest {
     #[must_use]
     pub fn new(mut choices: Vec<Position>, description: Option<String>) -> Self {
         choices.sort();
@@ -109,18 +114,40 @@ impl CustomPhasePositionRequest {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct CustomPhaseUnitRequest {
+pub struct UnitTypeRequest {
     pub choices: Vec<UnitType>,
+    pub player_index: usize,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>, // in case the description of the event origin is not enough
+    pub description: Option<String>,
 }
 
-impl CustomPhaseUnitRequest {
+impl UnitTypeRequest {
     #[must_use]
-    pub fn new(choices: Vec<UnitType>, description: Option<String>) -> Self {
+    pub fn new(choices: Vec<UnitType>, player_index: usize, description: Option<String>) -> Self {
         Self {
             choices,
+            player_index,
+            description,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct CustomPhaseUnitsRequest {
+    pub choices: Vec<u32>,
+    pub needed: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+}
+
+impl CustomPhaseUnitsRequest {
+    #[must_use]
+    pub fn new(choices: Vec<u32>, needed: u8, description: Option<String>) -> Self {
+        Self {
+            choices,
+            needed,
             description,
         }
     }
@@ -141,14 +168,17 @@ impl CustomPhaseEventAction {
             CustomPhaseEventAction::AdvanceReward(n) => {
                 game.undo_advance(&get_advance(&n), player_index, false);
             }
-            CustomPhaseEventAction::SelectPosition(_) | CustomPhaseEventAction::SelectUnit(_) => {
-                // done with payer commands
+            CustomPhaseEventAction::Bool(_)
+            | CustomPhaseEventAction::SelectUnits(_)
+            | CustomPhaseEventAction::SelectPosition(_)
+            | CustomPhaseEventAction::SelectUnitType(_) => {
+                // done with payer commands - or can't undo
             }
         }
         let Some(UndoContext::CustomPhaseEvent(e)) = game.pop_undo_context() else {
             panic!("when undoing custom phase event, the undo context stack should have a custom phase event")
         };
-        game.custom_phase_state = e;
+        game.custom_phase_state.push(e);
         if let Some(action) = game.action_log.get(game.action_log_index - 1) {
             // is there a better way to do this?
             if let Action::Playing(PlayingAction::Advance { .. }) = action.action {
@@ -158,11 +188,11 @@ impl CustomPhaseEventAction {
     }
 
     pub(crate) fn redo(self, game: &mut Game, player_index: usize) {
-        let Some(s) = &mut game.custom_phase_state.current else {
+        let Some(s) = game.current_custom_phase_event_mut() else {
             panic!("current custom phase event should be set")
         };
         s.response = Some(self.clone());
-        let event_type = s.event_type.clone();
+        let event_type = game.current_custom_phase().event_type.clone();
         game.execute_custom_phase_action(player_index, &event_type);
     }
 }

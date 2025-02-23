@@ -1,8 +1,8 @@
 use crate::assets::Assets;
 use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
-use crate::combat_ui::RemoveCasualtiesSelection;
 use crate::construct_ui::ConstructionPayment;
+use crate::custom_phase_ui::UnitsSelection;
 use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
 use crate::event_ui::{custom_phase_event_help, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
@@ -16,16 +16,13 @@ use crate::status_phase_ui::ChooseAdditionalAdvances;
 use macroquad::prelude::*;
 use server::action::Action;
 use server::city::{City, MoodState};
-use server::combat::{active_attackers, active_defenders, CombatPhase};
 use server::content::custom_phase_actions::{
-    CustomPhaseAdvanceRewardRequest, CustomPhasePositionRequest, CustomPhaseRequest,
-    CustomPhaseUnitRequest,
+    AdvanceRewardRequest, CustomPhaseRequest, PositionRequest, UnitTypeRequest,
 };
 use server::events::EventOrigin;
 use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
 use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
-use server::unit::carried_units;
 
 #[derive(Clone)]
 pub enum ActiveDialog {
@@ -56,20 +53,17 @@ pub enum ActiveDialog {
     ChangeGovernmentType,
     ChooseAdditionalAdvances(ChooseAdditionalAdvances),
 
-    // combat
-    PlayActionCard,
-    Retreat,
-    RemoveCasualties(RemoveCasualtiesSelection),
-
     // custom
     Sports((Payment, Position)),
     Theaters(Payment),
     Taxes(Payment),
-    CustomPhaseResourceRewardRequest(Payment),
-    CustomPhaseAdvanceRewardRequest(CustomPhaseAdvanceRewardRequest),
-    CustomPhasePaymentRequest(Vec<Payment>),
-    CustomPhasePositionRequest(CustomPhasePositionRequest),
-    CustomPhaseUnitRequest(CustomPhaseUnitRequest),
+    ResourceRewardRequest(Payment),
+    AdvanceRewardRequest(AdvanceRewardRequest),
+    PaymentRequest(Vec<Payment>),
+    PositionRequest(PositionRequest),
+    UnitTypeRequest(UnitTypeRequest),
+    UnitsRequest(UnitsSelection),
+    BoolRequest,
 }
 
 impl ActiveDialog {
@@ -98,17 +92,16 @@ impl ActiveDialog {
             ActiveDialog::DetermineFirstPlayer => "determine first player",
             ActiveDialog::ChangeGovernmentType => "change government type",
             ActiveDialog::ChooseAdditionalAdvances(_) => "choose additional advances",
-            ActiveDialog::PlayActionCard => "play action card",
-            ActiveDialog::Retreat => "retreat",
-            ActiveDialog::RemoveCasualties(_) => "remove casualties",
             ActiveDialog::Sports(_) => "sports",
             ActiveDialog::Theaters(_) => "theaters",
             ActiveDialog::Taxes(_) => "collect taxes",
-            ActiveDialog::CustomPhaseResourceRewardRequest(_) => "trade route selection",
-            ActiveDialog::CustomPhaseAdvanceRewardRequest(_) => "advance selection",
-            ActiveDialog::CustomPhasePaymentRequest(_) => "custom phase payment request",
-            ActiveDialog::CustomPhasePositionRequest(_) => "custom phase position request",
-            ActiveDialog::CustomPhaseUnitRequest(_) => "custom phase unit request",
+            ActiveDialog::ResourceRewardRequest(_) => "trade route selection",
+            ActiveDialog::AdvanceRewardRequest(_) => "advance selection",
+            ActiveDialog::PaymentRequest(_) => "custom phase payment request",
+            ActiveDialog::PositionRequest(_) => "custom phase position request",
+            ActiveDialog::UnitTypeRequest(_) => "custom phase unit request",
+            ActiveDialog::UnitsRequest(_) => "custom phase units request",
+            ActiveDialog::BoolRequest => "custom phase bool request",
         }
     }
 
@@ -166,16 +159,6 @@ impl ActiveDialog {
             ActiveDialog::ChooseAdditionalAdvances(_) => {
                 vec!["Click on an advance to choose it".to_string()]
             }
-            ActiveDialog::PlayActionCard => vec!["Click on an action card to play it".to_string()],
-            ActiveDialog::Retreat => vec!["Do you want to retreat?".to_string()],
-            ActiveDialog::RemoveCasualties(r) => vec![format!(
-                "Remove {} units: click on a unit to remove it",
-                if r.needed_carried > 0 {
-                    format!("{} ships and {} carried units", r.needed, r.needed_carried)
-                } else {
-                    r.needed.to_string()
-                }
-            )],
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
             ActiveDialog::Sports(_) => {
                 event_help(rc, &EventOrigin::Advance("Sports".to_string()), true)
@@ -186,15 +169,13 @@ impl ActiveDialog {
             ActiveDialog::Theaters(_) => {
                 event_help(rc, &EventOrigin::Advance("Theaters".to_string()), true)
             }
-            ActiveDialog::CustomPhaseResourceRewardRequest(_)
-            | ActiveDialog::CustomPhaseAdvanceRewardRequest(_)
-            | ActiveDialog::CustomPhasePaymentRequest(_) => custom_phase_event_help(rc, None),
-            ActiveDialog::CustomPhasePositionRequest(r) => {
-                custom_phase_event_help(rc, r.description.as_ref())
-            }
-            ActiveDialog::CustomPhaseUnitRequest(r) => {
-                custom_phase_event_help(rc, r.description.as_ref())
-            }
+            ActiveDialog::ResourceRewardRequest(_)
+            | ActiveDialog::AdvanceRewardRequest(_)
+            | ActiveDialog::PaymentRequest(_)
+            | ActiveDialog::BoolRequest => custom_phase_event_help(rc, None),
+            ActiveDialog::PositionRequest(r) => custom_phase_event_help(rc, r.description.as_ref()),
+            ActiveDialog::UnitTypeRequest(r) => custom_phase_event_help(rc, r.description.as_ref()),
+            ActiveDialog::UnitsRequest(r) => custom_phase_event_help(rc, r.description.as_ref()),
         }
     }
 
@@ -245,7 +226,7 @@ impl ActiveDialog {
                 | ActiveDialog::AdvancePayment(_)
                 | ActiveDialog::ChangeGovernmentType
                 | ActiveDialog::ChooseAdditionalAdvances(_)
-                | ActiveDialog::CustomPhaseAdvanceRewardRequest(_)
+                | ActiveDialog::AdvanceRewardRequest(_)
         )
     }
 }
@@ -538,9 +519,9 @@ impl State {
 
     #[must_use]
     pub fn game_state_dialog(&self, game: &Game) -> ActiveDialog {
-        if let Some(e) = &game.custom_phase_state.current {
+        if let Some(e) = &game.current_custom_phase_event() {
             return match &e.request {
-                CustomPhaseRequest::Payment(r) => ActiveDialog::CustomPhasePaymentRequest(
+                CustomPhaseRequest::Payment(r) => ActiveDialog::PaymentRequest(
                     r.iter()
                         .map(|p| {
                             Payment::new(
@@ -553,19 +534,17 @@ impl State {
                         .collect(),
                 ),
                 CustomPhaseRequest::ResourceReward(r) => {
-                    ActiveDialog::CustomPhaseResourceRewardRequest(Payment::new_gain(
-                        &r.reward, &r.name,
-                    ))
+                    ActiveDialog::ResourceRewardRequest(Payment::new_gain(&r.reward, &r.name))
                 }
                 CustomPhaseRequest::AdvanceReward(r) => {
-                    ActiveDialog::CustomPhaseAdvanceRewardRequest(r.clone())
+                    ActiveDialog::AdvanceRewardRequest(r.clone())
                 }
-                CustomPhaseRequest::SelectPosition(r) => {
-                    ActiveDialog::CustomPhasePositionRequest(r.clone())
-                }
-                CustomPhaseRequest::SelectUnit(r) => {
-                    ActiveDialog::CustomPhaseUnitRequest(r.clone())
-                }
+                CustomPhaseRequest::SelectPosition(r) => ActiveDialog::PositionRequest(r.clone()),
+                CustomPhaseRequest::SelectUnitType(r) => ActiveDialog::UnitTypeRequest(r.clone()),
+                CustomPhaseRequest::SelectUnits(r) => ActiveDialog::UnitsRequest(
+                    UnitsSelection::new(r.needed, r.choices.clone(), r.description.clone()),
+                ),
+                CustomPhaseRequest::BoolRequest => ActiveDialog::BoolRequest,
             };
         }
         match &game.state {
@@ -587,39 +566,7 @@ impl State {
                 StatusPhaseState::ChangeGovernmentType => ActiveDialog::ChangeGovernmentType,
                 StatusPhaseState::DetermineFirstPlayer => ActiveDialog::DetermineFirstPlayer,
             },
-            GameState::Combat(c) => match &c.phase {
-                CombatPhase::PlayActionCard(_) => ActiveDialog::PlayActionCard,
-                CombatPhase::RemoveCasualties(r) => {
-                    let (position, selectable) = if r.player == c.attacker {
-                        (
-                            c.attacker_position,
-                            active_attackers(game, c.attacker, &c.attackers, c.defender_position)
-                                .clone()
-                                .into_iter()
-                                .chain(c.attackers.iter().flat_map(|a| {
-                                    let units = carried_units(*a, game.get_player(r.player));
-                                    units
-                                }))
-                                .collect(),
-                        )
-                    } else if r.player == c.defender {
-                        (
-                            c.defender_position,
-                            active_defenders(game, c.defender, c.defender_position),
-                        )
-                    } else {
-                        panic!("player should be either defender or attacker")
-                    };
-                    ActiveDialog::RemoveCasualties(RemoveCasualtiesSelection::new(
-                        r.player,
-                        position,
-                        r.casualties,
-                        r.carried_units_casualties,
-                        selectable,
-                    ))
-                }
-                CombatPhase::Retreat => ActiveDialog::Retreat,
-            },
+            GameState::Combat(_) => panic!("should be in custom phase"),
             GameState::ExploreResolution(r) => {
                 ActiveDialog::ExploreResolution(ExploreResolutionConfig {
                     block: r.block.clone(),

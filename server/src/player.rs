@@ -187,7 +187,8 @@ impl Player {
             .for_each(|(id, units)| {
                 assert!(
                     units.len() == 1,
-                    "player data should not contain duplicate units {id}"
+                    "player data {} should not contain duplicate units {id}",
+                    data.id
                 );
             });
         let player = Self {

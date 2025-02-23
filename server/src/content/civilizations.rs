@@ -52,7 +52,7 @@ pub fn get_all() -> Vec<Civilization> {
                             s.hit_cancels += 1;
                         }
                     },
-                    2,
+                    4,
                 )
                 .build()],
         ),

@@ -269,11 +269,13 @@
       "undo": [
         {
           "CustomPhaseEvent": {
-            "players_used": [],
-            "last_priority_used": 102,
+            "event_type": "on_incident",
+            "last_priority_used": 200,
+            "barbarians": {
+              "move_units": false
+            },
             "current": {
-              "event_type": "Incident",
-              "priority": 102,
+              "priority": 200,
               "player_index": 0,
               "request": {
                 "SelectPosition": {
@@ -313,25 +315,29 @@
     {
       "action": {
         "CustomPhaseEvent": {
-          "SelectUnit": "Elephant"
+          "SelectUnitType": "Elephant"
         }
       },
       "undo": [
         {
           "CustomPhaseEvent": {
-            "players_used": [],
+            "event_type": "on_incident",
             "last_priority_used": 100,
+            "barbarians": {
+              "move_units": false,
+              "selected_position": "B3"
+            },
             "current": {
-              "event_type": "Incident",
               "priority": 100,
               "player_index": 0,
               "request": {
-                "SelectUnit": {
+                "SelectUnitType": {
                   "choices": [
                     "Infantry",
                     "Cavalry",
                     "Elephant"
                   ],
+                  "player_index": 2,
                   "description": "Select a unit to reinforce the barbarians"
                 }
               },
@@ -371,13 +377,16 @@
       "Player gained 1 mood token as advance bonus"
     ],
     [
+      "A new game event has been triggered: Barbarians spawn"
+    ],
+    [
       "Barbarians spawned a new city and a new Infantry unit at B3"
     ],
     [
       "Barbarians reinforced with 1 elephant at B3",
       "Player1 gained 1 food from A good year",
       "Player2 gained 1 food from A good year",
-      "Player2 Could not store 1 food"
+      "Player2 could not store 1 food"
     ],
     [
       "It's Player2's turn"

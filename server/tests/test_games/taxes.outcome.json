@@ -387,7 +387,7 @@
   "log": [
     [
       "Player1 paid 1 mood token to collect 1 food, 1 wood, 1 ore and 1 gold using Taxes",
-      "Player1 Could not store 1 food"
+      "Player1 could not store 1 food"
     ]
   ],
   "undo_limit": 0,

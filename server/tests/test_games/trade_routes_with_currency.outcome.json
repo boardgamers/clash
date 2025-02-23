@@ -1,41 +1,42 @@
 {
   "state": "Playing",
-  "state_change_event_state": {
-    "players_used": [],
-    "last_priority_used": 0,
-    "current": {
-      "event_type": "TurnStart",
-      "priority": 0,
-      "player_index": 1,
-      "request": {
-        "ResourceReward": {
-          "reward": {
-            "default": {
-              "gold": 2
+  "state_change_event_state": [
+    {
+      "event_type": "on_turn_start",
+      "last_priority_used": 0,
+      "current": {
+        "priority": 0,
+        "player_index": 1,
+        "request": {
+          "ResourceReward": {
+            "reward": {
+              "default": {
+                "gold": 2
+              },
+              "conversions": [
+                {
+                  "from": [
+                    {
+                      "gold": 1
+                    }
+                  ],
+                  "to": {
+                    "food": 1
+                  },
+                  "type": "Unlimited"
+                }
+              ]
             },
-            "conversions": [
-              {
-                "from": [
-                  {
-                    "gold": 1
-                  }
-                ],
-                "to": {
-                  "food": 1
-                },
-                "type": "Unlimited"
-              }
-            ]
-          },
-          "name": "Collect trade routes reward"
+            "name": "Collect trade routes reward"
+          }
+        },
+        "response": null,
+        "origin": {
+          "Advance": "Trade Routes"
         }
-      },
-      "response": null,
-      "origin": {
-        "Advance": "Trade Routes"
       }
     }
-  },
+  ],
   "players": [
     {
       "name": null,

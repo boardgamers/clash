@@ -4,7 +4,7 @@ use crate::advance::{Advance, AdvanceBuilder};
 use crate::city_pieces::Building::Market;
 use crate::content::advances::{advance_group_builder, AdvanceGroup, CURRENCY};
 use crate::content::custom_actions::CustomActionType::Taxes;
-use crate::content::custom_phase_actions::CustomPhaseResourceRewardRequest;
+use crate::content::custom_phase_actions::ResourceRewardRequest;
 use crate::content::trade_routes::{trade_route_log, trade_route_reward};
 use crate::game::Game;
 use crate::payment::PaymentOptions;
@@ -61,12 +61,12 @@ fn trade_routes() -> AdvanceBuilder {
     Advance::builder(
         "Trade Routes",
         "At the beginning of your turn, you gain 1 food for every trade route you can make, to a maximum of 4. A trade route is made between one of your Settlers or Ships and a non-Angry enemy player city within 2 spaces (without counting through unrevealed Regions). Each Settler or Ship can only be paired with one enemy player city. Likewise, each enemy player city must be paired with a different Settler or Ship. In other words, to gain X food you must have at least X Units (Settlers or Ships), each paired with X different enemy cities.")
-        .add_resource_reward_request_listener(
+        .add_resource_request(
             |event| &mut event.on_turn_start,
             0,
             |game, _player_index, ()| {
                 trade_route_reward(game).map(|(reward, _routes)| {
-                    CustomPhaseResourceRewardRequest {
+                    ResourceRewardRequest {
                         reward,
                         name: "Collect trade routes reward".to_string(),
                     }

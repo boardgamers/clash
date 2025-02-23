@@ -496,7 +496,7 @@
   "log": [
     [
       "Player2 paid 2 ideas to get the Dogma advance",
-      "Player2 Could not store 2 ideas"
+      "Player2 could not store 2 ideas"
     ]
   ],
   "undo_limit": 14,

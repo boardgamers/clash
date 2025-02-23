@@ -1,41 +1,42 @@
 {
   "state": "Playing",
-  "state_change_event_state": {
-    "players_used": [],
-    "last_priority_used": 0,
-    "current": {
-      "event_type": "OnRecruit",
-      "priority": 0,
-      "player_index": 0,
-      "request": {
-        "ResourceReward": {
-          "reward": {
-            "default": {
-              "wood": 1
+  "state_change_event_state": [
+    {
+      "event_type": "on_recruit",
+      "last_priority_used": 0,
+      "current": {
+        "priority": 0,
+        "player_index": 0,
+        "request": {
+          "ResourceReward": {
+            "reward": {
+              "default": {
+                "wood": 1
+              },
+              "conversions": [
+                {
+                  "from": [
+                    {
+                      "wood": 1
+                    }
+                  ],
+                  "to": {
+                    "gold": 1
+                  },
+                  "type": "Unlimited"
+                }
+              ]
             },
-            "conversions": [
-              {
-                "from": [
-                  {
-                    "wood": 1
-                  }
-                ],
-                "to": {
-                  "gold": 1
-                },
-                "type": "Unlimited"
-              }
-            ]
-          },
-          "name": "Select resource to gain back"
+            "name": "Select resource to gain back"
+          }
+        },
+        "response": null,
+        "origin": {
+          "Advance": "Medicine"
         }
-      },
-      "response": null,
-      "origin": {
-        "Advance": "Medicine"
       }
     }
-  },
+  ],
   "players": [
     {
       "name": null,
@@ -283,10 +284,9 @@
       "undo": [
         {
           "CustomPhaseEvent": {
-            "players_used": [],
+            "event_type": "on_recruit",
             "last_priority_used": 1,
             "current": {
-              "event_type": "OnRecruit",
               "priority": 1,
               "player_index": 0,
               "request": {

@@ -5,11 +5,11 @@ use crate::city_pieces::Building::Fortress;
 use crate::combat::CombatModifier::{
     CancelFortressExtraDie, CancelFortressIgnoreHit, SteelWeaponsAttacker, SteelWeaponsDefender,
 };
-use crate::combat::{Combat, CombatModifier, CombatStrength};
+use crate::combat::{get_combat, Combat, CombatModifier, CombatStrength};
 use crate::content::advances::{
     advance_group_builder, AdvanceGroup, METALLURGY, STEEL_WEAPONS, TACTICS,
 };
-use crate::content::custom_phase_actions::CustomPhasePaymentRequest;
+use crate::content::custom_phase_actions::PaymentRequest;
 use crate::game::{Game, GameState};
 use crate::payment::{PaymentConversion, PaymentOptions};
 use crate::resource::ResourceType;
@@ -30,7 +30,7 @@ fn tactics() -> AdvanceBuilder {
     )
     .with_advance_bonus(CultureToken)
     .with_unlocked_building(Fortress)
-    .add_player_event_listener(|event| &mut event.on_combat_round, fortress, 1)
+    .add_player_event_listener(|event| &mut event.on_combat_round, fortress, 3)
 }
 
 fn siegecraft() -> AdvanceBuilder {
@@ -42,7 +42,7 @@ fn siegecraft() -> AdvanceBuilder {
             |e| &mut e.on_combat_start,
             0,
             |game, player, ()| {
-                let GameState::Combat(c) = &game.state else { panic!("Invalid state") };
+                let c = get_combat(game);
 
                 let extra_die = PaymentOptions::sum(2, &[ResourceType::Wood, ResourceType::Gold]);
                 let ignore_hit = PaymentOptions::sum(2, &[ResourceType::Ore, ResourceType::Gold]);
@@ -54,12 +54,12 @@ fn siegecraft() -> AdvanceBuilder {
                     && (player.can_afford(&extra_die) || player.can_afford(&ignore_hit))
                 {
                     Some(vec![
-                        CustomPhasePaymentRequest {
+                        PaymentRequest {
                             cost: extra_die,
                             name: "Cancel fortress ability to add an extra die in the first round of combat".to_string(),
                             optional: true,
                         },
-                        CustomPhasePaymentRequest {
+                        PaymentRequest {
                             cost: ignore_hit,
                             name: "Cancel fortress ability to ignore the first hit in the first round of combat".to_string(),
                             optional: true,
@@ -105,7 +105,7 @@ fn steel_weapons() -> AdvanceBuilder {
             |e| &mut e.on_combat_start,
             1,
             |game, player_index, ()| {
-                let GameState::Combat(c) = &game.state else { panic!("Invalid state") };
+                let c = get_combat(game);
                 let player = &game.players[player_index];
 
                 let cost = steel_weapons_cost(game, c, player_index);
@@ -116,7 +116,7 @@ fn steel_weapons() -> AdvanceBuilder {
                 }
 
                 if player.can_afford(&cost) {
-                    Some(vec![CustomPhasePaymentRequest {
+                    Some(vec![PaymentRequest {
                         cost,
                         name: "Use steel weapons".to_string(),
                         optional: true,
@@ -135,7 +135,7 @@ fn steel_weapons() -> AdvanceBuilder {
         .add_player_event_listener(
             |event| &mut event.on_combat_round,
             use_steel_weapons,
-            0,
+            2,
         )
 }
 

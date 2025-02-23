@@ -3,7 +3,6 @@
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-use crate::action::PlayActionCard;
 use crate::game::ActionLogItem;
 use crate::player::Player;
 use crate::playing_actions::{
@@ -11,7 +10,7 @@ use crate::playing_actions::{
 };
 use crate::status_phase::{ChangeGovernmentType, RazeSize1City};
 use crate::{
-    action::{Action, CombatAction},
+    action::Action,
     game::Game,
     playing_actions::PlayingAction,
     position::Position,
@@ -44,7 +43,6 @@ pub fn format_action_log_item(action: &Action, game: &Game) -> Vec<String> {
         Action::CulturalInfluenceResolution(action) => {
             vec![format_cultural_influence_resolution_log_item(game, *action)]
         }
-        Action::Combat(action) => vec![format_combat_action_log_item(action, game)],
         Action::ExploreResolution(_rotation) => vec![format_explore_action_log_item(game)],
         Action::CustomPhaseEvent(_) => {
             // is done in the event handler itself
@@ -430,38 +428,6 @@ pub(crate) fn format_status_phase_action_log_item(
                 }
             )]
         }
-    }
-}
-
-fn format_combat_action_log_item(action: &CombatAction, game: &Game) -> String {
-    let player = &game.players[game.active_player()];
-    let player_name = player.get_name();
-    match action {
-        CombatAction::PlayActionCard(card) => format!(
-            "{player_name} {}",
-            match card {
-                PlayActionCard::Card(card) => format!("played the {card} tactics card"),
-                PlayActionCard::None => String::from("did not play a tactics card"),
-            }
-        ),
-        CombatAction::RemoveCasualties(casualties) => format!(
-            "{player_name} removed {}",
-            casualties
-                .iter()
-                .map(|unit| player
-                    .get_unit(*unit)
-                    .expect("the player should have units to be removed")
-                    .unit_type)
-                .collect::<Units>()
-        ),
-        CombatAction::Retreat(action) => format!(
-            "{player_name} {}",
-            if *action {
-                "retreated ending the battle in a draw"
-            } else {
-                "decided not to retreat"
-            }
-        ),
     }
 }
 

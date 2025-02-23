@@ -1,53 +1,54 @@
 {
   "state": "Playing",
-  "state_change_event_state": {
-    "players_used": [],
-    "last_priority_used": 1,
-    "current": {
-      "event_type": "OnAdvance",
-      "priority": 1,
-      "player_index": 0,
-      "request": {
-        "Payment": [
-          {
-            "cost": {
-              "default": {
-                "ideas": 1
+  "state_change_event_state": [
+    {
+      "event_type": "on_advance_custom_phase",
+      "last_priority_used": 1,
+      "current": {
+        "priority": 1,
+        "player_index": 0,
+        "request": {
+          "Payment": [
+            {
+              "cost": {
+                "default": {
+                  "ideas": 1
+                },
+                "conversions": [
+                  {
+                    "from": [
+                      {
+                        "food": 1
+                      },
+                      {
+                        "wood": 1
+                      },
+                      {
+                        "ore": 1
+                      },
+                      {
+                        "ideas": 1
+                      }
+                    ],
+                    "to": {
+                      "gold": 1
+                    },
+                    "type": "Unlimited"
+                  }
+                ]
               },
-              "conversions": [
-                {
-                  "from": [
-                    {
-                      "food": 1
-                    },
-                    {
-                      "wood": 1
-                    },
-                    {
-                      "ore": 1
-                    },
-                    {
-                      "ideas": 1
-                    }
-                  ],
-                  "to": {
-                    "gold": 1
-                  },
-                  "type": "Unlimited"
-                }
-              ]
-            },
-            "name": "Pay extra 1 idea for a mood token",
-            "optional": true
-          }
-        ]
-      },
-      "response": null,
-      "origin": {
-        "Advance": "Free Education"
+              "name": "Pay extra 1 idea for a mood token",
+              "optional": true
+            }
+          ]
+        },
+        "response": null,
+        "origin": {
+          "Advance": "Free Education"
+        }
       }
     }
-  },
+  ],
   "players": [
     {
       "name": null,
