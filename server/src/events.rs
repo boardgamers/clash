@@ -52,11 +52,20 @@ where
     T: Clone + PartialEq,
 {
     //return the id of the listener witch can be used to remove the listener later
-    pub fn add_listener_mut<F>(&mut self, new_listener: F, priority: i32, key: EventOrigin) -> usize
+    pub(crate) fn add_listener_mut<F>(
+        &mut self,
+        new_listener: F,
+        priority: i32,
+        key: EventOrigin,
+    ) -> usize
     where
         F: Fn(&mut T, &U, &V) + 'static,
     {
         let id = self.next_id;
+        assert!(
+            !self.listeners.iter().any(|(_, p, _, _)| &priority == p),
+            "Priority {priority} already used by listener with key {key:?}"
+        );
         self.listeners
             .push((Box::new(new_listener), priority, id, key));
         self.listeners.sort_by_key(|(_, priority, _, _)| *priority);
@@ -148,9 +157,17 @@ impl<T, U, V> Default for EventMut<T, U, V> {
 
 pub struct Event<T, U = (), V = ()> {
     pub inner: Option<EventMut<T, U, V>>,
+    pub name: String,
 }
 
 impl<T, U, V> Event<T, U, V> {
+    pub(crate) fn new(name: &str) -> Self {
+        Self {
+            inner: Some(EventMut::default()),
+            name: name.to_string(),
+        }
+    }
+
     pub(crate) fn get(&self) -> &EventMut<T, U, V> {
         self.inner.as_ref().expect("Event should be initialized")
     }
@@ -161,14 +178,6 @@ impl<T, U, V> Event<T, U, V> {
 
     pub(crate) fn set(&mut self, event: EventMut<T, U, V>) {
         self.inner = Some(event);
-    }
-}
-
-impl<T, U, V> Default for Event<T, U, V> {
-    fn default() -> Self {
-        Self {
-            inner: Some(EventMut::default()),
-        }
     }
 }
 
@@ -194,7 +203,7 @@ mod tests {
                 *item += 1;
                 *item -= 1;
             },
-            0,
+            1,
             EventOrigin::Advance("no change".to_string()),
         );
 
@@ -238,12 +247,12 @@ mod tests {
         );
         event.add_listener_mut(
             |value: &mut Info, (), ()| value.value += 2,
-            0,
+            1,
             EventOrigin::Advance("B".to_string()),
         );
         event.add_listener_mut(
             |value: &mut Info, (), ()| value.value += 4,
-            0,
+            2,
             EventOrigin::Advance("C".to_string()),
         );
 

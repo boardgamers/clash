@@ -411,10 +411,9 @@
       "undo": [
         {
           "CustomPhaseEvent": {
-            "players_used": [],
+            "event_type": "on_turn_start",
             "last_priority_used": 0,
             "current": {
-              "event_type": "TurnStart",
               "priority": 0,
               "player_index": 1,
               "request": {

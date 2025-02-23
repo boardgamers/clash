@@ -3,7 +3,7 @@ use crate::advance::Bonus::CultureToken;
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::city_pieces::Building::Observatory;
 use crate::content::advances::{advance_group_builder, AdvanceGroup, METALLURGY};
-use crate::content::custom_phase_actions::CustomPhaseResourceRewardRequest;
+use crate::content::custom_phase_actions::ResourceRewardRequest;
 use crate::payment::PaymentOptions;
 use crate::resource::ResourceType;
 
@@ -27,7 +27,7 @@ fn math() -> AdvanceBuilder {
                 i.set_zero();
             }
         },
-        0,
+        1,
     )
     .with_advance_bonus(CultureToken)
     .with_unlocked_building(Observatory)
@@ -59,7 +59,7 @@ fn medicine() -> AdvanceBuilder {
         "After recruiting, gain one of the paid resources back",
     )
     .with_advance_bonus(CultureToken)
-    .add_resource_reward_request_listener(
+    .add_resource_request(
         |event| &mut event.on_recruit,
         0,
         |_game, _player_index, recruit| {
@@ -72,7 +72,7 @@ fn medicine() -> AdvanceBuilder {
                 return None;
             }
 
-            Some(CustomPhaseResourceRewardRequest {
+            Some(ResourceRewardRequest {
                 reward: PaymentOptions::sum(1, &types),
                 name: "Select resource to gain back".to_string(),
             })

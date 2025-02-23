@@ -378,10 +378,9 @@
       "undo": [
         {
           "CustomPhaseEvent": {
-            "players_used": [],
+            "event_type": "on_advance_custom_phase",
             "last_priority_used": 1,
             "current": {
-              "event_type": "OnAdvance",
               "priority": 1,
               "player_index": 0,
               "request": {

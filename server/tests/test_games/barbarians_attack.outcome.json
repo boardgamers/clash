@@ -1,20 +1,22 @@
 {
-  "state": "Playing",
+  "state": {
+    "StatusPhase": "FreeAdvance"
+  },
   "players": [
     {
       "name": null,
       "id": 0,
       "resources": {
         "food": 1,
-        "wood": 7,
-        "ore": 7,
-        "ideas": 6,
+        "wood": 6,
+        "ore": 6,
+        "ideas": 5,
         "gold": 7,
-        "mood_tokens": 6,
+        "mood_tokens": 8,
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 2,
+        "food": 7,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -29,57 +31,13 @@
           "activations": 0,
           "angry_activation": false,
           "position": "A1"
-        },
-        {
-          "city_pieces": {
-            "academy": 0
-          },
-          "mood_state": "Neutral",
-          "activations": 1,
-          "angry_activation": false,
-          "position": "C2"
         }
       ],
       "units": [
         {
-          "position": "C2",
-          "unit_type": "Infantry",
-          "id": 0
-        },
-        {
-          "position": "C2",
-          "unit_type": "Cavalry",
-          "id": 1
-        },
-        {
-          "position": "C2",
-          "unit_type": "Leader",
-          "id": 2
-        },
-        {
-          "position": "C2",
-          "unit_type": "Elephant",
-          "id": 3
-        },
-        {
-          "position": "C2",
+          "position": "A1",
           "unit_type": "Settler",
-          "id": 4
-        },
-        {
-          "position": "C2",
-          "unit_type": "Settler",
-          "id": 5
-        },
-        {
-          "position": "C2",
-          "unit_type": "Settler",
-          "id": 6
-        },
-        {
-          "position": "C2",
-          "unit_type": "Settler",
-          "id": 7
+          "id": 8
         }
       ],
       "civilization": "test0",
@@ -87,21 +45,18 @@
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Math",
         "Mining",
-        "Public Education"
+        "Storage",
+        "Tactics"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "incident_tokens": 2,
+      "incident_tokens": 3,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "next_unit_id": 8,
-      "event_info": {
-        "Public Education": "used"
-      }
+      "next_unit_id": 9
     },
     {
       "name": null,
@@ -160,6 +115,75 @@
       "event_victory_points": 0.0,
       "wonder_cards": [],
       "next_unit_id": 2
+    },
+    {
+      "name": null,
+      "id": 2,
+      "resources": {},
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
+        },
+        {
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Angry",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C2"
+        }
+      ],
+      "units": [
+        {
+          "position": "B3",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "B3",
+          "unit_type": "Infantry",
+          "id": 2
+        },
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 3
+        },
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 4
+        },
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 5
+        }
+      ],
+      "civilization": "Barbarians",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 6
     }
   ],
   "map": {
@@ -174,9 +198,7 @@
       ],
       [
         "A3",
-        {
-          "Exhausted": "Forest"
-        }
+        "Mountain"
       ],
       [
         "B1",
@@ -209,52 +231,24 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 0,
+  "current_player_index": 1,
   "action_log": [
     {
       "action": {
-        "Playing": {
-          "Collect": {
-            "city_position": "C2",
-            "collections": [
-              [
-                "B1",
-                {
-                  "ore": 1
-                }
-              ],
-              [
-                "B2",
-                {
-                  "wood": 1
-                }
-              ]
-            ]
-          }
+        "StatusPhase": {
+          "FreeAdvance": "Storage"
         }
       },
       "undo": [
         {
           "Command": {
-            "gained_resources": {
-              "wood": 1,
-              "ore": 1
-            }
-          }
-        },
-        {
-          "Command": {
-            "gained_resources": {
-              "ideas": 1
-            }
-          }
-        },
-        {
-          "WastedResources": {
-            "resources": {
-              "ore": 1
-            },
-            "player_index": 0
+            "gained_units": [
+              {
+                "unit_type": "Settler",
+                "position": "A1",
+                "player": 0
+              }
+            ]
           }
         }
       ]
@@ -263,15 +257,32 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 collects 1 ore and 1 wood in the city at C2",
-      "Public Education gained 1 idea",
-      "Player1 could not store 1 ore"
+      "Player1 advanced Storage for free",
+      "Player gained 1 mood token as advance bonus"
+    ],
+    [
+      "A new game event has been triggered: Barbarians move",
+      "Barbarians move from B2 to C2: 2 infantry and 1 elephant"
+    ],
+    [
+      "Combat round 1",
+      "Barbarians rolled 6 (Infantry, +1 combat value), 6 (Infantry, +1 combat value), 6 (Infantry, no bonus) for combined combat value of 20 and gets 0 hits against defending units.",
+      "Player1 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units.",
+      "Player1 used the following combat modifiers: fortress added one extra die, fortress cancelled one hit",
+      "Barbarians has to remove 1 of their attacking units",
+      "Barbarians removed 1 elephant",
+      "Attacker wins and killed 4 settlers of Player1 and captured Player1's city at C2",
+      "Player1 gained 1 free Settler Unit at A1 for losing a city",
+      "Barbarians spawned a new Infantry unit at C2"
+    ],
+    [
+      "It's Player2's turn"
     ]
   ],
-  "undo_limit": 0,
-  "actions_left": 2,
+  "undo_limit": 1,
+  "actions_left": 3,
   "successful_cultural_influence": false,
-  "round": 2,
+  "round": 1,
   "age": 1,
   "messages": [
     "The game has started"
@@ -281,14 +292,15 @@
     1,
     10,
     10,
-    10,
+    10
+  ],
+  "dice_roll_log": [
     10,
     10,
     10,
     10,
     10
   ],
-  "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [
     "Pyramids"

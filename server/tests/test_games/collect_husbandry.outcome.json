@@ -332,7 +332,7 @@
     [
       "Player1 collects 1 food in the city at B3 making it Neutral",
       "Husbandry allows collecting 1 resources from 2 land spaces away",
-      "Player1 Could not store 1 food"
+      "Player1 could not store 1 food"
     ]
   ],
   "undo_limit": 0,

@@ -325,7 +325,7 @@
   "log": [
     [
       "Player1 disembarked 1 cavalry and 1 elephant from C3 to B2 and captured Player2's city at B2",
-      "Player1 Could not store 2 gold"
+      "Player1 could not store 2 gold"
     ]
   ],
   "undo_limit": 1,

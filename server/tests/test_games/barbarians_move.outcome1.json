@@ -1,47 +1,22 @@
 {
   "state": {
-    "Combat": {
-      "initiation": {
-        "Movement": {
-          "movement_actions_left": 1,
-          "moved_units": [
-            0
-          ]
-        }
-      },
-      "round": 1,
-      "phase": {
-        "RemoveCasualties": {
-          "player": 1,
-          "casualties": 1,
-          "defender_hits": 2
-        }
-      },
-      "defender": 1,
-      "defender_position": "C1",
-      "attacker": 0,
-      "attacker_position": "C2",
-      "attackers": [
-        0
-      ],
-      "can_retreat": true
-    }
+    "StatusPhase": "FreeAdvance"
   },
   "players": [
     {
       "name": null,
       "id": 0,
       "resources": {
-        "food": 2,
-        "wood": 7,
-        "ore": 7,
+        "food": 1,
+        "wood": 6,
+        "ore": 6,
         "ideas": 5,
         "gold": 7,
-        "mood_tokens": 7,
+        "mood_tokens": 8,
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 2,
+        "food": 7,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -58,9 +33,11 @@
           "position": "A1"
         },
         {
-          "city_pieces": {},
-          "mood_state": "Neutral",
-          "activations": 8,
+          "city_pieces": {
+            "fortress": 1
+          },
+          "mood_state": "Angry",
+          "activations": 0,
           "angry_activation": false,
           "position": "C2"
         }
@@ -69,9 +46,6 @@
         {
           "position": "C2",
           "unit_type": "Infantry",
-          "movement_restrictions": [
-            "Battle"
-          ],
           "id": 0
         },
         {
@@ -116,11 +90,12 @@
       "advances": [
         "Farming",
         "Mining",
+        "Storage",
         "Tactics"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "incident_tokens": 2,
+      "incident_tokens": 3,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -152,7 +127,7 @@
         {
           "city_pieces": {},
           "mood_state": "Angry",
-          "activations": 2,
+          "activations": 0,
           "angry_activation": false,
           "position": "C1"
         }
@@ -184,6 +159,71 @@
       "event_victory_points": 0.0,
       "wonder_cards": [],
       "next_unit_id": 2
+    },
+    {
+      "name": null,
+      "id": 2,
+      "resources": {},
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "B2",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "A3",
+          "unit_type": "Elephant",
+          "id": 1
+        },
+        {
+          "position": "B2",
+          "unit_type": "Infantry",
+          "id": 2
+        },
+        {
+          "position": "A3",
+          "unit_type": "Infantry",
+          "id": 3
+        },
+        {
+          "position": "A3",
+          "unit_type": "Infantry",
+          "id": 4
+        },
+        {
+          "position": "B3",
+          "unit_type": "Infantry",
+          "id": 5
+        }
+      ],
+      "civilization": "Barbarians",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 6
     }
   ],
   "map": {
@@ -198,9 +238,7 @@
       ],
       [
         "A3",
-        {
-          "Exhausted": "Forest"
-        }
+        "Mountain"
       ],
       [
         "B1",
@@ -233,35 +271,70 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 0,
+  "current_player_index": 1,
   "action_log": [
     {
       "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              0
-            ],
-            "destination": "C1"
-          }
+        "StatusPhase": {
+          "FreeAdvance": "Storage"
         }
       }
+    },
+    {
+      "action": {
+        "CustomPhaseEvent": {
+          "SelectPosition": "B3"
+        }
+      },
+      "undo": [
+        {
+          "CustomPhaseEvent": {
+            "event_type": "on_incident",
+            "last_priority_used": 136,
+            "barbarians": {
+              "move_units": true
+            },
+            "current": {
+              "priority": 136,
+              "player_index": 0,
+              "request": {
+                "SelectPosition": {
+                  "choices": [
+                    "A3",
+                    "B3"
+                  ],
+                  "description": "Select a Barbarian Army to move next"
+                }
+              },
+              "response": null,
+              "origin": {
+                "Incident": 100
+              }
+            }
+          }
+        }
+      ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
-      "Player1 marched 1 infantry from C2 to C1"
+      "Player1 advanced Storage for free",
+      "Player gained 1 mood token as advance bonus"
     ],
     [
-      "Combat round 1",
-      "Player1 rolled 6 (Infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
-      "Player2 rolled 6 (Infantry, +1 combat value), 6 (Infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against attacking units.",
-      "Player2 has to remove 1 of their defending units"
+      "A new game event has been triggered: Barbarians move"
+    ],
+    [
+      "Barbarians move from B3 to B2: 2 infantry",
+      "Barbarians spawned a new Infantry unit at B3"
+    ],
+    [
+      "It's Player2's turn"
     ]
   ],
-  "undo_limit": 1,
-  "actions_left": 1,
+  "undo_limit": 2,
+  "actions_left": 3,
   "successful_cultural_influence": false,
   "round": 1,
   "age": 1,
@@ -271,11 +344,15 @@
   "dice_roll_outcomes": [
     1,
     1,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
     10
   ],
   "dice_roll_log": [
-    10,
-    10,
     10
   ],
   "dropped_players": [],

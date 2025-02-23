@@ -15,7 +15,6 @@
         }
       },
       "round": 1,
-      "phase": "Retreat",
       "defender": 1,
       "defender_position": "C1",
       "attacker": 0,
@@ -34,67 +33,68 @@
       ]
     }
   },
-  "state_change_event_state": {
-    "players_used": [],
-    "last_priority_used": 0,
-    "current": {
-      "event_type": "StartCombat",
-      "priority": 0,
-      "player_index": 0,
-      "request": {
-        "Payment": [
-          {
-            "cost": {
-              "default": {
-                "wood": 2
+  "state_change_event_state": [
+    {
+      "event_type": "on_combat_start",
+      "last_priority_used": 0,
+      "current": {
+        "priority": 0,
+        "player_index": 0,
+        "request": {
+          "Payment": [
+            {
+              "cost": {
+                "default": {
+                  "wood": 2
+                },
+                "conversions": [
+                  {
+                    "from": [
+                      {
+                        "wood": 1
+                      }
+                    ],
+                    "to": {
+                      "gold": 1
+                    },
+                    "type": "Unlimited"
+                  }
+                ]
               },
-              "conversions": [
-                {
-                  "from": [
-                    {
-                      "wood": 1
-                    }
-                  ],
-                  "to": {
-                    "gold": 1
-                  },
-                  "type": "Unlimited"
-                }
-              ]
+              "name": "Cancel fortress ability to add an extra die in the first round of combat",
+              "optional": true
             },
-            "name": "Cancel fortress ability to add an extra die in the first round of combat",
-            "optional": true
-          },
-          {
-            "cost": {
-              "default": {
-                "ore": 2
+            {
+              "cost": {
+                "default": {
+                  "ore": 2
+                },
+                "conversions": [
+                  {
+                    "from": [
+                      {
+                        "ore": 1
+                      }
+                    ],
+                    "to": {
+                      "gold": 1
+                    },
+                    "type": "Unlimited"
+                  }
+                ]
               },
-              "conversions": [
-                {
-                  "from": [
-                    {
-                      "ore": 1
-                    }
-                  ],
-                  "to": {
-                    "gold": 1
-                  },
-                  "type": "Unlimited"
-                }
-              ]
-            },
-            "name": "Cancel fortress ability to ignore the first hit in the first round of combat",
-            "optional": true
-          }
-        ]
-      },
-      "response": null,
-      "origin": {
-        "Advance": "Siegecraft"
+              "name": "Cancel fortress ability to ignore the first hit in the first round of combat",
+              "optional": true
+            }
+          ]
+        },
+        "response": null,
+        "origin": {
+          "Advance": "Siegecraft"
+        }
       }
     }
-  },
+  ],
   "players": [
     {
       "name": null,
@@ -349,10 +349,9 @@
       "undo": [
         {
           "CustomPhaseEvent": {
-            "players_used": [],
+            "event_type": "on_combat_start",
             "last_priority_used": 1,
             "current": {
-              "event_type": "StartCombat",
               "priority": 1,
               "player_index": 0,
               "request": {

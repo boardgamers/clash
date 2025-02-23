@@ -1,4 +1,3 @@
-use server::action::CombatAction;
 use server::content::custom_actions::CustomAction;
 use server::content::custom_phase_actions::CustomPhaseEventAction;
 use server::status_phase::{
@@ -1269,9 +1268,9 @@ fn test_wrong_status_phase_action() {
 // status phase
 
 #[test]
-fn test_free_advance_with_incident() {
+fn test_barbarians_spawn() {
     test_actions(
-        "free_advance_with_incident",
+        "barbarians_spawn",
         vec![
             TestAction::not_undoable(
                 0,
@@ -1285,9 +1284,52 @@ fn test_free_advance_with_incident() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CustomPhaseEventAction::SelectUnit(UnitType::Elephant)),
+                Action::CustomPhaseEvent(CustomPhaseEventAction::SelectUnitType(
+                    UnitType::Elephant,
+                )),
             ),
         ],
+    );
+}
+
+#[test]
+fn test_barbarians_move() {
+    test_actions(
+        "barbarians_move",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::StatusPhase(StatusPhaseAction::FreeAdvance(String::from("Storage"))),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::CustomPhaseEvent(CustomPhaseEventAction::SelectPosition(
+                    Position::from_offset("B3"),
+                )),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_barbarians_attack() {
+    test_actions(
+        "barbarians_attack",
+        vec![TestAction::not_undoable(
+            0,
+            Action::StatusPhase(StatusPhaseAction::FreeAdvance(String::from("Storage"))),
+        )],
+    );
+}
+
+#[test]
+fn test_barbarians_recapture_city() {
+    test_actions(
+        "barbarians_recapture_city",
+        vec![TestAction::not_undoable(
+            0,
+            move_action(vec![5, 6, 7, 8], Position::from_offset("C2")),
+        )],
     );
 }
 
@@ -1345,46 +1387,30 @@ fn test_change_government() {
 // combat
 
 #[test]
-fn test_until_remove_casualties_attacker() {
-    test_action(
-        "until_remove_casualties_attacker",
-        move_action(vec![0, 1, 2, 3], Position::from_offset("C1")),
-        0,
-        false,
-        false,
-    );
-}
-
-#[test]
-fn test_remove_casualties_attacker_and_capture_city() {
-    test_action(
+fn test_remove_casualties_attacker() {
+    test_actions(
         "remove_casualties_attacker",
-        Action::Combat(CombatAction::RemoveCasualties(vec![0, 1])),
-        0,
-        false,
-        false,
+        vec![
+            TestAction::not_undoable(
+                0,
+                move_action(vec![0, 1, 2, 3], Position::from_offset("C1")),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::CustomPhaseEvent(CustomPhaseEventAction::SelectUnits(vec![0, 1])),
+            ),
+        ],
     );
 }
 
 #[test]
-fn test_until_remove_casualties_defender() {
-    test_action(
-        "until_remove_casualties_defender",
-        move_action(vec![0], Position::from_offset("C1")),
-        0,
-        false,
-        false,
-    );
-}
-
-#[test]
-fn test_remove_casualties_defender_and_defender_wins() {
-    test_action(
+fn test_remove_casualties_defender() {
+    test_actions(
         "remove_casualties_defender",
-        Action::Combat(CombatAction::RemoveCasualties(vec![0])),
-        1,
-        false,
-        false,
+        vec![TestAction::not_undoable(
+            0,
+            move_action(vec![0], Position::from_offset("C1")),
+        )],
     );
 }
 
@@ -1415,17 +1441,6 @@ fn test_direct_capture_city_only_fortress() {
     test_action(
         "direct_capture_city_only_fortress",
         move_action(vec![0, 1, 2, 3], Position::from_offset("C1")),
-        0,
-        false,
-        false,
-    );
-}
-
-#[test]
-fn test_first_combat_round_no_hits_attacker_may_retreat() {
-    test_action(
-        "first_combat_round_no_hits",
-        move_action(vec![0], Position::from_offset("C1")),
         0,
         false,
         false,
@@ -1477,23 +1492,29 @@ fn test_combat_fanaticism() {
 
 #[test]
 fn test_retreat() {
-    test_action(
+    test_actions(
         "retreat",
-        Action::Combat(CombatAction::Retreat(true)),
-        0,
-        false,
-        false,
+        vec![
+            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1"))),
+            TestAction::not_undoable(
+                0,
+                Action::CustomPhaseEvent(CustomPhaseEventAction::Bool(true)),
+            ),
+        ],
     );
 }
 
 #[test]
-fn test_do_not_retreat_and_next_combat_round() {
-    test_action(
-        "dont_retreat",
-        Action::Combat(CombatAction::Retreat(false)),
-        0,
-        false,
-        false,
+fn test_do_not_retreat() {
+    test_actions(
+        "retreat_no",
+        vec![
+            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1"))),
+            TestAction::not_undoable(
+                0,
+                Action::CustomPhaseEvent(CustomPhaseEventAction::Bool(false)),
+            ),
+        ],
     );
 }
 
@@ -1716,7 +1737,7 @@ fn test_ship_combat() {
             TestAction::not_undoable(0, move_action(vec![7, 8], Position::from_offset("D2"))),
             TestAction::not_undoable(
                 0,
-                Action::Combat(CombatAction::RemoveCasualties(vec![7, 1])),
+                Action::CustomPhaseEvent(CustomPhaseEventAction::SelectUnits(vec![1])),
             ),
         ],
     );

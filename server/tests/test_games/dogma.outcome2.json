@@ -1,27 +1,28 @@
 {
   "state": "Playing",
-  "state_change_event_state": {
-    "players_used": [],
-    "last_priority_used": 0,
-    "current": {
-      "event_type": "OnConstruct",
-      "priority": 0,
-      "player_index": 1,
-      "request": {
-        "AdvanceReward": {
-          "choices": [
-            "Devotion",
-            "Conversion",
-            "Fanaticism"
-          ]
+  "state_change_event_state": [
+    {
+      "event_type": "on_construct",
+      "last_priority_used": 0,
+      "current": {
+        "priority": 0,
+        "player_index": 1,
+        "request": {
+          "AdvanceReward": {
+            "choices": [
+              "Devotion",
+              "Conversion",
+              "Fanaticism"
+            ]
+          }
+        },
+        "response": null,
+        "origin": {
+          "Advance": "Dogma"
         }
-      },
-      "response": null,
-      "origin": {
-        "Advance": "Dogma"
       }
     }
-  },
+  ],
   "players": [
     {
       "name": null,
@@ -549,10 +550,9 @@
       "undo": [
         {
           "CustomPhaseEvent": {
-            "players_used": [],
+            "event_type": "on_construct",
             "last_priority_used": 1,
             "current": {
-              "event_type": "OnConstruct",
               "priority": 1,
               "player_index": 1,
               "request": {
@@ -592,7 +592,7 @@
   "log": [
     [
       "Player2 paid 2 ideas to get the Dogma advance",
-      "Player2 Could not store 2 ideas"
+      "Player2 could not store 2 ideas"
     ],
     [
       "Player2 paid 1 wood and 1 ore to construct a Temple in the city at C1",

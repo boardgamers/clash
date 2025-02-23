@@ -6,7 +6,6 @@ use crate::action::Action;
 use crate::city::MoodState;
 use crate::collect::{collect, undo_collect};
 use crate::content::advances::get_advance;
-use crate::content::custom_phase_actions::CustomPhaseEventType;
 use crate::game::{CulturalInfluenceResolution, GameState};
 use crate::payment::PaymentOptions;
 use crate::player_events::InfluenceCulturePossible;
@@ -235,12 +234,7 @@ impl PlayingAction {
     }
 
     pub(crate) fn on_construct(game: &mut Game, player_index: usize, building: Building) {
-        game.trigger_custom_phase_event(
-            &[player_index],
-            |e| &mut e.on_construct,
-            &CustomPhaseEventType::OnConstruct,
-            &building,
-        );
+        game.trigger_custom_phase_event(&[player_index], |e| &mut e.on_construct, &building, None);
     }
 
     #[must_use]

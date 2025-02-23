@@ -309,7 +309,7 @@
     ],
     [
       "Player1 collects 1 food and 1 wood in the city at A1",
-      "Player1 Could not store 1 food and 1 wood"
+      "Player1 could not store 1 food and 1 wood"
     ]
   ],
   "undo_limit": 0,
