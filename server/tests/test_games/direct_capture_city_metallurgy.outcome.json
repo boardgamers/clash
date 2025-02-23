@@ -258,7 +258,7 @@
       "Player2 has to remove all of their defending units",
       "Player2 removed a leader",
       "Attacker wins and captured Player2's city at C1",
-      "Player1 Could not store 1 gold"
+      "Player1 could not store 1 gold"
     ]
   ],
   "undo_limit": 1,

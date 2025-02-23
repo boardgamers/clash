@@ -312,7 +312,7 @@
       "Barbarians removed 3 infantry",
       "Attacker wins and captured Barbarians's city at C2",
       "Player1 gained 2 gold for winning a combat against the Barbarians",
-      "Player1 Could not store 3 gold"
+      "Player1 could not store 3 gold"
     ]
   ],
   "undo_limit": 2,

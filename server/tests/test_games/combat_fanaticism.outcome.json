@@ -298,7 +298,7 @@
       "Attacker wins and captured Player2's city at C1",
       "Player2 gained 1 free Infantry Unit at C2 for Fanaticism Advance",
       "Player2 gained 1 free Settler Unit at C2 for losing a city",
-      "Player1 Could not store 1 gold"
+      "Player1 could not store 1 gold"
     ]
   ],
   "undo_limit": 1,
