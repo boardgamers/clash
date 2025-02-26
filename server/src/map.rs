@@ -5,6 +5,7 @@ use std::collections::HashMap;
 
 use crate::city::City;
 use crate::city::MoodState::Happy;
+use crate::consts::NON_HUMAN_PLAYERS;
 use crate::player::Player;
 use crate::position::Position;
 use crate::unit::UnitType;
@@ -26,7 +27,7 @@ impl Map {
     }
 
     #[must_use]
-    pub fn is_water(&self, pos: Position) -> bool {
+    pub fn is_sea(&self, pos: Position) -> bool {
         self.get(pos).is_some_and(Terrain::is_water)
     }
 
@@ -63,8 +64,7 @@ impl Map {
 
     #[must_use]
     pub fn random_map(players: &mut [Player], rng: &mut Rng) -> Self {
-        // exclude barbarians
-        let setup = get_map_setup(players.len() - 1);
+        let setup = get_map_setup(players.len() - NON_HUMAN_PLAYERS);
 
         let blocks = &mut BLOCKS.to_vec();
         blocks.shuffle(rng);

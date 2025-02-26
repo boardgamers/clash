@@ -35,7 +35,7 @@ pub async fn init(
 pub fn execute_move(game: JsValue, move_data: JsValue, player_index: usize) -> JsValue {
     let game = get_game(game);
     let action = serde_wasm_bindgen::from_value(move_data).expect("move should be of type action");
-    let game = game_api::execute_action(game, action, player_index);
+    let game = game_api::execute(game, action, player_index);
     from_game(game)
 }
 

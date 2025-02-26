@@ -6,11 +6,13 @@ use crate::special_advance::SpecialAdvance;
 use crate::{civilization::Civilization, leader::Leader};
 
 pub const BARBARIANS: &str = "Barbarians";
+pub const PIRATES: &str = "Pirates";
 
 #[must_use]
 pub fn get_all() -> Vec<Civilization> {
     vec![
         Civilization::new(BARBARIANS, vec![], vec![]),
+        Civilization::new(PIRATES, vec![], vec![]),
         Civilization::new(
             "test0",
             vec![],

@@ -51,7 +51,7 @@ fn free_education() -> AdvanceBuilder {
         an extra 1 idea to gain 1 mood token",
     )
     .with_advance_bonus(MoodToken)
-    .add_payment_request_with_commands_listener(
+    .add_payment_request_listener(
         |e| &mut e.on_advance_custom_phase,
         1,
         |_game, _player_index, i| {
@@ -69,12 +69,14 @@ fn free_education() -> AdvanceBuilder {
                 None
             }
         },
-        |c, _game, payment| {
-            c.add_info_log_item(&format!(
-                "{} paid {} for free education to gain 1 mood token",
-                c.name, payment[0]
-            ));
-            c.gain_resources(ResourcePile::mood_tokens(1));
+        |game, payment| {
+            payment.to_commands(game, |c, _game, payment| {
+                c.add_info_log_item(&format!(
+                    "{} paid {} for free education to gain 1 mood token",
+                    c.name, payment[0]
+                ));
+                c.gain_resources(ResourcePile::mood_tokens(1));
+            });
         },
     )
 }

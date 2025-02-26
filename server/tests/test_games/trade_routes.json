@@ -20,21 +20,18 @@
       },
       "cities": [
         {
-          "city_pieces": {},
+          "city_pieces": {
+            "market": 0
+          },
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "position": "D6"
         },
         {
-          "city_pieces": {},
-          "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "C6"
-        },
-        {
-          "city_pieces": {},
+          "city_pieces": {
+            "market": 0
+          },
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
@@ -151,6 +148,32 @@
       "event_victory_points": 0.0,
       "wonder_cards": [],
       "next_unit_id": 1
+    },
+    {
+      "name": null,
+      "id": 2,
+      "resources": {},
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [],
+      "units": [],
+      "civilization": "Pirates",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 9
     }
   ],
   "map": {

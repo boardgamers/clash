@@ -25,15 +25,18 @@ fn myths() -> AdvanceBuilder {
             1,
             |_game, _player_index, building| {
                 if matches!(building, Temple) {
-                    return Some(ResourceRewardRequest {
-                        reward: PaymentOptions::sum(1, &[MoodTokens, CultureTokens]),
-                        name: "Select Temple bonus".to_string(),
-                    });
+                    return Some(ResourceRewardRequest::new(
+                        PaymentOptions::sum(1, &[MoodTokens, CultureTokens]),
+                        "Select Temple bonus".to_string(),
+                    ));
                 }
                 None
             },
-            |_game, _player_index, player_name, p, _selected| {
-                format!("{player_name} selected {p} as a reward for constructing a Temple")
+            |_game, p| {
+                vec![format!(
+                    "{} selected {} as a reward for constructing a Temple",
+                    p.player_name, p.choice
+                )]
             },
         )
 }

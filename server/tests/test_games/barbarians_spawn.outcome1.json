@@ -6,10 +6,6 @@
     {
       "event_type": "on_incident",
       "last_priority_used": 100,
-      "barbarians": {
-        "move_units": false,
-        "selected_position": "B3"
-      },
       "current": {
         "priority": 100,
         "player_index": 0,
@@ -28,6 +24,10 @@
         "origin": {
           "Incident": 9
         }
+      },
+      "barbarians": {
+        "move_units": false,
+        "selected_position": "B3"
       }
     }
   ],
@@ -295,9 +295,6 @@
           "CustomPhaseEvent": {
             "event_type": "on_incident",
             "last_priority_used": 200,
-            "barbarians": {
-              "move_units": false
-            },
             "current": {
               "priority": 200,
               "player_index": 0,
@@ -314,24 +311,10 @@
               "origin": {
                 "Incident": 9
               }
+            },
+            "barbarians": {
+              "move_units": false
             }
-          }
-        },
-        {
-          "Command": {
-            "gained_units": [
-              {
-                "unit_type": "Infantry",
-                "position": "B3",
-                "player": 2
-              }
-            ],
-            "gained_cities": [
-              {
-                "position": "B3",
-                "player": 2
-              }
-            ]
           }
         }
       ]

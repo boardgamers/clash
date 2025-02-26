@@ -254,15 +254,7 @@
       },
       "undo": [
         {
-          "Command": {
-            "gained_units": [
-              {
-                "unit_type": "Settler",
-                "position": "A1",
-                "player": 0
-              }
-            ]
-          }
+          "Command": {}
         }
       ]
     }

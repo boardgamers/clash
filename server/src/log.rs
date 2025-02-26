@@ -3,6 +3,7 @@
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
+use crate::cultural_influence::influence_culture_boost_cost;
 use crate::game::ActionLogItem;
 use crate::player::Player;
 use crate::playing_actions::{
@@ -123,15 +124,15 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     } else {
         String::new()
     };
-    let range_boost_cost = game
-        .influence_culture_boost_cost(
-            player_index,
-            starting_city_position,
-            target_player_index,
-            target_city_position,
-            city_piece,
-        )
-        .range_boost_cost;
+    let range_boost_cost = influence_culture_boost_cost(
+        game,
+        player_index,
+        starting_city_position,
+        target_player_index,
+        target_city_position,
+        city_piece,
+    )
+    .range_boost_cost;
     // this cost can't be changed by the player
     let cost = if !range_boost_cost.is_free() {
         format!(" and paid {} to boost the range", range_boost_cost.default)
@@ -269,7 +270,7 @@ fn format_construct_log_item(
             .city_position
             .neighbors()
             .iter()
-            .filter(|neighbor| game.map.is_water(**neighbor))
+            .filter(|neighbor| game.map.is_sea(**neighbor))
             .count();
         if adjacent_water_tiles > 1 {
             format!(" at the water tile {port_position}")
@@ -330,7 +331,7 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
                 .get_unit(m.units[0])
                 .expect("the player should have moved units")
                 .position;
-            let start_is_water = game.map.is_water(start);
+            let start_is_water = game.map.is_sea(start);
             let dest = m.destination;
             let t = game
                 .map

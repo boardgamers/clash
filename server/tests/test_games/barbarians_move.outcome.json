@@ -6,9 +6,6 @@
     {
       "event_type": "on_incident",
       "last_priority_used": 136,
-      "barbarians": {
-        "move_units": true
-      },
       "current": {
         "priority": 136,
         "player_index": 0,
@@ -23,8 +20,11 @@
         },
         "response": null,
         "origin": {
-          "Incident": 100
+          "Incident": 28
         }
+      },
+      "barbarians": {
+        "move_units": true
       }
     }
   ],
@@ -340,6 +340,6 @@
   ],
   "wonder_amount_left": 1,
   "incidents_left": [
-    100
+    28
   ]
 }

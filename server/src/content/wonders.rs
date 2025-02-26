@@ -36,7 +36,7 @@ pub fn get_all() -> Vec<Wonder> {
                         ResourcePile::gold(1),
                     ]));
                 },
-                0
+                1
             )
         .build(),
     ]

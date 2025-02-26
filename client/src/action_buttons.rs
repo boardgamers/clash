@@ -106,7 +106,7 @@ fn global_move(rc: &RenderContext) -> StateUpdate {
     StateUpdate::move_units(
         rc,
         pos,
-        if pos.is_some_and(|t| rc.game.map.is_water(t)) {
+        if pos.is_some_and(|t| rc.game.map.is_sea(t)) {
             MoveIntent::Sea
         } else {
             MoveIntent::Land

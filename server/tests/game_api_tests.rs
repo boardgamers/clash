@@ -4,8 +4,11 @@ use server::status_phase::{
     ChangeGovernment, ChangeGovernmentType, RazeSize1City, StatusPhaseAction,
 };
 
+use server::action::execute_action;
 use server::content::trade_routes::find_trade_routes;
 use server::events::EventOrigin;
+use server::move_units::move_units_destinations;
+use server::recruit::recruit_cost_without_replaced;
 use server::unit::{MoveUnits, UnitType, Units};
 use server::{
     action::Action,
@@ -42,7 +45,7 @@ fn basic_actions() {
         advance: String::from("Math"),
         payment: ResourcePile::food(2),
     });
-    let game = game_api::execute_action(game, advance_action, 0);
+    let game = game_api::execute(game, advance_action, 0);
     let player = &game.players[0];
 
     assert_eq!(ResourcePile::culture_tokens(1), player.resources);
@@ -52,7 +55,7 @@ fn basic_actions() {
         advance: String::from("Engineering"),
         payment: ResourcePile::empty(),
     });
-    let mut game = game_api::execute_action(game, advance_action, 0);
+    let mut game = game_api::execute(game, advance_action, 0);
     let player = &game.players[0];
 
     assert_eq!(
@@ -87,7 +90,7 @@ fn basic_actions() {
         payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
         port_position: None,
     }));
-    let game = game_api::execute_action(game, construct_action, 0);
+    let game = game_api::execute(game, construct_action, 0);
     let player = &game.players[0];
 
     assert_eq!(
@@ -108,7 +111,7 @@ fn basic_actions() {
     assert_eq!(ResourcePile::new(1, 3, 3, 0, 2, 2, 4), player.resources);
     assert_eq!(0, game.actions_left);
 
-    let game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
+    let game = game_api::execute(game, Action::Playing(EndTurn), 0);
 
     assert_eq!(3, game.actions_left);
     assert_eq!(0, game.active_player());
@@ -118,7 +121,7 @@ fn basic_actions() {
             happiness_increases: vec![(city_position, 1)],
             payment: ResourcePile::mood_tokens(2),
         }));
-    let game = game_api::execute_action(game, increase_happiness_action, 0);
+    let game = game_api::execute(game, increase_happiness_action, 0);
     let player = &game.players[0];
 
     assert_eq!(ResourcePile::new(1, 3, 3, 0, 2, 0, 4), player.resources);
@@ -136,7 +139,7 @@ fn basic_actions() {
         wonder: String::from("Pyramids"),
         payment: ResourcePile::new(1, 3, 3, 0, 2, 0, 4),
     }));
-    let mut game = game_api::execute_action(game, construct_wonder_action, 0);
+    let mut game = game_api::execute(game, construct_wonder_action, 0);
     let player = &game.players[0];
 
     assert_eq!(10.0, player.victory_points(&game));
@@ -167,7 +170,7 @@ fn basic_actions() {
         city_position,
         collections: vec![(tile_position, ResourcePile::ore(1))],
     }));
-    let game = game_api::execute_action(game, collect_action, 0);
+    let game = game_api::execute(game, collect_action, 0);
     let player = &game.players[0];
     assert_eq!(ResourcePile::ore(1), player.resources);
     assert!(player
@@ -175,7 +178,7 @@ fn basic_actions() {
         .expect("player should have a city at this position")
         .is_activated());
     assert_eq!(0, game.actions_left);
-    let mut game = game_api::execute_action(game, Action::Playing(EndTurn), 0);
+    let mut game = game_api::execute(game, Action::Playing(EndTurn), 0);
     let player = &mut game.players[0];
     player.gain_resources(ResourcePile::food(2));
     let recruit_action = Action::Playing(Recruit(server::playing_actions::Recruit {
@@ -185,7 +188,7 @@ fn basic_actions() {
         leader_name: None,
         replaced_units: Vec::new(),
     }));
-    let mut game = game_api::execute_action(game, recruit_action, 0);
+    let mut game = game_api::execute(game, recruit_action, 0);
     let player = &mut game.players[0];
     assert_eq!(1, player.units.len());
     assert_eq!(1, player.next_unit_id);
@@ -196,13 +199,13 @@ fn basic_actions() {
         .is_activated());
 
     let movement_action = move_action(vec![0], founded_city_position);
-    let game = game_api::execute_action(game, movement_action, 0);
-    let game = game_api::execute_action(game, Action::Movement(Stop), 0);
+    let game = game_api::execute(game, movement_action, 0);
+    let game = game_api::execute(game, Action::Movement(Stop), 0);
     let player = &game.players[0];
     assert_eq!(founded_city_position, player.units[0].position);
 
     let found_city_action = Action::Playing(FoundCity { settler: 0 });
-    let game = game_api::execute_action(game, found_city_action, 0);
+    let game = game_api::execute(game, found_city_action, 0);
     let player = &game.players[0];
     assert_eq!(0, player.units.len());
     assert_eq!(1, player.next_unit_id);
@@ -246,7 +249,7 @@ fn increase_happiness(game: Game) -> Game {
             happiness_increases: vec![(Position::new(0, 0), 1)],
             payment: ResourcePile::mood_tokens(1),
         }));
-    game_api::execute_action(game, increase_happiness_action, 0)
+    game_api::execute(game, increase_happiness_action, 0)
 }
 
 #[test]
@@ -266,22 +269,22 @@ fn undo() {
     let game = increase_happiness(game);
     assert_undo(&game, true, false, 2, 2, 0);
     assert_eq!(Happy, game.players[0].cities[0].mood_state);
-    let game = game_api::execute_action(game, Action::Undo, 0);
+    let game = game_api::execute(game, Action::Undo, 0);
     assert_undo(&game, true, true, 2, 1, 0);
     assert_eq!(Neutral, game.players[0].cities[0].mood_state);
-    let game = game_api::execute_action(game, Action::Undo, 0);
+    let game = game_api::execute(game, Action::Undo, 0);
     assert_undo(&game, false, true, 2, 0, 0);
     assert_eq!(Angry, game.players[0].cities[0].mood_state);
-    let game = game_api::execute_action(game, Action::Redo, 0);
+    let game = game_api::execute(game, Action::Redo, 0);
     assert_undo(&game, true, true, 2, 1, 0);
     assert_eq!(Neutral, game.players[0].cities[0].mood_state);
-    let game = game_api::execute_action(game, Action::Redo, 0);
+    let game = game_api::execute(game, Action::Redo, 0);
     assert_undo(&game, true, false, 2, 2, 0);
     assert_eq!(Happy, game.players[0].cities[0].mood_state);
-    let game = game_api::execute_action(game, Action::Undo, 0);
+    let game = game_api::execute(game, Action::Undo, 0);
     assert_undo(&game, true, true, 2, 1, 0);
     assert_eq!(Neutral, game.players[0].cities[0].mood_state);
-    let game = game_api::execute_action(game, Action::Undo, 0);
+    let game = game_api::execute(game, Action::Undo, 0);
     assert_undo(&game, false, true, 2, 0, 0);
     assert_eq!(Angry, game.players[0].cities[0].mood_state);
 
@@ -289,16 +292,16 @@ fn undo() {
         advance: String::from("Math"),
         payment: ResourcePile::food(2),
     });
-    let game = game_api::execute_action(game, advance_action, 0);
+    let game = game_api::execute(game, advance_action, 0);
     assert_undo(&game, true, false, 1, 1, 0);
-    let game = game_api::execute_action(game, Action::Undo, 0);
+    let game = game_api::execute(game, Action::Undo, 0);
     assert_undo(&game, false, true, 1, 0, 0);
     assert_eq!(2, game.players[0].advances.len());
     let advance_action = Action::Playing(Advance {
         advance: String::from("Engineering"),
         payment: ResourcePile::food(2),
     });
-    let game = game_api::execute_action(game, advance_action, 0);
+    let game = game_api::execute(game, advance_action, 0);
     assert_undo(&game, false, false, 1, 1, 1);
 }
 
@@ -444,7 +447,7 @@ fn test_action_internal(name: &str, outcome: &str, test: TestAction) {
         assert_illegal_action(game, test.player_index, a2);
         return;
     }
-    let game = game_api::execute_action(game, a2, test.player_index);
+    let game = game_api::execute(game, a2, test.player_index);
     let expected_game = read_game_str(outcome);
     assert_eq_game_json(
         &expected_game,
@@ -497,7 +500,7 @@ fn illegal_action_test(run: impl Fn(&mut IllegalActionTest)) {
 
 fn assert_illegal_action(game: Game, player: usize, action: Action) {
     let err = catch_unwind(AssertUnwindSafe(|| {
-        let _ = game_api::execute_action(game, action, player);
+        let _ = game_api::execute(game, action, player);
     }));
     assert!(err.is_err(), "execute action should panic");
 }
@@ -524,7 +527,7 @@ fn undo_redo(
     if cycle == 2 {
         return;
     }
-    let game = game_api::execute_action(game, Action::Undo, player_index);
+    let game = game_api::execute(game, Action::Undo, player_index);
     let mut trimmed_game = game.clone();
     trimmed_game.action_log.pop();
     assert_eq_game_json(
@@ -536,7 +539,7 @@ fn undo_redo(
             "UNDO {cycle}: the game did not match the expectation after undoing the {name} action"
         ),
     );
-    let game = game_api::execute_action(game, Action::Redo, player_index);
+    let game = game_api::execute(game, Action::Redo, player_index);
     assert_eq_game_json(
         expected_game,
         &to_json(&game),
@@ -633,8 +636,7 @@ fn test_road_coordinates() {
 
 fn get_destinations(game: &Game, units: &[u32], position: &str) -> Vec<String> {
     let player = game.get_player(1);
-    player
-        .move_units_destinations(game, units, Position::from_offset(position), None)
+    move_units_destinations(player, game, units, Position::from_offset(position), None)
         .unwrap()
         .into_iter()
         .map(|r| r.destination.to_string())
@@ -666,14 +668,16 @@ fn test_taxes() {
 #[test]
 fn test_trade_route_coordinates() {
     let game = &load_game("trade_routes_unit_test");
-    // trading cities are C6, D6, E6
+    // trading cities are C6, D6, E6, B6
 
-    // our units are at C8, but the path is not explored
-    // 4 ships on E7 can trade with E6
-    // settler on the ship can trade with D6
+    // 1 ships and 1 settler on E7 can trade with C6, D6, E6
+
+    // can't trade:
+    // 1 settler is at C8, but the path is not explored (or blocked by a pirate at C7)
+    // 1 ship is at A7, but the pirate at A8 blocks trading in its zone of control
 
     let found = find_trade_routes(game, game.get_player(1));
-    assert_eq!(found.len(), 3);
+    assert_eq!(found.len(), 2);
 }
 
 #[test]
@@ -759,9 +763,10 @@ fn test_cultural_influence() {
 fn test_separation_of_power() {
     illegal_action_test(|test| {
         let mut game = load_game("cultural_influence");
-        game.execute_action(Action::Playing(EndTurn), 1);
+        execute_action(&mut game, Action::Playing(EndTurn), 1);
         if test.fail {
-            game.execute_action(
+            execute_action(
+                &mut game,
                 Action::Playing(Advance {
                     advance: String::from("Separation of Power"),
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
@@ -769,9 +774,9 @@ fn test_separation_of_power() {
                 0,
             );
         }
-        game.execute_action(Action::Playing(EndTurn), 0);
+        execute_action(&mut game, Action::Playing(EndTurn), 0);
         test.setup_done = true;
-        game.execute_action(influence_action(), 1);
+        execute_action(&mut game, influence_action(), 1);
     });
 }
 
@@ -779,9 +784,10 @@ fn test_separation_of_power() {
 fn test_devotion() {
     illegal_action_test(|test| {
         let mut game = load_game("cultural_influence");
-        game.execute_action(Action::Playing(EndTurn), 1);
+        execute_action(&mut game, Action::Playing(EndTurn), 1);
         if test.fail {
-            game.execute_action(
+            execute_action(
+                &mut game,
                 Action::Playing(Advance {
                     advance: String::from("Devotion"),
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
@@ -789,9 +795,9 @@ fn test_devotion() {
                 0,
             );
         }
-        game.execute_action(Action::Playing(EndTurn), 0);
+        execute_action(&mut game, Action::Playing(EndTurn), 0);
         test.setup_done = true;
-        game.execute_action(influence_action(), 1);
+        execute_action(&mut game, influence_action(), 1);
     });
 }
 
@@ -799,9 +805,10 @@ fn test_devotion() {
 fn test_totalitarianism() {
     illegal_action_test(|test| {
         let mut game = load_game("cultural_influence");
-        game.execute_action(Action::Playing(EndTurn), 1);
+        execute_action(&mut game, Action::Playing(EndTurn), 1);
         if test.fail {
-            game.execute_action(
+            execute_action(
+                &mut game,
                 Action::Playing(Advance {
                     advance: String::from("Totalitarianism"),
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
@@ -809,9 +816,9 @@ fn test_totalitarianism() {
                 0,
             );
         }
-        game.execute_action(Action::Playing(EndTurn), 0);
+        execute_action(&mut game, Action::Playing(EndTurn), 0);
         test.setup_done = true;
-        game.execute_action(influence_action(), 1);
+        execute_action(&mut game, influence_action(), 1);
     });
 }
 
@@ -819,9 +826,10 @@ fn test_totalitarianism() {
 fn test_monuments() {
     illegal_action_test(|test| {
         let mut game = load_game("cultural_influence");
-        game.execute_action(Action::Playing(EndTurn), 1);
+        execute_action(&mut game, Action::Playing(EndTurn), 1);
         if test.fail {
-            game.execute_action(
+            execute_action(
+                &mut game,
                 Action::Playing(Advance {
                     advance: String::from("Monuments"),
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
@@ -829,7 +837,8 @@ fn test_monuments() {
                 0,
             );
         }
-        game.execute_action(
+        execute_action(
+            &mut game,
             Action::Playing(Custom(ConstructWonder {
                 city_position: Position::from_offset("C2"),
                 wonder: String::from("Pyramids"),
@@ -837,9 +846,9 @@ fn test_monuments() {
             })),
             0,
         );
-        game.execute_action(Action::Playing(EndTurn), 0);
+        execute_action(&mut game, Action::Playing(EndTurn), 0);
         test.setup_done = true;
-        game.execute_action(influence_action(), 1);
+        execute_action(&mut game, influence_action(), 1);
     });
 }
 
@@ -1066,10 +1075,10 @@ fn test_sanitation_and_draft() {
             })),
         )
         .with_pre_assert(move |game| {
-            let options = game.players[0]
-                .recruit_cost_without_replaced(&units, city_position, None, None)
-                .unwrap()
-                .cost;
+            let options =
+                recruit_cost_without_replaced(&game.players[0], &units, city_position, None, None)
+                    .unwrap()
+                    .cost;
             assert_eq!(3, options.conversions.len());
             assert_eq!(ResourcePile::mood_tokens(1), options.conversions[0].to);
             assert_eq!(ResourcePile::mood_tokens(1), options.conversions[1].to);
@@ -1126,9 +1135,9 @@ fn test_recruit_combat() {
             TestAction::undoable(
                 0,
                 Action::Playing(Recruit(server::playing_actions::Recruit {
-                    units: Units::new(0, 0, 1, 0, 0, 0),
+                    units: Units::new(0, 0, 3, 0, 0, 0),
                     city_position: Position::from_offset("C2"),
-                    payment: ResourcePile::wood(1) + ResourcePile::gold(1),
+                    payment: ResourcePile::wood(5) + ResourcePile::gold(1),
                     leader_name: None,
                     replaced_units: vec![],
                 })),
@@ -1143,6 +1152,12 @@ fn test_recruit_combat() {
                 0,
                 Action::CustomPhaseEvent(CustomPhaseEventAction::ResourceReward(
                     ResourcePile::gold(1),
+                )),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::CustomPhaseEvent(CustomPhaseEventAction::ResourceReward(
+                    ResourcePile::culture_tokens(1),
                 )),
             ),
         ],
@@ -1306,6 +1321,41 @@ fn test_barbarians_move() {
                 Action::CustomPhaseEvent(CustomPhaseEventAction::SelectPosition(
                     Position::from_offset("B3"),
                 )),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_pirates_spawn() {
+    test_actions(
+        "pirates_spawn",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::StatusPhase(StatusPhaseAction::FreeAdvance(String::from("Storage"))),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::CustomPhaseEvent(CustomPhaseEventAction::SelectUnits(vec![7])),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::CustomPhaseEvent(CustomPhaseEventAction::SelectPosition(
+                    Position::from_offset("A2"),
+                )),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::CustomPhaseEvent(CustomPhaseEventAction::SelectPosition(
+                    Position::from_offset("D2"),
+                )),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::CustomPhaseEvent(CustomPhaseEventAction::Payment(vec![ResourcePile::ore(
+                    1,
+                )])),
             ),
         ],
     );
@@ -1718,9 +1768,7 @@ fn test_ship_navigate_coordinates() {
 
 fn assert_navigate(game: &mut Game, from: Position, to: Position) {
     game.players[1].get_unit_mut(1).unwrap().position = from;
-    let result = game
-        .get_player(1)
-        .move_units_destinations(game, &[1], from, None)
+    let result = move_units_destinations(game.get_player(1), game, &[1], from, None)
         .is_ok_and(|d| d.iter().any(|route| route.destination == to));
     assert!(
         result,

@@ -45,6 +45,7 @@
         "player_index": 0,
         "request": {
           "SelectUnits": {
+            "player": 0,
             "choices": [
               0,
               1,

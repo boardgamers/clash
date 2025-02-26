@@ -34,19 +34,22 @@ fn nationalism() -> AdvanceBuilder {
                 .iter()
                 .any(|u| u.is_army_unit() || u.is_ship())
             {
-                Some(ResourceRewardRequest {
-                    reward: PaymentOptions::sum(
+                Some(ResourceRewardRequest::new(
+                    PaymentOptions::sum(
                         1,
                         &[ResourceType::MoodTokens, ResourceType::CultureTokens],
                     ),
-                    name: "Select token to gain".to_string(),
-                })
+                    "Select token to gain".to_string(),
+                ))
             } else {
                 None
             }
         },
-        |_game, _player_index, player_name, resource, _selected| {
-            format!("{player_name} selected {resource} for Nationalism Advance")
+        |_game, resource| {
+            vec![format!(
+                "{} selected {} for Nationalism Advance",
+                resource.player_name, resource.choice
+            )]
         },
     )
 }

@@ -5,26 +5,26 @@
       "name": null,
       "id": 0,
       "resources": {
-        "food": 1,
-        "wood": 6,
-        "ore": 6,
+        "food": 6,
+        "wood": 7,
+        "ore": 7,
         "ideas": 5,
         "gold": 7,
-        "mood_tokens": 7,
-        "culture_tokens": 7
+        "mood_tokens": 9,
+        "culture_tokens": 10
       },
       "resource_limit": {
         "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 7,
-        "culture_tokens": 7
+        "gold": 7
       },
       "cities": [
         {
-          "city_pieces": {},
+          "city_pieces": {
+            "market": 1
+          },
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
@@ -32,13 +32,34 @@
         },
         {
           "city_pieces": {
-            "port": 0
+            "academy": 1,
+            "obelisk": 0,
+            "port": 1
           },
-          "mood_state": "Angry",
-          "activations": 9,
+          "mood_state": "Happy",
+          "activations": 4,
           "angry_activation": false,
           "position": "C2",
           "port_position": "C3"
+        },
+        {
+          "city_pieces": {
+            "obelisk": 1,
+            "observatory": 1,
+            "fortress": 1,
+            "temple": 1
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Angry",
+          "activations": 4,
+          "angry_activation": true,
+          "position": "B3"
         }
       ],
       "units": [
@@ -48,42 +69,22 @@
           "id": 0
         },
         {
-          "position": "C2",
-          "unit_type": "Cavalry",
-          "id": 1
-        },
-        {
-          "position": "C2",
-          "unit_type": "Leader",
-          "id": 2
-        },
-        {
-          "position": "C2",
-          "unit_type": "Elephant",
-          "id": 3
-        },
-        {
-          "position": "C2",
+          "position": "B3",
           "unit_type": "Settler",
           "id": 4
         },
         {
-          "position": "C2",
+          "position": "B3",
           "unit_type": "Settler",
           "id": 5
         },
         {
-          "position": "C2",
+          "position": "B3",
           "unit_type": "Settler",
           "id": 6
-        },
-        {
-          "position": "C2",
-          "unit_type": "Settler",
-          "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "test1",
       "active_leader": null,
       "available_leaders": [],
       "advances": [
@@ -95,33 +96,33 @@
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "incident_tokens": 2,
+      "incident_tokens": 3,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
-      "wonder_cards": [],
-      "next_unit_id": 8
+      "wonder_cards": [
+        "Pyramids"
+      ],
+      "next_unit_id": 10
     },
     {
       "name": null,
       "id": 1,
       "resources": {
-        "food": 2,
+        "food": 6,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
         "gold": 7,
-        "mood_tokens": 7,
-        "culture_tokens": 7
+        "mood_tokens": 9,
+        "culture_tokens": 9
       },
       "resource_limit": {
         "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 7,
-        "culture_tokens": 7
+        "gold": 7
       },
       "cities": [
         {
@@ -130,21 +131,20 @@
           "activations": 2,
           "angry_activation": false,
           "position": "C1"
-        }
-      ],
-      "units": [
-        {
-          "position": "C1",
-          "unit_type": "Infantry",
-          "id": 0
         },
         {
-          "position": "C3",
-          "unit_type": "Ship",
-          "id": 1
+          "city_pieces": {
+            "port": 1
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B2",
+          "port_position": "C3"
         }
       ],
-      "civilization": "test1",
+      "units": [],
+      "civilization": "test0",
       "active_leader": null,
       "available_leaders": [],
       "advances": [
@@ -158,7 +158,44 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "next_unit_id": 2
+      "next_unit_id": 3
+    },
+    {
+      "name": null,
+      "id": 2,
+      "resources": {},
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [],
+      "units": [
+        {
+          "position": "C3",
+          "unit_type": "Ship",
+          "id": 1
+        },
+        {
+          "position": "C3",
+          "unit_type": "Ship",
+          "id": 2
+        }
+      ],
+      "civilization": "Pirates",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 9
     }
   ],
   "map": {
@@ -178,6 +215,10 @@
         }
       ],
       [
+        "A4",
+        "Mountain"
+      ],
+      [
         "B1",
         "Mountain"
       ],
@@ -187,6 +228,10 @@
       ],
       [
         "B3",
+        "Fertile"
+      ],
+      [
+        "B4",
         "Fertile"
       ],
       [
@@ -202,6 +247,18 @@
         "Water"
       ],
       [
+        "C4",
+        "Water"
+      ],
+      [
+        "C5",
+        "Water"
+      ],
+      [
+        "D1",
+        "Fertile"
+      ],
+      [
         "D2",
         "Water"
       ]
@@ -209,13 +266,42 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [],
-  "action_log_index": 0,
-  "log": [],
+  "action_log": [
+    {
+      "action": {
+        "Movement": "Stop"
+      },
+      "undo": [
+        {
+          "Movement": {
+            "movement_actions_left": 1,
+            "moved_units": [
+              7,
+              8
+            ],
+            "current_move": {
+              "Fleet": {
+                "units": [
+                  7,
+                  8
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "action_log_index": 1,
+  "log": [
+    [
+      "Player1 ended the movement action"
+    ]
+  ],
   "undo_limit": 0,
-  "actions_left": 1,
+  "actions_left": 2,
   "successful_cultural_influence": false,
-  "round": 1,
+  "round": 6,
   "age": 1,
   "messages": [
     "The game has started"
@@ -234,8 +320,6 @@
   ],
   "dice_roll_log": [],
   "dropped_players": [],
-  "wonders_left": [
-    "Pyramids"
-  ],
+  "wonders_left": [],
   "wonder_amount_left": 1
 }

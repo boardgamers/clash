@@ -1,20 +1,20 @@
+use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::dialog_ui::cancel_button_with_tooltip;
+use crate::payment_ui::{payment_dialog, Payment};
+use crate::render_context::RenderContext;
+use crate::unit_ui::{click_unit, unit_selection_clicked};
 use macroquad::math::{u32, Vec2};
 use macroquad::prelude::Texture2D;
 use server::action::Action;
 use server::events::EventOrigin;
-use server::game::{CurrentMove, Game, GameState};
+use server::game::{Game, GameState};
+use server::move_units::{move_units_destinations, CurrentMove};
 use server::payment::PaymentOptions;
 use server::player::Player;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::{MoveUnits, MovementAction, Unit, UnitType};
 use std::collections::HashSet;
-
-use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::dialog_ui::cancel_button_with_tooltip;
-use crate::payment_ui::{payment_dialog, Payment};
-use crate::render_context::RenderContext;
-use crate::unit_ui::{click_unit, unit_selection_clicked};
 
 #[derive(Clone, Copy)]
 pub enum MoveIntent {
@@ -64,8 +64,7 @@ pub fn possible_destinations(
     let player = game.get_player(player_index);
     let mut modifiers = HashSet::new();
 
-    let mut res = player
-        .move_units_destinations(game, units, start, None)
+    let mut res = move_units_destinations(player, game, units, start, None)
         .unwrap_or_default()
         .into_iter()
         .map(|route| {
@@ -78,8 +77,7 @@ pub fn possible_destinations(
 
     player.units.iter().for_each(|u| {
         if u.unit_type.is_ship()
-            && player
-                .move_units_destinations(game, units, start, Some(u.id))
+            && move_units_destinations(player, game, units, start, Some(u.id))
                 .is_ok_and(|v| v.iter().any(|route| route.destination == u.position))
         {
             res.push(MoveDestination::Carrier(u.id));

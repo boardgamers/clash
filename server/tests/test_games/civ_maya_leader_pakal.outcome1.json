@@ -360,17 +360,6 @@
               }
             }
           }
-        },
-        {
-          "Command": {
-            "gained_units": [
-              {
-                "unit_type": "Settler",
-                "position": "B2",
-                "player": 1
-              }
-            ]
-          }
         }
       ]
     }

@@ -1,8 +1,14 @@
-use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile};
+use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile, utils};
 
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::city_pieces::Building;
+use crate::content::advances;
+use crate::content::advances::get_advance;
 use crate::events::EventOrigin;
+use crate::game::Game;
+use crate::incident::trigger_incident;
+use crate::player_events::AdvanceInfo;
+use crate::special_advance::SpecialAdvance;
 use Bonus::*;
 
 pub struct Advance {
@@ -125,4 +131,137 @@ impl Bonus {
             CultureToken => ResourcePile::culture_tokens(1),
         }
     }
+}
+
+///
+///
+/// # Panics
+///
+/// Panics if advance does not exist
+pub fn do_advance(game: &mut Game, advance: &Advance, player_index: usize) {
+    game.trigger_command_event(player_index, |e| &mut e.on_advance, &advance.name);
+    (advance.listeners.initializer)(game, player_index);
+    (advance.listeners.one_time_initializer)(game, player_index);
+    let name = advance.name.clone();
+    for i in 0..game.players[player_index]
+        .civilization
+        .special_advances
+        .len()
+    {
+        if game.players[player_index].civilization.special_advances[i].required_advance == name {
+            let special_advance = game.players[player_index]
+                .civilization
+                .special_advances
+                .remove(i);
+            unlock_special_advance(game, &special_advance, player_index);
+            game.players[player_index]
+                .civilization
+                .special_advances
+                .insert(i, special_advance);
+            break;
+        }
+    }
+    if let Some(advance_bonus) = &advance.bonus {
+        let pile = advance_bonus.resources();
+        game.add_info_log_item(&format!("Player gained {pile} as advance bonus"));
+        game.players[player_index].gain_resources(pile);
+    }
+    let player = &mut game.players[player_index];
+    player.advances.push(get_advance(&advance.name));
+}
+
+pub(crate) fn advance_with_incident_token(
+    game: &mut Game,
+    name: &str,
+    player_index: usize,
+    payment: ResourcePile,
+) {
+    do_advance(game, &advances::get_advance(name), player_index);
+    gain_advance(game, player_index, payment, name);
+}
+
+pub(crate) fn gain_advance(
+    game: &mut Game,
+    player_index: usize,
+    payment: ResourcePile,
+    advance: &str,
+) {
+    if game.trigger_custom_phase_event(
+        &[player_index],
+        |e| &mut e.on_advance_custom_phase,
+        &AdvanceInfo {
+            name: advance.to_string(),
+            payment,
+        },
+        None,
+    ) {
+        return;
+    }
+    let player = &mut game.players[player_index];
+    player.incident_tokens -= 1;
+    if player.incident_tokens == 0 {
+        player.incident_tokens = 3;
+        trigger_incident(game, player_index);
+    }
+}
+
+pub(crate) fn undo_advance(
+    game: &mut Game,
+    advance: &Advance,
+    player_index: usize,
+    was_custom_phase: bool,
+) {
+    remove_advance(game, advance, player_index);
+    if !was_custom_phase {
+        game.players[player_index].incident_tokens += 1;
+    }
+}
+
+pub(crate) fn remove_advance(game: &mut Game, advance: &Advance, player_index: usize) {
+    (advance.listeners.deinitializer)(game, player_index);
+    (advance.listeners.undo_deinitializer)(game, player_index);
+
+    for i in 0..game.players[player_index]
+        .civilization
+        .special_advances
+        .len()
+    {
+        if game.players[player_index].civilization.special_advances[i].required_advance
+            == advance.name
+        {
+            let special_advance = game.players[player_index]
+                .civilization
+                .special_advances
+                .remove(i);
+            undo_unlock_special_advance(game, &special_advance, player_index);
+            game.players[player_index]
+                .civilization
+                .special_advances
+                .insert(i, special_advance);
+            break;
+        }
+    }
+    let player = &mut game.players[player_index];
+    if let Some(advance_bonus) = &advance.bonus {
+        player.lose_resources(advance_bonus.resources());
+    }
+    utils::remove_element(&mut game.players[player_index].advances, advance);
+}
+
+fn unlock_special_advance(game: &mut Game, special_advance: &SpecialAdvance, player_index: usize) {
+    (special_advance.listeners.initializer)(game, player_index);
+    (special_advance.listeners.one_time_initializer)(game, player_index);
+    game.players[player_index]
+        .unlocked_special_advances
+        .push(special_advance.name.clone());
+}
+
+fn undo_unlock_special_advance(
+    game: &mut Game,
+    special_advance: &SpecialAdvance,
+    player_index: usize,
+) {
+    (special_advance.listeners.deinitializer)(game, player_index);
+    (special_advance.listeners.undo_deinitializer)(game, player_index);
+    game.players[player_index].unlocked_special_advances.pop();
 }

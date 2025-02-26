@@ -17,10 +17,12 @@ use macroquad::prelude::*;
 use server::action::Action;
 use server::city::{City, MoodState};
 use server::content::custom_phase_actions::{
-    AdvanceRewardRequest, CustomPhaseRequest, PositionRequest, UnitTypeRequest,
+    AdvanceRewardRequest, CustomPhaseRequest, PlayerRequest, PositionRequest, UnitTypeRequest,
 };
+use server::cultural_influence::CulturalInfluenceResolution;
 use server::events::EventOrigin;
-use server::game::{CulturalInfluenceResolution, CurrentMove, Game, GameState};
+use server::game::{Game, GameState};
+use server::move_units::CurrentMove;
 use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
@@ -60,6 +62,7 @@ pub enum ActiveDialog {
     ResourceRewardRequest(Payment),
     AdvanceRewardRequest(AdvanceRewardRequest),
     PaymentRequest(Vec<Payment>),
+    PlayerRequest(PlayerRequest),
     PositionRequest(PositionRequest),
     UnitTypeRequest(UnitTypeRequest),
     UnitsRequest(UnitsSelection),
@@ -98,6 +101,7 @@ impl ActiveDialog {
             ActiveDialog::ResourceRewardRequest(_) => "trade route selection",
             ActiveDialog::AdvanceRewardRequest(_) => "advance selection",
             ActiveDialog::PaymentRequest(_) => "custom phase payment request",
+            ActiveDialog::PlayerRequest(_) => "custom phase player request",
             ActiveDialog::PositionRequest(_) => "custom phase position request",
             ActiveDialog::UnitTypeRequest(_) => "custom phase unit request",
             ActiveDialog::UnitsRequest(_) => "custom phase units request",
@@ -176,6 +180,7 @@ impl ActiveDialog {
             ActiveDialog::PositionRequest(r) => custom_phase_event_help(rc, r.description.as_ref()),
             ActiveDialog::UnitTypeRequest(r) => custom_phase_event_help(rc, r.description.as_ref()),
             ActiveDialog::UnitsRequest(r) => custom_phase_event_help(rc, r.description.as_ref()),
+            ActiveDialog::PlayerRequest(r) => custom_phase_event_help(rc, Some(&r.description)),
         }
     }
 
@@ -541,9 +546,15 @@ impl State {
                 }
                 CustomPhaseRequest::SelectPosition(r) => ActiveDialog::PositionRequest(r.clone()),
                 CustomPhaseRequest::SelectUnitType(r) => ActiveDialog::UnitTypeRequest(r.clone()),
-                CustomPhaseRequest::SelectUnits(r) => ActiveDialog::UnitsRequest(
-                    UnitsSelection::new(r.needed, r.choices.clone(), r.description.clone()),
-                ),
+                CustomPhaseRequest::SelectUnits(r) => {
+                    ActiveDialog::UnitsRequest(UnitsSelection::new(
+                        r.player,
+                        r.needed,
+                        r.choices.clone(),
+                        r.description.clone(),
+                    ))
+                }
+                CustomPhaseRequest::SelectPlayer(r) => ActiveDialog::PlayerRequest(r.clone()),
                 CustomPhaseRequest::BoolRequest => ActiveDialog::BoolRequest,
             };
         }

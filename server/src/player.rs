@@ -1,24 +1,20 @@
 use crate::advance::Advance;
-use crate::consts::SHIP_CAPACITY;
+use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::advances::get_advance;
 use crate::content::builtin;
 use crate::events::{Event, EventOrigin};
-use crate::game::CurrentMove;
-use crate::game::GameState::Movement;
-use crate::movement::move_routes;
-use crate::movement::{is_valid_movement_type, MoveRoute};
 use crate::payment::PaymentOptions;
 use crate::player_events::CostInfo;
 use crate::resource::ResourceType;
-use crate::unit::{carried_units, get_current_move, MovementRestriction, UnitData};
+use crate::unit::{carried_units, UnitData, UnitType};
 use crate::{
     city::{City, CityData},
     city_pieces::Building::{self, *},
     civilization::Civilization,
     consts::{
-        ADVANCE_COST, ADVANCE_VICTORY_POINTS, ARMY_MOVEMENT_REQUIRED_ADVANCE,
-        BUILDING_VICTORY_POINTS, CAPTURED_LEADER_VICTORY_POINTS, CITY_LIMIT, CITY_PIECE_LIMIT,
-        CONSTRUCT_COST, OBJECTIVE_VICTORY_POINTS, STACK_LIMIT, UNIT_LIMIT, WONDER_VICTORY_POINTS,
+        ADVANCE_COST, ADVANCE_VICTORY_POINTS, BUILDING_VICTORY_POINTS,
+        CAPTURED_LEADER_VICTORY_POINTS, CITY_LIMIT, CITY_PIECE_LIMIT, CONSTRUCT_COST,
+        OBJECTIVE_VICTORY_POINTS, UNIT_LIMIT, WONDER_VICTORY_POINTS,
     },
     content::{advances, civilizations, custom_actions::CustomActionType, wonders},
     game::Game,
@@ -26,11 +22,7 @@ use crate::{
     player_events::PlayerEvents,
     position::Position,
     resource_pile::ResourcePile,
-    unit::{
-        Unit,
-        UnitType::{self, *},
-        Units,
-    },
+    unit::{Unit, Units},
     utils,
     wonder::Wonder,
 };
@@ -175,11 +167,11 @@ impl Player {
     }
 
     fn from_data(data: PlayerData) -> Player {
-        let units: Vec<_> = data
+        let units = data
             .units
             .into_iter()
             .flat_map(|u| Unit::from_data(data.id, u))
-            .collect();
+            .collect_vec();
         units
             .iter()
             .into_group_map_by(|unit| unit.id)
@@ -554,7 +546,13 @@ impl Player {
 
     #[must_use]
     pub fn available_units(&self) -> Units {
-        let mut units = UNIT_LIMIT.clone();
+        let mut units = if self.is_human() {
+            UNIT_LIMIT.clone()
+        } else if self.civilization.is_barbarian() {
+            UNIT_LIMIT_BARBARIANS.clone()
+        } else {
+            UNIT_LIMIT_PIRATES.clone()
+        };
         for u in &self.units {
             units -= &u.unit_type;
         }
@@ -752,257 +750,10 @@ impl Player {
         }
     }
 
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if city does not exist
-    #[must_use]
-    pub fn recruit_cost(
-        &self,
-        units: &Units,
-        city_position: Position,
-        leader_name: Option<&String>,
-        replaced_units: &[u32],
-        execute: Option<&ResourcePile>,
-    ) -> Option<CostInfo> {
-        let mut require_replace = units.clone();
-        for t in self.available_units().to_vec() {
-            let a = require_replace.get_mut(&t);
-            if *a > 0 {
-                *a -= 1;
-            }
-        }
-        let replaced_units = replaced_units
-            .iter()
-            .map(|id| {
-                self.get_unit(*id)
-                    .expect("player should have units to be replaced")
-                    .unit_type
-            })
-            .collect();
-        if require_replace != replaced_units {
-            return None;
-        }
-        self.recruit_cost_without_replaced(units, city_position, leader_name, execute)
-    }
-
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if city does not exist
-    #[must_use]
-    pub fn recruit_cost_without_replaced(
-        &self,
-        units: &Units,
-        city_position: Position,
-        leader_name: Option<&String>,
-        execute: Option<&ResourcePile>,
-    ) -> Option<CostInfo> {
-        let city = self
-            .get_city(city_position)
-            .expect("player should have a city at the recruitment position");
-        if !city.can_activate() {
-            return None;
-        }
-        let vec = units.clone().to_vec();
-        let cost = self.trigger_cost_event(
-            |e| &e.recruit_cost,
-            &PaymentOptions::resources(vec.iter().map(UnitType::cost).sum()),
-            units,
-            self,
-            execute,
-        );
-        if !self.can_afford(&cost.cost) {
-            return None;
-        }
-        if vec.len() > city.mood_modified_size(self) {
-            return None;
-        }
-        if vec.iter().any(|unit| matches!(unit, Cavalry | Elephant)) && city.pieces.market.is_none()
-        {
-            return None;
-        }
-        if vec.iter().any(|unit| matches!(unit, Ship)) && city.pieces.port.is_none() {
-            return None;
-        }
-        if self
-            .get_units(city_position)
-            .iter()
-            .filter(|unit| unit.unit_type.is_army_unit())
-            .count()
-            + vec.iter().filter(|unit| unit.is_army_unit()).count()
-            > STACK_LIMIT
-        {
-            return None;
-        }
-
-        let leaders = vec
-            .iter()
-            .filter(|unit| matches!(unit, UnitType::Leader))
-            .count();
-        let match_leader = match leaders {
-            0 => leader_name.is_none(),
-            1 => leader_name.is_some_and(|n| self.available_leaders.contains(n)),
-            _ => false,
-        };
-        if !match_leader {
-            return None;
-        }
-        Some(cost)
-    }
-
     pub fn add_unit(&mut self, position: Position, unit_type: UnitType) {
         let unit = Unit::new(self.index, position, unit_type, self.next_unit_id);
         self.units.push(unit);
         self.next_unit_id += 1;
-    }
-
-    /// # Errors
-    ///
-    /// Will return `Err` if the unit cannot move.
-    ///
-    /// # Panics
-    ///
-    /// Panics if destination tile does not exist
-    pub fn move_units_destinations(
-        &self,
-        game: &Game,
-        unit_ids: &[u32],
-        start: Position,
-        embark_carrier_id: Option<u32>,
-    ) -> Result<Vec<MoveRoute>, String> {
-        let (moved_units, movement_actions_left, current_move) = if let Movement(m) = &game.state {
-            (&m.moved_units, m.movement_actions_left, &m.current_move)
-        } else {
-            (&vec![], 1, &CurrentMove::None)
-        };
-
-        let units = unit_ids
-            .iter()
-            .map(|id| {
-                self.get_unit(*id)
-                    .expect("the player should have all units to move")
-            })
-            .collect::<Vec<_>>();
-
-        if units.is_empty() {
-            return Err("no units to move".to_string());
-        }
-        if embark_carrier_id.is_some_and(|id| {
-            let player_index = self.index;
-            (carried_units(id, &game.players[player_index]).len() + units.len()) as u8
-                > SHIP_CAPACITY
-        }) {
-            return Err("carrier capacity exceeded".to_string());
-        }
-
-        let carrier_position = embark_carrier_id.map(|id| {
-            self.get_unit(id)
-                .expect("the player should have the carrier unit")
-                .position
-        });
-
-        let mut stack_size = 0;
-        let mut movement_restrictions = vec![];
-
-        for unit in &units {
-            if unit.position != start {
-                return Err("the unit should be at the starting position".to_string());
-            }
-            movement_restrictions.extend(unit.movement_restrictions.iter());
-            if let Some(embark_carrier_id) = embark_carrier_id {
-                if !unit.unit_type.is_land_based() {
-                    return Err("the unit should be land based to embark".to_string());
-                }
-                let carrier = self
-                    .get_unit(embark_carrier_id)
-                    .ok_or("the player should have the carrier unit")?;
-                if !carrier.unit_type.is_ship() {
-                    return Err("the carrier should be a ship".to_string());
-                }
-            }
-            if unit.unit_type.is_army_unit() && !self.has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE) {
-                return Err("army movement advance missing".to_string());
-            }
-            if unit.unit_type.is_army_unit() && !unit.unit_type.is_settler() {
-                stack_size += 1;
-            }
-        }
-
-        let destinations: Vec<MoveRoute> =
-            move_routes(start, self, unit_ids, game, embark_carrier_id)
-                .iter()
-                .filter(|route| {
-                    if !self.can_afford(&route.cost) {
-                        return false;
-                    }
-                    if movement_restrictions.contains(&&MovementRestriction::Battle) {
-                        return false;
-                    }
-                    let dest = route.destination;
-                    let attack = game.enemy_player(self.index, dest).is_some();
-                    if attack && game.map.is_land(dest) && stack_size == 0 {
-                        return false;
-                    }
-
-                    if !route.ignore_terrain_movement_restrictions {
-                        if movement_restrictions
-                            .iter()
-                            .contains(&&MovementRestriction::Mountain)
-                        {
-                            return false;
-                        }
-                        if attack
-                            && movement_restrictions
-                                .iter()
-                                .contains(&&MovementRestriction::Forest)
-                        {
-                            return false;
-                        }
-                    }
-
-                    if game.map.is_land(start)
-                        && self
-                            .get_units(dest)
-                            .iter()
-                            .filter(|unit| unit.unit_type.is_army_unit() && !unit.is_transported())
-                            .count()
-                            + stack_size
-                            + route.stack_size_used
-                            > STACK_LIMIT
-                    {
-                        return false;
-                    }
-
-                    if !is_valid_movement_type(game, &units, carrier_position, dest) {
-                        return false;
-                    }
-
-                    if !matches!(current_move, CurrentMove::None)
-                        && *current_move
-                            == get_current_move(game, unit_ids, start, dest, embark_carrier_id)
-                    {
-                        return true;
-                    }
-
-                    if movement_actions_left == 0 {
-                        return false;
-                    }
-
-                    if unit_ids.iter().any(|id| moved_units.contains(id)) {
-                        return false;
-                    }
-                    true
-                })
-                .cloned()
-                .collect();
-
-        if destinations.is_empty() {
-            return Err("no valid destinations".to_string());
-        }
-        Ok(destinations)
     }
 
     #[must_use]

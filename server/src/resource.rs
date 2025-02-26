@@ -1,5 +1,6 @@
-use crate::game::{Game, UndoContext};
+use crate::game::Game;
 use crate::resource_pile::ResourcePile;
+use crate::undo::UndoContext;
 use serde::{Deserialize, Serialize};
 use std::{fmt, mem};
 

@@ -9,6 +9,7 @@ use server::content::custom_actions::CustomAction;
 use server::map::Terrain;
 use server::playing_actions::{Construct, PlayingAction, Recruit};
 use server::position::Position;
+use server::recruit::recruit_cost;
 
 pub fn new_building_positions(
     building: Building,
@@ -109,16 +110,15 @@ impl ConstructionPayment {
                 city,
                 None,
             ),
-            ConstructionProject::Units(sel) => rc
-                .shown_player
-                .recruit_cost(
-                    &sel.amount.units,
-                    city.position,
-                    sel.amount.leader_name.as_ref(),
-                    &sel.replaced_units,
-                    None,
-                )
-                .unwrap(),
+            ConstructionProject::Units(sel) => recruit_cost(
+                rc.shown_player,
+                &sel.amount.units,
+                city.position,
+                sel.amount.leader_name.as_ref(),
+                &sel.replaced_units,
+                None,
+            )
+            .unwrap(),
         }
         .cost;
 

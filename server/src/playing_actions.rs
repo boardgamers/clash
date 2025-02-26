@@ -3,18 +3,20 @@ use serde::{Deserialize, Serialize};
 use PlayingAction::*;
 
 use crate::action::Action;
+use crate::advance::{advance_with_incident_token, undo_advance};
 use crate::city::MoodState;
 use crate::collect::{collect, undo_collect};
 use crate::content::advances::get_advance;
-use crate::game::{CulturalInfluenceResolution, GameState};
-use crate::payment::PaymentOptions;
-use crate::player_events::InfluenceCulturePossible;
+use crate::cultural_influence::influence_culture_attempt;
+use crate::game::GameState;
+use crate::recruit::{recruit, recruit_cost, undo_recruit};
+use crate::undo::UndoContext;
 use crate::unit::{Unit, Units};
 use crate::{
     city::City,
     city_pieces::Building::{self, *},
     content::custom_actions::CustomAction,
-    game::{Game, UndoContext},
+    game::Game,
     position::Position,
     resource_pile::ResourcePile,
 };
@@ -129,7 +131,7 @@ impl PlayingAction {
                 game.get_player(player_index)
                     .advance_cost(&a, Some(&payment))
                     .pay(game, &payment);
-                game.advance_with_incident_token(&advance, player_index, payment);
+                advance_with_incident_token(game, &advance, player_index, payment);
             }
             FoundCity { settler } => {
                 let settler = game.players[player_index].remove_unit(settler);
@@ -182,7 +184,8 @@ impl PlayingAction {
             }
             Recruit(r) => {
                 let player = &mut game.players[player_index];
-                if let Some(cost) = player.recruit_cost(
+                if let Some(cost) = recruit_cost(
+                    player,
                     &r.units,
                     r.city_position,
                     r.leader_name.as_ref(),
@@ -193,7 +196,8 @@ impl PlayingAction {
                 } else {
                     panic!("Cannot pay for units")
                 }
-                game.recruit(
+                recruit(
+                    game,
                     player_index,
                     r.units,
                     r.city_position,
@@ -279,7 +283,7 @@ impl PlayingAction {
             Advance { advance, payment } => {
                 let player = &mut game.players[player_index];
                 player.gain_resources_in_undo(payment);
-                game.undo_advance(&get_advance(&advance), player_index, was_custom_phase);
+                undo_advance(game, &get_advance(&advance), player_index, was_custom_phase);
             }
             FoundCity { settler: _ } => {
                 let Some(UndoContext::FoundCity { settler }) = game.pop_undo_context() else {
@@ -306,7 +310,8 @@ impl PlayingAction {
             Collect(c) => undo_collect(game, player_index, &c),
             Recruit(r) => {
                 game.players[player_index].gain_resources_in_undo(r.payment);
-                game.undo_recruit(
+                undo_recruit(
+                    game,
                     player_index,
                     r.units,
                     r.city_position,
@@ -425,69 +430,6 @@ pub(crate) fn undo_increase_happiness(
         }
     } else {
         panic!("Increase happiness context should be stored in undo context")
-    }
-}
-
-pub(crate) fn influence_culture_attempt(
-    game: &mut Game,
-    player_index: usize,
-    c: &InfluenceCultureAttempt,
-) {
-    let starting_city_position = c.starting_city_position;
-    let target_player_index = c.target_player_index;
-    let target_city_position = c.target_city_position;
-    let city_piece = c.city_piece;
-    let info = game.influence_culture_boost_cost(
-        player_index,
-        starting_city_position,
-        target_player_index,
-        target_city_position,
-        city_piece,
-    );
-    if matches!(info.possible, InfluenceCulturePossible::Impossible) {
-        panic!("Impossible to influence culture");
-    }
-
-    let self_influence = starting_city_position == target_city_position;
-
-    // currectly, there is no way to have different costs for this
-    game.players[player_index].lose_resources(info.range_boost_cost.default);
-    let roll = game.get_next_dice_roll().value + info.roll_boost;
-    let success = roll >= 5;
-    if success {
-        game.add_to_last_log_item(&format!(" and succeeded (rolled {roll})"));
-        info.info.execute(game);
-        game.influence_culture(
-            player_index,
-            target_player_index,
-            target_city_position,
-            city_piece,
-        );
-        return;
-    }
-
-    if self_influence || matches!(info.possible, InfluenceCulturePossible::NoBoost) {
-        game.add_to_last_log_item(&format!(" and failed (rolled {roll})"));
-        info.info.execute(game);
-        return;
-    }
-    if let Some(roll_boost_cost) = PaymentOptions::resources(roll_boost_cost(roll))
-        .first_valid_payment(&game.players[player_index].resources)
-    {
-        game.add_to_last_log_item(&format!(" and rolled a {roll}"));
-        info.info.execute(game);
-        game.add_info_log_item(&format!("{} now has the option to pay {roll_boost_cost} to increase the dice roll and proceed with the cultural influence", game.players[player_index].get_name()));
-        game.state = GameState::CulturalInfluenceResolution(CulturalInfluenceResolution {
-            roll_boost_cost,
-            target_player_index,
-            target_city_position,
-            city_piece,
-        });
-    } else {
-        game.add_to_last_log_item(&format!(
-            " but rolled a {roll} and has not enough culture tokens to increase the roll "
-        ));
-        info.info.execute(game);
     }
 }
 

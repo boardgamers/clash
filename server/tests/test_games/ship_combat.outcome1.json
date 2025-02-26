@@ -179,6 +179,32 @@
       "event_victory_points": 0.0,
       "wonder_cards": [],
       "next_unit_id": 2
+    },
+    {
+      "name": null,
+      "id": 2,
+      "resources": {},
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [],
+      "units": [],
+      "civilization": "Pirates",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 9
     }
   ],
   "map": {
@@ -281,6 +307,7 @@
               "player_index": 0,
               "request": {
                 "SelectUnits": {
+                  "player": 0,
                   "choices": [
                     2,
                     22,

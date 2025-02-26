@@ -16,6 +16,7 @@ pub const MOVEMENT_ACTIONS: u32 = 3;
 pub const ARMY_MOVEMENT_REQUIRED_ADVANCE: &str = TACTICS;
 pub const CITY_PIECE_LIMIT: usize = 5;
 pub const ACTIONS: u32 = 3;
+pub const NON_HUMAN_PLAYERS: usize = 2; // pirates, barbarians
 
 pub const UNIT_LIMIT: Units = Units {
     settlers: 4,
@@ -24,6 +25,22 @@ pub const UNIT_LIMIT: Units = Units {
     cavalry: 4,
     elephants: 4,
     leaders: 1,
+};
+pub const UNIT_LIMIT_BARBARIANS: Units = Units {
+    settlers: 0,
+    infantry: 20,
+    ships: 0,
+    cavalry: 4,
+    elephants: 4,
+    leaders: 0,
+};
+pub const UNIT_LIMIT_PIRATES: Units = Units {
+    settlers: 0,
+    infantry: 0,
+    ships: 4,
+    cavalry: 0,
+    elephants: 0,
+    leaders: 0,
 };
 pub const CONSTRUCT_COST: ResourcePile = ResourcePile {
     food: 1,
