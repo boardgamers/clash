@@ -1,13 +1,14 @@
 use crate::advance::Advance;
-use crate::barbarians::BarbariansEventState;
 use crate::collect::{CollectContext, CollectInfo};
-use crate::combat::{Combat, CombatResultInfo, CombatStrength};
+use crate::combat::Combat;
+use crate::combat_listeners::{CombatResultInfo, CombatRoundResult, CombatStrength};
 use crate::events::Event;
-use crate::game::{CommandContext, CommandUndoInfo, GainCityContext, GainUnitContext, Game};
+use crate::game::Game;
 use crate::map::Terrain;
 use crate::payment::PaymentOptions;
 use crate::playing_actions::{PlayingActionType, Recruit};
-use crate::unit::{UnitType, Units};
+use crate::undo::{CommandContext, CommandUndoInfo};
+use crate::unit::Units;
 use crate::{
     city::City, city_pieces::Building, player::Player, position::Position,
     resource_pile::ResourcePile, wonder::Wonder,
@@ -46,7 +47,7 @@ pub(crate) struct PlayerEvents {
     pub on_incident: CustomPhaseEvent<IncidentInfo>,
     pub on_combat_start: CustomPhaseEvent,
     pub on_combat_round: Event<CombatStrength, Combat, Game>,
-    pub on_combat_round_end: CustomPhaseEvent,
+    pub on_combat_round_end: CustomPhaseEvent<CombatRoundResult>,
     pub on_combat_end: CustomPhaseEvent<CombatResultInfo>,
 }
 
@@ -267,22 +268,6 @@ impl PlayerCommands {
 
     pub fn gain_resources(&mut self, resources: ResourcePile) {
         self.content.gained_resources += resources;
-    }
-
-    pub fn gain_unit(&mut self, player: usize, unit: UnitType, pos: Position) {
-        self.content
-            .gained_units
-            .push(GainUnitContext::new(unit, pos, player));
-    }
-
-    pub fn gain_city(&mut self, player: usize, pos: Position) {
-        self.content
-            .gained_cities
-            .push(GainCityContext::new(pos, player));
-    }
-
-    pub fn update_barbarian_info(&mut self, state: BarbariansEventState) {
-        self.content.barbarian_update = Some(state);
     }
 
     pub fn add_info_log_item(&mut self, edit: &str) {

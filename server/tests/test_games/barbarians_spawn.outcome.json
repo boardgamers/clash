@@ -6,9 +6,6 @@
     {
       "event_type": "on_incident",
       "last_priority_used": 200,
-      "barbarians": {
-        "move_units": false
-      },
       "current": {
         "priority": 200,
         "player_index": 0,
@@ -25,6 +22,9 @@
         "origin": {
           "Incident": 9
         }
+      },
+      "barbarians": {
+        "move_units": false
       }
     }
   ],

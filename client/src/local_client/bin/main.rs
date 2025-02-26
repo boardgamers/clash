@@ -4,12 +4,15 @@ use client::client::{init, render_and_update, Features, GameSyncRequest, GameSyn
 use macroquad::miniquad::window::set_window_size;
 use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
+use server::action::execute_action;
+use server::advance::do_advance;
 use server::city::City;
+use server::content::advances::get_advance;
 use server::game::{Game, GameData};
 use server::map::Terrain;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-use server::unit::{UnitType, Units};
+use server::unit::UnitType;
 use std::env;
 use std::fs::File;
 use std::io::BufReader;
@@ -52,8 +55,9 @@ pub async fn run(mut game: Game, features: &Features) {
         match message {
             GameSyncRequest::None => {}
             GameSyncRequest::ExecuteAction(a) => {
-                game.execute_action(a, game.active_player());
-                state.show_player = game.active_player();
+                let player_index = game.active_player();
+                execute_action(&mut game, a, player_index);
+                state.show_player = player_index;
                 sync_result = GameSyncResult::Update;
             }
             GameSyncRequest::Import => {
@@ -75,9 +79,8 @@ pub fn setup_local_game() -> Game {
     game.round = 6;
     game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];
     let add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {
-        let mut units = Units::empty();
-        units += &unit_type;
-        game.recruit(player_index, units, Position::from_offset(pos), None, &[]);
+        game.get_player_mut(player_index)
+            .add_unit(Position::from_offset(pos), unit_type);
     };
 
     let player_index1 = 0;
@@ -240,9 +243,9 @@ pub fn setup_local_game() -> Game {
         .pieces
         .market = Some(1);
 
-    game.advance("Voting", player_index1);
-    game.advance("Free Economy", player_index1);
-    game.advance("Storage", player_index1);
+    do_advance(&mut game, &get_advance("Voting"), player_index1);
+    do_advance(&mut game, &get_advance("Free Economy"), player_index1);
+    do_advance(&mut game, &get_advance("Storage"), player_index1);
     game.players[player_index1].gain_resources(ResourcePile::food(5));
 
     game

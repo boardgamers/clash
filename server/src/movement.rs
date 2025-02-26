@@ -3,6 +3,7 @@ use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::map::Map;
 use crate::map::Terrain::{Forest, Mountain};
+use crate::move_units::move_units_destinations;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::position::Position;
@@ -41,7 +42,7 @@ pub(crate) fn is_valid_movement_type(
         return dest == embark_position;
     }
     units.iter().all(|unit| {
-        if unit.unit_type.is_land_based() && game.map.is_water(dest) {
+        if unit.unit_type.is_land_based() && game.map.is_sea(dest) {
             return false;
         }
         if unit.unit_type.is_ship() && game.map.is_land(dest) {
@@ -87,7 +88,7 @@ fn reachable_with_roads(player: &Player, units: &[u32], game: &Game) -> Vec<Move
 
     if let Some(start) = start {
         let map = &game.map;
-        if map.is_water(start) {
+        if map.is_sea(start) {
             // not for disembarking
             return vec![];
         };
@@ -169,7 +170,7 @@ fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<M
 
             add_perimeter(map, start, &mut perimeter);
             let can_navigate =
-                |p: &Position| *p != ship && (map.is_water(*p) || map.is_unexplored(*p));
+                |p: &Position| *p != ship && (map.is_sea(*p) || map.is_unexplored(*p));
             let first = perimeter.iter().copied().find(can_navigate);
             let last = perimeter.iter().copied().rfind(can_navigate);
 
@@ -227,9 +228,7 @@ pub(crate) fn terrain_movement_restriction(
 
 pub(crate) fn has_movable_units(game: &Game, player: &Player) -> bool {
     player.units.iter().any(|unit| {
-        player
-            .move_units_destinations(game, &[unit.id], unit.position, None)
-            .is_ok()
+        move_units_destinations(player, game, &[unit.id], unit.position, None).is_ok()
             || can_embark(game, player, unit)
     })
 }
@@ -238,8 +237,6 @@ fn can_embark(game: &Game, player: &Player, unit: &Unit) -> bool {
     unit.unit_type.is_land_based()
         && player.units.iter().any(|u| {
             u.unit_type.is_ship()
-                && player
-                    .move_units_destinations(game, &[unit.id], u.position, Some(u.id))
-                    .is_ok()
+                && move_units_destinations(player, game, &[unit.id], u.position, Some(u.id)).is_ok()
         })
 }

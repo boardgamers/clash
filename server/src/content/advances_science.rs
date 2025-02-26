@@ -72,14 +72,21 @@ fn medicine() -> AdvanceBuilder {
                 return None;
             }
 
-            Some(ResourceRewardRequest {
-                reward: PaymentOptions::sum(1, &types),
-                name: "Select resource to gain back".to_string(),
-            })
+            Some(ResourceRewardRequest::new(
+                PaymentOptions::sum(1, &types),
+                "Select resource to gain back".to_string(),
+            ))
         },
-        |_game, _player_index, player_name, resource, selected| {
-            let verb = if selected { "selected" } else { "gained" };
-            format!("{player_name} {verb} {resource} for Medicine Advance")
+        |_game, s| {
+            let verb = if s.actively_selected {
+                "selected"
+            } else {
+                "gained"
+            };
+            vec![format!(
+                "{} {verb} {} for Medicine Advance",
+                s.player_name, s.choice
+            )]
         },
     )
 }

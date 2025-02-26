@@ -1,7 +1,7 @@
 use crate::advance_ui::{show_advance_menu, AdvanceState};
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{cancel_button, cancel_button_with_tooltip, ok_button, OkTooltip};
-use crate::layout_ui::bottom_centered_text;
+use crate::player_ui::choose_player_dialog;
 use crate::render_context::RenderContext;
 use server::action::Action;
 use server::content::advances::{get_government, get_governments};
@@ -155,16 +155,7 @@ pub fn complete_objectives_dialog(rc: &RenderContext) -> StateUpdate {
 }
 
 pub fn determine_first_player_dialog(rc: &RenderContext) -> StateUpdate {
-    if rc.can_control_active_player() {
-        bottom_centered_text(
-            rc,
-            &format!("Select {} as first player", rc.shown_player.get_name()),
-        );
-        if ok_button(rc, OkTooltip::Valid("Select".to_string())) {
-            return StateUpdate::status_phase(StatusPhaseAction::DetermineFirstPlayer(
-                rc.shown_player.index,
-            ));
-        }
-    }
-    StateUpdate::None
+    choose_player_dialog(rc, &rc.game.human_players(), |p| {
+        Action::StatusPhase(StatusPhaseAction::DetermineFirstPlayer(p))
+    })
 }

@@ -39,7 +39,7 @@ fn separation_of_power() -> AdvanceBuilder {
                 info.set_no_boost();
             }
         },
-        0,
+        2,
     )
 }
 

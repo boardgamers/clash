@@ -7,14 +7,15 @@ use crate::content::advances_culture::{
 };
 use crate::content::advances_economy::collect_taxes;
 use crate::content::wonders::construct_wonder;
+use crate::cultural_influence::influence_culture_attempt;
 use crate::log::{
     current_turn_log, format_city_happiness_increase, format_collect_log_item,
     format_cultural_influence_attempt_log_item, format_happiness_increase,
 };
 use crate::player::Player;
 use crate::playing_actions::{
-    increase_happiness, influence_culture_attempt, undo_increase_happiness, Collect,
-    IncreaseHappiness, InfluenceCultureAttempt, PlayingAction,
+    increase_happiness, undo_increase_happiness, Collect, IncreaseHappiness,
+    InfluenceCultureAttempt, PlayingAction,
 };
 use crate::{
     game::Game, playing_actions::ActionType, position::Position, resource_pile::ResourcePile,

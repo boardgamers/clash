@@ -1,5 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::{Advance, AdvanceBuilder};
+use crate::advance::{advance_with_incident_token, Advance, AdvanceBuilder};
 use crate::city_pieces::Building::Temple;
 use crate::consts::STACK_LIMIT;
 use crate::content::advances::{advance_group_builder, get_group, AdvanceGroup};
@@ -48,16 +48,16 @@ fn dogma() -> AdvanceBuilder {
                 }
                 None
             },
-            |game, player_index, player_name, name, selected| {
-                let verb = if selected {
+            |game, c| {
+                let verb = if c.actively_selected {
                     "selected"
                 } else {
                     "got"
                 };
                 game.add_info_log_item(&format!(
-                    "{player_name} {verb} {name} as a reward for constructing a Temple",
+                    "{} {verb} {} as a reward for constructing a Temple", c.player_name, c.choice
                 ));
-                game.advance_with_incident_token(name, player_index, ResourcePile::empty());
+                advance_with_incident_token(game, &c.choice, c.player_index, ResourcePile::empty());
             },
         )
 }
@@ -74,7 +74,7 @@ fn devotion() -> AdvanceBuilder {
                 info.set_no_boost();
             }
         },
-        0,
+        4,
     )
 }
 
@@ -88,7 +88,7 @@ fn conversion() -> AdvanceBuilder {
                     info.info.log.push("Player gets +1 to Influence Culture roll for Conversion Advance".to_string());
                 }
             },
-            0,
+            3,
         )
         .add_player_event_listener(
             |event| &mut event.on_influence_culture_success,
@@ -129,12 +129,11 @@ fn fanaticism() -> AdvanceBuilder {
                     None
                 }
             },
-            |c, _game, pos| {
-                c.add_info_log_item(&format!(
-                    "{} gained 1 free Infantry Unit at {pos} for Fanaticism Advance",
-                    c.name,
+            |game, s| {
+                game.add_info_log_item(&format!(
+                    "{} gained 1 free Infantry Unit at {} for Fanaticism Advance", s.player_name, s.choice
                 ));
-                c.gain_unit(c.index, UnitType::Infantry, *pos);
+                game.get_player_mut(s.player_index).add_unit(s.choice, UnitType::Infantry);
             },
         )
 }

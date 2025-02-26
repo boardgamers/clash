@@ -5,12 +5,13 @@ use crate::city_pieces::Building::Market;
 use crate::content::advances::{advance_group_builder, AdvanceGroup, CURRENCY};
 use crate::content::custom_actions::CustomActionType::Taxes;
 use crate::content::custom_phase_actions::ResourceRewardRequest;
-use crate::content::trade_routes::{trade_route_log, trade_route_reward};
+use crate::content::trade_routes::{trade_route_log, trade_route_reward, TradeRoute};
 use crate::game::Game;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
+use itertools::Itertools;
 
 pub(crate) fn economy() -> AdvanceGroup {
     advance_group_builder(
@@ -52,7 +53,7 @@ pub fn tax_options(player: &Player) -> PaymentOptions {
 pub(crate) fn collect_taxes(game: &mut Game, player_index: usize, gain: ResourcePile) {
     assert!(
         tax_options(game.get_player(player_index)).is_valid_payment(&gain),
-        "Invalid payment for Taxes"
+        "Invalid gain for Taxes"
     );
     game.players[player_index].gain_resources(gain);
 }
@@ -65,17 +66,41 @@ fn trade_routes() -> AdvanceBuilder {
             |event| &mut event.on_turn_start,
             0,
             |game, _player_index, ()| {
-                trade_route_reward(game).map(|(reward, _routes)| {
-                    ResourceRewardRequest {
+                trade_route_reward(game).map(|(reward, routes)| {
+                    gain_market_bonus(game, &routes);
+                    ResourceRewardRequest::new(
                         reward,
-                        name: "Collect trade routes reward".to_string(),
-                    }
+                         "Collect trade routes reward".to_string(),
+                    )
                 })
             },
-            |game, player_index, _player_name, p, selected| {
+            |game, p| {
                 let (_, routes) =
                     trade_route_reward(game).expect("No trade route reward");
-                trade_route_log(game, player_index, &routes, p, selected)
+                trade_route_log(game, p.player_index, &routes, &p.choice, p.actively_selected)
             },
         )
+}
+
+fn gain_market_bonus(game: &mut Game, routes: &[TradeRoute]) {
+    let players = routes
+        .iter()
+        .filter_map(|r| {
+            game.get_any_city(r.to).and_then(|c| {
+                if c.pieces.market.is_some() {
+                    Some(c.player_index)
+                } else {
+                    None
+                }
+            })
+        })
+        .unique()
+        .collect_vec();
+    for p in players {
+        let name = game.get_player(p).get_name();
+        game.add_info_log_item(&format!(
+            "{name} gains 1 gold for using a Market in a trade route",
+        ));
+        game.get_player_mut(p).gain_resources(ResourcePile::gold(1));
+    }
 }

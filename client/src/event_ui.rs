@@ -16,7 +16,7 @@ pub fn event_help(rc: &RenderContext, origin: &EventOrigin, do_break: bool) -> V
         EventOrigin::Incident(id) => get_incident(*id).description(),
         EventOrigin::Leader(l) => {
             let l = rc.shown_player.get_leader(l).unwrap();
-            // todo: leader should have a 2 event sources
+            // todo: leader should have a 2 event sources - no each event source should have a description
             format!(
                 "{}, {}",
                 l.first_ability_description, l.second_ability_description

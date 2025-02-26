@@ -4,6 +4,7 @@ use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
 use crate::hex_ui::Point;
 use crate::layout_ui::{bottom_center_anchor, icon_pos};
 use crate::payment_ui::{multi_payment_dialog, payment_dialog, Payment};
+use crate::player_ui::choose_player_dialog;
 use crate::render_context::RenderContext;
 use crate::select_ui::ConfirmSelection;
 use crate::unit_ui;
@@ -11,7 +12,7 @@ use crate::unit_ui::{draw_unit_type, UnitHighlightType, UnitSelection};
 use macroquad::math::vec2;
 use server::action::Action;
 use server::content::custom_phase_actions::{
-    AdvanceRewardRequest, CustomPhaseEventAction, UnitTypeRequest,
+    AdvanceRewardRequest, CustomPhaseEventAction, PlayerRequest, UnitTypeRequest,
 };
 use server::game::Game;
 use server::unit::Unit;
@@ -77,7 +78,7 @@ pub fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> StateUpda
 
         if draw_unit_type(
             rc,
-            &UnitHighlightType::None,
+            UnitHighlightType::None,
             Point::from_vec2(p),
             *u,
             r.player_index,
@@ -96,14 +97,21 @@ pub fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> StateUpda
 #[derive(Clone)]
 pub struct UnitsSelection {
     pub needed: u8,
+    pub player: usize,
     pub selectable: Vec<u32>,
     pub units: Vec<u32>,
     pub description: Option<String>,
 }
 
 impl UnitsSelection {
-    pub fn new(needed: u8, selectable: Vec<u32>, description: Option<String>) -> Self {
+    pub fn new(
+        player: usize,
+        needed: u8,
+        selectable: Vec<u32>,
+        description: Option<String>,
+    ) -> Self {
         UnitsSelection {
+            player,
             needed,
             units: Vec::new(),
             selectable,
@@ -120,6 +128,10 @@ impl UnitSelection for UnitsSelection {
     fn can_select(&self, _game: &Game, unit: &Unit) -> bool {
         self.selectable.contains(&unit.id)
     }
+
+    fn player_index(&self) -> usize {
+        self.player
+    }
 }
 
 impl ConfirmSelection for UnitsSelection {
@@ -133,7 +145,7 @@ impl ConfirmSelection for UnitsSelection {
         } else {
             OkTooltip::Invalid(format!(
                 "Need to select {} units",
-                self.needed - self.units.len() as u8
+                self.needed as i8 - self.units.len() as i8
             ))
         }
     }
@@ -147,7 +159,7 @@ pub fn select_units_dialog(rc: &RenderContext, sel: &UnitsSelection) -> StateUpd
     })
 }
 
-pub(crate) fn bool_request_dialog(rc: &RenderContext) -> StateUpdate {
+pub fn bool_request_dialog(rc: &RenderContext) -> StateUpdate {
     if ok_button(rc, OkTooltip::Valid("OK".to_string())) {
         return bool_answer(true);
     }
@@ -161,4 +173,10 @@ fn bool_answer(answer: bool) -> StateUpdate {
     StateUpdate::Execute(Action::CustomPhaseEvent(CustomPhaseEventAction::Bool(
         answer,
     )))
+}
+
+pub fn player_request_dialog(rc: &RenderContext, r: &PlayerRequest) -> StateUpdate {
+    choose_player_dialog(rc, &r.choices, |p| {
+        Action::CustomPhaseEvent(CustomPhaseEventAction::SelectPlayer(p))
+    })
 }

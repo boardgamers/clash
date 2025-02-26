@@ -14,7 +14,7 @@ use macroquad::prelude::{draw_circle_lines, WHITE};
 use server::action::Action;
 use server::city::City;
 use server::content::custom_actions::CustomAction;
-use server::game::CulturalInfluenceResolution;
+use server::cultural_influence::{influence_culture_boost_cost, CulturalInfluenceResolution};
 use server::player::Player;
 use server::player_events::InfluenceCulturePossible;
 use server::playing_actions::{InfluenceCultureAttempt, PlayingAction};
@@ -78,7 +78,8 @@ fn show_city(
                 closest_city_pos
             };
 
-            let info = rc.game.influence_culture_boost_cost(
+            let info = influence_culture_boost_cost(
+                rc.game,
                 player.index,
                 start_position,
                 city.player_index,

@@ -5,6 +5,7 @@ use crate::city_pieces::Building::Port;
 use crate::collect::{CollectContext, CollectInfo};
 use crate::content::advances::{advance_group_builder, AdvanceGroup, NAVIGATION};
 use crate::game::Game;
+use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use std::collections::HashSet;
 
@@ -17,7 +18,7 @@ pub(crate) fn seafaring() -> AdvanceGroup {
 
 fn fishing() -> AdvanceBuilder {
     Advance::builder("Fishing", "Your cities may Collect food from one Sea space")
-        .add_player_event_listener(|event| &mut event.collect_options, fishing_collect, 0)
+        .add_player_event_listener(|event| &mut event.collect_options, fishing_collect, 1)
         .with_advance_bonus(MoodToken)
         .with_unlocked_building(Port)
 }
@@ -37,8 +38,8 @@ fn war_ships() -> AdvanceBuilder {
         .add_player_event_listener(
             |event| &mut event.on_combat_round,
             |s, c, g| {
-                let attacker = s.attacker && g.map.is_water(c.attacker_position);
-                let defender = !s.attacker && g.map.is_water(c.defender_position);
+                let attacker = s.attacker && g.map.is_sea(c.attacker_position);
+                let defender = !s.attacker && g.map.is_sea(c.defender_position);
                 if c.round == 1 && (attacker || defender) {
                     s.hit_cancels += 1;
                     s.roll_log.push("War Ships ignore the first hit in the first round of combat".to_string());
@@ -86,18 +87,23 @@ fn cartography() -> AdvanceBuilder {
         )
 }
 
+#[must_use]
+fn is_enemy_player_or_pirate_zone(game: &Game, player_index: usize, position: Position) -> bool {
+    game.enemy_player(player_index, position).is_some() || game.is_pirate_zone(position)
+}
+
 fn fishing_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
     let city = game
         .get_any_city(c.city_position)
         .expect("city should exist");
     let port = city.port_position;
-    if let Some(position) =
-        port.filter(|p| game.enemy_player(c.player_index, *p).is_none())
-            .or_else(|| {
-                c.city_position.neighbors().into_iter().find(|p| {
-                    game.map.is_water(*p) && game.enemy_player(c.player_index, *p).is_none()
-                })
+    if let Some(position) = port
+        .filter(|p| !is_enemy_player_or_pirate_zone(game, c.player_index, *p))
+        .or_else(|| {
+            c.city_position.neighbors().into_iter().find(|p| {
+                game.map.is_sea(*p) && !is_enemy_player_or_pirate_zone(game, c.player_index, *p)
             })
+        })
     {
         i.choices.insert(
             position,

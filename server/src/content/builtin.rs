@@ -1,10 +1,11 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::barbarians::barbarians_bonus;
-use crate::combat::{
+use crate::combat_listeners::{
     choose_carried_units_casualties, choose_fighter_casualties, offer_retreat, place_settler,
 };
 use crate::events::EventOrigin;
+use crate::pirates::{pirates_bonus, pirates_round_bonus};
 
 pub struct Builtin {
     pub name: String,
@@ -62,6 +63,8 @@ pub fn get_all() -> Vec<Builtin> {
         choose_carried_units_casualties(),
         offer_retreat(),
         barbarians_bonus(),
+        pirates_bonus(),
+        pirates_round_bonus(),
     ]
 }
 

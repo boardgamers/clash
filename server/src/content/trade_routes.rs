@@ -12,7 +12,7 @@ use crate::unit::Unit;
 pub struct TradeRoute {
     unit_id: u32,
     from: Position,
-    to: Position,
+    pub to: Position,
 }
 
 #[must_use]
@@ -42,16 +42,16 @@ pub(crate) fn trade_route_log(
     trade_routes: &[TradeRoute],
     reward: &ResourcePile,
     selected: bool,
-) -> String {
-    let mut log = String::new();
+) -> Vec<String> {
+    let mut log = Vec::new();
     if selected {
-        log += &format!(
+        log.push(format!(
             "{} selected trade routes",
             game.players[player_index].get_name(),
-        );
+        ));
     }
     for t in trade_routes {
-        log += &format!(
+        log.push(format!(
             "{:?} at {:?} traded with city at {:?}",
             game.players[player_index]
                 .get_unit(t.unit_id)
@@ -59,9 +59,9 @@ pub(crate) fn trade_route_log(
                 .unit_type,
             t.from,
             t.to,
-        );
+        ));
     }
-    log += &format!(" - Total reward is {reward}");
+    log.push(format!("Total reward is {reward}"));
     log
 }
 
@@ -73,7 +73,9 @@ pub fn find_trade_routes(game: &Game, player: &Player) -> Vec<TradeRoute> {
         .map(|u| find_trade_route_for_unit(game, player, u))
         .filter(|r| !r.is_empty())
         .collect();
-    find_most_trade_routes(&all, 0, &[])
+    let mut routes = find_most_trade_routes(&all, 0, &[]);
+    routes.truncate(4);
+    routes
 }
 
 fn find_most_trade_routes(
@@ -132,15 +134,21 @@ fn find_trade_route_to_city(
         return None;
     }
 
-    let distance = unit.position.distance(to.position);
+    let from = unit.position;
+    let distance = from.distance(to.position);
     if distance > 2 {
         return None;
     }
 
-    let safe_passage = unit.position.neighbors().iter().any(|&pos| {
+    if game.is_pirate_zone(from) {
+        return None;
+    }
+
+    let safe_passage = from.neighbors().iter().any(|&pos| {
         pos.neighbors().contains(&to.position)
             && game.map.is_inside(pos)
             && !game.map.is_unexplored(pos)
+            && !game.is_pirate_zone(pos)
     });
 
     if !safe_passage {
@@ -149,7 +157,7 @@ fn find_trade_route_to_city(
 
     Some(TradeRoute {
         unit_id: unit.id,
-        from: unit.position,
+        from,
         to: to.position,
     })
 }

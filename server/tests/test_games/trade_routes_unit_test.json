@@ -42,6 +42,13 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
+          "position": "B6"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
           "position": "E6"
         }
       ],
@@ -121,11 +128,6 @@
           "id": 4
         },
         {
-          "position": "E7",
-          "unit_type": "Settler",
-          "id": 5
-        },
-        {
           "position": "E8",
           "unit_type": "Infantry",
           "id": 6
@@ -133,22 +135,18 @@
         {
           "position": "E7",
           "unit_type": "Ship",
-          "id": 7
+          "id": 7,
+          "carried_units": [
+            {
+              "unit_type": "Settler",
+              "id": 8
+            }
+          ]
         },
         {
-          "position": "E7",
-          "unit_type": "Ship",
-          "id": 8
-        },
-        {
-          "position": "E7",
+          "position": "A7",
           "unit_type": "Ship",
           "id": 9
-        },
-        {
-          "position": "E7",
-          "unit_type": "Ship",
-          "id": 10
         }
       ],
       "civilization": "test1",
@@ -169,6 +167,43 @@
       "event_victory_points": 0.0,
       "wonder_cards": [],
       "next_unit_id": 1
+    },
+    {
+      "name": null,
+      "id": 2,
+      "resources": {},
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [],
+      "units": [
+        {
+          "position": "C7",
+          "unit_type": "Ship",
+          "id": 6
+        },
+        {
+          "position": "A8",
+          "unit_type": "Ship",
+          "id": 7
+        }
+      ],
+      "civilization": "Pirates",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 9
     }
   ],
   "map": {
@@ -183,6 +218,10 @@
       ],
       [
         "A7",
+        "Water"
+      ],
+      [
+        "A8",
         "Water"
       ],
       [
@@ -207,7 +246,7 @@
       ],
       [
         "B7",
-        "Barren"
+        "Unexplored"
       ],
       [
         "C2",
@@ -231,7 +270,7 @@
       ],
       [
         "C7",
-        "Unexplored"
+        "Water"
       ],
       [
         "C8",

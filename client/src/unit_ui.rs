@@ -32,7 +32,7 @@ impl UnitPlace {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum UnitHighlightType {
     None,
     Primary,
@@ -40,7 +40,7 @@ pub enum UnitHighlightType {
 }
 
 impl UnitHighlightType {
-    fn color(&self) -> Color {
+    fn color(self) -> Color {
         match self {
             UnitHighlightType::None => BLACK,
             UnitHighlightType::Primary => WHITE,
@@ -50,13 +50,14 @@ impl UnitHighlightType {
 }
 
 struct UnitHighlight {
+    player: usize,
     unit: u32,
     highlight_type: UnitHighlightType,
 }
 
 pub fn draw_unit_type(
     rc: &RenderContext,
-    unit_highlight_type: &UnitHighlightType,
+    unit_highlight_type: UnitHighlightType,
     center: Point,
     unit_type: UnitType,
     player_index: usize,
@@ -141,12 +142,14 @@ pub fn non_leader_names() -> [(UnitType, &'static str); 5] {
 }
 
 pub fn draw_units(rc: &RenderContext, tooltip: bool) {
+    let player = rc.shown_player.index;
     let highlighted_units = match rc.state.active_dialog {
         ActiveDialog::MoveUnits(ref s) => {
-            let mut h = highlight_primary(&s.units);
+            let mut h = highlight_units(player, &s.units, UnitHighlightType::Primary);
             for d in &s.destinations.list {
                 if let MoveDestination::Carrier(id) = d {
                     h.push(UnitHighlight {
+                        player,
                         unit: *id,
                         highlight_type: UnitHighlightType::Secondary,
                     });
@@ -154,8 +157,21 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
             }
             h
         }
-        ActiveDialog::ReplaceUnits(ref s) => highlight_primary(&s.replaced_units),
-        ActiveDialog::UnitsRequest(ref s) => highlight_primary(&s.units),
+        ActiveDialog::ReplaceUnits(ref s) => highlight_units(
+            rc.shown_player.index,
+            &s.replaced_units,
+            UnitHighlightType::Primary,
+        ),
+        ActiveDialog::UnitsRequest(ref s) => {
+            highlight_units(s.player, &s.units, UnitHighlightType::Primary)
+                .into_iter()
+                .chain(highlight_units(
+                    s.player,
+                    &s.selectable,
+                    UnitHighlightType::Secondary,
+                ))
+                .collect_vec()
+        }
         _ => vec![],
     };
 
@@ -200,12 +216,17 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
     }
 }
 
-fn highlight_primary(units: &[u32]) -> Vec<UnitHighlight> {
+fn highlight_units(
+    player: usize,
+    units: &[u32],
+    highlight_type: UnitHighlightType,
+) -> Vec<UnitHighlight> {
     units
         .iter()
-        .map(|unit| UnitHighlight {
+        .map(move |unit| UnitHighlight {
+            player,
             unit: *unit,
-            highlight_type: UnitHighlightType::Primary,
+            highlight_type,
         })
         .collect()
 }
@@ -227,17 +248,14 @@ fn draw_unit(
             .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
         show_tooltip_for_circle(rc, &unit_label(unit, army_move), center.to_vec2(), radius);
     } else {
-        let highlight = if player_index == game.active_player() {
-            selected_units
-                .iter()
-                .find(|u| u.unit == unit.id)
-                .map_or(UnitHighlightType::None, |u| u.highlight_type.clone())
-        } else {
-            UnitHighlightType::None
-        };
+        let highlight = selected_units
+            .iter()
+            .find(|u| u.unit == unit.id && u.player == player_index)
+            .map_or(UnitHighlightType::None, |u| u.highlight_type);
+
         draw_unit_type(
             rc,
-            &highlight,
+            highlight,
             center,
             unit.unit_type,
             unit.player_index,
@@ -250,6 +268,7 @@ fn draw_unit(
 pub trait UnitSelection: ConfirmSelection {
     fn selected_units_mut(&mut self) -> &mut Vec<u32>;
     fn can_select(&self, game: &Game, unit: &Unit) -> bool;
+    fn player_index(&self) -> usize;
 }
 
 pub fn unit_selection_click<T: UnitSelection>(
@@ -259,8 +278,9 @@ pub fn unit_selection_click<T: UnitSelection>(
     sel: &T,
     on_change: impl Fn(T) -> StateUpdate,
 ) -> StateUpdate {
-    if let Some(unit_id) = click_unit(rc, pos, mouse_pos, rc.shown_player, true) {
-        if sel.can_select(rc.game, rc.shown_player.get_unit(unit_id).unwrap()) {
+    let p = rc.game.get_player(sel.player_index());
+    if let Some(unit_id) = click_unit(rc, pos, mouse_pos, p, true) {
+        if sel.can_select(rc.game, p.get_unit(unit_id).unwrap()) {
             let mut new = sel.clone();
             unit_selection_clicked(unit_id, new.selected_units_mut());
             return on_change(new);

@@ -251,28 +251,6 @@
       },
       "undo": [
         {
-          "Command": {
-            "gained_units": [
-              {
-                "unit_type": "Infantry",
-                "position": "C2",
-                "player": 1
-              }
-            ]
-          }
-        },
-        {
-          "Command": {
-            "gained_units": [
-              {
-                "unit_type": "Settler",
-                "position": "C2",
-                "player": 1
-              }
-            ]
-          }
-        },
-        {
           "WastedResources": {
             "resources": {
               "gold": 1

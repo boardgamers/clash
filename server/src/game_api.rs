@@ -1,5 +1,6 @@
 use std::{cmp::Ordering::*, mem};
 
+use crate::action::execute_action;
 use crate::utils::Shuffle;
 use crate::{
     action::Action,
@@ -15,8 +16,8 @@ pub fn init(player_amount: usize, seed: String) -> Game {
 }
 
 #[must_use]
-pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Game {
-    game.execute_action(action, player_index);
+pub fn execute(mut game: Game, action: Action, player_index: usize) -> Game {
+    execute_action(&mut game, action, player_index);
     game
 }
 

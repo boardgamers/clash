@@ -142,6 +142,11 @@
           "position": "C1",
           "unit_type": "Infantry",
           "id": 1
+        },
+        {
+          "position": "C1",
+          "unit_type": "Settler",
+          "id": 2
         }
       ],
       "civilization": "test1",
@@ -158,7 +163,7 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "next_unit_id": 2
+      "next_unit_id": 3
     },
     {
       "name": null,
@@ -291,9 +296,6 @@
           "CustomPhaseEvent": {
             "event_type": "on_incident",
             "last_priority_used": 136,
-            "barbarians": {
-              "move_units": true
-            },
             "current": {
               "priority": 136,
               "player_index": 0,
@@ -308,8 +310,11 @@
               },
               "response": null,
               "origin": {
-                "Incident": 100
+                "Incident": 28
               }
+            },
+            "barbarians": {
+              "move_units": true
             }
           }
         }
@@ -327,7 +332,9 @@
     ],
     [
       "Barbarians move from B3 to B2: 2 infantry",
-      "Barbarians spawned a new Infantry unit at B3"
+      "Barbarians spawned a new Infantry unit at B3",
+      "Player2 was selected to gain 1 settler from Population Boom",
+      "Player2 gained 1 settler in C1"
     ],
     [
       "It's Player2's turn"

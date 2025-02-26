@@ -1,6 +1,7 @@
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
+use crate::advance::{advance_with_incident_token, do_advance, remove_advance};
 use crate::payment::PaymentOptions;
 use crate::{
     content::advances,
@@ -8,6 +9,7 @@ use crate::{
     player::Player,
     position::Position,
     resource_pile::ResourcePile,
+    utils,
 };
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
@@ -66,7 +68,7 @@ impl StatusPhaseAction {
                     game.players[player_index].can_advance_free(&advances::get_advance(advance)),
                     "Illegal action"
                 );
-                game.advance_with_incident_token(advance, player_index, ResourcePile::empty());
+                advance_with_incident_token(game, advance, player_index, ResourcePile::empty());
             }
             StatusPhaseAction::RazeSize1City(ref city) => {
                 if let RazeSize1City::Position(city) = *city {
@@ -129,26 +131,26 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
         "Illegal number of additional advances"
     );
 
-    for advance in player_government_advances {
-        game.remove_advance(&advance, player_index);
+    for a in player_government_advances {
+        remove_advance(game, &a, player_index);
     }
 
     let new_government_advances = advances::get_government(government)
         .expect("government should exist")
         .advances;
-    game.advance(&new_government_advances[0].name, player_index);
-    for advance in &new_government.additional_advances {
+    do_advance(game, &new_government_advances[0], player_index);
+    for name in &new_government.additional_advances {
         let (pos, advance) = new_government_advances
             .iter()
-            .find_position(|a| a.name == *advance)
+            .find_position(|a| a.name == *name)
             .unwrap_or_else(|| {
-                panic!("Advance with name {advance} not found in government advances");
+                panic!("Advance with name {name} not found in government advances");
             });
         assert!(
             pos > 0,
             "Additional advances should not include the leading government advance"
         );
-        game.advance(&advance.name, player_index);
+        do_advance(game, advance, player_index);
     }
 }
 
@@ -232,6 +234,22 @@ pub enum StatusPhaseState {
     RazeSize1City,
     ChangeGovernmentType,
     DetermineFirstPlayer,
+}
+
+pub(crate) fn enter_status_phase(game: &mut Game) {
+    if game
+        .players
+        .iter()
+        .filter(|player| player.is_human())
+        .any(|player| player.cities.is_empty())
+    {
+        game.end_game();
+    }
+    game.add_info_log_group(format!(
+        "The game has entered the {} status phase",
+        utils::ordinal_number(game.age)
+    ));
+    skip_status_phase_players(game);
 }
 
 #[must_use]

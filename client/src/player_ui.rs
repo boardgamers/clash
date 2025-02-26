@@ -2,9 +2,10 @@ use crate::action_buttons::action_buttons;
 use crate::city_ui::city_labels;
 use crate::client::Features;
 use crate::client_state::StateUpdate;
+use crate::dialog_ui::{ok_button, OkTooltip};
 use crate::layout_ui::{
-    bottom_center_texture, bottom_right_texture, icon_pos, left_mouse_button_pressed_in_rect,
-    top_center_texture, ICON_SIZE,
+    bottom_center_texture, bottom_centered_text, bottom_right_texture, icon_pos,
+    left_mouse_button_pressed_in_rect, top_center_texture, ICON_SIZE,
 };
 use crate::map_ui::terrain_name;
 use crate::render_context::RenderContext;
@@ -15,7 +16,8 @@ use macroquad::math::vec2;
 use macroquad::prelude::*;
 use server::action::Action;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
-use server::game::{CurrentMove, Game, GameState, MoveState};
+use server::game::{Game, GameState};
+use server::move_units::{CurrentMove, MoveState};
 use server::playing_actions::PlayingAction;
 use server::resource::ResourceType;
 use server::unit::MovementAction;
@@ -325,4 +327,19 @@ fn end_move(game: &Game) -> StateUpdate {
             vec![]
         },
     )
+}
+
+pub fn choose_player_dialog(
+    rc: &RenderContext,
+    choices: &[usize],
+    execute: impl Fn(usize) -> Action,
+) -> StateUpdate {
+    let player = rc.shown_player.index;
+    if rc.can_control_active_player() && choices.contains(&player) {
+        bottom_centered_text(rc, &format!("Select {}", rc.shown_player.get_name()));
+        if ok_button(rc, OkTooltip::Valid("Select".to_string())) {
+            return StateUpdate::execute(execute(player));
+        }
+    }
+    StateUpdate::None
 }

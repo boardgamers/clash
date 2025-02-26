@@ -1,8 +1,22 @@
 use crate::content::advances::NAVIGATION;
-use crate::game::{CurrentMove, ExploreResolutionState, Game, GameState, MoveState, UndoContext};
+use crate::game::{Game, GameState};
 use crate::map::{Block, BlockPosition, Map, Rotation, Terrain, UnexploredBlock};
+use crate::move_units::{back_to_move, move_units, undo_move_units, CurrentMove, MoveState};
 use crate::position::Position;
+use crate::undo::UndoContext;
 use itertools::Itertools;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct ExploreResolutionState {
+    #[serde(flatten)]
+    pub move_state: MoveState,
+    pub block: UnexploredBlock,
+    pub units: Vec<u32>,
+    pub start: Position,
+    pub destination: Position,
+    pub ship_can_teleport: bool,
+}
 
 pub(crate) fn move_to_unexplored_tile(
     game: &mut Game,
@@ -160,7 +174,7 @@ fn move_to_explored_tile(
             for (p, t) in block.block.tiles(&block.position, rotation) {
                 if t.is_water() {
                     game.add_info_log_item(&format!("Teleported ship from {destination} to {p}"));
-                    game.move_units(player_index, units, p, None);
+                    move_units(game, player_index, units, p, None);
                     return;
                 }
             }
@@ -168,7 +182,7 @@ fn move_to_explored_tile(
         game.add_info_log_item("Ship can't move to the explored tile");
         return;
     }
-    game.move_units(player_index, units, destination, None);
+    move_units(game, player_index, units, destination, None);
 }
 
 pub fn is_any_ship(game: &Game, player_index: usize, units: &[u32]) -> bool {
@@ -187,7 +201,7 @@ fn water_has_water_neighbors(
     unexplored_block: &UnexploredBlock,
     rotation: Rotation,
 ) -> bool {
-    water_has_neighbors(unexplored_block, rotation, |p| map.is_water(*p))
+    water_has_neighbors(unexplored_block, rotation, |p| map.is_sea(*p))
 }
 
 #[must_use]
@@ -211,7 +225,7 @@ fn grow_ocean(map: &Map, ocean: &mut Vec<Position>) {
     while i < ocean.len() {
         let pos = ocean[i];
         for n in pos.neighbors() {
-            if map.is_water(n) && !ocean.contains(&n) {
+            if map.is_sea(n) && !ocean.contains(&n) {
                 ocean.push(n);
             }
         }
@@ -277,7 +291,7 @@ pub(crate) fn explore_resolution(game: &mut Game, r: &ExploreResolutionState, ro
         r.destination,
         r.ship_can_teleport,
     );
-    game.back_to_move(&r.move_state, true);
+    back_to_move(game, &r.move_state, true);
     game.push_undo_context(UndoContext::ExploreResolution(r.clone()));
 }
 
@@ -302,6 +316,6 @@ pub(crate) fn undo_explore_resolution(game: &mut Game, player_index: usize) {
     game.map
         .add_unexplored_blocks(vec![unexplored_block.clone()]);
 
-    game.undo_move_units(player_index, s.units.clone(), s.start);
+    undo_move_units(game, player_index, s.units.clone(), s.start);
     game.state = GameState::ExploreResolution(s);
 }

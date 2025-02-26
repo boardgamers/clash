@@ -3,6 +3,7 @@ use macroquad::prelude::*;
 use server::game::Game;
 use server::player::Player;
 use server::position::Position;
+use server::recruit::{recruit_cost, recruit_cost_without_replaced};
 use server::unit::{Unit, UnitType, Units};
 
 use crate::client_state::{ActiveDialog, StateUpdate};
@@ -88,14 +89,14 @@ fn selectable_unit(
         units.get(&unit.unit_type)
     };
 
-    let max = if player
-        .recruit_cost_without_replaced(
-            &all,
-            city_position,
-            unit.leader_name.as_ref().or(leader_name),
-            None,
-        )
-        .is_some()
+    let max = if recruit_cost_without_replaced(
+        player,
+        &all,
+        city_position,
+        unit.leader_name.as_ref().or(leader_name),
+        None,
+    )
+    .is_some()
     {
         u32::from(current + 1)
     } else {
@@ -152,6 +153,7 @@ fn new_units(player: &Player) -> Vec<NewUnit> {
 
 #[derive(Clone)]
 pub struct RecruitSelection {
+    pub player: usize,
     pub amount: RecruitAmount,
     pub available_units: Units,
     pub need_replacement: Units,
@@ -159,11 +161,17 @@ pub struct RecruitSelection {
 }
 
 impl RecruitSelection {
-    pub fn new(game: &Game, amount: RecruitAmount, replaced_units: Vec<u32>) -> RecruitSelection {
+    pub fn new(
+        game: &Game,
+        player: usize,
+        amount: RecruitAmount,
+        replaced_units: Vec<u32>,
+    ) -> RecruitSelection {
         let available_units = game.get_player(amount.player_index).available_units();
         let need_replacement = available_units.get_units_to_replace(&amount.units);
 
         RecruitSelection {
+            player,
             amount,
             available_units,
             need_replacement,
@@ -184,20 +192,23 @@ impl UnitSelection for RecruitSelection {
     fn can_select(&self, _game: &Game, unit: &Unit) -> bool {
         self.need_replacement.has_unit(&unit.unit_type)
     }
+
+    fn player_index(&self) -> usize {
+        self.player
+    }
 }
 
 impl ConfirmSelection for RecruitSelection {
     fn confirm(&self, game: &Game) -> OkTooltip {
-        if game
-            .get_player(self.amount.player_index)
-            .recruit_cost(
-                &self.amount.units,
-                self.amount.city_position,
-                self.amount.leader_name.as_ref(),
-                self.replaced_units.as_slice(),
-                None,
-            )
-            .is_some()
+        if recruit_cost(
+            game.get_player(self.amount.player_index),
+            &self.amount.units,
+            self.amount.city_position,
+            self.amount.leader_name.as_ref(),
+            self.replaced_units.as_slice(),
+            None,
+        )
+        .is_some()
         {
             OkTooltip::Valid("Recruit units".to_string())
         } else {
@@ -215,7 +226,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
         |s, p| {
             draw_unit_type(
                 rc,
-                &UnitHighlightType::None,
+                UnitHighlightType::None,
                 Point::from_vec2(p),
                 s.unit_type,
                 rc.shown_player.index,
@@ -228,7 +239,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
         },
         || OkTooltip::Valid("Recruit units".to_string()),
         || {
-            let sel = RecruitSelection::new(game, a.clone(), vec![]);
+            let sel = RecruitSelection::new(game, rc.shown_player.index, a.clone(), vec![]);
 
             if sel.is_finished() {
                 open_dialog(rc, a.city_position, sel)

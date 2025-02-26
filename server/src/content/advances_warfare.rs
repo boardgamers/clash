@@ -5,7 +5,8 @@ use crate::city_pieces::Building::Fortress;
 use crate::combat::CombatModifier::{
     CancelFortressExtraDie, CancelFortressIgnoreHit, SteelWeaponsAttacker, SteelWeaponsDefender,
 };
-use crate::combat::{get_combat, Combat, CombatModifier, CombatStrength};
+use crate::combat::{get_combat, Combat, CombatModifier};
+use crate::combat_listeners::CombatStrength;
 use crate::content::advances::{
     advance_group_builder, AdvanceGroup, METALLURGY, STEEL_WEAPONS, TACTICS,
 };
@@ -69,11 +70,12 @@ fn siegecraft() -> AdvanceBuilder {
                     None
                 }
             },
-            |game, _player_index, player_name, payment| {
+            |game, s| {
                 game.add_info_log_item(
-                    &format!("{player_name} paid for siegecraft: "));
+                    &format!("{} paid for siegecraft: ", s.player_name));
                 let mut paid = false;
                 let mut modifiers: Vec<CombatModifier> = Vec::new();
+                let payment = &s.choice;
                 if !payment[0].is_empty() {
                     modifiers.push(CancelFortressExtraDie);
                     game.add_to_last_log_item(&format!("{} to cancel the fortress ability to add an extra die", payment[0]));
@@ -125,11 +127,11 @@ fn steel_weapons() -> AdvanceBuilder {
                     None
                 }
             },
-            |game, player_index, player_name, payment| {
+            |game, s| {
                 let GameState::Combat(c) = &mut game.state else { panic!("Invalid state") };
-                add_steel_weapons(player_index, c);
+                add_steel_weapons(s.player_index, c);
                 game.add_info_log_item(
-                    &format!("{player_name} paid for steel weapons: {}", payment[0]));
+                    &format!("{} paid for steel weapons: {}", s.player_name, s.choice[0]));
             },
         )
         .add_player_event_listener(
