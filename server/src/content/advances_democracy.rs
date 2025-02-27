@@ -56,8 +56,9 @@ fn free_economy() -> AdvanceBuilder {
         .add_custom_action(FreeEconomyCollect)
         .add_player_event_listener(
             |event| &mut event.is_playing_action_available,
-            |available, action_type, player| {
-                if matches!(action_type, PlayingActionType::Collect) && player.played_once_per_turn_actions.contains(&FreeEconomyCollect) {
+            |available, game, i| {
+                let p = game.get_player(i.player);
+                if matches!(i.action_type, PlayingActionType::Collect) && p.played_once_per_turn_actions.contains(&FreeEconomyCollect) {
                     *available = false;
                 }
             },

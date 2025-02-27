@@ -77,18 +77,18 @@
         },
         {
           "position": "A1",
+          "unit_type": "Infantry",
+          "id": 9
+        },
+        {
+          "position": "A1",
           "unit_type": "Settler",
-          "id": 8
+          "id": 10
         },
         {
           "position": "A1",
           "unit_type": "Infantry",
-          "id": 9
-        },
-        {
-          "position": "A1",
-          "unit_type": "Infantry",
-          "id": 9
+          "id": 11
         }
       ],
       "civilization": "test0",
@@ -106,7 +106,7 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "next_unit_id": 10
+      "next_unit_id": 12
     },
     {
       "name": null,

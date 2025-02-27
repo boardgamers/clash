@@ -37,7 +37,7 @@ pub(crate) struct PlayerEvents {
     pub happiness_cost: Event<CostInfo>,
     pub recruit_cost: Event<CostInfo, Units, Player>,
 
-    pub is_playing_action_available: Event<bool, PlayingActionType, Player>,
+    pub is_playing_action_available: Event<bool, Game, PlayingActionInfo>,
 
     pub terrain_collect_options: Event<HashMap<Terrain, HashSet<ResourcePile>>>,
     pub collect_options: Event<CollectInfo, CollectContext, Game>,
@@ -196,6 +196,11 @@ impl MoveInfo {
             to,
         }
     }
+}
+
+pub struct PlayingActionInfo {
+    pub player: usize,
+    pub action_type: PlayingActionType,
 }
 
 #[derive(Clone, PartialEq)]

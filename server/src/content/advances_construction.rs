@@ -31,7 +31,7 @@ fn engineering() -> AdvanceBuilder {
 fn sanitation() -> AdvanceBuilder {
     Advance::builder(
         "Sanitation",
-        "When Recruiting, you may spend 1 mood token to pay for 1 Settler.",
+        "When Recruiting, you may spend 1 mood token to pay for 1 Settler. Ignore Pestilence and Epidemics events.",
     )
     .with_advance_bonus(MoodToken)
     .add_player_event_listener(

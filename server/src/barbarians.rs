@@ -310,7 +310,7 @@ pub(crate) fn set_info(
                 let mut state = BarbariansEventState::new();
                 init(&mut state, game, p.player);
                 game.current_custom_phase_mut().barbarians = Some(state);
-                game.add_to_last_log_item(&name);
+                game.add_info_log_item(&format!("Base effect: {name}"));
             }
         },
     )

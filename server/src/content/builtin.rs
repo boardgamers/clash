@@ -4,6 +4,7 @@ use crate::barbarians::barbarians_bonus;
 use crate::combat_listeners::{
     choose_carried_units_casualties, choose_fighter_casualties, offer_retreat, place_settler,
 };
+use crate::content::incidents_1::pestilence_permanent_effect;
 use crate::events::EventOrigin;
 use crate::pirates::{pirates_bonus, pirates_round_bonus};
 
@@ -65,6 +66,7 @@ pub fn get_all() -> Vec<Builtin> {
         barbarians_bonus(),
         pirates_bonus(),
         pirates_round_bonus(),
+        pestilence_permanent_effect(),
     ]
 }
 
