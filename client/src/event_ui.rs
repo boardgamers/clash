@@ -9,20 +9,21 @@ use server::events::EventOrigin;
 
 #[must_use]
 pub fn event_help(rc: &RenderContext, origin: &EventOrigin, do_break: bool) -> Vec<String> {
-    let h = match origin {
-        EventOrigin::Advance(a) => get_advance(a).description,
-        EventOrigin::Wonder(w) => get_wonder(w).description,
-        EventOrigin::Builtin(b) => get_builtin(b).description,
+    let mut h = vec![origin.name()];
+    h.extend(match origin {
+        EventOrigin::Advance(a) => vec![get_advance(a).description],
+        EventOrigin::Wonder(w) => vec![get_wonder(w).description],
+        EventOrigin::Builtin(b) => vec![get_builtin(b).description],
         EventOrigin::Incident(id) => get_incident(*id).description(),
-        EventOrigin::Leader(l) => {
+        EventOrigin::Leader(l) => vec![{
             let l = rc.shown_player.get_leader(l).unwrap();
             // todo: leader should have a 2 event sources - no each event source should have a description
             format!(
                 "{}, {}",
                 l.first_ability_description, l.second_ability_description
             )
-        }
-        EventOrigin::SpecialAdvance(s) => {
+        }],
+        EventOrigin::SpecialAdvance(s) => vec![{
             let s = rc
                 .shown_player
                 .civilization
@@ -31,15 +32,18 @@ pub fn event_help(rc: &RenderContext, origin: &EventOrigin, do_break: bool) -> V
                 .find(|sa| &sa.name == s)
                 .unwrap();
             s.description.clone()
-        }
-    };
-    let h = format!("{}: {}", origin.name(), h);
+        }],
+    });
     if do_break {
-        let mut result = vec![];
-        break_text(&h, 30, &mut result);
-        result
+        h.iter()
+            .flat_map(|s| {
+                let mut result = vec![];
+                break_text(s, 30, &mut result);
+                result
+            })
+            .collect()
     } else {
-        vec![h]
+        h
     }
 }
 

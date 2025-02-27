@@ -10,6 +10,7 @@ use crate::content::custom_phase_actions::{CurrentCustomPhaseEvent, CustomPhaseE
 use crate::cultural_influence::CulturalInfluenceResolution;
 use crate::events::{Event, EventOrigin};
 use crate::explore::ExploreResolutionState;
+use crate::incident::PermanentIncidentEffect;
 use crate::move_units::{CurrentMove, MoveState};
 use crate::pirates::get_pirates_player;
 use crate::player_events::{
@@ -57,6 +58,7 @@ pub struct Game {
     pub wonders_left: Vec<Wonder>,
     pub wonder_amount_left: usize,
     pub incidents_left: Vec<u8>,
+    pub permanent_incident_effects: Vec<PermanentIncidentEffect>,
     pub undo_context_stack: Vec<UndoContext>, // transient
 }
 
@@ -154,6 +156,7 @@ impl Game {
             wonders_left: wonders,
             wonder_amount_left: wonder_amount,
             incidents_left: Vec::new(),
+            permanent_incident_effects: Vec::new(),
             undo_context_stack: Vec::new(),
         }
     }
@@ -191,6 +194,7 @@ impl Game {
                 .collect(),
             wonder_amount_left: data.wonder_amount_left,
             incidents_left: data.incidents_left,
+            permanent_incident_effects: data.permanent_incident_effects,
             custom_phase_state: data.state_change_event_state,
             undo_context_stack: Vec::new(),
         };
@@ -229,6 +233,7 @@ impl Game {
                 .collect(),
             wonder_amount_left: self.wonder_amount_left,
             incidents_left: self.incidents_left,
+            permanent_incident_effects: self.permanent_incident_effects,
         }
     }
 
@@ -261,6 +266,7 @@ impl Game {
                 .collect(),
             wonder_amount_left: self.wonder_amount_left,
             incidents_left: self.incidents_left.clone(),
+            permanent_incident_effects: self.permanent_incident_effects.clone(),
         }
     }
 
@@ -814,6 +820,9 @@ pub struct GameData {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     incidents_left: Vec<u8>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    permanent_incident_effects: Vec<PermanentIncidentEffect>,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

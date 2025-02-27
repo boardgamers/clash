@@ -278,7 +278,8 @@
       "Player gained 1 mood token as advance bonus"
     ],
     [
-      "A new game event has been triggered: Pirates spawn"
+      "A new game event has been triggered: A successful year",
+      "Base effect: Pirates spawn"
     ]
   ],
   "undo_limit": 1,

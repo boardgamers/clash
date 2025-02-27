@@ -16,5 +16,8 @@ pub mod civilizations;
 pub mod custom_actions;
 pub mod custom_phase_actions;
 pub mod incidents;
+mod incidents_1;
+mod incidents_2;
+mod incidents_5;
 pub mod trade_routes;
 pub mod wonders;

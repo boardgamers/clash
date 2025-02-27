@@ -9,6 +9,7 @@ use crate::collect::{collect, undo_collect};
 use crate::content::advances::get_advance;
 use crate::cultural_influence::influence_culture_attempt;
 use crate::game::GameState;
+use crate::player_events::PlayingActionInfo;
 use crate::recruit::{recruit, recruit_cost, undo_recruit};
 use crate::undo::UndoContext;
 use crate::unit::{Unit, Units};
@@ -81,7 +82,16 @@ impl PlayingActionType {
     pub fn is_available(&self, game: &Game, player_index: usize) -> bool {
         let mut possible = true;
         let p = &game.players[player_index];
-        let _ = p.trigger_event(|e| &e.is_playing_action_available, &mut possible, self, p);
+        let info = PlayingActionInfo {
+            player: player_index,
+            action_type: *self,
+        };
+        let _ = p.trigger_event(
+            |e| &e.is_playing_action_available,
+            &mut possible,
+            game,
+            &info,
+        );
         possible
     }
 }
