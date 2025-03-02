@@ -7,7 +7,7 @@ use crate::cultural_influence::{
 use crate::explore::{explore_resolution, undo_explore_resolution, ExploreResolutionState};
 use crate::game::Game;
 use crate::game::GameState::{CulturalInfluenceResolution, ExploreResolution, Movement, Playing};
-use crate::move_units::{undo_move_units, MoveState};
+use crate::movement::{undo_move_units, MoveState};
 use crate::player::Player;
 use crate::position::Position;
 use crate::resource::check_for_waste;

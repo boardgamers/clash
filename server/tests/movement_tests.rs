@@ -1,7 +1,7 @@
 use crate::common::{load_game, move_action, test_action};
 use server::action::Action;
 use server::game::Game;
-use server::move_units::move_units_destinations;
+use server::movement::move_units_destinations;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::MoveUnits;

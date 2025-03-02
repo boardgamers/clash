@@ -8,7 +8,7 @@ use macroquad::prelude::Texture2D;
 use server::action::Action;
 use server::events::EventOrigin;
 use server::game::{Game, GameState};
-use server::move_units::{move_units_destinations, CurrentMove};
+use server::movement::{move_units_destinations, CurrentMove};
 use server::payment::PaymentOptions;
 use server::player::Player;
 use server::position::Position;

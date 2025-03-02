@@ -11,7 +11,7 @@ use crate::cultural_influence::CulturalInfluenceResolution;
 use crate::events::{Event, EventOrigin};
 use crate::explore::ExploreResolutionState;
 use crate::incident::PermanentIncidentEffect;
-use crate::move_units::{CurrentMove, MoveState};
+use crate::movement::{CurrentMove, MoveState};
 use crate::pirates::get_pirates_player;
 use crate::player_events::{
     CustomPhaseEvent, CustomPhaseInfo, PlayerCommandEvent, PlayerCommands, PlayerEvents,

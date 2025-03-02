@@ -15,7 +15,7 @@ use crate::incident::trigger_incident;
 use crate::log;
 use crate::map::Rotation;
 use crate::map::Terrain::Unexplored;
-use crate::move_units::{back_to_move, move_units_destinations, CurrentMove, MoveState};
+use crate::movement::{back_to_move, move_units_destinations, CurrentMove, MoveState};
 use crate::playing_actions::PlayingAction;
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
