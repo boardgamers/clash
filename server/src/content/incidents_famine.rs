@@ -1,4 +1,4 @@
-use crate::ability_initializer::AbilityInitializerSetup;
+use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::city::MoodState;
 use crate::content::builtin::Builtin;
 use crate::content::custom_phase_actions::{PositionRequest, UnitsRequest};
@@ -86,26 +86,32 @@ fn pestilence_city(
     priority: i32,
     pred: impl Fn(&Game, usize) -> bool + 'static + Clone,
 ) -> IncidentBuilder {
-    decrease_mood_incident_city(b, priority, move |game, player_index| {
-        let p = game.get_player(player_index);
-        if !pestilence_applies(p) || !pred(game, player_index) {
-            return vec![];
-        }
-        p.cities
-            .iter()
-            .filter(|c| !matches!(c.mood_state, MoodState::Angry))
-            .map(|c| c.position)
-            .collect_vec()
-    })
+    decrease_mood_incident_city(
+        b,
+        IncidentTarget::AllPlayers,
+        priority,
+        move |game, player_index| {
+            let p = game.get_player(player_index);
+            if !pestilence_applies(p) || !pred(game, player_index) {
+                return vec![];
+            }
+            p.cities
+                .iter()
+                .filter(|c| !matches!(c.mood_state, MoodState::Angry))
+                .map(|c| c.position)
+                .collect_vec()
+        },
+    )
 }
 
 pub(crate) fn decrease_mood_incident_city(
     b: IncidentBuilder,
+    target: IncidentTarget,
     priority: i32,
     cities: impl Fn(&Game, usize) -> Vec<Position> + 'static + Clone,
 ) -> IncidentBuilder {
     b.add_incident_position_request(
-        IncidentTarget::AllPlayers,
+        target,
         priority,
         move |game, player_index, _incident| {
             Some(PositionRequest::new(
@@ -114,16 +120,20 @@ pub(crate) fn decrease_mood_incident_city(
             ))
         },
         |game, s| {
-            game.add_info_log_item(&format!(
-                "{} decreased the mood in city {}",
-                s.player_name, s.choice
-            ));
-            game.get_player_mut(s.player_index)
-                .get_city_mut(s.choice)
-                .expect("city should exist")
-                .decrease_mood_state();
+            decrease_mod_and_log(game, s);
         },
     )
+}
+
+pub(crate) fn decrease_mod_and_log(game: &mut Game, s: &SelectedChoice<Position>) {
+    game.add_info_log_item(&format!(
+        "{} decreased the mood in city {}",
+        s.player_name, s.choice
+    ));
+    game.get_player_mut(s.player_index)
+        .get_city_mut(s.choice)
+        .expect("city should exist")
+        .decrease_mood_state();
 }
 
 pub(crate) fn epidemics() -> Vec<Incident> {

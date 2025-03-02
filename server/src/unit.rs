@@ -10,7 +10,7 @@ use std::{
 use UnitType::*;
 
 use crate::explore::is_any_ship;
-use crate::move_units::CurrentMove;
+use crate::movement::CurrentMove;
 use crate::player::Player;
 use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
 

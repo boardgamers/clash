@@ -68,6 +68,7 @@ pub enum IncidentBaseEffect {
     BarbariansMove,
     PiratesSpawnAndRaid,
     ExhaustedLand,
+    GoldDeposits,
 }
 
 impl std::fmt::Display for IncidentBaseEffect {
@@ -78,6 +79,7 @@ impl std::fmt::Display for IncidentBaseEffect {
             IncidentBaseEffect::BarbariansMove => write!(f, "Barbarians move."),
             IncidentBaseEffect::PiratesSpawnAndRaid => write!(f, "Pirates spawn."),
             IncidentBaseEffect::ExhaustedLand => write!(f, "Exhausted land."),
+            IncidentBaseEffect::GoldDeposits => write!(f, "Gold deposits."),
         }
     }
 }
@@ -145,6 +147,7 @@ impl IncidentBuilder {
             IncidentBaseEffect::BarbariansMove => barbarians_move(self),
             IncidentBaseEffect::PiratesSpawnAndRaid => pirates_spawn_and_raid(self),
             IncidentBaseEffect::ExhaustedLand => exhausted_land(self),
+            IncidentBaseEffect::GoldDeposits => gold_deposits(self),
         })
     }
 
@@ -525,6 +528,25 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
                 .get_mut(&s.choice)
                 .expect("tile should exist");
             *t = Terrain::Exhausted(Box::new(t.clone()));
+        },
+    )
+}
+
+fn gold_deposits(b: IncidentBuilder) -> IncidentBuilder {
+    b.add_incident_resource_request(
+        IncidentTarget::ActivePlayer,
+        BASE_EFFECT_PRIORITY,
+        |_game, _player_index, _incident| {
+            Some(ResourceRewardRequest::new(
+                PaymentOptions::sum(2, &[ResourceType::Gold]),
+                "-".to_string(),
+            ))
+        },
+        |_game, s| {
+            vec![format!(
+                "{} gained {} from a Gold Mine",
+                s.player_name, s.choice
+            )]
         },
     )
 }

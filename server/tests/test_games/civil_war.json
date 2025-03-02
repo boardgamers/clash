@@ -1,7 +1,5 @@
 {
-  "state": {
-    "StatusPhase": "FreeAdvance"
-  },
+  "state": "Playing",
   "players": [
     {
       "name": null,
@@ -12,11 +10,11 @@
         "ore": 6,
         "ideas": 5,
         "gold": 7,
-        "mood_tokens": 8,
+        "mood_tokens": 7,
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -26,20 +24,38 @@
       },
       "cities": [
         {
+          "city_pieces": {
+            "fortress": 0,
+            "temple": 1,
+            "wonders": [
+              "Pyramids"
+            ]
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C2"
+        },
+        {
           "city_pieces": {},
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "position": "A1"
+          "position": "C1"
         },
         {
-          "city_pieces": {
-            "fortress": 1
-          },
-          "mood_state": "Angry",
+          "city_pieces": {},
+          "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "position": "C2"
+          "position": "B2"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
         }
       ],
       "units": [
@@ -50,7 +66,10 @@
         },
         {
           "position": "C2",
-          "unit_type": "Cavalry",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 1
         },
         {
@@ -90,12 +109,13 @@
       "advances": [
         "Farming",
         "Mining",
-        "Storage",
         "Tactics"
       ],
       "unlocked_special_advance": [],
-      "wonders_build": [],
-      "incident_tokens": 3,
+      "wonders_build": [
+        "Pyramids"
+      ],
+      "incident_tokens": 1,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -125,30 +145,32 @@
       },
       "cities": [
         {
-          "city_pieces": {},
-          "mood_state": "Angry",
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "position": "C1"
-        }
-      ],
-      "units": [
-        {
-          "position": "C1",
-          "unit_type": "Infantry",
-          "id": 0
+          "position": "A1"
         },
         {
-          "position": "C1",
-          "unit_type": "Infantry",
-          "id": 1
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A3"
         },
         {
-          "position": "C1",
-          "unit_type": "Settler",
-          "id": 2
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A4"
         }
       ],
+      "units": [],
       "civilization": "test1",
       "active_leader": null,
       "available_leaders": [],
@@ -163,7 +185,7 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "next_unit_id": 3
+      "next_unit_id": 2
     },
     {
       "name": null,
@@ -176,47 +198,8 @@
         "ideas": 7,
         "gold": 7
       },
-      "cities": [
-        {
-          "city_pieces": {},
-          "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "B3"
-        }
-      ],
-      "units": [
-        {
-          "position": "B2",
-          "unit_type": "Infantry",
-          "id": 0
-        },
-        {
-          "position": "A3",
-          "unit_type": "Elephant",
-          "id": 1
-        },
-        {
-          "position": "B2",
-          "unit_type": "Infantry",
-          "id": 2
-        },
-        {
-          "position": "A3",
-          "unit_type": "Infantry",
-          "id": 3
-        },
-        {
-          "position": "A3",
-          "unit_type": "Infantry",
-          "id": 4
-        },
-        {
-          "position": "B3",
-          "unit_type": "Infantry",
-          "id": 5
-        }
-      ],
+      "cities": [],
+      "units": [],
       "civilization": "Barbarians",
       "active_leader": null,
       "available_leaders": [],
@@ -228,7 +211,7 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "next_unit_id": 6
+      "next_unit_id": 0
     }
   ],
   "map": {
@@ -243,6 +226,10 @@
       ],
       [
         "A3",
+        "Mountain"
+      ],
+      [
+        "A4",
         "Mountain"
       ],
       [
@@ -276,72 +263,11 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 1,
-  "action_log": [
-    {
-      "action": {
-        "StatusPhase": {
-          "FreeAdvance": "Storage"
-        }
-      }
-    },
-    {
-      "action": {
-        "CustomPhaseEvent": {
-          "SelectPosition": "B3"
-        }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_incident",
-            "player": 0,
-            "last_priority_used": 136,
-            "handler": {
-              "priority": 136,
-              "request": {
-                "SelectPosition": {
-                  "choices": [
-                    "A3",
-                    "B3"
-                  ],
-                  "description": "Select a Barbarian Army to move next"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Incident": 28
-              }
-            },
-            "barbarians": {
-              "move_units": true
-            }
-          }
-        }
-      ]
-    }
-  ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1 advanced Storage for free",
-      "Player gained 1 mood token as advance bonus"
-    ],
-    [
-      "A new game event has been triggered: Population Boom",
-      "Base effect: Barbarians move"
-    ],
-    [
-      "Barbarians move from B3 to B2: 2 infantry",
-      "Barbarians spawned a new Infantry unit at B3",
-      "Player2 was selected to gain 1 settler.",
-      "Player2 gained 1 settler in C1"
-    ],
-    [
-      "It's Player2's turn"
-    ]
-  ],
-  "undo_limit": 2,
+  "current_player_index": 0,
+  "action_log": [],
+  "action_log_index": 0,
+  "log": [],
+  "undo_limit": 0,
   "actions_left": 3,
   "successful_cultural_influence": false,
   "round": 1,
@@ -364,8 +290,9 @@
     10
   ],
   "dropped_players": [],
-  "wonders_left": [
-    "Pyramids"
-  ],
-  "wonder_amount_left": 1
+  "wonders_left": [],
+  "wonder_amount_left": 1,
+  "incidents_left": [
+    36
+  ]
 }

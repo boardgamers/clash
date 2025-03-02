@@ -12,7 +12,7 @@ use server::content::custom_phase_actions::CurrentEventResponse;
 use server::content::trade_routes::find_trade_routes;
 use server::events::EventOrigin;
 use server::game::Game;
-use server::move_units::move_units_destinations;
+use server::movement::move_units_destinations;
 use server::playing_actions;
 use server::playing_actions::PlayingAction::{
     Advance, Collect, Construct, Custom, EndTurn, Recruit,

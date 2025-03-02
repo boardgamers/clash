@@ -22,7 +22,7 @@ use server::content::custom_phase_actions::{
 use server::cultural_influence::CulturalInfluenceResolution;
 use server::events::EventOrigin;
 use server::game::{Game, GameState};
-use server::move_units::CurrentMove;
+use server::movement::CurrentMove;
 use server::position::Position;
 use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 

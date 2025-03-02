@@ -1,7 +1,7 @@
 use crate::content::advances::NAVIGATION;
 use crate::game::{Game, GameState};
 use crate::map::{Block, BlockPosition, Map, Rotation, Terrain, UnexploredBlock};
-use crate::move_units::{back_to_move, move_units, undo_move_units, CurrentMove, MoveState};
+use crate::movement::{back_to_move, move_units, undo_move_units, CurrentMove, MoveState};
 use crate::position::Position;
 use crate::undo::UndoContext;
 use itertools::Itertools;

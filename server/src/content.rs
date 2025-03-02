@@ -15,6 +15,7 @@ pub mod builtin;
 pub mod civilizations;
 pub mod custom_actions;
 pub mod custom_phase_actions;
+mod incidects_civil_war;
 pub mod incidents;
 mod incidents_5;
 mod incidents_earthquake;

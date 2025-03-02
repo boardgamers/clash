@@ -6,7 +6,7 @@ use crate::combat_listeners::{
 use crate::consts::SHIP_CAPACITY;
 use crate::game::GameState::Playing;
 use crate::game::{Game, GameState};
-use crate::move_units::{back_to_move, move_units, MoveState};
+use crate::movement::{back_to_move, move_units, MoveState};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType::{Cavalry, Elephant, Infantry, Leader};

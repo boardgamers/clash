@@ -17,7 +17,7 @@ use macroquad::prelude::*;
 use server::action::Action;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::game::{Game, GameState};
-use server::move_units::{CurrentMove, MoveState};
+use server::movement::{CurrentMove, MoveState};
 use server::playing_actions::PlayingAction;
 use server::resource::ResourceType;
 use server::unit::MovementAction;

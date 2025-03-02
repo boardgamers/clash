@@ -1,3 +1,4 @@
+use crate::content::incidects_civil_war::migrations;
 use crate::content::incidents_5::successful_year;
 use crate::content::incidents_earthquake::earthquakes;
 use crate::content::incidents_famine::{epidemics, famines, pestilence};
@@ -24,6 +25,8 @@ pub(crate) fn get_all() -> Vec<Incident> {
         population_booms(),
         // 29+
         earthquakes(),
+        // 34+
+        migrations(),
         // 51+
         successful_year(),
     ]
