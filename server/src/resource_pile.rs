@@ -384,7 +384,7 @@ mod tests {
         let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
         let can_afford = PaymentOptions::resources_with_discount(
             cost.clone(),
-            PaymentConversionType::Mandatory(discount),
+            PaymentConversionType::MayNotOverpay(discount),
         )
         .can_afford(&player_has);
         assert!(can_afford, "{name}");
@@ -394,7 +394,7 @@ mod tests {
         let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
         let can_afford = PaymentOptions::resources_with_discount(
             cost.clone(),
-            PaymentConversionType::Mandatory(discount),
+            PaymentConversionType::MayNotOverpay(discount),
         )
         .can_afford(&player_has);
         assert!(!can_afford, "{name}");

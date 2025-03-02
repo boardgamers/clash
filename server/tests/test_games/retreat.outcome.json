@@ -26,13 +26,13 @@
       }
     }
   },
-  "state_change_event_state": [
+  "current_events": [
     {
       "event_type": "on_combat_round_end",
+      "player": 0,
       "last_priority_used": 0,
-      "current": {
+      "handler": {
         "priority": 0,
-        "player_index": 0,
         "request": "BoolRequest",
         "response": null,
         "origin": {

@@ -80,7 +80,9 @@ pub fn draw_map(rc: &RenderContext) -> StateUpdate {
     if !matches!(&state.active_dialog, ActiveDialog::CollectResources(_)) {
         for p in &game.players {
             for city in &p.cities {
-                draw_city(rc, city);
+                if let Some(u) = draw_city(rc, city) {
+                    return u;
+                }
             }
         }
         unit_ui::draw_units(rc, false);

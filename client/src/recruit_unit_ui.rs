@@ -9,10 +9,9 @@ use server::unit::{Unit, UnitType, Units};
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::dialog_ui::OkTooltip;
-use crate::hex_ui::Point;
 use crate::render_context::RenderContext;
-use crate::select_ui::{ConfirmSelection, CountSelector, HasCountSelectableObject};
-use crate::unit_ui::{draw_unit_type, UnitHighlightType, UnitSelection};
+use crate::select_ui::{ConfirmSelection, CountSelector, HasCountSelectableObject, HighlightType};
+use crate::unit_ui::{draw_unit_type, UnitSelection};
 use crate::{select_ui, unit_ui};
 
 #[derive(Clone)]
@@ -226,8 +225,8 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
         |s, p| {
             draw_unit_type(
                 rc,
-                UnitHighlightType::None,
-                Point::from_vec2(p),
+                HighlightType::None,
+                p,
                 s.unit_type,
                 rc.shown_player.index,
                 &format!(

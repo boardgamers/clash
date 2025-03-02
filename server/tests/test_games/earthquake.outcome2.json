@@ -1,0 +1,513 @@
+{
+  "state": "Playing",
+  "current_events": [
+    {
+      "event_type": "on_incident",
+      "players_used": [
+        0
+      ],
+      "player": 1,
+      "last_priority_used": 11,
+      "handler": {
+        "priority": 11,
+        "request": {
+          "SelectStructures": {
+            "choices": [
+              [
+                "A1",
+                "CityCenter"
+              ],
+              [
+                "A1",
+                {
+                  "Building": "Fortress"
+                }
+              ],
+              [
+                "A3",
+                "CityCenter"
+              ],
+              [
+                "A4",
+                "CityCenter"
+              ],
+              [
+                "A4",
+                {
+                  "Building": "Fortress"
+                }
+              ]
+            ],
+            "needed": {
+              "start": 1,
+              "end": 3
+            },
+            "description": "Select 3 structures to be destroyed"
+          }
+        },
+        "response": null,
+        "origin": {
+          "Incident": 31
+        }
+      }
+    }
+  ],
+  "players": [
+    {
+      "name": null,
+      "id": 0,
+      "resources": {
+        "food": 1,
+        "wood": 6,
+        "ore": 6,
+        "ideas": 5,
+        "gold": 5,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 7,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "temple": 1
+          },
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C2"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
+        }
+      ],
+      "destroyed_structures": {
+        "fortress": 1,
+        "cities": 1
+      },
+      "units": [
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "C2",
+          "unit_type": "Cavalry",
+          "id": 1
+        },
+        {
+          "position": "C2",
+          "unit_type": "Leader",
+          "id": 2
+        },
+        {
+          "position": "C2",
+          "unit_type": "Elephant",
+          "id": 3
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 6
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 7
+        }
+      ],
+      "civilization": "test0",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [
+        "Farming",
+        "Mining",
+        "Myths",
+        "Storage",
+        "Tactics"
+      ],
+      "unlocked_special_advance": [],
+      "wonders_build": [
+        "Pyramids"
+      ],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 6.0,
+      "wonder_cards": [],
+      "next_unit_id": 8
+    },
+    {
+      "name": null,
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A3"
+        },
+        {
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A4"
+        }
+      ],
+      "units": [],
+      "civilization": "test1",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [
+        "Farming",
+        "Mining",
+        "Myths"
+      ],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 2
+    },
+    {
+      "name": null,
+      "id": 2,
+      "resources": {},
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [],
+      "units": [],
+      "civilization": "Barbarians",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 0
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Water"
+      ],
+      [
+        "A3",
+        "Mountain"
+      ],
+      [
+        "A4",
+        "Mountain"
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "D2",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "action": {
+        "Playing": {
+          "Advance": {
+            "advance": "Storage",
+            "payment": {
+              "gold": 2
+            }
+          }
+        }
+      }
+    },
+    {
+      "action": {
+        "CustomPhaseEvent": {
+          "SelectStructures": [
+            [
+              "B2",
+              "CityCenter"
+            ],
+            [
+              "C2",
+              {
+                "Building": "Fortress"
+              }
+            ],
+            [
+              "C2",
+              {
+                "Wonder": "Pyramids"
+              }
+            ]
+          ]
+        }
+      },
+      "undo": [
+        {
+          "CustomPhaseEvent": {
+            "event_type": "on_incident",
+            "player": 0,
+            "last_priority_used": 11,
+            "handler": {
+              "priority": 11,
+              "request": {
+                "SelectStructures": {
+                  "choices": [
+                    [
+                      "C2",
+                      "CityCenter"
+                    ],
+                    [
+                      "C2",
+                      {
+                        "Building": "Fortress"
+                      }
+                    ],
+                    [
+                      "C2",
+                      {
+                        "Building": "Temple"
+                      }
+                    ],
+                    [
+                      "C2",
+                      {
+                        "Wonder": "Pyramids"
+                      }
+                    ],
+                    [
+                      "C1",
+                      "CityCenter"
+                    ],
+                    [
+                      "B2",
+                      "CityCenter"
+                    ],
+                    [
+                      "B3",
+                      "CityCenter"
+                    ]
+                  ],
+                  "needed": {
+                    "start": 1,
+                    "end": 3
+                  },
+                  "description": "Select 3 structures to be destroyed"
+                }
+              },
+              "response": null,
+              "origin": {
+                "Incident": 31
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "action": {
+        "CustomPhaseEvent": {
+          "Payment": [
+            {
+              "mood_tokens": 1
+            }
+          ]
+        }
+      },
+      "undo": [
+        {
+          "CustomPhaseEvent": {
+            "event_type": "on_incident",
+            "player": 0,
+            "last_priority_used": 10,
+            "handler": {
+              "priority": 10,
+              "request": {
+                "Payment": [
+                  {
+                    "cost": {
+                      "default": {
+                        "mood_tokens": 1
+                      },
+                      "conversions": [
+                        {
+                          "from": [
+                            {
+                              "mood_tokens": 1
+                            }
+                          ],
+                          "to": {},
+                          "type": {
+                            "MayOverpay": 1
+                          }
+                        }
+                      ]
+                    },
+                    "name": "You may pay 1 mood token for each city to avoid reducing its mood",
+                    "optional": false
+                  }
+                ]
+              },
+              "response": null,
+              "origin": {
+                "Incident": 31
+              }
+            },
+            "must_reduce_mood": [
+              "C2"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "action_log_index": 3,
+  "log": [
+    [
+      "Player1 paid 2 gold to get the Storage advance",
+      "Player gained 1 mood token as advance bonus"
+    ],
+    [
+      "A new game event has been triggered: Heavy Earthquake"
+    ],
+    [
+      "Player1 gained 2 points for the Fortress at C2",
+      "Player1 gained 2 points for the Pyramids at C2",
+      "Player1 gained 2 points for the city center at B2"
+    ],
+    [
+      "Player1 paid 1 mood token for Heavy Earthquake"
+    ]
+  ],
+  "undo_limit": 3,
+  "actions_left": 2,
+  "successful_cultural_influence": false,
+  "round": 1,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+  ],
+  "dice_roll_log": [
+    10
+  ],
+  "dropped_players": [],
+  "wonders_left": [],
+  "wonder_amount_left": 1,
+  "incidents_left": [
+    31
+  ]
+}

@@ -3,6 +3,7 @@ use crate::client_state::{CameraMode, State, StateUpdate};
 use crate::payment_ui::Payment;
 use macroquad::camera::set_default_camera;
 use macroquad::color::{Color, PINK, YELLOW};
+use macroquad::input::mouse_position;
 use macroquad::math::{bool, Vec2};
 use macroquad::prelude::{set_camera, WHITE};
 use server::game::{Game, GameState};
@@ -95,5 +96,9 @@ impl RenderContext<'_> {
             1 => PINK,
             _ => panic!("unexpected player index"),
         }
+    }
+
+    pub fn mouse_pos(&self) -> Vec2 {
+        self.screen_to_world(mouse_position().into())
     }
 }

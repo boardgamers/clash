@@ -3,7 +3,7 @@ use crate::advance::{advance_with_incident_token, Advance, AdvanceBuilder};
 use crate::city_pieces::Building::Temple;
 use crate::consts::STACK_LIMIT;
 use crate::content::advances::{advance_group_builder, get_group, AdvanceGroup};
-use crate::content::custom_phase_actions::{AdvanceRewardRequest, PositionRequest};
+use crate::content::custom_phase_actions::{AdvanceRequest, PositionRequest};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -42,7 +42,7 @@ fn dogma() -> AdvanceBuilder {
                     if choices.is_empty() {
                         return None;
                     }
-                    return Some(AdvanceRewardRequest {
+                    return Some(AdvanceRequest {
                         choices,
                     });
                 }

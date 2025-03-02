@@ -197,12 +197,12 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
                 Some("Select Pirate Ships to remove".to_string()),
             ))
         },
-        |game, player, units| {
+        |game, s| {
             let pirates = get_pirates_player(game).index;
             game.add_info_log_item(&format!(
                 "{} removed a Pirate Ships at {}",
-                game.get_player(player).get_name(),
-                units
+                s.player_name,
+                s.choice
                     .iter()
                     .map(|u| game
                         .get_player(pirates)
@@ -212,7 +212,7 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
                         .to_string())
                     .join(", ")
             ));
-            for unit in units {
+            for unit in &s.choice {
                 game.get_player_mut(pirates).remove_unit(*unit);
             }
         },

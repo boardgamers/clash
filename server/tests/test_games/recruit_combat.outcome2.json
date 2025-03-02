@@ -24,13 +24,13 @@
       "result": "AttackerWins"
     }
   },
-  "state_change_event_state": [
+  "current_events": [
     {
       "event_type": "on_combat_end",
+      "player": 0,
       "last_priority_used": 3,
-      "current": {
+      "handler": {
         "priority": 3,
-        "player_index": 0,
         "request": {
           "ResourceReward": {
             "reward": {
@@ -379,10 +379,10 @@
         {
           "CustomPhaseEvent": {
             "event_type": "on_recruit",
+            "player": 0,
             "last_priority_used": 1,
-            "current": {
+            "handler": {
               "priority": 1,
-              "player_index": 0,
               "request": {
                 "ResourceReward": {
                   "reward": {
@@ -435,10 +435,10 @@
         {
           "CustomPhaseEvent": {
             "event_type": "on_recruit",
+            "player": 0,
             "last_priority_used": 0,
-            "current": {
+            "handler": {
               "priority": 0,
-              "player_index": 0,
               "request": {
                 "ResourceReward": {
                   "reward": {

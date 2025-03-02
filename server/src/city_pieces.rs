@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{content::wonders, wonder::Wonder};
+use num::Zero;
 use Building::*;
 
 #[derive(Default)]
@@ -155,7 +156,7 @@ impl CityPieces {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Default)]
 pub struct CityPiecesData {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
@@ -181,6 +182,77 @@ pub struct CityPiecesData {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[serde(default)]
     wonders: Vec<String>,
+}
+
+pub struct DestroyedStructures {
+    pub pieces: CityPieces,
+    pub cities: u8,
+}
+
+impl Default for DestroyedStructures {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl DestroyedStructures {
+    #[must_use]
+    pub fn data(self) -> DestroyedStructuresData {
+        DestroyedStructuresData {
+            pieces: self.pieces.data(),
+            cities: self.cities,
+        }
+    }
+
+    #[must_use]
+    pub fn from_data(data: &DestroyedStructuresData) -> Self {
+        Self {
+            pieces: CityPieces::from_data(&data.pieces),
+            cities: data.cities,
+        }
+    }
+
+    #[must_use]
+    pub fn cloned_data(&self) -> DestroyedStructuresData {
+        DestroyedStructuresData {
+            pieces: self.pieces.cloned_data(),
+            cities: self.cities,
+        }
+    }
+
+    #[must_use]
+    pub fn new() -> Self {
+        Self {
+            pieces: CityPieces::default(),
+            cities: 0,
+        }
+    }
+
+    pub fn add_building(&mut self, building: Building) {
+        self.pieces
+            .set_building(building, self.get_building(building) + 1);
+    }
+
+    #[must_use]
+    pub fn get_building(&self, building: Building) -> usize {
+        self.pieces.building_owner(building).unwrap_or(0)
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Default)]
+pub struct DestroyedStructuresData {
+    #[serde(flatten)]
+    pub pieces: CityPiecesData,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub cities: u8,
+}
+
+impl DestroyedStructuresData {
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.pieces == CityPiecesData::default() && self.cities.is_zero()
+    }
 }
 
 #[derive(Serialize, Deserialize, Eq, PartialEq, Hash, Clone, Debug, Copy)]

@@ -19,7 +19,7 @@ use std::io::BufReader;
 
 #[macroquad::main("Clash")]
 async fn main() {
-    set_window_size(900, 400);
+    set_window_size(1200, 600);
 
     let features = Features {
         import_export: true,

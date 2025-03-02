@@ -248,7 +248,7 @@ impl PlayingAction {
     }
 
     pub(crate) fn on_construct(game: &mut Game, player_index: usize, building: Building) {
-        game.trigger_custom_phase_event(&[player_index], |e| &mut e.on_construct, &building, None);
+        game.trigger_current_event(&[player_index], |e| &mut e.on_construct, &building, None);
     }
 
     #[must_use]

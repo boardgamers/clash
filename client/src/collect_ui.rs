@@ -4,12 +4,11 @@ use crate::dialog_ui::{
 };
 use crate::event_ui::event_help;
 use crate::hex_ui;
-use crate::hex_ui::Point;
 use crate::layout_ui::{draw_scaled_icon, is_in_circle, left_mouse_button_pressed};
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name, show_resource_pile};
 use macroquad::color::BLACK;
-use macroquad::math::vec2;
+use macroquad::math::{vec2, Vec2};
 use macroquad::prelude::WHITE;
 use macroquad::shapes::draw_circle;
 use server::action::Action;
@@ -189,7 +188,7 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpd
 
 fn draw_collect_item(
     rc: &RenderContext,
-    center: Point,
+    center: Vec2,
     resources: &[(ResourceType, &u32)],
     size: f32,
 ) {
@@ -199,7 +198,7 @@ fn draw_collect_item(
             rc,
             &rc.assets().resources[r],
             resource_name(*r),
-            center.to_vec2() - vec2(size / 2., size / 2.),
+            center - vec2(size / 2., size / 2.),
             size,
         );
     } else {
@@ -209,7 +208,7 @@ fn draw_collect_item(
                 rc,
                 &rc.assets().resources[r],
                 resource_name(*r),
-                c.to_vec2() - vec2(size / 2., size / 2.),
+                c - vec2(size / 2., size / 2.),
                 size / 2.,
             );
         });

@@ -109,10 +109,10 @@ pub(crate) fn barbarians_spawn(mut builder: IncidentBuilder) -> IncidentBuilder 
             |game, s| {
                 let mut state = BarbariansEventState::new();
                 state.selected_position = Some(s.choice);
-                game.current_custom_phase_mut().barbarians = Some(state);
+                game.current_event_mut().barbarians = Some(state);
             },
         )
-        .add_incident_unit_request(
+        .add_incident_unit_type_request(
             IncidentTarget::ActivePlayer,
             BASE_EFFECT_PRIORITY,
             |game, _player_index, _i| {
@@ -165,7 +165,7 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                 BASE_EFFECT_PRIORITY + (army * 2) + 1,
                 |game, player_index, _i| {
                     let state = game
-                        .current_custom_phase_mut()
+                        .current_event_mut()
                         .barbarians
                         .as_mut()
                         .expect("barbarians should exist");
@@ -187,7 +187,7 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                 },
                 |game, s| {
                     let mut state = game
-                        .current_custom_phase_mut()
+                        .current_event_mut()
                         .barbarians
                         .take()
                         .expect("barbarians should exist");
@@ -215,7 +215,7 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                             payment: ResourcePile::empty(),
                         },
                     );
-                    game.current_custom_phase_mut().barbarians = Some(state);
+                    game.current_event_mut().barbarians = Some(state);
                 },
             );
     }
@@ -306,10 +306,10 @@ pub(crate) fn set_info(
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY + 200,
         move |game, p, _i| {
-            if game.current_custom_phase().barbarians.is_none() {
+            if game.current_event().barbarians.is_none() {
                 let mut state = BarbariansEventState::new();
                 init(&mut state, game, p.player);
-                game.current_custom_phase_mut().barbarians = Some(state);
+                game.current_event_mut().barbarians = Some(state);
                 game.add_info_log_item(&format!("Base effect: {name}"));
             }
         },
@@ -340,7 +340,7 @@ fn add_barbarians_city(builder: IncidentBuilder) -> IncidentBuilder {
 }
 
 pub(crate) fn get_barbarian_state(game: &Game) -> BarbariansEventState {
-    game.current_custom_phase()
+    game.current_event()
         .barbarians
         .as_ref()
         .expect("barbarians should exist")
@@ -348,7 +348,7 @@ pub(crate) fn get_barbarian_state(game: &Game) -> BarbariansEventState {
 }
 
 pub(crate) fn get_barbarian_state_mut(game: &mut Game) -> &mut BarbariansEventState {
-    game.current_custom_phase_mut()
+    game.current_event_mut()
         .barbarians
         .as_mut()
         .expect("barbarians should exist")
@@ -431,7 +431,7 @@ fn is_base_barbarian_spawn_pos(game: &Game, pos: Position, player: &Player) -> b
         && cities_in_range(game, |p| p.index != player.index, pos, 2).is_empty()
 }
 
-fn no_units_present(game: &Game, pos: Position) -> bool {
+pub(crate) fn no_units_present(game: &Game, pos: Position) -> bool {
     !game
         .players
         .iter()

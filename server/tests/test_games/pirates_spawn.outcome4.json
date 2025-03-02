@@ -260,10 +260,10 @@
         {
           "CustomPhaseEvent": {
             "event_type": "on_incident",
+            "player": 0,
             "last_priority_used": 105,
-            "current": {
+            "handler": {
               "priority": 105,
-              "player_index": 0,
               "request": {
                 "SelectUnits": {
                   "player": 2,
@@ -298,10 +298,10 @@
         {
           "CustomPhaseEvent": {
             "event_type": "on_incident",
+            "player": 0,
             "last_priority_used": 104,
-            "current": {
+            "handler": {
               "priority": 104,
-              "player_index": 0,
               "request": {
                 "SelectPosition": {
                   "choices": [
@@ -335,10 +335,10 @@
         {
           "CustomPhaseEvent": {
             "event_type": "on_incident",
+            "player": 0,
             "last_priority_used": 103,
-            "current": {
+            "handler": {
               "priority": 103,
-              "player_index": 0,
               "request": {
                 "SelectPosition": {
                   "choices": [
@@ -376,10 +376,10 @@
         {
           "CustomPhaseEvent": {
             "event_type": "on_incident",
+            "player": 0,
             "last_priority_used": 102,
-            "current": {
+            "handler": {
               "priority": 102,
-              "player_index": 0,
               "request": {
                 "Payment": [
                   {

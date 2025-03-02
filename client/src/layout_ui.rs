@@ -1,4 +1,3 @@
-use crate::hex_ui::Point;
 use crate::log_ui::break_text;
 use crate::render_context::RenderContext;
 use crate::tooltip;
@@ -128,7 +127,7 @@ pub fn left_mouse_button_pressed_in_rect(rect: Rect, rc: &RenderContext) -> bool
 }
 
 #[must_use]
-pub fn is_in_circle(mouse_pos: Vec2, center: Point, radius: f32) -> bool {
+pub fn is_in_circle(mouse_pos: Vec2, center: Vec2, radius: f32) -> bool {
     let d = vec2(center.x - mouse_pos.x, center.y - mouse_pos.y);
     d.length() <= radius
 }

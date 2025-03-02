@@ -379,10 +379,10 @@
         {
           "CustomPhaseEvent": {
             "event_type": "on_advance_custom_phase",
+            "player": 0,
             "last_priority_used": 1,
-            "current": {
+            "handler": {
               "priority": 1,
-              "player_index": 0,
               "request": {
                 "Payment": [
                   {

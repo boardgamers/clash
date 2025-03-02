@@ -17,10 +17,10 @@ const SHORT_SIZE: f32 = SIZE * 0.866_025_4;
 
 const SPACING: Spacing = Spacing::FlatTop(SIZE);
 
-pub fn center(pos: Position) -> Point {
+pub fn center(pos: Position) -> Vec2 {
     let c = pos.coordinate();
     let p = c.to_pixel(SPACING);
-    Point { x: p.0, y: p.1 }.to_screen()
+    to_screen(Vec2::new(p.0, p.1))
 }
 
 pub fn draw_hex(
@@ -64,57 +64,31 @@ pub fn draw_hex(
 }
 
 pub fn pixel_to_coordinate(p: Vec2) -> Coordinate {
-    let p = Point::new(p.x, p.y).to_game();
+    let p = to_game(Vec2::new(p.x, p.y));
     Coordinate::from_pixel(p.x, p.y, SPACING)
 }
 
-pub fn rotate_around(center: Point, radius: f32, angle_deg: usize) -> Point {
+pub fn rotate_around(center: Vec2, radius: f32, angle_deg: usize) -> Vec2 {
     rotate_around_rad(center, radius, PI / 180.0 * (angle_deg as f32))
 }
 
-pub fn rotate_around_rad(center: Point, radius: f32, angle_rad: f32) -> Point {
-    Point {
-        x: center.x + radius * f32::cos(angle_rad),
-        y: center.y + radius * f32::sin(angle_rad),
-    }
+pub fn rotate_around_rad(center: Vec2, radius: f32, angle_rad: f32) -> Vec2 {
+    Vec2::new(
+        center.x + radius * f32::cos(angle_rad),
+        center.y + radius * f32::sin(angle_rad),
+    )
 }
 
-#[derive(Debug, Copy, Clone)]
-pub struct Point {
-    pub x: f32,
-    pub y: f32,
+pub fn to_screen(p: Vec2) -> Vec2 {
+    let x = p.x + LEFT_BORDER;
+    let y = TOP_BORDER - p.y;
+    Vec2::new(x, y)
 }
 
-impl Point {
-    pub fn new(x: f32, y: f32) -> Point {
-        Point { x, y }
-    }
-
-    pub fn from_vec2(vec2: Vec2) -> Point {
-        Point {
-            x: vec2.x,
-            y: vec2.y,
-        }
-    }
-
-    pub fn to_vec2(self) -> Vec2 {
-        Vec2 {
-            x: self.x,
-            y: self.y,
-        }
-    }
-
-    pub fn to_screen(self) -> Point {
-        let x = self.x + LEFT_BORDER;
-        let y = TOP_BORDER - self.y;
-        Point { x, y }
-    }
-
-    pub fn to_game(self) -> Point {
-        let x = self.x - LEFT_BORDER;
-        let y = TOP_BORDER - self.y;
-        Point { x, y }
-    }
+pub fn to_game(p: Vec2) -> Vec2 {
+    let x = p.x - LEFT_BORDER;
+    let y = TOP_BORDER - p.y;
+    Vec2::new(x, y)
 }
 
 const TOP_BORDER: f32 = 0.0;

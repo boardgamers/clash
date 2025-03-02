@@ -14,7 +14,7 @@ pub fn get_all() -> Vec<Wonder> {
         Wonder::builder(
             "Pyramids",
             "todo",
-            PaymentOptions::resources_with_discount(ResourcePile::new(3, 3, 3, 0, 0, 0, 4), PaymentConversionType::Mandatory(1)),
+            PaymentOptions::resources_with_discount(ResourcePile::new(3, 3, 3, 0, 0, 0, 4), PaymentConversionType::MayNotOverpay(1)),
             vec![],
         )
         .build(),

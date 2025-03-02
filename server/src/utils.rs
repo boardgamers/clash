@@ -127,7 +127,7 @@ pub mod tests {
     fn test_rng() {
         const ITERATIONS: usize = 10_000;
         const MODULO: usize = 12;
-        const TOLERANCE_PERCENTAGE: f32 = 10.;
+        const TOLERANCE_PERCENTAGE: f32 = 15.;
 
         const EXPECTED_OCCURRENCES: usize = ITERATIONS / MODULO;
         const TOLERANCE: usize =

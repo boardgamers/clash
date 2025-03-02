@@ -90,7 +90,7 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize) {
         panic!("last action should be a recruit action")
     };
 
-    if game.trigger_custom_phase_event(&[player_index], |events| &mut events.on_recruit, &r, None) {
+    if game.trigger_current_event(&[player_index], |events| &mut events.on_recruit, &r, None) {
         return;
     }
     let city_position = r.city_position;

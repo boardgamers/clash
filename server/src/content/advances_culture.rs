@@ -57,19 +57,15 @@ pub fn sports_options(city: &City) -> Option<PaymentOptions> {
     match city.mood_state {
         MoodState::Happy => None,
         MoodState::Neutral => Some(PaymentOptions::sum(1, &[ResourceType::CultureTokens])),
-        MoodState::Angry => {
-            let from = ResourcePile::culture_tokens(1);
-            let to = ResourcePile::empty();
-            Some(PaymentOptions {
-                default: ResourcePile::culture_tokens(2),
-                conversions: vec![PaymentConversion::new(
-                    vec![from],
-                    to,
-                    PaymentConversionType::Optional(1),
-                )],
-                modifiers: vec![],
-            })
-        }
+        MoodState::Angry => Some(PaymentOptions {
+            default: ResourcePile::culture_tokens(2),
+            conversions: vec![PaymentConversion::new(
+                vec![ResourcePile::culture_tokens(1)],
+                ResourcePile::empty(),
+                PaymentConversionType::MayOverpay(1),
+            )],
+            modifiers: vec![],
+        }),
     }
 }
 

@@ -1,4 +1,5 @@
 use crate::advance::Advance;
+use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::advances::get_advance;
 use crate::content::builtin;
@@ -49,6 +50,7 @@ pub struct Player {
     pub wasted_resources: ResourcePile,
     pub(crate) events: PlayerEvents,
     pub cities: Vec<City>,
+    pub destroyed_structures: DestroyedStructures,
     pub units: Vec<Unit>,
     pub civilization: Civilization,
     pub active_leader: Option<String>,
@@ -195,6 +197,7 @@ impl Player {
                 .into_iter()
                 .map(|d| City::from_data(d, data.id))
                 .collect(),
+            destroyed_structures: DestroyedStructures::from_data(&data.destroyed_structures),
             units,
             civilization: civilizations::get_civilization(&data.civilization)
                 .expect("player data should have a valid civilization"),
@@ -236,6 +239,7 @@ impl Player {
             resources: self.resources,
             resource_limit: self.resource_limit,
             cities: self.cities.into_iter().map(City::data).collect(),
+            destroyed_structures: self.destroyed_structures.data(),
             units,
             civilization: self.civilization.name,
             active_leader: self.active_leader,
@@ -273,6 +277,7 @@ impl Player {
             resources: self.resources.clone(),
             resource_limit: self.resource_limit.clone(),
             cities: self.cities.iter().map(City::cloned_data).collect(),
+            destroyed_structures: self.destroyed_structures.cloned_data(),
             units,
             civilization: self.civilization.name.clone(),
             active_leader: self.active_leader.clone(),
@@ -313,6 +318,7 @@ impl Player {
             wasted_resources: ResourcePile::empty(),
             events: PlayerEvents::new(),
             cities: Vec::new(),
+            destroyed_structures: DestroyedStructures::new(),
             units: Vec::new(),
             active_leader: None,
             available_leaders: civilization
@@ -531,12 +537,12 @@ impl Player {
             .flat_map(|city| city.pieces.building_owners())
             .filter(|(b, owner)| b == &building && owner.is_some_and(|owner| owner == self.index))
             .count()
-            < CITY_PIECE_LIMIT
+            < CITY_PIECE_LIMIT - self.destroyed_structures.get_building(building)
     }
 
     #[must_use]
     pub fn is_city_available(&self) -> bool {
-        self.cities.len() < CITY_LIMIT as usize
+        self.cities.len() < (CITY_LIMIT - self.destroyed_structures.cities) as usize
     }
 
     #[must_use]
@@ -854,6 +860,9 @@ pub struct PlayerData {
     resources: ResourcePile,
     resource_limit: ResourcePile,
     cities: Vec<CityData>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "DestroyedStructuresData::is_empty")]
+    destroyed_structures: DestroyedStructuresData,
     units: Vec<UnitData>,
     civilization: String,
     active_leader: Option<String>,

@@ -342,10 +342,10 @@
             "players_used": [
               0
             ],
+            "player": 1,
             "last_priority_used": 0,
-            "current": {
+            "handler": {
               "priority": 0,
-              "player_index": 1,
               "request": {
                 "SelectPosition": {
                   "choices": [

@@ -1,6 +1,6 @@
 use crate::action::{add_log_item_from_action, execute_movement_action, Action};
 use crate::consts::MOVEMENT_ACTIONS;
-use crate::content::custom_phase_actions::CustomPhaseEventState;
+use crate::content::custom_phase_actions::CurrentEvent;
 use crate::cultural_influence::{
     execute_cultural_influence_resolution_action, undo_cultural_influence_resolution_action,
 };
@@ -79,7 +79,7 @@ pub enum UndoContext {
     InfluenceCultureResolution {
         roll_boost_cost: ResourcePile,
     },
-    CustomPhaseEvent(Box<CustomPhaseEventState>),
+    CustomPhaseEvent(Box<CurrentEvent>),
     Command(CommandContext),
 }
 
@@ -116,9 +116,9 @@ pub(crate) fn undo(game: &mut Game, player_index: usize) {
     game.undo_context_stack = item.undo.clone();
     let action = item.action.clone();
 
-    let was_custom_phase = game.current_custom_phase_event().is_some();
+    let was_custom_phase = game.current_event_handler().is_some();
     if was_custom_phase {
-        game.custom_phase_state.pop();
+        game.current_events.pop();
     }
 
     match action {
