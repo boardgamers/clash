@@ -3,7 +3,7 @@ use crate::city_pieces::Building::Temple;
 use crate::combat::{
     combat_loop, combat_round_end, end_combat, move_with_possible_combat, start_combat, take_combat,
 };
-use crate::content::custom_phase_actions::CustomPhaseEventAction;
+use crate::content::custom_phase_actions::CurrentEventResponse;
 use crate::cultural_influence::execute_cultural_influence_resolution_action;
 use crate::explore::{explore_resolution, move_to_unexplored_tile};
 use crate::game::GameState::{
@@ -34,7 +34,7 @@ pub enum Action {
     Movement(MovementAction),
     CulturalInfluenceResolution(bool),
     ExploreResolution(Rotation),
-    CustomPhaseEvent(CustomPhaseEventAction),
+    CustomPhaseEvent(CurrentEventResponse),
     Undo,
     Redo,
 }
@@ -95,7 +95,7 @@ impl Action {
     }
 
     #[must_use]
-    pub fn custom_phase_event(self) -> Option<CustomPhaseEventAction> {
+    pub fn custom_phase_event(self) -> Option<CurrentEventResponse> {
         if let Self::CustomPhaseEvent(v) = self {
             Some(v)
         } else {
@@ -129,9 +129,9 @@ pub fn execute_action(game: &mut Game, action: Action, player_index: usize) {
     add_log_item_from_action(game, &action);
     add_action_log_item(game, action.clone());
 
-    if let Some(s) = game.current_custom_phase_event_mut() {
+    if let Some(s) = game.current_event_handler_mut() {
         s.response = action.custom_phase_event();
-        let event_type = game.current_custom_phase().event_type.clone();
+        let event_type = game.current_event().event_type.clone();
         execute_custom_phase_action(game, player_index, &event_type);
     } else {
         execute_regular_action(game, action, player_index);

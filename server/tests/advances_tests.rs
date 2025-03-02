@@ -8,7 +8,7 @@ use server::content::custom_actions::CustomAction::{
     AbsolutePower, CivilRights, ConstructWonder, ForcedLabor, Sports, Taxes, Theaters,
     VotingIncreaseHappiness,
 };
-use server::content::custom_phase_actions::CustomPhaseEventAction;
+use server::content::custom_phase_actions::CurrentEventResponse;
 use server::content::trade_routes::find_trade_routes;
 use server::events::EventOrigin;
 use server::game::Game;
@@ -393,7 +393,7 @@ fn test_trade_routes_with_currency() {
             TestAction::not_undoable(0, Action::Playing(EndTurn)),
             TestAction::undoable(
                 1,
-                Action::CustomPhaseEvent(CustomPhaseEventAction::ResourceReward(
+                Action::CustomPhaseEvent(CurrentEventResponse::ResourceReward(
                     ResourcePile::gold(1) + ResourcePile::food(1),
                 )),
             ),
@@ -424,13 +424,13 @@ fn test_dogma() {
             ),
             TestAction::undoable(
                 1,
-                Action::CustomPhaseEvent(CustomPhaseEventAction::ResourceReward(
+                Action::CustomPhaseEvent(CurrentEventResponse::ResourceReward(
                     ResourcePile::culture_tokens(1),
                 )),
             ),
             TestAction::undoable(
                 1,
-                Action::CustomPhaseEvent(CustomPhaseEventAction::AdvanceReward(
+                Action::CustomPhaseEvent(CurrentEventResponse::SelectAdvance(
                     "Fanaticism".to_string(),
                 )),
             ),
@@ -482,9 +482,9 @@ fn test_free_education() {
             ),
             TestAction::undoable(
                 0,
-                Action::CustomPhaseEvent(CustomPhaseEventAction::Payment(vec![
-                    ResourcePile::ideas(1),
-                ])),
+                Action::CustomPhaseEvent(CurrentEventResponse::Payment(vec![ResourcePile::ideas(
+                    1,
+                )])),
             ),
         ],
     );

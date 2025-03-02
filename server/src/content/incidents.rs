@@ -1,6 +1,8 @@
-use crate::content::incidents_1::{good_year, pestilence};
-use crate::content::incidents_2::population_boom;
 use crate::content::incidents_5::successful_year;
+use crate::content::incidents_earthquake::earthquakes;
+use crate::content::incidents_famine::{epidemics, famines, pestilence};
+use crate::content::incidents_good_year::{awesome_years, fantastic_years, good_years};
+use crate::content::incidents_population_boom::population_booms;
 use crate::incident::Incident;
 use itertools::Itertools;
 use std::vec;
@@ -10,9 +12,18 @@ pub(crate) fn get_all() -> Vec<Incident> {
     let all = vec![
         // 1+
         pestilence(),
-        good_year(),
-        // 11+
-        population_boom(),
+        epidemics(),
+        famines(),
+        // 9+
+        good_years(),
+        awesome_years(),
+        fantastic_years(),
+        // 18+
+        // great persons
+        // 27+
+        population_booms(),
+        // 29+
+        earthquakes(),
         // 51+
         successful_year(),
     ]

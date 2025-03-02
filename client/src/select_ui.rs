@@ -1,8 +1,8 @@
 use crate::client_state::StateUpdate;
-use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
+use crate::dialog_ui::{cancel_button, cancel_button_with_tooltip, ok_button, OkTooltip};
 use crate::layout_ui::{bottom_center_anchor, bottom_center_texture, ICON_SIZE};
 use crate::render_context::RenderContext;
-use macroquad::color::BLACK;
+use macroquad::color::{Color, BLACK, BLUE, WHITE};
 use macroquad::math::{bool, vec2, Vec2};
 use macroquad::prelude::TextParams;
 use macroquad::text::draw_text_ex;
@@ -95,4 +95,33 @@ pub trait ConfirmSelection: Clone {
     }
 
     fn confirm(&self, game: &Game) -> OkTooltip;
+}
+
+pub fn may_cancel(sel: &impl ConfirmSelection, rc: &RenderContext) -> StateUpdate {
+    if let Some(cancel_name) = sel.cancel_name() {
+        if cancel_button_with_tooltip(rc, cancel_name) {
+            StateUpdate::Cancel
+        } else {
+            StateUpdate::None
+        }
+    } else {
+        StateUpdate::None
+    }
+}
+
+#[derive(Clone, Copy)]
+pub enum HighlightType {
+    None,
+    Primary,
+    Secondary,
+}
+
+impl HighlightType {
+    pub fn color(self) -> Color {
+        match self {
+            HighlightType::None => BLACK,
+            HighlightType::Primary => WHITE,
+            HighlightType::Secondary => BLUE,
+        }
+    }
 }

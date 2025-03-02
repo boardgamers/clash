@@ -295,10 +295,10 @@
         {
           "CustomPhaseEvent": {
             "event_type": "on_incident",
+            "player": 0,
             "last_priority_used": 136,
-            "current": {
+            "handler": {
               "priority": 136,
-              "player_index": 0,
               "request": {
                 "SelectPosition": {
                   "choices": [

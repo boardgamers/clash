@@ -17,7 +17,7 @@ pub(crate) fn spirituality() -> AdvanceGroup {
 }
 
 fn myths() -> AdvanceBuilder {
-    Advance::builder("Myths", "not implemented")
+    Advance::builder("Myths", "Whenever an Event card asks you have to reduce the mood in a city, you may pay 1 mood token instead of reducing the mood (does not apply for Pirates).")
         .with_advance_bonus(MoodToken)
         .with_unlocked_building(Temple)
         .add_resource_request(

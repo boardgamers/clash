@@ -1,9 +1,9 @@
-use macroquad::input::{is_mouse_button_pressed, mouse_position, MouseButton};
+use macroquad::input::{is_mouse_button_pressed, MouseButton};
 use macroquad::prelude::clear_background;
 use macroquad::prelude::*;
 
 use server::action::Action;
-use server::content::custom_phase_actions::CustomPhaseEventAction;
+use server::content::custom_phase_actions::CurrentEventResponse;
 use server::game::Game;
 use server::position::Position;
 
@@ -167,11 +167,12 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::PaymentRequest(c) => custom_phase_ui::custom_phase_payment_dialog(rc, c),
         ActiveDialog::PlayerRequest(r) => custom_phase_ui::player_request_dialog(rc, r),
         ActiveDialog::ResourceRewardRequest(p) => custom_phase_ui::payment_reward_dialog(rc, p),
-        ActiveDialog::AdvanceRewardRequest(r) => {
+        ActiveDialog::AdvanceRequest(r) => {
             custom_phase_ui::advance_reward_dialog(rc, r, &custom_phase_event_origin(rc).name())
         }
         ActiveDialog::UnitTypeRequest(r) => custom_phase_ui::unit_request_dialog(rc, r),
         ActiveDialog::UnitsRequest(r) => custom_phase_ui::select_units_dialog(rc, r),
+        ActiveDialog::StructuresRequest(r) => custom_phase_ui::select_structures_dialog(rc, r),
         ActiveDialog::BoolRequest => custom_phase_ui::bool_request_dialog(rc),
     }
 }
@@ -189,12 +190,11 @@ fn dialog_chooser(rc: &RenderContext, c: &DialogChooser) -> StateUpdate {
 
 pub fn try_click(rc: &RenderContext) -> StateUpdate {
     let game = rc.game;
-    let state = &rc.state;
-    let mouse_pos = state.camera.screen_to_world(mouse_position().into());
+    let mouse_pos = rc.mouse_pos();
     let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));
 
     if rc.can_control() {
-        if let ActiveDialog::CulturalInfluence(b) = &state.active_dialog {
+        if let ActiveDialog::CulturalInfluence(b) = &rc.state.active_dialog {
             return influence_ui::hover(rc, mouse_pos, b);
         }
     }
@@ -227,7 +227,7 @@ fn controlling_player_click(rc: &RenderContext, mouse_pos: Vec2, pos: Position) 
         ActiveDialog::PositionRequest(r) => {
             if r.choices.contains(&pos) {
                 StateUpdate::Execute(Action::CustomPhaseEvent(
-                    CustomPhaseEventAction::SelectPosition(pos),
+                    CurrentEventResponse::SelectPosition(pos),
                 ))
             } else {
                 StateUpdate::None

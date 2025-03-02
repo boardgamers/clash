@@ -206,7 +206,7 @@ pub(crate) fn start_combat(game: &mut Game) {
         game.state = GameState::Combat(combat);
     }
 
-    if game.trigger_custom_phase_event(
+    if game.trigger_current_event(
         &[attacker, defender],
         |events| &mut events.on_combat_start,
         &(),
@@ -333,7 +333,7 @@ pub(crate) fn combat_round_end(game: &mut Game) -> Option<Combat> {
     let attacker = c.attacker;
     let defender = c.defender;
     let r = &c.round_result.clone().expect("no round result");
-    if game.trigger_custom_phase_event(
+    if game.trigger_current_event(
         &[attacker, defender],
         |events| &mut events.on_combat_round_end,
         r,
@@ -406,7 +406,7 @@ pub(crate) fn end_combat(game: &mut Game, combat: Combat) -> Option<Combat> {
     // set state back to combat for event listeners
     game.state = GameState::Combat(combat);
 
-    if game.trigger_custom_phase_event(
+    if game.trigger_current_event(
         &[attacker, defender],
         |events| &mut events.on_combat_end,
         &info,
@@ -749,7 +749,7 @@ pub mod tests {
     pub fn test_game() -> Game {
         Game {
             state: Playing,
-            custom_phase_state: Vec::new(),
+            current_events: Vec::new(),
             players: Vec::new(),
             map: Map::new(HashMap::new()),
             starting_player_index: 0,

@@ -8,8 +8,8 @@ use std::fmt::Display;
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum PaymentConversionType {
     Unlimited,
-    Optional(u32),
-    Mandatory(u32),
+    MayOverpay(u32),
+    MayNotOverpay(u32),
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -28,7 +28,7 @@ impl PaymentConversion {
 
     #[must_use]
     pub fn limited(from: ResourcePile, to: ResourcePile, limit: u32) -> Self {
-        PaymentConversion::new(vec![from], to, PaymentConversionType::Mandatory(limit))
+        PaymentConversion::new(vec![from], to, PaymentConversionType::MayNotOverpay(limit))
     }
 
     #[must_use]
@@ -66,8 +66,8 @@ impl PaymentOptions {
                 if c.to.is_empty() {
                     match c.payment_conversion_type {
                         PaymentConversionType::Unlimited => None,
-                        PaymentConversionType::Optional(i)
-                        | PaymentConversionType::Mandatory(i) => Some(i),
+                        PaymentConversionType::MayOverpay(i)
+                        | PaymentConversionType::MayNotOverpay(i) => Some(i),
                     }
                 } else {
                     None
@@ -80,7 +80,7 @@ impl PaymentOptions {
         let may_overpay = self.conversions.iter().any(|c| {
             matches!(
                 c.payment_conversion_type,
-                PaymentConversionType::Optional(_)
+                PaymentConversionType::MayOverpay(_)
             )
         });
 
@@ -200,10 +200,10 @@ impl Display for PaymentOptions {
             }
             match conversion.payment_conversion_type {
                 PaymentConversionType::Unlimited => {}
-                PaymentConversionType::Optional(i) => {
+                PaymentConversionType::MayOverpay(i) => {
                     write!(f, " (up to: {i})")?;
                 }
-                PaymentConversionType::Mandatory(i) => {
+                PaymentConversionType::MayNotOverpay(i) => {
                     write!(f, " (limit: {i})")?;
                 }
             };
@@ -243,7 +243,7 @@ pub fn can_convert(
 
     let upper_limit = match conversion.payment_conversion_type {
         PaymentConversionType::Unlimited => u32::MAX,
-        PaymentConversionType::Optional(i) | PaymentConversionType::Mandatory(i) => i,
+        PaymentConversionType::MayOverpay(i) | PaymentConversionType::MayNotOverpay(i) => i,
     };
 
     for amount in 1..=upper_limit {
@@ -367,7 +367,7 @@ mod tests {
                     conversions: vec![PaymentConversion {
                         from: vec![ResourcePile::food(1)],
                         to: ResourcePile::wood(1),
-                        payment_conversion_type: PaymentConversionType::Mandatory(1),
+                        payment_conversion_type: PaymentConversionType::MayNotOverpay(1),
                     }],
                     modifiers: vec![],
                 },
@@ -384,7 +384,7 @@ mod tests {
                     conversions: vec![PaymentConversion {
                         from: vec![ResourcePile::food(1) + ResourcePile::ore(1)],
                         to: ResourcePile::mood_tokens(1),
-                        payment_conversion_type: PaymentConversionType::Mandatory(1),
+                        payment_conversion_type: PaymentConversionType::MayNotOverpay(1),
                     }],
                     modifiers: vec![],
                 },
@@ -404,7 +404,7 @@ mod tests {
                     conversions: vec![PaymentConversion {
                         from: vec![ResourcePile::food(1)],
                         to: ResourcePile::empty(),
-                        payment_conversion_type: PaymentConversionType::Mandatory(2),
+                        payment_conversion_type: PaymentConversionType::MayNotOverpay(2),
                     }],
                     modifiers: vec![],
                 },
@@ -418,7 +418,7 @@ mod tests {
                     conversions: vec![PaymentConversion {
                         from: vec![ResourcePile::food(1)],
                         to: ResourcePile::empty(),
-                        payment_conversion_type: PaymentConversionType::Optional(2),
+                        payment_conversion_type: PaymentConversionType::MayOverpay(2),
                     }],
                     modifiers: vec![],
                 },

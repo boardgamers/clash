@@ -93,7 +93,7 @@ fn show_city(
                     show_tooltip_for_circle(
                         rc,
                         &format!("Attempt Influence {name} for {}", info.range_boost_cost),
-                        center.to_vec2(),
+                        center,
                         BUILDING_SIZE,
                     );
                     StateUpdate::None

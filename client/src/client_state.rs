@@ -2,7 +2,7 @@ use crate::assets::Assets;
 use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::ConstructionPayment;
-use crate::custom_phase_ui::UnitsSelection;
+use crate::custom_phase_ui::{StructuresSelection, UnitsSelection};
 use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
 use crate::event_ui::{custom_phase_event_help, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
@@ -17,7 +17,7 @@ use macroquad::prelude::*;
 use server::action::Action;
 use server::city::{City, MoodState};
 use server::content::custom_phase_actions::{
-    AdvanceRewardRequest, CustomPhaseRequest, PlayerRequest, PositionRequest, UnitTypeRequest,
+    AdvanceRequest, CurrentEventRequest, PlayerRequest, PositionRequest, UnitTypeRequest,
 };
 use server::cultural_influence::CulturalInfluenceResolution;
 use server::events::EventOrigin;
@@ -60,12 +60,13 @@ pub enum ActiveDialog {
     Theaters(Payment),
     Taxes(Payment),
     ResourceRewardRequest(Payment),
-    AdvanceRewardRequest(AdvanceRewardRequest),
+    AdvanceRequest(AdvanceRequest),
     PaymentRequest(Vec<Payment>),
     PlayerRequest(PlayerRequest),
     PositionRequest(PositionRequest),
     UnitTypeRequest(UnitTypeRequest),
     UnitsRequest(UnitsSelection),
+    StructuresRequest(StructuresSelection),
     BoolRequest,
 }
 
@@ -99,12 +100,13 @@ impl ActiveDialog {
             ActiveDialog::Theaters(_) => "theaters",
             ActiveDialog::Taxes(_) => "collect taxes",
             ActiveDialog::ResourceRewardRequest(_) => "trade route selection",
-            ActiveDialog::AdvanceRewardRequest(_) => "advance selection",
+            ActiveDialog::AdvanceRequest(_) => "advance selection",
             ActiveDialog::PaymentRequest(_) => "custom phase payment request",
             ActiveDialog::PlayerRequest(_) => "custom phase player request",
             ActiveDialog::PositionRequest(_) => "custom phase position request",
             ActiveDialog::UnitTypeRequest(_) => "custom phase unit request",
             ActiveDialog::UnitsRequest(_) => "custom phase units request",
+            ActiveDialog::StructuresRequest(_) => "custom phase structures request",
             ActiveDialog::BoolRequest => "custom phase bool request",
         }
     }
@@ -174,12 +176,15 @@ impl ActiveDialog {
                 event_help(rc, &EventOrigin::Advance("Theaters".to_string()), true)
             }
             ActiveDialog::ResourceRewardRequest(_)
-            | ActiveDialog::AdvanceRewardRequest(_)
+            | ActiveDialog::AdvanceRequest(_)
             | ActiveDialog::PaymentRequest(_)
             | ActiveDialog::BoolRequest => custom_phase_event_help(rc, None),
             ActiveDialog::PositionRequest(r) => custom_phase_event_help(rc, r.description.as_ref()),
             ActiveDialog::UnitTypeRequest(r) => custom_phase_event_help(rc, r.description.as_ref()),
             ActiveDialog::UnitsRequest(r) => custom_phase_event_help(rc, r.description.as_ref()),
+            ActiveDialog::StructuresRequest(r) => {
+                custom_phase_event_help(rc, r.request.description.as_ref())
+            }
             ActiveDialog::PlayerRequest(r) => custom_phase_event_help(rc, Some(&r.description)),
         }
     }
@@ -231,7 +236,7 @@ impl ActiveDialog {
                 | ActiveDialog::AdvancePayment(_)
                 | ActiveDialog::ChangeGovernmentType
                 | ActiveDialog::ChooseAdditionalAdvances(_)
-                | ActiveDialog::AdvanceRewardRequest(_)
+                | ActiveDialog::AdvanceRequest(_)
         )
     }
 }
@@ -524,9 +529,9 @@ impl State {
 
     #[must_use]
     pub fn game_state_dialog(&self, game: &Game) -> ActiveDialog {
-        if let Some(e) = &game.current_custom_phase_event() {
+        if let Some(e) = &game.current_event_handler() {
             return match &e.request {
-                CustomPhaseRequest::Payment(r) => ActiveDialog::PaymentRequest(
+                CurrentEventRequest::Payment(r) => ActiveDialog::PaymentRequest(
                     r.iter()
                         .map(|p| {
                             Payment::new(
@@ -538,15 +543,13 @@ impl State {
                         })
                         .collect(),
                 ),
-                CustomPhaseRequest::ResourceReward(r) => {
+                CurrentEventRequest::ResourceReward(r) => {
                     ActiveDialog::ResourceRewardRequest(Payment::new_gain(&r.reward, &r.name))
                 }
-                CustomPhaseRequest::AdvanceReward(r) => {
-                    ActiveDialog::AdvanceRewardRequest(r.clone())
-                }
-                CustomPhaseRequest::SelectPosition(r) => ActiveDialog::PositionRequest(r.clone()),
-                CustomPhaseRequest::SelectUnitType(r) => ActiveDialog::UnitTypeRequest(r.clone()),
-                CustomPhaseRequest::SelectUnits(r) => {
+                CurrentEventRequest::SelectAdvance(r) => ActiveDialog::AdvanceRequest(r.clone()),
+                CurrentEventRequest::SelectPosition(r) => ActiveDialog::PositionRequest(r.clone()),
+                CurrentEventRequest::SelectUnitType(r) => ActiveDialog::UnitTypeRequest(r.clone()),
+                CurrentEventRequest::SelectUnits(r) => {
                     ActiveDialog::UnitsRequest(UnitsSelection::new(
                         r.player,
                         r.needed,
@@ -554,8 +557,11 @@ impl State {
                         r.description.clone(),
                     ))
                 }
-                CustomPhaseRequest::SelectPlayer(r) => ActiveDialog::PlayerRequest(r.clone()),
-                CustomPhaseRequest::BoolRequest => ActiveDialog::BoolRequest,
+                CurrentEventRequest::SelectStructures(s) => {
+                    ActiveDialog::StructuresRequest(StructuresSelection::new(s))
+                }
+                CurrentEventRequest::SelectPlayer(r) => ActiveDialog::PlayerRequest(r.clone()),
+                CurrentEventRequest::BoolRequest => ActiveDialog::BoolRequest,
             };
         }
         match &game.state {

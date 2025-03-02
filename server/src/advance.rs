@@ -186,7 +186,7 @@ pub(crate) fn gain_advance(
     payment: ResourcePile,
     advance: &str,
 ) {
-    if game.trigger_custom_phase_event(
+    if game.trigger_current_event(
         &[player_index],
         |e| &mut e.on_advance_custom_phase,
         &AdvanceInfo {

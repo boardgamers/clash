@@ -6,7 +6,7 @@ use std::vec;
 use crate::combat::{Combat, CombatDieRoll, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
 use crate::content::civilizations::{BARBARIANS, PIRATES};
-use crate::content::custom_phase_actions::{CurrentCustomPhaseEvent, CustomPhaseEventState};
+use crate::content::custom_phase_actions::{CurrentEvent, CurrentEventHandler, CurrentEventPlayer};
 use crate::cultural_influence::CulturalInfluenceResolution;
 use crate::events::{Event, EventOrigin};
 use crate::explore::ExploreResolutionState;
@@ -36,7 +36,7 @@ use crate::{
 
 pub struct Game {
     pub state: GameState,
-    pub custom_phase_state: Vec<CustomPhaseEventState>,
+    pub current_events: Vec<CurrentEvent>,
     // in turn order starting from starting_player_index and wrapping around
     pub players: Vec<Player>,
     pub map: Map,
@@ -128,7 +128,7 @@ impl Game {
 
         Self {
             state: GameState::Playing,
-            custom_phase_state: Vec::new(),
+            current_events: Vec::new(),
             players,
             map,
             starting_player_index: starting_player,
@@ -195,7 +195,7 @@ impl Game {
             wonder_amount_left: data.wonder_amount_left,
             incidents_left: data.incidents_left,
             permanent_incident_effects: data.permanent_incident_effects,
-            custom_phase_state: data.state_change_event_state,
+            current_events: data.current_events,
             undo_context_stack: Vec::new(),
         };
         for player in data.players {
@@ -208,7 +208,7 @@ impl Game {
     pub fn data(self) -> GameData {
         GameData {
             state: self.state,
-            state_change_event_state: self.custom_phase_state,
+            current_events: self.current_events,
             players: self.players.into_iter().map(Player::data).collect(),
             map: self.map.data(),
             starting_player_index: self.starting_player_index,
@@ -241,7 +241,7 @@ impl Game {
     pub fn cloned_data(&self) -> GameData {
         GameData {
             state: self.state.clone(),
-            state_change_event_state: self.custom_phase_state.clone(),
+            current_events: self.current_events.clone(),
             players: self.players.iter().map(Player::cloned_data).collect(),
             map: self.map.cloned_data(),
             starting_player_index: self.starting_player_index,
@@ -306,31 +306,34 @@ impl Game {
     }
 
     #[must_use]
-    pub(crate) fn current_custom_phase(&self) -> &CustomPhaseEventState {
-        self.custom_phase_state.last().expect("state should exist")
+    pub(crate) fn current_event(&self) -> &CurrentEvent {
+        self.current_events.last().expect("state should exist")
     }
 
     #[must_use]
-    pub(crate) fn current_custom_phase_mut(&mut self) -> &mut CustomPhaseEventState {
-        self.custom_phase_state
-            .last_mut()
-            .expect("state should exist")
+    pub(crate) fn current_event_mut(&mut self) -> &mut CurrentEvent {
+        self.current_events.last_mut().expect("state should exist")
     }
 
     #[must_use]
-    pub fn current_custom_phase_event(&self) -> Option<&CurrentCustomPhaseEvent> {
-        self.custom_phase_state
+    pub(crate) fn current_event_player(&self) -> &CurrentEventPlayer {
+        &self.current_event().player
+    }
+
+    #[must_use]
+    pub fn current_event_handler(&self) -> Option<&CurrentEventHandler> {
+        self.current_events
             .last()
-            .and_then(|s| s.current.as_ref())
+            .and_then(|s| s.player.handler.as_ref())
     }
 
-    pub fn current_custom_phase_event_mut(&mut self) -> Option<&mut CurrentCustomPhaseEvent> {
-        self.custom_phase_state
+    pub fn current_event_handler_mut(&mut self) -> Option<&mut CurrentEventHandler> {
+        self.current_events
             .last_mut()
-            .and_then(|s| s.current.as_mut())
+            .and_then(|s| s.player.handler.as_mut())
     }
 
-    pub(crate) fn trigger_custom_phase_event<V>(
+    pub(crate) fn trigger_current_event<V>(
         &mut self,
         players: &[usize],
         event: fn(&mut PlayerEvents) -> &mut CustomPhaseEvent<V>,
@@ -339,37 +342,42 @@ impl Game {
     ) -> bool {
         let name = event(&mut self.players[0].events).name.clone();
         if self
-            .custom_phase_state
+            .current_events
             .last()
             .is_none_or(|s| s.event_type != name)
         {
             if let Some(log) = log {
                 self.add_info_log_group(log.to_string());
             }
-            self.custom_phase_state
-                .push(CustomPhaseEventState::new(name));
+            self.current_events
+                .push(CurrentEvent::new(name, players[0]));
         }
-        let state = self.current_custom_phase();
+        let state = self.current_event();
 
-        let remaining = players
-            .iter()
-            .filter(|&p| !state.players_used.contains(p))
-            .collect_vec();
-
-        for &player_index in remaining {
+        for player_index in Self::remaining_current_event_players(players, state) {
             let info = CustomPhaseInfo {
                 player: player_index,
             };
             self.trigger_event_with_game_value(player_index, event, &info, details);
-            if self.current_custom_phase().current.is_some() {
+            if self.current_event().player.handler.is_some() {
                 return true;
             }
-            let state = self.current_custom_phase_mut();
+            let state = self.current_event_mut();
             state.players_used.push(player_index);
-            state.last_priority_used = None;
+            if let Some(&p) = Self::remaining_current_event_players(players, state).first() {
+                state.player = CurrentEventPlayer::new(p);
+            }
         }
-        self.custom_phase_state.pop();
+        self.current_events.pop();
         false
+    }
+
+    fn remaining_current_event_players(players: &[usize], state: &CurrentEvent) -> Vec<usize> {
+        players
+            .iter()
+            .filter(|p| !state.players_used.contains(p))
+            .copied()
+            .collect_vec()
     }
 
     pub(crate) fn trigger_event_with_game_value<U, V>(
@@ -526,7 +534,7 @@ impl Game {
     }
 
     pub(crate) fn start_turn(&mut self) {
-        self.trigger_custom_phase_event(
+        self.trigger_current_event(
             &[self.current_player_index],
             |e| &mut e.on_turn_start,
             &(),
@@ -553,8 +561,8 @@ impl Game {
 
     #[must_use]
     pub fn active_player(&self) -> usize {
-        if let Some(custom_phase_event) = &self.current_custom_phase_event() {
-            return custom_phase_event.player_index;
+        if let Some(e) = &self.current_events.last() {
+            return e.player.index;
         }
         self.current_player_index
     }
@@ -764,7 +772,7 @@ impl Game {
     /// # Panics
     ///
     /// Panics if the player does not have the unit
-    pub fn kill_unit(&mut self, unit_id: u32, player_index: usize, killer: usize) {
+    pub fn kill_unit(&mut self, unit_id: u32, player_index: usize, killer: Option<usize>) {
         let unit = self.players[player_index].remove_unit(unit_id);
         if matches!(unit.unit_type, UnitType::Leader) {
             let leader = self.players[player_index]
@@ -774,7 +782,9 @@ impl Game {
             Player::with_leader(&leader, self, player_index, |game, leader| {
                 (leader.listeners.deinitializer)(game, player_index);
             });
-            self.players[killer].captured_leaders.push(leader);
+            if let Some(killer) = killer {
+                self.players[killer].captured_leaders.push(leader);
+            }
         }
         if let GameState::Movement(m) = &mut self.state {
             if let CurrentMove::Fleet { units } = &mut m.current_move {
@@ -793,7 +803,7 @@ pub struct GameData {
     state: GameState,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    state_change_event_state: Vec<CustomPhaseEventState>,
+    current_events: Vec<CurrentEvent>,
     players: Vec<PlayerData>,
     map: MapData,
     starting_player_index: usize,

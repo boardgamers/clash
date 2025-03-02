@@ -1,12 +1,12 @@
 {
   "state": "Playing",
-  "state_change_event_state": [
+  "current_events": [
     {
       "event_type": "on_recruit",
+      "player": 0,
       "last_priority_used": 1,
-      "current": {
+      "handler": {
         "priority": 1,
-        "player_index": 0,
         "request": {
           "ResourceReward": {
             "reward": {

@@ -27,16 +27,16 @@
       "result": "AttackerWins"
     }
   },
-  "state_change_event_state": [
+  "current_events": [
     {
       "event_type": "on_combat_end",
       "players_used": [
         0
       ],
+      "player": 1,
       "last_priority_used": 0,
-      "current": {
+      "handler": {
         "priority": 0,
-        "player_index": 1,
         "request": {
           "SelectPosition": {
             "choices": [

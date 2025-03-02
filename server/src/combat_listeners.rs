@@ -293,8 +293,8 @@ pub(crate) fn choose_casualties(
                     Some(format!("Remove {casualties} {role} units")),
                 ))
             },
-            move |game, player, r| {
-                kill_units(game, player, r);
+            move |game, s| {
+                kill_units(game, s.player_index, &s.choice);
             },
         )
         .build()
@@ -350,7 +350,7 @@ fn kill_units(game: &mut Game, player: usize, killed_unit_ids: &[u32]) {
     let killer = c.opponent(player);
 
     for unit in killed_unit_ids {
-        game.kill_unit(*unit, player, killer);
+        game.kill_unit(*unit, player, Some(killer));
         if player == c.attacker {
             c.attackers.retain(|id| id != unit);
         }

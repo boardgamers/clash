@@ -34,16 +34,16 @@
       ]
     }
   },
-  "state_change_event_state": [
+  "current_events": [
     {
       "event_type": "on_combat_start",
       "players_used": [
         0
       ],
+      "player": 1,
       "last_priority_used": 1,
-      "current": {
+      "handler": {
         "priority": 1,
-        "player_index": 1,
         "request": {
           "Payment": [
             {
@@ -332,10 +332,10 @@
         {
           "CustomPhaseEvent": {
             "event_type": "on_combat_start",
+            "player": 0,
             "last_priority_used": 1,
-            "current": {
+            "handler": {
               "priority": 1,
-              "player_index": 0,
               "request": {
                 "Payment": [
                   {
@@ -386,10 +386,10 @@
         {
           "CustomPhaseEvent": {
             "event_type": "on_combat_start",
+            "player": 0,
             "last_priority_used": 0,
-            "current": {
+            "handler": {
               "priority": 0,
-              "player_index": 0,
               "request": {
                 "Payment": [
                   {

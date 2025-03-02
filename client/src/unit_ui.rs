@@ -1,6 +1,4 @@
-use macroquad::color::BLACK;
 use macroquad::math::{u32, vec2, Vec2};
-use macroquad::prelude::{Color, BLUE, WHITE};
 use macroquad::shapes::draw_circle;
 
 use server::game::Game;
@@ -9,10 +7,9 @@ use server::unit::{carried_units, MovementRestriction, Unit, UnitType};
 
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::hex_ui;
-use crate::select_ui::ConfirmSelection;
+use crate::select_ui::{may_cancel, ConfirmSelection, HighlightType};
 
-use crate::dialog_ui::{cancel_button_with_tooltip, ok_button};
-use crate::hex_ui::Point;
+use crate::dialog_ui::ok_button;
 use crate::layout_ui::{draw_scaled_icon, is_in_circle};
 use crate::move_ui::MoveDestination;
 use crate::render_context::RenderContext;
@@ -22,43 +19,26 @@ use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::player::Player;
 
 pub struct UnitPlace {
-    pub center: Point,
+    pub center: Vec2,
     pub radius: f32,
 }
 
 impl UnitPlace {
-    pub fn new(center: Point, radius: f32) -> UnitPlace {
+    pub fn new(center: Vec2, radius: f32) -> UnitPlace {
         UnitPlace { center, radius }
-    }
-}
-
-#[derive(Clone, Copy)]
-pub enum UnitHighlightType {
-    None,
-    Primary,
-    Secondary,
-}
-
-impl UnitHighlightType {
-    fn color(self) -> Color {
-        match self {
-            UnitHighlightType::None => BLACK,
-            UnitHighlightType::Primary => WHITE,
-            UnitHighlightType::Secondary => BLUE,
-        }
     }
 }
 
 struct UnitHighlight {
     player: usize,
     unit: u32,
-    highlight_type: UnitHighlightType,
+    highlight_type: HighlightType,
 }
 
 pub fn draw_unit_type(
     rc: &RenderContext,
-    unit_highlight_type: UnitHighlightType,
-    center: Point,
+    unit_highlight_type: HighlightType,
+    center: Vec2,
     unit_type: UnitType,
     player_index: usize,
     tooltip: &str,
@@ -145,13 +125,13 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
     let player = rc.shown_player.index;
     let highlighted_units = match rc.state.active_dialog {
         ActiveDialog::MoveUnits(ref s) => {
-            let mut h = highlight_units(player, &s.units, UnitHighlightType::Primary);
+            let mut h = highlight_units(player, &s.units, HighlightType::Primary);
             for d in &s.destinations.list {
                 if let MoveDestination::Carrier(id) = d {
                     h.push(UnitHighlight {
                         player,
                         unit: *id,
-                        highlight_type: UnitHighlightType::Secondary,
+                        highlight_type: HighlightType::Secondary,
                     });
                 }
             }
@@ -160,15 +140,15 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
         ActiveDialog::ReplaceUnits(ref s) => highlight_units(
             rc.shown_player.index,
             &s.replaced_units,
-            UnitHighlightType::Primary,
+            HighlightType::Primary,
         ),
         ActiveDialog::UnitsRequest(ref s) => {
-            highlight_units(s.player, &s.units, UnitHighlightType::Primary)
+            highlight_units(s.player, &s.units, HighlightType::Primary)
                 .into_iter()
                 .chain(highlight_units(
                     s.player,
                     &s.selectable,
-                    UnitHighlightType::Secondary,
+                    HighlightType::Secondary,
                 ))
                 .collect_vec()
         }
@@ -219,7 +199,7 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
 fn highlight_units(
     player: usize,
     units: &[u32],
-    highlight_type: UnitHighlightType,
+    highlight_type: HighlightType,
 ) -> Vec<UnitHighlight> {
     units
         .iter()
@@ -246,12 +226,12 @@ fn draw_unit(
         let army_move = game
             .get_player(player_index)
             .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
-        show_tooltip_for_circle(rc, &unit_label(unit, army_move), center.to_vec2(), radius);
+        show_tooltip_for_circle(rc, &unit_label(unit, army_move), center, radius);
     } else {
         let highlight = selected_units
             .iter()
             .find(|u| u.unit == unit.id && u.player == player_index)
-            .map_or(UnitHighlightType::None, |u| u.highlight_type);
+            .map_or(HighlightType::None, |u| u.highlight_type);
 
         draw_unit_type(
             rc,
@@ -298,18 +278,6 @@ pub fn unit_selection_dialog<T: UnitSelection>(
         on_ok(sel.clone())
     } else {
         may_cancel(sel, rc)
-    }
-}
-
-fn may_cancel(sel: &impl ConfirmSelection, rc: &RenderContext) -> StateUpdate {
-    if let Some(cancel_name) = sel.cancel_name() {
-        if cancel_button_with_tooltip(rc, cancel_name) {
-            StateUpdate::Cancel
-        } else {
-            StateUpdate::None
-        }
-    } else {
-        StateUpdate::None
     }
 }
 

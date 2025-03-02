@@ -1,5 +1,48 @@
 {
   "state": "Playing",
+  "current_events": [
+    {
+      "event_type": "on_incident",
+      "players_used": [
+        0
+      ],
+      "player": 1,
+      "last_priority_used": 10,
+      "handler": {
+        "priority": 10,
+        "request": {
+          "Payment": [
+            {
+              "cost": {
+                "default": {
+                  "mood_tokens": 1
+                },
+                "conversions": [
+                  {
+                    "from": [
+                      {
+                        "mood_tokens": 1
+                      }
+                    ],
+                    "to": {},
+                    "type": {
+                      "MayOverpay": 1
+                    }
+                  }
+                ]
+              },
+              "name": "You may pay 1 mood token for each city to avoid reducing its mood",
+              "optional": false
+            }
+          ]
+        },
+        "response": null,
+        "origin": {
+          "Incident": 1
+        }
+      }
+    }
+  ],
   "players": [
     {
       "name": null,
@@ -122,10 +165,17 @@
       "cities": [
         {
           "city_pieces": {},
-          "mood_state": "Angry",
+          "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "position": "C1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
         }
       ],
       "units": [
@@ -145,7 +195,8 @@
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Mining"
+        "Mining",
+        "Myths"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
@@ -252,10 +303,10 @@
         {
           "CustomPhaseEvent": {
             "event_type": "on_incident",
+            "player": 0,
             "last_priority_used": 2,
-            "current": {
+            "handler": {
               "priority": 2,
-              "player_index": 0,
               "request": {
                 "SelectPosition": {
                   "choices": [
@@ -315,6 +366,9 @@
     "Pyramids"
   ],
   "wonder_amount_left": 1,
+  "incidents_left": [
+    1
+  ],
   "permanent_incident_effects": [
     "Pestilence"
   ]

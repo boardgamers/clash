@@ -1,12 +1,12 @@
 {
   "state": "Playing",
-  "state_change_event_state": [
+  "current_events": [
     {
       "event_type": "on_incident",
+      "player": 0,
       "last_priority_used": 2,
-      "current": {
+      "handler": {
         "priority": 2,
-        "player_index": 0,
         "request": {
           "SelectPosition": {
             "choices": [
@@ -145,10 +145,17 @@
       "cities": [
         {
           "city_pieces": {},
-          "mood_state": "Angry",
+          "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "position": "C1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
         }
       ],
       "units": [
@@ -168,7 +175,8 @@
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Mining"
+        "Mining",
+        "Myths"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],

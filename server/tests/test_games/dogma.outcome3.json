@@ -529,10 +529,10 @@
         {
           "CustomPhaseEvent": {
             "event_type": "on_construct",
+            "player": 1,
             "last_priority_used": 1,
-            "current": {
+            "handler": {
               "priority": 1,
-              "player_index": 1,
               "request": {
                 "ResourceReward": {
                   "reward": {
@@ -568,19 +568,19 @@
     {
       "action": {
         "CustomPhaseEvent": {
-          "AdvanceReward": "Fanaticism"
+          "SelectAdvance": "Fanaticism"
         }
       },
       "undo": [
         {
           "CustomPhaseEvent": {
             "event_type": "on_construct",
+            "player": 1,
             "last_priority_used": 0,
-            "current": {
+            "handler": {
               "priority": 0,
-              "player_index": 1,
               "request": {
-                "AdvanceReward": {
+                "SelectAdvance": {
                   "choices": [
                     "Devotion",
                     "Conversion",

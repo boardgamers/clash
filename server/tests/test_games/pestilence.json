@@ -121,10 +121,17 @@
       "cities": [
         {
           "city_pieces": {},
-          "mood_state": "Angry",
+          "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "position": "C1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
         }
       ],
       "units": [
@@ -144,7 +151,8 @@
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Mining"
+        "Mining",
+        "Myths"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],

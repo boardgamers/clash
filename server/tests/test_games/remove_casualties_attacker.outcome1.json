@@ -227,10 +227,10 @@
         {
           "CustomPhaseEvent": {
             "event_type": "on_combat_round_end",
+            "player": 0,
             "last_priority_used": 1,
-            "current": {
+            "handler": {
               "priority": 1,
-              "player_index": 0,
               "request": {
                 "SelectUnits": {
                   "player": 0,

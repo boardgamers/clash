@@ -59,7 +59,7 @@ pub fn custom_phase_event_help(rc: &RenderContext, description: Option<&String>)
 #[must_use]
 pub fn custom_phase_event_origin(rc: &RenderContext) -> EventOrigin {
     rc.game
-        .current_custom_phase_event()
+        .current_event_handler()
         .as_ref()
         .unwrap()
         .origin
