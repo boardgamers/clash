@@ -536,13 +536,13 @@ fn gold_deposits(b: IncidentBuilder) -> IncidentBuilder {
     b.add_incident_resource_request(
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY,
-        |game, _player_index, _incident| {
+            |_game, _player_index, _incident| {
                 Some(ResourceRewardRequest::new(
                     PaymentOptions::sum(2, &[ResourceType::Gold]),
                     "-".to_string(),
                 ))
         },
-        |game, s| {
+        |_game, s| {
             vec![format!("{} gained {} from a Gold Mine", s.player_name, s.choice)]
         },
     )

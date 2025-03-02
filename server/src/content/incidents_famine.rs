@@ -120,7 +120,7 @@ pub(crate) fn decrease_mood_incident_city(
             ))
         },
         |game, s| {
-            decrease_mod_and_log(game, &s);
+            decrease_mod_and_log(game, s);
         },
     )
 }
