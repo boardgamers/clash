@@ -246,6 +246,34 @@ fn test_volcano() {
 }
 
 #[test]
+fn test_flood() {
+    test_actions(
+        "flood",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::gold(2),
+                }),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::CustomPhaseEvent(CurrentEventResponse::SelectPosition(
+                    Position::from_offset("C2"),
+                )),
+            ),
+            TestAction::not_undoable(
+                1,
+                Action::CustomPhaseEvent(CurrentEventResponse::SelectPosition(
+                    Position::from_offset("A1"),
+                )),
+            ),
+        ],
+    );
+}
+
+#[test]
 fn test_earthquake() {
     test_actions(
         "earthquake",

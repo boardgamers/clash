@@ -86,26 +86,32 @@ fn pestilence_city(
     priority: i32,
     pred: impl Fn(&Game, usize) -> bool + 'static + Clone,
 ) -> IncidentBuilder {
-    decrease_mood_incident_city(b, priority, move |game, player_index| {
-        let p = game.get_player(player_index);
-        if !pestilence_applies(p) || !pred(game, player_index) {
-            return vec![];
-        }
-        p.cities
-            .iter()
-            .filter(|c| !matches!(c.mood_state, MoodState::Angry))
-            .map(|c| c.position)
-            .collect_vec()
-    })
+    decrease_mood_incident_city(
+        b,
+        IncidentTarget::AllPlayers,
+        priority,
+        move |game, player_index| {
+            let p = game.get_player(player_index);
+            if !pestilence_applies(p) || !pred(game, player_index) {
+                return vec![];
+            }
+            p.cities
+                .iter()
+                .filter(|c| !matches!(c.mood_state, MoodState::Angry))
+                .map(|c| c.position)
+                .collect_vec()
+        },
+    )
 }
 
 pub(crate) fn decrease_mood_incident_city(
     b: IncidentBuilder,
+    target: IncidentTarget,
     priority: i32,
     cities: impl Fn(&Game, usize) -> Vec<Position> + 'static + Clone,
 ) -> IncidentBuilder {
     b.add_incident_position_request(
-        IncidentTarget::AllPlayers,
+        target,
         priority,
         move |game, player_index, _incident| {
             Some(PositionRequest::new(

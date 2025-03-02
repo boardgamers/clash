@@ -16,6 +16,8 @@ pub(crate) fn earthquakes() -> Vec<Incident> {
         volcano(),
         earthquake(30, "Earthquake", IncidentTarget::ActivePlayer),
         earthquake(31, "Heavy Earthquake", IncidentTarget::AllPlayers),
+        flood(32, "Flood", IncidentTarget::ActivePlayer),
+        flood(33, "Heavy Flood", IncidentTarget::AllPlayers),
     ]
 }
 
@@ -215,12 +217,45 @@ fn destroy_wonder(game: &mut Game, position: Position, name: &str) {
 }
 
 fn earthquake_mood_city(b: IncidentBuilder, i: usize) -> IncidentBuilder {
-    decrease_mood_incident_city(b, i as i32, move |game, _player_index| {
-        let p = game.current_event_player();
-        if p.payment.resource_amount() as usize + i >= p.must_reduce_mood.len() {
-            return vec![];
-        }
+    decrease_mood_incident_city(
+        b,
+        IncidentTarget::AllPlayers,
+        i as i32,
+        move |game, _player_index| {
+            let p = game.current_event_player();
+            if p.payment.resource_amount() as usize + i >= p.must_reduce_mood.len() {
+                return vec![];
+            }
 
-        game.current_event_player().must_reduce_mood.clone()
+            game.current_event_player().must_reduce_mood.clone()
+        },
+    )
+}
+
+fn flood(id: u8, name: &str, target: IncidentTarget) -> Incident {
+    let b = Incident::builder(
+        id,
+        name,
+        "Select one of your cities that is adjacent to water. Decrease the mood in that city.",
+        IncidentBaseEffect::None,
+    )
+    .add_myths_payment(target, move |game, p| {
+        u32::from(!non_angry_shore_cites(game, p.index).is_empty())
+    });
+    decrease_mood_incident_city(b, target, 0, |game, player_index| {
+        non_angry_shore_cites(game, player_index)
     })
+    .build()
+}
+
+fn non_angry_shore_cites(game: &Game, player_index: usize) -> Vec<Position> {
+    let p = game.get_player(player_index);
+    p.cities
+        .iter()
+        .filter(|c| {
+            c.position.neighbors().iter().any(|p| game.map.is_sea(*p))
+                && !matches!(c.mood_state, MoodState::Angry)
+        })
+        .map(|c| c.position)
+        .collect_vec()
 }
