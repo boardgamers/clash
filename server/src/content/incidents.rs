@@ -1,3 +1,4 @@
+use crate::content::incidects_civil_war::migrations;
 use crate::content::incidents_5::successful_year;
 use crate::content::incidents_earthquake::earthquakes;
 use crate::content::incidents_famine::{epidemics, famines, pestilence};
@@ -6,7 +7,6 @@ use crate::content::incidents_population_boom::population_booms;
 use crate::incident::Incident;
 use itertools::Itertools;
 use std::vec;
-use crate::content::incidects_civil_war::migrations;
 
 #[must_use]
 pub(crate) fn get_all() -> Vec<Incident> {

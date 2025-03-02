@@ -90,7 +90,8 @@ fn civil_war(id: u8) -> Incident {
                 .get_units(s.choice)
                 .iter()
                 .filter(|u| matches!(u.unit_type, UnitType::Infantry))
-                .sorted_by_key(|u| u.movement_restrictions.len()).next_back()
+                .sorted_by_key(|u| u.movement_restrictions.len())
+                .next_back()
                 .expect("infantry should exist")
                 .id;
             game.add_info_log_item(&format!(

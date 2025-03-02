@@ -318,15 +318,13 @@ fn test_earthquake() {
 fn test_migration() {
     test_actions(
         "migration",
-        vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance {
-                    advance: String::from("Storage"),
-                    payment: ResourcePile::gold(2),
-                }),
-            ),
-        ],
+        vec![TestAction::not_undoable(
+            0,
+            Action::Playing(Advance {
+                advance: String::from("Storage"),
+                payment: ResourcePile::gold(2),
+            }),
+        )],
     );
 }
 
@@ -334,15 +332,12 @@ fn test_migration() {
 fn test_civil_war() {
     test_actions(
         "civil_war",
-        vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance {
-                    advance: String::from("Storage"),
-                    payment: ResourcePile::gold(2),
-                }),
-            ),
-        ],
+        vec![TestAction::not_undoable(
+            0,
+            Action::Playing(Advance {
+                advance: String::from("Storage"),
+                payment: ResourcePile::gold(2),
+            }),
+        )],
     );
 }
-
