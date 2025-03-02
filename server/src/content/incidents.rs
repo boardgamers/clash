@@ -6,6 +6,7 @@ use crate::content::incidents_population_boom::population_booms;
 use crate::incident::Incident;
 use itertools::Itertools;
 use std::vec;
+use crate::content::incidects_civil_war::migrations;
 
 #[must_use]
 pub(crate) fn get_all() -> Vec<Incident> {
@@ -24,6 +25,8 @@ pub(crate) fn get_all() -> Vec<Incident> {
         population_booms(),
         // 29+
         earthquakes(),
+        // 34+
+        migrations(),
         // 51+
         successful_year(),
     ]

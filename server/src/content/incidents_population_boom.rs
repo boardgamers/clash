@@ -13,25 +13,28 @@ pub(crate) fn population_booms() -> Vec<Incident> {
 
 fn population_boom(id: u8, effect: IncidentBaseEffect) -> Incident {
     let mut b = Incident::builder(id, "Population Boom", "-", effect);
-    b = select_settler(b, 2, |_game, player, i| {
+    b = select_settler(b, 13, |_game, player, i| {
         i.is_active(IncidentTarget::ActivePlayer, player)
     });
+    select_player_to_gain_settler(b).build()
+}
+
+pub(crate) fn select_player_to_gain_settler(mut b: IncidentBuilder) -> IncidentBuilder {
     b = b.add_incident_player_request(
         "Select a player to gain 1 settler",
-        |p| p.available_units().settlers > 0,
-        1,
+        |p| p.available_units().settlers > 0 && !p.cities.is_empty(),
+        12,
         |game, c| {
             game.add_info_log_item(&format!(
-                "{} was selected to gain 1 settler from Population Boom",
+                "{} was selected to gain 1 settler.",
                 game.get_player(c.choice).get_name()
             ));
             game.current_event_mut().selected_player = Some(c.choice);
         },
     );
-    b = select_settler(b, 0, |game, player, _| {
+    select_settler(b, 11, |game, player, _| {
         game.current_event().selected_player == Some(player)
-    });
-    b.build()
+    })
 }
 
 fn select_settler(

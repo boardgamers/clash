@@ -23,3 +23,4 @@ mod incidents_good_year;
 mod incidents_population_boom;
 pub mod trade_routes;
 pub mod wonders;
+mod incidects_civil_war;

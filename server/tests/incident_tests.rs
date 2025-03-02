@@ -313,3 +313,20 @@ fn test_earthquake() {
         ],
     );
 }
+
+#[test]
+fn test_migration() {
+    test_actions(
+        "migration",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::gold(2),
+                }),
+            ),
+        ],
+    );
+}
+
