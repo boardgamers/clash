@@ -1,4 +1,4 @@
-use crate::ability_initializer::AbilityInitializerSetup;
+use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::city::MoodState;
 use crate::content::builtin::Builtin;
 use crate::content::custom_phase_actions::{PositionRequest, UnitsRequest};
@@ -120,16 +120,20 @@ pub(crate) fn decrease_mood_incident_city(
             ))
         },
         |game, s| {
-            game.add_info_log_item(&format!(
-                "{} decreased the mood in city {}",
-                s.player_name, s.choice
-            ));
-            game.get_player_mut(s.player_index)
-                .get_city_mut(s.choice)
-                .expect("city should exist")
-                .decrease_mood_state();
+            decrease_mod_and_log(game, &s);
         },
     )
+}
+
+pub(crate) fn decrease_mod_and_log(game: &mut Game, s: &SelectedChoice<Position>) {
+    game.add_info_log_item(&format!(
+        "{} decreased the mood in city {}",
+        s.player_name, s.choice
+    ));
+    game.get_player_mut(s.player_index)
+        .get_city_mut(s.choice)
+        .expect("city should exist")
+        .decrease_mood_state();
 }
 
 pub(crate) fn epidemics() -> Vec<Incident> {

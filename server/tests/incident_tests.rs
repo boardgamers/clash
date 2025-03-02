@@ -330,3 +330,19 @@ fn test_migration() {
     );
 }
 
+#[test]
+fn test_civil_war() {
+    test_actions(
+        "civil_war",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::gold(2),
+                }),
+            ),
+        ],
+    );
+}
+
