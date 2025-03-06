@@ -11,7 +11,7 @@ mod common;
 fn test_end_game() {
     test_actions(
         "end_game",
-            vec![TestAction::not_undoable(
+        vec![TestAction::not_undoable(
             0,
             Action::Playing(PlayingAction::EndTurn),
         )],
