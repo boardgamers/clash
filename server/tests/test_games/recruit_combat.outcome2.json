@@ -1,32 +1,25 @@
 {
-  "state": {
-    "Combat": {
-      "initiation": "Playing",
-      "round": 1,
-      "defender": 2,
-      "defender_position": "C3",
-      "attacker": 0,
-      "attacker_position": "C2",
-      "attackers": [
-        12
-      ],
-      "can_retreat": false,
-      "round_result": {
-        "attacker_casualties": {
-          "fighters": 2
-        },
-        "defender_casualties": {
-          "fighters": 2
-        },
-        "can_retreat": false,
-        "retreated": false
-      },
-      "result": "AttackerWins"
+  "state": [
+    "Playing",
+    {
+      "Combat": {
+        "round": 1,
+        "defender": 2,
+        "defender_position": "C3",
+        "attacker": 0,
+        "attacker_position": "C2",
+        "attackers": [
+          12
+        ],
+        "retreat": "CannotRetreat"
+      }
     }
-  },
+  ],
   "current_events": [
     {
-      "event_type": "on_combat_end",
+      "event_type": {
+        "CombatEnd": "AttackerWins"
+      },
       "player": 0,
       "last_priority_used": 3,
       "handler": {
@@ -54,7 +47,6 @@
             "name": "Select a reward for fighting the Pirates"
           }
         },
-        "response": null,
         "origin": {
           "Builtin": "Barbarians bonus"
         }
@@ -325,26 +317,7 @@
     {
       "action": {
         "Movement": "Stop"
-      },
-      "undo": [
-        {
-          "Movement": {
-            "movement_actions_left": 1,
-            "moved_units": [
-              7,
-              8
-            ],
-            "current_move": {
-              "Fleet": {
-                "units": [
-                  7,
-                  8
-                ]
-              }
-            }
-          }
-        }
-      ]
+      }
     },
     {
       "action": {
@@ -360,72 +333,20 @@
             }
           }
         }
-      },
-      "undo": [
-        {
-          "Recruit": {}
-        }
-      ]
+      }
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "ResourceReward": {
             "mood_tokens": 1
           }
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_recruit",
-            "player": 0,
-            "last_priority_used": 1,
-            "handler": {
-              "priority": 1,
-              "request": {
-                "ResourceReward": {
-                  "reward": {
-                    "default": {
-                      "mood_tokens": 1
-                    },
-                    "conversions": [
-                      {
-                        "from": [
-                          {
-                            "mood_tokens": 1
-                          }
-                        ],
-                        "to": {
-                          "culture_tokens": 1
-                        },
-                        "type": "Unlimited"
-                      }
-                    ]
-                  },
-                  "name": "Select token to gain"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Advance": "Nationalism"
-              }
-            }
-          }
-        },
-        {
-          "WastedResources": {
-            "resources": {
-              "food": 4
-            },
-            "player_index": 0
-          }
-        }
-      ]
+      }
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "ResourceReward": {
             "gold": 1
           }
@@ -433,8 +354,19 @@
       },
       "undo": [
         {
-          "CustomPhaseEvent": {
-            "event_type": "on_recruit",
+          "Event": {
+            "event_type": {
+              "Recruit": {
+                "units": {
+                  "ships": 3
+                },
+                "city_position": "C2",
+                "payment": {
+                  "wood": 5,
+                  "gold": 1
+                }
+              }
+            },
             "player": 0,
             "last_priority_used": 0,
             "handler": {
@@ -462,7 +394,6 @@
                   "name": "Select resource to gain back"
                 }
               },
-              "response": null,
               "origin": {
                 "Advance": "Medicine"
               }

@@ -1,0 +1,601 @@
+{
+  "state": [
+    "Playing",
+    {
+      "Movement": {
+        "movement_actions_left": 2,
+        "moved_units": [
+          0
+        ]
+      }
+    }
+  ],
+  "players": [
+    {
+      "name": null,
+      "id": 0,
+      "resources": {
+        "food": 2
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "D1"
+        }
+      ],
+      "units": [
+        {
+          "position": "D1",
+          "unit_type": "Settler",
+          "id": 0
+        }
+      ],
+      "civilization": "Maya",
+      "active_leader": null,
+      "available_leaders": [
+        "Kʼinich Janaab Pakal I"
+      ],
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 1
+    },
+    {
+      "name": null,
+      "id": 1,
+      "resources": {
+        "food": 2
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "D8"
+        }
+      ],
+      "units": [
+        {
+          "position": "D6",
+          "unit_type": "Settler",
+          "id": 0
+        }
+      ],
+      "civilization": "test1",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 1
+    },
+    {
+      "name": null,
+      "id": 2,
+      "resources": {
+        "food": 2
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [],
+      "units": [],
+      "civilization": "Barbarians",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 0
+    },
+    {
+      "name": null,
+      "id": 3,
+      "resources": {
+        "food": 2
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [],
+      "units": [],
+      "civilization": "Pirates",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 0
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A3",
+        "Unexplored"
+      ],
+      [
+        "A5",
+        "Unexplored"
+      ],
+      [
+        "A7",
+        "Unexplored"
+      ],
+      [
+        "B2",
+        "Unexplored"
+      ],
+      [
+        "B3",
+        "Unexplored"
+      ],
+      [
+        "B4",
+        "Unexplored"
+      ],
+      [
+        "B5",
+        "Unexplored"
+      ],
+      [
+        "B6",
+        "Unexplored"
+      ],
+      [
+        "B7",
+        "Unexplored"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Unexplored"
+      ],
+      [
+        "C4",
+        "Unexplored"
+      ],
+      [
+        "C5",
+        "Unexplored"
+      ],
+      [
+        "C6",
+        "Fertile"
+      ],
+      [
+        "C7",
+        "Unexplored"
+      ],
+      [
+        "C8",
+        "Mountain"
+      ],
+      [
+        "D1",
+        "Fertile"
+      ],
+      [
+        "D2",
+        "Barren"
+      ],
+      [
+        "D3",
+        "Unexplored"
+      ],
+      [
+        "D4",
+        "Unexplored"
+      ],
+      [
+        "D5",
+        "Forest"
+      ],
+      [
+        "D6",
+        "Fertile"
+      ],
+      [
+        "D7",
+        "Barren"
+      ],
+      [
+        "D8",
+        "Fertile"
+      ],
+      [
+        "E2",
+        "Mountain"
+      ],
+      [
+        "E3",
+        "Unexplored"
+      ],
+      [
+        "E4",
+        "Unexplored"
+      ],
+      [
+        "E5",
+        "Unexplored"
+      ],
+      [
+        "E6",
+        "Fertile"
+      ],
+      [
+        "E7",
+        "Unexplored"
+      ],
+      [
+        "E8",
+        "Forest"
+      ],
+      [
+        "F2",
+        "Unexplored"
+      ],
+      [
+        "F3",
+        "Unexplored"
+      ],
+      [
+        "F4",
+        "Unexplored"
+      ],
+      [
+        "F5",
+        "Unexplored"
+      ],
+      [
+        "F6",
+        "Unexplored"
+      ],
+      [
+        "F7",
+        "Unexplored"
+      ],
+      [
+        "G3",
+        "Unexplored"
+      ],
+      [
+        "G5",
+        "Unexplored"
+      ],
+      [
+        "G7",
+        "Unexplored"
+      ]
+    ],
+    "unexplored_blocks": [
+      {
+        "position": {
+          "top_tile": "B2",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Mountain",
+            "Water",
+            "Fertile",
+            "Mountain"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "B4",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Fertile",
+            "Water",
+            "Fertile",
+            "Barren"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "B6",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Mountain",
+            "Water",
+            "Mountain"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "D3",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Barren",
+            "Forest",
+            "Fertile"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "F2",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Forest",
+            "Mountain",
+            "Fertile",
+            "Mountain"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "F4",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Water",
+            "Forest",
+            "Forest"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "F6",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Forest",
+            "Water",
+            "Fertile"
+          ]
+        }
+      }
+    ]
+  },
+  "starting_player_index": 1,
+  "current_player_index": 1,
+  "action_log": [
+    {
+      "action": {
+        "Movement": {
+          "Move": {
+            "units": [
+              0
+            ],
+            "destination": "E8"
+          }
+        }
+      }
+    },
+    {
+      "action": {
+        "Movement": "Stop"
+      }
+    },
+    {
+      "action": {
+        "Movement": {
+          "Move": {
+            "units": [
+              0
+            ],
+            "destination": "D7"
+          }
+        }
+      }
+    },
+    {
+      "action": {
+        "Movement": "Stop"
+      }
+    },
+    {
+      "action": {
+        "Movement": {
+          "Move": {
+            "units": [
+              0
+            ],
+            "destination": "D6"
+          }
+        }
+      }
+    },
+    {
+      "action": {
+        "Response": {
+          "ExploreResolution": 3
+        }
+      },
+      "undo": [
+        {
+          "Event": {
+            "event_type": {
+              "ExploreResolution": {
+                "block": {
+                  "position": {
+                    "top_tile": "D5",
+                    "rotation": 0
+                  },
+                  "block": {
+                    "terrain": [
+                      "Fertile",
+                      "Fertile",
+                      "Fertile",
+                      "Forest"
+                    ]
+                  }
+                },
+                "units": [
+                  0
+                ],
+                "start": "D7",
+                "destination": "D6",
+                "ship_can_teleport": false
+              }
+            },
+            "player": 1,
+            "last_priority_used": 0,
+            "handler": {
+              "priority": 0,
+              "request": {
+                "ExploreResolution": {
+                  "block": {
+                    "position": {
+                      "top_tile": "D5",
+                      "rotation": 0
+                    },
+                    "block": {
+                      "terrain": [
+                        "Fertile",
+                        "Fertile",
+                        "Fertile",
+                        "Forest"
+                      ]
+                    }
+                  },
+                  "units": [
+                    0
+                  ],
+                  "start": "D7",
+                  "destination": "D6",
+                  "ship_can_teleport": false
+                }
+              },
+              "origin": {
+                "Builtin": "Explore Resolution"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "action_log_index": 6,
+  "log": [
+    [
+      "The game has started"
+    ],
+    [
+      "Age 1 has started"
+    ],
+    [
+      "Round 1/3"
+    ],
+    [
+      "Player2 marched 1 settler from D8 to E8"
+    ],
+    [
+      "Player2 ended the movement action"
+    ],
+    [
+      "Player2 marched 1 settler from E8 to D7"
+    ],
+    [
+      "Player2 ended the movement action"
+    ],
+    [
+      "Player2 marched 1 settler from D7 to D6"
+    ],
+    [
+      "Player2 chose the orientation of the newly explored tiles",
+      "Explored tiles C6=Fertile, D5=Forest, D6=Fertile, E6=Fertile"
+    ]
+  ],
+  "undo_limit": 5,
+  "actions_left": 0,
+  "successful_cultural_influence": false,
+  "round": 1,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "rng": {
+    "seed": 175288996178563520907356813494494136334
+  },
+  "dice_roll_log": [],
+  "dropped_players": [],
+  "wonders_left": [
+    "Great Gardens",
+    "Pyramids"
+  ],
+  "wonder_amount_left": 2
+}

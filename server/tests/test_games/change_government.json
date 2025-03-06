@@ -1,7 +1,27 @@
 {
-  "state": {
-    "StatusPhase": "ChangeGovernmentType"
-  },
+  "state": [
+    {
+      "StatusPhase": "ChangeGovernmentType"
+    }
+  ],
+  "current_events": [
+    {
+      "event_type": "StatusPhase",
+      "player": 0,
+      "last_priority_used": 0,
+      "handler": {
+        "priority": 0,
+        "request": {
+          "ChangeGovernment": {
+            "optional": true
+          }
+        },
+        "origin": {
+          "Builtin": "Change Government"
+        }
+      }
+    }
+  ],
   "players": [
     {
       "name": null,

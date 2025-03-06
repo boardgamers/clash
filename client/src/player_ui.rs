@@ -16,6 +16,7 @@ use macroquad::math::vec2;
 use macroquad::prelude::*;
 use server::action::Action;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
+use server::game::GameState::Movement;
 use server::game::{Game, GameState};
 use server::movement::{CurrentMove, MoveState};
 use server::playing_actions::PlayingAction;
@@ -24,13 +25,7 @@ use server::unit::MovementAction;
 
 pub fn player_select(rc: &RenderContext) -> StateUpdate {
     let game = rc.game;
-    let i = game
-        .human_players()
-        .iter()
-        .position(|&p| p == game.starting_player_index)
-        .unwrap();
-    let mut players: Vec<_> = game.human_players();
-    players.rotate_left(i);
+    let players = game.human_players(game.starting_player_index);
 
     let size = 40.;
     let mut y = (players.len() as f32 * -size) / 2.;
@@ -161,11 +156,11 @@ pub fn show_top_left(rc: &RenderContext) {
 
     let game = rc.game;
 
-    match &game.state {
+    match &game.state() {
         GameState::Finished => label("Finished"),
         _ => label(&format!("Age {}", game.age)),
     }
-    match &game.state {
+    match &game.state() {
         GameState::StatusPhase(ref p) => label(&format!("Status Phase: {p:?}")),
         _ => label(&format!("Round {}", game.round)),
     }
@@ -186,14 +181,15 @@ pub fn show_top_left(rc: &RenderContext) {
     ));
 
     if game.current_player_index == player.index {
-        match &game.state {
+        match &game.state() {
             GameState::StatusPhase(_) | GameState::Finished => {}
             _ => label(&format!("{} actions left", game.actions_left)),
         }
-        if let Some(moves) = move_state(&game.state) {
+        if let Some(moves) = move_state(game) {
             let movement_actions_left = moves.movement_actions_left;
             label(&format!("Move units: {movement_actions_left} moves left"));
             match moves.current_move {
+                // todo break label
                 CurrentMove::Fleet { .. } => label(
                     "May continue to move the fleet in the same sea without using movement actions",
                 ),
@@ -205,7 +201,7 @@ pub fn show_top_left(rc: &RenderContext) {
         }
     }
 
-    if let GameState::Combat(c) = &game.state {
+    if let GameState::Combat(c) = &game.state() {
         if c.attacker == player.index {
             label(&format!("Attack - combat round {}", c.round));
         } else if c.defender == player.index {
@@ -236,7 +232,7 @@ pub fn show_top_left(rc: &RenderContext) {
                 .map_or("outside the map", terrain_name),
         ));
 
-        if let Some(c) = game.get_any_city(position) {
+        if let Some(c) = game.try_get_any_city(position) {
             for l in city_labels(game, c) {
                 label(&l);
             }
@@ -251,13 +247,10 @@ pub fn show_top_left(rc: &RenderContext) {
     }
 }
 
-fn move_state(state: &GameState) -> Option<&MoveState> {
-    match state {
-        GameState::Combat(c) => move_state(&c.initiation),
-        GameState::ExploreResolution(r) => Some(&r.move_state),
-        GameState::Movement(m) => Some(m),
-        _ => None,
-    }
+pub fn move_state(game: &Game) -> Option<&MoveState> {
+    game.state_stack
+        .iter()
+        .find_map(|s| if let Movement(m) = s { Some(m) } else { None })
 }
 
 pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpdate {
@@ -298,7 +291,7 @@ pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpd
 }
 
 fn can_end_move(game: &Game) -> Option<&str> {
-    match game.state {
+    match game.state() {
         GameState::Movement { .. } => Some("End movement"),
         GameState::Playing => Some("End turn"),
         _ => None,
@@ -306,7 +299,7 @@ fn can_end_move(game: &Game) -> Option<&str> {
 }
 
 fn end_move(game: &Game) -> StateUpdate {
-    if let GameState::Movement(m) = &game.state {
+    if let GameState::Movement(m) = &game.state() {
         let movement_actions_left = m.movement_actions_left;
         return StateUpdate::execute_with_warning(
             Action::Movement(MovementAction::Stop),

@@ -1,22 +1,31 @@
 {
-  "state": "Playing",
+  "state": [
+    "Playing"
+  ],
   "current_events": [
     {
-      "event_type": "on_incident",
+      "event_type": {
+        "Incident": {
+          "active_player": 0
+        }
+      },
       "player": 0,
-      "last_priority_used": 2,
+      "last_priority_used": 1,
       "handler": {
-        "priority": 2,
+        "priority": 1,
         "request": {
-          "SelectPosition": {
+          "SelectPositions": {
             "choices": [
               "A1",
               "C2"
             ],
+            "needed": {
+              "start": 1,
+              "end": 1
+            },
             "description": "Select a city to decrease the mood"
           }
         },
-        "response": null,
         "origin": {
           "Incident": 1
         }

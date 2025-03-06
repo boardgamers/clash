@@ -55,9 +55,9 @@ pub async fn run(mut game: Game, features: &Features) {
         match message {
             GameSyncRequest::None => {}
             GameSyncRequest::ExecuteAction(a) => {
-                let player_index = game.active_player();
-                execute_action(&mut game, a, player_index);
-                state.show_player = player_index;
+                let p = game.active_player();
+                execute_action(&mut game, a, p);
+                state.show_player = game.active_player();
                 sync_result = GameSyncResult::Update;
             }
             GameSyncRequest::Import => {
@@ -133,21 +133,17 @@ pub fn setup_local_game() -> Game {
 
     game.players[player_index1]
         .get_city_mut(Position::from_offset("A1"))
-        .unwrap()
         .increase_mood_state();
     game.players[player_index1]
         .get_city_mut(Position::from_offset("C2"))
-        .unwrap()
         .pieces
         .academy = Some(1);
     game.players[player_index1]
         .get_city_mut(Position::from_offset("C2"))
-        .unwrap()
         .pieces
         .port = Some(1);
     game.players[player_index1]
         .get_city_mut(Position::from_offset("C2"))
-        .unwrap()
         .port_position = Some(Position::from_offset("C3"));
     // game.players[player_index1]
     //     .get_city_mut(Position::from_offset("C2"))
@@ -163,37 +159,30 @@ pub fn setup_local_game() -> Game {
     game.players[player_index1].wonder_cards.push(gardens);
     game.players[player_index1]
         .get_city_mut(Position::from_offset("C2"))
-        .unwrap()
         .increase_mood_state();
 
     game.players[player_index2]
         .get_city_mut(Position::from_offset("B2"))
-        .unwrap()
         .pieces
         .port = Some(1);
     game.players[player_index2]
         .get_city_mut(Position::from_offset("B2"))
-        .unwrap()
         .port_position = Some(Position::from_offset("C3"));
 
     game.players[player_index1]
         .get_city_mut(Position::from_offset("B1"))
-        .unwrap()
         .pieces
         .obelisk = Some(1);
     game.players[player_index1]
         .get_city_mut(Position::from_offset("B1"))
-        .unwrap()
         .pieces
         .observatory = Some(1);
     game.players[player_index1]
         .get_city_mut(Position::from_offset("B1"))
-        .unwrap()
         .pieces
         .temple = Some(1);
     game.players[player_index1]
         .get_city_mut(Position::from_offset("B1"))
-        .unwrap()
         .pieces
         .fortress = Some(1);
 
@@ -222,24 +211,13 @@ pub fn setup_local_game() -> Game {
 
     game.players[player_index1]
         .get_unit_mut(elephant)
-        .unwrap()
         .carrier_id = Some(ship_id);
-    game.players[player_index1]
-        .get_unit_mut(elephant)
-        .unwrap()
-        .position = Position::from_offset("C3");
-    game.players[player_index1]
-        .get_unit_mut(cavalry)
-        .unwrap()
-        .carrier_id = Some(ship_id);
-    game.players[player_index1]
-        .get_unit_mut(cavalry)
-        .unwrap()
-        .position = Position::from_offset("C3");
+    game.players[player_index1].get_unit_mut(elephant).position = Position::from_offset("C3");
+    game.players[player_index1].get_unit_mut(cavalry).carrier_id = Some(ship_id);
+    game.players[player_index1].get_unit_mut(cavalry).position = Position::from_offset("C3");
 
     game.players[player_index1]
         .get_city_mut(Position::from_offset("A1"))
-        .unwrap()
         .pieces
         .market = Some(1);
 

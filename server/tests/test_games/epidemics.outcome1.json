@@ -1,5 +1,5 @@
 {
-  "state": "Playing",
+  "state": ["Playing"],
   "players": [
     {
       "name": null,
@@ -239,45 +239,12 @@
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "SelectUnits": [
             7
           ]
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_incident",
-            "player": 0,
-            "last_priority_used": 0,
-            "handler": {
-              "priority": 0,
-              "request": {
-                "SelectUnits": {
-                  "player": 0,
-                  "choices": [
-                    0,
-                    1,
-                    2,
-                    3,
-                    4,
-                    5,
-                    6,
-                    7
-                  ],
-                  "needed": 1,
-                  "description": "Select units to kill"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Incident": 2
-              }
-            }
-          }
-        }
-      ]
+      }
     }
   ],
   "action_log_index": 2,

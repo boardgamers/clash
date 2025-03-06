@@ -1,21 +1,14 @@
+use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action::Action;
 use crate::city_pieces::Building;
-use crate::game::GameState::Playing;
-use crate::game::{Game, GameState};
+use crate::content::builtin::Builtin;
+use crate::content::custom_phase_actions::{CurrentEventType, PaymentRequest};
+use crate::game::Game;
 use crate::payment::PaymentOptions;
 use crate::player_events::{ActionInfo, InfluenceCultureInfo, InfluenceCulturePossible};
 use crate::playing_actions::{roll_boost_cost, InfluenceCultureAttempt, PlayingAction};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use crate::undo::UndoContext;
-use serde::{Deserialize, Serialize};
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct CulturalInfluenceResolution {
-    pub roll_boost_cost: ResourcePile,
-    pub target_player_index: usize,
-    pub target_city_position: Position,
-    pub city_piece: Building,
-}
 
 pub(crate) fn influence_culture_attempt(
     game: &mut Game,
@@ -40,7 +33,7 @@ pub(crate) fn influence_culture_attempt(
 
     let self_influence = starting_city_position == target_city_position;
 
-    // currectly, there is no way to have different costs for this
+    // currently, there is no way to have different costs for this
     game.players[player_index].lose_resources(info.range_boost_cost.default);
     let roll = game.get_next_dice_roll().value + info.roll_boost;
     let success = roll >= 5;
@@ -68,12 +61,7 @@ pub(crate) fn influence_culture_attempt(
         game.add_to_last_log_item(&format!(" and rolled a {roll}"));
         info.info.execute(game);
         game.add_info_log_item(&format!("{} now has the option to pay {roll_boost_cost} to increase the dice roll and proceed with the cultural influence", game.players[player_index].get_name()));
-        game.state = GameState::CulturalInfluenceResolution(CulturalInfluenceResolution {
-            roll_boost_cost,
-            target_player_index,
-            target_city_position,
-            city_piece,
-        });
+        ask_for_cultural_influence_payment(game, player_index, &roll_boost_cost);
     } else {
         game.add_to_last_log_item(&format!(
             " but rolled a {roll} and has not enough culture tokens to increase the roll "
@@ -82,31 +70,68 @@ pub(crate) fn influence_culture_attempt(
     }
 }
 
-pub(crate) fn execute_cultural_influence_resolution_action(
+pub(crate) fn ask_for_cultural_influence_payment(
     game: &mut Game,
-    action: bool,
-    roll_boost_cost: ResourcePile,
-    target_player_index: usize,
-    target_city_position: Position,
-    city_piece: Building,
     player_index: usize,
+    roll_boost_cost: &ResourcePile,
 ) {
-    game.state = Playing;
-    if !action {
-        return;
-    }
-    game.players[player_index].lose_resources(roll_boost_cost.clone());
-    game.push_undo_context(UndoContext::InfluenceCultureResolution { roll_boost_cost });
-    influence_culture(
-        game,
-        player_index,
-        target_player_index,
-        target_city_position,
-        city_piece,
+    game.trigger_current_event(
+        &[player_index],
+        |e| &mut e.on_influence_culture_resolution,
+        roll_boost_cost,
+        CurrentEventType::InfluenceCultureResolution,
+        None,
     );
 }
 
-pub(crate) fn undo_cultural_influence_resolution_action(game: &mut Game, action: bool) {
+pub(crate) fn cultural_influence_resolution() -> Builtin {
+    Builtin::builder(
+        "Influence Culture",
+        "Pay culture tokens to increase the dice roll",
+    )
+    .add_payment_request_listener(
+        |e| &mut e.on_influence_culture_resolution,
+        0,
+        |_game, _player_index, cost| {
+            Some(vec![PaymentRequest::new(
+                PaymentOptions::resources(cost.clone()),
+                format!("Pay {cost} to increase the dice roll"),
+                true,
+            )])
+        },
+        |game, s| {
+            let roll_boost_cost = s.choice[0].clone();
+
+            game.add_info_log_item(&format!(
+                "{} paid {roll_boost_cost} to increase the dice roll and proceed with the cultural influence", s.player_name
+            ));
+
+            let o = game.action_log.iter().rfind(|l| {
+                matches!(
+                    l.action.playing_ref(),
+                    Some(PlayingAction::InfluenceCultureAttempt(_))
+                )
+            });
+            let Some(Action::Playing(PlayingAction::InfluenceCultureAttempt(a))) = o.map(|l| &l.action) else {
+                panic!("there should be a cultural influence attempt action log item before a cultural influence resolution action log item");
+            };
+
+            influence_culture(
+                game,
+                s.player_index,
+                a.target_player_index,
+                a.target_city_position,
+                a.city_piece,
+            );
+        },
+    )
+    .build()
+}
+
+pub(crate) fn undo_cultural_influence_resolution_action(
+    game: &mut Game,
+    roll_boost_cost: &ResourcePile,
+) {
     let cultural_influence_attempt_action = game.action_log[game.action_log_index - 1].action.playing_ref().expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
     let PlayingAction::InfluenceCultureAttempt(c) = cultural_influence_attempt_action else {
         panic!("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
@@ -116,22 +141,14 @@ pub(crate) fn undo_cultural_influence_resolution_action(game: &mut Game, action:
     let target_player_index = c.target_player_index;
     let target_city_position = c.target_city_position;
 
-    let Some(UndoContext::InfluenceCultureResolution { roll_boost_cost }) = game.pop_undo_context()
-    else {
-        panic!("when undoing a cultural influence resolution action, the game should have stored influence culture resolution context")
-    };
-
-    game.state = GameState::CulturalInfluenceResolution(CulturalInfluenceResolution {
-        roll_boost_cost: roll_boost_cost.clone(),
-        target_player_index,
-        target_city_position,
-        city_piece,
-    });
-    if !action {
+    if roll_boost_cost.is_empty() {
         return;
     }
-    game.players[game.current_player_index].gain_resources_in_undo(roll_boost_cost);
-    undo_influence_culture(game, target_player_index, target_city_position, city_piece);
+    game.players[target_player_index]
+        .get_city_mut(target_city_position)
+        .pieces
+        .set_building(city_piece, target_player_index);
+    game.successful_cultural_influence = false;
 }
 
 fn influence_distance(
@@ -230,7 +247,6 @@ pub fn influence_culture(
 ) {
     game.players[influenced_player_index]
         .get_city_mut(city_position)
-        .expect("influenced player should have influenced city")
         .pieces
         .set_building(building, influencer_index);
     game.successful_cultural_influence = true;
@@ -240,23 +256,4 @@ pub fn influence_culture(
         |e| &mut e.on_influence_culture_success,
         &(),
     );
-}
-
-///
-///
-/// # Panics
-///
-/// Panics if the influenced player does not have the influenced city
-pub fn undo_influence_culture(
-    game: &mut Game,
-    influenced_player_index: usize,
-    city_position: Position,
-    building: Building,
-) {
-    game.players[influenced_player_index]
-        .get_city_mut(city_position)
-        .expect("influenced player should have influenced city")
-        .pieces
-        .set_building(building, influenced_player_index);
-    game.successful_cultural_influence = false;
 }

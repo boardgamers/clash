@@ -1,16 +1,24 @@
 use crate::city::MoodState;
-use crate::content::custom_phase_actions::PositionRequest;
+use crate::content::custom_phase_actions::{new_position_request, UnitsRequest};
 use crate::content::incidents_famine::{decrease_mod_and_log, decrease_mood_incident_city};
 use crate::content::incidents_population_boom::select_player_to_gain_settler;
-use crate::incident::{Incident, IncidentBaseEffect};
+use crate::game::{Game, GameState};
+use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder, PermanentIncidentEffect};
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
+use crate::status_phase::can_change_government_for_free;
 use crate::unit::UnitType;
 use itertools::Itertools;
 
 pub(crate) fn migrations() -> Vec<Incident> {
-    vec![migration(34), migration(35), civil_war(36), civil_war(37)]
+    vec![
+        migration(34),
+        migration(35),
+        civil_war(36),
+        civil_war(37),
+        revolution(),
+    ]
 }
 
 fn migration(id: u8) -> Incident {
@@ -25,7 +33,7 @@ fn migration(id: u8) -> Incident {
         u32::from(!non_angry_cites(p).is_empty())
     });
     decrease_mood_incident_city(b, IncidentTarget::ActivePlayer, 0, |game, player_index| {
-        non_angry_cites(game.get_player(player_index))
+        (non_angry_cites(game.get_player(player_index)), 1)
     })
     .build()
 }
@@ -50,12 +58,12 @@ fn civil_war(id: u8) -> Incident {
     });
     b = decrease_mood_incident_city(b, IncidentTarget::ActivePlayer, 1, |game, player_index| {
         if !game.current_event_player().payment.is_empty() {
-            return vec![];
+            return (vec![], 0);
         }
         if non_happy_cites_with_infantry(game.get_player(player_index)).is_empty() {
-            return non_angry_cites(game.get_player(player_index));
+            return (non_angry_cites(game.get_player(player_index)), 1);
         }
-        vec![]
+        (vec![], 0)
     });
     b = b.add_incident_position_request(
         IncidentTarget::ActivePlayer,
@@ -69,25 +77,23 @@ fn civil_war(id: u8) -> Incident {
             } else {
                 ""
             };
-            Some(PositionRequest::new(
+            Some(new_position_request(
                 non_happy_cites_with_infantry(p),
+                1..=1,
                 Some(format!(
                     "Select a non-Happy city with an Infantry to kill the Infantry {suffix}"
                 )),
             ))
         },
         |game, s| {
-            let mood = game
-                .get_any_city(s.choice)
-                .expect("city should exist")
-                .mood_state
-                .clone();
+            let position = s.choice[0];
+            let mood = game.get_any_city(position).mood_state.clone();
             if game.current_event_player().payment.is_empty() && !matches!(mood, MoodState::Angry) {
                 decrease_mod_and_log(game, s);
             }
             let unit = game
                 .get_player(s.player_index)
-                .get_units(s.choice)
+                .get_units(position)
                 .iter()
                 .filter(|u| matches!(u.unit_type, UnitType::Infantry))
                 .sorted_by_key(|u| u.movement_restrictions.len())
@@ -96,7 +102,7 @@ fn civil_war(id: u8) -> Incident {
                 .id;
             game.add_info_log_item(&format!(
                 "{} killed an Infantry in {}",
-                s.player_name, s.choice
+                s.player_name, position
             ));
             game.kill_unit(unit, s.player_index, None);
         },
@@ -115,4 +121,89 @@ fn non_happy_cites_with_infantry(p: &Player) -> Vec<Position> {
         })
         .map(|c| c.position)
         .collect_vec()
+}
+
+fn revolution() -> Incident {
+    let mut b = Incident::builder(
+        38,
+        "Revolution",
+        "You may kill one of your Army units each to avoid the following steps: Step 1: Loose one action (from your next turn if in Status phase). Step 2: Change your government for free if possible.",
+        IncidentBaseEffect::GoldDeposits,
+    );
+    b = kill_unit_for_revolution(
+        b,
+        3,
+        "Kill a unit to avoid losing an action".to_string(),
+        |game, _player| can_loose_action(game),
+    );
+    b = b.add_incident_listener(IncidentTarget::ActivePlayer, 2, |game, p, _incident| {
+        if game.current_event_player().sacrifice == 0 {
+            loose_action(game, p.player);
+        }
+    });
+    b = kill_unit_for_revolution(
+        b,
+        1,
+        "Kill a unit to avoid changing government".to_string(),
+        |_game, player| can_change_government_for_free(player),
+    );
+    // todo change government
+
+    b.build()
+}
+
+fn kill_unit_for_revolution(
+    b: IncidentBuilder,
+    priority: i32,
+    description: String,
+    pred: impl Fn(&Game, &Player) -> bool + 'static + Clone,
+) -> IncidentBuilder {
+    b.add_incident_units_request(
+        IncidentTarget::ActivePlayer,
+        priority,
+        move |game, player_index, _incident| {
+            game.current_event_mut().player.sacrifice = 0;
+            let units = game
+                .get_player(player_index)
+                .units
+                .iter()
+                .filter(|u| u.unit_type.is_army_unit())
+                .map(|u| u.id)
+                .collect_vec();
+            Some(UnitsRequest::new(
+                player_index,
+                if pred(game, game.get_player(player_index)) {
+                    units
+                } else {
+                    vec![]
+                },
+                0..=1,
+                Some(description.to_string()),
+            ))
+        },
+        |game, s| {
+            if s.choice.is_empty() {
+                return;
+            }
+            game.add_info_log_item(&format!("{} killed an Army unit", s.player_name));
+            game.kill_unit(s.choice[0], s.player_index, None);
+            game.current_event_mut().player.sacrifice = 1;
+        },
+    )
+}
+
+fn can_loose_action(game: &Game) -> bool {
+    match game.state() {
+        GameState::StatusPhase(_) => true,
+        _ => game.actions_left > 0,
+    }
+}
+
+fn loose_action(game: &mut Game, player: usize) {
+    match game.state() {
+        GameState::StatusPhase(_) => game
+            .permanent_incident_effects
+            .push(PermanentIncidentEffect::LooseAction(player)),
+        _ => game.actions_left -= 1,
+    };
 }

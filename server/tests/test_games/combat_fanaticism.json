@@ -1,5 +1,7 @@
 {
-  "state": "Playing",
+  "state": [
+    "Playing"
+  ],
   "players": [
     {
       "name": null,

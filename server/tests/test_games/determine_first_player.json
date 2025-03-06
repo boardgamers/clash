@@ -1,7 +1,33 @@
 {
-  "state": {
-    "StatusPhase": "DetermineFirstPlayer"
-  },
+  "state": [
+    {
+      "StatusPhase": {
+        "DetermineFirstPlayer": 0
+      }
+    }
+  ],
+  "current_events": [
+    {
+      "event_type": "StatusPhase",
+      "player": 0,
+      "last_priority_used": 0,
+      "handler": {
+        "priority": 0,
+        "request": {
+          "SelectPlayer": {
+            "choices": [
+              0,
+              1
+            ],
+            "description": "Select the first player"
+          }
+        },
+        "origin": {
+          "Builtin": "Free Advance"
+        }
+      }
+    }
+  ],
   "players": [
     {
       "name": null,

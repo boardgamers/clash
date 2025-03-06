@@ -1,7 +1,36 @@
 {
-  "state": {
-    "StatusPhase": "DetermineFirstPlayer"
-  },
+  "state": [
+    {
+      "StatusPhase": "RazeSize1City"
+    }
+  ],
+  "current_events": [
+    {
+      "event_type": "StatusPhase",
+      "players_used": [
+        0
+      ],
+      "player": 1,
+      "last_priority_used": 0,
+      "handler": {
+        "priority": 0,
+        "request": {
+          "SelectPositions": {
+            "choices": [
+              "C1"
+            ],
+            "needed": {
+              "start": 0,
+              "end": 1
+            }
+          }
+        },
+        "origin": {
+          "Builtin": "Raze city"
+        }
+      }
+    }
+  ],
   "players": [
     {
       "name": null,
@@ -211,8 +240,8 @@
   "action_log": [
     {
       "action": {
-        "StatusPhase": {
-          "RazeSize1City": "None"
+        "Response": {
+          "SelectPositions": []
         }
       }
     }
@@ -220,10 +249,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 did not rase a city"
-    ],
-    [
-      "It's Player2's turn"
+      "Player1 did not raze a city"
     ]
   ],
   "undo_limit": 1,

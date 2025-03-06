@@ -1,5 +1,5 @@
 {
-  "state": "Playing",
+  "state": ["Playing"],
   "players": [
     {
       "name": null,
@@ -298,181 +298,6 @@
       "action": {
         "Playing": {
           "Advance": {
-            "advance": "Writing",
-            "payment": {
-              "ideas": 2
-            }
-          }
-        }
-      },
-      "undo": [
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        }
-      ]
-    },
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Free Education",
-            "payment": {
-              "ideas": 2
-            }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Playing": "EndTurn"
-      }
-    },
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Dogma",
-            "payment": {
-              "ideas": 2
-            }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Myths",
-            "payment": {
-              "ideas": 2
-            }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Playing": {
-          "IncreaseHappiness": {
-            "happiness_increases": [
-              [
-                "C1",
-                2
-              ],
-              [
-                "B2",
-                0
-              ]
-            ],
-            "payment": {
-              "mood_tokens": 2
-            }
-          }
-        }
-      },
-      "undo": [
-        {
-          "IncreaseHappiness": {
-            "angry_activations": [
-              "C1"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "action": {
-        "Playing": "EndTurn"
-      }
-    },
-    {
-      "action": {
-        "StatusPhase": {
-          "FreeAdvance": "Fishing"
-        }
-      }
-    },
-    {
-      "action": {
-        "StatusPhase": {
-          "FreeAdvance": "Fishing"
-        }
-      }
-    },
-    {
-      "action": {
-        "StatusPhase": {
-          "RazeSize1City": "None"
-        }
-      }
-    },
-    {
-      "action": {
-        "StatusPhase": {
-          "RazeSize1City": "None"
-        }
-      }
-    },
-    {
-      "action": {
-        "StatusPhase": {
-          "ChangeGovernmentType": "KeepGovernment"
-        }
-      }
-    },
-    {
-      "action": {
-        "StatusPhase": {
-          "ChangeGovernmentType": "KeepGovernment"
-        }
-      }
-    },
-    {
-      "action": {
-        "StatusPhase": {
-          "DetermineFirstPlayer": 1
-        }
-      }
-    },
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
             "advance": "Dogma",
             "payment": {
               "ideas": 2
@@ -492,14 +317,14 @@
       ]
     }
   ],
-  "action_log_index": 15,
+  "action_log_index": 1,
   "log": [
     [
       "Player2 paid 2 ideas to get the Dogma advance",
       "Player2 could not store 2 ideas"
     ]
   ],
-  "undo_limit": 14,
+  "undo_limit": 0,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 1,

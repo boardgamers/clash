@@ -7,6 +7,7 @@ use crate::advance::{advance_with_incident_token, undo_advance};
 use crate::city::MoodState;
 use crate::collect::{collect, undo_collect};
 use crate::content::advances::get_advance;
+use crate::content::custom_phase_actions::CurrentEventType;
 use crate::cultural_influence::influence_culture_attempt;
 use crate::game::GameState;
 use crate::player_events::PlayingActionInfo;
@@ -36,7 +37,7 @@ pub struct Collect {
     pub collections: Vec<(Position, ResourcePile)>,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct Recruit {
     pub units: Units,
     pub city_position: Position,
@@ -154,7 +155,7 @@ impl PlayingAction {
             }
             Construct(c) => {
                 let player = &game.players[player_index];
-                let city = player.get_city(c.city_position).expect("Illegal action");
+                let city = player.get_city(c.city_position);
                 let cost = player.construct_cost(c.city_piece, city, Some(&c.payment));
                 assert!(
                     city.can_construct(c.city_piece, player, game),
@@ -188,7 +189,7 @@ impl PlayingAction {
                         Action::Playing(PlayingAction::Custom(CustomAction::FreeEconomyCollect(_)))
                     )
                 }) {
-                    assert!(game.state == GameState::Playing, "Illegal action");
+                    assert!(game.state() == &GameState::Playing, "Illegal action");
                 }
                 collect(game, player_index, &c);
             }
@@ -206,14 +207,7 @@ impl PlayingAction {
                 } else {
                     panic!("Cannot pay for units")
                 }
-                recruit(
-                    game,
-                    player_index,
-                    r.units,
-                    r.city_position,
-                    r.leader_name.as_ref(),
-                    &r.replaced_units,
-                );
+                recruit(game, player_index, &r);
             }
             IncreaseHappiness(i) => {
                 increase_happiness(game, player_index, &i.happiness_increases, Some(i.payment));
@@ -248,7 +242,13 @@ impl PlayingAction {
     }
 
     pub(crate) fn on_construct(game: &mut Game, player_index: usize, building: Building) {
-        game.trigger_current_event(&[player_index], |e| &mut e.on_construct, &building, None);
+        game.trigger_current_event(
+            &[player_index],
+            |e| &mut e.on_construct,
+            &building,
+            CurrentEventType::Construct,
+            None,
+        );
     }
 
     #[must_use]
@@ -390,7 +390,7 @@ pub(crate) fn increase_happiness(
     let mut angry_activations = vec![];
     let mut count = 0;
     for &(city_position, steps) in happiness_increases {
-        let city = player.get_city(city_position).expect("Illegal action");
+        let city = player.get_city(city_position);
         if steps == 0 {
             continue;
         }
@@ -400,7 +400,7 @@ pub(crate) fn increase_happiness(
         if city.mood_state == MoodState::Angry {
             angry_activations.push(city_position);
         }
-        let city = player.get_city_mut(city_position).expect("Illegal action");
+        let city = player.get_city_mut(city_position);
         for _ in 0..steps {
             city.increase_mood_state();
         }
@@ -422,7 +422,7 @@ pub(crate) fn undo_increase_happiness(
 ) {
     let player = &mut game.players[player_index];
     for &(city_position, steps) in happiness_increases {
-        let city = player.get_city_mut(city_position).expect("Illegal action");
+        let city = player.get_city_mut(city_position);
         for _ in 0..steps {
             city.decrease_mood_state();
         }
@@ -433,9 +433,7 @@ pub(crate) fn undo_increase_happiness(
 
     if let Some(UndoContext::IncreaseHappiness { angry_activations }) = game.pop_undo_context() {
         for city_position in angry_activations {
-            let city = game.players[player_index]
-                .get_city_mut(city_position)
-                .expect("Illegal action");
+            let city = game.players[player_index].get_city_mut(city_position);
             city.angry_activation = true;
         }
     } else {

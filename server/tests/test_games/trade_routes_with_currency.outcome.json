@@ -1,8 +1,10 @@
 {
-  "state": "Playing",
+  "state": [
+    "Playing"
+  ],
   "current_events": [
     {
-      "event_type": "on_turn_start",
+      "event_type": "TurnStart",
       "player": 1,
       "last_priority_used": 0,
       "handler": {
@@ -30,7 +32,6 @@
             "name": "Collect trade routes reward"
           }
         },
-        "response": null,
         "origin": {
           "Advance": "Trade Routes"
         }

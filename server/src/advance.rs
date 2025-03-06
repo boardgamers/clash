@@ -2,12 +2,12 @@ use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::Resourc
 
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::city_pieces::Building;
-use crate::content::advances;
 use crate::content::advances::get_advance;
+use crate::content::custom_phase_actions::CurrentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::incident::trigger_incident;
-use crate::player_events::AdvanceInfo;
+use crate::player_events::{AdvanceInfo, IncidentInfo};
 use crate::special_advance::SpecialAdvance;
 use Bonus::*;
 
@@ -176,23 +176,23 @@ pub(crate) fn advance_with_incident_token(
     player_index: usize,
     payment: ResourcePile,
 ) {
-    do_advance(game, &advances::get_advance(name), player_index);
-    gain_advance(game, player_index, payment, name);
+    do_advance(game, &get_advance(name), player_index);
+    gain_advance(
+        game,
+        player_index,
+        &AdvanceInfo {
+            name: name.to_string(),
+            payment,
+        },
+    );
 }
 
-pub(crate) fn gain_advance(
-    game: &mut Game,
-    player_index: usize,
-    payment: ResourcePile,
-    advance: &str,
-) {
+pub(crate) fn gain_advance(game: &mut Game, player_index: usize, info: &AdvanceInfo) {
     if game.trigger_current_event(
         &[player_index],
         |e| &mut e.on_advance_custom_phase,
-        &AdvanceInfo {
-            name: advance.to_string(),
-            payment,
-        },
+        info,
+        CurrentEventType::Advance,
         None,
     ) {
         return;
@@ -201,7 +201,7 @@ pub(crate) fn gain_advance(
     player.incident_tokens -= 1;
     if player.incident_tokens == 0 {
         player.incident_tokens = 3;
-        trigger_incident(game, player_index);
+        trigger_incident(game, player_index, &IncidentInfo::new(player_index));
     }
 }
 

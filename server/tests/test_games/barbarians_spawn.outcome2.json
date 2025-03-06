@@ -1,7 +1,16 @@
 {
-  "state": {
-    "StatusPhase": "FreeAdvance"
-  },
+  "state": [
+    {
+      "StatusPhase": "FreeAdvance"
+    }
+  ],
+  "current_events": [
+    {
+      "event_type": "StatusPhase",
+      "player": 0,
+      "last_priority_used": 0
+    }
+  ],
   "players": [
     {
       "name": null,
@@ -251,86 +260,31 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 1,
+  "current_player_index": 0,
   "action_log": [
     {
       "action": {
-        "StatusPhase": {
-          "FreeAdvance": "Storage"
+        "Response": {
+          "SelectAdvance": "Storage"
         }
       }
     },
     {
       "action": {
-        "CustomPhaseEvent": {
-          "SelectPosition": "B3"
+        "Response": {
+          "SelectPositions": [
+            "B3"
+          ]
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_incident",
-            "player": 0,
-            "last_priority_used": 200,
-            "handler": {
-              "priority": 200,
-              "request": {
-                "SelectPosition": {
-                  "choices": [
-                    "A3",
-                    "B3"
-                  ],
-                  "description": "Select a position for the new city and infantry unit"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Incident": 9
-              }
-            },
-            "barbarians": {
-              "move_units": false
-            }
-          }
-        }
-      ]
+      }
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "SelectUnitType": "Elephant"
         }
       },
       "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_incident",
-            "player": 0,
-            "last_priority_used": 100,
-            "handler": {
-              "priority": 100,
-              "request": {
-                "SelectUnitType": {
-                  "choices": [
-                    "Infantry",
-                    "Cavalry",
-                    "Elephant"
-                  ],
-                  "player_index": 2,
-                  "description": "Select a unit to reinforce the barbarians"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Incident": 9
-              }
-            },
-            "barbarians": {
-              "move_units": false,
-              "selected_position": "B3"
-            }
-          }
-        },
         {
           "WastedResources": {
             "resources": {
@@ -360,9 +314,6 @@
       "Player1 gained 1 food from A good year",
       "Player2 gained 1 food from A good year",
       "Player2 could not store 1 food"
-    ],
-    [
-      "It's Player2's turn"
     ]
   ],
   "undo_limit": 3,
@@ -391,5 +342,8 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1
+  "wonder_amount_left": 1,
+  "incidents_left": [
+    9
+  ]
 }

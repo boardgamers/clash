@@ -1,32 +1,75 @@
 {
-  "state": {
-    "ExploreResolution": {
-      "movement_actions_left": 2,
-      "moved_units": [
-        1
-      ],
-      "block": {
-        "position": {
-          "top_tile": "F2",
-          "rotation": 0
-        },
-        "block": {
-          "terrain": [
-            "Forest",
-            "Forest",
-            "Fertile",
-            "Forest"
-          ]
+  "state": [
+    "Playing",
+    {
+      "Movement": {
+        "movement_actions_left": 2,
+        "moved_units": [
+          1
+        ]
+      }
+    }
+  ],
+  "current_events": [
+    {
+      "event_type": {
+        "ExploreResolution": {
+          "block": {
+            "position": {
+              "top_tile": "F2",
+              "rotation": 0
+            },
+            "block": {
+              "terrain": [
+                "Forest",
+                "Forest",
+                "Fertile",
+                "Forest"
+              ]
+            }
+          },
+          "units": [
+            1
+          ],
+          "start": "B3",
+          "destination": "F2",
+          "ship_can_teleport": false
         }
       },
-      "units": [
-        1
-      ],
-      "start": "B3",
-      "destination": "F2",
-      "ship_can_teleport": false
+      "player": 1,
+      "last_priority_used": 0,
+      "handler": {
+        "priority": 0,
+        "request": {
+          "ExploreResolution": {
+            "block": {
+              "position": {
+                "top_tile": "F2",
+                "rotation": 0
+              },
+              "block": {
+                "terrain": [
+                  "Forest",
+                  "Forest",
+                  "Fertile",
+                  "Forest"
+                ]
+              }
+            },
+            "units": [
+              1
+            ],
+            "start": "B3",
+            "destination": "F2",
+            "ship_can_teleport": false
+          }
+        },
+        "origin": {
+          "Builtin": "Explore Resolution"
+        }
+      }
     }
-  },
+  ],
   "players": [
     {
       "name": null,

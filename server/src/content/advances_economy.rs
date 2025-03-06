@@ -86,7 +86,7 @@ fn gain_market_bonus(game: &mut Game, routes: &[TradeRoute]) {
     let players = routes
         .iter()
         .filter_map(|r| {
-            game.get_any_city(r.to).and_then(|c| {
+            game.try_get_any_city(r.to).and_then(|c| {
                 if c.pieces.market.is_some() {
                     Some(c.player_index)
                 } else {

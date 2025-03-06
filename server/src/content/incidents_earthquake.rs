@@ -2,12 +2,15 @@ use crate::ability_initializer::SelectedChoice;
 use crate::city::{City, MoodState};
 use crate::city_pieces::Building;
 use crate::consts::WONDER_VICTORY_POINTS;
-use crate::content::custom_phase_actions::{PositionRequest, Structure, StructuresRequest};
+use crate::content::custom_phase_actions::{
+    is_selected_structures_valid, new_position_request, SelectedStructure, Structure,
+    StructuresRequest,
+};
 use crate::content::incidents_famine::decrease_mood_incident_city;
 use crate::content::wonders::get_wonder;
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
-use crate::player_events::IncidentTarget;
+use crate::player_events::{IncidentInfo, IncidentTarget};
 use crate::position::Position;
 use itertools::Itertools;
 
@@ -38,28 +41,29 @@ fn volcano() -> Incident {
                     .map(|c| c.position)
                     .collect_vec();
                 (cities.len() >= 4)
-                    .then_some(PositionRequest::new(
+                    .then_some(new_position_request(
                         cities,
+                        1..=1,
                         Some("Select a city to be destroyed".to_string()),
                     ))
             },
             |game, s| {
-                let position = s.choice;
+                let pos = s.choice[0];
                 let player_index = s.player_index;
                 game.add_info_log_item(&format!(
                     "{} selected city {} to be destroyed",
-                    s.player_name, position
+                    s.player_name, pos
                 ));
-                let city = game.get_player(player_index).get_city(position).expect("city should exist");
+                let city = game.get_player(player_index).get_city(pos);
                 let buildings = city.pieces.buildings(None);
                 let wonders = city.pieces.wonders.iter().map(|w| w.name.clone()).collect_vec();
                 for b in buildings {
-                    destroy_building(game, b, position);
+                    destroy_building(game, b, pos);
                 }
                 for wonder in wonders {
-                    destroy_wonder(game, position, &wonder);
+                    destroy_wonder(game, pos, &wonder);
                 }
-                destroy_city_center(game, position);
+                destroy_city_center(game, pos);
             },
         ).build()
 }
@@ -91,9 +95,9 @@ fn earthquake(id: u8, name: &str, target: IncidentTarget) -> Incident {
     b.build()
 }
 
-fn apply_earthquake(game: &mut Game, s: &SelectedChoice<Vec<(Position, Structure)>>) {
+fn apply_earthquake(game: &mut Game, s: &SelectedChoice<Vec<SelectedStructure>, IncidentInfo>) {
     assert!(
-        structures_request(&game.get_player(s.player_index).cities).is_valid(game, &s.choice),
+        is_selected_structures_valid(game, &s.choice),
         "structures should be valid"
     );
     let mut l = s.choice.clone();
@@ -119,7 +123,7 @@ fn apply_earthquake(game: &mut Game, s: &SelectedChoice<Vec<(Position, Structure
         .into_iter()
         .map(|(&p, _g)| p)
         .filter(|p| {
-            game.get_any_city(*p)
+            game.try_get_any_city(*p)
                 .is_some_and(|c| !matches!(c.mood_state, MoodState::Angry))
         })
         .collect_vec();
@@ -133,7 +137,7 @@ fn structures_request(cities: &[City]) -> StructuresRequest {
     )
 }
 
-fn destroyable_structures(city: &City) -> Vec<(Position, Structure)> {
+fn destroyable_structures(city: &City) -> Vec<SelectedStructure> {
     let pieces = &city.pieces;
     let s = vec![(city.position, Structure::CityCenter)];
     let w = pieces
@@ -150,7 +154,7 @@ fn destroyable_structures(city: &City) -> Vec<(Position, Structure)> {
 }
 
 fn destroy_city_center(game: &mut Game, position: Position) {
-    let city = game.get_any_city(position).expect("city should exist");
+    let city = game.get_any_city(position);
     let owner = city.player_index;
     let p = game.get_player_mut(owner);
     p.cities.remove(
@@ -169,7 +173,7 @@ fn destroy_city_center(game: &mut Game, position: Position) {
 }
 
 fn destroy_building(game: &mut Game, b: Building, position: Position) {
-    let city = game.get_any_city(position).expect("city should exist");
+    let city = game.get_any_city(position);
     let city_owner = city.player_index;
     let owner = city
         .pieces
@@ -180,7 +184,6 @@ fn destroy_building(game: &mut Game, b: Building, position: Position) {
     o.destroyed_structures.add_building(b);
     game.get_player_mut(city_owner)
         .get_city_mut(position)
-        .expect("city should exist")
         .pieces
         .remove_building(b);
     game.add_info_log_item(&format!(
@@ -192,17 +195,13 @@ fn destroy_building(game: &mut Game, b: Building, position: Position) {
 }
 
 fn destroy_wonder(game: &mut Game, position: Position, name: &str) {
-    let owner = game
-        .get_any_city(position)
-        .expect("city should exist")
-        .player_index;
+    let owner = game.get_any_city(position).player_index;
     let wonder = get_wonder(name);
     (wonder.listeners.deinitializer)(game, owner);
 
     let a = WONDER_VICTORY_POINTS / 2.0;
     let p = game.get_player_mut(owner);
     p.get_city_mut(position)
-        .expect("city should exist")
         .pieces
         .wonders
         .retain(|w| w.name != name);
@@ -224,10 +223,10 @@ fn earthquake_mood_city(b: IncidentBuilder, i: usize) -> IncidentBuilder {
         move |game, _player_index| {
             let p = game.current_event_player();
             if p.payment.resource_amount() as usize + i >= p.must_reduce_mood.len() {
-                return vec![];
+                return (vec![], 0);
             }
 
-            game.current_event_player().must_reduce_mood.clone()
+            (game.current_event_player().must_reduce_mood.clone(), 1)
         },
     )
 }
@@ -243,7 +242,7 @@ fn flood(id: u8, name: &str, target: IncidentTarget) -> Incident {
         u32::from(!non_angry_shore_cites(game, p.index).is_empty())
     });
     decrease_mood_incident_city(b, target, 0, |game, player_index| {
-        non_angry_shore_cites(game, player_index)
+        (non_angry_shore_cites(game, player_index), 1)
     })
     .build()
 }

@@ -1,4 +1,4 @@
-use crate::content::custom_phase_actions::PositionRequest;
+use crate::content::custom_phase_actions::new_position_request;
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
 use crate::player_events::{IncidentInfo, IncidentTarget};
@@ -48,8 +48,9 @@ fn select_settler(
         move |game, player_index, incident| {
             let p = game.get_player(player_index);
             if pred(game, player_index, incident) && p.available_units().settlers > 0 {
-                Some(PositionRequest::new(
+                Some(new_position_request(
                     p.cities.iter().map(|c| c.position).collect(),
+                    1..=1,
                     Some("Select a city to gain 1 settler".to_string()),
                 ))
             } else {
@@ -57,12 +58,10 @@ fn select_settler(
             }
         },
         |game, s| {
-            game.add_info_log_item(&format!(
-                "{} gained 1 settler in {}",
-                s.player_name, s.choice
-            ));
+            let pos = s.choice[0];
+            game.add_info_log_item(&format!("{} gained 1 settler in {}", s.player_name, pos));
             game.get_player_mut(s.player_index)
-                .add_unit(s.choice, UnitType::Settler);
+                .add_unit(pos, UnitType::Settler);
         },
     )
 }

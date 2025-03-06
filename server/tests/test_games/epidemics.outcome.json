@@ -1,8 +1,14 @@
 {
-  "state": "Playing",
+  "state": [
+    "Playing"
+  ],
   "current_events": [
     {
-      "event_type": "on_incident",
+      "event_type": {
+        "Incident": {
+          "active_player": 0
+        }
+      },
       "player": 0,
       "last_priority_used": 0,
       "handler": {
@@ -20,11 +26,13 @@
               6,
               7
             ],
-            "needed": 1,
+            "needed": {
+              "start": 1,
+              "end": 1
+            },
             "description": "Select units to kill"
           }
         },
-        "response": null,
         "origin": {
           "Incident": 2
         }

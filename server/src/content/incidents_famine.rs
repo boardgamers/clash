@@ -1,11 +1,11 @@
 use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::city::MoodState;
 use crate::content::builtin::Builtin;
-use crate::content::custom_phase_actions::{PositionRequest, UnitsRequest};
+use crate::content::custom_phase_actions::{new_position_request, UnitsRequest};
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder, PermanentIncidentEffect};
 use crate::player::Player;
-use crate::player_events::IncidentTarget;
+use crate::player_events::{IncidentInfo, IncidentTarget};
 use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -30,13 +30,7 @@ pub(crate) fn pestilence() -> Vec<Incident> {
             0
         }
     });
-    builder = pestilence_city(builder, 2, |game, _| {
-        game.current_event_player().payment.resource_amount() < 1
-    });
-    builder = pestilence_city(builder, 1, |game, player| {
-        additional_sanitation_damage(game.get_player(player))
-            && game.current_event_player().payment.resource_amount() < 2
-    });
+    builder = pestilence_city(builder, 1);
     builder = builder.add_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _p, _i| {
         if game
             .permanent_incident_effects
@@ -81,25 +75,31 @@ pub(crate) fn pestilence_permanent_effect() -> Builtin {
     .build()
 }
 
-fn pestilence_city(
-    b: IncidentBuilder,
-    priority: i32,
-    pred: impl Fn(&Game, usize) -> bool + 'static + Clone,
-) -> IncidentBuilder {
+fn pestilence_city(b: IncidentBuilder, priority: i32) -> IncidentBuilder {
     decrease_mood_incident_city(
         b,
         IncidentTarget::AllPlayers,
         priority,
         move |game, player_index| {
             let p = game.get_player(player_index);
-            if !pestilence_applies(p) || !pred(game, player_index) {
-                return vec![];
+            if !pestilence_applies(p) {
+                return (vec![], 0);
             }
-            p.cities
-                .iter()
-                .filter(|c| !matches!(c.mood_state, MoodState::Angry))
-                .map(|c| c.position)
-                .collect_vec()
+
+            let needed = if additional_sanitation_damage(p) {
+                2
+            } else {
+                1
+            } - game.current_event_player().payment.resource_amount() as u8;
+
+            (
+                p.cities
+                    .iter()
+                    .filter(|c| !matches!(c.mood_state, MoodState::Angry))
+                    .map(|c| c.position)
+                    .collect_vec(),
+                needed,
+            )
         },
     )
 }
@@ -108,14 +108,16 @@ pub(crate) fn decrease_mood_incident_city(
     b: IncidentBuilder,
     target: IncidentTarget,
     priority: i32,
-    cities: impl Fn(&Game, usize) -> Vec<Position> + 'static + Clone,
+    cities: impl Fn(&Game, usize) -> (Vec<Position>, u8) + 'static + Clone,
 ) -> IncidentBuilder {
     b.add_incident_position_request(
         target,
         priority,
         move |game, player_index, _incident| {
-            Some(PositionRequest::new(
-                cities(game, player_index),
+            let (cities, needed) = cities(game, player_index);
+            Some(new_position_request(
+                cities,
+                needed..=needed,
                 Some("Select a city to decrease the mood".to_string()),
             ))
         },
@@ -125,14 +127,17 @@ pub(crate) fn decrease_mood_incident_city(
     )
 }
 
-pub(crate) fn decrease_mod_and_log(game: &mut Game, s: &SelectedChoice<Position>) {
+pub(crate) fn decrease_mod_and_log(
+    game: &mut Game,
+    s: &SelectedChoice<Vec<Position>, IncidentInfo>,
+) {
+    let pos = s.choice[0];
     game.add_info_log_item(&format!(
         "{} decreased the mood in city {}",
-        s.player_name, s.choice
+        s.player_name, pos
     ));
     game.get_player_mut(s.player_index)
-        .get_city_mut(s.choice)
-        .expect("city should exist")
+        .get_city_mut(pos)
         .decrease_mood_state();
 }
 
@@ -163,7 +168,7 @@ pub(crate) fn epidemics() -> Vec<Incident> {
                 Some(UnitsRequest::new(
                     player_index,
                     units,
-                    needed,
+                    needed..=needed,
                     Some("Select units to kill".to_string()),
                 ))
             }
@@ -175,7 +180,7 @@ pub(crate) fn epidemics() -> Vec<Incident> {
                 p.get_name(),
                 s.choice.iter().map(|u| {
                     let unit = p
-                        .get_unit(*u).expect("unit should exist");
+                        .get_unit(*u);
                     format!("{:?} at {}", unit.unit_type, unit.position)
                 }).join(", ")
             ));
@@ -235,8 +240,9 @@ pub(crate) fn famine(id: u8, severe: bool) -> Incident {
             ));
 
             if applies && game.current_event_player().payment.is_empty() {
-                Some(PositionRequest::new(
+                Some(new_position_request(
                     famine_targets(game.get_player(player_index)),
+                    1..=1,
                     Some("Select a city to make Angry".to_string()),
                 ))
             } else {
@@ -245,11 +251,11 @@ pub(crate) fn famine(id: u8, severe: bool) -> Incident {
         },
         |game, s| {
             let p = game.get_player_mut(s.player_index);
-            p.get_city_mut(s.choice)
-                .expect("city should exist")
+            let pos = s.choice[0];
+            p.get_city_mut(pos)
                 .mood_state = MoodState::Angry;
             let name = p.get_name();
-            game.add_info_log_item(&format!("{} made city {} Angry", name, s.choice));
+            game.add_info_log_item(&format!("{name} made city {pos} Angry"));
         },
     )
     .build()

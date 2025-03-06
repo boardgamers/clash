@@ -1,110 +1,248 @@
-use itertools::Itertools;
-use serde::{Deserialize, Serialize};
-
+use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::{advance_with_incident_token, do_advance, remove_advance};
+use crate::consts::AGES;
+use crate::content::builtin::{status_phase_handler, Builtin, BuiltinBuilder};
+use crate::content::custom_phase_actions::{
+    new_position_request, AdvanceRequest, ChangeGovernmentRequest, CurrentEventRequest,
+    CurrentEventResponse, CurrentEventType, PlayerRequest,
+};
 use crate::payment::PaymentOptions;
 use crate::{
     content::advances,
     game::{Game, GameState::*},
     player::Player,
-    position::Position,
     resource_pile::ResourcePile,
     utils,
 };
+use itertools::Itertools;
+use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub enum StatusPhaseState {
+    CompleteObjectives,
+    FreeAdvance,
+    DrawCards,
+    RazeSize1City,
+    ChangeGovernmentType,
+    DetermineFirstPlayer(usize),
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct ChangeGovernment {
     pub new_government: String,
     pub additional_advances: Vec<String>,
 }
 
 // Can't use Option<String> because of mongo stips null values
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum ChangeGovernmentType {
     ChangeGovernment(ChangeGovernment),
     KeepGovernment,
 }
 
-// Can't use Option<String> because of mongo stips null values
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
-pub enum RazeSize1City {
-    None,
-    Position(Position),
+pub const CHANGE_GOVERNMENT_COST: ResourcePile = ResourcePile::new(0, 0, 0, 0, 0, 1, 1);
+
+pub(crate) fn enter_status_phase(game: &mut Game) {
+    game.add_info_log_group(format!(
+        "The game has entered the {} status phase",
+        utils::ordinal_number(game.age)
+    ));
+    game.pop_state();
+    game.push_state(StatusPhase(StatusPhaseState::CompleteObjectives));
+    play_status_phase(game);
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
-pub enum StatusPhaseAction {
-    CompleteObjectives(Vec<String>),
-    FreeAdvance(String),
-    RazeSize1City(RazeSize1City),
-    ChangeGovernmentType(ChangeGovernmentType),
-    DetermineFirstPlayer(usize),
-}
+pub(crate) fn play_status_phase(game: &mut Game) {
+    use StatusPhaseState::*;
+    game.lock_undo();
 
-impl StatusPhaseAction {
-    #[must_use]
-    pub fn phase(&self) -> StatusPhaseState {
-        match self {
-            StatusPhaseAction::CompleteObjectives(_) => StatusPhaseState::CompleteObjectives,
-            StatusPhaseAction::FreeAdvance(_) => StatusPhaseState::FreeAdvance,
-            StatusPhaseAction::RazeSize1City(_) => StatusPhaseState::RazeSize1City,
-            StatusPhaseAction::ChangeGovernmentType(_) => StatusPhaseState::ChangeGovernmentType,
-            StatusPhaseAction::DetermineFirstPlayer(_) => StatusPhaseState::DetermineFirstPlayer,
+    loop {
+        let StatusPhase(phase) = game.state().clone() else {
+            panic!("invalid state")
+        };
+
+        if game.trigger_current_event_with_listener(
+            &game.human_players(game.starting_player_index),
+            |events| &mut events.on_status_phase,
+            &status_phase_handler(&phase).listeners,
+            &(),
+            |()| CurrentEventType::StatusPhase,
+            None,
+        ) {
+            return;
         }
-    }
 
-    /// # Panics
-    /// Panics if the action is not legal
-    pub fn execute(self, game: &mut Game, player_index: usize) {
-        match self {
-            StatusPhaseAction::CompleteObjectives(ref completed_objectives) => {
-                //todo legality check
-                game.players[player_index]
-                    .completed_objectives
-                    .append(&mut completed_objectives.clone());
-            }
-            StatusPhaseAction::FreeAdvance(ref advance) => {
-                assert!(
-                    game.players[player_index].can_advance_free(&advances::get_advance(advance)),
-                    "Illegal action"
-                );
-                advance_with_incident_token(game, advance, player_index, ResourcePile::empty());
-            }
-            StatusPhaseAction::RazeSize1City(ref city) => {
-                if let RazeSize1City::Position(city) = *city {
-                    assert!(
-                        game.players[player_index].can_raze_city(city),
-                        "Illegal action"
-                    );
-                    game.raze_city(city, player_index);
-                    game.players[player_index].gain_resources(ResourcePile::gold(1));
-                }
-            }
-            StatusPhaseAction::ChangeGovernmentType(ref new_government_advance) => {
-                if let ChangeGovernmentType::ChangeGovernment(new_government) =
-                    new_government_advance
+        let StatusPhase(phase) = game.pop_state() else {
+            panic!("invalid state")
+        };
+
+        let next_phase = match phase {
+            CompleteObjectives => {
+                if game.age == AGES
+                    || game
+                        .players
+                        .iter()
+                        .filter(|player| player.is_human())
+                        .any(|player| player.cities.is_empty())
                 {
-                    change_government_type(game, player_index, new_government);
+                    game.end_game();
+                    return;
                 }
+                FreeAdvance
             }
-            StatusPhaseAction::DetermineFirstPlayer(ref player) => {
-                game.starting_player_index = *player;
+            FreeAdvance => DrawCards,
+            DrawCards => RazeSize1City,
+            RazeSize1City => ChangeGovernmentType,
+            ChangeGovernmentType => DetermineFirstPlayer(player_that_chooses_next_first_player(
+                &game
+                    .human_players(game.starting_player_index)
+                    .into_iter()
+                    .map(|p| game.get_player(p))
+                    .collect_vec(),
+            )),
+            DetermineFirstPlayer(_) => {
                 game.next_age();
                 return;
             }
-        }
-        if game.current_events.is_empty() && player_index == game.current_player_index {
-            Self::action_done(game);
-        }
-    }
-
-    pub(crate) fn action_done(game: &mut Game) {
-        game.next_player();
-        skip_status_phase_players(game);
+        };
+        game.push_state(StatusPhase(next_phase));
     }
 }
 
-pub const CHANGE_GOVERNMENT_COST: ResourcePile = ResourcePile::new(0, 0, 0, 0, 0, 1, 1);
+pub(crate) fn complete_objectives() -> Builtin {
+    // not implemented
+    Builtin::builder("Complete Objectives", "Complete objectives").build()
+}
+
+pub(crate) fn free_advance() -> Builtin {
+    Builtin::builder("Free Advance", "Advance for free")
+        .add_advance_reward_request_listener(
+            |event| &mut event.on_status_phase,
+            0,
+            |game, player_index, _player_name| {
+                let choices = advances::get_all()
+                    .into_iter()
+                    .filter(|advance| game.get_player(player_index).can_advance_free(advance))
+                    .map(|a| a.name)
+                    .collect_vec();
+                Some(AdvanceRequest::new(choices))
+            },
+            |game, c| {
+                game.add_info_log_item(&format!(
+                    "{} advanced {} for free",
+                    c.player_name, c.choice
+                ));
+                advance_with_incident_token(game, &c.choice, c.player_index, ResourcePile::empty());
+            },
+        )
+        .build()
+}
+
+pub(crate) fn draw_cards() -> Builtin {
+    Builtin::builder("Draw Cards", "-")
+        .add_player_event_listener(
+            |event| &mut event.on_status_phase,
+            |_game, _p, ()| {
+                // every player draws 1 action card and 1 objective card
+            },
+            0,
+        )
+        .build()
+}
+
+pub(crate) fn raze_city() -> Builtin {
+    Builtin::builder("Raze city", "Raze size 1 city for 1 gold")
+        .add_position_request(
+            |event| &mut event.on_status_phase,
+            0,
+            |game, player_index, _player_name| {
+                let player = game.get_player(player_index);
+                let cities = player
+                    .cities
+                    .iter()
+                    .filter(|city| city.size() == 1)
+                    .map(|city| city.position)
+                    .collect_vec();
+                if cities.is_empty() {
+                    return None;
+                }
+                Some(new_position_request(cities, 0..=1, None))
+            },
+            |game, s| {
+                if s.choice.is_empty() {
+                    game.add_info_log_item(&format!("{} did not raze a city", s.player_name));
+                    return;
+                }
+                let pos = s.choice[0];
+                game.add_info_log_item(&format!(
+                    "{} razed the city at {pos} and gained 1 gold",
+                    s.player_name
+                ));
+                game.raze_city(pos, s.player_index);
+                game.players[s.player_index].gain_resources(ResourcePile::gold(1));
+            },
+        )
+        .build()
+}
+
+pub(crate) fn may_change_government() -> Builtin {
+    add_change_government(
+        Builtin::builder("Change Government", "Change your government"),
+        true,
+        |g, player| {
+            let p = g.get_player(player);
+            p.can_afford(&PaymentOptions::resources(CHANGE_GOVERNMENT_COST))
+                && can_change_government_for_free(p)
+        },
+    )
+    .build()
+}
+
+pub(crate) fn add_change_government(
+    b: BuiltinBuilder,
+    optional: bool,
+    pred: impl Fn(&Game, usize) -> bool + 'static + Clone,
+) -> BuiltinBuilder {
+    b.add_current_event_listener(
+        |event| &mut event.on_status_phase,
+        0,
+        move |game, player_index, _, ()| {
+            pred(game, player_index).then_some(CurrentEventRequest::ChangeGovernment(
+                ChangeGovernmentRequest::new(optional),
+            ))
+        },
+        move |game, player_index, player_name, action, request, ()| {
+            if let CurrentEventRequest::ChangeGovernment(r) = &request {
+                if let CurrentEventResponse::ChangeGovernmentType(t) = action {
+                    match t {
+                        ChangeGovernmentType::ChangeGovernment(c) => {
+                            game.add_info_log_item(&format!(
+                                "{player_name} changed their government from {} to {}",
+                                game.players[game.active_player()]
+                                    .government()
+                                    .expect("player should have a government before changing it"),
+                                c.new_government
+                            ));
+                            game.add_info_log_item(&format!(
+                                "Additional advances: {}",
+                                c.additional_advances.join(", ")
+                            ));
+                            change_government_type(game, player_index, &c);
+                        }
+                        ChangeGovernmentType::KeepGovernment => {
+                            assert!(r.optional, "Must change government");
+                            game.add_info_log_item(&format!(
+                                "{player_name} did not change their government"
+                            ));
+                        }
+                    }
+                    return;
+                }
+            }
+            panic!("Illegal action")
+        },
+    )
+}
 
 fn change_government_type(game: &mut Game, player_index: usize, new_government: &ChangeGovernment) {
     game.players[player_index].lose_resources(CHANGE_GOVERNMENT_COST);
@@ -154,147 +292,67 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
     }
 }
 
-fn next_phase(game: &mut Game, phase: Option<StatusPhaseState>) -> StatusPhaseState {
-    if let Some(StatusPhaseState::FreeAdvance) = phase {
-        //draw card phase
-        game.draw_new_cards();
-    }
-    let next_phase = next_status_phase(phase);
-    if let StatusPhaseState::DetermineFirstPlayer = next_phase {
-        game.set_player_index(player_that_chooses_next_first_player(
-            &game.players,
-            game.starting_player_index,
-            &game.dropped_players,
-        ));
-    }
-    game.state = StatusPhase(next_phase.clone());
-    next_phase
-}
-
-/// # Panics
-///
-/// Panics if the game state is not valid
-pub fn skip_status_phase_players(game: &mut Game) {
-    let mut phase = match game.state {
-        StatusPhase(ref phase) => Some(phase.clone()),
-        _ => None,
-    };
-
-    loop {
-        if game.active_player() == game.starting_player_index {
-            phase = Some(next_phase(game, phase));
-        }
-
-        game.skip_dropped_players();
-
-        if play_status_phase_for_player(
-            game,
-            game.active_player(),
-            phase.as_ref().expect("phase should be set"),
-        ) {
-            return;
-        }
-        game.increment_player_index();
-    }
-}
-
-fn play_status_phase_for_player(
-    game: &Game,
-    player_index: usize,
-    state: &StatusPhaseState,
-) -> bool {
-    let player = &game.players[player_index];
-    match state {
-        StatusPhaseState::CompleteObjectives => false, //todo only skip player if the doesn't have objective cards in their hand (don't skip if the can't complete them unless otherwise specified via setting)
-        StatusPhaseState::FreeAdvance => advances::get_all()
-            .into_iter()
-            .any(|advance| player.can_advance_free(&advance)),
-        StatusPhaseState::RazeSize1City => {
-            player.cities.len() > 1 && player.cities.iter().any(|city| city.size() == 1)
-        }
-        StatusPhaseState::ChangeGovernmentType => {
-            let cost = &PaymentOptions::resources(CHANGE_GOVERNMENT_COST);
-            player.can_afford(cost)
-                && player.government().is_some_and(|government| {
-                    advances::get_governments().iter().any(|g| {
-                        g.government != Some(government.clone())
-                            && player.can_advance_in_change_government(&g.advances[0])
-                    })
-                })
-        }
-        StatusPhaseState::DetermineFirstPlayer => true,
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub enum StatusPhaseState {
-    CompleteObjectives,
-    FreeAdvance,
-    //draw new cards (after free advance)
-    RazeSize1City,
-    ChangeGovernmentType,
-    DetermineFirstPlayer,
-}
-
-pub(crate) fn enter_status_phase(game: &mut Game) {
-    if game
-        .players
-        .iter()
-        .filter(|player| player.is_human())
-        .any(|player| player.cities.is_empty())
-    {
-        game.end_game();
-    }
-    game.add_info_log_group(format!(
-        "The game has entered the {} status phase",
-        utils::ordinal_number(game.age)
-    ));
-    skip_status_phase_players(game);
-}
-
 #[must_use]
-pub fn next_status_phase(phase: Option<StatusPhaseState>) -> StatusPhaseState {
-    use StatusPhaseState::*;
-    if let Some(phase) = phase {
-        match phase {
-            CompleteObjectives => FreeAdvance,
-            FreeAdvance => RazeSize1City,
-            RazeSize1City => ChangeGovernmentType,
-            ChangeGovernmentType => DetermineFirstPlayer,
-            DetermineFirstPlayer => {
-                unreachable!("function should return early with this action")
-            }
-        }
-    } else {
-        CompleteObjectives
-    }
+pub(crate) fn can_change_government_for_free(player: &Player) -> bool {
+    player.government().is_some_and(|government| {
+        advances::get_governments().iter().any(|g| {
+            g.government != Some(government.clone())
+                && player.can_advance_in_change_government(&g.advances[0])
+        })
+    })
 }
 
-/// # Panics
-/// Panics if the game state is not valid
-pub fn player_that_chooses_next_first_player(
-    players: &[Player],
-    current_start_player_index: usize,
-    dropped_players: &[usize],
-) -> usize {
-    fn score(player: &Player) -> u32 {
-        player.resources.mood_tokens + player.resources.culture_tokens
-    }
+pub(crate) fn determine_first_player() -> Builtin {
+    Builtin::builder("Determine First Player", "Determine the first player")
+        .add_player_request(
+            |event| &mut event.on_status_phase,
+            0,
+            |game, player_index, ()| {
+                if let StatusPhase(StatusPhaseState::DetermineFirstPlayer(want)) = game.state() {
+                    (*want == player_index).then_some(PlayerRequest::new(
+                        game.human_players(game.starting_player_index),
+                        "Determine the first player",
+                    ))
+                } else {
+                    panic!("Illegal state")
+                }
+            },
+            |game, s| {
+                game.add_info_log_item(&format!(
+                    "{} choose {}",
+                    game.players[s.player_index].get_name(),
+                    if s.choice == game.starting_player_index {
+                        format!(
+                            "{} to remain the staring player",
+                            if s.choice == game.active_player() {
+                                String::new()
+                            } else {
+                                game.players[s.choice].get_name()
+                            }
+                        )
+                    } else {
+                        format!(
+                            "{} as the new starting player",
+                            if s.choice == game.active_player() {
+                                String::from("themselves")
+                            } else {
+                                game.players[s.choice].get_name()
+                            }
+                        )
+                    }
+                ));
+                game.starting_player_index = s.choice;
+            },
+        )
+        .build()
+}
 
-    let best = players
-        .iter()
-        .filter(|player| !dropped_players.contains(&player.index))
-        .map(score)
-        .max()
-        .expect("no player found");
+fn player_that_chooses_next_first_player(players: &[&Player]) -> usize {
     players
         .iter()
-        .filter(|p| score(p) == best && !dropped_players.contains(&p.index))
-        .min_by_key(|&p| {
-            (p.index as isize - current_start_player_index as isize)
-                .rem_euclid(players.len() as isize)
-        })
-        .expect("there should at least be one player with the most mood and culture tokens")
+        .sorted_by_key(|p| -((p.resources.mood_tokens + p.resources.culture_tokens) as i32))
+        .next()
+        .expect("no player found")
         .index
 }
 
@@ -318,8 +376,8 @@ mod tests {
         player1.gain_resources(ResourcePile::mood_tokens(player1_mood));
         let mut player2 = Player::new(civ::get_test_civilization(), 2);
         player2.gain_resources(ResourcePile::mood_tokens(player2_mood));
-        let players = vec![player0, player1, player2];
-        let got = super::player_that_chooses_next_first_player(&players, 1, &[]);
+        let players = vec![&player2, &player1, &player0];
+        let got = super::player_that_chooses_next_first_player(&players);
         assert_eq!(got, expected_player_index, "{name}");
     }
 

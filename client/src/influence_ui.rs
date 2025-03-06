@@ -1,12 +1,9 @@
 use crate::city_ui::{building_position, BUILDING_SIZE};
 use crate::client_state::{CameraMode, StateUpdate};
-use crate::dialog_ui::{
-    cancel_button_with_tooltip, ok_button, BaseOrCustomAction, BaseOrCustomDialog, OkTooltip,
-};
+use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
 use crate::hex_ui;
 use crate::layout_ui::is_in_circle;
 use crate::render_context::RenderContext;
-use crate::resource_ui::show_resource_pile;
 use crate::tooltip::show_tooltip_for_circle;
 use macroquad::input::{is_mouse_button_pressed, MouseButton};
 use macroquad::math::Vec2;
@@ -14,12 +11,11 @@ use macroquad::prelude::{draw_circle_lines, WHITE};
 use server::action::Action;
 use server::city::City;
 use server::content::custom_actions::CustomAction;
-use server::cultural_influence::{influence_culture_boost_cost, CulturalInfluenceResolution};
+use server::cultural_influence::influence_culture_boost_cost;
 use server::player::Player;
 use server::player_events::InfluenceCulturePossible;
 use server::playing_actions::{InfluenceCultureAttempt, PlayingAction};
 use server::position::Position;
-use server::resource::ResourceType;
 
 fn closest_city(player: &Player, position: Position) -> Position {
     player
@@ -28,23 +24,6 @@ fn closest_city(player: &Player, position: Position) -> Position {
         .min_by_key(|c| c.position.distance(position))
         .unwrap()
         .position
-}
-
-pub fn cultural_influence_resolution_dialog(
-    rc: &RenderContext,
-    r: &CulturalInfluenceResolution,
-) -> StateUpdate {
-    let name = r.city_piece.name();
-    let pile = &r.roll_boost_cost;
-    show_resource_pile(rc, pile, &[ResourceType::CultureTokens]);
-    if ok_button(rc, OkTooltip::Valid(format!("Influence {name} for {pile}"))) {
-        return StateUpdate::Execute(Action::CulturalInfluenceResolution(true));
-    }
-    if cancel_button_with_tooltip(rc, "Decline") {
-        return StateUpdate::Execute(Action::CulturalInfluenceResolution(false));
-    }
-
-    StateUpdate::None
 }
 
 pub fn hover(rc: &RenderContext, mouse_pos: Vec2, b: &BaseOrCustomDialog) -> StateUpdate {

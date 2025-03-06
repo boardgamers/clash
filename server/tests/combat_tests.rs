@@ -21,7 +21,7 @@ fn test_remove_casualties_attacker() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::SelectUnits(vec![0, 1])),
+                Action::Response(CurrentEventResponse::SelectUnits(vec![0, 1])),
             ),
         ],
     );
@@ -82,18 +82,18 @@ fn test_combat_all_modifiers() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::Payment(vec![ResourcePile::ore(1)])),
+                Action::Response(CurrentEventResponse::Payment(vec![ResourcePile::ore(1)])),
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::Payment(vec![
+                Action::Response(CurrentEventResponse::Payment(vec![
                     ResourcePile::empty(),
                     ResourcePile::ore(2),
                 ])),
             ),
             TestAction::not_undoable(
                 1,
-                Action::CustomPhaseEvent(CurrentEventResponse::Payment(vec![ResourcePile::ore(1)])),
+                Action::Response(CurrentEventResponse::Payment(vec![ResourcePile::ore(1)])),
             ),
         ],
     );
@@ -116,10 +116,7 @@ fn test_retreat() {
         "retreat",
         vec![
             TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1"))),
-            TestAction::not_undoable(
-                0,
-                Action::CustomPhaseEvent(CurrentEventResponse::Bool(true)),
-            ),
+            TestAction::not_undoable(0, Action::Response(CurrentEventResponse::Bool(true))),
         ],
     );
 }
@@ -130,10 +127,7 @@ fn test_do_not_retreat() {
         "retreat_no",
         vec![
             TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1"))),
-            TestAction::not_undoable(
-                0,
-                Action::CustomPhaseEvent(CurrentEventResponse::Bool(false)),
-            ),
+            TestAction::not_undoable(0, Action::Response(CurrentEventResponse::Bool(false))),
         ],
     );
 }
@@ -146,7 +140,7 @@ fn test_ship_combat() {
             TestAction::not_undoable(0, move_action(vec![7, 8], Position::from_offset("D2"))),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::SelectUnits(vec![1])),
+                Action::Response(CurrentEventResponse::SelectUnits(vec![1])),
             ),
         ],
     );
@@ -180,19 +174,17 @@ fn test_recruit_combat() {
             ),
             TestAction::undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::ResourceReward(
+                Action::Response(CurrentEventResponse::ResourceReward(
                     ResourcePile::mood_tokens(1),
                 )),
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::ResourceReward(ResourcePile::gold(
-                    1,
-                ))),
+                Action::Response(CurrentEventResponse::ResourceReward(ResourcePile::gold(1))),
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::ResourceReward(
+                Action::Response(CurrentEventResponse::ResourceReward(
                     ResourcePile::culture_tokens(1),
                 )),
             ),

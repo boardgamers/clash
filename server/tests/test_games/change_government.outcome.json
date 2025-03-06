@@ -1,7 +1,36 @@
 {
-  "state": {
-    "StatusPhase": "DetermineFirstPlayer"
-  },
+  "state": [
+    {
+      "StatusPhase": {
+        "DetermineFirstPlayer": 1
+      }
+    }
+  ],
+  "current_events": [
+    {
+      "event_type": "StatusPhase",
+      "players_used": [
+        0
+      ],
+      "player": 1,
+      "last_priority_used": 0,
+      "handler": {
+        "priority": 0,
+        "request": {
+          "SelectPlayer": {
+            "choices": [
+              0,
+              1
+            ],
+            "description": "Determine the first player"
+          }
+        },
+        "origin": {
+          "Builtin": "Determine First Player"
+        }
+      }
+    }
+  ],
   "players": [
     {
       "name": null,
@@ -211,11 +240,11 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 1,
+  "current_player_index": 0,
   "action_log": [
     {
       "action": {
-        "StatusPhase": {
+        "Response": {
           "ChangeGovernmentType": {
             "ChangeGovernment": {
               "new_government": "Theocracy",
@@ -244,9 +273,6 @@
       "Player1 changed their government from Democracy to Theocracy",
       "Additional advances: Devotion",
       "Player1 could not store 1 idea"
-    ],
-    [
-      "It's Player2's turn"
     ]
   ],
   "undo_limit": 1,

@@ -1,41 +1,52 @@
 {
-  "state": {
-    "Combat": {
-      "initiation": {
-        "Movement": {
-          "movement_actions_left": 1,
-          "moved_units": [
-            7,
-            8
-          ]
+  "state": [
+    "Playing",
+    {
+      "Movement": {
+        "movement_actions_left": 1,
+        "moved_units": [
+          7,
+          8
+        ],
+        "current_move": {
+          "Fleet": {
+            "units": [
+              7,
+              8
+            ]
+          }
         }
-      },
-      "round": 1,
-      "defender": 1,
-      "defender_position": "D2",
-      "attacker": 0,
-      "attacker_position": "C3",
-      "attackers": [
-        7,
-        8
-      ],
-      "can_retreat": true,
-      "round_result": {
-        "attacker_casualties": {
-          "fighters": 1,
-          "carried_units": 1
-        },
-        "defender_casualties": {
-          "fighters": 1
-        },
-        "can_retreat": false,
-        "retreated": false
+      }
+    },
+    {
+      "Combat": {
+        "round": 1,
+        "defender": 1,
+        "defender_position": "D2",
+        "attacker": 0,
+        "attacker_position": "C3",
+        "attackers": [
+          7,
+          8
+        ],
+        "retreat": "CanRetreat"
       }
     }
-  },
+  ],
   "current_events": [
     {
-      "event_type": "on_combat_round_end",
+      "event_type": {
+        "CombatRoundEnd": {
+          "attacker_casualties": {
+            "fighters": 1,
+            "carried_units": 1
+          },
+          "defender_casualties": {
+            "fighters": 1
+          },
+          "can_retreat": false
+        }
+      },
       "player": 0,
       "last_priority_used": 2,
       "handler": {
@@ -48,11 +59,13 @@
               22,
               1
             ],
-            "needed": 1,
+            "needed": {
+              "start": 1,
+              "end": 1
+            },
             "description": "Remove 1 attacking units"
           }
         },
-        "response": null,
         "origin": {
           "Builtin": "Choose Casualties (carried units)"
         }

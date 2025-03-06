@@ -3,11 +3,10 @@ use macroquad::prelude::clear_background;
 use macroquad::prelude::*;
 
 use server::action::Action;
-use server::content::custom_phase_actions::CurrentEventResponse;
 use server::game::Game;
 use server::position::Position;
 
-use crate::advance_ui::{pay_advance_dialog, show_free_advance_menu, show_paid_advance_menu};
+use crate::advance_ui::{pay_advance_dialog, show_paid_advance_menu};
 use crate::client_state::{
     ActiveDialog, CameraMode, DialogChooser, State, StateUpdate, StateUpdates,
 };
@@ -22,7 +21,6 @@ use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, explore_dialog, show_tile_menu};
 use crate::player_ui::{player_select, show_global_controls, show_top_center, show_top_left};
 use crate::render_context::RenderContext;
-use crate::status_phase_ui::raze_city_confirm_dialog;
 use crate::unit_ui::unit_selection_click;
 use crate::{
     custom_actions_ui, custom_phase_ui, dialog_ui, influence_ui, map_ui, move_ui, recruit_unit_ui,
@@ -97,7 +95,7 @@ fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
             updates.add(show_tile_menu(rc, pos));
         }
     }
-    updates.add(try_click(rc));
+    updates.add(rc.with_camera(CameraMode::World, try_click));
     updates.result()
 }
 
@@ -130,8 +128,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
     match &state.active_dialog {
         ActiveDialog::None
         | ActiveDialog::WaitingForUpdate
-        | ActiveDialog::CulturalInfluence(_)
-        | ActiveDialog::PositionRequest(_) => StateUpdate::None,
+        | ActiveDialog::CulturalInfluence(_) => StateUpdate::None,
         ActiveDialog::DialogChooser(d) => dialog_chooser(rc, d),
         ActiveDialog::Log => show_log(rc),
 
@@ -143,23 +140,17 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::CollectResources(c) => collect_dialog(rc, c),
         ActiveDialog::RecruitUnitSelection(s) => recruit_unit_ui::select_dialog(rc, s),
         ActiveDialog::ReplaceUnits(r) => recruit_unit_ui::replace_dialog(rc, r),
-        ActiveDialog::CulturalInfluenceResolution(r) => {
-            influence_ui::cultural_influence_resolution_dialog(rc, r)
-        }
         ActiveDialog::ExploreResolution(r) => explore_dialog(rc, r),
         ActiveDialog::MoveUnits(_) => move_ui::move_units_dialog(rc),
         ActiveDialog::MovePayment(p) => move_ui::move_payment_dialog(rc, p),
 
         //status phase
-        ActiveDialog::FreeAdvance => show_free_advance_menu(rc),
-        ActiveDialog::RazeSize1City => status_phase_ui::raze_city_dialog(rc),
-        ActiveDialog::CompleteObjectives => status_phase_ui::complete_objectives_dialog(rc),
-        ActiveDialog::ChangeGovernmentType => status_phase_ui::change_government_type_dialog(rc),
+        ActiveDialog::ChangeGovernmentType(r) => {
+            status_phase_ui::change_government_type_dialog(rc, r)
+        }
         ActiveDialog::ChooseAdditionalAdvances(a) => {
             status_phase_ui::choose_additional_advances_dialog(rc, a)
         }
-        ActiveDialog::DetermineFirstPlayer => status_phase_ui::determine_first_player_dialog(rc),
-
         ActiveDialog::Sports((p, pos)) => custom_actions_ui::sports(rc, p, *pos),
         ActiveDialog::Taxes(p) => custom_actions_ui::taxes(rc, p),
         ActiveDialog::Theaters(p) => custom_actions_ui::theaters(rc, p),
@@ -174,6 +165,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::UnitsRequest(r) => custom_phase_ui::select_units_dialog(rc, r),
         ActiveDialog::StructuresRequest(r) => custom_phase_ui::select_structures_dialog(rc, r),
         ActiveDialog::BoolRequest => custom_phase_ui::bool_request_dialog(rc),
+        ActiveDialog::PositionRequest(r) => custom_phase_ui::position_request_dialog(rc, r),
     }
 }
 
@@ -223,15 +215,8 @@ fn controlling_player_click(rc: &RenderContext, mouse_pos: Vec2, pos: Position) 
         ActiveDialog::ReplaceUnits(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
             StateUpdate::OpenDialog(ActiveDialog::ReplaceUnits(new.clone()))
         }),
-        ActiveDialog::RazeSize1City => raze_city_confirm_dialog(rc, pos),
         ActiveDialog::PositionRequest(r) => {
-            if r.choices.contains(&pos) {
-                StateUpdate::Execute(Action::CustomPhaseEvent(
-                    CurrentEventResponse::SelectPosition(pos),
-                ))
-            } else {
-                StateUpdate::None
-            }
+            StateUpdate::OpenDialog(ActiveDialog::PositionRequest(r.clone().toggle(pos)))
         }
         ActiveDialog::UnitsRequest(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
             StateUpdate::OpenDialog(ActiveDialog::UnitsRequest(new.clone()))

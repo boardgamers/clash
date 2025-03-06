@@ -3,18 +3,19 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::vec;
 
+use crate::ability_initializer::AbilityListeners;
 use crate::combat::{Combat, CombatDieRoll, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
 use crate::content::civilizations::{BARBARIANS, PIRATES};
-use crate::content::custom_phase_actions::{CurrentEvent, CurrentEventHandler, CurrentEventPlayer};
-use crate::cultural_influence::CulturalInfluenceResolution;
+use crate::content::custom_phase_actions::{
+    CurrentEventHandler, CurrentEventPlayer, CurrentEventState, CurrentEventType,
+};
 use crate::events::{Event, EventOrigin};
-use crate::explore::ExploreResolutionState;
 use crate::incident::PermanentIncidentEffect;
 use crate::movement::{CurrentMove, MoveState};
 use crate::pirates::get_pirates_player;
 use crate::player_events::{
-    CustomPhaseEvent, CustomPhaseInfo, PlayerCommandEvent, PlayerCommands, PlayerEvents,
+    CurrentEvent, CurrentEventInfo, PlayerCommandEvent, PlayerCommands, PlayerEvents,
 };
 use crate::resource::check_for_waste;
 use crate::status_phase::enter_status_phase;
@@ -25,7 +26,6 @@ use crate::utils::Shuffle;
 use crate::{
     action::Action,
     city::City,
-    consts::AGES,
     content::{civilizations, custom_actions::CustomActionType, wonders},
     map::{Map, MapData},
     player::{Player, PlayerData},
@@ -35,8 +35,8 @@ use crate::{
 };
 
 pub struct Game {
-    pub state: GameState,
-    pub current_events: Vec<CurrentEvent>,
+    pub state_stack: Vec<GameState>,
+    pub current_events: Vec<CurrentEventState>,
     // in turn order starting from starting_player_index and wrapping around
     pub players: Vec<Player>,
     pub map: Map,
@@ -127,7 +127,7 @@ impl Game {
         };
 
         Self {
-            state: GameState::Playing,
+            state_stack: vec![GameState::Playing],
             current_events: Vec::new(),
             players,
             map,
@@ -169,7 +169,7 @@ impl Game {
     #[must_use]
     pub fn from_data(data: GameData) -> Self {
         let mut game = Self {
-            state: data.state,
+            state_stack: data.state_stack,
             players: Vec::new(),
             map: Map::from_data(data.map),
             starting_player_index: data.starting_player_index,
@@ -207,7 +207,7 @@ impl Game {
     #[must_use]
     pub fn data(self) -> GameData {
         GameData {
-            state: self.state,
+            state_stack: self.state_stack,
             current_events: self.current_events,
             players: self.players.into_iter().map(Player::data).collect(),
             map: self.map.data(),
@@ -240,7 +240,7 @@ impl Game {
     #[must_use]
     pub fn cloned_data(&self) -> GameData {
         GameData {
-            state: self.state.clone(),
+            state_stack: self.state_stack.clone(),
             current_events: self.current_events.clone(),
             players: self.players.iter().map(Player::cloned_data).collect(),
             map: self.map.cloned_data(),
@@ -289,29 +289,51 @@ impl Game {
     /// if you want to get an option instead, use `Player::get_city` function
     #[must_use]
     pub fn get_city(&self, player_index: usize, position: Position) -> &City {
-        self.get_player(player_index)
-            .get_city(position)
-            .expect("city not found")
+        self.get_player(player_index).get_city(position)
+    }
+
+    ///
+    /// # Panics
+    /// Panics if the city does not exist
+    #[must_use]
+    pub fn get_any_city(&self, position: Position) -> &City {
+        self.try_get_any_city(position).expect("city not found")
     }
 
     #[must_use]
-    pub fn get_any_city(&self, position: Position) -> Option<&City> {
+    pub fn try_get_any_city(&self, position: Position) -> Option<&City> {
         self.players
             .iter()
-            .find_map(|player| player.get_city(position))
+            .find_map(|player| player.try_get_city(position))
     }
 
     pub(crate) fn lock_undo(&mut self) {
         self.undo_limit = self.action_log_index;
+        for a in &mut self.action_log {
+            a.undo.clear();
+        }
     }
 
     #[must_use]
-    pub(crate) fn current_event(&self) -> &CurrentEvent {
+    pub fn state(&self) -> &GameState {
+        self.state_stack.last().unwrap_or(&GameState::Finished)
+    }
+
+    pub(crate) fn push_state(&mut self, state: GameState) {
+        self.state_stack.push(state);
+    }
+
+    pub(crate) fn pop_state(&mut self) -> GameState {
+        self.state_stack.pop().expect("game has ended")
+    }
+
+    #[must_use]
+    pub(crate) fn current_event(&self) -> &CurrentEventState {
         self.current_events.last().expect("state should exist")
     }
 
     #[must_use]
-    pub(crate) fn current_event_mut(&mut self) -> &mut CurrentEvent {
+    pub(crate) fn current_event_mut(&mut self) -> &mut CurrentEventState {
         self.current_events.last_mut().expect("state should exist")
     }
 
@@ -333,29 +355,57 @@ impl Game {
             .and_then(|s| s.player.handler.as_mut())
     }
 
+    pub(crate) fn trigger_current_event_with_listener<V>(
+        &mut self,
+        players: &[usize],
+        event: fn(&mut PlayerEvents) -> &mut CurrentEvent<V>,
+        listeners: &AbilityListeners,
+        event_type: &V,
+        store_type: impl Fn(V) -> CurrentEventType,
+        log: Option<&str>,
+    ) -> bool
+    where
+        V: Clone,
+    {
+        for p in players {
+            (listeners.initializer)(self, *p);
+        }
+
+        let return_early = self.trigger_current_event(players, event, event_type, store_type, log);
+
+        for p in players {
+            (listeners.deinitializer)(self, *p);
+        }
+        return_early
+    }
+
     pub(crate) fn trigger_current_event<V>(
         &mut self,
         players: &[usize],
-        event: fn(&mut PlayerEvents) -> &mut CustomPhaseEvent<V>,
+        event: fn(&mut PlayerEvents) -> &mut CurrentEvent<V>,
         details: &V,
+        store_details: impl Fn(V) -> CurrentEventType,
         log: Option<&str>,
-    ) -> bool {
-        let name = event(&mut self.players[0].events).name.clone();
+    ) -> bool
+    where
+        V: Clone,
+    {
+        let current_event_details = store_details(details.clone());
         if self
             .current_events
             .last()
-            .is_none_or(|s| s.event_type != name)
+            .is_none_or(|s| s.event_type != current_event_details)
         {
             if let Some(log) = log {
                 self.add_info_log_group(log.to_string());
             }
             self.current_events
-                .push(CurrentEvent::new(name, players[0]));
+                .push(CurrentEventState::new(players[0], current_event_details));
         }
         let state = self.current_event();
 
         for player_index in Self::remaining_current_event_players(players, state) {
-            let info = CustomPhaseInfo {
+            let info = CurrentEventInfo {
                 player: player_index,
             };
             self.trigger_event_with_game_value(player_index, event, &info, details);
@@ -372,7 +422,7 @@ impl Game {
         false
     }
 
-    fn remaining_current_event_players(players: &[usize], state: &CurrentEvent) -> Vec<usize> {
+    fn remaining_current_event_players(players: &[usize], state: &CurrentEventState) -> Vec<usize> {
         players
             .iter()
             .filter(|p| !state.players_used.contains(p))
@@ -498,7 +548,8 @@ impl Game {
     pub fn enemy_player(&self, player_index: usize, position: Position) -> Option<usize> {
         self.players.iter().position(|player| {
             player.index != player_index
-                && (!player.get_units(position).is_empty() || player.get_city(position).is_some())
+                && (!player.get_units(position).is_empty()
+                    || player.try_get_city(position).is_some())
         })
     }
 
@@ -528,6 +579,16 @@ impl Game {
             "It's {}'s turn",
             self.players[self.current_player_index].get_name()
         ));
+        self.actions_left = ACTIONS;
+        let lost_action = self.permanent_incident_effects.iter().position(
+            |e| matches!(e, PermanentIncidentEffect::LooseAction(p) if *p == self.current_player_index),
+        ).map(|i| self.permanent_incident_effects.remove(i));
+        if lost_action.is_some() {
+            self.add_info_log_item("Remove 1 action for Revolution");
+            self.actions_left -= 1;
+        }
+        self.successful_cultural_influence = false;
+
         self.lock_undo();
 
         self.start_turn();
@@ -538,12 +599,13 @@ impl Game {
             &[self.current_player_index],
             |e| &mut e.on_turn_start,
             &(),
+            |()| CurrentEventType::TurnStart,
             None,
         );
     }
 
     pub fn skip_dropped_players(&mut self) {
-        if self.human_players().is_empty() {
+        if self.human_players_count() == 0 {
             return;
         }
         while self.dropped_players.contains(&self.current_player_index)
@@ -556,7 +618,7 @@ impl Game {
     pub fn increment_player_index(&mut self) {
         // Barbarians and Pirates have the highest player indices
         self.current_player_index += 1;
-        self.current_player_index %= self.human_players().len();
+        self.current_player_index %= self.human_players_count();
     }
 
     #[must_use]
@@ -568,23 +630,42 @@ impl Game {
     }
 
     #[must_use]
-    pub fn human_players(&self) -> Vec<usize> {
+    pub(crate) fn human_players_count(&self) -> usize {
         self.players
             .iter()
             .enumerate()
-            .filter_map(|(i, p)| {
-                if p.civilization.is_human() {
-                    Some(i)
-                } else {
-                    None
-                }
-            })
-            .collect()
+            .filter_map(|(i, p)| self.is_active_human(i, p))
+            .count()
+    }
+
+    ///
+    /// # Panics
+    /// Panics if the player is not human
+    #[must_use]
+    pub fn human_players(&self, first: usize) -> Vec<usize> {
+        let mut all = self
+            .players
+            .iter()
+            .enumerate()
+            .filter_map(|(i, p)| self.is_active_human(i, p))
+            .collect_vec();
+        let i = all
+            .iter()
+            .position(|&p| p == first)
+            .expect("player should exist");
+        all.rotate_left(i);
+        all
+    }
+
+    fn is_active_human(&self, i: usize, p: &Player) -> Option<usize> {
+        if p.civilization.is_human() && !self.dropped_players.contains(&i) {
+            Some(i)
+        } else {
+            None
+        }
     }
 
     pub fn next_turn(&mut self) {
-        self.actions_left = ACTIONS;
-        self.successful_cultural_influence = false;
         self.players[self.current_player_index].end_turn();
         self.next_player();
         self.skip_dropped_players();
@@ -605,24 +686,15 @@ impl Game {
     }
 
     pub fn next_age(&mut self) {
-        if self.age == 6 {
-            self.state = GameState::Finished;
-            return;
-        }
-        self.state = GameState::Playing;
         self.age += 1;
         self.current_player_index = self.starting_player_index;
         self.lock_undo();
-        if self.age > AGES {
-            self.end_game();
-            return;
-        }
+        self.push_state(GameState::Playing);
         self.add_info_log_group(format!("Age {} has started", self.age));
         self.add_info_log_group(String::from("Round 1/3"));
     }
 
     pub(crate) fn end_game(&mut self) {
-        self.state = GameState::Finished;
         let winner_player_index = self
             .players
             .iter()
@@ -738,7 +810,6 @@ impl Game {
         player.wonders_build.push(wonder.name.clone());
         player
             .get_city_mut(city_position)
-            .expect("player should have city")
             .pieces
             .wonders
             .push(wonder);
@@ -754,7 +825,6 @@ impl Game {
         player.wonders_build.pop();
         let wonder = player
             .get_city_mut(city_position)
-            .expect("player should have city")
             .pieces
             .wonders
             .pop()
@@ -762,10 +832,6 @@ impl Game {
         (wonder.listeners.deinitializer)(self, player_index);
         (wonder.listeners.undo_deinitializer)(self, player_index);
         wonder
-    }
-
-    pub fn draw_new_cards(&mut self) {
-        //todo every player draws 1 action card and 1 objective card
     }
 
     ///
@@ -786,7 +852,7 @@ impl Game {
                 self.players[killer].captured_leaders.push(leader);
             }
         }
-        if let GameState::Movement(m) = &mut self.state {
+        if let Some(GameState::Movement(m)) = self.state_stack.last_mut() {
             if let CurrentMove::Fleet { units } = &mut m.current_move {
                 units.retain(|&id| id != unit_id);
             }
@@ -800,10 +866,11 @@ impl Game {
 
 #[derive(Serialize, Deserialize, PartialEq)]
 pub struct GameData {
-    state: GameState,
+    #[serde(rename = "state")]
+    state_stack: Vec<GameState>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    current_events: Vec<CurrentEvent>,
+    current_events: Vec<CurrentEventState>,
     players: Vec<PlayerData>,
     map: MapData,
     starting_player_index: usize,
@@ -840,9 +907,7 @@ pub enum GameState {
     Playing,
     StatusPhase(StatusPhaseState),
     Movement(MoveState),
-    CulturalInfluenceResolution(CulturalInfluenceResolution),
     Combat(Combat),
-    ExploreResolution(ExploreResolutionState),
     Finished,
 }
 

@@ -65,7 +65,7 @@ fn cartography() -> AdvanceBuilder {
                 let mut ship = false;
                 let mut navigation = false;
                 for id in &i.units {
-                    let unit = g.get_player(i.player).get_unit(*id).expect("unit should exist");
+                    let unit = g.get_player(i.player).get_unit(*id);
                     if unit.unit_type.is_ship() {
                         ship = true;
                         if !unit.position.is_neighbor(i.to) {
@@ -93,9 +93,7 @@ fn is_enemy_player_or_pirate_zone(game: &Game, player_index: usize, position: Po
 }
 
 fn fishing_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
-    let city = game
-        .get_any_city(c.city_position)
-        .expect("city should exist");
+    let city = game.get_any_city(c.city_position);
     let port = city.port_position;
     if let Some(position) = port
         .filter(|p| !is_enemy_player_or_pirate_zone(game, c.player_index, *p))

@@ -113,7 +113,7 @@ pub fn may_cancel(sel: &impl ConfirmSelection, rc: &RenderContext) -> StateUpdat
 pub enum HighlightType {
     None,
     Primary,
-    Secondary,
+    Choices,
 }
 
 impl HighlightType {
@@ -121,7 +121,7 @@ impl HighlightType {
         match self {
             HighlightType::None => BLACK,
             HighlightType::Primary => WHITE,
-            HighlightType::Secondary => BLUE,
+            HighlightType::Choices => BLUE,
         }
     }
 }

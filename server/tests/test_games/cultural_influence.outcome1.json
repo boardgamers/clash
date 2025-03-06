@@ -1,5 +1,7 @@
 {
-  "state": "Playing",
+  "state": [
+    "Playing"
+  ],
   "players": [
     {
       "name": null,
@@ -234,13 +236,64 @@
     },
     {
       "action": {
-        "CulturalInfluenceResolution": true
+        "Response": {
+          "Payment": [
+            {
+              "culture_tokens": 4
+            }
+          ]
+        }
       },
       "undo": [
         {
-          "InfluenceCultureResolution": {
-            "roll_boost_cost": {
-              "culture_tokens": 4
+          "Event": {
+            "event_type": {
+              "InfluenceCultureResolution": {
+                "culture_tokens": 4
+              }
+            },
+            "player": 1,
+            "last_priority_used": 0,
+            "handler": {
+              "priority": 0,
+              "request": {
+                "Payment": [
+                  {
+                    "cost": {
+                      "default": {
+                        "culture_tokens": 4
+                      },
+                      "conversions": [
+                        {
+                          "from": [
+                            {
+                              "food": 1
+                            },
+                            {
+                              "wood": 1
+                            },
+                            {
+                              "ore": 1
+                            },
+                            {
+                              "ideas": 1
+                            }
+                          ],
+                          "to": {
+                            "gold": 1
+                          },
+                          "type": "Unlimited"
+                        }
+                      ]
+                    },
+                    "name": "Pay 4 culture tokens to increase the dice roll",
+                    "optional": true
+                  }
+                ]
+              },
+              "origin": {
+                "Builtin": "Influence Culture"
+              }
             }
           }
         }
@@ -254,7 +307,7 @@
       "Player2 now has the option to pay 4 culture tokens to increase the dice roll and proceed with the cultural influence"
     ],
     [
-      "Player2 paid 1 culture tokens to increase the dice roll and proceed with the cultural influence"
+      "Player2 paid 4 culture tokens to increase the dice roll and proceed with the cultural influence"
     ]
   ],
   "undo_limit": 1,

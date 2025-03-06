@@ -4,7 +4,7 @@ use crate::combat::move_with_possible_combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::builtin::Builtin;
 use crate::content::custom_phase_actions::{
-    PositionRequest, ResourceRewardRequest, UnitTypeRequest,
+    new_position_request, ResourceRewardRequest, UnitTypeRequest,
 };
 use crate::game::Game;
 use crate::incident::{IncidentBuilder, BASE_EFFECT_PRIORITY};
@@ -101,14 +101,15 @@ pub(crate) fn barbarians_spawn(mut builder: IncidentBuilder) -> IncidentBuilder 
             IncidentTarget::ActivePlayer,
             BASE_EFFECT_PRIORITY + 1,
             |game, _player_index, _i| {
-                Some(PositionRequest::new(
+                Some(new_position_request(
                     possible_barbarians_reinforcements(game),
+                    1..=1,
                     Some("Select a position for the additional Barbarian unit".to_string()),
                 ))
             },
             |game, s| {
                 let mut state = BarbariansEventState::new();
-                state.selected_position = Some(s.choice);
+                state.selected_position = Some(s.choice[0]);
                 game.current_event_mut().barbarians = Some(state);
             },
         )
@@ -151,13 +152,14 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                 BASE_EFFECT_PRIORITY + (army * 2) + 2,
                 |game, player_index, _i| {
                     let armies = get_movable_units(game, player_index, &get_barbarian_state(game));
-                    Some(PositionRequest::new(
+                    Some(new_position_request(
                         armies,
+                        1..=1,
                         Some("Select a Barbarian Army to move next".to_string()),
                     ))
                 },
                 |game, s| {
-                    get_barbarian_state_mut(game).selected_position = Some(s.choice);
+                    get_barbarian_state_mut(game).selected_position = Some(s.choice[0]);
                 },
             )
             .add_incident_position_request(
@@ -177,8 +179,9 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                             0, // stack size was already checked in last step
                         );
 
-                        Some(PositionRequest::new(
+                        Some(new_position_request(
                             choices,
+                            1..=1,
                             Some("Select a position to move the Barbarian Army".to_string()),
                         ))
                     } else {
@@ -195,7 +198,7 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                         .selected_position
                         .take()
                         .expect("selected position should exist");
-                    let to = s.choice;
+                    let to = s.choice[0];
                     let ids = get_barbarians_player(game).get_units(from);
                     let units: Vec<u32> = ids.iter().map(|u| u.id).collect();
                     state.moved_units.extend(units.iter());
@@ -206,7 +209,6 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                     move_with_possible_combat(
                         game,
                         get_barbarians_player(game).index,
-                        None,
                         from,
                         &MoveUnits {
                             units,
@@ -321,20 +323,21 @@ fn add_barbarians_city(builder: IncidentBuilder) -> IncidentBuilder {
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY + 100,
         move |game, player_index, _i| {
-            (!get_barbarian_state(game).move_units).then_some(PositionRequest::new(
+            (!get_barbarian_state(game).move_units).then_some(new_position_request(
                 possible_barbarians_spawns(game, game.get_player(player_index)),
+                1..=1,
                 Some("Select a position for the new city and infantry unit".to_string()),
             ))
         },
         move |game, s| {
+            let pos = s.choice[0];
             game.add_info_log_item(&format!(
-                "Barbarians spawned a new city and a new Infantry unit at {}",
-                s.choice
+                "Barbarians spawned a new city and a new Infantry unit at {pos}"
             ));
             let b = get_barbarians_player(game).index;
             let p = game.get_player_mut(b);
-            p.cities.push(City::new(b, s.choice));
-            p.add_unit(s.choice, UnitType::Infantry);
+            p.cities.push(City::new(b, pos));
+            p.add_unit(pos, UnitType::Infantry);
         },
     )
 }

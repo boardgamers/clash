@@ -1,7 +1,30 @@
 {
-  "state": {
-    "StatusPhase": "FreeAdvance"
-  },
+  "state": [
+    {
+      "StatusPhase": "FreeAdvance"
+    }
+  ],
+  "current_events": [
+    {
+      "event_type": "StatusPhase",
+      "player": 0,
+      "last_priority_used": 0,
+      "handler": {
+        "priority": 0,
+        "request": {
+          "SelectAdvance": {
+            "choices": [
+              "Storage",
+              "Dogma"
+            ]
+          }
+        },
+        "origin": {
+          "Builtin": "Free Advance"
+        }
+      }
+    }
+  ],
   "players": [
     {
       "name": null,

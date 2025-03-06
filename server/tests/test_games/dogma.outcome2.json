@@ -1,8 +1,12 @@
 {
-  "state": "Playing",
+  "state": [
+    "Playing"
+  ],
   "current_events": [
     {
-      "event_type": "on_construct",
+      "event_type": {
+        "Construct": "Temple"
+      },
       "player": 1,
       "last_priority_used": 0,
       "handler": {
@@ -16,7 +20,6 @@
             ]
           }
         },
-        "response": null,
         "origin": {
           "Advance": "Dogma"
         }
@@ -326,181 +329,6 @@
       "action": {
         "Playing": {
           "Advance": {
-            "advance": "Writing",
-            "payment": {
-              "ideas": 2
-            }
-          }
-        }
-      },
-      "undo": [
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        }
-      ]
-    },
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Free Education",
-            "payment": {
-              "ideas": 2
-            }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Playing": "EndTurn"
-      }
-    },
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Dogma",
-            "payment": {
-              "ideas": 2
-            }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Myths",
-            "payment": {
-              "ideas": 2
-            }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Playing": {
-          "IncreaseHappiness": {
-            "happiness_increases": [
-              [
-                "C1",
-                2
-              ],
-              [
-                "B2",
-                0
-              ]
-            ],
-            "payment": {
-              "mood_tokens": 2
-            }
-          }
-        }
-      },
-      "undo": [
-        {
-          "IncreaseHappiness": {
-            "angry_activations": [
-              "C1"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "action": {
-        "Playing": "EndTurn"
-      }
-    },
-    {
-      "action": {
-        "StatusPhase": {
-          "FreeAdvance": "Fishing"
-        }
-      }
-    },
-    {
-      "action": {
-        "StatusPhase": {
-          "FreeAdvance": "Fishing"
-        }
-      }
-    },
-    {
-      "action": {
-        "StatusPhase": {
-          "RazeSize1City": "None"
-        }
-      }
-    },
-    {
-      "action": {
-        "StatusPhase": {
-          "RazeSize1City": "None"
-        }
-      }
-    },
-    {
-      "action": {
-        "StatusPhase": {
-          "ChangeGovernmentType": "KeepGovernment"
-        }
-      }
-    },
-    {
-      "action": {
-        "StatusPhase": {
-          "ChangeGovernmentType": "KeepGovernment"
-        }
-      }
-    },
-    {
-      "action": {
-        "StatusPhase": {
-          "DetermineFirstPlayer": 1
-        }
-      }
-    },
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
             "advance": "Dogma",
             "payment": {
               "ideas": 2
@@ -541,7 +369,7 @@
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "ResourceReward": {
             "culture_tokens": 1
           }
@@ -549,8 +377,10 @@
       },
       "undo": [
         {
-          "CustomPhaseEvent": {
-            "event_type": "on_construct",
+          "Event": {
+            "event_type": {
+              "Construct": "Temple"
+            },
             "player": 1,
             "last_priority_used": 1,
             "handler": {
@@ -578,7 +408,6 @@
                   "name": "Select Temple bonus"
                 }
               },
-              "response": null,
               "origin": {
                 "Advance": "Myths"
               }
@@ -588,7 +417,7 @@
       ]
     }
   ],
-  "action_log_index": 17,
+  "action_log_index": 3,
   "log": [
     [
       "Player2 paid 2 ideas to get the Dogma advance",
@@ -602,7 +431,7 @@
       "Player2 selected 1 culture token as a reward for constructing a Temple"
     ]
   ],
-  "undo_limit": 14,
+  "undo_limit": 0,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,

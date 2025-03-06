@@ -1,14 +1,59 @@
 {
-  "state": {
-    "CulturalInfluenceResolution": {
-      "roll_boost_cost": {
-        "culture_tokens": 4
+  "state": [
+    "Playing"
+  ],
+  "current_events": [
+    {
+      "event_type": {
+        "InfluenceCultureResolution": {
+          "culture_tokens": 4
+        }
       },
-      "target_player_index": 0,
-      "target_city_position": "C2",
-      "city_piece": "Temple"
+      "player": 1,
+      "last_priority_used": 0,
+      "handler": {
+        "priority": 0,
+        "request": {
+          "Payment": [
+            {
+              "cost": {
+                "default": {
+                  "culture_tokens": 4
+                },
+                "conversions": [
+                  {
+                    "from": [
+                      {
+                        "food": 1
+                      },
+                      {
+                        "wood": 1
+                      },
+                      {
+                        "ore": 1
+                      },
+                      {
+                        "ideas": 1
+                      }
+                    ],
+                    "to": {
+                      "gold": 1
+                    },
+                    "type": "Unlimited"
+                  }
+                ]
+              },
+              "name": "Pay 4 culture tokens to increase the dice roll",
+              "optional": true
+            }
+          ]
+        },
+        "origin": {
+          "Builtin": "Influence Culture"
+        }
+      }
     }
-  },
+  ],
   "players": [
     {
       "name": null,

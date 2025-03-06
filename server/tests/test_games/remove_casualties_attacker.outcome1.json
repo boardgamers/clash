@@ -1,15 +1,18 @@
 {
-  "state": {
-    "Movement": {
-      "movement_actions_left": 1,
-      "moved_units": [
-        0,
-        1,
-        2,
-        3
-      ]
+  "state": [
+    "Playing",
+    {
+      "Movement": {
+        "movement_actions_left": 1,
+        "moved_units": [
+          0,
+          1,
+          2,
+          3
+        ]
+      }
     }
-  },
+  ],
   "players": [
     {
       "name": null,
@@ -216,7 +219,7 @@
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "SelectUnits": [
             0,
             1
@@ -224,33 +227,6 @@
         }
       },
       "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_combat_round_end",
-            "player": 0,
-            "last_priority_used": 1,
-            "handler": {
-              "priority": 1,
-              "request": {
-                "SelectUnits": {
-                  "player": 0,
-                  "choices": [
-                    0,
-                    1,
-                    2,
-                    3
-                  ],
-                  "needed": 2,
-                  "description": "Remove 2 attacking units"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Builtin": "Choose Casualties"
-              }
-            }
-          }
-        },
         {
           "WastedResources": {
             "resources": {

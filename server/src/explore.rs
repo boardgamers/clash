@@ -1,16 +1,18 @@
+use crate::ability_initializer::AbilityInitializerSetup;
 use crate::content::advances::NAVIGATION;
-use crate::game::{Game, GameState};
+use crate::content::builtin::Builtin;
+use crate::content::custom_phase_actions::{
+    CurrentEventRequest, CurrentEventResponse, CurrentEventType,
+};
+use crate::game::Game;
 use crate::map::{Block, BlockPosition, Map, Rotation, Terrain, UnexploredBlock};
-use crate::movement::{back_to_move, move_units, undo_move_units, CurrentMove, MoveState};
+use crate::movement::{move_units, stop_current_move, undo_move_units};
 use crate::position::Position;
-use crate::undo::UndoContext;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct ExploreResolutionState {
-    #[serde(flatten)]
-    pub move_state: MoveState,
     pub block: UnexploredBlock,
     pub units: Vec<u32>,
     pub start: Position,
@@ -24,20 +26,11 @@ pub(crate) fn move_to_unexplored_tile(
     units: &[u32],
     start: Position,
     destination: Position,
-    move_state: &MoveState,
 ) -> bool {
     for b in &game.map.unexplored_blocks.clone() {
         for (position, _tile) in b.block.tiles(&b.position, b.position.rotation) {
             if position == destination {
-                return move_to_unexplored_block(
-                    game,
-                    player_index,
-                    b,
-                    units,
-                    start,
-                    destination,
-                    move_state,
-                );
+                return move_to_unexplored_block(game, player_index, b, units, start, destination);
             }
         }
     }
@@ -51,7 +44,6 @@ pub(crate) fn move_to_unexplored_block(
     units: &[u32],
     start: Position,
     destination: Position,
-    move_state: &MoveState,
 ) -> bool {
     let base = move_to.position.rotation;
     let opposite = (base + 3) as Rotation;
@@ -78,7 +70,7 @@ pub(crate) fn move_to_unexplored_block(
             destination,
             ship_can_teleport,
         );
-        true // indicates to continue moving
+        true // no current event is active
     };
 
     let mut ship_can_teleport = false;
@@ -131,23 +123,32 @@ pub(crate) fn move_to_unexplored_block(
     }
 
     game.lock_undo();
-    let start = game
-        .get_player(player_index)
-        .get_unit(units[0])
-        .expect("unit not found")
-        .position;
-    let mut state = move_state.clone();
-    state.current_move = CurrentMove::None;
-    game.state = GameState::ExploreResolution(ExploreResolutionState {
+    let start = game.get_player(player_index).get_unit(units[0]).position;
+
+    let resolution_state = ExploreResolutionState {
         block: move_to.clone(),
-        move_state: state,
         units: units.to_vec(),
         start,
         destination,
         ship_can_teleport,
-    });
+    };
+    ask_explore_resolution(game, player_index, &resolution_state);
 
-    false // don't continue moving
+    true // current event is active
+}
+
+pub(crate) fn ask_explore_resolution(
+    game: &mut Game,
+    player_index: usize,
+    resolution_state: &ExploreResolutionState,
+) {
+    game.trigger_current_event(
+        &[player_index],
+        |events| &mut events.on_explore_resolution,
+        resolution_state,
+        CurrentEventType::ExploreResolution,
+        None,
+    );
 }
 
 fn move_to_explored_tile(
@@ -164,11 +165,7 @@ fn move_to_explored_tile(
     if is_any_ship(game, player_index, units) && game.map.is_land(destination) {
         let player = game.get_player(player_index);
         let used_navigation = player.has_advance(NAVIGATION)
-            && !player
-                .get_unit(units[0])
-                .expect("unit should exist")
-                .position
-                .is_neighbor(destination);
+            && !player.get_unit(units[0]).position.is_neighbor(destination);
 
         if ship_can_teleport || used_navigation {
             for (p, t) in block.block.tiles(&block.position, rotation) {
@@ -187,12 +184,7 @@ fn move_to_explored_tile(
 
 pub fn is_any_ship(game: &Game, player_index: usize, units: &[u32]) -> bool {
     let p = game.get_player(player_index);
-    units.iter().any(|&id| {
-        p.get_unit(id)
-            .expect("unit should exist")
-            .unit_type
-            .is_ship()
-    })
+    units.iter().any(|&id| p.get_unit(id).unit_type.is_ship())
 }
 
 #[must_use]
@@ -276,30 +268,50 @@ fn add_block_tiles_with_log(
     game.map.add_block_tiles(pos, block, rotation);
 }
 
-pub(crate) fn explore_resolution(game: &mut Game, r: &ExploreResolutionState, rotation: Rotation) {
-    let unexplored_block = &r.block;
-    let rotate_by = rotation - unexplored_block.position.rotation;
-    let valid_rotation = rotate_by == 0 || rotate_by == 3;
-    assert!(valid_rotation, "Invalid rotation {rotate_by}");
+pub(crate) fn explore_resolution() -> Builtin {
+    Builtin::builder(
+        "Explore Resolution",
+        "Select a rotation for the unexplored tiles",
+    )
+    .add_current_event_listener(
+        |e| &mut e.on_explore_resolution,
+        0,
+        move |_game, _player_index, _player_name, state| {
+            Some(CurrentEventRequest::ExploreResolution(state.clone()))
+        },
+        move |game, _player_index, player_name, action, _request, r| {
+            let CurrentEventResponse::ExploreResolution(rotation) = action else {
+                panic!("Invalid action");
+            };
 
-    move_to_explored_tile(
-        game,
-        unexplored_block,
-        rotation,
-        game.current_player_index,
-        &r.units,
-        r.destination,
-        r.ship_can_teleport,
-    );
-    back_to_move(game, &r.move_state, true);
-    game.push_undo_context(UndoContext::ExploreResolution(r.clone()));
+            game.add_info_log_item(&format!(
+                "{player_name} chose the orientation of the newly explored tiles"
+            ));
+            let unexplored_block = &r.block;
+            let rotate_by = rotation - unexplored_block.position.rotation;
+            let valid_rotation = rotate_by == 0 || rotate_by == 3;
+            assert!(valid_rotation, "Invalid rotation {rotate_by}");
+
+            move_to_explored_tile(
+                game,
+                unexplored_block,
+                rotation,
+                game.current_player_index,
+                &r.units,
+                r.destination,
+                r.ship_can_teleport,
+            );
+            stop_current_move(game);
+        },
+    )
+    .build()
 }
 
-pub(crate) fn undo_explore_resolution(game: &mut Game, player_index: usize) {
-    let Some(UndoContext::ExploreResolution(s)) = game.pop_undo_context() else {
-        panic!("when undoing explore resolution, the undo context stack should have an explore resolution")
-    };
-
+pub(crate) fn undo_explore_resolution(
+    game: &mut Game,
+    player_index: usize,
+    s: &ExploreResolutionState,
+) {
     let unexplored_block = &s.block;
 
     let block = &unexplored_block.block;
@@ -317,5 +329,4 @@ pub(crate) fn undo_explore_resolution(game: &mut Game, player_index: usize) {
         .add_unexplored_blocks(vec![unexplored_block.clone()]);
 
     undo_move_units(game, player_index, s.units.clone(), s.start);
-    game.state = GameState::ExploreResolution(s);
 }

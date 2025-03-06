@@ -1,5 +1,6 @@
-use crate::common::{load_game, move_action, test_action};
+use crate::common::{load_game, move_action, test_action, test_actions, TestAction};
 use server::action::Action;
+use server::content::custom_phase_actions::CurrentEventResponse;
 use server::game::Game;
 use server::movement::move_units_destinations;
 use server::position::Position;
@@ -66,12 +67,15 @@ fn test_explore_auto_water_outside() {
 
 #[test]
 fn test_explore_resolution() {
-    test_action(
+    test_actions(
         "explore_resolution",
-        Action::ExploreResolution(3),
-        1,
-        true,
-        false,
+        vec![
+            TestAction::not_undoable(1, move_action(vec![0], Position::from_offset("D6"))),
+            TestAction::undoable(
+                1,
+                Action::Response(CurrentEventResponse::ExploreResolution(3)),
+            ),
+        ],
     );
 }
 
@@ -180,7 +184,7 @@ fn test_ship_explore_teleport() {
 fn test_ship_explore_move_not_possible() {
     test_action(
         "ship_explore_move_not_possible",
-        Action::ExploreResolution(3),
+        Action::Response(CurrentEventResponse::ExploreResolution(3)),
         1,
         true,
         false,
@@ -219,7 +223,7 @@ fn test_ship_navigate_coordinates() {
 }
 
 fn assert_navigate(game: &mut Game, from: Position, to: Position) {
-    game.players[1].get_unit_mut(1).unwrap().position = from;
+    game.players[1].get_unit_mut(1).position = from;
     let result = move_units_destinations(game.get_player(1), game, &[1], from, None)
         .is_ok_and(|d| d.iter().any(|route| route.destination == to));
     assert!(

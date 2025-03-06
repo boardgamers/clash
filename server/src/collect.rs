@@ -22,7 +22,7 @@ pub fn get_total_collection(
     collections: &[(Position, ResourcePile)],
 ) -> Option<CollectInfo> {
     let player = &game.players[player_index];
-    let city = player.get_city(city_position)?;
+    let city = player.get_city(city_position);
     if city.mood_modified_size(player) < collections.len() || city.player_index != player_index {
         return None;
     }
@@ -58,9 +58,7 @@ pub fn get_total_collection(
 pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) {
     let i = get_total_collection(game, player_index, c.city_position, &c.collections)
         .expect("Illegal action");
-    let city = game.players[player_index]
-        .get_city_mut(c.city_position)
-        .expect("Illegal action");
+    let city = game.players[player_index].get_city_mut(c.city_position);
     assert!(city.can_activate(), "Illegal action");
     city.activate();
     game.players[player_index].gain_resources(i.total.clone());
@@ -73,7 +71,6 @@ pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) {
 pub(crate) fn undo_collect(game: &mut Game, player_index: usize, c: &Collect) {
     game.players[player_index]
         .get_city_mut(c.city_position)
-        .expect("city should be owned by the player")
         .undo_activate();
     // resources are handled with player commands
 }
@@ -175,7 +172,8 @@ pub fn possible_resource_collections(
     }
 
     i.choices.retain(|p, _| {
-        game.get_any_city(*p).is_none_or(|c| c.position == city_pos)
+        game.try_get_any_city(*p)
+            .is_none_or(|c| c.position == city_pos)
             && game.enemy_player(player_index, *p).is_none()
     });
     i

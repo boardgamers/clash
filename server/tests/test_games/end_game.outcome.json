@@ -1,0 +1,347 @@
+{
+  "state": [],
+  "players": [
+    {
+      "name": null,
+      "id": 0,
+      "resources": {
+        "food": 7,
+        "wood": 5,
+        "ore": 5,
+        "ideas": 1,
+        "gold": 5,
+        "mood_tokens": 12,
+        "culture_tokens": 10
+      },
+      "resource_limit": {
+        "food": 7,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "market": 1
+          },
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A1"
+        },
+        {
+          "city_pieces": {
+            "academy": 1,
+            "port": 1
+          },
+          "mood_state": "Angry",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C2",
+          "port_position": "C3"
+        },
+        {
+          "city_pieces": {
+            "obelisk": 1,
+            "observatory": 1,
+            "fortress": 1,
+            "temple": 1
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Angry",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "B3",
+          "unit_type": "Settler",
+          "id": 3
+        },
+        {
+          "position": "B3",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "position": "B3",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "B3",
+          "unit_type": "Settler",
+          "id": 6
+        },
+        {
+          "position": "C3",
+          "unit_type": "Ship",
+          "id": 7,
+          "carried_units": [
+            {
+              "unit_type": "Cavalry",
+              "id": 1
+            },
+            {
+              "unit_type": "Elephant",
+              "id": 2
+            }
+          ]
+        },
+        {
+          "position": "C3",
+          "unit_type": "Ship",
+          "id": 8
+        },
+        {
+          "position": "C3",
+          "unit_type": "Ship",
+          "id": 9
+        }
+      ],
+      "civilization": "Maya",
+      "active_leader": null,
+      "available_leaders": [
+        "Kʼinich Janaab Pakal I"
+      ],
+      "advances": [
+        "Farming",
+        "Fishing",
+        "Free Economy",
+        "Free Education",
+        "Mining",
+        "Storage",
+        "Voting",
+        "Writing"
+      ],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [
+        "Great Gardens"
+      ],
+      "next_unit_id": 10
+    },
+    {
+      "name": null,
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 5,
+        "ore": 5,
+        "ideas": 6,
+        "gold": 5,
+        "mood_tokens": 9,
+        "culture_tokens": 9
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C1"
+        },
+        {
+          "city_pieces": {
+            "port": 1
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B2",
+          "port_position": "C3"
+        }
+      ],
+      "units": [
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 1
+        }
+      ],
+      "civilization": "test0",
+      "active_leader": null,
+      "available_leaders": [
+        "Alexander",
+        "Kleopatra"
+      ],
+      "advances": [
+        "Farming",
+        "Fishing",
+        "Mining",
+        "Myths",
+        "State Religion"
+      ],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 2
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Water"
+      ],
+      [
+        "A3",
+        {
+          "Exhausted": "Forest"
+        }
+      ],
+      [
+        "A4",
+        "Mountain"
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "B4",
+        "Fertile"
+      ],
+      [
+        "B5",
+        "Fertile"
+      ],
+      [
+        "B6",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "C4",
+        "Water"
+      ],
+      [
+        "C5",
+        "Water"
+      ],
+      [
+        "D1",
+        "Fertile"
+      ],
+      [
+        "D2",
+        "Water"
+      ],
+      [
+        "E2",
+        "Fertile"
+      ]
+    ]
+  },
+  "starting_player_index": 1,
+  "current_player_index": 1,
+  "action_log": [
+    {
+      "action": {
+        "Playing": "EndTurn"
+      }
+    }
+  ],
+  "action_log_index": 1,
+  "log": [
+    [
+      "Player1 ended their turn"
+    ],
+    [
+      "It's Player2's turn"
+    ],
+    [
+      "The game has entered the 6th status phase"
+    ],
+    [
+      "The game has ended. Player2 has won"
+    ]
+  ],
+  "undo_limit": 1,
+  "actions_left": 3,
+  "successful_cultural_influence": false,
+  "round": 1,
+  "age": 6,
+  "messages": [
+    "The game has started",
+    "The game has ended"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+  ],
+  "rng": {
+    "seed": 46312381643103681595563341886777350953
+  },
+  "dice_roll_log": [],
+  "dropped_players": [],
+  "wonders_left": [
+    "Pyramids"
+  ],
+  "wonder_amount_left": 2
+}
