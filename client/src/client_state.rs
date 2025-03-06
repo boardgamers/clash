@@ -2,7 +2,7 @@ use crate::assets::Assets;
 use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::ConstructionPayment;
-use crate::custom_phase_ui::{StructuresSelection, UnitsSelection};
+use crate::custom_phase_ui::{MultiSelection, UnitsSelection};
 use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
 use crate::event_ui::{custom_phase_event_help, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
@@ -17,14 +17,13 @@ use macroquad::prelude::*;
 use server::action::Action;
 use server::city::{City, MoodState};
 use server::content::custom_phase_actions::{
-    AdvanceRequest, CurrentEventRequest, PlayerRequest, PositionRequest, UnitTypeRequest,
+    AdvanceRequest, ChangeGovernmentRequest, CurrentEventRequest, CurrentEventResponse,
+    PlayerRequest, SelectedStructure, UnitTypeRequest,
 };
-use server::cultural_influence::CulturalInfluenceResolution;
 use server::events::EventOrigin;
 use server::game::{Game, GameState};
 use server::movement::CurrentMove;
 use server::position::Position;
-use server::status_phase::{StatusPhaseAction, StatusPhaseState};
 
 #[derive(Clone)]
 pub enum ActiveDialog {
@@ -44,16 +43,7 @@ pub enum ActiveDialog {
     MoveUnits(MoveSelection),
     MovePayment(MovePayment),
     CulturalInfluence(BaseOrCustomDialog),
-    CulturalInfluenceResolution(CulturalInfluenceResolution),
     ExploreResolution(ExploreResolutionConfig),
-
-    // status phase
-    FreeAdvance,
-    RazeSize1City,
-    CompleteObjectives,
-    DetermineFirstPlayer,
-    ChangeGovernmentType,
-    ChooseAdditionalAdvances(ChooseAdditionalAdvances),
 
     // custom
     Sports((Payment, Position)),
@@ -63,11 +53,13 @@ pub enum ActiveDialog {
     AdvanceRequest(AdvanceRequest),
     PaymentRequest(Vec<Payment>),
     PlayerRequest(PlayerRequest),
-    PositionRequest(PositionRequest),
+    PositionRequest(MultiSelection<Position>),
     UnitTypeRequest(UnitTypeRequest),
     UnitsRequest(UnitsSelection),
-    StructuresRequest(StructuresSelection),
+    StructuresRequest(MultiSelection<SelectedStructure>),
     BoolRequest,
+    ChangeGovernmentType(ChangeGovernmentRequest),
+    ChooseAdditionalAdvances(ChooseAdditionalAdvances),
 }
 
 impl ActiveDialog {
@@ -88,13 +80,8 @@ impl ActiveDialog {
             ActiveDialog::MoveUnits(_) => "move units",
             ActiveDialog::MovePayment(_) => "move payment",
             ActiveDialog::CulturalInfluence(_) => "cultural influence",
-            ActiveDialog::CulturalInfluenceResolution(_) => "cultural influence resolution",
             ActiveDialog::ExploreResolution(_) => "explore resolution",
-            ActiveDialog::FreeAdvance => "free advance",
-            ActiveDialog::RazeSize1City => "raze size 1 city",
-            ActiveDialog::CompleteObjectives => "complete objectives",
-            ActiveDialog::DetermineFirstPlayer => "determine first player",
-            ActiveDialog::ChangeGovernmentType => "change government type",
+            ActiveDialog::ChangeGovernmentType(_) => "change government type",
             ActiveDialog::ChooseAdditionalAdvances(_) => "choose additional advances",
             ActiveDialog::Sports(_) => "sports",
             ActiveDialog::Theaters(_) => "theaters",
@@ -139,28 +126,15 @@ impl ActiveDialog {
                 }
                 v
             }
-            ActiveDialog::CulturalInfluenceResolution(c) => vec![format!(
-                "Pay {} to influence {}",
-                c.roll_boost_cost,
-                c.city_piece.name()
-            )],
             ActiveDialog::ExploreResolution(_) => {
                 vec!["Click on the new tile to rotate it".to_string()]
             }
-            ActiveDialog::FreeAdvance => {
-                vec!["Click on an advance to take it for free".to_string()]
-            }
-            ActiveDialog::RazeSize1City => {
-                vec!["Click on a city to raze it - or click cancel".to_string()]
-            }
-            ActiveDialog::CompleteObjectives => {
-                vec!["Click on an objective to complete it".to_string()]
-            }
-            ActiveDialog::DetermineFirstPlayer => {
-                vec!["Click on a player to determine first player".to_string()]
-            }
-            ActiveDialog::ChangeGovernmentType => {
-                vec!["Click on a government type to change - or click cancel".to_string()]
+            ActiveDialog::ChangeGovernmentType(r) => {
+                if r.optional {
+                    vec!["Click on a government type to change - or click cancel".to_string()]
+                } else {
+                    vec!["Click on a government type to change".to_string()]
+                }
             }
             ActiveDialog::ChooseAdditionalAdvances(_) => {
                 vec!["Click on an advance to choose it".to_string()]
@@ -179,10 +153,14 @@ impl ActiveDialog {
             | ActiveDialog::AdvanceRequest(_)
             | ActiveDialog::PaymentRequest(_)
             | ActiveDialog::BoolRequest => custom_phase_event_help(rc, None),
-            ActiveDialog::PositionRequest(r) => custom_phase_event_help(rc, r.description.as_ref()),
             ActiveDialog::UnitTypeRequest(r) => custom_phase_event_help(rc, r.description.as_ref()),
-            ActiveDialog::UnitsRequest(r) => custom_phase_event_help(rc, r.description.as_ref()),
+            ActiveDialog::UnitsRequest(r) => {
+                custom_phase_event_help(rc, r.selection.request.description.as_ref())
+            }
             ActiveDialog::StructuresRequest(r) => {
+                custom_phase_event_help(rc, r.request.description.as_ref())
+            }
+            ActiveDialog::PositionRequest(r) => {
                 custom_phase_event_help(rc, r.request.description.as_ref())
             }
             ActiveDialog::PlayerRequest(r) => custom_phase_event_help(rc, Some(&r.description)),
@@ -219,7 +197,7 @@ impl ActiveDialog {
 
     #[must_use]
     pub fn show_for_other_player(&self) -> bool {
-        matches!(self, ActiveDialog::Log | ActiveDialog::DetermineFirstPlayer) || self.is_advance()
+        matches!(self, ActiveDialog::Log | ActiveDialog::PlayerRequest(_)) | self.is_advance()
     }
 
     #[must_use]
@@ -232,9 +210,8 @@ impl ActiveDialog {
         matches!(
             self,
             ActiveDialog::AdvanceMenu
-                | ActiveDialog::FreeAdvance
                 | ActiveDialog::AdvancePayment(_)
-                | ActiveDialog::ChangeGovernmentType
+                | ActiveDialog::ChangeGovernmentType(_)
                 | ActiveDialog::ChooseAdditionalAdvances(_)
                 | ActiveDialog::AdvanceRequest(_)
         )
@@ -338,8 +315,8 @@ impl StateUpdate {
         }
     }
 
-    pub fn status_phase(action: StatusPhaseAction) -> StateUpdate {
-        StateUpdate::Execute(Action::StatusPhase(action))
+    pub fn response(action: CurrentEventResponse) -> StateUpdate {
+        StateUpdate::Execute(Action::Response(action))
     }
 
     pub fn move_units(
@@ -547,24 +524,30 @@ impl State {
                     ActiveDialog::ResourceRewardRequest(Payment::new_gain(&r.reward, &r.name))
                 }
                 CurrentEventRequest::SelectAdvance(r) => ActiveDialog::AdvanceRequest(r.clone()),
-                CurrentEventRequest::SelectPosition(r) => ActiveDialog::PositionRequest(r.clone()),
+                CurrentEventRequest::SelectPositions(r) => {
+                    ActiveDialog::PositionRequest(MultiSelection::new(r.clone()))
+                }
                 CurrentEventRequest::SelectUnitType(r) => ActiveDialog::UnitTypeRequest(r.clone()),
                 CurrentEventRequest::SelectUnits(r) => {
-                    ActiveDialog::UnitsRequest(UnitsSelection::new(
-                        r.player,
-                        r.needed,
-                        r.choices.clone(),
-                        r.description.clone(),
-                    ))
+                    ActiveDialog::UnitsRequest(UnitsSelection::new(r))
                 }
-                CurrentEventRequest::SelectStructures(s) => {
-                    ActiveDialog::StructuresRequest(StructuresSelection::new(s))
+                CurrentEventRequest::SelectStructures(r) => {
+                    ActiveDialog::StructuresRequest(MultiSelection::new(r.clone()))
                 }
                 CurrentEventRequest::SelectPlayer(r) => ActiveDialog::PlayerRequest(r.clone()),
                 CurrentEventRequest::BoolRequest => ActiveDialog::BoolRequest,
+                CurrentEventRequest::ChangeGovernment(r) => {
+                    ActiveDialog::ChangeGovernmentType(r.clone())
+                }
+                CurrentEventRequest::ExploreResolution(r) => {
+                    ActiveDialog::ExploreResolution(ExploreResolutionConfig {
+                        block: r.block.clone(),
+                        rotation: r.block.position.rotation,
+                    })
+                }
             };
         }
-        match &game.state {
+        match &game.state() {
             GameState::Playing | GameState::Finished => ActiveDialog::None,
             GameState::Movement(move_state) => ActiveDialog::MoveUnits(MoveSelection::new(
                 game.active_player(),
@@ -573,23 +556,7 @@ impl State {
                 MoveIntent::Land, // is not used, because no tile is focused
                 &move_state.current_move,
             )),
-            GameState::CulturalInfluenceResolution(c) => {
-                ActiveDialog::CulturalInfluenceResolution(c.clone())
-            }
-            GameState::StatusPhase(state) => match state {
-                StatusPhaseState::CompleteObjectives => ActiveDialog::CompleteObjectives,
-                StatusPhaseState::FreeAdvance => ActiveDialog::FreeAdvance,
-                StatusPhaseState::RazeSize1City => ActiveDialog::RazeSize1City,
-                StatusPhaseState::ChangeGovernmentType => ActiveDialog::ChangeGovernmentType,
-                StatusPhaseState::DetermineFirstPlayer => ActiveDialog::DetermineFirstPlayer,
-            },
-            GameState::Combat(_) => panic!("should be in custom phase"),
-            GameState::ExploreResolution(r) => {
-                ActiveDialog::ExploreResolution(ExploreResolutionConfig {
-                    block: r.block.clone(),
-                    rotation: r.block.position.rotation,
-                })
-            }
+            GameState::Combat(_) | GameState::StatusPhase(_) => panic!("should be in custom phase"),
         }
     }
 

@@ -1,8 +1,14 @@
 {
-  "state": "Playing",
+  "state": [
+    "Playing"
+  ],
   "current_events": [
     {
-      "event_type": "on_incident",
+      "event_type": {
+        "Incident": {
+          "active_player": 0
+        }
+      },
       "players_used": [
         0
       ],
@@ -11,15 +17,18 @@
       "handler": {
         "priority": 0,
         "request": {
-          "SelectPosition": {
+          "SelectPositions": {
             "choices": [
               "A1",
               "A3"
             ],
+            "needed": {
+              "start": 1,
+              "end": 1
+            },
             "description": "Select a city to decrease the mood"
           }
         },
-        "response": null,
         "origin": {
           "Incident": 33
         }
@@ -303,36 +312,12 @@
     },
     {
       "action": {
-        "CustomPhaseEvent": {
-          "SelectPosition": "C2"
+        "Response": {
+          "SelectPositions": [
+            "C2"
+          ]
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_incident",
-            "player": 0,
-            "last_priority_used": 0,
-            "handler": {
-              "priority": 0,
-              "request": {
-                "SelectPosition": {
-                  "choices": [
-                    "B2",
-                    "B3",
-                    "C2"
-                  ],
-                  "description": "Select a city to decrease the mood"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Incident": 33
-              }
-            }
-          }
-        }
-      ]
+      }
     }
   ],
   "action_log_index": 2,

@@ -1,8 +1,18 @@
 {
-  "state": "Playing",
+  "state": [
+    "Playing"
+  ],
   "current_events": [
     {
-      "event_type": "on_advance_custom_phase",
+      "event_type": {
+        "Advance": {
+          "name": "Draft",
+          "payment": {
+            "food": 1,
+            "gold": 1
+          }
+        }
+      },
       "player": 0,
       "last_priority_used": 1,
       "handler": {
@@ -42,7 +52,6 @@
             }
           ]
         },
-        "response": null,
         "origin": {
           "Advance": "Free Education"
         }

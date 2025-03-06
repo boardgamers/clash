@@ -1,12 +1,15 @@
 {
-  "state": {
-    "Movement": {
-      "movement_actions_left": 2,
-      "moved_units": [
-        10
-      ]
+  "state": [
+    "Playing",
+    {
+      "Movement": {
+        "movement_actions_left": 2,
+        "moved_units": [
+          10
+        ]
+      }
     }
-  },
+  ],
   "players": [
     {
       "name": null,
@@ -317,51 +320,16 @@
             "destination": "B1"
           }
         }
-      },
-      "undo": [
-        {
-          "WastedResources": {
-            "resources": {
-              "gold": 3
-            },
-            "player_index": 0
-          }
-        }
-      ]
+      }
     },
     {
       "action": {
-        "CustomPhaseEvent": {
-          "SelectPosition": "B2"
+        "Response": {
+          "SelectPositions": [
+            "B2"
+          ]
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_combat_end",
-            "players_used": [
-              0
-            ],
-            "player": 1,
-            "last_priority_used": 0,
-            "handler": {
-              "priority": 0,
-              "request": {
-                "SelectPosition": {
-                  "choices": [
-                    "B2",
-                    "C1"
-                  ]
-                }
-              },
-              "response": null,
-              "origin": {
-                "Builtin": "Place Settler"
-              }
-            }
-          }
-        }
-      ]
+      }
     }
   ],
   "action_log_index": 2,

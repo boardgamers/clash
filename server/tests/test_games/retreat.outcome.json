@@ -1,40 +1,42 @@
 {
-  "state": {
-    "Combat": {
-      "initiation": {
-        "Movement": {
-          "movement_actions_left": 1,
-          "moved_units": [
-            0
-          ]
-        }
-      },
-      "round": 1,
-      "defender": 1,
-      "defender_position": "C1",
-      "attacker": 0,
-      "attacker_position": "C2",
-      "attackers": [
-        0
-      ],
-      "can_retreat": true,
-      "round_result": {
-        "attacker_casualties": {},
-        "defender_casualties": {},
-        "can_retreat": true,
-        "retreated": false
+  "state": [
+    "Playing",
+    {
+      "Movement": {
+        "movement_actions_left": 1,
+        "moved_units": [
+          0
+        ]
+      }
+    },
+    {
+      "Combat": {
+        "round": 1,
+        "defender": 1,
+        "defender_position": "C1",
+        "attacker": 0,
+        "attacker_position": "C2",
+        "attackers": [
+          0
+        ],
+        "retreat": "CanRetreat"
       }
     }
-  },
+  ],
   "current_events": [
     {
-      "event_type": "on_combat_round_end",
+      "event_type": {
+        "CombatRoundEnd": {
+          "attacker_casualties": {},
+          "defender_casualties": {},
+          "can_retreat": true
+        }
+      },
       "player": 0,
       "last_priority_used": 0,
       "handler": {
         "priority": 0,
         "request": "BoolRequest",
-        "response": null,
         "origin": {
           "Builtin": "Offer Retreat"
         }

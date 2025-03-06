@@ -50,7 +50,7 @@ fn siegecraft() -> AdvanceBuilder {
 
                 let player = &game.players[player];
                 if game
-                    .get_any_city(c.defender_position)
+                    .try_get_any_city(c.defender_position)
                     .is_some_and(|c| c.pieces.fortress.is_some())
                     && (player.can_afford(&extra_die) || player.can_afford(&ignore_hit))
                 {
@@ -92,7 +92,7 @@ fn siegecraft() -> AdvanceBuilder {
                 if !paid {
                     game.add_to_last_log_item("nothing");
                 }
-                let GameState::Combat(c) = &mut game.state else { panic!("Invalid state") };
+                let Some(GameState::Combat(c)) = &mut game.state_stack.last_mut() else { panic!("Invalid state") };
                 c.modifiers.extend(modifiers);
             },
         )
@@ -112,7 +112,7 @@ fn steel_weapons() -> AdvanceBuilder {
 
                 let cost = steel_weapons_cost(game, c, player_index);
                 if cost.is_free() {
-                    let GameState::Combat(c) = &mut game.state else { panic!("Invalid state") };
+                    let Some(GameState::Combat(c)) = &mut game.state_stack.last_mut() else { panic!("Invalid state") };
                     add_steel_weapons(player_index, c);
                     return None;
                 }
@@ -128,7 +128,7 @@ fn steel_weapons() -> AdvanceBuilder {
                 }
             },
             |game, s| {
-                let GameState::Combat(c) = &mut game.state else { panic!("Invalid state") };
+                let Some(GameState::Combat(c)) = &mut game.state_stack.last_mut() else { panic!("Invalid state") };
                 add_steel_weapons(s.player_index, c);
                 game.add_info_log_item(
                     &format!("{} paid for steel weapons: {}", s.player_name, s.choice[0]));

@@ -1,7 +1,34 @@
 {
-  "state": {
-    "StatusPhase": "RazeSize1City"
-  },
+  "state": [
+    {
+      "StatusPhase": "RazeSize1City"
+    }
+  ],
+  "current_events": [
+    {
+      "event_type": "StatusPhase",
+      "player": 0,
+      "last_priority_used": 0,
+      "handler": {
+        "priority": 0,
+        "request": {
+          "SelectPositions": {
+            "choices": [
+              "A1",
+              "C2"
+            ],
+            "needed": {
+              "start": 0,
+              "end": 1
+            }
+          }
+        },
+        "origin": {
+          "Builtin": "Raze city"
+        }
+      }
+    }
+  ],
   "players": [
     {
       "name": null,

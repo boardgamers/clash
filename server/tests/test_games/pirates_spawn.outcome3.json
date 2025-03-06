@@ -1,10 +1,21 @@
 {
-  "state": {
-    "StatusPhase": "FreeAdvance"
-  },
+  "state": [
+    {
+      "StatusPhase": "FreeAdvance"
+    }
+  ],
   "current_events": [
     {
-      "event_type": "on_incident",
+      "event_type": "StatusPhase",
+      "player": 0,
+      "last_priority_used": 0
+    },
+    {
+      "event_type": {
+        "Incident": {
+          "active_player": 0
+        }
+      },
       "player": 0,
       "last_priority_used": 102,
       "handler": {
@@ -90,7 +101,6 @@
             }
           ]
         },
-        "response": null,
         "origin": {
           "Incident": 54
         }
@@ -339,124 +349,37 @@
   "action_log": [
     {
       "action": {
-        "StatusPhase": {
-          "FreeAdvance": "Storage"
+        "Response": {
+          "SelectAdvance": "Storage"
         }
       }
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "SelectUnits": [
             7
           ]
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_incident",
-            "player": 0,
-            "last_priority_used": 105,
-            "handler": {
-              "priority": 105,
-              "request": {
-                "SelectUnits": {
-                  "player": 2,
-                  "choices": [
-                    5,
-                    6,
-                    7
-                  ],
-                  "needed": 1,
-                  "description": "Select Pirate Ships to remove"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Incident": 54
-              }
-            },
-            "barbarians": {
-              "move_units": false
-            }
-          }
-        }
-      ]
+      }
     },
     {
       "action": {
-        "CustomPhaseEvent": {
-          "SelectPosition": "A2"
+        "Response": {
+          "SelectPositions": [
+            "A2"
+          ]
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_incident",
-            "player": 0,
-            "last_priority_used": 104,
-            "handler": {
-              "priority": 104,
-              "request": {
-                "SelectPosition": {
-                  "choices": [
-                    "A2",
-                    "C3",
-                    "D1",
-                    "D2"
-                  ],
-                  "description": "Select a position for the Pirate Ship"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Incident": 54
-              }
-            },
-            "barbarians": {
-              "move_units": false
-            }
-          }
-        }
-      ]
+      }
     },
     {
       "action": {
-        "CustomPhaseEvent": {
-          "SelectPosition": "D2"
+        "Response": {
+          "SelectPositions": [
+            "D2"
+          ]
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_incident",
-            "player": 0,
-            "last_priority_used": 103,
-            "handler": {
-              "priority": 103,
-              "request": {
-                "SelectPosition": {
-                  "choices": [
-                    "A2",
-                    "C3",
-                    "D1",
-                    "D2"
-                  ],
-                  "description": "Select a position for the Pirate Ship"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Incident": 54
-              }
-            },
-            "barbarians": {
-              "move_units": false
-            }
-          }
-        }
-      ]
+      }
     }
   ],
   "action_log_index": 4,

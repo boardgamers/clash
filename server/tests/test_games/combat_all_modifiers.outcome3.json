@@ -1,17 +1,20 @@
 {
-  "state": {
-    "Movement": {
-      "movement_actions_left": 2,
-      "moved_units": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5
-      ]
+  "state": [
+    "Playing",
+    {
+      "Movement": {
+        "movement_actions_left": 2,
+        "moved_units": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      }
     }
-  },
+  ],
   "players": [
     {
       "name": null,
@@ -243,60 +246,18 @@
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "Payment": [
             {
               "ore": 1
             }
           ]
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_combat_start",
-            "player": 0,
-            "last_priority_used": 1,
-            "handler": {
-              "priority": 1,
-              "request": {
-                "Payment": [
-                  {
-                    "cost": {
-                      "default": {
-                        "ore": 1
-                      },
-                      "conversions": [
-                        {
-                          "from": [
-                            {
-                              "ore": 1
-                            }
-                          ],
-                          "to": {
-                            "gold": 1
-                          },
-                          "type": "Unlimited"
-                        }
-                      ]
-                    },
-                    "name": "Use steel weapons",
-                    "optional": true
-                  }
-                ]
-              },
-              "response": null,
-              "origin": {
-                "Advance": "Steel Weapons"
-              }
-            }
-          }
-        }
-      ]
+      }
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "Payment": [
             {},
             {
@@ -304,75 +265,11 @@
             }
           ]
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_combat_start",
-            "player": 0,
-            "last_priority_used": 0,
-            "handler": {
-              "priority": 0,
-              "request": {
-                "Payment": [
-                  {
-                    "cost": {
-                      "default": {
-                        "wood": 2
-                      },
-                      "conversions": [
-                        {
-                          "from": [
-                            {
-                              "wood": 1
-                            }
-                          ],
-                          "to": {
-                            "gold": 1
-                          },
-                          "type": "Unlimited"
-                        }
-                      ]
-                    },
-                    "name": "Cancel fortress ability to add an extra die in the first round of combat",
-                    "optional": true
-                  },
-                  {
-                    "cost": {
-                      "default": {
-                        "ore": 2
-                      },
-                      "conversions": [
-                        {
-                          "from": [
-                            {
-                              "ore": 1
-                            }
-                          ],
-                          "to": {
-                            "gold": 1
-                          },
-                          "type": "Unlimited"
-                        }
-                      ]
-                    },
-                    "name": "Cancel fortress ability to ignore the first hit in the first round of combat",
-                    "optional": true
-                  }
-                ]
-              },
-              "response": null,
-              "origin": {
-                "Advance": "Siegecraft"
-              }
-            }
-          }
-        }
-      ]
+      }
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "Payment": [
             {
               "ore": 1
@@ -381,49 +278,6 @@
         }
       },
       "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_combat_start",
-            "players_used": [
-              0
-            ],
-            "player": 1,
-            "last_priority_used": 1,
-            "handler": {
-              "priority": 1,
-              "request": {
-                "Payment": [
-                  {
-                    "cost": {
-                      "default": {
-                        "ore": 1
-                      },
-                      "conversions": [
-                        {
-                          "from": [
-                            {
-                              "ore": 1
-                            }
-                          ],
-                          "to": {
-                            "gold": 1
-                          },
-                          "type": "Unlimited"
-                        }
-                      ]
-                    },
-                    "name": "Use steel weapons",
-                    "optional": true
-                  }
-                ]
-              },
-              "response": null,
-              "origin": {
-                "Advance": "Steel Weapons"
-              }
-            }
-          }
-        },
         {
           "WastedResources": {
             "resources": {

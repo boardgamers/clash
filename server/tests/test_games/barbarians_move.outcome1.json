@@ -1,7 +1,16 @@
 {
-  "state": {
-    "StatusPhase": "FreeAdvance"
-  },
+  "state": [
+    {
+      "StatusPhase": "FreeAdvance"
+    }
+  ],
+  "current_events": [
+    {
+      "event_type": "StatusPhase",
+      "player": 0,
+      "last_priority_used": 0
+    }
+  ],
   "players": [
     {
       "name": null,
@@ -276,49 +285,23 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 1,
+  "current_player_index": 0,
   "action_log": [
     {
       "action": {
-        "StatusPhase": {
-          "FreeAdvance": "Storage"
+        "Response": {
+          "SelectAdvance": "Storage"
         }
       }
     },
     {
       "action": {
-        "CustomPhaseEvent": {
-          "SelectPosition": "B3"
+        "Response": {
+          "SelectPositions": [
+            "B3"
+          ]
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_incident",
-            "player": 0,
-            "last_priority_used": 136,
-            "handler": {
-              "priority": 136,
-              "request": {
-                "SelectPosition": {
-                  "choices": [
-                    "A3",
-                    "B3"
-                  ],
-                  "description": "Select a Barbarian Army to move next"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Incident": 28
-              }
-            },
-            "barbarians": {
-              "move_units": true
-            }
-          }
-        }
-      ]
+      }
     }
   ],
   "action_log_index": 2,
@@ -336,9 +319,6 @@
       "Barbarians spawned a new Infantry unit at B3",
       "Player2 was selected to gain 1 settler.",
       "Player2 gained 1 settler in C1"
-    ],
-    [
-      "It's Player2's turn"
     ]
   ],
   "undo_limit": 2,
@@ -367,5 +347,8 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1
+  "wonder_amount_left": 1,
+  "incidents_left": [
+    28
+  ]
 }

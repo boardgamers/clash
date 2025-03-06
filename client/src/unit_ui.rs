@@ -62,7 +62,7 @@ fn carried_unit_place(carrier: &UnitPlace, index: usize) -> UnitPlace {
 }
 
 fn unit_place(rc: &RenderContext, index: usize, position: Position) -> UnitPlace {
-    let has_city = rc.game.get_any_city(position).is_some();
+    let has_city = rc.game.try_get_any_city(position).is_some();
     let c = hex_ui::center(position);
     let n = units_on_tile(rc.game, position)
         .filter(|(_, u)| !u.is_transported())
@@ -131,7 +131,7 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
                     h.push(UnitHighlight {
                         player,
                         unit: *id,
-                        highlight_type: HighlightType::Secondary,
+                        highlight_type: HighlightType::Choices,
                     });
                 }
             }
@@ -143,12 +143,12 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
             HighlightType::Primary,
         ),
         ActiveDialog::UnitsRequest(ref s) => {
-            highlight_units(s.player, &s.units, HighlightType::Primary)
+            highlight_units(s.player, &s.selection.selected, HighlightType::Primary)
                 .into_iter()
                 .chain(highlight_units(
                     s.player,
-                    &s.selectable,
-                    HighlightType::Secondary,
+                    &s.selection.request.choices,
+                    HighlightType::Choices,
                 ))
                 .collect_vec()
         }
@@ -188,7 +188,7 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
                         tooltip,
                         &highlighted_units,
                         *p,
-                        player.get_unit(*u).unwrap(),
+                        player.get_unit(*u),
                         &carried_unit_place(&place, j),
                     );
                 });
@@ -245,13 +245,13 @@ fn draw_unit(
     }
 }
 
-pub trait UnitSelection: ConfirmSelection {
+pub trait UnitSelection {
     fn selected_units_mut(&mut self) -> &mut Vec<u32>;
     fn can_select(&self, game: &Game, unit: &Unit) -> bool;
     fn player_index(&self) -> usize;
 }
 
-pub fn unit_selection_click<T: UnitSelection>(
+pub fn unit_selection_click<T: UnitSelection + Clone>(
     rc: &RenderContext,
     pos: Position,
     mouse_pos: Vec2,
@@ -260,7 +260,7 @@ pub fn unit_selection_click<T: UnitSelection>(
 ) -> StateUpdate {
     let p = rc.game.get_player(sel.player_index());
     if let Some(unit_id) = click_unit(rc, pos, mouse_pos, p, true) {
-        if sel.can_select(rc.game, p.get_unit(unit_id).unwrap()) {
+        if sel.can_select(rc.game, p.get_unit(unit_id)) {
             let mut new = sel.clone();
             unit_selection_clicked(unit_id, new.selected_units_mut());
             return on_change(new);
@@ -269,7 +269,7 @@ pub fn unit_selection_click<T: UnitSelection>(
     StateUpdate::None
 }
 
-pub fn unit_selection_dialog<T: UnitSelection>(
+pub fn unit_selection_dialog<T: UnitSelection + ConfirmSelection>(
     rc: &RenderContext,
     sel: &T,
     on_ok: impl FnOnce(T) -> StateUpdate,

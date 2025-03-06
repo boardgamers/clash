@@ -1,8 +1,14 @@
 {
-  "state": "Playing",
+  "state": [
+    "Playing"
+  ],
   "current_events": [
     {
-      "event_type": "on_incident",
+      "event_type": {
+        "Incident": {
+          "active_player": 0
+        }
+      },
       "player": 0,
       "last_priority_used": 11,
       "handler": {
@@ -52,7 +58,6 @@
             "description": "Select 3 structures to be destroyed"
           }
         },
-        "response": null,
         "origin": {
           "Incident": 31
         }

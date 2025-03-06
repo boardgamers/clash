@@ -23,7 +23,7 @@ pub fn execute(mut game: Game, action: Action, player_index: usize) -> Game {
 
 #[must_use]
 pub fn ended(game: &Game) -> bool {
-    matches!(game.state, Finished)
+    matches!(game.state(), Finished)
 }
 
 #[must_use]
@@ -43,7 +43,7 @@ pub fn drop_player(mut game: Game, player_index: usize) -> Game {
 
 #[must_use]
 pub fn current_player(game: &Game) -> Option<usize> {
-    match game.state {
+    match game.state() {
         Finished => None,
         _ => Some(game.active_player()),
     }
@@ -86,7 +86,7 @@ pub fn rankings(game: &Game) -> Vec<u32> {
 
 #[must_use]
 pub fn round(game: &Game) -> Option<u32> {
-    match game.state {
+    match game.state() {
         Playing => Some((game.age - 1) * 3 + game.round),
         _ => None,
     }

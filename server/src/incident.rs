@@ -2,8 +2,8 @@ use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::barbarians::{barbarians_move, barbarians_spawn, no_units_present};
 use crate::content::custom_phase_actions::{
-    PaymentRequest, PlayerRequest, PositionRequest, ResourceRewardRequest, Structure,
-    StructuresRequest, UnitTypeRequest, UnitsRequest,
+    new_position_request, CurrentEventType, PaymentRequest, PlayerRequest, PositionRequest,
+    ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitTypeRequest, UnitsRequest,
 };
 use crate::content::incidents;
 use crate::events::EventOrigin;
@@ -12,11 +12,11 @@ use crate::map::Terrain;
 use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions};
 use crate::pirates::pirates_spawn_and_raid;
 use crate::player::Player;
-use crate::player_events::{CustomPhaseInfo, IncidentInfo, IncidentTarget};
+use crate::player_events::{CurrentEventInfo, IncidentInfo, IncidentTarget};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-use crate::status_phase::StatusPhaseAction;
+use crate::status_phase::play_status_phase;
 use crate::unit::UnitType;
 use crate::utils::Shuffle;
 use itertools::Itertools;
@@ -87,6 +87,7 @@ impl std::fmt::Display for IncidentBaseEffect {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum PermanentIncidentEffect {
     Pestilence,
+    LooseAction(usize),
 }
 
 #[derive(Clone)]
@@ -171,7 +172,7 @@ impl IncidentBuilder {
     #[must_use]
     pub fn add_incident_listener<F>(self, role: IncidentTarget, priority: i32, listener: F) -> Self
     where
-        F: Fn(&mut Game, &CustomPhaseInfo, &IncidentInfo) + 'static + Clone,
+        F: Fn(&mut Game, &CurrentEventInfo, &IncidentInfo) + 'static + Clone,
     {
         let f = self.new_filter(role, priority);
         self.add_player_event_listener(
@@ -191,7 +192,7 @@ impl IncidentBuilder {
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<PositionRequest> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Position>) + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<Position>, IncidentInfo>) + 'static + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_position_request(
@@ -214,7 +215,7 @@ impl IncidentBuilder {
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<UnitTypeRequest> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<UnitType>) + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<UnitType, IncidentInfo>) + 'static + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_unit_type_request(
@@ -237,7 +238,7 @@ impl IncidentBuilder {
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<UnitsRequest> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<u32>>) + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<u32>, IncidentInfo>) + 'static + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_units_request(
@@ -260,7 +261,9 @@ impl IncidentBuilder {
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<StructuresRequest> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<(Position, Structure)>>) + 'static + Clone,
+        structures_selected: impl Fn(&mut Game, &SelectedChoice<Vec<SelectedStructure>, IncidentInfo>)
+            + 'static
+            + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_structures_request(
@@ -273,7 +276,7 @@ impl IncidentBuilder {
                     None
                 }
             },
-            gain_reward,
+            structures_selected,
         )
     }
 
@@ -285,7 +288,9 @@ impl IncidentBuilder {
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<ResourceRewardRequest>
             + 'static
             + Clone,
-        gain_reward_log: impl Fn(&Game, &SelectedChoice<ResourcePile>) -> Vec<String> + 'static + Clone,
+        gain_reward_log: impl Fn(&Game, &SelectedChoice<ResourcePile, IncidentInfo>) -> Vec<String>
+            + 'static
+            + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_resource_request(
@@ -314,7 +319,9 @@ impl IncidentBuilder {
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<Vec<PaymentRequest>>
             + 'static
             + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<ResourcePile>>) + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<ResourcePile>, IncidentInfo>)
+            + 'static
+            + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_payment_request_listener(
@@ -337,7 +344,7 @@ impl IncidentBuilder {
         description: &str,
         player_pred: impl Fn(&Player) -> bool + 'static + Clone,
         priority: i32,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<usize>) + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<usize, IncidentInfo>) + 'static + Clone,
     ) -> Self {
         let f = self.new_filter(IncidentTarget::ActivePlayer, priority);
         let d = description.to_string();
@@ -419,7 +426,7 @@ impl AbilityInitializerSetup for IncidentBuilder {
     }
 }
 
-pub(crate) fn trigger_incident(game: &mut Game, player_index: usize) {
+pub(crate) fn trigger_incident(game: &mut Game, player_index: usize, info: &IncidentInfo) {
     game.lock_undo();
 
     if game.incidents_left.is_empty() {
@@ -429,37 +436,24 @@ pub(crate) fn trigger_incident(game: &mut Game, player_index: usize) {
 
     let id = *game.incidents_left.first().expect("incident should exist");
     let incident = incidents::get_incident(id);
-    for p in &game.human_players() {
-        (incident.listeners.initializer)(game, *p);
-    }
 
-    let i = game
-        .human_players()
-        .iter()
-        .position(|&p| p == player_index)
-        .expect("player should exist");
-    let mut players: Vec<_> = game.human_players();
-    players.rotate_left(i);
-
-    game.trigger_current_event(
-        &players,
+    game.trigger_current_event_with_listener(
+        &game.human_players(player_index),
         |events| &mut events.on_incident,
-        &IncidentInfo::new(player_index),
+        &incident.listeners,
+        info,
+        CurrentEventType::Incident,
         Some(&format!(
             "A new game event has been triggered: {}",
             incident.name
         )),
     );
 
-    for p in &players {
-        (incidents::get_incident(id).listeners.deinitializer)(game, *p);
-    }
-
     if game.current_events.is_empty() {
         game.incidents_left.remove(0);
 
-        if matches!(game.state, GameState::StatusPhase(_)) {
-            StatusPhaseAction::action_done(game);
+        if matches!(game.state(), GameState::StatusPhase(_)) {
+            play_status_phase(game);
         }
     }
 }
@@ -500,7 +494,7 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
                 .iter()
                 .flat_map(|c| c.position.neighbors())
                 .filter(|p| {
-                    game.get_any_city(*p).is_none()
+                    game.try_get_any_city(*p).is_none()
                         && no_units_present(game, *p)
                         && game
                             .map
@@ -508,25 +502,19 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
                             .is_some_and(|t| t.is_land() && !matches!(t, Terrain::Exhausted(_)))
                 })
                 .collect_vec();
-            if positions.is_empty() {
-                None
-            } else {
-                Some(PositionRequest::new(
-                    positions,
-                    Some("Select a land position to exhaust".to_string()),
-                ))
-            }
+            Some(new_position_request(
+                positions,
+                1..=1,
+                Some("Select a land position to exhaust".to_string()),
+            ))
         },
         |game, s| {
+            let pos = s.choice[0];
             game.add_info_log_item(&format!(
                 "{} exhausted the land in position {}",
-                s.player_name, s.choice
+                s.player_name, pos
             ));
-            let t = game
-                .map
-                .tiles
-                .get_mut(&s.choice)
-                .expect("tile should exist");
+            let t = game.map.tiles.get_mut(&pos).expect("tile should exist");
             *t = Terrain::Exhausted(Box::new(t.clone()));
         },
     )

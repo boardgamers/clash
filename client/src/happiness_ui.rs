@@ -31,7 +31,7 @@ impl IncreaseHappinessConfig {
         let payment = new_steps
             .iter()
             .map(|(pos, steps)| {
-                let city = p.get_city(*pos).unwrap();
+                let city = p.get_city(*pos);
                 p.increase_happiness_cost(city, *steps).unwrap().cost
             })
             .reduce(|mut a, b| {
@@ -82,7 +82,7 @@ pub fn increase_happiness_click(
     pos: Position,
     h: &IncreaseHappinessConfig,
 ) -> StateUpdate {
-    if let Some(city) = rc.shown_player.get_city(pos) {
+    if let Some(city) = rc.shown_player.try_get_city(pos) {
         StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(add_increase_happiness(
             rc,
             city,

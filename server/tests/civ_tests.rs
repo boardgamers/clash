@@ -13,9 +13,9 @@ fn test_civ_maya_leader_pakal_and_place_settler() {
             TestAction::not_undoable(0, move_action(vec![10], Position::from_offset("B1"))),
             TestAction::not_undoable(
                 1,
-                Action::CustomPhaseEvent(CurrentEventResponse::SelectPosition(
+                Action::Response(CurrentEventResponse::SelectPositions(vec![
                     Position::from_offset("B2"),
-                )),
+                ])),
             ),
         ],
     );

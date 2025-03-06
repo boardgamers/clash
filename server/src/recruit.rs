@@ -1,27 +1,19 @@
-use crate::action::Action;
 use crate::combat;
 use crate::consts::STACK_LIMIT;
+use crate::content::custom_phase_actions::CurrentEventType;
 use crate::game::Game;
-use crate::game::GameState::Playing;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::CostInfo;
-use crate::playing_actions::PlayingAction;
+use crate::playing_actions::Recruit;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::undo::UndoContext;
 use crate::unit::{Unit, UnitType, Units};
 
-pub(crate) fn recruit(
-    game: &mut Game,
-    player_index: usize,
-    units: Units,
-    city_position: Position,
-    leader_name: Option<&String>,
-    replaced_units: &[u32],
-) {
+pub(crate) fn recruit(game: &mut Game, player_index: usize, r: &Recruit) {
     let mut replaced_leader = None;
-    if let Some(leader_name) = leader_name {
+    if let Some(leader_name) = &r.leader_name {
         if let Some(previous_leader) = game.players[player_index].active_leader.take() {
             Player::with_leader(
                 &previous_leader,
@@ -36,10 +28,10 @@ pub(crate) fn recruit(
         set_active_leader(game, leader_name.clone(), player_index);
     }
     let mut replaced_units_undo_context = Vec::new();
-    for unit in replaced_units {
+    for unit in &r.replaced_units {
         let player = game.get_player_mut(player_index);
         let u = player.remove_unit(*unit);
-        if u.carrier_id.is_some_and(|c| replaced_units.contains(&c)) {
+        if u.carrier_id.is_some_and(|c| r.replaced_units.contains(&c)) {
             // will be removed when the carrier is removed
             continue;
         }
@@ -51,25 +43,21 @@ pub(crate) fn recruit(
         replaced_leader,
     });
     let player = game.get_player_mut(player_index);
-    let vec = units.to_vec();
+    let vec = r.units.clone().to_vec();
     player.units.reserve_exact(vec.len());
     for unit_type in vec {
-        let city = player
-            .get_city(city_position)
-            .expect("player should have a city at the recruitment position");
+        let city = player.get_city(r.city_position);
         let position = match &unit_type {
             UnitType::Ship => city
                 .port_position
                 .expect("there should be a port in the city"),
-            _ => city_position,
+            _ => r.city_position,
         };
         player.add_unit(position, unit_type);
     }
-    let city = player
-        .get_city_mut(city_position)
-        .expect("player should have a city at the recruitment position");
+    let city = player.get_city_mut(r.city_position);
     city.activate();
-    on_recruit(game, player_index);
+    on_recruit(game, player_index, r);
 }
 
 fn set_active_leader(game: &mut Game, leader_name: String, player_index: usize) {
@@ -83,20 +71,20 @@ fn set_active_leader(game: &mut Game, leader_name: String, player_index: usize) 
     game.get_player_mut(player_index).active_leader = Some(leader_name);
 }
 
-pub(crate) fn on_recruit(game: &mut Game, player_index: usize) {
-    let Some(Action::Playing(PlayingAction::Recruit(r))) = find_last_action(game, |action| {
-        matches!(action, Action::Playing(PlayingAction::Recruit(_)))
-    }) else {
-        panic!("last action should be a recruit action")
-    };
-
-    if game.trigger_current_event(&[player_index], |events| &mut events.on_recruit, &r, None) {
+pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: &Recruit) {
+    if game.trigger_current_event(
+        &[player_index],
+        |events| &mut events.on_recruit,
+        r,
+        CurrentEventType::Recruit,
+        None,
+    ) {
         return;
     }
     let city_position = r.city_position;
 
     if let Some(port_position) = game.players[player_index]
-        .get_city(city_position)
+        .try_get_city(city_position)
         .and_then(|city| city.port_position)
     {
         let ships = game.players[player_index]
@@ -118,19 +106,10 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize) {
                     city_position,
                     ships,
                     false,
-                    Some(Playing),
                 );
             }
         }
     }
-}
-
-fn find_last_action(game: &Game, pred: fn(&Action) -> bool) -> Option<Action> {
-    game.action_log
-        .iter()
-        .rev()
-        .find(|item| pred(&item.action))
-        .map(|item| item.action.clone())
 }
 
 ///
@@ -148,7 +127,6 @@ pub fn undo_recruit(
     undo_recruit_without_activate(game, player_index, &units.to_vec(), leader_name);
     game.players[player_index]
         .get_city_mut(city_position)
-        .expect("player should have a city a recruitment position")
         .undo_activate();
     if let Some(UndoContext::Recruit {
         replaced_units,
@@ -235,12 +213,7 @@ pub fn recruit_cost(
     }
     let replaced_units = replaced_units
         .iter()
-        .map(|id| {
-            player
-                .get_unit(*id)
-                .expect("player should have units to be replaced")
-                .unit_type
-        })
+        .map(|id| player.get_unit(*id).unit_type)
         .collect();
     if require_replace != replaced_units {
         return None;
@@ -261,9 +234,7 @@ pub fn recruit_cost_without_replaced(
     leader_name: Option<&String>,
     execute: Option<&ResourcePile>,
 ) -> Option<CostInfo> {
-    let city = player
-        .get_city(city_position)
-        .expect("player should have a city at the recruitment position");
+    let city = player.get_city(city_position);
     if !city.can_activate() {
         return None;
     }

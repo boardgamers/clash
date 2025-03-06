@@ -70,7 +70,7 @@ impl Unit {
             return false;
         }
         let player = &game.players[self.player_index];
-        if player.get_city(self.position).is_some() {
+        if player.try_get_city(self.position).is_some() {
             return false;
         }
         if matches!(
@@ -101,7 +101,7 @@ impl Unit {
             carried_units: carried_units(self.id, player)
                 .iter()
                 .map(|id| {
-                    let unit = player.get_unit(*id).expect("unit not found");
+                    let unit = player.get_unit(*id);
                     UnitBaseData {
                         unit_type: unit.unit_type,
                         movement_restrictions: unit.movement_restrictions.clone(),

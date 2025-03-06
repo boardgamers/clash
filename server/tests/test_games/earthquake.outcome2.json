@@ -1,8 +1,14 @@
 {
-  "state": "Playing",
+  "state": [
+    "Playing"
+  ],
   "current_events": [
     {
-      "event_type": "on_incident",
+      "event_type": {
+        "Incident": {
+          "active_player": 0
+        }
+      },
       "players_used": [
         0
       ],
@@ -45,7 +51,6 @@
             "description": "Select 3 structures to be destroyed"
           }
         },
-        "response": null,
         "origin": {
           "Incident": 31
         }
@@ -324,7 +329,7 @@
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "SelectStructures": [
             [
               "B2",
@@ -344,124 +349,18 @@
             ]
           ]
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_incident",
-            "player": 0,
-            "last_priority_used": 11,
-            "handler": {
-              "priority": 11,
-              "request": {
-                "SelectStructures": {
-                  "choices": [
-                    [
-                      "C2",
-                      "CityCenter"
-                    ],
-                    [
-                      "C2",
-                      {
-                        "Building": "Fortress"
-                      }
-                    ],
-                    [
-                      "C2",
-                      {
-                        "Building": "Temple"
-                      }
-                    ],
-                    [
-                      "C2",
-                      {
-                        "Wonder": "Pyramids"
-                      }
-                    ],
-                    [
-                      "C1",
-                      "CityCenter"
-                    ],
-                    [
-                      "B2",
-                      "CityCenter"
-                    ],
-                    [
-                      "B3",
-                      "CityCenter"
-                    ]
-                  ],
-                  "needed": {
-                    "start": 1,
-                    "end": 3
-                  },
-                  "description": "Select 3 structures to be destroyed"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Incident": 31
-              }
-            }
-          }
-        }
-      ]
+      }
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "Payment": [
             {
               "mood_tokens": 1
             }
           ]
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_incident",
-            "player": 0,
-            "last_priority_used": 10,
-            "handler": {
-              "priority": 10,
-              "request": {
-                "Payment": [
-                  {
-                    "cost": {
-                      "default": {
-                        "mood_tokens": 1
-                      },
-                      "conversions": [
-                        {
-                          "from": [
-                            {
-                              "mood_tokens": 1
-                            }
-                          ],
-                          "to": {},
-                          "type": {
-                            "MayOverpay": 1
-                          }
-                        }
-                      ]
-                    },
-                    "name": "You may pay 1 mood token for each city to avoid reducing its mood",
-                    "optional": false
-                  }
-                ]
-              },
-              "response": null,
-              "origin": {
-                "Incident": 31
-              }
-            },
-            "must_reduce_mood": [
-              "C2"
-            ]
-          }
-        }
-      ]
+      }
     }
   ],
   "action_log_index": 3,

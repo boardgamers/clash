@@ -9,14 +9,12 @@ use crate::player::Player;
 use crate::playing_actions::{
     Collect, Construct, IncreaseHappiness, InfluenceCultureAttempt, Recruit,
 };
-use crate::status_phase::{ChangeGovernmentType, RazeSize1City};
 use crate::{
     action::Action,
     game::Game,
     playing_actions::PlayingAction,
     position::Position,
     resource_pile::ResourcePile,
-    status_phase::StatusPhaseAction,
     unit::{MovementAction, Units},
     utils,
 };
@@ -39,13 +37,8 @@ pub struct LogSliceOptions {
 pub fn format_action_log_item(action: &Action, game: &Game) -> Vec<String> {
     match action {
         Action::Playing(action) => vec![format_playing_action_log_item(action, game)],
-        Action::StatusPhase(action) => format_status_phase_action_log_item(action, game),
         Action::Movement(action) => vec![format_movement_action_log_item(action, game)],
-        Action::CulturalInfluenceResolution(action) => {
-            vec![format_cultural_influence_resolution_log_item(game, *action)]
-        }
-        Action::ExploreResolution(_rotation) => vec![format_explore_action_log_item(game)],
-        Action::CustomPhaseEvent(_) => {
+        Action::Response(_) => {
             // is done in the event handler itself
             vec![]
         }
@@ -53,23 +46,6 @@ pub fn format_action_log_item(action: &Action, game: &Game) -> Vec<String> {
             panic!("undoing or redoing actions should not be written to the log")
         }
     }
-}
-
-fn format_explore_action_log_item(game: &Game) -> String {
-    let player = game.players[game.active_player()].get_name();
-    format!("{player} chose the orientation of the newly explored tiles")
-}
-
-fn format_cultural_influence_resolution_log_item(game: &Game, success: bool) -> String {
-    let player = game.players[game.active_player()].get_name();
-    let outcome = if success {
-        let price = game.dice_roll_log.last()
-            .expect("there should have been at least one die roll before a cultural influence resolution action");
-        format!("paid {} culture tokens to increase the dice roll and proceed with the cultural influence", price / 2 + 1)
-    } else {
-        String::from("declined to increase the dice roll")
-    };
-    format!("{player} {outcome}")
 }
 
 fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String {
@@ -81,10 +57,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         }
         PlayingAction::FoundCity { settler } => format!(
             "{player_name} founded a city at {}",
-            player
-                .get_unit(*settler)
-                .expect("The player should have the settler")
-                .position
+            player.get_unit(*settler).position
         ),
         PlayingAction::Construct(c) => format_construct_log_item(game, player, &player_name, c),
         PlayingAction::Collect(c) => format_collect_log_item(player, &player_name, c),
@@ -115,7 +88,7 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     let starting_city_position = c.starting_city_position;
     let city_piece = c.city_piece;
     let player = if target_player_index == game.active_player() {
-        String::from("himself")
+        String::from("themselves")
     } else {
         game.players[target_player_index].get_name()
     };
@@ -177,12 +150,7 @@ pub(crate) fn format_city_happiness_increase(
 ) -> String {
     format!(
         "the city at {position} by {steps} steps, making it {:?}",
-        player
-            .get_city(position)
-            .expect("player should have a city at this position")
-            .mood_state
-            .clone()
-            + steps
+        player.get_city(position).mood_state.clone() + steps
     )
 }
 
@@ -212,13 +180,7 @@ fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -
     let replace_pos = utils::format_list(
         &replaced_units
             .iter()
-            .map(|unit_id| {
-                player
-                    .get_unit(*unit_id)
-                    .expect("the player should have the replaced units")
-                    .position
-                    .to_string()
-            })
+            .map(|unit_id| player.get_unit(*unit_id).position.to_string())
             .unique()
             .collect::<Vec<String>>(),
         "",
@@ -290,19 +252,10 @@ fn format_construct_log_item(
 }
 
 fn format_mood_change(player: &Player, city_position: Position) -> String {
-    if player
-        .get_city(city_position)
-        .expect("there should be a city at the given position")
-        .is_activated()
-    {
+    if player.get_city(city_position).is_activated() {
         format!(
             " making it {:?}",
-            player
-                .get_city(city_position)
-                .expect("there should be a city at the given position")
-                .mood_state
-                .clone()
-                - 1
+            player.get_city(city_position).mood_state.clone() - 1
         )
     } else {
         String::new()
@@ -320,17 +273,9 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
             let units_str = m
                 .units
                 .iter()
-                .map(|unit| {
-                    player
-                        .get_unit(*unit)
-                        .expect("the player should have moved units")
-                        .unit_type
-                })
+                .map(|unit| player.get_unit(*unit).unit_type)
                 .collect::<Units>();
-            let start = player
-                .get_unit(m.units[0])
-                .expect("the player should have moved units")
-                .position;
+            let start = player.get_unit(m.units[0]).position;
             let start_is_water = game.map.is_sea(start);
             let dest = m.destination;
             let t = game
@@ -362,85 +307,11 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
     }
 }
 
-pub(crate) fn format_status_phase_action_log_item(
-    action: &StatusPhaseAction,
-    game: &Game,
-) -> Vec<String> {
-    let player_name = game.players[game.active_player()].get_name();
-    match action {
-        StatusPhaseAction::CompleteObjectives(completed_objectives) => {
-            vec![format!(
-                "{player_name} completed {}",
-                utils::format_list(completed_objectives, "no objectives")
-            )]
-        }
-        StatusPhaseAction::FreeAdvance(advance) => {
-            vec![format!("{player_name} advanced {advance} for free")]
-        }
-        StatusPhaseAction::RazeSize1City(city) => {
-            vec![format!(
-                "{player_name} {}",
-                match city {
-                    RazeSize1City::Position(city) =>
-                        format!("razed the city at {city} and gained 1 gold"),
-                    RazeSize1City::None => String::from("did not rase a city"),
-                }
-            )]
-        }
-        StatusPhaseAction::ChangeGovernmentType(new_government) => match new_government {
-            ChangeGovernmentType::ChangeGovernment(new_government_advance) => vec![
-                format!(
-                    "{player_name} changed their government from {} to {}",
-                    game.players[game.active_player()]
-                        .government()
-                        .expect("player should have a government before changing it"),
-                    new_government_advance.new_government
-                ),
-                format!(
-                    "Additional advances: {}",
-                    new_government_advance.additional_advances.join(", ")
-                ),
-            ],
-            ChangeGovernmentType::KeepGovernment => {
-                vec![format!("{player_name} did not change their government")]
-            }
-        },
-        StatusPhaseAction::DetermineFirstPlayer(player_index) => {
-            vec![format!(
-                "{player_name} choose {}",
-                if *player_index == game.starting_player_index {
-                    format!(
-                        "{} to remain the staring player",
-                        if *player_index != game.active_player() {
-                            game.players[*player_index].get_name()
-                        } else {
-                            String::new()
-                        }
-                    )
-                } else {
-                    format!(
-                        "{} as the new starting player",
-                        if *player_index == game.active_player() {
-                            String::from("himself")
-                        } else {
-                            game.players[*player_index].get_name()
-                        }
-                    )
-                }
-            )]
-        }
-    }
-}
-
 #[must_use]
 pub fn current_turn_log(game: &Game) -> Vec<ActionLogItem> {
     let from = game.action_log[0..game.action_log_index]
         .iter()
         .rposition(|item| matches!(item.action, Action::Playing(PlayingAction::EndTurn)))
         .unwrap_or(0);
-    game.action_log[from..game.action_log_index]
-        .iter()
-        .filter(|item| !matches!(item.action, Action::StatusPhase(_)))
-        .cloned()
-        .collect()
+    game.action_log[from..game.action_log_index].to_vec()
 }

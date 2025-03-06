@@ -1,26 +1,24 @@
 use crate::advance::gain_advance;
-use crate::city_pieces::Building::Temple;
 use crate::combat::{
     combat_loop, combat_round_end, end_combat, move_with_possible_combat, start_combat, take_combat,
 };
-use crate::content::custom_phase_actions::CurrentEventResponse;
-use crate::cultural_influence::execute_cultural_influence_resolution_action;
-use crate::explore::{explore_resolution, move_to_unexplored_tile};
-use crate::game::GameState::{
-    Combat, CulturalInfluenceResolution, ExploreResolution, Finished, Movement, Playing,
-    StatusPhase,
-};
-use crate::game::{ActionLogItem, Game};
+use crate::content::custom_phase_actions::{CurrentEventResponse, CurrentEventType};
+use crate::cultural_influence::ask_for_cultural_influence_payment;
+use crate::explore::{ask_explore_resolution, move_to_unexplored_tile};
+use crate::game::GameState::{Combat, Finished, Movement, Playing, StatusPhase};
+use crate::game::{ActionLogItem, Game, GameState};
 use crate::incident::trigger_incident;
 use crate::log;
-use crate::map::Rotation;
 use crate::map::Terrain::Unexplored;
-use crate::movement::{back_to_move, move_units_destinations, CurrentMove, MoveState};
+use crate::movement::{
+    has_movable_units, move_units_destinations, stop_current_move, take_move_state, CurrentMove,
+    MoveState,
+};
 use crate::playing_actions::PlayingAction;
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
 use crate::resource_pile::ResourcePile;
-use crate::status_phase::StatusPhaseAction;
+use crate::status_phase::play_status_phase;
 use crate::undo::{redo, undo, DisembarkUndoContext, UndoContext};
 use crate::unit::MovementAction::{Move, Stop};
 use crate::unit::{get_current_move, MovementAction};
@@ -30,11 +28,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum Action {
     Playing(PlayingAction),
-    StatusPhase(StatusPhaseAction),
     Movement(MovementAction),
-    CulturalInfluenceResolution(bool),
-    ExploreResolution(Rotation),
-    CustomPhaseEvent(CurrentEventResponse),
+    Response(CurrentEventResponse),
     Undo,
     Redo,
 }
@@ -59,15 +54,6 @@ impl Action {
     }
 
     #[must_use]
-    pub fn status_phase(self) -> Option<StatusPhaseAction> {
-        if let Self::StatusPhase(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-
-    #[must_use]
     pub fn movement(self) -> Option<MovementAction> {
         if let Self::Movement(v) = self {
             Some(v)
@@ -77,26 +63,8 @@ impl Action {
     }
 
     #[must_use]
-    pub fn cultural_influence_resolution(self) -> Option<bool> {
-        if let Self::CulturalInfluenceResolution(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-
-    #[must_use]
-    pub fn explore_resolution(self) -> Option<Rotation> {
-        if let Self::ExploreResolution(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-
-    #[must_use]
     pub fn custom_phase_event(self) -> Option<CurrentEventResponse> {
-        if let Self::CustomPhaseEvent(v) = self {
+        if let Self::Response(v) = self {
             Some(v)
         } else {
             None
@@ -131,8 +99,8 @@ pub fn execute_action(game: &mut Game, action: Action, player_index: usize) {
 
     if let Some(s) = game.current_event_handler_mut() {
         s.response = action.custom_phase_event();
-        let event_type = game.current_event().event_type.clone();
-        execute_custom_phase_action(game, player_index, &event_type);
+        let details = game.current_event().event_type.clone();
+        execute_custom_phase_action(game, player_index, &details);
     } else {
         execute_regular_action(game, action, player_index);
     }
@@ -149,37 +117,46 @@ fn add_action_log_item(game: &mut Game, item: Action) {
     game.action_log_index += 1;
 }
 
-pub(crate) fn execute_custom_phase_action(game: &mut Game, player_index: usize, event_type: &str) {
-    match event_type {
-        "on_combat_start" => {
+pub(crate) fn execute_custom_phase_action(
+    game: &mut Game,
+    player_index: usize,
+    details: &CurrentEventType,
+) {
+    use CurrentEventType::*;
+    match details {
+        ExploreResolution(r) => {
+            ask_explore_resolution(game, player_index, r);
+        }
+        InfluenceCultureResolution(r) => {
+            ask_for_cultural_influence_payment(game, player_index, r);
+        }
+        CombatStart => {
             start_combat(game);
         }
-        "on_combat_round_end" => {
+        CombatRoundEnd(r) => {
             game.lock_undo();
-            if let Some(c) = combat_round_end(game) {
+            if let Some(c) = combat_round_end(game, r) {
                 combat_loop(game, c);
             }
         }
-        "on_combat_end" => {
+        CombatEnd(r) => {
             let c = take_combat(game);
-            end_combat(game, c);
+            end_combat(game, c, r.clone());
         }
-        "on_turn_start" => game.start_turn(),
-        // name and payment is ignored here
-        "on_advance_custom_phase" => {
-            gain_advance(game, player_index, ResourcePile::empty(), "");
+        StatusPhase => play_status_phase(game),
+        TurnStart => game.start_turn(),
+        Advance(a) => {
+            gain_advance(game, player_index, a);
         }
-        "on_construct" => {
-            // building is ignored here
-            PlayingAction::on_construct(game, player_index, Temple);
+        Construct(b) => {
+            PlayingAction::on_construct(game, player_index, *b);
         }
-        "on_recruit" => {
-            on_recruit(game, player_index);
+        Recruit(r) => {
+            on_recruit(game, player_index, r);
         }
-        "on_incident" => {
-            trigger_incident(game, player_index);
+        Incident(i) => {
+            trigger_incident(game, player_index, i);
         }
-        _ => panic!("unknown custom phase event {event_type}"),
     }
 }
 
@@ -188,50 +165,29 @@ pub(crate) fn add_log_item_from_action(game: &mut Game, action: &Action) {
 }
 
 fn execute_regular_action(game: &mut Game, action: Action, player_index: usize) {
-    match game.state.clone() {
+    match game.state() {
         Playing => {
             if let Some(m) = action.clone().movement() {
-                execute_movement_action(game, m, player_index, MoveState::new());
+                assert_ne!(game.actions_left, 0, "Illegal action");
+                game.actions_left -= 1;
+                game.push_state(GameState::Movement(MoveState::new()));
+                execute_movement_action(game, m, player_index);
             } else {
                 let action = action.playing().expect("action should be a playing action");
                 action.execute(game, player_index);
             }
         }
-        StatusPhase(phase) => {
-            let action = action
-                .status_phase()
-                .expect("action should be a status phase action");
-            assert!(phase == action.phase(), "Illegal action: Same phase again");
-            action.execute(game, player_index);
-        }
-        Movement(m) => {
+        Movement(_) => {
             let action = action
                 .movement()
                 .expect("action should be a movement action");
-            execute_movement_action(game, action, player_index, m);
-        }
-        CulturalInfluenceResolution(c) => {
-            let action = action
-                .cultural_influence_resolution()
-                .expect("action should be a cultural influence resolution action");
-            execute_cultural_influence_resolution_action(
-                game,
-                action,
-                c.roll_boost_cost,
-                c.target_player_index,
-                c.target_city_position,
-                c.city_piece,
-                player_index,
-            );
+            execute_movement_action(game, action, player_index);
         }
         Combat(_) => {
             panic!("actions can't be executed when the game is in a combat state");
         }
-        ExploreResolution(r) => {
-            let rotation = action
-                .explore_resolution()
-                .expect("action should be an explore resolution action");
-            explore_resolution(game, &r, rotation);
+        StatusPhase(_) => {
+            panic!("actions can't be executed when the game is in a status state");
         }
         Finished => panic!("actions can't be executed when the game is finished"),
     }
@@ -241,27 +197,23 @@ pub(crate) fn execute_movement_action(
     game: &mut Game,
     action: MovementAction,
     player_index: usize,
-    mut move_state: MoveState,
 ) {
-    let saved_state = move_state.clone();
+    let Some(GameState::Movement(saved_state)) = game.state_stack.last().cloned() else {
+        panic!("game should be in a movement state");
+    };
     let (starting_position, disembarked_units) = match action {
         Move(m) => {
-            if let Playing = game.state {
-                assert_ne!(game.actions_left, 0, "Illegal action");
-                game.actions_left -= 1;
-            }
             let player = &game.players[player_index];
             let starting_position = player
                 .get_unit(*m.units.first().expect(
                     "instead of providing no units to move a stop movement actions should be done",
                 ))
-                .expect("the player should have all units to move")
                 .position;
             let disembarked_units = m
                 .units
                 .iter()
                 .filter_map(|unit| {
-                    let unit = player.get_unit(*unit).expect("unit should exist");
+                    let unit = player.get_unit(*unit);
                     unit.carrier_id.map(|carrier_id| DisembarkUndoContext {
                         unit_id: unit.id,
                         carrier_id,
@@ -292,6 +244,7 @@ pub(crate) fn execute_movement_action(
                 }
             }
 
+            let mut move_state = take_move_state(game);
             move_state.moved_units.extend(m.units.iter());
             move_state.moved_units = move_state.moved_units.iter().unique().copied().collect();
             let current_move = get_current_move(
@@ -301,11 +254,17 @@ pub(crate) fn execute_movement_action(
                 m.destination,
                 m.embark_carrier_id,
             );
+
             if matches!(current_move, CurrentMove::None) || move_state.current_move != current_move
             {
                 move_state.movement_actions_left -= 1;
                 move_state.current_move = current_move;
             }
+            if !starting_position.is_neighbor(m.destination) {
+                // roads move ends the current move
+                move_state.current_move = CurrentMove::None;
+            }
+            game.push_state(GameState::Movement(move_state));
 
             let dest_terrain = game
                 .map
@@ -313,34 +272,26 @@ pub(crate) fn execute_movement_action(
                 .expect("destination should be a valid tile");
 
             if dest_terrain == &Unexplored {
-                if move_to_unexplored_tile(
+                move_to_unexplored_tile(
                     game,
                     player_index,
                     &m.units,
                     starting_position,
                     m.destination,
-                    &move_state,
-                ) {
-                    back_to_move(game, &move_state, true);
-                }
-                return;
+                );
+                stop_current_move(game);
+                return; // can't undo this action
             }
 
-            if move_with_possible_combat(
-                game,
-                player_index,
-                Some(&mut move_state),
-                starting_position,
-                &m,
-            ) {
+            if move_with_possible_combat(game, player_index, starting_position, &m) {
                 return;
             }
 
             (Some(starting_position), disembarked_units)
         }
         Stop => {
-            game.state = Playing;
-            (None, Vec::new())
+            game.pop_state();
+            return;
         }
     };
     game.push_undo_context(UndoContext::Movement {
@@ -348,4 +299,12 @@ pub(crate) fn execute_movement_action(
         move_state: saved_state,
         disembarked_units,
     });
+
+    let state = take_move_state(game);
+    let all_moves_used =
+        state.movement_actions_left == 0 && state.current_move == CurrentMove::None;
+    if all_moves_used || !has_movable_units(game, game.get_player(game.current_player_index)) {
+        return;
+    }
+    game.push_state(GameState::Movement(state));
 }

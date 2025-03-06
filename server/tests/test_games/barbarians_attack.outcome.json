@@ -1,7 +1,44 @@
 {
-  "state": {
-    "StatusPhase": "FreeAdvance"
-  },
+  "state": [
+    {
+      "StatusPhase": "FreeAdvance"
+    }
+  ],
+  "current_events": [
+    {
+      "event_type": "StatusPhase",
+      "players_used": [
+        0
+      ],
+      "player": 1,
+      "last_priority_used": 0,
+      "handler": {
+        "priority": 0,
+        "request": {
+          "SelectAdvance": {
+            "choices": [
+              "Storage",
+              "Irrigation",
+              "Husbandry",
+              "Engineering",
+              "Sanitation",
+              "Roads",
+              "Fishing",
+              "Writing",
+              "Tactics",
+              "Myths",
+              "Bartering",
+              "Arts",
+              "Math"
+            ]
+          }
+        },
+        "origin": {
+          "Builtin": "Free Advance"
+        }
+      }
+    }
+  ],
   "players": [
     {
       "name": null,
@@ -241,12 +278,12 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 1,
+  "current_player_index": 0,
   "action_log": [
     {
       "action": {
-        "StatusPhase": {
-          "FreeAdvance": "Storage"
+        "Response": {
+          "SelectAdvance": "Storage"
         }
       }
     }
@@ -275,9 +312,6 @@
       "Player1 gained 1 settler in A1",
       "Player2 was selected to gain 1 settler.",
       "Player2 gained 1 settler in C1"
-    ],
-    [
-      "It's Player2's turn"
     ]
   ],
   "undo_limit": 1,
@@ -306,5 +340,8 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1
+  "wonder_amount_left": 1,
+  "incidents_left": [
+    28
+  ]
 }

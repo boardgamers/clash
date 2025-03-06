@@ -1,7 +1,16 @@
+use crate::city_ui::{draw_city, show_city_menu, IconAction, IconActionVec};
+use crate::client_state::{ActiveDialog, State, StateUpdate, MAX_OFFSET, MIN_OFFSET, ZOOM};
+use crate::dialog_ui::{cancel_button_pos, ok_button, OkTooltip};
+use crate::layout_ui::{bottom_center_texture, bottom_right_texture, icon_pos};
+use crate::move_ui::{movable_units, MoveDestination, MoveIntent};
+use crate::render_context::RenderContext;
+use crate::select_ui::HighlightType;
+use crate::{collect_ui, hex_ui, unit_ui};
 use macroquad::math::{f32, vec2};
 use macroquad::prelude::*;
 use server::action::Action;
 use server::combat::Combat;
+use server::content::custom_phase_actions::CurrentEventResponse;
 use server::game::GameState;
 use server::map::{Rotation, Terrain, UnexploredBlock};
 use server::playing_actions::{PlayingAction, PlayingActionType};
@@ -10,14 +19,6 @@ use server::unit::UnitType;
 use std::collections::HashMap;
 use std::ops::{Add, Mul, Rem, Sub};
 use std::vec;
-
-use crate::city_ui::{draw_city, show_city_menu, IconAction, IconActionVec};
-use crate::client_state::{ActiveDialog, State, StateUpdate, MAX_OFFSET, MIN_OFFSET, ZOOM};
-use crate::dialog_ui::{cancel_button_pos, ok_button, OkTooltip};
-use crate::layout_ui::{bottom_center_texture, bottom_right_texture, icon_pos};
-use crate::move_ui::{movable_units, MoveDestination, MoveIntent};
-use crate::render_context::RenderContext;
-use crate::{collect_ui, hex_ui, unit_ui};
 
 const MOVE_DESTINATION: Color = color(51, 255, 72, 0.4);
 
@@ -73,7 +74,7 @@ pub fn draw_map(rc: &RenderContext) -> StateUpdate {
             return update;
         }
     }
-    if let GameState::Combat(c) = &game.state {
+    if let GameState::Combat(c) = &game.state() {
         draw_combat_arrow(c);
     }
     let state = &rc.state;
@@ -138,7 +139,6 @@ pub fn pan_and_zoom(state: &mut State) {
 }
 
 fn overlay_color(rc: &RenderContext, pos: Position) -> Color {
-    let game = rc.game;
     let state = &rc.state;
 
     match &state.active_dialog {
@@ -160,10 +160,15 @@ fn overlay_color(rc: &RenderContext, pos: Position) -> Color {
                 alpha_overlay(0.)
             }
         }
-        ActiveDialog::RazeSize1City => {
-            highlight_if(game.players[game.active_player()].can_raze_city(pos))
+        ActiveDialog::PositionRequest(r) => {
+            if r.selected.contains(&pos) {
+                with_alpha(HighlightType::Primary.color(), 0.5)
+            } else if r.request.choices.contains(&pos) {
+                with_alpha(HighlightType::Choices.color(), 0.5)
+            } else {
+                alpha_overlay(0.)
+            }
         }
-        ActiveDialog::PositionRequest(r) => highlight_if(r.choices.contains(&pos)),
         _ => {
             if let Some(p) = state.focused_tile {
                 highlight_if(p == pos)
@@ -205,7 +210,7 @@ fn highlight_if(b: bool) -> Color {
 }
 
 pub fn show_tile_menu(rc: &RenderContext, pos: Position) -> StateUpdate {
-    if let Some(city) = rc.game.get_any_city(pos) {
+    if let Some(city) = rc.game.try_get_any_city(pos) {
         if rc.shown_player.index == city.player_index {
             return show_city_menu(rc, city);
         }
@@ -291,7 +296,9 @@ pub fn explore_dialog(rc: &RenderContext, r: &ExploreResolutionConfig) -> StateU
         rc,
         OkTooltip::Valid("Accept current tile rotation".to_string()),
     ) {
-        return StateUpdate::execute(Action::ExploreResolution(r.rotation));
+        return StateUpdate::execute(Action::Response(CurrentEventResponse::ExploreResolution(
+            r.rotation,
+        )));
     }
     if bottom_right_texture(
         rc,

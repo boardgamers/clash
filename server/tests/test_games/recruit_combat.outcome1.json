@@ -1,8 +1,21 @@
 {
-  "state": "Playing",
+  "state": [
+    "Playing"
+  ],
   "current_events": [
     {
-      "event_type": "on_recruit",
+      "event_type": {
+        "Recruit": {
+          "units": {
+            "ships": 3
+          },
+          "city_position": "C2",
+          "payment": {
+            "wood": 5,
+            "gold": 1
+          }
+        }
+      },
       "player": 0,
       "last_priority_used": 0,
       "handler": {
@@ -30,7 +43,6 @@
             "name": "Select resource to gain back"
           }
         },
-        "response": null,
         "origin": {
           "Advance": "Medicine"
         }
@@ -366,7 +378,7 @@
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "ResourceReward": {
             "mood_tokens": 1
           }
@@ -374,8 +386,19 @@
       },
       "undo": [
         {
-          "CustomPhaseEvent": {
-            "event_type": "on_recruit",
+          "Event": {
+            "event_type": {
+              "Recruit": {
+                "units": {
+                  "ships": 3
+                },
+                "city_position": "C2",
+                "payment": {
+                  "wood": 5,
+                  "gold": 1
+                }
+              }
+            },
             "player": 0,
             "last_priority_used": 1,
             "handler": {
@@ -403,7 +426,6 @@
                   "name": "Select token to gain"
                 }
               },
-              "response": null,
               "origin": {
                 "Advance": "Nationalism"
               }

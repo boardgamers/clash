@@ -20,7 +20,7 @@ use server::city::{City, MoodState};
 use server::city_pieces::Building;
 use server::collect::possible_resource_collections;
 use server::content::custom_actions::CustomActionType;
-use server::content::custom_phase_actions::Structure;
+use server::content::custom_phase_actions::{SelectedStructure, Structure};
 use server::game::Game;
 use server::playing_actions::PlayingActionType;
 use server::position::Position;
@@ -257,26 +257,12 @@ fn structure_selected(
         let ActiveDialog::StructuresRequest(r) = &rc.state.active_dialog else {
             panic!("invalid state");
         };
-        if let Some(i) = r
-            .structures
-            .iter()
-            .position(|(pos, s)| s == &h.structure && pos == &position)
-        {
-            let mut new = r.clone();
-            new.structures.remove(i);
-            return Some(StateUpdate::OpenDialog(ActiveDialog::StructuresRequest(
-                new,
-            )));
-        }
-        if r.request.choices.contains(&(position, h.structure.clone())) {
-            let mut new = r.clone();
-            new.structures.push((position, h.structure.clone()));
-            return Some(StateUpdate::OpenDialog(ActiveDialog::StructuresRequest(
-                new,
-            )));
-        };
+        Some(StateUpdate::OpenDialog(ActiveDialog::StructuresRequest(
+            r.clone().toggle((position, h.structure.clone())),
+        )))
+    } else {
+        None
     }
-    None
 }
 
 pub fn draw_city(rc: &RenderContext, city: &City) -> Option<StateUpdate> {
@@ -285,13 +271,13 @@ pub fn draw_city(rc: &RenderContext, city: &City) -> Option<StateUpdate> {
 
     let highlighted = match rc.state.active_dialog {
         ActiveDialog::StructuresRequest(ref s) => highlight_structures(
-            &position_structures(city, &s.structures),
+            &position_structures(city, &s.selected),
             HighlightType::Primary,
         )
         .into_iter()
         .chain(highlight_structures(
             &position_structures(city, &s.request.choices),
-            HighlightType::Secondary,
+            HighlightType::Choices,
         ))
         .collect_vec(),
         _ => vec![],
@@ -415,7 +401,7 @@ fn draw_wonders(
     Ok(i)
 }
 
-fn position_structures(city: &City, list: &[(Position, Structure)]) -> Vec<Structure> {
+fn position_structures(city: &City, list: &[SelectedStructure]) -> Vec<Structure> {
     list.iter()
         .filter_map(|(pos, st)| {
             if pos == &city.position {

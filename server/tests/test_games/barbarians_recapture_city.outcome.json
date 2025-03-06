@@ -1,5 +1,18 @@
 {
-  "state": "Playing",
+  "state": [
+    "Playing",
+    {
+      "Movement": {
+        "movement_actions_left": 2,
+        "moved_units": [
+          5,
+          6,
+          7,
+          8
+        ]
+      }
+    }
+  ],
   "players": [
     {
       "name": null,
@@ -231,18 +244,6 @@
   "action_log": [
     {
       "action": {
-        "StatusPhase": {
-          "FreeAdvance": "Storage"
-        }
-      },
-      "undo": [
-        {
-          "Command": {}
-        }
-      ]
-    },
-    {
-      "action": {
         "Movement": {
           "Move": {
             "units": [
@@ -267,30 +268,8 @@
       ]
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 1,
   "log": [
-    [
-      "Player1 advanced Storage for free",
-      "Player gained 1 mood token as advance bonus"
-    ],
-    [
-      "A new game event has been triggered: Barbarians move",
-      "Barbarians move from B2 to C2: 2 infantry and 1 elephant"
-    ],
-    [
-      "Combat round 1",
-      "Barbarians rolled 6 (Infantry, +1 combat value), 6 (Infantry, +1 combat value), 6 (Infantry, no bonus) for combined combat value of 20 and gets 0 hits against defending units.",
-      "Player1 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units.",
-      "Player1 used the following combat modifiers: fortress added one extra die, fortress cancelled one hit",
-      "Barbarians has to remove 1 of their attacking units",
-      "Barbarians removed 1 elephant",
-      "Attacker wins and killed 4 settlers of Player1 and captured Player1's city at C2",
-      "Player1 gained 1 free Settler Unit at A1 for losing a city",
-      "Barbarians spawned a new Infantry unit at C2"
-    ],
-    [
-      "It's Player2's turn"
-    ],
     [
       "Player1 marched 4 elephants from B1 to C2"
     ],
@@ -307,7 +286,7 @@
       "Player1 could not store 3 gold"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 1,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 1,

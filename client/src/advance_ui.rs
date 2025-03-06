@@ -15,7 +15,6 @@ use server::content::advances;
 use server::game::GameState;
 use server::player::Player;
 use server::playing_actions::PlayingAction;
-use server::status_phase::StatusPhaseAction;
 use std::ops::Rem;
 
 const COLUMNS: usize = 6;
@@ -39,7 +38,9 @@ pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
         |a, p| {
             if p.has_advance(&a.name) {
                 AdvanceState::Owned
-            } else if game.state == GameState::Playing && game.actions_left > 0 && p.can_advance(a)
+            } else if game.state() == &GameState::Playing
+                && game.actions_left > 0
+                && p.can_advance(a)
             {
                 AdvanceState::Available
             } else {
@@ -47,28 +48,6 @@ pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
             }
         },
         |a| StateUpdate::OpenDialog(ActiveDialog::AdvancePayment(new_advance_payment(rc, a))),
-    )
-}
-
-pub fn show_free_advance_menu(rc: &RenderContext) -> StateUpdate {
-    show_advance_menu(
-        rc,
-        "Select a free advance",
-        |a, p| {
-            if p.can_advance_free(a) {
-                AdvanceState::Available
-            } else if p.has_advance(&a.name) {
-                AdvanceState::Owned
-            } else {
-                AdvanceState::Unavailable
-            }
-        },
-        |a| {
-            StateUpdate::execute_with_confirm(
-                vec![format!("Select {} as a free advance?", a.name)],
-                Action::StatusPhase(StatusPhaseAction::FreeAdvance(a.name.clone())),
-            )
-        },
     )
 }
 

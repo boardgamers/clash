@@ -6,8 +6,8 @@ use server::playing_actions;
 use server::playing_actions::PlayingAction::{Advance, Construct};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-use server::status_phase::StatusPhaseAction;
 use server::unit::UnitType;
+use std::vec;
 
 mod common;
 
@@ -18,17 +18,17 @@ fn test_barbarians_spawn() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::StatusPhase(StatusPhaseAction::FreeAdvance(String::from("Storage"))),
+                Action::Response(CurrentEventResponse::SelectAdvance("Storage".to_string())),
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::SelectPosition(
+                Action::Response(CurrentEventResponse::SelectPositions(vec![
                     Position::from_offset("B3"),
-                )),
+                ])),
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::SelectUnitType(UnitType::Elephant)),
+                Action::Response(CurrentEventResponse::SelectUnitType(UnitType::Elephant)),
             ),
         ],
     );
@@ -41,13 +41,13 @@ fn test_barbarians_move() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::StatusPhase(StatusPhaseAction::FreeAdvance(String::from("Storage"))),
+                Action::Response(CurrentEventResponse::SelectAdvance("Storage".to_string())),
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::SelectPosition(
+                Action::Response(CurrentEventResponse::SelectPositions(vec![
                     Position::from_offset("B3"),
-                )),
+                ])),
             ),
         ],
     );
@@ -60,27 +60,27 @@ fn test_pirates_spawn() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::StatusPhase(StatusPhaseAction::FreeAdvance(String::from("Storage"))),
+                Action::Response(CurrentEventResponse::SelectAdvance("Storage".to_string())),
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::SelectUnits(vec![7])),
+                Action::Response(CurrentEventResponse::SelectUnits(vec![7])),
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::SelectPosition(
+                Action::Response(CurrentEventResponse::SelectPositions(vec![
                     Position::from_offset("A2"),
-                )),
+                ])),
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::SelectPosition(
+                Action::Response(CurrentEventResponse::SelectPositions(vec![
                     Position::from_offset("D2"),
-                )),
+                ])),
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::Payment(vec![ResourcePile::ore(1)])),
+                Action::Response(CurrentEventResponse::Payment(vec![ResourcePile::ore(1)])),
             ),
         ],
     );
@@ -92,7 +92,7 @@ fn test_barbarians_attack() {
         "barbarians_attack",
         vec![TestAction::not_undoable(
             0,
-            Action::StatusPhase(StatusPhaseAction::FreeAdvance(String::from("Storage"))),
+            Action::Response(CurrentEventResponse::SelectAdvance("Storage".to_string())),
         )],
     );
 }
@@ -128,13 +128,13 @@ fn test_pestilence() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::SelectPosition(
+                Action::Response(CurrentEventResponse::SelectPositions(vec![
                     Position::from_offset("A1"),
-                )),
+                ])),
             ),
             TestAction::not_undoable(
                 1,
-                Action::CustomPhaseEvent(CurrentEventResponse::Payment(vec![
+                Action::Response(CurrentEventResponse::Payment(vec![
                     ResourcePile::mood_tokens(1),
                 ])),
             ),
@@ -181,7 +181,7 @@ fn test_epidemics() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::SelectUnits(vec![7])),
+                Action::Response(CurrentEventResponse::SelectUnits(vec![7])),
             ),
         ],
     );
@@ -194,11 +194,11 @@ fn test_good_year_with_player_select() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::StatusPhase(StatusPhaseAction::FreeAdvance(String::from("Storage"))),
+                Action::Response(CurrentEventResponse::SelectAdvance("Storage".to_string())),
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::SelectUnitType(UnitType::Elephant)),
+                Action::Response(CurrentEventResponse::SelectUnitType(UnitType::Elephant)),
             ),
         ],
     );
@@ -211,13 +211,13 @@ fn test_exhausted_land() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::StatusPhase(StatusPhaseAction::FreeAdvance(String::from("Storage"))),
+                Action::Response(CurrentEventResponse::SelectAdvance("Storage".to_string())),
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::SelectPosition(
+                Action::Response(CurrentEventResponse::SelectPositions(vec![
                     Position::from_offset("B2"),
-                )),
+                ])),
             ),
         ],
     );
@@ -237,9 +237,9 @@ fn test_volcano() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::SelectPosition(
+                Action::Response(CurrentEventResponse::SelectPositions(vec![
                     Position::from_offset("C2"),
-                )),
+                ])),
             ),
         ],
     );
@@ -259,15 +259,15 @@ fn test_flood() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::SelectPosition(
+                Action::Response(CurrentEventResponse::SelectPositions(vec![
                     Position::from_offset("C2"),
-                )),
+                ])),
             ),
             TestAction::not_undoable(
                 1,
-                Action::CustomPhaseEvent(CurrentEventResponse::SelectPosition(
+                Action::Response(CurrentEventResponse::SelectPositions(vec![
                     Position::from_offset("A1"),
-                )),
+                ])),
             ),
         ],
     );
@@ -287,7 +287,7 @@ fn test_earthquake() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::SelectStructures(vec![
+                Action::Response(CurrentEventResponse::SelectStructures(vec![
                     (Position::from_offset("B2"), Structure::CityCenter),
                     (Position::from_offset("C2"), Structure::Building(Fortress)),
                     (
@@ -298,13 +298,13 @@ fn test_earthquake() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::Payment(vec![
+                Action::Response(CurrentEventResponse::Payment(vec![
                     ResourcePile::mood_tokens(1),
                 ])),
             ),
             TestAction::not_undoable(
                 1,
-                Action::CustomPhaseEvent(CurrentEventResponse::SelectStructures(vec![
+                Action::Response(CurrentEventResponse::SelectStructures(vec![
                     (Position::from_offset("A1"), Structure::CityCenter),
                     (Position::from_offset("A1"), Structure::Building(Fortress)),
                     (Position::from_offset("A3"), Structure::CityCenter),

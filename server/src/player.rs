@@ -680,8 +680,16 @@ impl Player {
         )
     }
 
+    ///
+    /// # Panics
+    /// Panics if city does not exist
     #[must_use]
-    pub fn get_city(&self, position: Position) -> Option<&City> {
+    pub fn get_city(&self, position: Position) -> &City {
+        self.try_get_city(position).expect("city should exist")
+    }
+
+    #[must_use]
+    pub fn try_get_city(&self, position: Position) -> Option<&City> {
         let position = self
             .cities
             .iter()
@@ -689,12 +697,17 @@ impl Player {
         Some(&self.cities[position])
     }
 
-    pub fn get_city_mut(&mut self, position: Position) -> Option<&mut City> {
+    ///
+    /// # Panics
+    /// Panics if city does not exist
+    #[must_use]
+    pub fn get_city_mut(&mut self, position: Position) -> &mut City {
         let position = self
             .cities
             .iter()
-            .position(|city| city.position == position)?;
-        Some(&mut self.cities[position])
+            .position(|city| city.position == position)
+            .expect("city should exist");
+        &mut self.cities[position]
     }
 
     pub fn take_city(&mut self, position: Position) -> Option<City> {
@@ -711,7 +724,7 @@ impl Player {
     pub fn can_raze_city(&self, city_position: Position) -> bool {
         self.cities.len() > 1
             && self
-                .get_city(city_position)
+                .try_get_city(city_position)
                 .is_some_and(|city| city.size() == 1)
     }
 
@@ -727,9 +740,7 @@ impl Player {
         port_position: Option<Position>,
     ) {
         let index = self.index;
-        let city = self
-            .get_city_mut(city_position)
-            .expect("player should be have the this city");
+        let city = self.get_city_mut(city_position);
         city.activate();
         city.pieces.set_building(building, index);
         if let Some(port_position) = port_position {
@@ -743,9 +754,7 @@ impl Player {
     ///
     /// Panics if city does not exist
     pub fn undo_construct(&mut self, building: Building, city_position: Position) {
-        let city = self
-            .get_city_mut(city_position)
-            .expect("player should have city");
+        let city = self.get_city_mut(city_position);
         city.undo_activate();
         city.pieces.remove_building(building);
         if matches!(building, Port) {
@@ -762,14 +771,26 @@ impl Player {
         self.next_unit_id += 1;
     }
 
+    ///
+    /// # Panics
+    /// Panics if unit does not exist
     #[must_use]
-    pub fn get_unit(&self, id: u32) -> Option<&Unit> {
-        self.units.iter().find(|unit| unit.id == id)
+    pub fn get_unit(&self, id: u32) -> &Unit {
+        self.units
+            .iter()
+            .find(|unit| unit.id == id)
+            .expect("unit should exist")
     }
 
+    ///
+    /// # Panics
+    /// Panics if unit does not exist
     #[must_use]
-    pub fn get_unit_mut(&mut self, id: u32) -> Option<&mut Unit> {
-        self.units.iter_mut().find(|unit| unit.id == id)
+    pub fn get_unit_mut(&mut self, id: u32) -> &mut Unit {
+        self.units
+            .iter_mut()
+            .find(|unit| unit.id == id)
+            .expect("unit should exist")
     }
 
     pub(crate) fn remove_unit(&mut self, id: u32) -> Unit {

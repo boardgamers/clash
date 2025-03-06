@@ -1,18 +1,18 @@
 use crate::advance_ui::{show_advance_menu, AdvanceState};
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
-use crate::layout_ui::{bottom_center_anchor, icon_pos};
+use crate::layout_ui::{bottom_center_anchor, bottom_centered_text, icon_pos};
 use crate::payment_ui::{multi_payment_dialog, payment_dialog, Payment};
 use crate::player_ui::choose_player_dialog;
 use crate::render_context::RenderContext;
-use crate::select_ui::{may_cancel, ConfirmSelection, HighlightType};
+use crate::select_ui::HighlightType;
 use crate::unit_ui;
 use crate::unit_ui::{draw_unit_type, UnitSelection};
 use macroquad::math::vec2;
 use server::action::Action;
 use server::content::custom_phase_actions::{
-    AdvanceRequest, CurrentEventResponse, PlayerRequest, Structure, StructuresRequest,
-    UnitTypeRequest,
+    is_selected_structures_valid, AdvanceRequest, CurrentEventResponse, MultiRequest,
+    PlayerRequest, SelectedStructure, Structure, UnitTypeRequest, UnitsRequest,
 };
 use server::game::Game;
 use server::position::Position;
@@ -24,11 +24,7 @@ pub fn custom_phase_payment_dialog(rc: &RenderContext, payments: &[Payment]) -> 
         payments,
         |p| ActiveDialog::PaymentRequest(p.clone()),
         false,
-        |p| {
-            StateUpdate::Execute(Action::CustomPhaseEvent(CurrentEventResponse::Payment(
-                p.clone(),
-            )))
-        },
+        |p| StateUpdate::Execute(Action::Response(CurrentEventResponse::Payment(p.clone()))),
     )
 }
 
@@ -38,11 +34,7 @@ pub fn payment_reward_dialog(rc: &RenderContext, payment: &Payment) -> StateUpda
         payment,
         false,
         |p| ActiveDialog::ResourceRewardRequest(p.clone()),
-        |p| {
-            StateUpdate::Execute(Action::CustomPhaseEvent(
-                CurrentEventResponse::ResourceReward(p),
-            ))
-        },
+        |p| StateUpdate::Execute(Action::Response(CurrentEventResponse::ResourceReward(p))),
     )
 }
 
@@ -54,14 +46,17 @@ pub fn advance_reward_dialog(rc: &RenderContext, r: &AdvanceRequest, name: &str)
         |a, _| {
             if possible.contains(&a.name) {
                 AdvanceState::Available
+            } else if rc.shown_player.has_advance(&a.name) {
+                AdvanceState::Owned
             } else {
                 AdvanceState::Unavailable
             }
         },
         |a| {
-            StateUpdate::Execute(Action::CustomPhaseEvent(
-                CurrentEventResponse::SelectAdvance(a.name.clone()),
-            ))
+            StateUpdate::execute_with_confirm(
+                vec![format!("Select {}?", a.name)],
+                Action::Response(CurrentEventResponse::SelectAdvance(a.name.clone())),
+            )
         },
     )
 }
@@ -82,9 +77,9 @@ pub fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> StateUpda
             unit_ui::name(u),
             20.,
         ) {
-            return StateUpdate::Execute(Action::CustomPhaseEvent(
-                CurrentEventResponse::SelectUnitType(*u),
-            ));
+            return StateUpdate::Execute(Action::Response(CurrentEventResponse::SelectUnitType(
+                *u,
+            )));
         }
     }
 
@@ -93,37 +88,26 @@ pub fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> StateUpda
 
 #[derive(Clone)]
 pub struct UnitsSelection {
-    pub needed: u8,
     pub player: usize,
-    pub selectable: Vec<u32>,
-    pub units: Vec<u32>,
-    pub description: Option<String>,
+    pub selection: MultiSelection<u32>,
 }
 
 impl UnitsSelection {
-    pub fn new(
-        player: usize,
-        needed: u8,
-        selectable: Vec<u32>,
-        description: Option<String>,
-    ) -> Self {
+    pub fn new(r: &UnitsRequest) -> Self {
         UnitsSelection {
-            player,
-            needed,
-            units: Vec::new(),
-            selectable,
-            description,
+            player: r.player,
+            selection: MultiSelection::new(r.request.clone()),
         }
     }
 }
 
 impl UnitSelection for UnitsSelection {
     fn selected_units_mut(&mut self) -> &mut Vec<u32> {
-        &mut self.units
+        &mut self.selection.selected
     }
 
     fn can_select(&self, _game: &Game, unit: &Unit) -> bool {
-        self.selectable.contains(&unit.id)
+        self.selection.request.choices.contains(&unit.id)
     }
 
     fn player_index(&self) -> usize {
@@ -131,71 +115,92 @@ impl UnitSelection for UnitsSelection {
     }
 }
 
-impl ConfirmSelection for UnitsSelection {
-    fn cancel_name(&self) -> Option<&str> {
-        None
-    }
+pub fn select_units_dialog(rc: &RenderContext, s: &UnitsSelection) -> StateUpdate {
+    bottom_centered_text(
+        rc,
+        format!("{} units selected", s.selection.selected.len()).as_str(),
+    );
 
-    fn confirm(&self, _game: &Game) -> OkTooltip {
-        if self.units.len() as u8 == self.needed {
-            OkTooltip::Valid("Select units".to_string())
-        } else {
-            OkTooltip::Invalid(format!(
-                "Need to select {} units",
-                self.needed as i8 - self.units.len() as i8
-            ))
-        }
+    if ok_button(
+        rc,
+        multi_select_tooltip(&s.selection, s.selection.is_valid(), "units"),
+    ) {
+        StateUpdate::response(CurrentEventResponse::SelectUnits(
+            s.selection.selected.clone(),
+        ))
+    } else {
+        StateUpdate::None
     }
-}
-
-pub fn select_units_dialog(rc: &RenderContext, sel: &UnitsSelection) -> StateUpdate {
-    unit_ui::unit_selection_dialog::<UnitsSelection>(rc, sel, |new: UnitsSelection| {
-        StateUpdate::Execute(Action::CustomPhaseEvent(CurrentEventResponse::SelectUnits(
-            new.units.clone(),
-        )))
-    })
 }
 
 #[derive(Clone)]
-pub struct StructuresSelection {
-    pub request: StructuresRequest,
-    pub structures: Vec<(Position, Structure)>,
+pub struct MultiSelection<T>
+where
+    T: Clone,
+{
+    pub request: MultiRequest<T>,
+    pub selected: Vec<T>,
 }
 
-impl StructuresSelection {
-    pub fn new(s: &StructuresRequest) -> Self {
-        StructuresSelection {
-            request: s.clone(),
-            structures: Vec::new(),
+impl<T: Clone + PartialEq> MultiSelection<T> {
+    pub fn new(request: MultiRequest<T>) -> Self {
+        MultiSelection {
+            request,
+            selected: vec![],
         }
     }
-}
 
-impl ConfirmSelection for StructuresSelection {
-    fn cancel_name(&self) -> Option<&str> {
-        None
+    pub fn is_valid(&self) -> bool {
+        self.request.is_valid(&self.selected)
     }
 
-    fn confirm(&self, game: &Game) -> OkTooltip {
-        if self.request.is_valid(game, &self.structures) {
-            OkTooltip::Valid("Select structures".to_string())
-        } else {
-            OkTooltip::Invalid(format!(
-                "Need to select {} to {} structures (city center must be the last one)",
-                self.request.needed.clone().min().unwrap(),
-                self.request.needed.clone().max().unwrap()
-            ))
+    pub fn toggle(self, value: T) -> Self {
+        if let Some(i) = self.selected.iter().position(|s| s == &value) {
+            let mut new = self.clone();
+            new.selected.remove(i);
+            return new;
         }
+        if self.request.choices.contains(&value) {
+            let mut new = self.clone();
+            new.selected.push(value);
+            return new;
+        };
+        self
     }
 }
 
-pub fn select_structures_dialog(rc: &RenderContext, sel: &StructuresSelection) -> StateUpdate {
-    if ok_button(rc, sel.confirm(rc.game)) {
-        StateUpdate::Execute(Action::CustomPhaseEvent(
-            CurrentEventResponse::SelectStructures(sel.structures.clone()),
-        ))
+pub fn select_structures_dialog(
+    rc: &RenderContext,
+    s: &MultiSelection<SelectedStructure>,
+) -> StateUpdate {
+    bottom_centered_text(
+        rc,
+        format!("{} structures selected", s.selected.len()).as_str(),
+    );
+
+    if ok_button(
+        rc,
+        multi_select_tooltip(
+            s,
+            s.request.is_valid(&s.selected) && is_selected_structures_valid(rc.game, &s.selected),
+            "structures (city center must be the last one)",
+        ),
+    ) {
+        StateUpdate::response(CurrentEventResponse::SelectStructures(s.selected.clone()))
     } else {
-        may_cancel(sel, rc)
+        StateUpdate::None
+    }
+}
+
+fn multi_select_tooltip<T: Clone>(s: &MultiSelection<T>, valid: bool, name: &str) -> OkTooltip {
+    if valid {
+        OkTooltip::Valid(format!("Select {name}"))
+    } else {
+        OkTooltip::Invalid(format!(
+            "Need to select {} to {} {name}",
+            s.request.needed.clone().min().unwrap(),
+            s.request.needed.clone().max().unwrap()
+        ))
     }
 }
 
@@ -210,12 +215,12 @@ pub fn bool_request_dialog(rc: &RenderContext) -> StateUpdate {
 }
 
 fn bool_answer(answer: bool) -> StateUpdate {
-    StateUpdate::Execute(Action::CustomPhaseEvent(CurrentEventResponse::Bool(answer)))
+    StateUpdate::Execute(Action::Response(CurrentEventResponse::Bool(answer)))
 }
 
 pub fn player_request_dialog(rc: &RenderContext, r: &PlayerRequest) -> StateUpdate {
     choose_player_dialog(rc, &r.choices, |p| {
-        Action::CustomPhaseEvent(CurrentEventResponse::SelectPlayer(p))
+        Action::Response(CurrentEventResponse::SelectPlayer(p))
     })
 }
 
@@ -235,4 +240,19 @@ pub fn highlight_structures(
             highlight_type,
         })
         .collect()
+}
+
+pub(crate) fn position_request_dialog(
+    rc: &RenderContext,
+    s: &MultiSelection<Position>,
+) -> StateUpdate {
+    bottom_centered_text(
+        rc,
+        format!("{} positions selected", s.selected.len()).as_str(),
+    );
+    if ok_button(rc, multi_select_tooltip(s, s.is_valid(), "positions")) {
+        StateUpdate::response(CurrentEventResponse::SelectPositions(s.selected.clone()))
+    } else {
+        StateUpdate::None
+    }
 }

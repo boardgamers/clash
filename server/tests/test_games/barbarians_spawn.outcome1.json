@@ -1,10 +1,21 @@
 {
-  "state": {
-    "StatusPhase": "FreeAdvance"
-  },
+  "state": [
+    {
+      "StatusPhase": "FreeAdvance"
+    }
+  ],
   "current_events": [
     {
-      "event_type": "on_incident",
+      "event_type": "StatusPhase",
+      "player": 0,
+      "last_priority_used": 0
+    },
+    {
+      "event_type": {
+        "Incident": {
+          "active_player": 0
+        }
+      },
       "player": 0,
       "last_priority_used": 100,
       "handler": {
@@ -20,7 +31,6 @@
             "description": "Select a unit to reinforce the barbarians"
           }
         },
-        "response": null,
         "origin": {
           "Incident": 9
         }
@@ -279,45 +289,19 @@
   "action_log": [
     {
       "action": {
-        "StatusPhase": {
-          "FreeAdvance": "Storage"
+        "Response": {
+          "SelectAdvance": "Storage"
         }
       }
     },
     {
       "action": {
-        "CustomPhaseEvent": {
-          "SelectPosition": "B3"
+        "Response": {
+          "SelectPositions": [
+            "B3"
+          ]
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_incident",
-            "player": 0,
-            "last_priority_used": 200,
-            "handler": {
-              "priority": 200,
-               "request": {
-                "SelectPosition": {
-                  "choices": [
-                    "A3",
-                    "B3"
-                  ],
-                  "description": "Select a position for the new city and infantry unit"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Incident": 9
-              }
-            },
-            "barbarians": {
-              "move_units": false
-            }
-          }
-        }
-      ]
+      }
     }
   ],
   "action_log_index": 2,

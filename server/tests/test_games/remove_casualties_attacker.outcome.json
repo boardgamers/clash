@@ -1,44 +1,47 @@
 {
-  "state": {
-    "Combat": {
-      "initiation": {
-        "Movement": {
-          "movement_actions_left": 1,
-          "moved_units": [
-            0,
-            1,
-            2,
-            3
-          ]
-        }
-      },
-      "round": 1,
-      "defender": 1,
-      "defender_position": "C1",
-      "attacker": 0,
-      "attacker_position": "C2",
-      "attackers": [
-        0,
-        1,
-        2,
-        3
-      ],
-      "can_retreat": true,
-      "round_result": {
-        "attacker_casualties": {
-          "fighters": 2
-        },
-        "defender_casualties": {
-          "fighters": 2
-        },
-        "can_retreat": false,
-        "retreated": false
+  "state": [
+    "Playing",
+    {
+      "Movement": {
+        "movement_actions_left": 1,
+        "moved_units": [
+          0,
+          1,
+          2,
+          3
+        ]
+      }
+    },
+    {
+      "Combat": {
+        "round": 1,
+        "defender": 1,
+        "defender_position": "C1",
+        "attacker": 0,
+        "attacker_position": "C2",
+        "attackers": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "retreat": "CanRetreat"
       }
     }
-  },
+  ],
   "current_events": [
     {
-      "event_type": "on_combat_round_end",
+      "event_type": {
+        "CombatRoundEnd": {
+          "attacker_casualties": {
+            "fighters": 2
+          },
+          "defender_casualties": {
+            "fighters": 2
+          },
+          "can_retreat": false
+        }
+      },
       "player": 0,
       "last_priority_used": 1,
       "handler": {
@@ -52,11 +55,13 @@
               2,
               3
             ],
-            "needed": 2,
+            "needed": {
+              "start": 2,
+              "end": 2
+            },
             "description": "Remove 2 attacking units"
           }
         },
-        "response": null,
         "origin": {
           "Builtin": "Choose Casualties"
         }

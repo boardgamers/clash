@@ -1,19 +1,22 @@
 {
-  "state": {
-    "Movement": {
-      "movement_actions_left": 1,
-      "moved_units": [
-        3,
-        4
-      ],
-      "current_move": {
-        "Embark": {
-          "source": "B3",
-          "destination": "C3"
+  "state": [
+    "Playing",
+    {
+      "Movement": {
+        "movement_actions_left": 1,
+        "moved_units": [
+          3,
+          4
+        ],
+        "current_move": {
+          "Embark": {
+            "source": "B3",
+            "destination": "C3"
+          }
         }
       }
     }
-  },
+  ],
   "players": [
     {
       "name": null,

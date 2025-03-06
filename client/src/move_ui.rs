@@ -141,7 +141,7 @@ fn unit_clicked(
 ) -> StateUpdate {
     let mut new = s.clone();
     new.start = Some(pos);
-    let is_transported = p.get_unit(unit_id).unwrap().is_transported();
+    let is_transported = p.get_unit(unit_id).is_transported();
     if new.units.is_empty() {
         new.units = movable_units(pos, game, p, |u| u.is_transported() == is_transported);
     } else {
@@ -220,11 +220,7 @@ impl MoveSelection {
         current_move: &CurrentMove,
     ) -> MoveSelection {
         if let CurrentMove::Fleet { units } = current_move {
-            let fleet_pos = game
-                .get_player(player_index)
-                .get_unit(units[0])
-                .unwrap()
-                .position;
+            let fleet_pos = game.get_player(player_index).get_unit(units[0]).position;
             return MoveSelection {
                 player_index,
                 start: Some(fleet_pos),
@@ -269,7 +265,7 @@ impl MoveSelection {
 }
 
 pub(crate) fn move_units_dialog(rc: &RenderContext) -> StateUpdate {
-    if matches!(rc.game.state, GameState::Playing)
+    if matches!(rc.game.state(), GameState::Playing)
         && cancel_button_with_tooltip(rc, "Back to playing actions")
     {
         return StateUpdate::CloseDialog;

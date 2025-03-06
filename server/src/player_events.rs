@@ -3,6 +3,7 @@ use crate::collect::{CollectContext, CollectInfo};
 use crate::combat::Combat;
 use crate::combat_listeners::{CombatResultInfo, CombatRoundResult, CombatStrength};
 use crate::events::Event;
+use crate::explore::ExploreResolutionState;
 use crate::game::Game;
 use crate::map::Terrain;
 use crate::payment::PaymentOptions;
@@ -14,22 +15,25 @@ use crate::{
     resource_pile::ResourcePile, wonder::Wonder,
 };
 use itertools::Itertools;
+use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
-pub(crate) type CustomPhaseEvent<V = ()> = Event<Game, CustomPhaseInfo, V>;
+pub(crate) type CurrentEvent<V = ()> = Event<Game, CurrentEventInfo, V>;
 
 pub(crate) type PlayerCommandEvent<V = ()> = Event<PlayerCommands, Game, V>;
 
 pub(crate) struct PlayerEvents {
-    pub on_construct: CustomPhaseEvent<Building>,
+    pub on_construct: CurrentEvent<Building>,
     pub on_construct_wonder: Event<Player, Position, Wonder>,
     pub on_collect: PlayerCommandEvent<Position>,
     pub on_advance: PlayerCommandEvent<String>,
-    pub on_advance_custom_phase: CustomPhaseEvent<AdvanceInfo>,
-    pub on_recruit: CustomPhaseEvent<Recruit>,
+    pub on_advance_custom_phase: CurrentEvent<AdvanceInfo>,
+    pub on_recruit: CurrentEvent<Recruit>,
     pub on_influence_culture_attempt: Event<InfluenceCultureInfo, City, Game>,
     pub on_influence_culture_success: PlayerCommandEvent,
+    pub on_influence_culture_resolution: CurrentEvent<ResourcePile>,
     pub before_move: PlayerCommandEvent<MoveInfo>,
+    pub on_explore_resolution: CurrentEvent<ExploreResolutionState>,
 
     pub construct_cost: Event<CostInfo, City, Building>,
     pub wonder_cost: Event<CostInfo, City, Wonder>,
@@ -43,12 +47,13 @@ pub(crate) struct PlayerEvents {
     pub collect_options: Event<CollectInfo, CollectContext, Game>,
     pub collect_total: Event<CollectInfo>,
 
-    pub on_turn_start: CustomPhaseEvent,
-    pub on_incident: CustomPhaseEvent<IncidentInfo>,
-    pub on_combat_start: CustomPhaseEvent,
+    pub on_status_phase: CurrentEvent,
+    pub on_turn_start: CurrentEvent,
+    pub on_incident: CurrentEvent<IncidentInfo>,
+    pub on_combat_start: CurrentEvent,
     pub on_combat_round: Event<CombatStrength, Combat, Game>,
-    pub on_combat_round_end: CustomPhaseEvent<CombatRoundResult>,
-    pub on_combat_end: CustomPhaseEvent<CombatResultInfo>,
+    pub on_combat_round_end: CurrentEvent<CombatRoundResult>,
+    pub on_combat_end: CurrentEvent<CombatResultInfo>,
 }
 
 impl PlayerEvents {
@@ -62,7 +67,9 @@ impl PlayerEvents {
             on_recruit: Event::new("on_recruit"),
             on_influence_culture_attempt: Event::new("on_influence_culture_attempt"),
             on_influence_culture_success: Event::new("on_influence_culture_success"),
+            on_influence_culture_resolution: Event::new("on_influence_culture_resolution"),
             before_move: Event::new("before_move"),
+            on_explore_resolution: Event::new("on_explore_resolution"),
 
             construct_cost: Event::new("construct_cost"),
             wonder_cost: Event::new("wonder_cost"),
@@ -76,6 +83,7 @@ impl PlayerEvents {
             collect_options: Event::new("collect_options"),
             collect_total: Event::new("collect_total"),
 
+            on_status_phase: Event::new("on_status_phase"),
             on_turn_start: Event::new("on_turn_start"),
             on_incident: Event::new("on_incident"),
             on_combat_start: Event::new("on_combat_start"),
@@ -124,7 +132,7 @@ pub enum IncidentTarget {
     AllPlayers,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct IncidentInfo {
     pub active_player: usize,
 }
@@ -167,14 +175,14 @@ impl CostInfo {
     }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct AdvanceInfo {
     pub name: String,
     pub payment: ResourcePile,
 }
 
 #[derive(Clone, PartialEq)]
-pub struct CustomPhaseInfo {
+pub struct CurrentEventInfo {
     pub player: usize,
 }
 

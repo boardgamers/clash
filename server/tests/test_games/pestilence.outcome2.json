@@ -1,5 +1,5 @@
 {
-  "state": "Playing",
+  "state": ["Playing"],
   "players": [
     {
       "name": null,
@@ -252,91 +252,23 @@
     },
     {
       "action": {
-        "CustomPhaseEvent": {
-          "SelectPosition": "A1"
+        "Response": {
+          "SelectPositions": [
+            "A1"
+          ]
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_incident",
-            "player": 0,
-            "last_priority_used": 2,
-            "handler": {
-              "priority": 2,
-              "request": {
-                "SelectPosition": {
-                  "choices": [
-                    "A1",
-                    "C2"
-                  ],
-                  "description": "Select a city to decrease the mood"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Incident": 1
-              }
-            }
-          }
-        }
-      ]
+      }
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "Payment": [
             {
               "mood_tokens": 1
             }
           ]
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_incident",
-            "players_used": [
-              0
-            ],
-            "player": 1,
-            "last_priority_used": 10,
-            "handler": {
-              "priority": 10,
-              "request": {
-                "Payment": [
-                  {
-                    "cost": {
-                      "default": {
-                        "mood_tokens": 1
-                      },
-                      "conversions": [
-                        {
-                          "from": [
-                            {
-                              "mood_tokens": 1
-                            }
-                          ],
-                          "to": {},
-                          "type": {
-                            "MayOverpay": 1
-                          }
-                        }
-                      ]
-                    },
-                    "name": "You may pay 1 mood token for each city to avoid reducing its mood",
-                    "optional": false
-                  }
-                ]
-              },
-              "response": null,
-              "origin": {
-                "Incident": 1
-              }
-            }
-          }
-        }
-      ]
+      }
     }
   ],
   "action_log_index": 3,

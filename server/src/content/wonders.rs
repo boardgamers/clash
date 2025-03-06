@@ -73,9 +73,7 @@ pub fn construct_wonder(
     let wonder = game.players[player_index]
         .wonder_cards
         .remove(wonder_cards_index);
-    let city = game.players[player_index]
-        .get_city(city_position)
-        .expect("player should have city");
+    let city = game.players[player_index].get_city(city_position);
     assert!(
         city.can_build_wonder(&wonder, &game.players[player_index], game),
         "Illegal action"

@@ -13,7 +13,7 @@ pub fn event_help(rc: &RenderContext, origin: &EventOrigin, do_break: bool) -> V
     h.extend(match origin {
         EventOrigin::Advance(a) => vec![get_advance(a).description],
         EventOrigin::Wonder(w) => vec![get_wonder(w).description],
-        EventOrigin::Builtin(b) => vec![get_builtin(b).description],
+        EventOrigin::Builtin(b) => vec![get_builtin(rc.game, b).description],
         EventOrigin::Incident(id) => get_incident(*id).description(),
         EventOrigin::Leader(l) => vec![{
             let l = rc.shown_player.get_leader(l).unwrap();

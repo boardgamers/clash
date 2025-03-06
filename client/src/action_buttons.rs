@@ -164,7 +164,7 @@ pub fn base_or_custom_available(
     custom: &CustomActionType,
 ) -> bool {
     rc.can_play_action(action)
-        || (rc.game.state == GameState::Playing
+        || (rc.game.state() == &GameState::Playing
             && rc
                 .game
                 .is_custom_action_available(rc.shown_player.index, custom))

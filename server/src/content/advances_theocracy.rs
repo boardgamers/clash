@@ -3,7 +3,7 @@ use crate::advance::{advance_with_incident_token, Advance, AdvanceBuilder};
 use crate::city_pieces::Building::Temple;
 use crate::consts::STACK_LIMIT;
 use crate::content::advances::{advance_group_builder, get_group, AdvanceGroup};
-use crate::content::custom_phase_actions::{AdvanceRequest, PositionRequest};
+use crate::content::custom_phase_actions::{new_position_request, AdvanceRequest};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -42,9 +42,7 @@ fn dogma() -> AdvanceBuilder {
                     if choices.is_empty() {
                         return None;
                     }
-                    return Some(AdvanceRequest {
-                        choices,
-                    });
+                    return Some(AdvanceRequest::new(choices));
                 }
                 None
             },
@@ -124,16 +122,17 @@ fn fanaticism() -> AdvanceBuilder {
                         .filter(|c| p.get_units(c.position).iter().filter(|u| u.unit_type.is_army_unit()).count() < STACK_LIMIT)
                         .map(|c| c.position)
                         .collect();
-                    Some(PositionRequest::new(choices, None))
+                    Some(new_position_request(choices, 1..=1, None))
                 } else {
                     None
                 }
             },
             |game, s| {
+                let pos = s.choice[0];
                 game.add_info_log_item(&format!(
-                    "{} gained 1 free Infantry Unit at {} for Fanaticism Advance", s.player_name, s.choice
+                    "{} gained 1 free Infantry Unit at {} for Fanaticism Advance", s.player_name, pos
                 ));
-                game.get_player_mut(s.player_index).add_unit(s.choice, UnitType::Infantry);
+                game.get_player_mut(s.player_index).add_unit(pos, UnitType::Infantry);
             },
         )
 }

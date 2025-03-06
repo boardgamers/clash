@@ -7,8 +7,8 @@ use crate::resource_pile::ResourcePile;
 use crate::unit::Unit;
 
 use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, MOVEMENT_ACTIONS, SHIP_CAPACITY, STACK_LIMIT};
+use crate::game::Game;
 use crate::game::GameState::Movement;
-use crate::game::{Game, GameState};
 use crate::player::Player;
 use crate::player_events::MoveInfo;
 use crate::position::Position;
@@ -64,19 +64,22 @@ impl MoveState {
     }
 }
 
-pub(crate) fn back_to_move(game: &mut Game, move_state: &MoveState, stop_current_move: bool) {
-    let mut state = move_state.clone();
-    if stop_current_move {
-        state.current_move = CurrentMove::None;
+pub(crate) fn take_move_state(game: &mut Game) -> MoveState {
+    if let Movement(m) = game.pop_state() {
+        m
+    } else {
+        panic!("no move state to pop");
     }
-    // set state to Movement first, because that affects has_movable_units
-    game.state = GameState::Movement(state);
+}
 
-    let all_moves_used =
-        move_state.movement_actions_left == 0 && move_state.current_move == CurrentMove::None;
-    if all_moves_used || !has_movable_units(game, game.get_player(game.current_player_index)) {
-        game.state = GameState::Playing;
+pub(crate) fn stop_current_move(game: &mut Game) {
+    let mut move_state = take_move_state(game);
+    move_state.current_move = CurrentMove::None;
+
+    if move_state.movement_actions_left == 0 {
+        return;
     }
+    game.push_state(Movement(move_state));
 }
 
 pub(crate) fn move_units(
@@ -87,7 +90,7 @@ pub(crate) fn move_units(
     embark_carrier_id: Option<u32>,
 ) {
     let p = game.get_player(player_index);
-    let from = p.get_unit(units[0]).expect("unit not found").position;
+    let from = p.get_unit(units[0]).position;
     let info = MoveInfo::new(player_index, units.to_vec(), from, to);
     game.trigger_command_event(player_index, |e| &mut e.before_move, &info);
 
@@ -103,9 +106,7 @@ fn move_unit(
     destination: Position,
     embark_carrier_id: Option<u32>,
 ) {
-    let unit = game.players[player_index]
-        .get_unit_mut(unit_id)
-        .expect("the player should have all units to move");
+    let unit = game.players[player_index].get_unit_mut(unit_id);
     unit.position = destination;
     unit.carrier_id = embark_carrier_id;
 
@@ -114,10 +115,7 @@ fn move_unit(
     }
 
     for id in carried_units(unit_id, &game.players[player_index]) {
-        game.players[player_index]
-            .get_unit_mut(id)
-            .expect("the player should have all units to move")
-            .position = destination;
+        game.players[player_index].get_unit_mut(id).position = destination;
     }
 }
 
@@ -130,15 +128,10 @@ pub(crate) fn undo_move_units(
     let Some(unit) = units.first() else {
         return;
     };
-    let destination = game.players[player_index]
-        .get_unit(*unit)
-        .expect("there should be at least one moved unit")
-        .position;
+    let destination = game.players[player_index].get_unit(*unit).position;
 
     for unit_id in units {
-        let unit = game.players[player_index]
-            .get_unit_mut(unit_id)
-            .expect("the player should have all units to move");
+        let unit = game.players[player_index].get_unit_mut(unit_id);
         unit.position = starting_position;
 
         if let Some(terrain) = terrain_movement_restriction(&game.map, destination, unit) {
@@ -152,10 +145,7 @@ pub(crate) fn undo_move_units(
             unit.carrier_id = None;
         }
         for id in &carried_units(unit_id, &game.players[player_index]) {
-            game.players[player_index]
-                .get_unit_mut(*id)
-                .expect("the player should have all units to move")
-                .position = starting_position;
+            game.players[player_index].get_unit_mut(*id).position = starting_position;
         }
     }
 }
@@ -174,7 +164,7 @@ pub fn move_units_destinations(
     start: Position,
     embark_carrier_id: Option<u32>,
 ) -> Result<Vec<MoveRoute>, String> {
-    let (moved_units, movement_actions_left, current_move) = if let Movement(m) = &game.state {
+    let (moved_units, movement_actions_left, current_move) = if let Movement(m) = &game.state() {
         (&m.moved_units, m.movement_actions_left, &m.current_move)
     } else {
         (&vec![], 1, &CurrentMove::None)
@@ -182,11 +172,7 @@ pub fn move_units_destinations(
 
     let units = unit_ids
         .iter()
-        .map(|id| {
-            player
-                .get_unit(*id)
-                .expect("the player should have all units to move")
-        })
+        .map(|id| player.get_unit(*id))
         .collect::<Vec<_>>();
 
     if units.is_empty() {
@@ -199,12 +185,7 @@ pub fn move_units_destinations(
         return Err("carrier capacity exceeded".to_string());
     }
 
-    let carrier_position = embark_carrier_id.map(|id| {
-        player
-            .get_unit(id)
-            .expect("the player should have the carrier unit")
-            .position
-    });
+    let carrier_position = embark_carrier_id.map(|id| player.get_unit(id).position);
 
     let mut stack_size = 0;
     let mut movement_restrictions = vec![];
@@ -218,9 +199,7 @@ pub fn move_units_destinations(
             if !unit.unit_type.is_land_based() {
                 return Err("the unit should be land based to embark".to_string());
             }
-            let carrier = player
-                .get_unit(embark_carrier_id)
-                .ok_or("the player should have the carrier unit")?;
+            let carrier = player.get_unit(embark_carrier_id);
             if !carrier.unit_type.is_ship() {
                 return Err("the carrier should be a ship".to_string());
             }
@@ -374,7 +353,7 @@ pub(crate) fn move_routes(
 #[must_use]
 fn reachable_with_roads(player: &Player, units: &[u32], game: &Game) -> Vec<MoveRoute> {
     let start = units.iter().find_map(|&id| {
-        let unit = player.get_unit(id).expect("unit not found");
+        let unit = player.get_unit(id);
         if unit.unit_type.is_land_based() {
             Some(unit.position)
         } else {
@@ -420,7 +399,8 @@ fn reachable_with_roads(player: &Player, units: &[u32], game: &Game) -> Vec<Move
                 if map.is_land(destination)
                     && (
                         // from or to owned city
-                        player.get_city(start).is_some() || player.get_city(destination).is_some()
+                        player.try_get_city(start).is_some()
+                            || player.try_get_city(destination).is_some()
                     )
                 {
                     let stack_size_used =
@@ -452,7 +432,7 @@ fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<M
         return vec![];
     }
     let ship = units.iter().find_map(|&id| {
-        let unit = player.get_unit(id).expect("unit not found");
+        let unit = player.get_unit(id);
         if unit.unit_type.is_ship() {
             Some(unit.position)
         } else {

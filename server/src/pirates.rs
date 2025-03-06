@@ -4,7 +4,7 @@ use crate::city::MoodState;
 use crate::combat::get_combat;
 use crate::content::builtin::Builtin;
 use crate::content::custom_phase_actions::{
-    PaymentRequest, PositionRequest, ResourceRewardRequest, UnitsRequest,
+    new_position_request, PaymentRequest, ResourceRewardRequest, UnitsRequest,
 };
 use crate::game::Game;
 use crate::incident::{IncidentBuilder, BASE_EFFECT_PRIORITY};
@@ -130,12 +130,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                 let player = game.get_player(player_index);
                 let choices = cities_with_adjacent_pirates(game.get_player(player_index), game)
                     .into_iter()
-                    .filter(|&pos| {
-                        !matches!(
-                            player.get_city(pos).expect("city should exist").mood_state,
-                            MoodState::Angry
-                        )
-                    })
+                    .filter(|&pos| !matches!(player.get_city(pos).mood_state, MoodState::Angry))
                     .collect_vec();
                 if choices.is_empty() {
                     return None;
@@ -146,30 +141,23 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                     player.get_name()
                 ));
 
-                Some(PositionRequest::new(
+                Some(new_position_request(
                     choices,
+                    1..=1,
                     Some("Select a city to reduce Mood".to_string()),
                 ))
             },
             |game, s| {
+                let pos = s.choice[0];
                 game.add_info_log_item(&format!(
                     "{} reduced Mood in the city at {}",
-                    s.player_name, s.choice
+                    s.player_name, pos
                 ));
                 game.get_player_mut(s.player_index)
-                    .get_city_mut(s.choice)
-                    .expect("city should exist")
+                    .get_city_mut(pos)
                     .decrease_mood_state();
             },
         )
-
-    // todo implement
-    // Pirate Ships also have lasting in-game effects:
-    // ✦ Pirate Ships block the collection of Resources from the
-    // Sea spaces they are in and all adjacent Sea spaces.
-    // ✦ Pirate Ships block Trade Routes starting from, or going
-    // through, the Sea spaces they are in and all adjacent Sea
-    // spaces. [“Trade Routes”, pg. 31]
 }
 
 fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
@@ -193,7 +181,7 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
             Some(UnitsRequest::new(
                 pirates.index,
                 pirate_ships,
-                needs_removal,
+                needs_removal..=needs_removal,
                 Some("Select Pirate Ships to remove".to_string()),
             ))
         },
@@ -204,12 +192,7 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
                 s.player_name,
                 s.choice
                     .iter()
-                    .map(|u| game
-                        .get_player(pirates)
-                        .get_unit(*u)
-                        .expect("unit should exist")
-                        .position
-                        .to_string())
+                    .map(|u| game.get_player(pirates).get_unit(*u).position.to_string())
                     .join(", ")
             ));
             for unit in &s.choice {
@@ -250,16 +233,17 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
                     sea_spaces = blocking;
                 }
             }
-            Some(PositionRequest::new(
+            Some(new_position_request(
                 sea_spaces,
+                1..=1,
                 Some("Select a position for the Pirate Ship".to_string()),
             ))
         },
         |game, s| {
             let pirate = get_pirates_player(game).index;
-            game.add_info_log_item(&format!("Pirates spawned a Pirate Ship at {}", s.choice));
-            game.get_player_mut(pirate)
-                .add_unit(s.choice, UnitType::Ship);
+            let pos = s.choice[0];
+            game.add_info_log_item(&format!("Pirates spawned a Pirate Ship at {pos}"));
+            game.get_player_mut(pirate).add_unit(pos, UnitType::Ship);
         },
     )
 }

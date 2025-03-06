@@ -1,25 +1,39 @@
 {
-  "state": {
-    "StatusPhase": "FreeAdvance"
-  },
+  "state": [
+    {
+      "StatusPhase": "FreeAdvance"
+    }
+  ],
   "current_events": [
     {
-      "event_type": "on_incident",
+      "event_type": "StatusPhase",
+      "player": 0,
+      "last_priority_used": 0
+    },
+    {
+      "event_type": {
+        "Incident": {
+          "active_player": 0
+        }
+      },
       "player": 0,
       "last_priority_used": 100,
       "handler": {
         "priority": 100,
         "request": {
-          "SelectPosition": {
+          "SelectPositions": {
             "choices": [
               "B1",
               "B1",
               "B2"
             ],
+            "needed": {
+              "start": 1,
+              "end": 1
+            },
             "description": "Select a land position to exhaust"
           }
         },
-        "response": null,
         "origin": {
           "Incident": 13
         }
@@ -260,8 +274,8 @@
   "action_log": [
     {
       "action": {
-        "StatusPhase": {
-          "FreeAdvance": "Storage"
+        "Response": {
+          "SelectAdvance": "Storage"
         }
       }
     }

@@ -1,7 +1,16 @@
 {
-  "state": {
-    "StatusPhase": "FreeAdvance"
-  },
+  "state": [
+    {
+      "StatusPhase": "FreeAdvance"
+    }
+  ],
+  "current_events": [
+    {
+      "event_type": "StatusPhase",
+      "player": 0,
+      "last_priority_used": 0
+    }
+  ],
   "players": [
     {
       "name": null,
@@ -234,46 +243,24 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 1,
+  "current_player_index": 0,
   "action_log": [
     {
       "action": {
-        "StatusPhase": {
-          "FreeAdvance": "Storage"
+        "Response": {
+          "SelectAdvance": "Storage"
         }
       }
     },
     {
       "action": {
-        "CustomPhaseEvent": {
-          "SelectPosition": "B2"
+        "Response": {
+          "SelectPositions": [
+            "B2"
+          ]
         }
       },
       "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_incident",
-            "player": 0,
-            "last_priority_used": 100,
-            "handler": {
-              "priority": 100,
-              "request": {
-                "SelectPosition": {
-                  "choices": [
-                    "B1",
-                    "B1",
-                    "B2"
-                  ],
-                  "description": "Select a land position to exhaust"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Incident": 13
-              }
-            }
-          }
-        },
         {
           "WastedResources": {
             "resources": {
@@ -299,9 +286,6 @@
       "Player1 gained 2 food from An awsome year",
       "Player2 gained 2 food from An awsome year",
       "Player2 could not store 1 food"
-    ],
-    [
-      "It's Player2's turn"
     ]
   ],
   "undo_limit": 2,
@@ -330,5 +314,8 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1
+  "wonder_amount_left": 1,
+  "incidents_left": [
+    13
+  ]
 }

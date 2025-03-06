@@ -1,5 +1,7 @@
 {
-  "state": "Playing",
+  "state": [
+    "Playing"
+  ],
   "players": [
     {
       "name": null,
@@ -367,7 +369,7 @@
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "Payment": [
             {
               "ideas": 1
@@ -377,8 +379,16 @@
       },
       "undo": [
         {
-          "CustomPhaseEvent": {
-            "event_type": "on_advance_custom_phase",
+          "Event": {
+            "event_type": {
+              "Advance": {
+                "name": "Draft",
+                "payment": {
+                  "food": 1,
+                  "gold": 1
+                }
+              }
+            },
             "player": 0,
             "last_priority_used": 1,
             "handler": {
@@ -418,7 +428,6 @@
                   }
                 ]
               },
-              "response": null,
               "origin": {
                 "Advance": "Free Education"
               }

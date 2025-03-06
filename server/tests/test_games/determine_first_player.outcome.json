@@ -1,5 +1,7 @@
 {
-  "state": "Playing",
+  "state": [
+    "Playing"
+  ],
   "players": [
     {
       "name": null,
@@ -202,8 +204,8 @@
   "action_log": [
     {
       "action": {
-        "StatusPhase": {
-          "DetermineFirstPlayer": 1
+        "Response": {
+          "SelectPlayer": 1
         }
       }
     }

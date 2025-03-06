@@ -1,35 +1,33 @@
 {
-  "state": {
-    "Combat": {
-      "initiation": {
-        "Movement": {
-          "movement_actions_left": 2,
-          "moved_units": [
-            10
-          ]
-        }
-      },
-      "round": 1,
-      "defender": 1,
-      "defender_position": "B1",
-      "attacker": 0,
-      "attacker_position": "A1",
-      "attackers": [
-        10
-      ],
-      "can_retreat": true,
-      "round_result": {
-        "attacker_casualties": {},
-        "defender_casualties": {},
-        "can_retreat": false,
-        "retreated": false
-      },
-      "result": "AttackerWins"
+  "state": [
+    "Playing",
+    {
+      "Movement": {
+        "movement_actions_left": 2,
+        "moved_units": [
+          10
+        ]
+      }
+    },
+    {
+      "Combat": {
+        "round": 1,
+        "defender": 1,
+        "defender_position": "B1",
+        "attacker": 0,
+        "attacker_position": "A1",
+        "attackers": [
+          10
+        ],
+        "retreat": "CanRetreat"
+      }
     }
-  },
+  ],
   "current_events": [
     {
-      "event_type": "on_combat_end",
+      "event_type": {
+        "CombatEnd": "AttackerWins"
+      },
       "players_used": [
         0
       ],
@@ -38,14 +36,17 @@
       "handler": {
         "priority": 0,
         "request": {
-          "SelectPosition": {
+          "SelectPositions": {
             "choices": [
               "B2",
               "C1"
-            ]
+            ],
+            "needed": {
+              "start": 1,
+              "end": 1
+            }
           }
         },
-        "response": null,
         "origin": {
           "Builtin": "Place Settler"
         }

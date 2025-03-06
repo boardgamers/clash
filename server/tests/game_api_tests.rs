@@ -1,3 +1,5 @@
+use crate::common::*;
+use server::content::custom_phase_actions::CurrentEventResponse;
 use server::unit::Units;
 use server::{
     action::Action,
@@ -14,8 +16,6 @@ use server::{
     unit::MovementAction::*,
 };
 use std::{collections::HashMap, vec};
-
-use crate::common::*;
 
 mod common;
 
@@ -78,21 +78,8 @@ fn basic_actions() {
     let game = game_api::execute(game, construct_action, 0);
     let player = &game.players[0];
 
-    assert_eq!(
-        Some(0),
-        player
-            .get_city(city_position)
-            .expect("player should have a city at this position")
-            .pieces
-            .observatory
-    );
-    assert_eq!(
-        2,
-        player
-            .get_city(city_position)
-            .expect("player should have a city at this position")
-            .size()
-    );
+    assert_eq!(Some(0), player.get_city(city_position).pieces.observatory);
+    assert_eq!(2, player.get_city(city_position).size());
     assert_eq!(ResourcePile::new(1, 3, 3, 0, 2, 2, 4), player.resources);
     assert_eq!(0, game.actions_left);
 
@@ -110,13 +97,7 @@ fn basic_actions() {
     let player = &game.players[0];
 
     assert_eq!(ResourcePile::new(1, 3, 3, 0, 2, 0, 4), player.resources);
-    assert!(matches!(
-        player
-            .get_city(city_position)
-            .expect("player should have a city at this position")
-            .mood_state,
-        Happy
-    ));
+    assert!(matches!(player.get_city(city_position).mood_state, Happy));
     assert_eq!(2, game.actions_left);
 
     let construct_wonder_action = Action::Playing(Custom(ConstructWonder {
@@ -130,22 +111,8 @@ fn basic_actions() {
     assert_eq!(10.0, player.victory_points(&game));
     assert_eq!(ResourcePile::empty(), player.resources);
     assert_eq!(vec![String::from("Pyramids")], player.wonders_build);
-    assert_eq!(
-        1,
-        player
-            .get_city(city_position)
-            .expect("player should have a city at this position")
-            .pieces
-            .wonders
-            .len()
-    );
-    assert_eq!(
-        4,
-        player
-            .get_city(city_position)
-            .expect("player should have a city at this position")
-            .mood_modified_size(player)
-    );
+    assert_eq!(1, player.get_city(city_position).pieces.wonders.len());
+    assert_eq!(4, player.get_city(city_position).mood_modified_size(player));
     assert_eq!(1, game.actions_left);
 
     let tile_position = Position::new(1, 0);
@@ -159,7 +126,7 @@ fn basic_actions() {
     let player = &game.players[0];
     assert_eq!(ResourcePile::ore(1), player.resources);
     assert!(player
-        .get_city(city_position)
+        .try_get_city(city_position)
         .expect("player should have a city at this position")
         .is_activated());
     assert_eq!(0, game.actions_left);
@@ -178,10 +145,7 @@ fn basic_actions() {
     assert_eq!(1, player.units.len());
     assert_eq!(1, player.next_unit_id);
     assert_eq!(ResourcePile::ore(1), player.resources);
-    assert!(player
-        .get_city(city_position)
-        .expect("The player should have a city at this position")
-        .is_activated());
+    assert!(player.get_city(city_position).is_activated());
 
     let movement_action = move_action(vec![0], founded_city_position);
     let game = game_api::execute(game, movement_action, 0);
@@ -195,13 +159,7 @@ fn basic_actions() {
     assert_eq!(0, player.units.len());
     assert_eq!(1, player.next_unit_id);
     assert_eq!(4, player.cities.len());
-    assert_eq!(
-        1,
-        player
-            .get_city(founded_city_position)
-            .expect("The player should have the founded city")
-            .size()
-    );
+    assert_eq!(1, player.get_city(founded_city_position).size());
 }
 
 fn assert_undo(
@@ -323,7 +281,12 @@ fn test_cultural_influence_with_conversion() {
         "cultural_influence_with_conversion",
         vec![
             TestAction::not_undoable(1, influence_action()),
-            TestAction::undoable(1, Action::CulturalInfluenceResolution(true)),
+            TestAction::undoable(
+                1,
+                Action::Response(CurrentEventResponse::Payment(vec![
+                    ResourcePile::culture_tokens(3),
+                ])),
+            ),
         ],
     );
 }
@@ -334,7 +297,12 @@ fn test_cultural_influence() {
         "cultural_influence",
         vec![
             TestAction::not_undoable(1, influence_action()),
-            TestAction::undoable(1, Action::CulturalInfluenceResolution(true)),
+            TestAction::undoable(
+                1,
+                Action::Response(CurrentEventResponse::Payment(vec![
+                    ResourcePile::culture_tokens(4),
+                ])),
+            ),
         ],
     );
 }

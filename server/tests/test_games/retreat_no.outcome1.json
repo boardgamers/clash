@@ -1,12 +1,15 @@
 {
-  "state": {
-    "Movement": {
-      "movement_actions_left": 1,
-      "moved_units": [
-        0
-      ]
+  "state": [
+    "Playing",
+    {
+      "Movement": {
+        "movement_actions_left": 1,
+        "moved_units": [
+          0
+        ]
+      }
     }
-  },
+  ],
   "players": [
     {
       "name": null,
@@ -216,27 +219,10 @@
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "Bool": false
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_combat_round_end",
-            "player": 0,
-            "last_priority_used": 0,
-            "handler": {
-              "priority": 0,
-              "request": "BoolRequest",
-              "response": null,
-              "origin": {
-                "Builtin": "Offer Retreat"
-              }
-            }
-          }
-        }
-      ]
+      }
     }
   ],
   "action_log_index": 2,

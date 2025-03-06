@@ -1,5 +1,5 @@
 {
-  "state": "Playing",
+  "state": ["Playing"],
   "players": [
     {
       "name": null,
@@ -264,26 +264,7 @@
     {
       "action": {
         "Movement": "Stop"
-      },
-      "undo": [
-        {
-          "Movement": {
-            "movement_actions_left": 1,
-            "moved_units": [
-              7,
-              8
-            ],
-            "current_move": {
-              "Fleet": {
-                "units": [
-                  7,
-                  8
-                ]
-              }
-            }
-          }
-        }
-      ]
+      }
     },
     {
       "action": {
@@ -299,172 +280,34 @@
             }
           }
         }
-      },
-      "undo": [
-        {
-          "Recruit": {}
-        }
-      ]
+      }
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "ResourceReward": {
             "mood_tokens": 1
           }
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_recruit",
-            "player": 0,
-            "last_priority_used": 1,
-            "handler": {
-              "priority": 1,
-              "request": {
-                "ResourceReward": {
-                  "reward": {
-                    "default": {
-                      "mood_tokens": 1
-                    },
-                    "conversions": [
-                      {
-                        "from": [
-                          {
-                            "mood_tokens": 1
-                          }
-                        ],
-                        "to": {
-                          "culture_tokens": 1
-                        },
-                        "type": "Unlimited"
-                      }
-                    ]
-                  },
-                  "name": "Select token to gain"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Advance": "Nationalism"
-              }
-            }
-          }
-        },
-        {
-          "WastedResources": {
-            "resources": {
-              "food": 4
-            },
-            "player_index": 0
-          }
-        }
-      ]
+      }
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "ResourceReward": {
             "gold": 1
           }
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_recruit",
-            "player": 0,
-            "last_priority_used": 0,
-            "handler": {
-              "priority": 0,
-              "request": {
-                "ResourceReward": {
-                  "reward": {
-                    "default": {
-                      "wood": 1
-                    },
-                    "conversions": [
-                      {
-                        "from": [
-                          {
-                            "wood": 1
-                          }
-                        ],
-                        "to": {
-                          "gold": 1
-                        },
-                        "type": "Unlimited"
-                      }
-                    ]
-                  },
-                  "name": "Select resource to gain back"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Advance": "Medicine"
-              }
-            }
-          }
-        },
-        {
-          "WastedResources": {
-            "resources": {
-              "gold": 2
-            },
-            "player_index": 0
-          }
-        }
-      ]
+      }
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "ResourceReward": {
             "culture_tokens": 1
           }
         }
-      },
-      "undo": [
-        {
-          "CustomPhaseEvent": {
-            "event_type": "on_combat_end",
-            "player": 0,
-            "last_priority_used": 3,
-            "handler": {
-              "priority": 3,
-              "request": {
-                "ResourceReward": {
-                  "reward": {
-                    "default": {
-                      "mood_tokens": 1
-                    },
-                    "conversions": [
-                      {
-                        "from": [
-                          {
-                            "mood_tokens": 1
-                          }
-                        ],
-                        "to": {
-                          "culture_tokens": 1
-                        },
-                        "type": "Unlimited"
-                      }
-                    ]
-                  },
-                  "name": "Select a reward for fighting the Pirates"
-                }
-              },
-              "response": null,
-              "origin": {
-                "Builtin": "Barbarians bonus"
-              }
-            }
-          }
-        }
-      ]
+      }
     }
   ],
   "action_log_index": 5,

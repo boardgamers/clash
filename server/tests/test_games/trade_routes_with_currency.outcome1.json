@@ -1,5 +1,7 @@
 {
-  "state": "Playing",
+  "state": [
+    "Playing"
+  ],
   "players": [
     {
       "name": null,
@@ -427,7 +429,7 @@
     },
     {
       "action": {
-        "CustomPhaseEvent": {
+        "Response": {
           "ResourceReward": {
             "food": 1,
             "gold": 1
@@ -436,8 +438,8 @@
       },
       "undo": [
         {
-          "CustomPhaseEvent": {
-            "event_type": "on_turn_start",
+          "Event": {
+            "event_type": "TurnStart",
             "player": 1,
             "last_priority_used": 0,
             "handler": {
@@ -465,7 +467,6 @@
                   "name": "Collect trade routes reward"
                 }
               },
-              "response": null,
               "origin": {
                 "Advance": "Trade Routes"
               }

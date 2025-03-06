@@ -393,7 +393,7 @@ fn test_trade_routes_with_currency() {
             TestAction::not_undoable(0, Action::Playing(EndTurn)),
             TestAction::undoable(
                 1,
-                Action::CustomPhaseEvent(CurrentEventResponse::ResourceReward(
+                Action::Response(CurrentEventResponse::ResourceReward(
                     ResourcePile::gold(1) + ResourcePile::food(1),
                 )),
             ),
@@ -424,13 +424,13 @@ fn test_dogma() {
             ),
             TestAction::undoable(
                 1,
-                Action::CustomPhaseEvent(CurrentEventResponse::ResourceReward(
+                Action::Response(CurrentEventResponse::ResourceReward(
                     ResourcePile::culture_tokens(1),
                 )),
             ),
             TestAction::undoable(
                 1,
-                Action::CustomPhaseEvent(CurrentEventResponse::SelectAdvance(
+                Action::Response(CurrentEventResponse::SelectAdvance(
                     "Fanaticism".to_string(),
                 )),
             ),
@@ -482,9 +482,7 @@ fn test_free_education() {
             ),
             TestAction::undoable(
                 0,
-                Action::CustomPhaseEvent(CurrentEventResponse::Payment(vec![ResourcePile::ideas(
-                    1,
-                )])),
+                Action::Response(CurrentEventResponse::Payment(vec![ResourcePile::ideas(1)])),
             ),
         ],
     );

@@ -1,38 +1,41 @@
 {
-  "state": {
-    "Combat": {
-      "initiation": {
-        "Movement": {
-          "movement_actions_left": 2,
-          "moved_units": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5
-          ]
-        }
-      },
-      "round": 1,
-      "defender": 1,
-      "defender_position": "C1",
-      "attacker": 0,
-      "attacker_position": "C2",
-      "attackers": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5
-      ],
-      "can_retreat": true
+  "state": [
+    "Playing",
+    {
+      "Movement": {
+        "movement_actions_left": 2,
+        "moved_units": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      }
+    },
+    {
+      "Combat": {
+        "round": 1,
+        "defender": 1,
+        "defender_position": "C1",
+        "attacker": 0,
+        "attacker_position": "C2",
+        "attackers": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "retreat": "CanRetreat"
+      }
     }
-  },
+  ],
   "current_events": [
     {
-      "event_type": "on_combat_start",
+      "event_type": "CombatStart",
       "player": 0,
       "last_priority_used": 1,
       "handler": {
@@ -63,7 +66,6 @@
             }
           ]
         },
-        "response": null,
         "origin": {
           "Advance": "Steel Weapons"
         }

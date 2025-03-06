@@ -4,16 +4,15 @@ use crate::combat_listeners::{
     Casualties, CombatResult, CombatResultInfo, CombatRoundResult, CombatStrength,
 };
 use crate::consts::SHIP_CAPACITY;
-use crate::game::GameState::Playing;
+use crate::content::custom_phase_actions::CurrentEventType;
 use crate::game::{Game, GameState};
-use crate::movement::{back_to_move, move_units, MoveState};
+use crate::movement::{move_units, stop_current_move};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType::{Cavalry, Elephant, Infantry, Leader};
 use crate::unit::{MoveUnits, MovementRestriction, UnitType, Units};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use std::mem;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Copy)]
 pub enum CombatModifier {
@@ -23,31 +22,30 @@ pub enum CombatModifier {
     SteelWeaponsDefender,
 }
 
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Copy)]
+pub enum CombatRetreatState {
+    CanRetreat,
+    CannotRetreat,
+    Retreated,
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct Combat {
-    pub initiation: Box<GameState>,
     pub round: u32, //starts with one,
     pub defender: usize,
     pub defender_position: Position,
     pub attacker: usize,
     pub attacker_position: Position,
     pub attackers: Vec<u32>,
-    pub can_retreat: bool,
+    pub retreat: CombatRetreatState,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub modifiers: Vec<CombatModifier>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub round_result: Option<CombatRoundResult>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub result: Option<CombatResult>,
 }
 
 impl Combat {
     #[must_use]
     pub fn new(
-        initiation: Box<GameState>,
         round: u32,
         defender: usize,
         defender_position: Position,
@@ -57,17 +55,18 @@ impl Combat {
         can_retreat: bool,
     ) -> Self {
         Self {
-            initiation,
             round,
             defender,
             defender_position,
             attacker,
             attacker_position,
             attackers,
-            can_retreat,
             modifiers: vec![],
-            round_result: None,
-            result: None,
+            retreat: if can_retreat {
+                CombatRetreatState::CanRetreat
+            } else {
+                CombatRetreatState::CannotRetreat
+            },
         }
     }
 
@@ -91,15 +90,7 @@ impl Combat {
         attackers
             .iter()
             .copied()
-            .filter(|u| {
-                can_remove_after_combat(
-                    on_water,
-                    &player
-                        .get_unit(*u)
-                        .expect("player should have unit")
-                        .unit_type,
-                )
-            })
+            .filter(|u| can_remove_after_combat(on_water, &player.get_unit(*u).unit_type))
             .collect_vec()
     }
 
@@ -119,14 +110,14 @@ impl Combat {
     #[must_use]
     pub fn defender_fortress(&self, game: &Game) -> bool {
         game.players[self.defender]
-            .get_city(self.defender_position)
+            .try_get_city(self.defender_position)
             .is_some_and(|city| city.pieces.fortress.is_some())
     }
 
     #[must_use]
     pub fn defender_temple(&self, game: &Game) -> bool {
         game.players[self.defender]
-            .get_city(self.defender_position)
+            .try_get_city(self.defender_position)
             .is_some_and(|city| city.pieces.temple.is_some())
     }
 
@@ -175,14 +166,8 @@ pub fn initiate_combat(
     attacker_position: Position,
     attackers: Vec<u32>,
     can_retreat: bool,
-    next_game_state: Option<GameState>,
 ) {
-    let initiation = next_game_state.map_or_else(
-        || Box::new(mem::replace(&mut game.state, Playing)),
-        Box::new,
-    );
     let combat = Combat::new(
-        initiation,
         1,
         defender,
         defender_position,
@@ -191,25 +176,21 @@ pub fn initiate_combat(
         attackers,
         can_retreat,
     );
-    game.state = GameState::Combat(combat);
+    game.push_state(GameState::Combat(combat));
     start_combat(game);
 }
 
 pub(crate) fn start_combat(game: &mut Game) {
     game.lock_undo();
-    let combat = take_combat(game);
+    let combat = get_combat(game);
     let attacker = combat.attacker;
     let defender = combat.defender;
-
-    if let Playing = game.state {
-        // event listener needs to find the correct state to get the combat position
-        game.state = GameState::Combat(combat);
-    }
 
     if game.trigger_current_event(
         &[attacker, defender],
         |events| &mut events.on_combat_start,
         &(),
+        |()| CurrentEventType::CombatStart,
         None,
     ) {
         return;
@@ -221,7 +202,7 @@ pub(crate) fn start_combat(game: &mut Game) {
 
 #[must_use]
 pub(crate) fn get_combat(game: &Game) -> &Combat {
-    let GameState::Combat(c) = &game.state else {
+    let GameState::Combat(c) = &game.state() else {
         panic!("Invalid state")
     };
     c
@@ -294,20 +275,19 @@ pub(crate) fn combat_loop(game: &mut Game, mut c: Combat) {
             ));
         }
 
-        let can_retreat = c.can_retreat
+        let can_retreat = matches!(c.retreat, CombatRetreatState::CanRetreat)
             && attacker_hits < active_defenders.len() as u8
             && defender_hits < active_attackers.len() as u8;
 
-        c.round_result = Some(CombatRoundResult::new(
+        let result = CombatRoundResult::new(
             Casualties::new(defender_hits, game, &c, c.attacker),
             Casualties::new(attacker_hits, game, &c, c.defender),
             can_retreat,
-        ));
-        game.state = GameState::Combat(c);
+        );
+        game.push_state(GameState::Combat(c));
 
-        if let Some(r) = combat_round_end(game) {
+        if let Some(r) = combat_round_end(game, &result) {
             c = r;
-            c.round_result = None;
         } else {
             return;
         }
@@ -315,7 +295,7 @@ pub(crate) fn combat_loop(game: &mut Game, mut c: Combat) {
 }
 
 pub(crate) fn take_combat(game: &mut Game) -> Combat {
-    let GameState::Combat(c) = mem::replace(&mut game.state, Playing) else {
+    let GameState::Combat(c) = game.pop_state() else {
         panic!("Illegal state");
     };
     c
@@ -328,15 +308,15 @@ fn roll_log_str(log: &[String]) -> String {
     log.join(", ")
 }
 
-pub(crate) fn combat_round_end(game: &mut Game) -> Option<Combat> {
+pub(crate) fn combat_round_end(game: &mut Game, r: &CombatRoundResult) -> Option<Combat> {
     let c = get_combat(game);
     let attacker = c.attacker;
     let defender = c.defender;
-    let r = &c.round_result.clone().expect("no round result");
     if game.trigger_current_event(
         &[attacker, defender],
         |events| &mut events.on_combat_round_end,
         r,
+        CurrentEventType::CombatRoundEnd,
         None,
     ) {
         return None;
@@ -351,7 +331,7 @@ pub(crate) fn combat_round_end(game: &mut Game) -> Option<Combat> {
         defender_wins(game, c)
     } else if defenders_left.is_empty() {
         attacker_wins(game, c)
-    } else if c.round_result.as_ref().expect("no round result").retreated {
+    } else if matches!(c.retreat, CombatRetreatState::Retreated) {
         None
     } else {
         c.round += 1;
@@ -359,64 +339,54 @@ pub(crate) fn combat_round_end(game: &mut Game) -> Option<Combat> {
     }
 }
 
-fn attacker_wins(game: &mut Game, mut c: Combat) -> Option<Combat> {
+fn attacker_wins(game: &mut Game, c: Combat) -> Option<Combat> {
     game.add_info_log_item("Attacker wins");
     move_units(game, c.attacker, &c.attackers, c.defender_position, None);
     capture_position(game, c.defender, c.defender_position, c.attacker);
-    c.result = Some(CombatResult::AttackerWins);
-    end_combat(game, c)
+    end_combat(game, c, CombatResult::AttackerWins)
 }
 
-fn defender_wins(game: &mut Game, mut c: Combat) -> Option<Combat> {
+fn defender_wins(game: &mut Game, c: Combat) -> Option<Combat> {
     game.add_info_log_item("Defender wins");
-    c.result = Some(CombatResult::DefenderWins);
-    end_combat(game, c)
+    end_combat(game, c, CombatResult::DefenderWins)
 }
 
-pub(crate) fn draw(game: &mut Game, mut c: Combat) -> Option<Combat> {
+pub(crate) fn draw(game: &mut Game, c: Combat) -> Option<Combat> {
     if c.defender_fortress(game) && c.round == 1 {
         game.add_info_log_item(&format!(
             "{} wins the battle because he has a defending fortress",
             game.players[c.defender].get_name()
         ));
-        // only relevant for event listeners
-        c.result = Some(CombatResult::DefenderWins);
-        return end_combat(game, c);
+        return end_combat(game, c, CombatResult::DefenderWins);
     }
     game.add_info_log_item("Battle ends in a draw");
-    c.result = Some(CombatResult::Draw);
-    end_combat(game, c)
+    end_combat(game, c, CombatResult::Draw)
 }
 
-pub(crate) fn end_combat(game: &mut Game, combat: Combat) -> Option<Combat> {
+pub(crate) fn end_combat(game: &mut Game, combat: Combat, r: CombatResult) -> Option<Combat> {
     game.lock_undo();
     let attacker = combat.attacker;
     let defender = combat.defender;
     let defender_position = combat.defender_position;
-    let info = CombatResultInfo::new(
-        combat
-            .result
-            .clone()
-            .expect("Combat result should be set when ending combat"),
-        attacker,
-        defender,
-        defender_position,
-    );
+    let info = CombatResultInfo::new(r, attacker, defender, defender_position);
 
     // set state back to combat for event listeners
-    game.state = GameState::Combat(combat);
+    game.push_state(GameState::Combat(combat));
 
     if game.trigger_current_event(
         &[attacker, defender],
         |events| &mut events.on_combat_end,
         &info,
+        |i| CurrentEventType::CombatEnd(i.result),
         None,
     ) {
         return None;
     }
 
-    let c = take_combat(game);
-    game.state = *c.initiation;
+    take_combat(game);
+    if let Some(GameState::Movement(_)) = game.state_stack.last() {
+        stop_current_move(game);
+    }
     None
 }
 
@@ -464,10 +434,7 @@ fn roll(
     let mut dice_rolls = extra_dies;
     let mut unit_types = Units::empty();
     for unit in units {
-        let unit = &game.players[player_index]
-            .get_unit(*unit)
-            .expect("player should have all units")
-            .unit_type;
+        let unit = &game.players[player_index].get_unit(*unit).unit_type;
         dice_rolls += 1;
         unit_types += unit;
     }
@@ -624,7 +591,7 @@ pub fn capture_position(game: &mut Game, old_player: usize, position: Position, 
     for id in captured_settlers {
         game.players[old_player].remove_unit(id);
     }
-    if game.get_player(old_player).get_city(position).is_some() {
+    if game.get_player(old_player).try_get_city(position).is_some() {
         conquer_city(game, position, new_player, old_player);
     }
 }
@@ -632,7 +599,6 @@ pub fn capture_position(game: &mut Game, old_player: usize, position: Position, 
 fn move_to_defended_tile(
     game: &mut Game,
     player_index: usize,
-    move_state: Option<&mut MoveState>,
     units: &Vec<u32>,
     destination: Position,
     starting_position: Position,
@@ -643,14 +609,12 @@ fn move_to_defended_tile(
         .iter()
         .any(|unit| !unit.unit_type.is_settler());
     let has_fortress = game.players[defender]
-        .get_city(destination)
+        .try_get_city(destination)
         .is_some_and(|city| city.pieces.fortress.is_some());
 
     let mut military = false;
     for unit_id in units {
-        let unit = game.players[player_index]
-            .get_unit_mut(*unit_id)
-            .expect("the player should have all units to move");
+        let unit = game.players[player_index].get_unit_mut(*unit_id);
         if !unit.unit_type.is_settler() {
             if unit
                 .movement_restrictions
@@ -663,9 +627,6 @@ fn move_to_defended_tile(
         }
     }
     assert!(military, "Need military units to attack");
-    if let Some(move_state) = move_state {
-        back_to_move(game, move_state, true);
-    }
 
     if has_defending_units || has_fortress {
         initiate_combat(
@@ -676,7 +637,6 @@ fn move_to_defended_tile(
             starting_position,
             units.clone(),
             game.get_player(player_index).is_human(),
-            None,
         );
         return true;
     }
@@ -686,7 +646,6 @@ fn move_to_defended_tile(
 pub(crate) fn move_with_possible_combat(
     game: &mut Game,
     player_index: usize,
-    move_state: Option<&mut MoveState>,
     starting_position: Position,
     m: &MoveUnits,
 ) -> bool {
@@ -695,7 +654,6 @@ pub(crate) fn move_with_possible_combat(
         if move_to_defended_tile(
             game,
             player_index,
-            move_state,
             &m.units,
             m.destination,
             starting_position,
@@ -711,13 +669,6 @@ pub(crate) fn move_with_possible_combat(
             m.destination,
             m.embark_carrier_id,
         );
-        if let Some(move_state) = move_state {
-            back_to_move(
-                game,
-                move_state,
-                !starting_position.is_neighbor(m.destination),
-            );
-        }
     }
 
     if let Some(enemy) = enemy {
@@ -730,8 +681,9 @@ pub(crate) fn move_with_possible_combat(
 pub mod tests {
     use std::collections::HashMap;
 
-    use super::{conquer_city, Game, GameState::Playing};
+    use super::{conquer_city, Game};
 
+    use crate::game::GameState;
     use crate::payment::PaymentOptions;
     use crate::utils::tests::FloatEq;
     use crate::{
@@ -748,7 +700,7 @@ pub mod tests {
     #[must_use]
     pub fn test_game() -> Game {
         Game {
-            state: Playing,
+            state_stack: vec![GameState::Playing],
             current_events: Vec::new(),
             players: Vec::new(),
             map: Map::new(HashMap::new()),
@@ -804,9 +756,7 @@ pub mod tests {
 
         conquer_city(&mut game, position, new, old);
 
-        let c = game.players[new]
-            .get_city_mut(position)
-            .expect("player new should the city");
+        let c = game.players[new].get_city_mut(position);
         assert_eq!(1, c.player_index);
         assert_eq!(Angry, c.mood_state);
 
