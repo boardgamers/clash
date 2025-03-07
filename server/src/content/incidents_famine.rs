@@ -31,13 +31,7 @@ pub(crate) fn pestilence() -> Vec<Incident> {
         }
     });
     builder = pestilence_city(builder, 1);
-    builder = builder.add_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _p, _i| {
-        if game
-            .permanent_incident_effects
-            .contains(&PermanentIncidentEffect::Pestilence)
-        {
-            return;
-        }
+    builder = builder.add_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _p| {
         game.permanent_incident_effects
             .push(PermanentIncidentEffect::Pestilence);
     });
@@ -118,7 +112,7 @@ pub(crate) fn decrease_mood_incident_city(
             Some(new_position_request(
                 cities,
                 needed..=needed,
-                Some("Select a city to decrease the mood".to_string()),
+                "Select a city to decrease the mood",
             ))
         },
         |game, s| {
@@ -169,7 +163,7 @@ pub(crate) fn epidemics() -> Vec<Incident> {
                     player_index,
                     units,
                     needed..=needed,
-                    Some("Select units to kill".to_string()),
+                    "Select units to kill",
                 ))
             }
         },
@@ -243,7 +237,7 @@ pub(crate) fn famine(id: u8, severe: bool) -> Incident {
                 Some(new_position_request(
                     famine_targets(game.get_player(player_index)),
                     1..=1,
-                    Some("Select a city to make Angry".to_string()),
+                    "Select a city to make Angry",
                 ))
             } else {
                 None

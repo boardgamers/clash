@@ -104,7 +104,7 @@ pub(crate) fn barbarians_spawn(mut builder: IncidentBuilder) -> IncidentBuilder 
                 Some(new_position_request(
                     possible_barbarians_reinforcements(game),
                     1..=1,
-                    Some("Select a position for the additional Barbarian unit".to_string()),
+                    "Select a position for the additional Barbarian unit",
                 ))
             },
             |game, s| {
@@ -121,7 +121,7 @@ pub(crate) fn barbarians_spawn(mut builder: IncidentBuilder) -> IncidentBuilder 
                 Some(UnitTypeRequest::new(
                     choices,
                     get_barbarians_player(game).index,
-                    Some("Select a unit to reinforce the barbarians".to_string()),
+                    "Select a unit to reinforce the barbarians",
                 ))
             },
             |game, s| {
@@ -155,7 +155,7 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                     Some(new_position_request(
                         armies,
                         1..=1,
-                        Some("Select a Barbarian Army to move next".to_string()),
+                        "Select a Barbarian Army to move next",
                     ))
                 },
                 |game, s| {
@@ -182,7 +182,7 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                         Some(new_position_request(
                             choices,
                             1..=1,
-                            Some("Select a position to move the Barbarian Army".to_string()),
+                            "Select a position to move the Barbarian Army",
                         ))
                     } else {
                         None
@@ -224,11 +224,11 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
     builder.add_incident_listener(
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY,
-        |game, p, _i| {
+        |game, player| {
             let s = get_barbarian_state(game);
-            if s.move_units && get_movable_units(game, p.player, &s).is_empty() {
+            if s.move_units && get_movable_units(game, player, &s).is_empty() {
                 // after all moves are done
-                reinforce_after_move(game, p.player);
+                reinforce_after_move(game, player);
                 // clear movement restrictions
                 game.get_player_mut(get_barbarians_player(game).index)
                     .end_turn();
@@ -307,10 +307,10 @@ pub(crate) fn set_info(
     builder.add_incident_listener(
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY + 200,
-        move |game, p, _i| {
+        move |game, player| {
             if game.current_event().barbarians.is_none() {
                 let mut state = BarbariansEventState::new();
-                init(&mut state, game, p.player);
+                init(&mut state, game, player);
                 game.current_event_mut().barbarians = Some(state);
                 game.add_info_log_item(&format!("Base effect: {name}"));
             }
@@ -326,7 +326,7 @@ fn add_barbarians_city(builder: IncidentBuilder) -> IncidentBuilder {
             (!get_barbarian_state(game).move_units).then_some(new_position_request(
                 possible_barbarians_spawns(game, game.get_player(player_index)),
                 1..=1,
-                Some("Select a position for the new city and infantry unit".to_string()),
+                "Select a position for the new city and infantry unit",
             ))
         },
         move |game, s| {

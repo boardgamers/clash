@@ -20,7 +20,8 @@
             "needed": {
               "start": 0,
               "end": 1
-            }
+            },
+            "description": "Select a city to raze"
           }
         },
         "origin": {

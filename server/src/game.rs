@@ -327,8 +327,11 @@ impl Game {
         self.state_stack.pop().expect("game has ended")
     }
 
+    ///
+    /// # Panics
+    /// Panics if the player does not have events
     #[must_use]
-    pub(crate) fn current_event(&self) -> &CurrentEventState {
+    pub fn current_event(&self) -> &CurrentEventState {
         self.current_events.last().expect("state should exist")
     }
 

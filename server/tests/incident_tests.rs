@@ -6,6 +6,7 @@ use server::playing_actions;
 use server::playing_actions::PlayingAction::{Advance, Construct};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
+use server::status_phase::{ChangeGovernment, ChangeGovernmentType};
 use server::unit::UnitType;
 use std::vec;
 
@@ -339,5 +340,38 @@ fn test_civil_war() {
                 payment: ResourcePile::gold(2),
             }),
         )],
+    );
+}
+
+#[test]
+fn test_revolution() {
+    test_actions(
+        "revolution",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::gold(2),
+                }),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::Response(CurrentEventResponse::SelectUnits(vec![3])),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::Response(CurrentEventResponse::SelectUnits(vec![])),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::Response(CurrentEventResponse::ChangeGovernmentType(
+                    ChangeGovernmentType::ChangeGovernment(ChangeGovernment {
+                        new_government: String::from("Theocracy"),
+                        additional_advances: vec![],
+                    }),
+                )),
+            ),
+        ],
     );
 }

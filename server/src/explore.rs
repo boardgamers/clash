@@ -276,8 +276,8 @@ pub(crate) fn explore_resolution() -> Builtin {
     .add_current_event_listener(
         |e| &mut e.on_explore_resolution,
         0,
-        move |_game, _player_index, _player_name, state| {
-            Some(CurrentEventRequest::ExploreResolution(state.clone()))
+        move |_game, _player_index, _player_name, _state| {
+            Some(CurrentEventRequest::ExploreResolution)
         },
         move |game, _player_index, player_name, action, _request, r| {
             let CurrentEventResponse::ExploreResolution(rotation) = action else {

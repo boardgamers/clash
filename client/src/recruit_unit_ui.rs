@@ -8,9 +8,9 @@ use server::unit::{Unit, UnitType, Units};
 
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
-use crate::dialog_ui::OkTooltip;
+use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
 use crate::render_context::RenderContext;
-use crate::select_ui::{ConfirmSelection, CountSelector, HasCountSelectableObject, HighlightType};
+use crate::select_ui::{CountSelector, HasCountSelectableObject, HighlightType};
 use crate::unit_ui::{draw_unit_type, UnitSelection};
 use crate::{select_ui, unit_ui};
 
@@ -181,24 +181,8 @@ impl RecruitSelection {
     pub fn is_finished(&self) -> bool {
         self.need_replacement.is_empty()
     }
-}
 
-impl UnitSelection for RecruitSelection {
-    fn selected_units_mut(&mut self) -> &mut Vec<u32> {
-        &mut self.replaced_units
-    }
-
-    fn can_select(&self, _game: &Game, unit: &Unit) -> bool {
-        self.need_replacement.has_unit(&unit.unit_type)
-    }
-
-    fn player_index(&self) -> usize {
-        self.player
-    }
-}
-
-impl ConfirmSelection for RecruitSelection {
-    fn confirm(&self, game: &Game) -> OkTooltip {
+    pub fn confirm(&self, game: &Game) -> OkTooltip {
         if recruit_cost(
             game.get_player(self.amount.player_index),
             &self.amount.units,
@@ -213,6 +197,20 @@ impl ConfirmSelection for RecruitSelection {
         } else {
             OkTooltip::Invalid("Replace exact amount of units".to_string())
         }
+    }
+}
+
+impl UnitSelection for RecruitSelection {
+    fn selected_units_mut(&mut self) -> &mut Vec<u32> {
+        &mut self.replaced_units
+    }
+
+    fn can_select(&self, _game: &Game, unit: &Unit) -> bool {
+        self.need_replacement.has_unit(&unit.unit_type)
+    }
+
+    fn player_index(&self) -> usize {
+        self.player
     }
 }
 
@@ -311,7 +309,11 @@ fn update_selection(
 }
 
 pub fn replace_dialog(rc: &RenderContext, sel: &RecruitSelection) -> StateUpdate {
-    unit_ui::unit_selection_dialog::<RecruitSelection>(rc, sel, |new: RecruitSelection| {
-        open_dialog(rc, new.amount.city_position, new)
-    })
+    if ok_button(rc, sel.confirm(rc.game)) {
+        open_dialog(rc, sel.amount.city_position, sel.clone())
+    } else if cancel_button(rc) {
+        StateUpdate::Cancel
+    } else {
+        StateUpdate::None
+    }
 }

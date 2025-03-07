@@ -44,7 +44,8 @@
             "needed": {
               "start": 1,
               "end": 1
-            }
+            },
+            "description": "Select a city to place the free Settler Unit"
           }
         },
         "origin": {

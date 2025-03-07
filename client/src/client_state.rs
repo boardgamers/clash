@@ -4,7 +4,7 @@ use crate::collect_ui::CollectResources;
 use crate::construct_ui::ConstructionPayment;
 use crate::custom_phase_ui::{MultiSelection, UnitsSelection};
 use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
-use crate::event_ui::{custom_phase_event_help, event_help, pay_help};
+use crate::event_ui::{custom_phase_event_help, custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
 use crate::map_ui::ExploreResolutionConfig;
@@ -18,7 +18,7 @@ use server::action::Action;
 use server::city::{City, MoodState};
 use server::content::custom_phase_actions::{
     AdvanceRequest, ChangeGovernmentRequest, CurrentEventRequest, CurrentEventResponse,
-    PlayerRequest, SelectedStructure, UnitTypeRequest,
+    CurrentEventType, PlayerRequest, SelectedStructure, UnitTypeRequest,
 };
 use server::events::EventOrigin;
 use server::game::{Game, GameState};
@@ -57,7 +57,7 @@ pub enum ActiveDialog {
     UnitTypeRequest(UnitTypeRequest),
     UnitsRequest(UnitsSelection),
     StructuresRequest(MultiSelection<SelectedStructure>),
-    BoolRequest,
+    BoolRequest(String),
     ChangeGovernmentType(ChangeGovernmentRequest),
     ChooseAdditionalAdvances(ChooseAdditionalAdvances),
 }
@@ -94,7 +94,7 @@ impl ActiveDialog {
             ActiveDialog::UnitTypeRequest(_) => "custom phase unit request",
             ActiveDialog::UnitsRequest(_) => "custom phase units request",
             ActiveDialog::StructuresRequest(_) => "custom phase structures request",
-            ActiveDialog::BoolRequest => "custom phase bool request",
+            ActiveDialog::BoolRequest(_) => "custom phase bool request",
         }
     }
 
@@ -151,19 +151,19 @@ impl ActiveDialog {
             }
             ActiveDialog::ResourceRewardRequest(_)
             | ActiveDialog::AdvanceRequest(_)
-            | ActiveDialog::PaymentRequest(_)
-            | ActiveDialog::BoolRequest => custom_phase_event_help(rc, None),
-            ActiveDialog::UnitTypeRequest(r) => custom_phase_event_help(rc, r.description.as_ref()),
+            | ActiveDialog::PaymentRequest(_) => {
+                event_help(rc, &custom_phase_event_origin(rc), true)
+            }
+            ActiveDialog::BoolRequest(d) => custom_phase_event_help(rc, d),
+            ActiveDialog::UnitTypeRequest(r) => custom_phase_event_help(rc, &r.description),
             ActiveDialog::UnitsRequest(r) => {
-                custom_phase_event_help(rc, r.selection.request.description.as_ref())
+                custom_phase_event_help(rc, &r.selection.request.description)
             }
             ActiveDialog::StructuresRequest(r) => {
-                custom_phase_event_help(rc, r.request.description.as_ref())
+                custom_phase_event_help(rc, &r.request.description)
             }
-            ActiveDialog::PositionRequest(r) => {
-                custom_phase_event_help(rc, r.request.description.as_ref())
-            }
-            ActiveDialog::PlayerRequest(r) => custom_phase_event_help(rc, Some(&r.description)),
+            ActiveDialog::PositionRequest(r) => custom_phase_event_help(rc, &r.request.description),
+            ActiveDialog::PlayerRequest(r) => custom_phase_event_help(rc, &r.description),
         }
     }
 
@@ -535,15 +535,20 @@ impl State {
                     ActiveDialog::StructuresRequest(MultiSelection::new(r.clone()))
                 }
                 CurrentEventRequest::SelectPlayer(r) => ActiveDialog::PlayerRequest(r.clone()),
-                CurrentEventRequest::BoolRequest => ActiveDialog::BoolRequest,
+                CurrentEventRequest::BoolRequest(d) => ActiveDialog::BoolRequest(d.clone()),
                 CurrentEventRequest::ChangeGovernment(r) => {
                     ActiveDialog::ChangeGovernmentType(r.clone())
                 }
-                CurrentEventRequest::ExploreResolution(r) => {
-                    ActiveDialog::ExploreResolution(ExploreResolutionConfig {
-                        block: r.block.clone(),
-                        rotation: r.block.position.rotation,
-                    })
+                CurrentEventRequest::ExploreResolution => {
+                    if let CurrentEventType::ExploreResolution(r) = &game.current_event().event_type
+                    {
+                        ActiveDialog::ExploreResolution(ExploreResolutionConfig {
+                            block: r.block.clone(),
+                            rotation: r.block.position.rotation,
+                        })
+                    } else {
+                        panic!("invalid state");
+                    }
                 }
             };
         }

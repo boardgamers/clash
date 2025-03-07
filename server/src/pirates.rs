@@ -144,7 +144,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                 Some(new_position_request(
                     choices,
                     1..=1,
-                    Some("Select a city to reduce Mood".to_string()),
+                    "Select a city to reduce Mood",
                 ))
             },
             |game, s| {
@@ -182,7 +182,7 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
                 pirates.index,
                 pirate_ships,
                 needs_removal..=needs_removal,
-                Some("Select Pirate Ships to remove".to_string()),
+                "Select Pirate Ships to remove",
             ))
         },
         |game, s| {
@@ -236,7 +236,7 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
             Some(new_position_request(
                 sea_spaces,
                 1..=1,
-                Some("Select a position for the Pirate Ship".to_string()),
+                "Select a position for the Pirate Ship",
             ))
         },
         |game, s| {

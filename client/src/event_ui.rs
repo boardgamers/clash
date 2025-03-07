@@ -48,11 +48,9 @@ pub fn event_help(rc: &RenderContext, origin: &EventOrigin, do_break: bool) -> V
 }
 
 #[must_use]
-pub fn custom_phase_event_help(rc: &RenderContext, description: Option<&String>) -> Vec<String> {
+pub fn custom_phase_event_help(rc: &RenderContext, description: &str) -> Vec<String> {
     let mut h = event_help(rc, &custom_phase_event_origin(rc), true);
-    if let Some(d) = description {
-        h.push(d.clone());
-    }
+    h.push(description.to_string());
     h
 }
 

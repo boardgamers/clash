@@ -92,9 +92,9 @@ pub enum CurrentEventRequest {
     SelectUnitType(UnitTypeRequest),
     SelectUnits(UnitsRequest),
     SelectStructures(StructuresRequest),
-    BoolRequest,
+    BoolRequest(String),
     ChangeGovernment(ChangeGovernmentRequest),
-    ExploreResolution(ExploreResolutionState),
+    ExploreResolution,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -212,7 +212,7 @@ pub type PositionRequest = MultiRequest<Position>;
 pub(crate) fn new_position_request(
     mut choices: Vec<Position>,
     needed: RangeInclusive<u8>,
-    description: Option<String>,
+    description: &str,
 ) -> PositionRequest {
     choices.sort();
     MultiRequest::new(choices, needed, description)
@@ -222,18 +222,16 @@ pub(crate) fn new_position_request(
 pub struct UnitTypeRequest {
     pub choices: Vec<UnitType>,
     pub player_index: usize,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub description: String,
 }
 
 impl UnitTypeRequest {
     #[must_use]
-    pub fn new(choices: Vec<UnitType>, player_index: usize, description: Option<String>) -> Self {
+    pub fn new(choices: Vec<UnitType>, player_index: usize, description: &str) -> Self {
         Self {
             choices,
             player_index,
-            description,
+            description: description.to_string(),
         }
     }
 }
@@ -251,7 +249,7 @@ impl UnitsRequest {
         player: usize,
         choices: Vec<u32>,
         needed: RangeInclusive<u8>,
-        description: Option<String>,
+        description: &str,
     ) -> Self {
         Self {
             player,
@@ -271,18 +269,16 @@ pub enum Structure {
 pub struct MultiRequest<T> {
     pub choices: Vec<T>,
     pub needed: RangeInclusive<u8>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub description: String,
 }
 
 impl<T> MultiRequest<T> {
     #[must_use]
-    pub fn new(choices: Vec<T>, needed: RangeInclusive<u8>, description: Option<String>) -> Self {
+    pub fn new(choices: Vec<T>, needed: RangeInclusive<u8>, description: &str) -> Self {
         Self {
             choices,
             needed,
-            description,
+            description: description.to_string(),
         }
     }
 
@@ -311,12 +307,13 @@ impl PlayerRequest {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct ChangeGovernmentRequest {
     pub optional: bool,
+    pub cost: ResourcePile,
 }
 
 impl ChangeGovernmentRequest {
     #[must_use]
-    pub fn new(optional: bool) -> Self {
-        Self { optional }
+    pub fn new(optional: bool, cost: ResourcePile) -> Self {
+        Self { optional, cost }
     }
 }
 
@@ -328,10 +325,8 @@ impl CurrentEventResponse {
         let state = *e;
         match self {
             CurrentEventResponse::ExploreResolution(_r) => {
-                if let Some(CurrentEventRequest::ExploreResolution(e)) =
-                    state.player.handler.as_ref().map(|h| &h.request)
-                {
-                    undo_explore_resolution(game, player_index, e);
+                if let CurrentEventType::ExploreResolution(r) = &state.event_type {
+                    undo_explore_resolution(game, player_index, r);
                 } else {
                     panic!("explore resolution should have been requested")
                 }

@@ -13,7 +13,11 @@
         "priority": 0,
         "request": {
           "ChangeGovernment": {
-            "optional": true
+            "optional": true,
+            "cost": {
+              "mood_tokens": 1,
+              "culture_tokens": 1
+            }
           }
         },
         "origin": {

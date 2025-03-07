@@ -7,7 +7,8 @@ use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder, PermanentIn
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
-use crate::status_phase::can_change_government_for_free;
+use crate::resource_pile::ResourcePile;
+use crate::status_phase::{add_change_government, can_change_government_for_free};
 use crate::unit::UnitType;
 use itertools::Itertools;
 
@@ -80,9 +81,7 @@ fn civil_war(id: u8) -> Incident {
             Some(new_position_request(
                 non_happy_cites_with_infantry(p),
                 1..=1,
-                Some(format!(
-                    "Select a non-Happy city with an Infantry to kill the Infantry {suffix}"
-                )),
+                &format!("Select a non-Happy city with an Infantry to kill the Infantry {suffix}"),
             ))
         },
         |game, s| {
@@ -133,31 +132,36 @@ fn revolution() -> Incident {
     b = kill_unit_for_revolution(
         b,
         3,
-        "Kill a unit to avoid losing an action".to_string(),
+        "Kill a unit to avoid losing an action",
         |game, _player| can_loose_action(game),
     );
-    b = b.add_incident_listener(IncidentTarget::ActivePlayer, 2, |game, p, _incident| {
-        if game.current_event_player().sacrifice == 0 {
-            loose_action(game, p.player);
+    b = b.add_incident_listener(IncidentTarget::ActivePlayer, 2, |game, player| {
+        if can_loose_action(game) && game.current_event_player().sacrifice == 0 {
+            loose_action(game, player);
         }
     });
     b = kill_unit_for_revolution(
         b,
         1,
-        "Kill a unit to avoid changing government".to_string(),
+        "Kill a unit to avoid changing government",
         |_game, player| can_change_government_for_free(player),
     );
-    // todo change government
-
+    b = add_change_government(
+        b,
+        |event| &mut event.on_incident,
+        false,
+        ResourcePile::empty(),
+    );
     b.build()
 }
 
 fn kill_unit_for_revolution(
     b: IncidentBuilder,
     priority: i32,
-    description: String,
+    description: &str,
     pred: impl Fn(&Game, &Player) -> bool + 'static + Clone,
 ) -> IncidentBuilder {
+    let description = description.to_string();
     b.add_incident_units_request(
         IncidentTarget::ActivePlayer,
         priority,
@@ -178,11 +182,12 @@ fn kill_unit_for_revolution(
                     vec![]
                 },
                 0..=1,
-                Some(description.to_string()),
+                &description,
             ))
         },
         |game, s| {
             if s.choice.is_empty() {
+                game.add_info_log_item(&format!("{} did not kill an Army unit", s.player_name));
                 return;
             }
             game.add_info_log_item(&format!("{} killed an Army unit", s.player_name));
@@ -200,10 +205,13 @@ fn can_loose_action(game: &Game) -> bool {
 }
 
 fn loose_action(game: &mut Game, player: usize) {
-    match game.state() {
-        GameState::StatusPhase(_) => game
-            .permanent_incident_effects
-            .push(PermanentIncidentEffect::LooseAction(player)),
-        _ => game.actions_left -= 1,
+    let name = game.get_player(player).get_name();
+    if let GameState::StatusPhase(_) = game.state() {
+        game.add_info_log_item(&format!("{name} lost an action for the next turn"));
+        game.permanent_incident_effects
+            .push(PermanentIncidentEffect::LooseAction(player));
+    } else {
+        game.add_info_log_item(&format!("{name} lost an action"));
+        game.actions_left -= 1;
     };
 }

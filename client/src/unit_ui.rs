@@ -7,9 +7,8 @@ use server::unit::{carried_units, MovementRestriction, Unit, UnitType};
 
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::hex_ui;
-use crate::select_ui::{may_cancel, ConfirmSelection, HighlightType};
+use crate::select_ui::HighlightType;
 
-use crate::dialog_ui::ok_button;
 use crate::layout_ui::{draw_scaled_icon, is_in_circle};
 use crate::move_ui::MoveDestination;
 use crate::render_context::RenderContext;
@@ -267,18 +266,6 @@ pub fn unit_selection_click<T: UnitSelection + Clone>(
         }
     }
     StateUpdate::None
-}
-
-pub fn unit_selection_dialog<T: UnitSelection + ConfirmSelection>(
-    rc: &RenderContext,
-    sel: &T,
-    on_ok: impl FnOnce(T) -> StateUpdate,
-) -> StateUpdate {
-    if ok_button(rc, sel.confirm(rc.game)) {
-        on_ok(sel.clone())
-    } else {
-        may_cancel(sel, rc)
-    }
 }
 
 pub fn units_on_tile(game: &Game, pos: Position) -> impl Iterator<Item = (usize, Unit)> + '_ {
