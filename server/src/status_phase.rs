@@ -1,12 +1,13 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::{advance_with_incident_token, do_advance, remove_advance};
 use crate::consts::AGES;
-use crate::content::builtin::{status_phase_handler, Builtin, BuiltinBuilder};
+use crate::content::builtin::{status_phase_handler, Builtin};
 use crate::content::custom_phase_actions::{
     new_position_request, AdvanceRequest, ChangeGovernmentRequest, CurrentEventRequest,
     CurrentEventResponse, CurrentEventType, PlayerRequest,
 };
 use crate::payment::PaymentOptions;
+use crate::player_events::{CurrentEvent, PlayerEvents};
 use crate::{
     content::advances,
     game::{Game, GameState::*},
@@ -166,7 +167,11 @@ pub(crate) fn raze_city() -> Builtin {
                 if cities.is_empty() {
                     return None;
                 }
-                Some(new_position_request(cities, 0..=1, None))
+                Some(new_position_request(
+                    cities,
+                    0..=1,
+                    "May raze a size 1 city for 1 gold",
+                ))
             },
             |game, s| {
                 if s.choice.is_empty() {
@@ -188,30 +193,36 @@ pub(crate) fn raze_city() -> Builtin {
 pub(crate) fn may_change_government() -> Builtin {
     add_change_government(
         Builtin::builder("Change Government", "Change your government"),
+        |event| &mut event.on_status_phase,
         true,
-        |g, player| {
-            let p = g.get_player(player);
-            p.can_afford(&PaymentOptions::resources(CHANGE_GOVERNMENT_COST))
-                && can_change_government_for_free(p)
-        },
+        CHANGE_GOVERNMENT_COST,
     )
     .build()
 }
 
-pub(crate) fn add_change_government(
-    b: BuiltinBuilder,
+pub(crate) fn add_change_government<A, E, V>(
+    a: A,
+    event: E,
     optional: bool,
-    pred: impl Fn(&Game, usize) -> bool + 'static + Clone,
-) -> BuiltinBuilder {
-    b.add_current_event_listener(
-        |event| &mut event.on_status_phase,
+    cost: ResourcePile,
+) -> A
+where
+    E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+    A: AbilityInitializerSetup,
+{
+    let cost2 = cost.clone();
+    a.add_current_event_listener(
+        event,
         0,
-        move |game, player_index, _, ()| {
-            pred(game, player_index).then_some(CurrentEventRequest::ChangeGovernment(
-                ChangeGovernmentRequest::new(optional),
+        move |game, player_index, _, _| {
+            let p = game.get_player(player_index);
+            (can_change_government_for_free(p)
+                && p.can_afford(&PaymentOptions::resources(cost.clone())))
+            .then_some(CurrentEventRequest::ChangeGovernment(
+                ChangeGovernmentRequest::new(optional, cost.clone()),
             ))
         },
-        move |game, player_index, player_name, action, request, ()| {
+        move |game, player_index, player_name, action, request, _| {
             if let CurrentEventRequest::ChangeGovernment(r) = &request {
                 if let CurrentEventResponse::ChangeGovernmentType(t) = action {
                     match t {
@@ -225,8 +236,13 @@ pub(crate) fn add_change_government(
                             ));
                             game.add_info_log_item(&format!(
                                 "Additional advances: {}",
-                                c.additional_advances.join(", ")
+                                if c.additional_advances.is_empty() {
+                                    "none".to_string()
+                                } else {
+                                    c.additional_advances.join(", ")
+                                }
                             ));
+                            game.players[player_index].lose_resources(cost2.clone());
                             change_government_type(game, player_index, &c);
                         }
                         ChangeGovernmentType::KeepGovernment => {
@@ -245,7 +261,6 @@ pub(crate) fn add_change_government(
 }
 
 fn change_government_type(game: &mut Game, player_index: usize, new_government: &ChangeGovernment) {
-    game.players[player_index].lose_resources(CHANGE_GOVERNMENT_COST);
     let government = &new_government.new_government;
     let a = advances::get_government(government).expect("government should exist");
     assert!(

@@ -1,12 +1,11 @@
 use crate::client_state::StateUpdate;
-use crate::dialog_ui::{cancel_button, cancel_button_with_tooltip, ok_button, OkTooltip};
+use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
 use crate::layout_ui::{bottom_center_anchor, bottom_center_texture, ICON_SIZE};
 use crate::render_context::RenderContext;
 use macroquad::color::{Color, BLACK, BLUE, WHITE};
 use macroquad::math::{bool, vec2, Vec2};
 use macroquad::prelude::TextParams;
 use macroquad::text::draw_text_ex;
-use server::game::Game;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct CountSelector {
@@ -87,26 +86,6 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
     };
 
     StateUpdate::None
-}
-
-pub trait ConfirmSelection: Clone {
-    fn cancel_name(&self) -> Option<&str> {
-        Some("Cancel")
-    }
-
-    fn confirm(&self, game: &Game) -> OkTooltip;
-}
-
-pub fn may_cancel(sel: &impl ConfirmSelection, rc: &RenderContext) -> StateUpdate {
-    if let Some(cancel_name) = sel.cancel_name() {
-        if cancel_button_with_tooltip(rc, cancel_name) {
-            StateUpdate::Cancel
-        } else {
-            StateUpdate::None
-        }
-    } else {
-        StateUpdate::None
-    }
 }
 
 #[derive(Clone, Copy)]

@@ -24,6 +24,10 @@ fn dogma() -> AdvanceBuilder {
             let p = &mut game.players[player_index];
             p.resource_limit.ideas = 2;
             p.gain_resources(ResourcePile::ideas(0)); // to trigger the limit
+            let name = p.get_name();
+            game.add_info_log_item(&format!(
+                "{name} is now limited to a maximum of 2 ideas for Dogma Advance",
+            ));
         })
         .add_ability_undo_deinitializer(|game, player_index| {
             game.players[player_index].resource_limit.ideas = 7;
@@ -122,7 +126,7 @@ fn fanaticism() -> AdvanceBuilder {
                         .filter(|c| p.get_units(c.position).iter().filter(|u| u.unit_type.is_army_unit()).count() < STACK_LIMIT)
                         .map(|c| c.position)
                         .collect();
-                    Some(new_position_request(choices, 1..=1, None))
+                    Some(new_position_request(choices, 1..=1, "Select a city to place the free Infantry Unit"))
                 } else {
                     None
                 }

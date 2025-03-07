@@ -1,40 +1,16 @@
 {
   "state": [
-    {
-      "StatusPhase": "ChangeGovernmentType"
-    }
-  ],
-  "current_events": [
-    {
-      "event_type": "StatusPhase",
-      "player": 0,
-      "last_priority_used": 0,
-      "handler": {
-        "priority": 0,
-        "request": {
-          "ChangeGovernment": {
-            "optional": true,
-            "cost": {
-              "mood_tokens": 1,
-              "culture_tokens": 1
-            }
-          }
-        },
-        "origin": {
-          "Builtin": "Change Government"
-        }
-      }
-    }
+    "Playing"
   ],
   "players": [
     {
       "name": null,
       "id": 0,
       "resources": {
-        "food": 2,
-        "wood": 7,
-        "ore": 7,
-        "ideas": 3,
+        "food": 1,
+        "wood": 6,
+        "ore": 6,
+        "ideas": 5,
         "gold": 7,
         "mood_tokens": 7,
         "culture_tokens": 7
@@ -50,18 +26,38 @@
       },
       "cities": [
         {
-          "city_pieces": {},
-          "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "A1"
-        },
-        {
-          "city_pieces": {},
+          "city_pieces": {
+            "fortress": 0,
+            "temple": 1,
+            "wonders": [
+              "Pyramids"
+            ]
+          },
           "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
           "position": "C2"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B2"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
         }
       ],
       "units": [
@@ -72,13 +68,11 @@
         },
         {
           "position": "C2",
-          "unit_type": "Cavalry",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 1
-        },
-        {
-          "position": "C2",
-          "unit_type": "Leader",
-          "id": 2
         },
         {
           "position": "C2",
@@ -111,15 +105,16 @@
       "available_leaders": [],
       "advances": [
         "Farming",
-        "Fishing",
-        "Free Economy",
         "Mining",
         "State Religion",
+        "Tactics",
         "Voting"
       ],
       "unlocked_special_advance": [],
-      "wonders_build": [],
-      "incident_tokens": 3,
+      "wonders_build": [
+        "Pyramids"
+      ],
+      "incident_tokens": 1,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -149,43 +144,73 @@
       },
       "cities": [
         {
-          "city_pieces": {},
-          "mood_state": "Angry",
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "position": "C1"
-        }
-      ],
-      "units": [
-        {
-          "position": "C1",
-          "unit_type": "Infantry",
-          "id": 0
+          "position": "A1"
         },
         {
-          "position": "C1",
-          "unit_type": "Infantry",
-          "id": 1
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A3"
+        },
+        {
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A4"
         }
       ],
+      "units": [],
       "civilization": "test1",
       "active_leader": null,
       "available_leaders": [],
       "advances": [
-        "Engineering",
         "Farming",
         "Mining"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "incident_tokens": 2,
+      "incident_tokens": 3,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
-      "wonder_cards": [
-        "Pyramids"
-      ],
+      "wonder_cards": [],
       "next_unit_id": 2
+    },
+    {
+      "name": null,
+      "id": 2,
+      "resources": {},
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [],
+      "units": [],
+      "civilization": "Barbarians",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 0
     }
   ],
   "map": {
@@ -200,9 +225,11 @@
       ],
       [
         "A3",
-        {
-          "Exhausted": "Forest"
-        }
+        "Mountain"
+      ],
+      [
+        "A4",
+        "Mountain"
       ],
       [
         "B1",
@@ -256,11 +283,15 @@
     10,
     10,
     10,
-    10,
     10
   ],
-  "dice_roll_log": [],
+  "dice_roll_log": [
+    10
+  ],
   "dropped_players": [],
   "wonders_left": [],
-  "wonder_amount_left": 0
+  "wonder_amount_left": 1,
+  "incidents_left": [
+    38
+  ]
 }

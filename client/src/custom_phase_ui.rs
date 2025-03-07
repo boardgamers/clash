@@ -62,6 +62,8 @@ pub fn advance_reward_dialog(rc: &RenderContext, r: &AdvanceRequest, name: &str)
 }
 
 pub fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> StateUpdate {
+    bottom_centered_text(rc, &r.description);
+
     let c = &r.choices;
     let anchor = bottom_center_anchor(rc) + vec2(0., 60.);
     for (i, u) in c.iter().enumerate() {
@@ -118,7 +120,12 @@ impl UnitSelection for UnitsSelection {
 pub fn select_units_dialog(rc: &RenderContext, s: &UnitsSelection) -> StateUpdate {
     bottom_centered_text(
         rc,
-        format!("{} units selected", s.selection.selected.len()).as_str(),
+        format!(
+            "{}: {} units selected",
+            s.selection.request.description,
+            s.selection.selected.len()
+        )
+        .as_str(),
     );
 
     if ok_button(
@@ -175,7 +182,12 @@ pub fn select_structures_dialog(
 ) -> StateUpdate {
     bottom_centered_text(
         rc,
-        format!("{} structures selected", s.selected.len()).as_str(),
+        format!(
+            "{}: {} structures selected",
+            s.request.description,
+            s.selected.len()
+        )
+        .as_str(),
     );
 
     if ok_button(
@@ -204,7 +216,8 @@ fn multi_select_tooltip<T: Clone>(s: &MultiSelection<T>, valid: bool, name: &str
     }
 }
 
-pub fn bool_request_dialog(rc: &RenderContext) -> StateUpdate {
+pub fn bool_request_dialog(rc: &RenderContext, description: &str) -> StateUpdate {
+    bottom_centered_text(rc, description);
     if ok_button(rc, OkTooltip::Valid("OK".to_string())) {
         return bool_answer(true);
     }
@@ -248,7 +261,7 @@ pub(crate) fn position_request_dialog(
 ) -> StateUpdate {
     bottom_centered_text(
         rc,
-        format!("{} positions selected", s.selected.len()).as_str(),
+        format!("{}: {} selected", s.request.description, s.selected.len()).as_str(),
     );
     if ok_button(rc, multi_select_tooltip(s, s.is_valid(), "positions")) {
         StateUpdate::response(CurrentEventResponse::SelectPositions(s.selected.clone()))

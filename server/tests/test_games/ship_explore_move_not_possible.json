@@ -40,30 +40,7 @@
       "last_priority_used": 0,
       "handler": {
         "priority": 0,
-        "request": {
-          "ExploreResolution": {
-            "block": {
-              "position": {
-                "top_tile": "F4",
-                "rotation": 0
-              },
-              "block": {
-                "terrain": [
-                  "Fertile",
-                  "Mountain",
-                  "Forest",
-                  "Fertile"
-                ]
-              }
-            },
-            "units": [
-              1
-            ],
-            "start": "D5",
-            "destination": "E5",
-            "ship_can_teleport": false
-          }
-        },
+        "request": "ExploreResolution",
         "origin": {
           "Builtin": "Explore Resolution"
         }

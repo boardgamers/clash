@@ -12,7 +12,7 @@ use crate::map::Terrain;
 use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions};
 use crate::pirates::pirates_spawn_and_raid;
 use crate::player::Player;
-use crate::player_events::{CurrentEventInfo, IncidentInfo, IncidentTarget};
+use crate::player_events::{IncidentInfo, IncidentTarget};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
@@ -172,17 +172,16 @@ impl IncidentBuilder {
     #[must_use]
     pub fn add_incident_listener<F>(self, role: IncidentTarget, priority: i32, listener: F) -> Self
     where
-        F: Fn(&mut Game, &CurrentEventInfo, &IncidentInfo) + 'static + Clone,
+        F: Fn(&mut Game, usize) + 'static + Clone,
     {
-        let f = self.new_filter(role, priority);
-        self.add_player_event_listener(
-            |event| &mut event.on_incident,
-            move |game, p, i| {
-                if f.is_active(game, i, p.player) {
-                    listener(game, p, i);
-                }
-            },
+        self.add_incident_resource_request(
+            role,
             priority,
+            move |game, player_index, _incident| {
+                listener(game, player_index);
+                None // only to call the listener
+            },
+            |_game, _s| vec![], // only to call the listener
         )
     }
 
@@ -505,7 +504,7 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
             Some(new_position_request(
                 positions,
                 1..=1,
-                Some("Select a land position to exhaust".to_string()),
+                "Select a land position to exhaust",
             ))
         },
         |game, s| {

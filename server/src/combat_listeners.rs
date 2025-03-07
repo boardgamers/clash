@@ -212,9 +212,9 @@ pub(crate) fn offer_retreat() -> Builtin {
                     let p = game.get_player(player);
                     let name = p.get_name();
                     game.add_info_log_item(&format!("{name} can retreat",));
-                    true
+                    Some("Do you want to retreat?".to_string())
                 } else {
-                    false
+                    None
                 }
             },
             |game, retreat| {
@@ -286,7 +286,7 @@ pub(crate) fn choose_casualties(
                     player,
                     choices,
                     casualties..=casualties,
-                    Some(format!("Remove {casualties} {role} units")),
+                    &format!("Remove {casualties} {role} units"),
                 ))
             },
             move |game, s| {
@@ -314,7 +314,11 @@ pub(crate) fn place_settler() -> Builtin {
                 && p.is_human()
             {
                 let choices: Vec<Position> = p.cities.iter().map(|c| c.position).collect();
-                Some(new_position_request(choices, 1..=1, None))
+                Some(new_position_request(
+                    choices,
+                    1..=1,
+                    "Select a city to place the free Settler Unit",
+                ))
             } else {
                 None
             }

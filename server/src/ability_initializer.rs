@@ -399,7 +399,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &V) -> bool + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &V) -> Option<String> + 'static + Clone,
         gain_reward: impl Fn(&mut Game, &SelectedChoice<bool, V>) + 'static + Clone,
     ) -> Self
     where
@@ -409,10 +409,10 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             event,
             priority,
             move |game, player_index, _player_name, details| {
-                request(game, player_index, details).then_some(CurrentEventRequest::BoolRequest)
+                request(game, player_index, details).map(CurrentEventRequest::BoolRequest)
             },
             move |game, player_index, player_name, action, request, details| {
-                if let CurrentEventRequest::BoolRequest = &request {
+                if let CurrentEventRequest::BoolRequest(_) = &request {
                     if let CurrentEventResponse::Bool(reward) = action {
                         gain_reward(
                             game,

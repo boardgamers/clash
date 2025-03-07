@@ -22,7 +22,8 @@
             "needed": {
               "start": 0,
               "end": 1
-            }
+            },
+            "description": "May raze a size 1 city for 1 gold"
           }
         },
         "origin": {

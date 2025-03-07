@@ -44,7 +44,7 @@ pub fn change_government_type_dialog(
     }
     show_advance_menu(
         rc,
-        "Change government - or click cancel",
+        &format!("Change government for {}", r.cost),
         |a, p| {
             if get_governments()
                 .iter()

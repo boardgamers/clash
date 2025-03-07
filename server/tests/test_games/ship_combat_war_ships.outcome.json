@@ -48,7 +48,9 @@
       "last_priority_used": 0,
       "handler": {
         "priority": 0,
-        "request": "BoolRequest",
+        "request": {
+          "BoolRequest": "Do you want to retreat?"
+        },
         "origin": {
           "Builtin": "Offer Retreat"
         }

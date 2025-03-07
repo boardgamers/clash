@@ -51,7 +51,7 @@ fn select_settler(
                 Some(new_position_request(
                     p.cities.iter().map(|c| c.position).collect(),
                     1..=1,
-                    Some("Select a city to gain 1 settler".to_string()),
+                    "Select a city to gain 1 settler",
                 ))
             } else {
                 None

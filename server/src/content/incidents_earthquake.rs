@@ -44,7 +44,7 @@ fn volcano() -> Incident {
                     .then_some(new_position_request(
                         cities,
                         1..=1,
-                        Some("Select a city to be destroyed".to_string()),
+                        "Select a city to be destroyed",
                     ))
             },
             |game, s| {
@@ -133,7 +133,7 @@ fn structures_request(cities: &[City]) -> StructuresRequest {
     StructuresRequest::new(
         cities.iter().flat_map(destroyable_structures).collect_vec(),
         1..=3,
-        Some("Select 3 structures to be destroyed".to_string()),
+        "Select 1-3 structures to be destroyed",
     )
 }
 
