@@ -139,7 +139,6 @@ impl Bonus {
 ///
 /// Panics if advance does not exist
 pub fn do_advance(game: &mut Game, advance: &Advance, player_index: usize) {
-    game.trigger_command_event(player_index, |e| &mut e.on_advance, &advance.name);
     (advance.listeners.initializer)(game, player_index);
     (advance.listeners.one_time_initializer)(game, player_index);
     let name = advance.name.clone();
@@ -190,7 +189,7 @@ pub(crate) fn advance_with_incident_token(
 pub(crate) fn gain_advance(game: &mut Game, player_index: usize, info: &AdvanceInfo) {
     if game.trigger_current_event(
         &[player_index],
-        |e| &mut e.on_advance_custom_phase,
+        |e| &mut e.on_advance,
         info,
         CurrentEventType::Advance,
         None,

@@ -31,7 +31,7 @@ fn tactics() -> AdvanceBuilder {
     )
     .with_advance_bonus(CultureToken)
     .with_unlocked_building(Fortress)
-    .add_player_event_listener(|event| &mut event.on_combat_round, fortress, 3)
+    .add_player_event_listener(|event| &mut event.on_combat_round, 3, fortress)
 }
 
 fn siegecraft() -> AdvanceBuilder {
@@ -128,16 +128,20 @@ fn steel_weapons() -> AdvanceBuilder {
                 }
             },
             |game, s| {
-                let Some(GameState::Combat(c)) = &mut game.state_stack.last_mut() else { panic!("Invalid state") };
-                add_steel_weapons(s.player_index, c);
+                let pile = &s.choice[0];
                 game.add_info_log_item(
-                    &format!("{} paid for steel weapons: {}", s.player_name, s.choice[0]));
+                    &format!("{} paid for steel weapons: {}", s.player_name, pile));
+                let Some(GameState::Combat(c)) = &mut game.state_stack.last_mut() else { panic!("Invalid state") };
+                if pile.is_empty() {
+                    return;
+                }
+                add_steel_weapons(s.player_index, c);
             },
         )
         .add_player_event_listener(
             |event| &mut event.on_combat_round,
-            use_steel_weapons,
             2,
+            use_steel_weapons,
         )
 }
 
@@ -149,6 +153,7 @@ fn draft() -> AdvanceBuilder {
     .with_advance_bonus(CultureToken)
     .add_player_event_listener(
         |event| &mut event.recruit_cost,
+        0,
         |cost, units, player| {
             if units.infantry > 0 {
                 // insert at beginning so that it's preferred over gold
@@ -167,7 +172,6 @@ fn draft() -> AdvanceBuilder {
                 );
             }
         },
-        0,
     )
 }
 

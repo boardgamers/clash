@@ -1,4 +1,4 @@
-use crate::common::{load_game, move_action, test_action, test_actions, TestAction};
+use crate::common::{move_action, JsonTest, TestAction};
 use server::action::Action;
 use server::content::custom_phase_actions::CurrentEventResponse;
 use server::game::Game;
@@ -10,64 +10,66 @@ use server::unit::MovementAction::Move;
 
 mod common;
 
+const JSON: JsonTest = JsonTest::new("movement");
+
 #[test]
 fn test_movement() {
-    test_action(
+    JSON.test(
         "movement",
-        move_action(vec![4], Position::from_offset("B3")),
-        0,
-        true,
-        false,
+        vec![TestAction::undoable(
+            0,
+            move_action(vec![4], Position::from_offset("B3")),
+        )],
     );
 }
 
 #[test]
 fn test_explore_choose() {
-    test_action(
+    JSON.test(
         "explore_choose",
-        move_action(vec![0], Position::from_offset("C7")),
-        1,
-        false,
-        false,
+        vec![TestAction::not_undoable(
+            1,
+            move_action(vec![0], Position::from_offset("C7")),
+        )],
     );
 }
 
 #[test]
 fn test_explore_auto_no_walk_on_water() {
-    test_action(
+    JSON.test(
         "explore_auto_no_walk_on_water",
-        move_action(vec![0], Position::from_offset("B2")),
-        0,
-        false,
-        false,
+        vec![TestAction::not_undoable(
+            0,
+            move_action(vec![0], Position::from_offset("B2")),
+        )],
     );
 }
 
 #[test]
 fn test_explore_auto_adjacent_water() {
-    test_action(
+    JSON.test(
         "explore_auto_adjacent_water",
-        move_action(vec![0], Position::from_offset("C7")),
-        0,
-        false,
-        false,
+        vec![TestAction::not_undoable(
+            0,
+            move_action(vec![0], Position::from_offset("C7")),
+        )],
     );
 }
 
 #[test]
 fn test_explore_auto_water_outside() {
-    test_action(
+    JSON.test(
         "explore_auto_water_outside",
-        move_action(vec![1], Position::from_offset("F5")),
-        1,
-        false,
-        false,
+        vec![TestAction::not_undoable(
+            1,
+            move_action(vec![1], Position::from_offset("F5")),
+        )],
     );
 }
 
 #[test]
 fn test_explore_resolution() {
-    test_actions(
+    JSON.test(
         "explore_resolution",
         vec![
             TestAction::not_undoable(1, move_action(vec![0], Position::from_offset("D6"))),
@@ -81,130 +83,127 @@ fn test_explore_resolution() {
 
 #[test]
 fn test_ship_transport() {
-    // undo capture empty city is broken
-    test_action(
+    JSON.test(
         "ship_transport",
-        move_action(vec![7], Position::from_offset("D2")),
-        0,
-        true,
-        false,
+        vec![TestAction::undoable(
+            0,
+            move_action(vec![7], Position::from_offset("D2")),
+        )],
     );
 }
 
 #[test]
 fn test_ship_transport_same_sea() {
-    // undo capture empty city is broken
-    test_action(
+    JSON.test(
         "ship_transport_same_sea",
-        move_action(vec![7], Position::from_offset("C3")),
-        0,
-        true,
-        false,
+        vec![TestAction::undoable(
+            0,
+            move_action(vec![7], Position::from_offset("C3")),
+        )],
     );
 }
 
 #[test]
 fn test_ship_embark() {
-    test_action(
+    JSON.test(
         "ship_embark",
-        Action::Movement(Move(MoveUnits {
-            units: vec![3, 4],
-            destination: Position::from_offset("C3"),
-            embark_carrier_id: Some(8),
-            payment: ResourcePile::empty(),
-        })),
-        0,
-        true,
-        false,
+        vec![TestAction::undoable(
+            0,
+            Action::Movement(Move(MoveUnits {
+                units: vec![3, 4],
+                destination: Position::from_offset("C3"),
+                embark_carrier_id: Some(8),
+                payment: ResourcePile::empty(),
+            })),
+        )],
     );
 }
 
 #[test]
 fn test_ship_embark_continue() {
-    test_action(
+    JSON.test(
         "ship_embark_continue",
-        Action::Movement(Move(MoveUnits {
-            units: vec![5, 6],
-            destination: Position::from_offset("C3"),
-            embark_carrier_id: Some(9),
-            payment: ResourcePile::empty(),
-        })),
-        0,
-        true,
-        false,
+        vec![TestAction::undoable(
+            0,
+            Action::Movement(Move(MoveUnits {
+                units: vec![5, 6],
+                destination: Position::from_offset("C3"),
+                embark_carrier_id: Some(9),
+                payment: ResourcePile::empty(),
+            })),
+        )],
     );
 }
 
 #[test]
 fn test_ship_disembark() {
-    // undo capture empty city is broken
-    test_action(
+    JSON.test(
         "ship_disembark",
-        move_action(vec![1, 2], Position::from_offset("B3")),
-        0,
-        true,
-        false,
+        vec![TestAction::undoable(
+            0,
+            move_action(vec![1, 2], Position::from_offset("B3")),
+        )],
     );
 }
 
 #[test]
 fn test_ship_disembark_capture_empty_city() {
-    test_action(
+    JSON.test(
         "ship_disembark_capture_empty_city",
-        move_action(vec![1, 2], Position::from_offset("B2")),
-        0,
-        false,
-        false,
+        vec![TestAction::not_undoable(
+            0,
+            move_action(vec![1, 2], Position::from_offset("B2")),
+        )],
     );
 }
 
 #[test]
 fn test_ship_explore() {
-    test_action(
+    JSON.test(
         "ship_explore",
-        move_action(vec![1], Position::from_offset("C5")),
-        1,
-        false,
-        false,
+        vec![TestAction::not_undoable(
+            1,
+            move_action(vec![1], Position::from_offset("C5")),
+        )],
     );
 }
 
 #[test]
 fn test_ship_explore_teleport() {
-    test_action(
+    JSON.test(
         "ship_explore_teleport",
-        move_action(vec![1], Position::from_offset("C4")),
-        1,
-        false,
-        false,
+        vec![TestAction::not_undoable(
+            1,
+            move_action(vec![1], Position::from_offset("C4")),
+        )],
     );
 }
 
 #[test]
 fn test_ship_explore_move_not_possible() {
-    test_action(
+    JSON.test(
         "ship_explore_move_not_possible",
-        Action::Response(CurrentEventResponse::ExploreResolution(3)),
-        1,
-        true,
-        false,
+        vec![TestAction::undoable(
+            1,
+            Action::Response(CurrentEventResponse::ExploreResolution(3)),
+        )],
     );
 }
 
 #[test]
 fn test_ship_navigate() {
-    test_action(
+    JSON.test(
         "ship_navigate",
-        move_action(vec![1], Position::from_offset("A7")),
-        1,
-        true,
-        false,
+        vec![TestAction::undoable(
+            1,
+            move_action(vec![1], Position::from_offset("A7")),
+        )],
     );
 }
 
 #[test]
 fn test_ship_navigate_coordinates() {
-    let mut game = load_game("ship_navigation_unit_test");
+    let mut game = JSON.load_game("ship_navigation_unit_test");
 
     let pairs = [
         ("B3", "B5"),
@@ -235,22 +234,22 @@ fn assert_navigate(game: &mut Game, from: Position, to: Position) {
 
 #[test]
 fn test_ship_navigate_explore_move() {
-    test_action(
+    JSON.test(
         "ship_navigate_explore_move",
-        move_action(vec![1], Position::from_offset("F2")),
-        1,
-        false,
-        false,
+        vec![TestAction::not_undoable(
+            1,
+            move_action(vec![1], Position::from_offset("F2")),
+        )],
     );
 }
 
 #[test]
 fn test_ship_navigate_explore_not_move() {
-    test_action(
+    JSON.test(
         "ship_navigate_explore_not_move",
-        move_action(vec![1], Position::from_offset("F2")),
-        1,
-        false,
-        false,
+        vec![TestAction::not_undoable(
+            1,
+            move_action(vec![1], Position::from_offset("F2")),
+        )],
     );
 }

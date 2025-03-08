@@ -61,6 +61,7 @@ fn totalitarianism() -> AdvanceBuilder {
     )
     .add_player_event_listener(
         |event| &mut event.on_influence_culture_attempt,
+        0,
         |info, city, game| {
             if info.is_defender
                 && game
@@ -72,7 +73,6 @@ fn totalitarianism() -> AdvanceBuilder {
                 info.set_no_boost();
             }
         },
-        0,
     )
 }
 

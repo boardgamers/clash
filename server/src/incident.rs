@@ -85,9 +85,19 @@ impl std::fmt::Display for IncidentBaseEffect {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+pub struct Anarchy {
+    pub player: usize,
+    pub advances_lost: usize,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum PermanentIncidentEffect {
     Pestilence,
     LooseAction(usize),
+    PublicWonderCard(String),
+    TrojanHorse,
+    SolarEclipse,
+    Anarchy(Anarchy),
 }
 
 #[derive(Clone)]
@@ -170,18 +180,23 @@ impl IncidentBuilder {
     }
 
     #[must_use]
-    pub fn add_incident_listener<F>(self, role: IncidentTarget, priority: i32, listener: F) -> Self
+    pub fn add_simple_incident_listener<F>(
+        self,
+        role: IncidentTarget,
+        priority: i32,
+        listener: F,
+    ) -> Self
     where
-        F: Fn(&mut Game, usize) + 'static + Clone,
+        F: Fn(&mut Game, usize, &str) + 'static + Clone,
     {
-        self.add_incident_resource_request(
-            role,
+        self.add_simple_current_event_listener(
+            |event| &mut event.on_incident,
             priority,
-            move |game, player_index, _incident| {
-                listener(game, player_index);
-                None // only to call the listener
+            move |game, player_index, player_name, i| {
+                if i.is_active(role, player_index) {
+                    listener(game, player_index, player_name);
+                }
             },
-            |_game, _s| vec![], // only to call the listener
         )
     }
 
@@ -398,8 +413,7 @@ impl IncidentBuilder {
 
                     Some(vec![PaymentRequest::new(
                         options,
-                        "You may pay 1 mood token for each city to avoid reducing its mood"
-                            .to_string(),
+                        "You may pay 1 mood token for each city to avoid reducing its mood",
                         false,
                     )])
                 } else {

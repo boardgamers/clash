@@ -43,10 +43,10 @@ fn irrigation() -> AdvanceBuilder {
     )
     .add_player_event_listener(
         |event| &mut event.terrain_collect_options,
+        0,
         |m, (), ()| {
             m.insert(Barren, HashSet::from([ResourcePile::food(1)]));
         },
-        0,
     )
     .with_advance_bonus(MoodToken)
 }

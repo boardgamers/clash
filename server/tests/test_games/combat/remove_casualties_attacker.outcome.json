@@ -1,0 +1,344 @@
+{
+  "state": [
+    "Playing",
+    {
+      "Movement": {
+        "movement_actions_left": 1,
+        "moved_units": [
+          0,
+          1,
+          2,
+          3
+        ]
+      }
+    },
+    {
+      "Combat": {
+        "round": 1,
+        "defender": 1,
+        "defender_position": "C1",
+        "attacker": 0,
+        "attacker_position": "C2",
+        "attackers": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "retreat": "CanRetreat"
+      }
+    }
+  ],
+  "current_events": [
+    {
+      "event_type": {
+        "CombatRoundEnd": {
+          "attacker_casualties": {
+            "fighters": 2
+          },
+          "defender_casualties": {
+            "fighters": 2
+          },
+          "can_retreat": false,
+          "final_result": "AttackerWins"
+        }
+      },
+      "player": 0,
+      "last_priority_used": 1,
+      "handler": {
+        "priority": 1,
+        "request": {
+          "SelectUnits": {
+            "player": 0,
+            "choices": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "needed": {
+              "start": 2,
+              "end": 2
+            },
+            "description": "Remove 2 attacking units"
+          }
+        },
+        "origin": {
+          "Builtin": "Choose Casualties"
+        }
+      }
+    }
+  ],
+  "players": [
+    {
+      "name": null,
+      "id": 0,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 5,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "activations": 8,
+          "angry_activation": false,
+          "position": "C2"
+        }
+      ],
+      "units": [
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 0
+        },
+        {
+          "position": "C2",
+          "unit_type": "Cavalry",
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 1
+        },
+        {
+          "position": "C2",
+          "unit_type": "Leader",
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 2
+        },
+        {
+          "position": "C2",
+          "unit_type": "Elephant",
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 3
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 6
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 7
+        }
+      ],
+      "civilization": "test0",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [
+        "Farming",
+        "Mining",
+        "Tactics"
+      ],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 2,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 8
+    },
+    {
+      "name": null,
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Angry",
+          "activations": 2,
+          "angry_activation": false,
+          "position": "C1"
+        }
+      ],
+      "units": [
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 1
+        }
+      ],
+      "civilization": "test1",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 2
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Water"
+      ],
+      [
+        "A3",
+        {
+          "Exhausted": "Forest"
+        }
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "D2",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "action": {
+        "Movement": {
+          "Move": {
+            "units": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "destination": "C1"
+          }
+        }
+      }
+    }
+  ],
+  "action_log_index": 1,
+  "log": [
+    [
+      "Player1 marched 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1"
+    ],
+    [
+      "Combat round 1",
+      "Player1 rolled 6 (Infantry, +1 combat value), 6 (Infantry, no bonus), 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 25 and gets 2 hits against defending units.",
+      "Player2 rolled 6 (Infantry, +1 combat value), 6 (Infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against attacking units.",
+      "Player1 has to remove 2 of their attacking units"
+    ]
+  ],
+  "undo_limit": 1,
+  "actions_left": 1,
+  "successful_cultural_influence": false,
+  "round": 1,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10
+  ],
+  "dice_roll_log": [
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+  ],
+  "dropped_players": [],
+  "wonders_left": [
+    "Pyramids"
+  ],
+  "wonder_amount_left": 1
+}

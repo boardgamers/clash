@@ -1,24 +1,29 @@
 use crate::city::MoodState;
-use crate::content::custom_phase_actions::{new_position_request, UnitsRequest};
+use crate::content::custom_phase_actions::{new_position_request, PaymentRequest, UnitsRequest};
 use crate::content::incidents_famine::{decrease_mod_and_log, decrease_mood_incident_city};
 use crate::content::incidents_population_boom::select_player_to_gain_settler;
 use crate::game::{Game, GameState};
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder, PermanentIncidentEffect};
+use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions};
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
+use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{add_change_government, can_change_government_for_free};
 use crate::unit::UnitType;
+use crate::wonder::draw_wonder_from_pile;
 use itertools::Itertools;
 
-pub(crate) fn migrations() -> Vec<Incident> {
+pub(crate) fn civil_wars() -> Vec<Incident> {
     vec![
         migration(34),
         migration(35),
         civil_war(36),
         civil_war(37),
         revolution(),
+        uprising(),
+        envoy(),
     ]
 }
 
@@ -135,7 +140,7 @@ fn revolution() -> Incident {
         "Kill a unit to avoid losing an action",
         |game, _player| can_loose_action(game),
     );
-    b = b.add_incident_listener(IncidentTarget::ActivePlayer, 2, |game, player| {
+    b = b.add_simple_incident_listener(IncidentTarget::ActivePlayer, 2, |game, player, _| {
         if can_loose_action(game) && game.current_event_player().sacrifice == 0 {
             loose_action(game, player);
         }
@@ -205,7 +210,7 @@ fn can_loose_action(game: &Game) -> bool {
 }
 
 fn loose_action(game: &mut Game, player: usize) {
-    let name = game.get_player(player).get_name();
+    let name = game.player_name(player);
     if let GameState::StatusPhase(_) = game.state() {
         game.add_info_log_item(&format!("{name} lost an action for the next turn"));
         game.permanent_incident_effects
@@ -214,4 +219,68 @@ fn loose_action(game: &mut Game, player: usize) {
         game.add_info_log_item(&format!("{name} lost an action"));
         game.actions_left -= 1;
     };
+}
+
+#[allow(clippy::float_cmp)]
+fn uprising() -> Incident {
+    Incident::builder(39, "Uprising", "Pay 1-4 mood or culture tokens if possible. Each token is worth half a point at the end of the game.", IncidentBaseEffect::None)
+        .add_incident_payment_request(
+            IncidentTarget::ActivePlayer,
+            0,
+            |game, player_index, _incident| {
+                let player = game.get_player(player_index);
+                let mut cost = PaymentOptions::sum(4, &[ResourceType::MoodTokens, ResourceType::CultureTokens]);
+                cost.conversions.push(PaymentConversion::new(
+                    vec![ResourcePile::mood_tokens(1), ResourcePile::culture_tokens(1)],
+                    ResourcePile::empty(),
+                    PaymentConversionType::MayOverpay(3),
+                ));
+                player.can_afford(&cost).then_some(
+                    vec![PaymentRequest::new(cost, "Pay 1-4 mood or culture tokens", false)])
+            },
+            |game, s| {
+                let player = game.get_player_mut(s.player_index);
+                let pile = &s.choice[0];
+                let v = pile.resource_amount() as f32 / 2_f32;
+                player.event_victory_points += v;
+                game.add_info_log_item(&format!("{} paid {} to gain {} victory point{}", s.player_name, pile, v,
+                                                if v == 1.0 { "" } else { "s" }));
+            },
+        )
+        .build()
+}
+
+fn envoy() -> Incident {
+    Incident::builder(40,
+                      "Envoy",
+                      "Gain 1 idea and 1 culture token. Select another player to gain 1 culture token. Draw the top card from the wonder deck. This card can be taken by anyone instead of drawing from the wonder pile.",
+                      IncidentBaseEffect::BarbariansMove)
+        .add_simple_incident_listener(
+            IncidentTarget::ActivePlayer,
+            1,
+            |game, player, player_name | {
+                game.add_info_log_item(&format!("{player_name} gained 1 idea and 1 culture token"));
+                game.get_player_mut(player).gain_resources(
+                    ResourcePile::culture_tokens(1) + ResourcePile::ideas(1));
+
+                let wonder_from_pile = draw_wonder_from_pile(game);
+                if let Some(wonder) = wonder_from_pile {
+                    game.add_info_log_item(&format!("{} is now available to be taken by anyone",
+                                                    wonder.name));
+                    game.permanent_incident_effects.push(
+                        PermanentIncidentEffect::PublicWonderCard(wonder.name));
+                }
+            },
+        )
+        .add_incident_player_request(
+            "Select a player to gain 1 culture token",
+            |_p| true,
+            0,
+            |game, s| {
+                let p = s.choice;
+                game.add_info_log_item(&format!("{} was selected to gain 1 culture token.",
+                                                game.player_name(p)));
+                game.get_player_mut(p).gain_resources(ResourcePile::culture_tokens(1));
+            })
+        .build()
 }

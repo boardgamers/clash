@@ -5,6 +5,9 @@ use crate::combat_listeners::{
     choose_carried_units_casualties, choose_fighter_casualties, offer_retreat, place_settler,
 };
 use crate::content::incidents_famine::pestilence_permanent_effect;
+use crate::content::incidents_trojan::{
+    activate_trojan_horse, anarchy_advance, decide_trojan_horse, solar_eclipse_end_combat,
+};
 use crate::cultural_influence::cultural_influence_resolution;
 use crate::events::EventOrigin;
 use crate::explore::explore_resolution;
@@ -14,6 +17,7 @@ use crate::status_phase::{
     complete_objectives, determine_first_player, draw_cards, free_advance, may_change_government,
     raze_city, StatusPhaseState,
 };
+use crate::wonder::on_draw_wonder_card;
 
 pub struct Builtin {
     pub name: String,
@@ -68,14 +72,21 @@ pub fn get_all() -> Vec<Builtin> {
     vec![
         cultural_influence_resolution(),
         explore_resolution(),
+        on_draw_wonder_card(),
+        // combat related
         place_settler(),
         choose_fighter_casualties(),
         choose_carried_units_casualties(),
         offer_retreat(),
+        // incident related
         barbarians_bonus(),
         pirates_bonus(),
         pirates_round_bonus(),
         pestilence_permanent_effect(),
+        decide_trojan_horse(),
+        activate_trojan_horse(),
+        solar_eclipse_end_combat(),
+        anarchy_advance(),
     ]
 }
 
@@ -109,5 +120,11 @@ pub(crate) fn status_phase_handler(phase: &StatusPhaseState) -> Builtin {
         DrawCards => draw_cards(),
         ChangeGovernmentType => may_change_government(),
         DetermineFirstPlayer(_) => determine_first_player(),
+    }
+}
+
+pub(crate) fn init_player(game: &mut Game, player_index: usize) {
+    for b in get_all() {
+        (b.listeners.initializer)(game, player_index);
     }
 }

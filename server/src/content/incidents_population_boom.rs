@@ -27,7 +27,7 @@ pub(crate) fn select_player_to_gain_settler(mut b: IncidentBuilder) -> IncidentB
         |game, c| {
             game.add_info_log_item(&format!(
                 "{} was selected to gain 1 settler.",
-                game.get_player(c.choice).get_name()
+                game.player_name(c.choice)
             ));
             game.current_event_mut().selected_player = Some(c.choice);
         },

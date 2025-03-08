@@ -1,4 +1,4 @@
-use crate::common::{move_action, test_actions, TestAction};
+use crate::common::{move_action, JsonTest, TestAction};
 use server::action::Action;
 use server::city_pieces::Building::Fortress;
 use server::content::custom_phase_actions::{CurrentEventResponse, Structure};
@@ -12,9 +12,11 @@ use std::vec;
 
 mod common;
 
+const JSON: JsonTest = JsonTest::new("incidents");
+
 #[test]
 fn test_barbarians_spawn() {
-    test_actions(
+    JSON.test(
         "barbarians_spawn",
         vec![
             TestAction::not_undoable(
@@ -37,7 +39,7 @@ fn test_barbarians_spawn() {
 
 #[test]
 fn test_barbarians_move() {
-    test_actions(
+    JSON.test(
         "barbarians_move",
         vec![
             TestAction::not_undoable(
@@ -56,7 +58,7 @@ fn test_barbarians_move() {
 
 #[test]
 fn test_pirates_spawn() {
-    test_actions(
+    JSON.test(
         "pirates_spawn",
         vec![
             TestAction::not_undoable(
@@ -89,7 +91,7 @@ fn test_pirates_spawn() {
 
 #[test]
 fn test_barbarians_attack() {
-    test_actions(
+    JSON.test(
         "barbarians_attack",
         vec![TestAction::not_undoable(
             0,
@@ -100,7 +102,7 @@ fn test_barbarians_attack() {
 
 #[test]
 fn test_barbarians_recapture_city() {
-    test_actions(
+    JSON.test(
         "barbarians_recapture_city",
         vec![TestAction::not_undoable(
             0,
@@ -117,7 +119,7 @@ fn test_pestilence() {
         payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
         port_position: None,
     }));
-    test_actions(
+    JSON.test(
         "pestilence",
         vec![
             TestAction::not_undoable(
@@ -156,7 +158,7 @@ fn test_pestilence() {
 
 #[test]
 fn test_famine() {
-    test_actions(
+    JSON.test(
         "famine",
         vec![TestAction::not_undoable(
             0,
@@ -170,7 +172,7 @@ fn test_famine() {
 
 #[test]
 fn test_epidemics() {
-    test_actions(
+    JSON.test(
         "epidemics",
         vec![
             TestAction::not_undoable(
@@ -190,7 +192,7 @@ fn test_epidemics() {
 
 #[test]
 fn test_good_year_with_player_select() {
-    test_actions(
+    JSON.test(
         "good_year",
         vec![
             TestAction::not_undoable(
@@ -207,7 +209,7 @@ fn test_good_year_with_player_select() {
 
 #[test]
 fn test_exhausted_land() {
-    test_actions(
+    JSON.test(
         "exhausted_land",
         vec![
             TestAction::not_undoable(
@@ -226,7 +228,7 @@ fn test_exhausted_land() {
 
 #[test]
 fn test_volcano() {
-    test_actions(
+    JSON.test(
         "volcano",
         vec![
             TestAction::not_undoable(
@@ -248,7 +250,7 @@ fn test_volcano() {
 
 #[test]
 fn test_flood() {
-    test_actions(
+    JSON.test(
         "flood",
         vec![
             TestAction::not_undoable(
@@ -276,7 +278,7 @@ fn test_flood() {
 
 #[test]
 fn test_earthquake() {
-    test_actions(
+    JSON.test(
         "earthquake",
         vec![
             TestAction::not_undoable(
@@ -317,7 +319,7 @@ fn test_earthquake() {
 
 #[test]
 fn test_migration() {
-    test_actions(
+    JSON.test(
         "migration",
         vec![TestAction::not_undoable(
             0,
@@ -331,7 +333,7 @@ fn test_migration() {
 
 #[test]
 fn test_civil_war() {
-    test_actions(
+    JSON.test(
         "civil_war",
         vec![TestAction::not_undoable(
             0,
@@ -345,7 +347,7 @@ fn test_civil_war() {
 
 #[test]
 fn test_revolution() {
-    test_actions(
+    JSON.test(
         "revolution",
         vec![
             TestAction::not_undoable(
@@ -371,6 +373,121 @@ fn test_revolution() {
                         additional_advances: vec![],
                     }),
                 )),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_uprising() {
+    JSON.test(
+        "uprising",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::gold(2),
+                }),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::Response(CurrentEventResponse::Payment(vec![
+                    ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
+                ])),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_envoy() {
+    JSON.test(
+        "envoy",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::gold(2),
+                }),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Monuments"),
+                    payment: ResourcePile::gold(2),
+                }),
+            ),
+            TestAction::not_undoable(0, Action::Response(CurrentEventResponse::Bool(true))),
+        ],
+    );
+}
+
+#[test]
+fn test_trojan_horse() {
+    JSON.test(
+        "trojan_horse",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::gold(2),
+                }),
+            ),
+            TestAction::not_undoable(
+                0,
+                move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::Response(CurrentEventResponse::Payment(vec![
+                    ResourcePile::culture_tokens(1) + ResourcePile::gold(1),
+                ])),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_solar_eclipse() {
+    JSON.test(
+        "solar_eclipse",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::gold(2),
+                }),
+            ),
+            TestAction::not_undoable(
+                0,
+                move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_anarchy() {
+    JSON.test(
+        "anarchy",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::gold(2),
+                }),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Dogma"),
+                    payment: ResourcePile::gold(2),
+                }),
             ),
         ],
     );

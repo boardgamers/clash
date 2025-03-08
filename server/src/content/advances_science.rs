@@ -21,13 +21,13 @@ fn math() -> AdvanceBuilder {
     )
     .add_player_event_listener(
         |event| &mut event.advance_cost,
+        1,
         |i, a, ()| {
             if a.name == "Engineering" || a.name == "Roads" {
                 i.info.log.push("Math reduced the cost to 0".to_string());
                 i.set_zero();
             }
         },
-        1,
     )
     .with_advance_bonus(CultureToken)
     .with_unlocked_building(Observatory)
@@ -40,6 +40,7 @@ fn astronomy() -> AdvanceBuilder {
     )
     .add_player_event_listener(
         |event| &mut event.advance_cost,
+        0,
         |i, a, ()| {
             if a.name == "Navigation" || a.name == "Cartography" {
                 i.set_zero();
@@ -48,7 +49,6 @@ fn astronomy() -> AdvanceBuilder {
                     .push("Astronomy reduced the cost to 0".to_string());
             }
         },
-        0,
     )
     .with_advance_bonus(CultureToken)
 }
@@ -98,6 +98,7 @@ fn metallurgy() -> AdvanceBuilder {
         .with_advance_bonus(CultureToken)
         .add_player_event_listener(
             |event| &mut event.collect_total,
+            0,
             |i, (),()| {
                 if i.total.ore >= 2 {
                     i.total.ore -= 1;
@@ -105,6 +106,5 @@ fn metallurgy() -> AdvanceBuilder {
                     i.info.log.push("Metallurgy converted 1 ore to 1 gold".to_string());
                 }
             },
-            0,
         )
 }

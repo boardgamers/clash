@@ -18,7 +18,7 @@ pub(crate) fn seafaring() -> AdvanceGroup {
 
 fn fishing() -> AdvanceBuilder {
     Advance::builder("Fishing", "Your cities may Collect food from one Sea space")
-        .add_player_event_listener(|event| &mut event.collect_options, fishing_collect, 1)
+        .add_player_event_listener(|event| &mut event.collect_options, 1, fishing_collect)
         .with_advance_bonus(MoodToken)
         .with_unlocked_building(Port)
 }
@@ -37,6 +37,7 @@ fn war_ships() -> AdvanceBuilder {
         "Ignore the first hit it the first round of combat when attacking with Ships or disembarking from Ships")
         .add_player_event_listener(
             |event| &mut event.on_combat_round,
+            0,
             |s, c, g| {
                 let attacker = s.attacker && g.map.is_sea(c.attacker_position);
                 let defender = !s.attacker && g.map.is_sea(c.defender_position);
@@ -45,7 +46,6 @@ fn war_ships() -> AdvanceBuilder {
                     s.roll_log.push("War Ships ignore the first hit in the first round of combat".to_string());
                 }
             },
-            0,
         )
 }
 
@@ -56,6 +56,7 @@ fn cartography() -> AdvanceBuilder {
         .with_advance_bonus(CultureToken)
         .add_player_event_listener(
             |event| &mut event.before_move,
+            0,
             |player, g, i| {
                 // info is the action that we last used this ability for
                 let key = g.actions_left.to_string();
@@ -83,7 +84,6 @@ fn cartography() -> AdvanceBuilder {
                     }
                 }
             },
-            0,
         )
 }
 

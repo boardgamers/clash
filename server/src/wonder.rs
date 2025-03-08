@@ -1,5 +1,9 @@
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
+use crate::content::builtin::Builtin;
+use crate::content::custom_phase_actions::CurrentEventType;
+use crate::content::wonders::get_wonder;
 use crate::events::EventOrigin;
+use crate::incident::PermanentIncidentEffect;
 use crate::payment::PaymentOptions;
 use crate::{ability_initializer::AbilityInitializerSetup, game::Game, position::Position};
 
@@ -84,4 +88,85 @@ impl AbilityInitializerSetup for WonderBuilder {
     fn get_key(&self) -> EventOrigin {
         EventOrigin::Wonder(self.name.clone())
     }
+}
+
+pub(crate) fn draw_wonder_card(game: &mut Game, player_index: usize) {
+    game.lock_undo();
+    game.trigger_current_event(
+        &[player_index],
+        |e| &mut e.on_draw_wonder_card,
+        &(),
+        |()| CurrentEventType::DrawWonderCard,
+        None,
+    );
+}
+
+pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<Wonder> {
+    if game.wonder_amount_left == 0 {
+        return None;
+    }
+    game.wonder_amount_left -= 1;
+    game.wonders_left.pop()
+}
+
+fn gain_wonder(game: &mut Game, player_index: usize, wonder: Wonder) {
+    game.players[player_index].wonder_cards.push(wonder);
+    game.lock_undo();
+}
+
+pub(crate) fn on_draw_wonder_card() -> Builtin {
+    Builtin::builder("Draw Wonder Card", "Draw a wonder card")
+        .add_bool_request(
+            |e| &mut e.on_draw_wonder_card,
+            0,
+            |game, player_index, ()| {
+                let public_wonder = find_public_wonder(game);
+                if let Some(public_wonder) = public_wonder {
+                    Some(format!(
+                        "Do you want to draw the public wonder card {public_wonder}?"
+                    ))
+                } else {
+                    gain_wonder_from_pile(game, player_index);
+                    None
+                }
+            },
+            |game, s| {
+                if s.choice {
+                    let name = find_public_wonder(game)
+                        .expect("public wonder card not found")
+                        .clone();
+                    game.add_info_log_item(&format!(
+                        "{} drew the public wonder card {}",
+                        s.player_name, name
+                    ));
+                    gain_wonder(game, s.player_index, get_wonder(&name));
+                    game.permanent_incident_effects
+                        .retain(|e| !matches!(e, PermanentIncidentEffect::PublicWonderCard(_)));
+                } else {
+                    gain_wonder_from_pile(game, s.player_index);
+                }
+            },
+        )
+        .build()
+}
+
+fn gain_wonder_from_pile(game: &mut Game, player: usize) {
+    if let Some(w) = draw_wonder_from_pile(game) {
+        game.add_info_log_item(&format!(
+            "{} drew a wonder card from the pile",
+            game.player_name(player)
+        ));
+        gain_wonder(game, player, w);
+    } else {
+        game.add_info_log_item("No wonders left to draw");
+    }
+}
+
+fn find_public_wonder(game: &Game) -> Option<&String> {
+    game.permanent_incident_effects
+        .iter()
+        .find_map(|e| match e {
+            PermanentIncidentEffect::PublicWonderCard(name) => Some(name),
+            _ => None,
+        })
 }

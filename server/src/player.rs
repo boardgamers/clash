@@ -125,10 +125,7 @@ impl Player {
         let player = Self::from_data(data);
         let player_index = player.index;
         game.players.push(player);
-        let builtin = builtin::get_all();
-        for b in builtin {
-            (b.listeners.initializer)(game, player_index);
-        }
+        builtin::init_player(game, player_index);
         let advances = mem::take(&mut game.players[player_index].advances);
         for advance in &advances {
             (advance.listeners.initializer)(game, player_index);

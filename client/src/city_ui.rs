@@ -213,7 +213,7 @@ pub fn city_labels(game: &Game, city: &City) -> Vec<String> {
     [
         vec![format!(
             "City: {}, {}, {} {}",
-            game.get_player(city.player_index).get_name(),
+            game.player_name(city.player_index),
             city.size(),
             match city.mood_state {
                 MoodState::Happy => "Happy",
@@ -234,7 +234,7 @@ pub fn city_labels(game: &Game, city: &City) -> Vec<String> {
                     if city.player_index == *o {
                         b.name().to_string()
                     } else {
-                        format!("{} (owned by {})", b.name(), game.get_player(*o).get_name())
+                        format!("{} (owned by {})", b.name(), game.player_name(*o))
                     }
                 })
             })

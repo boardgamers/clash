@@ -103,7 +103,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                     ));
                     Some(vec![PaymentRequest::new(
                         PaymentOptions::sum(1, &ResourceType::all()),
-                        "Pay 1 Resource or token to bribe the pirates".to_string(),
+                        "Pay 1 Resource or token to bribe the pirates",
                         false,
                     )])
                 } else {
@@ -128,7 +128,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                 }
 
                 let player = game.get_player(player_index);
-                let choices = cities_with_adjacent_pirates(game.get_player(player_index), game)
+                let choices = cities_with_adjacent_pirates(player, game)
                     .into_iter()
                     .filter(|&pos| !matches!(player.get_city(pos).mood_state, MoodState::Angry))
                     .collect_vec();
@@ -233,6 +233,12 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
                     sea_spaces = blocking;
                 }
             }
+
+            if sea_spaces.is_empty() && blockade {
+                // don't log this twice (blockade is only for first call)
+                game.add_info_log_item("No valid positions for Pirate Ship");
+            }
+
             Some(new_position_request(
                 sea_spaces,
                 1..=1,

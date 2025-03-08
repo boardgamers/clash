@@ -51,6 +51,13 @@ impl<T, U, V> EventMut<T, U, V>
 where
     T: Clone + PartialEq,
 {
+    fn new() -> Self {
+        Self {
+            listeners: Vec::new(),
+            next_id: 0,
+        }
+    }
+
     //return the id of the listener witch can be used to remove the listener later
     pub(crate) fn add_listener_mut<F>(
         &mut self,
@@ -146,28 +153,19 @@ where
     }
 }
 
-impl<T, U, V> Default for EventMut<T, U, V> {
+impl<T: Clone + PartialEq, U, V> Default for Event<T, U, V> {
     fn default() -> Self {
         Self {
-            listeners: Vec::new(),
-            next_id: 0,
+            inner: Some(EventMut::new()),
         }
     }
 }
 
 pub struct Event<T, U = (), V = ()> {
     pub inner: Option<EventMut<T, U, V>>,
-    pub name: String,
 }
 
 impl<T, U, V> Event<T, U, V> {
-    pub(crate) fn new(name: &str) -> Self {
-        Self {
-            inner: Some(EventMut::default()),
-            name: name.to_string(),
-        }
-    }
-
     pub(crate) fn get(&self) -> &EventMut<T, U, V> {
         self.inner.as_ref().expect("Event should be initialized")
     }
@@ -187,7 +185,7 @@ mod tests {
 
     #[test]
     fn mutable_event() {
-        let mut event = EventMut::default();
+        let mut event = EventMut::new();
         event.add_listener_mut(
             |item, constant, _| *item += constant,
             0,
@@ -239,7 +237,7 @@ mod tests {
             pub modifiers: Vec<EventOrigin>,
         }
 
-        let mut event = EventMut::default();
+        let mut event = EventMut::new();
         event.add_listener_mut(
             |value: &mut Info, (), ()| value.value += 1,
             0,

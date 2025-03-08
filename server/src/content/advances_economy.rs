@@ -97,7 +97,7 @@ fn gain_market_bonus(game: &mut Game, routes: &[TradeRoute]) {
         .unique()
         .collect_vec();
     for p in players {
-        let name = game.get_player(p).get_name();
+        let name = game.player_name(p);
         game.add_info_log_item(&format!(
             "{name} gains 1 gold for using a Market in a trade route",
         ));

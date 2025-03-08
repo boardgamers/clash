@@ -167,7 +167,7 @@ fn destroy_city_center(game: &mut Game, position: Position) {
     p.destroyed_structures.cities += 1;
     game.add_info_log_item(&format!(
         "{} gained 2 points for the city center at {}",
-        game.get_player(owner).get_name(),
+        game.player_name(owner),
         position
     ));
 }
@@ -188,7 +188,7 @@ fn destroy_building(game: &mut Game, b: Building, position: Position) {
         .remove_building(b);
     game.add_info_log_item(&format!(
         "{} gained 2 points for the {:?} at {}",
-        game.get_player(owner).get_name(),
+        game.player_name(owner),
         b,
         position
     ));
@@ -208,7 +208,7 @@ fn destroy_wonder(game: &mut Game, position: Position, name: &str) {
     p.event_victory_points += a;
     game.add_info_log_item(&format!(
         "{} gained {} points for the {} at {}",
-        game.get_player(owner).get_name(),
+        game.player_name(owner),
         a,
         name,
         position

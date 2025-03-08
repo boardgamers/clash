@@ -1,20 +1,93 @@
 {
-  "state": ["Playing"],
+  "state": [
+    "Playing",
+    {
+      "Movement": {
+        "movement_actions_left": 1,
+        "moved_units": [
+          7,
+          8
+        ],
+        "current_move": {
+          "Fleet": {
+            "units": [
+              7,
+              8
+            ]
+          }
+        }
+      }
+    },
+    {
+      "Combat": {
+        "round": 1,
+        "defender": 1,
+        "defender_position": "D2",
+        "attacker": 0,
+        "attacker_position": "C3",
+        "attackers": [
+          7,
+          8
+        ],
+        "retreat": "CanRetreat"
+      }
+    }
+  ],
+  "current_events": [
+    {
+      "event_type": {
+        "CombatRoundEnd": {
+          "attacker_casualties": {
+            "fighters": 1,
+            "carried_units": 1
+          },
+          "defender_casualties": {
+            "fighters": 1
+          },
+          "can_retreat": false,
+          "final_result": "AttackerWins"
+        }
+      },
+      "player": 0,
+      "last_priority_used": 2,
+      "handler": {
+        "priority": 2,
+        "request": {
+          "SelectUnits": {
+            "player": 0,
+            "choices": [
+              2,
+              22,
+              1
+            ],
+            "needed": {
+              "start": 1,
+              "end": 1
+            },
+            "description": "Remove 1 attacking units"
+          }
+        },
+        "origin": {
+          "Builtin": "Choose Casualties (carried units)"
+        }
+      }
+    }
+  ],
   "players": [
     {
       "name": null,
       "id": 0,
       "resources": {
-        "food": 7,
-        "wood": 5,
-        "ore": 5,
-        "ideas": 1,
-        "gold": 5,
-        "mood_tokens": 12,
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 5,
+        "gold": 7,
+        "mood_tokens": 9,
         "culture_tokens": 10
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -36,7 +109,7 @@
             "port": 1
           },
           "mood_state": "Angry",
-          "activations": 0,
+          "activations": 4,
           "angry_activation": false,
           "position": "C2",
           "port_position": "C3"
@@ -56,8 +129,8 @@
         {
           "city_pieces": {},
           "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
+          "activations": 4,
+          "angry_activation": true,
           "position": "B3"
         }
       ],
@@ -90,43 +163,45 @@
         {
           "position": "C3",
           "unit_type": "Ship",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 7,
           "carried_units": [
             {
-              "unit_type": "Cavalry",
-              "id": 1
-            },
-            {
               "unit_type": "Elephant",
               "id": 2
+            },
+            {
+              "unit_type": "Settler",
+              "id": 22
             }
           ]
         },
         {
           "position": "C3",
           "unit_type": "Ship",
-          "id": 8
-        },
-        {
-          "position": "C3",
-          "unit_type": "Ship",
-          "id": 9
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 8,
+          "carried_units": [
+            {
+              "unit_type": "Cavalry",
+              "id": 1
+            }
+          ]
         }
       ],
-      "civilization": "Maya",
+      "civilization": "test1",
       "active_leader": null,
-      "available_leaders": [
-        "Kʼinich Janaab Pakal I"
-      ],
+      "available_leaders": [],
       "advances": [
         "Farming",
-        "Fishing",
         "Free Economy",
-        "Free Education",
         "Mining",
-        "Storage",
-        "Voting",
-        "Writing"
+        "Tactics",
+        "Voting"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
@@ -135,20 +210,21 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [
-        "Great Gardens"
+        "Pyramids"
       ],
-      "next_unit_id": 10
+      "next_unit_id": 9
     },
     {
       "name": null,
       "id": 1,
       "resources": {
-        "food": 1,
-        "wood": 5,
-        "ore": 5,
-        "gold": 3,
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
         "mood_tokens": 9,
-        "culture_tokens": 11
+        "culture_tokens": 9
       },
       "resource_limit": {
         "food": 2,
@@ -160,8 +236,8 @@
       "cities": [
         {
           "city_pieces": {},
-          "mood_state": "Happy",
-          "activations": 0,
+          "mood_state": "Angry",
+          "activations": 2,
           "angry_activation": false,
           "position": "C1"
         },
@@ -178,43 +254,52 @@
       ],
       "units": [
         {
-          "position": "C1",
-          "unit_type": "Infantry",
-          "id": 0
-        },
-        {
-          "position": "C1",
-          "unit_type": "Infantry",
+          "position": "D2",
+          "unit_type": "Ship",
           "id": 1
         }
       ],
       "civilization": "test0",
       "active_leader": null,
-      "available_leaders": [
-        "Alexander",
-        "Kleopatra"
-      ],
+      "available_leaders": [],
       "advances": [
-        "Astronomy",
-        "Dogma",
         "Farming",
-        "Fishing",
-        "Math",
-        "Mining",
-        "Myths",
-        "Priesthood"
+        "Mining"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "incident_tokens": 1,
+      "incident_tokens": 3,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "next_unit_id": 2,
-      "event_info": {
-        "Priesthood": "used"
-      }
+      "next_unit_id": 2
+    },
+    {
+      "name": null,
+      "id": 2,
+      "resources": {},
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [],
+      "units": [],
+      "civilization": "Pirates",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 9
     }
   ],
   "map": {
@@ -254,14 +339,6 @@
         "Fertile"
       ],
       [
-        "B5",
-        "Fertile"
-      ],
-      [
-        "B6",
-        "Fertile"
-      ],
-      [
         "C1",
         "Barren"
       ],
@@ -288,61 +365,43 @@
       [
         "D2",
         "Water"
-      ],
-      [
-        "E2",
-        "Fertile"
       ]
     ]
   },
-  "starting_player_index": 1,
-  "current_player_index": 1,
+  "starting_player_index": 0,
+  "current_player_index": 0,
   "action_log": [
     {
       "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Math",
-            "payment": {}
-          }
-        }
-      },
-      "undo": [
-        {
-          "Command": {}
-        }
-      ]
-    },
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Astronomy",
-            "payment": {
-              "gold": 2
-            }
+        "Movement": {
+          "Move": {
+            "units": [
+              7,
+              8
+            ],
+            "destination": "D2"
           }
         }
       }
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 1,
   "log": [
     [
-      "Player2 paid nothing to get the Math advance",
-      "Priesthood reduced the cost to 0",
-      "Player gained 1 culture token as advance bonus"
+      "Player1 sailed 2 ships from C3 to D2"
     ],
     [
-      "Player2 paid 2 gold to get the Astronomy advance",
-      "Player gained 1 culture token as advance bonus"
+      "Combat round 1",
+      "Player1 rolled 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units.",
+      "Player2 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units.",
+      "Player1 has to remove 1 of their attacking units"
     ]
   ],
-  "undo_limit": 0,
-  "actions_left": 0,
+  "undo_limit": 1,
+  "actions_left": 2,
   "successful_cultural_influence": false,
-  "round": 1,
-  "age": 2,
+  "round": 6,
+  "age": 1,
   "messages": [
     "The game has started"
   ],
@@ -353,18 +412,14 @@
     10,
     10,
     10,
-    10,
+    10
+  ],
+  "dice_roll_log": [
     10,
     10,
     10
   ],
-  "rng": {
-    "seed": 46312381643103681595563341886777350953
-  },
-  "dice_roll_log": [],
   "dropped_players": [],
-  "wonders_left": [
-    "Pyramids"
-  ],
-  "wonder_amount_left": 2
+  "wonders_left": [],
+  "wonder_amount_left": 1
 }

@@ -71,12 +71,12 @@ fn devotion() -> AdvanceBuilder {
     )
     .add_player_event_listener(
         |event| &mut event.on_influence_culture_attempt,
+        4,
         |info, city, _| {
             if info.is_defender && city.pieces.temple.is_some() {
                 info.set_no_boost();
             }
         },
-        4,
     )
 }
 
@@ -84,21 +84,21 @@ fn conversion() -> AdvanceBuilder {
     Advance::builder("Conversion", "You add +1 to your Influence Culture roll and gain 1 culture token when you make a successful Influence Culture attempt.")
         .add_player_event_listener(
             |event| &mut event.on_influence_culture_attempt,
+            3,
             |info, _, _| {
                 if !info.is_defender {
                     info.roll_boost += 1;
                     info.info.log.push("Player gets +1 to Influence Culture roll for Conversion Advance".to_string());
                 }
             },
-            3,
         )
         .add_player_event_listener(
             |event| &mut event.on_influence_culture_success,
+            0,
             |c, _, ()| {
                 c.gain_resources(ResourcePile::culture_tokens(1));
                 c.add_info_log_item("Player gained 1 culture token for a successful Influence Culture attempt for Conversion Advance");
             },
-            0,
         )
 }
 
@@ -106,13 +106,13 @@ fn fanaticism() -> AdvanceBuilder {
     Advance::builder("Fanaticism", "During a battle in a city with a Temple, whether you are the attacker or defender, you add +2 combat value to your first combat roll. If you lose the battle, you get 1 free Infantry Unit after the battle and place it in one of your cities.")
         .add_player_event_listener(
             |event| &mut event.on_combat_round,
+            1,
             |s, c, game| {
                 if c.round == 1 && c.defender_temple(game) {
                     s.extra_combat_value += 2;
                     s.roll_log.push("Player gets +2 combat value for Fanaticism Advance".to_string());
                 }
             },
-            1,
         )
         .add_position_request(
             |event| &mut event.on_combat_end,

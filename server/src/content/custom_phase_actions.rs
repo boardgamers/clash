@@ -31,10 +31,10 @@ pub struct PaymentRequest {
 
 impl PaymentRequest {
     #[must_use]
-    pub fn new(cost: PaymentOptions, name: String, optional: bool) -> Self {
+    pub fn new(cost: PaymentOptions, name: &str, optional: bool) -> Self {
         Self {
             cost,
-            name,
+            name: name.to_string(),
             optional,
         }
     }
@@ -173,6 +173,7 @@ pub enum CurrentEventType {
     Construct(Building),
     Recruit(Recruit),
     Incident(IncidentInfo),
+    DrawWonderCard,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

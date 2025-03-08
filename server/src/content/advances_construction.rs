@@ -3,10 +3,10 @@ use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::content::advances::{advance_group_builder, AdvanceGroup, ROADS};
 use crate::content::custom_actions::CustomActionType::ConstructWonder;
-use crate::game::Game;
 use crate::payment::PaymentConversion;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
+use crate::wonder::draw_wonder_card;
 
 pub(crate) fn construction() -> AdvanceGroup {
     advance_group_builder(
@@ -24,7 +24,7 @@ fn engineering() -> AdvanceBuilder {
         "Engineering",
         "Immediately draw 1 wonder card. May Construct wonders in happy cities",
     )
-    .add_one_time_ability_initializer(Game::draw_wonder_card)
+    .add_one_time_ability_initializer(draw_wonder_card)
     .add_custom_action(ConstructWonder)
 }
 
@@ -36,6 +36,7 @@ fn sanitation() -> AdvanceBuilder {
     .with_advance_bonus(MoodToken)
     .add_player_event_listener(
         |event| &mut event.recruit_cost,
+        1,
         |cost, units, _| {
             if units.settlers > 0 {
                 // insert at beginning so that it's preferred over gold
@@ -53,7 +54,6 @@ fn sanitation() -> AdvanceBuilder {
                 );
             }
         },
-        1,
     )
 }
 

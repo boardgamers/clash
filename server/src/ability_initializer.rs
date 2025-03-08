@@ -150,7 +150,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self
     }
 
-    fn add_player_event_listener<T, U, V, E, F>(self, event: E, listener: F, priority: i32) -> Self
+    fn add_player_event_listener<T, U, V, E, F>(self, event: E, priority: i32, listener: F) -> Self
     where
         T: Clone + PartialEq,
         E: Fn(&mut PlayerEvents) -> &mut Event<T, U, V> + 'static + Clone,
@@ -190,16 +190,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         F: Fn(&mut T, &U, &V) + 'static + Clone,
     {
         let id = self.get_key().id();
-        self.add_player_event_listener(
-            event,
-            move |value, u, v| {
-                if !get_info(value).contains_key(&id) {
-                    listener(value, u, v);
-                    get_info(value).insert(id.clone(), "used".to_string());
-                }
-            },
-            priority,
-        )
+        self.add_player_event_listener(event, priority, move |value, u, v| {
+            if !get_info(value).contains_key(&id) {
+                listener(value, u, v);
+                get_info(value).insert(id.clone(), "used".to_string());
+            }
+        })
     }
 
     fn add_current_event_listener<E, V>(
@@ -217,72 +213,89 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
     {
         let origin = self.get_key();
-        self.add_player_event_listener(
-            event,
-            move |game, i, details| {
-                let player_index = i.player;
-                let player_name = game.players[player_index].get_name();
+        self.add_player_event_listener(event, priority, move |game, i, details| {
+            let player_index = i.player;
+            let player_name = game.player_name(player_index);
 
-                if let Some(mut phase) = game.current_events.pop() {
-                    if let Some(ref c) = phase.player.handler {
-                        if let Some(ref action) = c.response {
-                            if c.priority == priority {
-                                let mut current = phase.clone();
-                                current
-                                    .player
-                                    .handler
-                                    .as_mut()
-                                    .expect("current missing")
-                                    .response = None;
-                                if can_undo(&current.event_type) {
-                                    game.undo_context_stack
-                                        .push(UndoContext::Event(Box::new(current)));
-                                }
-                                let r = c.request.clone();
-                                let a = action.clone();
-                                phase.player.handler = None;
-                                game.current_events.push(phase);
-                                end_custom_phase.clone()(
-                                    game,
-                                    player_index,
-                                    &player_name,
-                                    a,
-                                    r,
-                                    details,
-                                );
-                                return;
+            if let Some(mut phase) = game.current_events.pop() {
+                if let Some(ref c) = phase.player.handler {
+                    if let Some(ref action) = c.response {
+                        if c.priority == priority {
+                            let mut current = phase.clone();
+                            current
+                                .player
+                                .handler
+                                .as_mut()
+                                .expect("current missing")
+                                .response = None;
+                            if can_undo(&current.event_type) {
+                                game.undo_context_stack
+                                    .push(UndoContext::Event(Box::new(current)));
                             }
+                            let r = c.request.clone();
+                            let a = action.clone();
+                            phase.player.handler = None;
+                            game.current_events.push(phase);
+                            end_custom_phase.clone()(
+                                game,
+                                player_index,
+                                &player_name,
+                                a,
+                                r,
+                                details,
+                            );
+                            return;
                         }
                     }
-                    let is_current = phase.player.handler.is_some();
-                    game.current_events.push(phase);
-                    if is_current {
-                        return;
-                    }
                 }
-
-                if game
-                    .current_event_player()
-                    .last_priority_used
-                    .is_some_and(|last| last < priority)
-                {
-                    // already handled before
+                let is_current = phase.player.handler.is_some();
+                game.current_events.push(phase);
+                if is_current {
                     return;
                 }
+            }
 
-                if let Some(request) = start_custom_phase(game, player_index, &player_name, details)
-                {
-                    let s = game.current_event_mut();
-                    s.player.last_priority_used = Some(priority);
-                    s.player.handler = Some(CurrentEventHandler {
-                        priority,
-                        request: request.clone(),
-                        response: None,
-                        origin: origin.clone(),
-                    });
-                };
-            },
+            if game
+                .current_event_player()
+                .last_priority_used
+                .is_some_and(|last| last < priority)
+            {
+                // already handled before
+                return;
+            }
+
+            if let Some(request) = start_custom_phase(game, player_index, &player_name, details) {
+                let s = game.current_event_mut();
+                s.player.last_priority_used = Some(priority);
+                s.player.handler = Some(CurrentEventHandler {
+                    priority,
+                    request: request.clone(),
+                    response: None,
+                    origin: origin.clone(),
+                });
+            };
+        })
+    }
+
+    fn add_simple_current_event_listener<V, E, F>(
+        self,
+        event: E,
+        priority: i32,
+        listener: F,
+    ) -> Self
+    where
+        E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        F: Fn(&mut Game, usize, &str, &V) + 'static + Clone,
+    {
+        self.add_current_event_listener(
+            event,
             priority,
+            move |game, player_index, player_name, details| {
+                // only for the listener
+                listener(game, player_index, player_name, details);
+                None
+            },
+            |_, _, _, _, _, _| {},
         )
     }
 
@@ -300,7 +313,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             event,
             priority,
             move |game, player_index, _player_name, details| {
-                request(game, player_index, details).map(CurrentEventRequest::Payment)
+                request(game, player_index, details)
+                    .filter(|r| {
+                        r.iter()
+                            .any(|r| game.get_player(player_index).can_afford(&r.cost))
+                    })
+                    .map(CurrentEventRequest::Payment)
             },
             move |game, player_index, player_name, action, request, details| {
                 if let CurrentEventRequest::Payment(requests) = &request {
@@ -350,7 +368,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 let req = request(game, player_index, details);
                 if let Some(r) = &req {
                     if r.reward.possible_resource_types().len() == 1 {
-                        let player_name = game.players[player_index].get_name();
+                        let player_name = game.player_name(player_index);
                         let r = r.reward.default_payment();
                         for log in g(
                             game,
@@ -689,7 +707,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                             game,
                             &SelectedChoice::new(
                                 player_index,
-                                &game.get_player(player_index).get_name(),
+                                &game.player_name(player_index),
                                 false,
                                 m.choices.clone(),
                                 details,

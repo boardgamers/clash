@@ -59,7 +59,7 @@ pub(crate) fn check_for_waste(game: &mut Game) {
         if !wasted_resources.is_empty() {
             game.add_info_log_item(&format!(
                 "{} could not store {wasted_resources}",
-                game.players[p].get_name()
+                game.player_name(p)
             ));
             game.push_undo_context(UndoContext::WastedResources {
                 resources: wasted_resources,

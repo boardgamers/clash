@@ -1,3 +1,4 @@
+use crate::city::City;
 use crate::city::MoodState::Angry;
 use crate::city_pieces::Building;
 use crate::combat_listeners::{
@@ -20,13 +21,14 @@ pub enum CombatModifier {
     CancelFortressIgnoreHit,
     SteelWeaponsAttacker,
     SteelWeaponsDefender,
+    TrojanHorse,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Copy)]
 pub enum CombatRetreatState {
     CanRetreat,
     CannotRetreat,
-    Retreated,
+    EndAfterCurrentRound,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -109,15 +111,18 @@ impl Combat {
 
     #[must_use]
     pub fn defender_fortress(&self, game: &Game) -> bool {
-        game.players[self.defender]
-            .try_get_city(self.defender_position)
+        self.defender_city(game)
             .is_some_and(|city| city.pieces.fortress.is_some())
     }
 
     #[must_use]
+    pub fn defender_city<'a>(&self, game: &'a Game) -> Option<&'a City> {
+        game.players[self.defender].try_get_city(self.defender_position)
+    }
+
+    #[must_use]
     pub fn defender_temple(&self, game: &Game) -> bool {
-        game.players[self.defender]
-            .try_get_city(self.defender_position)
+        self.defender_city(game)
             .is_some_and(|city| city.pieces.temple.is_some())
     }
 
@@ -213,7 +218,7 @@ pub(crate) fn combat_loop(game: &mut Game, mut c: Combat) {
         game.add_info_log_group(format!("Combat round {}", c.round));
         //todo: go into tactics phase if either player has tactics card (also if they can not play it unless otherwise specified via setting)
 
-        let attacker_name = game.players[c.attacker].get_name();
+        let attacker_name = game.player_name(c.attacker);
         let active_attackers = c.active_attackers(game);
         let mut attacker_strength = CombatStrength::new(c.attacker, true);
         let _ = game.players[c.attacker]
@@ -233,7 +238,7 @@ pub(crate) fn combat_loop(game: &mut Game, mut c: Combat) {
         let attacker_log_str = roll_log_str(&attacker_log);
 
         let active_defenders = c.active_defenders(game);
-        let defender_name = game.players[c.defender].get_name();
+        let defender_name = game.player_name(c.defender);
         let mut defender_log = vec![];
         let mut defender_strength = CombatStrength::new(c.defender, false);
         let _ = game.players[c.defender]
@@ -283,6 +288,8 @@ pub(crate) fn combat_loop(game: &mut Game, mut c: Combat) {
             Casualties::new(defender_hits, game, &c, c.attacker),
             Casualties::new(attacker_hits, game, &c, c.defender),
             can_retreat,
+            &c,
+            game,
         );
         game.push_state(GameState::Combat(c));
 
@@ -323,15 +330,13 @@ pub(crate) fn combat_round_end(game: &mut Game, r: &CombatRoundResult) -> Option
     }
 
     let mut c = take_combat(game);
-    let active_attackers = c.active_attackers(game);
-    let defenders_left = c.active_defenders(game);
-    if active_attackers.is_empty() && defenders_left.is_empty() {
-        draw(game, c)
-    } else if active_attackers.is_empty() {
-        defender_wins(game, c)
-    } else if defenders_left.is_empty() {
-        attacker_wins(game, c)
-    } else if matches!(c.retreat, CombatRetreatState::Retreated) {
+    if let Some(f) = &r.final_result {
+        match f {
+            CombatResult::AttackerWins => attacker_wins(game, c),
+            CombatResult::DefenderWins => defender_wins(game, c),
+            CombatResult::Draw => draw(game, c),
+        }
+    } else if matches!(c.retreat, CombatRetreatState::EndAfterCurrentRound) {
         None
     } else {
         c.round += 1;
@@ -355,7 +360,7 @@ pub(crate) fn draw(game: &mut Game, c: Combat) -> Option<Combat> {
     if c.defender_fortress(game) && c.round == 1 {
         game.add_info_log_item(&format!(
             "{} wins the battle because he has a defending fortress",
-            game.players[c.defender].get_name()
+            game.player_name(c.defender)
         ));
         return end_combat(game, c, CombatResult::DefenderWins);
     }
@@ -532,7 +537,7 @@ pub(crate) fn conquer_city(
     game.lock_undo();
     game.add_to_last_log_item(&format!(
         " and captured {}'s city at {position}",
-        game.players[old_player_index].get_name()
+        game.player_name(old_player_index)
     ));
     let attacker_is_human = game.get_player(new_player_index).is_human();
     let size = city.mood_modified_size(&game.players[new_player_index]);
@@ -585,7 +590,7 @@ pub fn capture_position(game: &mut Game, old_player: usize, position: Position, 
         game.add_to_last_log_item(&format!(
             " and killed {} settlers of {}",
             captured_settlers.len(),
-            game.players[old_player].get_name()
+            game.player_name(old_player)
         ));
     }
     for id in captured_settlers {
