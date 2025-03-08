@@ -65,7 +65,7 @@ fn test_sanitation_and_draft() {
 fn test_separation_of_power() {
     illegal_action_test(|test| {
         let mut game = load_culture();
-        game = execute_action(game,Action::Playing(EndTurn), 1);
+        game = execute_action(game, Action::Playing(EndTurn), 1);
         if test.fail {
             game = execute_action(
                 game,
@@ -76,9 +76,9 @@ fn test_separation_of_power() {
                 0,
             );
         }
-        game = execute_action(game,Action::Playing(EndTurn), 0);
+        game = execute_action(game, Action::Playing(EndTurn), 0);
         test.setup_done = true;
-        game = execute_action(game,influence_action(), 1);
+        game = execute_action(game, influence_action(), 1);
     });
 }
 
@@ -86,9 +86,9 @@ fn test_separation_of_power() {
 fn test_devotion() {
     illegal_action_test(|test| {
         let mut game = load_culture();
-        game = execute_action(game,Action::Playing(EndTurn), 1);
+        game = execute_action(game, Action::Playing(EndTurn), 1);
         if test.fail {
-            game =execute_action(
+            game = execute_action(
                 game,
                 Action::Playing(Advance {
                     advance: String::from("Devotion"),
@@ -97,9 +97,9 @@ fn test_devotion() {
                 0,
             );
         }
-        game = execute_action(game,Action::Playing(EndTurn), 0);
+        game = execute_action(game, Action::Playing(EndTurn), 0);
         test.setup_done = true;
-        game = execute_action(game,influence_action(), 1);
+        game = execute_action(game, influence_action(), 1);
     });
 }
 
@@ -111,10 +111,9 @@ fn load_culture() -> Game {
 fn test_totalitarianism() {
     illegal_action_test(|test| {
         let mut game = load_culture();
-        game = execute_action(game,Action::Playing(EndTurn), 1);
+        game = execute_action(game, Action::Playing(EndTurn), 1);
         if test.fail {
-            game =
-            execute_action(
+            game = execute_action(
                 game,
                 Action::Playing(Advance {
                     advance: String::from("Totalitarianism"),
@@ -123,9 +122,9 @@ fn test_totalitarianism() {
                 0,
             );
         }
-        game = execute_action(game,Action::Playing(EndTurn), 0);
+        game = execute_action(game, Action::Playing(EndTurn), 0);
         test.setup_done = true;
-        game = execute_action(game,influence_action(), 1);
+        game = execute_action(game, influence_action(), 1);
     });
 }
 
@@ -133,7 +132,7 @@ fn test_totalitarianism() {
 fn test_monuments() {
     illegal_action_test(|test| {
         let mut game = load_culture();
-        game = execute_action(game,Action::Playing(EndTurn), 1);
+        game = execute_action(game, Action::Playing(EndTurn), 1);
         if test.fail {
             game = execute_action(
                 game,
@@ -153,9 +152,9 @@ fn test_monuments() {
             })),
             0,
         );
-        game = execute_action(game,Action::Playing(EndTurn), 0);
+        game = execute_action(game, Action::Playing(EndTurn), 0);
         test.setup_done = true;
-        game = execute_action(game,influence_action(), 1);
+        game = execute_action(game, influence_action(), 1);
     });
 }
 

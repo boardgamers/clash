@@ -7,7 +7,6 @@ use crate::events::{Event, EventOrigin};
 use crate::player_events::{CurrentEvent, PlayerCommands};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use crate::undo::UndoContext;
 use crate::unit::UnitType;
 use crate::{content::custom_actions::CustomActionType, game::Game, player_events::PlayerEvents};
 use std::collections::HashMap;

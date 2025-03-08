@@ -18,7 +18,7 @@ use crate::playing_actions::PlayingAction;
 use crate::recruit::on_recruit;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::play_status_phase;
-use crate::undo::{redo, undo, DisembarkUndoContext, UndoContext};
+use crate::undo::{redo, to_serde_value, undo, DisembarkUndoContext, UndoContext};
 use crate::unit::MovementAction::{Move, Stop};
 use crate::unit::{get_current_move, MovementAction};
 use crate::wonder::draw_wonder_card;
@@ -78,18 +78,16 @@ impl Action {
 /// # Panics
 ///
 /// Panics if the action is illegal
+#[must_use]
 pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Game {
     let add_undo = matches!(
         &action,
         Action::Playing(_) | Action::Movement(_) | Action::Response(_)
     );
-    let old = serde_json::to_string(&game.cloned_data()).expect("game should be serializable");
-    let old: Value = serde_json::from_str(&old).expect("game should be serializable");
+    let old = to_serde_value(&game);
     game = execute_without_undo(game, action, player_index);
-    let new = serde_json::to_string(&game.cloned_data()).expect("game should be serializable");
-    let new: Value = serde_json::from_str(&new).expect("game should be serializable");
+    let new = to_serde_value(&game);
     let patch = json_patch::diff(&new, &old);
-    // todo check for lock undo
     if add_undo && game.can_undo() {
         game.action_log[game.action_log_index - 1].undo = patch.0;
     }
@@ -107,7 +105,7 @@ fn execute_without_undo(mut game: Game, action: Action, player_index: usize) -> 
     }
 
     if matches!(action, Action::Redo) {
-        assert!(game.can_redo(), "no action can be redone");
+        assert!(game.can_redo(), "action can't be redone");
         redo(&mut game, player_index);
         return game;
     }

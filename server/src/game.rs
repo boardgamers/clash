@@ -1,8 +1,5 @@
-use itertools::Itertools;
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::vec;
-use json_patch::{ PatchOperation};
+use num::Zero;
+use std::str::FromStr;
 use crate::ability_initializer::AbilityListeners;
 use crate::combat::{Combat, CombatDieRoll, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
@@ -19,7 +16,7 @@ use crate::player_events::{
     CurrentEvent, CurrentEventInfo, PlayerCommandEvent, PlayerCommands, PlayerEvents,
 };
 use crate::status_phase::enter_status_phase;
-use crate::undo::{undo_commands, CommandUndoInfo, UndoContext};
+use crate::undo::{CommandUndoInfo, UndoContext};
 use crate::unit::UnitType;
 use crate::utils::Rng;
 use crate::utils::Shuffle;
@@ -33,6 +30,11 @@ use crate::{
     status_phase::StatusPhaseState::{self},
     wonder::Wonder,
 };
+use itertools::Itertools;
+use json_patch::PatchOperation;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::vec;
 
 pub struct Game {
     pub state_stack: Vec<GameState>,
@@ -186,7 +188,7 @@ impl Game {
             round: data.round,
             age: data.age,
             messages: data.messages,
-            rng: data.rng,
+            rng: Rng::from_seed(data.rng.parse().expect("can't parse seed")),
             dice_roll_outcomes: data.dice_roll_outcomes,
             dice_roll_log: data.dice_roll_log,
             dropped_players: data.dropped_players,
@@ -224,7 +226,7 @@ impl Game {
             round: self.round,
             age: self.age,
             messages: self.messages,
-            rng: self.rng,
+            rng: self.rng.seed.to_string(),
             dice_roll_outcomes: self.dice_roll_outcomes,
             dice_roll_log: self.dice_roll_log,
             dropped_players: self.dropped_players,
@@ -257,7 +259,7 @@ impl Game {
             round: self.round,
             age: self.age,
             messages: self.messages.clone(),
-            rng: self.rng.clone(),
+            rng: self.rng.seed.to_string(),
             dice_roll_outcomes: self.dice_roll_outcomes.clone(),
             dice_roll_log: self.dice_roll_log.clone(),
             dropped_players: self.dropped_players.clone(),
@@ -494,8 +496,7 @@ impl Game {
         self.action_log_index < self.action_log.len()
     }
 
-    pub(crate) fn push_undo_context(&mut self, context: UndoContext) {
-    }
+    pub(crate) fn push_undo_context(&mut self, context: UndoContext) {}
 
     pub(crate) fn pop_undo_context(&mut self) -> Option<UndoContext> {
         self.maybe_pop_undo_context(|_| true)
@@ -855,8 +856,8 @@ pub struct GameData {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     dice_roll_outcomes: Vec<u8>, // for testing purposes
     #[serde(default)]
-    #[serde(skip_serializing_if = "Rng::is_zero")]
-    rng: Rng,
+    #[serde(skip_serializing_if = "is_string_zero")]
+    rng: String,
     dice_roll_log: Vec<u8>,
     dropped_players: Vec<usize>,
     wonders_left: Vec<String>,
@@ -867,6 +868,10 @@ pub struct GameData {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     permanent_incident_effects: Vec<PermanentIncidentEffect>,
+}
+
+fn is_string_zero(s: &String) -> bool {
+    s == "0"
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

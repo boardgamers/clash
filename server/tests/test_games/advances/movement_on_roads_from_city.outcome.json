@@ -402,9 +402,7 @@
   "messages": [
     "The game has started"
   ],
-  "rng": {
-    "seed": 216866240505556079347337134957831925981
-  },
+  "rng": "216866240505556079347337134957831925981",
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [

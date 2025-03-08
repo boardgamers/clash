@@ -1,4 +1,3 @@
-use serde::{Deserialize, Serialize};
 
 pub fn format_list(list: &[String], empty_message: &str) -> String {
     match list {
@@ -49,9 +48,9 @@ pub fn ordinal_number(value: u32) -> String {
     )
 }
 
-#[derive(Serialize, Deserialize, Clone, Default, PartialEq)]
+#[derive(Clone, Default)]
 pub struct Rng {
-    seed: u128,
+    pub(crate) seed: u128,
 }
 
 impl Rng {

@@ -9,10 +9,10 @@ use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::MovementAction::Move;
 use crate::unit::{MovementAction, UnitData};
+use json_patch::patch;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::mem;
-use json_patch::{patch, Patch};
+use serde_json::Value;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct CommandUndoInfo {
@@ -104,23 +104,25 @@ impl CommandContext {
 
 pub(crate) fn undo(mut game: Game, player_index: usize) -> Game {
     game.action_log_index -= 1;
-    game.log.remove(game.log.len() - 1);
-    let p = mem::replace(&mut game.action_log[game.action_log_index].undo, Vec::new());
+    // game.log.remove(game.log.len() - 1);
+    let p = std::mem::take(&mut game.action_log[game.action_log_index].undo);
 
-    let mut v = serde_json::to_value(game.data()).expect("should be able to serialize game");
+    let mut v = to_serde_value(&game);
 
-    let old = patch(&mut v, &p)
-        .unwrap_or_else(|e| panic!("could not patch game data: {}", e));
+    patch(&mut v, &p).unwrap_or_else(|e| panic!("could not patch game data: {e}"));
+
+    let string = v.to_string();
+    println!("after undo: {}", string);
 
     Game::from_data(serde_json::from_value(v).expect("should be able to deserialize game"))
-    
+
     // let action = item.action.clone();
-    // 
+    //
     // let was_custom_phase = game.current_event_handler().is_some();
     // if was_custom_phase {
     //     game.current_events.pop();
     // }
-    // 
+    //
     // match action {
     //     Action::Playing(action) => action.clone().undo(game, player_index, was_custom_phase),
     //     Action::Movement(action) => {
@@ -130,12 +132,17 @@ pub(crate) fn undo(mut game: Game, player_index: usize) -> Game {
     //     Action::Undo => panic!("undo action can't be undone"),
     //     Action::Redo => panic!("redo action can't be undone"),
     // }
-    // 
+    //
     // maybe_undo_waste(game);
-    // 
+    //
     // while game.maybe_pop_undo_context(|_| false).is_some() {
     //     // pop all undo contexts until action start
     // }
+}
+
+pub(crate) fn to_serde_value(game: &Game) -> Value {
+    let s = serde_json::to_string(&game.cloned_data()).expect("game should be serializable");
+    serde_json::from_str(&s).expect("game should be serializable")
 }
 
 fn maybe_undo_waste(game: &mut Game) {
