@@ -16,9 +16,8 @@ pub fn init(player_amount: usize, seed: String) -> Game {
 }
 
 #[must_use]
-pub fn execute(mut game: Game, action: Action, player_index: usize) -> Game {
-    execute_action(&mut game, action, player_index);
-    game
+pub fn execute(game: Game, action: Action, player_index: usize) -> Game {
+    execute_action(game, action, player_index)
 }
 
 #[must_use]

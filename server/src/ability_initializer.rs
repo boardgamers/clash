@@ -228,10 +228,6 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                                 .as_mut()
                                 .expect("current missing")
                                 .response = None;
-                            if can_undo(&current.event_type) {
-                                game.undo_context_stack
-                                    .push(UndoContext::Event(Box::new(current)));
-                            }
                             let r = c.request.clone();
                             let a = action.clone();
                             phase.player.handler = None;

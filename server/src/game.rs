@@ -2,7 +2,7 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::vec;
-
+use json_patch::{ PatchOperation};
 use crate::ability_initializer::AbilityListeners;
 use crate::combat::{Combat, CombatDieRoll, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
@@ -18,7 +18,6 @@ use crate::pirates::get_pirates_player;
 use crate::player_events::{
     CurrentEvent, CurrentEventInfo, PlayerCommandEvent, PlayerCommands, PlayerEvents,
 };
-use crate::resource::check_for_waste;
 use crate::status_phase::enter_status_phase;
 use crate::undo::{undo_commands, CommandUndoInfo, UndoContext};
 use crate::unit::UnitType;
@@ -60,7 +59,6 @@ pub struct Game {
     pub wonder_amount_left: usize, // todo is this redundant?
     pub incidents_left: Vec<u8>,
     pub permanent_incident_effects: Vec<PermanentIncidentEffect>,
-    pub undo_context_stack: Vec<UndoContext>, // transient
 }
 
 impl Clone for Game {
@@ -158,7 +156,6 @@ impl Game {
             wonder_amount_left: wonder_amount,
             incidents_left: Vec::new(),
             permanent_incident_effects: Vec::new(),
-            undo_context_stack: Vec::new(),
         };
         for i in 0..game.players.len() {
             builtin::init_player(&mut game, i);
@@ -202,7 +199,6 @@ impl Game {
             incidents_left: data.incidents_left,
             permanent_incident_effects: data.permanent_incident_effects,
             current_events: data.current_events,
-            undo_context_stack: Vec::new(),
         };
         for player in data.players {
             Player::initialize_player(player, &mut game);
@@ -499,7 +495,6 @@ impl Game {
     }
 
     pub(crate) fn push_undo_context(&mut self, context: UndoContext) {
-        self.undo_context_stack.push(context);
     }
 
     pub(crate) fn pop_undo_context(&mut self) -> Option<UndoContext> {
@@ -510,38 +505,7 @@ impl Game {
         &mut self,
         pred: fn(&UndoContext) -> bool,
     ) -> Option<UndoContext> {
-        loop {
-            if let Some(context) = &self.undo_context_stack.last() {
-                match context {
-                    UndoContext::WastedResources { .. } => {
-                        let Some(UndoContext::WastedResources {
-                            resources,
-                            player_index,
-                        }) = self.undo_context_stack.pop()
-                        else {
-                            panic!("when popping a wasted resources undo context, the undo context stack should have a wasted resources undo context")
-                        };
-                        let pile = resources.clone();
-                        self.get_player_mut(player_index)
-                            .gain_resources_in_undo(pile);
-                    }
-                    UndoContext::Command(_) => {
-                        let Some(UndoContext::Command(c)) = self.undo_context_stack.pop() else {
-                            panic!("when popping a command undo context, the undo context stack should have a command undo context")
-                        };
-                        undo_commands(self, &c);
-                    }
-                    _ => {
-                        if pred(context) {
-                            return self.undo_context_stack.pop();
-                        }
-                        return None;
-                    }
-                }
-            } else {
-                return None;
-            }
-        }
+        None
     }
 
     pub(crate) fn is_pirate_zone(&self, position: Position) -> bool {
@@ -587,7 +551,6 @@ impl Game {
     /// # Panics
     /// Panics if the player does not have events
     pub fn next_player(&mut self) {
-        check_for_waste(self);
         self.increment_player_index();
         self.add_info_log_group(format!(
             "It's {}'s turn",
@@ -927,7 +890,7 @@ pub struct ActionLogItem {
     pub action: Action,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub undo: Vec<UndoContext>,
+    pub undo: Vec<PatchOperation>,
 }
 
 impl ActionLogItem {

@@ -735,7 +735,6 @@ pub mod tests {
             wonder_amount_left: 0,
             incidents_left: Vec::new(),
             permanent_incident_effects: Vec::new(),
-            undo_context_stack: Vec::new(),
         }
     }
 

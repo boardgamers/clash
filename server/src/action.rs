@@ -16,7 +16,6 @@ use crate::movement::{
 };
 use crate::playing_actions::PlayingAction;
 use crate::recruit::on_recruit;
-use crate::resource::check_for_waste;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::play_status_phase;
 use crate::undo::{redo, undo, DisembarkUndoContext, UndoContext};
@@ -25,6 +24,7 @@ use crate::unit::{get_current_move, MovementAction};
 use crate::wonder::draw_wonder_card;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum Action {
@@ -78,36 +78,51 @@ impl Action {
 /// # Panics
 ///
 /// Panics if the action is illegal
-pub fn execute_action(game: &mut Game, action: Action, player_index: usize) {
+pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Game {
+    let add_undo = matches!(
+        &action,
+        Action::Playing(_) | Action::Movement(_) | Action::Response(_)
+    );
+    let old = serde_json::to_string(&game.cloned_data()).expect("game should be serializable");
+    let old: Value = serde_json::from_str(&old).expect("game should be serializable");
+    game = execute_without_undo(game, action, player_index);
+    let new = serde_json::to_string(&game.cloned_data()).expect("game should be serializable");
+    let new: Value = serde_json::from_str(&new).expect("game should be serializable");
+    let patch = json_patch::diff(&new, &old);
+    // todo check for lock undo
+    if add_undo && game.can_undo() {
+        game.action_log[game.action_log_index - 1].undo = patch.0;
+    }
+    game
+}
+
+fn execute_without_undo(mut game: Game, action: Action, player_index: usize) -> Game {
     assert!(player_index == game.active_player(), "Illegal action");
     if let Action::Undo = action {
         assert!(
             game.can_undo(),
             "actions revealing new information can't be undone"
         );
-        undo(game, player_index);
-        return;
+        return undo(game, player_index);
     }
 
     if matches!(action, Action::Redo) {
         assert!(game.can_redo(), "no action can be redone");
-        redo(game, player_index);
-        return;
+        redo(&mut game, player_index);
+        return game;
     }
 
-    add_log_item_from_action(game, &action);
-    add_action_log_item(game, action.clone());
+    add_log_item_from_action(&mut game, &action);
+    add_action_log_item(&mut game, action.clone());
 
     if let Some(s) = game.current_event_handler_mut() {
         s.response = action.custom_phase_event();
         let details = game.current_event().event_type.clone();
-        execute_custom_phase_action(game, player_index, &details);
+        execute_custom_phase_action(&mut game, player_index, &details);
     } else {
-        execute_regular_action(game, action, player_index);
+        execute_regular_action(&mut game, action, player_index);
     }
-    check_for_waste(game);
-
-    game.action_log[game.action_log_index - 1].undo = std::mem::take(&mut game.undo_context_stack);
+    game
 }
 
 fn add_action_log_item(game: &mut Game, item: Action) {

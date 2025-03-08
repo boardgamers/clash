@@ -6,12 +6,13 @@ use crate::game::GameState::Movement;
 use crate::movement::{undo_move_units, MoveState};
 use crate::player::Player;
 use crate::position::Position;
-use crate::resource::check_for_waste;
 use crate::resource_pile::ResourcePile;
 use crate::unit::MovementAction::Move;
 use crate::unit::{MovementAction, UnitData};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::mem;
+use json_patch::{patch, Patch};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct CommandUndoInfo {
@@ -101,33 +102,40 @@ impl CommandContext {
     }
 }
 
-pub(crate) fn undo(game: &mut Game, player_index: usize) {
+pub(crate) fn undo(mut game: Game, player_index: usize) -> Game {
     game.action_log_index -= 1;
     game.log.remove(game.log.len() - 1);
-    let item = &game.action_log[game.action_log_index];
-    game.undo_context_stack = item.undo.clone();
-    let action = item.action.clone();
+    let p = mem::replace(&mut game.action_log[game.action_log_index].undo, Vec::new());
 
-    let was_custom_phase = game.current_event_handler().is_some();
-    if was_custom_phase {
-        game.current_events.pop();
-    }
+    let mut v = serde_json::to_value(game.data()).expect("should be able to serialize game");
 
-    match action {
-        Action::Playing(action) => action.clone().undo(game, player_index, was_custom_phase),
-        Action::Movement(action) => {
-            undo_movement_action(game, action.clone(), player_index);
-        }
-        Action::Response(action) => action.clone().undo(game, player_index),
-        Action::Undo => panic!("undo action can't be undone"),
-        Action::Redo => panic!("redo action can't be undone"),
-    }
+    let old = patch(&mut v, &p)
+        .unwrap_or_else(|e| panic!("could not patch game data: {}", e));
 
-    maybe_undo_waste(game);
-
-    while game.maybe_pop_undo_context(|_| false).is_some() {
-        // pop all undo contexts until action start
-    }
+    Game::from_data(serde_json::from_value(v).expect("should be able to deserialize game"))
+    
+    // let action = item.action.clone();
+    // 
+    // let was_custom_phase = game.current_event_handler().is_some();
+    // if was_custom_phase {
+    //     game.current_events.pop();
+    // }
+    // 
+    // match action {
+    //     Action::Playing(action) => action.clone().undo(game, player_index, was_custom_phase),
+    //     Action::Movement(action) => {
+    //         undo_movement_action(game, action.clone(), player_index);
+    //     }
+    //     Action::Response(action) => action.clone().undo(game, player_index),
+    //     Action::Undo => panic!("undo action can't be undone"),
+    //     Action::Redo => panic!("redo action can't be undone"),
+    // }
+    // 
+    // maybe_undo_waste(game);
+    // 
+    // while game.maybe_pop_undo_context(|_| false).is_some() {
+    //     // pop all undo contexts until action start
+    // }
 }
 
 fn maybe_undo_waste(game: &mut Game) {
@@ -153,7 +161,6 @@ pub fn redo(game: &mut Game, player_index: usize) {
         Action::Redo => panic!("redo action can't be redone"),
     }
     game.action_log_index += 1;
-    check_for_waste(game);
 }
 
 pub(crate) fn undo_commands(game: &mut Game, c: &CommandContext) {

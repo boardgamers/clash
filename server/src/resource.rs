@@ -50,21 +50,3 @@ impl fmt::Display for ResourceType {
         write!(f, "{self:?}")
     }
 }
-
-pub(crate) fn check_for_waste(game: &mut Game) {
-    let map: Vec<usize> = game.players.iter().map(|p| p.index).collect();
-    for p in map {
-        let wasted_resources =
-            mem::replace(&mut game.players[p].wasted_resources, ResourcePile::empty());
-        if !wasted_resources.is_empty() {
-            game.add_info_log_item(&format!(
-                "{} could not store {wasted_resources}",
-                game.player_name(p)
-            ));
-            game.push_undo_context(UndoContext::WastedResources {
-                resources: wasted_resources,
-                player_index: p,
-            });
-        }
-    }
-}
