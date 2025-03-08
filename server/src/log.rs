@@ -90,7 +90,7 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     let player = if target_player_index == game.active_player() {
         String::from("themselves")
     } else {
-        game.players[target_player_index].get_name()
+        game.player_name(target_player_index)
     };
     let city = if starting_city_position != target_city_position {
         format!(" with the city at {starting_city_position}")

@@ -17,6 +17,7 @@ pub struct CombatStrength {
     pub extra_dies: u8,
     pub extra_combat_value: u8,
     pub hit_cancels: u8,
+    pub deny_tactics: Vec<usize>, // todo use effect when tactics cards are added
     pub roll_log: Vec<String>,
 }
 
@@ -30,6 +31,7 @@ impl CombatStrength {
             extra_combat_value: 0,
             hit_cancels: 0,
             roll_log: vec![],
+            deny_tactics: vec![],
         }
     }
 }
@@ -39,7 +41,6 @@ pub enum CombatResult {
     AttackerWins,
     DefenderWins,
     Draw,
-    Retreat,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -136,6 +137,9 @@ pub struct CombatRoundResult {
     pub defender_casualties: Casualties,
     #[serde(default)]
     pub can_retreat: bool,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub final_result: Option<CombatResult>,
 }
 
 impl CombatRoundResult {
@@ -144,11 +148,29 @@ impl CombatRoundResult {
         attacker_casualties: Casualties,
         defender_casualties: Casualties,
         can_retreat: bool,
+        c: &Combat,
+        game: &Game,
     ) -> Self {
+        let attackers_dead =
+            c.active_attackers(game).len() - attacker_casualties.fighters as usize == 0;
+        let defenders_dead =
+            c.active_defenders(game).len() - defender_casualties.fighters as usize == 0;
+
+        let final_result = if attackers_dead && defenders_dead {
+            Some(CombatResult::Draw)
+        } else if attackers_dead {
+            Some(CombatResult::DefenderWins)
+        } else if defenders_dead {
+            Some(CombatResult::AttackerWins)
+        } else {
+            None
+        };
+
         Self {
             attacker_casualties,
             defender_casualties,
             can_retreat,
+            final_result,
         }
     }
 }
@@ -209,8 +231,7 @@ pub(crate) fn offer_retreat() -> Builtin {
             |game, player, r| {
                 let c = get_combat(game);
                 if c.attacker == player && r.can_retreat {
-                    let p = game.get_player(player);
-                    let name = p.get_name();
+                    let name = game.player_name(player);
                     game.add_info_log_item(&format!("{name} can retreat",));
                     Some("Do you want to retreat?".to_string())
                 } else {
@@ -226,7 +247,7 @@ pub(crate) fn offer_retreat() -> Builtin {
                 }
                 if retreat.choice {
                     let mut c = take_combat(game);
-                    c.retreat = CombatRetreatState::Retreated;
+                    c.retreat = CombatRetreatState::EndAfterCurrentRound;
                     game.push_state(GameState::Combat(c));
                 }
             },

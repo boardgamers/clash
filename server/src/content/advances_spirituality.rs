@@ -46,6 +46,7 @@ fn rituals() -> AdvanceBuilder {
         .with_advance_bonus(CultureToken)
         .add_player_event_listener(
             |event| &mut event.happiness_cost,
+            0,
             |cost, (), ()| {
                 for r in &[
                     ResourceType::Food,
@@ -58,7 +59,6 @@ fn rituals() -> AdvanceBuilder {
                     cost.cost.conversions.push(PaymentConversion::unlimited(ResourcePile::mood_tokens(1), ResourcePile::of(*r, 1)));
                 }
             },
-            0,
         )
 }
 

@@ -1,5 +1,7 @@
 {
-  "state": ["Playing"],
+  "state": [
+    "Playing"
+  ],
   "players": [
     {
       "name": null,
@@ -148,7 +150,7 @@
         "ore": 5,
         "gold": 5,
         "mood_tokens": 9,
-        "culture_tokens": 10
+        "culture_tokens": 9
       },
       "resource_limit": {
         "food": 2,
@@ -198,22 +200,19 @@
         "Dogma",
         "Farming",
         "Fishing",
-        "Math",
         "Mining",
         "Myths",
+        "Philosophy",
         "Priesthood"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "incident_tokens": 2,
+      "incident_tokens": 3,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "next_unit_id": 2,
-      "event_info": {
-        "Priesthood": "used"
-      }
+      "next_unit_id": 2
     }
   ],
   "map": {
@@ -296,33 +295,11 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Math",
-            "payment": {}
-          }
-        }
-      },
-      "undo": [
-        {
-          "Command": {}
-        }
-      ]
-    }
-  ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player2 paid nothing to get the Math advance",
-      "Priesthood reduced the cost to 0",
-      "Player gained 1 culture token as advance bonus"
-    ]
-  ],
+  "action_log": [],
+  "action_log_index": 0,
+  "log": [],
   "undo_limit": 0,
-  "actions_left": 1,
+  "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 1,
   "age": 2,

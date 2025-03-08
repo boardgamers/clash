@@ -11,6 +11,7 @@ use crate::playing_actions::{increase_happiness, undo_increase_happiness};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
+use crate::wonder::draw_wonder_card;
 use std::vec;
 
 pub(crate) fn culture() -> AdvanceGroup {
@@ -32,16 +33,16 @@ fn sports() -> AdvanceBuilder {
 
 fn monuments() -> AdvanceBuilder {
     Advance::builder("Monuments", "Immediately draw 1 wonder card. Your cities with wonders may not be the target of influence culture attempts")
-        .add_one_time_ability_initializer(Game::draw_wonder_card)
+        .add_one_time_ability_initializer(draw_wonder_card)
         .with_advance_bonus(CultureToken)
         .add_player_event_listener(
             |event| &mut event.on_influence_culture_attempt,
+            1,
             |info, city, _| {
                 if info.is_defender && !city.pieces.wonders.is_empty() {
                     info.set_impossible();
                 }
             },
-            1,
         )
 }
 

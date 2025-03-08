@@ -22,6 +22,7 @@ use crate::status_phase::play_status_phase;
 use crate::undo::{redo, undo, DisembarkUndoContext, UndoContext};
 use crate::unit::MovementAction::{Move, Stop};
 use crate::unit::{get_current_move, MovementAction};
+use crate::wonder::draw_wonder_card;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -124,6 +125,9 @@ pub(crate) fn execute_custom_phase_action(
 ) {
     use CurrentEventType::*;
     match details {
+        DrawWonderCard => {
+            draw_wonder_card(game, player_index);
+        }
         ExploreResolution(r) => {
             ask_explore_resolution(game, player_index, r);
         }

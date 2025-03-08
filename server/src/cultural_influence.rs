@@ -60,7 +60,7 @@ pub(crate) fn influence_culture_attempt(
     {
         game.add_to_last_log_item(&format!(" and rolled a {roll}"));
         info.info.execute(game);
-        game.add_info_log_item(&format!("{} now has the option to pay {roll_boost_cost} to increase the dice roll and proceed with the cultural influence", game.players[player_index].get_name()));
+        game.add_info_log_item(&format!("{} now has the option to pay {roll_boost_cost} to increase the dice roll and proceed with the cultural influence", game.player_name(player_index)));
         ask_for_cultural_influence_payment(game, player_index, &roll_boost_cost);
     } else {
         game.add_to_last_log_item(&format!(
@@ -95,12 +95,18 @@ pub(crate) fn cultural_influence_resolution() -> Builtin {
         |_game, _player_index, cost| {
             Some(vec![PaymentRequest::new(
                 PaymentOptions::resources(cost.clone()),
-                format!("Pay {cost} to increase the dice roll"),
+                &format!("Pay {cost} to increase the dice roll"),
                 true,
             )])
         },
         |game, s| {
             let roll_boost_cost = s.choice[0].clone();
+            if roll_boost_cost.is_empty() {
+                game.add_info_log_item(&format!(
+                    "{} declined to pay to increase the dice roll and failed the cultural influence", s.player_name
+                ));
+                return;
+            }
 
             game.add_info_log_item(&format!(
                 "{} paid {roll_boost_cost} to increase the dice roll and proceed with the cultural influence", s.player_name

@@ -27,6 +27,7 @@ pub fn get_all() -> Vec<Wonder> {
         )
             .add_player_event_listener(
                 |events| &mut events.terrain_collect_options,
+                1,
                 |m,(),()| {
                     m.insert(Fertile, HashSet::from([
                         ResourcePile::food(1),
@@ -35,8 +36,7 @@ pub fn get_all() -> Vec<Wonder> {
                         ResourcePile::ideas(1),
                         ResourcePile::gold(1),
                     ]));
-                },
-                1
+                }
             )
         .build(),
     ]

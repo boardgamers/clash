@@ -22,12 +22,13 @@ pub(crate) type CurrentEvent<V = ()> = Event<Game, CurrentEventInfo, V>;
 
 pub(crate) type PlayerCommandEvent<V = ()> = Event<PlayerCommands, Game, V>;
 
+#[derive(Default)]
 pub(crate) struct PlayerEvents {
     pub on_construct: CurrentEvent<Building>,
     pub on_construct_wonder: Event<Player, Position, Wonder>,
+    pub on_draw_wonder_card: CurrentEvent,
     pub on_collect: PlayerCommandEvent<Position>,
-    pub on_advance: PlayerCommandEvent<String>,
-    pub on_advance_custom_phase: CurrentEvent<AdvanceInfo>,
+    pub on_advance: CurrentEvent<AdvanceInfo>,
     pub on_recruit: CurrentEvent<Recruit>,
     pub on_influence_culture_attempt: Event<InfluenceCultureInfo, City, Game>,
     pub on_influence_culture_success: PlayerCommandEvent,
@@ -58,39 +59,7 @@ pub(crate) struct PlayerEvents {
 
 impl PlayerEvents {
     pub fn new() -> PlayerEvents {
-        Self {
-            on_construct: Event::new("on_construct"),
-            on_construct_wonder: Event::new("on_construct_wonder"),
-            on_collect: Event::new("on_collect"),
-            on_advance: Event::new("on_advance"),
-            on_advance_custom_phase: Event::new("on_advance_custom_phase"),
-            on_recruit: Event::new("on_recruit"),
-            on_influence_culture_attempt: Event::new("on_influence_culture_attempt"),
-            on_influence_culture_success: Event::new("on_influence_culture_success"),
-            on_influence_culture_resolution: Event::new("on_influence_culture_resolution"),
-            before_move: Event::new("before_move"),
-            on_explore_resolution: Event::new("on_explore_resolution"),
-
-            construct_cost: Event::new("construct_cost"),
-            wonder_cost: Event::new("wonder_cost"),
-            advance_cost: Event::new("advance_cost"),
-            happiness_cost: Event::new("happiness_cost"),
-            recruit_cost: Event::new("recruit_cost"),
-
-            is_playing_action_available: Event::new("is_playing_action_available"),
-
-            terrain_collect_options: Event::new("terrain_collect_options"),
-            collect_options: Event::new("collect_options"),
-            collect_total: Event::new("collect_total"),
-
-            on_status_phase: Event::new("on_status_phase"),
-            on_turn_start: Event::new("on_turn_start"),
-            on_incident: Event::new("on_incident"),
-            on_combat_start: Event::new("on_combat_start"),
-            on_combat_round: Event::new("on_combat_round"),
-            on_combat_round_end: Event::new("on_combat_round_end"),
-            on_combat_end: Event::new("on_combat_end"),
-        }
+        Self::default()
     }
 }
 
@@ -183,7 +152,7 @@ pub struct AdvanceInfo {
 
 #[derive(Clone, PartialEq)]
 pub struct CurrentEventInfo {
-    pub player: usize,
+    pub player: usize, // player currently handling the event
 }
 
 pub struct MoveInfo {
@@ -283,7 +252,7 @@ impl PlayerCommands {
         self.content.gained_resources += resources;
     }
 
-    pub fn add_info_log_item(&mut self, edit: &str) {
-        self.log.push(edit.to_string());
+    pub fn add_info_log_item(&mut self, log: &str) {
+        self.log.push(log.to_string());
     }
 }

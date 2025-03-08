@@ -6,6 +6,7 @@ use std::vec;
 use crate::ability_initializer::AbilityListeners;
 use crate::combat::{Combat, CombatDieRoll, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
+use crate::content::builtin;
 use crate::content::civilizations::{BARBARIANS, PIRATES};
 use crate::content::custom_phase_actions::{
     CurrentEventHandler, CurrentEventPlayer, CurrentEventState, CurrentEventType,
@@ -56,7 +57,7 @@ pub struct Game {
     pub dice_roll_log: Vec<u8>,
     pub dropped_players: Vec<usize>,
     pub wonders_left: Vec<Wonder>,
-    pub wonder_amount_left: usize,
+    pub wonder_amount_left: usize, // todo is this redundant?
     pub incidents_left: Vec<u8>,
     pub permanent_incident_effects: Vec<PermanentIncidentEffect>,
     pub undo_context_stack: Vec<UndoContext>, // transient
@@ -126,7 +127,7 @@ impl Game {
             Map::new(HashMap::new())
         };
 
-        Self {
+        let mut game = Self {
             state_stack: vec![GameState::Playing],
             current_events: Vec::new(),
             players,
@@ -158,7 +159,12 @@ impl Game {
             incidents_left: Vec::new(),
             permanent_incident_effects: Vec::new(),
             undo_context_stack: Vec::new(),
+        };
+        for i in 0..game.players.len() {
+            builtin::init_player(&mut game, i);
         }
+
+        game
     }
 
     ///
@@ -276,6 +282,11 @@ impl Game {
     }
 
     #[must_use]
+    pub fn player_name(&self, player_index: usize) -> String {
+        self.get_player(player_index).get_name()
+    }
+
+    #[must_use]
     pub fn get_player_mut(&mut self, player_index: usize) -> &mut Player {
         &mut self.players[player_index]
     }
@@ -387,13 +398,13 @@ impl Game {
         players: &[usize],
         event: fn(&mut PlayerEvents) -> &mut CurrentEvent<V>,
         details: &V,
-        store_details: impl Fn(V) -> CurrentEventType,
+        to_event_type: impl Fn(V) -> CurrentEventType,
         log: Option<&str>,
     ) -> bool
     where
         V: Clone,
     {
-        let current_event_details = store_details(details.clone());
+        let current_event_details = to_event_type(details.clone());
         if self
             .current_events
             .last()
@@ -580,7 +591,7 @@ impl Game {
         self.increment_player_index();
         self.add_info_log_group(format!(
             "It's {}'s turn",
-            self.players[self.current_player_index].get_name()
+            self.player_name(self.current_player_index)
         ));
         self.actions_left = ACTIONS;
         let lost_action = self.permanent_incident_effects.iter().position(
@@ -705,7 +716,7 @@ impl Game {
             .max_by(|(_, player), (_, other)| player.compare_score(other, self))
             .expect("there should be at least one player in the game")
             .0;
-        let winner_name = self.players[winner_player_index].get_name();
+        let winner_name = self.player_name(winner_player_index);
         self.add_info_log_group(format!("The game has ended. {winner_name} has won"));
         self.add_message("The game has ended");
     }
@@ -732,7 +743,7 @@ impl Game {
         self.dropped_players.push(player_index);
         self.add_message(&format!(
             "{} has left the game",
-            self.players[player_index].get_name()
+            self.player_name(player_index)
         ));
         if self.current_player_index != player_index {
             return;
@@ -771,16 +782,6 @@ impl Game {
         self.get_available_custom_actions(player_index)
             .iter()
             .any(|(a, _)| a == action)
-    }
-
-    pub fn draw_wonder_card(&mut self, player_index: usize) {
-        let Some(wonder) = self.wonders_left.pop() else {
-            return;
-        };
-
-        self.wonder_amount_left -= 1;
-        self.players[player_index].wonder_cards.push(wonder);
-        self.lock_undo();
     }
 
     ///

@@ -146,7 +146,7 @@ fn good_year(mut builder: IncidentBuilder, amount: u32, good_year_type: &GoodYea
                 move |game, c| {
                     game.add_info_log_item(&format!(
                         "{} gained 1 food from {}",
-                        game.get_player(c.choice).get_name(),
+                        game.player_name(c.choice),
                         n.clone(),
                     ));
                     game.get_player_mut(c.choice)

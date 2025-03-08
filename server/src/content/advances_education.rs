@@ -52,7 +52,7 @@ fn free_education() -> AdvanceBuilder {
     )
     .with_advance_bonus(MoodToken)
     .add_payment_request_listener(
-        |e| &mut e.on_advance_custom_phase,
+        |e| &mut e.on_advance,
         1,
         |_game, _player_index, i| {
             if i.name == "Free Education" {
@@ -71,9 +71,14 @@ fn free_education() -> AdvanceBuilder {
         },
         |game, payment| {
             payment.to_commands(game, |c, _game, payment| {
+                let pile = &payment[0];
+                if pile.is_empty() {
+                    c.add_info_log_item(&format!("{} declined to pay for free education", c.name));
+                    return;
+                }
                 c.add_info_log_item(&format!(
                     "{} paid {} for free education to gain 1 mood token",
-                    c.name, payment[0]
+                    c.name, pile
                 ));
                 c.gain_resources(ResourcePile::mood_tokens(1));
             });
@@ -92,19 +97,22 @@ fn philosophy() -> AdvanceBuilder {
     .add_ability_undo_deinitializer(|game, player_index| {
         game.players[player_index].lose_resources(ResourcePile::ideas(1));
     })
-    .add_player_event_listener(
+    .add_simple_current_event_listener(
         |event| &mut event.on_advance,
-        |player, _, advance| {
+        0,
+        |game, player_index, player_name, advance| {
             if get_group("Science")
                 .advances
                 .iter()
-                .any(|a| &a.name == advance)
+                .any(|a| a.name == advance.name)
             {
-                player.gain_resources(ResourcePile::ideas(1));
-                player.add_info_log_item("Philosophy gained 1 idea");
+                game.with_commands(player_index, |player, _game| {
+                    player.gain_resources(ResourcePile::ideas(1));
+                    player
+                        .add_info_log_item(&format!("{player_name} gained 1 idea from Philosophy"));
+                });
             }
         },
-        0,
     )
     .with_advance_bonus(MoodToken)
 }

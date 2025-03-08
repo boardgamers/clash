@@ -47,7 +47,7 @@ pub(crate) fn trade_route_log(
     if selected {
         log.push(format!(
             "{} selected trade routes",
-            game.players[player_index].get_name(),
+            game.player_name(player_index),
         ));
     }
     for t in trade_routes {

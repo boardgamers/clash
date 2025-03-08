@@ -7,36 +7,8 @@
   "current_events": [
     {
       "event_type": "StatusPhase",
-      "players_used": [
-        0
-      ],
-      "player": 1,
-      "last_priority_used": 0,
-      "handler": {
-        "priority": 0,
-        "request": {
-          "SelectAdvance": {
-            "choices": [
-              "Storage",
-              "Irrigation",
-              "Husbandry",
-              "Engineering",
-              "Sanitation",
-              "Roads",
-              "Fishing",
-              "Writing",
-              "Tactics",
-              "Myths",
-              "Bartering",
-              "Arts",
-              "Math"
-            ]
-          }
-        },
-        "origin": {
-          "Builtin": "Free Advance"
-        }
-      }
+      "player": 0,
+      "last_priority_used": 0
     }
   ],
   "players": [
@@ -68,18 +40,57 @@
           "activations": 0,
           "angry_activation": false,
           "position": "A1"
+        },
+        {
+          "city_pieces": {
+            "fortress": 1
+          },
+          "mood_state": "Angry",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C2"
         }
       ],
       "units": [
         {
-          "position": "A1",
-          "unit_type": "Settler",
-          "id": 8
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 0
         },
         {
-          "position": "A1",
+          "position": "C2",
+          "unit_type": "Cavalry",
+          "id": 1
+        },
+        {
+          "position": "C2",
+          "unit_type": "Leader",
+          "id": 2
+        },
+        {
+          "position": "C2",
+          "unit_type": "Elephant",
+          "id": 3
+        },
+        {
+          "position": "C2",
           "unit_type": "Settler",
-          "id": 9
+          "id": 4
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 6
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 7
         }
       ],
       "civilization": "test0",
@@ -98,7 +109,7 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "next_unit_id": 10
+      "next_unit_id": 8
     },
     {
       "name": null,
@@ -181,40 +192,36 @@
           "activations": 0,
           "angry_activation": false,
           "position": "B3"
-        },
-        {
-          "city_pieces": {
-            "fortress": 0
-          },
-          "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "C2"
         }
       ],
       "units": [
         {
-          "position": "B3",
+          "position": "B2",
           "unit_type": "Infantry",
           "id": 0
         },
         {
-          "position": "B3",
+          "position": "A3",
+          "unit_type": "Elephant",
+          "id": 1
+        },
+        {
+          "position": "B2",
           "unit_type": "Infantry",
           "id": 2
         },
         {
-          "position": "C2",
+          "position": "A3",
           "unit_type": "Infantry",
           "id": 3
         },
         {
-          "position": "C2",
+          "position": "A3",
           "unit_type": "Infantry",
           "id": 4
         },
         {
-          "position": "C2",
+          "position": "B3",
           "unit_type": "Infantry",
           "id": 5
         }
@@ -286,9 +293,18 @@
           "SelectAdvance": "Storage"
         }
       }
+    },
+    {
+      "action": {
+        "Response": {
+          "SelectPositions": [
+            "B3"
+          ]
+        }
+      }
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
       "Player1 advanced Storage for free",
@@ -296,25 +312,16 @@
     ],
     [
       "A new game event has been triggered: Population Boom",
-      "Base effect: Barbarians move",
-      "Barbarians move from B2 to C2: 2 infantry and 1 elephant"
+      "Base effect: Barbarians move"
     ],
     [
-      "Combat round 1",
-      "Barbarians rolled 6 (Infantry, +1 combat value), 6 (Infantry, +1 combat value), 6 (Infantry, no bonus) for combined combat value of 20 and gets 0 hits against defending units.",
-      "Player1 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units.",
-      "Player1 used the following combat modifiers: fortress added one extra die, fortress cancelled one hit",
-      "Barbarians has to remove 1 of their attacking units",
-      "Barbarians removed 1 elephant",
-      "Attacker wins and killed 4 settlers of Player1 and captured Player1's city at C2",
-      "Player1 gained 1 free Settler Unit at A1 for losing a city",
-      "Barbarians spawned a new Infantry unit at C2",
-      "Player1 gained 1 settler in A1",
+      "Barbarians move from B3 to B2: 2 infantry",
+      "Barbarians spawned a new Infantry unit at B3",
       "Player2 was selected to gain 1 settler.",
       "Player2 gained 1 settler in C1"
     ]
   ],
-  "undo_limit": 1,
+  "undo_limit": 2,
   "actions_left": 3,
   "successful_cultural_influence": false,
   "round": 1,
@@ -327,13 +334,13 @@
     1,
     10,
     10,
+    10,
+    10,
+    10,
+    10,
     10
   ],
   "dice_roll_log": [
-    10,
-    10,
-    10,
-    10,
     10
   ],
   "dropped_players": [],

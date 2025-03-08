@@ -31,10 +31,11 @@ pub(crate) fn pestilence() -> Vec<Incident> {
         }
     });
     builder = pestilence_city(builder, 1);
-    builder = builder.add_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _p| {
-        game.permanent_incident_effects
-            .push(PermanentIncidentEffect::Pestilence);
-    });
+    builder =
+        builder.add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _| {
+            game.permanent_incident_effects
+                .push(PermanentIncidentEffect::Pestilence);
+        });
     vec![builder.build()]
 }
 
@@ -53,6 +54,7 @@ pub(crate) fn pestilence_permanent_effect() -> Builtin {
     )
     .add_player_event_listener(
         |event| &mut event.is_playing_action_available,
+        1,
         |available, game, i| {
             let player = game.get_player(i.player);
             if game
@@ -64,7 +66,6 @@ pub(crate) fn pestilence_permanent_effect() -> Builtin {
                 *available = false;
             }
         },
-        1,
     )
     .build()
 }
@@ -229,7 +230,7 @@ pub(crate) fn famine(id: u8, severe: bool) -> Incident {
 
             game.add_info_log_item(&format!(
                 "{} lost {} food to Famine",
-                game.get_player(player_index).get_name(),
+                game.player_name(player_index),
                 lost
             ));
 

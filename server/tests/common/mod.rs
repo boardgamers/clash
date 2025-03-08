@@ -18,6 +18,28 @@ use std::{
     vec,
 };
 
+pub struct JsonTest {
+    pub directory: &'static str,
+}
+
+impl JsonTest {
+    pub const fn new(directory: &'static str) -> Self {
+        Self { directory }
+    }
+
+    pub fn test(&self, name: &str, actions: Vec<TestAction>) {
+        test_actions(&self.full_path(name), actions);
+    }
+
+    pub fn load_game(&self, name: &str) -> Game {
+        load_game(&self.full_path(name))
+    }
+
+    fn full_path(&self, name: &str) -> String {
+        format!("{}{}{name}", self.directory, SEPARATOR)
+    }
+}
+
 fn assert_eq_game_json(
     expected: &str,
     actual: &str,
@@ -142,22 +164,6 @@ pub(crate) fn test_actions(name: &str, actions: Vec<TestAction>) {
         }))
         .unwrap_or_else(|e| panic!("test action {i} should not panic: {e:?}"))
     }
-}
-
-pub fn test_action(
-    name: &str,
-    action: Action,
-    player_index: usize,
-    undoable: bool,
-    illegal_action_test: bool,
-) {
-    let outcome = format!("{name}.outcome");
-    test_action_internal(
-        load_game(name),
-        name,
-        &outcome,
-        TestAction::new(action, undoable, illegal_action_test, player_index),
-    );
 }
 
 fn test_action_internal(game: Game, name: &str, outcome: &str, test: TestAction) -> Game {

@@ -143,10 +143,10 @@ pub(crate) fn draw_cards() -> Builtin {
     Builtin::builder("Draw Cards", "-")
         .add_player_event_listener(
             |event| &mut event.on_status_phase,
+            0,
             |_game, _p, ()| {
                 // every player draws 1 action card and 1 objective card
             },
-            0,
         )
         .build()
 }
@@ -335,14 +335,14 @@ pub(crate) fn determine_first_player() -> Builtin {
             |game, s| {
                 game.add_info_log_item(&format!(
                     "{} choose {}",
-                    game.players[s.player_index].get_name(),
+                    game.player_name(s.player_index),
                     if s.choice == game.starting_player_index {
                         format!(
                             "{} to remain the staring player",
                             if s.choice == game.active_player() {
                                 String::new()
                             } else {
-                                game.players[s.choice].get_name()
+                                game.player_name(s.choice)
                             }
                         )
                     } else {
@@ -351,7 +351,7 @@ pub(crate) fn determine_first_player() -> Builtin {
                             if s.choice == game.active_player() {
                                 String::from("themselves")
                             } else {
-                                game.players[s.choice].get_name()
+                                game.player_name(s.choice)
                             }
                         )
                     }
