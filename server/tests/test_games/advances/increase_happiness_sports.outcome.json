@@ -288,24 +288,6 @@
       },
       "undo": [
         {
-          "op": "remove",
-          "path": "/action_log/0"
-        },
-        {
-          "op": "replace",
-          "path": "/action_log_index",
-          "value": 0
-        },
-        {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 3
-        },
-        {
-          "op": "remove",
-          "path": "/log/0"
-        },
-        {
           "op": "replace",
           "path": "/players/0/cities/1/angry_activation",
           "value": true

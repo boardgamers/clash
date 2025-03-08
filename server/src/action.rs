@@ -18,11 +18,12 @@ use crate::playing_actions::PlayingAction;
 use crate::recruit::on_recruit;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::play_status_phase;
-use crate::undo::{redo, to_serde_value, undo, DisembarkUndoContext, UndoContext};
+use crate::undo::{clean_patch, redo, to_serde_value, undo, DisembarkUndoContext, UndoContext};
 use crate::unit::MovementAction::{Move, Stop};
 use crate::unit::{get_current_move, MovementAction};
 use crate::wonder::draw_wonder_card;
 use itertools::Itertools;
+use json_patch::PatchOperation;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -80,16 +81,16 @@ impl Action {
 /// Panics if the action is illegal
 #[must_use]
 pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Game {
-    let add_undo = matches!(
+    let add_undo = !matches!(
         &action,
-        Action::Playing(_) | Action::Movement(_) | Action::Response(_)
+        Action::Undo
     );
     let old = to_serde_value(&game);
     game = execute_without_undo(game, action, player_index);
     let new = to_serde_value(&game);
     let patch = json_patch::diff(&new, &old);
     if add_undo && game.can_undo() {
-        game.action_log[game.action_log_index - 1].undo = patch.0;
+        game.action_log[game.action_log_index - 1].undo = clean_patch(patch.0);
     }
     game
 }

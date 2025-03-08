@@ -282,63 +282,63 @@ impl PlayingAction {
     /// # Panics
     ///
     /// Panics if no temple bonus is given when undoing a construct temple action
-    pub fn undo(self, game: &mut Game, player_index: usize, was_custom_phase: bool) {
+    pub fn undo(&self, game: &mut Game, player_index: usize) {
         let free_action = self.action_type().free;
         if !free_action {
             game.actions_left += 1;
         }
-        game.players[player_index].gain_resources_in_undo(self.action_type().cost);
-
-        match self {
-            Advance { advance, payment } => {
-                let player = &mut game.players[player_index];
-                player.gain_resources_in_undo(payment);
-                undo_advance(game, &get_advance(&advance), player_index, was_custom_phase);
-            }
-            FoundCity { settler: _ } => {
-                let Some(UndoContext::FoundCity { settler }) = game.pop_undo_context() else {
-                    panic!("Settler context should be stored in undo context");
-                };
-                let player = &mut game.players[player_index];
-                let units = Unit::from_data(player_index, settler);
-                player.units.push(
-                    units
-                        .into_iter()
-                        .next()
-                        .expect("The player should have a unit after founding a city"),
-                );
-                player
-                    .cities
-                    .pop()
-                    .expect("The player should have a city after founding one");
-            }
-            Construct(c) => {
-                let player = &mut game.players[player_index];
-                player.undo_construct(c.city_piece, c.city_position);
-                player.gain_resources_in_undo(c.payment);
-            }
-            Collect(c) => undo_collect(game, player_index, &c),
-            Recruit(r) => {
-                game.players[player_index].gain_resources_in_undo(r.payment);
-                undo_recruit(
-                    game,
-                    player_index,
-                    r.units,
-                    r.city_position,
-                    r.leader_name.as_ref(),
-                );
-            }
-            IncreaseHappiness(i) => {
-                undo_increase_happiness(
-                    game,
-                    player_index,
-                    &i.happiness_increases,
-                    Some(i.payment),
-                );
-            }
-            Custom(custom_action) => custom_action.undo(game, player_index),
-            InfluenceCultureAttempt(_) | EndTurn => panic!("Action can't be undone"),
-        }
+    //     game.players[player_index].gain_resources_in_undo(self.action_type().cost);
+    // 
+    //     match self {
+    //         Advance { advance, payment } => {
+    //             let player = &mut game.players[player_index];
+    //             player.gain_resources_in_undo(payment);
+    //             undo_advance(game, &get_advance(&advance), player_index, was_custom_phase);
+    //         }
+    //         FoundCity { settler: _ } => {
+    //             let Some(UndoContext::FoundCity { settler }) = game.pop_undo_context() else {
+    //                 panic!("Settler context should be stored in undo context");
+    //             };
+    //             let player = &mut game.players[player_index];
+    //             let units = Unit::from_data(player_index, settler);
+    //             player.units.push(
+    //                 units
+    //                     .into_iter()
+    //                     .next()
+    //                     .expect("The player should have a unit after founding a city"),
+    //             );
+    //             player
+    //                 .cities
+    //                 .pop()
+    //                 .expect("The player should have a city after founding one");
+    //         }
+    //         Construct(c) => {
+    //             let player = &mut game.players[player_index];
+    //             player.undo_construct(c.city_piece, c.city_position);
+    //             player.gain_resources_in_undo(c.payment);
+    //         }
+    //         Collect(c) => undo_collect(game, player_index, &c),
+    //         Recruit(r) => {
+    //             game.players[player_index].gain_resources_in_undo(r.payment);
+    //             undo_recruit(
+    //                 game,
+    //                 player_index,
+    //                 r.units,
+    //                 r.city_position,
+    //                 r.leader_name.as_ref(),
+    //             );
+    //         }
+    //         IncreaseHappiness(i) => {
+    //             undo_increase_happiness(
+    //                 game,
+    //                 player_index,
+    //                 &i.happiness_increases,
+    //                 Some(i.payment),
+    //             );
+    //         }
+    //         Custom(custom_action) => custom_action.undo(game, player_index),
+    //         InfluenceCultureAttempt(_) | EndTurn => panic!("Action can't be undone"),
+    //     }
     }
 }
 
