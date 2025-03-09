@@ -8,8 +8,7 @@ use crate::game::Game;
 use crate::map::Terrain;
 use crate::payment::PaymentOptions;
 use crate::playing_actions::{PlayingActionType, Recruit};
-use crate::undo::{CommandContext, CommandUndoInfo};
-use crate::unit::Units;
+use crate::unit::Units;                          
 use crate::{
     city::City, city_pieces::Building, player::Player, position::Position,
     resource_pile::ResourcePile, wonder::Wonder,
@@ -64,7 +63,6 @@ impl PlayerEvents {
 #[derive(Clone, PartialEq)]
 pub(crate) struct ActionInfo {
     pub(crate) player: usize,
-    pub(crate) undo: CommandUndoInfo,
     pub(crate) info: HashMap<String, String>,
     pub(crate) log: Vec<String>,
 }
@@ -73,23 +71,19 @@ impl ActionInfo {
     pub(crate) fn new(player: &Player) -> ActionInfo {
         ActionInfo {
             player: player.index,
-            undo: CommandUndoInfo::new(player),
             info: player.event_info.clone(),
             log: Vec::new(),
         }
     }
 
     pub(crate) fn execute(&self, game: &mut Game) {
-        self.execute_with_options(game, |_| {});
-    }
-
-    pub(crate) fn execute_with_options(&self, game: &mut Game, c: impl Fn(&mut CommandContext)) {
         for l in self.log.iter().unique() {
             game.add_info_log_item(l);
         }
-        let mut context = CommandContext::new(self.info.clone());
-        c(&mut context);
-        self.undo.apply(game, context);
+        let player = game.get_player_mut(self.player);
+        for (k, v) in self.info.clone() {
+            player.event_info.insert(k, v);
+        }
     }
 }
 
@@ -137,7 +131,7 @@ impl CostInfo {
     }
 
     pub(crate) fn pay(&self, game: &mut Game, payment: &ResourcePile) {
-        game.players[self.info.undo.player].pay_cost(&self.cost, payment);
+        game.players[self.info.player].pay_cost(&self.cost, payment);
         self.info.execute(game);
     }
 }

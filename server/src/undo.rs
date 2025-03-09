@@ -1,55 +1,9 @@
 use crate::action::{add_log_item_from_action, execute_movement_action, Action};
 use crate::game::Game;
-use crate::player::Player;
 use crate::resource::check_for_waste;
-use crate::resource_pile::ResourcePile;
 use json_patch::{patch, PatchOperation};
-use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::HashMap;
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
-pub struct CommandUndoInfo {
-    pub player: usize,
-    pub info: HashMap<String, String>,
-}
-
-impl CommandUndoInfo {
-    #[must_use]
-    pub fn new(player: &Player) -> Self {
-        Self {
-            info: player.event_info.clone(),
-            player: player.index,
-        }
-    }
-
-    pub fn apply(&self, game: &mut Game, c: CommandContext) {
-        let player = game.get_player_mut(self.player);
-        for (k, v) in c.info.clone() {
-            player.event_info.insert(k, v);
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
-pub struct CommandContext {
-    #[serde(default)]
-    #[serde(skip_serializing_if = "HashMap::is_empty")]
-    pub info: HashMap<String, String>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "ResourcePile::is_empty")]
-    pub gained_resources: ResourcePile,
-}
-
-impl CommandContext {
-    #[must_use]
-    pub fn new(info: HashMap<String, String>) -> Self {
-        Self {
-            info,
-            gained_resources: ResourcePile::empty(),
-        }
-    }
-}
 
 const IGNORE_PATHS: [&str; 3] = ["/action_log/", "/action_log_index", "/log/"];
 
