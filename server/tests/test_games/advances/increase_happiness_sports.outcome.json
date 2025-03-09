@@ -1,5 +1,7 @@
 {
-  "state": ["Playing"],
+  "state": [
+    "Playing"
+  ],
   "players": [
     {
       "name": null,
@@ -287,6 +289,11 @@
         }
       },
       "undo": [
+        {
+          "op": "replace",
+          "path": "/actions_left",
+          "value": 3
+        },
         {
           "op": "replace",
           "path": "/players/0/cities/1/angry_activation",

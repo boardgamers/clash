@@ -1,5 +1,7 @@
 {
-  "state": ["Playing"],
+  "state": [
+    "Playing"
+  ],
   "players": [
     {
       "name": null,
@@ -301,12 +303,49 @@
       },
       "undo": [
         {
-          "IncreaseHappiness": {
-            "angry_activations": [
-              "C2",
-              "B3"
-            ]
-          }
+          "op": "replace",
+          "path": "/players/0/cities/1/angry_activation",
+          "value": true
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/cities/1/mood_state",
+          "value": "Angry"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/cities/3/angry_activation",
+          "value": true
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/cities/3/mood_state",
+          "value": "Angry"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/food",
+          "value": 2
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/gold",
+          "value": 5
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/ideas",
+          "value": 5
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/mood_tokens",
+          "value": 9
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/ore",
+          "value": 5
         }
       ]
     }

@@ -1,4 +1,4 @@
-use crate::common::{illegal_action_test, influence_action, load_game, JsonTest, TestAction};
+use crate::common::{illegal_action_test, influence_action, JsonTest, TestAction};
 use server::action::{execute_action, Action};
 use server::city_pieces::Building::{Fortress, Temple};
 use server::content::custom_actions::CustomAction;

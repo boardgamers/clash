@@ -333,30 +333,6 @@
   "action_log": [
     {
       "action": {
-        "Movement": "Stop"
-      },
-      "undo": [
-        {
-          "Movement": {
-            "movement_actions_left": 1,
-            "moved_units": [
-              7,
-              8
-            ],
-            "current_move": {
-              "Fleet": {
-                "units": [
-                  7,
-                  8
-                ]
-              }
-            }
-          }
-        }
-      ]
-    },
-    {
-      "action": {
         "Playing": {
           "Recruit": {
             "units": {
@@ -372,7 +348,50 @@
       },
       "undo": [
         {
-          "Recruit": {}
+          "op": "replace",
+          "path": "/actions_left",
+          "value": 2
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/cities/1/activations",
+          "value": 4
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/cities/1/mood_state",
+          "value": "Happy"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/next_unit_id",
+          "value": 10
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/gold",
+          "value": 7
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/wood",
+          "value": 7
+        },
+        {
+          "op": "remove",
+          "path": "/players/0/units/4"
+        },
+        {
+          "op": "remove",
+          "path": "/players/0/units/4"
+        },
+        {
+          "op": "remove",
+          "path": "/players/0/units/4"
+        },
+        {
+          "op": "remove",
+          "path": "/current_events"
         }
       ]
     },
@@ -386,64 +405,66 @@
       },
       "undo": [
         {
-          "Event": {
-            "event_type": {
-              "Recruit": {
-                "units": {
-                  "ships": 3
-                },
-                "city_position": "C2",
-                "payment": {
-                  "wood": 5,
-                  "gold": 1
-                }
-              }
-            },
-            "player": 0,
-            "last_priority_used": 1,
-            "handler": {
-              "priority": 1,
-              "request": {
-                "ResourceReward": {
-                  "reward": {
-                    "default": {
-                      "mood_tokens": 1
-                    },
-                    "conversions": [
-                      {
-                        "from": [
-                          {
-                            "mood_tokens": 1
-                          }
-                        ],
-                        "to": {
-                          "culture_tokens": 1
-                        },
-                        "type": "Unlimited"
-                      }
-                    ]
-                  },
-                  "name": "Select token to gain"
-                }
-              },
-              "origin": {
-                "Advance": "Nationalism"
-              }
-            }
-          }
+          "op": "replace",
+          "path": "/current_events/0/handler/origin/Advance",
+          "value": "Nationalism"
         },
         {
-          "WastedResources": {
-            "resources": {
-              "food": 4
-            },
-            "player_index": 0
-          }
+          "op": "replace",
+          "path": "/current_events/0/handler/priority",
+          "value": 1
+        },
+        {
+          "op": "replace",
+          "path": "/current_events/0/handler/request/ResourceReward/name",
+          "value": "Select token to gain"
+        },
+        {
+          "op": "add",
+          "path": "/current_events/0/handler/request/ResourceReward/reward/conversions/0/from/0/mood_tokens",
+          "value": 1
+        },
+        {
+          "op": "remove",
+          "path": "/current_events/0/handler/request/ResourceReward/reward/conversions/0/from/0/wood"
+        },
+        {
+          "op": "add",
+          "path": "/current_events/0/handler/request/ResourceReward/reward/conversions/0/to/culture_tokens",
+          "value": 1
+        },
+        {
+          "op": "remove",
+          "path": "/current_events/0/handler/request/ResourceReward/reward/conversions/0/to/gold"
+        },
+        {
+          "op": "add",
+          "path": "/current_events/0/handler/request/ResourceReward/reward/default/mood_tokens",
+          "value": 1
+        },
+        {
+          "op": "remove",
+          "path": "/current_events/0/handler/request/ResourceReward/reward/default/wood"
+        },
+        {
+          "op": "replace",
+          "path": "/current_events/0/last_priority_used",
+          "value": 1
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/food",
+          "value": 6
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/mood_tokens",
+          "value": 9
         }
       ]
     }
   ],
-  "action_log_index": 3,
+  "action_log_index": 2,
   "log": [
     [
       "Player1 ended the movement action"

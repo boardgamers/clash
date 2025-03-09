@@ -1,5 +1,7 @@
 {
-  "state": ["Playing"],
+  "state": [
+    "Playing"
+  ],
   "players": [
     {
       "name": null,
@@ -257,7 +259,18 @@
         "Playing": {
           "Custom": "ForcedLabor"
         }
-      }
+      },
+      "undo": [
+        {
+          "op": "replace",
+          "path": "/players/0/resources/mood_tokens",
+          "value": 9
+        },
+        {
+          "op": "remove",
+          "path": "/players/0/played_once_per_turn_actions"
+        }
+      ]
     }
   ],
   "action_log_index": 1,

@@ -438,40 +438,53 @@
       },
       "undo": [
         {
-          "Event": {
-            "event_type": "TurnStart",
-            "player": 1,
-            "last_priority_used": 0,
-            "handler": {
-              "priority": 0,
-              "request": {
-                "ResourceReward": {
-                  "reward": {
-                    "default": {
-                      "gold": 2
-                    },
-                    "conversions": [
-                      {
-                        "from": [
-                          {
-                            "gold": 1
-                          }
-                        ],
-                        "to": {
-                          "food": 1
-                        },
-                        "type": "Unlimited"
+          "op": "add",
+          "path": "/current_events",
+          "value": [
+            {
+              "event_type": "TurnStart",
+              "handler": {
+                "origin": {
+                  "Advance": "Trade Routes"
+                },
+                "priority": 0,
+                "request": {
+                  "ResourceReward": {
+                    "name": "Collect trade routes reward",
+                    "reward": {
+                      "conversions": [
+                        {
+                          "from": [
+                            {
+                              "gold": 1
+                            }
+                          ],
+                          "to": {
+                            "food": 1
+                          },
+                          "type": "Unlimited"
+                        }
+                      ],
+                      "default": {
+                        "gold": 2
                       }
-                    ]
-                  },
-                  "name": "Collect trade routes reward"
+                    }
+                  }
                 }
               },
-              "origin": {
-                "Advance": "Trade Routes"
-              }
+              "last_priority_used": 0,
+              "player": 1
             }
-          }
+          ]
+        },
+        {
+          "op": "replace",
+          "path": "/players/1/resources/food",
+          "value": 1
+        },
+        {
+          "op": "remove",
+          "path": "/players/1/resources/gold"
         }
       ]
     }

@@ -295,33 +295,7 @@
             "destination": "B2"
           }
         }
-      },
-      "undo": [
-        {
-          "Movement": {
-            "starting_position": "C3",
-            "movement_actions_left": 2,
-            "disembarked_units": [
-              {
-                "unit_id": 1,
-                "carrier_id": 8
-              },
-              {
-                "unit_id": 2,
-                "carrier_id": 7
-              }
-            ]
-          }
-        },
-        {
-          "WastedResources": {
-            "resources": {
-              "gold": 2
-            },
-            "player_index": 0
-          }
-        }
-      ]
+      }
     }
   ],
   "action_log_index": 1,

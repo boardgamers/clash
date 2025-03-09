@@ -199,27 +199,35 @@ fn undo() {
 
     assert_undo(&game, false, false, 0, 0, 0);
     assert_eq!(Angry, game.players[0].cities[0].mood_state);
+
     let game = increase_happiness(game);
     assert_undo(&game, true, false, 1, 1, 0);
     assert_eq!(Neutral, game.players[0].cities[0].mood_state);
+
     let game = increase_happiness(game);
     assert_undo(&game, true, false, 2, 2, 0);
     assert_eq!(Happy, game.players[0].cities[0].mood_state);
+
     let game = game_api::execute(game, Action::Undo, 0);
     assert_undo(&game, true, true, 2, 1, 0);
     assert_eq!(Neutral, game.players[0].cities[0].mood_state);
+
     let game = game_api::execute(game, Action::Undo, 0);
     assert_undo(&game, false, true, 2, 0, 0);
     assert_eq!(Angry, game.players[0].cities[0].mood_state);
+
     let game = game_api::execute(game, Action::Redo, 0);
     assert_undo(&game, true, true, 2, 1, 0);
     assert_eq!(Neutral, game.players[0].cities[0].mood_state);
+
     let game = game_api::execute(game, Action::Redo, 0);
     assert_undo(&game, true, false, 2, 2, 0);
     assert_eq!(Happy, game.players[0].cities[0].mood_state);
+
     let game = game_api::execute(game, Action::Undo, 0);
     assert_undo(&game, true, true, 2, 1, 0);
     assert_eq!(Neutral, game.players[0].cities[0].mood_state);
+
     let game = game_api::execute(game, Action::Undo, 0);
     assert_undo(&game, false, true, 2, 0, 0);
     assert_eq!(Angry, game.players[0].cities[0].mood_state);

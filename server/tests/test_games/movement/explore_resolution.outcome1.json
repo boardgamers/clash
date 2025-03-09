@@ -440,40 +440,6 @@
             "units": [
               0
             ],
-            "destination": "E8"
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Movement": "Stop"
-      }
-    },
-    {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              0
-            ],
-            "destination": "D7"
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Movement": "Stop"
-      }
-    },
-    {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              0
-            ],
             "destination": "D6"
           }
         }
@@ -487,46 +453,158 @@
       },
       "undo": [
         {
-          "Event": {
-            "event_type": {
-              "ExploreResolution": {
-                "block": {
-                  "position": {
-                    "top_tile": "D5",
-                    "rotation": 0
-                  },
+          "op": "add",
+          "path": "/current_events",
+          "value": [
+            {
+              "event_type": {
+                "ExploreResolution": {
                   "block": {
-                    "terrain": [
-                      "Fertile",
-                      "Fertile",
-                      "Fertile",
-                      "Forest"
-                    ]
-                  }
+                    "block": {
+                      "terrain": [
+                        "Fertile",
+                        "Fertile",
+                        "Fertile",
+                        "Forest"
+                      ]
+                    },
+                    "position": {
+                      "rotation": 0,
+                      "top_tile": "D5"
+                    }
+                  },
+                  "destination": "D6",
+                  "ship_can_teleport": false,
+                  "start": "D7",
+                  "units": [
+                    0
+                  ]
+                }
+              },
+              "handler": {
+                "origin": {
+                  "Builtin": "Explore Resolution"
                 },
-                "units": [
-                  0
-                ],
-                "start": "D7",
-                "destination": "D6",
-                "ship_can_teleport": false
-              }
+                "priority": 0,
+                "request": "ExploreResolution"
+              },
+              "last_priority_used": 0,
+              "player": 1
+            }
+          ]
+        },
+        {
+          "op": "replace",
+          "path": "/map/tiles/13/1",
+          "value": "Unexplored"
+        },
+        {
+          "op": "replace",
+          "path": "/map/tiles/20/1",
+          "value": "Unexplored"
+        },
+        {
+          "op": "replace",
+          "path": "/map/tiles/21/1",
+          "value": "Unexplored"
+        },
+        {
+          "op": "replace",
+          "path": "/map/tiles/28/1",
+          "value": "Unexplored"
+        },
+        {
+          "op": "replace",
+          "path": "/map/unexplored_blocks/4/block/terrain/0",
+          "value": "Fertile"
+        },
+        {
+          "op": "replace",
+          "path": "/map/unexplored_blocks/4/block/terrain/1",
+          "value": "Fertile"
+        },
+        {
+          "op": "replace",
+          "path": "/map/unexplored_blocks/4/block/terrain/3",
+          "value": "Forest"
+        },
+        {
+          "op": "replace",
+          "path": "/map/unexplored_blocks/4/position/top_tile",
+          "value": "D5"
+        },
+        {
+          "op": "replace",
+          "path": "/map/unexplored_blocks/5/block/terrain/0",
+          "value": "Forest"
+        },
+        {
+          "op": "replace",
+          "path": "/map/unexplored_blocks/5/block/terrain/1",
+          "value": "Mountain"
+        },
+        {
+          "op": "replace",
+          "path": "/map/unexplored_blocks/5/block/terrain/2",
+          "value": "Fertile"
+        },
+        {
+          "op": "replace",
+          "path": "/map/unexplored_blocks/5/block/terrain/3",
+          "value": "Mountain"
+        },
+        {
+          "op": "replace",
+          "path": "/map/unexplored_blocks/5/position/top_tile",
+          "value": "F2"
+        },
+        {
+          "op": "replace",
+          "path": "/map/unexplored_blocks/6/block/terrain/1",
+          "value": "Water"
+        },
+        {
+          "op": "replace",
+          "path": "/map/unexplored_blocks/6/block/terrain/2",
+          "value": "Forest"
+        },
+        {
+          "op": "replace",
+          "path": "/map/unexplored_blocks/6/block/terrain/3",
+          "value": "Forest"
+        },
+        {
+          "op": "replace",
+          "path": "/map/unexplored_blocks/6/position/top_tile",
+          "value": "F4"
+        },
+        {
+          "op": "add",
+          "path": "/map/unexplored_blocks/7",
+          "value": {
+            "block": {
+              "terrain": [
+                "Water",
+                "Forest",
+                "Water",
+                "Fertile"
+              ]
             },
-            "player": 1,
-            "last_priority_used": 0,
-            "handler": {
-              "priority": 0,
-              "request": "ExploreResolution",
-              "origin": {
-                "Builtin": "Explore Resolution"
-              }
+            "position": {
+              "rotation": 0,
+              "top_tile": "F6"
             }
           }
+        },
+        {
+          "op": "replace",
+          "path": "/players/1/units/0/position",
+          "value": "D7"
         }
       ]
     }
   ],
-  "action_log_index": 6,
+  "action_log_index": 2,
   "log": [
     [
       "The game has started"
@@ -557,7 +635,7 @@
       "Explored tiles C6=Fertile, D5=Forest, D6=Fertile, E6=Fertile"
     ]
   ],
-  "undo_limit": 5,
+  "undo_limit": 1,
   "actions_left": 0,
   "successful_cultural_influence": false,
   "round": 1,

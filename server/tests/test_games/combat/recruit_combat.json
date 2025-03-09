@@ -268,33 +268,8 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "action": {
-        "Movement": "Stop"
-      },
-      "undo": [
-        {
-          "Movement": {
-            "movement_actions_left": 1,
-            "moved_units": [
-              7,
-              8
-            ],
-            "current_move": {
-              "Fleet": {
-                "units": [
-                  7,
-                  8
-                ]
-              }
-            }
-          }
-        }
-      ]
-    }
-  ],
-  "action_log_index": 1,
+  "action_log": [],
+  "action_log_index": 0,
   "log": [
     [
       "Player1 ended the movement action"

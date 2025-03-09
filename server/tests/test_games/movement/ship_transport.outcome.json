@@ -290,10 +290,22 @@
       },
       "undo": [
         {
-          "Movement": {
-            "starting_position": "C3",
-            "movement_actions_left": 2
-          }
+          "op": "replace",
+          "path": "/players/0/units/5/position",
+          "value": "C3"
+        },
+        {
+          "op": "replace",
+          "path": "/state/1/Movement/movement_actions_left",
+          "value": 2
+        },
+        {
+          "op": "remove",
+          "path": "/state/1/Movement/current_move"
+        },
+        {
+          "op": "remove",
+          "path": "/state/1/Movement/moved_units"
         }
       ]
     }

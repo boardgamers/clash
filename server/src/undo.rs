@@ -6,6 +6,7 @@ use json_patch::{patch, PatchOperation};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
+use crate::resource::check_for_waste;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct CommandUndoInfo {
@@ -112,4 +113,5 @@ pub fn redo(game: &mut Game, player_index: usize) {
         Action::Redo => panic!("redo action can't be redone"),
     }
     game.action_log_index += 1;
+    check_for_waste(game);
 }

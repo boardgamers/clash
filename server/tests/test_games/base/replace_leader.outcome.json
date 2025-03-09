@@ -1,5 +1,7 @@
 {
-  "state": ["Playing"],
+  "state": [
+    "Playing"
+  ],
   "players": [
     {
       "name": null,
@@ -295,16 +297,49 @@
       },
       "undo": [
         {
-          "Recruit": {
-            "replaced_units": [
-              {
-                "position": "A1",
-                "unit_type": "Leader",
-                "id": 10
-              }
-            ],
-            "replaced_leader": "Alexander"
-          }
+          "op": "replace",
+          "path": "/actions_left",
+          "value": 2
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/active_leader",
+          "value": "Alexander"
+        },
+        {
+          "op": "add",
+          "path": "/players/0/available_leaders/0",
+          "value": "Kleopatra"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/cities/0/activations",
+          "value": 1
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/cities/0/mood_state",
+          "value": "Happy"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/next_unit_id",
+          "value": 11
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/culture_tokens",
+          "value": 8
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/mood_tokens",
+          "value": 8
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/units/10/id",
+          "value": 10
         }
       ]
     }

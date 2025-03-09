@@ -296,68 +296,6 @@
       "action": {
         "Playing": {
           "Advance": {
-            "advance": "Writing",
-            "payment": {
-              "ideas": 2
-            }
-          }
-        }
-      },
-      "undo": [
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        }
-      ]
-    },
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Free Education",
-            "payment": {
-              "ideas": 2
-            }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
             "advance": "Draft",
             "payment": {
               "food": 1,
@@ -365,7 +303,77 @@
             }
           }
         }
-      }
+      },
+      "undo": [
+        {
+          "op": "replace",
+          "path": "/actions_left",
+          "value": 1
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/advances/0",
+          "value": "Farming"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/advances/1",
+          "value": "Free Economy"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/advances/2",
+          "value": "Free Education"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/advances/3",
+          "value": "Mining"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/advances/4",
+          "value": "Storage"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/advances/5",
+          "value": "Tactics"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/advances/6",
+          "value": "Voting"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/advances/7",
+          "value": "Writing"
+        },
+        {
+          "op": "remove",
+          "path": "/players/0/advances/8"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/culture_tokens",
+          "value": 10
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/food",
+          "value": 7
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/gold",
+          "value": 5
+        },
+        {
+          "op": "remove",
+          "path": "/current_events"
+        }
+      ]
     },
     {
       "action": {
@@ -379,72 +387,84 @@
       },
       "undo": [
         {
-          "Event": {
-            "event_type": {
-              "Advance": {
-                "name": "Draft",
-                "payment": {
-                  "food": 1,
-                  "gold": 1
-                }
-              }
-            },
-            "player": 0,
-            "last_priority_used": 1,
-            "handler": {
-              "priority": 1,
-              "request": {
-                "Payment": [
-                  {
-                    "cost": {
-                      "default": {
-                        "ideas": 1
-                      },
-                      "conversions": [
-                        {
-                          "from": [
-                            {
-                              "food": 1
-                            },
-                            {
-                              "wood": 1
-                            },
-                            {
-                              "ore": 1
-                            },
-                            {
-                              "ideas": 1
-                            }
-                          ],
-                          "to": {
-                            "gold": 1
-                          },
-                          "type": "Unlimited"
-                        }
-                      ]
-                    },
-                    "name": "Pay extra 1 idea for a mood token",
-                    "optional": true
+          "op": "add",
+          "path": "/current_events",
+          "value": [
+            {
+              "event_type": {
+                "Advance": {
+                  "name": "Draft",
+                  "payment": {
+                    "food": 1,
+                    "gold": 1
                   }
-                ]
+                }
               },
-              "origin": {
-                "Advance": "Free Education"
-              }
+              "handler": {
+                "origin": {
+                  "Advance": "Free Education"
+                },
+                "priority": 1,
+                "request": {
+                  "Payment": [
+                    {
+                      "cost": {
+                        "conversions": [
+                          {
+                            "from": [
+                              {
+                                "food": 1
+                              },
+                              {
+                                "wood": 1
+                              },
+                              {
+                                "ore": 1
+                              },
+                              {
+                                "ideas": 1
+                              }
+                            ],
+                            "to": {
+                              "gold": 1
+                            },
+                            "type": "Unlimited"
+                          }
+                        ],
+                        "default": {
+                          "ideas": 1
+                        }
+                      },
+                      "name": "Pay extra 1 idea for a mood token",
+                      "optional": true
+                    }
+                  ]
+                }
+              },
+              "last_priority_used": 1,
+              "player": 0
             }
-          }
+          ]
         },
         {
-          "Command": {
-            "gained_resources": {
-              "mood_tokens": 1
-            }
-          }
+          "op": "replace",
+          "path": "/players/0/incident_tokens",
+          "value": 2
+        },
+        {
+          "op": "add",
+          "path": "/players/0/resources/ideas",
+          "value": 1
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/mood_tokens",
+          "value": 11
         }
       ]
     }
   ],
-  "action_log_index": 4,
+  "action_log_index": 2,
   "log": [
     [
       "Player1 paid 1 food and 1 gold to get the Draft advance",

@@ -1,5 +1,7 @@
 {
-  "state": ["Playing"],
+  "state": [
+    "Playing"
+  ],
   "players": [
     {
       "name": null,
@@ -263,11 +265,6 @@
   "action_log": [
     {
       "action": {
-        "Movement": "Stop"
-      }
-    },
-    {
-      "action": {
         "Playing": {
           "Recruit": {
             "units": {
@@ -310,7 +307,7 @@
       }
     }
   ],
-  "action_log_index": 5,
+  "action_log_index": 4,
   "log": [
     [
       "Player1 ended the movement action"
@@ -341,7 +338,7 @@
       "Player1 gained 1 culture token for fighting the Pirates"
     ]
   ],
-  "undo_limit": 5,
+  "undo_limit": 4,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 6,

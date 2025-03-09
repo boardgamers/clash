@@ -309,12 +309,53 @@
       },
       "undo": [
         {
-          "WastedResources": {
-            "resources": {
-              "ideas": 2
-            },
-            "player_index": 1
-          }
+          "op": "replace",
+          "path": "/actions_left",
+          "value": 3
+        },
+        {
+          "op": "replace",
+          "path": "/players/1/advances/0",
+          "value": "Farming"
+        },
+        {
+          "op": "replace",
+          "path": "/players/1/advances/1",
+          "value": "Fishing"
+        },
+        {
+          "op": "replace",
+          "path": "/players/1/advances/2",
+          "value": "Mining"
+        },
+        {
+          "op": "replace",
+          "path": "/players/1/advances/3",
+          "value": "Myths"
+        },
+        {
+          "op": "replace",
+          "path": "/players/1/advances/4",
+          "value": "State Religion"
+        },
+        {
+          "op": "remove",
+          "path": "/players/1/advances/5"
+        },
+        {
+          "op": "replace",
+          "path": "/players/1/incident_tokens",
+          "value": 3
+        },
+        {
+          "op": "replace",
+          "path": "/players/1/resource_limit/ideas",
+          "value": 7
+        },
+        {
+          "op": "replace",
+          "path": "/players/1/resources/ideas",
+          "value": 6
         }
       ]
     }

@@ -247,63 +247,75 @@
       },
       "undo": [
         {
-          "Event": {
-            "event_type": {
-              "InfluenceCultureResolution": {
-                "culture_tokens": 3
-              }
-            },
-            "player": 1,
-            "last_priority_used": 0,
-            "handler": {
-              "priority": 0,
-              "request": {
-                "Payment": [
-                  {
-                    "cost": {
-                      "default": {
-                        "culture_tokens": 3
-                      },
-                      "conversions": [
-                        {
-                          "from": [
-                            {
-                              "food": 1
-                            },
-                            {
-                              "wood": 1
-                            },
-                            {
-                              "ore": 1
-                            },
-                            {
-                              "ideas": 1
-                            }
-                          ],
-                          "to": {
-                            "gold": 1
-                          },
-                          "type": "Unlimited"
-                        }
-                      ]
-                    },
-                    "name": "Pay 3 culture tokens to increase the dice roll",
-                    "optional": true
-                  }
-                ]
+          "op": "add",
+          "path": "/current_events",
+          "value": [
+            {
+              "event_type": {
+                "InfluenceCultureResolution": {
+                  "culture_tokens": 3
+                }
               },
-              "origin": {
-                "Builtin": "Influence Culture"
-              }
+              "handler": {
+                "origin": {
+                  "Builtin": "Influence Culture"
+                },
+                "priority": 0,
+                "request": {
+                  "Payment": [
+                    {
+                      "cost": {
+                        "conversions": [
+                          {
+                            "from": [
+                              {
+                                "food": 1
+                              },
+                              {
+                                "wood": 1
+                              },
+                              {
+                                "ore": 1
+                              },
+                              {
+                                "ideas": 1
+                              }
+                            ],
+                            "to": {
+                              "gold": 1
+                            },
+                            "type": "Unlimited"
+                          }
+                        ],
+                        "default": {
+                          "culture_tokens": 3
+                        }
+                      },
+                      "name": "Pay 3 culture tokens to increase the dice roll",
+                      "optional": true
+                    }
+                  ]
+                }
+              },
+              "last_priority_used": 0,
+              "player": 1
             }
-          }
+          ]
         },
         {
-          "Command": {
-            "gained_resources": {
-              "culture_tokens": 1
-            }
-          }
+          "op": "replace",
+          "path": "/players/0/cities/2/city_pieces/temple",
+          "value": 0
+        },
+        {
+          "op": "replace",
+          "path": "/players/1/resources/culture_tokens",
+          "value": 6
+        },
+        {
+          "op": "replace",
+          "path": "/successful_cultural_influence",
+          "value": false
         }
       ]
     }

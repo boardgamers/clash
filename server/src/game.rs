@@ -1,3 +1,4 @@
+use crate::resource::check_for_waste;
 use crate::ability_initializer::AbilityListeners;
 use crate::combat::{Combat, CombatDieRoll, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
@@ -536,6 +537,7 @@ impl Game {
     /// # Panics
     /// Panics if the player does not have events
     pub fn next_player(&mut self) {
+        check_for_waste(self);
         self.increment_player_index();
         self.add_info_log_group(format!(
             "It's {}'s turn",

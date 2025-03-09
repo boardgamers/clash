@@ -1,5 +1,7 @@
 {
-  "state": ["Playing"],
+  "state": [
+    "Playing"
+  ],
   "players": [
     {
       "name": null,
@@ -299,102 +301,32 @@
     {
       "action": {
         "Playing": {
-          "Advance": {
-            "advance": "Writing",
-            "payment": {
-              "ideas": 2
-            }
-          }
-        }
-      },
-      "undo": [
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        }
-      ]
-    },
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Free Education",
-            "payment": {
-              "ideas": 2
-            }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Playing": {
-          "Custom": {
-            "Taxes": {
-              "food": 1,
-              "wood": 1,
-              "ore": 1,
-              "gold": 1
-            }
-          }
-        }
-      },
-      "undo": [
-        {
-          "WastedResources": {
-            "resources": {
-              "food": 1
-            },
-            "player_index": 0
-          }
-        }
-      ]
-    },
-    {
-      "action": {
-        "Playing": {
           "Custom": {
             "Theaters": {
               "culture_tokens": 1
             }
           }
         }
-      }
+      },
+      "undo": [
+        {
+          "op": "replace",
+          "path": "/players/0/resources/culture_tokens",
+          "value": 10
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/mood_tokens",
+          "value": 10
+        },
+        {
+          "op": "remove",
+          "path": "/players/0/played_once_per_turn_actions"
+        }
+      ]
     }
   ],
-  "action_log_index": 4,
+  "action_log_index": 1,
   "log": [
     [
       "Player1 paid 1 culture token to convert resources using Theaters"

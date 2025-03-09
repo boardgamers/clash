@@ -283,17 +283,7 @@
         "Response": {
           "SelectUnitType": "Elephant"
         }
-      },
-      "undo": [
-        {
-          "WastedResources": {
-            "resources": {
-              "food": 1
-            },
-            "player_index": 1
-          }
-        }
-      ]
+      }
     }
   ],
   "action_log_index": 3,

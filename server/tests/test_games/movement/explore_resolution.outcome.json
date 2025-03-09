@@ -491,47 +491,13 @@
             "units": [
               0
             ],
-            "destination": "E8"
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Movement": "Stop"
-      }
-    },
-    {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              0
-            ],
-            "destination": "D7"
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Movement": "Stop"
-      }
-    },
-    {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              0
-            ],
             "destination": "D6"
           }
         }
       }
     }
   ],
-  "action_log_index": 5,
+  "action_log_index": 1,
   "log": [
     [
       "The game has started"
@@ -558,7 +524,7 @@
       "Player2 marched 1 settler from D7 to D6"
     ]
   ],
-  "undo_limit": 5,
+  "undo_limit": 1,
   "actions_left": 0,
   "successful_cultural_influence": false,
   "round": 1,

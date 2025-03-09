@@ -1,5 +1,7 @@
 {
-  "state": ["Playing"],
+  "state": [
+    "Playing"
+  ],
   "players": [
     {
       "name": null,
@@ -223,7 +225,42 @@
             "port_position": "A2"
           }
         }
-      }
+      },
+      "undo": [
+        {
+          "op": "replace",
+          "path": "/actions_left",
+          "value": 3
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/cities/0/activations",
+          "value": 0
+        },
+        {
+          "op": "remove",
+          "path": "/players/0/cities/0/city_pieces/port"
+        },
+        {
+          "op": "remove",
+          "path": "/players/0/cities/0/port_position"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/food",
+          "value": 2
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/ore",
+          "value": 7
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/wood",
+          "value": 7
+        }
+      ]
     }
   ],
   "action_log_index": 1,

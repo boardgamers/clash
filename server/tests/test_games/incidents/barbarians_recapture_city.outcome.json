@@ -255,17 +255,7 @@
             "destination": "C2"
           }
         }
-      },
-      "undo": [
-        {
-          "WastedResources": {
-            "resources": {
-              "gold": 3
-            },
-            "player_index": 0
-          }
-        }
-      ]
+      }
     }
   ],
   "action_log_index": 1,
