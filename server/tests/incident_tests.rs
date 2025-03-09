@@ -497,31 +497,26 @@ fn test_anarchy() {
 fn test_scientific_trade() {
     JSON.test(
         "scientific_trade",
-        vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance {
-                    advance: String::from("Storage"),
-                    payment: ResourcePile::gold(2),
-                }),
-            ),
-        ],
+        vec![TestAction::not_undoable(
+            0,
+            Action::Playing(Advance {
+                advance: String::from("Storage"),
+                payment: ResourcePile::gold(2),
+            }),
+        )],
     );
 }
-
 
 #[test]
 fn test_flourishing_trade() {
     JSON.test(
         "flourishing_trade",
-        vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance {
-                    advance: String::from("Storage"),
-                    payment: ResourcePile::gold(2),
-                }),
-            ),
-        ],
+        vec![TestAction::not_undoable(
+            0,
+            Action::Playing(Advance {
+                advance: String::from("Storage"),
+                payment: ResourcePile::gold(2),
+            }),
+        )],
     );
 }

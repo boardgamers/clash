@@ -53,9 +53,9 @@ fn flourishing_trade() -> Incident {
                         b.contains(&Building::Market) || b.contains(&Building::Port)
                     })
                     .count();
-                
+
                 gold = gold.min(3);
-                
+
                 if i.active_player == p {
                     gold = gold.max(1);
                 }
