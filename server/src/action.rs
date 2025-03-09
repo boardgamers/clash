@@ -16,6 +16,7 @@ use crate::movement::{
 };
 use crate::playing_actions::PlayingAction;
 use crate::recruit::on_recruit;
+use crate::resource::check_for_waste;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::play_status_phase;
 use crate::undo::{clean_patch, redo, to_serde_value, undo};
@@ -24,7 +25,6 @@ use crate::unit::{get_current_move, MovementAction};
 use crate::wonder::draw_wonder_card;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use crate::resource::check_for_waste;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum Action {

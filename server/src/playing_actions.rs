@@ -149,7 +149,6 @@ impl PlayingAction {
                 let player = &mut game.players[player_index];
                 let city = City::new(player_index, settler.position);
                 player.cities.push(city);
-                let unit_data = settler.data(player);
             }
             Construct(c) => {
                 let player = &game.players[player_index];

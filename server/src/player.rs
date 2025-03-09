@@ -423,11 +423,6 @@ impl Player {
             .find_map(|advance| advance.government.clone())
     }
 
-    pub(crate) fn gain_resources_in_undo(&mut self, resources: ResourcePile) {
-        // resource limit may be adjusted later
-        self.resources += resources;
-    }
-
     pub fn gain_resources(&mut self, resources: ResourcePile) {
         self.resources += resources;
         let waste = self.resources.apply_resource_limit(&self.resource_limit);

@@ -1,7 +1,7 @@
-use serde::{Deserialize, Serialize};
-use std::{fmt, mem};
 use crate::game::Game;
 use crate::resource_pile::ResourcePile;
+use serde::{Deserialize, Serialize};
+use std::{fmt, mem};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Copy, Hash, Ord, PartialOrd)]
 pub enum ResourceType {

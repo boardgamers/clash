@@ -11,7 +11,6 @@ use crate::resource_pile::ResourcePile;
 use crate::unit::{UnitType, Units};
 
 pub(crate) fn recruit(game: &mut Game, player_index: usize, r: &Recruit) {
-    let mut replaced_leader = None;
     if let Some(leader_name) = &r.leader_name {
         if let Some(previous_leader) = game.players[player_index].active_leader.take() {
             Player::with_leader(
@@ -22,7 +21,6 @@ pub(crate) fn recruit(game: &mut Game, player_index: usize, r: &Recruit) {
                     (previous_leader.listeners.deinitializer)(game, player_index);
                 },
             );
-            replaced_leader = Some(previous_leader);
         }
         set_active_leader(game, leader_name.clone(), player_index);
     }

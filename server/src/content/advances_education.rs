@@ -94,9 +94,6 @@ fn philosophy() -> AdvanceBuilder {
     .add_one_time_ability_initializer(|game, player_index| {
         game.players[player_index].gain_resources(ResourcePile::ideas(1));
     })
-    .add_ability_undo_deinitializer(|game, player_index| {
-        game.players[player_index].lose_resources(ResourcePile::ideas(1));
-    })
     .add_simple_current_event_listener(
         |event| &mut event.on_advance,
         0,
