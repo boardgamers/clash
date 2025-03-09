@@ -548,3 +548,21 @@ fn test_era_of_stability() {
         ],
     );
 }
+
+#[test]
+fn test_reformation() {
+    JSON.test(
+        "reformation",
+        vec![TestAction::not_undoable(
+            0,
+            Action::Playing(Advance {
+                advance: String::from("Storage"),
+                payment: ResourcePile::gold(2),
+            }),
+        ),
+        TestAction::not_undoable(
+            2,
+            Action::Response(CurrentEventResponse::SelectPlayer(1))
+        )],
+    );
+}

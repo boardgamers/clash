@@ -332,8 +332,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
-  "incidents_left": [
-    9
-  ]
+  "wonder_amount_left": 1
 }
