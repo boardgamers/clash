@@ -78,7 +78,7 @@ fn test_separation_of_power() {
         }
         game = execute_action(game, Action::Playing(EndTurn), 0);
         test.setup_done = true;
-        game = execute_action(game, influence_action(), 1);
+        let _ = execute_action(game, influence_action(), 1);
     });
 }
 
@@ -99,7 +99,7 @@ fn test_devotion() {
         }
         game = execute_action(game, Action::Playing(EndTurn), 0);
         test.setup_done = true;
-        game = execute_action(game, influence_action(), 1);
+        let _ = execute_action(game, influence_action(), 1);
     });
 }
 
@@ -124,7 +124,7 @@ fn test_totalitarianism() {
         }
         game = execute_action(game, Action::Playing(EndTurn), 0);
         test.setup_done = true;
-        game = execute_action(game, influence_action(), 1);
+        let _ = execute_action(game, influence_action(), 1);
     });
 }
 
@@ -154,7 +154,7 @@ fn test_monuments() {
         );
         game = execute_action(game, Action::Playing(EndTurn), 0);
         test.setup_done = true;
-        game = execute_action(game, influence_action(), 1);
+        let _ = execute_action(game, influence_action(), 1);
     });
 }
 

@@ -1,7 +1,7 @@
 use crate::content::custom_phase_actions::{
-    AdvanceRequest, CurrentEventHandler, CurrentEventRequest, CurrentEventResponse,
-    CurrentEventType, MultiRequest, PaymentRequest, PlayerRequest, PositionRequest,
-    ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitTypeRequest, UnitsRequest,
+    AdvanceRequest, CurrentEventHandler, CurrentEventRequest, CurrentEventResponse, MultiRequest,
+    PaymentRequest, PlayerRequest, PositionRequest, ResourceRewardRequest, SelectedStructure,
+    StructuresRequest, UnitTypeRequest, UnitsRequest,
 };
 use crate::events::{Event, EventOrigin};
 use crate::player_events::{CurrentEvent, PlayerCommands};
@@ -752,17 +752,4 @@ pub(crate) fn join_ability_initializers(setup: Vec<AbilityInitializer>) -> Abili
             initializer(game, player_index);
         }
     })
-}
-
-fn can_undo(event_type: &CurrentEventType) -> bool {
-    use CurrentEventType::*;
-    matches!(
-        event_type,
-        Advance(_)
-            | TurnStart
-            | Construct(_)
-            | Recruit(_)
-            | InfluenceCultureResolution(_)
-            | ExploreResolution(_)
-    )
 }

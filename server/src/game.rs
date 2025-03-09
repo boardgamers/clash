@@ -1,4 +1,3 @@
-use crate::resource::check_for_waste;
 use crate::ability_initializer::AbilityListeners;
 use crate::combat::{Combat, CombatDieRoll, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
@@ -14,6 +13,7 @@ use crate::pirates::get_pirates_player;
 use crate::player_events::{
     CurrentEvent, CurrentEventInfo, PlayerCommandEvent, PlayerCommands, PlayerEvents,
 };
+use crate::resource::check_for_waste;
 use crate::status_phase::enter_status_phase;
 use crate::undo::CommandUndoInfo;
 use crate::unit::UnitType;
