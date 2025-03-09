@@ -440,7 +440,7 @@ impl AbilityInitializerSetup for IncidentBuilder {
 }
 
 pub(crate) fn trigger_incident(game: &mut Game, player_index: usize, info: &IncidentInfo) {
-    game.lock_undo();
+    game.lock_undo(); // new information is revealed
 
     if game.incidents_left.is_empty() {
         game.incidents_left = incidents::get_all().iter().map(|i| i.id).collect_vec();

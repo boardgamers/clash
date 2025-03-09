@@ -1,8 +1,3 @@
-use itertools::Itertools;
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::vec;
-
 use crate::ability_initializer::AbilityListeners;
 use crate::combat::{Combat, CombatDieRoll, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
@@ -15,12 +10,9 @@ use crate::events::{Event, EventOrigin};
 use crate::incident::PermanentIncidentEffect;
 use crate::movement::{CurrentMove, MoveState};
 use crate::pirates::get_pirates_player;
-use crate::player_events::{
-    CurrentEvent, CurrentEventInfo, PlayerCommandEvent, PlayerCommands, PlayerEvents,
-};
+use crate::player_events::{CurrentEvent, CurrentEventInfo, PlayerEvents};
 use crate::resource::check_for_waste;
 use crate::status_phase::enter_status_phase;
-use crate::undo::{undo_commands, CommandUndoInfo, UndoContext};
 use crate::unit::UnitType;
 use crate::utils::Rng;
 use crate::utils::Shuffle;
@@ -34,6 +26,11 @@ use crate::{
     status_phase::StatusPhaseState::{self},
     wonder::Wonder,
 };
+use itertools::Itertools;
+use json_patch::PatchOperation;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::vec;
 
 pub struct Game {
     pub state_stack: Vec<GameState>,
@@ -60,7 +57,6 @@ pub struct Game {
     pub wonder_amount_left: usize, // todo is this redundant?
     pub incidents_left: Vec<u8>,
     pub permanent_incident_effects: Vec<PermanentIncidentEffect>,
-    pub undo_context_stack: Vec<UndoContext>, // transient
 }
 
 impl Clone for Game {
@@ -158,7 +154,6 @@ impl Game {
             wonder_amount_left: wonder_amount,
             incidents_left: Vec::new(),
             permanent_incident_effects: Vec::new(),
-            undo_context_stack: Vec::new(),
         };
         for i in 0..game.players.len() {
             builtin::init_player(&mut game, i);
@@ -189,7 +184,7 @@ impl Game {
             round: data.round,
             age: data.age,
             messages: data.messages,
-            rng: data.rng,
+            rng: Rng::from_seed_string(&data.rng),
             dice_roll_outcomes: data.dice_roll_outcomes,
             dice_roll_log: data.dice_roll_log,
             dropped_players: data.dropped_players,
@@ -202,7 +197,6 @@ impl Game {
             incidents_left: data.incidents_left,
             permanent_incident_effects: data.permanent_incident_effects,
             current_events: data.current_events,
-            undo_context_stack: Vec::new(),
         };
         for player in data.players {
             Player::initialize_player(player, &mut game);
@@ -228,7 +222,7 @@ impl Game {
             round: self.round,
             age: self.age,
             messages: self.messages,
-            rng: self.rng,
+            rng: self.rng.seed.to_string(),
             dice_roll_outcomes: self.dice_roll_outcomes,
             dice_roll_log: self.dice_roll_log,
             dropped_players: self.dropped_players,
@@ -261,7 +255,7 @@ impl Game {
             round: self.round,
             age: self.age,
             messages: self.messages.clone(),
-            rng: self.rng.clone(),
+            rng: self.rng.seed.to_string(),
             dice_roll_outcomes: self.dice_roll_outcomes.clone(),
             dice_roll_log: self.dice_roll_log.clone(),
             dropped_players: self.dropped_players.clone(),
@@ -456,38 +450,6 @@ impl Game {
         event(&mut self.players[player_index].events).set(e);
     }
 
-    pub(crate) fn trigger_command_event<V>(
-        &mut self,
-        player_index: usize,
-        event: fn(&mut PlayerEvents) -> &mut PlayerCommandEvent<V>,
-        details: &V,
-    ) {
-        let e = event(&mut self.players[player_index].events).take();
-        self.with_commands(player_index, |commands, game| {
-            let _ = e.trigger(commands, game, details);
-        });
-        event(&mut self.players[player_index].events).set(e);
-    }
-
-    pub(crate) fn with_commands(
-        &mut self,
-        player_index: usize,
-        callback: impl FnOnce(&mut PlayerCommands, &mut Game),
-    ) {
-        let p = self.get_player(player_index);
-        let info = CommandUndoInfo::new(p);
-        let mut commands = PlayerCommands::new(player_index, p.get_name(), p.event_info.clone());
-
-        callback(&mut commands, self);
-
-        info.apply(self, commands.content.clone());
-        self.players[player_index].gain_resources(commands.content.gained_resources);
-
-        for edit in commands.log {
-            self.add_info_log_item(&edit);
-        }
-    }
-
     #[must_use]
     pub fn can_undo(&self) -> bool {
         self.undo_limit < self.action_log_index
@@ -497,53 +459,6 @@ impl Game {
     pub fn can_redo(&self) -> bool {
         self.action_log_index < self.action_log.len()
     }
-
-    pub(crate) fn push_undo_context(&mut self, context: UndoContext) {
-        self.undo_context_stack.push(context);
-    }
-
-    pub(crate) fn pop_undo_context(&mut self) -> Option<UndoContext> {
-        self.maybe_pop_undo_context(|_| true)
-    }
-
-    pub(crate) fn maybe_pop_undo_context(
-        &mut self,
-        pred: fn(&UndoContext) -> bool,
-    ) -> Option<UndoContext> {
-        loop {
-            if let Some(context) = &self.undo_context_stack.last() {
-                match context {
-                    UndoContext::WastedResources { .. } => {
-                        let Some(UndoContext::WastedResources {
-                            resources,
-                            player_index,
-                        }) = self.undo_context_stack.pop()
-                        else {
-                            panic!("when popping a wasted resources undo context, the undo context stack should have a wasted resources undo context")
-                        };
-                        let pile = resources.clone();
-                        self.get_player_mut(player_index)
-                            .gain_resources_in_undo(pile);
-                    }
-                    UndoContext::Command(_) => {
-                        let Some(UndoContext::Command(c)) = self.undo_context_stack.pop() else {
-                            panic!("when popping a command undo context, the undo context stack should have a command undo context")
-                        };
-                        undo_commands(self, &c);
-                    }
-                    _ => {
-                        if pred(context) {
-                            return self.undo_context_stack.pop();
-                        }
-                        return None;
-                    }
-                }
-            } else {
-                return None;
-            }
-        }
-    }
-
     pub(crate) fn is_pirate_zone(&self, position: Position) -> bool {
         if self.map.is_sea(position) {
             let pirate = get_pirates_player(self);
@@ -602,8 +517,6 @@ impl Game {
             self.actions_left -= 1;
         }
         self.successful_cultural_influence = false;
-
-        self.lock_undo();
 
         self.start_turn();
     }
@@ -702,7 +615,6 @@ impl Game {
     pub fn next_age(&mut self) {
         self.age += 1;
         self.current_player_index = self.starting_player_index;
-        self.lock_undo();
         self.push_state(GameState::Playing);
         self.add_info_log_group(format!("Age {} has started", self.age));
         self.add_info_log_group(String::from("Round 1/3"));
@@ -722,7 +634,7 @@ impl Game {
     }
 
     pub(crate) fn get_next_dice_roll(&mut self) -> CombatDieRoll {
-        self.lock_undo();
+        self.lock_undo(); // dice rolls are not undoable
         let dice_roll = if self.dice_roll_outcomes.is_empty() {
             self.rng.range(0, 12) as u8
         } else {
@@ -819,25 +731,6 @@ impl Game {
             .push(wonder);
     }
 
-    /// .
-    ///
-    /// # Panics
-    ///
-    /// Panics if city or wonder does not exist
-    pub fn undo_build_wonder(&mut self, city_position: Position, player_index: usize) -> Wonder {
-        let player = &mut self.players[player_index];
-        player.wonders_build.pop();
-        let wonder = player
-            .get_city_mut(city_position)
-            .pieces
-            .wonders
-            .pop()
-            .expect("city should have a wonder");
-        (wonder.listeners.deinitializer)(self, player_index);
-        (wonder.listeners.undo_deinitializer)(self, player_index);
-        wonder
-    }
-
     ///
     /// # Panics
     ///
@@ -892,8 +785,8 @@ pub struct GameData {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     dice_roll_outcomes: Vec<u8>, // for testing purposes
     #[serde(default)]
-    #[serde(skip_serializing_if = "Rng::is_zero")]
-    rng: Rng,
+    #[serde(skip_serializing_if = "is_string_zero")]
+    rng: String,
     dice_roll_log: Vec<u8>,
     dropped_players: Vec<usize>,
     wonders_left: Vec<String>,
@@ -904,6 +797,10 @@ pub struct GameData {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     permanent_incident_effects: Vec<PermanentIncidentEffect>,
+}
+
+fn is_string_zero(s: &String) -> bool {
+    s == "0"
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -927,7 +824,7 @@ pub struct ActionLogItem {
     pub action: Action,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub undo: Vec<UndoContext>,
+    pub undo: Vec<PatchOperation>,
 }
 
 impl ActionLogItem {

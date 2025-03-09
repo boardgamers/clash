@@ -8,7 +8,6 @@ use crate::game::Game;
 use crate::map::Terrain;
 use crate::payment::PaymentOptions;
 use crate::playing_actions::{PlayingActionType, Recruit};
-use crate::undo::{CommandContext, CommandUndoInfo};
 use crate::unit::Units;
 use crate::{
     city::City, city_pieces::Building, player::Player, position::Position,
@@ -20,20 +19,18 @@ use std::collections::{HashMap, HashSet};
 
 pub(crate) type CurrentEvent<V = ()> = Event<Game, CurrentEventInfo, V>;
 
-pub(crate) type PlayerCommandEvent<V = ()> = Event<PlayerCommands, Game, V>;
-
 #[derive(Default)]
 pub(crate) struct PlayerEvents {
     pub on_construct: CurrentEvent<Building>,
     pub on_construct_wonder: Event<Player, Position, Wonder>,
     pub on_draw_wonder_card: CurrentEvent,
-    pub on_collect: PlayerCommandEvent<Position>,
+    pub on_collect: Event<CollectInfo, Game>,
     pub on_advance: CurrentEvent<AdvanceInfo>,
     pub on_recruit: CurrentEvent<Recruit>,
     pub on_influence_culture_attempt: Event<InfluenceCultureInfo, City, Game>,
-    pub on_influence_culture_success: PlayerCommandEvent,
+    pub on_influence_culture_success: Event<Game, usize>,
     pub on_influence_culture_resolution: CurrentEvent<ResourcePile>,
-    pub before_move: PlayerCommandEvent<MoveInfo>,
+    pub before_move: Event<Game, MoveInfo>,
     pub on_explore_resolution: CurrentEvent<ExploreResolutionState>,
 
     pub construct_cost: Event<CostInfo, City, Building>,
@@ -66,7 +63,6 @@ impl PlayerEvents {
 #[derive(Clone, PartialEq)]
 pub(crate) struct ActionInfo {
     pub(crate) player: usize,
-    pub(crate) undo: CommandUndoInfo,
     pub(crate) info: HashMap<String, String>,
     pub(crate) log: Vec<String>,
 }
@@ -75,23 +71,19 @@ impl ActionInfo {
     pub(crate) fn new(player: &Player) -> ActionInfo {
         ActionInfo {
             player: player.index,
-            undo: CommandUndoInfo::new(player),
             info: player.event_info.clone(),
             log: Vec::new(),
         }
     }
 
     pub(crate) fn execute(&self, game: &mut Game) {
-        self.execute_with_options(game, |_| {});
-    }
-
-    pub(crate) fn execute_with_options(&self, game: &mut Game, c: impl Fn(&mut CommandContext)) {
         for l in self.log.iter().unique() {
             game.add_info_log_item(l);
         }
-        let mut context = CommandContext::new(self.info.clone());
-        c(&mut context);
-        self.undo.apply(game, context);
+        let player = game.get_player_mut(self.player);
+        for (k, v) in self.info.clone() {
+            player.event_info.insert(k, v);
+        }
     }
 }
 
@@ -139,7 +131,7 @@ impl CostInfo {
     }
 
     pub(crate) fn pay(&self, game: &mut Game, payment: &ResourcePile) {
-        game.players[self.info.undo.player].pay_cost(&self.cost, payment);
+        game.players[self.info.player].pay_cost(&self.cost, payment);
         self.info.execute(game);
     }
 }
@@ -226,33 +218,5 @@ impl InfluenceCultureInfo {
             return;
         }
         self.possible = InfluenceCulturePossible::NoBoost;
-    }
-}
-
-#[derive(Clone, PartialEq)]
-pub(crate) struct PlayerCommands {
-    pub name: String,
-    pub index: usize,
-    pub log: Vec<String>,
-    pub content: CommandContext,
-}
-
-impl PlayerCommands {
-    #[must_use]
-    pub fn new(player_index: usize, name: String, info: HashMap<String, String>) -> PlayerCommands {
-        PlayerCommands {
-            name,
-            index: player_index,
-            log: Vec::new(),
-            content: CommandContext::new(info),
-        }
-    }
-
-    pub fn gain_resources(&mut self, resources: ResourcePile) {
-        self.content.gained_resources += resources;
-    }
-
-    pub fn add_info_log_item(&mut self, log: &str) {
-        self.log.push(log.to_string());
     }
 }

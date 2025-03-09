@@ -300,7 +300,57 @@
             }
           }
         }
-      }
+      },
+      "undo": [
+        {
+          "op": "replace",
+          "path": "/actions_left",
+          "value": 2
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/advances/3",
+          "value": "State Religion"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/advances/4",
+          "value": "Storage"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/advances/5",
+          "value": "Tactics"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/advances/6",
+          "value": "Voting"
+        },
+        {
+          "op": "remove",
+          "path": "/players/0/advances/7"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/incident_tokens",
+          "value": 3
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/culture_tokens",
+          "value": 8
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/gold",
+          "value": 5
+        },
+        {
+          "op": "remove",
+          "path": "/current_events"
+        }
+      ]
     }
   ],
   "action_log_index": 2,
@@ -323,7 +373,7 @@
       "Player gained 1 culture token as advance bonus"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 1,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,

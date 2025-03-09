@@ -1,6 +1,11 @@
 {
   "state": [
-    "Playing"
+    "Playing",
+    {
+      "Movement": {
+        "movement_actions_left": 1
+      }
+    }
   ],
   "players": [
     {
@@ -438,59 +443,8 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
-    {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              0
-            ],
-            "destination": "E8"
-          }
-        }
-      },
-      "undo": [
-        {
-          "Movement": {
-            "starting_position": "D8",
-            "movement_actions_left": 3
-          }
-        }
-      ]
-    },
-    {
-      "action": {
-        "Movement": "Stop"
-      }
-    },
-    {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              0
-            ],
-            "destination": "D7"
-          }
-        }
-      },
-      "undo": [
-        {
-          "Movement": {
-            "starting_position": "E8",
-            "movement_actions_left": 3
-          }
-        }
-      ]
-    },
-    {
-      "action": {
-        "Movement": "Stop"
-      }
-    }
-  ],
-  "action_log_index": 4,
+  "action_log": [],
+  "action_log_index": 0,
   "log": [
     [
       "The game has started"
@@ -522,9 +476,7 @@
   "messages": [
     "The game has started"
   ],
-  "rng": {
-    "seed": 175288996178563520907356813494494136334
-  },
+  "rng": "175288996178563520907356813494494136334",
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [

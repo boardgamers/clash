@@ -1,5 +1,7 @@
 {
-  "state": ["Playing"],
+  "state": [
+    "Playing"
+  ],
   "players": [
     {
       "name": null,
@@ -220,7 +222,19 @@
         "Playing": {
           "Custom": "CivilRights"
         }
-      }
+      },
+      "undo": [
+        {
+          "op": "replace",
+          "path": "/actions_left",
+          "value": 3
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/mood_tokens",
+          "value": 6
+        }
+      ]
     },
     {
       "action": {
@@ -238,7 +252,28 @@
       },
       "undo": [
         {
-          "Recruit": {}
+          "op": "replace",
+          "path": "/actions_left",
+          "value": 2
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/cities/0/activations",
+          "value": 0
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/next_unit_id",
+          "value": 8
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/mood_tokens",
+          "value": 9
+        },
+        {
+          "op": "remove",
+          "path": "/players/0/units/8"
         }
       ]
     }

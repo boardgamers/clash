@@ -150,7 +150,7 @@ fn test_ship_disembark() {
 fn test_ship_disembark_capture_empty_city() {
     JSON.test(
         "ship_disembark_capture_empty_city",
-        vec![TestAction::not_undoable(
+        vec![TestAction::undoable(
             0,
             move_action(vec![1, 2], Position::from_offset("B2")),
         )],

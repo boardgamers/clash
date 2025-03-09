@@ -8,11 +8,9 @@ use crate::player_events::CostInfo;
 use crate::playing_actions::Recruit;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use crate::undo::UndoContext;
-use crate::unit::{Unit, UnitType, Units};
+use crate::unit::{UnitType, Units};
 
 pub(crate) fn recruit(game: &mut Game, player_index: usize, r: &Recruit) {
-    let mut replaced_leader = None;
     if let Some(leader_name) = &r.leader_name {
         if let Some(previous_leader) = game.players[player_index].active_leader.take() {
             Player::with_leader(
@@ -23,7 +21,6 @@ pub(crate) fn recruit(game: &mut Game, player_index: usize, r: &Recruit) {
                     (previous_leader.listeners.deinitializer)(game, player_index);
                 },
             );
-            replaced_leader = Some(previous_leader);
         }
         set_active_leader(game, leader_name.clone(), player_index);
     }
@@ -38,10 +35,6 @@ pub(crate) fn recruit(game: &mut Game, player_index: usize, r: &Recruit) {
         let unit = u.data(game.get_player(player_index));
         replaced_units_undo_context.push(unit);
     }
-    game.push_undo_context(UndoContext::Recruit {
-        replaced_units: replaced_units_undo_context,
-        replaced_leader,
-    });
     let player = game.get_player_mut(player_index);
     let vec = r.units.clone().to_vec();
     player.units.reserve_exact(vec.len());
@@ -109,84 +102,6 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: &Recruit) {
                 );
             }
         }
-    }
-}
-
-///
-///
-/// # Panics
-///
-/// Panics if city does not exist
-pub fn undo_recruit(
-    game: &mut Game,
-    player_index: usize,
-    units: Units,
-    city_position: Position,
-    leader_name: Option<&String>,
-) {
-    undo_recruit_without_activate(game, player_index, &units.to_vec(), leader_name);
-    game.players[player_index]
-        .get_city_mut(city_position)
-        .undo_activate();
-    if let Some(UndoContext::Recruit {
-        replaced_units,
-        replaced_leader,
-    }) = game.pop_undo_context()
-    {
-        let player = game.get_player_mut(player_index);
-        for unit in replaced_units {
-            player.units.extend(Unit::from_data(player_index, unit));
-        }
-        if let Some(replaced_leader) = replaced_leader {
-            player.active_leader = Some(replaced_leader.clone());
-            Player::with_leader(
-                &replaced_leader,
-                game,
-                player_index,
-                |game, replaced_leader| {
-                    (replaced_leader.listeners.initializer)(game, player_index);
-                    (replaced_leader.listeners.one_time_initializer)(game, player_index);
-                },
-            );
-        }
-    }
-}
-
-fn undo_recruit_without_activate(
-    game: &mut Game,
-    player_index: usize,
-    units: &[UnitType],
-    leader_name: Option<&String>,
-) {
-    if let Some(leader_name) = leader_name {
-        let current_leader = game.players[player_index]
-            .active_leader
-            .take()
-            .expect("the player should have an active leader");
-        Player::with_leader(
-            &current_leader,
-            game,
-            player_index,
-            |game, current_leader| {
-                (current_leader.listeners.deinitializer)(game, player_index);
-                (current_leader.listeners.undo_deinitializer)(game, player_index);
-            },
-        );
-
-        game.players[player_index]
-            .available_leaders
-            .push(leader_name.clone());
-        game.players[player_index].available_leaders.sort();
-
-        game.players[player_index].active_leader = None;
-    }
-    let player = game.get_player_mut(player_index);
-    for _ in 0..units.len() {
-        player
-            .units
-            .pop()
-            .expect("the player should have the recruited units when undoing");
-        player.next_unit_id -= 1;
     }
 }
 

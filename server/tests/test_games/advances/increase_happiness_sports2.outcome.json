@@ -1,5 +1,7 @@
 {
-  "state": ["Playing"],
+  "state": [
+    "Playing"
+  ],
   "players": [
     {
       "name": null,
@@ -288,11 +290,24 @@
       },
       "undo": [
         {
-          "IncreaseHappiness": {
-            "angry_activations": [
-              "C2"
-            ]
-          }
+          "op": "replace",
+          "path": "/actions_left",
+          "value": 3
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/cities/1/angry_activation",
+          "value": true
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/cities/1/mood_state",
+          "value": "Angry"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/culture_tokens",
+          "value": 9
         }
       ]
     }
@@ -323,9 +338,7 @@
     10,
     10
   ],
-  "rng": {
-    "seed": 234162992961072890508432380903651342097
-  },
+  "rng": "234162992961072890508432380903651342097",
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [],

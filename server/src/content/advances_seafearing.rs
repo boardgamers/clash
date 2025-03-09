@@ -57,16 +57,16 @@ fn cartography() -> AdvanceBuilder {
         .add_player_event_listener(
             |event| &mut event.before_move,
             0,
-            |player, g, i| {
+            |game,  i, ()| {
                 // info is the action that we last used this ability for
-                let key = g.actions_left.to_string();
-                if player.content.info.get("Cartography").is_some_and(|info| info == &key) {
+                let key = game.actions_left.to_string();
+                if game.get_player(i.player).event_info.get("Cartography").is_some_and(|info| info == &key) {
                     return;
                 }
                 let mut ship = false;
                 let mut navigation = false;
                 for id in &i.units {
-                    let unit = g.get_player(i.player).get_unit(*id);
+                    let unit = game.get_player(i.player).get_unit(*id);
                     if unit.unit_type.is_ship() {
                         ship = true;
                         if !unit.position.is_neighbor(i.to) {
@@ -75,12 +75,13 @@ fn cartography() -> AdvanceBuilder {
                     }
                 }
                 if ship {
-                    player.content.info.insert("Cartography".to_string(), key);
+                    let player = game.get_player_mut(i.player);
+                    player.event_info.insert("Cartography".to_string(), key);
                     player.gain_resources(ResourcePile::ideas(1));
-                    player.add_info_log_item("Cartography gained 1 idea");
+                    game.add_info_log_item("Cartography gained 1 idea");
                     if navigation {
-                        player.gain_resources(ResourcePile::culture_tokens(1));
-                        player.add_info_log_item(" and 1 culture token (for using navigation)");
+                        game.get_player_mut(i.player).gain_resources(ResourcePile::culture_tokens(1));
+                        game.add_info_log_item(" and 1 culture token (for using navigation)");
                     }
                 }
             },

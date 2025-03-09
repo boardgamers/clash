@@ -1,5 +1,7 @@
 {
-  "state": ["Playing"],
+  "state": [
+    "Playing"
+  ],
   "players": [
     {
       "name": null,
@@ -294,7 +296,48 @@
       },
       "undo": [
         {
-          "Recruit": {}
+          "op": "replace",
+          "path": "/actions_left",
+          "value": 3
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/active_leader",
+          "value": null
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/available_leaders/0",
+          "value": "Alexander"
+        },
+        {
+          "op": "add",
+          "path": "/players/0/available_leaders/1",
+          "value": "Kleopatra"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/cities/0/activations",
+          "value": 0
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/next_unit_id",
+          "value": 10
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/culture_tokens",
+          "value": 9
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/mood_tokens",
+          "value": 9
+        },
+        {
+          "op": "remove",
+          "path": "/players/0/units/10"
         }
       ]
     }
@@ -325,9 +368,7 @@
     10,
     10
   ],
-  "rng": {
-    "seed": 234162992961072890508432380903651342097
-  },
+  "rng": "234162992961072890508432380903651342097",
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [],

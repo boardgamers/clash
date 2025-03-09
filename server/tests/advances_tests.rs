@@ -1,4 +1,4 @@
-use crate::common::{illegal_action_test, influence_action, load_game, JsonTest, TestAction};
+use crate::common::{illegal_action_test, influence_action, JsonTest, TestAction};
 use server::action::{execute_action, Action};
 use server::city_pieces::Building::{Fortress, Temple};
 use server::content::custom_actions::CustomAction;
@@ -65,10 +65,10 @@ fn test_sanitation_and_draft() {
 fn test_separation_of_power() {
     illegal_action_test(|test| {
         let mut game = load_culture();
-        execute_action(&mut game, Action::Playing(EndTurn), 1);
+        game = execute_action(game, Action::Playing(EndTurn), 1);
         if test.fail {
-            execute_action(
-                &mut game,
+            game = execute_action(
+                game,
                 Action::Playing(Advance {
                     advance: String::from("Separation of Power"),
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
@@ -76,9 +76,9 @@ fn test_separation_of_power() {
                 0,
             );
         }
-        execute_action(&mut game, Action::Playing(EndTurn), 0);
+        game = execute_action(game, Action::Playing(EndTurn), 0);
         test.setup_done = true;
-        execute_action(&mut game, influence_action(), 1);
+        let _ = execute_action(game, influence_action(), 1);
     });
 }
 
@@ -86,10 +86,10 @@ fn test_separation_of_power() {
 fn test_devotion() {
     illegal_action_test(|test| {
         let mut game = load_culture();
-        execute_action(&mut game, Action::Playing(EndTurn), 1);
+        game = execute_action(game, Action::Playing(EndTurn), 1);
         if test.fail {
-            execute_action(
-                &mut game,
+            game = execute_action(
+                game,
                 Action::Playing(Advance {
                     advance: String::from("Devotion"),
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
@@ -97,24 +97,24 @@ fn test_devotion() {
                 0,
             );
         }
-        execute_action(&mut game, Action::Playing(EndTurn), 0);
+        game = execute_action(game, Action::Playing(EndTurn), 0);
         test.setup_done = true;
-        execute_action(&mut game, influence_action(), 1);
+        let _ = execute_action(game, influence_action(), 1);
     });
 }
 
 fn load_culture() -> Game {
-    load_game("base/cultural_influence")
+    JsonTest::new("base").load_game("cultural_influence")
 }
 
 #[test]
 fn test_totalitarianism() {
     illegal_action_test(|test| {
         let mut game = load_culture();
-        execute_action(&mut game, Action::Playing(EndTurn), 1);
+        game = execute_action(game, Action::Playing(EndTurn), 1);
         if test.fail {
-            execute_action(
-                &mut game,
+            game = execute_action(
+                game,
                 Action::Playing(Advance {
                     advance: String::from("Totalitarianism"),
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
@@ -122,9 +122,9 @@ fn test_totalitarianism() {
                 0,
             );
         }
-        execute_action(&mut game, Action::Playing(EndTurn), 0);
+        game = execute_action(game, Action::Playing(EndTurn), 0);
         test.setup_done = true;
-        execute_action(&mut game, influence_action(), 1);
+        let _ = execute_action(game, influence_action(), 1);
     });
 }
 
@@ -132,10 +132,10 @@ fn test_totalitarianism() {
 fn test_monuments() {
     illegal_action_test(|test| {
         let mut game = load_culture();
-        execute_action(&mut game, Action::Playing(EndTurn), 1);
+        game = execute_action(game, Action::Playing(EndTurn), 1);
         if test.fail {
-            execute_action(
-                &mut game,
+            game = execute_action(
+                game,
                 Action::Playing(Advance {
                     advance: String::from("Monuments"),
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
@@ -143,8 +143,8 @@ fn test_monuments() {
                 0,
             );
         }
-        execute_action(
-            &mut game,
+        game = execute_action(
+            game,
             Action::Playing(Custom(ConstructWonder {
                 city_position: Position::from_offset("C2"),
                 wonder: String::from("Pyramids"),
@@ -152,9 +152,9 @@ fn test_monuments() {
             })),
             0,
         );
-        execute_action(&mut game, Action::Playing(EndTurn), 0);
+        game = execute_action(game, Action::Playing(EndTurn), 0);
         test.setup_done = true;
-        execute_action(&mut game, influence_action(), 1);
+        let _ = execute_action(game, influence_action(), 1);
     });
 }
 

@@ -5,8 +5,8 @@ use crate::content::custom_phase_actions::{
     CurrentEventRequest, CurrentEventResponse, CurrentEventType,
 };
 use crate::game::Game;
-use crate::map::{Block, BlockPosition, Map, Rotation, Terrain, UnexploredBlock};
-use crate::movement::{move_units, stop_current_move, undo_move_units};
+use crate::map::{Block, BlockPosition, Map, Rotation, UnexploredBlock};
+use crate::movement::{move_units, stop_current_move};
 use crate::position::Position;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -27,6 +27,9 @@ pub(crate) fn move_to_unexplored_tile(
     start: Position,
     destination: Position,
 ) -> bool {
+    game.lock_undo(); // tile is revealed, so we can't undo the move
+    stop_current_move(game);
+
     for b in &game.map.unexplored_blocks.clone() {
         for (position, _tile) in b.block.tiles(&b.position, b.position.rotation) {
             if position == destination {
@@ -60,7 +63,6 @@ pub(crate) fn move_to_unexplored_block(
     let ship_explore = is_any_ship(game, player_index, units);
 
     let instant_explore = |game: &mut Game, rotation: Rotation, ship_can_teleport| {
-        game.lock_undo();
         move_to_explored_tile(
             game,
             move_to,
@@ -122,7 +124,6 @@ pub(crate) fn move_to_unexplored_block(
         return instant_explore(game, rotation, false);
     }
 
-    game.lock_undo();
     let start = game.get_player(player_index).get_unit(units[0]).position;
 
     let resolution_state = ExploreResolutionState {
@@ -301,32 +302,7 @@ pub(crate) fn explore_resolution() -> Builtin {
                 r.destination,
                 r.ship_can_teleport,
             );
-            stop_current_move(game);
         },
     )
     .build()
-}
-
-pub(crate) fn undo_explore_resolution(
-    game: &mut Game,
-    player_index: usize,
-    s: &ExploreResolutionState,
-) {
-    let unexplored_block = &s.block;
-
-    let block = &unexplored_block.block;
-    block
-        .tiles(
-            &unexplored_block.position,
-            unexplored_block.position.rotation,
-        )
-        .into_iter()
-        .for_each(|(position, _tile)| {
-            game.map.tiles.insert(position, Terrain::Unexplored);
-        });
-
-    game.map
-        .add_unexplored_blocks(vec![unexplored_block.clone()]);
-
-    undo_move_units(game, player_index, s.units.clone(), s.start);
 }

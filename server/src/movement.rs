@@ -73,13 +73,15 @@ pub(crate) fn take_move_state(game: &mut Game) -> MoveState {
 }
 
 pub(crate) fn stop_current_move(game: &mut Game) {
-    let mut move_state = take_move_state(game);
-    move_state.current_move = CurrentMove::None;
+    if let Movement(_) = game.state() {
+        let mut move_state = take_move_state(game);
+        move_state.current_move = CurrentMove::None;
 
-    if move_state.movement_actions_left == 0 {
-        return;
+        if move_state.movement_actions_left == 0 {
+            return;
+        }
+        game.push_state(Movement(move_state));
     }
-    game.push_state(Movement(move_state));
 }
 
 pub(crate) fn move_units(
@@ -92,7 +94,7 @@ pub(crate) fn move_units(
     let p = game.get_player(player_index);
     let from = p.get_unit(units[0]).position;
     let info = MoveInfo::new(player_index, units.to_vec(), from, to);
-    game.trigger_command_event(player_index, |e| &mut e.before_move, &info);
+    game.trigger_event_with_game_value(player_index, |e| &mut e.before_move, &info, &());
 
     for unit_id in units {
         move_unit(game, player_index, *unit_id, to, embark_carrier_id);
@@ -116,37 +118,6 @@ fn move_unit(
 
     for id in carried_units(unit_id, &game.players[player_index]) {
         game.players[player_index].get_unit_mut(id).position = destination;
-    }
-}
-
-pub(crate) fn undo_move_units(
-    game: &mut Game,
-    player_index: usize,
-    units: Vec<u32>,
-    starting_position: Position,
-) {
-    let Some(unit) = units.first() else {
-        return;
-    };
-    let destination = game.players[player_index].get_unit(*unit).position;
-
-    for unit_id in units {
-        let unit = game.players[player_index].get_unit_mut(unit_id);
-        unit.position = starting_position;
-
-        if let Some(terrain) = terrain_movement_restriction(&game.map, destination, unit) {
-            unit.movement_restrictions
-                .iter()
-                .position(|r| r == &terrain)
-                .map(|i| unit.movement_restrictions.remove(i));
-        }
-
-        if !game.map.is_sea(starting_position) {
-            unit.carrier_id = None;
-        }
-        for id in &carried_units(unit_id, &game.players[player_index]) {
-            game.players[player_index].get_unit_mut(*id).position = starting_position;
-        }
     }
 }
 

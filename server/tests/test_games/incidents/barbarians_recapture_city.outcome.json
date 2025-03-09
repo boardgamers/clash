@@ -255,17 +255,7 @@
             "destination": "C2"
           }
         }
-      },
-      "undo": [
-        {
-          "WastedResources": {
-            "resources": {
-              "gold": 3
-            },
-            "player_index": 0
-          }
-        }
-      ]
+      }
     }
   ],
   "action_log_index": 1,
@@ -294,9 +284,7 @@
   "messages": [
     "The game has started"
   ],
-  "rng": {
-    "seed": 294774916637212236631404434476213304938
-  },
+  "rng": "294774916637212236631404434476213304938",
   "dice_roll_log": [
     10,
     10,

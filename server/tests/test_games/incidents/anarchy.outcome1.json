@@ -253,12 +253,70 @@
       },
       "undo": [
         {
-          "WastedResources": {
-            "resources": {
-              "ideas": 1
-            },
-            "player_index": 0
-          }
+          "op": "replace",
+          "path": "/actions_left",
+          "value": 2
+        },
+        {
+          "op": "add",
+          "path": "/permanent_incident_effects",
+          "value": [
+            {
+              "Anarchy": {
+                "advances_lost": 1,
+                "player": 0
+              }
+            }
+          ]
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/advances/0",
+          "value": "Farming"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/advances/1",
+          "value": "Mining"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/advances/2",
+          "value": "State Religion"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/advances/3",
+          "value": "Storage"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/advances/4",
+          "value": "Tactics"
+        },
+        {
+          "op": "remove",
+          "path": "/players/0/advances/5"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/event_victory_points",
+          "value": 1.0
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resource_limit/ideas",
+          "value": 7
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/gold",
+          "value": 5
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/ideas",
+          "value": 3
         }
       ]
     }
@@ -280,7 +338,7 @@
       "Player1 could not store 1 idea"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 1,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 2,

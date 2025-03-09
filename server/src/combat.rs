@@ -186,7 +186,9 @@ pub fn initiate_combat(
 }
 
 pub(crate) fn start_combat(game: &mut Game) {
-    game.lock_undo();
+    game.lock_undo(); // combat should not be undoable
+    stop_current_move(game);
+
     let combat = get_combat(game);
     let attacker = combat.attacker;
     let defender = combat.defender;
@@ -369,7 +371,6 @@ pub(crate) fn draw(game: &mut Game, c: Combat) -> Option<Combat> {
 }
 
 pub(crate) fn end_combat(game: &mut Game, combat: Combat, r: CombatResult) -> Option<Combat> {
-    game.lock_undo();
     let attacker = combat.attacker;
     let defender = combat.defender;
     let defender_position = combat.defender_position;
@@ -389,9 +390,6 @@ pub(crate) fn end_combat(game: &mut Game, combat: Combat, r: CombatResult) -> Op
     }
 
     take_combat(game);
-    if let Some(GameState::Movement(_)) = game.state_stack.last() {
-        stop_current_move(game);
-    }
     None
 }
 
@@ -532,9 +530,6 @@ pub(crate) fn conquer_city(
     let Some(mut city) = game.players[old_player_index].take_city(position) else {
         panic!("player should have this city")
     };
-    // undo would only be possible if the old owner can't spawn a settler
-    // and this would be hard to understand
-    game.lock_undo();
     game.add_to_last_log_item(&format!(
         " and captured {}'s city at {position}",
         game.player_name(old_player_index)
@@ -735,7 +730,6 @@ pub mod tests {
             wonder_amount_left: 0,
             incidents_left: Vec::new(),
             permanent_incident_effects: Vec::new(),
-            undo_context_stack: Vec::new(),
         }
     }
 

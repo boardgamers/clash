@@ -204,18 +204,6 @@ pub(crate) fn gain_advance(game: &mut Game, player_index: usize, info: &AdvanceI
     }
 }
 
-pub(crate) fn undo_advance(
-    game: &mut Game,
-    advance: &Advance,
-    player_index: usize,
-    was_custom_phase: bool,
-) {
-    remove_advance(game, advance, player_index);
-    if !was_custom_phase {
-        game.players[player_index].incident_tokens += 1;
-    }
-}
-
 pub(crate) fn remove_advance(game: &mut Game, advance: &Advance, player_index: usize) {
     (advance.listeners.deinitializer)(game, player_index);
     (advance.listeners.undo_deinitializer)(game, player_index);

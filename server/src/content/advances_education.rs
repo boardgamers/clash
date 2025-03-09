@@ -33,11 +33,14 @@ fn public_education() -> AdvanceBuilder {
     .with_advance_bonus(MoodToken)
     .add_once_per_turn_listener(
         |event| &mut event.on_collect,
-        |e| &mut e.content.info,
-        |player, game, pos| {
-            if game.get_city(player.index, *pos).pieces.academy.is_some() {
-                player.gain_resources(ResourcePile::ideas(1));
-                player.add_info_log_item("Public Education gained 1 idea");
+        |e| &mut e.info.info,
+        |i, game, ()| {
+            let player = game.get_player(game.active_player());
+            if player.get_city(i.city).pieces.academy.is_some() {
+                i.total += ResourcePile::ideas(1);
+                i.info
+                    .log
+                    .push("Public Education gained 1 idea".to_string());
             }
         },
         0,
@@ -69,19 +72,21 @@ fn free_education() -> AdvanceBuilder {
                 None
             }
         },
-        |game, payment| {
-            payment.to_commands(game, |c, _game, payment| {
-                let pile = &payment[0];
-                if pile.is_empty() {
-                    c.add_info_log_item(&format!("{} declined to pay for free education", c.name));
-                    return;
-                }
-                c.add_info_log_item(&format!(
-                    "{} paid {} for free education to gain 1 mood token",
-                    c.name, pile
+        |game, s| {
+            let pile = &s.choice[0];
+            if pile.is_empty() {
+                game.add_info_log_item(&format!(
+                    "{} declined to pay for free education",
+                    s.player_name
                 ));
-                c.gain_resources(ResourcePile::mood_tokens(1));
-            });
+                return;
+            }
+            game.add_info_log_item(&format!(
+                "{} paid {} for free education to gain 1 mood token",
+                s.player_name, pile
+            ));
+            game.get_player_mut(s.player_index)
+                .gain_resources(ResourcePile::mood_tokens(1));
         },
     )
 }
@@ -94,9 +99,6 @@ fn philosophy() -> AdvanceBuilder {
     .add_one_time_ability_initializer(|game, player_index| {
         game.players[player_index].gain_resources(ResourcePile::ideas(1));
     })
-    .add_ability_undo_deinitializer(|game, player_index| {
-        game.players[player_index].lose_resources(ResourcePile::ideas(1));
-    })
     .add_simple_current_event_listener(
         |event| &mut event.on_advance,
         0,
@@ -106,11 +108,9 @@ fn philosophy() -> AdvanceBuilder {
                 .iter()
                 .any(|a| a.name == advance.name)
             {
-                game.with_commands(player_index, |player, _game| {
-                    player.gain_resources(ResourcePile::ideas(1));
-                    player
-                        .add_info_log_item(&format!("{player_name} gained 1 idea from Philosophy"));
-                });
+                let player = game.get_player_mut(player_index);
+                player.gain_resources(ResourcePile::ideas(1));
+                game.add_info_log_item(&format!("{player_name} gained 1 idea from Philosophy"));
             }
         },
     )

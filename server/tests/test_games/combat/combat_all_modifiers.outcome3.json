@@ -276,17 +276,7 @@
             }
           ]
         }
-      },
-      "undo": [
-        {
-          "WastedResources": {
-            "resources": {
-              "gold": 1
-            },
-            "player_index": 0
-          }
-        }
-      ]
+      }
     }
   ],
   "action_log_index": 4,

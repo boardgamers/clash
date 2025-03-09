@@ -1,6 +1,5 @@
 use crate::game::Game;
 use crate::resource_pile::ResourcePile;
-use crate::undo::UndoContext;
 use serde::{Deserialize, Serialize};
 use std::{fmt, mem};
 
@@ -61,10 +60,6 @@ pub(crate) fn check_for_waste(game: &mut Game) {
                 "{} could not store {wasted_resources}",
                 game.player_name(p)
             ));
-            game.push_undo_context(UndoContext::WastedResources {
-                resources: wasted_resources,
-                player_index: p,
-            });
         }
     }
 }

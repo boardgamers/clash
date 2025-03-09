@@ -1,5 +1,7 @@
 {
-  "state": ["Playing"],
+  "state": [
+    "Playing"
+  ],
   "players": [
     {
       "name": null,
@@ -310,19 +312,23 @@
       },
       "undo": [
         {
-          "Command": {
-            "gained_resources": {
-              "food": 1
-            }
-          }
+          "op": "replace",
+          "path": "/actions_left",
+          "value": 2
         },
         {
-          "WastedResources": {
-            "resources": {
-              "food": 1
-            },
-            "player_index": 0
-          }
+          "op": "replace",
+          "path": "/players/0/cities/3/activations",
+          "value": 4
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/cities/3/mood_state",
+          "value": "Happy"
+        },
+        {
+          "op": "remove",
+          "path": "/players/0/event_info"
         }
       ]
     }
@@ -355,9 +361,7 @@
     10,
     10
   ],
-  "rng": {
-    "seed": 234162992961072890508432380903651342097
-  },
+  "rng": "234162992961072890508432380903651342097",
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [],

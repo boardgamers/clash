@@ -412,14 +412,14 @@ fn test_envoy() {
                     payment: ResourcePile::gold(2),
                 }),
             ),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Playing(Advance {
                     advance: String::from("Monuments"),
                     payment: ResourcePile::gold(2),
                 }),
             ),
-            TestAction::not_undoable(0, Action::Response(CurrentEventResponse::Bool(true))),
+            TestAction::undoable(0, Action::Response(CurrentEventResponse::Bool(true))),
         ],
     );
 }
@@ -482,7 +482,7 @@ fn test_anarchy() {
                     payment: ResourcePile::gold(2),
                 }),
             ),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Playing(Advance {
                     advance: String::from("Dogma"),

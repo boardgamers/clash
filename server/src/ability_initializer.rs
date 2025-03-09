@@ -1,13 +1,12 @@
 use crate::content::custom_phase_actions::{
-    AdvanceRequest, CurrentEventHandler, CurrentEventRequest, CurrentEventResponse,
-    CurrentEventType, MultiRequest, PaymentRequest, PlayerRequest, PositionRequest,
-    ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitTypeRequest, UnitsRequest,
+    AdvanceRequest, CurrentEventHandler, CurrentEventRequest, CurrentEventResponse, MultiRequest,
+    PaymentRequest, PlayerRequest, PositionRequest, ResourceRewardRequest, SelectedStructure,
+    StructuresRequest, UnitTypeRequest, UnitsRequest,
 };
 use crate::events::{Event, EventOrigin};
-use crate::player_events::{CurrentEvent, PlayerCommands};
+use crate::player_events::CurrentEvent;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use crate::undo::UndoContext;
 use crate::unit::UnitType;
 use crate::{content::custom_actions::CustomActionType, game::Game, player_events::PlayerEvents};
 use std::collections::HashMap;
@@ -38,16 +37,6 @@ impl<'a, C, V> SelectedChoice<'a, C, V> {
             choice,
             details,
         }
-    }
-
-    pub(crate) fn to_commands(
-        &self,
-        game: &mut Game,
-        gain: impl Fn(&mut PlayerCommands, &Game, &C) + 'static + Clone,
-    ) {
-        game.with_commands(self.player_index, |commands, game| {
-            gain(commands, game, &self.choice);
-        });
     }
 }
 
@@ -228,10 +217,6 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                                 .as_mut()
                                 .expect("current missing")
                                 .response = None;
-                            if can_undo(&current.event_type) {
-                                game.undo_context_stack
-                                    .push(UndoContext::Event(Box::new(current)));
-                            }
                             let r = c.request.clone();
                             let a = action.clone();
                             phase.player.handler = None;
@@ -757,17 +742,4 @@ pub(crate) fn join_ability_initializers(setup: Vec<AbilityInitializer>) -> Abili
             initializer(game, player_index);
         }
     })
-}
-
-fn can_undo(event_type: &CurrentEventType) -> bool {
-    use CurrentEventType::*;
-    matches!(
-        event_type,
-        Advance(_)
-            | TurnStart
-            | Construct(_)
-            | Recruit(_)
-            | InfluenceCultureResolution(_)
-            | ExploreResolution(_)
-    )
 }

@@ -1,5 +1,3 @@
-use serde::{Deserialize, Serialize};
-
 pub fn format_list(list: &[String], empty_message: &str) -> String {
     match list {
         [] => empty_message.to_string(),
@@ -49,13 +47,22 @@ pub fn ordinal_number(value: u32) -> String {
     )
 }
 
-#[derive(Serialize, Deserialize, Clone, Default, PartialEq)]
+#[derive(Clone, Default)]
 pub struct Rng {
-    seed: u128,
+    pub(crate) seed: u128,
 }
 
 impl Rng {
     pub fn from_seed(seed: u128) -> Self {
+        Self { seed }
+    }
+
+    pub fn from_seed_string(seed: &str) -> Self {
+        let seed = if seed.is_empty() {
+            0
+        } else {
+            seed.parse().expect("seed should be a number")
+        };
         Self { seed }
     }
 

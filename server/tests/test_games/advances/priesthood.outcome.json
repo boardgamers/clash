@@ -312,17 +312,51 @@
       },
       "undo": [
         {
-          "Command": {}
+          "op": "replace",
+          "path": "/actions_left",
+          "value": 2
         },
         {
-          "Command": {
-            "info": {
-              "Priesthood": "used"
-            },
-            "gained_resources": {
-              "ideas": 1
-            }
-          }
+          "op": "replace",
+          "path": "/players/1/advances/3",
+          "value": "Mining"
+        },
+        {
+          "op": "replace",
+          "path": "/players/1/advances/4",
+          "value": "Myths"
+        },
+        {
+          "op": "replace",
+          "path": "/players/1/advances/5",
+          "value": "Philosophy"
+        },
+        {
+          "op": "replace",
+          "path": "/players/1/advances/6",
+          "value": "Priesthood"
+        },
+        {
+          "op": "remove",
+          "path": "/players/1/advances/7"
+        },
+        {
+          "op": "replace",
+          "path": "/players/1/incident_tokens",
+          "value": 3
+        },
+        {
+          "op": "replace",
+          "path": "/players/1/resources/culture_tokens",
+          "value": 9
+        },
+        {
+          "op": "remove",
+          "path": "/players/1/resources/ideas"
+        },
+        {
+          "op": "remove",
+          "path": "/players/1/event_info"
         }
       ]
     }
@@ -356,9 +390,7 @@
     10,
     10
   ],
-  "rng": {
-    "seed": 46312381643103681595563341886777350953
-  },
+  "rng": "46312381643103681595563341886777350953",
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [

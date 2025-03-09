@@ -316,11 +316,6 @@
   "action_log": [
     {
       "action": {
-        "Movement": "Stop"
-      }
-    },
-    {
-      "action": {
         "Playing": {
           "Recruit": {
             "units": {
@@ -351,67 +346,10 @@
             "gold": 1
           }
         }
-      },
-      "undo": [
-        {
-          "Event": {
-            "event_type": {
-              "Recruit": {
-                "units": {
-                  "ships": 3
-                },
-                "city_position": "C2",
-                "payment": {
-                  "wood": 5,
-                  "gold": 1
-                }
-              }
-            },
-            "player": 0,
-            "last_priority_used": 0,
-            "handler": {
-              "priority": 0,
-              "request": {
-                "ResourceReward": {
-                  "reward": {
-                    "default": {
-                      "wood": 1
-                    },
-                    "conversions": [
-                      {
-                        "from": [
-                          {
-                            "wood": 1
-                          }
-                        ],
-                        "to": {
-                          "gold": 1
-                        },
-                        "type": "Unlimited"
-                      }
-                    ]
-                  },
-                  "name": "Select resource to gain back"
-                }
-              },
-              "origin": {
-                "Advance": "Medicine"
-              }
-            }
-          }
-        },
-        {
-          "WastedResources": {
-            "resources": {
-              "gold": 2
-            },
-            "player_index": 0
-          }
-        }
-      ]
+      }
     }
   ],
-  "action_log_index": 4,
+  "action_log_index": 3,
   "log": [
     [
       "Player1 ended the movement action"
@@ -439,7 +377,7 @@
       "Player1 could not store 2 gold"
     ]
   ],
-  "undo_limit": 4,
+  "undo_limit": 3,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 6,

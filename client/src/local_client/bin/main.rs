@@ -56,7 +56,7 @@ pub async fn run(mut game: Game, features: &Features) {
             GameSyncRequest::None => {}
             GameSyncRequest::ExecuteAction(a) => {
                 let p = game.active_player();
-                execute_action(&mut game, a, p);
+                game = execute_action(game, a, p);
                 state.show_player = game.active_player();
                 sync_result = GameSyncResult::Update;
             }

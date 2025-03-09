@@ -1,5 +1,7 @@
 {
-  "state": ["Playing"],
+  "state": [
+    "Playing"
+  ],
   "players": [
     {
       "name": null,
@@ -299,68 +301,6 @@
     {
       "action": {
         "Playing": {
-          "Advance": {
-            "advance": "Writing",
-            "payment": {
-              "ideas": 2
-            }
-          }
-        }
-      },
-      "undo": [
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        }
-      ]
-    },
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Free Education",
-            "payment": {
-              "ideas": 2
-            }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Playing": {
           "Custom": {
             "Taxes": {
               "food": 1,
@@ -373,17 +313,38 @@
       },
       "undo": [
         {
-          "WastedResources": {
-            "resources": {
-              "food": 1
-            },
-            "player_index": 0
-          }
+          "op": "replace",
+          "path": "/actions_left",
+          "value": 1
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/gold",
+          "value": 5
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/mood_tokens",
+          "value": 11
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/ore",
+          "value": 5
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/wood",
+          "value": 5
+        },
+        {
+          "op": "remove",
+          "path": "/players/0/played_once_per_turn_actions"
         }
       ]
     }
   ],
-  "action_log_index": 3,
+  "action_log_index": 1,
   "log": [
     [
       "Player1 paid 1 mood token to collect 1 food, 1 wood, 1 ore and 1 gold using Taxes",
@@ -410,9 +371,7 @@
     10,
     10
   ],
-  "rng": {
-    "seed": 46312381643103681595563341886777350953
-  },
+  "rng": "46312381643103681595563341886777350953",
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [

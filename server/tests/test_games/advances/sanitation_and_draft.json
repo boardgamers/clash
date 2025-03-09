@@ -282,71 +282,8 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Writing",
-            "payment": {
-              "ideas": 2
-            }
-          }
-        }
-      },
-      "undo": [
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        },
-        {
-          "Recruit": {}
-        }
-      ]
-    },
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Free Education",
-            "payment": {
-              "ideas": 2
-            }
-          }
-        }
-      }
-    }
-  ],
-  "action_log_index": 2,
+  "action_log": [],
+  "action_log_index": 0,
   "log": [],
   "undo_limit": 0,
   "actions_left": 1,
@@ -368,9 +305,7 @@
     10,
     10
   ],
-  "rng": {
-    "seed": 46312381643103681595563341886777350953
-  },
+  "rng": "46312381643103681595563341886777350953",
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [

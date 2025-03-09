@@ -358,39 +358,81 @@
       },
       "undo": [
         {
-          "Event": {
-            "event_type": {
-              "ExploreResolution": {
-                "block": {
-                  "position": {
-                    "top_tile": "F4",
-                    "rotation": 0
-                  },
+          "op": "add",
+          "path": "/current_events",
+          "value": [
+            {
+              "event_type": {
+                "ExploreResolution": {
                   "block": {
-                    "terrain": [
-                      "Fertile",
-                      "Mountain",
-                      "Forest",
-                      "Fertile"
-                    ]
-                  }
+                    "block": {
+                      "terrain": [
+                        "Fertile",
+                        "Mountain",
+                        "Forest",
+                        "Fertile"
+                      ]
+                    },
+                    "position": {
+                      "rotation": 0,
+                      "top_tile": "F4"
+                    }
+                  },
+                  "destination": "E5",
+                  "ship_can_teleport": false,
+                  "start": "D5",
+                  "units": [
+                    1
+                  ]
+                }
+              },
+              "handler": {
+                "origin": {
+                  "Builtin": "Explore Resolution"
                 },
-                "units": [
-                  1
-                ],
-                "start": "D5",
-                "destination": "E5",
-                "ship_can_teleport": false
-              }
+                "priority": 0,
+                "request": "ExploreResolution"
+              },
+              "last_priority_used": 0,
+              "player": 1
+            }
+          ]
+        },
+        {
+          "op": "replace",
+          "path": "/map/tiles/27/1",
+          "value": "Unexplored"
+        },
+        {
+          "op": "replace",
+          "path": "/map/tiles/33/1",
+          "value": "Unexplored"
+        },
+        {
+          "op": "replace",
+          "path": "/map/tiles/34/1",
+          "value": "Unexplored"
+        },
+        {
+          "op": "replace",
+          "path": "/map/tiles/38/1",
+          "value": "Unexplored"
+        },
+        {
+          "op": "add",
+          "path": "/map/unexplored_blocks/4",
+          "value": {
+            "block": {
+              "terrain": [
+                "Fertile",
+                "Mountain",
+                "Forest",
+                "Fertile"
+              ]
             },
-            "player": 1,
-            "last_priority_used": 0,
-            "handler": {
-              "priority": 0,
-              "request": "ExploreResolution",
-              "origin": {
-                "Builtin": "Explore Resolution"
-              }
+            "position": {
+              "rotation": 0,
+              "top_tile": "F4"
             }
           }
         }
@@ -413,9 +455,7 @@
   "messages": [
     "The game has started"
   ],
-  "rng": {
-    "seed": 216866240505556079347337134957831925981
-  },
+  "rng": "216866240505556079347337134957831925981",
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [

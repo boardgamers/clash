@@ -11,15 +11,14 @@ use crate::incident::trigger_incident;
 use crate::log;
 use crate::map::Terrain::Unexplored;
 use crate::movement::{
-    has_movable_units, move_units_destinations, stop_current_move, take_move_state, CurrentMove,
-    MoveState,
+    has_movable_units, move_units_destinations, take_move_state, CurrentMove, MoveState,
 };
 use crate::playing_actions::PlayingAction;
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::play_status_phase;
-use crate::undo::{redo, undo, DisembarkUndoContext, UndoContext};
+use crate::undo::{clean_patch, redo, to_serde_value, undo};
 use crate::unit::MovementAction::{Move, Stop};
 use crate::unit::{get_current_move, MovementAction};
 use crate::wonder::draw_wonder_card;
@@ -78,36 +77,51 @@ impl Action {
 /// # Panics
 ///
 /// Panics if the action is illegal
-pub fn execute_action(game: &mut Game, action: Action, player_index: usize) {
+#[must_use]
+pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Game {
+    let add_undo = !matches!(&action, Action::Undo);
+    let old = to_serde_value(&game);
+    let old_player = game.active_player();
+    game = execute_without_undo(game, action, player_index);
+    let new = to_serde_value(&game);
+    let new_player = game.active_player();
+    let patch = json_patch::diff(&new, &old);
+    if old_player != new_player {
+        game.lock_undo(); // don't undo player change
+    } else if add_undo && game.can_undo() {
+        game.action_log[game.action_log_index - 1].undo = clean_patch(patch.0);
+    }
+    game
+}
+
+fn execute_without_undo(mut game: Game, action: Action, player_index: usize) -> Game {
     assert!(player_index == game.active_player(), "Illegal action");
     if let Action::Undo = action {
         assert!(
             game.can_undo(),
             "actions revealing new information can't be undone"
         );
-        undo(game, player_index);
-        return;
+        return undo(game);
     }
 
     if matches!(action, Action::Redo) {
-        assert!(game.can_redo(), "no action can be redone");
-        redo(game, player_index);
-        return;
+        assert!(game.can_redo(), "action can't be redone");
+        redo(&mut game, player_index);
+        return game;
     }
 
-    add_log_item_from_action(game, &action);
-    add_action_log_item(game, action.clone());
+    add_log_item_from_action(&mut game, &action);
+    add_action_log_item(&mut game, action.clone());
 
     if let Some(s) = game.current_event_handler_mut() {
         s.response = action.custom_phase_event();
         let details = game.current_event().event_type.clone();
-        execute_custom_phase_action(game, player_index, &details);
+        execute_custom_phase_action(&mut game, player_index, &details);
     } else {
-        execute_regular_action(game, action, player_index);
+        execute_regular_action(&mut game, action, player_index);
     }
-    check_for_waste(game);
-
-    game.action_log[game.action_log_index - 1].undo = std::mem::take(&mut game.undo_context_stack);
+    check_for_waste(&mut game);
+    game
 }
 
 fn add_action_log_item(game: &mut Game, item: Action) {
@@ -138,7 +152,6 @@ pub(crate) fn execute_custom_phase_action(
             start_combat(game);
         }
         CombatRoundEnd(r) => {
-            game.lock_undo();
             if let Some(c) = combat_round_end(game, r) {
                 combat_loop(game, c);
             }
@@ -202,10 +215,7 @@ pub(crate) fn execute_movement_action(
     action: MovementAction,
     player_index: usize,
 ) {
-    let Some(GameState::Movement(saved_state)) = game.state_stack.last().cloned() else {
-        panic!("game should be in a movement state");
-    };
-    let (starting_position, disembarked_units) = match action {
+    match action {
         Move(m) => {
             let player = &game.players[player_index];
             let starting_position = player
@@ -213,17 +223,6 @@ pub(crate) fn execute_movement_action(
                     "instead of providing no units to move a stop movement actions should be done",
                 ))
                 .position;
-            let disembarked_units = m
-                .units
-                .iter()
-                .filter_map(|unit| {
-                    let unit = player.get_unit(*unit);
-                    unit.carrier_id.map(|carrier_id| DisembarkUndoContext {
-                        unit_id: unit.id,
-                        carrier_id,
-                    })
-                })
-                .collect();
             match move_units_destinations(
                 player,
                 game,
@@ -283,26 +282,18 @@ pub(crate) fn execute_movement_action(
                     starting_position,
                     m.destination,
                 );
-                stop_current_move(game);
-                return; // can't undo this action
+                return;
             }
 
             if move_with_possible_combat(game, player_index, starting_position, &m) {
                 return;
             }
-
-            (Some(starting_position), disembarked_units)
         }
         Stop => {
             game.pop_state();
             return;
         }
     };
-    game.push_undo_context(UndoContext::Movement {
-        starting_position,
-        move_state: saved_state,
-        disembarked_units,
-    });
 
     let state = take_move_state(game);
     let all_moves_used =
