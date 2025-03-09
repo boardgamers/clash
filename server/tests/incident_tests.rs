@@ -492,3 +492,76 @@ fn test_anarchy() {
         ],
     );
 }
+
+#[test]
+fn test_scientific_trade() {
+    JSON.test(
+        "scientific_trade",
+        vec![TestAction::not_undoable(
+            0,
+            Action::Playing(Advance {
+                advance: String::from("Storage"),
+                payment: ResourcePile::gold(2),
+            }),
+        )],
+    );
+}
+
+#[test]
+fn test_flourishing_trade() {
+    JSON.test(
+        "flourishing_trade",
+        vec![TestAction::not_undoable(
+            0,
+            Action::Playing(Advance {
+                advance: String::from("Storage"),
+                payment: ResourcePile::gold(2),
+            }),
+        )],
+    );
+}
+
+#[test]
+fn test_era_of_stability() {
+    JSON.test(
+        "era_of_stability",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::gold(2),
+                }),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::Response(CurrentEventResponse::ResourceReward(
+                    ResourcePile::culture_tokens(1),
+                )),
+            ),
+            TestAction::not_undoable(
+                1,
+                Action::Response(CurrentEventResponse::ResourceReward(
+                    ResourcePile::culture_tokens(1),
+                )),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_reformation() {
+    JSON.test(
+        "reformation",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::gold(2),
+                }),
+            ),
+            TestAction::not_undoable(2, Action::Response(CurrentEventResponse::SelectPlayer(1))),
+        ],
+    );
+}

@@ -32,7 +32,7 @@ pub(crate) fn pestilence() -> Vec<Incident> {
     });
     builder = pestilence_city(builder, 1);
     builder =
-        builder.add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _| {
+        builder.add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _, _| {
             game.permanent_incident_effects
                 .push(PermanentIncidentEffect::Pestilence);
         });

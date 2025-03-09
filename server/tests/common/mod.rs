@@ -89,7 +89,7 @@ fn game_path(name: &str) -> String {
 
 pub(crate) type TestAssert = Vec<Box<dyn FnOnce(&Game)>>;
 
-pub(crate) struct TestAction {
+pub struct TestAction {
     action: Action,
     undoable: bool,
     illegal_action_test: bool,

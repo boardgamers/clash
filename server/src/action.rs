@@ -172,7 +172,7 @@ pub(crate) fn execute_custom_phase_action(
             on_recruit(game, player_index, r);
         }
         Incident(i) => {
-            trigger_incident(game, player_index, i);
+            trigger_incident(game, i.clone());
         }
     }
 }

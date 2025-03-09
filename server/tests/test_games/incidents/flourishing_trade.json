@@ -1,15 +1,6 @@
 {
   "state": [
-    {
-      "StatusPhase": "FreeAdvance"
-    }
-  ],
-  "current_events": [
-    {
-      "event_type": "StatusPhase",
-      "player": 0,
-      "last_priority_used": 0
-    }
+    "Playing"
   ],
   "players": [
     {
@@ -17,15 +8,15 @@
       "id": 0,
       "resources": {
         "food": 2,
-        "wood": 6,
-        "ore": 6,
-        "ideas": 5,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 3,
         "gold": 7,
-        "mood_tokens": 8,
+        "mood_tokens": 7,
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -40,15 +31,6 @@
           "activations": 0,
           "angry_activation": false,
           "position": "A1"
-        },
-        {
-          "city_pieces": {
-            "fortress": 1
-          },
-          "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "C2"
         }
       ],
       "units": [
@@ -99,12 +81,11 @@
       "advances": [
         "Farming",
         "Mining",
-        "Storage",
         "Tactics"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
-      "incident_tokens": 3,
+      "incident_tokens": 1,
       "completed_objectives": [],
       "captured_leaders": [],
       "event_victory_points": 0.0,
@@ -134,11 +115,20 @@
       },
       "cities": [
         {
-          "city_pieces": {},
+          "city_pieces": {
+            "market": 1
+          },
           "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
           "position": "C1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C2"
         }
       ],
       "units": [
@@ -157,8 +147,10 @@
       "active_leader": null,
       "available_leaders": [],
       "advances": [
+        "Fanaticism",
         "Farming",
-        "Mining"
+        "Mining",
+        "Tactics"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
@@ -180,28 +172,9 @@
         "ideas": 7,
         "gold": 7
       },
-      "cities": [
-        {
-          "city_pieces": {},
-          "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "B3"
-        }
-      ],
-      "units": [
-        {
-          "position": "B3",
-          "unit_type": "Infantry",
-          "id": 0
-        },
-        {
-          "position": "B3",
-          "unit_type": "Elephant",
-          "id": 1
-        }
-      ],
-      "civilization": "Barbarians",
+      "cities": [],
+      "units": [],
+      "civilization": "Pirates",
       "active_leader": null,
       "available_leaders": [],
       "advances": [],
@@ -212,7 +185,7 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "next_unit_id": 2
+      "next_unit_id": 0
     }
   ],
   "map": {
@@ -222,12 +195,10 @@
         "Fertile"
       ],
       [
-        "A2",
-        "Water"
-      ],
-      [
         "A3",
-        "Mountain"
+        {
+          "Exhausted": "Forest"
+        }
       ],
       [
         "B1",
@@ -248,68 +219,18 @@
       [
         "C2",
         "Forest"
-      ],
-      [
-        "C3",
-        "Water"
-      ],
-      [
-        "D2",
-        "Water"
       ]
     ]
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "action": {
-        "Response": {
-          "SelectAdvance": "Storage"
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectPositions": [
-            "B3"
-          ]
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectUnitType": "Elephant"
-        }
-      }
-    }
-  ],
-  "action_log_index": 3,
-  "log": [
-    [
-      "Player1 advanced Storage for free",
-      "Player gained 1 mood token as advance bonus"
-    ],
-    [
-      "A new game event has been triggered: A good year",
-      "Base effect: Barbarians spawn"
-    ],
-    [
-      "Barbarians spawned a new city and a new Infantry unit at B3"
-    ],
-    [
-      "Barbarians reinforced with 1 elephant at B3",
-      "Player1 gained 1 food from A good year",
-      "Player2 gained 1 food from A good year",
-      "Player2 could not store 1 food"
-    ]
-  ],
-  "undo_limit": 3,
+  "action_log": [],
+  "action_log_index": 0,
+  "log": [],
+  "undo_limit": 0,
   "actions_left": 3,
   "successful_cultural_influence": false,
-  "round": 1,
+  "round": 2,
   "age": 1,
   "messages": [
     "The game has started"
@@ -317,20 +238,21 @@
   "dice_roll_outcomes": [
     1,
     1,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10
+    1,
+    1,
+    1,
+    11,
+    11,
+    11,
+    11
   ],
-  "dice_roll_log": [
-    10
-  ],
+  "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1
+  "wonder_amount_left": 1,
+  "incidents_left": [
+    46
+  ]
 }

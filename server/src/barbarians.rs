@@ -7,7 +7,7 @@ use crate::content::custom_phase_actions::{
     new_position_request, ResourceRewardRequest, UnitTypeRequest,
 };
 use crate::game::Game;
-use crate::incident::{IncidentBuilder, BASE_EFFECT_PRIORITY};
+use crate::incident::{play_base_effect, IncidentBuilder, BASE_EFFECT_PRIORITY};
 use crate::map::Terrain;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
@@ -230,7 +230,7 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
     builder.add_simple_incident_listener(
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY,
-        |game, player, _| {
+        |game, player, _, _| {
             let s = get_barbarian_state(game);
             if s.move_units && get_movable_units(game, player, &s).is_empty() {
                 // after all moves are done
@@ -313,8 +313,8 @@ pub(crate) fn set_info(
     builder.add_simple_incident_listener(
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY + 200,
-        move |game, player, _| {
-            if game.current_event().barbarians.is_none() {
+        move |game, player, _, _| {
+            if play_base_effect(game) && game.current_event().barbarians.is_none() {
                 game.add_info_log_item(&format!("Base effect: {name}"));
                 let mut state = BarbariansEventState::new();
                 init(&mut state, game, player);
@@ -417,9 +417,9 @@ fn possible_barbarians_reinforcements(game: &Game) -> Vec<Position> {
 
 fn get_barbarian_reinforcement_choices(game: &Game) -> Vec<UnitType> {
     let barbarian = get_barbarians_player(game);
-    let pos = get_barbarian_state(game)
-        .selected_position
-        .expect("selected position should exist");
+    let Some(pos) = get_barbarian_state(game).selected_position else {
+        return vec![];
+    };
     let possible = if barbarian
         .get_units(pos)
         .iter()

@@ -4,7 +4,6 @@ use crate::content::advances::{advance_group_builder, AdvanceGroup};
 use crate::content::custom_actions::CustomActionType::{AbsolutePower, ForcedLabor};
 use crate::content::custom_phase_actions::ResourceRewardRequest;
 use crate::payment::PaymentOptions;
-use crate::resource::ResourceType;
 
 pub(crate) fn autocracy() -> AdvanceGroup {
     advance_group_builder(
@@ -35,10 +34,7 @@ fn nationalism() -> AdvanceBuilder {
                 .any(|u| u.is_army_unit() || u.is_ship())
             {
                 Some(ResourceRewardRequest::new(
-                    PaymentOptions::sum(
-                        1,
-                        &[ResourceType::MoodTokens, ResourceType::CultureTokens],
-                    ),
+                    PaymentOptions::tokens(1),
                     "Select token to gain".to_string(),
                 ))
             } else {

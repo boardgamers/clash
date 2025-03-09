@@ -1,26 +1,17 @@
 {
   "state": [
-    {
-      "StatusPhase": "FreeAdvance"
-    }
-  ],
-  "current_events": [
-    {
-      "event_type": "StatusPhase",
-      "player": 0,
-      "last_priority_used": 0
-    }
+    "Playing"
   ],
   "players": [
     {
       "name": null,
       "id": 0,
       "resources": {
-        "food": 2,
+        "food": 1,
         "wood": 6,
         "ore": 6,
         "ideas": 5,
-        "gold": 7,
+        "gold": 5,
         "mood_tokens": 8,
         "culture_tokens": 7
       },
@@ -35,20 +26,34 @@
       },
       "cities": [
         {
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C2"
+        },
+        {
           "city_pieces": {},
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "position": "A1"
+          "position": "C1"
         },
         {
-          "city_pieces": {
-            "fortress": 1
-          },
-          "mood_state": "Angry",
+          "city_pieces": {},
+          "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "position": "C2"
+          "position": "B2"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
         }
       ],
       "units": [
@@ -59,13 +64,11 @@
         },
         {
           "position": "C2",
-          "unit_type": "Cavalry",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 1
-        },
-        {
-          "position": "C2",
-          "unit_type": "Leader",
-          "id": 2
         },
         {
           "position": "C2",
@@ -97,10 +100,13 @@
       "active_leader": null,
       "available_leaders": [],
       "advances": [
+        "Arts",
         "Farming",
         "Mining",
+        "State Religion",
         "Storage",
-        "Tactics"
+        "Tactics",
+        "Voting"
       ],
       "unlocked_special_advance": [],
       "wonders_build": [],
@@ -135,24 +141,22 @@
       "cities": [
         {
           "city_pieces": {},
-          "mood_state": "Angry",
+          "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "position": "C1"
-        }
-      ],
-      "units": [
-        {
-          "position": "C1",
-          "unit_type": "Infantry",
-          "id": 0
+          "position": "A3"
         },
         {
-          "position": "C1",
-          "unit_type": "Infantry",
-          "id": 1
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A4"
         }
       ],
+      "units": [],
       "civilization": "test1",
       "active_leader": null,
       "available_leaders": [],
@@ -172,6 +176,55 @@
     {
       "name": null,
       "id": 2,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "temple": 1
+          },
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A1"
+        }
+      ],
+      "units": [],
+      "civilization": "test1",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 2
+    },
+    {
+      "name": null,
+      "id": 3,
       "resources": {},
       "resource_limit": {
         "food": 2,
@@ -180,27 +233,8 @@
         "ideas": 7,
         "gold": 7
       },
-      "cities": [
-        {
-          "city_pieces": {},
-          "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "B3"
-        }
-      ],
-      "units": [
-        {
-          "position": "B3",
-          "unit_type": "Infantry",
-          "id": 0
-        },
-        {
-          "position": "B3",
-          "unit_type": "Elephant",
-          "id": 1
-        }
-      ],
+      "cities": [],
+      "units": [],
       "civilization": "Barbarians",
       "active_leader": null,
       "available_leaders": [],
@@ -212,7 +246,7 @@
       "captured_leaders": [],
       "event_victory_points": 0.0,
       "wonder_cards": [],
-      "next_unit_id": 2
+      "next_unit_id": 0
     }
   ],
   "map": {
@@ -227,6 +261,10 @@
       ],
       [
         "A3",
+        "Mountain"
+      ],
+      [
+        "A4",
         "Mountain"
       ],
       [
@@ -264,50 +302,44 @@
   "action_log": [
     {
       "action": {
-        "Response": {
-          "SelectAdvance": "Storage"
+        "Playing": {
+          "Advance": {
+            "advance": "Storage",
+            "payment": {
+              "gold": 2
+            }
+          }
         }
       }
     },
     {
       "action": {
         "Response": {
-          "SelectPositions": [
-            "B3"
-          ]
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectUnitType": "Elephant"
+          "SelectPlayer": 1
         }
       }
     }
   ],
-  "action_log_index": 3,
+  "action_log_index": 2,
   "log": [
     [
-      "Player1 advanced Storage for free",
+      "Player1 paid 2 gold to get the Storage advance",
       "Player gained 1 mood token as advance bonus"
     ],
     [
-      "A new game event has been triggered: A good year",
-      "Base effect: Barbarians spawn"
+      "A new game event has been triggered: Reformation",
+      "Base effect: Barbarians spawn",
+      "Barbarians cannot spawn a new city",
+      "Barbarians cannot reinforce",
+      "Player1 selected Player3 to execute the event",
+      "Player Player1 has passed the incident to Player3"
     ],
     [
-      "Barbarians spawned a new city and a new Infantry unit at B3"
-    ],
-    [
-      "Barbarians reinforced with 1 elephant at B3",
-      "Player1 gained 1 food from A good year",
-      "Player2 gained 1 food from A good year",
-      "Player2 could not store 1 food"
+      "Player2 gained a Temple from Player3 in A1"
     ]
   ],
-  "undo_limit": 3,
-  "actions_left": 3,
+  "undo_limit": 2,
+  "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 1,
   "age": 1,

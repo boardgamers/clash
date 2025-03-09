@@ -60,10 +60,7 @@ pub(crate) fn pirates_bonus() -> Builtin {
                 .is_pirates()
             {
                 Some(ResourceRewardRequest::new(
-                    PaymentOptions::sum(
-                        1,
-                        &[ResourceType::MoodTokens, ResourceType::CultureTokens],
-                    ),
+                    PaymentOptions::tokens(1),
                     "Select a reward for fighting the Pirates".to_string(),
                 ))
             } else {
@@ -165,7 +162,7 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
         |event| &mut event.on_incident,
         BASE_EFFECT_PRIORITY + 5,
         |game, player_index, i| {
-            if !i.is_active(IncidentTarget::ActivePlayer, player_index) {
+            if !i.is_active(IncidentTarget::ActivePlayer, player_index, game) {
                 return None;
             }
 

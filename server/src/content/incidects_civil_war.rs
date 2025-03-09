@@ -8,7 +8,6 @@ use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions};
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
-use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{add_change_government, can_change_government_for_free};
 use crate::unit::UnitType;
@@ -140,7 +139,7 @@ fn revolution() -> Incident {
         "Kill a unit to avoid losing an action",
         |game, _player| can_loose_action(game),
     );
-    b = b.add_simple_incident_listener(IncidentTarget::ActivePlayer, 2, |game, player, _| {
+    b = b.add_simple_incident_listener(IncidentTarget::ActivePlayer, 2, |game, player, _, _| {
         if can_loose_action(game) && game.current_event_player().sacrifice == 0 {
             loose_action(game, player);
         }
@@ -229,7 +228,7 @@ fn uprising() -> Incident {
             0,
             |game, player_index, _incident| {
                 let player = game.get_player(player_index);
-                let mut cost = PaymentOptions::sum(4, &[ResourceType::MoodTokens, ResourceType::CultureTokens]);
+                let mut cost = PaymentOptions::tokens(4);
                 cost.conversions.push(PaymentConversion::new(
                     vec![ResourcePile::mood_tokens(1), ResourcePile::culture_tokens(1)],
                     ResourcePile::empty(),
@@ -258,7 +257,7 @@ fn envoy() -> Incident {
         .add_simple_incident_listener(
             IncidentTarget::ActivePlayer,
             1,
-            |game, player, player_name | {
+            |game, player, player_name, _| {
                 game.add_info_log_item(&format!("{player_name} gained 1 idea and 1 culture token"));
                 game.get_player_mut(player).gain_resources(
                     ResourcePile::culture_tokens(1) + ResourcePile::ideas(1));
@@ -274,7 +273,7 @@ fn envoy() -> Incident {
         )
         .add_incident_player_request(
             "Select a player to gain 1 culture token",
-            |_p| true,
+            |_p, _| true,
             0,
             |game, s| {
                 let p = s.choice;
