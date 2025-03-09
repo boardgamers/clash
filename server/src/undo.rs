@@ -54,7 +54,7 @@ impl CommandContext {
     }
 }
 
-const IGNORE_PATHS: [&str; 2] = ["/action_log/", "/log/"];
+const IGNORE_PATHS: [&str; 3] = ["/action_log/", "/action_log_index", "/log/"];
 
 pub(crate) fn clean_patch(mut patch: Vec<PatchOperation>) -> Vec<PatchOperation> {
     patch.retain(|op| {
@@ -69,8 +69,14 @@ pub(crate) fn undo(mut game: Game) -> Game {
     game.action_log_index -= 1;
     game.log.remove(game.log.len() - 1);
 
-    let item = game.action_log.last_mut().expect("should have action log");
+    let option = game.action_log.iter().rposition(|a| !a.undo.is_empty())
+        .expect("should have undoable action");
+
+    let item = game.action_log.get_mut(option).expect("should have undoable action");
+    // let item = game.action_log.last_mut().expect("should have action log");
+    // let item = &mut game.action_log[game.action_log_index - 1];
     let p = std::mem::take(&mut item.undo);
+    // let p = item.undo.clone();
 
     match &item.action {
         // Action::Playing(action) => {
@@ -85,7 +91,7 @@ pub(crate) fn undo(mut game: Game) -> Game {
 
     let mut v = to_serde_value(&game);
 
-    patch(&mut v, &p).unwrap_or_else(|e| panic!("could not patch game data: {e}"));
+    patch(&mut v, &p).expect("could not patch game data");
 
     game = Game::from_data(serde_json::from_value(v).expect("should be able to deserialize game"));
 
