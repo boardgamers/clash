@@ -94,7 +94,7 @@ pub(crate) fn move_units(
     let p = game.get_player(player_index);
     let from = p.get_unit(units[0]).position;
     let info = MoveInfo::new(player_index, units.to_vec(), from, to);
-    game.trigger_command_event(player_index, |e| &mut e.before_move, &info);
+    game.trigger_event_with_game_value(player_index, |e| &mut e.before_move,  &info, &());
 
     for unit_id in units {
         move_unit(game, player_index, *unit_id, to, embark_carrier_id);
