@@ -128,7 +128,8 @@ fn reformation() -> Incident {
             |game, p, name, _i| {
                 if has_temple(game, p) {
                     game.current_event_mut().selected_player = vec![p];
-                } else {
+                } else if game.players.iter().filter(
+                    |p|has_temple(game, p.index) && p.is_human()).count() > 1 {
                     game.add_info_log_item(&format!("{name} has no temples - and must select a player to execute the event"));
                 }
             },
@@ -141,7 +142,7 @@ fn reformation() -> Incident {
                 game.current_event().selected_player.is_empty() && has_temple(game, p.index),
             3,
             |game, s| {
-                game.current_event_mut().selected_player = vec![s.choice];
+                game.current_event_mut().selected_player.push(s.choice);
                 game.add_info_log_item(
                     &format!("{} selected {} to execute the event",
                              s.player_name, game.player_name(s.choice)));
@@ -154,7 +155,7 @@ fn reformation() -> Incident {
             |p, game| can_gain_temple(game, p),
             2,
             |game, s| {
-                game.current_event_mut().selected_player = vec![s.choice];
+                game.current_event_mut().selected_player.push(s.choice);
             },
         )
         .add_incident_position_request(

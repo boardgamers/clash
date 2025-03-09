@@ -417,9 +417,9 @@ fn possible_barbarians_reinforcements(game: &Game) -> Vec<Position> {
 
 fn get_barbarian_reinforcement_choices(game: &Game) -> Vec<UnitType> {
     let barbarian = get_barbarians_player(game);
-    let pos = get_barbarian_state(game)
-        .selected_position
-        .expect("selected position should exist");
+    let Some(pos) = get_barbarian_state(game).selected_position else {
+        return vec![];
+    };
     let possible = if barbarian
         .get_units(pos)
         .iter()

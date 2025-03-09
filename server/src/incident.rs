@@ -371,7 +371,7 @@ impl IncidentBuilder {
                     let choices = game
                         .players
                         .iter()
-                        .filter(|p| p.is_human() && player_pred(p, game) && p.index != player_index)
+                        .filter(|p| p.is_human() && p.index != player_index && player_pred(p, game))
                         .map(|p| p.index)
                         .collect_vec();
 
