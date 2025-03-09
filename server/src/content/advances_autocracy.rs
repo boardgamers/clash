@@ -35,10 +35,7 @@ fn nationalism() -> AdvanceBuilder {
                 .any(|u| u.is_army_unit() || u.is_ship())
             {
                 Some(ResourceRewardRequest::new(
-                    PaymentOptions::sum(
-                        1,
-                        &[ResourceType::MoodTokens, ResourceType::CultureTokens],
-                    ),
+                    PaymentOptions::tokens(1),
                     "Select token to gain".to_string(),
                 ))
             } else {

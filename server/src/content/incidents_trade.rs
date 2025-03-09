@@ -1,10 +1,14 @@
+use crate::ability_initializer::AbilityInitializerSetup;
 use crate::city_pieces::Building;
+use crate::content::custom_phase_actions::ResourceRewardRequest;
 use crate::incident::{Incident, IncidentBaseEffect};
+use crate::payment::PaymentOptions;
 use crate::player_events::IncidentTarget;
+use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn trades() -> Vec<Incident> {
-    vec![scientific_trade(), flourishing_trade()]
+    vec![scientific_trade(), flourishing_trade(), era_of_stability()]
 }
 
 fn scientific_trade() -> Incident {
@@ -15,7 +19,9 @@ fn scientific_trade() -> Incident {
         IncidentBaseEffect::PiratesSpawnAndRaid,
     )
         .add_simple_incident_listener(
-            IncidentTarget::AllPlayers, 0, |game, p, name, i| {
+            IncidentTarget::AllPlayers, 
+            0, 
+            |game, p, name, i| {
                 let player = game.get_player_mut(p);
                 let mut ideas = player
                     .cities
@@ -43,7 +49,9 @@ fn flourishing_trade() -> Incident {
         IncidentBaseEffect::PiratesSpawnAndRaid,
     )
         .add_simple_incident_listener(
-            IncidentTarget::AllPlayers, 0, |game, p, name, i| {
+            IncidentTarget::AllPlayers, 
+            0, 
+            |game, p, name, i| {
                 let player = game.get_player_mut(p);
                 let mut gold = player
                     .cities
@@ -65,4 +73,39 @@ fn flourishing_trade() -> Incident {
                 game.add_info_log_item(&format!("{name} gained {pile}"));
             }).build(
         )
+}
+
+fn era_of_stability() -> Incident {
+    Incident::builder(
+        47,
+        "Era of Stability",
+        "Every player gains an amount of mood or culture tokens equal to the number of cities that have a Temple or Obelisk (up to a maximum of 3). You gain at least 1 token.",
+        IncidentBaseEffect::ExhaustedLand,
+    )
+        .add_incident_resource_request(
+            IncidentTarget::AllPlayers, 
+            0, 
+            |game, p, i| {
+                let player = game.get_player(p);
+                let mut tokens = player
+                    .cities
+                    .iter()
+                    .filter(|c| {
+                        let b = c.pieces.buildings(None);
+                        b.contains(&Building::Temple) || b.contains(&Building::Obelisk)
+                    })
+                    .count();
+
+                tokens = tokens.min(3);
+
+                if i.active_player == p {
+                    tokens = tokens.max(1);
+                }
+                Some(ResourceRewardRequest::new(PaymentOptions::tokens(tokens as u32),
+                "Select token to gain".to_string()))
+            },
+            |game, s| {
+                vec![format!("{} gained {}", s.player_name, s.choice)]
+            },
+        ).build()
 }

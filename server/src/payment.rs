@@ -127,6 +127,14 @@ impl PaymentOptions {
     }
 
     #[must_use]
+    pub fn tokens(cost: u32) -> Self {
+        Self::sum(
+            cost,
+            &[ResourceType::MoodTokens, ResourceType::CultureTokens],
+        )
+    }
+
+    #[must_use]
     pub fn resources_with_discount(
         cost: ResourcePile,
         discount_type: PaymentConversionType,

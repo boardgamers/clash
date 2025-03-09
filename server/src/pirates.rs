@@ -60,10 +60,7 @@ pub(crate) fn pirates_bonus() -> Builtin {
                 .is_pirates()
             {
                 Some(ResourceRewardRequest::new(
-                    PaymentOptions::sum(
-                        1,
-                        &[ResourceType::MoodTokens, ResourceType::CultureTokens],
-                    ),
+                    PaymentOptions::tokens(1),
                     "Select a reward for fighting the Pirates".to_string(),
                 ))
             } else {

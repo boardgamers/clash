@@ -520,3 +520,31 @@ fn test_flourishing_trade() {
         )],
     );
 }
+
+#[test]
+fn test_era_of_stability() {
+    JSON.test(
+        "era_of_stability",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::gold(2),
+                }),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::Response(CurrentEventResponse::ResourceReward(
+                    ResourcePile::culture_tokens(1),
+                )),
+            ),
+            TestAction::not_undoable(
+                1,
+                Action::Response(CurrentEventResponse::ResourceReward(
+                    ResourcePile::culture_tokens(1),
+                )),
+            ),
+        ],
+    );
+}

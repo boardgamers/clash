@@ -229,7 +229,7 @@ fn uprising() -> Incident {
             0,
             |game, player_index, _incident| {
                 let player = game.get_player(player_index);
-                let mut cost = PaymentOptions::sum(4, &[ResourceType::MoodTokens, ResourceType::CultureTokens]);
+                let mut cost = PaymentOptions::tokens(4);
                 cost.conversions.push(PaymentConversion::new(
                     vec![ResourcePile::mood_tokens(1), ResourcePile::culture_tokens(1)],
                     ResourcePile::empty(),
