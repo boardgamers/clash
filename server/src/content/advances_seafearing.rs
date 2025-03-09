@@ -57,7 +57,7 @@ fn cartography() -> AdvanceBuilder {
         .add_player_event_listener(
             |event| &mut event.before_move,
             0,
-            |game,  i, _| {
+            |game,  i, ()| {
                 // info is the action that we last used this ability for
                 let key = game.actions_left.to_string();
                 if game.get_player(i.player).event_info.get("Cartography").is_some_and(|info| info == &key) {

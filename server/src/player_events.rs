@@ -8,7 +8,7 @@ use crate::game::Game;
 use crate::map::Terrain;
 use crate::payment::PaymentOptions;
 use crate::playing_actions::{PlayingActionType, Recruit};
-use crate::unit::Units;                          
+use crate::unit::Units;
 use crate::{
     city::City, city_pieces::Building, player::Player, position::Position,
     resource_pile::ResourcePile, wonder::Wonder,
@@ -220,4 +220,3 @@ impl InfluenceCultureInfo {
         self.possible = InfluenceCulturePossible::NoBoost;
     }
 }
-

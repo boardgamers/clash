@@ -34,11 +34,13 @@ fn public_education() -> AdvanceBuilder {
     .add_once_per_turn_listener(
         |event| &mut event.on_collect,
         |e| &mut e.info.info,
-        |i, game, _| {
+        |i, game, ()| {
             let player = game.get_player(game.active_player());
             if player.get_city(i.city).pieces.academy.is_some() {
                 i.total += ResourcePile::ideas(1);
-                i.info.log.push("Public Education gained 1 idea".to_string());
+                i.info
+                    .log
+                    .push("Public Education gained 1 idea".to_string());
             }
         },
         0,
@@ -107,9 +109,8 @@ fn philosophy() -> AdvanceBuilder {
                 .any(|a| a.name == advance.name)
             {
                 let player = game.get_player_mut(player_index);
-                    player.gain_resources(ResourcePile::ideas(1));
-                    game
-                        .add_info_log_item(&format!("{player_name} gained 1 idea from Philosophy"));
+                player.gain_resources(ResourcePile::ideas(1));
+                game.add_info_log_item(&format!("{player_name} gained 1 idea from Philosophy"));
             }
         },
     )

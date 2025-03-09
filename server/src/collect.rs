@@ -61,7 +61,12 @@ pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) {
     let city = game.players[player_index].get_city_mut(c.city_position);
     assert!(city.can_activate(), "Illegal action");
     city.activate();
-    let _ = game.get_player(player_index).events.on_collect.get().trigger(&mut i, game, &());
+    let _ = game
+        .get_player(player_index)
+        .events
+        .on_collect
+        .get()
+        .trigger(&mut i, game, &());
     i.info.execute(game);
     game.players[player_index].gain_resources(i.total.clone());
 }

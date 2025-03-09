@@ -10,9 +10,7 @@ use crate::events::{Event, EventOrigin};
 use crate::incident::PermanentIncidentEffect;
 use crate::movement::{CurrentMove, MoveState};
 use crate::pirates::get_pirates_player;
-use crate::player_events::{
-    CurrentEvent, CurrentEventInfo, PlayerEvents,
-};
+use crate::player_events::{CurrentEvent, CurrentEventInfo, PlayerEvents};
 use crate::resource::check_for_waste;
 use crate::status_phase::enter_status_phase;
 use crate::unit::UnitType;

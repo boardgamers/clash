@@ -4,7 +4,7 @@ use crate::content::custom_phase_actions::{
     StructuresRequest, UnitTypeRequest, UnitsRequest,
 };
 use crate::events::{Event, EventOrigin};
-use crate::player_events::{CurrentEvent};
+use crate::player_events::CurrentEvent;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;

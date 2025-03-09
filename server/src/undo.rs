@@ -4,7 +4,6 @@ use crate::resource::check_for_waste;
 use json_patch::{patch, PatchOperation};
 use serde_json::Value;
 
-
 const IGNORE_PATHS: [&str; 3] = ["/action_log/", "/action_log_index", "/log/"];
 
 pub(crate) fn clean_patch(mut patch: Vec<PatchOperation>) -> Vec<PatchOperation> {

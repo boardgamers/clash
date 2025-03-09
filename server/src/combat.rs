@@ -188,7 +188,7 @@ pub fn initiate_combat(
 pub(crate) fn start_combat(game: &mut Game) {
     game.lock_undo(); // combat should not be undoable
     stop_current_move(game);
-    
+
     let combat = get_combat(game);
     let attacker = combat.attacker;
     let defender = combat.defender;
