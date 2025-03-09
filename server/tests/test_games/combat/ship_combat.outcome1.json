@@ -299,7 +299,134 @@
             1
           ]
         }
-      }
+      },
+      "undo": [
+        {
+          "op": "add",
+          "path": "/current_events",
+          "value": [
+            {
+              "event_type": {
+                "CombatRoundEnd": {
+                  "attacker_casualties": {
+                    "carried_units": 1,
+                    "fighters": 1
+                  },
+                  "can_retreat": false,
+                  "defender_casualties": {
+                    "fighters": 1
+                  },
+                  "final_result": "AttackerWins"
+                }
+              },
+              "handler": {
+                "origin": {
+                  "Builtin": "Choose Casualties (carried units)"
+                },
+                "priority": 2,
+                "request": {
+                  "SelectUnits": {
+                    "choices": [
+                      2,
+                      22,
+                      1
+                    ],
+                    "description": "Remove 1 attacking units",
+                    "needed": {
+                      "end": 1,
+                      "start": 1
+                    },
+                    "player": 0
+                  }
+                }
+              },
+              "last_priority_used": 2,
+              "player": 0
+            }
+          ]
+        },
+        {
+          "op": "add",
+          "path": "/players/0/units/5/carried_units",
+          "value": [
+            {
+              "id": 2,
+              "unit_type": "Elephant"
+            },
+            {
+              "id": 22,
+              "unit_type": "Settler"
+            }
+          ]
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/units/5/id",
+          "value": 7
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/units/5/position",
+          "value": "C3"
+        },
+        {
+          "op": "add",
+          "path": "/players/0/units/6",
+          "value": {
+            "carried_units": [
+              {
+                "id": 1,
+                "unit_type": "Cavalry"
+              }
+            ],
+            "id": 8,
+            "movement_restrictions": [
+              "Battle"
+            ],
+            "position": "C3",
+            "unit_type": "Ship"
+          }
+        },
+        {
+          "op": "add",
+          "path": "/players/1/units/0",
+          "value": {
+            "id": 1,
+            "position": "D2",
+            "unit_type": "Ship"
+          }
+        },
+        {
+          "op": "add",
+          "path": "/state/1/Movement/current_move",
+          "value": {
+            "Fleet": {
+              "units": [
+                7,
+                8
+              ]
+            }
+          }
+        },
+        {
+          "op": "add",
+          "path": "/state/2",
+          "value": {
+            "Combat": {
+              "attacker": 0,
+              "attacker_position": "C3",
+              "attackers": [
+                7,
+                8
+              ],
+              "defender": 1,
+              "defender_position": "D2",
+              "retreat": "CanRetreat",
+              "round": 1
+            }
+          }
+        }
+      ]
     }
   ],
   "action_log_index": 2,
@@ -322,7 +449,7 @@
       "Attacker wins"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 1,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 6,

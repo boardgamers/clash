@@ -22,7 +22,7 @@ fn test_remove_casualties_attacker() {
                 0,
                 move_action(vec![0, 1, 2, 3], Position::from_offset("C1")),
             ),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Response(CurrentEventResponse::SelectUnits(vec![0, 1])),
             ),
@@ -119,7 +119,7 @@ fn test_retreat() {
         "retreat",
         vec![
             TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1"))),
-            TestAction::not_undoable(0, Action::Response(CurrentEventResponse::Bool(true))),
+            TestAction::undoable(0, Action::Response(CurrentEventResponse::Bool(true))),
         ],
     );
 }
@@ -141,7 +141,7 @@ fn test_ship_combat() {
         "ship_combat",
         vec![
             TestAction::not_undoable(0, move_action(vec![7, 8], Position::from_offset("D2"))),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Response(CurrentEventResponse::SelectUnits(vec![1])),
             ),
@@ -185,7 +185,7 @@ fn test_recruit_combat() {
                 0,
                 Action::Response(CurrentEventResponse::ResourceReward(ResourcePile::gold(1))),
             ),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Response(CurrentEventResponse::ResourceReward(
                     ResourcePile::culture_tokens(1),

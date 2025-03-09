@@ -225,7 +225,198 @@
             1
           ]
         }
-      }
+      },
+      "undo": [
+        {
+          "op": "add",
+          "path": "/current_events",
+          "value": [
+            {
+              "event_type": {
+                "CombatRoundEnd": {
+                  "attacker_casualties": {
+                    "fighters": 2
+                  },
+                  "can_retreat": false,
+                  "defender_casualties": {
+                    "fighters": 2
+                  },
+                  "final_result": "AttackerWins"
+                }
+              },
+              "handler": {
+                "origin": {
+                  "Builtin": "Choose Casualties"
+                },
+                "priority": 1,
+                "request": {
+                  "SelectUnits": {
+                    "choices": [
+                      0,
+                      1,
+                      2,
+                      3
+                    ],
+                    "description": "Remove 2 attacking units",
+                    "needed": {
+                      "end": 2,
+                      "start": 2
+                    },
+                    "player": 0
+                  }
+                }
+              },
+              "last_priority_used": 1,
+              "player": 0
+            }
+          ]
+        },
+        {
+          "op": "remove",
+          "path": "/players/0/cities/2"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/units/0/id",
+          "value": 0
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/units/0/position",
+          "value": "C2"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/units/0/unit_type",
+          "value": "Infantry"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/units/1/id",
+          "value": 1
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/units/1/position",
+          "value": "C2"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/units/1/unit_type",
+          "value": "Cavalry"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/units/2/id",
+          "value": 2
+        },
+        {
+          "op": "add",
+          "path": "/players/0/units/2/movement_restrictions",
+          "value": [
+            "Battle"
+          ]
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/units/2/unit_type",
+          "value": "Leader"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/units/3/id",
+          "value": 3
+        },
+        {
+          "op": "add",
+          "path": "/players/0/units/3/movement_restrictions",
+          "value": [
+            "Battle"
+          ]
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/units/3/unit_type",
+          "value": "Elephant"
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/units/4/id",
+          "value": 4
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/units/5/id",
+          "value": 5
+        },
+        {
+          "op": "add",
+          "path": "/players/0/units/6",
+          "value": {
+            "id": 6,
+            "position": "C2",
+            "unit_type": "Settler"
+          }
+        },
+        {
+          "op": "add",
+          "path": "/players/0/units/7",
+          "value": {
+            "id": 7,
+            "position": "C2",
+            "unit_type": "Settler"
+          }
+        },
+        {
+          "op": "add",
+          "path": "/players/1/cities/0",
+          "value": {
+            "activations": 2,
+            "angry_activation": false,
+            "city_pieces": {},
+            "mood_state": "Angry",
+            "position": "C1"
+          }
+        },
+        {
+          "op": "add",
+          "path": "/players/1/units/0",
+          "value": {
+            "id": 0,
+            "position": "C1",
+            "unit_type": "Infantry"
+          }
+        },
+        {
+          "op": "add",
+          "path": "/players/1/units/1",
+          "value": {
+            "id": 1,
+            "position": "C1",
+            "unit_type": "Infantry"
+          }
+        },
+        {
+          "op": "add",
+          "path": "/state/2",
+          "value": {
+            "Combat": {
+              "attacker": 0,
+              "attacker_position": "C2",
+              "attackers": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "defender": 1,
+              "defender_position": "C1",
+              "retreat": "CanRetreat",
+              "round": 1
+            }
+          }
+        }
+      ]
     }
   ],
   "action_log_index": 2,
@@ -247,7 +438,7 @@
       "Player1 could not store 1 gold"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 1,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 1,

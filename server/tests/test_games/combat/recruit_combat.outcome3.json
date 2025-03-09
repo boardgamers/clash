@@ -304,7 +304,73 @@
             "culture_tokens": 1
           }
         }
-      }
+      },
+      "undo": [
+        {
+          "op": "add",
+          "path": "/current_events",
+          "value": [
+            {
+              "event_type": {
+                "CombatEnd": "AttackerWins"
+              },
+              "handler": {
+                "origin": {
+                  "Builtin": "Barbarians bonus"
+                },
+                "priority": 3,
+                "request": {
+                  "ResourceReward": {
+                    "name": "Select a reward for fighting the Pirates",
+                    "reward": {
+                      "conversions": [
+                        {
+                          "from": [
+                            {
+                              "mood_tokens": 1
+                            }
+                          ],
+                          "to": {
+                            "culture_tokens": 1
+                          },
+                          "type": "Unlimited"
+                        }
+                      ],
+                      "default": {
+                        "mood_tokens": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "last_priority_used": 3,
+              "player": 0
+            }
+          ]
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/culture_tokens",
+          "value": 10
+        },
+        {
+          "op": "add",
+          "path": "/state/1",
+          "value": {
+            "Combat": {
+              "attacker": 0,
+              "attacker_position": "C2",
+              "attackers": [
+                12
+              ],
+              "defender": 2,
+              "defender_position": "C3",
+              "retreat": "CannotRetreat",
+              "round": 1
+            }
+          }
+        }
+      ]
     }
   ],
   "action_log_index": 4,
@@ -338,7 +404,7 @@
       "Player1 gained 1 culture token for fighting the Pirates"
     ]
   ],
-  "undo_limit": 4,
+  "undo_limit": 3,
   "actions_left": 1,
   "successful_cultural_influence": false,
   "round": 6,

@@ -295,7 +295,44 @@
             "destination": "B2"
           }
         }
-      }
+      },
+      "undo": [
+        {
+          "op": "remove",
+          "path": "/players/0/cities/4"
+        },
+        {
+          "op": "remove",
+          "path": "/players/0/units/5/carried_units/0/movement_restrictions"
+        },
+        {
+          "op": "remove",
+          "path": "/players/0/units/6/carried_units/0/movement_restrictions"
+        },
+        {
+          "op": "add",
+          "path": "/players/1/cities/1",
+          "value": {
+            "activations": 0,
+            "angry_activation": false,
+            "city_pieces": {
+              "port": 1
+            },
+            "mood_state": "Neutral",
+            "port_position": "C3",
+            "position": "B2"
+          }
+        },
+        {
+          "op": "replace",
+          "path": "/state/1/Movement/movement_actions_left",
+          "value": 2
+        },
+        {
+          "op": "remove",
+          "path": "/state/1/Movement/moved_units"
+        }
+      ]
     }
   ],
   "action_log_index": 1,
@@ -305,7 +342,7 @@
       "Player1 could not store 2 gold"
     ]
   ],
-  "undo_limit": 1,
+  "undo_limit": 0,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 6,
