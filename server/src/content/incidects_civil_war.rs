@@ -274,7 +274,7 @@ fn envoy() -> Incident {
         )
         .add_incident_player_request(
             "Select a player to gain 1 culture token",
-            |_p| true,
+            |_p, _, _| true,
             0,
             |game, s| {
                 let p = s.choice;

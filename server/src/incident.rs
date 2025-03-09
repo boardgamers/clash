@@ -356,7 +356,7 @@ impl IncidentBuilder {
     pub(crate) fn add_incident_player_request(
         self,
         description: &str,
-        player_pred: impl Fn(&Player) -> bool + 'static + Clone,
+        player_pred: impl Fn(&Player, &Game, &IncidentInfo) -> bool + 'static + Clone,
         priority: i32,
         gain_reward: impl Fn(&mut Game, &SelectedChoice<usize, IncidentInfo>) + 'static + Clone,
     ) -> Self {
@@ -370,7 +370,9 @@ impl IncidentBuilder {
                     let choices = game
                         .players
                         .iter()
-                        .filter(|p| p.is_human() && player_pred(p) && p.index != player_index)
+                        .filter(|p| {
+                            p.is_human() && player_pred(p, game, i) && p.index != player_index
+                        })
                         .map(|p| p.index)
                         .collect_vec();
 

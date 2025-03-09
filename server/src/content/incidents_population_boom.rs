@@ -22,7 +22,7 @@ fn population_boom(id: u8, effect: IncidentBaseEffect) -> Incident {
 pub(crate) fn select_player_to_gain_settler(mut b: IncidentBuilder) -> IncidentBuilder {
     b = b.add_incident_player_request(
         "Select a player to gain 1 settler",
-        |p| p.available_units().settlers > 0 && !p.cities.is_empty(),
+        |p, _, _| p.available_units().settlers > 0 && !p.cities.is_empty(),
         12,
         |game, c| {
             game.add_info_log_item(&format!(
