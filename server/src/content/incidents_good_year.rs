@@ -142,7 +142,7 @@ fn good_year(mut builder: IncidentBuilder, amount: u32, good_year_type: &GoodYea
             builder = builder.add_incident_player_request(
                 IncidentTarget::ActivePlayer,
                 "Select a player to gain 1 food",
-                |p, _, _| p.resources.food < p.resource_limit.food,
+                |p, _| p.resources.food < p.resource_limit.food,
                 i as i32,
                 move |game, c| {
                     game.add_info_log_item(&format!(

@@ -187,8 +187,8 @@ pub struct CurrentEventState {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub barbarians: Option<BarbariansEventState>,
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub selected_player: Option<usize>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub selected_player: Vec<usize>,
 }
 
 impl CurrentEventState {
@@ -198,7 +198,7 @@ impl CurrentEventState {
             players_used: vec![],
             player: CurrentEventPlayer::new(current_player),
             barbarians: None,
-            selected_player: None,
+            selected_player: Vec::new(),
             event_type,
         }
     }

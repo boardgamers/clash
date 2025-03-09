@@ -1,7 +1,6 @@
 use crate::content::custom_phase_actions::new_position_request;
-use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
-use crate::player_events::{IncidentInfo, IncidentTarget};
+use crate::player_events::IncidentTarget;
 use crate::unit::UnitType;
 
 pub(crate) fn population_booms() -> Vec<Incident> {
@@ -21,26 +20,22 @@ pub(crate) fn select_player_to_gain_settler(mut b: IncidentBuilder) -> IncidentB
     b = b.add_incident_player_request(
         IncidentTarget::ActivePlayer,
         "Select a player to gain 1 settler",
-        |p, _, _| p.available_units().settlers > 0 && !p.cities.is_empty(),
+        |p, _| p.available_units().settlers > 0 && !p.cities.is_empty(),
         12,
         |game, c| {
             game.add_info_log_item(&format!(
                 "{} was selected to gain 1 settler.",
                 game.player_name(c.choice)
             ));
-            game.current_event_mut().selected_player = Some(c.choice);
+            game.current_event_mut().selected_player = vec![c.choice];
         },
     );
     select_settler(b, 11, IncidentTarget::SelectedPlayer)
 }
 
-fn select_settler(
-    b: IncidentBuilder,
-    priority: i32,
-    target: IncidentTarget,
-) -> IncidentBuilder {
+fn select_settler(b: IncidentBuilder, priority: i32, target: IncidentTarget) -> IncidentBuilder {
     b.add_incident_position_request(
-        IncidentTarget::AllPlayers,
+        target,
         priority,
         move |game, player_index, _| {
             let p = game.get_player(player_index);

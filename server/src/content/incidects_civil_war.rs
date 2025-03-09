@@ -8,7 +8,6 @@ use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions};
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
-use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{add_change_government, can_change_government_for_free};
 use crate::unit::UnitType;
@@ -275,7 +274,7 @@ fn envoy() -> Incident {
         .add_incident_player_request(
             IncidentTarget::ActivePlayer,
             "Select a player to gain 1 culture token",
-            |_p, _, _| true,
+            |_p, _| true,
             0,
             |game, s| {
                 let p = s.choice;
