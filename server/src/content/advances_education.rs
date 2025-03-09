@@ -69,19 +69,21 @@ fn free_education() -> AdvanceBuilder {
                 None
             }
         },
-        |game, payment| {
-            payment.to_commands(game, |c, _game, payment| {
-                let pile = &payment[0];
-                if pile.is_empty() {
-                    c.add_info_log_item(&format!("{} declined to pay for free education", c.name));
-                    return;
-                }
-                c.add_info_log_item(&format!(
-                    "{} paid {} for free education to gain 1 mood token",
-                    c.name, pile
+        |game, s| {
+            let pile = &s.choice[0];
+            if pile.is_empty() {
+                game.add_info_log_item(&format!(
+                    "{} declined to pay for free education",
+                    s.player_name
                 ));
-                c.gain_resources(ResourcePile::mood_tokens(1));
-            });
+                return;
+            }
+            game.add_info_log_item(&format!(
+                "{} paid {} for free education to gain 1 mood token",
+                s.player_name, pile
+            ));
+            game.get_player_mut(s.player_index)
+                .gain_resources(ResourcePile::mood_tokens(1));
         },
     )
 }
@@ -103,11 +105,10 @@ fn philosophy() -> AdvanceBuilder {
                 .iter()
                 .any(|a| a.name == advance.name)
             {
-                game.with_commands(player_index, |player, _game| {
+                let player = game.get_player_mut(player_index);
                     player.gain_resources(ResourcePile::ideas(1));
-                    player
+                    game
                         .add_info_log_item(&format!("{player_name} gained 1 idea from Philosophy"));
-                });
             }
         },
     )

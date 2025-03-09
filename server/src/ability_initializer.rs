@@ -38,16 +38,6 @@ impl<'a, C, V> SelectedChoice<'a, C, V> {
             details,
         }
     }
-
-    pub(crate) fn to_commands(
-        &self,
-        game: &mut Game,
-        gain: impl Fn(&mut PlayerCommands, &Game, &C) + 'static + Clone,
-    ) {
-        game.with_commands(self.player_index, |commands, game| {
-            gain(commands, game, &self.choice);
-        });
-    }
 }
 
 pub struct AbilityListeners {
