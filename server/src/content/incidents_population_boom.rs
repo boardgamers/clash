@@ -18,7 +18,6 @@ fn population_boom(id: u8, effect: IncidentBaseEffect) -> Incident {
 
 pub(crate) fn select_player_to_gain_settler(mut b: IncidentBuilder) -> IncidentBuilder {
     b = b.add_incident_player_request(
-        IncidentTarget::ActivePlayer,
         "Select a player to gain 1 settler",
         |p, _| p.available_units().settlers > 0 && !p.cities.is_empty(),
         12,
@@ -27,7 +26,7 @@ pub(crate) fn select_player_to_gain_settler(mut b: IncidentBuilder) -> IncidentB
                 "{} was selected to gain 1 settler.",
                 game.player_name(c.choice)
             ));
-            game.current_event_mut().selected_player = vec![c.choice];
+            game.current_event_mut().selected_player = Some(c.choice);
         },
     );
     select_settler(b, 11, IncidentTarget::SelectedPlayer)

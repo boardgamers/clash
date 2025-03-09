@@ -204,9 +204,9 @@ pub(crate) fn anarchy_advance() -> Builtin {
                     return;
                 }
 
-                if let Some(PermanentIncidentEffect::Anarchy(mut a)) = remove_element_by(&mut game
+                if let Some(mut a) = remove_element_by(&mut game
                     .permanent_incident_effects,
-                    |e| matches!(e, PermanentIncidentEffect::Anarchy(_)))
+                    |e| if let PermanentIncidentEffect::Anarchy(a) = e { Some(a.clone()) } else { None })
                 {
                     if player_index == a.player {
                         game.add_info_log_item(&format!(

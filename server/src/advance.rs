@@ -200,7 +200,7 @@ pub(crate) fn gain_advance(game: &mut Game, player_index: usize, info: &AdvanceI
     player.incident_tokens -= 1;
     if player.incident_tokens == 0 {
         player.incident_tokens = 3;
-        trigger_incident(game, player_index, &IncidentInfo::new(player_index));
+        trigger_incident(game, IncidentInfo::new(player_index));
     }
 }
 

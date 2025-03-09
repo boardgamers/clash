@@ -2,7 +2,7 @@ use crate::city::City;
 use crate::city_pieces::Building;
 use crate::content::custom_phase_actions::{new_position_request, ResourceRewardRequest};
 use crate::game::Game;
-use crate::incident::{Incident, IncidentBaseEffect};
+use crate::incident::{Incident, IncidentBaseEffect, PassedIncident, PermanentIncidentEffect};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
@@ -125,24 +125,30 @@ fn reformation() -> Incident {
         .add_simple_incident_listener(
             IncidentTarget::ActivePlayer,
             4,
-            |game, p, name, _i| {
+            |game, p, player_name, _i| {
+                // if game.permanent_incident_effects.iter().any(
+                //     |e| matches!(e, PermanentIncidentEffect::PassedIncident(PassedIncident::AlreadyPassed))) {
+                //     // can't pass the event again
+                //     return;
+                // }
+
                 if has_temple(game, p) {
-                    game.current_event_mut().selected_player = vec![p];
+                    game.current_event_mut().selected_player = Some(p);
                 } else if game.players.iter().filter(
-                    |p|has_temple(game, p.index) && p.is_human()).count() > 1 {
-                    game.add_info_log_item(&format!("{name} has no temples - and must select a player to execute the event"));
+                    |p| has_temple(game, p.index) && p.is_human()).count() > 1 {
+                    game.add_info_log_item(&format!("{player_name} has no temples - and must select a player to execute the event"));
                 }
             },
         )
         // select a player to execute the incident
         .add_incident_player_request(
-            IncidentTarget::ActivePlayer,
             "Select a player to execute the event",
-            |p, game|
-                game.current_event().selected_player.is_empty() && has_temple(game, p.index),
+            |p, game| has_temple(game, p.index) && game.current_event().selected_player.is_none(),
             3,
             |game, s| {
-                game.current_event_mut().selected_player.push(s.choice);
+                // pass the event to the player itself
+                game.permanent_incident_effects.push(PermanentIncidentEffect::PassedIncident(
+                    PassedIncident::NewPlayer(s.choice)));
                 game.add_info_log_item(
                     &format!("{} selected {} to execute the event",
                              s.player_name, game.player_name(s.choice)));
@@ -150,21 +156,20 @@ fn reformation() -> Incident {
         )
         // select a player to gain a temple
         .add_incident_player_request(
-            IncidentTarget::SelectedPlayer,
             "Select a player to gain a Temple",
             |p, game| can_gain_temple(game, p),
             2,
             |game, s| {
-                game.current_event_mut().selected_player.push(s.choice);
+                game.current_event_mut().selected_player = Some(s.choice);
             },
         )
         .add_incident_position_request(
             IncidentTarget::SelectedPlayer,
             1,
-            |game, _p, _i| {
-                let d = get_temple_donor(game);
-                let choices = game.get_player(d).cities.iter()
-                    .filter(|c|city_has_temple(c, d))
+            |game, _p, i| {
+                let donor = i.active_player;
+                let choices = game.get_player(donor).cities.iter()
+                    .filter(|c| city_has_temple(c, donor))
                     .map(|c| c.position).collect();
                 Some(new_position_request(
                     choices,
@@ -173,22 +178,17 @@ fn reformation() -> Incident {
                 ))
             },
             |game, s| {
-                let d = get_temple_donor(game);
-                let d = game.get_player_mut(d);
+                let donor = game.get_player_mut(s.details.active_player);
                 let pos = s.choice[0];
-                d.get_city_mut(pos).pieces.set_building(Building::Temple, s.player_index);
-                let donor = d.get_name();
+                donor.get_city_mut(pos).pieces.set_building(Building::Temple, s.player_index);
+                let donor_name = donor.get_name();
                 game.add_info_log_item(&format!(
-                    "{} gained a Temple from {donor} in {pos}",
+                    "{} gained a Temple from {donor_name} in {pos}",
                     s.player_name,
                 ));
             },
         )
         .build()
-}
-
-fn get_temple_donor(game: &mut Game) -> usize {
-    game.current_event().selected_player[0]
 }
 
 fn has_temple(game: &Game, player: usize) -> bool {

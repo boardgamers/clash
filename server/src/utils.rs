@@ -24,15 +24,23 @@ where
     None
 }
 
-pub fn remove_element_by<T, F>(list: &mut Vec<T>, f: F) -> Option<T>
+pub fn remove_element_by<F, T, U>(list: &mut Vec<T>, f: F) -> Option<U>
 where
-    F: Fn(&T) -> bool,
+    F: Fn(&T) -> Option<U>,
 {
-    let index = list.iter().position(f);
+    let mut u: Option<U> = None;
+    let index = list.iter().position(|e| {
+        let option = f(e);
+        if option.is_some() {
+            u = option;
+            return true
+        }
+        false
+    });
     if let Some(index) = index {
-        return Some(list.remove(index));
+        list.remove(index);
     }
-    None
+    u
 }
 
 pub fn ordinal_number(value: u32) -> String {

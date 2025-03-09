@@ -7,7 +7,7 @@ use crate::content::custom_phase_actions::{
     new_position_request, ResourceRewardRequest, UnitTypeRequest,
 };
 use crate::game::Game;
-use crate::incident::{IncidentBuilder, BASE_EFFECT_PRIORITY};
+use crate::incident::{play_base_effect, IncidentBuilder, BASE_EFFECT_PRIORITY};
 use crate::map::Terrain;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
@@ -314,7 +314,7 @@ pub(crate) fn set_info(
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY + 200,
         move |game, player, _, _| {
-            if game.current_event().barbarians.is_none() {
+            if play_base_effect(game) && game.current_event().barbarians.is_none() {
                 game.add_info_log_item(&format!("Base effect: {name}"));
                 let mut state = BarbariansEventState::new();
                 init(&mut state, game, player);

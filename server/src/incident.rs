@@ -18,7 +18,7 @@ use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::play_status_phase;
 use crate::unit::UnitType;
-use crate::utils::Shuffle;
+use crate::utils::{remove_element_by, Shuffle};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -91,6 +91,12 @@ pub struct Anarchy {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+pub enum PassedIncident {
+    NewPlayer(usize),
+    AlreadyPassed,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum PermanentIncidentEffect {
     Pestilence,
     LooseAction(usize),
@@ -98,6 +104,7 @@ pub enum PermanentIncidentEffect {
     TrojanHorse,
     SolarEclipse,
     Anarchy(Anarchy),
+    PassedIncident(PassedIncident),
 }
 
 #[derive(Clone)]
@@ -355,13 +362,12 @@ impl IncidentBuilder {
     #[must_use]
     pub(crate) fn add_incident_player_request(
         self,
-        target: IncidentTarget,
         description: &str,
         player_pred: impl Fn(&Player, &Game) -> bool + 'static + Clone,
         priority: i32,
         gain_reward: impl Fn(&mut Game, &SelectedChoice<usize, IncidentInfo>) + 'static + Clone,
     ) -> Self {
-        let f = self.new_filter(target, priority);
+        let f = self.new_filter(IncidentTarget::ActivePlayer, priority);
         let d = description.to_string();
         self.add_player_request(
             |event| &mut event.on_incident,
@@ -440,7 +446,7 @@ impl AbilityInitializerSetup for IncidentBuilder {
     }
 }
 
-pub(crate) fn trigger_incident(game: &mut Game, player_index: usize, info: &IncidentInfo) {
+pub(crate) fn trigger_incident(game: &mut Game, mut info: IncidentInfo) {
     game.lock_undo(); // new information is revealed
 
     if game.incidents_left.is_empty() {
@@ -451,25 +457,72 @@ pub(crate) fn trigger_incident(game: &mut Game, player_index: usize, info: &Inci
     let id = *game.incidents_left.first().expect("incident should exist");
     let incident = incidents::get_incident(id);
 
-    game.trigger_current_event_with_listener(
-        &game.human_players(player_index),
-        |events| &mut events.on_incident,
-        &incident.listeners,
-        info,
-        CurrentEventType::Incident,
-        Some(&format!(
-            "A new game event has been triggered: {}",
-            incident.name
-        )),
-    );
+    loop {
+        if game.trigger_current_event_with_listener(
+            &game.human_players(info.active_player),
+            |events| &mut events.on_incident,
+            &incident.listeners,
+            &info,
+            CurrentEventType::Incident,
+            play_base_effect(game).then_some(&format!(
+                "A new game event has been triggered: {}",
+                incident.name
+            )),
+        ) {
+            return;
+        }
 
-    if game.current_events.is_empty() {
-        game.incidents_left.remove(0);
-
-        if matches!(game.state(), GameState::StatusPhase(_)) {
-            play_status_phase(game);
+        if game.current_events.is_empty() {
+            if let Some(p) = passed_to_player(game, info.active_player) {
+                info.active_player = p;
+                game.permanent_incident_effects
+                    .push(PermanentIncidentEffect::PassedIncident(
+                        PassedIncident::AlreadyPassed,
+                    ));
+                continue;
+            }
+            break;
         }
     }
+
+    game.incidents_left.remove(0);
+
+    remove_element_by(&mut game.permanent_incident_effects, |e| {
+        matches!(
+            e,
+            PermanentIncidentEffect::PassedIncident(PassedIncident::AlreadyPassed)
+        )
+        .then_some(true)
+    });
+
+    if matches!(game.state(), GameState::StatusPhase(_)) {
+        play_status_phase(game);
+    }
+}
+
+pub(crate) fn play_base_effect(game: &Game) -> bool {
+    !game.permanent_incident_effects
+        .iter()
+        .any(|e| matches!(e, PermanentIncidentEffect::PassedIncident(_)))
+}
+
+fn passed_to_player(game: &mut Game, player_index: usize) -> Option<usize> {
+    let p = remove_element_by(&mut game.permanent_incident_effects, |e| {
+        if let PermanentIncidentEffect::PassedIncident(PassedIncident::NewPlayer(p)) = e {
+            Some(*p)
+        } else {
+            None
+        }
+    });
+
+    if let Some(p) = p {
+        game.add_info_log_item(&format!(
+            "Player {} has passed the incident to {}",
+            game.player_name(player_index),
+            game.player_name(p)
+        ));
+    }
+    p
 }
 
 #[must_use]
@@ -485,9 +538,9 @@ pub fn is_active(
         return false;
     }
     if priority >= BASE_EFFECT_PRIORITY {
-        // protection advance does not protect against base effects
-        return true;
+        return play_base_effect(game);
     }
+    // protection advance does not protect against base effects
     if let Some(advance) = &protection_advance {
         if game.players[player].has_advance(advance) {
             return false;
