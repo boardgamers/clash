@@ -27,6 +27,8 @@ pub(crate) fn move_to_unexplored_tile(
     start: Position,
     destination: Position,
 ) -> bool {
+    game.lock_undo(); // tile is revealed, so we can't undo the move
+    
     for b in &game.map.unexplored_blocks.clone() {
         for (position, _tile) in b.block.tiles(&b.position, b.position.rotation) {
             if position == destination {
@@ -60,7 +62,6 @@ pub(crate) fn move_to_unexplored_block(
     let ship_explore = is_any_ship(game, player_index, units);
 
     let instant_explore = |game: &mut Game, rotation: Rotation, ship_can_teleport| {
-        game.lock_undo();
         move_to_explored_tile(
             game,
             move_to,
@@ -122,7 +123,6 @@ pub(crate) fn move_to_unexplored_block(
         return instant_explore(game, rotation, false);
     }
 
-    game.lock_undo();
     let start = game.get_player(player_index).get_unit(units[0]).position;
 
     let resolution_state = ExploreResolutionState {

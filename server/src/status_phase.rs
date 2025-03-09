@@ -55,7 +55,6 @@ pub(crate) fn enter_status_phase(game: &mut Game) {
 
 pub(crate) fn play_status_phase(game: &mut Game) {
     use StatusPhaseState::*;
-    game.lock_undo();
 
     loop {
         let StatusPhase(phase) = game.state().clone() else {

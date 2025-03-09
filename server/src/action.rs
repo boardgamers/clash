@@ -88,7 +88,7 @@ pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Ga
     let new_player = game.active_player();
     let patch = json_patch::diff(&new, &old);
     if old_player != new_player {
-        game.lock_undo();
+        game.lock_undo(); // don't undo player change
     } else if add_undo && game.can_undo() {
         game.action_log[game.action_log_index - 1].undo = clean_patch(patch.0);
     }
@@ -153,7 +153,6 @@ pub(crate) fn execute_custom_phase_action(
             start_combat(game);
         }
         CombatRoundEnd(r) => {
-            game.lock_undo();
             if let Some(c) = combat_round_end(game, r) {
                 combat_loop(game, c);
             }
@@ -285,6 +284,7 @@ pub(crate) fn execute_movement_action(
                     m.destination,
                 );
                 stop_current_move(game);
+                // todo should stop move if not in explore state
                 return; // can't undo this action
             }
 

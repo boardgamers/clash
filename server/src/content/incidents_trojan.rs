@@ -209,7 +209,6 @@ pub(crate) fn anarchy_advance() -> Builtin {
                     |e| matches!(e, PermanentIncidentEffect::Anarchy(_)))
                 {
                     if player_index == a.player {
-                        game.lock_undo(); // until generic undo is implemented
                         game.add_info_log_item(&format!(
                             "{player_name} gained a government advance, taking a game event token instead of triggering a game event (and losing 1 victory point)",
                         ));

@@ -553,8 +553,6 @@ impl Game {
         }
         self.successful_cultural_influence = false;
 
-        self.lock_undo();
-
         self.start_turn();
     }
 
@@ -652,7 +650,6 @@ impl Game {
     pub fn next_age(&mut self) {
         self.age += 1;
         self.current_player_index = self.starting_player_index;
-        self.lock_undo();
         self.push_state(GameState::Playing);
         self.add_info_log_group(format!("Age {} has started", self.age));
         self.add_info_log_group(String::from("Round 1/3"));
@@ -672,7 +669,7 @@ impl Game {
     }
 
     pub(crate) fn get_next_dice_roll(&mut self) -> CombatDieRoll {
-        self.lock_undo();
+        self.lock_undo(); // dice rolls are not undoable
         let dice_roll = if self.dice_roll_outcomes.is_empty() {
             self.rng.range(0, 12) as u8
         } else {

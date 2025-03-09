@@ -91,7 +91,6 @@ impl AbilityInitializerSetup for WonderBuilder {
 }
 
 pub(crate) fn draw_wonder_card(game: &mut Game, player_index: usize) {
-    game.lock_undo();
     game.trigger_current_event(
         &[player_index],
         |e| &mut e.on_draw_wonder_card,
@@ -105,13 +104,13 @@ pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<Wonder> {
     if game.wonder_amount_left == 0 {
         return None;
     }
+    game.lock_undo(); // new information is revealed
     game.wonder_amount_left -= 1;
     game.wonders_left.pop()
 }
 
 fn gain_wonder(game: &mut Game, player_index: usize, wonder: Wonder) {
     game.players[player_index].wonder_cards.push(wonder);
-    game.lock_undo();
 }
 
 pub(crate) fn on_draw_wonder_card() -> Builtin {
