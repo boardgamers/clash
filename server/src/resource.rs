@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
-use std::fmt;
+use std::{fmt, mem};
+use crate::game::Game;
+use crate::resource_pile::ResourcePile;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Copy, Hash, Ord, PartialOrd)]
 pub enum ResourceType {
@@ -45,5 +47,19 @@ impl ResourceType {
 impl fmt::Display for ResourceType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{self:?}")
+    }
+}
+
+pub(crate) fn check_for_waste(game: &mut Game) {
+    let map: Vec<usize> = game.players.iter().map(|p| p.index).collect();
+    for p in map {
+        let wasted_resources =
+            mem::replace(&mut game.players[p].wasted_resources, ResourcePile::empty());
+        if !wasted_resources.is_empty() {
+            game.add_info_log_item(&format!(
+                "{} could not store {wasted_resources}",
+                game.player_name(p)
+            ));
+        }
     }
 }

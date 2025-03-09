@@ -24,6 +24,7 @@ use crate::unit::{get_current_move, MovementAction};
 use crate::wonder::draw_wonder_card;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use crate::resource::check_for_waste;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum Action {
@@ -120,6 +121,7 @@ fn execute_without_undo(mut game: Game, action: Action, player_index: usize) -> 
     } else {
         execute_regular_action(&mut game, action, player_index);
     }
+    check_for_waste(&mut game);
     game
 }
 

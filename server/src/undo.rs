@@ -69,21 +69,19 @@ pub(crate) fn undo(mut game: Game) -> Game {
     game.action_log_index -= 1;
     game.log.remove(game.log.len() - 1);
 
-    let option = game.action_log.iter().rposition(|a| !a.undo.is_empty())
+    let option = game
+        .action_log
+        .iter()
+        .rposition(|a| !a.undo.is_empty())
         .expect("should have undoable action");
 
-    let item = game.action_log.get_mut(option).expect("should have undoable action");
-    // let item = game.action_log.last_mut().expect("should have action log");
-    // let item = &mut game.action_log[game.action_log_index - 1];
+    let item = game
+        .action_log
+        .get_mut(option)
+        .expect("should have undoable action");
     let p = std::mem::take(&mut item.undo);
-    // let p = item.undo.clone();
 
     match &item.action {
-        // Action::Playing(action) => {
-        //     if !action.action_type().free {
-        //         game.actions_left += 1;
-        //     }
-        // }
         Action::Undo => panic!("undo action can't be undone"),
         Action::Redo => panic!("redo action can't be undone"),
         _ => {}
@@ -93,9 +91,7 @@ pub(crate) fn undo(mut game: Game) -> Game {
 
     patch(&mut v, &p).expect("could not patch game data");
 
-    game = Game::from_data(serde_json::from_value(v).expect("should be able to deserialize game"));
-
-    game
+    Game::from_data(serde_json::from_value(v).expect("should be able to deserialize game"))
 }
 
 pub(crate) fn to_serde_value(game: &Game) -> Value {
