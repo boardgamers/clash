@@ -33,11 +33,12 @@ fn public_education() -> AdvanceBuilder {
     .with_advance_bonus(MoodToken)
     .add_once_per_turn_listener(
         |event| &mut event.on_collect,
-        |e| &mut e.content.info,
-        |player, game, pos| {
-            if game.get_city(player.index, *pos).pieces.academy.is_some() {
-                player.gain_resources(ResourcePile::ideas(1));
-                player.add_info_log_item("Public Education gained 1 idea");
+        |e| &mut e.info.info,
+        |i, game, _| {
+            let player = game.get_player(game.active_player());
+            if player.get_city(i.city).pieces.academy.is_some() {
+                i.total += ResourcePile::ideas(1);
+                i.info.log.push("Public Education gained 1 idea".to_string());
             }
         },
         0,

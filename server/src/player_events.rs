@@ -27,7 +27,7 @@ pub(crate) struct PlayerEvents {
     pub on_construct: CurrentEvent<Building>,
     pub on_construct_wonder: Event<Player, Position, Wonder>,
     pub on_draw_wonder_card: CurrentEvent,
-    pub on_collect: PlayerCommandEvent<Position>,
+    pub on_collect: Event<CollectInfo, Game>,
     pub on_advance: CurrentEvent<AdvanceInfo>,
     pub on_recruit: CurrentEvent<Recruit>,
     pub on_influence_culture_attempt: Event<InfluenceCultureInfo, City, Game>,

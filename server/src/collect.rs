@@ -56,16 +56,14 @@ pub fn get_total_collection(
 }
 
 pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) {
-    let i = get_total_collection(game, player_index, c.city_position, &c.collections)
+    let mut i = get_total_collection(game, player_index, c.city_position, &c.collections)
         .expect("Illegal action");
     let city = game.players[player_index].get_city_mut(c.city_position);
     assert!(city.can_activate(), "Illegal action");
     city.activate();
+    let _ = game.get_player(player_index).events.on_collect.get().trigger(&mut i, game, &());
+    i.info.execute(game);
     game.players[player_index].gain_resources(i.total.clone());
-    i.info.execute_with_options(game, |c| {
-        c.gained_resources = i.total.clone();
-    });
-    game.trigger_command_event(player_index, |e| &mut e.on_collect, &c.city_position);
 }
 
 pub(crate) struct CollectContext {
@@ -79,6 +77,7 @@ pub(crate) struct CollectContext {
 pub struct CollectInfo {
     pub choices: HashMap<Position, HashSet<ResourcePile>>,
     pub modifiers: Vec<EventOrigin>,
+    pub city: Position,
     pub total: ResourcePile,
     pub(crate) info: ActionInfo,
 }
@@ -87,12 +86,14 @@ impl CollectInfo {
     pub(crate) fn new(
         choices: HashMap<Position, HashSet<ResourcePile>>,
         player: &Player,
+        city: Position,
     ) -> CollectInfo {
         CollectInfo {
             choices,
             modifiers: Vec::new(),
             total: ResourcePile::empty(),
             info: ActionInfo::new(player),
+            city,
         }
     }
 }
@@ -139,7 +140,7 @@ pub fn possible_resource_collections(
         .collect_options
         .get()
         .trigger_with_minimal_modifiers(
-            &CollectInfo::new(collect_options, &game.players[player_index]),
+            &CollectInfo::new(collect_options, &game.players[player_index], city_pos),
             &CollectContext {
                 player_index,
                 city_position: city_pos,

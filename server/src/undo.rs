@@ -23,14 +23,10 @@ impl CommandUndoInfo {
         }
     }
 
-    pub fn apply(&self, game: &mut Game, mut undo: CommandContext) {
+    pub fn apply(&self, game: &mut Game, c: CommandContext) {
         let player = game.get_player_mut(self.player);
-        for (k, v) in undo.info.clone() {
+        for (k, v) in c.info.clone() {
             player.event_info.insert(k, v);
-        }
-
-        if undo.info != self.info || !undo.gained_resources.is_empty() {
-            undo.info.clone_from(&self.info);
         }
     }
 }
