@@ -20,8 +20,6 @@ use std::collections::{HashMap, HashSet};
 
 pub(crate) type CurrentEvent<V = ()> = Event<Game, CurrentEventInfo, V>;
 
-pub(crate) type PlayerCommandEvent<V = ()> = Event<PlayerCommands, Game, V>;
-
 #[derive(Default)]
 pub(crate) struct PlayerEvents {
     pub on_construct: CurrentEvent<Building>,
@@ -229,30 +227,3 @@ impl InfluenceCultureInfo {
     }
 }
 
-#[derive(Clone, PartialEq)]
-pub(crate) struct PlayerCommands {
-    pub name: String,
-    pub index: usize,
-    pub log: Vec<String>,
-    pub content: CommandContext,
-}
-
-impl PlayerCommands {
-    #[must_use]
-    pub fn new(player_index: usize, name: String, info: HashMap<String, String>) -> PlayerCommands {
-        PlayerCommands {
-            name,
-            index: player_index,
-            log: Vec::new(),
-            content: CommandContext::new(info),
-        }
-    }
-
-    pub fn gain_resources(&mut self, resources: ResourcePile) {
-        self.content.gained_resources += resources;
-    }
-
-    pub fn add_info_log_item(&mut self, log: &str) {
-        self.log.push(log.to_string());
-    }
-}

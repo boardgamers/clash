@@ -11,11 +11,10 @@ use crate::incident::PermanentIncidentEffect;
 use crate::movement::{CurrentMove, MoveState};
 use crate::pirates::get_pirates_player;
 use crate::player_events::{
-    CurrentEvent, CurrentEventInfo, PlayerCommandEvent, PlayerCommands, PlayerEvents,
+    CurrentEvent, CurrentEventInfo, PlayerEvents,
 };
 use crate::resource::check_for_waste;
 use crate::status_phase::enter_status_phase;
-use crate::undo::CommandUndoInfo;
 use crate::unit::UnitType;
 use crate::utils::Rng;
 use crate::utils::Shuffle;
@@ -451,38 +450,6 @@ impl Game {
         let e = event(&mut self.players[player_index].events).take();
         let _ = e.trigger(self, info, details);
         event(&mut self.players[player_index].events).set(e);
-    }
-
-    pub(crate) fn trigger_command_event<V>(
-        &mut self,
-        player_index: usize,
-        event: fn(&mut PlayerEvents) -> &mut PlayerCommandEvent<V>,
-        details: &V,
-    ) {
-        let e = event(&mut self.players[player_index].events).take();
-        self.with_commands(player_index, |commands, game| {
-            let _ = e.trigger(commands, game, details);
-        });
-        event(&mut self.players[player_index].events).set(e);
-    }
-
-    pub(crate) fn with_commands(
-        &mut self,
-        player_index: usize,
-        callback: impl FnOnce(&mut PlayerCommands, &mut Game),
-    ) {
-        let p = self.get_player(player_index);
-        let info = CommandUndoInfo::new(p);
-        let mut commands = PlayerCommands::new(player_index, p.get_name(), p.event_info.clone());
-
-        callback(&mut commands, self);
-
-        info.apply(self, commands.content.clone());
-        self.players[player_index].gain_resources(commands.content.gained_resources);
-
-        for edit in commands.log {
-            self.add_info_log_item(&edit);
-        }
     }
 
     #[must_use]
