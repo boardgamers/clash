@@ -95,9 +95,9 @@ fn conversion() -> AdvanceBuilder {
         .add_player_event_listener(
             |event| &mut event.on_influence_culture_success,
             0,
-            |c, _, ()| {
-                c.gain_resources(ResourcePile::culture_tokens(1));
-                c.add_info_log_item("Player gained 1 culture token for a successful Influence Culture attempt for Conversion Advance");
+            |game, player, ()| {
+                game.get_player_mut(*player).gain_resources(ResourcePile::culture_tokens(1));
+                game.add_info_log_item("Player gained 1 culture token for a successful Influence Culture attempt for Conversion Advance");
             },
         )
 }

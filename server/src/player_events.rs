@@ -31,9 +31,9 @@ pub(crate) struct PlayerEvents {
     pub on_advance: CurrentEvent<AdvanceInfo>,
     pub on_recruit: CurrentEvent<Recruit>,
     pub on_influence_culture_attempt: Event<InfluenceCultureInfo, City, Game>,
-    pub on_influence_culture_success: PlayerCommandEvent,
+    pub on_influence_culture_success: Event<Game, usize>,
     pub on_influence_culture_resolution: CurrentEvent<ResourcePile>,
-    pub before_move: PlayerCommandEvent<MoveInfo>,
+    pub before_move: Event<Game, MoveInfo>,
     pub on_explore_resolution: CurrentEvent<ExploreResolutionState>,
 
     pub construct_cost: Event<CostInfo, City, Building>,

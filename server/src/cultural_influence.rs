@@ -234,9 +234,10 @@ pub fn influence_culture(
         .set_building(building, influencer_index);
     game.successful_cultural_influence = true;
 
-    game.trigger_command_event(
+    game.trigger_event_with_game_value(
         influencer_index,
         |e| &mut e.on_influence_culture_success,
+        &influencer_index,
         &(),
     );
 }
