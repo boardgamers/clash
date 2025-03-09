@@ -5,8 +5,8 @@ use crate::content::custom_phase_actions::{
     CurrentEventRequest, CurrentEventResponse, CurrentEventType,
 };
 use crate::game::Game;
-use crate::map::{Block, BlockPosition, Map, Rotation, Terrain, UnexploredBlock};
-use crate::movement::{move_units, stop_current_move, undo_move_units};
+use crate::map::{Block, BlockPosition, Map, Rotation, UnexploredBlock};
+use crate::movement::{move_units, stop_current_move};
 use crate::position::Position;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -305,28 +305,4 @@ pub(crate) fn explore_resolution() -> Builtin {
         },
     )
     .build()
-}
-
-pub(crate) fn undo_explore_resolution(
-    game: &mut Game,
-    player_index: usize,
-    s: &ExploreResolutionState,
-) {
-    let unexplored_block = &s.block;
-
-    let block = &unexplored_block.block;
-    block
-        .tiles(
-            &unexplored_block.position,
-            unexplored_block.position.rotation,
-        )
-        .into_iter()
-        .for_each(|(position, _tile)| {
-            game.map.tiles.insert(position, Terrain::Unexplored);
-        });
-
-    game.map
-        .add_unexplored_blocks(vec![unexplored_block.clone()]);
-
-    undo_move_units(game, player_index, s.units.clone(), s.start);
 }

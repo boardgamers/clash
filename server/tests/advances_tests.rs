@@ -104,7 +104,7 @@ fn test_devotion() {
 }
 
 fn load_culture() -> Game {
-    load_game("base/cultural_influence")
+    JsonTest::new("base").load_game("cultural_influence")
 }
 
 #[test]

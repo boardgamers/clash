@@ -10,7 +10,7 @@ use crate::resource::ResourceType;
 use crate::unit::{carried_units, UnitData, UnitType};
 use crate::{
     city::{City, CityData},
-    city_pieces::Building::{self, *},
+    city_pieces::Building::{self},
     civilization::Civilization,
     consts::{
         ADVANCE_COST, ADVANCE_VICTORY_POINTS, BUILDING_VICTORY_POINTS,
@@ -742,23 +742,6 @@ impl Player {
         city.pieces.set_building(building, index);
         if let Some(port_position) = port_position {
             city.port_position = Some(port_position);
-        }
-    }
-
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if city does not exist
-    pub fn undo_construct(&mut self, building: Building, city_position: Position) {
-        let city = self.get_city_mut(city_position);
-        city.undo_activate();
-        city.pieces.remove_building(building);
-        if matches!(building, Port) {
-            city.port_position = None;
-        }
-        if matches!(building, Academy) {
-            self.lose_resources(ResourcePile::ideas(2));
         }
     }
 

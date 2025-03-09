@@ -1,21 +1,17 @@
-use crate::action::{execute_custom_phase_action, Action};
-use crate::advance::undo_advance;
+use crate::action::execute_custom_phase_action;
 use crate::barbarians::BarbariansEventState;
 use crate::city_pieces::Building;
 use crate::combat_listeners::{CombatResult, CombatRoundResult};
-use crate::content::advances::get_advance;
-use crate::cultural_influence::undo_cultural_influence_resolution_action;
 use crate::events::EventOrigin;
-use crate::explore::{undo_explore_resolution, ExploreResolutionState};
+use crate::explore::ExploreResolutionState;
 use crate::game::Game;
 use crate::map::Rotation;
 use crate::payment::PaymentOptions;
 use crate::player_events::{AdvanceInfo, IncidentInfo};
-use crate::playing_actions::{PlayingAction, Recruit};
+use crate::playing_actions::Recruit;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::ChangeGovernmentType;
-use crate::undo::UndoContext;
 use crate::unit::UnitType;
 use itertools::Itertools;
 use num::Zero;
@@ -319,56 +315,6 @@ impl ChangeGovernmentRequest {
 }
 
 impl CurrentEventResponse {
-    pub(crate) fn undo(self, game: &mut Game, player_index: usize) {
-        let Some(UndoContext::Event(e)) = game.pop_undo_context() else {
-            panic!("when undoing custom phase event, the undo context stack should have a custom phase event")
-        };
-        let state = *e;
-        match self {
-            CurrentEventResponse::ExploreResolution(_r) => {
-                if let CurrentEventType::ExploreResolution(r) = &state.event_type {
-                    undo_explore_resolution(game, player_index, r);
-                } else {
-                    panic!("explore resolution should have been requested")
-                }
-            }
-            CurrentEventResponse::Payment(p) => {
-                if let CurrentEventType::InfluenceCultureResolution(ref c) = state.event_type {
-                    undo_cultural_influence_resolution_action(game, c);
-                }
-
-                let player = &mut game.players[player_index];
-                for p in p {
-                    player.gain_resources_in_undo(p);
-                }
-            }
-            CurrentEventResponse::ResourceReward(r) => {
-                game.players[player_index].lose_resources(r);
-            }
-            CurrentEventResponse::SelectAdvance(n) => {
-                undo_advance(game, &get_advance(&n), player_index, false);
-            }
-            CurrentEventResponse::Bool(_)
-            | CurrentEventResponse::ChangeGovernmentType(_)
-            | CurrentEventResponse::SelectUnits(_)
-            | CurrentEventResponse::SelectPlayer(_)
-            | CurrentEventResponse::SelectPositions(_)
-            | CurrentEventResponse::SelectStructures(_)
-            | CurrentEventResponse::SelectUnitType(_) => {
-                // done with payer commands - or can't undo
-            }
-        }
-        game.current_events.push(state);
-        if game.action_log_index > 0 {
-            if let Some(action) = game.action_log.get(game.action_log_index - 1) {
-                // is there a better way to do this?
-                if let Action::Playing(PlayingAction::Advance { .. }) = action.action {
-                    game.players[player_index].incident_tokens += 1;
-                }
-            }
-        }
-    }
-
     pub(crate) fn redo(self, game: &mut Game, player_index: usize) {
         let Some(s) = game.current_event_handler_mut() else {
             panic!("current custom phase event should be set")

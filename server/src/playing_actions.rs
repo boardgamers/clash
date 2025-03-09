@@ -3,17 +3,16 @@ use serde::{Deserialize, Serialize};
 use PlayingAction::*;
 
 use crate::action::Action;
-use crate::advance::{advance_with_incident_token, undo_advance};
+use crate::advance::advance_with_incident_token;
 use crate::city::MoodState;
-use crate::collect::{collect, undo_collect};
+use crate::collect::collect;
 use crate::content::advances::get_advance;
 use crate::content::custom_phase_actions::CurrentEventType;
 use crate::cultural_influence::influence_culture_attempt;
 use crate::game::GameState;
 use crate::player_events::PlayingActionInfo;
-use crate::recruit::{recruit, recruit_cost, undo_recruit};
-use crate::undo::UndoContext;
-use crate::unit::{Unit, Units};
+use crate::recruit::{recruit, recruit_cost};
+use crate::unit::Units;
 use crate::{
     city::City,
     city_pieces::Building::{self, *},
@@ -151,7 +150,6 @@ impl PlayingAction {
                 let city = City::new(player_index, settler.position);
                 player.cities.push(city);
                 let unit_data = settler.data(player);
-                game.push_undo_context(UndoContext::FoundCity { settler: unit_data });
             }
             Construct(c) => {
                 let player = &game.players[player_index];
@@ -276,70 +274,6 @@ impl PlayingAction {
             PlayingAction::EndTurn => PlayingActionType::EndTurn,
         }
     }
-
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if no temple bonus is given when undoing a construct temple action
-    pub fn undo(&self, game: &mut Game, player_index: usize) {
-        let free_action = self.action_type().free;
-        if !free_action {
-            game.actions_left += 1;
-        }
-    //     game.players[player_index].gain_resources_in_undo(self.action_type().cost);
-    // 
-    //     match self {
-    //         Advance { advance, payment } => {
-    //             let player = &mut game.players[player_index];
-    //             player.gain_resources_in_undo(payment);
-    //             undo_advance(game, &get_advance(&advance), player_index, was_custom_phase);
-    //         }
-    //         FoundCity { settler: _ } => {
-    //             let Some(UndoContext::FoundCity { settler }) = game.pop_undo_context() else {
-    //                 panic!("Settler context should be stored in undo context");
-    //             };
-    //             let player = &mut game.players[player_index];
-    //             let units = Unit::from_data(player_index, settler);
-    //             player.units.push(
-    //                 units
-    //                     .into_iter()
-    //                     .next()
-    //                     .expect("The player should have a unit after founding a city"),
-    //             );
-    //             player
-    //                 .cities
-    //                 .pop()
-    //                 .expect("The player should have a city after founding one");
-    //         }
-    //         Construct(c) => {
-    //             let player = &mut game.players[player_index];
-    //             player.undo_construct(c.city_piece, c.city_position);
-    //             player.gain_resources_in_undo(c.payment);
-    //         }
-    //         Collect(c) => undo_collect(game, player_index, &c),
-    //         Recruit(r) => {
-    //             game.players[player_index].gain_resources_in_undo(r.payment);
-    //             undo_recruit(
-    //                 game,
-    //                 player_index,
-    //                 r.units,
-    //                 r.city_position,
-    //                 r.leader_name.as_ref(),
-    //             );
-    //         }
-    //         IncreaseHappiness(i) => {
-    //             undo_increase_happiness(
-    //                 game,
-    //                 player_index,
-    //                 &i.happiness_increases,
-    //                 Some(i.payment),
-    //             );
-    //         }
-    //         Custom(custom_action) => custom_action.undo(game, player_index),
-    //         InfluenceCultureAttempt(_) | EndTurn => panic!("Action can't be undone"),
-    //     }
-    }
 }
 
 #[derive(Default)]
@@ -410,34 +344,6 @@ pub(crate) fn increase_happiness(
         player
             .increase_happiness_total_cost(count, Some(&r))
             .pay(game, &r);
-    }
-    game.push_undo_context(UndoContext::IncreaseHappiness { angry_activations });
-}
-
-pub(crate) fn undo_increase_happiness(
-    game: &mut Game,
-    player_index: usize,
-    happiness_increases: &[(Position, u32)],
-    payment: Option<ResourcePile>,
-) {
-    let player = &mut game.players[player_index];
-    for &(city_position, steps) in happiness_increases {
-        let city = player.get_city_mut(city_position);
-        for _ in 0..steps {
-            city.decrease_mood_state();
-        }
-    }
-    if let Some(r) = payment {
-        player.gain_resources_in_undo(r);
-    }
-
-    if let Some(UndoContext::IncreaseHappiness { angry_activations }) = game.pop_undo_context() {
-        for city_position in angry_activations {
-            let city = game.players[player_index].get_city_mut(city_position);
-            city.angry_activation = true;
-        }
-    } else {
-        panic!("Increase happiness context should be stored in undo context")
     }
 }
 

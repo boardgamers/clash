@@ -1,10 +1,8 @@
 use serde::{Deserialize, Serialize};
 
 use crate::action::Action;
-use crate::collect::{collect, undo_collect};
-use crate::content::advances_culture::{
-    execute_sports, execute_theaters, undo_sports, undo_theaters,
-};
+use crate::collect::collect;
+use crate::content::advances_culture::{execute_sports, execute_theaters};
 use crate::content::advances_economy::collect_taxes;
 use crate::content::wonders::construct_wonder;
 use crate::cultural_influence::influence_culture_attempt;
@@ -14,8 +12,7 @@ use crate::log::{
 };
 use crate::player::Player;
 use crate::playing_actions::{
-    increase_happiness, undo_increase_happiness, Collect, IncreaseHappiness,
-    InfluenceCultureAttempt, PlayingAction,
+    increase_happiness, Collect, IncreaseHappiness, InfluenceCultureAttempt, PlayingAction,
 };
 use crate::{
     game::Game, playing_actions::ActionType, position::Position, resource_pile::ResourcePile,
@@ -109,55 +106,6 @@ impl CustomAction {
             CustomAction::Sports { .. } => CustomActionType::Sports,
             CustomAction::Taxes(_) => CustomActionType::Taxes,
             CustomAction::Theaters(_) => CustomActionType::Theaters,
-        }
-    }
-
-    pub(crate) fn undo(self, game: &mut Game, player_index: usize) {
-        let action = self.custom_action_type();
-        if action.action_type().once_per_turn {
-            game.players[player_index]
-                .played_once_per_turn_actions
-                .retain(|a| a != &action);
-        }
-        match self {
-            CustomAction::ConstructWonder {
-                city_position,
-                wonder: _,
-                payment,
-            } => {
-                game.players[player_index].gain_resources_in_undo(payment);
-                let wonder = game.undo_build_wonder(city_position, player_index);
-                game.players[player_index].wonder_cards.push(wonder);
-            }
-            CustomAction::AbsolutePower => game.actions_left -= 1,
-            CustomAction::ForcedLabor => {
-                // we check that the action was played
-            }
-            CustomAction::CivilRights => {
-                game.players[player_index].lose_resources(ResourcePile::mood_tokens(3));
-            }
-            CustomAction::ArtsInfluenceCultureAttempt(_) => panic!("Action can't be undone"),
-            CustomAction::VotingIncreaseHappiness(i) => {
-                undo_increase_happiness(
-                    game,
-                    player_index,
-                    &i.happiness_increases,
-                    Some(i.payment),
-                );
-            }
-            CustomAction::FreeEconomyCollect(c) => undo_collect(game, player_index, &c),
-            CustomAction::Taxes(r) => {
-                game.players[player_index].lose_resources(r);
-            }
-            CustomAction::Theaters(r) => {
-                undo_theaters(game, player_index, &r);
-            }
-            CustomAction::Sports {
-                city_position,
-                payment,
-            } => {
-                undo_sports(game, player_index, city_position, &payment);
-            }
         }
     }
 

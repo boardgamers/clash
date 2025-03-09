@@ -7,7 +7,7 @@ use crate::content::advances::{advance_group_builder, AdvanceGroup};
 use crate::content::custom_actions::CustomActionType;
 use crate::game::Game;
 use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions};
-use crate::playing_actions::{increase_happiness, undo_increase_happiness};
+use crate::playing_actions::increase_happiness;
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
@@ -81,16 +81,6 @@ pub(crate) fn execute_sports(
     increase_happiness(game, player_index, &[(pos, payment.culture_tokens)], None);
 }
 
-pub(crate) fn undo_sports(
-    game: &mut Game,
-    player_index: usize,
-    pos: Position,
-    payment: &ResourcePile,
-) {
-    undo_increase_happiness(game, player_index, &[(pos, payment.culture_tokens)], None);
-    game.players[player_index].gain_resources_in_undo(payment.clone());
-}
-
 #[must_use]
 pub fn theaters_options() -> PaymentOptions {
     PaymentOptions::sum(1, &[ResourceType::CultureTokens, ResourceType::MoodTokens])
@@ -99,11 +89,6 @@ pub fn theaters_options() -> PaymentOptions {
 pub(crate) fn execute_theaters(game: &mut Game, player_index: usize, payment: &ResourcePile) {
     game.players[player_index].gain_resources(theater_opposite(payment));
     game.players[player_index].pay_cost(&theaters_options(), payment);
-}
-
-pub(crate) fn undo_theaters(game: &mut Game, player_index: usize, payment: &ResourcePile) {
-    game.players[player_index].lose_resources(theater_opposite(payment));
-    game.players[player_index].gain_resources_in_undo(payment.clone());
 }
 
 fn theater_opposite(payment: &ResourcePile) -> ResourcePile {

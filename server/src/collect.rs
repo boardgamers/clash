@@ -68,13 +68,6 @@ pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) {
     game.trigger_command_event(player_index, |e| &mut e.on_collect, &c.city_position);
 }
 
-pub(crate) fn undo_collect(game: &mut Game, player_index: usize, c: &Collect) {
-    game.players[player_index]
-        .get_city_mut(c.city_position)
-        .undo_activate();
-    // resources are handled with player commands
-}
-
 pub(crate) struct CollectContext {
     pub player_index: usize,
     pub city_position: Position,

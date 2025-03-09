@@ -1,5 +1,3 @@
-use num::Zero;
-use std::str::FromStr;
 use crate::ability_initializer::AbilityListeners;
 use crate::combat::{Combat, CombatDieRoll, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
@@ -16,7 +14,7 @@ use crate::player_events::{
     CurrentEvent, CurrentEventInfo, PlayerCommandEvent, PlayerCommands, PlayerEvents,
 };
 use crate::status_phase::enter_status_phase;
-use crate::undo::{CommandUndoInfo, UndoContext};
+use crate::undo::CommandUndoInfo;
 use crate::unit::UnitType;
 use crate::utils::Rng;
 use crate::utils::Shuffle;
@@ -188,7 +186,7 @@ impl Game {
             round: data.round,
             age: data.age,
             messages: data.messages,
-            rng: Rng::from_seed(data.rng.parse().expect("can't parse seed")),
+            rng: Rng::from_seed_string(&data.rng),
             dice_roll_outcomes: data.dice_roll_outcomes,
             dice_roll_log: data.dice_roll_log,
             dropped_players: data.dropped_players,
@@ -495,20 +493,6 @@ impl Game {
     pub fn can_redo(&self) -> bool {
         self.action_log_index < self.action_log.len()
     }
-
-    pub(crate) fn push_undo_context(&mut self, context: UndoContext) {}
-
-    pub(crate) fn pop_undo_context(&mut self) -> Option<UndoContext> {
-        self.maybe_pop_undo_context(|_| true)
-    }
-
-    pub(crate) fn maybe_pop_undo_context(
-        &mut self,
-        pred: fn(&UndoContext) -> bool,
-    ) -> Option<UndoContext> {
-        None
-    }
-
     pub(crate) fn is_pirate_zone(&self, position: Position) -> bool {
         if self.map.is_sea(position) {
             let pirate = get_pirates_player(self);
@@ -781,25 +765,6 @@ impl Game {
             .pieces
             .wonders
             .push(wonder);
-    }
-
-    /// .
-    ///
-    /// # Panics
-    ///
-    /// Panics if city or wonder does not exist
-    pub fn undo_build_wonder(&mut self, city_position: Position, player_index: usize) -> Wonder {
-        let player = &mut self.players[player_index];
-        player.wonders_build.pop();
-        let wonder = player
-            .get_city_mut(city_position)
-            .pieces
-            .wonders
-            .pop()
-            .expect("city should have a wonder");
-        (wonder.listeners.deinitializer)(self, player_index);
-        (wonder.listeners.undo_deinitializer)(self, player_index);
-        wonder
     }
 
     ///

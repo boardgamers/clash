@@ -94,15 +94,6 @@ impl City {
         self.angry_activation = false;
     }
 
-    pub fn undo_activate(&mut self) {
-        self.activations -= 1;
-        if self.angry_activation {
-            self.angry_activation = false;
-        } else if self.is_activated() {
-            self.increase_mood_state();
-        }
-    }
-
     #[must_use]
     pub fn is_activated(&self) -> bool {
         self.activations > 0

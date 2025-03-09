@@ -134,29 +134,6 @@ pub(crate) fn cultural_influence_resolution() -> Builtin {
     .build()
 }
 
-pub(crate) fn undo_cultural_influence_resolution_action(
-    game: &mut Game,
-    roll_boost_cost: &ResourcePile,
-) {
-    let cultural_influence_attempt_action = game.action_log[game.action_log_index - 1].action.playing_ref().expect("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
-    let PlayingAction::InfluenceCultureAttempt(c) = cultural_influence_attempt_action else {
-        panic!("any log item previous to a cultural influence resolution action log item should a cultural influence attempt action log item");
-    };
-
-    let city_piece = c.city_piece;
-    let target_player_index = c.target_player_index;
-    let target_city_position = c.target_city_position;
-
-    if roll_boost_cost.is_empty() {
-        return;
-    }
-    game.players[target_player_index]
-        .get_city_mut(target_city_position)
-        .pieces
-        .set_building(city_piece, target_player_index);
-    game.successful_cultural_influence = false;
-}
-
 fn influence_distance(
     game: &Game,
     src: Position,

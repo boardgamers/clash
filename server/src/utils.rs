@@ -1,4 +1,3 @@
-
 pub fn format_list(list: &[String], empty_message: &str) -> String {
     match list {
         [] => empty_message.to_string(),
@@ -55,6 +54,15 @@ pub struct Rng {
 
 impl Rng {
     pub fn from_seed(seed: u128) -> Self {
+        Self { seed }
+    }
+
+    pub fn from_seed_string(seed: &str) -> Self {
+        let seed = if seed.is_empty() {
+            0
+        } else {
+            seed.parse().expect("seed should be a number")
+        };
         Self { seed }
     }
 

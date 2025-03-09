@@ -119,37 +119,6 @@ fn move_unit(
     }
 }
 
-pub(crate) fn undo_move_units(
-    game: &mut Game,
-    player_index: usize,
-    units: Vec<u32>,
-    starting_position: Position,
-) {
-    let Some(unit) = units.first() else {
-        return;
-    };
-    let destination = game.players[player_index].get_unit(*unit).position;
-
-    for unit_id in units {
-        let unit = game.players[player_index].get_unit_mut(unit_id);
-        unit.position = starting_position;
-
-        if let Some(terrain) = terrain_movement_restriction(&game.map, destination, unit) {
-            unit.movement_restrictions
-                .iter()
-                .position(|r| r == &terrain)
-                .map(|i| unit.movement_restrictions.remove(i));
-        }
-
-        if !game.map.is_sea(starting_position) {
-            unit.carrier_id = None;
-        }
-        for id in &carried_units(unit_id, &game.players[player_index]) {
-            game.players[player_index].get_unit_mut(*id).position = starting_position;
-        }
-    }
-}
-
 /// # Errors
 ///
 /// Will return `Err` if the unit cannot move.
