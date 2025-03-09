@@ -7,7 +7,7 @@ use crate::content::custom_phase_actions::{
 };
 use crate::content::incidents;
 use crate::events::EventOrigin;
-use crate::game::{Game, GameState};
+use crate::game::Game;
 use crate::map::Terrain;
 use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions};
 use crate::pirates::pirates_spawn_and_raid;
@@ -16,7 +16,6 @@ use crate::player_events::{IncidentInfo, IncidentTarget};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-use crate::status_phase::play_status_phase;
 use crate::unit::UnitType;
 use crate::utils::{remove_element_by, Shuffle};
 use itertools::Itertools;

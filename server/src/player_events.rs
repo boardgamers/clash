@@ -5,6 +5,7 @@ use crate::combat_listeners::{CombatResultInfo, CombatRoundResult, CombatStrengt
 use crate::events::Event;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
+use crate::incident::{PassedIncident, PermanentIncidentEffect};
 use crate::map::Terrain;
 use crate::payment::PaymentOptions;
 use crate::playing_actions::{PlayingActionType, Recruit};
@@ -16,7 +17,6 @@ use crate::{
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
-use crate::incident::{PassedIncident, PermanentIncidentEffect};
 
 pub(crate) type CurrentEvent<V = ()> = Event<Game, CurrentEventInfo, V>;
 
@@ -110,18 +110,19 @@ impl IncidentInfo {
 
     #[must_use]
     pub fn is_active(&self, role: IncidentTarget, player: usize, game: &Game) -> bool {
-        if game.permanent_incident_effects.iter().any(
-            |e| matches!(e, PermanentIncidentEffect::PassedIncident(PassedIncident::NewPlayer(_))),
-        ) {
+        if game.permanent_incident_effects.iter().any(|e| {
+            matches!(
+                e,
+                PermanentIncidentEffect::PassedIncident(PassedIncident::NewPlayer(_))
+            )
+        }) {
             // wait until the new player is playing the advance
             return false;
         }
-        
+
         match role {
             IncidentTarget::ActivePlayer => self.active_player == player,
-            IncidentTarget::SelectedPlayer => {
-                game.current_event().selected_player == Some(player)
-            }
+            IncidentTarget::SelectedPlayer => game.current_event().selected_player == Some(player),
             IncidentTarget::AllPlayers => true,
         }
     }

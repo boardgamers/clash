@@ -33,7 +33,7 @@ where
         let option = f(e);
         if option.is_some() {
             u = option;
-            return true
+            return true;
         }
         false
     });
