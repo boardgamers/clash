@@ -284,8 +284,7 @@ pub(crate) fn execute_movement_action(
                     m.destination,
                 );
                 stop_current_move(game);
-                // todo should stop move if not in explore state
-                return; // can't undo this action
+                return;
             }
 
             if move_with_possible_combat(game, player_index, starting_position, &m) {
