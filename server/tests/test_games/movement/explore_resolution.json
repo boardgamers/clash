@@ -1,6 +1,11 @@
 {
   "state": [
-    "Playing"
+    "Playing",
+    {
+      "Movement": {
+        "movement_actions_left": 1
+      }
+    }
   ],
   "players": [
     {

@@ -73,13 +73,15 @@ pub(crate) fn take_move_state(game: &mut Game) -> MoveState {
 }
 
 pub(crate) fn stop_current_move(game: &mut Game) {
-    let mut move_state = take_move_state(game);
-    move_state.current_move = CurrentMove::None;
+    if let Movement(_) = game.state() {
+        let mut move_state = take_move_state(game);
+        move_state.current_move = CurrentMove::None;
 
-    if move_state.movement_actions_left == 0 {
-        return;
+        if move_state.movement_actions_left == 0 {
+            return;
+        }
+        game.push_state(Movement(move_state));
     }
-    game.push_state(Movement(move_state));
 }
 
 pub(crate) fn move_units(
