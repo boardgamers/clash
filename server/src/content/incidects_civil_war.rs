@@ -140,7 +140,7 @@ fn revolution() -> Incident {
         "Kill a unit to avoid losing an action",
         |game, _player| can_loose_action(game),
     );
-    b = b.add_simple_incident_listener(IncidentTarget::ActivePlayer, 2, |game, player, _| {
+    b = b.add_simple_incident_listener(IncidentTarget::ActivePlayer, 2, |game, player, _, _| {
         if can_loose_action(game) && game.current_event_player().sacrifice == 0 {
             loose_action(game, player);
         }
@@ -258,7 +258,7 @@ fn envoy() -> Incident {
         .add_simple_incident_listener(
             IncidentTarget::ActivePlayer,
             1,
-            |game, player, player_name | {
+            |game, player, player_name, _| {
                 game.add_info_log_item(&format!("{player_name} gained 1 idea and 1 culture token"));
                 game.get_player_mut(player).gain_resources(
                     ResourcePile::culture_tokens(1) + ResourcePile::ideas(1));

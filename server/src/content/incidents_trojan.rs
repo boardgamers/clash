@@ -24,7 +24,7 @@ fn trojan_horse() -> Incident {
         &format!("The following is available to all players: {TROJAN_DESCRIPTION}"),
         IncidentBaseEffect::BarbariansMove,
     )
-    .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _| {
+    .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _, _| {
         game.permanent_incident_effects
             .push(PermanentIncidentEffect::TrojanHorse);
     })
@@ -108,7 +108,7 @@ fn solar_eclipse() -> Incident {
         "The next land battle will end after the first round (retreat if not finished). The winner gains 1 victory point (defender if draw).",
         IncidentBaseEffect::PiratesSpawnAndRaid,
     )
-        .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _| {
+        .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _, _| {
             game.permanent_incident_effects
                 .push(PermanentIncidentEffect::SolarEclipse);
         })
@@ -173,7 +173,7 @@ fn anarchy() -> Incident {
         "Set aside all government advances. Whenever you research a new government advance, take a game event token from there instead of the supply (thereby not triggering game events). Each advance left in the government advances area at the end of the game is worth 1 victory point.",
         IncidentBaseEffect::None,
     )
-        .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, player_index, player_name| {
+        .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, player_index, player_name, _| {
             let p = game.get_player_mut(player_index);
             let old = p.advances.len();
             p.advances.retain(|a| a.government.is_none());

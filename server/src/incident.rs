@@ -187,14 +187,14 @@ impl IncidentBuilder {
         listener: F,
     ) -> Self
     where
-        F: Fn(&mut Game, usize, &str) + 'static + Clone,
+        F: Fn(&mut Game, usize, &str, &IncidentInfo) + 'static + Clone,
     {
         self.add_simple_current_event_listener(
             |event| &mut event.on_incident,
             priority,
             move |game, player_index, player_name, i| {
                 if i.is_active(role, player_index) {
-                    listener(game, player_index, player_name);
+                    listener(game, player_index, player_name, i);
                 }
             },
         )

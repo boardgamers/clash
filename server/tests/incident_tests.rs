@@ -492,3 +492,19 @@ fn test_anarchy() {
         ],
     );
 }
+
+#[test]
+fn test_scientific_trade() {
+    JSON.test(
+        "scientific_trade",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::gold(2),
+                }),
+            ),
+        ],
+    );
+}

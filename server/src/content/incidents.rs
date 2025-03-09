@@ -4,6 +4,7 @@ use crate::content::incidents_earthquake::earthquakes;
 use crate::content::incidents_famine::{epidemics, famines, pestilence};
 use crate::content::incidents_good_year::{awesome_years, fantastic_years, good_years};
 use crate::content::incidents_population_boom::population_booms;
+use crate::content::incidents_trade::trades;
 use crate::content::incidents_trojan::trojan_incidents;
 use crate::incident::Incident;
 use itertools::Itertools;
@@ -30,6 +31,8 @@ pub(crate) fn get_all() -> Vec<Incident> {
         civil_wars(),
         // 41+
         trojan_incidents(),
+        // 45+
+        trades(),
         // 51+
         successful_year(),
     ]
