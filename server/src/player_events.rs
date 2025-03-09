@@ -90,6 +90,7 @@ impl ActionInfo {
 #[derive(Clone, PartialEq, Eq, Copy)]
 pub enum IncidentTarget {
     ActivePlayer,
+    SelectedPlayer,
     AllPlayers,
 }
 
@@ -107,8 +108,12 @@ impl IncidentInfo {
     }
 
     #[must_use]
-    pub fn is_active(&self, role: IncidentTarget, player: usize) -> bool {
-        role == IncidentTarget::AllPlayers || self.active_player == player
+    pub fn is_active(&self, role: IncidentTarget, player: usize, game: &Game) -> bool {
+        match role {
+            IncidentTarget::ActivePlayer => self.active_player == player,
+            IncidentTarget::SelectedPlayer => game.current_event().selected_player == Some(player),
+            IncidentTarget::AllPlayers => true
+        }
     }
 }
 

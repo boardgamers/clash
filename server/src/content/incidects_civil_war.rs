@@ -273,6 +273,7 @@ fn envoy() -> Incident {
             },
         )
         .add_incident_player_request(
+            IncidentTarget::ActivePlayer,
             "Select a player to gain 1 culture token",
             |_p, _, _| true,
             0,

@@ -13,14 +13,13 @@ pub(crate) fn population_booms() -> Vec<Incident> {
 
 fn population_boom(id: u8, effect: IncidentBaseEffect) -> Incident {
     let mut b = Incident::builder(id, "Population Boom", "-", effect);
-    b = select_settler(b, 13, |_game, player, i| {
-        i.is_active(IncidentTarget::ActivePlayer, player)
-    });
+    b = select_settler(b, 13, IncidentTarget::ActivePlayer);
     select_player_to_gain_settler(b).build()
 }
 
 pub(crate) fn select_player_to_gain_settler(mut b: IncidentBuilder) -> IncidentBuilder {
     b = b.add_incident_player_request(
+        IncidentTarget::ActivePlayer,
         "Select a player to gain 1 settler",
         |p, _, _| p.available_units().settlers > 0 && !p.cities.is_empty(),
         12,
@@ -32,22 +31,20 @@ pub(crate) fn select_player_to_gain_settler(mut b: IncidentBuilder) -> IncidentB
             game.current_event_mut().selected_player = Some(c.choice);
         },
     );
-    select_settler(b, 11, |game, player, _| {
-        game.current_event().selected_player == Some(player)
-    })
+    select_settler(b, 11, IncidentTarget::SelectedPlayer)
 }
 
 fn select_settler(
     b: IncidentBuilder,
     priority: i32,
-    pred: impl Fn(&Game, usize, &IncidentInfo) -> bool + 'static + Clone,
+    target: IncidentTarget,
 ) -> IncidentBuilder {
     b.add_incident_position_request(
         IncidentTarget::AllPlayers,
         priority,
-        move |game, player_index, incident| {
+        move |game, player_index, _| {
             let p = game.get_player(player_index);
-            if pred(game, player_index, incident) && p.available_units().settlers > 0 {
+            if p.available_units().settlers > 0 {
                 Some(new_position_request(
                     p.cities.iter().map(|c| c.position).collect(),
                     1..=1,

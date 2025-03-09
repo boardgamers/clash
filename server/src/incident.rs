@@ -193,7 +193,7 @@ impl IncidentBuilder {
             |event| &mut event.on_incident,
             priority,
             move |game, player_index, player_name, i| {
-                if i.is_active(role, player_index) {
+                if i.is_active(role, player_index, game) {
                     listener(game, player_index, player_name, i);
                 }
             },
@@ -355,12 +355,13 @@ impl IncidentBuilder {
     #[must_use]
     pub(crate) fn add_incident_player_request(
         self,
+        target: IncidentTarget,
         description: &str,
-        player_pred: impl Fn(&Player, &Game, &IncidentInfo) -> bool + 'static + Clone,
+        player_pred: impl Fn(usize, &mut Game, &IncidentInfo) -> bool + 'static + Clone,
         priority: i32,
         gain_reward: impl Fn(&mut Game, &SelectedChoice<usize, IncidentInfo>) + 'static + Clone,
     ) -> Self {
-        let f = self.new_filter(IncidentTarget::ActivePlayer, priority);
+        let f = self.new_filter(target, priority);
         let d = description.to_string();
         self.add_player_request(
             |event| &mut event.on_incident,
@@ -482,7 +483,7 @@ pub fn is_active(
     role: IncidentTarget,
     player: usize,
 ) -> bool {
-    if !i.is_active(role, player) {
+    if !i.is_active(role, player, game) {
         return false;
     }
     if priority >= BASE_EFFECT_PRIORITY {

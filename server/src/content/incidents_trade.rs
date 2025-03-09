@@ -128,39 +128,39 @@ fn reformation() -> Incident {
     )
         // select a player to execute the incident
         .add_incident_player_request(
+            IncidentTarget::ActivePlayer,
             "Select a player to execute the event",
             |p, game, i| {
                 if has_temple(game, i.active_player) {
                     // active player executes the event
+                    game.current_event_mut().selected_player = Some(i.active_player);
                     false
                 } else {
-                    p.index != i.active_player && has_temple(game, p.index)
+                    p != i.active_player && has_temple(game, p)
                 }
             },
             3,
             |game, s| {
                 game.current_event_mut().selected_player = Some(s.choice);
                 game.add_info_log_item(
-                    &format!("{} selected {} to execute the event", 
+                    &format!("{} selected {} to execute the event",
                              s.player_name, game.player_name(s.choice)));
             },
         )
         // select a player to gain a temple
         .add_incident_player_request(
+            IncidentTarget::SelectedPlayer,
             "Select a player to gain a Temple",
             |p, game, i| {
-                if let Some(s) = game.current_event().selected_player {
-                    if p.index != s && can_gain_temple(game, p.index) {
-                        return true;
-                    }
-                }
-                false
+                Some(p.index) != game.current_event().selected_player && can_gain_temple(game, p.index) 
             },
             2,
             |game, p| {
                 game.current_event_mut().selected_player = Some(p.choice);
             },
         )
+        // .add_incident_position_request(
+        //     IncidentTarget::SelectedPlayer
         .build()
 }
 

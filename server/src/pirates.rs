@@ -162,7 +162,7 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
         |event| &mut event.on_incident,
         BASE_EFFECT_PRIORITY + 5,
         |game, player_index, i| {
-            if !i.is_active(IncidentTarget::ActivePlayer, player_index) {
+            if !i.is_active(IncidentTarget::ActivePlayer, player_index, game) {
                 return None;
             }
 
