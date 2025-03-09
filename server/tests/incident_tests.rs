@@ -508,3 +508,20 @@ fn test_scientific_trade() {
         ],
     );
 }
+
+
+#[test]
+fn test_flourishing_trade() {
+    JSON.test(
+        "flourishing_trade",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::gold(2),
+                }),
+            ),
+        ],
+    );
+}
