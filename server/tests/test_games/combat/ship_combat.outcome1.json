@@ -7,7 +7,14 @@
         "moved_units": [
           7,
           8
-        ]
+        ],
+        "current_move": {
+          "Fleet": {
+            "units": [
+              8
+            ]
+          }
+        }
       }
     }
   ],
@@ -397,16 +404,14 @@
           }
         },
         {
+          "op": "replace",
+          "path": "/state/1/Movement/current_move/Fleet/units/0",
+          "value": 7
+        },
+        {
           "op": "add",
-          "path": "/state/1/Movement/current_move",
-          "value": {
-            "Fleet": {
-              "units": [
-                7,
-                8
-              ]
-            }
-          }
+          "path": "/state/1/Movement/current_move/Fleet/units/1",
+          "value": 8
         },
         {
           "op": "add",

@@ -283,7 +283,6 @@ pub(crate) fn execute_movement_action(
                     starting_position,
                     m.destination,
                 );
-                stop_current_move(game);
                 return;
             }
 

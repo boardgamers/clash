@@ -187,6 +187,8 @@ pub fn initiate_combat(
 
 pub(crate) fn start_combat(game: &mut Game) {
     game.lock_undo(); // combat should not be undoable
+    stop_current_move(game);
+    
     let combat = get_combat(game);
     let attacker = combat.attacker;
     let defender = combat.defender;
@@ -388,9 +390,6 @@ pub(crate) fn end_combat(game: &mut Game, combat: Combat, r: CombatResult) -> Op
     }
 
     take_combat(game);
-    if let Some(GameState::Movement(_)) = game.state_stack.last() {
-        stop_current_move(game);
-    }
     None
 }
 
