@@ -472,7 +472,11 @@ pub(crate) fn trigger_incident(game: &mut Game, mut info: IncidentInfo) {
             return;
         }
 
-        if game.current_events.is_empty() {
+        if !game
+            .current_events
+            .iter()
+            .any(|e| matches!(e.event_type, CurrentEventType::Incident(_)))
+        {
             if let Some(p) = passed_to_player(game, info.active_player) {
                 info.active_player = p;
                 game.permanent_incident_effects
@@ -494,14 +498,11 @@ pub(crate) fn trigger_incident(game: &mut Game, mut info: IncidentInfo) {
         )
         .then_some(true)
     });
-
-    if matches!(game.state(), GameState::StatusPhase(_)) {
-        play_status_phase(game);
-    }
 }
 
 pub(crate) fn play_base_effect(game: &Game) -> bool {
-    !game.permanent_incident_effects
+    !game
+        .permanent_incident_effects
         .iter()
         .any(|e| matches!(e, PermanentIncidentEffect::PassedIncident(_)))
 }
