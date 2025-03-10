@@ -1,12 +1,10 @@
 {
-  "state": [
-    {
-      "StatusPhase": "RazeSize1City"
-    }
-  ],
+  "state": "Playing",
   "current_events": [
     {
-      "event_type": "StatusPhase",
+        "event_type": {
+        "StatusPhase": "RazeSize1City"
+      },
       "players_used": [
         0
       ],

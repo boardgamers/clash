@@ -1,17 +1,17 @@
 use crate::advance::gain_advance;
 use crate::combat::{
-    combat_loop, combat_round_end, end_combat, move_with_possible_combat, start_combat, take_combat,
+    combat_loop, combat_round_end, end_combat, move_with_possible_combat, start_combat,
 };
 use crate::content::custom_phase_actions::{CurrentEventResponse, CurrentEventType};
 use crate::cultural_influence::ask_for_cultural_influence_payment;
 use crate::explore::{ask_explore_resolution, move_to_unexplored_tile};
-use crate::game::GameState::{Combat, Finished, Movement, Playing, StatusPhase};
+use crate::game::GameState::{Finished, Movement, Playing};
 use crate::game::{ActionLogItem, Game, GameState};
 use crate::incident::trigger_incident;
 use crate::log;
 use crate::map::Terrain::Unexplored;
 use crate::movement::{
-    has_movable_units, move_units_destinations, take_move_state, CurrentMove, MoveState,
+    get_move_state, has_movable_units, move_units_destinations, CurrentMove, MoveState,
 };
 use crate::playing_actions::PlayingAction;
 use crate::recruit::on_recruit;
@@ -148,8 +148,8 @@ pub(crate) fn execute_custom_phase_action(
         InfluenceCultureResolution(r) => {
             ask_for_cultural_influence_payment(game, player_index, r);
         }
-        CombatStart => {
-            start_combat(game);
+        CombatStart(c) => {
+            start_combat(game, c.clone());
         }
         CombatRoundEnd(r) => {
             if let Some(c) = combat_round_end(game, r) {
@@ -157,10 +157,9 @@ pub(crate) fn execute_custom_phase_action(
             }
         }
         CombatEnd(r) => {
-            let c = take_combat(game);
-            end_combat(game, c, r.clone());
+            end_combat(game, r);
         }
-        StatusPhase => play_status_phase(game),
+        StatusPhase(s) => play_status_phase(game, s.clone()),
         TurnStart => game.start_turn(),
         Advance(a) => {
             gain_advance(game, player_index, a);
@@ -182,12 +181,16 @@ pub(crate) fn add_log_item_from_action(game: &mut Game, action: &Action) {
 }
 
 fn execute_regular_action(game: &mut Game, action: Action, player_index: usize) {
-    match game.state() {
+    match game.state {
         Playing => {
             if let Some(m) = action.clone().movement() {
+                if let MovementAction::Move(_) = m {
+                } else {
+                    panic!("Illegal action");
+                }
                 assert_ne!(game.actions_left, 0, "Illegal action");
                 game.actions_left -= 1;
-                game.push_state(GameState::Movement(MoveState::new()));
+                game.state = GameState::Movement(MoveState::new());
                 execute_movement_action(game, m, player_index);
             } else {
                 let action = action.playing().expect("action should be a playing action");
@@ -199,12 +202,6 @@ fn execute_regular_action(game: &mut Game, action: Action, player_index: usize) 
                 .movement()
                 .expect("action should be a movement action");
             execute_movement_action(game, action, player_index);
-        }
-        Combat(_) => {
-            panic!("actions can't be executed when the game is in a combat state");
-        }
-        StatusPhase(_) => {
-            panic!("actions can't be executed when the game is in a status state");
         }
         Finished => panic!("actions can't be executed when the game is finished"),
     }
@@ -247,9 +244,6 @@ pub(crate) fn execute_movement_action(
                 }
             }
 
-            let mut move_state = take_move_state(game);
-            move_state.moved_units.extend(m.units.iter());
-            move_state.moved_units = move_state.moved_units.iter().unique().copied().collect();
             let current_move = get_current_move(
                 game,
                 &m.units,
@@ -257,6 +251,9 @@ pub(crate) fn execute_movement_action(
                 m.destination,
                 m.embark_carrier_id,
             );
+            let move_state = get_move_state(game);
+            move_state.moved_units.extend(m.units.iter());
+            move_state.moved_units = move_state.moved_units.iter().unique().copied().collect();
 
             if matches!(current_move, CurrentMove::None) || move_state.current_move != current_move
             {
@@ -267,7 +264,6 @@ pub(crate) fn execute_movement_action(
                 // roads move ends the current move
                 move_state.current_move = CurrentMove::None;
             }
-            game.push_state(GameState::Movement(move_state));
 
             let dest_terrain = game
                 .map
@@ -290,16 +286,15 @@ pub(crate) fn execute_movement_action(
             }
         }
         Stop => {
-            game.pop_state();
+            game.state = GameState::Playing;
             return;
         }
     };
 
-    let state = take_move_state(game);
+    let state = get_move_state(game);
     let all_moves_used =
         state.movement_actions_left == 0 && state.current_move == CurrentMove::None;
     if all_moves_used || !has_movable_units(game, game.get_player(game.current_player_index)) {
-        return;
+        game.state = GameState::Playing;
     }
-    game.push_state(GameState::Movement(state));
 }

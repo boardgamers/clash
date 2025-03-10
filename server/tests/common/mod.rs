@@ -19,12 +19,20 @@ use std::{
 };
 
 pub struct JsonTest {
+    pub parent: &'static str,
     pub directory: &'static str,
 }
 
 impl JsonTest {
     pub const fn new(directory: &'static str) -> Self {
-        Self { directory }
+        Self {
+            parent: "",
+            directory,
+        }
+    }
+
+    pub const fn child(parent: &'static str, directory: &'static str) -> Self {
+        Self { parent, directory }
     }
 
     pub fn test(&self, name: &str, actions: Vec<TestAction>) {
@@ -36,7 +44,13 @@ impl JsonTest {
     }
 
     fn full_path(&self, name: &str) -> String {
-        format!("{}{}{name}", self.directory, SEPARATOR)
+        if self.parent.is_empty() {
+            return format!("{}{}{name}", self.directory, SEPARATOR);
+        }
+        format!(
+            "{}{}{}{}{name}",
+            self.parent, SEPARATOR, self.directory, SEPARATOR
+        )
     }
 }
 

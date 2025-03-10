@@ -186,7 +186,7 @@ impl PlayingAction {
                         Action::Playing(PlayingAction::Custom(CustomAction::FreeEconomyCollect(_)))
                     )
                 }) {
-                    assert!(game.state() == &GameState::Playing, "Illegal action");
+                    assert!(game.state == GameState::Playing, "Illegal action");
                 }
                 collect(game, player_index, &c);
             }

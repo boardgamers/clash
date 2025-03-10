@@ -1,15 +1,17 @@
 use crate::city::MoodState;
 use crate::content::custom_phase_actions::{new_position_request, PaymentRequest, UnitsRequest};
 use crate::content::incidents_famine::{decrease_mod_and_log, decrease_mood_incident_city};
-use crate::content::incidents_population_boom::select_player_to_gain_settler;
-use crate::game::{Game, GameState};
+use crate::content::incidents_good_year::select_player_to_gain_settler;
+use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder, PermanentIncidentEffect};
 use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions};
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use crate::status_phase::{add_change_government, can_change_government_for_free};
+use crate::status_phase::{
+    add_change_government, can_change_government_for_free, get_status_phase,
+};
 use crate::unit::UnitType;
 use crate::wonder::draw_wonder_from_pile;
 use itertools::Itertools;
@@ -202,15 +204,12 @@ fn kill_unit_for_revolution(
 }
 
 fn can_loose_action(game: &Game) -> bool {
-    match game.state() {
-        GameState::StatusPhase(_) => true,
-        _ => game.actions_left > 0,
-    }
+    get_status_phase(game).is_some() || game.actions_left > 0
 }
 
 fn loose_action(game: &mut Game, player: usize) {
     let name = game.player_name(player);
-    if let GameState::StatusPhase(_) = game.state() {
+    if get_status_phase(game).is_some() {
         game.add_info_log_item(&format!("{name} lost an action for the next turn"));
         game.permanent_incident_effects
             .push(PermanentIncidentEffect::LooseAction(player));

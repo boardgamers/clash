@@ -265,7 +265,7 @@ impl MoveSelection {
 }
 
 pub(crate) fn move_units_dialog(rc: &RenderContext) -> StateUpdate {
-    if matches!(rc.game.state(), GameState::Playing)
+    if matches!(rc.game.state, GameState::Playing)
         && cancel_button_with_tooltip(rc, "Back to playing actions")
     {
         return StateUpdate::CloseDialog;

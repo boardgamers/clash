@@ -5,13 +5,13 @@ use crate::city_pieces::Building::Fortress;
 use crate::combat::CombatModifier::{
     CancelFortressExtraDie, CancelFortressIgnoreHit, SteelWeaponsAttacker, SteelWeaponsDefender,
 };
-use crate::combat::{get_combat, Combat, CombatModifier};
+use crate::combat::{get_combat_start, Combat, CombatModifier};
 use crate::combat_listeners::CombatStrength;
 use crate::content::advances::{
     advance_group_builder, AdvanceGroup, METALLURGY, STEEL_WEAPONS, TACTICS,
 };
 use crate::content::custom_phase_actions::PaymentRequest;
-use crate::game::{Game, GameState};
+use crate::game::Game;
 use crate::payment::{PaymentConversion, PaymentOptions};
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
@@ -42,9 +42,7 @@ fn siegecraft() -> AdvanceBuilder {
         .add_payment_request_listener(
             |e| &mut e.on_combat_start,
             0,
-            |game, player, ()| {
-                let c = get_combat(game);
-
+            |game, player, c| {
                 let extra_die = PaymentOptions::sum(2, &[ResourceType::Wood, ResourceType::Gold]);
                 let ignore_hit = PaymentOptions::sum(2, &[ResourceType::Ore, ResourceType::Gold]);
 
@@ -92,8 +90,7 @@ fn siegecraft() -> AdvanceBuilder {
                 if !paid {
                     game.add_to_last_log_item("nothing");
                 }
-                let Some(GameState::Combat(c)) = &mut game.state_stack.last_mut() else { panic!("Invalid state") };
-                c.modifiers.extend(modifiers);
+                get_combat_start(game).modifiers.extend(modifiers);
             },
         )
 }
@@ -106,14 +103,12 @@ fn steel_weapons() -> AdvanceBuilder {
         .add_payment_request_listener(
             |e| &mut e.on_combat_start,
             1,
-            |game, player_index, ()| {
-                let c = get_combat(game);
+            |game, player_index, c| {
                 let player = &game.players[player_index];
 
                 let cost = steel_weapons_cost(game, c, player_index);
                 if cost.is_free() {
-                    let Some(GameState::Combat(c)) = &mut game.state_stack.last_mut() else { panic!("Invalid state") };
-                    add_steel_weapons(player_index, c);
+                    add_steel_weapons(player_index, get_combat_start(game));
                     return None;
                 }
 
@@ -131,11 +126,10 @@ fn steel_weapons() -> AdvanceBuilder {
                 let pile = &s.choice[0];
                 game.add_info_log_item(
                     &format!("{} paid for steel weapons: {}", s.player_name, pile));
-                let Some(GameState::Combat(c)) = &mut game.state_stack.last_mut() else { panic!("Invalid state") };
                 if pile.is_empty() {
                     return;
                 }
-                add_steel_weapons(s.player_index, c);
+                add_steel_weapons(s.player_index, get_combat_start(game));
             },
         )
         .add_player_event_listener(

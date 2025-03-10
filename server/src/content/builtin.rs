@@ -11,11 +11,11 @@ use crate::content::incidents_trojan::{
 use crate::cultural_influence::cultural_influence_resolution;
 use crate::events::EventOrigin;
 use crate::explore::explore_resolution;
-use crate::game::{Game, GameState};
+use crate::game::Game;
 use crate::pirates::{pirates_bonus, pirates_round_bonus};
 use crate::status_phase::{
-    complete_objectives, determine_first_player, draw_cards, free_advance, may_change_government,
-    raze_city, StatusPhaseState,
+    complete_objectives, determine_first_player, draw_cards, free_advance, get_status_phase,
+    may_change_government, raze_city, StatusPhaseState,
 };
 use crate::wonder::on_draw_wonder_card;
 
@@ -99,7 +99,7 @@ pub fn get_builtin(game: &Game, name: &str) -> Builtin {
         .into_iter()
         .find(|builtin| builtin.name == name)
         .or_else(|| {
-            if let GameState::StatusPhase(p) = game.state() {
+            if let Some(p) = get_status_phase(game) {
                 let handler = status_phase_handler(p);
                 if handler.name == name {
                     return Some(handler);

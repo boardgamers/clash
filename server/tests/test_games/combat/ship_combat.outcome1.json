@@ -1,23 +1,13 @@
 {
-  "state": [
-    "Playing",
-    {
-      "Movement": {
-        "movement_actions_left": 1,
-        "moved_units": [
-          7,
-          8
-        ],
-        "current_move": {
-          "Fleet": {
-            "units": [
-              8
-            ]
-          }
-        }
-      }
+  "state": {
+    "Movement": {
+      "movement_actions_left": 1,
+      "moved_units": [
+        7,
+        8
+      ]
     }
-  ],
+  },
   "players": [
     {
       "name": null,
@@ -320,6 +310,18 @@
                     "fighters": 1
                   },
                   "can_retreat": false,
+                  "combat": {
+                    "attacker": 0,
+                    "attacker_position": "C3",
+                    "attackers": [
+                      7,
+                      8
+                    ],
+                    "defender": 1,
+                    "defender_position": "D2",
+                    "retreat": "CanRetreat",
+                    "round": 1
+                  },
                   "defender_casualties": {
                     "fighters": 1
                   },
@@ -401,34 +403,6 @@
             "id": 1,
             "position": "D2",
             "unit_type": "Ship"
-          }
-        },
-        {
-          "op": "replace",
-          "path": "/state/1/Movement/current_move/Fleet/units/0",
-          "value": 7
-        },
-        {
-          "op": "add",
-          "path": "/state/1/Movement/current_move/Fleet/units/1",
-          "value": 8
-        },
-        {
-          "op": "add",
-          "path": "/state/2",
-          "value": {
-            "Combat": {
-              "attacker": 0,
-              "attacker_position": "C3",
-              "attackers": [
-                7,
-                8
-              ],
-              "defender": 1,
-              "defender_position": "D2",
-              "retreat": "CanRetreat",
-              "round": 1
-            }
           }
         }
       ]

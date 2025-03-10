@@ -1,12 +1,10 @@
 {
-  "state": [
-    {
-      "StatusPhase": "ChangeGovernmentType"
-    }
-  ],
+  "state": "Playing",
   "current_events": [
     {
-      "event_type": "StatusPhase",
+      "event_type": {
+        "StatusPhase": "ChangeGovernmentType"
+      },
       "player": 0,
       "last_priority_used": 0,
       "handler": {

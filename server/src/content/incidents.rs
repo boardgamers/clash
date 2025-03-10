@@ -2,8 +2,9 @@ use crate::content::incidects_civil_war::civil_wars;
 use crate::content::incidents_5::successful_year;
 use crate::content::incidents_earthquake::earthquakes;
 use crate::content::incidents_famine::{epidemics, famines, pestilence};
-use crate::content::incidents_good_year::{awesome_years, fantastic_years, good_years};
-use crate::content::incidents_population_boom::population_booms;
+use crate::content::incidents_good_year::{
+    awesome_years, fantastic_years, good_years, population_booms,
+};
 use crate::content::incidents_trade::trades;
 use crate::content::incidents_trojan::trojan_incidents;
 use crate::incident::Incident;
@@ -21,8 +22,6 @@ pub(crate) fn get_all() -> Vec<Incident> {
         good_years(),
         awesome_years(),
         fantastic_years(),
-        // 18+
-        // great persons
         // 27+
         population_booms(),
         // 29+
@@ -35,6 +34,8 @@ pub(crate) fn get_all() -> Vec<Incident> {
         trades(),
         // 51+
         successful_year(),
+        // 18+
+        // great persons
     ]
     .into_iter()
     .flatten()

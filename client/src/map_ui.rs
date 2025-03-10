@@ -3,6 +3,7 @@ use crate::client_state::{ActiveDialog, State, StateUpdate, MAX_OFFSET, MIN_OFFS
 use crate::dialog_ui::{cancel_button_pos, ok_button, OkTooltip};
 use crate::layout_ui::{bottom_center_texture, bottom_right_texture, icon_pos};
 use crate::move_ui::{movable_units, MoveDestination, MoveIntent};
+use crate::player_ui::get_combat;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
 use crate::{collect_ui, hex_ui, unit_ui};
@@ -11,7 +12,6 @@ use macroquad::prelude::*;
 use server::action::Action;
 use server::combat::Combat;
 use server::content::custom_phase_actions::CurrentEventResponse;
-use server::game::GameState;
 use server::map::{Rotation, Terrain, UnexploredBlock};
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
@@ -74,7 +74,8 @@ pub fn draw_map(rc: &RenderContext) -> StateUpdate {
             return update;
         }
     }
-    if let GameState::Combat(c) = &game.state() {
+    // get from current event
+    if let Some(c) = get_combat(game) {
         draw_combat_arrow(c);
     }
     let state = &rc.state;

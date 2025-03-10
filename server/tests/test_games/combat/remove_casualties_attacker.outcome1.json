@@ -1,18 +1,15 @@
 {
-  "state": [
-    "Playing",
-    {
-      "Movement": {
-        "movement_actions_left": 1,
-        "moved_units": [
-          0,
-          1,
-          2,
-          3
-        ]
-      }
+  "state": {
+    "Movement": {
+      "movement_actions_left": 1,
+      "moved_units": [
+        0,
+        1,
+        2,
+        3
+      ]
     }
-  ],
+  },
   "players": [
     {
       "name": null,
@@ -238,6 +235,20 @@
                     "fighters": 2
                   },
                   "can_retreat": false,
+                  "combat": {
+                    "attacker": 0,
+                    "attacker_position": "C2",
+                    "attackers": [
+                      0,
+                      1,
+                      2,
+                      3
+                    ],
+                    "defender": 1,
+                    "defender_position": "C1",
+                    "retreat": "CanRetreat",
+                    "round": 1
+                  },
                   "defender_casualties": {
                     "fighters": 2
                   },
@@ -394,26 +405,6 @@
             "id": 1,
             "position": "C1",
             "unit_type": "Infantry"
-          }
-        },
-        {
-          "op": "add",
-          "path": "/state/2",
-          "value": {
-            "Combat": {
-              "attacker": 0,
-              "attacker_position": "C2",
-              "attackers": [
-                0,
-                1,
-                2,
-                3
-              ],
-              "defender": 1,
-              "defender_position": "C1",
-              "retreat": "CanRetreat",
-              "round": 1
-            }
           }
         }
       ]

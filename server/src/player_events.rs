@@ -1,7 +1,7 @@
 use crate::advance::Advance;
 use crate::collect::{CollectContext, CollectInfo};
 use crate::combat::Combat;
-use crate::combat_listeners::{CombatResultInfo, CombatRoundResult, CombatStrength};
+use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatStrength};
 use crate::events::Event;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
@@ -9,6 +9,7 @@ use crate::incident::{PassedIncident, PermanentIncidentEffect};
 use crate::map::Terrain;
 use crate::payment::PaymentOptions;
 use crate::playing_actions::{PlayingActionType, Recruit};
+use crate::status_phase::StatusPhaseState;
 use crate::unit::Units;
 use crate::{
     city::City, city_pieces::Building, player::Player, position::Position,
@@ -46,13 +47,13 @@ pub(crate) struct PlayerEvents {
     pub collect_options: Event<CollectInfo, CollectContext, Game>,
     pub collect_total: Event<CollectInfo>,
 
-    pub on_status_phase: CurrentEvent,
+    pub on_status_phase: CurrentEvent<StatusPhaseState>,
     pub on_turn_start: CurrentEvent,
     pub on_incident: CurrentEvent<IncidentInfo>,
-    pub on_combat_start: CurrentEvent,
+    pub on_combat_start: CurrentEvent<Combat>,
     pub on_combat_round: Event<CombatStrength, Combat, Game>,
-    pub on_combat_round_end: CurrentEvent<CombatRoundResult>,
-    pub on_combat_end: CurrentEvent<CombatResultInfo>,
+    pub on_combat_round_end: CurrentEvent<CombatRoundEnd>,
+    pub on_combat_end: CurrentEvent<CombatEnd>,
 }
 
 impl PlayerEvents {

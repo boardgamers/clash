@@ -1,7 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::barbarians;
 use crate::city::MoodState;
-use crate::combat::get_combat;
 use crate::content::builtin::Builtin;
 use crate::content::custom_phase_actions::{
     new_position_request, PaymentRequest, ResourceRewardRequest, UnitsRequest,
@@ -22,7 +21,7 @@ pub(crate) fn pirates_round_bonus() -> Builtin {
             |event| &mut event.on_combat_round_end,
             3,
             |game, player_index, r| {
-                let c = get_combat(game);
+                let c = &r.combat;
                 if c.is_sea_battle(game)
                     && c.opponent(player_index) == get_pirates_player(game).index
                 {

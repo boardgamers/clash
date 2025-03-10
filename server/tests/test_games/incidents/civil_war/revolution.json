@@ -1,0 +1,295 @@
+{
+  "state": "Playing",
+  "players": [
+    {
+      "name": null,
+      "id": 0,
+      "resources": {
+        "food": 1,
+        "wood": 6,
+        "ore": 6,
+        "ideas": 5,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "fortress": 0,
+            "temple": 1,
+            "wonders": [
+              "Pyramids"
+            ]
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C2"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B2"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 1
+        },
+        {
+          "position": "C2",
+          "unit_type": "Elephant",
+          "id": 3
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 6
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 7
+        }
+      ],
+      "civilization": "test0",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [
+        "Farming",
+        "Mining",
+        "State Religion",
+        "Tactics",
+        "Voting"
+      ],
+      "unlocked_special_advance": [],
+      "wonders_build": [
+        "Pyramids"
+      ],
+      "incident_tokens": 1,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 8
+    },
+    {
+      "name": null,
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A3"
+        },
+        {
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A4"
+        }
+      ],
+      "units": [],
+      "civilization": "test1",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 2
+    },
+    {
+      "name": null,
+      "id": 2,
+      "resources": {},
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [],
+      "units": [],
+      "civilization": "Barbarians",
+      "active_leader": null,
+      "available_leaders": [],
+      "advances": [],
+      "unlocked_special_advance": [],
+      "wonders_build": [],
+      "incident_tokens": 3,
+      "completed_objectives": [],
+      "captured_leaders": [],
+      "event_victory_points": 0.0,
+      "wonder_cards": [],
+      "next_unit_id": 0
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Water"
+      ],
+      [
+        "A3",
+        "Mountain"
+      ],
+      [
+        "A4",
+        "Mountain"
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "D2",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "action_log": [],
+  "action_log_index": 0,
+  "log": [],
+  "undo_limit": 0,
+  "actions_left": 3,
+  "successful_cultural_influence": false,
+  "round": 1,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+  ],
+  "dice_roll_log": [
+    10
+  ],
+  "dropped_players": [],
+  "wonders_left": [],
+  "wonder_amount_left": 1,
+  "incidents_left": [
+    38
+  ]
+}

@@ -13,7 +13,6 @@ use server::{
     playing_actions::PlayingAction::*,
     position::Position,
     resource_pile::ResourcePile,
-    unit::MovementAction::*,
 };
 use std::{collections::HashMap, vec};
 
@@ -151,7 +150,7 @@ fn basic_actions() {
 
     let movement_action = move_action(vec![0], founded_city_position);
     let game = game_api::execute(game, movement_action, 0);
-    let game = game_api::execute(game, Action::Movement(Stop), 0);
+    // move stopped automatically - no more movable units left
     let player = &game.players[0];
     assert_eq!(founded_city_position, player.units[0].position);
 
