@@ -1,34 +1,15 @@
 {
-  "state": [
-    "Playing",
-    {
-      "Movement": {
-        "movement_actions_left": 1,
-        "moved_units": [
-          0,
-          1,
-          2,
-          3
-        ]
-      }
-    },
-    {
-      "Combat": {
-        "round": 1,
-        "defender": 1,
-        "defender_position": "C1",
-        "attacker": 0,
-        "attacker_position": "C2",
-        "attackers": [
-          0,
-          1,
-          2,
-          3
-        ],
-        "retreat": "CanRetreat"
-      }
+  "state": {
+    "Movement": {
+      "movement_actions_left": 1,
+      "moved_units": [
+        0,
+        1,
+        2,
+        3
+      ]
     }
-  ],
+  },
   "current_events": [
     {
       "event_type": {
@@ -40,7 +21,21 @@
             "fighters": 2
           },
           "can_retreat": false,
-          "final_result": "AttackerWins"
+          "final_result": "AttackerWins",
+          "combat": {
+            "round": 1,
+            "defender": 1,
+            "defender_position": "C1",
+            "attacker": 0,
+            "attacker_position": "C2",
+            "attackers": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "retreat": "CanRetreat"
+          }
         }
       },
       "player": 0,

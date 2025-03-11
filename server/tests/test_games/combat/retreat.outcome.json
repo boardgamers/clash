@@ -1,35 +1,30 @@
 {
-  "state": [
-    "Playing",
-    {
-      "Movement": {
-        "movement_actions_left": 1,
-        "moved_units": [
-          0
-        ]
-      }
-    },
-    {
-      "Combat": {
-        "round": 1,
-        "defender": 1,
-        "defender_position": "C1",
-        "attacker": 0,
-        "attacker_position": "C2",
-        "attackers": [
-          0
-        ],
-        "retreat": "CanRetreat"
-      }
+  "state": {
+    "Movement": {
+      "movement_actions_left": 1,
+      "moved_units": [
+        0
+      ]
     }
-  ],
+  },
   "current_events": [
     {
       "event_type": {
         "CombatRoundEnd": {
           "attacker_casualties": {},
           "defender_casualties": {},
-          "can_retreat": true
+          "can_retreat": true,
+          "combat": {
+            "round": 1,
+            "defender": 1,
+            "defender_position": "C1",
+            "attacker": 0,
+            "attacker_position": "C2",
+            "attackers": [
+              0
+            ],
+            "retreat": "CanRetreat"
+          }
         }
       },
       "player": 0,

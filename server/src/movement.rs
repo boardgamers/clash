@@ -7,8 +7,8 @@ use crate::resource_pile::ResourcePile;
 use crate::unit::Unit;
 
 use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, MOVEMENT_ACTIONS, SHIP_CAPACITY, STACK_LIMIT};
-use crate::game::Game;
 use crate::game::GameState::Movement;
+use crate::game::{Game, GameState};
 use crate::player::Player;
 use crate::player_events::MoveInfo;
 use crate::position::Position;
@@ -64,8 +64,8 @@ impl MoveState {
     }
 }
 
-pub(crate) fn take_move_state(game: &mut Game) -> MoveState {
-    if let Movement(m) = game.pop_state() {
+pub(crate) fn get_move_state(game: &mut Game) -> &mut MoveState {
+    if let Movement(m) = &mut game.state {
         m
     } else {
         panic!("no move state to pop");
@@ -73,14 +73,13 @@ pub(crate) fn take_move_state(game: &mut Game) -> MoveState {
 }
 
 pub(crate) fn stop_current_move(game: &mut Game) {
-    if let Movement(_) = game.state() {
-        let mut move_state = take_move_state(game);
+    if let Movement(_) = game.state {
+        let move_state = get_move_state(game);
         move_state.current_move = CurrentMove::None;
 
         if move_state.movement_actions_left == 0 {
-            return;
+            game.state = GameState::Playing;
         }
-        game.push_state(Movement(move_state));
     }
 }
 
@@ -135,7 +134,7 @@ pub fn move_units_destinations(
     start: Position,
     embark_carrier_id: Option<u32>,
 ) -> Result<Vec<MoveRoute>, String> {
-    let (moved_units, movement_actions_left, current_move) = if let Movement(m) = &game.state() {
+    let (moved_units, movement_actions_left, current_move) = if let Movement(m) = &game.state {
         (&m.moved_units, m.movement_actions_left, &m.current_move)
     } else {
         (&vec![], 1, &CurrentMove::None)

@@ -8,13 +8,7 @@ use crate::content::custom_phase_actions::{
 };
 use crate::payment::PaymentOptions;
 use crate::player_events::{CurrentEvent, PlayerEvents};
-use crate::{
-    content::advances,
-    game::{Game, GameState::*},
-    player::Player,
-    resource_pile::ResourcePile,
-    utils,
-};
+use crate::{content::advances, game::Game, player::Player, resource_pile::ResourcePile, utils};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -43,40 +37,41 @@ pub enum ChangeGovernmentType {
 
 pub const CHANGE_GOVERNMENT_COST: ResourcePile = ResourcePile::new(0, 0, 0, 0, 0, 1, 1);
 
+#[must_use]
+pub fn get_status_phase(game: &Game) -> Option<&StatusPhaseState> {
+    game.current_events.iter().find_map(|e| {
+        if let CurrentEventType::StatusPhase(s) = &e.event_type {
+            Some(s)
+        } else {
+            None
+        }
+    })
+}
+
 pub(crate) fn enter_status_phase(game: &mut Game) {
     game.add_info_log_group(format!(
         "The game has entered the {} status phase",
         utils::ordinal_number(game.age)
     ));
-    game.pop_state();
-    game.push_state(StatusPhase(StatusPhaseState::CompleteObjectives));
-    play_status_phase(game);
+    play_status_phase(game, StatusPhaseState::CompleteObjectives);
 }
 
-pub(crate) fn play_status_phase(game: &mut Game) {
+pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
     use StatusPhaseState::*;
 
     loop {
-        let StatusPhase(phase) = game.state().clone() else {
-            panic!("invalid state")
-        };
-
         if game.trigger_current_event_with_listener(
             &game.human_players(game.starting_player_index),
             |events| &mut events.on_status_phase,
             &status_phase_handler(&phase).listeners,
-            &(),
-            |()| CurrentEventType::StatusPhase,
+            &phase,
+            CurrentEventType::StatusPhase,
             None,
         ) {
             return;
         }
 
-        let StatusPhase(phase) = game.pop_state() else {
-            panic!("invalid state")
-        };
-
-        let next_phase = match phase {
+        phase = match phase {
             CompleteObjectives => {
                 if game.age == AGES
                     || game
@@ -105,7 +100,6 @@ pub(crate) fn play_status_phase(game: &mut Game) {
                 return;
             }
         };
-        game.push_state(StatusPhase(next_phase));
     }
 }
 
@@ -143,7 +137,7 @@ pub(crate) fn draw_cards() -> Builtin {
         .add_player_event_listener(
             |event| &mut event.on_status_phase,
             0,
-            |_game, _p, ()| {
+            |_game, _p, _| {
                 // every player draws 1 action card and 1 objective card
             },
         )
@@ -321,8 +315,8 @@ pub(crate) fn determine_first_player() -> Builtin {
         .add_player_request(
             |event| &mut event.on_status_phase,
             0,
-            |game, player_index, ()| {
-                if let StatusPhase(StatusPhaseState::DetermineFirstPlayer(want)) = game.state() {
+            |game, player_index, phase| {
+                if let StatusPhaseState::DetermineFirstPlayer(want) = phase {
                     (*want == player_index).then_some(PlayerRequest::new(
                         game.human_players(game.starting_player_index),
                         "Determine the first player",

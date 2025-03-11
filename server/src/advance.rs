@@ -187,13 +187,16 @@ pub(crate) fn advance_with_incident_token(
 }
 
 pub(crate) fn gain_advance(game: &mut Game, player_index: usize, info: &AdvanceInfo) {
-    if game.trigger_current_event(
-        &[player_index],
-        |e| &mut e.on_advance,
-        info,
-        CurrentEventType::Advance,
-        None,
-    ) {
+    if game
+        .trigger_current_event(
+            &[player_index],
+            |e| &mut e.on_advance,
+            info,
+            CurrentEventType::Advance,
+            None,
+        )
+        .is_none()
+    {
         return;
     }
     let player = &mut game.players[player_index];

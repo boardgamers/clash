@@ -1,22 +1,19 @@
 {
-  "state": [
-    "Playing",
-    {
-      "Movement": {
-        "movement_actions_left": 1,
-        "moved_units": [
-          3,
-          4
-        ],
-        "current_move": {
-          "Embark": {
-            "source": "B3",
-            "destination": "C3"
-          }
+  "state": {
+    "Movement": {
+      "movement_actions_left": 1,
+      "moved_units": [
+        3,
+        4
+      ],
+      "current_move": {
+        "Embark": {
+          "source": "B3",
+          "destination": "C3"
         }
       }
     }
-  ],
+  },
   "players": [
     {
       "name": null,
@@ -369,16 +366,16 @@
         },
         {
           "op": "replace",
-          "path": "/state/1/Movement/movement_actions_left",
+          "path": "/state/Movement/movement_actions_left",
           "value": 2
         },
         {
           "op": "remove",
-          "path": "/state/1/Movement/current_move"
+          "path": "/state/Movement/current_move"
         },
         {
           "op": "remove",
-          "path": "/state/1/Movement/moved_units"
+          "path": "/state/Movement/moved_units"
         }
       ]
     }

@@ -1,12 +1,10 @@
 {
-  "state": [
-    {
-      "StatusPhase": "FreeAdvance"
-    }
-  ],
+  "state": "Playing",
   "current_events": [
     {
-      "event_type": "StatusPhase",
+      "event_type": {
+        "StatusPhase": "FreeAdvance"
+      },
       "player": 1,
       "last_priority_used": 0,
       "handler": {

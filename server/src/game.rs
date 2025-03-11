@@ -1,5 +1,5 @@
 use crate::ability_initializer::AbilityListeners;
-use crate::combat::{Combat, CombatDieRoll, COMBAT_DIE_SIDES};
+use crate::combat::{CombatDieRoll, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
 use crate::content::builtin;
 use crate::content::civilizations::{BARBARIANS, PIRATES};
@@ -23,7 +23,6 @@ use crate::{
     map::{Map, MapData},
     player::{Player, PlayerData},
     position::Position,
-    status_phase::StatusPhaseState::{self},
     wonder::Wonder,
 };
 use itertools::Itertools;
@@ -33,7 +32,7 @@ use std::collections::HashMap;
 use std::vec;
 
 pub struct Game {
-    pub state_stack: Vec<GameState>,
+    pub state: GameState,
     pub current_events: Vec<CurrentEventState>,
     // in turn order starting from starting_player_index and wrapping around
     pub players: Vec<Player>,
@@ -124,7 +123,7 @@ impl Game {
         };
 
         let mut game = Self {
-            state_stack: vec![GameState::Playing],
+            state: GameState::Playing,
             current_events: Vec::new(),
             players,
             map,
@@ -170,7 +169,7 @@ impl Game {
     #[must_use]
     pub fn from_data(data: GameData) -> Self {
         let mut game = Self {
-            state_stack: data.state_stack,
+            state: data.state,
             players: Vec::new(),
             map: Map::from_data(data.map),
             starting_player_index: data.starting_player_index,
@@ -207,7 +206,7 @@ impl Game {
     #[must_use]
     pub fn data(self) -> GameData {
         GameData {
-            state_stack: self.state_stack,
+            state: self.state,
             current_events: self.current_events,
             players: self.players.into_iter().map(Player::data).collect(),
             map: self.map.data(),
@@ -240,7 +239,7 @@ impl Game {
     #[must_use]
     pub fn cloned_data(&self) -> GameData {
         GameData {
-            state_stack: self.state_stack.clone(),
+            state: self.state.clone(),
             current_events: self.current_events.clone(),
             players: self.players.iter().map(Player::cloned_data).collect(),
             map: self.map.cloned_data(),
@@ -319,19 +318,6 @@ impl Game {
         }
     }
 
-    #[must_use]
-    pub fn state(&self) -> &GameState {
-        self.state_stack.last().unwrap_or(&GameState::Finished)
-    }
-
-    pub(crate) fn push_state(&mut self, state: GameState) {
-        self.state_stack.push(state);
-    }
-
-    pub(crate) fn pop_state(&mut self) -> GameState {
-        self.state_stack.pop().expect("game has ended")
-    }
-
     ///
     /// # Panics
     /// Panics if the player does not have events
@@ -379,7 +365,9 @@ impl Game {
             (listeners.initializer)(self, *p);
         }
 
-        let return_early = self.trigger_current_event(players, event, event_type, store_type, log);
+        let return_early = self
+            .trigger_current_event(players, event, event_type, store_type, log)
+            .is_none();
 
         for p in players {
             (listeners.deinitializer)(self, *p);
@@ -394,21 +382,21 @@ impl Game {
         details: &V,
         to_event_type: impl Fn(V) -> CurrentEventType,
         log: Option<&str>,
-    ) -> bool
+    ) -> Option<CurrentEventType>
     where
         V: Clone,
     {
-        let current_event_details = to_event_type(details.clone());
+        let current_event_type = to_event_type(details.clone());
         if self
             .current_events
             .last()
-            .is_none_or(|s| s.event_type != current_event_details)
+            .is_none_or(|s| s.event_type != current_event_type)
         {
             if let Some(log) = log {
                 self.add_info_log_group(log.to_string());
             }
             self.current_events
-                .push(CurrentEventState::new(players[0], current_event_details));
+                .push(CurrentEventState::new(players[0], current_event_type));
         }
         let state = self.current_event();
 
@@ -418,7 +406,7 @@ impl Game {
             };
             self.trigger_event_with_game_value(player_index, event, &info, details);
             if self.current_event().player.handler.is_some() {
-                return true;
+                return None;
             }
             let state = self.current_event_mut();
             state.players_used.push(player_index);
@@ -426,8 +414,7 @@ impl Game {
                 state.player = CurrentEventPlayer::new(p);
             }
         }
-        self.current_events.pop();
-        false
+        self.current_events.pop().map(|s| s.event_type)
     }
 
     fn remaining_current_event_players(players: &[usize], state: &CurrentEventState) -> Vec<usize> {
@@ -615,7 +602,6 @@ impl Game {
     pub fn next_age(&mut self) {
         self.age += 1;
         self.current_player_index = self.starting_player_index;
-        self.push_state(GameState::Playing);
         self.add_info_log_group(format!("Age {} has started", self.age));
         self.add_info_log_group(String::from("Round 1/3"));
     }
@@ -749,7 +735,7 @@ impl Game {
                 self.players[killer].captured_leaders.push(leader);
             }
         }
-        if let Some(GameState::Movement(m)) = self.state_stack.last_mut() {
+        if let GameState::Movement(m) = &mut self.state {
             if let CurrentMove::Fleet { units } = &mut m.current_move {
                 units.retain(|&id| id != unit_id);
             }
@@ -763,8 +749,7 @@ impl Game {
 
 #[derive(Serialize, Deserialize, PartialEq)]
 pub struct GameData {
-    #[serde(rename = "state")]
-    state_stack: Vec<GameState>,
+    state: GameState,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     current_events: Vec<CurrentEventState>,
@@ -806,9 +791,7 @@ fn is_string_zero(s: &String) -> bool {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum GameState {
     Playing,
-    StatusPhase(StatusPhaseState),
     Movement(MoveState),
-    Combat(Combat),
     Finished,
 }
 

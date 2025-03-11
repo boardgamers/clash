@@ -65,13 +65,16 @@ fn set_active_leader(game: &mut Game, leader_name: String, player_index: usize) 
 }
 
 pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: &Recruit) {
-    if game.trigger_current_event(
-        &[player_index],
-        |events| &mut events.on_recruit,
-        r,
-        CurrentEventType::Recruit,
-        None,
-    ) {
+    if game
+        .trigger_current_event(
+            &[player_index],
+            |events| &mut events.on_recruit,
+            r,
+            CurrentEventType::Recruit,
+            None,
+        )
+        .is_none()
+    {
         return;
     }
     let city_position = r.city_position;

@@ -1,7 +1,8 @@
 use crate::action::execute_custom_phase_action;
 use crate::barbarians::BarbariansEventState;
 use crate::city_pieces::Building;
-use crate::combat_listeners::{CombatResult, CombatRoundResult};
+use crate::combat::Combat;
+use crate::combat_listeners::{CombatEnd, CombatRoundEnd};
 use crate::events::EventOrigin;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
@@ -11,7 +12,7 @@ use crate::player_events::{AdvanceInfo, IncidentInfo};
 use crate::playing_actions::Recruit;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use crate::status_phase::ChangeGovernmentType;
+use crate::status_phase::{ChangeGovernmentType, StatusPhaseState};
 use crate::unit::UnitType;
 use itertools::Itertools;
 use num::Zero;
@@ -160,10 +161,10 @@ impl CurrentEventPlayer {
 pub enum CurrentEventType {
     ExploreResolution(ExploreResolutionState),
     InfluenceCultureResolution(ResourcePile),
-    CombatStart,
-    CombatEnd(CombatResult),
-    CombatRoundEnd(CombatRoundResult),
-    StatusPhase,
+    CombatStart(Combat),
+    CombatRoundEnd(CombatRoundEnd),
+    CombatEnd(CombatEnd),
+    StatusPhase(StatusPhaseState),
     TurnStart,
     Advance(AdvanceInfo),
     Construct(Building),

@@ -1,16 +1,13 @@
 {
-  "state": [
-    "Playing",
-    {
-      "Movement": {
-        "movement_actions_left": 1,
-        "moved_units": [
-          1,
-          2
-        ]
-      }
+  "state": {
+    "Movement": {
+      "movement_actions_left": 1,
+      "moved_units": [
+        1,
+        2
+      ]
     }
-  ],
+  },
   "players": [
     {
       "name": null,
@@ -296,12 +293,12 @@
         },
         {
           "op": "replace",
-          "path": "/state/1/Movement/movement_actions_left",
+          "path": "/state/Movement/movement_actions_left",
           "value": 2
         },
         {
           "op": "remove",
-          "path": "/state/1/Movement/moved_units"
+          "path": "/state/Movement/moved_units"
         }
       ]
     }

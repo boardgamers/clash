@@ -112,6 +112,27 @@ fn test_barbarians_recapture_city() {
 }
 
 #[test]
+fn test_exhausted_land() {
+    JSON.test(
+        "exhausted_land",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Response(CurrentEventResponse::SelectAdvance("Storage".to_string())),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::Response(CurrentEventResponse::SelectPositions(vec![
+                    Position::from_offset("B2"),
+                ])),
+            ),
+        ],
+    );
+}
+
+const FAMINE: JsonTest = JsonTest::child("incidents", "famine");
+
+#[test]
 fn test_pestilence() {
     let cons = Action::Playing(Construct(playing_actions::Construct {
         city_position: Position::from_offset("C2"),
@@ -119,7 +140,7 @@ fn test_pestilence() {
         payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
         port_position: None,
     }));
-    JSON.test(
+    FAMINE.test(
         "pestilence",
         vec![
             TestAction::not_undoable(
@@ -158,7 +179,7 @@ fn test_pestilence() {
 
 #[test]
 fn test_famine() {
-    JSON.test(
+    FAMINE.test(
         "famine",
         vec![TestAction::not_undoable(
             0,
@@ -172,7 +193,7 @@ fn test_famine() {
 
 #[test]
 fn test_epidemics() {
-    JSON.test(
+    FAMINE.test(
         "epidemics",
         vec![
             TestAction::not_undoable(
@@ -190,9 +211,11 @@ fn test_epidemics() {
     );
 }
 
+const GOOD_YEAR: JsonTest = JsonTest::child("incidents", "good_year");
+
 #[test]
 fn test_good_year_with_player_select() {
-    JSON.test(
+    GOOD_YEAR.test(
         "good_year",
         vec![
             TestAction::not_undoable(
@@ -207,28 +230,11 @@ fn test_good_year_with_player_select() {
     );
 }
 
-#[test]
-fn test_exhausted_land() {
-    JSON.test(
-        "exhausted_land",
-        vec![
-            TestAction::not_undoable(
-                0,
-                Action::Response(CurrentEventResponse::SelectAdvance("Storage".to_string())),
-            ),
-            TestAction::not_undoable(
-                0,
-                Action::Response(CurrentEventResponse::SelectPositions(vec![
-                    Position::from_offset("B2"),
-                ])),
-            ),
-        ],
-    );
-}
+const EARTHQUAKE: JsonTest = JsonTest::child("incidents", "earthquake");
 
 #[test]
 fn test_volcano() {
-    JSON.test(
+    EARTHQUAKE.test(
         "volcano",
         vec![
             TestAction::not_undoable(
@@ -250,7 +256,7 @@ fn test_volcano() {
 
 #[test]
 fn test_flood() {
-    JSON.test(
+    EARTHQUAKE.test(
         "flood",
         vec![
             TestAction::not_undoable(
@@ -278,7 +284,7 @@ fn test_flood() {
 
 #[test]
 fn test_earthquake() {
-    JSON.test(
+    EARTHQUAKE.test(
         "earthquake",
         vec![
             TestAction::not_undoable(
@@ -317,9 +323,11 @@ fn test_earthquake() {
     );
 }
 
+const CIVIL_WAR: JsonTest = JsonTest::child("incidents", "civil_war");
+
 #[test]
 fn test_migration() {
-    JSON.test(
+    CIVIL_WAR.test(
         "migration",
         vec![TestAction::not_undoable(
             0,
@@ -333,7 +341,7 @@ fn test_migration() {
 
 #[test]
 fn test_civil_war() {
-    JSON.test(
+    CIVIL_WAR.test(
         "civil_war",
         vec![TestAction::not_undoable(
             0,
@@ -347,7 +355,7 @@ fn test_civil_war() {
 
 #[test]
 fn test_revolution() {
-    JSON.test(
+    CIVIL_WAR.test(
         "revolution",
         vec![
             TestAction::not_undoable(
@@ -380,7 +388,7 @@ fn test_revolution() {
 
 #[test]
 fn test_uprising() {
-    JSON.test(
+    CIVIL_WAR.test(
         "uprising",
         vec![
             TestAction::not_undoable(
@@ -402,7 +410,7 @@ fn test_uprising() {
 
 #[test]
 fn test_envoy() {
-    JSON.test(
+    CIVIL_WAR.test(
         "envoy",
         vec![
             TestAction::not_undoable(
@@ -424,9 +432,11 @@ fn test_envoy() {
     );
 }
 
+const TROJAN: JsonTest = JsonTest::child("incidents", "trojan");
+
 #[test]
 fn test_trojan_horse() {
-    JSON.test(
+    TROJAN.test(
         "trojan_horse",
         vec![
             TestAction::not_undoable(
@@ -452,7 +462,7 @@ fn test_trojan_horse() {
 
 #[test]
 fn test_solar_eclipse() {
-    JSON.test(
+    TROJAN.test(
         "solar_eclipse",
         vec![
             TestAction::not_undoable(
@@ -472,7 +482,7 @@ fn test_solar_eclipse() {
 
 #[test]
 fn test_anarchy() {
-    JSON.test(
+    TROJAN.test(
         "anarchy",
         vec![
             TestAction::not_undoable(
@@ -493,9 +503,11 @@ fn test_anarchy() {
     );
 }
 
+const TRADE: JsonTest = JsonTest::child("incidents", "trade");
+
 #[test]
 fn test_scientific_trade() {
-    JSON.test(
+    TRADE.test(
         "scientific_trade",
         vec![TestAction::not_undoable(
             0,
@@ -509,7 +521,7 @@ fn test_scientific_trade() {
 
 #[test]
 fn test_flourishing_trade() {
-    JSON.test(
+    TRADE.test(
         "flourishing_trade",
         vec![TestAction::not_undoable(
             0,
@@ -523,7 +535,7 @@ fn test_flourishing_trade() {
 
 #[test]
 fn test_era_of_stability() {
-    JSON.test(
+    TRADE.test(
         "era_of_stability",
         vec![
             TestAction::not_undoable(
@@ -551,7 +563,7 @@ fn test_era_of_stability() {
 
 #[test]
 fn test_reformation() {
-    JSON.test(
+    TRADE.test(
         "reformation",
         vec![
             TestAction::not_undoable(

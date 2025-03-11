@@ -1,7 +1,5 @@
 {
-  "state": [
-    "Playing"
-  ],
+"state": "Playing",
   "current_events": [
     {
       "event_type": "TurnStart",

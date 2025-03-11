@@ -1,24 +1,22 @@
 {
-  "state": [
-    "Playing",
-    {
-      "Combat": {
-        "round": 1,
-        "defender": 2,
-        "defender_position": "C3",
-        "attacker": 0,
-        "attacker_position": "C2",
-        "attackers": [
-          12
-        ],
-        "retreat": "CannotRetreat"
-      }
-    }
-  ],
+"state": "Playing",
   "current_events": [
     {
       "event_type": {
-        "CombatEnd": "AttackerWins"
+        "CombatEnd": {
+          "result": "AttackerWins",
+          "combat": {
+            "round": 1,
+            "defender": 2,
+            "defender_position": "C3",
+            "attacker": 0,
+            "attacker_position": "C2",
+            "attackers": [
+              12
+            ],
+            "retreat": "CannotRetreat"
+          }
+        }
       },
       "player": 0,
       "last_priority_used": 3,

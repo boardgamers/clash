@@ -1,7 +1,5 @@
 {
-  "state": [
-    "Playing"
-  ],
+"state": "Playing",
   "players": [
     {
       "name": null,
@@ -312,7 +310,20 @@
           "value": [
             {
               "event_type": {
-                "CombatEnd": "AttackerWins"
+                "CombatEnd": {
+                  "combat": {
+                    "attacker": 0,
+                    "attacker_position": "C2",
+                    "attackers": [
+                      12
+                    ],
+                    "defender": 2,
+                    "defender_position": "C3",
+                    "retreat": "CannotRetreat",
+                    "round": 1
+                  },
+                  "result": "AttackerWins"
+                }
               },
               "handler": {
                 "origin": {
@@ -352,23 +363,6 @@
           "op": "replace",
           "path": "/players/0/resources/culture_tokens",
           "value": 10
-        },
-        {
-          "op": "add",
-          "path": "/state/1",
-          "value": {
-            "Combat": {
-              "attacker": 0,
-              "attacker_position": "C2",
-              "attackers": [
-                12
-              ],
-              "defender": 2,
-              "defender_position": "C3",
-              "retreat": "CannotRetreat",
-              "round": 1
-            }
-          }
         }
       ]
     }

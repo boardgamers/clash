@@ -552,7 +552,7 @@ impl State {
                 }
             };
         }
-        match &game.state() {
+        match &game.state {
             GameState::Playing | GameState::Finished => ActiveDialog::None,
             GameState::Movement(move_state) => ActiveDialog::MoveUnits(MoveSelection::new(
                 game.active_player(),
@@ -561,7 +561,6 @@ impl State {
                 MoveIntent::Land, // is not used, because no tile is focused
                 &move_state.current_move,
             )),
-            GameState::Combat(_) | GameState::StatusPhase(_) => panic!("should be in custom phase"),
         }
     }
 

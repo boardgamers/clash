@@ -1,14 +1,12 @@
 {
-  "state": [
-    {
-      "StatusPhase": {
-        "DetermineFirstPlayer": 0
-      }
-    }
-  ],
+  "state": "Playing",
   "current_events": [
     {
-      "event_type": "StatusPhase",
+      "event_type": {
+        "StatusPhase": {
+          "DetermineFirstPlayer": 0
+        }
+      },
       "player": 0,
       "last_priority_used": 0,
       "handler": {

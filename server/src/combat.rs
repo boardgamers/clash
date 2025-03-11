@@ -2,11 +2,11 @@ use crate::city::City;
 use crate::city::MoodState::Angry;
 use crate::city_pieces::Building;
 use crate::combat_listeners::{
-    Casualties, CombatResult, CombatResultInfo, CombatRoundResult, CombatStrength,
+    Casualties, CombatEnd, CombatResult, CombatRoundEnd, CombatStrength,
 };
 use crate::consts::SHIP_CAPACITY;
 use crate::content::custom_phase_actions::CurrentEventType;
-use crate::game::{Game, GameState};
+use crate::game::Game;
 use crate::movement::{move_units, stop_current_move};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -181,38 +181,44 @@ pub fn initiate_combat(
         attackers,
         can_retreat,
     );
-    game.push_state(GameState::Combat(combat));
-    start_combat(game);
+    start_combat(game, combat);
 }
 
-pub(crate) fn start_combat(game: &mut Game) {
+pub(crate) fn start_combat(game: &mut Game, mut combat: Combat) {
     game.lock_undo(); // combat should not be undoable
     stop_current_move(game);
 
-    let combat = get_combat(game);
-    let attacker = combat.attacker;
-    let defender = combat.defender;
-
-    if game.trigger_current_event(
-        &[attacker, defender],
+    match game.trigger_current_event(
+        &[combat.attacker, combat.defender],
         |events| &mut events.on_combat_start,
-        &(),
-        |()| CurrentEventType::CombatStart,
+        &combat,
+        CurrentEventType::CombatStart,
         None,
     ) {
-        return;
+        None => return,
+        Some(CurrentEventType::CombatStart(c)) => combat = c,
+        _ => panic!("Invalid event type"),
     }
 
-    let c = take_combat(game);
-    combat_loop(game, c);
+    combat_loop(game, combat);
 }
 
 #[must_use]
-pub(crate) fn get_combat(game: &Game) -> &Combat {
-    let GameState::Combat(c) = &game.state() else {
-        panic!("Invalid state")
-    };
-    c
+pub(crate) fn get_combat_start(game: &mut Game) -> &mut Combat {
+    if let CurrentEventType::CombatStart(e) = &mut game.current_event_mut().event_type {
+        e
+    } else {
+        panic!("Invalid event type")
+    }
+}
+
+#[must_use]
+pub(crate) fn get_combat_round_end(game: &mut Game) -> &mut CombatRoundEnd {
+    if let CurrentEventType::CombatRoundEnd(e) = &mut game.current_event_mut().event_type {
+        e
+    } else {
+        panic!("Invalid event type")
+    }
 }
 
 pub(crate) fn combat_loop(game: &mut Game, mut c: Combat) {
@@ -286,14 +292,13 @@ pub(crate) fn combat_loop(game: &mut Game, mut c: Combat) {
             && attacker_hits < active_defenders.len() as u8
             && defender_hits < active_attackers.len() as u8;
 
-        let result = CombatRoundResult::new(
+        let result = CombatRoundEnd::new(
             Casualties::new(defender_hits, game, &c, c.attacker),
             Casualties::new(attacker_hits, game, &c, c.defender),
             can_retreat,
-            &c,
+            c,
             game,
         );
-        game.push_state(GameState::Combat(c));
 
         if let Some(r) = combat_round_end(game, &result) {
             c = r;
@@ -303,13 +308,6 @@ pub(crate) fn combat_loop(game: &mut Game, mut c: Combat) {
     }
 }
 
-pub(crate) fn take_combat(game: &mut Game) -> Combat {
-    let GameState::Combat(c) = game.pop_state() else {
-        panic!("Illegal state");
-    };
-    c
-}
-
 fn roll_log_str(log: &[String]) -> String {
     if log.is_empty() {
         return String::from("no dice");
@@ -317,27 +315,26 @@ fn roll_log_str(log: &[String]) -> String {
     log.join(", ")
 }
 
-pub(crate) fn combat_round_end(game: &mut Game, r: &CombatRoundResult) -> Option<Combat> {
-    let c = get_combat(game);
-    let attacker = c.attacker;
-    let defender = c.defender;
-    if game.trigger_current_event(
-        &[attacker, defender],
+pub(crate) fn combat_round_end(game: &mut Game, r: &CombatRoundEnd) -> Option<Combat> {
+    let mut c = match game.trigger_current_event(
+        &[r.combat.attacker, r.combat.defender],
         |events| &mut events.on_combat_round_end,
         r,
         CurrentEventType::CombatRoundEnd,
         None,
     ) {
-        return None;
-    }
+        None => return None,
+        Some(CurrentEventType::CombatRoundEnd(e)) => e.combat,
+        _ => panic!("Invalid event type"),
+    };
 
-    let mut c = take_combat(game);
     if let Some(f) = &r.final_result {
         match f {
             CombatResult::AttackerWins => attacker_wins(game, c),
             CombatResult::DefenderWins => defender_wins(game, c),
             CombatResult::Draw => draw(game, c),
         }
+        None
     } else if matches!(c.retreat, CombatRetreatState::EndAfterCurrentRound) {
         None
     } else {
@@ -346,51 +343,40 @@ pub(crate) fn combat_round_end(game: &mut Game, r: &CombatRoundResult) -> Option
     }
 }
 
-fn attacker_wins(game: &mut Game, c: Combat) -> Option<Combat> {
+fn attacker_wins(game: &mut Game, c: Combat) {
     game.add_info_log_item("Attacker wins");
     move_units(game, c.attacker, &c.attackers, c.defender_position, None);
     capture_position(game, c.defender, c.defender_position, c.attacker);
-    end_combat(game, c, CombatResult::AttackerWins)
+    end_combat(game, &CombatEnd::new(CombatResult::AttackerWins, c));
 }
 
-fn defender_wins(game: &mut Game, c: Combat) -> Option<Combat> {
+fn defender_wins(game: &mut Game, c: Combat) {
     game.add_info_log_item("Defender wins");
-    end_combat(game, c, CombatResult::DefenderWins)
+    end_combat(game, &CombatEnd::new(CombatResult::DefenderWins, c));
 }
 
-pub(crate) fn draw(game: &mut Game, c: Combat) -> Option<Combat> {
+pub(crate) fn draw(game: &mut Game, c: Combat) {
     if c.defender_fortress(game) && c.round == 1 {
         game.add_info_log_item(&format!(
             "{} wins the battle because he has a defending fortress",
             game.player_name(c.defender)
         ));
-        return end_combat(game, c, CombatResult::DefenderWins);
+        return end_combat(game, &CombatEnd::new(CombatResult::DefenderWins, c));
     }
     game.add_info_log_item("Battle ends in a draw");
-    end_combat(game, c, CombatResult::Draw)
+    end_combat(game, &CombatEnd::new(CombatResult::Draw, c));
 }
 
-pub(crate) fn end_combat(game: &mut Game, combat: Combat, r: CombatResult) -> Option<Combat> {
-    let attacker = combat.attacker;
-    let defender = combat.defender;
-    let defender_position = combat.defender_position;
-    let info = CombatResultInfo::new(r, attacker, defender, defender_position);
+pub(crate) fn end_combat(game: &mut Game, info: &CombatEnd) {
+    let c = &info.combat;
 
-    // set state back to combat for event listeners
-    game.push_state(GameState::Combat(combat));
-
-    if game.trigger_current_event(
-        &[attacker, defender],
+    game.trigger_current_event(
+        &[c.attacker, c.defender],
         |events| &mut events.on_combat_end,
-        &info,
-        |i| CurrentEventType::CombatEnd(i.result),
+        info,
+        CurrentEventType::CombatEnd,
         None,
-    ) {
-        return None;
-    }
-
-    take_combat(game);
-    None
+    );
 }
 
 struct CombatRolls {
@@ -700,7 +686,7 @@ pub mod tests {
     #[must_use]
     pub fn test_game() -> Game {
         Game {
-            state_stack: vec![GameState::Playing],
+            state: GameState::Playing,
             current_events: Vec::new(),
             players: Vec::new(),
             map: Map::new(HashMap::new()),

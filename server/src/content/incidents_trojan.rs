@@ -1,10 +1,12 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::combat::{get_combat, take_combat, CombatModifier, CombatRetreatState};
+use crate::combat::{
+    get_combat_round_end, get_combat_start, Combat, CombatModifier, CombatRetreatState,
+};
 use crate::combat_listeners::CombatResult;
 use crate::content::advances::get_advance;
 use crate::content::builtin::Builtin;
 use crate::content::custom_phase_actions::PaymentRequest;
-use crate::game::{Game, GameState};
+use crate::game::Game;
 use crate::incident::{Anarchy, Incident, IncidentBaseEffect, PermanentIncidentEffect};
 use crate::payment::PaymentOptions;
 use crate::player_events::IncidentTarget;
@@ -40,8 +42,8 @@ pub(crate) fn decide_trojan_horse() -> Builtin {
         .add_payment_request_listener(
             |event| &mut event.on_combat_start,
             10,
-            |game, player_index, ()| {
-                if is_land_battle_against_defended_city(game, player_index) {
+            |game, player_index, c| {
+                if is_land_battle_against_defended_city(game, player_index, c) {
                     game.permanent_incident_effects.iter().find_map(|e| {
                         matches!(e, PermanentIncidentEffect::TrojanHorse).then_some(vec![
                             PaymentRequest::new(trojan_cost(), "Activate the Trojan Horse?", true),
@@ -66,18 +68,16 @@ pub(crate) fn decide_trojan_horse() -> Builtin {
                     ));
                     game.permanent_incident_effects
                         .retain(|e| !matches!(e, PermanentIncidentEffect::TrojanHorse));
-                    let Some(GameState::Combat(c)) = &mut game.state_stack.last_mut() else {
-                        panic!("Invalid state")
-                    };
-                    c.modifiers.push(CombatModifier::TrojanHorse);
+                    get_combat_start(game)
+                        .modifiers
+                        .push(CombatModifier::TrojanHorse);
                 }
             },
         )
         .build()
 }
 
-fn is_land_battle_against_defended_city(game: &Game, player_index: usize) -> bool {
-    let combat = get_combat(game);
+fn is_land_battle_against_defended_city(game: &Game, player_index: usize, combat: &Combat) -> bool {
     !combat.is_sea_battle(game)
         && combat.attacker == player_index
         && combat.defender_city(game).is_some()
@@ -126,10 +126,11 @@ pub(crate) fn solar_eclipse_end_combat() -> Builtin {
                     .iter()
                     .position(|e| matches!(e, PermanentIncidentEffect::SolarEclipse))
                 {
-                    let mut c = take_combat(game);
+                    let c = &r.combat;
                     if c.round == 1 && !c.is_sea_battle(game) {
                         game.permanent_incident_effects.remove(p);
-                        c.retreat = CombatRetreatState::EndAfterCurrentRound;
+                        get_combat_round_end(game).combat.retreat =
+                            CombatRetreatState::EndAfterCurrentRound;
 
                         let p = match &r.final_result {
                             Some(CombatResult::AttackerWins) => c.attacker,
@@ -142,7 +143,6 @@ pub(crate) fn solar_eclipse_end_combat() -> Builtin {
                             "{name} gained 1 victory point for the Solar Eclipse",
                         ));
                     }
-                    game.push_state(GameState::Combat(c));
                 }
             },
         )

@@ -21,7 +21,6 @@ mod incidents_5;
 mod incidents_earthquake;
 mod incidents_famine;
 mod incidents_good_year;
-mod incidents_population_boom;
 mod incidents_trade;
 mod incidents_trojan;
 pub mod trade_routes;
