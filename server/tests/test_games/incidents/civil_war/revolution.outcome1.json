@@ -1,5 +1,5 @@
 {
-"state": "Playing",
+  "state": "Playing",
   "current_events": [
     {
       "event_type": {
@@ -322,7 +322,7 @@
       "Player1 gained 2 gold from a Gold Mine"
     ],
     [
-      "Player1 killed an Army unit"
+      "Player1 killed units: Elephant at C2"
     ]
   ],
   "undo_limit": 2,

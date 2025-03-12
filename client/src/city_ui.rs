@@ -255,7 +255,7 @@ fn structure_selected(
     draw_circle_lines(center.x, center.y, size, 3., h.highlight_type.color());
     if is_mouse_button_pressed(MouseButton::Left) && is_in_circle(rc.mouse_pos(), center, size) {
         let ActiveDialog::StructuresRequest(r) = &rc.state.active_dialog else {
-            panic!("invalid state");
+            panic!("Expected StructuresRequest");
         };
         Some(StateUpdate::OpenDialog(ActiveDialog::StructuresRequest(
             r.clone().toggle((position, h.structure.clone())),

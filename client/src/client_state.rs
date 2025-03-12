@@ -547,7 +547,7 @@ impl State {
                             rotation: r.block.position.rotation,
                         })
                     } else {
-                        panic!("invalid state");
+                        panic!("ExploreResolution expected");
                     }
                 }
             };

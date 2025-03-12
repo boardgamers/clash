@@ -1,17 +1,31 @@
+mod agriculture;
+mod autocracy;
+mod construction;
+pub mod culture;
+mod democracy;
+pub mod economy;
+mod education;
+mod science;
+mod seafearing;
+mod spirituality;
+mod theocracy;
+pub mod trade_routes;
+mod warfare;
+
 use crate::advance::Advance;
 use crate::advance::AdvanceBuilder;
-use crate::content::advances_agriculture::agriculture;
-use crate::content::advances_autocracy::autocracy;
-use crate::content::advances_construction::construction;
-use crate::content::advances_culture::culture;
-use crate::content::advances_democracy::democracy;
-use crate::content::advances_economy::economy;
-use crate::content::advances_education::education;
-use crate::content::advances_science::science;
-use crate::content::advances_seafearing::seafaring;
-use crate::content::advances_spirituality::spirituality;
-use crate::content::advances_theocracy::theocracy;
-use crate::content::advances_warfare::warfare;
+use crate::content::advances::agriculture::agriculture;
+use crate::content::advances::autocracy::autocracy;
+use crate::content::advances::construction::construction;
+use crate::content::advances::culture::culture;
+use crate::content::advances::democracy::democracy;
+use crate::content::advances::economy::economy;
+use crate::content::advances::education::education;
+use crate::content::advances::science::science;
+use crate::content::advances::seafearing::seafaring;
+use crate::content::advances::spirituality::spirituality;
+use crate::content::advances::theocracy::theocracy;
+use crate::content::advances::warfare::warfare;
 use std::vec;
 
 //names of advances that need special handling

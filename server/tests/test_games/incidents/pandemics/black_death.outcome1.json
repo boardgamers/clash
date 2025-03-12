@@ -1,28 +1,5 @@
 {
   "state": "Playing",
-  "current_events": [
-    {
-      "event_type": {
-        "Incident": {
-          "active_player": 0
-        }
-      },
-      "player": 0,
-      "last_priority_used": 0,
-      "handler": {
-        "priority": 0,
-        "request": {
-          "ChangeGovernment": {
-            "optional": false,
-            "cost": {}
-          }
-        },
-        "origin": {
-          "Incident": 38
-        }
-      }
-    }
-  ],
   "players": [
     {
       "name": null,
@@ -32,7 +9,7 @@
         "wood": 6,
         "ore": 6,
         "ideas": 5,
-        "gold": 7,
+        "gold": 5,
         "mood_tokens": 8,
         "culture_tokens": 7
       },
@@ -49,10 +26,7 @@
         {
           "city_pieces": {
             "fortress": 0,
-            "temple": 1,
-            "wonders": [
-              "Pyramids"
-            ]
+            "temple": 1
           },
           "mood_state": "Neutral",
           "activations": 0,
@@ -85,15 +59,15 @@
         {
           "position": "C2",
           "unit_type": "Infantry",
-          "id": 0
-        },
-        {
-          "position": "C2",
-          "unit_type": "Infantry",
           "movement_restrictions": [
             "Battle"
           ],
           "id": 1
+        },
+        {
+          "position": "C2",
+          "unit_type": "Elephant",
+          "id": 3
         },
         {
           "position": "C2",
@@ -120,6 +94,7 @@
       "active_leader": null,
       "available_leaders": [],
       "advances": [
+        "Arts",
         "Farming",
         "Mining",
         "State Religion",
@@ -128,13 +103,11 @@
         "Voting"
       ],
       "unlocked_special_advance": [],
-      "wonders_build": [
-        "Pyramids"
-      ],
+      "wonders_build": [],
       "incident_tokens": 3,
       "completed_objectives": [],
       "captured_leaders": [],
-      "event_victory_points": 0.0,
+      "event_victory_points": 1.0,
       "wonder_cards": [],
       "next_unit_id": 8
     },
@@ -297,37 +270,27 @@
       "action": {
         "Response": {
           "SelectUnits": [
-            3
+            0
           ]
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectUnits": []
         }
       }
     }
   ],
-  "action_log_index": 3,
+  "action_log_index": 2,
   "log": [
     [
       "Player1 paid 2 gold to get the Storage advance",
       "Player gained 1 mood token as advance bonus"
     ],
     [
-      "A new game event has been triggered: Revolution",
-      "Player1 gained 2 gold from a Gold Mine"
+      "A new game event has been triggered: Black Death"
     ],
     [
-      "Player1 killed units: Elephant at C2"
-    ],
-    [
-      "Player1 declined to kill units"
+      "Player1 killed units: Infantry at C2",
+      "Player1 gained 1 victory points"
     ]
   ],
-  "undo_limit": 3,
+  "undo_limit": 2,
   "actions_left": 2,
   "successful_cultural_influence": false,
   "round": 1,
@@ -350,9 +313,8 @@
     10
   ],
   "dropped_players": [],
-  "wonders_left": [],
-  "wonder_amount_left": 1,
-  "incidents_left": [
-    38
-  ]
+  "wonders_left": [
+    "Pyramids"
+  ],
+  "wonder_amount_left": 1
 }

@@ -35,6 +35,13 @@
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
+          "position": "A2"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
           "position": "C2"
         }
       ],
@@ -86,6 +93,8 @@
       "advances": [
         "Farming",
         "Mining",
+        "Myths",
+        "Roads",
         "Tactics"
       ],
       "unlocked_special_advance": [],
@@ -198,7 +207,7 @@
       ],
       [
         "A2",
-        "Water"
+        "Fertile"
       ],
       [
         "A3",

@@ -92,7 +92,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                     return None;
                 }
 
-                if player.resources.resource_amount() > 0 {
+                if player.resources.amount() > 0 {
                     game.add_info_log_item(&format!(
                         "{} must pay 1 resource or token to bribe the pirates",
                         player.get_name()

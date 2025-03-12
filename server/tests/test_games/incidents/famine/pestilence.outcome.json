@@ -1,5 +1,5 @@
 {
-"state": "Playing",
+  "state": "Playing",
   "current_events": [
     {
       "event_type": {
@@ -8,21 +8,34 @@
         }
       },
       "player": 0,
-      "last_priority_used": 1,
+      "last_priority_used": 10,
       "handler": {
-        "priority": 1,
+        "priority": 10,
         "request": {
-          "SelectPositions": {
-            "choices": [
-              "A1",
-              "C2"
-            ],
-            "needed": {
-              "start": 1,
-              "end": 1
-            },
-            "description": "Select a city to decrease the mood"
-          }
+          "Payment": [
+            {
+              "cost": {
+                "default": {
+                  "mood_tokens": 2
+                },
+                "conversions": [
+                  {
+                    "from": [
+                      {
+                        "mood_tokens": 1
+                      }
+                    ],
+                    "to": {},
+                    "type": {
+                      "MayOverpay": 2
+                    }
+                  }
+                ]
+              },
+              "name": "You may pay 1 mood token for each city to avoid reducing the mood",
+              "optional": false
+            }
+          ]
         },
         "origin": {
           "Incident": 1
@@ -59,6 +72,13 @@
           "activations": 0,
           "angry_activation": false,
           "position": "A1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A2"
         },
         {
           "city_pieces": {},
@@ -116,6 +136,8 @@
       "advances": [
         "Farming",
         "Mining",
+        "Myths",
+        "Roads",
         "Storage",
         "Tactics"
       ],
@@ -229,7 +251,7 @@
       ],
       [
         "A2",
-        "Water"
+        "Fertile"
       ],
       [
         "A3",

@@ -141,6 +141,9 @@ pub struct CurrentEventPlayer {
     #[serde(default)]
     #[serde(skip_serializing_if = "u8::is_zero")]
     pub sacrifice: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub myths_payment: u8,
 }
 
 impl CurrentEventPlayer {
@@ -153,6 +156,7 @@ impl CurrentEventPlayer {
             payment: ResourcePile::empty(),
             must_reduce_mood: vec![],
             sacrifice: 0,
+            myths_payment: 0,
         }
     }
 }
@@ -190,17 +194,21 @@ pub struct CurrentEventState {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub selected_player: Option<usize>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub selected_position: Option<Position>,
 }
 
 impl CurrentEventState {
     #[must_use]
     pub fn new(current_player: usize, event_type: CurrentEventType) -> Self {
         Self {
+            event_type,
             players_used: vec![],
             player: CurrentEventPlayer::new(current_player),
             barbarians: None,
             selected_player: None,
-            event_type,
+            selected_position: None,
         }
     }
 }

@@ -1,5 +1,5 @@
 {
-"state": "Playing",
+  "state": "Playing",
   "current_events": [
     {
       "event_type": {
@@ -376,7 +376,7 @@
       "Player1 gained 2 points for the city center at B2"
     ],
     [
-      "Player1 paid 1 mood token for Heavy Earthquake"
+      "Player1 paid 1 mood token to avoid the mood change using Myths"
     ]
   ],
   "undo_limit": 3,

@@ -6,15 +6,14 @@ use crate::content::custom_phase_actions::{
     is_selected_structures_valid, new_position_request, SelectedStructure, Structure,
     StructuresRequest,
 };
-use crate::content::incidents_famine::decrease_mood_incident_city;
 use crate::content::wonders::get_wonder;
 use crate::game::Game;
-use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
+use crate::incident::{Incident, IncidentBaseEffect, MoodModifier};
 use crate::player_events::{IncidentInfo, IncidentTarget};
 use crate::position::Position;
 use itertools::Itertools;
 
-pub(crate) fn earthquakes() -> Vec<Incident> {
+pub(crate) fn earthquake_incidents() -> Vec<Incident> {
     vec![
         volcano(),
         earthquake(30, "Earthquake", IncidentTarget::ActivePlayer),
@@ -28,71 +27,88 @@ fn volcano() -> Incident {
     Incident::builder(
         29,
         "Vulcan",
-        "If you have at least 4 cities: Select one of your cities. Kill all units in the city. Remove all structures (center, buildings, wonders) from the game permanently. Wonder effects are lost (exception: Pyramids). The city center and buildings are worth 2 points each (according to the last owner), wonders as usual.",
-        IncidentBaseEffect::None)
-        .add_incident_position_request(
-            IncidentTarget::ActivePlayer,
-            0,
-            |game, player_index, _incident| {
-                let p = game.get_player(player_index);
-                let cities = p
-                    .cities
-                    .iter()
-                    .map(|c| c.position)
-                    .collect_vec();
-                (cities.len() >= 4)
-                    .then_some(new_position_request(
-                        cities,
-                        1..=1,
-                        "Select a city to be destroyed",
-                    ))
-            },
-            |game, s| {
-                let pos = s.choice[0];
-                let player_index = s.player_index;
-                game.add_info_log_item(&format!(
-                    "{} selected city {} to be destroyed",
-                    s.player_name, pos
-                ));
-                let city = game.get_player(player_index).get_city(pos);
-                let buildings = city.pieces.buildings(None);
-                let wonders = city.pieces.wonders.iter().map(|w| w.name.clone()).collect_vec();
-                for b in buildings {
-                    destroy_building(game, b, pos);
-                }
-                for wonder in wonders {
-                    destroy_wonder(game, pos, &wonder);
-                }
-                destroy_city_center(game, pos);
-            },
-        ).build()
+        "If you have at least 4 cities: \
+            Select one of your cities. \
+            Kill all units in the city. \
+            Remove all structures (center, buildings, wonders) from the game permanently. \
+            Wonder effects are lost (exception: Pyramids). \
+            The city center and buildings are worth 2 points each (according to the last owner), \
+            wonders as usual.",
+        IncidentBaseEffect::None,
+    )
+    .add_incident_position_request(
+        IncidentTarget::ActivePlayer,
+        0,
+        |game, player_index, _incident| {
+            let p = game.get_player(player_index);
+            let cities = p.cities.iter().map(|c| c.position).collect_vec();
+            (cities.len() >= 4).then_some(new_position_request(
+                cities,
+                1..=1,
+                "Select a city to be destroyed",
+            ))
+        },
+        |game, s| {
+            let pos = s.choice[0];
+            let player_index = s.player_index;
+            game.add_info_log_item(&format!(
+                "{} selected city {} to be destroyed",
+                s.player_name, pos
+            ));
+            let city = game.get_player(player_index).get_city(pos);
+            let buildings = city.pieces.buildings(None);
+            let wonders = city
+                .pieces
+                .wonders
+                .iter()
+                .map(|w| w.name.clone())
+                .collect_vec();
+            for b in buildings {
+                destroy_building(game, b, pos);
+            }
+            for wonder in wonders {
+                destroy_wonder(game, pos, &wonder);
+            }
+            destroy_city_center(game, pos);
+        },
+    )
+    .build()
 }
 
 fn earthquake(id: u8, name: &str, target: IncidentTarget) -> Incident {
-    let mut b = Incident::builder(
+    Incident::builder(
         id,
         name,
-        "If you have at least 3 cities: Select 1-3 structures (center, buildings, wonders) in your cities and remove them from the game permanently. Wonder effects are lost (exception: Pyramids). The mood of all affected cities is reduced. The city center and buildings are worth 2 points each (according to the last owner), wonders as usual.", IncidentBaseEffect::None)
-        .add_incident_structures_request(
-            target,
-            11,
-            |game, player_index, _incident| {
-                let p = game.get_player(player_index);
-                let cities = &p.cities;
-                (cities.len() >= 3)
-                    .then_some(structures_request(cities))
-            },
-            |game, s| {
-                apply_earthquake(game, s);
-            },
-        )
-        .add_myths_payment(target, move |game, _p| {
-            game.current_event_player().must_reduce_mood.len() as u32
-        });
-    b = earthquake_mood_city(b, 0);
-    b = earthquake_mood_city(b, 1);
-    b = earthquake_mood_city(b, 2);
-    b.build()
+        "If you have at least 3 cities: \
+                      Select 1-3 structures (center, buildings, wonders) in your cities \
+                      and remove them from the game permanently. \
+                      Wonder effects are lost (exception: Pyramids). \
+                      The mood of all affected cities is reduced. \
+                      The city center and buildings are worth 2 points each \
+                      (according to the last owner), wonders as usual.",
+        IncidentBaseEffect::None,
+    )
+    .add_incident_structures_request(
+        target,
+        11,
+        |game, player_index, _incident| {
+            let p = game.get_player(player_index);
+            let cities = &p.cities;
+            (cities.len() >= 3).then_some(structures_request(cities))
+        },
+        |game, s| {
+            apply_earthquake(game, s);
+        },
+    )
+    .add_decrease_mood(
+        IncidentTarget::AllPlayers,
+        MoodModifier::Decrease,
+        move |_p, game| {
+            let c = &game.current_event_player().must_reduce_mood;
+            (c.clone(), c.len() as u8)
+        },
+    )
+    .build()
 }
 
 fn apply_earthquake(game: &mut Game, s: &SelectedChoice<Vec<SelectedStructure>, IncidentInfo>) {
@@ -215,34 +231,16 @@ fn destroy_wonder(game: &mut Game, position: Position, name: &str) {
     ));
 }
 
-fn earthquake_mood_city(b: IncidentBuilder, i: usize) -> IncidentBuilder {
-    decrease_mood_incident_city(
-        b,
-        IncidentTarget::AllPlayers,
-        i as i32,
-        move |game, _player_index| {
-            let p = game.current_event_player();
-            if p.payment.resource_amount() as usize + i >= p.must_reduce_mood.len() {
-                return (vec![], 0);
-            }
-
-            (game.current_event_player().must_reduce_mood.clone(), 1)
-        },
-    )
-}
-
 fn flood(id: u8, name: &str, target: IncidentTarget) -> Incident {
-    let b = Incident::builder(
+    Incident::builder(
         id,
         name,
-        "Select one of your cities that is adjacent to water. Decrease the mood in that city.",
+        "Select one of your cities that is adjacent to water. \
+                      Decrease the mood in that city.",
         IncidentBaseEffect::None,
     )
-    .add_myths_payment(target, move |game, p| {
-        u32::from(!non_angry_shore_cites(game, p.index).is_empty())
-    });
-    decrease_mood_incident_city(b, target, 0, |game, player_index| {
-        (non_angry_shore_cites(game, player_index), 1)
+    .add_decrease_mood(target, MoodModifier::Decrease, |p, game| {
+        (non_angry_shore_cites(game, p.index), 1)
     })
     .build()
 }

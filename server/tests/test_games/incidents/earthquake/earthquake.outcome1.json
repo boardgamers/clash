@@ -1,5 +1,5 @@
 {
-"state": "Playing",
+  "state": "Playing",
   "current_events": [
     {
       "event_type": {
@@ -32,7 +32,7 @@
                   }
                 ]
               },
-              "name": "You may pay 1 mood token for each city to avoid reducing its mood",
+              "name": "You may pay 1 mood token for each city to avoid reducing the mood",
               "optional": false
             }
           ]
