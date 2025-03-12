@@ -152,6 +152,12 @@ fn test_pestilence() {
             ),
             TestAction::not_undoable(
                 0,
+                Action::Response(CurrentEventResponse::Payment(vec![
+                    ResourcePile::mood_tokens(1),
+                ])),
+            ),
+            TestAction::not_undoable(
+                0,
                 Action::Response(CurrentEventResponse::SelectPositions(vec![
                     Position::from_offset("A1"),
                 ])),
@@ -574,6 +580,110 @@ fn test_reformation() {
                 }),
             ),
             TestAction::not_undoable(2, Action::Response(CurrentEventResponse::SelectPlayer(1))),
+        ],
+    );
+}
+
+const PANDEMICS: JsonTest = JsonTest::child("incidents", "pandemics");
+
+#[test]
+fn test_pandemics() {
+    PANDEMICS.test(
+        "pandemics",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::gold(2),
+                }),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::Response(CurrentEventResponse::SelectUnits(vec![0])),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::Response(CurrentEventResponse::Payment(vec![
+                    ResourcePile::culture_tokens(1),
+                ])),
+            ),
+            TestAction::not_undoable(
+                1,
+                Action::Response(CurrentEventResponse::Payment(vec![
+                    ResourcePile::culture_tokens(1),
+                ])),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_black_death() {
+    PANDEMICS.test(
+        "black_death",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::gold(2),
+                }),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::Response(CurrentEventResponse::SelectUnits(vec![0])),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_vermin() {
+    PANDEMICS.test(
+        "vermin",
+        vec![TestAction::not_undoable(
+            0,
+            Action::Playing(Advance {
+                advance: String::from("Storage"),
+                payment: ResourcePile::gold(2),
+            }),
+        )],
+    );
+}
+
+#[test]
+fn test_drought() {
+    PANDEMICS.test(
+        "drought",
+        vec![TestAction::not_undoable(
+            0,
+            Action::Playing(Advance {
+                advance: String::from("Storage"),
+                payment: ResourcePile::gold(2),
+            }),
+        )],
+    );
+}
+
+#[test]
+fn test_fire() {
+    PANDEMICS.test(
+        "fire",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::gold(2),
+                }),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::Response(CurrentEventResponse::SelectPositions(vec![
+                    Position::from_offset("B2"),
+                ])),
+            ),
         ],
     );
 }

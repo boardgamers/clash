@@ -1,5 +1,5 @@
 {
-"state": "Playing",
+  "state": "Playing",
   "current_events": [
     {
       "event_type": {
@@ -8,9 +8,9 @@
         }
       },
       "player": 0,
-      "last_priority_used": 0,
+      "last_priority_used": 9,
       "handler": {
-        "priority": 0,
+        "priority": 9,
         "request": {
           "SelectPositions": {
             "choices": [

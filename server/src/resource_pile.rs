@@ -188,7 +188,7 @@ impl ResourcePile {
     }
 
     #[must_use]
-    pub fn resource_amount(&self) -> u32 {
+    pub fn amount(&self) -> u32 {
         self.food
             + self.wood
             + self.ore
@@ -200,7 +200,7 @@ impl ResourcePile {
 
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        self.resource_amount() == 0
+        self.amount() == 0
     }
 
     #[must_use]

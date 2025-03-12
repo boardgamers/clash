@@ -60,7 +60,7 @@ impl Payment {
 
     #[must_use]
     pub fn new_gain(options: &PaymentOptions, name: &str) -> Payment {
-        let a = options.default.resource_amount();
+        let a = options.default.amount();
         let mut available = ResourcePile::empty();
         for r in options.possible_resource_types() {
             available += ResourcePile::of(r, a);

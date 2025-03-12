@@ -1,13 +1,13 @@
 use crate::common::{illegal_action_test, influence_action, JsonTest, TestAction};
 use server::action::{execute_action, Action};
 use server::city_pieces::Building::{Fortress, Temple};
+use server::content::advances::trade_routes::find_trade_routes;
 use server::content::custom_actions::CustomAction;
 use server::content::custom_actions::CustomAction::{
     AbsolutePower, ArtsInfluenceCultureAttempt, CivilRights, ConstructWonder, ForcedLabor, Sports,
     Taxes, Theaters, VotingIncreaseHappiness,
 };
 use server::content::custom_phase_actions::CurrentEventResponse;
-use server::content::trade_routes::find_trade_routes;
 use server::events::EventOrigin;
 use server::game::Game;
 use server::movement::move_units_destinations;

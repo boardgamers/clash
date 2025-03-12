@@ -1,5 +1,5 @@
 {
-"state": "Playing",
+  "state": "Playing",
   "players": [
     {
       "name": null,
@@ -310,10 +310,10 @@
       "Player1 gained 2 gold from a Gold Mine"
     ],
     [
-      "Player1 killed an Army unit"
+      "Player1 killed units: Elephant at C2"
     ],
     [
-      "Player1 did not kill an Army unit"
+      "Player1 declined to kill units"
     ],
     [
       "Player1 changed their government from Democracy to Theocracy",

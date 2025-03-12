@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::action::Action;
 use crate::collect::collect;
-use crate::content::advances_culture::{execute_sports, execute_theaters};
-use crate::content::advances_economy::collect_taxes;
+use crate::content::advances::culture::{execute_sports, execute_theaters};
+use crate::content::advances::economy::collect_taxes;
 use crate::content::wonders::construct_wonder;
 use crate::cultural_influence::influence_culture_attempt;
 use crate::log::{
@@ -128,7 +128,7 @@ impl CustomAction {
                 format!("{} using Free Economy", format_collect_log_item(player, player_name, c)),
             CustomAction::Sports { city_position, payment } =>
                 format!("{player_name} paid {payment} to increase the happiness in {} using Sports",
-                    format_city_happiness_increase(player, *city_position, payment.resource_amount())),
+                    format_city_happiness_increase(player, *city_position, payment.amount())),
             CustomAction::Taxes(r) =>
                 format!("{player_name} paid 1 mood token to collect {r} using Taxes"),
             CustomAction::Theaters(r) =>

@@ -328,7 +328,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                         return;
                     }
                 }
-                panic!("Invalid state");
+                panic!("Expected payment response");
             },
         )
     }
@@ -393,7 +393,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                         return;
                     }
                 }
-                panic!("Invalid state");
+                panic!("Expected resource reward response");
             },
         )
     }
@@ -424,7 +424,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                         return;
                     }
                 }
-                panic!("Invalid state");
+                panic!("Boolean request expected");
             },
         )
     }
@@ -450,7 +450,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                         return (request.choices.clone(), reward);
                     }
                 }
-                panic!("Invalid state");
+                panic!("Advance request expected");
             },
             request,
             gain_reward,
@@ -478,7 +478,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                         return (request.choices.clone(), reward, request.needed.clone());
                     }
                 }
-                panic!("Invalid state");
+                panic!("Position request expected");
             },
             request,
             gain_reward,
@@ -506,7 +506,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                         return (request.choices.clone(), reward);
                     }
                 }
-                panic!("Invalid state");
+                panic!("Player request expected");
             },
             request,
             gain_reward,
@@ -534,7 +534,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                         return (request.choices.clone(), reward);
                     }
                 }
-                panic!("Invalid state");
+                panic!("Unit type request expected");
             },
             request,
             gain_reward,
@@ -566,7 +566,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                         );
                     }
                 }
-                panic!("Invalid state");
+                panic!("Units request expected");
             },
             request,
             move |game, c| {
@@ -598,7 +598,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                         return (request.choices.clone(), choices, request.needed.clone());
                     }
                 }
-                panic!("Invalid state");
+                panic!("Structures request expected");
             },
             request,
             structures_selected,

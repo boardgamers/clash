@@ -1,5 +1,51 @@
 {
   "state": "Playing",
+  "current_events": [
+    {
+      "event_type": {
+        "Incident": {
+          "active_player": 0
+        }
+      },
+      "players_used": [
+        0
+      ],
+      "player": 1,
+      "last_priority_used": 10,
+      "handler": {
+        "priority": 10,
+        "request": {
+          "Payment": [
+            {
+              "cost": {
+                "default": {
+                  "mood_tokens": 1
+                },
+                "conversions": [
+                  {
+                    "from": [
+                      {
+                        "mood_tokens": 1
+                      }
+                    ],
+                    "to": {},
+                    "type": {
+                      "MayOverpay": 1
+                    }
+                  }
+                ]
+              },
+              "name": "You may pay 1 mood token for each city to avoid reducing the mood",
+              "optional": false
+            }
+          ]
+        },
+        "origin": {
+          "Incident": 1
+        }
+      }
+    }
+  ],
   "players": [
     {
       "name": null,
@@ -10,7 +56,7 @@
         "ore": 6,
         "ideas": 5,
         "gold": 5,
-        "mood_tokens": 8,
+        "mood_tokens": 7,
         "culture_tokens": 7
       },
       "resource_limit": {
@@ -29,6 +75,13 @@
           "activations": 0,
           "angry_activation": false,
           "position": "A1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A2"
         },
         {
           "city_pieces": {},
@@ -86,6 +139,8 @@
       "advances": [
         "Farming",
         "Mining",
+        "Myths",
+        "Roads",
         "Storage",
         "Tactics"
       ],
@@ -107,7 +162,7 @@
         "ore": 7,
         "ideas": 7,
         "gold": 7,
-        "mood_tokens": 6,
+        "mood_tokens": 7,
         "culture_tokens": 7
       },
       "resource_limit": {
@@ -199,7 +254,7 @@
       ],
       [
         "A2",
-        "Water"
+        "Fertile"
       ],
       [
         "A3",
@@ -253,8 +308,10 @@
     {
       "action": {
         "Response": {
-          "SelectPositions": [
-            "A1"
+          "Payment": [
+            {
+              "mood_tokens": 1
+            }
           ]
         }
       }
@@ -262,10 +319,8 @@
     {
       "action": {
         "Response": {
-          "Payment": [
-            {
-              "mood_tokens": 1
-            }
+          "SelectPositions": [
+            "A1"
           ]
         }
       }
@@ -281,10 +336,10 @@
       "A new game event has been triggered: Pestilence"
     ],
     [
-      "Player1 decreased the mood in city A1"
+      "Player1 paid 1 mood token to avoid the mood change using Myths"
     ],
     [
-      "Player2 paid 1 mood token for Pestilence"
+      "Player1 selected to decrease the mood in city A1 to Neutral"
     ]
   ],
   "undo_limit": 3,
@@ -314,6 +369,9 @@
     "Pyramids"
   ],
   "wonder_amount_left": 1,
+  "incidents_left": [
+    1
+  ],
   "permanent_incident_effects": [
     "Pestilence"
   ]

@@ -105,14 +105,15 @@ fn solar_eclipse() -> Incident {
     Incident::builder(
         41,
         "Solar Eclipse",
-        "The next land battle will end after the first round (retreat if not finished). The winner gains 1 victory point (defender if draw).",
+        "The next land battle will end after the first round (retreat if not finished). \
+        The winner gains 1 victory point (defender if draw).",
         IncidentBaseEffect::PiratesSpawnAndRaid,
     )
-        .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _, _| {
-            game.permanent_incident_effects
-                .push(PermanentIncidentEffect::SolarEclipse);
-        })
-        .build()
+    .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _, _| {
+        game.permanent_incident_effects
+            .push(PermanentIncidentEffect::SolarEclipse);
+    })
+    .build()
 }
 
 pub(crate) fn solar_eclipse_end_combat() -> Builtin {
@@ -170,10 +171,18 @@ fn anarchy() -> Incident {
     Incident::builder(
         44,
         "Anarchy",
-        "Set aside all government advances. Whenever you research a new government advance, take a game event token from there instead of the supply (thereby not triggering game events). Each advance left in the government advances area at the end of the game is worth 1 victory point.",
+        "Set aside all government advances. \
+        Whenever you research a new government advance, \
+        take a game event token from there instead of the supply \
+        (thereby not triggering game events). \
+        Each advance left in the government advances area at \
+        the end of the game is worth 1 victory point.",
         IncidentBaseEffect::None,
     )
-        .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, player_index, player_name, _| {
+    .add_simple_incident_listener(
+        IncidentTarget::ActivePlayer,
+        0,
+        |game, player_index, player_name, _| {
             let p = game.get_player_mut(player_index);
             let old = p.advances.len();
             p.advances.retain(|a| a.government.is_none());
@@ -181,7 +190,8 @@ fn anarchy() -> Incident {
             p.event_victory_points += lost as f32;
             if lost > 0 {
                 game.add_info_log_item(&format!(
-                    "{player_name} lost {lost} government advances due to Anarchy - adding {lost} victory points",
+                    "{player_name} lost {lost} government advances due to Anarchy -\
+                     adding {lost} victory points",
                 ));
             }
 
@@ -190,8 +200,9 @@ fn anarchy() -> Incident {
                     player: player_index,
                     advances_lost: lost,
                 }));
-        })
-        .build()
+        },
+    )
+    .build()
 }
 
 pub(crate) fn anarchy_advance() -> Builtin {

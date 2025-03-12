@@ -1,12 +1,18 @@
-use crate::content::incidects_civil_war::civil_wars;
-use crate::content::incidents_5::successful_year;
-use crate::content::incidents_earthquake::earthquakes;
-use crate::content::incidents_famine::{epidemics, famines, pestilence};
-use crate::content::incidents_good_year::{
-    awesome_years, fantastic_years, good_years, population_booms,
-};
-use crate::content::incidents_trade::trades;
-use crate::content::incidents_trojan::trojan_incidents;
+mod civil_war;
+mod earthquake;
+pub(crate) mod famine;
+mod good_year;
+mod pandemics;
+mod trade;
+pub(crate) mod trojan;
+
+use crate::content::incidents::civil_war::civil_war_incidents;
+use crate::content::incidents::earthquake::earthquake_incidents;
+use crate::content::incidents::famine::pestilence_incidents;
+use crate::content::incidents::good_year::good_years_incidents;
+use crate::content::incidents::pandemics::pandemics_incidents;
+use crate::content::incidents::trade::trade_incidents;
+use crate::content::incidents::trojan::trojan_incidents;
 use crate::incident::Incident;
 use itertools::Itertools;
 use std::vec;
@@ -15,25 +21,19 @@ use std::vec;
 pub(crate) fn get_all() -> Vec<Incident> {
     let all = vec![
         // 1+
-        pestilence(),
-        epidemics(),
-        famines(),
+        pestilence_incidents(),
         // 9+
-        good_years(),
-        awesome_years(),
-        fantastic_years(),
-        // 27+
-        population_booms(),
+        good_years_incidents(),
         // 29+
-        earthquakes(),
+        earthquake_incidents(),
         // 34+
-        civil_wars(),
+        civil_war_incidents(),
         // 41+
         trojan_incidents(),
         // 45+
-        trades(),
-        // 51+
-        successful_year(),
+        trade_incidents(),
+        // 49+
+        pandemics_incidents(),
         // 18+
         // great persons
     ]

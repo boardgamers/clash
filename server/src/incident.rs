@@ -1,6 +1,7 @@
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::barbarians::{barbarians_move, barbarians_spawn, no_units_present};
+use crate::city::MoodState;
 use crate::content::custom_phase_actions::{
     new_position_request, CurrentEventType, PaymentRequest, PlayerRequest, PositionRequest,
     ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitTypeRequest, UnitsRequest,
@@ -133,6 +134,12 @@ impl IncidentFilter {
             player,
         )
     }
+}
+
+#[derive(Clone, Copy)]
+pub(crate) enum MoodModifier {
+    Decrease,
+    MakeAngry,
 }
 
 pub struct IncidentBuilder {
@@ -393,15 +400,25 @@ impl IncidentBuilder {
         )
     }
 
-    pub(crate) fn add_myths_payment(
+    pub(crate) fn add_decrease_mood(
         self,
-        role: IncidentTarget,
+        target: IncidentTarget,
+        mood_modifier: MoodModifier,
+        cities: impl Fn(&Player, &Game) -> (Vec<Position>, u8) + 'static + Clone,
+    ) -> Self {
+        let cities2 = cities.clone();
+        self.add_myths_payment(target, mood_modifier, move |g, p| cities(p, g).1 as u32)
+            .decrease_mood(target, mood_modifier, cities2)
+    }
+
+    fn add_myths_payment(
+        self,
+        target: IncidentTarget,
+        mood_modifier: MoodModifier,
         amount: impl Fn(&Game, &Player) -> u32 + 'static + Clone,
     ) -> Self {
-        let name = self.name.clone();
-
         self.add_incident_payment_request(
-            role,
+            target,
             10,
             move |game, player_index, _incident| {
                 let p = game.get_player(player_index);
@@ -417,9 +434,14 @@ impl IncidentBuilder {
                         PaymentConversionType::MayOverpay(needed),
                     ));
 
+                    let action = match mood_modifier {
+                        MoodModifier::Decrease => "reducing the mood",
+                        MoodModifier::MakeAngry => "making it Angry",
+                    };
+
                     Some(vec![PaymentRequest::new(
                         options,
-                        "You may pay 1 mood token for each city to avoid reducing its mood",
+                        &format!("You may pay 1 mood token for each city to avoid {action}"),
                         false,
                     )])
                 } else {
@@ -428,8 +450,41 @@ impl IncidentBuilder {
             },
             move |game, s| {
                 let pile = &s.choice[0];
-                game.add_info_log_item(&format!("{} paid {} for {}", s.player_name, pile, name));
-                game.current_event_mut().player.payment = pile.clone();
+                game.current_event_mut().player.myths_payment = pile.amount() as u8;
+                game.add_info_log_item(&format!(
+                    "{} paid {pile} to avoid the mood change using Myths",
+                    s.player_name
+                ));
+            },
+        )
+    }
+
+    fn decrease_mood(
+        self,
+        target: IncidentTarget,
+        mood_modifier: MoodModifier,
+        cities: impl Fn(&Player, &Game) -> (Vec<Position>, u8) + 'static + Clone,
+    ) -> Self {
+        self.add_incident_position_request(
+            target,
+            9,
+            move |game, p, _incident| {
+                let (cities, mut needed) = cities(game.get_player(p), game);
+                needed -= game.current_event_player().myths_payment;
+
+                let action = match mood_modifier {
+                    MoodModifier::Decrease => "decrease the mood",
+                    MoodModifier::MakeAngry => "make Angry",
+                };
+
+                Some(new_position_request(
+                    cities,
+                    needed..=needed,
+                    &format!("Select a city to {action}"),
+                ))
+            },
+            move |game, s| {
+                decrease_mod_and_log(game, s, mood_modifier);
             },
         )
     }
@@ -604,4 +659,37 @@ fn gold_deposits(b: IncidentBuilder) -> IncidentBuilder {
             )]
         },
     )
+}
+
+pub(crate) fn decrease_mod_and_log(
+    game: &mut Game,
+    s: &SelectedChoice<Vec<Position>, IncidentInfo>,
+    mood_modifier: MoodModifier,
+) {
+    for &pos in &s.choice {
+        let name = &s.player_name;
+        match mood_modifier {
+            MoodModifier::Decrease => {
+                game.get_player_mut(s.player_index)
+                    .get_city_mut(pos)
+                    .decrease_mood_state();
+                let mood_state = &game.get_player(s.player_index).get_city(pos).mood_state;
+                if s.actively_selected {
+                    game.add_info_log_item(&format!(
+                        "{name} selected to decrease the mood in city {pos} to {mood_state:?}",
+                    ));
+                } else {
+                    game.add_info_log_item(&format!(
+                        "{name} decreased the mood in city {pos} to {mood_state:?}",
+                    ));
+                }
+            }
+            MoodModifier::MakeAngry => {
+                game.add_info_log_item(&format!("{name} made city {pos} Angry"));
+                game.get_player_mut(s.player_index)
+                    .get_city_mut(pos)
+                    .mood_state = MoodState::Angry;
+            }
+        }
+    }
 }

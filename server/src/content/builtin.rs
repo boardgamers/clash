@@ -4,8 +4,8 @@ use crate::barbarians::barbarians_bonus;
 use crate::combat_listeners::{
     choose_carried_units_casualties, choose_fighter_casualties, offer_retreat, place_settler,
 };
-use crate::content::incidents_famine::pestilence_permanent_effect;
-use crate::content::incidents_trojan::{
+use crate::content::incidents::famine::pestilence_permanent_effect;
+use crate::content::incidents::trojan::{
     activate_trojan_horse, anarchy_advance, decide_trojan_horse, solar_eclipse_end_combat,
 };
 use crate::cultural_influence::cultural_influence_resolution;

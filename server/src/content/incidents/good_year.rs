@@ -12,7 +12,15 @@ enum GoodYearType {
     Distribute,
 }
 
-pub(crate) fn good_years() -> Vec<Incident> {
+pub(crate) fn good_years_incidents() -> Vec<Incident> {
+    let mut r = good_years();
+    r.extend(awesome_years());
+    r.extend(fantastic_years());
+    r.extend(population_booms());
+    r
+}
+
+fn good_years() -> Vec<Incident> {
     vec![
         good_year(
             Incident::builder(
@@ -47,7 +55,7 @@ pub(crate) fn good_years() -> Vec<Incident> {
     ]
 }
 
-pub(crate) fn awesome_years() -> Vec<Incident> {
+fn awesome_years() -> Vec<Incident> {
     vec![
         good_year(
             Incident::builder(
@@ -82,7 +90,7 @@ pub(crate) fn awesome_years() -> Vec<Incident> {
     ]
 }
 
-pub(crate) fn fantastic_years() -> Vec<Incident> {
+fn fantastic_years() -> Vec<Incident> {
     vec![
         good_year(
             Incident::builder(
@@ -160,7 +168,7 @@ fn good_year(mut builder: IncidentBuilder, amount: u32, good_year_type: &GoodYea
     builder.build()
 }
 
-pub(crate) fn population_booms() -> Vec<Incident> {
+fn population_booms() -> Vec<Incident> {
     vec![
         population_boom(27, IncidentBaseEffect::BarbariansSpawn),
         population_boom(28, IncidentBaseEffect::BarbariansMove),
@@ -168,14 +176,20 @@ pub(crate) fn population_booms() -> Vec<Incident> {
 }
 
 fn population_boom(id: u8, effect: IncidentBaseEffect) -> Incident {
-    let mut b = Incident::builder(id, "Population Boom", "-", effect);
+    let mut b = Incident::builder(
+        id,
+        "Population Boom",
+        "Gain 1 settler in one of your cities. \
+            Select another player to gain 1 settler on one of their cities.",
+        effect,
+    );
     b = select_settler(b, 13, IncidentTarget::ActivePlayer);
     select_player_to_gain_settler(b).build()
 }
 
 pub(crate) fn select_player_to_gain_settler(mut b: IncidentBuilder) -> IncidentBuilder {
     b = b.add_incident_player_request(
-        "Select a player to gain 1 settler",
+        "Select another player to gain 1 settler on one of their cities",
         |p, _| p.available_units().settlers > 0 && !p.cities.is_empty(),
         12,
         |game, c| {
