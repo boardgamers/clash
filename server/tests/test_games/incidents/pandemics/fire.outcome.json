@@ -32,7 +32,6 @@
   ],
   "players": [
     {
-      "name": null,
       "id": 0,
       "resources": {
         "food": 3,
@@ -126,8 +125,6 @@
         }
       ],
       "civilization": "test0",
-      "active_leader": null,
-      "available_leaders": [],
       "advances": [
         "Arts",
         "Farming",
@@ -137,17 +134,10 @@
         "Tactics",
         "Voting"
       ],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 3,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
-      "wonder_cards": [],
       "next_unit_id": 8
     },
     {
-      "name": null,
       "id": 1,
       "resources": {
         "wood": 7,
@@ -177,28 +167,17 @@
           "position": "A1"
         }
       ],
-      "units": [],
       "civilization": "test1",
-      "active_leader": null,
-      "available_leaders": [],
       "advances": [
         "Farming",
         "Mining",
         "Storage"
       ],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 3,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
-      "wonder_cards": [],
       "next_unit_id": 2
     },
     {
-      "name": null,
       "id": 2,
-      "resources": {},
       "resource_limit": {
         "food": 2,
         "wood": 7,
@@ -206,19 +185,8 @@
         "ideas": 7,
         "gold": 7
       },
-      "cities": [],
-      "units": [],
       "civilization": "Barbarians",
-      "active_leader": null,
-      "available_leaders": [],
-      "advances": [],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 3,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
-      "wonder_cards": [],
       "next_unit_id": 0
     }
   ],
@@ -323,7 +291,7 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1,
+  "action_cards_left": [],
   "incidents_left": [
     53
   ]

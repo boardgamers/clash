@@ -1,6 +1,7 @@
 use std::{cmp::Ordering::*, mem};
 
 use crate::action::execute_action;
+use crate::content::custom_phase_actions::CurrentEventType;
 use crate::utils::Shuffle;
 use crate::{
     action::Action,
@@ -102,14 +103,23 @@ pub fn civilizations(game: Game) -> Vec<String> {
 #[must_use]
 pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
     game.incidents_left.shuffle(&mut game.rng);
+    game.wonders_left.shuffle(&mut game.rng);
+    game.action_cards_left.shuffle(&mut game.rng);
     game.rng = Rng::default();
-    game.wonders_left = Vec::new();
     for (i, player) in game.players.iter_mut().enumerate() {
         if player_index != Some(i) {
             player.strip_secret();
         }
     }
     game.map.strip_secret();
+    for s in &mut game.current_events {
+        if let CurrentEventType::CombatRoundStart(r) = &mut s.event_type {
+            if r.attacker_strength.tactics_card.is_some() {
+                // defender shouldn't see attacker's tactics card
+                r.attacker_strength.tactics_card = Some(String::new());
+            }
+        }
+    }
     game
 }
 

@@ -6,7 +6,7 @@ use crate::combat_listeners::{
 };
 use crate::content::incidents::famine::pestilence_permanent_effect;
 use crate::content::incidents::trojan::{
-    activate_trojan_horse, anarchy_advance, decide_trojan_horse, solar_eclipse_end_combat,
+    anarchy_advance, decide_trojan_horse, solar_eclipse_end_combat,
 };
 use crate::cultural_influence::cultural_influence_resolution;
 use crate::events::EventOrigin;
@@ -84,7 +84,6 @@ pub fn get_all() -> Vec<Builtin> {
         pirates_round_bonus(),
         pestilence_permanent_effect(),
         decide_trojan_horse(),
-        activate_trojan_horse(),
         solar_eclipse_end_combat(),
         anarchy_advance(),
     ]

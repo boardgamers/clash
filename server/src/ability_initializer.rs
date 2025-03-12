@@ -1,12 +1,16 @@
+use crate::card::HandCard;
+use crate::combat::{update_combat_strength, Combat};
+use crate::combat_listeners::CombatStrength;
 use crate::content::custom_phase_actions::{
-    AdvanceRequest, CurrentEventHandler, CurrentEventRequest, CurrentEventResponse, MultiRequest,
-    PaymentRequest, PlayerRequest, PositionRequest, ResourceRewardRequest, SelectedStructure,
-    StructuresRequest, UnitTypeRequest, UnitsRequest,
+    AdvanceRequest, CurrentEventHandler, CurrentEventRequest, CurrentEventResponse,
+    HandCardsRequest, MultiRequest, PaymentRequest, PlayerRequest, PositionRequest,
+    ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitTypeRequest, UnitsRequest,
 };
 use crate::events::{Event, EventOrigin};
 use crate::player_events::CurrentEvent;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
+use crate::tactics_card::CombatRole;
 use crate::unit::UnitType;
 use crate::{content::custom_actions::CustomActionType, game::Game, player_events::PlayerEvents};
 use std::collections::HashMap;
@@ -164,6 +168,23 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         };
         self.add_ability_initializer(initializer)
             .add_ability_deinitializer(deinitializer)
+    }
+
+    fn add_combat_round_start_listener(
+        self,
+        priority: i32,
+        listener: impl Fn(&Game, &Combat, &mut CombatStrength, CombatRole) + Clone + 'static,
+    ) -> Self {
+        self.add_simple_current_event_listener(
+            |event| &mut event.on_combat_round_start,
+            priority,
+            move |game, _, _, _| {
+                update_combat_strength(game, {
+                    let l = listener.clone();
+                    move |game, combat, s, role| l(game, combat, s, role)
+                });
+            },
+        )
     }
 
     fn add_once_per_turn_listener<T, U, V, E, F>(
@@ -538,6 +559,34 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             },
             request,
             gain_reward,
+        )
+    }
+
+    fn add_hand_card_request<E, V>(
+        self,
+        event: E,
+        priority: i32,
+        request: impl Fn(&mut Game, usize, &V) -> Option<HandCardsRequest> + 'static + Clone,
+        cards_selected: impl Fn(&mut Game, &SelectedChoice<Vec<HandCard>, V>) + 'static + Clone,
+    ) -> Self
+    where
+        E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+    {
+        self.add_multi_choice_reward_request_listener::<E, HandCard, HandCardsRequest, V>(
+            event,
+            priority,
+            |r| r,
+            CurrentEventRequest::SelectHandCards,
+            |request, action| {
+                if let CurrentEventRequest::SelectHandCards(request) = &request {
+                    if let CurrentEventResponse::SelectHandCards(choices) = action {
+                        return (request.choices.clone(), choices, request.needed.clone());
+                    }
+                }
+                panic!("Hand Cards request expected");
+            },
+            request,
+            cards_selected,
         )
     }
 

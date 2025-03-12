@@ -1,5 +1,5 @@
 {
-"state": "Playing",
+  "state": "Playing",
   "current_events": [
     {
       "event_type": {
@@ -59,7 +59,6 @@
   ],
   "players": [
     {
-      "name": null,
       "id": 0,
       "resources": {
         "food": 1,
@@ -156,8 +155,6 @@
         }
       ],
       "civilization": "test0",
-      "active_leader": null,
-      "available_leaders": [],
       "advances": [
         "Farming",
         "Mining",
@@ -166,19 +163,13 @@
         "Tactics",
         "Voting"
       ],
-      "unlocked_special_advance": [],
       "wonders_build": [
         "Pyramids"
       ],
       "incident_tokens": 3,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
-      "wonder_cards": [],
       "next_unit_id": 8
     },
     {
-      "name": null,
       "id": 1,
       "resources": {
         "food": 2,
@@ -225,27 +216,16 @@
           "position": "A4"
         }
       ],
-      "units": [],
       "civilization": "test1",
-      "active_leader": null,
-      "available_leaders": [],
       "advances": [
         "Farming",
         "Mining"
       ],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 3,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
-      "wonder_cards": [],
       "next_unit_id": 2
     },
     {
-      "name": null,
       "id": 2,
-      "resources": {},
       "resource_limit": {
         "food": 2,
         "wood": 7,
@@ -253,19 +233,8 @@
         "ideas": 7,
         "gold": 7
       },
-      "cities": [],
-      "units": [],
       "civilization": "Barbarians",
-      "active_leader": null,
-      "available_leaders": [],
-      "advances": [],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 3,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
-      "wonder_cards": [],
       "next_unit_id": 0
     }
   ],
@@ -367,7 +336,7 @@
   ],
   "dropped_players": [],
   "wonders_left": [],
-  "wonder_amount_left": 1,
+  "action_cards_left": [],
   "incidents_left": [
     39
   ]

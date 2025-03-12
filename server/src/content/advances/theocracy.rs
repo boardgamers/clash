@@ -104,10 +104,7 @@ fn conversion() -> AdvanceBuilder {
 
 fn fanaticism() -> AdvanceBuilder {
     Advance::builder("Fanaticism", "During a battle in a city with a Temple, whether you are the attacker or defender, you add +2 combat value to your first combat roll. If you lose the battle, you get 1 free Infantry Unit after the battle and place it in one of your cities.")
-        .add_player_event_listener(
-            |event| &mut event.on_combat_round,
-            1,
-            |s, c, game| {
+        .add_combat_round_start_listener(1, |game, c, s, _attacker| {
                 if c.round == 1 && c.defender_temple(game) {
                     s.extra_combat_value += 2;
                     s.roll_log.push("Player gets +2 combat value for Fanaticism Advance".to_string());

@@ -12,6 +12,7 @@ use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
 use crate::resource::ResourceType;
+use crate::tactics_card::CombatRole;
 use crate::unit::UnitType;
 use itertools::Itertools;
 
@@ -25,7 +26,7 @@ pub(crate) fn pirates_round_bonus() -> Builtin {
                 if c.is_sea_battle(game)
                     && c.opponent(player_index) == get_pirates_player(game).index
                 {
-                    let hits = r.casualties(false).fighters as u32;
+                    let hits = r.casualties(CombatRole::Defender).fighters as u32;
                     Some(ResourceRewardRequest::new(
                         PaymentOptions::sum(hits, &[ResourceType::Gold]),
                         "-".to_string(),

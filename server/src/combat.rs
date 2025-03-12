@@ -2,7 +2,8 @@ use crate::city::City;
 use crate::city::MoodState::Angry;
 use crate::city_pieces::Building;
 use crate::combat_listeners::{
-    Casualties, CombatEnd, CombatResult, CombatRoundEnd, CombatStrength,
+    combat_round_end, combat_round_start, Casualties, CombatRoundEnd, CombatRoundStart,
+    CombatRoundType, CombatStrength,
 };
 use crate::consts::SHIP_CAPACITY;
 use crate::content::custom_phase_actions::CurrentEventType;
@@ -10,6 +11,7 @@ use crate::game::Game;
 use crate::movement::{move_units, stop_current_move};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
+use crate::tactics_card::CombatRole;
 use crate::unit::UnitType::{Cavalry, Elephant, Infantry, Leader};
 use crate::unit::{MoveUnits, MovementRestriction, UnitType, Units};
 use itertools::Itertools;
@@ -161,6 +163,20 @@ impl Combat {
             self.attacker
         }
     }
+
+    #[must_use]
+    pub fn players(&self) -> [usize; 2] {
+        [self.attacker, self.defender]
+    }
+
+    #[must_use]
+    pub fn role(&self, player: usize) -> CombatRole {
+        if player == self.attacker {
+            CombatRole::Attacker
+        } else {
+            CombatRole::Defender
+        }
+    }
 }
 
 pub fn initiate_combat(
@@ -181,6 +197,7 @@ pub fn initiate_combat(
         attackers,
         can_retreat,
     );
+    log_round(game, &combat);
     start_combat(game, combat);
 }
 
@@ -189,7 +206,7 @@ pub(crate) fn start_combat(game: &mut Game, mut combat: Combat) {
     stop_current_move(game);
 
     match game.trigger_current_event(
-        &[combat.attacker, combat.defender],
+        &combat.players(),
         |events| &mut events.on_combat_start,
         &combat,
         CurrentEventType::CombatStart,
@@ -200,11 +217,11 @@ pub(crate) fn start_combat(game: &mut Game, mut combat: Combat) {
         _ => panic!("Invalid event type"),
     }
 
-    combat_loop(game, combat);
+    combat_loop(game, CombatRoundStart::new(combat));
 }
 
 #[must_use]
-pub(crate) fn get_combat_start(game: &mut Game) -> &mut Combat {
+pub(crate) fn get_combat_start_mut(game: &mut Game) -> &mut Combat {
     if let CurrentEventType::CombatStart(e) = &mut game.current_event_mut().event_type {
         e
     } else {
@@ -212,8 +229,38 @@ pub(crate) fn get_combat_start(game: &mut Game) -> &mut Combat {
     }
 }
 
+pub(crate) fn update_combat_strength(
+    game: &mut Game,
+    update: impl Fn(&mut Game, &Combat, &mut CombatStrength, CombatRole) + Clone + 'static,
+) {
+    let mut s = game.current_events.pop().expect("No current event");
+    let player = s.player.index;
+    if let CurrentEventType::CombatRoundStart(e) = &mut s.event_type {
+        if player == e.combat.attacker {
+            update(
+                game,
+                &e.combat,
+                &mut e.attacker_strength,
+                CombatRole::Attacker,
+            );
+        } else if player == e.combat.defender {
+            update(
+                game,
+                &e.combat,
+                &mut e.defender_strength,
+                CombatRole::Defender,
+            );
+        } else {
+            panic!("Invalid player index")
+        }
+    } else {
+        panic!("Invalid event type")
+    }
+    game.current_events.push(s);
+}
+
 #[must_use]
-pub(crate) fn get_combat_round_end(game: &mut Game) -> &mut CombatRoundEnd {
+pub(crate) fn get_combat_round_end_mut(game: &mut Game) -> &mut CombatRoundEnd {
     if let CurrentEventType::CombatRoundEnd(e) = &mut game.current_event_mut().event_type {
         e
     } else {
@@ -221,19 +268,22 @@ pub(crate) fn get_combat_round_end(game: &mut Game) -> &mut CombatRoundEnd {
     }
 }
 
-pub(crate) fn combat_loop(game: &mut Game, mut c: Combat) {
+pub(crate) fn combat_loop(game: &mut Game, mut s: CombatRoundStart) {
     loop {
-        game.add_info_log_group(format!("Combat round {}", c.round));
-        //todo: go into tactics phase if either player has tactics card (also if they can not play it unless otherwise specified via setting)
+        if s.round_type != CombatRoundType::Done {
+            match combat_round_start(game, &s) {
+                Some(value) => s = value,
+                None => return,
+            };
+        }
+
+        let c = s.combat;
+
+        //todo remove copy-paste below
 
         let attacker_name = game.player_name(c.attacker);
         let active_attackers = c.active_attackers(game);
-        let mut attacker_strength = CombatStrength::new(c.attacker, true);
-        let _ = game.players[c.attacker]
-            .events
-            .on_combat_round
-            .get()
-            .trigger(&mut attacker_strength, &c, game);
+        let attacker_strength = &s.attacker_strength;
         let mut attacker_log = vec![];
         let attacker_rolls = roll(
             game,
@@ -248,12 +298,7 @@ pub(crate) fn combat_loop(game: &mut Game, mut c: Combat) {
         let active_defenders = c.active_defenders(game);
         let defender_name = game.player_name(c.defender);
         let mut defender_log = vec![];
-        let mut defender_strength = CombatStrength::new(c.defender, false);
-        let _ = game.players[c.defender]
-            .events
-            .on_combat_round
-            .get()
-            .trigger(&mut defender_strength, &c, game);
+        let defender_strength = &s.defender_strength;
         let defender_rolls = roll(
             game,
             c.defender,
@@ -273,6 +318,7 @@ pub(crate) fn combat_loop(game: &mut Game, mut c: Combat) {
         let defender_hits = (defender_combat_value / 5)
             .saturating_sub(attacker_hit_cancels)
             .min(active_attackers.len() as u8);
+
         game.add_info_log_item(&format!("{attacker_name} rolled {attacker_log_str} for combined combat value of {attacker_combat_value} and gets {attacker_hits} hits against defending units."));
         game.add_info_log_item(&format!("{defender_name} rolled {defender_log_str} for combined combat value of {defender_combat_value} and gets {defender_hits} hits against attacking units."));
         if !attacker_strength.roll_log.is_empty() {
@@ -293,15 +339,27 @@ pub(crate) fn combat_loop(game: &mut Game, mut c: Combat) {
             && defender_hits < active_attackers.len() as u8;
 
         let result = CombatRoundEnd::new(
-            Casualties::new(defender_hits, game, &c, c.attacker),
-            Casualties::new(attacker_hits, game, &c, c.defender),
+            Casualties::new(
+                defender_hits,
+                game,
+                &c,
+                c.attacker,
+                s.attacker_strength.tactics_card.clone(),
+            ),
+            Casualties::new(
+                attacker_hits,
+                game,
+                &c,
+                c.defender,
+                s.defender_strength.tactics_card.clone(),
+            ),
             can_retreat,
             c,
             game,
         );
 
         if let Some(r) = combat_round_end(game, &result) {
-            c = r;
+            s = CombatRoundStart::new(r);
         } else {
             return;
         }
@@ -315,68 +373,8 @@ fn roll_log_str(log: &[String]) -> String {
     log.join(", ")
 }
 
-pub(crate) fn combat_round_end(game: &mut Game, r: &CombatRoundEnd) -> Option<Combat> {
-    let mut c = match game.trigger_current_event(
-        &[r.combat.attacker, r.combat.defender],
-        |events| &mut events.on_combat_round_end,
-        r,
-        CurrentEventType::CombatRoundEnd,
-        None,
-    ) {
-        None => return None,
-        Some(CurrentEventType::CombatRoundEnd(e)) => e.combat,
-        _ => panic!("Invalid event type"),
-    };
-
-    if let Some(f) = &r.final_result {
-        match f {
-            CombatResult::AttackerWins => attacker_wins(game, c),
-            CombatResult::DefenderWins => defender_wins(game, c),
-            CombatResult::Draw => draw(game, c),
-        }
-        None
-    } else if matches!(c.retreat, CombatRetreatState::EndAfterCurrentRound) {
-        None
-    } else {
-        c.round += 1;
-        Some(c)
-    }
-}
-
-fn attacker_wins(game: &mut Game, c: Combat) {
-    game.add_info_log_item("Attacker wins");
-    move_units(game, c.attacker, &c.attackers, c.defender_position, None);
-    capture_position(game, c.defender, c.defender_position, c.attacker);
-    end_combat(game, &CombatEnd::new(CombatResult::AttackerWins, c));
-}
-
-fn defender_wins(game: &mut Game, c: Combat) {
-    game.add_info_log_item("Defender wins");
-    end_combat(game, &CombatEnd::new(CombatResult::DefenderWins, c));
-}
-
-pub(crate) fn draw(game: &mut Game, c: Combat) {
-    if c.defender_fortress(game) && c.round == 1 {
-        game.add_info_log_item(&format!(
-            "{} wins the battle because he has a defending fortress",
-            game.player_name(c.defender)
-        ));
-        return end_combat(game, &CombatEnd::new(CombatResult::DefenderWins, c));
-    }
-    game.add_info_log_item("Battle ends in a draw");
-    end_combat(game, &CombatEnd::new(CombatResult::Draw, c));
-}
-
-pub(crate) fn end_combat(game: &mut Game, info: &CombatEnd) {
-    let c = &info.combat;
-
-    game.trigger_current_event(
-        &[c.attacker, c.defender],
-        |events| &mut events.on_combat_end,
-        info,
-        CurrentEventType::CombatEnd,
-        None,
-    );
+pub(crate) fn log_round(game: &mut Game, c: &Combat) {
+    game.add_info_log_group(format!("Combat round {}", c.round));
 }
 
 struct CombatRolls {
@@ -384,7 +382,7 @@ struct CombatRolls {
     pub hit_cancels: u8,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct CombatDieRoll {
     pub value: u8,
     pub bonus: UnitType,
@@ -694,14 +692,7 @@ pub mod tests {
             current_player_index: 0,
             action_log: Vec::new(),
             action_log_index: 0,
-            log: [
-                String::from("The game has started"),
-                String::from("Age 1 has started"),
-                String::from("Round 1/3"),
-            ]
-            .iter()
-            .map(|s| vec![s.to_string()])
-            .collect(),
+            log: Vec::new(),
             undo_limit: 0,
             actions_left: 3,
             successful_cultural_influence: false,
@@ -713,7 +704,7 @@ pub mod tests {
             dice_roll_log: Vec::new(),
             dropped_players: Vec::new(),
             wonders_left: Vec::new(),
-            wonder_amount_left: 0,
+            action_cards_left: Vec::new(),
             incidents_left: Vec::new(),
             permanent_incident_effects: Vec::new(),
         }
@@ -726,6 +717,7 @@ pub mod tests {
 
         let wonder = Wonder::builder("wonder", "test", PaymentOptions::free(), vec![]).build();
         let mut game = test_game();
+        game.add_info_log_group("combat".into()); // usually filled in combat
         game.players.push(old);
         game.players.push(new);
         let old = 0;
@@ -737,7 +729,7 @@ pub mod tests {
         game.players[old].construct(Academy, position, None);
         game.players[old].construct(Obelisk, position, None);
 
-        game.players[old].victory_points(&game).assert_eq(8.0);
+        game.players[old].victory_points(&game).assert_eq(7.0);
 
         conquer_city(&mut game, position, new, old);
 
@@ -747,8 +739,8 @@ pub mod tests {
 
         let old = &game.players[old];
         let new = &game.players[new];
-        old.victory_points(&game).assert_eq(4.0);
-        new.victory_points(&game).assert_eq(5.0);
+        old.victory_points(&game).assert_eq(3.0);
+        new.victory_points(&game).assert_eq(4.0);
         assert_eq!(0, old.wonders_owned());
         assert_eq!(1, new.wonders_owned());
         assert_eq!(1, old.owned_buildings(&game));

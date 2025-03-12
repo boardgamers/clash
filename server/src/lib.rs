@@ -14,8 +14,10 @@
 
 pub mod ability_initializer;
 pub mod action;
+pub mod action_card;
 pub mod advance;
 mod barbarians;
+pub mod card;
 pub mod city;
 pub mod city_pieces;
 mod civilization;
@@ -46,7 +48,8 @@ pub mod resource;
 pub mod resource_pile;
 mod special_advance;
 pub mod status_phase;
+mod tactics_card;
 mod undo;
 pub mod unit;
-mod utils;
+pub mod utils;
 mod wonder;

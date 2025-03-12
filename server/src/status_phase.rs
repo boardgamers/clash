@@ -60,16 +60,19 @@ pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
     use StatusPhaseState::*;
 
     loop {
-        if game.trigger_current_event_with_listener(
-            &game.human_players(game.starting_player_index),
-            |events| &mut events.on_status_phase,
-            &status_phase_handler(&phase).listeners,
-            &phase,
-            CurrentEventType::StatusPhase,
-            None,
-        ) {
+        if game
+            .trigger_current_event_with_listener(
+                &game.human_players(game.starting_player_index),
+                |events| &mut events.on_status_phase,
+                Some(&status_phase_handler(&phase).listeners),
+                &phase,
+                CurrentEventType::StatusPhase,
+                None,
+            )
+            .is_none()
+        {
             return;
-        }
+        };
 
         phase = match phase {
             CompleteObjectives => {
@@ -134,7 +137,7 @@ pub(crate) fn free_advance() -> Builtin {
 
 pub(crate) fn draw_cards() -> Builtin {
     Builtin::builder("Draw Cards", "-")
-        .add_player_event_listener(
+        .add_simple_current_event_listener(
             |event| &mut event.on_status_phase,
             0,
             |_game, _p, _| {

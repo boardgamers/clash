@@ -3,6 +3,7 @@
 use crate::common::{move_action, TestAction};
 use common::JsonTest;
 use server::action::Action;
+use server::card::HandCard;
 use server::content::custom_phase_actions::CurrentEventResponse;
 use server::playing_actions::PlayingAction::Recruit;
 use server::position::Position;
@@ -97,6 +98,18 @@ fn test_combat_all_modifiers() {
             TestAction::not_undoable(
                 1,
                 Action::Response(CurrentEventResponse::Payment(vec![ResourcePile::ore(1)])),
+            ),
+            TestAction::not_undoable(
+                0,
+                Action::Response(CurrentEventResponse::SelectHandCards(vec![
+                    HandCard::ActionCard(1),
+                ])),
+            ),
+            TestAction::not_undoable(
+                1,
+                Action::Response(CurrentEventResponse::SelectHandCards(vec![
+                    HandCard::ActionCard(2),
+                ])),
             ),
         ],
     );

@@ -1,9 +1,11 @@
 use crate::log_ui::break_text;
 use crate::payment_ui::Payment;
 use crate::render_context::RenderContext;
+use server::content::action_cards::get_action_card;
 use server::content::advances::get_advance;
 use server::content::builtin::get_builtin;
 use server::content::incidents::get_incident;
+use server::content::tactics_cards::get_tactics_card;
 use server::content::wonders::get_wonder;
 use server::events::EventOrigin;
 
@@ -14,6 +16,8 @@ pub fn event_help(rc: &RenderContext, origin: &EventOrigin, do_break: bool) -> V
         EventOrigin::Advance(a) => vec![get_advance(a).description],
         EventOrigin::Wonder(w) => vec![get_wonder(w).description],
         EventOrigin::Builtin(b) => vec![get_builtin(rc.game, b).description],
+        EventOrigin::ActionCard(id) => vec![get_action_card(*id).civil_card.description],
+        EventOrigin::TacticsCard(name) => vec![get_tactics_card(name).description],
         EventOrigin::Incident(id) => get_incident(*id).description(),
         EventOrigin::Leader(l) => vec![{
             let l = rc.shown_player.get_leader(l).unwrap();

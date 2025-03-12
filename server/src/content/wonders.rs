@@ -4,6 +4,7 @@ use crate::game::Game;
 use crate::map::Terrain::Fertile;
 use crate::payment::{PaymentConversionType, PaymentOptions};
 use crate::position::Position;
+use crate::utils::remove_element;
 use crate::{resource_pile::ResourcePile, wonder::Wonder};
 use std::collections::HashSet;
 
@@ -62,17 +63,19 @@ pub fn construct_wonder(
     game: &mut Game,
     player_index: usize,
     city_position: Position,
-    wonder: &str,
+    name: &str,
     payment: ResourcePile,
 ) {
-    let wonder_cards_index = game.players[player_index]
-        .wonder_cards
-        .iter()
-        .position(|wonder_card| wonder_card.name == wonder)
-        .expect("Illegal action");
-    let wonder = game.players[player_index]
-        .wonder_cards
-        .remove(wonder_cards_index);
+    if remove_element(
+        &mut game.get_player_mut(player_index).wonder_cards,
+        &name.to_string(),
+    )
+    .is_none()
+    {
+        panic!("wonder not found");
+    }
+    let wonder = get_wonder(name);
+
     let city = game.players[player_index].get_city(city_position);
     assert!(
         city.can_build_wonder(&wonder, &game.players[player_index], game),

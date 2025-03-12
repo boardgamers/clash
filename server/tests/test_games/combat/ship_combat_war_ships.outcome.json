@@ -12,6 +12,7 @@
     {
       "event_type": {
         "CombatRoundEnd": {
+          "round_type": "Default",
           "attacker_casualties": {
             "fighters": 1
           },
@@ -47,7 +48,6 @@
   ],
   "players": [
     {
-      "name": null,
       "id": 0,
       "resources": {
         "food": 2,
@@ -148,8 +148,6 @@
         }
       ],
       "civilization": "test1",
-      "active_leader": null,
-      "available_leaders": [],
       "advances": [
         "Farming",
         "Free Economy",
@@ -158,19 +156,13 @@
         "Voting",
         "War Ships"
       ],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 3,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
       "wonder_cards": [
         "Pyramids"
       ],
       "next_unit_id": 9
     },
     {
-      "name": null,
       "id": 1,
       "resources": {
         "food": 2,
@@ -220,26 +212,16 @@
         }
       ],
       "civilization": "test0",
-      "active_leader": null,
-      "available_leaders": [],
       "advances": [
         "Farming",
         "Mining",
         "War Ships"
       ],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 3,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
-      "wonder_cards": [],
       "next_unit_id": 2
     },
     {
-      "name": null,
       "id": 2,
-      "resources": {},
       "resource_limit": {
         "food": 2,
         "wood": 7,
@@ -247,19 +229,8 @@
         "ideas": 7,
         "gold": 7
       },
-      "cities": [],
-      "units": [],
       "civilization": "Pirates",
-      "active_leader": null,
-      "available_leaders": [],
-      "advances": [],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 3,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
-      "wonder_cards": [],
       "next_unit_id": 9
     }
   ],
@@ -386,5 +357,5 @@
   ],
   "dropped_players": [],
   "wonders_left": [],
-  "wonder_amount_left": 1
+  "action_cards_left": []
 }

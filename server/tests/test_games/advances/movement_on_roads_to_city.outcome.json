@@ -2,7 +2,6 @@
   "state": "Playing",
   "players": [
     {
-      "name": null,
       "id": 0,
       "resources": {
         "food": 2,
@@ -33,25 +32,15 @@
         }
       ],
       "civilization": "test0",
-      "active_leader": null,
-      "available_leaders": [],
       "advances": [
         "Farming",
         "Mining"
       ],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 3,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
-      "wonder_cards": [],
       "next_unit_id": 1
     },
     {
-      "name": null,
       "id": 1,
-      "resources": {},
       "resource_limit": {
         "food": 2,
         "wood": 7,
@@ -76,20 +65,12 @@
         }
       ],
       "civilization": "test1",
-      "active_leader": null,
-      "available_leaders": [],
       "advances": [
         "Farming",
         "Mining",
         "Roads"
       ],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 2,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
-      "wonder_cards": [],
       "next_unit_id": 1
     }
   ],
@@ -364,13 +345,11 @@
       "undo": [
         {
           "op": "add",
-          "path": "/players/1/resources/food",
-          "value": 1
-        },
-        {
-          "op": "add",
-          "path": "/players/1/resources/ore",
-          "value": 1
+          "path": "/players/1/resources",
+          "value": {
+            "food": 1,
+            "ore": 1
+          }
         },
         {
           "op": "replace",
@@ -409,5 +388,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1
+  "action_cards_left": []
 }

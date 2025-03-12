@@ -286,8 +286,7 @@ fn envoy() -> Incident {
             game.get_player_mut(player)
                 .gain_resources(ResourcePile::culture_tokens(1) + ResourcePile::ideas(1));
 
-            let wonder_from_pile = draw_wonder_from_pile(game);
-            if let Some(wonder) = wonder_from_pile {
+            if let Some(wonder) = draw_wonder_from_pile(game) {
                 game.add_info_log_item(&format!(
                     "{} is now available to be taken by anyone",
                     wonder.name

@@ -1,17 +1,19 @@
 use crate::ability_initializer::AbilityListeners;
+use crate::action_card::gain_action_card_from_pile;
 use crate::combat::{CombatDieRoll, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
-use crate::content::builtin;
 use crate::content::civilizations::{BARBARIANS, PIRATES};
 use crate::content::custom_phase_actions::{
     CurrentEventHandler, CurrentEventPlayer, CurrentEventState, CurrentEventType,
 };
+use crate::content::{action_cards, advances, builtin, incidents};
 use crate::events::{Event, EventOrigin};
 use crate::incident::PermanentIncidentEffect;
 use crate::movement::{CurrentMove, MoveState};
 use crate::pirates::get_pirates_player;
 use crate::player_events::{CurrentEvent, CurrentEventInfo, PlayerEvents};
 use crate::resource::check_for_waste;
+use crate::resource_pile::ResourcePile;
 use crate::status_phase::enter_status_phase;
 use crate::unit::UnitType;
 use crate::utils::Rng;
@@ -52,8 +54,8 @@ pub struct Game {
     pub dice_roll_outcomes: Vec<u8>, // for testing
     pub dice_roll_log: Vec<u8>,
     pub dropped_players: Vec<usize>,
-    pub wonders_left: Vec<Wonder>,
-    pub wonder_amount_left: usize, // todo is this redundant?
+    pub wonders_left: Vec<String>,
+    pub action_cards_left: Vec<u8>,
     pub incidents_left: Vec<u8>,
     pub permanent_incident_effects: Vec<PermanentIncidentEffect>,
 }
@@ -96,9 +98,15 @@ impl Game {
 
         let mut players = Vec::new();
         let mut civilizations = civilizations::get_all();
-        for i in 0..player_amount {
+        for player_index in 0..player_amount {
             let civilization = rng.range(NON_HUMAN_PLAYERS, civilizations.len());
-            players.push(Player::new(civilizations.remove(civilization), i));
+            let mut player = Player::new(civilizations.remove(civilization), player_index);
+            player.resource_limit = ResourcePile::new(2, 7, 7, 7, 7, 0, 0);
+            player.gain_resources(ResourcePile::food(2));
+            player.advances.push(advances::get_advance("Farming"));
+            player.advances.push(advances::get_advance("Mining"));
+            player.incident_tokens = 3;
+            players.push(player);
         }
 
         let starting_player = rng.range(0, players.len());
@@ -112,16 +120,27 @@ impl Game {
             players.len(),
         ));
 
-        let mut wonders = wonders::get_all();
-        wonders.shuffle(&mut rng);
-        let wonder_amount = wonders.len();
-
         let map = if setup {
             Map::random_map(&mut players, &mut rng)
         } else {
             Map::new(HashMap::new())
         };
 
+        let wonders_left = wonders::get_all()
+            .shuffled(&mut rng)
+            .iter()
+            .map(|w| w.name.clone())
+            .collect();
+        let action_cards_left = action_cards::get_all()
+            .shuffled(&mut rng)
+            .iter()
+            .map(|a| a.id)
+            .collect();
+        let incidents_left = incidents::get_all()
+            .shuffled(&mut rng)
+            .iter()
+            .map(|i| i.id)
+            .collect();
         let mut game = Self {
             state: GameState::Playing,
             current_events: Vec::new(),
@@ -131,14 +150,10 @@ impl Game {
             current_player_index: starting_player,
             action_log: Vec::new(),
             action_log_index: 0,
-            log: [
-                String::from("The game has started"),
-                String::from("Age 1 has started"),
-                String::from("Round 1/3"),
-            ]
-            .iter()
-            .map(|s| vec![s.clone()])
-            .collect(),
+            log: [String::from("The game has started")]
+                .iter()
+                .map(|s| vec![s.clone()])
+                .collect(),
             undo_limit: 0,
             actions_left: ACTIONS,
             successful_cultural_influence: false,
@@ -149,15 +164,28 @@ impl Game {
             dice_roll_outcomes: Vec::new(),
             dice_roll_log: Vec::new(),
             dropped_players: Vec::new(),
-            wonders_left: wonders,
-            wonder_amount_left: wonder_amount,
-            incidents_left: Vec::new(),
+            wonders_left,
+            action_cards_left,
+            incidents_left,
             permanent_incident_effects: Vec::new(),
         };
         for i in 0..game.players.len() {
             builtin::init_player(&mut game, i);
         }
 
+        for player_index in 0..player_amount {
+            let p = game.get_player(player_index);
+            game.add_info_log_group(format!(
+                "{} is playing as {}",
+                p.get_name(),
+                p.civilization.name
+            ));
+            gain_action_card_from_pile(&mut game, player_index);
+            // todo draw 1 objective card
+        }
+
+        game.add_info_log_group("Age 1 has started".into());
+        game.add_info_log_group("Round 1/3".into());
         game
     }
 
@@ -187,12 +215,8 @@ impl Game {
             dice_roll_outcomes: data.dice_roll_outcomes,
             dice_roll_log: data.dice_roll_log,
             dropped_players: data.dropped_players,
-            wonders_left: data
-                .wonders_left
-                .into_iter()
-                .map(|wonder| wonders::get_wonder(&wonder))
-                .collect(),
-            wonder_amount_left: data.wonder_amount_left,
+            wonders_left: data.wonders_left,
+            action_cards_left: data.action_cards_left,
             incidents_left: data.incidents_left,
             permanent_incident_effects: data.permanent_incident_effects,
             current_events: data.current_events,
@@ -225,12 +249,8 @@ impl Game {
             dice_roll_outcomes: self.dice_roll_outcomes,
             dice_roll_log: self.dice_roll_log,
             dropped_players: self.dropped_players,
-            wonders_left: self
-                .wonders_left
-                .into_iter()
-                .map(|wonder| wonder.name)
-                .collect(),
-            wonder_amount_left: self.wonder_amount_left,
+            wonders_left: self.wonders_left,
+            action_cards_left: self.action_cards_left,
             incidents_left: self.incidents_left,
             permanent_incident_effects: self.permanent_incident_effects,
         }
@@ -258,12 +278,8 @@ impl Game {
             dice_roll_outcomes: self.dice_roll_outcomes.clone(),
             dice_roll_log: self.dice_roll_log.clone(),
             dropped_players: self.dropped_players.clone(),
-            wonders_left: self
-                .wonders_left
-                .iter()
-                .map(|wonder| wonder.name.clone())
-                .collect(),
-            wonder_amount_left: self.wonder_amount_left,
+            wonders_left: self.wonders_left.clone(),
+            action_cards_left: self.action_cards_left.clone(),
             incidents_left: self.incidents_left.clone(),
             permanent_incident_effects: self.permanent_incident_effects.clone(),
         }
@@ -353,26 +369,28 @@ impl Game {
         &mut self,
         players: &[usize],
         event: fn(&mut PlayerEvents) -> &mut CurrentEvent<V>,
-        listeners: &AbilityListeners,
+        listeners: Option<&AbilityListeners>,
         event_type: &V,
         store_type: impl Fn(V) -> CurrentEventType,
         log: Option<&str>,
-    ) -> bool
+    ) -> Option<CurrentEventType>
     where
         V: Clone,
     {
-        for p in players {
-            (listeners.initializer)(self, *p);
-        }
+        if let Some(listeners) = listeners {
+            for p in players {
+                (listeners.initializer)(self, *p);
+            }
 
-        let return_early = self
-            .trigger_current_event(players, event, event_type, store_type, log)
-            .is_none();
+            let result = self.trigger_current_event(players, event, event_type, store_type, log);
 
-        for p in players {
-            (listeners.deinitializer)(self, *p);
+            for p in players {
+                (listeners.deinitializer)(self, *p);
+            }
+            result
+        } else {
+            self.trigger_current_event(players, event, event_type, store_type, log)
         }
-        return_early
     }
 
     pub(crate) fn trigger_current_event<V>(
@@ -775,7 +793,7 @@ pub struct GameData {
     dice_roll_log: Vec<u8>,
     dropped_players: Vec<usize>,
     wonders_left: Vec<String>,
-    wonder_amount_left: usize,
+    action_cards_left: Vec<u8>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     incidents_left: Vec<u8>,

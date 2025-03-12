@@ -1,8 +1,9 @@
 use crate::action::execute_custom_phase_action;
 use crate::barbarians::BarbariansEventState;
+use crate::card::HandCard;
 use crate::city_pieces::Building;
 use crate::combat::Combat;
-use crate::combat_listeners::{CombatEnd, CombatRoundEnd};
+use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
 use crate::events::EventOrigin;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
@@ -66,6 +67,8 @@ pub type SelectedStructure = (Position, Structure);
 
 pub type StructuresRequest = MultiRequest<SelectedStructure>;
 
+pub type HandCardsRequest = MultiRequest<HandCard>;
+
 #[must_use]
 pub fn is_selected_structures_valid(game: &Game, selected: &[SelectedStructure]) -> bool {
     selected
@@ -89,6 +92,7 @@ pub enum CurrentEventRequest {
     SelectUnitType(UnitTypeRequest),
     SelectUnits(UnitsRequest),
     SelectStructures(StructuresRequest),
+    SelectHandCards(HandCardsRequest),
     BoolRequest(String),
     ChangeGovernment(ChangeGovernmentRequest),
     ExploreResolution,
@@ -103,6 +107,7 @@ pub enum CurrentEventResponse {
     SelectPositions(Vec<Position>),
     SelectUnitType(UnitType),
     SelectUnits(Vec<u32>),
+    SelectHandCards(Vec<HandCard>),
     SelectStructures(Vec<SelectedStructure>),
     Bool(bool),
     ChangeGovernmentType(ChangeGovernmentType),
@@ -166,6 +171,7 @@ pub enum CurrentEventType {
     ExploreResolution(ExploreResolutionState),
     InfluenceCultureResolution(ResourcePile),
     CombatStart(Combat),
+    CombatRoundStart(CombatRoundStart),
     CombatRoundEnd(CombatRoundEnd),
     CombatEnd(CombatEnd),
     StatusPhase(StatusPhaseState),

@@ -1,4 +1,5 @@
-pub fn format_list(list: &[String], empty_message: &str) -> String {
+#[must_use]
+pub(crate) fn format_list(list: &[String], empty_message: &str) -> String {
     match list {
         [] => empty_message.to_string(),
         [element] => element.clone(),
@@ -24,25 +25,21 @@ where
     None
 }
 
-pub fn remove_element_by<F, T, U>(list: &mut Vec<T>, f: F) -> Option<U>
+pub fn remove_element_by<F, T>(list: &mut Vec<T>, f: F) -> Option<T>
+where
+    F: Fn(&T) -> bool,
+{
+    list.iter().position(f).map(|index| list.remove(index))
+}
+
+pub fn remove_and_map_element_by<F, T, U>(list: &mut Vec<T>, f: F) -> Option<U>
 where
     F: Fn(&T) -> Option<U>,
 {
-    let mut u: Option<U> = None;
-    let index = list.iter().position(|e| {
-        let option = f(e);
-        if option.is_some() {
-            u = option;
-            return true;
-        }
-        false
-    });
-    if let Some(index) = index {
-        list.remove(index);
-    }
-    u
+    remove_element_by(list, |e| f(e).is_some()).and_then(|e| f(&e))
 }
 
+#[must_use]
 pub fn ordinal_number(value: u32) -> String {
     format!(
         "{value}{}",
@@ -61,11 +58,13 @@ pub struct Rng {
 }
 
 impl Rng {
-    pub fn from_seed(seed: u128) -> Self {
+    #[must_use]
+    pub(crate) fn from_seed(seed: u128) -> Self {
         Self { seed }
     }
 
-    pub fn from_seed_string(seed: &str) -> Self {
+    #[must_use]
+    pub(crate) fn from_seed_string(seed: &str) -> Self {
         let seed = if seed.is_empty() {
             0
         } else {
@@ -74,15 +73,11 @@ impl Rng {
         Self { seed }
     }
 
-    pub fn range(&mut self, start: usize, end: usize) -> usize {
+    pub(crate) fn range(&mut self, start: usize, end: usize) -> usize {
         self.seed = next_seed(self.seed);
         let range = (end - start) as u128;
         let random_value = self.seed % range;
         start + random_value as usize
-    }
-
-    pub fn is_zero(&self) -> bool {
-        self.seed == 0
     }
 }
 
@@ -99,11 +94,18 @@ fn next_seed(seed: u128) -> u128 {
         .wrapping_add(INCREMENT)
 }
 
-pub trait Shuffle {
+pub(crate) trait Shuffle {
+    #[must_use]
+    fn shuffled(self, rng: &mut Rng) -> Self;
     fn shuffle(&mut self, rng: &mut Rng);
 }
 
 impl<T> Shuffle for Vec<T> {
+    fn shuffled(mut self, rng: &mut Rng) -> Self {
+        self.shuffle(rng);
+        self
+    }
+
     fn shuffle(&mut self, rng: &mut Rng) {
         let mut new = Vec::new();
         let length = self.len();

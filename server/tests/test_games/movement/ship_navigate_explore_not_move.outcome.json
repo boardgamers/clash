@@ -46,7 +46,6 @@
   ],
   "players": [
     {
-      "name": null,
       "id": 0,
       "resources": {
         "food": 1,
@@ -80,27 +79,17 @@
           "port_position": "B3"
         }
       ],
-      "units": [],
       "civilization": "test0",
-      "active_leader": null,
-      "available_leaders": [],
       "advances": [
         "Farming",
         "Fishing",
         "Irrigation",
         "Mining"
       ],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 1,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
-      "wonder_cards": [],
       "next_unit_id": 1
     },
     {
-      "name": null,
       "id": 1,
       "resources": {
         "food": 1,
@@ -140,8 +129,6 @@
         }
       ],
       "civilization": "test1",
-      "active_leader": null,
-      "available_leaders": [],
       "advances": [
         "Farming",
         "Fishing",
@@ -150,13 +137,7 @@
         "Navigation",
         "Storage"
       ],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 2,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
-      "wonder_cards": [],
       "next_unit_id": 2
     }
   ],
@@ -390,5 +371,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1
+  "action_cards_left": []
 }

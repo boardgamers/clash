@@ -43,20 +43,27 @@ pub fn get_all() -> Vec<Civilization> {
                     )
                     .build(),
             ],
-            vec![Leader::builder("Kʼinich Janaab Pakal I",
-                                 "Shield of the sun",
-                                 "ignore the first hit in a battle with an Obelisk", "", "")
-                .add_player_event_listener(
-                    |events| &mut events.on_combat_round,
-                    4,
-                    |s, c, game| {
-                        if c.round == 1 && game.try_get_any_city(c.defender_position).is_some_and(|city| city.pieces.obelisk.is_some()) {
-                            s.roll_log.push("Kʼinich Janaab Pakal I ignores the first hit in a battle with an Obelisk".to_string());
-                            s.hit_cancels += 1;
-                        }
-                    },
-                )
-                .build()],
+            vec![Leader::builder(
+                "Kʼinich Janaab Pakal I",
+                "Shield of the sun",
+                "ignore the first hit in a battle with an Obelisk",
+                "",
+                "",
+            )
+            .add_combat_round_start_listener(4, |game, c, s, _attacker| {
+                if c.round == 1
+                    && game
+                        .try_get_any_city(c.defender_position)
+                        .is_some_and(|city| city.pieces.obelisk.is_some())
+                {
+                    s.roll_log.push(
+                        "Kʼinich Janaab Pakal I ignores the first hit in a battle with an Obelisk"
+                            .to_string(),
+                    );
+                    s.hit_cancels += 1;
+                }
+            })
+            .build()],
         ),
     ]
 }

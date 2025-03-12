@@ -1,7 +1,7 @@
 use crate::advance::Advance;
 use crate::collect::{CollectContext, CollectInfo};
 use crate::combat::Combat;
-use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatStrength};
+use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
 use crate::events::Event;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
@@ -51,8 +51,10 @@ pub(crate) struct PlayerEvents {
     pub on_turn_start: CurrentEvent,
     pub on_incident: CurrentEvent<IncidentInfo>,
     pub on_combat_start: CurrentEvent<Combat>,
-    pub on_combat_round: Event<CombatStrength, Combat, Game>,
+    pub on_combat_round_start: CurrentEvent<CombatRoundStart>,
+    pub on_combat_round_start_tactics: CurrentEvent<CombatRoundStart>,
     pub on_combat_round_end: CurrentEvent<CombatRoundEnd>,
+    pub on_combat_round_end_tactics: CurrentEvent<CombatRoundEnd>,
     pub on_combat_end: CurrentEvent<CombatEnd>,
 }
 
