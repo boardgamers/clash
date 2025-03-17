@@ -223,7 +223,7 @@ pub(crate) fn update_combat_strength(
     game: &mut Game,
     player: usize,
     e: &mut CombatRoundStart,
-    update: impl Fn(&mut Game, &Combat, &mut CombatStrength, CombatRole) + Clone + Sized,
+    update: impl Fn(&mut Game, &Combat, &mut CombatStrength, CombatRole) + Clone,
 ) {
     if player == e.combat.attacker {
         update(

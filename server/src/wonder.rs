@@ -133,7 +133,7 @@ pub(crate) fn on_draw_wonder_card() -> Builtin {
                     None
                 }
             },
-            |game, s, _| {
+            |game, s, ()| {
                 if s.choice {
                     let name = find_public_wonder(game)
                         .expect("public wonder card not found")

@@ -1,7 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::combat::{
-     Combat, CombatModifier, CombatRetreatState,
-};
+use crate::combat::{Combat, CombatModifier, CombatRetreatState};
 use crate::combat_listeners::CombatResult;
 use crate::content::advances::get_advance;
 use crate::content::builtin::Builtin;
@@ -68,9 +66,7 @@ pub(crate) fn decide_trojan_horse() -> Builtin {
                     ));
                     game.permanent_incident_effects
                         .retain(|e| !matches!(e, PermanentIncidentEffect::TrojanHorse));
-                    c
-                        .modifiers
-                        .push(CombatModifier::TrojanHorse);
+                    c.modifiers.push(CombatModifier::TrojanHorse);
                 }
             },
         )

@@ -406,7 +406,7 @@ impl IncidentBuilder {
             move |game, s, _| {
                 gain_reward(game, s);
             },
-                    )
+        )
     }
 
     pub(crate) fn add_decrease_mood(

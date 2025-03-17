@@ -5,7 +5,7 @@ use crate::content::custom_phase_actions::UnitsRequest;
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, MoodModifier, PermanentIncidentEffect};
 use crate::player::Player;
-use crate::player_events::{IncidentInfo, IncidentTarget};
+use crate::player_events::IncidentTarget;
 use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;

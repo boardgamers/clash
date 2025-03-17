@@ -9,7 +9,7 @@ use crate::content::custom_phase_actions::{
 use crate::content::wonders::get_wonder;
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, MoodModifier};
-use crate::player_events::{IncidentInfo, IncidentTarget};
+use crate::player_events::IncidentTarget;
 use crate::position::Position;
 use itertools::Itertools;
 

@@ -74,7 +74,7 @@ fn trade_routes() -> AdvanceBuilder {
                     )
                 })
             },
-            |game, p, _| {
+            |game, p, ()| {
                 let (_, routes) =
                     trade_route_reward(game).expect("No trade route reward");
                 trade_route_log(game, p.player_index, &routes, &p.choice, p.actively_selected)

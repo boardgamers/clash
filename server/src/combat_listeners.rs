@@ -1,5 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::combat::{capture_position,  Combat, CombatRetreatState};
+use crate::combat::{capture_position, Combat, CombatRetreatState};
 use crate::consts::SHIP_CAPACITY;
 use crate::content::builtin::{Builtin, BuiltinBuilder};
 use crate::content::custom_phase_actions::{new_position_request, CurrentEventType, UnitsRequest};
@@ -371,10 +371,7 @@ pub(crate) fn event_with_tactics<T: Clone + PartialEq>(
             ),
             CombatRoundType::Done => panic!("Invalid round type"),
         };
-        s = match option {
-            None => return None,
-            Some(e) => e,
-        }
+        s = option?;
     }
     *get_round_type(&mut s) = CombatRoundType::Done;
     Some(s)
@@ -463,8 +460,7 @@ pub(crate) fn offer_retreat() -> Builtin {
                     game.add_info_log_item(&format!("{player_name} does not retreat",));
                 }
                 if retreat.choice {
-                    e.combat.retreat =
-                        CombatRetreatState::EndAfterCurrentRound;
+                    e.combat.retreat = CombatRetreatState::EndAfterCurrentRound;
                 }
             },
         )

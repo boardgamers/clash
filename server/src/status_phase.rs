@@ -140,7 +140,7 @@ pub(crate) fn draw_cards() -> Builtin {
         .add_simple_current_event_listener(
             |event| &mut event.on_status_phase,
             0,
-            |_game, p, name, s| {
+            |_game, _p, _name, _s| {
                 // todo every player draws 1 action card and 1 objective card
             },
         )

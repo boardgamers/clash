@@ -416,7 +416,7 @@ impl Game {
             self.current_events
                 .push(CurrentEventState::new(players[0], current_event_type));
         }
-        
+
         let event_index = self.current_events.len() - 1;
 
         let mut value = details.clone();

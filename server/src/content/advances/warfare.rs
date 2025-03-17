@@ -5,7 +5,7 @@ use crate::city_pieces::Building::Fortress;
 use crate::combat::CombatModifier::{
     CancelFortressExtraDie, CancelFortressIgnoreHit, SteelWeaponsAttacker, SteelWeaponsDefender,
 };
-use crate::combat::{ Combat, CombatModifier};
+use crate::combat::{Combat, CombatModifier};
 use crate::combat_listeners::CombatStrength;
 use crate::content::advances::{
     advance_group_builder, AdvanceGroup, METALLURGY, STEEL_WEAPONS, TACTICS,

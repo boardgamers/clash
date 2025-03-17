@@ -1,5 +1,5 @@
 use crate::card::HandCard;
-use crate::combat::{update_combat_strength,  Combat};
+use crate::combat::{update_combat_strength, Combat};
 use crate::combat_listeners::CombatStrength;
 use crate::content::custom_phase_actions::{
     AdvanceRequest, CurrentEventHandler, CurrentEventRequest, CurrentEventResponse,
