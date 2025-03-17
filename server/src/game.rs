@@ -373,9 +373,9 @@ impl Game {
         event_type: &V,
         store_type: impl Fn(V) -> CurrentEventType,
         log: Option<&str>,
-    ) -> Option<CurrentEventType>
+    ) -> Option<V>
     where
-        V: Clone,
+        V: Clone + PartialEq,
     {
         if let Some(listeners) = listeners {
             for p in players {
@@ -400,9 +400,9 @@ impl Game {
         details: &V,
         to_event_type: impl Fn(V) -> CurrentEventType,
         log: Option<&str>,
-    ) -> Option<CurrentEventType>
+    ) -> Option<V>
     where
-        V: Clone,
+        V: Clone + PartialEq,
     {
         let current_event_type = to_event_type(details.clone());
         if self
@@ -416,14 +416,18 @@ impl Game {
             self.current_events
                 .push(CurrentEventState::new(players[0], current_event_type));
         }
-        let state = self.current_event();
+        
+        let event_index = self.current_events.len() - 1;
 
-        for player_index in Self::remaining_current_event_players(players, state) {
+        let mut value = details.clone();
+        for player_index in Self::remaining_current_event_players(players, self.current_event()) {
             let info = CurrentEventInfo {
                 player: player_index,
             };
-            self.trigger_event_with_game_value(player_index, event, &info, details);
+            self.trigger_event_with_game_value(player_index, event, &info, &(), &mut value);
+
             if self.current_event().player.handler.is_some() {
+                self.current_events[event_index].event_type = to_event_type(value.clone());
                 return None;
             }
             let state = self.current_event_mut();
@@ -432,7 +436,8 @@ impl Game {
                 state.player = CurrentEventPlayer::new(p);
             }
         }
-        self.current_events.pop().map(|s| s.event_type)
+        self.current_events.pop();
+        Some(value)
     }
 
     fn remaining_current_event_players(players: &[usize], state: &CurrentEventState) -> Vec<usize> {
@@ -443,15 +448,18 @@ impl Game {
             .collect_vec()
     }
 
-    pub(crate) fn trigger_event_with_game_value<U, V>(
+    pub(crate) fn trigger_event_with_game_value<U, V, W>(
         &mut self,
         player_index: usize,
-        event: fn(&mut PlayerEvents) -> &mut Event<Game, U, V>,
+        event: fn(&mut PlayerEvents) -> &mut Event<Game, U, V, W>,
         info: &U,
         details: &V,
-    ) {
+        extra_value: &mut W,
+    ) where
+        W: Clone + PartialEq,
+    {
         let e = event(&mut self.players[player_index].events).take();
-        let _ = e.trigger(self, info, details);
+        let _ = e.trigger(self, info, details, extra_value);
         event(&mut self.players[player_index].events).set(e);
     }
 

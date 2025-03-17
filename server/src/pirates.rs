@@ -35,7 +35,7 @@ pub(crate) fn pirates_round_bonus() -> Builtin {
                     None
                 }
             },
-            |_game, s| {
+            |_game, s, _| {
                 vec![format!(
                     "{} gained {} for destroying Pirate Ships",
                     s.player_name, s.choice
@@ -67,7 +67,7 @@ pub(crate) fn pirates_bonus() -> Builtin {
                 None
             }
         },
-        |_game, s| {
+        |_game, s, _| {
             vec![format!(
                 "{} gained {} for fighting the Pirates",
                 s.player_name, s.choice
@@ -182,7 +182,7 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
                 "Select Pirate Ships to remove",
             ))
         },
-        |game, s| {
+        |game, s, _| {
             let pirates = get_pirates_player(game).index;
             game.add_info_log_item(&format!(
                 "{} removed a Pirate Ships at {}",

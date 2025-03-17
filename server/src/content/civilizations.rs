@@ -30,7 +30,7 @@ pub fn get_all() -> Vec<Civilization> {
                     .add_player_event_listener(
                         |events| &mut events.terrain_collect_options,
                         2,
-                        |m, (), ()| {
+                        |m, (), (), ()| {
                             m.insert(
                                 Terrain::Mountain,
                                 std::collections::HashSet::from([
@@ -50,7 +50,7 @@ pub fn get_all() -> Vec<Civilization> {
                 "",
                 "",
             )
-            .add_combat_round_start_listener(4, |game, c, s, _attacker| {
+            .add_combat_round_start_listener(4, |game, c, s, _role| {
                 if c.round == 1
                     && game
                         .try_get_any_city(c.defender_position)

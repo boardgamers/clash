@@ -196,7 +196,8 @@ fn reformation() -> Incident {
             ))
         },
         |game, s| {
-            let donor = game.get_player_mut(s.details.active_player);
+            let &p = game.current_event().active_player().expect("should have active player");
+            let donor = game.get_player_mut(p);
             let pos = s.choice[0];
             donor
                 .get_city_mut(pos)

@@ -38,7 +38,7 @@ fn monuments() -> AdvanceBuilder {
         .add_player_event_listener(
             |event| &mut event.on_influence_culture_attempt,
             1,
-            |info, city, _| {
+            |info, city, _, ()| {
                 if info.is_defender && !city.pieces.wonders.is_empty() {
                     info.set_impossible();
                 }

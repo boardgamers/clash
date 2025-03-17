@@ -775,7 +775,7 @@ impl Player {
     #[must_use]
     pub(crate) fn trigger_event<T, U, V>(
         &self,
-        event: fn(&PlayerEvents) -> &Event<T, U, V>,
+        event: fn(&PlayerEvents) -> &Event<T, U, V, ()>,
         value: &mut T,
         info: &U,
         details: &V,
@@ -784,7 +784,7 @@ impl Player {
         T: Clone + PartialEq,
     {
         let e = event(&self.events);
-        e.get().trigger(value, info, details)
+        e.get().trigger(value, info, details, &mut ())
     }
 
     pub(crate) fn trigger_cost_event<U, V>(
@@ -802,11 +802,12 @@ impl Player {
                 &cost_info,
                 info,
                 details,
+                &mut (),
                 |i| i.cost.is_valid_payment(execute),
                 |i, m| i.cost.modifiers = m,
             )
         } else {
-            let m = event.trigger(&mut cost_info, info, details);
+            let m = event.trigger(&mut cost_info, info, details, &mut ());
             cost_info.cost.modifiers = m;
             cost_info
         }
@@ -819,7 +820,7 @@ impl Player {
         details: &V,
     ) {
         let e = event(&mut self.events).take();
-        let _ = e.trigger(self, info, details);
+        let _ = e.trigger(self, info, details, &mut ());
         event(&mut self.events).set(e);
     }
 

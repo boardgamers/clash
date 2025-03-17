@@ -5,7 +5,7 @@ use crate::city_pieces::Building::Fortress;
 use crate::combat::CombatModifier::{
     CancelFortressExtraDie, CancelFortressIgnoreHit, SteelWeaponsAttacker, SteelWeaponsDefender,
 };
-use crate::combat::{get_combat_start_mut, Combat, CombatModifier};
+use crate::combat::{ Combat, CombatModifier};
 use crate::combat_listeners::CombatStrength;
 use crate::content::advances::{
     advance_group_builder, AdvanceGroup, METALLURGY, STEEL_WEAPONS, TACTICS,
@@ -71,7 +71,7 @@ fn siegecraft() -> AdvanceBuilder {
                     None
                 }
             },
-            |game, s| {
+            |game, s, c| {
                 game.add_info_log_item(
                     &format!("{} paid for siegecraft: ", s.player_name));
                 let mut paid = false;
@@ -93,7 +93,7 @@ fn siegecraft() -> AdvanceBuilder {
                 if !paid {
                     game.add_to_last_log_item("nothing");
                 }
-                get_combat_start_mut(game).modifiers.extend(modifiers);
+                c.modifiers.extend(modifiers);
             },
         )
 }
@@ -111,7 +111,7 @@ fn steel_weapons() -> AdvanceBuilder {
 
                 let cost = steel_weapons_cost(game, c, player_index);
                 if cost.is_free() {
-                    add_steel_weapons(player_index, get_combat_start_mut(game));
+                    add_steel_weapons(player_index, c);
                     return None;
                 }
 
@@ -125,14 +125,14 @@ fn steel_weapons() -> AdvanceBuilder {
                     None
                 }
             },
-            |game, s| {
+            |game, s, c| {
                 let pile = &s.choice[0];
                 game.add_info_log_item(
                     &format!("{} paid for steel weapons: {}", s.player_name, pile));
                 if pile.is_empty() {
                     return;
                 }
-                add_steel_weapons(s.player_index, get_combat_start_mut(game));
+                add_steel_weapons(s.player_index, c);
             },
         )
         .add_combat_round_start_listener(2,
@@ -149,7 +149,7 @@ fn draft() -> AdvanceBuilder {
     .add_player_event_listener(
         |event| &mut event.recruit_cost,
         0,
-        |cost, units, player| {
+        |cost, units, player, ()| {
             if units.infantry > 0 {
                 // insert at beginning so that it's preferred over gold
 

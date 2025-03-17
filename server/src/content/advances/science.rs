@@ -22,7 +22,7 @@ fn math() -> AdvanceBuilder {
     .add_player_event_listener(
         |event| &mut event.advance_cost,
         1,
-        |i, a, ()| {
+        |i, a, (), ()| {
             if a.name == "Engineering" || a.name == "Roads" {
                 i.info.log.push("Math reduced the cost to 0".to_string());
                 i.set_zero();
@@ -41,7 +41,7 @@ fn astronomy() -> AdvanceBuilder {
     .add_player_event_listener(
         |event| &mut event.advance_cost,
         0,
-        |i, a, ()| {
+        |i, a, (), ()| {
             if a.name == "Navigation" || a.name == "Cartography" {
                 i.set_zero();
                 i.info
@@ -77,7 +77,7 @@ fn medicine() -> AdvanceBuilder {
                 "Select resource to gain back".to_string(),
             ))
         },
-        |_game, s| {
+        |_game, s, _| {
             let verb = if s.actively_selected {
                 "selected"
             } else {
@@ -99,7 +99,7 @@ fn metallurgy() -> AdvanceBuilder {
         .add_player_event_listener(
             |event| &mut event.collect_total,
             0,
-            |i, (),()| {
+            |i, (),(), ()| {
                 if i.total.ore >= 2 {
                     i.total.ore -= 1;
                     i.total.gold += 1;

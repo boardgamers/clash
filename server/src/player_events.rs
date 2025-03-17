@@ -19,7 +19,7 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
-pub(crate) type CurrentEvent<V = ()> = Event<Game, CurrentEventInfo, V>;
+pub(crate) type CurrentEvent<V = ()> = Event<Game, CurrentEventInfo, (), V>;
 
 #[derive(Default)]
 pub(crate) struct PlayerEvents {
@@ -29,7 +29,7 @@ pub(crate) struct PlayerEvents {
     pub on_collect: Event<CollectInfo, Game>,
     pub on_advance: CurrentEvent<AdvanceInfo>,
     pub on_recruit: CurrentEvent<Recruit>,
-    pub on_influence_culture_attempt: Event<InfluenceCultureInfo, City, Game>,
+    pub on_influence_culture_attempt: Event<InfluenceCultureInfo, City, Game>, // todo add listener method
     pub on_influence_culture_success: Event<Game, usize>,
     pub on_influence_culture_resolution: CurrentEvent<ResourcePile>,
     pub before_move: Event<Game, MoveInfo>,

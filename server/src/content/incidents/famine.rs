@@ -77,7 +77,7 @@ pub(crate) fn pestilence_permanent_effect() -> Builtin {
     .add_player_event_listener(
         |event| &mut event.is_playing_action_available,
         1,
-        |available, game, i| {
+        |available, game, i, ()| {
             let player = game.get_player(i.player);
             if game
                 .permanent_incident_effects
@@ -130,7 +130,7 @@ fn epidemics() -> Incident {
     .build()
 }
 
-pub(crate) fn kill_incident_units(game: &mut Game, s: &SelectedChoice<Vec<u32>, IncidentInfo>) {
+pub(crate) fn kill_incident_units(game: &mut Game, s: &SelectedChoice<Vec<u32>>) {
     if s.choice.is_empty() {
         game.add_info_log_item(&format!("{} declined to kill units", s.player_name));
         return;

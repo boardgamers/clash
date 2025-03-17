@@ -32,7 +32,7 @@ fn myths() -> AdvanceBuilder {
                 }
                 None
             },
-            |_game, p| {
+            |_game, p,_| {
                 vec![format!(
                     "{} selected {} as a reward for constructing a Temple",
                     p.player_name, p.choice
@@ -47,7 +47,7 @@ fn rituals() -> AdvanceBuilder {
         .add_player_event_listener(
             |event| &mut event.happiness_cost,
             0,
-            |cost, (), ()| {
+            |cost, (), (), ()| {
                 for r in &[
                     ResourceType::Food,
                     ResourceType::Wood,

@@ -29,7 +29,7 @@ pub fn get_all() -> Vec<Wonder> {
             .add_player_event_listener(
                 |events| &mut events.terrain_collect_options,
                 1,
-                |m,(),()| {
+                |m,(),(), ()| {
                     m.insert(Fertile, HashSet::from([
                         ResourcePile::food(1),
                         ResourcePile::wood(1),

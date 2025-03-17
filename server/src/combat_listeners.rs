@@ -1,5 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::combat::{capture_position, get_combat_round_end_mut, Combat, CombatRetreatState};
+use crate::combat::{capture_position,  Combat, CombatRetreatState};
 use crate::consts::SHIP_CAPACITY;
 use crate::content::builtin::{Builtin, BuiltinBuilder};
 use crate::content::custom_phase_actions::{new_position_request, CurrentEventType, UnitsRequest};
@@ -240,13 +240,6 @@ pub(crate) fn combat_round_start(
         game,
         start,
         CurrentEventType::CombatRoundStart,
-        |s| {
-            if let CurrentEventType::CombatRoundStart(s) = s {
-                s
-            } else {
-                panic!("Invalid event type")
-            }
-        },
         ROUND_START_TYPES,
         |events| &mut events.on_combat_round_start,
         |events| &mut events.on_combat_round_start_tactics,
@@ -268,13 +261,6 @@ pub(crate) fn combat_round_end(game: &mut Game, r: &CombatRoundEnd) -> Option<Co
         game,
         r,
         CurrentEventType::CombatRoundEnd,
-        |s| {
-            if let CurrentEventType::CombatRoundEnd(s) = s {
-                s
-            } else {
-                panic!("Invalid event type")
-            }
-        },
         ROUND_END_TYPES,
         |events| &mut events.on_combat_round_end,
         |events| &mut events.on_combat_round_end_tactics,
@@ -340,11 +326,10 @@ pub(crate) fn end_combat(game: &mut Game, info: &CombatEnd) {
     );
 }
 
-pub(crate) fn event_with_tactics<T: Clone>(
+pub(crate) fn event_with_tactics<T: Clone + PartialEq>(
     game: &mut Game,
     event_type: &T,
     store_type: impl Fn(T) -> CurrentEventType + Clone + 'static,
-    restore_type: impl Fn(CurrentEventType) -> T + Clone + 'static,
     round_types: &[CombatRoundType; 3],
     event: fn(&mut PlayerEvents) -> &mut CurrentEvent<T>,
     tactics_event: fn(&mut PlayerEvents) -> &mut CurrentEvent<T>,
@@ -388,7 +373,7 @@ pub(crate) fn event_with_tactics<T: Clone>(
         };
         s = match option {
             None => return None,
-            Some(e) => restore_type(e),
+            Some(e) => e,
         }
     }
     *get_round_type(&mut s) = CombatRoundType::Done;
@@ -402,9 +387,9 @@ pub(crate) fn trigger_tactics_event<T>(
     get_combat: impl Fn(&T) -> &Combat,
     get_tactics_card: impl Fn(&T) -> Option<&String>,
     store_type: impl Fn(T) -> CurrentEventType,
-) -> Option<CurrentEventType>
+) -> Option<T>
 where
-    T: Clone,
+    T: Clone + PartialEq,
 {
     game.trigger_current_event_with_listener(
         &get_combat(event_type).players(),
@@ -470,7 +455,7 @@ pub(crate) fn offer_retreat() -> Builtin {
                     None
                 }
             },
-            |game, retreat| {
+            |game, retreat, e| {
                 let player_name = &retreat.player_name;
                 if retreat.choice {
                     game.add_info_log_item(&format!("{player_name} retreats",));
@@ -478,7 +463,7 @@ pub(crate) fn offer_retreat() -> Builtin {
                     game.add_info_log_item(&format!("{player_name} does not retreat",));
                 }
                 if retreat.choice {
-                    get_combat_round_end_mut(game).combat.retreat =
+                    e.combat.retreat =
                         CombatRetreatState::EndAfterCurrentRound;
                 }
             },
@@ -491,18 +476,16 @@ pub(crate) fn choose_casualties(
     priority: i32,
     get_casualties: impl Fn(&Casualties) -> u8 + 'static + Clone,
     get_choices: impl Fn(&Game, usize, &Combat) -> Vec<u32> + 'static + Clone,
-    kill_units: impl Fn(&mut Game, usize, &[u32], &Combat) + 'static + Copy,
+    kill_units: impl Fn(&mut Game, usize, &[u32], &mut Combat) + 'static + Copy,
 ) -> Builtin {
     builder
         .add_units_request(
             |event| &mut event.on_combat_round_end,
             priority,
             move |game, player, r| {
-                let c = &r.combat;
+                let choices = get_choices(game, player, &mut r.combat).clone();
 
-                let choices = get_choices(game, player, c).clone();
-
-                let role = c.role(player);
+                let role = r.combat.role(player);
                 let role_str = if role.is_attacker() {
                     "attacking"
                 } else {
@@ -518,7 +501,7 @@ pub(crate) fn choose_casualties(
                     game.add_info_log_item(&format!(
                         "{name} has to remove all of their {role_str} units",
                     ));
-                    kill_units(game, player, &choices, c);
+                    kill_units(game, player, &choices, &mut r.combat);
                     return None;
                 }
 
@@ -531,7 +514,7 @@ pub(crate) fn choose_casualties(
                     game.add_info_log_item(&format!(
                         "{name} has to remove {casualties} of their {role_str} units",
                     ));
-                    kill_units(game, player, &choices[..casualties as usize], c);
+                    kill_units(game, player, &choices[..casualties as usize], &mut r.combat);
                     return None;
                 }
 
@@ -545,8 +528,8 @@ pub(crate) fn choose_casualties(
                     &format!("Remove {casualties} {role_str} units"),
                 ))
             },
-            move |game, s| {
-                kill_units(game, s.player_index, &s.choice, &s.details.combat);
+            move |game, s, e| {
+                kill_units(game, s.player_index, &s.choice, &mut e.combat);
             },
         )
         .build()
@@ -579,7 +562,7 @@ pub(crate) fn place_settler() -> Builtin {
                 None
             }
         },
-        |game, s| {
+        |game, s, _e| {
             let pos = s.choice[0];
             game.add_info_log_item(&format!(
                 "{} gained 1 free Settler Unit at {} for losing a city",
@@ -592,7 +575,7 @@ pub(crate) fn place_settler() -> Builtin {
     .build()
 }
 
-fn kill_units(game: &mut Game, player: usize, killed_unit_ids: &[u32], c: &Combat) {
+fn kill_units(game: &mut Game, player: usize, killed_unit_ids: &[u32], c: &mut Combat) {
     let p = game.get_player(player);
     game.add_info_log_item(&format!(
         "{} removed {}",
@@ -608,10 +591,7 @@ fn kill_units(game: &mut Game, player: usize, killed_unit_ids: &[u32], c: &Comba
     for unit in killed_unit_ids {
         game.kill_unit(*unit, player, Some(killer));
         if player == c.attacker {
-            get_combat_round_end_mut(game)
-                .combat
-                .attackers
-                .retain(|id| id != unit);
+            c.attackers.retain(|id| id != unit);
         }
     }
 }

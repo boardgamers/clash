@@ -83,7 +83,7 @@ pub(crate) fn barbarians_bonus() -> Builtin {
                     None
                 }
             },
-            |_game, s| {
+            |_game, s, _| {
                 vec![format!(
                     "{} gained {} for winning a combat against the Barbarians",
                     s.player_name, s.choice

@@ -45,16 +45,17 @@ use crate::content::{action_cards, incidents};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-type Listener<T, U, V> = (Box<dyn Fn(&mut T, &U, &V)>, i32, usize, EventOrigin);
+type Listener<T, U, V, W> = (Box<dyn Fn(&mut T, &U, &V, &mut W)>, i32, usize, EventOrigin);
 
-pub struct EventMut<T, U = (), V = ()> {
-    listeners: Vec<Listener<T, U, V>>,
+pub struct EventMut<T, U = (), V = (), W = ()> {
+    listeners: Vec<Listener<T, U, V, W>>,
     next_id: usize,
 }
 
-impl<T, U, V> EventMut<T, U, V>
+impl<T, U, V, W> EventMut<T, U, V, W>
 where
     T: Clone + PartialEq,
+    W: Clone + PartialEq,
 {
     fn new() -> Self {
         Self {
@@ -71,7 +72,7 @@ where
         key: EventOrigin,
     ) -> usize
     where
-        F: Fn(&mut T, &U, &V) + 'static,
+        F: Fn(&mut T, &U, &V, &mut W) + 'static,
     {
         let id = self.next_id;
         assert!(
@@ -96,8 +97,14 @@ where
     }
 
     #[must_use]
-    pub(crate) fn trigger(&self, value: &mut T, info: &U, details: &V) -> Vec<EventOrigin> {
-        self.trigger_with_exclude(value, info, details, &[])
+    pub(crate) fn trigger(
+        &self,
+        value: &mut T,
+        info: &U,
+        details: &V,
+        extra_value: &mut W,
+    ) -> Vec<EventOrigin> {
+        self.trigger_with_exclude(value, info, details, extra_value, &[])
     }
 
     #[must_use]
@@ -106,6 +113,7 @@ where
         value: &mut T,
         info: &U,
         details: &V,
+        extra_value: &mut W,
         exclude: &[EventOrigin],
     ) -> Vec<EventOrigin> {
         let mut modifiers = Vec::new();
@@ -114,8 +122,9 @@ where
                 continue;
             }
             let previous_value = value.clone();
-            listener(value, info, details);
-            if *value != previous_value {
+            let previous_extra_value = extra_value.clone();
+            listener(value, info, details, extra_value);
+            if *value != previous_value || *extra_value != previous_extra_value {
                 modifiers.push(key.clone());
             }
         }
@@ -127,6 +136,7 @@ where
         value: &T,
         info: &U,
         details: &V,
+        extra_value: &mut W,
         is_ok: impl Fn(&T) -> bool,
         set_modifiers: impl Fn(&mut T, Vec<EventOrigin>),
     ) -> T
@@ -134,7 +144,7 @@ where
         T: Clone + PartialEq,
     {
         let mut initial_value = value.clone();
-        let initial_modifiers = self.trigger(&mut initial_value, info, details);
+        let initial_modifiers = self.trigger(&mut initial_value, info, details, extra_value);
 
         initial_modifiers
             .iter()
@@ -143,7 +153,7 @@ where
                 let mut v = value.clone();
                 let mut exclude = initial_modifiers.clone();
                 exclude.retain(|origin| !try_modifiers.contains(&origin));
-                let m = self.trigger_with_exclude(&mut v, info, details, &exclude);
+                let m = self.trigger_with_exclude(&mut v, info, details, extra_value, &exclude);
                 if is_ok(&v) {
                     set_modifiers(&mut v, m);
                     Some(v)
@@ -158,7 +168,7 @@ where
     }
 }
 
-impl<T: Clone + PartialEq, U, V> Default for Event<T, U, V> {
+impl<T: Clone + PartialEq, U, V, W: Clone + PartialEq> Default for Event<T, U, V, W> {
     fn default() -> Self {
         Self {
             inner: Some(EventMut::new()),
@@ -166,20 +176,20 @@ impl<T: Clone + PartialEq, U, V> Default for Event<T, U, V> {
     }
 }
 
-pub struct Event<T, U = (), V = ()> {
-    pub inner: Option<EventMut<T, U, V>>,
+pub struct Event<T, U = (), V = (), W = ()> {
+    pub inner: Option<EventMut<T, U, V, W>>,
 }
 
-impl<T, U, V> Event<T, U, V> {
-    pub(crate) fn get(&self) -> &EventMut<T, U, V> {
+impl<T, U, V, W> Event<T, U, V, W> {
+    pub(crate) fn get(&self) -> &EventMut<T, U, V, W> {
         self.inner.as_ref().expect("Event should be initialized")
     }
 
-    pub(crate) fn take(&mut self) -> EventMut<T, U, V> {
+    pub(crate) fn take(&mut self) -> EventMut<T, U, V, W> {
         self.inner.take().expect("Event should be initialized")
     }
 
-    pub(crate) fn set(&mut self, event: EventMut<T, U, V>) {
+    pub(crate) fn set(&mut self, event: EventMut<T, U, V, W>) {
         self.inner = Some(event);
     }
 }
@@ -192,17 +202,17 @@ mod tests {
     fn mutable_event() {
         let mut event = EventMut::new();
         event.add_listener_mut(
-            |item, constant, _| *item += constant,
+            |item, constant, _, ()| *item += constant,
             0,
             EventOrigin::Advance("add constant".to_string()),
         );
         event.add_listener_mut(
-            |item, _, multiplier| *item *= multiplier,
+            |item, _, multiplier, ()| *item *= multiplier,
             -1,
             EventOrigin::Advance("multiply value".to_string()),
         );
         event.add_listener_mut(
-            |item, _, _| {
+            |item, _, _, ()| {
                 *item += 1;
                 *item -= 1;
             },
@@ -213,7 +223,7 @@ mod tests {
         let mut item = 0;
         let addend = 2;
         let multiplier = 3;
-        let modifiers = event.trigger(&mut item, &addend, &multiplier);
+        let modifiers = event.trigger(&mut item, &addend, &multiplier, &mut ());
         assert_eq!(6, item);
         assert_eq!(
             vec![
@@ -226,7 +236,7 @@ mod tests {
         event.remove_listener_mut_by_key(&EventOrigin::Advance("multiply value".to_string()));
         let mut item = 0;
         let addend = 3;
-        let modifiers = event.trigger(&mut item, &addend, &0);
+        let modifiers = event.trigger(&mut item, &addend, &0, &mut ());
         assert_eq!(3, item);
         assert_eq!(
             vec![EventOrigin::Advance("add constant".to_string())],
@@ -244,17 +254,17 @@ mod tests {
 
         let mut event = EventMut::new();
         event.add_listener_mut(
-            |value: &mut Info, (), ()| value.value += 1,
+            |value: &mut Info, (), (), ()| value.value += 1,
             0,
             EventOrigin::Advance("A".to_string()),
         );
         event.add_listener_mut(
-            |value: &mut Info, (), ()| value.value += 2,
+            |value: &mut Info, (), (), ()| value.value += 2,
             1,
             EventOrigin::Advance("B".to_string()),
         );
         event.add_listener_mut(
-            |value: &mut Info, (), ()| value.value += 4,
+            |value: &mut Info, (), (), ()| value.value += 4,
             2,
             EventOrigin::Advance("C".to_string()),
         );
@@ -272,6 +282,7 @@ mod tests {
                     },
                     &(),
                     &(),
+                    &mut (),
                     |i| i.value == 5,
                     |v, m| v.modifiers = m
                 )

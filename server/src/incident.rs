@@ -220,7 +220,7 @@ impl IncidentBuilder {
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<PositionRequest> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<Position>, IncidentInfo>) + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<Position>>) + 'static + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_position_request(
@@ -233,7 +233,9 @@ impl IncidentBuilder {
                     None
                 }
             },
-            gain_reward,
+            move |game, s, _| {
+                gain_reward(game, s);
+            },
         )
     }
 
@@ -243,7 +245,7 @@ impl IncidentBuilder {
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<UnitTypeRequest> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<UnitType, IncidentInfo>) + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<UnitType>) + 'static + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_unit_type_request(
@@ -256,7 +258,9 @@ impl IncidentBuilder {
                     None
                 }
             },
-            gain_reward,
+            move |game, s, _| {
+                gain_reward(game, s);
+            },
         )
     }
 
@@ -266,7 +270,7 @@ impl IncidentBuilder {
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<UnitsRequest> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<u32>, IncidentInfo>) + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<u32>>) + 'static + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_units_request(
@@ -279,7 +283,9 @@ impl IncidentBuilder {
                     None
                 }
             },
-            gain_reward,
+            move |game, s, _| {
+                gain_reward(game, s);
+            },
         )
     }
 
@@ -289,7 +295,7 @@ impl IncidentBuilder {
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<StructuresRequest> + 'static + Clone,
-        structures_selected: impl Fn(&mut Game, &SelectedChoice<Vec<SelectedStructure>, IncidentInfo>)
+        structures_selected: impl Fn(&mut Game, &SelectedChoice<Vec<SelectedStructure>>)
             + 'static
             + Clone,
     ) -> Self {
@@ -304,7 +310,9 @@ impl IncidentBuilder {
                     None
                 }
             },
-            structures_selected,
+            move |game, s, _| {
+                structures_selected(game, s);
+            },
         )
     }
 
@@ -316,9 +324,7 @@ impl IncidentBuilder {
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<ResourceRewardRequest>
             + 'static
             + Clone,
-        gain_reward_log: impl Fn(&Game, &SelectedChoice<ResourcePile, IncidentInfo>) -> Vec<String>
-            + 'static
-            + Clone,
+        gain_reward_log: impl Fn(&Game, &SelectedChoice<ResourcePile>) -> Vec<String> + 'static + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_resource_request(
@@ -331,7 +337,7 @@ impl IncidentBuilder {
                     None
                 }
             },
-            gain_reward_log,
+            move |game, s, _| gain_reward_log(game, s),
         )
     }
 
@@ -347,9 +353,7 @@ impl IncidentBuilder {
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<Vec<PaymentRequest>>
             + 'static
             + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<ResourcePile>, IncidentInfo>)
-            + 'static
-            + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<ResourcePile>>) + 'static + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_payment_request_listener(
@@ -362,7 +366,9 @@ impl IncidentBuilder {
                     None
                 }
             },
-            gain_reward,
+            move |game, s, _| {
+                gain_reward(game, s);
+            },
         )
     }
 
@@ -372,7 +378,7 @@ impl IncidentBuilder {
         description: &str,
         player_pred: impl Fn(&Player, &Game) -> bool + 'static + Clone,
         priority: i32,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<usize, IncidentInfo>) + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<usize>) + 'static + Clone,
     ) -> Self {
         let f = self.new_filter(IncidentTarget::ActivePlayer, priority);
         let d = description.to_string();
@@ -397,8 +403,10 @@ impl IncidentBuilder {
                     None
                 }
             },
-            gain_reward,
-        )
+            move |game, s, _| {
+                gain_reward(game, s);
+            },
+                    )
     }
 
     pub(crate) fn add_decrease_mood(
@@ -668,7 +676,7 @@ fn gold_deposits(b: IncidentBuilder) -> IncidentBuilder {
 
 pub(crate) fn decrease_mod_and_log(
     game: &mut Game,
-    s: &SelectedChoice<Vec<Position>, IncidentInfo>,
+    s: &SelectedChoice<Vec<Position>>,
     mood_modifier: MoodModifier,
 ) {
     for &pos in &s.choice {

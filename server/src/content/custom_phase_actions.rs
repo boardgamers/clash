@@ -217,6 +217,11 @@ impl CurrentEventState {
             selected_position: None,
         }
     }
+    
+    #[must_use]
+    pub fn active_player(&self) -> Option<&usize> {
+        self.players_used.first()
+    }
 }
 
 pub type PositionRequest = MultiRequest<Position>;

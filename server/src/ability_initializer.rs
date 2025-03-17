@@ -1,5 +1,5 @@
 use crate::card::HandCard;
-use crate::combat::{update_combat_strength, Combat};
+use crate::combat::{update_combat_strength,  Combat};
 use crate::combat_listeners::CombatStrength;
 use crate::content::custom_phase_actions::{
     AdvanceRequest, CurrentEventHandler, CurrentEventRequest, CurrentEventResponse,
@@ -18,28 +18,20 @@ use std::ops::RangeInclusive;
 
 pub(crate) type AbilityInitializer = Box<dyn Fn(&mut Game, usize)>;
 
-pub struct SelectedChoice<'a, C, V> {
+pub struct SelectedChoice<C> {
     pub player_index: usize,
     pub player_name: String,
     pub actively_selected: bool,
     pub choice: C,
-    pub details: &'a V,
 }
 
-impl<'a, C, V> SelectedChoice<'a, C, V> {
-    pub fn new(
-        player_index: usize,
-        player_name: &str,
-        actively_selected: bool,
-        choice: C,
-        details: &'a V,
-    ) -> Self {
+impl<C> SelectedChoice<C> {
+    pub fn new(player_index: usize, player_name: &str, actively_selected: bool, choice: C) -> Self {
         Self {
             player_index,
             player_name: player_name.to_string(),
             actively_selected,
             choice,
-            details,
         }
     }
 }
@@ -143,11 +135,17 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self
     }
 
-    fn add_player_event_listener<T, U, V, E, F>(self, event: E, priority: i32, listener: F) -> Self
+    fn add_player_event_listener<T, U, V, W, E, F>(
+        self,
+        event: E,
+        priority: i32,
+        listener: F,
+    ) -> Self
     where
         T: Clone + PartialEq,
-        E: Fn(&mut PlayerEvents) -> &mut Event<T, U, V> + 'static + Clone,
-        F: Fn(&mut T, &U, &V) + 'static + Clone,
+        W: Clone + PartialEq,
+        E: Fn(&mut PlayerEvents) -> &mut Event<T, U, V, W> + 'static + Clone,
+        F: Fn(&mut T, &U, &V, &mut W) + 'static + Clone,
     {
         let key = self.get_key().clone();
         let deinitialize_event = event.clone();
@@ -178,8 +176,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.add_simple_current_event_listener(
             |event| &mut event.on_combat_round_start,
             priority,
-            move |game, _, _, _| {
-                update_combat_strength(game, {
+            move |game, p, _, s| {
+                update_combat_strength(game, p, s, {
                     let l = listener.clone();
                     move |game, combat, s, role| l(game, combat, s, role)
                 });
@@ -196,11 +194,11 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     ) -> Self
     where
         T: Clone + PartialEq,
-        E: Fn(&mut PlayerEvents) -> &mut Event<T, U, V> + 'static + Clone,
+        E: Fn(&mut PlayerEvents) -> &mut Event<T, U, V, ()> + 'static + Clone,
         F: Fn(&mut T, &U, &V) + 'static + Clone,
     {
         let id = self.get_key().id();
-        self.add_player_event_listener(event, priority, move |value, u, v| {
+        self.add_player_event_listener(event, priority, move |value, u, v, ()| {
             if !get_info(value).contains_key(&id) {
                 listener(value, u, v);
                 get_info(value).insert(id.clone(), "used".to_string());
@@ -212,18 +210,19 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        start_custom_phase: impl Fn(&mut Game, usize, &str, &V) -> Option<CurrentEventRequest>
+        start_custom_phase: impl Fn(&mut Game, usize, &str, &mut V) -> Option<CurrentEventRequest>
             + 'static
             + Clone,
-        end_custom_phase: impl Fn(&mut Game, usize, &str, CurrentEventResponse, CurrentEventRequest, &V)
+        end_custom_phase: impl Fn(&mut Game, usize, &str, CurrentEventResponse, CurrentEventRequest, &mut V)
             + 'static
             + Clone,
     ) -> Self
     where
         E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        V: Clone + PartialEq,
     {
         let origin = self.get_key();
-        self.add_player_event_listener(event, priority, move |game, i, details| {
+        self.add_player_event_listener(event, priority, move |game, i, (), details| {
             let player_index = i.player;
             let player_name = game.player_name(player_index);
 
@@ -291,7 +290,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     ) -> Self
     where
         E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
-        F: Fn(&mut Game, usize, &str, &V) + 'static + Clone,
+        F: Fn(&mut Game, usize, &str, &mut V) + 'static + Clone,
+        V: Clone + PartialEq,
     {
         self.add_current_event_listener(
             event,
@@ -309,11 +309,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &V) -> Option<Vec<PaymentRequest>> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<ResourcePile>, V>) + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<Vec<PaymentRequest>> + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<ResourcePile>>, &mut V) + 'static + Clone,
     ) -> Self
     where
         E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        V: Clone + PartialEq,
     {
         self.add_current_event_listener(
             event,
@@ -338,13 +339,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                         }
                         gain_reward(
                             game,
-                            &SelectedChoice::new(
-                                player_index,
-                                player_name,
-                                true,
-                                payments,
-                                details,
-                            ),
+                            &SelectedChoice::new(player_index, player_name, true, payments),
+                            details,
                         );
                         return;
                     }
@@ -358,13 +354,14 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &V) -> Option<ResourceRewardRequest> + 'static + Clone,
-        gain_reward_log: impl Fn(&Game, &SelectedChoice<ResourcePile, V>) -> Vec<String>
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<ResourceRewardRequest> + 'static + Clone,
+        gain_reward_log: impl Fn(&Game, &SelectedChoice<ResourcePile>, &mut V) -> Vec<String>
             + 'static
             + Clone,
     ) -> Self
     where
         E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        V: Clone + PartialEq,
     {
         let g = gain_reward_log.clone();
         self.add_current_event_listener(
@@ -378,13 +375,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                         let r = r.reward.default_payment();
                         for log in g(
                             game,
-                            &SelectedChoice::new(
-                                player_index,
-                                &player_name,
-                                false,
-                                r.clone(),
-                                details,
-                            ),
+                            &SelectedChoice::new(player_index, &player_name, false, r.clone()),
+                            details,
                         ) {
                             game.add_info_log_item(&log);
                         }
@@ -400,13 +392,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                         assert!(request.reward.is_valid_payment(&reward), "Invalid reward");
                         for log in &gain_reward_log(
                             game,
-                            &SelectedChoice::new(
-                                player_index,
-                                player_name,
-                                true,
-                                reward.clone(),
-                                details,
-                            ),
+                            &SelectedChoice::new(player_index, player_name, true, reward.clone()),
+                            details,
                         ) {
                             game.add_info_log_item(log);
                         }
@@ -423,11 +410,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &V) -> Option<String> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<bool, V>) + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<String> + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<bool>, &mut V) + 'static + Clone,
     ) -> Self
     where
         E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        V: Clone + PartialEq,
     {
         self.add_current_event_listener(
             event,
@@ -440,7 +428,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                     if let CurrentEventResponse::Bool(reward) = action {
                         gain_reward(
                             game,
-                            &SelectedChoice::new(player_index, player_name, true, reward, details),
+                            &SelectedChoice::new(player_index, player_name, true, reward),
+                            details,
                         );
                         return;
                     }
@@ -454,11 +443,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &V) -> Option<AdvanceRequest> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<String, V>) + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<AdvanceRequest> + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<String>, &mut V) + 'static + Clone,
     ) -> Self
     where
         E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        V: Clone + PartialEq,
     {
         self.add_choice_reward_request_listener::<E, String, AdvanceRequest, V>(
             event,
@@ -482,11 +472,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &V) -> Option<PositionRequest> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<Position>, V>) + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<PositionRequest> + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<Position>>, &mut V) + 'static + Clone,
     ) -> Self
     where
         E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        V: Clone + PartialEq,
     {
         self.add_multi_choice_reward_request_listener::<E, Position, PositionRequest, V>(
             event,
@@ -510,11 +501,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &V) -> Option<PlayerRequest> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<usize, V>) + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<PlayerRequest> + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<usize>, &mut V) + 'static + Clone,
     ) -> Self
     where
         E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        V: Clone + PartialEq,
     {
         self.add_choice_reward_request_listener::<E, usize, PlayerRequest, V>(
             event,
@@ -538,11 +530,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &V) -> Option<UnitTypeRequest> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<UnitType, V>) + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<UnitTypeRequest> + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<UnitType>, &mut V) + 'static + Clone,
     ) -> Self
     where
         E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        V: Clone + PartialEq,
     {
         self.add_choice_reward_request_listener::<E, UnitType, UnitTypeRequest, V>(
             event,
@@ -566,11 +559,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &V) -> Option<HandCardsRequest> + 'static + Clone,
-        cards_selected: impl Fn(&mut Game, &SelectedChoice<Vec<HandCard>, V>) + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<HandCardsRequest> + 'static + Clone,
+        cards_selected: impl Fn(&mut Game, &SelectedChoice<Vec<HandCard>>, &mut V) + 'static + Clone,
     ) -> Self
     where
         E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        V: Clone + PartialEq,
     {
         self.add_multi_choice_reward_request_listener::<E, HandCard, HandCardsRequest, V>(
             event,
@@ -594,11 +588,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &V) -> Option<UnitsRequest> + 'static + Clone,
-        units_selected: impl Fn(&mut Game, &SelectedChoice<Vec<u32>, V>) + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<UnitsRequest> + 'static + Clone,
+        units_selected: impl Fn(&mut Game, &SelectedChoice<Vec<u32>>, &mut V) + 'static + Clone,
     ) -> Self
     where
         E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        V: Clone + PartialEq,
     {
         self.add_multi_choice_reward_request_listener::<E, u32, UnitsRequest, V>(
             event,
@@ -618,8 +613,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 panic!("Units request expected");
             },
             request,
-            move |game, c| {
-                units_selected(game, c);
+            move |game, c, details| {
+                units_selected(game, c, details);
             },
         )
     }
@@ -628,13 +623,14 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &V) -> Option<StructuresRequest> + 'static + Clone,
-        structures_selected: impl Fn(&mut Game, &SelectedChoice<Vec<SelectedStructure>, V>)
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<StructuresRequest> + 'static + Clone,
+        structures_selected: impl Fn(&mut Game, &SelectedChoice<Vec<SelectedStructure>>, &mut V)
             + 'static
             + Clone,
     ) -> Self
     where
         E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        V: Clone + PartialEq,
     {
         self.add_multi_choice_reward_request_listener::<E, SelectedStructure, StructuresRequest, V>(
             event,
@@ -663,12 +659,13 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         from_request: impl Fn(&CurrentEventRequest, CurrentEventResponse) -> (Vec<C>, C)
             + 'static
             + Clone,
-        request: impl Fn(&mut Game, usize, &V) -> Option<R> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<C, V>) + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<R> + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<C>, &mut V) + 'static + Clone,
     ) -> Self
     where
         C: Clone + PartialEq,
         E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        V: Clone + PartialEq,
     {
         let g = gain_reward.clone();
         self.add_current_event_listener(
@@ -688,8 +685,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                                 player_name,
                                 false,
                                 choices[0].clone(),
-                                details,
                             ),
+                            details,
                         );
                         return None;
                     }
@@ -702,7 +699,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 assert!(choices.contains(&selected), "Invalid choice");
                 gain_reward(
                     game,
-                    &SelectedChoice::new(player_index, player_name, true, selected, details),
+                    &SelectedChoice::new(player_index, player_name, true, selected),
+                    details,
                 );
             },
         )
@@ -717,12 +715,13 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         from_request: impl Fn(&CurrentEventRequest, CurrentEventResponse) -> (Vec<C>, Vec<C>, RangeInclusive<u8>)
             + 'static
             + Clone,
-        request: impl Fn(&mut Game, usize, &V) -> Option<R> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<C>, V>) + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<R> + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<C>>, &mut V) + 'static + Clone,
     ) -> Self
     where
         C: Clone + PartialEq,
         E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        V: Clone + PartialEq,
     {
         let g = gain_reward.clone();
         self.add_current_event_listener(
@@ -744,8 +743,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                                 &game.player_name(player_index),
                                 false,
                                 m.choices.clone(),
-                                details,
                             ),
+                            details,
                         );
                         return None;
                     }
@@ -765,7 +764,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 );
                 gain_reward(
                     game,
-                    &SelectedChoice::new(player_index, player_name, true, selected, details),
+                    &SelectedChoice::new(player_index, player_name, true, selected),
+                    details,
                 );
             },
         )

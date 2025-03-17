@@ -120,11 +120,11 @@ impl TacticsCardBuilder {
         self.add_simple_current_event_listener(
             |event| &mut event.on_combat_round_start_tactics,
             priority,
-            move |game, player, _, s| {
-                if target.is_active(player, &s.combat, &s.round_type) {
-                    update_combat_strength(game, {
+            move |game, p, _, s| {
+                if target.is_active(p, &s.combat, &s.round_type) {
+                    update_combat_strength(game, p, s, {
                         let l = listener.clone();
-                        move |game, combat, s, _attacker| l(player, game, combat, s)
+                        move |game, combat, s, _role| l(p, game, combat, s)
                     });
                 }
             },
@@ -169,7 +169,7 @@ pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
                 && c.round == 1
                 && c.modifiers.contains(&CombatModifier::TrojanHorse)
             {
-                update_combat_strength(game, |_game, _c, s, _attacker| {
+                update_combat_strength(game, player, s, |_game, _c, s, _role| {
                     s.roll_log
                         .push("Trojan Horse denied playing Tactics Cards".to_string());
                 });
@@ -179,7 +179,7 @@ pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
 
             Some(HandCardsRequest::new(cards, 0..=1, "Play Tactics Card"))
         },
-        |game, sel| {
+        |game, sel, s| {
             let name = &sel.player_name;
             if sel.choice.is_empty() {
                 game.add_info_log_item(&format!("{name} did not play a Tactics Card"));
@@ -189,7 +189,7 @@ pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
                 let HandCard::ActionCard(card) = sel.choice[0] else {
                     panic!("Expected ActionCard, got {:?}", sel.choice[0]);
                 };
-                update_combat_strength(game, move |_game, _c, s, _attacker| {
+                update_combat_strength(game, player, s, move |_game, _c, s, _role| {
                     s.tactics_card = Some(
                         action_cards::get_action_card(card)
                             .tactics_card

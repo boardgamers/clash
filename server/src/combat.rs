@@ -213,58 +213,34 @@ pub(crate) fn start_combat(game: &mut Game, mut combat: Combat) {
         None,
     ) {
         None => return,
-        Some(CurrentEventType::CombatStart(c)) => combat = c,
-        _ => panic!("Invalid event type"),
+        Some(c) => combat = c,
     }
 
     combat_loop(game, CombatRoundStart::new(combat));
 }
 
-#[must_use]
-pub(crate) fn get_combat_start_mut(game: &mut Game) -> &mut Combat {
-    if let CurrentEventType::CombatStart(e) = &mut game.current_event_mut().event_type {
-        e
-    } else {
-        panic!("Invalid event type")
-    }
-}
-
 pub(crate) fn update_combat_strength(
     game: &mut Game,
-    update: impl Fn(&mut Game, &Combat, &mut CombatStrength, CombatRole) + Clone + 'static,
+    player: usize,
+    e: &mut CombatRoundStart,
+    update: impl Fn(&mut Game, &Combat, &mut CombatStrength, CombatRole) + Clone + Sized,
 ) {
-    let mut s = game.current_events.pop().expect("No current event");
-    let player = s.player.index;
-    if let CurrentEventType::CombatRoundStart(e) = &mut s.event_type {
-        if player == e.combat.attacker {
-            update(
-                game,
-                &e.combat,
-                &mut e.attacker_strength,
-                CombatRole::Attacker,
-            );
-        } else if player == e.combat.defender {
-            update(
-                game,
-                &e.combat,
-                &mut e.defender_strength,
-                CombatRole::Defender,
-            );
-        } else {
-            panic!("Invalid player index")
-        }
+    if player == e.combat.attacker {
+        update(
+            game,
+            &e.combat,
+            &mut e.attacker_strength,
+            CombatRole::Attacker,
+        );
+    } else if player == e.combat.defender {
+        update(
+            game,
+            &e.combat,
+            &mut e.defender_strength,
+            CombatRole::Defender,
+        );
     } else {
-        panic!("Invalid event type")
-    }
-    game.current_events.push(s);
-}
-
-#[must_use]
-pub(crate) fn get_combat_round_end_mut(game: &mut Game) -> &mut CombatRoundEnd {
-    if let CurrentEventType::CombatRoundEnd(e) = &mut game.current_event_mut().event_type {
-        e
-    } else {
-        panic!("Invalid event type")
+        panic!("Invalid player index")
     }
 }
 
