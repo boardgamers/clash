@@ -10,7 +10,6 @@
   },
   "players": [
     {
-      "name": null,
       "id": 0,
       "resources": {
         "food": 2,
@@ -112,8 +111,6 @@
         }
       ],
       "civilization": "test1",
-      "active_leader": null,
-      "available_leaders": [],
       "advances": [
         "Farming",
         "Free Economy",
@@ -121,19 +118,13 @@
         "Tactics",
         "Voting"
       ],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 3,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
       "wonder_cards": [
         "Pyramids"
       ],
       "next_unit_id": 8
     },
     {
-      "name": null,
       "id": 1,
       "resources": {
         "food": 2,
@@ -183,19 +174,11 @@
         }
       ],
       "civilization": "test0",
-      "active_leader": null,
-      "available_leaders": [],
       "advances": [
         "Farming",
         "Mining"
       ],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 3,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
-      "wonder_cards": [],
       "next_unit_id": 2
     }
   ],
@@ -332,5 +315,5 @@
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [],
-  "wonder_amount_left": 1
+  "action_cards_left": []
 }

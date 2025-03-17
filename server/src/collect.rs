@@ -66,7 +66,7 @@ pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) {
         .events
         .on_collect
         .get()
-        .trigger(&mut i, game, &());
+        .trigger(&mut i, game, &(), &mut ());
     i.info.execute(game);
     game.players[player_index].gain_resources(i.total.clone());
 }
@@ -124,7 +124,7 @@ pub fn possible_resource_collections(
         .events
         .terrain_collect_options
         .get()
-        .trigger(&mut terrain_options, &(), &());
+        .trigger(&mut terrain_options, &(), &(), &mut ());
 
     let collect_options = city_pos
         .neighbors()
@@ -153,6 +153,7 @@ pub fn possible_resource_collections(
                 terrain_options,
             },
             game,
+            &mut (),
             |i| {
                 expect.is_empty()
                     || i.choices.iter().all(|(pos, options)| {

@@ -66,8 +66,7 @@ impl Map {
     pub fn random_map(players: &mut [Player], rng: &mut Rng) -> Self {
         let setup = get_map_setup(players.len() - NON_HUMAN_PLAYERS);
 
-        let blocks = &mut BLOCKS.to_vec();
-        blocks.shuffle(rng);
+        let blocks = &mut BLOCKS.to_vec().shuffled(rng);
         let unexplored_blocks = setup
             .free_positions
             .iter()

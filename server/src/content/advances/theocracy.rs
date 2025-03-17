@@ -50,7 +50,7 @@ fn dogma() -> AdvanceBuilder {
                 }
                 None
             },
-            |game, c| {
+            |game, c,_| {
                 let verb = if c.actively_selected {
                     "selected"
                 } else {
@@ -72,7 +72,7 @@ fn devotion() -> AdvanceBuilder {
     .add_player_event_listener(
         |event| &mut event.on_influence_culture_attempt,
         4,
-        |info, city, _| {
+        |info, city, _, ()| {
             if info.is_defender && city.pieces.temple.is_some() {
                 info.set_no_boost();
             }
@@ -85,7 +85,7 @@ fn conversion() -> AdvanceBuilder {
         .add_player_event_listener(
             |event| &mut event.on_influence_culture_attempt,
             3,
-            |info, _, _| {
+            |info, _, _, ()| {
                 if !info.is_defender {
                     info.roll_boost += 1;
                     info.info.log.push("Player gets +1 to Influence Culture roll for Conversion Advance".to_string());
@@ -95,7 +95,7 @@ fn conversion() -> AdvanceBuilder {
         .add_player_event_listener(
             |event| &mut event.on_influence_culture_success,
             0,
-            |game, player, ()| {
+            |game, player, (), ()| {
                 game.get_player_mut(*player).gain_resources(ResourcePile::culture_tokens(1));
                 game.add_info_log_item("Player gained 1 culture token for a successful Influence Culture attempt for Conversion Advance");
             },
@@ -104,10 +104,7 @@ fn conversion() -> AdvanceBuilder {
 
 fn fanaticism() -> AdvanceBuilder {
     Advance::builder("Fanaticism", "During a battle in a city with a Temple, whether you are the attacker or defender, you add +2 combat value to your first combat roll. If you lose the battle, you get 1 free Infantry Unit after the battle and place it in one of your cities.")
-        .add_player_event_listener(
-            |event| &mut event.on_combat_round,
-            1,
-            |s, c, game| {
+        .add_combat_round_start_listener(1, |game, c, s, _role| {
                 if c.round == 1 && c.defender_temple(game) {
                     s.extra_combat_value += 2;
                     s.roll_log.push("Player gets +2 combat value for Fanaticism Advance".to_string());
@@ -131,7 +128,7 @@ fn fanaticism() -> AdvanceBuilder {
                     None
                 }
             },
-            |game, s| {
+            |game, s,_| {
                 let pos = s.choice[0];
                 game.add_info_log_item(&format!(
                     "{} gained 1 free Infantry Unit at {} for Fanaticism Advance", s.player_name, pos

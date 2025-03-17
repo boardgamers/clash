@@ -9,6 +9,7 @@ use server::resource_pile::ResourcePile;
 use server::unit::MoveUnits;
 use server::unit::MovementAction::Move;
 use server::{game_api, playing_actions};
+use std::fmt::Display;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::{
     env,
@@ -17,6 +18,28 @@ use std::{
     path::MAIN_SEPARATOR as SEPARATOR,
     vec,
 };
+
+#[derive(Clone)]
+pub struct GamePath {
+    directory: String,
+    name: String,
+}
+
+impl GamePath {
+    #[must_use]
+    pub fn new(directory: &str, name: &str) -> Self {
+        Self {
+            directory: directory.to_string(),
+            name: name.to_string(),
+        }
+    }
+}
+
+impl Display for GamePath {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}{SEPARATOR}{}.json", self.directory, self.name)
+    }
+}
 
 pub struct JsonTest {
     pub parent: &'static str,
@@ -36,21 +59,35 @@ impl JsonTest {
     }
 
     pub fn test(&self, name: &str, actions: Vec<TestAction>) {
-        test_actions(&self.full_path(name), actions);
+        test_actions(self, name, actions);
     }
 
     pub fn load_game(&self, name: &str) -> Game {
-        load_game(&self.full_path(name))
+        load_game(&self.path(name))
     }
 
-    fn full_path(&self, name: &str) -> String {
-        if self.parent.is_empty() {
-            return format!("{}{}{name}", self.directory, SEPARATOR);
-        }
-        format!(
-            "{}{}{}{}{name}",
-            self.parent, SEPARATOR, self.directory, SEPARATOR
-        )
+    fn dir(&self) -> String {
+        let local = if self.parent.is_empty() {
+            self.directory.to_string()
+        } else {
+            format!("{}{}{}", self.parent, SEPARATOR, self.directory)
+        };
+        format!("tests{SEPARATOR}test_games{SEPARATOR}{local}")
+    }
+
+    pub fn compare_game(&self, name: &str, game: &Game) {
+        let path = self.path(name);
+        assert_eq_game_json(
+            &read_game_str(&path),
+            &to_json(game),
+            name,
+            &path,
+            "NEW: the game did not match",
+        );
+    }
+
+    pub fn path(&self, name: &str) -> GamePath {
+        GamePath::new(&self.dir(), name)
     }
 }
 
@@ -58,17 +95,19 @@ fn assert_eq_game_json(
     expected: &str,
     actual: &str,
     name: &str,
-    expected_name: &str,
+    expected_path: &GamePath,
     message: &str,
 ) {
-    let result_path = game_path(&format!("{name}.result"));
+    let result_path = GamePath::new(
+        &expected_path.directory,
+        &format!("{}.result", expected_path.name),
+    );
     if clean_json(expected) == clean_json(actual) {
-        fs::remove_file(&result_path).unwrap_or(());
+        fs::remove_file(result_path.to_string()).unwrap_or(());
         return;
     }
-    let expected_path = game_path(expected_name);
     if update_expected() {
-        write_result(actual, &expected_path);
+        write_result(actual, expected_path);
         return;
     } else {
         write_result(actual, &result_path);
@@ -86,19 +125,15 @@ fn clean_json(expected: &str) -> String {
     expected.replace([' ', '\t', '\n', '\r'], "")
 }
 
-fn write_result(actual: &str, result_path: &String) {
+fn write_result(actual: &str, result_path: &GamePath) {
     let mut file = OpenOptions::new()
         .write(true)
         .create(true)
         .truncate(true)
-        .open(result_path)
+        .open(result_path.to_string())
         .expect("Failed to create output file");
     file.write_all(actual.as_bytes())
         .expect("Failed to write output file");
-}
-
-fn game_path(name: &str) -> String {
-    format!("tests{SEPARATOR}test_games{SEPARATOR}{name}.json")
 }
 
 pub(crate) type TestAssert = Vec<Box<dyn FnOnce(&Game)>>;
@@ -158,29 +193,37 @@ impl TestAction {
     }
 }
 
-pub(crate) fn test_actions(name: &str, actions: Vec<TestAction>) {
-    let outcome: fn(name: &str, i: usize) -> String = |name, i| {
-        if i == 0 {
-            format!("{name}.outcome")
+pub(crate) fn test_actions(test: &JsonTest, name: &str, actions: Vec<TestAction>) {
+    let outcome: fn(name: &GamePath, i: usize) -> GamePath = |name, i| {
+        let local = if i == 0 {
+            format!("{}.outcome", name.name)
         } else {
-            format!("{name}.outcome{}", i)
-        }
+            format!("{}.outcome{}", name.name, i)
+        };
+        GamePath::new(&name.directory, &local)
     };
-    let mut game = load_game(name);
+    let path = test.path(name);
+    let mut game = load_game(&path);
     for (i, action) in actions.into_iter().enumerate() {
         let from = if i == 0 {
-            name.to_string()
+            path.clone()
         } else {
-            outcome(name, i - 1)
+            outcome(&path, i - 1)
         };
         game = catch_unwind(AssertUnwindSafe(|| {
-            test_action_internal(game, &from, outcome(name, i).as_str(), action)
+            test_action_internal(game, name, &from, &outcome(&path, i), action)
         }))
         .unwrap_or_else(|e| panic!("test action {i} should not panic: {e:?}"))
     }
 }
 
-fn test_action_internal(game: Game, name: &str, outcome: &str, test: TestAction) -> Game {
+fn test_action_internal(
+    game: Game,
+    name: &str,
+    original: &GamePath,
+    outcome: &GamePath,
+    test: TestAction,
+) -> Game {
     let action = test.action;
     let a = serde_json::to_string(&action).expect("action should be serializable");
     let a2 = serde_json::from_str(&a).expect("action should be deserializable");
@@ -194,9 +237,8 @@ fn test_action_internal(game: Game, name: &str, outcome: &str, test: TestAction)
     }
     let game = game_api::execute(game, a2, test.player_index);
     if test.compare_json {
-        let expected_game = read_game_str(outcome);
         assert_eq_game_json(
-            &expected_game,
+            &read_game_str(outcome),
             &to_json(&game),
             name,
             outcome,
@@ -217,18 +259,18 @@ fn test_action_internal(game: Game, name: &str, outcome: &str, test: TestAction)
         test.player_index,
         test.compare_json,
         if test.compare_json {
-            read_game_str(name)
+            read_game_str(original)
         } else {
             "".to_string()
         },
         game.clone(),
+        original,
         outcome,
         if test.compare_json {
             read_game_str(outcome)
         } else {
             "".to_string()
         },
-        0,
     );
     game
 }
@@ -268,10 +310,9 @@ fn to_json(game: &Game) -> String {
     serde_json::to_string_pretty(&game.cloned_data()).expect("game data should be serializable")
 }
 
-fn read_game_str(name: &str) -> String {
-    let path = game_path(name);
-    fs::read_to_string(&path)
-        .unwrap_or_else(|e| panic!("game file {path} should exist in the test games folder: {e}"))
+fn read_game_str(name: &GamePath) -> String {
+    fs::read_to_string(name.to_string())
+        .unwrap_or_else(|e| panic!("game file {name} should exist in the test games folder: {e}"))
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -281,13 +322,10 @@ fn undo_redo(
     compare_json: bool,
     original_game: String,
     game: Game,
-    outcome: &str,
+    original_path: &GamePath,
+    outcome_path: &GamePath,
     expected_game: String,
-    cycle: usize,
 ) {
-    if cycle == 2 {
-        return;
-    }
     let game = game_api::execute(game, Action::Undo, player_index);
     if compare_json {
         let mut trimmed_game = game.clone();
@@ -296,9 +334,9 @@ fn undo_redo(
             &original_game,
             &to_json(&trimmed_game),
             name,
-            name,
+            original_path,
             &format!(
-                "UNDO {cycle}: the game did not match the expectation after undoing the {name} action"
+                "UNDO: the game did not match the expectation after undoing the {name} action"
             ),
         );
     }
@@ -308,22 +346,12 @@ fn undo_redo(
             &expected_game,
             &to_json(&game),
             name,
-            outcome,
+            outcome_path,
             &format!(
-            "REDO {cycle}: the game did not match the expectation after redoing the {name} action"
-        ),
+                "REDO: the game did not match the expectation after redoing the {name} action"
+            ),
         );
     }
-    undo_redo(
-        name,
-        player_index,
-        compare_json,
-        original_game,
-        game,
-        outcome,
-        expected_game,
-        cycle + 1,
-    );
 }
 
 fn update_expected() -> bool {
@@ -332,18 +360,13 @@ fn update_expected() -> bool {
         .is_some_and(|s| s == "true")
 }
 
-pub fn load_game(name: &str) -> Game {
+pub fn load_game(path: &GamePath) -> Game {
     let game = Game::from_data(
-        serde_json::from_str(&read_game_str(name)).unwrap_or_else(|e| {
-            panic!(
-                "the game file should be deserializable {}: {}",
-                game_path(name),
-                e
-            )
-        }),
+        serde_json::from_str(&read_game_str(path))
+            .unwrap_or_else(|e| panic!("the game file should be deserializable {path}: {e}",)),
     );
     if update_expected() {
-        write_result(&to_json(&game), &game_path(name));
+        write_result(&to_json(&game), path);
     }
     game
 }

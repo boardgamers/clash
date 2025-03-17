@@ -60,16 +60,19 @@ pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
     use StatusPhaseState::*;
 
     loop {
-        if game.trigger_current_event_with_listener(
-            &game.human_players(game.starting_player_index),
-            |events| &mut events.on_status_phase,
-            &status_phase_handler(&phase).listeners,
-            &phase,
-            CurrentEventType::StatusPhase,
-            None,
-        ) {
+        if game
+            .trigger_current_event_with_listener(
+                &game.human_players(game.starting_player_index),
+                |events| &mut events.on_status_phase,
+                Some(&status_phase_handler(&phase).listeners),
+                &phase,
+                CurrentEventType::StatusPhase,
+                None,
+            )
+            .is_none()
+        {
             return;
-        }
+        };
 
         phase = match phase {
             CompleteObjectives => {
@@ -121,7 +124,7 @@ pub(crate) fn free_advance() -> Builtin {
                     .collect_vec();
                 Some(AdvanceRequest::new(choices))
             },
-            |game, c| {
+            |game, c, _| {
                 game.add_info_log_item(&format!(
                     "{} advanced {} for free",
                     c.player_name, c.choice
@@ -134,11 +137,11 @@ pub(crate) fn free_advance() -> Builtin {
 
 pub(crate) fn draw_cards() -> Builtin {
     Builtin::builder("Draw Cards", "-")
-        .add_player_event_listener(
+        .add_simple_current_event_listener(
             |event| &mut event.on_status_phase,
             0,
-            |_game, _p, _| {
-                // every player draws 1 action card and 1 objective card
+            |_game, _p, _name, _s| {
+                // todo every player draws 1 action card and 1 objective card
             },
         )
         .build()
@@ -166,7 +169,7 @@ pub(crate) fn raze_city() -> Builtin {
                     "May raze a size 1 city for 1 gold",
                 ))
             },
-            |game, s| {
+            |game, s, _| {
                 if s.choice.is_empty() {
                     game.add_info_log_item(&format!("{} did not raze a city", s.player_name));
                     return;
@@ -202,6 +205,7 @@ pub(crate) fn add_change_government<A, E, V>(
 where
     E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
     A: AbilityInitializerSetup,
+    V: Clone + PartialEq,
 {
     let cost2 = cost.clone();
     a.add_current_event_listener(
@@ -325,7 +329,7 @@ pub(crate) fn determine_first_player() -> Builtin {
                     panic!("Illegal state")
                 }
             },
-            |game, s| {
+            |game, s, _| {
                 game.add_info_log_item(&format!(
                     "{} choose {}",
                     game.player_name(s.player_index),

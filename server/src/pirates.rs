@@ -12,6 +12,7 @@ use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
 use crate::resource::ResourceType;
+use crate::tactics_card::CombatRole;
 use crate::unit::UnitType;
 use itertools::Itertools;
 
@@ -25,7 +26,7 @@ pub(crate) fn pirates_round_bonus() -> Builtin {
                 if c.is_sea_battle(game)
                     && c.opponent(player_index) == get_pirates_player(game).index
                 {
-                    let hits = r.casualties(false).fighters as u32;
+                    let hits = r.casualties(CombatRole::Defender).fighters as u32;
                     Some(ResourceRewardRequest::new(
                         PaymentOptions::sum(hits, &[ResourceType::Gold]),
                         "-".to_string(),
@@ -34,7 +35,7 @@ pub(crate) fn pirates_round_bonus() -> Builtin {
                     None
                 }
             },
-            |_game, s| {
+            |_game, s, _| {
                 vec![format!(
                     "{} gained {} for destroying Pirate Ships",
                     s.player_name, s.choice
@@ -66,7 +67,7 @@ pub(crate) fn pirates_bonus() -> Builtin {
                 None
             }
         },
-        |_game, s| {
+        |_game, s, _| {
             vec![format!(
                 "{} gained {} for fighting the Pirates",
                 s.player_name, s.choice
@@ -181,7 +182,7 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
                 "Select Pirate Ships to remove",
             ))
         },
-        |game, s| {
+        |game, s, _| {
             let pirates = get_pirates_player(game).index;
             game.add_info_log_item(&format!(
                 "{} removed a Pirate Ships at {}",

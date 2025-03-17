@@ -35,7 +35,7 @@ fn separation_of_power() -> AdvanceBuilder {
     .add_player_event_listener(
         |event| &mut event.on_influence_culture_attempt,
         2,
-        |info, city, _| {
+        |info, city, _, ()| {
             if matches!(city.mood_state, MoodState::Happy) {
                 info.set_no_boost();
             }
@@ -57,7 +57,7 @@ fn free_economy() -> AdvanceBuilder {
         .add_player_event_listener(
             |event| &mut event.is_playing_action_available,
             0,
-            |available, game, i| {
+            |available, game, i, ()| {
                 let p = game.get_player(i.player);
                 if matches!(i.action_type, PlayingActionType::Collect) && p.played_once_per_turn_actions.contains(&FreeEconomyCollect) {
                     *available = false;

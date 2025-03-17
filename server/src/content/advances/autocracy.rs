@@ -41,7 +41,7 @@ fn nationalism() -> AdvanceBuilder {
                 None
             }
         },
-        |_game, resource| {
+        |_game, resource, _| {
             vec![format!(
                 "{} selected {} for Nationalism Advance",
                 resource.player_name, resource.choice
@@ -58,7 +58,7 @@ fn totalitarianism() -> AdvanceBuilder {
     .add_player_event_listener(
         |event| &mut event.on_influence_culture_attempt,
         0,
-        |info, city, game| {
+        |info, city, game, ()| {
             if info.is_defender
                 && game
                     .get_player(city.player_index)

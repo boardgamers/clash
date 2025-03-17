@@ -1,6 +1,7 @@
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::barbarians::{barbarians_move, barbarians_spawn, no_units_present};
+use crate::card::draw_card_from_pile;
 use crate::city::MoodState;
 use crate::content::custom_phase_actions::{
     new_position_request, CurrentEventType, PaymentRequest, PlayerRequest, PositionRequest,
@@ -18,7 +19,7 @@ use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
-use crate::utils::{remove_element_by, Shuffle};
+use crate::utils::{remove_and_map_element_by, remove_element_by};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -219,7 +220,7 @@ impl IncidentBuilder {
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<PositionRequest> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<Position>, IncidentInfo>) + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<Position>>) + 'static + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_position_request(
@@ -232,7 +233,9 @@ impl IncidentBuilder {
                     None
                 }
             },
-            gain_reward,
+            move |game, s, _| {
+                gain_reward(game, s);
+            },
         )
     }
 
@@ -242,7 +245,7 @@ impl IncidentBuilder {
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<UnitTypeRequest> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<UnitType, IncidentInfo>) + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<UnitType>) + 'static + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_unit_type_request(
@@ -255,7 +258,9 @@ impl IncidentBuilder {
                     None
                 }
             },
-            gain_reward,
+            move |game, s, _| {
+                gain_reward(game, s);
+            },
         )
     }
 
@@ -265,7 +270,7 @@ impl IncidentBuilder {
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<UnitsRequest> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<u32>, IncidentInfo>) + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<u32>>) + 'static + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_units_request(
@@ -278,7 +283,9 @@ impl IncidentBuilder {
                     None
                 }
             },
-            gain_reward,
+            move |game, s, _| {
+                gain_reward(game, s);
+            },
         )
     }
 
@@ -288,7 +295,7 @@ impl IncidentBuilder {
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<StructuresRequest> + 'static + Clone,
-        structures_selected: impl Fn(&mut Game, &SelectedChoice<Vec<SelectedStructure>, IncidentInfo>)
+        structures_selected: impl Fn(&mut Game, &SelectedChoice<Vec<SelectedStructure>>)
             + 'static
             + Clone,
     ) -> Self {
@@ -303,7 +310,9 @@ impl IncidentBuilder {
                     None
                 }
             },
-            structures_selected,
+            move |game, s, _| {
+                structures_selected(game, s);
+            },
         )
     }
 
@@ -315,9 +324,7 @@ impl IncidentBuilder {
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<ResourceRewardRequest>
             + 'static
             + Clone,
-        gain_reward_log: impl Fn(&Game, &SelectedChoice<ResourcePile, IncidentInfo>) -> Vec<String>
-            + 'static
-            + Clone,
+        gain_reward_log: impl Fn(&Game, &SelectedChoice<ResourcePile>) -> Vec<String> + 'static + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_resource_request(
@@ -330,7 +337,7 @@ impl IncidentBuilder {
                     None
                 }
             },
-            gain_reward_log,
+            move |game, s, _| gain_reward_log(game, s),
         )
     }
 
@@ -346,9 +353,7 @@ impl IncidentBuilder {
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<Vec<PaymentRequest>>
             + 'static
             + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<ResourcePile>, IncidentInfo>)
-            + 'static
-            + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<ResourcePile>>) + 'static + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_payment_request_listener(
@@ -361,7 +366,9 @@ impl IncidentBuilder {
                     None
                 }
             },
-            gain_reward,
+            move |game, s, _| {
+                gain_reward(game, s);
+            },
         )
     }
 
@@ -371,7 +378,7 @@ impl IncidentBuilder {
         description: &str,
         player_pred: impl Fn(&Player, &Game) -> bool + 'static + Clone,
         priority: i32,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<usize, IncidentInfo>) + 'static + Clone,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<usize>) + 'static + Clone,
     ) -> Self {
         let f = self.new_filter(IncidentTarget::ActivePlayer, priority);
         let d = description.to_string();
@@ -396,7 +403,9 @@ impl IncidentBuilder {
                     None
                 }
             },
-            gain_reward,
+            move |game, s, _| {
+                gain_reward(game, s);
+            },
         )
     }
 
@@ -501,28 +510,33 @@ impl AbilityInitializerSetup for IncidentBuilder {
 }
 
 pub(crate) fn trigger_incident(game: &mut Game, mut info: IncidentInfo) {
-    game.lock_undo(); // new information is revealed
-
-    if game.incidents_left.is_empty() {
-        game.incidents_left = incidents::get_all().iter().map(|i| i.id).collect_vec();
-        game.incidents_left.shuffle(&mut game.rng);
-    }
-
-    let id = *game.incidents_left.first().expect("incident should exist");
-    let incident = incidents::get_incident(id);
+    let incident = incidents::get_incident(
+        draw_card_from_pile(
+            game,
+            "Events",
+            true,
+            |g| &mut g.incidents_left,
+            || incidents::get_all().iter().map(|i| i.id).collect_vec(),
+            |_| vec![],
+        )
+        .expect("incident should exist"),
+    );
 
     loop {
-        if game.trigger_current_event_with_listener(
-            &game.human_players(info.active_player),
-            |events| &mut events.on_incident,
-            &incident.listeners,
-            &info,
-            CurrentEventType::Incident,
-            play_base_effect(game).then_some(&format!(
-                "A new game event has been triggered: {}",
-                incident.name
-            )),
-        ) {
+        if game
+            .trigger_current_event_with_listener(
+                &game.human_players(info.active_player),
+                |events| &mut events.on_incident,
+                Some(&incident.listeners),
+                &info,
+                CurrentEventType::Incident,
+                play_base_effect(game).then_some(&format!(
+                    "A new game event has been triggered: {}",
+                    incident.name
+                )),
+            )
+            .is_none()
+        {
             return;
         }
 
@@ -550,7 +564,6 @@ pub(crate) fn trigger_incident(game: &mut Game, mut info: IncidentInfo) {
             e,
             PermanentIncidentEffect::PassedIncident(PassedIncident::AlreadyPassed)
         )
-        .then_some(true)
     });
 }
 
@@ -562,7 +575,7 @@ pub(crate) fn play_base_effect(game: &Game) -> bool {
 }
 
 fn passed_to_player(game: &mut Game, player_index: usize) -> Option<usize> {
-    let p = remove_element_by(&mut game.permanent_incident_effects, |e| {
+    let p = remove_and_map_element_by(&mut game.permanent_incident_effects, |e| {
         if let PermanentIncidentEffect::PassedIncident(PassedIncident::NewPlayer(p)) = e {
             Some(*p)
         } else {
@@ -663,7 +676,7 @@ fn gold_deposits(b: IncidentBuilder) -> IncidentBuilder {
 
 pub(crate) fn decrease_mod_and_log(
     game: &mut Game,
-    s: &SelectedChoice<Vec<Position>, IncidentInfo>,
+    s: &SelectedChoice<Vec<Position>>,
     mood_modifier: MoodModifier,
 ) {
     for &pos in &s.choice {

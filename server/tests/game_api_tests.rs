@@ -21,10 +21,18 @@ mod common;
 const JSON: JsonTest = JsonTest::new("base");
 
 #[test]
+fn new_game() {
+    let seed = String::new();
+    let game = Game::new(2, seed, true);
+    JSON.compare_game("new_game", &game);
+}
+
+#[test]
 fn basic_actions() {
     let seed = String::new();
     let mut game = Game::new(1, seed, false);
-    game.wonders_left.retain(|w| w.name == "Pyramids");
+
+    game.wonders_left.retain(|w| w == "Pyramids");
     let founded_city_position = Position::new(0, 1);
     game.map.tiles = HashMap::from([(founded_city_position, Forest)]);
     let advance_action = Action::Playing(Advance {

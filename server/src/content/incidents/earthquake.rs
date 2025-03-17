@@ -9,7 +9,7 @@ use crate::content::custom_phase_actions::{
 use crate::content::wonders::get_wonder;
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, MoodModifier};
-use crate::player_events::{IncidentInfo, IncidentTarget};
+use crate::player_events::IncidentTarget;
 use crate::position::Position;
 use itertools::Itertools;
 
@@ -111,7 +111,7 @@ fn earthquake(id: u8, name: &str, target: IncidentTarget) -> Incident {
     .build()
 }
 
-fn apply_earthquake(game: &mut Game, s: &SelectedChoice<Vec<SelectedStructure>, IncidentInfo>) {
+fn apply_earthquake(game: &mut Game, s: &SelectedChoice<Vec<SelectedStructure>>) {
     assert!(
         is_selected_structures_valid(game, &s.choice),
         "structures should be valid"

@@ -14,7 +14,6 @@
   },
   "players": [
     {
-      "name": null,
       "id": 0,
       "resources": {
         "food": 2,
@@ -107,25 +106,17 @@
         }
       ],
       "civilization": "test0",
-      "active_leader": null,
-      "available_leaders": [],
       "advances": [
         "Farming",
         "Mining",
         "Storage",
         "Tactics"
       ],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 3,
-      "completed_objectives": [],
-      "captured_leaders": [],
       "event_victory_points": 1.0,
-      "wonder_cards": [],
       "next_unit_id": 8
     },
     {
-      "name": null,
       "id": 1,
       "resources": {
         "food": 2,
@@ -167,27 +158,20 @@
         }
       ],
       "civilization": "test1",
-      "active_leader": null,
-      "available_leaders": [],
       "advances": [
         "Fanaticism",
         "Farming",
         "Mining",
         "Tactics"
       ],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 3,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
-      "wonder_cards": [],
+      "action_cards": [
+        1
+      ],
       "next_unit_id": 4
     },
     {
-      "name": null,
       "id": 2,
-      "resources": {},
       "resource_limit": {
         "food": 2,
         "wood": 7,
@@ -195,19 +179,8 @@
         "ideas": 7,
         "gold": 7
       },
-      "cities": [],
-      "units": [],
       "civilization": "Barbarians",
-      "active_leader": null,
-      "available_leaders": [],
-      "advances": [],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 3,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
-      "wonder_cards": [],
       "next_unit_id": 0
     }
   ],
@@ -318,14 +291,13 @@
       "Player1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1"
     ],
     [
-      "Player1 activated the Trojan Horse and gained 1 victory point"
+      "Combat round 1"
     ],
     [
-      "Combat round 1",
+      "Player1 activated the Trojan Horse and gained 1 victory point",
       "Player1 rolled 6 (Infantry, +1 combat value), 6 (Infantry, no bonus), 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 25 and gets 2 hits against defending units.",
       "Player2 rolled 1 (Leader, no bonus), 1 (Leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units.",
-      "Player1 used the following combat modifiers: Trojan Horse denies the defender tactics cards in the first round of combat",
-      "Player2 used the following combat modifiers: Player gets +2 combat value for Fanaticism Advance",
+      "Player2 used the following combat modifiers: Player gets +2 combat value for Fanaticism Advance, Trojan Horse denied playing Tactics Cards",
       "Player2 has to remove all of their defending units",
       "Player2 removed 2 infantry",
       "Attacker wins and captured Player2's city at C1",
@@ -358,5 +330,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1
+  "action_cards_left": []
 }

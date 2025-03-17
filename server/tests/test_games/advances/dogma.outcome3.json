@@ -1,8 +1,7 @@
 {
-"state": "Playing",
+  "state": "Playing",
   "players": [
     {
-      "name": null,
       "id": 0,
       "resources": {
         "food": 7,
@@ -114,7 +113,6 @@
         }
       ],
       "civilization": "Maya",
-      "active_leader": null,
       "available_leaders": [
         "Kʼinich Janaab Pakal I"
       ],
@@ -128,19 +126,13 @@
         "Voting",
         "Writing"
       ],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 3,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
       "wonder_cards": [
         "Great Gardens"
       ],
       "next_unit_id": 10
     },
     {
-      "name": null,
       "id": 1,
       "resources": {
         "food": 2,
@@ -192,7 +184,6 @@
         }
       ],
       "civilization": "test0",
-      "active_leader": null,
       "available_leaders": [
         "Alexander",
         "Kleopatra"
@@ -206,13 +197,7 @@
         "Myths",
         "State Religion"
       ],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 1,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
-      "wonder_cards": [],
       "next_unit_id": 2,
       "event_info": {
         "State Religion": "used"
@@ -588,5 +573,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 2
+  "action_cards_left": []
 }

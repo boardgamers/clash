@@ -95,7 +95,6 @@
   ],
   "players": [
     {
-      "name": null,
       "id": 0,
       "resources": {
         "food": 2,
@@ -186,8 +185,6 @@
         }
       ],
       "civilization": "test0",
-      "active_leader": null,
-      "available_leaders": [],
       "advances": [
         "Farming",
         "Mining",
@@ -195,17 +192,13 @@
         "Steel Weapons",
         "Tactics"
       ],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 1,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
-      "wonder_cards": [],
+      "action_cards": [
+        1
+      ],
       "next_unit_id": 8
     },
     {
-      "name": null,
       "id": 1,
       "resources": {
         "food": 2,
@@ -249,8 +242,6 @@
         }
       ],
       "civilization": "test1",
-      "active_leader": null,
-      "available_leaders": [],
       "advances": [
         "Fanaticism",
         "Farming",
@@ -258,13 +249,10 @@
         "Steel Weapons",
         "Tactics"
       ],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 3,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
-      "wonder_cards": [],
+      "action_cards": [
+        2
+      ],
       "next_unit_id": 2
     }
   ],
@@ -352,6 +340,9 @@
       "Player1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1"
     ],
     [
+      "Combat round 1"
+    ],
+    [
       "Player1 paid for steel weapons: 1 ore"
     ]
   ],
@@ -379,5 +370,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 1
+  "action_cards_left": []
 }

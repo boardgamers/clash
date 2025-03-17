@@ -72,7 +72,7 @@ fn free_education() -> AdvanceBuilder {
                 None
             }
         },
-        |game, s| {
+        |game, s, _| {
             let pile = &s.choice[0];
             if pile.is_empty() {
                 game.add_info_log_item(&format!(

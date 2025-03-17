@@ -53,7 +53,6 @@
   ],
   "players": [
     {
-      "name": null,
       "id": 0,
       "resources": {
         "food": 7,
@@ -175,7 +174,6 @@
       ],
       "civilization": "Maya",
       "active_leader": "Kʼinich Janaab Pakal I",
-      "available_leaders": [],
       "advances": [
         "Farming",
         "Free Economy",
@@ -184,19 +182,13 @@
         "Tactics",
         "Voting"
       ],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 2,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
       "wonder_cards": [
         "Great Gardens"
       ],
       "next_unit_id": 11
     },
     {
-      "name": null,
       "id": 1,
       "resources": {
         "food": 2,
@@ -246,7 +238,6 @@
         }
       ],
       "civilization": "test0",
-      "active_leader": null,
       "available_leaders": [
         "Alexander",
         "Kleopatra"
@@ -255,13 +246,7 @@
         "Farming",
         "Mining"
       ],
-      "unlocked_special_advance": [],
-      "wonders_build": [],
       "incident_tokens": 3,
-      "completed_objectives": [],
-      "captured_leaders": [],
-      "event_victory_points": 0.0,
-      "wonder_cards": [],
       "next_unit_id": 2
     }
   ],
@@ -400,5 +385,5 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "wonder_amount_left": 2
+  "action_cards_left": []
 }

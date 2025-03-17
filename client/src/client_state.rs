@@ -550,6 +550,7 @@ impl State {
                         panic!("ExploreResolution expected");
                     }
                 }
+                CurrentEventRequest::SelectHandCards(_) => todo!(),
             };
         }
         match &game.state {

@@ -1,7 +1,6 @@
 use crate::advance::gain_advance;
-use crate::combat::{
-    combat_loop, combat_round_end, end_combat, move_with_possible_combat, start_combat,
-};
+use crate::combat::{combat_loop, move_with_possible_combat, start_combat};
+use crate::combat_listeners::{combat_round_end, combat_round_start, end_combat};
 use crate::content::custom_phase_actions::{CurrentEventResponse, CurrentEventType};
 use crate::cultural_influence::ask_for_cultural_influence_payment;
 use crate::explore::{ask_explore_resolution, move_to_unexplored_tile};
@@ -151,9 +150,14 @@ pub(crate) fn execute_custom_phase_action(
         CombatStart(c) => {
             start_combat(game, c.clone());
         }
+        CombatRoundStart(r) => {
+            if let Some(c) = combat_round_start(game, r) {
+                combat_loop(game, c);
+            }
+        }
         CombatRoundEnd(r) => {
             if let Some(c) = combat_round_end(game, r) {
-                combat_loop(game, c);
+                combat_loop(game, crate::combat_listeners::CombatRoundStart::new(c));
             }
         }
         CombatEnd(r) => {

@@ -85,8 +85,8 @@ fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> 
     let game = rc.game;
 
     owner
-        .wonder_cards
-        .iter()
+        .wonder_cards()
+        .into_iter()
         .filter(|w| city.can_build_wonder(w, owner, game))
         .map(|w| {
             let a: IconAction<'a> = (

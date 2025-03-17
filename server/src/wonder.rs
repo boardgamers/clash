@@ -1,4 +1,5 @@
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
+use crate::card::draw_card_from_pile;
 use crate::content::builtin::Builtin;
 use crate::content::custom_phase_actions::CurrentEventType;
 use crate::content::wonders::get_wonder;
@@ -101,16 +102,19 @@ pub(crate) fn draw_wonder_card(game: &mut Game, player_index: usize) {
 }
 
 pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<Wonder> {
-    if game.wonder_amount_left == 0 {
-        return None;
-    }
-    game.lock_undo(); // new information is revealed
-    game.wonder_amount_left -= 1;
-    game.wonders_left.pop()
+    draw_card_from_pile(
+        game,
+        "Wonders",
+        false,
+        |game| &mut game.wonders_left,
+        Vec::new,
+        |_| vec![], // can't reshuffle wonders
+    )
+    .map(|n| get_wonder(&n))
 }
 
 fn gain_wonder(game: &mut Game, player_index: usize, wonder: Wonder) {
-    game.players[player_index].wonder_cards.push(wonder);
+    game.players[player_index].wonder_cards.push(wonder.name);
 }
 
 pub(crate) fn on_draw_wonder_card() -> Builtin {
@@ -129,7 +133,7 @@ pub(crate) fn on_draw_wonder_card() -> Builtin {
                     None
                 }
             },
-            |game, s| {
+            |game, s, ()| {
                 if s.choice {
                     let name = find_public_wonder(game)
                         .expect("public wonder card not found")
@@ -156,8 +160,6 @@ fn gain_wonder_from_pile(game: &mut Game, player: usize) {
             game.player_name(player)
         ));
         gain_wonder(game, player, w);
-    } else {
-        game.add_info_log_item("No wonders left to draw");
     }
 }
 

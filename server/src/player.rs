@@ -1,8 +1,10 @@
+use crate::action_card::ActionCard;
 use crate::advance::Advance;
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::advances::get_advance;
-use crate::content::builtin;
+use crate::content::wonders::get_wonder;
+use crate::content::{action_cards, builtin};
 use crate::events::{Event, EventOrigin};
 use crate::payment::PaymentOptions;
 use crate::player_events::CostInfo;
@@ -17,7 +19,7 @@ use crate::{
         CAPTURED_LEADER_VICTORY_POINTS, CITY_LIMIT, CITY_PIECE_LIMIT, CONSTRUCT_COST,
         OBJECTIVE_VICTORY_POINTS, UNIT_LIMIT, WONDER_VICTORY_POINTS,
     },
-    content::{advances, civilizations, custom_actions::CustomActionType, wonders},
+    content::{civilizations, custom_actions::CustomActionType},
     game::Game,
     leader::Leader,
     player_events::PlayerEvents,
@@ -28,6 +30,7 @@ use crate::{
     wonder::Wonder,
 };
 use itertools::Itertools;
+use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::{
@@ -63,7 +66,8 @@ pub struct Player {
     pub captured_leaders: Vec<String>,
     pub event_victory_points: f32,
     pub custom_actions: HashMap<CustomActionType, EventOrigin>,
-    pub wonder_cards: Vec<Wonder>,
+    pub wonder_cards: Vec<String>,
+    pub action_cards: Vec<ActionCard>,
     pub next_unit_id: u32,
     pub played_once_per_turn_actions: Vec<CustomActionType>,
     pub event_info: HashMap<String, String>,
@@ -78,39 +82,7 @@ impl Clone for Player {
 
 impl PartialEq for Player {
     fn eq(&self, other: &Self) -> bool {
-        self.name == other.name
-            && self.index == other.index
-            && self.resources == other.resources
-            && self.resource_limit == other.resource_limit
-            && self
-                .cities
-                .iter()
-                .enumerate()
-                .all(|(i, city)| city.position == other.cities[i].position)
-            && self
-                .units
-                .iter()
-                .enumerate()
-                .all(|(i, unit)| unit.id == other.units[i].id)
-            && self.civilization.name == other.civilization.name
-            && self.active_leader == other.active_leader
-            && self
-                .available_leaders
-                .iter()
-                .enumerate()
-                .all(|(i, leader)| *leader == other.available_leaders[i])
-            && self.advances == other.advances
-            && self.unlocked_special_advances == other.unlocked_special_advances
-            && self.wonders_build == other.wonders_build
-            && self.incident_tokens == other.incident_tokens
-            && self.completed_objectives == other.completed_objectives
-            && self.captured_leaders == other.captured_leaders
-            && self.event_victory_points == other.event_victory_points
-            && self
-                .wonder_cards
-                .iter()
-                .enumerate()
-                .all(|(i, wonder)| wonder.name == other.wonder_cards[i].name)
+        self.cloned_data() == other.cloned_data()
     }
 }
 
@@ -208,10 +180,11 @@ impl Player {
             captured_leaders: data.captured_leaders,
             event_victory_points: data.event_victory_points,
             custom_actions: HashMap::new(),
-            wonder_cards: data
-                .wonder_cards
+            wonder_cards: data.wonder_cards,
+            action_cards: data
+                .action_cards
                 .iter()
-                .map(|wonder| wonders::get_wonder(wonder))
+                .map(|action_card| action_cards::get_action_card(*action_card))
                 .collect(),
             next_unit_id: data.next_unit_id,
             played_once_per_turn_actions: data.played_once_per_turn_actions,
@@ -248,10 +221,11 @@ impl Player {
             completed_objectives: self.completed_objectives,
             captured_leaders: self.captured_leaders,
             event_victory_points: self.event_victory_points,
-            wonder_cards: self
-                .wonder_cards
+            wonder_cards: self.wonder_cards,
+            action_cards: self
+                .action_cards
                 .into_iter()
-                .map(|wonder| wonder.name)
+                .map(|action_card| action_card.id)
                 .collect(),
             next_unit_id: self.next_unit_id,
             played_once_per_turn_actions: self.played_once_per_turn_actions,
@@ -291,10 +265,11 @@ impl Player {
             completed_objectives: self.completed_objectives.clone(),
             captured_leaders: self.captured_leaders.clone(),
             event_victory_points: self.event_victory_points,
-            wonder_cards: self
-                .wonder_cards
+            wonder_cards: self.wonder_cards.clone(),
+            action_cards: self
+                .action_cards
                 .iter()
-                .map(|wonder| wonder.name.clone())
+                .map(|action_card| action_card.id)
                 .collect(),
             next_unit_id: self.next_unit_id,
             played_once_per_turn_actions: self.played_once_per_turn_actions.clone(),
@@ -310,8 +285,8 @@ impl Player {
         Self {
             name: None,
             index,
-            resources: ResourcePile::food(2),
-            resource_limit: ResourcePile::new(2, 7, 7, 7, 7, 0, 0),
+            resources: ResourcePile::empty(),
+            resource_limit: ResourcePile::empty(),
             wasted_resources: ResourcePile::empty(),
             events: PlayerEvents::new(),
             cities: Vec::new(),
@@ -324,17 +299,15 @@ impl Player {
                 .map(|l| l.name.clone())
                 .collect(),
             civilization,
-            advances: vec![
-                advances::get_advance("Farming"),
-                advances::get_advance("Mining"),
-            ],
+            advances: vec![],
             unlocked_special_advances: Vec::new(),
-            incident_tokens: 3,
+            incident_tokens: 0,
             completed_objectives: Vec::new(),
             captured_leaders: Vec::new(),
             event_victory_points: 0.0,
             custom_actions: HashMap::new(),
             wonder_cards: Vec::new(),
+            action_cards: Vec::new(),
             wonders_build: Vec::new(),
             next_unit_id: 0,
             played_once_per_turn_actions: Vec::new(),
@@ -568,6 +541,8 @@ impl Player {
 
     pub fn strip_secret(&mut self) {
         self.wonder_cards = Vec::new();
+        self.action_cards = Vec::new();
+        //replace with empty strings to see the number of cards?
         //todo strip information about other hand cards
     }
 
@@ -800,7 +775,7 @@ impl Player {
     #[must_use]
     pub(crate) fn trigger_event<T, U, V>(
         &self,
-        event: fn(&PlayerEvents) -> &Event<T, U, V>,
+        event: fn(&PlayerEvents) -> &Event<T, U, V, ()>,
         value: &mut T,
         info: &U,
         details: &V,
@@ -809,7 +784,7 @@ impl Player {
         T: Clone + PartialEq,
     {
         let e = event(&self.events);
-        e.get().trigger(value, info, details)
+        e.get().trigger(value, info, details, &mut ())
     }
 
     pub(crate) fn trigger_cost_event<U, V>(
@@ -827,11 +802,12 @@ impl Player {
                 &cost_info,
                 info,
                 details,
+                &mut (),
                 |i| i.cost.is_valid_payment(execute),
                 |i, m| i.cost.modifiers = m,
             )
         } else {
-            let m = event.trigger(&mut cost_info, info, details);
+            let m = event.trigger(&mut cost_info, info, details, &mut ());
             cost_info.cost.modifiers = m;
             cost_info
         }
@@ -844,33 +820,71 @@ impl Player {
         details: &V,
     ) {
         let e = event(&mut self.events).take();
-        let _ = e.trigger(self, info, details);
+        let _ = e.trigger(self, info, details, &mut ());
         event(&mut self.events).set(e);
+    }
+
+    #[must_use]
+    pub fn wonder_cards(&self) -> Vec<Wonder> {
+        self.wonder_cards.iter().map(|n| get_wonder(n)).collect()
     }
 }
 
 #[derive(Serialize, Deserialize, PartialEq)]
 pub struct PlayerData {
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     name: Option<String>,
     id: usize,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "ResourcePile::is_empty")]
     resources: ResourcePile,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "ResourcePile::is_empty")]
     resource_limit: ResourcePile,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     cities: Vec<CityData>,
     #[serde(default)]
     #[serde(skip_serializing_if = "DestroyedStructuresData::is_empty")]
     destroyed_structures: DestroyedStructuresData,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     units: Vec<UnitData>,
     civilization: String,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     active_leader: Option<String>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     available_leaders: Vec<String>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     advances: Vec<String>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     unlocked_special_advance: Vec<String>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     wonders_build: Vec<String>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
     incident_tokens: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     completed_objectives: Vec<String>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     captured_leaders: Vec<String>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "f32::is_zero")]
     event_victory_points: f32,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     wonder_cards: Vec<String>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    action_cards: Vec<u8>,
     next_unit_id: u32,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]

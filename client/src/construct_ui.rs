@@ -106,7 +106,7 @@ impl ConstructionPayment {
         let cost = match &project {
             ConstructionProject::Building(b, _) => p.construct_cost(*b, city, None),
             ConstructionProject::Wonder(name) => p.wonder_cost(
-                p.wonder_cards.iter().find(|w| w.name == *name).unwrap(),
+                p.wonder_cards().iter().find(|w| w.name == *name).unwrap(),
                 city,
                 None,
             ),

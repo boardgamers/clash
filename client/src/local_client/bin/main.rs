@@ -13,6 +13,7 @@ use server::map::Terrain;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::UnitType;
+use server::utils::remove_element;
 use std::env;
 use std::fs::File;
 use std::io::BufReader;
@@ -150,13 +151,10 @@ pub fn setup_local_game() -> Game {
     //     .unwrap()
     //     .pieces
     //     .wonders = vec![game.wonders_left.pop().unwrap()];
-    let gardens = game.wonders_left.remove(
-        game.wonders_left
-            .iter()
-            .position(|w| w.name == "Great Gardens")
-            .unwrap(),
-    );
-    game.players[player_index1].wonder_cards.push(gardens);
+
+    game.players[player_index1]
+        .wonder_cards
+        .push(remove_element(&mut game.wonders_left, &"Great Gardens".to_string()).unwrap());
     game.players[player_index1]
         .get_city_mut(Position::from_offset("C2"))
         .increase_mood_state();

@@ -99,7 +99,7 @@ pub(crate) fn cultural_influence_resolution() -> Builtin {
                 true,
             )])
         },
-        |game, s| {
+        |game, s, _| {
             let roll_boost_cost = s.choice[0].clone();
             if roll_boost_cost.is_empty() {
                 game.add_info_log_item(&format!(
@@ -185,19 +185,19 @@ pub fn influence_culture_boost_cost(
         PaymentOptions::resources(ResourcePile::culture_tokens(range_boost)),
         ActionInfo::new(attacker),
     );
-    let _ =
-        attacker
-            .events
-            .on_influence_culture_attempt
-            .get()
-            .trigger(&mut info, target_city, game);
+    let _ = attacker.events.on_influence_culture_attempt.get().trigger(
+        &mut info,
+        target_city,
+        game,
+        &mut (),
+    );
     info.is_defender = true;
-    let _ =
-        defender
-            .events
-            .on_influence_culture_attempt
-            .get()
-            .trigger(&mut info, target_city, game);
+    let _ = defender.events.on_influence_culture_attempt.get().trigger(
+        &mut info,
+        target_city,
+        game,
+        &mut (),
+    );
 
     if !matches!(city_piece, Building::Obelisk)
         && starting_city.player_index == player_index
@@ -239,5 +239,6 @@ pub fn influence_culture(
         |e| &mut e.on_influence_culture_success,
         &influencer_index,
         &(),
+        &mut (),
     );
 }

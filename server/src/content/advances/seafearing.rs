@@ -18,7 +18,11 @@ pub(crate) fn seafaring() -> AdvanceGroup {
 
 fn fishing() -> AdvanceBuilder {
     Advance::builder("Fishing", "Your cities may Collect food from one Sea space")
-        .add_player_event_listener(|event| &mut event.collect_options, 1, fishing_collect)
+        .add_player_event_listener(
+            |event| &mut event.collect_options,
+            1,
+            |i, c, game, ()| fishing_collect(i, c, game),
+        )
         .with_advance_bonus(MoodToken)
         .with_unlocked_building(Port)
 }
@@ -34,19 +38,19 @@ fn navigation() -> AdvanceBuilder {
 fn war_ships() -> AdvanceBuilder {
     Advance::builder(
         "War Ships",
-        "Ignore the first hit it the first round of combat when attacking with Ships or disembarking from Ships")
-        .add_player_event_listener(
-            |event| &mut event.on_combat_round,
-            0,
-            |s, c, g| {
-                let attacker = s.attacker && g.map.is_sea(c.attacker_position);
-                let defender = !s.attacker && g.map.is_sea(c.defender_position);
-                if c.round == 1 && (attacker || defender) {
-                    s.hit_cancels += 1;
-                    s.roll_log.push("War Ships ignore the first hit in the first round of combat".to_string());
-                }
-            },
-        )
+        "Ignore the first hit it the first round of combat \
+        when attacking with Ships or disembarking from Ships",
+    )
+    .add_combat_round_start_listener(5, |g, c, s, role| {
+        let at = role.is_attacker();
+        let attacker = at && g.map.is_sea(c.attacker_position);
+        let defender = !at && g.map.is_sea(c.defender_position);
+        if c.round == 1 && (attacker || defender) {
+            s.hit_cancels += 1;
+            s.roll_log
+                .push("War Ships ignore the first hit in the first round of combat".to_string());
+        }
+    })
 }
 
 fn cartography() -> AdvanceBuilder {
@@ -57,7 +61,7 @@ fn cartography() -> AdvanceBuilder {
         .add_player_event_listener(
             |event| &mut event.before_move,
             0,
-            |game,  i, ()| {
+            |game,  i, (), ()| {
                 // info is the action that we last used this ability for
                 let key = game.actions_left.to_string();
                 if game.get_player(i.player).event_info.get("Cartography").is_some_and(|info| info == &key) {

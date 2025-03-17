@@ -5,7 +5,7 @@ use crate::city_pieces::Building::Fortress;
 use crate::combat::CombatModifier::{
     CancelFortressExtraDie, CancelFortressIgnoreHit, SteelWeaponsAttacker, SteelWeaponsDefender,
 };
-use crate::combat::{get_combat_start, Combat, CombatModifier};
+use crate::combat::{Combat, CombatModifier};
 use crate::combat_listeners::CombatStrength;
 use crate::content::advances::{
     advance_group_builder, AdvanceGroup, METALLURGY, STEEL_WEAPONS, TACTICS,
@@ -15,6 +15,7 @@ use crate::game::Game;
 use crate::payment::{PaymentConversion, PaymentOptions};
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
+use crate::tactics_card::{play_tactics_card, CombatRole};
 use crate::unit::UnitType;
 
 pub(crate) fn warfare() -> AdvanceGroup {
@@ -25,13 +26,15 @@ pub(crate) fn warfare() -> AdvanceGroup {
 }
 
 fn tactics() -> AdvanceBuilder {
-    Advance::builder(
-        TACTICS,
-        "May Move Army units, May use Tactics on Action Cards",
+    play_tactics_card(
+        Advance::builder(
+            TACTICS,
+            "May Move Army units, May use Tactics on Action Cards",
+        )
+        .with_advance_bonus(CultureToken)
+        .with_unlocked_building(Fortress)
+        .add_combat_round_start_listener(3, fortress),
     )
-    .with_advance_bonus(CultureToken)
-    .with_unlocked_building(Fortress)
-    .add_player_event_listener(|event| &mut event.on_combat_round, 3, fortress)
 }
 
 fn siegecraft() -> AdvanceBuilder {
@@ -68,7 +71,7 @@ fn siegecraft() -> AdvanceBuilder {
                     None
                 }
             },
-            |game, s| {
+            |game, s, c| {
                 game.add_info_log_item(
                     &format!("{} paid for siegecraft: ", s.player_name));
                 let mut paid = false;
@@ -90,7 +93,7 @@ fn siegecraft() -> AdvanceBuilder {
                 if !paid {
                     game.add_to_last_log_item("nothing");
                 }
-                get_combat_start(game).modifiers.extend(modifiers);
+                c.modifiers.extend(modifiers);
             },
         )
 }
@@ -108,7 +111,7 @@ fn steel_weapons() -> AdvanceBuilder {
 
                 let cost = steel_weapons_cost(game, c, player_index);
                 if cost.is_free() {
-                    add_steel_weapons(player_index, get_combat_start(game));
+                    add_steel_weapons(player_index, c);
                     return None;
                 }
 
@@ -122,20 +125,18 @@ fn steel_weapons() -> AdvanceBuilder {
                     None
                 }
             },
-            |game, s| {
+            |game, s, c| {
                 let pile = &s.choice[0];
                 game.add_info_log_item(
                     &format!("{} paid for steel weapons: {}", s.player_name, pile));
                 if pile.is_empty() {
                     return;
                 }
-                add_steel_weapons(s.player_index, get_combat_start(game));
+                add_steel_weapons(s.player_index, c);
             },
         )
-        .add_player_event_listener(
-            |event| &mut event.on_combat_round,
-            2,
-            use_steel_weapons,
+        .add_combat_round_start_listener(2,
+                                         use_steel_weapons,
         )
 }
 
@@ -148,7 +149,7 @@ fn draft() -> AdvanceBuilder {
     .add_player_event_listener(
         |event| &mut event.recruit_cost,
         0,
-        |cost, units, player| {
+        |cost, units, player, ()| {
             if units.infantry > 0 {
                 // insert at beginning so that it's preferred over gold
 
@@ -188,8 +189,8 @@ fn steel_weapons_cost(game: &Game, combat: &Combat, player_index: usize) -> Paym
     PaymentOptions::sum(cost, &[ResourceType::Ore, ResourceType::Gold])
 }
 
-fn fortress(s: &mut CombatStrength, c: &Combat, game: &Game) {
-    if s.attacker || !c.defender_fortress(game) || c.round != 1 {
+fn fortress(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole) {
+    if role.is_attacker() || !c.defender_fortress(game) || c.round != 1 {
         return;
     }
 
@@ -204,7 +205,7 @@ fn fortress(s: &mut CombatStrength, c: &Combat, game: &Game) {
     }
 }
 
-fn use_steel_weapons(s: &mut CombatStrength, c: &Combat, game: &Game) {
+fn use_steel_weapons(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole) {
     let steel_weapon_value = if game.get_player(c.attacker).has_advance(STEEL_WEAPONS)
         && game.get_player(c.defender).has_advance(STEEL_WEAPONS)
     {
@@ -219,7 +220,7 @@ fn use_steel_weapons(s: &mut CombatStrength, c: &Combat, game: &Game) {
             .push(format!("steel weapons added {value} combat value"));
     };
 
-    if s.attacker {
+    if role.is_attacker() {
         if c.modifiers.contains(&SteelWeaponsAttacker) {
             add_combat_value(s, steel_weapon_value);
         }
