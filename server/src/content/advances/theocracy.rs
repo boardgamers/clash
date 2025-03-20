@@ -1,5 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::{advance_with_incident_token, Advance, AdvanceBuilder};
+use crate::advance::{gain_advance, Advance, AdvanceBuilder};
 use crate::city_pieces::Building::Temple;
 use crate::consts::STACK_LIMIT;
 use crate::content::advances::{advance_group_builder, get_group, AdvanceGroup};
@@ -32,7 +32,7 @@ fn dogma() -> AdvanceBuilder {
         .add_ability_undo_deinitializer(|game, player_index| {
             game.players[player_index].resource_limit.ideas = 7;
         })
-        .add_advance_reward_request_listener(
+        .add_advance_request(
             |event| &mut event.on_construct,
             0,
             |game, player_index, building| {
@@ -59,7 +59,7 @@ fn dogma() -> AdvanceBuilder {
                 game.add_info_log_item(&format!(
                     "{} {verb} {} as a reward for constructing a Temple", c.player_name, c.choice
                 ));
-                advance_with_incident_token(game, &c.choice, c.player_index, ResourcePile::empty());
+                gain_advance(game, &c.choice, c.player_index, ResourcePile::empty(), true);
             },
         )
 }
@@ -69,10 +69,10 @@ fn devotion() -> AdvanceBuilder {
         "Devotion",
         "Attempts to influence your cities with a Temple may not be boosted by culture tokens",
     )
-    .add_player_event_listener(
+    .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,
         4,
-        |info, city, _, ()| {
+        |info, city, _| {
             if info.is_defender && city.pieces.temple.is_some() {
                 info.set_no_boost();
             }
@@ -82,20 +82,20 @@ fn devotion() -> AdvanceBuilder {
 
 fn conversion() -> AdvanceBuilder {
     Advance::builder("Conversion", "You add +1 to your Influence Culture roll and gain 1 culture token when you make a successful Influence Culture attempt.")
-        .add_player_event_listener(
+        .add_transient_event_listener(
             |event| &mut event.on_influence_culture_attempt,
             3,
-            |info, _, _, ()| {
+            |info, _, _| {
                 if !info.is_defender {
                     info.roll_boost += 1;
                     info.info.log.push("Player gets +1 to Influence Culture roll for Conversion Advance".to_string());
                 }
             },
         )
-        .add_player_event_listener(
+        .add_transient_event_listener(
             |event| &mut event.on_influence_culture_success,
             0,
-            |game, player, (), ()| {
+            |game, player, ()| {
                 game.get_player_mut(*player).gain_resources(ResourcePile::culture_tokens(1));
                 game.add_info_log_item("Player gained 1 culture token for a successful Influence Culture attempt for Conversion Advance");
             },

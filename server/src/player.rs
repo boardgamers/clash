@@ -1,13 +1,11 @@
-use crate::action_card::ActionCard;
 use crate::advance::Advance;
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::advances::get_advance;
-use crate::content::wonders::get_wonder;
-use crate::content::{action_cards, builtin};
+use crate::content::builtin;
 use crate::events::{Event, EventOrigin};
 use crate::payment::PaymentOptions;
-use crate::player_events::CostInfo;
+use crate::player_events::{CostInfo, TransientEvents};
 use crate::resource::ResourceType;
 use crate::unit::{carried_units, UnitData, UnitType};
 use crate::{
@@ -67,7 +65,7 @@ pub struct Player {
     pub event_victory_points: f32,
     pub custom_actions: HashMap<CustomActionType, EventOrigin>,
     pub wonder_cards: Vec<String>,
-    pub action_cards: Vec<ActionCard>,
+    pub action_cards: Vec<u8>,
     pub next_unit_id: u32,
     pub played_once_per_turn_actions: Vec<CustomActionType>,
     pub event_info: HashMap<String, String>,
@@ -181,11 +179,7 @@ impl Player {
             event_victory_points: data.event_victory_points,
             custom_actions: HashMap::new(),
             wonder_cards: data.wonder_cards,
-            action_cards: data
-                .action_cards
-                .iter()
-                .map(|action_card| action_cards::get_action_card(*action_card))
-                .collect(),
+            action_cards: data.action_cards,
             next_unit_id: data.next_unit_id,
             played_once_per_turn_actions: data.played_once_per_turn_actions,
             event_info: data.event_info,
@@ -222,11 +216,7 @@ impl Player {
             captured_leaders: self.captured_leaders,
             event_victory_points: self.event_victory_points,
             wonder_cards: self.wonder_cards,
-            action_cards: self
-                .action_cards
-                .into_iter()
-                .map(|action_card| action_card.id)
-                .collect(),
+            action_cards: self.action_cards,
             next_unit_id: self.next_unit_id,
             played_once_per_turn_actions: self.played_once_per_turn_actions,
             event_info: self.event_info,
@@ -266,11 +256,7 @@ impl Player {
             captured_leaders: self.captured_leaders.clone(),
             event_victory_points: self.event_victory_points,
             wonder_cards: self.wonder_cards.clone(),
-            action_cards: self
-                .action_cards
-                .iter()
-                .map(|action_card| action_card.id)
-                .collect(),
+            action_cards: self.action_cards.clone(),
             next_unit_id: self.next_unit_id,
             played_once_per_turn_actions: self.played_once_per_turn_actions.clone(),
             event_info: self.event_info.clone(),
@@ -540,9 +526,8 @@ impl Player {
     }
 
     pub fn strip_secret(&mut self) {
-        self.wonder_cards = Vec::new();
-        self.action_cards = Vec::new();
-        //replace with empty strings to see the number of cards?
+        self.wonder_cards = self.wonder_cards.iter().map(|_| String::new()).collect();
+        self.action_cards = self.action_cards.iter().map(|_| 0).collect();
         //todo strip information about other hand cards
     }
 
@@ -775,7 +760,7 @@ impl Player {
     #[must_use]
     pub(crate) fn trigger_event<T, U, V>(
         &self,
-        event: fn(&PlayerEvents) -> &Event<T, U, V, ()>,
+        event: fn(&TransientEvents) -> &Event<T, U, V, ()>,
         value: &mut T,
         info: &U,
         details: &V,
@@ -783,19 +768,19 @@ impl Player {
     where
         T: Clone + PartialEq,
     {
-        let e = event(&self.events);
+        let e = event(&self.events.transient);
         e.get().trigger(value, info, details, &mut ())
     }
 
     pub(crate) fn trigger_cost_event<U, V>(
         &self,
-        get_event: fn(&PlayerEvents) -> &Event<CostInfo, U, V>,
+        get_event: impl Fn(&TransientEvents) -> &Event<CostInfo, U, V>,
         value: &PaymentOptions,
         info: &U,
         details: &V,
         execute: Option<&ResourcePile>,
     ) -> CostInfo {
-        let event = get_event(&self.events).get();
+        let event = get_event(&self.events.transient).get();
         let mut cost_info = CostInfo::new(self, value.clone());
         if let Some(execute) = execute {
             event.trigger_with_minimal_modifiers(
@@ -815,18 +800,13 @@ impl Player {
 
     pub(crate) fn trigger_player_event<U, V>(
         &mut self,
-        event: fn(&mut PlayerEvents) -> &mut Event<Player, U, V>,
+        event: impl Fn(&mut TransientEvents) -> &mut Event<Player, U, V>,
         info: &U,
         details: &V,
     ) {
-        let e = event(&mut self.events).take();
+        let e = event(&mut self.events.transient).take();
         let _ = e.trigger(self, info, details, &mut ());
-        event(&mut self.events).set(e);
-    }
-
-    #[must_use]
-    pub fn wonder_cards(&self) -> Vec<Wonder> {
-        self.wonder_cards.iter().map(|n| get_wonder(n)).collect()
+        event(&mut self.events.transient).set(e);
     }
 }
 

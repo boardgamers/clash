@@ -7,7 +7,7 @@
       ]
     }
   },
-  "current_events": [
+  "events": [
     {
       "event_type": {
         "ExploreResolution": {

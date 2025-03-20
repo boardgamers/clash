@@ -35,13 +35,15 @@ impl EventOrigin {
             | EventOrigin::Leader(name)
             | EventOrigin::TacticsCard(name)
             | EventOrigin::Builtin(name) => name.to_string(),
-            EventOrigin::ActionCard(id) => action_cards::get_action_card(*id).civil_card.name,
-            EventOrigin::Incident(id) => incidents::get_incident(*id).name,
+            EventOrigin::ActionCard(id) => get_action_card(*id).civil_card.name,
+            EventOrigin::Incident(id) => get_incident(*id).name,
         }
     }
 }
 
 use crate::content::{action_cards, incidents};
+use action_cards::get_action_card;
+use incidents::get_incident;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 

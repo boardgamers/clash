@@ -31,6 +31,12 @@ fn test_free_advance() {
                 1,
                 Action::Response(CurrentEventResponse::SelectAdvance("Storage".to_string())),
             ),
+            TestAction::not_undoable(
+                0,
+                Action::Response(CurrentEventResponse::SelectAdvance(
+                    "Philosophy".to_string(),
+                )),
+            ),
         ],
     );
 }
@@ -63,10 +69,16 @@ fn test_raze_city() {
 fn test_raze_city_decline() {
     JSON.test(
         "raze_city_decline",
-        vec![TestAction::not_undoable(
-            0,
-            Action::Response(CurrentEventResponse::SelectPositions(vec![])),
-        )],
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Response(CurrentEventResponse::SelectPositions(vec![])),
+            ),
+            TestAction::not_undoable(
+                1,
+                Action::Response(CurrentEventResponse::SelectPositions(vec![])),
+            ),
+        ],
     );
 }
 

@@ -393,7 +393,7 @@
         },
         {
           "op": "remove",
-          "path": "/current_events"
+          "path": "/events"
         }
       ]
     },
@@ -408,17 +408,17 @@
       "undo": [
         {
           "op": "replace",
-          "path": "/current_events/0/handler/origin/Advance",
+          "path": "/events/0/handler/origin/Advance",
           "value": "Myths"
         },
         {
           "op": "replace",
-          "path": "/current_events/0/handler/priority",
+          "path": "/events/0/handler/priority",
           "value": 1
         },
         {
           "op": "add",
-          "path": "/current_events/0/handler/request/ResourceReward",
+          "path": "/events/0/handler/request/ResourceReward",
           "value": {
             "name": "Select Temple bonus",
             "reward": {
@@ -443,11 +443,11 @@
         },
         {
           "op": "remove",
-          "path": "/current_events/0/handler/request/SelectAdvance"
+          "path": "/events/0/handler/request/SelectAdvance"
         },
         {
           "op": "replace",
-          "path": "/current_events/0/last_priority_used",
+          "path": "/events/0/last_priority_used",
           "value": 1
         },
         {
@@ -466,7 +466,7 @@
       "undo": [
         {
           "op": "add",
-          "path": "/current_events",
+          "path": "/events",
           "value": [
             {
               "event_type": {

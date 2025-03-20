@@ -115,8 +115,8 @@ pub(crate) fn status_phase_handler(phase: &StatusPhaseState) -> Builtin {
     match phase {
         CompleteObjectives => complete_objectives(),
         FreeAdvance => free_advance(),
-        RazeSize1City => raze_city(),
         DrawCards => draw_cards(),
+        RazeSize1City => raze_city(),
         ChangeGovernmentType => may_change_government(),
         DetermineFirstPlayer(_) => determine_first_player(),
     }

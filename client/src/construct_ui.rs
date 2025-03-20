@@ -10,6 +10,7 @@ use server::map::Terrain;
 use server::playing_actions::{Construct, PlayingAction, Recruit};
 use server::position::Position;
 use server::recruit::recruit_cost;
+use crate::cards_ui::wonder_cards;
 
 pub fn new_building_positions(
     building: Building,
@@ -106,7 +107,7 @@ impl ConstructionPayment {
         let cost = match &project {
             ConstructionProject::Building(b, _) => p.construct_cost(*b, city, None),
             ConstructionProject::Wonder(name) => p.wonder_cost(
-                p.wonder_cards().iter().find(|w| w.name == *name).unwrap(),
+                wonder_cards(p).iter().find(|w| w.name == *name).unwrap(),
                 city,
                 None,
             ),

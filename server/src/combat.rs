@@ -2,8 +2,8 @@ use crate::city::City;
 use crate::city::MoodState::Angry;
 use crate::city_pieces::Building;
 use crate::combat_listeners::{
-    combat_round_end, combat_round_start, Casualties, CombatRoundEnd, CombatRoundStart,
-    CombatRoundType, CombatStrength,
+    combat_round_end, combat_round_start, Casualties, CombatEventPhase, CombatRoundEnd,
+    CombatRoundStart, CombatStrength,
 };
 use crate::consts::SHIP_CAPACITY;
 use crate::content::custom_phase_actions::CurrentEventType;
@@ -177,6 +177,14 @@ impl Combat {
             CombatRole::Defender
         }
     }
+
+    #[must_use]
+    pub fn player(&self, role: CombatRole) -> usize {
+        match role {
+            CombatRole::Attacker => self.attacker,
+            CombatRole::Defender => self.defender,
+        }
+    }
 }
 
 pub fn initiate_combat(
@@ -201,22 +209,22 @@ pub fn initiate_combat(
     start_combat(game, combat);
 }
 
-pub(crate) fn start_combat(game: &mut Game, mut combat: Combat) {
+pub(crate) fn start_combat(game: &mut Game, combat: Combat) {
     game.lock_undo(); // combat should not be undoable
     stop_current_move(game);
 
-    match game.trigger_current_event(
+    let c = match game.trigger_current_event(
         &combat.players(),
         |events| &mut events.on_combat_start,
-        &combat,
+        combat,
         CurrentEventType::CombatStart,
         None,
     ) {
         None => return,
-        Some(c) => combat = c,
-    }
+        Some(c) => c,
+    };
 
-    combat_loop(game, CombatRoundStart::new(combat));
+    combat_loop(game, CombatRoundStart::new(c));
 }
 
 pub(crate) fn update_combat_strength(
@@ -246,8 +254,8 @@ pub(crate) fn update_combat_strength(
 
 pub(crate) fn combat_loop(game: &mut Game, mut s: CombatRoundStart) {
     loop {
-        if s.round_type != CombatRoundType::Done {
-            match combat_round_start(game, &s) {
+        if s.phase != CombatEventPhase::Done {
+            match combat_round_start(game, s) {
                 Some(value) => s = value,
                 None => return,
             };
@@ -315,26 +323,14 @@ pub(crate) fn combat_loop(game: &mut Game, mut s: CombatRoundStart) {
             && defender_hits < active_attackers.len() as u8;
 
         let result = CombatRoundEnd::new(
-            Casualties::new(
-                defender_hits,
-                game,
-                &c,
-                c.attacker,
-                s.attacker_strength.tactics_card.clone(),
-            ),
-            Casualties::new(
-                attacker_hits,
-                game,
-                &c,
-                c.defender,
-                s.defender_strength.tactics_card.clone(),
-            ),
+            Casualties::new(defender_hits, s.attacker_strength.tactics_card.clone()),
+            Casualties::new(attacker_hits, s.defender_strength.tactics_card.clone()),
             can_retreat,
             c,
             game,
         );
 
-        if let Some(r) = combat_round_end(game, &result) {
+        if let Some(r) = combat_round_end(game, result) {
             s = CombatRoundStart::new(r);
         } else {
             return;
@@ -661,7 +657,7 @@ pub mod tests {
     pub fn test_game() -> Game {
         Game {
             state: GameState::Playing,
-            current_events: Vec::new(),
+            events: Vec::new(),
             players: Vec::new(),
             map: Map::new(HashMap::new()),
             starting_player_index: 0,

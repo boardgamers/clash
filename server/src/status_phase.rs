@@ -1,5 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::{advance_with_incident_token, do_advance, remove_advance};
+use crate::action_card::gain_action_card_from_pile;
+use crate::advance::{do_advance, gain_advance, remove_advance};
 use crate::consts::AGES;
 use crate::content::builtin::{status_phase_handler, Builtin};
 use crate::content::custom_phase_actions::{
@@ -7,7 +8,7 @@ use crate::content::custom_phase_actions::{
     CurrentEventResponse, CurrentEventType, PlayerRequest,
 };
 use crate::payment::PaymentOptions;
-use crate::player_events::{CurrentEvent, PlayerEvents};
+use crate::player_events::{CurrentEvent, PersistentEvents};
 use crate::{content::advances, game::Game, player::Player, resource_pile::ResourcePile, utils};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -39,7 +40,7 @@ pub const CHANGE_GOVERNMENT_COST: ResourcePile = ResourcePile::new(0, 0, 0, 0, 0
 
 #[must_use]
 pub fn get_status_phase(game: &Game) -> Option<&StatusPhaseState> {
-    game.current_events.iter().find_map(|e| {
+    game.events.iter().find_map(|e| {
         if let CurrentEventType::StatusPhase(s) = &e.event_type {
             Some(s)
         } else {
@@ -60,18 +61,16 @@ pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
     use StatusPhaseState::*;
 
     loop {
-        if game
-            .trigger_current_event_with_listener(
-                &game.human_players(game.starting_player_index),
-                |events| &mut events.on_status_phase,
-                Some(&status_phase_handler(&phase).listeners),
-                &phase,
-                CurrentEventType::StatusPhase,
-                None,
-            )
-            .is_none()
-        {
-            return;
+        phase = match game.trigger_current_event_with_listener(
+            &game.human_players(game.starting_player_index),
+            |events| &mut events.on_status_phase,
+            &status_phase_handler(&phase).listeners,
+            phase,
+            CurrentEventType::StatusPhase,
+            None,
+        ) {
+            Some(s) => s,
+            None => return,
         };
 
         phase = match phase {
@@ -113,7 +112,7 @@ pub(crate) fn complete_objectives() -> Builtin {
 
 pub(crate) fn free_advance() -> Builtin {
     Builtin::builder("Free Advance", "Advance for free")
-        .add_advance_reward_request_listener(
+        .add_advance_request(
             |event| &mut event.on_status_phase,
             0,
             |game, player_index, _player_name| {
@@ -129,7 +128,7 @@ pub(crate) fn free_advance() -> Builtin {
                     "{} advanced {} for free",
                     c.player_name, c.choice
                 ));
-                advance_with_incident_token(game, &c.choice, c.player_index, ResourcePile::empty());
+                gain_advance(game, &c.choice, c.player_index, ResourcePile::empty(), true);
             },
         )
         .build()
@@ -140,8 +139,9 @@ pub(crate) fn draw_cards() -> Builtin {
         .add_simple_current_event_listener(
             |event| &mut event.on_status_phase,
             0,
-            |_game, _p, _name, _s| {
-                // todo every player draws 1 action card and 1 objective card
+            |game, p, _name, _s| {
+                gain_action_card_from_pile(game, p);
+                // todo every player draws 1 objective card
             },
         )
         .build()
@@ -203,7 +203,7 @@ pub(crate) fn add_change_government<A, E, V>(
     cost: ResourcePile,
 ) -> A
 where
-    E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+    E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<V> + 'static + Clone,
     A: AbilityInitializerSetup,
     V: Clone + PartialEq,
 {

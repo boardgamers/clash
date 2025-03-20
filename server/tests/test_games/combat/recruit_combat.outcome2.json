@@ -1,6 +1,6 @@
 {
   "state": "Playing",
-  "current_events": [
+  "events": [
     {
       "event_type": {
         "CombatEnd": {

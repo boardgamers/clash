@@ -23,17 +23,17 @@ pub(crate) type CurrentEvent<V = ()> = Event<Game, CurrentEventInfo, (), V>;
 
 #[derive(Default)]
 pub(crate) struct PlayerEvents {
-    pub on_construct: CurrentEvent<Building>,
+    pub persistent: PersistentEvents,
+    pub transient: TransientEvents,
+}
+
+#[derive(Default)]
+pub(crate) struct TransientEvents {
     pub on_construct_wonder: Event<Player, Position, Wonder>,
-    pub on_draw_wonder_card: CurrentEvent,
     pub on_collect: Event<CollectInfo, Game>,
-    pub on_advance: CurrentEvent<AdvanceInfo>,
-    pub on_recruit: CurrentEvent<Recruit>,
-    pub on_influence_culture_attempt: Event<InfluenceCultureInfo, City, Game>, // todo add listener method
+    pub on_influence_culture_attempt: Event<InfluenceCultureInfo, City, Game>,
     pub on_influence_culture_success: Event<Game, usize>,
-    pub on_influence_culture_resolution: CurrentEvent<ResourcePile>,
     pub before_move: Event<Game, MoveInfo>,
-    pub on_explore_resolution: CurrentEvent<ExploreResolutionState>,
 
     pub construct_cost: Event<CostInfo, City, Building>,
     pub wonder_cost: Event<CostInfo, City, Wonder>,
@@ -46,6 +46,18 @@ pub(crate) struct PlayerEvents {
     pub terrain_collect_options: Event<HashMap<Terrain, HashSet<ResourcePile>>>,
     pub collect_options: Event<CollectInfo, CollectContext, Game>,
     pub collect_total: Event<CollectInfo>,
+}
+
+#[derive(Default)]
+#[allow(clippy::struct_field_names)]
+pub(crate) struct PersistentEvents {
+    pub on_construct: CurrentEvent<Building>,
+    pub on_draw_wonder_card: CurrentEvent,
+    pub on_advance: CurrentEvent<AdvanceInfo>,
+    pub on_recruit: CurrentEvent<Recruit>,
+    pub on_influence_culture_resolution: CurrentEvent<ResourcePile>,
+    pub on_explore_resolution: CurrentEvent<ExploreResolutionState>,
+    pub on_play_action_card: CurrentEvent<u8>,
 
     pub on_status_phase: CurrentEvent<StatusPhaseState>,
     pub on_turn_start: CurrentEvent,
@@ -159,6 +171,7 @@ impl CostInfo {
 pub struct AdvanceInfo {
     pub name: String,
     pub payment: ResourcePile,
+    pub take_incident_token: bool,
 }
 
 #[derive(Clone, PartialEq)]

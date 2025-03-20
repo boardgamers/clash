@@ -5,12 +5,13 @@ use crate::action_card::ActionCard;
 use crate::advance::AdvanceBuilder;
 use crate::card::HandCard;
 use crate::combat::{update_combat_strength, Combat, CombatModifier};
-use crate::combat_listeners::{CombatRoundType, CombatStrength};
+use crate::combat_listeners::{CombatEventPhase, CombatRoundEnd, CombatStrength};
 use crate::content::action_cards;
 use crate::content::custom_phase_actions::HandCardsRequest;
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::utils::remove_element_by;
+use action_cards::get_action_card;
 
 #[derive(Clone, PartialEq, Eq, Copy)]
 pub enum TacticsCardTarget {
@@ -24,12 +25,12 @@ impl TacticsCardTarget {
         self,
         player: usize,
         combat: &Combat,
-        round_type: &CombatRoundType,
+        round_type: &CombatEventPhase,
     ) -> bool {
         match &self {
             TacticsCardTarget::ActivePlayer => match round_type {
-                CombatRoundType::TacticsCardAttacker => combat.attacker == player,
-                CombatRoundType::TacticsCardDefender => combat.defender == player,
+                CombatEventPhase::TacticsCardAttacker => combat.attacker == player,
+                CombatEventPhase::TacticsCardDefender => combat.defender == player,
                 _ => panic!("TacticsCardTarget::ActivePlayer is not valid"),
             },
             TacticsCardTarget::AllPlayers => true,
@@ -37,6 +38,7 @@ impl TacticsCardTarget {
     }
 }
 
+#[derive(Debug)]
 pub enum FighterRequirement {
     Army,
     Fortress,
@@ -121,11 +123,28 @@ impl TacticsCardBuilder {
             |event| &mut event.on_combat_round_start_tactics,
             priority,
             move |game, p, _, s| {
-                if target.is_active(p, &s.combat, &s.round_type) {
+                if target.is_active(p, &s.combat, &s.phase) {
                     update_combat_strength(game, p, s, {
                         let l = listener.clone();
                         move |game, combat, s, _role| l(p, game, combat, s)
                     });
+                }
+            },
+        )
+    }
+
+    pub(crate) fn add_resolve_listener(
+        self,
+        priority: i32,
+        listener: impl Fn(usize, &mut Game, &mut CombatRoundEnd) + Clone + 'static,
+    ) -> Self {
+        let target = self.tactics_card_target;
+        self.add_simple_current_event_listener(
+            |event| &mut event.on_combat_round_end_tactics,
+            priority,
+            move |game, p, _, s| {
+                if target.is_active(p, &s.combat, &s.phase) {
+                    listener(p, game, s);
                 }
             },
         )
@@ -190,15 +209,10 @@ pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
                     panic!("Expected ActionCard, got {:?}", sel.choice[0]);
                 };
                 update_combat_strength(game, player, s, move |_game, _c, s, _role| {
-                    s.tactics_card = Some(
-                        action_cards::get_action_card(card)
-                            .tactics_card
-                            .name
-                            .clone(),
-                    );
+                    s.tactics_card = Some(get_action_card(card).tactics_card.name.clone());
                 });
-                remove_element_by(&mut game.get_player_mut(player).action_cards, |c| {
-                    c.id == card
+                remove_element_by(&mut game.get_player_mut(player).action_cards, |&id| {
+                    id == card
                 });
             }
         },
@@ -209,6 +223,7 @@ fn available_tactics_cards(game: &Game, player: usize, combat: &Combat) -> Vec<H
     game.players[player]
         .action_cards
         .iter()
+        .map(|id| get_action_card(*id))
         .filter(|a| can_play_tactics_card(game, player, a, combat))
         .map(|a| HandCard::ActionCard(a.id))
         .collect()

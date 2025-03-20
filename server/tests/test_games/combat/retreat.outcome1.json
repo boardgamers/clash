@@ -218,7 +218,7 @@
       "undo": [
         {
           "op": "add",
-          "path": "/current_events",
+          "path": "/events",
           "value": [
             {
               "event_type": {
@@ -236,8 +236,7 @@
                     "retreat": "CanRetreat",
                     "round": 1
                   },
-                  "defender_casualties": {},
-                  "round_type": "Default"
+                  "defender_casualties": {}
                 }
               },
               "handler": {

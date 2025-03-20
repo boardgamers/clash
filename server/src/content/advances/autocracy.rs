@@ -55,10 +55,10 @@ fn totalitarianism() -> AdvanceBuilder {
         "Totalitarianism",
         "Attempts to influence your cities with Army Units may not be boosted by culture tokens",
     )
-    .add_player_event_listener(
+    .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,
         0,
-        |info, city, game, ()| {
+        |info, city, game| {
             if info.is_defender
                 && game
                     .get_player(city.player_index)

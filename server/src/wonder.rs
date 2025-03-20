@@ -69,6 +69,7 @@ impl WonderBuilder {
         self
     }
 
+    #[must_use]
     pub fn build(self) -> Wonder {
         Wonder {
             name: self.name,
@@ -92,10 +93,10 @@ impl AbilityInitializerSetup for WonderBuilder {
 }
 
 pub(crate) fn draw_wonder_card(game: &mut Game, player_index: usize) {
-    game.trigger_current_event(
+    let _ = game.trigger_current_event(
         &[player_index],
         |e| &mut e.on_draw_wonder_card,
-        &(),
+        (),
         |()| CurrentEventType::DrawWonderCard,
         None,
     );

@@ -169,41 +169,44 @@ pub fn do_advance(game: &mut Game, advance: &Advance, player_index: usize) {
     player.advances.push(get_advance(&advance.name));
 }
 
-pub(crate) fn advance_with_incident_token(
+pub(crate) fn gain_advance(
     game: &mut Game,
     name: &str,
     player_index: usize,
     payment: ResourcePile,
+    take_incident_token: bool,
 ) {
     do_advance(game, &get_advance(name), player_index);
-    gain_advance(
+    on_advance(
         game,
         player_index,
-        &AdvanceInfo {
+        AdvanceInfo {
             name: name.to_string(),
             payment,
+            take_incident_token,
         },
     );
 }
 
-pub(crate) fn gain_advance(game: &mut Game, player_index: usize, info: &AdvanceInfo) {
-    if game
-        .trigger_current_event(
-            &[player_index],
-            |e| &mut e.on_advance,
-            info,
-            CurrentEventType::Advance,
-            None,
-        )
-        .is_none()
-    {
-        return;
-    }
-    let player = &mut game.players[player_index];
-    player.incident_tokens -= 1;
-    if player.incident_tokens == 0 {
-        player.incident_tokens = 3;
-        trigger_incident(game, IncidentInfo::new(player_index));
+pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: AdvanceInfo) {
+    let info = match game.trigger_current_event(
+        &[player_index],
+        |e| &mut e.on_advance,
+        info,
+        CurrentEventType::Advance,
+        None,
+    ) {
+        None => return,
+        Some(i) => i,
+    };
+
+    if info.take_incident_token {
+        let player = game.get_player_mut(player_index);
+        player.incident_tokens -= 1;
+        if player.incident_tokens == 0 {
+            player.incident_tokens = 3;
+            trigger_incident(game, IncidentInfo::new(player_index));
+        }
     }
 }
 

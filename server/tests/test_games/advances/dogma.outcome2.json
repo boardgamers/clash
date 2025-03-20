@@ -1,6 +1,6 @@
 {
   "state": "Playing",
-  "current_events": [
+  "events": [
     {
       "event_type": {
         "Construct": "Temple"
@@ -416,7 +416,7 @@
         },
         {
           "op": "remove",
-          "path": "/current_events"
+          "path": "/events"
         }
       ]
     },
@@ -431,17 +431,17 @@
       "undo": [
         {
           "op": "replace",
-          "path": "/current_events/0/handler/origin/Advance",
+          "path": "/events/0/handler/origin/Advance",
           "value": "Myths"
         },
         {
           "op": "replace",
-          "path": "/current_events/0/handler/priority",
+          "path": "/events/0/handler/priority",
           "value": 1
         },
         {
           "op": "add",
-          "path": "/current_events/0/handler/request/ResourceReward",
+          "path": "/events/0/handler/request/ResourceReward",
           "value": {
             "name": "Select Temple bonus",
             "reward": {
@@ -466,11 +466,11 @@
         },
         {
           "op": "remove",
-          "path": "/current_events/0/handler/request/SelectAdvance"
+          "path": "/events/0/handler/request/SelectAdvance"
         },
         {
           "op": "replace",
-          "path": "/current_events/0/last_priority_used",
+          "path": "/events/0/last_priority_used",
           "value": 1
         },
         {

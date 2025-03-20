@@ -1,4 +1,4 @@
-use crate::advance::gain_advance;
+use crate::advance::on_advance;
 use crate::combat::{combat_loop, move_with_possible_combat, start_combat};
 use crate::combat_listeners::{combat_round_end, combat_round_start, end_combat};
 use crate::content::custom_phase_actions::{CurrentEventResponse, CurrentEventType};
@@ -12,7 +12,7 @@ use crate::map::Terrain::Unexplored;
 use crate::movement::{
     get_move_state, has_movable_units, move_units_destinations, CurrentMove, MoveState,
 };
-use crate::playing_actions::PlayingAction;
+use crate::playing_actions::{on_construct, play_action_card, PlayingAction};
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
 use crate::resource_pile::ResourcePile;
@@ -115,7 +115,7 @@ fn execute_without_undo(mut game: Game, action: Action, player_index: usize) -> 
     if let Some(s) = game.current_event_handler_mut() {
         s.response = action.custom_phase_event();
         let details = game.current_event().event_type.clone();
-        execute_custom_phase_action(&mut game, player_index, &details);
+        execute_custom_phase_action(&mut game, player_index, details);
     } else {
         execute_regular_action(&mut game, action, player_index);
     }
@@ -134,7 +134,7 @@ fn add_action_log_item(game: &mut Game, item: Action) {
 pub(crate) fn execute_custom_phase_action(
     game: &mut Game,
     player_index: usize,
-    details: &CurrentEventType,
+    details: CurrentEventType,
 ) {
     use CurrentEventType::*;
     match details {
@@ -148,7 +148,7 @@ pub(crate) fn execute_custom_phase_action(
             ask_for_cultural_influence_payment(game, player_index, r);
         }
         CombatStart(c) => {
-            start_combat(game, c.clone());
+            start_combat(game, c);
         }
         CombatRoundStart(r) => {
             if let Some(c) = combat_round_start(game, r) {
@@ -163,20 +163,19 @@ pub(crate) fn execute_custom_phase_action(
         CombatEnd(r) => {
             end_combat(game, r);
         }
-        StatusPhase(s) => play_status_phase(game, s.clone()),
+        StatusPhase(s) => play_status_phase(game, s),
         TurnStart => game.start_turn(),
         Advance(a) => {
-            gain_advance(game, player_index, a);
+            on_advance(game, player_index, a);
         }
         Construct(b) => {
-            PlayingAction::on_construct(game, player_index, *b);
+            on_construct(game, player_index, b);
         }
         Recruit(r) => {
             on_recruit(game, player_index, r);
         }
-        Incident(i) => {
-            trigger_incident(game, i.clone());
-        }
+        Incident(i) => trigger_incident(game, i),
+        ActionCard(a) => play_action_card(game, player_index, a),
     }
 }
 

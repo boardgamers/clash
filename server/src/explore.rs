@@ -133,7 +133,7 @@ pub(crate) fn move_to_unexplored_block(
         destination,
         ship_can_teleport,
     };
-    ask_explore_resolution(game, player_index, &resolution_state);
+    ask_explore_resolution(game, player_index, resolution_state);
 
     true // current event is active
 }
@@ -141,9 +141,9 @@ pub(crate) fn move_to_unexplored_block(
 pub(crate) fn ask_explore_resolution(
     game: &mut Game,
     player_index: usize,
-    resolution_state: &ExploreResolutionState,
+    resolution_state: ExploreResolutionState,
 ) {
-    game.trigger_current_event(
+    let _ = game.trigger_current_event(
         &[player_index],
         |events| &mut events.on_explore_resolution,
         resolution_state,

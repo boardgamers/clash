@@ -129,12 +129,6 @@ fn reformation() -> Incident {
         IncidentTarget::ActivePlayer,
         4,
         |game, p, player_name, _i| {
-            // if game.permanent_incident_effects.iter().any(
-            //     |e| matches!(e, PermanentIncidentEffect::PassedIncident(PassedIncident::AlreadyPassed))) {
-            //     // can't pass the event again
-            //     return;
-            // }
-
             if has_temple(game, p) {
                 game.current_event_mut().selected_player = Some(p);
             } else if game

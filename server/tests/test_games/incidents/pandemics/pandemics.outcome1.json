@@ -1,6 +1,6 @@
 {
   "state": "Playing",
-  "current_events": [
+  "events": [
     {
       "event_type": {
         "Incident": {
@@ -8,89 +8,22 @@
         }
       },
       "player": 0,
-      "last_priority_used": 0,
+      "last_priority_used": 1,
       "handler": {
-        "priority": 0,
+        "priority": 1,
         "request": {
-          "Payment": [
-            {
-              "cost": {
-                "default": {
-                  "food": 1
-                },
-                "conversions": [
-                  {
-                    "from": [
-                      {
-                        "food": 1
-                      }
-                    ],
-                    "to": {
-                      "wood": 1
-                    },
-                    "type": "Unlimited"
-                  },
-                  {
-                    "from": [
-                      {
-                        "wood": 1
-                      }
-                    ],
-                    "to": {
-                      "ore": 1
-                    },
-                    "type": "Unlimited"
-                  },
-                  {
-                    "from": [
-                      {
-                        "ore": 1
-                      }
-                    ],
-                    "to": {
-                      "ideas": 1
-                    },
-                    "type": "Unlimited"
-                  },
-                  {
-                    "from": [
-                      {
-                        "ideas": 1
-                      }
-                    ],
-                    "to": {
-                      "gold": 1
-                    },
-                    "type": "Unlimited"
-                  },
-                  {
-                    "from": [
-                      {
-                        "gold": 1
-                      }
-                    ],
-                    "to": {
-                      "mood_tokens": 1
-                    },
-                    "type": "Unlimited"
-                  },
-                  {
-                    "from": [
-                      {
-                        "mood_tokens": 1
-                      }
-                    ],
-                    "to": {
-                      "culture_tokens": 1
-                    },
-                    "type": "Unlimited"
-                  }
-                ]
-              },
-              "name": "Select resources to lose",
-              "optional": false
-            }
-          ]
+          "SelectHandCards": {
+            "choices": [
+              {
+                "ActionCard": 1
+              }
+            ],
+            "needed": {
+              "start": 0,
+              "end": 1
+            },
+            "description": "Select cards to lose"
+          }
         },
         "origin": {
           "Incident": 49
@@ -202,6 +135,9 @@
         "Voting"
       ],
       "incident_tokens": 3,
+      "action_cards": [
+        1
+      ],
       "next_unit_id": 8
     },
     {
@@ -356,7 +292,8 @@
       "A new game event has been triggered: Pandemics",
       "Base effect: Barbarians move",
       "Barbarians cannot move - will try to spawn a new city instead",
-      "Barbarians cannot spawn a new city"
+      "Barbarians cannot spawn a new city",
+      "Player1 has to lose a total of 2 units, cards, and resources"
     ],
     [
       "Player1 killed units: Infantry at C2"

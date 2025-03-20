@@ -1,11 +1,12 @@
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::barbarians::{barbarians_move, barbarians_spawn, no_units_present};
-use crate::card::draw_card_from_pile;
+use crate::card::{draw_card_from_pile, HandCard};
 use crate::city::MoodState;
 use crate::content::custom_phase_actions::{
-    new_position_request, CurrentEventType, PaymentRequest, PlayerRequest, PositionRequest,
-    ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitTypeRequest, UnitsRequest,
+    new_position_request, CurrentEventType, HandCardsRequest, PaymentRequest, PlayerRequest,
+    PositionRequest, ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitTypeRequest,
+    UnitsRequest,
 };
 use crate::content::incidents;
 use crate::events::EventOrigin;
@@ -373,6 +374,31 @@ impl IncidentBuilder {
     }
 
     #[must_use]
+    pub(crate) fn add_incident_hand_card_request(
+        self,
+        role: IncidentTarget,
+        priority: i32,
+        request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<HandCardsRequest> + 'static + Clone,
+        cards_selected: impl Fn(&mut Game, &SelectedChoice<Vec<HandCard>>) + 'static + Clone,
+    ) -> Self {
+        let f = self.new_filter(role, priority);
+        self.add_hand_card_request(
+            |event| &mut event.on_incident,
+            priority,
+            move |game, player_index, i| {
+                if f.is_active(game, i, player_index) {
+                    request(game, player_index, i)
+                } else {
+                    None
+                }
+            },
+            move |game, s, _| {
+                cards_selected(game, s);
+            },
+        )
+    }
+
+    #[must_use]
     pub(crate) fn add_incident_player_request(
         self,
         description: &str,
@@ -523,25 +549,23 @@ pub(crate) fn trigger_incident(game: &mut Game, mut info: IncidentInfo) {
     );
 
     loop {
-        if game
-            .trigger_current_event_with_listener(
-                &game.human_players(info.active_player),
-                |events| &mut events.on_incident,
-                Some(&incident.listeners),
-                &info,
-                CurrentEventType::Incident,
-                play_base_effect(game).then_some(&format!(
-                    "A new game event has been triggered: {}",
-                    incident.name
-                )),
-            )
-            .is_none()
-        {
-            return;
-        }
+        info = match game.trigger_current_event_with_listener(
+            &game.human_players(info.active_player),
+            |events| &mut events.on_incident,
+            &incident.listeners,
+            info,
+            CurrentEventType::Incident,
+            play_base_effect(game).then_some(&format!(
+                "A new game event has been triggered: {}",
+                incident.name
+            )),
+        ) {
+            Some(p) => p,
+            None => return,
+        };
 
         if !game
-            .current_events
+            .events
             .iter()
             .any(|e| matches!(e.event_type, CurrentEventType::Incident(_)))
         {

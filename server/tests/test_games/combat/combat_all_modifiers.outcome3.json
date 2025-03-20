@@ -12,7 +12,7 @@
       ]
     }
   },
-  "current_events": [
+  "events": [
     {
       "event_type": {
         "CombatRoundStart": {
@@ -37,7 +37,6 @@
               "SteelWeaponsDefender"
             ]
           },
-          "round_type": "Default",
           "attacker_strength": {
             "extra_dies": 0,
             "extra_combat_value": 1,

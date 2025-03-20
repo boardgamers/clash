@@ -38,10 +38,10 @@ fn irrigation() -> AdvanceBuilder {
         IRRIGATION,
         "Your cities may Collect food from Barren spaces, Ignore Famine events",
     )
-    .add_player_event_listener(
+    .add_transient_event_listener(
         |event| &mut event.terrain_collect_options,
         0,
-        |m, (), (), ()| {
+        |m, (), ()| {
             m.insert(Barren, HashSet::from([ResourcePile::food(1)]));
         },
     )

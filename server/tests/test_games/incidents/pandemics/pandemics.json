@@ -104,6 +104,9 @@
         "Voting"
       ],
       "incident_tokens": 1,
+      "action_cards": [
+        1
+      ],
       "next_unit_id": 8
     },
     {

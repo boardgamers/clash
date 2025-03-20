@@ -35,10 +35,10 @@ fn monuments() -> AdvanceBuilder {
     Advance::builder("Monuments", "Immediately draw 1 wonder card. Your cities with wonders may not be the target of influence culture attempts")
         .add_one_time_ability_initializer(draw_wonder_card)
         .with_advance_bonus(CultureToken)
-        .add_player_event_listener(
+        .add_transient_event_listener(
             |event| &mut event.on_influence_culture_attempt,
             1,
-            |info, city, _, ()| {
+            |info, city, _| {
                 if info.is_defender && !city.pieces.wonders.is_empty() {
                     info.set_impossible();
                 }

@@ -3,7 +3,7 @@ use itertools::Itertools;
 
 #[must_use]
 pub(crate) fn get_all() -> Vec<TacticsCard> {
-    let all: Vec<TacticsCard> = vec![vec![peltasts()]].into_iter().flatten().collect_vec();
+    let all: Vec<TacticsCard> = vec![peltasts(), encircled()];
     assert_eq!(
         all.iter().unique_by(|i| &i.name).count(),
         all.len(),
@@ -42,6 +42,44 @@ pub(crate) fn peltasts() -> TacticsCard {
             }
         }
         s.roll_log.push("Pelts rolled no 5 or 6".to_string());
+    })
+    .build()
+}
+
+pub(crate) fn encircled() -> TacticsCard {
+    TacticsCard::builder(
+        "Encircled",
+        "Before removing casualties: If your opponent loses the same number of units \
+        as you or more: Roll a die. On a 5 or 6, add 1 hit, which cannot be ignored",
+        TacticsCardTarget::ActivePlayer,
+        FighterRequirement::Army,
+    )
+    .add_resolve_listener(0, |player, game, e| {
+        let combat = &e.combat;
+        let opponent = combat.opponent(player);
+        let role = combat.role(player);
+        let opponent_role = combat.role(opponent);
+
+        let player_losses = e.casualties(role).fighters;
+        let opponent_losses = e.casualties(opponent_role).fighters;
+        if opponent_losses >= player_losses {
+            if opponent_losses == combat.fighting_units(game, opponent).len() as u8 {
+                game.add_info_log_item("Encircled cannot do damage - all units already die");
+                return;
+            }
+
+            let roll = game.get_next_dice_roll().value;
+            if roll >= 5 {
+                game.add_info_log_item(
+                    "Encircled rolled a 5 or 6 and added a hit that cannot be ignored",
+                );
+                e.casualties_mut(opponent_role).fighters += 1;
+            } else {
+                game.add_info_log_item("Encircled rolled no 5 or 6");
+            }
+        } else {
+            game.add_info_log_item("Encircled cannot do damage - opponent has fewer losses");
+        }
     })
     .build()
 }

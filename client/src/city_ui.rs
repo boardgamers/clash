@@ -28,6 +28,7 @@ use server::resource::ResourceType;
 use server::unit::{UnitType, Units};
 use std::collections::HashMap;
 use std::ops::Add;
+use crate::cards_ui::wonder_cards;
 
 pub type IconAction<'a> = (&'a Texture2D, String, Box<dyn Fn() -> StateUpdate + 'a>);
 
@@ -84,8 +85,7 @@ fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> 
     let owner = rc.shown_player;
     let game = rc.game;
 
-    owner
-        .wonder_cards()
+        wonder_cards(owner)
         .into_iter()
         .filter(|w| city.can_build_wonder(w, owner, game))
         .map(|w| {
