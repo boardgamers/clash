@@ -13,7 +13,6 @@ use server::card::{hand_cards, HandCard, HandCardType};
 use server::content::action_cards::get_action_card;
 use server::content::custom_phase_actions::CurrentEventResponse;
 use server::content::wonders::get_wonder;
-use server::game::GameState;
 use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::tactics_card::CombatRole;
