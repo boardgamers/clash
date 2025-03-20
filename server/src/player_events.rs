@@ -5,7 +5,7 @@ use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
 use crate::events::Event;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
-use crate::incident::{PassedIncident, PermanentIncidentEffect};
+use crate::incident::PassedIncident;
 use crate::map::Terrain;
 use crate::payment::PaymentOptions;
 use crate::playing_actions::{PlayingActionType, Recruit};
@@ -23,17 +23,17 @@ pub(crate) type CurrentEvent<V = ()> = Event<Game, CurrentEventInfo, (), V>;
 
 #[derive(Default)]
 pub(crate) struct PlayerEvents {
-    pub on_construct: CurrentEvent<Building>,
+    pub persistent: PersistentEvents,
+    pub transient: TransientEvents,
+}
+
+#[derive(Default)]
+pub(crate) struct TransientEvents {
     pub on_construct_wonder: Event<Player, Position, Wonder>,
-    pub on_draw_wonder_card: CurrentEvent,
     pub on_collect: Event<CollectInfo, Game>,
-    pub on_advance: CurrentEvent<AdvanceInfo>,
-    pub on_recruit: CurrentEvent<Recruit>,
-    pub on_influence_culture_attempt: Event<InfluenceCultureInfo, City, Game>, // todo add listener method
+    pub on_influence_culture_attempt: Event<InfluenceCultureInfo, City, Game>,
     pub on_influence_culture_success: Event<Game, usize>,
-    pub on_influence_culture_resolution: CurrentEvent<ResourcePile>,
     pub before_move: Event<Game, MoveInfo>,
-    pub on_explore_resolution: CurrentEvent<ExploreResolutionState>,
 
     pub construct_cost: Event<CostInfo, City, Building>,
     pub wonder_cost: Event<CostInfo, City, Wonder>,
@@ -46,6 +46,18 @@ pub(crate) struct PlayerEvents {
     pub terrain_collect_options: Event<HashMap<Terrain, HashSet<ResourcePile>>>,
     pub collect_options: Event<CollectInfo, CollectContext, Game>,
     pub collect_total: Event<CollectInfo>,
+}
+
+#[derive(Default)]
+#[allow(clippy::struct_field_names)]
+pub(crate) struct PersistentEvents {
+    pub on_construct: CurrentEvent<Building>,
+    pub on_draw_wonder_card: CurrentEvent,
+    pub on_advance: CurrentEvent<AdvanceInfo>,
+    pub on_recruit: CurrentEvent<Recruit>,
+    pub on_influence_culture_resolution: CurrentEvent<ResourcePile>,
+    pub on_explore_resolution: CurrentEvent<ExploreResolutionState>,
+    pub on_play_action_card: CurrentEvent<u8>,
 
     pub on_status_phase: CurrentEvent<StatusPhaseState>,
     pub on_turn_start: CurrentEvent,
@@ -101,6 +113,9 @@ pub enum IncidentTarget {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct IncidentInfo {
     pub active_player: usize,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub passed: Option<PassedIncident>,
 }
 
 impl IncidentInfo {
@@ -108,17 +123,13 @@ impl IncidentInfo {
     pub fn new(origin: usize) -> IncidentInfo {
         IncidentInfo {
             active_player: origin,
+            passed: None,
         }
     }
 
     #[must_use]
     pub fn is_active(&self, role: IncidentTarget, player: usize, game: &Game) -> bool {
-        if game.permanent_incident_effects.iter().any(|e| {
-            matches!(
-                e,
-                PermanentIncidentEffect::PassedIncident(PassedIncident::NewPlayer(_))
-            )
-        }) {
+        if matches!(self.passed, Some(PassedIncident::NewPlayer(_))) {
             // wait until the new player is playing the advance
             return false;
         }
@@ -159,6 +170,7 @@ impl CostInfo {
 pub struct AdvanceInfo {
     pub name: String,
     pub payment: ResourcePile,
+    pub take_incident_token: bool,
 }
 
 #[derive(Clone, PartialEq)]

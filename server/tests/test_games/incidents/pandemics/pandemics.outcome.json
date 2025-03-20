@@ -1,6 +1,6 @@
 {
   "state": "Playing",
-  "current_events": [
+  "events": [
     {
       "event_type": {
         "Incident": {
@@ -8,9 +8,9 @@
         }
       },
       "player": 0,
-      "last_priority_used": 1,
+      "last_priority_used": 2,
       "handler": {
-        "priority": 1,
+        "priority": 2,
         "request": {
           "SelectUnits": {
             "player": 0,
@@ -144,6 +144,9 @@
         "Voting"
       ],
       "incident_tokens": 3,
+      "action_cards": [
+        1
+      ],
       "next_unit_id": 8
     },
     {
@@ -289,7 +292,8 @@
       "A new game event has been triggered: Pandemics",
       "Base effect: Barbarians move",
       "Barbarians cannot move - will try to spawn a new city instead",
-      "Barbarians cannot spawn a new city"
+      "Barbarians cannot spawn a new city",
+      "Player1 has to lose a total of 2 units, cards, and resources"
     ]
   ],
   "undo_limit": 1,

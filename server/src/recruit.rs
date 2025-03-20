@@ -10,7 +10,7 @@ use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::{UnitType, Units};
 
-pub(crate) fn recruit(game: &mut Game, player_index: usize, r: &Recruit) {
+pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) {
     if let Some(leader_name) = &r.leader_name {
         if let Some(previous_leader) = game.players[player_index].active_leader.take() {
             Player::with_leader(
@@ -64,7 +64,8 @@ fn set_active_leader(game: &mut Game, leader_name: String, player_index: usize) 
     game.get_player_mut(player_index).active_leader = Some(leader_name);
 }
 
-pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: &Recruit) {
+pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
+    let city_position = r.city_position;
     if game
         .trigger_current_event(
             &[player_index],
@@ -77,7 +78,6 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: &Recruit) {
     {
         return;
     }
-    let city_position = r.city_position;
 
     if let Some(port_position) = game.players[player_index]
         .try_get_city(city_position)

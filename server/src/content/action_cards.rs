@@ -1,10 +1,12 @@
+mod inspiration;
+
 use crate::action_card::ActionCard;
-use crate::content::tactics_cards::peltasts;
+use crate::content::action_cards::inspiration::inspiration_action_cards;
 use itertools::Itertools;
 
 #[must_use]
 pub(crate) fn get_all() -> Vec<ActionCard> {
-    let all = vec![test_action_cards()]
+    let all = vec![inspiration_action_cards()]
         .into_iter()
         .flatten()
         .collect_vec();
@@ -25,15 +27,4 @@ pub fn get_action_card(id: u8) -> ActionCard {
         .into_iter()
         .find(|c| c.id == id)
         .expect("action card not found")
-}
-
-fn test_action_cards() -> Vec<ActionCard> {
-    vec![advance(1), advance(2)]
-}
-
-// todo move to dedicated module
-fn advance(id: u8) -> ActionCard {
-    ActionCard::civil_card_builder(id, "Advance", "todo", peltasts())
-        // .add_units_request()
-        .build()
 }

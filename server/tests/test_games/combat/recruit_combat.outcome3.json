@@ -275,7 +275,7 @@
       "undo": [
         {
           "op": "add",
-          "path": "/current_events",
+          "path": "/events",
           "value": [
             {
               "event_type": {

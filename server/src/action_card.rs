@@ -5,11 +5,16 @@ use crate::card::draw_card_from_pile;
 use crate::content::action_cards;
 use crate::events::EventOrigin;
 use crate::game::Game;
+use crate::player::Player;
 use crate::tactics_card::TacticsCard;
+use action_cards::get_action_card;
+
+pub type CanPlayCard = Box<dyn Fn(&Game, &Player) -> bool>;
 
 pub struct CivilCard {
     pub name: String,
     pub description: String,
+    pub can_play: CanPlayCard,
     pub listeners: AbilityListeners,
 }
 
@@ -30,13 +35,24 @@ impl ActionCard {
     }
 
     #[must_use]
-    pub fn civil_card_builder(
+    pub fn civil_card_builder<F>(
         id: u8,
         name: &str,
         description: &str,
+        can_play: F,
         tactics_card: TacticsCard,
-    ) -> CivilCardBuilder {
-        CivilCardBuilder::new(id, name, description, tactics_card)
+    ) -> CivilCardBuilder
+    where
+        F: Fn(&Game, &Player) -> bool + 'static,
+    {
+        CivilCardBuilder {
+            id,
+            name: name.to_string(),
+            description: description.to_string(),
+            can_play: Box::new(can_play),
+            tactics_card,
+            builder: AbilityInitializerBuilder::new(),
+        }
     }
 
     #[must_use]
@@ -53,21 +69,12 @@ pub struct CivilCardBuilder {
     id: u8,
     name: String,
     description: String,
+    can_play: CanPlayCard,
     tactics_card: TacticsCard,
     builder: AbilityInitializerBuilder,
 }
 
 impl CivilCardBuilder {
-    fn new(id: u8, name: &str, description: &str, tactics_card: TacticsCard) -> Self {
-        Self {
-            id,
-            name: name.to_string(),
-            description: description.to_string(),
-            tactics_card,
-            builder: AbilityInitializerBuilder::new(),
-        }
-    }
-
     #[must_use]
     pub fn build(self) -> ActionCard {
         ActionCard::new(
@@ -75,6 +82,7 @@ impl CivilCardBuilder {
             CivilCard {
                 name: self.name,
                 description: self.description,
+                can_play: self.can_play,
                 listeners: self.builder.build(),
             },
             self.tactics_card,
@@ -98,7 +106,7 @@ pub(crate) fn gain_action_card_from_pile(game: &mut Game, player: usize) {
             "{} gained an action card from the pile",
             game.player_name(player)
         ));
-        gain_action_card(game, player, c);
+        gain_action_card(game, player, &c);
     }
 }
 
@@ -109,11 +117,11 @@ fn draw_action_card_from_pile(game: &mut Game) -> Option<ActionCard> {
         false,
         |g| &mut g.action_cards_left,
         || action_cards::get_all().iter().map(|c| c.id).collect(),
-        |p| p.action_cards.iter().map(|c| c.id).collect(),
+        |p| p.action_cards.clone(),
     )
-    .map(action_cards::get_action_card)
+    .map(get_action_card)
 }
 
-fn gain_action_card(game: &mut Game, player_index: usize, action_card: ActionCard) {
-    game.players[player_index].action_cards.push(action_card);
+fn gain_action_card(game: &mut Game, player_index: usize, action_card: &ActionCard) {
+    game.players[player_index].action_cards.push(action_card.id);
 }

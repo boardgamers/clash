@@ -19,10 +19,10 @@ fn math() -> AdvanceBuilder {
         "Math",
         "Engineering and Roads can be bought at no food cost",
     )
-    .add_player_event_listener(
+    .add_transient_event_listener(
         |event| &mut event.advance_cost,
         1,
-        |i, a, (), ()| {
+        |i, a, ()| {
             if a.name == "Engineering" || a.name == "Roads" {
                 i.info.log.push("Math reduced the cost to 0".to_string());
                 i.set_zero();
@@ -38,10 +38,10 @@ fn astronomy() -> AdvanceBuilder {
         "Astronomy",
         "Navigation and Cartography can be bought at no food cost",
     )
-    .add_player_event_listener(
+    .add_transient_event_listener(
         |event| &mut event.advance_cost,
         0,
-        |i, a, (), ()| {
+        |i, a, ()| {
             if a.name == "Navigation" || a.name == "Cartography" {
                 i.set_zero();
                 i.info
@@ -96,10 +96,10 @@ fn metallurgy() -> AdvanceBuilder {
         METALLURGY,
         "If you have the Steel Weapons Advance, you no longer have to pay 1 ore to activate it against enemies without Steel Weapons. If you collect at least 2 ore, replace 1 ore with 1 gold",)
         .with_advance_bonus(CultureToken)
-        .add_player_event_listener(
+        .add_transient_event_listener(
             |event| &mut event.collect_total,
             0,
-            |i, (),(), ()| {
+            |i, (), ()| {
                 if i.total.ore >= 2 {
                     i.total.ore -= 1;
                     i.total.gold += 1;

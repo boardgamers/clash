@@ -7,6 +7,7 @@
     clippy::cast_possible_truncation,
     clippy::missing_panics_doc
 )]
+extern crate core;
 
 mod action_buttons;
 mod advance_ui;

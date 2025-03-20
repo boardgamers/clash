@@ -32,10 +32,10 @@ fn separation_of_power() -> AdvanceBuilder {
         "Separation of Power",
         "Attempts to influence your happy cities may not be boosted by culture tokens",
     )
-    .add_player_event_listener(
+    .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,
         2,
-        |info, city, _, ()| {
+        |info, city, _| {
             if matches!(city.mood_state, MoodState::Happy) {
                 info.set_no_boost();
             }
@@ -54,10 +54,10 @@ fn civil_liberties() -> AdvanceBuilder {
 fn free_economy() -> AdvanceBuilder {
     Advance::builder("Free Economy", "As a free action, you may spend 1 mood token to collect resources in one city. This must be your only collect action this turn")
         .add_custom_action(FreeEconomyCollect)
-        .add_player_event_listener(
+        .add_transient_event_listener(
             |event| &mut event.is_playing_action_available,
             0,
-            |available, game, i, ()| {
+            |available, game, i| {
                 let p = game.get_player(i.player);
                 if matches!(i.action_type, PlayingActionType::Collect) && p.played_once_per_turn_actions.contains(&FreeEconomyCollect) {
                     *available = false;

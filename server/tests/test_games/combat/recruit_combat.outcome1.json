@@ -1,6 +1,6 @@
 {
   "state": "Playing",
-  "current_events": [
+  "events": [
     {
       "event_type": {
         "Recruit": {
@@ -359,7 +359,7 @@
         },
         {
           "op": "remove",
-          "path": "/current_events"
+          "path": "/events"
         }
       ]
     },
@@ -374,49 +374,49 @@
       "undo": [
         {
           "op": "replace",
-          "path": "/current_events/0/handler/origin/Advance",
+          "path": "/events/0/handler/origin/Advance",
           "value": "Nationalism"
         },
         {
           "op": "replace",
-          "path": "/current_events/0/handler/priority",
+          "path": "/events/0/handler/priority",
           "value": 1
         },
         {
           "op": "replace",
-          "path": "/current_events/0/handler/request/ResourceReward/name",
+          "path": "/events/0/handler/request/ResourceReward/name",
           "value": "Select token to gain"
         },
         {
           "op": "add",
-          "path": "/current_events/0/handler/request/ResourceReward/reward/conversions/0/from/0/mood_tokens",
+          "path": "/events/0/handler/request/ResourceReward/reward/conversions/0/from/0/mood_tokens",
           "value": 1
         },
         {
           "op": "remove",
-          "path": "/current_events/0/handler/request/ResourceReward/reward/conversions/0/from/0/wood"
+          "path": "/events/0/handler/request/ResourceReward/reward/conversions/0/from/0/wood"
         },
         {
           "op": "add",
-          "path": "/current_events/0/handler/request/ResourceReward/reward/conversions/0/to/culture_tokens",
+          "path": "/events/0/handler/request/ResourceReward/reward/conversions/0/to/culture_tokens",
           "value": 1
         },
         {
           "op": "remove",
-          "path": "/current_events/0/handler/request/ResourceReward/reward/conversions/0/to/gold"
+          "path": "/events/0/handler/request/ResourceReward/reward/conversions/0/to/gold"
         },
         {
           "op": "add",
-          "path": "/current_events/0/handler/request/ResourceReward/reward/default/mood_tokens",
+          "path": "/events/0/handler/request/ResourceReward/reward/default/mood_tokens",
           "value": 1
         },
         {
           "op": "remove",
-          "path": "/current_events/0/handler/request/ResourceReward/reward/default/wood"
+          "path": "/events/0/handler/request/ResourceReward/reward/default/wood"
         },
         {
           "op": "replace",
-          "path": "/current_events/0/last_priority_used",
+          "path": "/events/0/last_priority_used",
           "value": 1
         },
         {

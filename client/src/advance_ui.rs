@@ -108,7 +108,7 @@ pub fn show_advance_menu(
                     // tooltip should be shown on top of everything
                     show_tooltip_for_rect(rc, &description(p, a), rect);
 
-                    if rc.can_control()
+                    if rc.can_control_shown_player()
                         && matches!(
                             advance_state,
                             AdvanceState::Available | AdvanceState::Removable

@@ -152,7 +152,7 @@ fn good_year(mut builder: IncidentBuilder, amount: u32, good_year_type: &GoodYea
                 "Select a player to gain 1 food",
                 |p, _| p.resources.food < p.resource_limit.food,
                 i as i32,
-                move |game, c| {
+                move |game, c, _| {
                     game.add_info_log_item(&format!(
                         "{} gained 1 food from {}",
                         game.player_name(c.choice),
@@ -192,7 +192,7 @@ pub(crate) fn select_player_to_gain_settler(mut b: IncidentBuilder) -> IncidentB
         "Select another player to gain 1 settler on one of their cities",
         |p, _| p.available_units().settlers > 0 && !p.cities.is_empty(),
         12,
-        |game, c| {
+        |game, c, _| {
             game.add_info_log_item(&format!(
                 "{} was selected to gain 1 settler.",
                 game.player_name(c.choice)

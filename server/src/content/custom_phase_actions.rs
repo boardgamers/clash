@@ -180,6 +180,7 @@ pub enum CurrentEventType {
     Construct(Building),
     Recruit(Recruit),
     Incident(IncidentInfo),
+    ActionCard(u8),
     DrawWonderCard,
 }
 
@@ -341,6 +342,6 @@ impl CurrentEventResponse {
         };
         s.response = Some(self.clone());
         let details = game.current_event().event_type.clone();
-        execute_custom_phase_action(game, player_index, &details);
+        execute_custom_phase_action(game, player_index, details);
     }
 }

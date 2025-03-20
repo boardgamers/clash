@@ -354,7 +354,7 @@
         },
         {
           "op": "remove",
-          "path": "/current_events"
+          "path": "/events"
         }
       ]
     },
@@ -371,7 +371,7 @@
       "undo": [
         {
           "op": "add",
-          "path": "/current_events",
+          "path": "/events",
           "value": [
             {
               "event_type": {
@@ -380,7 +380,8 @@
                   "payment": {
                     "food": 1,
                     "gold": 1
-                  }
+                  },
+                  "take_incident_token": true
                 }
               },
               "handler": {

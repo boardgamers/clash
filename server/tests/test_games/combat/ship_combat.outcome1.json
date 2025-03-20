@@ -269,13 +269,12 @@
       "undo": [
         {
           "op": "add",
-          "path": "/current_events",
+          "path": "/events",
           "value": [
             {
               "event_type": {
                 "CombatRoundEnd": {
                   "attacker_casualties": {
-                    "carried_units": 1,
                     "fighters": 1
                   },
                   "can_retreat": false,
@@ -294,8 +293,7 @@
                   "defender_casualties": {
                     "fighters": 1
                   },
-                  "final_result": "AttackerWins",
-                  "round_type": "Default"
+                  "final_result": "AttackerWins"
                 }
               },
               "handler": {

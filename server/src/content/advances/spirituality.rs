@@ -44,10 +44,10 @@ fn myths() -> AdvanceBuilder {
 fn rituals() -> AdvanceBuilder {
     Advance::builder("Rituals", "When you perform the Increase Happiness Action you may spend any Resources as a substitute for mood tokens. This is done at a 1:1 ratio")
         .with_advance_bonus(CultureToken)
-        .add_player_event_listener(
+        .add_transient_event_listener(
             |event| &mut event.happiness_cost,
             0,
-            |cost, (), (), ()| {
+            |cost, (), ()| {
                 for r in &[
                     ResourceType::Food,
                     ResourceType::Wood,

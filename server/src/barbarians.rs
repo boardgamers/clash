@@ -313,8 +313,8 @@ pub(crate) fn set_info(
     builder.add_simple_incident_listener(
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY + 200,
-        move |game, player, _, _| {
-            if play_base_effect(game) && game.current_event().barbarians.is_none() {
+        move |game, player, _, i| {
+            if play_base_effect(i) && game.current_event().barbarians.is_none() {
                 game.add_info_log_item(&format!("Base effect: {name}"));
                 let mut state = BarbariansEventState::new();
                 init(&mut state, game, player);

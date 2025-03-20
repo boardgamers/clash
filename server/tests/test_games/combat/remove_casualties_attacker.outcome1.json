@@ -206,7 +206,7 @@
       "undo": [
         {
           "op": "add",
-          "path": "/current_events",
+          "path": "/events",
           "value": [
             {
               "event_type": {
@@ -232,8 +232,7 @@
                   "defender_casualties": {
                     "fighters": 2
                   },
-                  "final_result": "AttackerWins",
-                  "round_type": "Default"
+                  "final_result": "AttackerWins"
                 }
               },
               "handler": {

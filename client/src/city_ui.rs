@@ -1,6 +1,7 @@
 use crate::action_buttons::{
     base_or_custom_action, base_or_custom_available, custom_action_buttons,
 };
+use crate::cards_ui::wonder_cards;
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
@@ -84,8 +85,7 @@ fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> 
     let owner = rc.shown_player;
     let game = rc.game;
 
-    owner
-        .wonder_cards()
+    wonder_cards(owner)
         .into_iter()
         .filter(|w| city.can_build_wonder(w, owner, game))
         .map(|w| {

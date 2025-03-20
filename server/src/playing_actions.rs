@@ -3,9 +3,10 @@ use serde::{Deserialize, Serialize};
 use PlayingAction::*;
 
 use crate::action::Action;
-use crate::advance::advance_with_incident_token;
+use crate::advance::gain_advance;
 use crate::city::MoodState;
 use crate::collect::collect;
+use crate::content::action_cards::get_action_card;
 use crate::content::advances::get_advance;
 use crate::content::custom_phase_actions::CurrentEventType;
 use crate::cultural_influence::influence_culture_attempt;
@@ -73,6 +74,7 @@ pub enum PlayingActionType {
     MoveUnits,
     IncreaseHappiness,
     InfluenceCultureAttempt,
+    ActionCard,
     Custom,
     EndTurn,
 }
@@ -111,6 +113,7 @@ pub enum PlayingAction {
     IncreaseHappiness(IncreaseHappiness),
     InfluenceCultureAttempt(InfluenceCultureAttempt),
     Custom(CustomAction),
+    ActionCard(u8),
     EndTurn,
 }
 
@@ -141,7 +144,7 @@ impl PlayingAction {
                 game.get_player(player_index)
                     .advance_cost(&a, Some(&payment))
                     .pay(game, &payment);
-                advance_with_incident_token(game, &advance, player_index, payment);
+                gain_advance(game, &advance, player_index, payment, true);
             }
             FoundCity { settler } => {
                 let settler = game.players[player_index].remove_unit(settler);
@@ -177,7 +180,7 @@ impl PlayingAction {
                     game.add_info_log_item("Academy gained 2 ideas");
                 }
                 cost.pay(game, &c.payment);
-                Self::on_construct(game, player_index, c.city_piece);
+                on_construct(game, player_index, c.city_piece);
             }
             Collect(c) => {
                 if game.action_log.iter().any(|i| {
@@ -204,12 +207,15 @@ impl PlayingAction {
                 } else {
                     panic!("Cannot pay for units")
                 }
-                recruit(game, player_index, &r);
+                recruit(game, player_index, r);
             }
             IncreaseHappiness(i) => {
                 increase_happiness(game, player_index, &i.happiness_increases, Some(i.payment));
             }
             InfluenceCultureAttempt(c) => influence_culture_attempt(game, player_index, &c),
+            ActionCard(a) => {
+                play_action_card(game, player_index, a);
+            }
             Custom(custom_action) => {
                 assert!(
                     game.is_custom_action_available(
@@ -238,16 +244,6 @@ impl PlayingAction {
         }
     }
 
-    pub(crate) fn on_construct(game: &mut Game, player_index: usize, building: Building) {
-        game.trigger_current_event(
-            &[player_index],
-            |e| &mut e.on_construct,
-            &building,
-            CurrentEventType::Construct,
-            None,
-        );
-    }
-
     #[must_use]
     pub fn action_type(&self) -> ActionType {
         match self {
@@ -269,6 +265,7 @@ impl PlayingAction {
             PlayingAction::InfluenceCultureAttempt { .. } => {
                 PlayingActionType::InfluenceCultureAttempt
             }
+            PlayingAction::ActionCard(_) => PlayingActionType::ActionCard,
             PlayingAction::Custom(_) => PlayingActionType::Custom,
             PlayingAction::EndTurn => PlayingActionType::EndTurn,
         }
@@ -348,4 +345,26 @@ pub(crate) fn increase_happiness(
 
 pub(crate) fn roll_boost_cost(roll: u8) -> ResourcePile {
     ResourcePile::culture_tokens(5 - roll as u32)
+}
+
+pub(crate) fn play_action_card(game: &mut Game, player_index: usize, card_id: u8) {
+    let card = get_action_card(card_id);
+    let _ = game.trigger_current_event_with_listener(
+        &[player_index],
+        |e| &mut e.on_play_action_card,
+        &card.civil_card.listeners,
+        card_id,
+        CurrentEventType::ActionCard,
+        None,
+    );
+}
+
+pub(crate) fn on_construct(game: &mut Game, player_index: usize, building: Building) {
+    let _ = game.trigger_current_event(
+        &[player_index],
+        |e| &mut e.on_construct,
+        building,
+        CurrentEventType::Construct,
+        None,
+    );
 }

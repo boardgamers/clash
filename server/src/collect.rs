@@ -63,10 +63,7 @@ pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) {
     city.activate();
     let _ = game
         .get_player(player_index)
-        .events
-        .on_collect
-        .get()
-        .trigger(&mut i, game, &(), &mut ());
+        .trigger_event(|e| &e.on_collect, &mut i, game, &());
     i.info.execute(game);
     game.players[player_index].gain_resources(i.total.clone());
 }
@@ -120,11 +117,12 @@ pub fn possible_resource_collections(
         (Forest, HashSet::from([ResourcePile::wood(1)])),
     ];
     let mut terrain_options = HashMap::from(set);
-    let modifiers = game.players[player_index]
-        .events
-        .terrain_collect_options
-        .get()
-        .trigger(&mut terrain_options, &(), &(), &mut ());
+    let modifiers = game.get_player(player_index).trigger_event(
+        |e| &e.terrain_collect_options,
+        &mut terrain_options,
+        &(),
+        &(),
+    );
 
     let collect_options = city_pos
         .neighbors()
@@ -142,6 +140,7 @@ pub fn possible_resource_collections(
 
     let mut i = game.players[player_index]
         .events
+        .transient
         .collect_options
         .get()
         .trigger_with_minimal_modifiers(

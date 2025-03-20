@@ -8,14 +8,12 @@
       ]
     }
   },
-  "current_events": [
+  "events": [
     {
       "event_type": {
         "CombatRoundEnd": {
-          "round_type": "Default",
           "attacker_casualties": {
-            "fighters": 1,
-            "carried_units": 1
+            "fighters": 1
           },
           "defender_casualties": {
             "fighters": 1

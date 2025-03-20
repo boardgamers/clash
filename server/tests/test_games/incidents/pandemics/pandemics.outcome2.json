@@ -1,6 +1,6 @@
 {
   "state": "Playing",
-  "current_events": [
+  "events": [
     {
       "event_type": {
         "Incident": {
@@ -114,7 +114,7 @@
         "ideas": 5,
         "gold": 5,
         "mood_tokens": 8,
-        "culture_tokens": 6
+        "culture_tokens": 7
       },
       "resource_limit": {
         "food": 7,
@@ -350,9 +350,9 @@
     {
       "action": {
         "Response": {
-          "Payment": [
+          "SelectHandCards": [
             {
-              "culture_tokens": 1
+              "ActionCard": 1
             }
           ]
         }
@@ -369,13 +369,15 @@
       "A new game event has been triggered: Pandemics",
       "Base effect: Barbarians move",
       "Barbarians cannot move - will try to spawn a new city instead",
-      "Barbarians cannot spawn a new city"
+      "Barbarians cannot spawn a new city",
+      "Player1 has to lose a total of 2 units, cards, and resources"
     ],
     [
       "Player1 killed units: Infantry at C2"
     ],
     [
-      "Player1 lost 1 culture token"
+      "Player1 discarded an action card",
+      "Player2 has to lose a total of 1 units, cards, and resources"
     ]
   ],
   "undo_limit": 3,

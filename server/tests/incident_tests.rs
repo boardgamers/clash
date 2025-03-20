@@ -1,5 +1,6 @@
 use crate::common::{move_action, JsonTest, TestAction};
 use server::action::Action;
+use server::card::HandCard;
 use server::city_pieces::Building::Fortress;
 use server::content::custom_phase_actions::{CurrentEventResponse, Structure};
 use server::playing_actions;
@@ -604,8 +605,8 @@ fn test_pandemics() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::Payment(vec![
-                    ResourcePile::culture_tokens(1),
+                Action::Response(CurrentEventResponse::SelectHandCards(vec![
+                    HandCard::ActionCard(1),
                 ])),
             ),
             TestAction::not_undoable(

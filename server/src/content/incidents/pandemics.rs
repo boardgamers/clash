@@ -1,6 +1,7 @@
+use crate::card::{hand_cards, HandCard, HandCardType};
 use crate::city::City;
 use crate::content::custom_phase_actions::{
-    PaymentRequest, PositionRequest, ResourceRewardRequest, UnitsRequest,
+    HandCardsRequest, PaymentRequest, PositionRequest, ResourceRewardRequest, UnitsRequest,
 };
 use crate::content::incidents::famine::{
     additional_sanitation_damage, famine, kill_incident_units,
@@ -14,6 +15,7 @@ use crate::player_events::IncidentTarget;
 use crate::position::Position;
 use crate::resource::ResourceType;
 use itertools::Itertools;
+use std::ops::RangeInclusive;
 
 pub(crate) fn pandemics_incidents() -> Vec<Incident> {
     vec![
@@ -31,24 +33,26 @@ fn pandemics() -> Incident {
     Incident::builder(
         49,
         "Pandemics",
-        "Every player loses an amount resources, tokens, cards, \
+        "Every player loses an amount resources, tokens, action or objective cards, \
         or units equal to the half of the number of their cities (rounded down).",
         IncidentBaseEffect::BarbariansMove,
     )
     .set_protection_advance("Sanitation")
     .add_incident_units_request(
         IncidentTarget::AllPlayers,
-        1,
+        2,
         |game, p, _i| {
+            game.add_info_log_item(&format!(
+                "{} has to lose a total of {} units, cards, and resources",
+                game.player_name(p),
+                pandemics_cost(game.get_player(p))
+            ));
+
             let player = game.get_player(p);
-            let needed = pandemics_cost(player);
-            let choices = player.units.iter().map(|u| u.id).collect_vec();
-            let min = needed.saturating_sub(player.resources.amount() as u8);
-            let max = needed.min(choices.len() as u8);
             Some(UnitsRequest::new(
                 p,
-                choices,
-                min..=max,
+                player.units.iter().map(|u| u.id).collect_vec(),
+                PandemicsContributions::range(player, game, 0),
                 "Select units to lose",
             ))
         },
@@ -57,14 +61,49 @@ fn pandemics() -> Incident {
             game.current_event_mut().player.sacrifice = s.choice.len() as u8;
         },
     )
+    .add_incident_hand_card_request(
+        IncidentTarget::AllPlayers,
+        1,
+        |game, p, _i| {
+            let player = game.get_player(p);
+            Some(HandCardsRequest::new(
+                // todo also objective cards
+                hand_cards(player, &[HandCardType::Action]),
+                PandemicsContributions::range(player, game, 1),
+                "Select cards to lose",
+            ))
+        },
+        |game, s| {
+            for id in &s.choice {
+                match id {
+                    HandCard::ActionCard(a) => {
+                        game.get_player_mut(s.player_index)
+                            .action_cards
+                            .retain(|c| c != a);
+                        game.add_info_log_item(&format!(
+                            "{} discarded an action card",
+                            s.player_name
+                        ));
+                    }
+                    HandCard::Wonder(_) => panic!("Unexpected card type"),
+                }
+            }
+            game.current_event_mut().player.sacrifice += s.choice.len() as u8;
+        },
+    )
     .add_incident_payment_request(
         IncidentTarget::AllPlayers,
         0,
         |game, p, _i| {
             let player = game.get_player(p);
-            let resources = player.resources.amount() as u8;
-            let needed =
-                (pandemics_cost(player) - game.current_event_mut().player.sacrifice).min(resources);
+            let needed = PandemicsContributions::range(player, game, 2)
+                .min()
+                .expect("min not found");
+
+            if needed == 0 {
+                return None;
+            }
+
             Some(vec![PaymentRequest::new(
                 PaymentOptions::sum(needed as u32, &ResourceType::all()),
                 "Select resources to lose",
@@ -76,6 +115,40 @@ fn pandemics() -> Incident {
         },
     )
     .build()
+}
+
+struct PandemicsContributions {
+    pub max: Vec<u8>,
+}
+
+impl PandemicsContributions {
+    pub fn new(player: &Player) -> Self {
+        Self {
+            max: vec![
+                player.units.len() as u8,
+                player.action_cards.len() as u8,
+                player.resources.amount() as u8,
+            ],
+        }
+    }
+
+    pub fn range(player: &Player, game: &Game, level: usize) -> RangeInclusive<u8> {
+        PandemicsContributions::new(player).range_impl(
+            level,
+            pandemics_cost(player) - game.current_event_player().sacrifice,
+        )
+    }
+
+    fn range_impl(&self, level: usize, needed: u8) -> RangeInclusive<u8> {
+        let current_max = self.max[level];
+        let remaining: u8 = self.max.iter().skip(level + 1).sum();
+
+        let i = needed.saturating_sub(remaining);
+        let min = i.min(current_max);
+        let max = needed.min(current_max);
+
+        min..=max
+    }
 }
 
 fn pandemics_cost(player: &Player) -> u8 {
@@ -281,4 +354,20 @@ pub(crate) fn successful_year() -> Incident {
         },
     )
     .build()
+}
+
+#[cfg(test)]
+pub mod tests {
+    use crate::content::incidents::pandemics;
+
+    #[test]
+    pub fn get_test_range_impl() {
+        let c = pandemics::PandemicsContributions { max: vec![7, 2, 3] };
+        assert_eq!(c.range_impl(0, 4), 0..=4);
+        assert_eq!(c.range_impl(1, 4), 1..=2);
+        assert_eq!(c.range_impl(2, 4), 3..=3);
+
+        assert_eq!(c.range_impl(2, 3), 3..=3);
+        assert_eq!(c.range_impl(2, 2), 2..=2);
+    }
 }

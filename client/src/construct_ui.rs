@@ -1,3 +1,4 @@
+use crate::cards_ui::wonder_cards;
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::payment_ui::{payment_dialog, Payment};
 use crate::recruit_unit_ui::RecruitSelection;
@@ -106,7 +107,7 @@ impl ConstructionPayment {
         let cost = match &project {
             ConstructionProject::Building(b, _) => p.construct_cost(*b, city, None),
             ConstructionProject::Wonder(name) => p.wonder_cost(
-                p.wonder_cards().iter().find(|w| w.name == *name).unwrap(),
+                wonder_cards(p).iter().find(|w| w.name == *name).unwrap(),
                 city,
                 None,
             ),

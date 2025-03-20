@@ -18,11 +18,7 @@ pub(crate) fn seafaring() -> AdvanceGroup {
 
 fn fishing() -> AdvanceBuilder {
     Advance::builder("Fishing", "Your cities may Collect food from one Sea space")
-        .add_player_event_listener(
-            |event| &mut event.collect_options,
-            1,
-            |i, c, game, ()| fishing_collect(i, c, game),
-        )
+        .add_transient_event_listener(|event| &mut event.collect_options, 1, fishing_collect)
         .with_advance_bonus(MoodToken)
         .with_unlocked_building(Port)
 }
@@ -58,10 +54,10 @@ fn cartography() -> AdvanceBuilder {
         "Cartography",
         "Gain 1 idea after a move action where you moved a Ship. If you used navigation, gain an additional 1 culture token.", )
         .with_advance_bonus(CultureToken)
-        .add_player_event_listener(
+        .add_transient_event_listener(
             |event| &mut event.before_move,
             0,
-            |game,  i, (), ()| {
+            |game,  i, ()| {
                 // info is the action that we last used this ability for
                 let key = game.actions_left.to_string();
                 if game.get_player(i.player).event_info.get("Cartography").is_some_and(|info| info == &key) {

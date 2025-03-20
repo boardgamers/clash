@@ -250,20 +250,18 @@ pub fn show_top_left(rc: &RenderContext) {
 }
 
 pub fn get_combat(game: &Game) -> Option<&Combat> {
-    game.current_events
-        .last()
-        .and_then(|e| match &e.event_type {
-            CurrentEventType::CombatStart(c) => Some(c),
-            CurrentEventType::CombatRoundStart(s) => Some(&s.combat),
-            CurrentEventType::CombatRoundEnd(e) => Some(&e.combat),
-            CurrentEventType::CombatEnd(e) => Some(&e.combat),
-            _ => None,
-        })
+    game.events.last().and_then(|e| match &e.event_type {
+        CurrentEventType::CombatStart(c) => Some(c),
+        CurrentEventType::CombatRoundStart(s) => Some(&s.combat),
+        CurrentEventType::CombatRoundEnd(e) => Some(&e.combat),
+        CurrentEventType::CombatEnd(e) => Some(&e.combat),
+        _ => None,
+    })
 }
 
 pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpdate {
     let assets = rc.assets();
-    let can_control = rc.can_control();
+    let can_control = rc.can_control_shown_player();
     if can_control {
         let game = rc.game;
         if let Some(tooltip) = can_end_move(game) {

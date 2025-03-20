@@ -7,7 +7,7 @@ use crate::content::custom_phase_actions::{
     ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitTypeRequest, UnitsRequest,
 };
 use crate::events::{Event, EventOrigin};
-use crate::player_events::CurrentEvent;
+use crate::player_events::{CurrentEvent, PersistentEvents, TransientEvents};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::CombatRole;
@@ -135,7 +135,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self
     }
 
-    fn add_player_event_listener<T, U, V, W, E, F>(
+    fn add_transient_event_listener<T, U, V, E, F>(
         self,
         event: E,
         priority: i32,
@@ -143,29 +143,15 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     ) -> Self
     where
         T: Clone + PartialEq,
-        W: Clone + PartialEq,
-        E: Fn(&mut PlayerEvents) -> &mut Event<T, U, V, W> + 'static + Clone,
-        F: Fn(&mut T, &U, &V, &mut W) + 'static + Clone,
+        E: Fn(&mut TransientEvents) -> &mut Event<T, U, V> + 'static + Clone,
+        F: Fn(&mut T, &U, &V) + 'static + Clone,
     {
-        let key = self.get_key().clone();
-        let deinitialize_event = event.clone();
-        let initializer = move |game: &mut Game, player_index: usize| {
-            event(&mut game.players[player_index].events)
-                .inner
-                .as_mut()
-                .expect("events should be set")
-                .add_listener_mut(listener.clone(), priority, key.clone());
-        };
-        let key = self.get_key().clone();
-        let deinitializer = move |game: &mut Game, player_index: usize| {
-            deinitialize_event(&mut game.players[player_index].events)
-                .inner
-                .as_mut()
-                .expect("events should be set")
-                .remove_listener_mut_by_key(&key);
-        };
-        self.add_ability_initializer(initializer)
-            .add_ability_deinitializer(deinitializer)
+        add_player_event_listener(
+            self,
+            move |events| event(&mut events.transient),
+            priority,
+            move |value, u, v, ()| listener(value, u, v),
+        )
     }
 
     fn add_combat_round_start_listener(
@@ -194,11 +180,11 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     ) -> Self
     where
         T: Clone + PartialEq,
-        E: Fn(&mut PlayerEvents) -> &mut Event<T, U, V, ()> + 'static + Clone,
+        E: Fn(&mut TransientEvents) -> &mut Event<T, U, V, ()> + 'static + Clone,
         F: Fn(&mut T, &U, &V) + 'static + Clone,
     {
         let id = self.get_key().id();
-        self.add_player_event_listener(event, priority, move |value, u, v, ()| {
+        self.add_transient_event_listener(event, priority, move |value, u, v| {
             if !get_info(value).contains_key(&id) {
                 listener(value, u, v);
                 get_info(value).insert(id.clone(), "used".to_string());
@@ -218,68 +204,74 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             + Clone,
     ) -> Self
     where
-        E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<V> + 'static + Clone,
         V: Clone + PartialEq,
     {
         let origin = self.get_key();
-        self.add_player_event_listener(event, priority, move |game, i, (), details| {
-            let player_index = i.player;
-            let player_name = game.player_name(player_index);
+        add_player_event_listener(
+            self,
+            move |e| event(&mut e.persistent),
+            priority,
+            move |game, i, (), details| {
+                let player_index = i.player;
+                let player_name = game.player_name(player_index);
 
-            if let Some(mut phase) = game.current_events.pop() {
-                if let Some(ref c) = phase.player.handler {
-                    if let Some(ref action) = c.response {
-                        if c.priority == priority {
-                            let mut current = phase.clone();
-                            current
-                                .player
-                                .handler
-                                .as_mut()
-                                .expect("current missing")
-                                .response = None;
-                            let r = c.request.clone();
-                            let a = action.clone();
-                            phase.player.handler = None;
-                            game.current_events.push(phase);
-                            end_custom_phase.clone()(
-                                game,
-                                player_index,
-                                &player_name,
-                                a,
-                                r,
-                                details,
-                            );
-                            return;
+                if let Some(mut phase) = game.events.pop() {
+                    if let Some(ref c) = phase.player.handler {
+                        if let Some(ref action) = c.response {
+                            if c.priority == priority {
+                                let mut current = phase.clone();
+                                current
+                                    .player
+                                    .handler
+                                    .as_mut()
+                                    .expect("current missing")
+                                    .response = None;
+                                let r = c.request.clone();
+                                let a = action.clone();
+                                phase.player.handler = None;
+                                game.events.push(phase);
+                                end_custom_phase.clone()(
+                                    game,
+                                    player_index,
+                                    &player_name,
+                                    a,
+                                    r,
+                                    details,
+                                );
+                                return;
+                            }
                         }
                     }
+                    let is_current = phase.player.handler.is_some();
+                    game.events.push(phase);
+                    if is_current {
+                        return;
+                    }
                 }
-                let is_current = phase.player.handler.is_some();
-                game.current_events.push(phase);
-                if is_current {
+
+                if game
+                    .current_event_player()
+                    .last_priority_used
+                    .is_some_and(|last| last < priority)
+                {
+                    // already handled before
                     return;
                 }
-            }
 
-            if game
-                .current_event_player()
-                .last_priority_used
-                .is_some_and(|last| last < priority)
-            {
-                // already handled before
-                return;
-            }
-
-            if let Some(request) = start_custom_phase(game, player_index, &player_name, details) {
-                let s = game.current_event_mut();
-                s.player.last_priority_used = Some(priority);
-                s.player.handler = Some(CurrentEventHandler {
-                    priority,
-                    request: request.clone(),
-                    response: None,
-                    origin: origin.clone(),
-                });
-            };
-        })
+                if let Some(request) = start_custom_phase(game, player_index, &player_name, details)
+                {
+                    let s = game.current_event_mut();
+                    s.player.last_priority_used = Some(priority);
+                    s.player.handler = Some(CurrentEventHandler {
+                        priority,
+                        request: request.clone(),
+                        response: None,
+                        origin: origin.clone(),
+                    });
+                };
+            },
+        )
     }
 
     fn add_simple_current_event_listener<V, E, F>(
@@ -289,7 +281,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         listener: F,
     ) -> Self
     where
-        E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<V> + 'static + Clone,
         F: Fn(&mut Game, usize, &str, &mut V) + 'static + Clone,
         V: Clone + PartialEq,
     {
@@ -313,7 +305,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<ResourcePile>>, &mut V) + 'static + Clone,
     ) -> Self
     where
-        E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<V> + 'static + Clone,
         V: Clone + PartialEq,
     {
         self.add_current_event_listener(
@@ -360,7 +352,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             + Clone,
     ) -> Self
     where
-        E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<V> + 'static + Clone,
         V: Clone + PartialEq,
     {
         let g = gain_reward_log.clone();
@@ -414,7 +406,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         gain_reward: impl Fn(&mut Game, &SelectedChoice<bool>, &mut V) + 'static + Clone,
     ) -> Self
     where
-        E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<V> + 'static + Clone,
         V: Clone + PartialEq,
     {
         self.add_current_event_listener(
@@ -439,7 +431,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         )
     }
 
-    fn add_advance_reward_request_listener<E, V>(
+    fn add_advance_request<E, V>(
         self,
         event: E,
         priority: i32,
@@ -447,7 +439,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         gain_reward: impl Fn(&mut Game, &SelectedChoice<String>, &mut V) + 'static + Clone,
     ) -> Self
     where
-        E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<V> + 'static + Clone,
         V: Clone + PartialEq,
     {
         self.add_choice_reward_request_listener::<E, String, AdvanceRequest, V>(
@@ -476,7 +468,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<Position>>, &mut V) + 'static + Clone,
     ) -> Self
     where
-        E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<V> + 'static + Clone,
         V: Clone + PartialEq,
     {
         self.add_multi_choice_reward_request_listener::<E, Position, PositionRequest, V>(
@@ -505,7 +497,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         gain_reward: impl Fn(&mut Game, &SelectedChoice<usize>, &mut V) + 'static + Clone,
     ) -> Self
     where
-        E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<V> + 'static + Clone,
         V: Clone + PartialEq,
     {
         self.add_choice_reward_request_listener::<E, usize, PlayerRequest, V>(
@@ -534,7 +526,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         gain_reward: impl Fn(&mut Game, &SelectedChoice<UnitType>, &mut V) + 'static + Clone,
     ) -> Self
     where
-        E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<V> + 'static + Clone,
         V: Clone + PartialEq,
     {
         self.add_choice_reward_request_listener::<E, UnitType, UnitTypeRequest, V>(
@@ -563,7 +555,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         cards_selected: impl Fn(&mut Game, &SelectedChoice<Vec<HandCard>>, &mut V) + 'static + Clone,
     ) -> Self
     where
-        E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<V> + 'static + Clone,
         V: Clone + PartialEq,
     {
         self.add_multi_choice_reward_request_listener::<E, HandCard, HandCardsRequest, V>(
@@ -592,7 +584,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         units_selected: impl Fn(&mut Game, &SelectedChoice<Vec<u32>>, &mut V) + 'static + Clone,
     ) -> Self
     where
-        E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<V> + 'static + Clone,
         V: Clone + PartialEq,
     {
         self.add_multi_choice_reward_request_listener::<E, u32, UnitsRequest, V>(
@@ -629,7 +621,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             + Clone,
     ) -> Self
     where
-        E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<V> + 'static + Clone,
         V: Clone + PartialEq,
     {
         self.add_multi_choice_reward_request_listener::<E, SelectedStructure, StructuresRequest, V>(
@@ -664,7 +656,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     ) -> Self
     where
         C: Clone + PartialEq,
-        E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<V> + 'static + Clone,
         V: Clone + PartialEq,
     {
         let g = gain_reward.clone();
@@ -720,7 +712,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     ) -> Self
     where
         C: Clone + PartialEq,
-        E: Fn(&mut PlayerEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<V> + 'static + Clone,
         V: Clone + PartialEq,
     {
         let g = gain_reward.clone();
@@ -785,10 +777,45 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     }
 }
 
-pub(crate) fn join_ability_initializers(setup: Vec<AbilityInitializer>) -> AbilityInitializer {
+fn join_ability_initializers(setup: Vec<AbilityInitializer>) -> AbilityInitializer {
     Box::new(move |game: &mut Game, player_index: usize| {
         for initializer in &setup {
             initializer(game, player_index);
         }
     })
+}
+
+fn add_player_event_listener<S, T, U, V, W, E, F>(
+    setup: S,
+    event: E,
+    priority: i32,
+    listener: F,
+) -> S
+where
+    S: AbilityInitializerSetup,
+    T: Clone + PartialEq,
+    W: Clone + PartialEq,
+    E: Fn(&mut PlayerEvents) -> &mut Event<T, U, V, W> + 'static + Clone,
+    F: Fn(&mut T, &U, &V, &mut W) + 'static + Clone,
+{
+    let key = setup.get_key().clone();
+    let deinitialize_event = event.clone();
+    let initializer = move |game: &mut Game, player_index: usize| {
+        event(&mut game.players[player_index].events)
+            .inner
+            .as_mut()
+            .expect("events should be set")
+            .add_listener_mut(listener.clone(), priority, key.clone());
+    };
+    let key = setup.get_key().clone();
+    let deinitializer = move |game: &mut Game, player_index: usize| {
+        deinitialize_event(&mut game.players[player_index].events)
+            .inner
+            .as_mut()
+            .expect("events should be set")
+            .remove_listener_mut_by_key(&key);
+    };
+    setup
+        .add_ability_initializer(initializer)
+        .add_ability_deinitializer(deinitializer)
 }

@@ -10,11 +10,10 @@
       ]
     }
   },
-  "current_events": [
+  "events": [
     {
       "event_type": {
         "CombatRoundEnd": {
-          "round_type": "Default",
           "attacker_casualties": {
             "fighters": 2
           },

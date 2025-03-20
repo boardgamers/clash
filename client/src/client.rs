@@ -7,6 +7,7 @@ use server::game::Game;
 use server::position::Position;
 
 use crate::advance_ui::{pay_advance_dialog, show_paid_advance_menu};
+use crate::cards_ui::show_cards;
 use crate::client_state::{
     ActiveDialog, CameraMode, DialogChooser, State, StateUpdate, StateUpdates,
 };
@@ -23,8 +24,8 @@ use crate::player_ui::{player_select, show_global_controls, show_top_center, sho
 use crate::render_context::RenderContext;
 use crate::unit_ui::unit_selection_click;
 use crate::{
-    custom_actions_ui, custom_phase_ui, dialog_ui, influence_ui, map_ui, move_ui, recruit_unit_ui,
-    status_phase_ui, tooltip,
+    cards_ui, custom_actions_ui, custom_phase_ui, dialog_ui, influence_ui, map_ui, move_ui,
+    recruit_unit_ui, status_phase_ui, tooltip,
 };
 
 fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
@@ -62,6 +63,7 @@ fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
         show_top_center(rc);
     }
     if !state.active_dialog.is_modal() {
+        updates.add(show_cards(rc));
         updates.add(player_select(rc));
         updates.add(show_global_controls(rc, features));
     }
@@ -79,7 +81,7 @@ fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     };
 
-    let can_control = rc.can_control();
+    let can_control = rc.can_control_shown_player();
     if can_control {
         if let Some(u) = &state.pending_update {
             updates.add(dialog_ui::show_pending_update(u, rc));
@@ -166,6 +168,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::StructuresRequest(r) => custom_phase_ui::select_structures_dialog(rc, r),
         ActiveDialog::BoolRequest(d) => custom_phase_ui::bool_request_dialog(rc, d),
         ActiveDialog::PositionRequest(r) => custom_phase_ui::position_request_dialog(rc, r),
+        ActiveDialog::HandCardsRequest(r) => cards_ui::select_cards_dialog(rc, r),
     }
 }
 
@@ -185,7 +188,7 @@ pub fn try_click(rc: &RenderContext) -> StateUpdate {
     let mouse_pos = rc.mouse_pos();
     let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));
 
-    if rc.can_control() {
+    if rc.can_control_shown_player() {
         if let ActiveDialog::CulturalInfluence(b) = &rc.state.active_dialog {
             return influence_ui::hover(rc, mouse_pos, b);
         }
@@ -199,7 +202,7 @@ pub fn try_click(rc: &RenderContext) -> StateUpdate {
         return StateUpdate::None;
     }
 
-    if rc.can_control() {
+    if rc.can_control_shown_player() {
         let update = controlling_player_click(rc, mouse_pos, pos);
         if !matches!(update, StateUpdate::None) {
             return update;

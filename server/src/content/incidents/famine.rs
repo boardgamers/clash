@@ -2,6 +2,7 @@ use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::city::{City, MoodState};
 use crate::content::builtin::Builtin;
 use crate::content::custom_phase_actions::UnitsRequest;
+use crate::content::incidents::civil_war::non_angry_cites;
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, MoodModifier, PermanentIncidentEffect};
 use crate::player::Player;
@@ -44,14 +45,7 @@ fn pestilence() -> Incident {
                 1
             } - game.current_event_player().payment.amount() as u8;
 
-            (
-                p.cities
-                    .iter()
-                    .filter(|c| !matches!(c.mood_state, MoodState::Angry))
-                    .map(|c| c.position)
-                    .collect_vec(),
-                needed,
-            )
+            (non_angry_cites(p), needed)
         },
     )
     .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _, _| {
@@ -74,10 +68,10 @@ pub(crate) fn pestilence_permanent_effect() -> Builtin {
         "Pestilence",
         "You cannot construct buildings or wonders until you research Sanitation.",
     )
-    .add_player_event_listener(
+    .add_transient_event_listener(
         |event| &mut event.is_playing_action_available,
         1,
-        |available, game, i, ()| {
+        |available, game, i| {
             let player = game.get_player(i.player);
             if game
                 .permanent_incident_effects

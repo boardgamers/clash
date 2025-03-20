@@ -61,7 +61,7 @@ pub(crate) fn influence_culture_attempt(
         game.add_to_last_log_item(&format!(" and rolled a {roll}"));
         info.info.execute(game);
         game.add_info_log_item(&format!("{} now has the option to pay {roll_boost_cost} to increase the dice roll and proceed with the cultural influence", game.player_name(player_index)));
-        ask_for_cultural_influence_payment(game, player_index, &roll_boost_cost);
+        ask_for_cultural_influence_payment(game, player_index, roll_boost_cost);
     } else {
         game.add_to_last_log_item(&format!(
             " but rolled a {roll} and has not enough culture tokens to increase the roll "
@@ -73,9 +73,9 @@ pub(crate) fn influence_culture_attempt(
 pub(crate) fn ask_for_cultural_influence_payment(
     game: &mut Game,
     player_index: usize,
-    roll_boost_cost: &ResourcePile,
+    roll_boost_cost: ResourcePile,
 ) {
-    game.trigger_current_event(
+    let _ = game.trigger_current_event(
         &[player_index],
         |e| &mut e.on_influence_culture_resolution,
         roll_boost_cost,
@@ -185,18 +185,18 @@ pub fn influence_culture_boost_cost(
         PaymentOptions::resources(ResourcePile::culture_tokens(range_boost)),
         ActionInfo::new(attacker),
     );
-    let _ = attacker.events.on_influence_culture_attempt.get().trigger(
+    let _ = attacker.trigger_event(
+        |e| &e.on_influence_culture_attempt,
         &mut info,
         target_city,
         game,
-        &mut (),
     );
     info.is_defender = true;
-    let _ = defender.events.on_influence_culture_attempt.get().trigger(
+    let _ = defender.trigger_event(
+        |e| &e.on_influence_culture_attempt,
         &mut info,
         target_city,
         game,
-        &mut (),
     );
 
     if !matches!(city_piece, Building::Obelisk)
@@ -234,11 +234,10 @@ pub fn influence_culture(
         .set_building(building, influencer_index);
     game.successful_cultural_influence = true;
 
-    game.trigger_event_with_game_value(
+    game.trigger_transient_event_with_game_value(
         influencer_index,
         |e| &mut e.on_influence_culture_success,
         &influencer_index,
         &(),
-        &mut (),
     );
 }

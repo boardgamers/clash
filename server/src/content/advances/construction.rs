@@ -34,10 +34,10 @@ fn sanitation() -> AdvanceBuilder {
         "When Recruiting, you may spend 1 mood token to pay for 1 Settler. Ignore Pestilence and Epidemics events.",
     )
     .with_advance_bonus(MoodToken)
-    .add_player_event_listener(
+    .add_transient_event_listener(
         |event| &mut event.recruit_cost,
         1,
-        |cost, units, _, ()| {
+        |cost, units, _| {
             if units.settlers > 0 {
                 // insert at beginning so that it's preferred over gold
                 cost.info

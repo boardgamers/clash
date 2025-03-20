@@ -204,7 +204,11 @@ pub fn select_structures_dialog(
     }
 }
 
-fn multi_select_tooltip<T: Clone>(s: &MultiSelection<T>, valid: bool, name: &str) -> OkTooltip {
+pub(crate) fn multi_select_tooltip<T: Clone>(
+    s: &MultiSelection<T>,
+    valid: bool,
+    name: &str,
+) -> OkTooltip {
     if valid {
         OkTooltip::Valid(format!("Select {name}"))
     } else {

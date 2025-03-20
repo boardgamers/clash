@@ -15,6 +15,7 @@ use crate::render_context::RenderContext;
 use crate::status_phase_ui::ChooseAdditionalAdvances;
 use macroquad::prelude::*;
 use server::action::Action;
+use server::card::HandCard;
 use server::city::{City, MoodState};
 use server::content::custom_phase_actions::{
     AdvanceRequest, ChangeGovernmentRequest, CurrentEventRequest, CurrentEventResponse,
@@ -57,6 +58,7 @@ pub enum ActiveDialog {
     UnitTypeRequest(UnitTypeRequest),
     UnitsRequest(UnitsSelection),
     StructuresRequest(MultiSelection<SelectedStructure>),
+    HandCardsRequest(MultiSelection<HandCard>),
     BoolRequest(String),
     ChangeGovernmentType(ChangeGovernmentRequest),
     ChooseAdditionalAdvances(ChooseAdditionalAdvances),
@@ -95,6 +97,7 @@ impl ActiveDialog {
             ActiveDialog::UnitsRequest(_) => "custom phase units request",
             ActiveDialog::StructuresRequest(_) => "custom phase structures request",
             ActiveDialog::BoolRequest(_) => "custom phase bool request",
+            ActiveDialog::HandCardsRequest(_) => "custom phase hand cards request",
         }
     }
 
@@ -163,6 +166,9 @@ impl ActiveDialog {
                 custom_phase_event_help(rc, &r.request.description)
             }
             ActiveDialog::PositionRequest(r) => custom_phase_event_help(rc, &r.request.description),
+            ActiveDialog::HandCardsRequest(r) => {
+                custom_phase_event_help(rc, &r.request.description)
+            }
             ActiveDialog::PlayerRequest(r) => custom_phase_event_help(rc, &r.description),
         }
     }
@@ -550,7 +556,9 @@ impl State {
                         panic!("ExploreResolution expected");
                     }
                 }
-                CurrentEventRequest::SelectHandCards(_) => todo!(),
+                CurrentEventRequest::SelectHandCards(r) => {
+                    ActiveDialog::HandCardsRequest(MultiSelection::new(r.clone()))
+                }
             };
         }
         match &game.state {

@@ -1,6 +1,6 @@
 {
   "state": "Playing",
-  "current_events": [
+  "events": [
     {
       "event_type": {
         "Construct": "Temple"
@@ -430,7 +430,7 @@
         },
         {
           "op": "remove",
-          "path": "/current_events"
+          "path": "/events"
         }
       ]
     }

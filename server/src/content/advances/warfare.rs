@@ -146,10 +146,10 @@ fn draft() -> AdvanceBuilder {
         "When Recruiting, you may spend 1 mood token to pay for 1 Infantry Army Unit.",
     )
     .with_advance_bonus(CultureToken)
-    .add_player_event_listener(
+    .add_transient_event_listener(
         |event| &mut event.recruit_cost,
         0,
-        |cost, units, player, ()| {
+        |cost, units, player| {
             if units.infantry > 0 {
                 // insert at beginning so that it's preferred over gold
 

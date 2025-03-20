@@ -27,10 +27,10 @@ pub fn get_all() -> Vec<Civilization> {
             vec![
                 // todo add other effects
                 SpecialAdvance::builder("Terrace", IRRIGATION)
-                    .add_player_event_listener(
+                    .add_transient_event_listener(
                         |events| &mut events.terrain_collect_options,
                         2,
-                        |m, (), (), ()| {
+                        |m, (), ()| {
                             m.insert(
                                 Terrain::Mountain,
                                 std::collections::HashSet::from([
