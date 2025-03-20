@@ -2,7 +2,7 @@ use crate::city::City;
 use crate::city_pieces::Building;
 use crate::content::custom_phase_actions::{new_position_request, ResourceRewardRequest};
 use crate::game::Game;
-use crate::incident::{Incident, IncidentBaseEffect, PassedIncident, PermanentIncidentEffect};
+use crate::incident::{Incident, IncidentBaseEffect, PassedIncident};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
@@ -149,12 +149,9 @@ fn reformation() -> Incident {
         "Select a player to execute the event",
         |p, game| has_temple(game, p.index) && game.current_event().selected_player.is_none(),
         3,
-        |game, s| {
+        |game, s, i| {
             // pass the event to the player itself
-            game.permanent_incident_effects
-                .push(PermanentIncidentEffect::PassedIncident(
-                    PassedIncident::NewPlayer(s.choice),
-                ));
+            i.passed = Some(PassedIncident::NewPlayer(s.choice));
             game.add_info_log_item(&format!(
                 "{} selected {} to execute the event",
                 s.player_name,
@@ -167,7 +164,7 @@ fn reformation() -> Incident {
         "Select a player to gain a Temple",
         |p, game| can_gain_temple(game, p),
         2,
-        |game, s| {
+        |game, s, _| {
             game.current_event_mut().selected_player = Some(s.choice);
         },
     )

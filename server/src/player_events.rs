@@ -5,7 +5,7 @@ use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
 use crate::events::Event;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
-use crate::incident::{PassedIncident, PermanentIncidentEffect};
+use crate::incident::PassedIncident;
 use crate::map::Terrain;
 use crate::payment::PaymentOptions;
 use crate::playing_actions::{PlayingActionType, Recruit};
@@ -113,6 +113,9 @@ pub enum IncidentTarget {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct IncidentInfo {
     pub active_player: usize,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub passed: Option<PassedIncident>,
 }
 
 impl IncidentInfo {
@@ -120,17 +123,13 @@ impl IncidentInfo {
     pub fn new(origin: usize) -> IncidentInfo {
         IncidentInfo {
             active_player: origin,
+            passed: None,
         }
     }
 
     #[must_use]
     pub fn is_active(&self, role: IncidentTarget, player: usize, game: &Game) -> bool {
-        if game.permanent_incident_effects.iter().any(|e| {
-            matches!(
-                e,
-                PermanentIncidentEffect::PassedIncident(PassedIncident::NewPlayer(_))
-            )
-        }) {
+        if matches!(self.passed, Some(PassedIncident::NewPlayer(_))) {
             // wait until the new player is playing the advance
             return false;
         }

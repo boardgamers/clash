@@ -300,7 +300,7 @@ fn envoy() -> Incident {
         "Select a player to gain 1 culture token",
         |_p, _| true,
         0,
-        |game, s| {
+        |game, s, _| {
             let p = s.choice;
             game.add_info_log_item(&format!(
                 "{} was selected to gain 1 culture token.",

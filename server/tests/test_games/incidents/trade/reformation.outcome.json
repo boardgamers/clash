@@ -4,7 +4,8 @@
     {
       "event_type": {
         "Incident": {
-          "active_player": 2
+          "active_player": 2,
+          "passed": "AlreadyPassed"
         }
       },
       "player": 2,
@@ -340,10 +341,5 @@
   "action_cards_left": [],
   "incidents_left": [
     48
-  ],
-  "permanent_incident_effects": [
-    {
-      "PassedIncident": "AlreadyPassed"
-    }
   ]
 }
