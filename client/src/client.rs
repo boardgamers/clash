@@ -7,6 +7,7 @@ use server::game::Game;
 use server::position::Position;
 
 use crate::advance_ui::{pay_advance_dialog, show_paid_advance_menu};
+use crate::cards_ui::show_cards;
 use crate::client_state::{
     ActiveDialog, CameraMode, DialogChooser, State, StateUpdate, StateUpdates,
 };
@@ -22,8 +23,10 @@ use crate::map_ui::{draw_map, explore_dialog, show_tile_menu};
 use crate::player_ui::{player_select, show_global_controls, show_top_center, show_top_left};
 use crate::render_context::RenderContext;
 use crate::unit_ui::unit_selection_click;
-use crate::{cards_ui, custom_actions_ui, custom_phase_ui, dialog_ui, influence_ui, map_ui, move_ui, recruit_unit_ui, status_phase_ui, tooltip};
-use crate::cards_ui::show_cards;
+use crate::{
+    cards_ui, custom_actions_ui, custom_phase_ui, dialog_ui, influence_ui, map_ui, move_ui,
+    recruit_unit_ui, status_phase_ui, tooltip,
+};
 
 fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
     tooltip::update(state);

@@ -18,7 +18,7 @@ run = [
     "cargo fmt",
     "cargo clippy --fix --allow-dirty --allow-staged"
 ]
-dir = "server"
+dir = "client"
 
 [tasks.format-and-lint]
 depends = ["server-format-and-lint", "client-format-and-lint"]

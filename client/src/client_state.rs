@@ -166,7 +166,9 @@ impl ActiveDialog {
                 custom_phase_event_help(rc, &r.request.description)
             }
             ActiveDialog::PositionRequest(r) => custom_phase_event_help(rc, &r.request.description),
-            ActiveDialog::HandCardsRequest(r) => custom_phase_event_help(rc, &r.request.description),
+            ActiveDialog::HandCardsRequest(r) => {
+                custom_phase_event_help(rc, &r.request.description)
+            }
             ActiveDialog::PlayerRequest(r) => custom_phase_event_help(rc, &r.description),
         }
     }
@@ -554,7 +556,9 @@ impl State {
                         panic!("ExploreResolution expected");
                     }
                 }
-                CurrentEventRequest::SelectHandCards(r) => ActiveDialog::HandCardsRequest(MultiSelection::new(r.clone())),
+                CurrentEventRequest::SelectHandCards(r) => {
+                    ActiveDialog::HandCardsRequest(MultiSelection::new(r.clone()))
+                }
             };
         }
         match &game.state {

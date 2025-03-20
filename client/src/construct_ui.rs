@@ -1,3 +1,4 @@
+use crate::cards_ui::wonder_cards;
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::payment_ui::{payment_dialog, Payment};
 use crate::recruit_unit_ui::RecruitSelection;
@@ -10,7 +11,6 @@ use server::map::Terrain;
 use server::playing_actions::{Construct, PlayingAction, Recruit};
 use server::position::Position;
 use server::recruit::recruit_cost;
-use crate::cards_ui::wonder_cards;
 
 pub fn new_building_positions(
     building: Building,

@@ -250,15 +250,13 @@ pub fn show_top_left(rc: &RenderContext) {
 }
 
 pub fn get_combat(game: &Game) -> Option<&Combat> {
-    game.events
-        .last()
-        .and_then(|e| match &e.event_type {
-            CurrentEventType::CombatStart(c) => Some(c),
-            CurrentEventType::CombatRoundStart(s) => Some(&s.combat),
-            CurrentEventType::CombatRoundEnd(e) => Some(&e.combat),
-            CurrentEventType::CombatEnd(e) => Some(&e.combat),
-            _ => None,
-        })
+    game.events.last().and_then(|e| match &e.event_type {
+        CurrentEventType::CombatStart(c) => Some(c),
+        CurrentEventType::CombatRoundStart(s) => Some(&s.combat),
+        CurrentEventType::CombatRoundEnd(e) => Some(&e.combat),
+        CurrentEventType::CombatEnd(e) => Some(&e.combat),
+        _ => None,
+    })
 }
 
 pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpdate {
