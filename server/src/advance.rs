@@ -194,7 +194,6 @@ pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: AdvanceInfo
         |e| &mut e.on_advance,
         info,
         CurrentEventType::Advance,
-        None,
     ) {
         None => return,
         Some(i) => i,

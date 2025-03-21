@@ -8,7 +8,7 @@ pub enum EventOrigin {
     Wonder(String),
     Builtin(String),
     Incident(u8),
-    ActionCard(u8),
+    CivilCard(u8),
     TacticsCard(String),
 }
 
@@ -22,7 +22,7 @@ impl EventOrigin {
             | EventOrigin::Leader(name)
             | EventOrigin::TacticsCard(name)
             | EventOrigin::Builtin(name) => name.to_string(),
-            EventOrigin::ActionCard(id) | EventOrigin::Incident(id) => id.to_string(),
+            EventOrigin::CivilCard(id) | EventOrigin::Incident(id) => id.to_string(),
         }
     }
 
@@ -35,14 +35,14 @@ impl EventOrigin {
             | EventOrigin::Leader(name)
             | EventOrigin::TacticsCard(name)
             | EventOrigin::Builtin(name) => name.to_string(),
-            EventOrigin::ActionCard(id) => get_action_card(*id).civil_card.name,
+            EventOrigin::CivilCard(id) => get_civil_card(*id).name,
             EventOrigin::Incident(id) => get_incident(*id).name,
         }
     }
 }
 
-use crate::content::{action_cards, incidents};
-use action_cards::get_action_card;
+use crate::content::action_cards::get_civil_card;
+use crate::content::incidents;
 use incidents::get_incident;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};

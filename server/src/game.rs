@@ -18,6 +18,7 @@ use crate::resource::check_for_waste;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::enter_status_phase;
 use crate::unit::UnitType;
+use crate::utils;
 use crate::utils::Rng;
 use crate::utils::Shuffle;
 use crate::{
@@ -350,11 +351,6 @@ impl Game {
     }
 
     #[must_use]
-    pub(crate) fn current_event_player(&self) -> &CurrentEventPlayer {
-        &self.current_event().player
-    }
-
-    #[must_use]
     pub fn current_event_handler(&self) -> Option<&CurrentEventHandler> {
         self.events.last().and_then(|s| s.player.handler.as_ref())
     }
@@ -373,6 +369,7 @@ impl Game {
         event_type: V,
         store_type: impl Fn(V) -> CurrentEventType,
         log: Option<&str>,
+        next_player: fn(&mut V) -> (),
     ) -> Option<V>
     where
         V: Clone + PartialEq,
@@ -381,7 +378,14 @@ impl Game {
             (listeners.initializer)(self, *p);
         }
 
-        let result = self.trigger_current_event(players, event, event_type, store_type, log);
+        let result = self.trigger_current_event_ext(
+            players,
+            event,
+            event_type,
+            store_type,
+            log,
+            next_player,
+        );
 
         for p in players {
             (listeners.deinitializer)(self, *p);
@@ -394,9 +398,24 @@ impl Game {
         &mut self,
         players: &[usize],
         event: fn(&mut PersistentEvents) -> &mut CurrentEvent<V>,
+        value: V,
+        to_event_type: impl Fn(V) -> CurrentEventType,
+    ) -> Option<V>
+    where
+        V: Clone + PartialEq,
+    {
+        self.trigger_current_event_ext(players, event, value, to_event_type, None, |_| {})
+    }
+
+    #[must_use]
+    pub(crate) fn trigger_current_event_ext<V>(
+        &mut self,
+        players: &[usize],
+        event: fn(&mut PersistentEvents) -> &mut CurrentEvent<V>,
         mut value: V,
         to_event_type: impl Fn(V) -> CurrentEventType,
         log: Option<&str>,
+        next_player: fn(&mut V) -> (),
     ) -> Option<V>
     where
         V: Clone + PartialEq,
@@ -436,6 +455,7 @@ impl Game {
             state.players_used.push(player_index);
             if let Some(&p) = Self::remaining_current_event_players(players, state).first() {
                 state.player = CurrentEventPlayer::new(p);
+                next_player(&mut value);
             }
         }
         self.events.pop();
@@ -577,7 +597,6 @@ impl Game {
             |e| &mut e.on_turn_start,
             (),
             |()| CurrentEventType::TurnStart,
-            None,
         );
     }
 
@@ -724,25 +743,8 @@ impl Game {
             .custom_actions
             .clone()
             .into_iter()
-            .filter(|(action, _)| {
-                !self
-                    .get_player(player_index)
-                    .played_once_per_turn_actions
-                    .contains(action)
-                    && action.is_available(self, player_index)
-            })
+            .filter(|(t, _)| t.is_available(self, player_index))
             .collect()
-    }
-
-    #[must_use]
-    pub fn is_custom_action_available(
-        &self,
-        player_index: usize,
-        action: &CustomActionType,
-    ) -> bool {
-        self.get_available_custom_actions(player_index)
-            .iter()
-            .any(|(a, _)| a == action)
     }
 
     ///
@@ -825,6 +827,8 @@ pub struct GameData {
     log: Vec<Vec<String>>,
     undo_limit: usize,
     actions_left: u32,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "utils::is_false")]
     successful_cultural_influence: bool,
     round: u32,
     age: u32,

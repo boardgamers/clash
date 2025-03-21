@@ -1,7 +1,7 @@
 use crate::common::TestAction;
 use common::JsonTest;
 use server::action::Action;
-use server::content::custom_phase_actions::CurrentEventResponse;
+use server::content::custom_phase_actions::EventResponse;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::status_phase::{ChangeGovernment, ChangeGovernmentType};
@@ -29,13 +29,11 @@ fn test_free_advance() {
             TestAction::not_undoable(0, Action::Playing(PlayingAction::EndTurn)),
             TestAction::not_undoable(
                 1,
-                Action::Response(CurrentEventResponse::SelectAdvance("Storage".to_string())),
+                Action::Response(EventResponse::SelectAdvance("Storage".to_string())),
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectAdvance(
-                    "Philosophy".to_string(),
-                )),
+                Action::Response(EventResponse::SelectAdvance("Philosophy".to_string())),
             ),
         ],
     );
@@ -47,7 +45,7 @@ fn test_wrong_status_phase_action() {
         "illegal_free_advance",
         vec![TestAction::illegal(
             0,
-            Action::Response(CurrentEventResponse::SelectPositions(vec![])),
+            Action::Response(EventResponse::SelectPositions(vec![])),
         )],
     );
 }
@@ -58,9 +56,9 @@ fn test_raze_city() {
         "raze_city",
         vec![TestAction::not_undoable(
             0,
-            Action::Response(CurrentEventResponse::SelectPositions(vec![
-                Position::from_offset("A1"),
-            ])),
+            Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                "A1",
+            )])),
         )],
     );
 }
@@ -70,14 +68,8 @@ fn test_raze_city_decline() {
     JSON.test(
         "raze_city_decline",
         vec![
-            TestAction::not_undoable(
-                0,
-                Action::Response(CurrentEventResponse::SelectPositions(vec![])),
-            ),
-            TestAction::not_undoable(
-                1,
-                Action::Response(CurrentEventResponse::SelectPositions(vec![])),
-            ),
+            TestAction::not_undoable(0, Action::Response(EventResponse::SelectPositions(vec![]))),
+            TestAction::not_undoable(1, Action::Response(EventResponse::SelectPositions(vec![]))),
         ],
     );
 }
@@ -88,7 +80,7 @@ fn test_determine_first_player() {
         "determine_first_player",
         vec![TestAction::not_undoable(
             0,
-            Action::Response(CurrentEventResponse::SelectPlayer(1)),
+            Action::Response(EventResponse::SelectPlayer(1)),
         )],
     );
 }
@@ -99,7 +91,7 @@ fn test_change_government() {
         "change_government",
         vec![TestAction::not_undoable(
             0,
-            Action::Response(CurrentEventResponse::ChangeGovernmentType(
+            Action::Response(EventResponse::ChangeGovernmentType(
                 ChangeGovernmentType::ChangeGovernment(ChangeGovernment {
                     new_government: String::from("Theocracy"),
                     additional_advances: vec![String::from("Devotion")],

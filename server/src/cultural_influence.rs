@@ -80,7 +80,6 @@ pub(crate) fn ask_for_cultural_influence_payment(
         |e| &mut e.on_influence_culture_resolution,
         roll_boost_cost,
         CurrentEventType::InfluenceCultureResolution,
-        None,
     );
 }
 
@@ -103,24 +102,34 @@ pub(crate) fn cultural_influence_resolution() -> Builtin {
             let roll_boost_cost = s.choice[0].clone();
             if roll_boost_cost.is_empty() {
                 game.add_info_log_item(&format!(
-                    "{} declined to pay to increase the dice roll and failed the cultural influence", s.player_name
+                    "{} declined to pay to increase the dice roll and failed the \
+                        cultural influence",
+                    s.player_name
                 ));
                 return;
             }
 
             game.add_info_log_item(&format!(
-                "{} paid {roll_boost_cost} to increase the dice roll and proceed with the cultural influence", s.player_name
+                "{} paid {roll_boost_cost} to increase the dice roll and proceed \
+                    with the cultural influence",
+                s.player_name
             ));
 
-            let o = game.action_log.iter().rfind(|l| {
-                matches!(
-                    l.action.playing_ref(),
-                    Some(PlayingAction::InfluenceCultureAttempt(_))
-                )
-            });
-            let Some(Action::Playing(PlayingAction::InfluenceCultureAttempt(a))) = o.map(|l| &l.action) else {
-                panic!("there should be a cultural influence attempt action log item before a cultural influence resolution action log item");
-            };
+            let a = game
+                .action_log
+                .iter()
+                .rev()
+                .find_map(|l| {
+                    if let Action::Playing(PlayingAction::InfluenceCultureAttempt(a)) = &l.action {
+                        Some(a)
+                    } else {
+                        None
+                    }
+                })
+                .expect(
+                    "there should be a cultural influence attempt action log item before \
+                    a cultural influence resolution action log item",
+                );
 
             influence_culture(
                 game,

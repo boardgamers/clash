@@ -98,7 +98,6 @@ pub(crate) fn draw_wonder_card(game: &mut Game, player_index: usize) {
         |e| &mut e.on_draw_wonder_card,
         (),
         |()| CurrentEventType::DrawWonderCard,
-        None,
     );
 }
 

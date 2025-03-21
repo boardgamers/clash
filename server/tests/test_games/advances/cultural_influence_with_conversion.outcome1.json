@@ -294,9 +294,8 @@
           "value": 6
         },
         {
-          "op": "replace",
-          "path": "/successful_cultural_influence",
-          "value": false
+          "op": "remove",
+          "path": "/successful_cultural_influence"
         }
       ]
     }

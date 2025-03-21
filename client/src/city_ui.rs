@@ -78,7 +78,7 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
 }
 
 fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> {
-    if !city.can_activate() || !rc.can_play_action(PlayingActionType::Construct) {
+    if !city.can_activate() || !rc.can_play_action(&PlayingActionType::Construct) {
         // is this the right thing to check?
         return vec![];
     }
@@ -109,7 +109,7 @@ fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> 
 }
 
 fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> {
-    if !city.can_activate() || !rc.can_play_action(PlayingActionType::Construct) {
+    if !city.can_activate() || !rc.can_play_action(&PlayingActionType::Construct) {
         return vec![];
     }
     let owner = rc.shown_player;
@@ -151,7 +151,7 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
 }
 
 fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
-    if !city.can_activate() || !rc.can_play_action(PlayingActionType::Recruit) {
+    if !city.can_activate() || !rc.can_play_action(&PlayingActionType::Recruit) {
         return None;
     }
     Some((
@@ -174,7 +174,7 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
     if !city.can_activate()
         || !base_or_custom_available(
             rc,
-            PlayingActionType::Collect,
+            &PlayingActionType::Collect,
             &CustomActionType::FreeEconomyCollect,
         )
     {
@@ -186,7 +186,7 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
         Box::new(|| {
             base_or_custom_action(
                 rc,
-                PlayingActionType::Collect,
+                &PlayingActionType::Collect,
                 "Collect resources",
                 &[("Free Economy", CustomActionType::FreeEconomyCollect)],
                 |custom| {

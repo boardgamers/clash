@@ -4,7 +4,8 @@
     {
       "event_type": {
         "Incident": {
-          "active_player": 0
+          "active_player": 0,
+          "myths_payment": 1
         }
       },
       "player": 0,
@@ -28,8 +29,7 @@
         "origin": {
           "Incident": 1
         }
-      },
-      "myths_payment": 1
+      }
     }
   ],
   "players": [
@@ -287,7 +287,6 @@
   ],
   "undo_limit": 2,
   "actions_left": 2,
-  "successful_cultural_influence": false,
   "round": 1,
   "age": 1,
   "messages": [

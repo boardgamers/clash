@@ -32,13 +32,13 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
         return open_increase_happiness_dialog(rc, |h| h);
     }
 
-    if rc.can_play_action(PlayingActionType::MoveUnits)
+    if rc.can_play_action(&PlayingActionType::MoveUnits)
         && bottom_left_texture(rc, &assets.move_units, icon_pos(0, -3), "Move units")
     {
         return global_move(rc);
     }
 
-    if rc.can_play_action(PlayingActionType::Advance)
+    if rc.can_play_action(&PlayingActionType::Advance)
         && bottom_left_texture(rc, &assets.advances, icon_pos(1, -3), "Research advances")
     {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
@@ -53,7 +53,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     {
         return base_or_custom_action(
             rc,
-            PlayingActionType::InfluenceCultureAttempt,
+            &PlayingActionType::InfluenceCultureAttempt,
             "Influence culture",
             &[("Arts", CustomActionType::ArtsInfluenceCultureAttempt)],
             ActiveDialog::CulturalInfluence,
@@ -160,19 +160,18 @@ fn generic_custom_action(
 
 pub fn base_or_custom_available(
     rc: &RenderContext,
-    action: PlayingActionType,
+    action: &PlayingActionType,
     custom: &CustomActionType,
 ) -> bool {
+    let self1 = &rc.game;
+    let player_index = rc.shown_player.index;
     rc.can_play_action(action)
-        || (rc.game.state == GameState::Playing
-            && rc
-                .game
-                .is_custom_action_available(rc.shown_player.index, custom))
+        || (rc.game.state == GameState::Playing && custom.is_available(self1, player_index))
 }
 
 pub fn base_or_custom_action(
     rc: &RenderContext,
-    action: PlayingActionType,
+    action: &PlayingActionType,
     title: &str,
     custom: &[(&str, CustomActionType)],
     execute: impl Fn(BaseOrCustomDialog) -> ActiveDialog,
@@ -188,7 +187,11 @@ pub fn base_or_custom_action(
 
     let special = custom
         .iter()
-        .find(|(_, a)| rc.game.is_custom_action_available(rc.shown_player.index, a))
+        .find(|(_, a)| {
+            let self1 = &rc.game;
+            let player_index = rc.shown_player.index;
+            a.is_available(self1, player_index)
+        })
         .map(|(advance, a)| {
             let dialog = execute(BaseOrCustomDialog {
                 custom: BaseOrCustomAction::Custom {

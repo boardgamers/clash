@@ -2,9 +2,9 @@ use crate::card::HandCard;
 use crate::combat::{update_combat_strength, Combat};
 use crate::combat_listeners::CombatStrength;
 use crate::content::custom_phase_actions::{
-    AdvanceRequest, CurrentEventHandler, CurrentEventRequest, CurrentEventResponse,
-    HandCardsRequest, MultiRequest, PaymentRequest, PlayerRequest, PositionRequest,
-    ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitTypeRequest, UnitsRequest,
+    AdvanceRequest, CurrentEventHandler, CurrentEventRequest, EventResponse, HandCardsRequest,
+    MultiRequest, PaymentRequest, PlayerRequest, PositionRequest, ResourceRewardRequest,
+    SelectedStructure, StructuresRequest, UnitTypeRequest, UnitsRequest,
 };
 use crate::events::{Event, EventOrigin};
 use crate::player_events::{CurrentEvent, PersistentEvents, TransientEvents};
@@ -199,7 +199,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         start_custom_phase: impl Fn(&mut Game, usize, &str, &mut V) -> Option<CurrentEventRequest>
             + 'static
             + Clone,
-        end_custom_phase: impl Fn(&mut Game, usize, &str, CurrentEventResponse, CurrentEventRequest, &mut V)
+        end_custom_phase: impl Fn(&mut Game, usize, &str, EventResponse, CurrentEventRequest, &mut V)
             + 'static
             + Clone,
     ) -> Self
@@ -251,7 +251,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 }
 
                 if game
-                    .current_event_player()
+                    .current_event()
+                    .player
                     .last_priority_used
                     .is_some_and(|last| last < priority)
                 {
@@ -321,7 +322,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             },
             move |game, player_index, player_name, action, request, details| {
                 if let CurrentEventRequest::Payment(requests) = &request {
-                    if let CurrentEventResponse::Payment(payments) = action {
+                    if let EventResponse::Payment(payments) = action {
                         assert_eq!(requests.len(), payments.len());
                         for (request, payment) in requests.iter().zip(payments.iter()) {
                             let zero_payment = payment.is_empty() && request.optional;
@@ -380,7 +381,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             },
             move |game, player_index, player_name, action, request, details| {
                 if let CurrentEventRequest::ResourceReward(request) = &request {
-                    if let CurrentEventResponse::ResourceReward(reward) = action {
+                    if let EventResponse::ResourceReward(reward) = action {
                         assert!(request.reward.is_valid_payment(&reward), "Invalid reward");
                         for log in &gain_reward_log(
                             game,
@@ -417,7 +418,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             },
             move |game, player_index, player_name, action, request, details| {
                 if let CurrentEventRequest::BoolRequest(_) = &request {
-                    if let CurrentEventResponse::Bool(reward) = action {
+                    if let EventResponse::Bool(reward) = action {
                         gain_reward(
                             game,
                             &SelectedChoice::new(player_index, player_name, true, reward),
@@ -449,7 +450,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             CurrentEventRequest::SelectAdvance,
             |request, action| {
                 if let CurrentEventRequest::SelectAdvance(request) = &request {
-                    if let CurrentEventResponse::SelectAdvance(reward) = action {
+                    if let EventResponse::SelectAdvance(reward) = action {
                         return (request.choices.clone(), reward);
                     }
                 }
@@ -478,7 +479,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             CurrentEventRequest::SelectPositions,
             |request, action| {
                 if let CurrentEventRequest::SelectPositions(request) = &request {
-                    if let CurrentEventResponse::SelectPositions(reward) = action {
+                    if let EventResponse::SelectPositions(reward) = action {
                         return (request.choices.clone(), reward, request.needed.clone());
                     }
                 }
@@ -507,7 +508,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             CurrentEventRequest::SelectPlayer,
             |request, action| {
                 if let CurrentEventRequest::SelectPlayer(request) = &request {
-                    if let CurrentEventResponse::SelectPlayer(reward) = action {
+                    if let EventResponse::SelectPlayer(reward) = action {
                         return (request.choices.clone(), reward);
                     }
                 }
@@ -536,7 +537,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             CurrentEventRequest::SelectUnitType,
             |request, action| {
                 if let CurrentEventRequest::SelectUnitType(request) = &request {
-                    if let CurrentEventResponse::SelectUnitType(reward) = action {
+                    if let EventResponse::SelectUnitType(reward) = action {
                         return (request.choices.clone(), reward);
                     }
                 }
@@ -565,7 +566,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             CurrentEventRequest::SelectHandCards,
             |request, action| {
                 if let CurrentEventRequest::SelectHandCards(request) = &request {
-                    if let CurrentEventResponse::SelectHandCards(choices) = action {
+                    if let EventResponse::SelectHandCards(choices) = action {
                         return (request.choices.clone(), choices, request.needed.clone());
                     }
                 }
@@ -594,7 +595,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             CurrentEventRequest::SelectUnits,
             |request, action| {
                 if let CurrentEventRequest::SelectUnits(request) = &request {
-                    if let CurrentEventResponse::SelectUnits(choices) = action {
+                    if let EventResponse::SelectUnits(choices) = action {
                         return (
                             request.request.choices.clone(),
                             choices,
@@ -631,7 +632,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             CurrentEventRequest::SelectStructures,
             |request, action| {
                 if let CurrentEventRequest::SelectStructures(request) = &request {
-                    if let CurrentEventResponse::SelectStructures(choices) = action {
+                    if let EventResponse::SelectStructures(choices) = action {
                         return (request.choices.clone(), choices, request.needed.clone());
                     }
                 }
@@ -648,9 +649,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         priority: i32,
         get_choices: impl Fn(&R) -> &Vec<C> + 'static + Clone,
         to_request: impl Fn(R) -> CurrentEventRequest + 'static + Clone,
-        from_request: impl Fn(&CurrentEventRequest, CurrentEventResponse) -> (Vec<C>, C)
-            + 'static
-            + Clone,
+        from_request: impl Fn(&CurrentEventRequest, EventResponse) -> (Vec<C>, C) + 'static + Clone,
         request: impl Fn(&mut Game, usize, &mut V) -> Option<R> + 'static + Clone,
         gain_reward: impl Fn(&mut Game, &SelectedChoice<C>, &mut V) + 'static + Clone,
     ) -> Self
@@ -704,7 +703,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         priority: i32,
         get_request: impl Fn(&R) -> &MultiRequest<C> + 'static + Clone,
         to_request: impl Fn(R) -> CurrentEventRequest + 'static + Clone,
-        from_request: impl Fn(&CurrentEventRequest, CurrentEventResponse) -> (Vec<C>, Vec<C>, RangeInclusive<u8>)
+        from_request: impl Fn(&CurrentEventRequest, EventResponse) -> (Vec<C>, Vec<C>, RangeInclusive<u8>)
             + 'static
             + Clone,
         request: impl Fn(&mut Game, usize, &mut V) -> Option<R> + 'static + Clone,

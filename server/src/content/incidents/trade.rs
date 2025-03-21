@@ -128,9 +128,9 @@ fn reformation() -> Incident {
     .add_simple_incident_listener(
         IncidentTarget::ActivePlayer,
         4,
-        |game, p, player_name, _i| {
+        |game, p, player_name, i| {
             if has_temple(game, p) {
-                game.current_event_mut().selected_player = Some(p);
+                i.selected_player = Some(p);
             } else if game
                 .players
                 .iter()
@@ -147,7 +147,7 @@ fn reformation() -> Incident {
     // select a player to execute the incident
     .add_incident_player_request(
         "Select a player to execute the event",
-        |p, game| has_temple(game, p.index) && game.current_event().selected_player.is_none(),
+        |p, game, i| has_temple(game, p.index) && i.selected_player.is_none(),
         3,
         |game, s, i| {
             // pass the event to the player itself
@@ -162,10 +162,10 @@ fn reformation() -> Incident {
     // select a player to gain a temple
     .add_incident_player_request(
         "Select a player to gain a Temple",
-        |p, game| can_gain_temple(game, p),
+        |p, game, _| can_gain_temple(game, p),
         2,
-        |game, s, _| {
-            game.current_event_mut().selected_player = Some(s.choice);
+        |_game, s, i| {
+            i.selected_player = Some(s.choice);
         },
     )
     .add_incident_position_request(
@@ -186,7 +186,7 @@ fn reformation() -> Incident {
                 "Select a city to gain a Temple",
             ))
         },
-        |game, s| {
+        |game, s, _| {
             let &p = game
                 .current_event()
                 .active_player()

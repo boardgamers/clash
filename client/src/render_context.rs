@@ -6,7 +6,7 @@ use macroquad::color::{Color, PINK, YELLOW};
 use macroquad::input::mouse_position;
 use macroquad::math::{bool, Vec2};
 use macroquad::prelude::{set_camera, WHITE};
-use server::game::{Game, GameState};
+use server::game::Game;
 use server::payment::PaymentOptions;
 use server::player::Player;
 use server::playing_actions::PlayingActionType;
@@ -63,15 +63,8 @@ impl RenderContext<'_> {
         }
     }
 
-    pub fn can_play_action(&self, action: PlayingActionType) -> bool {
-        self.can_control_shown_player()
-            && self.is_playing()
-            && self.game.actions_left > 0
-            && action.is_available(self.game, self.shown_player.index)
-    }
-
-    pub fn is_playing(&self) -> bool {
-        self.game.state == GameState::Playing && self.game.events.is_empty()
+    pub fn can_play_action(&self, action: &PlayingActionType) -> bool {
+        self.can_control_shown_player() && action.is_available(self.game, self.shown_player.index)
     }
 
     pub fn can_control_shown_player(&self) -> bool {

@@ -237,7 +237,7 @@ const BLOCK_RELATIVE_POSITIONS: [Position; 4] = [
     Position { q: 0, r: 1 },
 ];
 
-const UNEXPLORED_BLOCK: Block = Block {
+pub(crate) const UNEXPLORED_BLOCK: Block = Block {
     terrain: [
         Terrain::Unexplored,
         Terrain::Unexplored,

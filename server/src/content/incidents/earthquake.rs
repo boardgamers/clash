@@ -9,7 +9,7 @@ use crate::content::custom_phase_actions::{
 use crate::content::wonders::get_wonder;
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, MoodModifier};
-use crate::player_events::IncidentTarget;
+use crate::player_events::{IncidentInfo, IncidentTarget};
 use crate::position::Position;
 use itertools::Itertools;
 
@@ -48,7 +48,7 @@ fn volcano() -> Incident {
                 "Select a city to be destroyed",
             ))
         },
-        |game, s| {
+        |game, s, _| {
             let pos = s.choice[0];
             let player_index = s.player_index;
             game.add_info_log_item(&format!(
@@ -96,22 +96,26 @@ fn earthquake(id: u8, name: &str, target: IncidentTarget) -> Incident {
             let cities = &p.cities;
             (cities.len() >= 3).then_some(structures_request(cities))
         },
-        |game, s| {
-            apply_earthquake(game, s);
+        |game, s, i| {
+            apply_earthquake(game, s, i);
         },
     )
     .add_decrease_mood(
         IncidentTarget::AllPlayers,
         MoodModifier::Decrease,
-        move |_p, game| {
-            let c = &game.current_event_player().must_reduce_mood;
+        move |_p, _game, i| {
+            let c = &i.player.must_reduce_mood;
             (c.clone(), c.len() as u8)
         },
     )
     .build()
 }
 
-fn apply_earthquake(game: &mut Game, s: &SelectedChoice<Vec<SelectedStructure>>) {
+fn apply_earthquake(
+    game: &mut Game,
+    s: &SelectedChoice<Vec<SelectedStructure>>,
+    i: &mut IncidentInfo,
+) {
     assert!(
         is_selected_structures_valid(game, &s.choice),
         "structures should be valid"
@@ -132,7 +136,7 @@ fn apply_earthquake(game: &mut Game, s: &SelectedChoice<Vec<SelectedStructure>>)
         }
     }
 
-    game.current_event_mut().player.must_reduce_mood = s
+    i.player.must_reduce_mood = s
         .choice
         .iter()
         .chunk_by(|(p, _s)| p)
@@ -239,7 +243,7 @@ fn flood(id: u8, name: &str, target: IncidentTarget) -> Incident {
                       Decrease the mood in that city.",
         IncidentBaseEffect::None,
     )
-    .add_decrease_mood(target, MoodModifier::Decrease, |p, game| {
+    .add_decrease_mood(target, MoodModifier::Decrease, |p, game, _| {
         (non_angry_shore_cites(game, p.index), 1)
     })
     .build()

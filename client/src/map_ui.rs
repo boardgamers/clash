@@ -11,7 +11,7 @@ use macroquad::math::{f32, vec2};
 use macroquad::prelude::*;
 use server::action::Action;
 use server::combat::Combat;
-use server::content::custom_phase_actions::CurrentEventResponse;
+use server::content::custom_phase_actions::EventResponse;
 use server::map::{Rotation, Terrain, UnexploredBlock};
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
@@ -226,7 +226,7 @@ pub fn show_tile_menu(rc: &RenderContext, pos: Position) -> StateUpdate {
 }
 
 fn found_city_button<'a>(rc: &'a RenderContext<'a>, pos: Position) -> Option<IconAction<'a>> {
-    if !rc.can_play_action(PlayingActionType::FoundCity) {
+    if !rc.can_play_action(&PlayingActionType::FoundCity) {
         return None;
     }
     let game = rc.game;
@@ -252,7 +252,7 @@ pub fn move_units_button<'a>(
     pos: Position,
     move_intent: MoveIntent,
 ) -> Option<IconAction<'a>> {
-    if !rc.can_play_action(PlayingActionType::MoveUnits)
+    if !rc.can_play_action(&PlayingActionType::MoveUnits)
         || movable_units(pos, rc.game, rc.shown_player, move_intent.to_predicate()).is_empty()
     {
         return None;
@@ -297,7 +297,7 @@ pub fn explore_dialog(rc: &RenderContext, r: &ExploreResolutionConfig) -> StateU
         rc,
         OkTooltip::Valid("Accept current tile rotation".to_string()),
     ) {
-        return StateUpdate::execute(Action::Response(CurrentEventResponse::ExploreResolution(
+        return StateUpdate::execute(Action::Response(EventResponse::ExploreResolution(
             r.rotation,
         )));
     }

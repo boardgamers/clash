@@ -5,7 +5,7 @@ use crate::consts::AGES;
 use crate::content::builtin::{status_phase_handler, Builtin};
 use crate::content::custom_phase_actions::{
     new_position_request, AdvanceRequest, ChangeGovernmentRequest, CurrentEventRequest,
-    CurrentEventResponse, CurrentEventType, PlayerRequest,
+    CurrentEventType, EventResponse, PlayerRequest,
 };
 use crate::payment::PaymentOptions;
 use crate::player_events::{CurrentEvent, PersistentEvents};
@@ -68,6 +68,7 @@ pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
             phase,
             CurrentEventType::StatusPhase,
             None,
+            |_| {},
         ) {
             Some(s) => s,
             None => return,
@@ -221,7 +222,7 @@ where
         },
         move |game, player_index, player_name, action, request, _| {
             if let CurrentEventRequest::ChangeGovernment(r) = &request {
-                if let CurrentEventResponse::ChangeGovernmentType(t) = action {
+                if let EventResponse::ChangeGovernmentType(t) = action {
                     match t {
                         ChangeGovernmentType::ChangeGovernment(c) => {
                             game.add_info_log_item(&format!(

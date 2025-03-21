@@ -87,7 +87,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
         .add_incident_payment_request(
             IncidentTarget::AllPlayers,
             BASE_EFFECT_PRIORITY + 2,
-            |game, player_index, _i| {
+            |game, player_index, i| {
                 let player = game.get_player(player_index);
                 if cities_with_adjacent_pirates(player, game).is_empty() {
                     return None;
@@ -104,20 +104,21 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                         false,
                     )])
                 } else {
-                    let state = barbarians::get_barbarian_state_mut(game);
+                    let state = i.get_barbarian_state();
                     state.must_reduce_mood.push(player_index);
                     None
                 }
             },
-            |c, s| {
+            |c, s, _| {
                 c.add_info_log_item(&format!("Pirates took {}", s.choice[0]));
             },
         )
         .add_incident_position_request(
             IncidentTarget::AllPlayers,
             BASE_EFFECT_PRIORITY + 1,
-            |game, player_index, _i| {
-                if !barbarians::get_barbarian_state(game)
+            |game, player_index, i| {
+                if !i
+                    .get_barbarian_state()
                     .must_reduce_mood
                     .contains(&player_index)
                 {
@@ -144,7 +145,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                     "Select a city to reduce Mood",
                 ))
             },
-            |game, s| {
+            |game, s, _| {
                 let pos = s.choice[0];
                 game.add_info_log_item(&format!(
                     "{} reduced Mood in the city at {}",
@@ -162,7 +163,7 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
         |event| &mut event.on_incident,
         BASE_EFFECT_PRIORITY + 5,
         |game, player_index, i| {
-            if !i.is_active(IncidentTarget::ActivePlayer, player_index, game) {
+            if !i.is_active(IncidentTarget::ActivePlayer, player_index) {
                 return None;
             }
 
@@ -242,7 +243,7 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
                 "Select a position for the Pirate Ship",
             ))
         },
-        |game, s| {
+        |game, s, _| {
             let pirate = get_pirates_player(game).index;
             let pos = s.choice[0];
             game.add_info_log_item(&format!("Pirates spawned a Pirate Ship at {pos}"));

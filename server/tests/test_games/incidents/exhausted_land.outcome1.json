@@ -5,8 +5,36 @@
       "event_type": {
         "StatusPhase": "FreeAdvance"
       },
-      "player": 0,
-      "last_priority_used": 0
+      "players_used": [
+        0
+      ],
+      "player": 1,
+      "last_priority_used": 0,
+      "handler": {
+        "priority": 0,
+        "request": {
+          "SelectAdvance": {
+            "choices": [
+              "Storage",
+              "Irrigation",
+              "Husbandry",
+              "Engineering",
+              "Sanitation",
+              "Roads",
+              "Fishing",
+              "Writing",
+              "Tactics",
+              "Myths",
+              "Bartering",
+              "Arts",
+              "Math"
+            ]
+          }
+        },
+        "origin": {
+          "Builtin": "Free Advance"
+        }
+      }
     }
   ],
   "players": [
@@ -247,7 +275,6 @@
   ],
   "undo_limit": 2,
   "actions_left": 3,
-  "successful_cultural_influence": false,
   "round": 1,
   "age": 1,
   "messages": [

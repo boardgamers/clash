@@ -1,7 +1,8 @@
 mod inspiration;
 
-use crate::action_card::ActionCard;
+use crate::action_card::{ActionCard, CivilCard};
 use crate::content::action_cards::inspiration::inspiration_action_cards;
+use crate::content::incidents;
 use itertools::Itertools;
 
 #[must_use]
@@ -26,5 +27,18 @@ pub fn get_action_card(id: u8) -> ActionCard {
     get_all()
         .into_iter()
         .find(|c| c.id == id)
-        .expect("action card not found")
+        .unwrap_or_else(|| {
+            incidents::get_all()
+                .into_iter()
+                .find_map(|incident| incident.action_card.filter(|a| a.id == id))
+                .expect("incident action card not found")
+        })
+}
+
+///
+/// # Panics
+/// Panics if action card does not exist
+#[must_use]
+pub fn get_civil_card(id: u8) -> CivilCard {
+    get_action_card(id).civil_card
 }

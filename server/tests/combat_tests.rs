@@ -4,7 +4,7 @@ use crate::common::{move_action, TestAction};
 use common::JsonTest;
 use server::action::Action;
 use server::card::HandCard;
-use server::content::custom_phase_actions::CurrentEventResponse;
+use server::content::custom_phase_actions::EventResponse;
 use server::playing_actions::PlayingAction::Recruit;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
@@ -23,10 +23,7 @@ fn test_remove_casualties_attacker() {
                 0,
                 move_action(vec![0, 1, 2, 3], Position::from_offset("C1")),
             ),
-            TestAction::undoable(
-                0,
-                Action::Response(CurrentEventResponse::SelectUnits(vec![0, 1])),
-            ),
+            TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![0, 1]))),
         ],
     );
 }
@@ -86,30 +83,30 @@ fn test_combat_all_modifiers() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::Payment(vec![ResourcePile::ore(1)])),
+                Action::Response(EventResponse::Payment(vec![ResourcePile::ore(1)])),
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::Payment(vec![
+                Action::Response(EventResponse::Payment(vec![
                     ResourcePile::empty(),
                     ResourcePile::ore(2),
                 ])),
             ),
             TestAction::not_undoable(
                 1,
-                Action::Response(CurrentEventResponse::Payment(vec![ResourcePile::ore(1)])),
+                Action::Response(EventResponse::Payment(vec![ResourcePile::ore(1)])),
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectHandCards(vec![
-                    HandCard::ActionCard(1),
-                ])),
+                Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
+                    1,
+                )])),
             ),
             TestAction::not_undoable(
                 1,
-                Action::Response(CurrentEventResponse::SelectHandCards(vec![
-                    HandCard::ActionCard(2),
-                ])),
+                Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
+                    2,
+                )])),
             ),
         ],
     );
@@ -132,7 +129,7 @@ fn test_retreat() {
         "retreat",
         vec![
             TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1"))),
-            TestAction::undoable(0, Action::Response(CurrentEventResponse::Bool(true))),
+            TestAction::undoable(0, Action::Response(EventResponse::Bool(true))),
         ],
     );
 }
@@ -143,7 +140,7 @@ fn test_do_not_retreat() {
         "retreat_no",
         vec![
             TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1"))),
-            TestAction::not_undoable(0, Action::Response(CurrentEventResponse::Bool(false))),
+            TestAction::not_undoable(0, Action::Response(EventResponse::Bool(false))),
         ],
     );
 }
@@ -154,10 +151,7 @@ fn test_ship_combat() {
         "ship_combat",
         vec![
             TestAction::not_undoable(0, move_action(vec![7, 8], Position::from_offset("D2"))),
-            TestAction::undoable(
-                0,
-                Action::Response(CurrentEventResponse::SelectUnits(vec![1])),
-            ),
+            TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![1]))),
         ],
     );
 }
@@ -190,19 +184,17 @@ fn test_recruit_combat() {
             ),
             TestAction::undoable(
                 0,
-                Action::Response(CurrentEventResponse::ResourceReward(
-                    ResourcePile::mood_tokens(1),
-                )),
+                Action::Response(EventResponse::ResourceReward(ResourcePile::mood_tokens(1))),
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::ResourceReward(ResourcePile::gold(1))),
+                Action::Response(EventResponse::ResourceReward(ResourcePile::gold(1))),
             ),
             TestAction::undoable(
                 0,
-                Action::Response(CurrentEventResponse::ResourceReward(
-                    ResourcePile::culture_tokens(1),
-                )),
+                Action::Response(EventResponse::ResourceReward(ResourcePile::culture_tokens(
+                    1,
+                ))),
             ),
         ],
     );

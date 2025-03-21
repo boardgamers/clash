@@ -1,5 +1,5 @@
 use crate::action::execute_custom_phase_action;
-use crate::barbarians::BarbariansEventState;
+use crate::action_card::ActionCardInfo;
 use crate::card::HandCard;
 use crate::city_pieces::Building;
 use crate::combat::Combat;
@@ -16,7 +16,6 @@ use crate::resource_pile::ResourcePile;
 use crate::status_phase::{ChangeGovernmentType, StatusPhaseState};
 use crate::unit::UnitType;
 use itertools::Itertools;
-use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
 
@@ -99,7 +98,7 @@ pub enum CurrentEventRequest {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub enum CurrentEventResponse {
+pub enum EventResponse {
     Payment(Vec<ResourcePile>),
     ResourceReward(ResourcePile),
     SelectAdvance(String),
@@ -120,7 +119,7 @@ pub struct CurrentEventHandler {
     pub request: CurrentEventRequest,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub response: Option<CurrentEventResponse>,
+    pub response: Option<EventResponse>,
     pub origin: EventOrigin,
 }
 
@@ -135,20 +134,6 @@ pub struct CurrentEventPlayer {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub handler: Option<CurrentEventHandler>,
-
-    // saved state for other handlers
-    #[serde(default)]
-    #[serde(skip_serializing_if = "ResourcePile::is_empty")]
-    pub payment: ResourcePile,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub must_reduce_mood: Vec<Position>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "u8::is_zero")]
-    pub sacrifice: u8,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "u8::is_zero")]
-    pub myths_payment: u8,
 }
 
 impl CurrentEventPlayer {
@@ -158,10 +143,6 @@ impl CurrentEventPlayer {
             index: current_player,
             last_priority_used: None,
             handler: None,
-            payment: ResourcePile::empty(),
-            must_reduce_mood: vec![],
-            sacrifice: 0,
-            myths_payment: 0,
         }
     }
 }
@@ -180,7 +161,7 @@ pub enum CurrentEventType {
     Construct(Building),
     Recruit(Recruit),
     Incident(IncidentInfo),
-    ActionCard(u8),
+    ActionCard(ActionCardInfo),
     DrawWonderCard,
 }
 
@@ -193,17 +174,6 @@ pub struct CurrentEventState {
 
     #[serde(flatten)]
     pub player: CurrentEventPlayer,
-
-    // saved state for other handlers
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub barbarians: Option<BarbariansEventState>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub selected_player: Option<usize>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub selected_position: Option<Position>,
 }
 
 impl CurrentEventState {
@@ -213,9 +183,6 @@ impl CurrentEventState {
             event_type,
             players_used: vec![],
             player: CurrentEventPlayer::new(current_player),
-            barbarians: None,
-            selected_player: None,
-            selected_position: None,
         }
     }
 
@@ -335,7 +302,7 @@ impl ChangeGovernmentRequest {
     }
 }
 
-impl CurrentEventResponse {
+impl EventResponse {
     pub(crate) fn redo(self, game: &mut Game, player_index: usize) {
         let Some(s) = game.current_event_handler_mut() else {
             panic!("current custom phase event should be set")

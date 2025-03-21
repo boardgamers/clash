@@ -1,6 +1,6 @@
 #![allow(clippy::if_not_else)]
 
-use crate::content::action_cards;
+use crate::content::action_cards::get_civil_card;
 use crate::cultural_influence::influence_culture_boost_cost;
 use crate::game::ActionLogItem;
 use crate::player::Player;
@@ -16,7 +16,6 @@ use crate::{
     unit::{MovementAction, Units},
     utils,
 };
-use action_cards::get_action_card;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -70,7 +69,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         PlayingAction::Custom(action) => action.format_log_item(game, player, &player_name),
         PlayingAction::ActionCard(a) => format!(
             "{player_name} played the action card {}",
-            get_action_card(*a).civil_card.name
+            get_civil_card(*a).name
         ),
         PlayingAction::EndTurn => format!(
             "{player_name} ended their turn{}",

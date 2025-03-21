@@ -72,7 +72,6 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
             |events| &mut events.on_recruit,
             r,
             CurrentEventType::Recruit,
-            None,
         )
         .is_none()
     {

@@ -30,11 +30,11 @@ fn pestilence() -> Incident {
             You cannot construct buildings or wonders until you research Sanitation.",
         IncidentBaseEffect::None,
     )
-    .set_protection_advance("Sanitation")
+    .with_protection_advance("Sanitation")
     .add_decrease_mood(
         IncidentTarget::AllPlayers,
         MoodModifier::Decrease,
-        move |p, game| {
+        move |p, _game, i| {
             if !pestilence_applies(p) {
                 return (vec![], 0);
             }
@@ -43,7 +43,7 @@ fn pestilence() -> Incident {
                 2
             } else {
                 1
-            } - game.current_event_player().payment.amount() as u8;
+            } - i.player.payment.amount() as u8;
 
             (non_angry_cites(p), needed)
         },
@@ -94,7 +94,7 @@ fn epidemics() -> Incident {
             Choose 1 (or 2 if you have Roads, Navigation, or Trade Routes) units and kill them.",
         IncidentBaseEffect::None,
     )
-    .set_protection_advance("Sanitation")
+    .with_protection_advance("Sanitation")
     .add_incident_units_request(
         IncidentTarget::AllPlayers,
         0,
@@ -117,7 +117,7 @@ fn epidemics() -> Incident {
                 ))
             }
         },
-        |game, s| {
+        |game, s, _| {
             kill_incident_units(game, s);
         },
     )
@@ -193,8 +193,8 @@ pub(crate) fn famine(
     let player_pred2 = player_pred.clone();
     let city_pred2 = city_pred.clone();
     Incident::builder(id, name, description, incident_base_effect)
-        .set_protection_advance("Irrigation")
-        .add_simple_incident_listener(target, 11, move |game, player_index, player_name, _| {
+        .with_protection_advance("Irrigation")
+        .add_simple_incident_listener(target, 11, move |game, player_index, player_name, i| {
             // we lose the food regardless of the outcome
             let p = game.get_player(player_index);
             if !player_pred.clone()(p) {
@@ -206,7 +206,7 @@ pub(crate) fn famine(
 
             if lost == needed as u32 {
                 // only avoid anger if full amount is paid
-                game.current_event_mut().player.payment = ResourcePile::food(lost);
+                i.player.payment = ResourcePile::food(lost);
             }
 
             game.get_player_mut(player_index)
@@ -214,8 +214,8 @@ pub(crate) fn famine(
 
             game.add_info_log_item(&format!("{player_name} lost {lost} food to Famine",));
         })
-        .add_decrease_mood(target, MoodModifier::MakeAngry, move |p, game| {
-            if player_pred2(p) && game.current_event_player().payment.is_empty() {
+        .add_decrease_mood(target, MoodModifier::MakeAngry, move |p, game, i| {
+            if player_pred2(p) && i.player.payment.is_empty() {
                 (famine_targets(p, game, city_pred2.clone()), 1)
             } else {
                 (vec![], 0)

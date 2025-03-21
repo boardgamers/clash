@@ -150,7 +150,7 @@ fn good_year(mut builder: IncidentBuilder, amount: u32, good_year_type: &GoodYea
 
             builder = builder.add_incident_player_request(
                 "Select a player to gain 1 food",
-                |p, _| p.resources.food < p.resource_limit.food,
+                |p, _, _| p.resources.food < p.resource_limit.food,
                 i as i32,
                 move |game, c, _| {
                     game.add_info_log_item(&format!(
@@ -190,14 +190,14 @@ fn population_boom(id: u8, effect: IncidentBaseEffect) -> Incident {
 pub(crate) fn select_player_to_gain_settler(mut b: IncidentBuilder) -> IncidentBuilder {
     b = b.add_incident_player_request(
         "Select another player to gain 1 settler on one of their cities",
-        |p, _| p.available_units().settlers > 0 && !p.cities.is_empty(),
+        |p, _, _| p.available_units().settlers > 0 && !p.cities.is_empty(),
         12,
-        |game, c, _| {
+        |game, c, i| {
             game.add_info_log_item(&format!(
                 "{} was selected to gain 1 settler.",
                 game.player_name(c.choice)
             ));
-            game.current_event_mut().selected_player = Some(c.choice);
+            i.selected_player = Some(c.choice);
         },
     );
     select_settler(b, 11, IncidentTarget::SelectedPlayer)
@@ -219,7 +219,7 @@ fn select_settler(b: IncidentBuilder, priority: i32, target: IncidentTarget) -> 
                 None
             }
         },
-        |game, s| {
+        |game, s, _| {
             let pos = s.choice[0];
             game.add_info_log_item(&format!("{} gained 1 settler in {}", s.player_name, pos));
             game.get_player_mut(s.player_index)

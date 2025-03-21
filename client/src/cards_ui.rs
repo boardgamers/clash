@@ -10,11 +10,11 @@ use macroquad::math::{vec2, Rect};
 use macroquad::prelude::{draw_rectangle, draw_rectangle_lines, Color, GREEN, RED, YELLOW};
 use server::action::Action;
 use server::card::{hand_cards, HandCard, HandCardType};
-use server::content::action_cards::get_action_card;
-use server::content::custom_phase_actions::CurrentEventResponse;
+use server::content::action_cards::{get_action_card, get_civil_card};
+use server::content::custom_phase_actions::EventResponse;
 use server::content::wonders::get_wonder;
 use server::player::Player;
-use server::playing_actions::PlayingAction;
+use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::tactics_card::CombatRole;
 use server::wonder::Wonder;
 
@@ -65,7 +65,7 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
 
             if pass == 0 {
                 draw_rectangle(pos.x, pos.y, size.x, size.y, c.color);
-                let (thickness, border) = highlight(&c, selection);
+                let (thickness, border) = highlight(rc, &c, selection);
                 draw_rectangle_lines(pos.x, pos.y, size.x, size.y, thickness, border);
 
                 rc.state.draw_text(&c.name, pos.x + 10., pos.y + 22.);
@@ -94,9 +94,9 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
 }
 
 fn can_play_card(rc: &RenderContext, card: &HandCard) -> bool {
-    if rc.can_control_shown_player() && rc.is_playing() {
+    if rc.can_control_shown_player() {
         if let HandCard::ActionCard(id) = card {
-            return (get_action_card(*id).civil_card.can_play)(rc.game, rc.shown_player);
+            return rc.can_play_action(&PlayingActionType::ActionCard(*id));
         }
     }
     false
@@ -104,15 +104,19 @@ fn can_play_card(rc: &RenderContext, card: &HandCard) -> bool {
 
 fn play_card(card: &HandCard) -> StateUpdate {
     match card {
-        HandCard::ActionCard(a) => StateUpdate::execute_with_warning(
+        HandCard::ActionCard(a) => StateUpdate::execute_with_confirm(
+            vec![format!("Play Action Card: {}", get_civil_card(*a).name)],
             Action::Playing(PlayingAction::ActionCard(*a)),
-            vec![],
         ),
         HandCard::Wonder(_) => panic!("wonders are played in the construct menu"),
     }
 }
 
-fn highlight(c: &HandCardObject, selection: Option<&MultiSelection<HandCard>>) -> (f32, Color) {
+fn highlight(
+    rc: &RenderContext,
+    c: &HandCardObject,
+    selection: Option<&MultiSelection<HandCard>>,
+) -> (f32, Color) {
     if let Some(s) = selection {
         if s.selected.contains(&c.id) {
             return (8.0, GREEN);
@@ -120,6 +124,8 @@ fn highlight(c: &HandCardObject, selection: Option<&MultiSelection<HandCard>>) -
         if s.request.choices.contains(&c.id) {
             return (8.0, HighlightType::Choices.color());
         }
+    } else if can_play_card(rc, &c.id) {
+        return (8.0, HighlightType::Choices.color());
     }
     (2.0, BLACK)
 }
@@ -134,17 +140,14 @@ fn get_card_object(card: &HandCard) -> HandCardObject {
         ),
         HandCard::ActionCard(id) => {
             let a = get_action_card(*id);
-            HandCardObject::new(
-                card.clone(),
-                ACTION_CARD_COLOR,
-                a.civil_card.name.clone(),
-                vec![
-                    a.civil_card.description.clone(),
-                    format!("Tactics: {}", a.tactics_card.name),
-                    format!("Unit Type: {:?}", a.tactics_card.fighter_requirement),
+            let mut description = vec![a.civil_card.description.clone()];
+            if let Some(t) = a.tactics_card {
+                description.extend(vec![
+                    format!("Tactics: {}", t.name),
+                    format!("Unit Type: {:?}", t.fighter_requirement),
                     format!(
                         "Role: {:?}",
-                        match a.tactics_card.role_requirement {
+                        match t.role_requirement {
                             None => "None".to_string(),
                             Some(r) => match r {
                                 CombatRole::Attacker => "Attacker".to_string(),
@@ -152,8 +155,14 @@ fn get_card_object(card: &HandCard) -> HandCardObject {
                             },
                         }
                     ),
-                    a.tactics_card.description.clone(),
-                ],
+                    t.description.clone(),
+                ]);
+            }
+            HandCardObject::new(
+                card.clone(),
+                ACTION_CARD_COLOR,
+                a.civil_card.name.clone(),
+                description,
             )
         }
         HandCard::Wonder(n) if n.is_empty() => HandCardObject::new(
@@ -193,7 +202,7 @@ pub fn select_cards_dialog(rc: &RenderContext, s: &MultiSelection<HandCard>) -> 
         rc,
         crate::custom_phase_ui::multi_select_tooltip(s, s.request.is_valid(&s.selected), "cards"),
     ) {
-        StateUpdate::response(CurrentEventResponse::SelectHandCards(s.selected.clone()))
+        StateUpdate::response(EventResponse::SelectHandCards(s.selected.clone()))
     } else {
         StateUpdate::None
     }
