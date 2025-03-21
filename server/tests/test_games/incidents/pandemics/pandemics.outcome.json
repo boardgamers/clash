@@ -4,7 +4,8 @@
     {
       "event_type": {
         "Incident": {
-          "active_player": 0
+          "active_player": 0,
+          "barbarians": {}
         }
       },
       "player": 0,
@@ -33,9 +34,6 @@
         "origin": {
           "Incident": 49
         }
-      },
-      "barbarians": {
-        "move_units": false
       }
     }
   ],
@@ -298,7 +296,6 @@
   ],
   "undo_limit": 1,
   "actions_left": 2,
-  "successful_cultural_influence": false,
   "round": 1,
   "age": 1,
   "messages": [

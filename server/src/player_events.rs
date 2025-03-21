@@ -1,4 +1,6 @@
+use crate::action_card::ActionCardInfo;
 use crate::advance::Advance;
+use crate::barbarians::BarbariansEventState;
 use crate::collect::{CollectContext, CollectInfo};
 use crate::combat::Combat;
 use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
@@ -11,11 +13,13 @@ use crate::payment::PaymentOptions;
 use crate::playing_actions::{PlayingActionType, Recruit};
 use crate::status_phase::StatusPhaseState;
 use crate::unit::Units;
+use crate::utils;
 use crate::{
     city::City, city_pieces::Building, player::Player, position::Position,
     resource_pile::ResourcePile, wonder::Wonder,
 };
 use itertools::Itertools;
+use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
@@ -57,7 +61,7 @@ pub(crate) struct PersistentEvents {
     pub on_recruit: CurrentEvent<Recruit>,
     pub on_influence_culture_resolution: CurrentEvent<ResourcePile>,
     pub on_explore_resolution: CurrentEvent<ExploreResolutionState>,
-    pub on_play_action_card: CurrentEvent<u8>,
+    pub on_play_action_card: CurrentEvent<ActionCardInfo>,
 
     pub on_status_phase: CurrentEvent<StatusPhaseState>,
     pub on_turn_start: CurrentEvent,
@@ -111,11 +115,61 @@ pub enum IncidentTarget {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct IncidentPlayerInfo {
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub sacrifice: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub myths_payment: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub must_reduce_mood: Vec<Position>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "ResourcePile::is_empty")]
+    pub payment: ResourcePile,
+}
+
+impl Default for IncidentPlayerInfo {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl IncidentPlayerInfo {
+    #[must_use]
+    pub fn new() -> IncidentPlayerInfo {
+        IncidentPlayerInfo {
+            sacrifice: 0,
+            myths_payment: 0,
+            must_reduce_mood: Vec::new(),
+            payment: ResourcePile::empty(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct IncidentInfo {
     pub active_player: usize,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub passed: Option<PassedIncident>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "utils::is_false")]
+    pub consumed: bool,
+
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub barbarians: Option<BarbariansEventState>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub selected_player: Option<usize>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub selected_position: Option<Position>,
+
+    #[serde(flatten)]
+    pub player: IncidentPlayerInfo,
 }
 
 impl IncidentInfo {
@@ -124,21 +178,30 @@ impl IncidentInfo {
         IncidentInfo {
             active_player: origin,
             passed: None,
+            consumed: false,
+            barbarians: None,
+            selected_player: None,
+            selected_position: None,
+            player: IncidentPlayerInfo::new(),
         }
     }
 
     #[must_use]
-    pub fn is_active(&self, role: IncidentTarget, player: usize, game: &Game) -> bool {
-        if matches!(self.passed, Some(PassedIncident::NewPlayer(_))) {
+    pub fn is_active(&self, role: IncidentTarget, player: usize) -> bool {
+        if self.consumed || matches!(self.passed, Some(PassedIncident::NewPlayer(_))) {
             // wait until the new player is playing the advance
             return false;
         }
 
         match role {
             IncidentTarget::ActivePlayer => self.active_player == player,
-            IncidentTarget::SelectedPlayer => game.current_event().selected_player == Some(player),
+            IncidentTarget::SelectedPlayer => self.selected_player == Some(player),
             IncidentTarget::AllPlayers => true,
         }
+    }
+
+    pub(crate) fn get_barbarian_state(&mut self) -> &mut BarbariansEventState {
+        self.barbarians.as_mut().expect("barbarians should exist")
     }
 }
 

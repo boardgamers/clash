@@ -2,8 +2,9 @@ use crate::common::{move_action, JsonTest, TestAction};
 use server::action::Action;
 use server::card::HandCard;
 use server::city_pieces::Building::Fortress;
-use server::content::custom_phase_actions::{CurrentEventResponse, Structure};
+use server::content::custom_phase_actions::{EventResponse, Structure};
 use server::playing_actions;
+use server::playing_actions::PlayingAction;
 use server::playing_actions::PlayingAction::{Advance, Construct};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
@@ -22,17 +23,17 @@ fn test_barbarians_spawn() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectAdvance("Storage".to_string())),
+                Action::Response(EventResponse::SelectAdvance("Storage".to_string())),
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectPositions(vec![
-                    Position::from_offset("B3"),
-                ])),
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "B3",
+                )])),
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectUnitType(UnitType::Elephant)),
+                Action::Response(EventResponse::SelectUnitType(UnitType::Elephant)),
             ),
         ],
     );
@@ -45,13 +46,13 @@ fn test_barbarians_move() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectAdvance("Storage".to_string())),
+                Action::Response(EventResponse::SelectAdvance("Storage".to_string())),
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectPositions(vec![
-                    Position::from_offset("B3"),
-                ])),
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "B3",
+                )])),
             ),
         ],
     );
@@ -64,27 +65,24 @@ fn test_pirates_spawn() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectAdvance("Storage".to_string())),
+                Action::Response(EventResponse::SelectAdvance("Storage".to_string())),
+            ),
+            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![7]))),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "A2",
+                )])),
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectUnits(vec![7])),
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "D2",
+                )])),
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectPositions(vec![
-                    Position::from_offset("A2"),
-                ])),
-            ),
-            TestAction::not_undoable(
-                0,
-                Action::Response(CurrentEventResponse::SelectPositions(vec![
-                    Position::from_offset("D2"),
-                ])),
-            ),
-            TestAction::not_undoable(
-                0,
-                Action::Response(CurrentEventResponse::Payment(vec![ResourcePile::ore(1)])),
+                Action::Response(EventResponse::Payment(vec![ResourcePile::ore(1)])),
             ),
         ],
     );
@@ -96,7 +94,7 @@ fn test_barbarians_attack() {
         "barbarians_attack",
         vec![TestAction::not_undoable(
             0,
-            Action::Response(CurrentEventResponse::SelectAdvance("Storage".to_string())),
+            Action::Response(EventResponse::SelectAdvance("Storage".to_string())),
         )],
     );
 }
@@ -119,13 +117,13 @@ fn test_exhausted_land() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectAdvance("Storage".to_string())),
+                Action::Response(EventResponse::SelectAdvance("Storage".to_string())),
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectPositions(vec![
-                    Position::from_offset("B2"),
-                ])),
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "B2",
+                )])),
             ),
         ],
     );
@@ -153,21 +151,17 @@ fn test_pestilence() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::Payment(vec![
-                    ResourcePile::mood_tokens(1),
-                ])),
+                Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectPositions(vec![
-                    Position::from_offset("A1"),
-                ])),
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "A1",
+                )])),
             ),
             TestAction::not_undoable(
                 1,
-                Action::Response(CurrentEventResponse::Payment(vec![
-                    ResourcePile::mood_tokens(1),
-                ])),
+                Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
             ),
             TestAction::illegal(0, cons.clone()).without_json_comparison(),
             TestAction::undoable(
@@ -210,10 +204,7 @@ fn test_epidemics() {
                     payment: ResourcePile::gold(2),
                 }),
             ),
-            TestAction::not_undoable(
-                0,
-                Action::Response(CurrentEventResponse::SelectUnits(vec![7])),
-            ),
+            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![7]))),
         ],
     );
 }
@@ -227,11 +218,11 @@ fn test_good_year_with_player_select() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectAdvance("Storage".to_string())),
+                Action::Response(EventResponse::SelectAdvance("Storage".to_string())),
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectUnitType(UnitType::Elephant)),
+                Action::Response(EventResponse::SelectUnitType(UnitType::Elephant)),
             ),
         ],
     );
@@ -253,9 +244,9 @@ fn test_volcano() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectPositions(vec![
-                    Position::from_offset("C2"),
-                ])),
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "C2",
+                )])),
             ),
         ],
     );
@@ -275,15 +266,15 @@ fn test_flood() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectPositions(vec![
-                    Position::from_offset("C2"),
-                ])),
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "C2",
+                )])),
             ),
             TestAction::not_undoable(
                 1,
-                Action::Response(CurrentEventResponse::SelectPositions(vec![
-                    Position::from_offset("A1"),
-                ])),
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "A1",
+                )])),
             ),
         ],
     );
@@ -303,7 +294,7 @@ fn test_earthquake() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectStructures(vec![
+                Action::Response(EventResponse::SelectStructures(vec![
                     (Position::from_offset("B2"), Structure::CityCenter),
                     (Position::from_offset("C2"), Structure::Building(Fortress)),
                     (
@@ -314,13 +305,11 @@ fn test_earthquake() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::Payment(vec![
-                    ResourcePile::mood_tokens(1),
-                ])),
+                Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
             ),
             TestAction::not_undoable(
                 1,
-                Action::Response(CurrentEventResponse::SelectStructures(vec![
+                Action::Response(EventResponse::SelectStructures(vec![
                     (Position::from_offset("A1"), Structure::CityCenter),
                     (Position::from_offset("A1"), Structure::Building(Fortress)),
                     (Position::from_offset("A3"), Structure::CityCenter),
@@ -372,17 +361,11 @@ fn test_revolution() {
                     payment: ResourcePile::gold(2),
                 }),
             ),
+            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![3]))),
+            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![]))),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectUnits(vec![3])),
-            ),
-            TestAction::not_undoable(
-                0,
-                Action::Response(CurrentEventResponse::SelectUnits(vec![])),
-            ),
-            TestAction::not_undoable(
-                0,
-                Action::Response(CurrentEventResponse::ChangeGovernmentType(
+                Action::Response(EventResponse::ChangeGovernmentType(
                     ChangeGovernmentType::ChangeGovernment(ChangeGovernment {
                         new_government: String::from("Theocracy"),
                         additional_advances: vec![],
@@ -407,7 +390,7 @@ fn test_uprising() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::Payment(vec![
+                Action::Response(EventResponse::Payment(vec![
                     ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
                 ])),
             ),
@@ -434,7 +417,7 @@ fn test_envoy() {
                     payment: ResourcePile::gold(2),
                 }),
             ),
-            TestAction::undoable(0, Action::Response(CurrentEventResponse::Bool(true))),
+            TestAction::undoable(0, Action::Response(EventResponse::Bool(true))),
         ],
     );
 }
@@ -459,7 +442,7 @@ fn test_trojan_horse() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::Payment(vec![
+                Action::Response(EventResponse::Payment(vec![
                     ResourcePile::culture_tokens(1) + ResourcePile::gold(1),
                 ])),
             ),
@@ -554,15 +537,15 @@ fn test_era_of_stability() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::ResourceReward(
-                    ResourcePile::culture_tokens(1),
-                )),
+                Action::Response(EventResponse::ResourceReward(ResourcePile::culture_tokens(
+                    1,
+                ))),
             ),
             TestAction::not_undoable(
                 1,
-                Action::Response(CurrentEventResponse::ResourceReward(
-                    ResourcePile::culture_tokens(1),
-                )),
+                Action::Response(EventResponse::ResourceReward(ResourcePile::culture_tokens(
+                    1,
+                ))),
             ),
         ],
     );
@@ -580,7 +563,7 @@ fn test_reformation() {
                     payment: ResourcePile::gold(2),
                 }),
             ),
-            TestAction::not_undoable(2, Action::Response(CurrentEventResponse::SelectPlayer(1))),
+            TestAction::not_undoable(2, Action::Response(EventResponse::SelectPlayer(1))),
         ],
     );
 }
@@ -599,21 +582,18 @@ fn test_pandemics() {
                     payment: ResourcePile::gold(2),
                 }),
             ),
+            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![0]))),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectUnits(vec![0])),
-            ),
-            TestAction::not_undoable(
-                0,
-                Action::Response(CurrentEventResponse::SelectHandCards(vec![
-                    HandCard::ActionCard(1),
-                ])),
+                Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
+                    1,
+                )])),
             ),
             TestAction::not_undoable(
                 1,
-                Action::Response(CurrentEventResponse::Payment(vec![
-                    ResourcePile::culture_tokens(1),
-                ])),
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    1,
+                )])),
             ),
         ],
     );
@@ -631,10 +611,7 @@ fn test_black_death() {
                     payment: ResourcePile::gold(2),
                 }),
             ),
-            TestAction::not_undoable(
-                0,
-                Action::Response(CurrentEventResponse::SelectUnits(vec![0])),
-            ),
+            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![0]))),
         ],
     );
 }
@@ -681,9 +658,49 @@ fn test_fire() {
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectPositions(vec![
-                    Position::from_offset("B2"),
-                ])),
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "B2",
+                )])),
+            ),
+        ],
+    );
+}
+
+const GREAT_PERSONS: JsonTest = JsonTest::child("incidents", "great_persons");
+
+#[test]
+fn test_great_explorer() {
+    GREAT_PERSONS.test(
+        "great_explorer",
+        vec![
+            TestAction::not_undoable(
+                1,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::food(2),
+                }),
+            ),
+            TestAction::not_undoable(
+                1,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::ideas(1)])),
+            ),
+            TestAction::undoable(1, Action::Playing(PlayingAction::ActionCard(118))),
+            TestAction::undoable(
+                1,
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "B6",
+                )])),
+            ),
+            TestAction::undoable(1, Action::Response(EventResponse::ExploreResolution(0))),
+            TestAction::undoable(
+                1,
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "B6",
+                )])),
+            ),
+            TestAction::undoable(
+                1,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::food(2)])),
             ),
         ],
     );

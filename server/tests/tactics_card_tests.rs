@@ -2,7 +2,7 @@ use crate::common::{move_action, TestAction};
 use common::JsonTest;
 use server::action::Action;
 use server::card::HandCard;
-use server::content::custom_phase_actions::CurrentEventResponse;
+use server::content::custom_phase_actions::EventResponse;
 use server::position::Position;
 
 mod common;
@@ -17,9 +17,9 @@ fn test_peltasts() {
             TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1"))),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectHandCards(vec![
-                    HandCard::ActionCard(1),
-                ])),
+                Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
+                    1,
+                )])),
             ),
         ],
     );
@@ -33,9 +33,9 @@ fn test_encircled() {
             TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1"))),
             TestAction::not_undoable(
                 0,
-                Action::Response(CurrentEventResponse::SelectHandCards(vec![
-                    HandCard::ActionCard(2),
-                ])),
+                Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
+                    2,
+                )])),
             ),
         ],
     );

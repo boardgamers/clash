@@ -11,7 +11,7 @@ use crate::incident::{Incident, IncidentBaseEffect, MoodModifier};
 use crate::map::{Map, Terrain};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
-use crate::player_events::IncidentTarget;
+use crate::player_events::{IncidentInfo, IncidentTarget};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use itertools::Itertools;
@@ -29,7 +29,6 @@ pub(crate) fn pandemics_incidents() -> Vec<Incident> {
 }
 
 fn pandemics() -> Incident {
-    // todo can also discard any cards to pay the cost
     Incident::builder(
         49,
         "Pandemics",
@@ -37,11 +36,11 @@ fn pandemics() -> Incident {
         or units equal to the half of the number of their cities (rounded down).",
         IncidentBaseEffect::BarbariansMove,
     )
-    .set_protection_advance("Sanitation")
+    .with_protection_advance("Sanitation")
     .add_incident_units_request(
         IncidentTarget::AllPlayers,
         2,
-        |game, p, _i| {
+        |game, p, i| {
             game.add_info_log_item(&format!(
                 "{} has to lose a total of {} units, cards, and resources",
                 game.player_name(p),
@@ -52,28 +51,28 @@ fn pandemics() -> Incident {
             Some(UnitsRequest::new(
                 p,
                 player.units.iter().map(|u| u.id).collect_vec(),
-                PandemicsContributions::range(player, game, 0),
+                PandemicsContributions::range(player, i, 0),
                 "Select units to lose",
             ))
         },
-        |game, s| {
+        |game, s, i| {
             kill_incident_units(game, s);
-            game.current_event_mut().player.sacrifice = s.choice.len() as u8;
+            i.player.sacrifice = s.choice.len() as u8;
         },
     )
     .add_incident_hand_card_request(
         IncidentTarget::AllPlayers,
         1,
-        |game, p, _i| {
+        |game, p, i| {
             let player = game.get_player(p);
             Some(HandCardsRequest::new(
                 // todo also objective cards
                 hand_cards(player, &[HandCardType::Action]),
-                PandemicsContributions::range(player, game, 1),
+                PandemicsContributions::range(player, i, 1),
                 "Select cards to lose",
             ))
         },
-        |game, s| {
+        |game, s, i| {
             for id in &s.choice {
                 match id {
                     HandCard::ActionCard(a) => {
@@ -88,15 +87,15 @@ fn pandemics() -> Incident {
                     HandCard::Wonder(_) => panic!("Unexpected card type"),
                 }
             }
-            game.current_event_mut().player.sacrifice += s.choice.len() as u8;
+            i.player.sacrifice += s.choice.len() as u8;
         },
     )
     .add_incident_payment_request(
         IncidentTarget::AllPlayers,
         0,
-        |game, p, _i| {
+        |game, p, i| {
             let player = game.get_player(p);
-            let needed = PandemicsContributions::range(player, game, 2)
+            let needed = PandemicsContributions::range(player, i, 2)
                 .min()
                 .expect("min not found");
 
@@ -110,7 +109,7 @@ fn pandemics() -> Incident {
                 false,
             )])
         },
-        |game, s| {
+        |game, s, _| {
             game.add_info_log_item(&format!("{} lost {}", s.player_name, s.choice[0]));
         },
     )
@@ -132,11 +131,9 @@ impl PandemicsContributions {
         }
     }
 
-    pub fn range(player: &Player, game: &Game, level: usize) -> RangeInclusive<u8> {
-        PandemicsContributions::new(player).range_impl(
-            level,
-            pandemics_cost(player) - game.current_event_player().sacrifice,
-        )
+    pub fn range(player: &Player, i: &IncidentInfo, level: usize) -> RangeInclusive<u8> {
+        PandemicsContributions::new(player)
+            .range_impl(level, pandemics_cost(player) - i.player.sacrifice)
     }
 
     fn range_impl(&self, level: usize, needed: u8) -> RangeInclusive<u8> {
@@ -187,7 +184,7 @@ fn black_death() -> Incident {
                 "Select units to lose",
             ))
         },
-        |game, s| {
+        |game, s, _| {
             kill_incident_units(game, s);
             let vp = s.choice.len() as f32;
             game.add_info_log_item(&format!("{} gained {} victory points", s.player_name, vp));
@@ -266,15 +263,15 @@ fn fire() -> Incident {
                 "Select a city to set on fire",
             ))
         },
-        |game, s| {
-            game.current_event_mut().selected_position = Some(s.choice[0]);
+        |_game, s, i| {
+            i.selected_position = Some(s.choice[0]);
         },
     )
     .add_decrease_mood(
         IncidentTarget::AllPlayers,
         MoodModifier::Decrease,
-        |p, game| {
-            let b = burning_cities(p, game);
+        |p, game, i| {
+            let b = burning_cities(p, game, i);
             let a = b.len() as u8;
             (b, a)
         },
@@ -282,8 +279,8 @@ fn fire() -> Incident {
     .build()
 }
 
-fn burning_cities(p: &Player, game: &Game) -> Vec<Position> {
-    if let Some(pos) = game.current_event().selected_position {
+fn burning_cities(p: &Player, game: &Game, i: &IncidentInfo) -> Vec<Position> {
+    if let Some(pos) = i.selected_position {
         let mut fire = vec![];
         spread_fire(pos, &game.map, &mut fire);
         p.cities

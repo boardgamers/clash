@@ -1,18 +1,17 @@
 use serde::{Deserialize, Serialize};
 
-use crate::action::Action;
 use crate::collect::collect;
 use crate::content::advances::culture::{execute_sports, execute_theaters};
 use crate::content::advances::economy::collect_taxes;
 use crate::content::wonders::construct_wonder;
 use crate::cultural_influence::influence_culture_attempt;
 use crate::log::{
-    current_turn_log, format_city_happiness_increase, format_collect_log_item,
+    format_city_happiness_increase, format_collect_log_item,
     format_cultural_influence_attempt_log_item, format_happiness_increase,
 };
 use crate::player::Player;
 use crate::playing_actions::{
-    increase_happiness, Collect, IncreaseHappiness, InfluenceCultureAttempt, PlayingAction,
+    increase_happiness, Collect, IncreaseHappiness, InfluenceCultureAttempt, PlayingActionType,
 };
 use crate::{
     game::Game, playing_actions::ActionType, position::Position, resource_pile::ResourcePile,
@@ -37,6 +36,29 @@ pub enum CustomAction {
     },
     Taxes(ResourcePile),
     Theaters(ResourcePile),
+}
+
+#[derive(Clone)]
+pub struct CustomActionInfo {
+    pub custom_action_type: CustomActionType,
+    pub action_type: ActionType,
+    pub once_per_turn: bool,
+}
+
+impl CustomActionInfo {
+    #[must_use]
+    fn new(
+        custom_action_type: &CustomActionType,
+        free: bool,
+        once_per_turn: bool,
+        cost: ResourcePile,
+    ) -> CustomActionInfo {
+        CustomActionInfo {
+            custom_action_type: custom_action_type.clone(),
+            action_type: ActionType::new(free, cost),
+            once_per_turn,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash)]
@@ -139,35 +161,48 @@ impl CustomAction {
 
 impl CustomActionType {
     #[must_use]
-    pub fn action_type(&self) -> ActionType {
+    pub fn info(&self) -> CustomActionInfo {
         match self {
             CustomActionType::AbsolutePower => {
-                ActionType::free_and_once_per_turn(ResourcePile::mood_tokens(2))
+                self.free_and_once_per_turn(ResourcePile::mood_tokens(2))
             }
             CustomActionType::CivilLiberties
             | CustomActionType::Sports
-            | CustomActionType::ConstructWonder => ActionType::default(),
+            | CustomActionType::ConstructWonder => self.default(),
             CustomActionType::ArtsInfluenceCultureAttempt => {
-                ActionType::free_and_once_per_turn(ResourcePile::culture_tokens(1))
+                self.free_and_once_per_turn(ResourcePile::culture_tokens(1))
             }
-            CustomActionType::VotingIncreaseHappiness => {
-                ActionType::free(ResourcePile::mood_tokens(1))
-            }
+            CustomActionType::VotingIncreaseHappiness => self.cost(ResourcePile::mood_tokens(1)),
             CustomActionType::FreeEconomyCollect | CustomActionType::ForcedLabor => {
-                ActionType::free_and_once_per_turn(ResourcePile::mood_tokens(1))
+                self.free_and_once_per_turn(ResourcePile::mood_tokens(1))
             }
-            CustomActionType::Taxes => ActionType::once_per_turn(ResourcePile::mood_tokens(1)),
-            CustomActionType::Theaters => ActionType::free_and_once_per_turn(ResourcePile::empty()),
+            CustomActionType::Taxes => self.once_per_turn(ResourcePile::mood_tokens(1)),
+            CustomActionType::Theaters => self.free_and_once_per_turn(ResourcePile::empty()),
         }
     }
 
     #[must_use]
-    pub fn is_available(&self, game: &Game, _player_index: usize) -> bool {
-        match self {
-            CustomActionType::FreeEconomyCollect => !current_turn_log(game)
-                .iter()
-                .any(|item| matches!(item.action, Action::Playing(PlayingAction::Collect(_)))),
-            _ => true,
-        }
+    pub fn is_available(&self, game: &Game, player_index: usize) -> bool {
+        PlayingActionType::Custom(self.info()).is_available(game, player_index)
+    }
+
+    #[must_use]
+    fn default(&self) -> CustomActionInfo {
+        CustomActionInfo::new(self, false, false, ResourcePile::empty())
+    }
+
+    #[must_use]
+    fn cost(&self, cost: ResourcePile) -> CustomActionInfo {
+        CustomActionInfo::new(self, true, false, cost)
+    }
+
+    #[must_use]
+    fn once_per_turn(&self, cost: ResourcePile) -> CustomActionInfo {
+        CustomActionInfo::new(self, false, true, cost)
+    }
+
+    #[must_use]
+    fn free_and_once_per_turn(&self, cost: ResourcePile) -> CustomActionInfo {
+        CustomActionInfo::new(self, true, true, cost)
     }
 }

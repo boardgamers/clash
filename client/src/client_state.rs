@@ -18,8 +18,8 @@ use server::action::Action;
 use server::card::HandCard;
 use server::city::{City, MoodState};
 use server::content::custom_phase_actions::{
-    AdvanceRequest, ChangeGovernmentRequest, CurrentEventRequest, CurrentEventResponse,
-    CurrentEventType, PlayerRequest, SelectedStructure, UnitTypeRequest,
+    AdvanceRequest, ChangeGovernmentRequest, CurrentEventRequest, CurrentEventType, EventResponse,
+    PlayerRequest, SelectedStructure, UnitTypeRequest,
 };
 use server::events::EventOrigin;
 use server::game::{Game, GameState};
@@ -321,7 +321,7 @@ impl StateUpdate {
         }
     }
 
-    pub fn response(action: CurrentEventResponse) -> StateUpdate {
+    pub fn response(action: EventResponse) -> StateUpdate {
         StateUpdate::Execute(Action::Response(action))
     }
 

@@ -3,7 +3,9 @@
   "events": [
     {
       "event_type": {
-        "ActionCard": 2
+        "ActionCard": {
+          "id": 2
+        }
       },
       "player": 0,
       "last_priority_used": 0,
@@ -31,7 +33,7 @@
           }
         },
         "origin": {
-          "ActionCard": 2
+          "CivilCard": 2
         }
       }
     }
@@ -122,9 +124,6 @@
         "Tactics"
       ],
       "incident_tokens": 2,
-      "action_cards": [
-        2
-      ],
       "next_unit_id": 8
     },
     {
@@ -236,9 +235,11 @@
       },
       "undo": [
         {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 3
+          "op": "add",
+          "path": "/players/0/action_cards",
+          "value": [
+            2
+          ]
         },
         {
           "op": "remove",
@@ -254,8 +255,7 @@
     ]
   ],
   "undo_limit": 0,
-  "actions_left": 2,
-  "successful_cultural_influence": false,
+  "actions_left": 3,
   "round": 2,
   "age": 1,
   "messages": [

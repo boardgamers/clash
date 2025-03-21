@@ -218,7 +218,6 @@ pub(crate) fn start_combat(game: &mut Game, combat: Combat) {
         |events| &mut events.on_combat_start,
         combat,
         CurrentEventType::CombatStart,
-        None,
     ) {
         None => return,
         Some(c) => c,

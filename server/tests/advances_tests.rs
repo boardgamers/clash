@@ -7,7 +7,7 @@ use server::content::custom_actions::CustomAction::{
     AbsolutePower, ArtsInfluenceCultureAttempt, CivilRights, ConstructWonder, ForcedLabor, Sports,
     Taxes, Theaters, VotingIncreaseHappiness,
 };
-use server::content::custom_phase_actions::CurrentEventResponse;
+use server::content::custom_phase_actions::EventResponse;
 use server::events::EventOrigin;
 use server::game::Game;
 use server::movement::move_units_destinations;
@@ -400,7 +400,7 @@ fn test_trade_routes_with_currency() {
             TestAction::not_undoable(0, Action::Playing(EndTurn)),
             TestAction::undoable(
                 1,
-                Action::Response(CurrentEventResponse::ResourceReward(
+                Action::Response(EventResponse::ResourceReward(
                     ResourcePile::gold(1) + ResourcePile::food(1),
                 )),
             ),
@@ -431,15 +431,13 @@ fn test_dogma() {
             ),
             TestAction::undoable(
                 1,
-                Action::Response(CurrentEventResponse::ResourceReward(
-                    ResourcePile::culture_tokens(1),
-                )),
+                Action::Response(EventResponse::ResourceReward(ResourcePile::culture_tokens(
+                    1,
+                ))),
             ),
             TestAction::undoable(
                 1,
-                Action::Response(CurrentEventResponse::SelectAdvance(
-                    "Fanaticism".to_string(),
-                )),
+                Action::Response(EventResponse::SelectAdvance("Fanaticism".to_string())),
             ),
         ],
     );
@@ -489,7 +487,7 @@ fn test_free_education() {
             ),
             TestAction::undoable(
                 0,
-                Action::Response(CurrentEventResponse::Payment(vec![ResourcePile::ideas(1)])),
+                Action::Response(EventResponse::Payment(vec![ResourcePile::ideas(1)])),
             ),
         ],
     );
@@ -555,9 +553,9 @@ fn test_cultural_influence_with_conversion() {
             TestAction::not_undoable(1, influence_action()),
             TestAction::undoable(
                 1,
-                Action::Response(CurrentEventResponse::Payment(vec![
-                    ResourcePile::culture_tokens(3),
-                ])),
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    3,
+                )])),
             ),
         ],
     );

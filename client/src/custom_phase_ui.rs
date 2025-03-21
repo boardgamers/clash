@@ -11,8 +11,8 @@ use crate::unit_ui::{draw_unit_type, UnitSelection};
 use macroquad::math::vec2;
 use server::action::Action;
 use server::content::custom_phase_actions::{
-    is_selected_structures_valid, AdvanceRequest, CurrentEventResponse, MultiRequest,
-    PlayerRequest, SelectedStructure, Structure, UnitTypeRequest, UnitsRequest,
+    is_selected_structures_valid, AdvanceRequest, EventResponse, MultiRequest, PlayerRequest,
+    SelectedStructure, Structure, UnitTypeRequest, UnitsRequest,
 };
 use server::game::Game;
 use server::position::Position;
@@ -24,7 +24,7 @@ pub fn custom_phase_payment_dialog(rc: &RenderContext, payments: &[Payment]) -> 
         payments,
         |p| ActiveDialog::PaymentRequest(p.clone()),
         false,
-        |p| StateUpdate::Execute(Action::Response(CurrentEventResponse::Payment(p.clone()))),
+        |p| StateUpdate::Execute(Action::Response(EventResponse::Payment(p.clone()))),
     )
 }
 
@@ -34,7 +34,7 @@ pub fn payment_reward_dialog(rc: &RenderContext, payment: &Payment) -> StateUpda
         payment,
         false,
         |p| ActiveDialog::ResourceRewardRequest(p.clone()),
-        |p| StateUpdate::Execute(Action::Response(CurrentEventResponse::ResourceReward(p))),
+        |p| StateUpdate::Execute(Action::Response(EventResponse::ResourceReward(p))),
     )
 }
 
@@ -55,7 +55,7 @@ pub fn advance_reward_dialog(rc: &RenderContext, r: &AdvanceRequest, name: &str)
         |a| {
             StateUpdate::execute_with_confirm(
                 vec![format!("Select {}?", a.name)],
-                Action::Response(CurrentEventResponse::SelectAdvance(a.name.clone())),
+                Action::Response(EventResponse::SelectAdvance(a.name.clone())),
             )
         },
     )
@@ -79,9 +79,7 @@ pub fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> StateUpda
             unit_ui::name(u),
             20.,
         ) {
-            return StateUpdate::Execute(Action::Response(CurrentEventResponse::SelectUnitType(
-                *u,
-            )));
+            return StateUpdate::Execute(Action::Response(EventResponse::SelectUnitType(*u)));
         }
     }
 
@@ -132,9 +130,7 @@ pub fn select_units_dialog(rc: &RenderContext, s: &UnitsSelection) -> StateUpdat
         rc,
         multi_select_tooltip(&s.selection, s.selection.is_valid(), "units"),
     ) {
-        StateUpdate::response(CurrentEventResponse::SelectUnits(
-            s.selection.selected.clone(),
-        ))
+        StateUpdate::response(EventResponse::SelectUnits(s.selection.selected.clone()))
     } else {
         StateUpdate::None
     }
@@ -198,7 +194,7 @@ pub fn select_structures_dialog(
             "structures (city center must be the last one)",
         ),
     ) {
-        StateUpdate::response(CurrentEventResponse::SelectStructures(s.selected.clone()))
+        StateUpdate::response(EventResponse::SelectStructures(s.selected.clone()))
     } else {
         StateUpdate::None
     }
@@ -232,12 +228,12 @@ pub fn bool_request_dialog(rc: &RenderContext, description: &str) -> StateUpdate
 }
 
 fn bool_answer(answer: bool) -> StateUpdate {
-    StateUpdate::Execute(Action::Response(CurrentEventResponse::Bool(answer)))
+    StateUpdate::Execute(Action::Response(EventResponse::Bool(answer)))
 }
 
 pub fn player_request_dialog(rc: &RenderContext, r: &PlayerRequest) -> StateUpdate {
     choose_player_dialog(rc, &r.choices, |p| {
-        Action::Response(CurrentEventResponse::SelectPlayer(p))
+        Action::Response(EventResponse::SelectPlayer(p))
     })
 }
 
@@ -268,7 +264,7 @@ pub(crate) fn position_request_dialog(
         format!("{}: {} selected", s.request.description, s.selected.len()).as_str(),
     );
     if ok_button(rc, multi_select_tooltip(s, s.is_valid(), "positions")) {
-        StateUpdate::response(CurrentEventResponse::SelectPositions(s.selected.clone()))
+        StateUpdate::response(EventResponse::SelectPositions(s.selected.clone()))
     } else {
         StateUpdate::None
     }

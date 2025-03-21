@@ -1,9 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::content::advances::NAVIGATION;
 use crate::content::builtin::Builtin;
-use crate::content::custom_phase_actions::{
-    CurrentEventRequest, CurrentEventResponse, CurrentEventType,
-};
+use crate::content::custom_phase_actions::{CurrentEventRequest, CurrentEventType, EventResponse};
 use crate::game::Game;
 use crate::map::{Block, BlockPosition, Map, Rotation, UnexploredBlock};
 use crate::movement::{move_units, stop_current_move};
@@ -16,7 +14,7 @@ pub struct ExploreResolutionState {
     pub block: UnexploredBlock,
     pub units: Vec<u32>,
     pub start: Position,
-    pub destination: Position,
+    pub destination: Option<Position>,
     pub ship_can_teleport: bool,
 }
 
@@ -26,14 +24,15 @@ pub(crate) fn move_to_unexplored_tile(
     units: &[u32],
     start: Position,
     destination: Position,
-) -> bool {
+) {
     game.lock_undo(); // tile is revealed, so we can't undo the move
     stop_current_move(game);
 
     for b in &game.map.unexplored_blocks.clone() {
         for (position, _tile) in b.block.tiles(&b.position, b.position.rotation) {
             if position == destination {
-                return move_to_unexplored_block(game, player_index, b, units, start, destination);
+                move_to_unexplored_block(game, player_index, b, units, start, Some(destination));
+                return;
             }
         }
     }
@@ -46,32 +45,28 @@ pub(crate) fn move_to_unexplored_block(
     move_to: &UnexploredBlock,
     units: &[u32],
     start: Position,
-    destination: Position,
+    destination: Option<Position>,
 ) -> bool {
     let base = move_to.position.rotation;
     let opposite = (base + 3) as Rotation;
 
     let block = &move_to.block;
     let tiles = block.tiles(&move_to.position, base);
-    let i = tiles
-        .into_iter()
-        .position(|(p, _)| p == destination)
-        .expect("Destination not in block");
-    let unrotated = &block.terrain[i];
-    let rotated = &block.opposite(i);
 
     let ship_explore = is_any_ship(game, player_index, units);
 
     let instant_explore = |game: &mut Game, rotation: Rotation, ship_can_teleport| {
-        move_to_explored_tile(
-            game,
-            move_to,
-            rotation,
-            player_index,
-            units,
-            destination,
-            ship_can_teleport,
-        );
+        if let Some(destination) = destination {
+            move_to_explored_tile(
+                game,
+                move_to,
+                rotation,
+                player_index,
+                units,
+                destination,
+                ship_can_teleport,
+            );
+        }
         true // no current event is active
     };
 
@@ -90,9 +85,16 @@ pub(crate) fn move_to_unexplored_block(
             return instant_explore(game, rotation, true);
         }
         ship_can_teleport = base_has_connected_sea && opposite_has_connected_sea;
-    } else {
+    } else if let Some(destination) = destination {
+        let i = tiles
+            .into_iter()
+            .position(|(p, _)| p == destination)
+            .expect("Destination not in block");
+        let t = &block.terrain[i];
+        let rotated = &block.opposite(i);
+
         // first rule: don't move into water
-        if unrotated.is_water() {
+        if t.is_water() {
             return instant_explore(game, opposite, false);
         }
         if rotated.is_water() {
@@ -124,8 +126,6 @@ pub(crate) fn move_to_unexplored_block(
         return instant_explore(game, rotation, false);
     }
 
-    let start = game.get_player(player_index).get_unit(units[0]).position;
-
     let resolution_state = ExploreResolutionState {
         block: move_to.clone(),
         units: units.to_vec(),
@@ -148,7 +148,6 @@ pub(crate) fn ask_explore_resolution(
         |events| &mut events.on_explore_resolution,
         resolution_state,
         CurrentEventType::ExploreResolution,
-        None,
     );
 }
 
@@ -281,7 +280,7 @@ pub(crate) fn explore_resolution() -> Builtin {
             Some(CurrentEventRequest::ExploreResolution)
         },
         move |game, _player_index, player_name, action, _request, r| {
-            let CurrentEventResponse::ExploreResolution(rotation) = action else {
+            let EventResponse::ExploreResolution(rotation) = action else {
                 panic!("Invalid action");
             };
 
@@ -293,15 +292,17 @@ pub(crate) fn explore_resolution() -> Builtin {
             let valid_rotation = rotate_by == 0 || rotate_by == 3;
             assert!(valid_rotation, "Invalid rotation {rotate_by}");
 
-            move_to_explored_tile(
-                game,
-                unexplored_block,
-                rotation,
-                game.current_player_index,
-                &r.units,
-                r.destination,
-                r.ship_can_teleport,
-            );
+            if let Some(destination) = r.destination {
+                move_to_explored_tile(
+                    game,
+                    unexplored_block,
+                    rotation,
+                    game.current_player_index,
+                    &r.units,
+                    destination,
+                    r.ship_can_teleport,
+                );
+            }
         },
     )
     .build()

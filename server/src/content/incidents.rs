@@ -2,6 +2,8 @@ mod civil_war;
 mod earthquake;
 pub(crate) mod famine;
 mod good_year;
+mod great_explorer;
+pub(crate) mod great_persons;
 mod pandemics;
 mod trade;
 pub(crate) mod trojan;
@@ -10,6 +12,7 @@ use crate::content::incidents::civil_war::civil_war_incidents;
 use crate::content::incidents::earthquake::earthquake_incidents;
 use crate::content::incidents::famine::pestilence_incidents;
 use crate::content::incidents::good_year::good_years_incidents;
+use crate::content::incidents::great_persons::great_person_incidents;
 use crate::content::incidents::pandemics::pandemics_incidents;
 use crate::content::incidents::trade::trade_incidents;
 use crate::content::incidents::trojan::trojan_incidents;
@@ -35,7 +38,7 @@ pub(crate) fn get_all() -> Vec<Incident> {
         // 49+
         pandemics_incidents(),
         // 18+
-        // great persons
+        great_person_incidents(),
     ]
     .into_iter()
     .flatten()

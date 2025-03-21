@@ -1,7 +1,7 @@
 use crate::advance::on_advance;
 use crate::combat::{combat_loop, move_with_possible_combat, start_combat};
 use crate::combat_listeners::{combat_round_end, combat_round_start, end_combat};
-use crate::content::custom_phase_actions::{CurrentEventResponse, CurrentEventType};
+use crate::content::custom_phase_actions::{CurrentEventType, EventResponse};
 use crate::cultural_influence::ask_for_cultural_influence_payment;
 use crate::explore::{ask_explore_resolution, move_to_unexplored_tile};
 use crate::game::GameState::{Finished, Movement, Playing};
@@ -28,7 +28,7 @@ use serde::{Deserialize, Serialize};
 pub enum Action {
     Playing(PlayingAction),
     Movement(MovementAction),
-    Response(CurrentEventResponse),
+    Response(EventResponse),
     Undo,
     Redo,
 }
@@ -36,15 +36,6 @@ pub enum Action {
 impl Action {
     #[must_use]
     pub fn playing(self) -> Option<PlayingAction> {
-        if let Self::Playing(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-
-    #[must_use]
-    pub fn playing_ref(&self) -> Option<&PlayingAction> {
         if let Self::Playing(v) = self {
             Some(v)
         } else {
@@ -62,7 +53,7 @@ impl Action {
     }
 
     #[must_use]
-    pub fn custom_phase_event(self) -> Option<CurrentEventResponse> {
+    pub fn response(self) -> Option<EventResponse> {
         if let Self::Response(v) = self {
             Some(v)
         } else {
@@ -113,7 +104,7 @@ fn execute_without_undo(mut game: Game, action: Action, player_index: usize) -> 
     add_action_log_item(&mut game, action.clone());
 
     if let Some(s) = game.current_event_handler_mut() {
-        s.response = action.custom_phase_event();
+        s.response = action.response();
         let details = game.current_event().event_type.clone();
         execute_custom_phase_action(&mut game, player_index, details);
     } else {
@@ -176,6 +167,20 @@ pub(crate) fn execute_custom_phase_action(
         }
         Incident(i) => trigger_incident(game, i),
         ActionCard(a) => play_action_card(game, player_index, a),
+    }
+
+    if let Some(mut s) = game.events.pop() {
+        if s.player.handler.is_none() {
+            if let Some(l) = s.player.last_priority_used.as_mut() {
+                *l -= 1;
+            }
+            let p = s.player.index;
+            let event_type = s.event_type.clone();
+            game.events.push(s);
+            execute_custom_phase_action(game, p, event_type);
+        } else {
+            game.events.push(s);
+        }
     }
 }
 

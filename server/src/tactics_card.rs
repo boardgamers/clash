@@ -1,6 +1,7 @@
 use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
+use crate::action_card;
 use crate::action_card::ActionCard;
 use crate::advance::AdvanceBuilder;
 use crate::card::HandCard;
@@ -10,7 +11,7 @@ use crate::content::action_cards;
 use crate::content::custom_phase_actions::HandCardsRequest;
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::utils::remove_element_by;
+use action_card::discard_action_card;
 use action_cards::get_action_card;
 
 #[derive(Clone, PartialEq, Eq, Copy)]
@@ -209,11 +210,15 @@ pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
                     panic!("Expected ActionCard, got {:?}", sel.choice[0]);
                 };
                 update_combat_strength(game, player, s, move |_game, _c, s, _role| {
-                    s.tactics_card = Some(get_action_card(card).tactics_card.name.clone());
+                    s.tactics_card = Some(
+                        get_action_card(card)
+                            .tactics_card
+                            .expect("Expected Tactics Card")
+                            .name
+                            .clone(),
+                    );
                 });
-                remove_element_by(&mut game.get_player_mut(player).action_cards, |&id| {
-                    id == card
-                });
+                discard_action_card(game, player, card);
             }
         },
     )
@@ -230,17 +235,22 @@ fn available_tactics_cards(game: &Game, player: usize, combat: &Combat) -> Vec<H
 }
 
 fn can_play_tactics_card(game: &Game, player: usize, card: &ActionCard, combat: &Combat) -> bool {
-    let position_met = card
-        .tactics_card
-        .role_requirement
-        .as_ref()
-        .is_none_or(|&r| combat.role(player) == r);
+    if let Some(card) = &card.tactics_card {
+        let position_met = card
+            .role_requirement
+            .as_ref()
+            .is_none_or(|&r| combat.role(player) == r);
 
-    let fighter_met = match card.tactics_card.fighter_requirement {
-        FighterRequirement::Army => !combat.is_sea_battle(game),
-        FighterRequirement::Fortress => combat.defender_fortress(game) && combat.defender == player,
-        FighterRequirement::Ship => combat.is_sea_battle(game),
-    };
+        let fighter_met = match card.fighter_requirement {
+            FighterRequirement::Army => !combat.is_sea_battle(game),
+            FighterRequirement::Fortress => {
+                combat.defender_fortress(game) && combat.defender == player
+            }
+            FighterRequirement::Ship => combat.is_sea_battle(game),
+        };
 
-    position_met && fighter_met
+        position_met && fighter_met
+    } else {
+        false
+    }
 }

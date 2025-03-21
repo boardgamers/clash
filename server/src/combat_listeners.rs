@@ -335,7 +335,6 @@ pub(crate) fn end_combat(game: &mut Game, info: CombatEnd) {
         |events| &mut events.on_combat_end,
         info,
         CurrentEventType::CombatEnd,
-        None,
     );
 }
 
@@ -368,7 +367,6 @@ pub(crate) fn event_with_tactics<T: Clone + PartialEq>(
                 event,
                 event_type,
                 store_type,
-                None,
             ),
             CombatEventPhase::TacticsCardAttacker => trigger_tactics_event(
                 game,
@@ -428,6 +426,7 @@ where
             event_type,
             store_type,
             None,
+            |_| {},
         )
     } else {
         Some(event_type)

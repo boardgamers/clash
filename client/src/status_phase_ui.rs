@@ -3,7 +3,7 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
 use crate::render_context::RenderContext;
 use server::content::advances::{get_government, get_governments};
-use server::content::custom_phase_actions::{ChangeGovernmentRequest, CurrentEventResponse};
+use server::content::custom_phase_actions::{ChangeGovernmentRequest, EventResponse};
 use server::status_phase::{ChangeGovernment, ChangeGovernmentType};
 
 #[derive(Clone)]
@@ -38,7 +38,7 @@ pub fn change_government_type_dialog(
 ) -> StateUpdate {
     let current = rc.shown_player.government().unwrap();
     if r.optional && cancel_button_with_tooltip(rc, &format!("Keep {current}")) {
-        return StateUpdate::response(CurrentEventResponse::ChangeGovernmentType(
+        return StateUpdate::response(EventResponse::ChangeGovernmentType(
             ChangeGovernmentType::KeepGovernment,
         ));
     }
@@ -91,7 +91,7 @@ pub fn choose_additional_advances_dialog(
         OkTooltip::Invalid("Select all additional advances".to_string())
     };
     if ok_button(rc, t) {
-        return StateUpdate::response(CurrentEventResponse::ChangeGovernmentType(
+        return StateUpdate::response(EventResponse::ChangeGovernmentType(
             ChangeGovernmentType::ChangeGovernment(ChangeGovernment {
                 new_government: choose.government.clone(),
                 additional_advances: choose.selected.clone(),

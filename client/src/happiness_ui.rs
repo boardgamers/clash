@@ -47,14 +47,14 @@ impl IncreaseHappinessConfig {
 pub fn can_play_influence_culture(rc: &RenderContext) -> bool {
     base_or_custom_available(
         rc,
-        PlayingActionType::InfluenceCultureAttempt,
+        &PlayingActionType::InfluenceCultureAttempt,
         &CustomActionType::ArtsInfluenceCultureAttempt,
     )
 }
 pub fn can_play_increase_happiness(rc: &RenderContext) -> bool {
     base_or_custom_available(
         rc,
-        PlayingActionType::IncreaseHappiness,
+        &PlayingActionType::IncreaseHappiness,
         &CustomActionType::VotingIncreaseHappiness,
     )
 }
@@ -65,7 +65,7 @@ pub fn open_increase_happiness_dialog(
 ) -> StateUpdate {
     base_or_custom_action(
         rc,
-        PlayingActionType::IncreaseHappiness,
+        &PlayingActionType::IncreaseHappiness,
         "Increase happiness",
         &[("Voting", CustomActionType::VotingIncreaseHappiness)],
         |custom| {

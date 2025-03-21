@@ -5,6 +5,7 @@ use crate::content::advances;
 use crate::content::custom_phase_actions::AdvanceRequest;
 use crate::content::tactics_cards::{encircled, peltasts};
 use crate::player::Player;
+use crate::playing_actions::ActionType;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::TacticsCard;
 
@@ -13,13 +14,14 @@ pub(crate) fn inspiration_action_cards() -> Vec<ActionCard> {
 }
 
 fn advance(id: u8, tactics_card: TacticsCard) -> ActionCard {
-    ActionCard::civil_card_builder(
+    ActionCard::builder(
         id,
         "Advance",
         "Pay 1 idea: Gain 1 advance without changing the Game Event counter.",
+        ActionType::free(),
         |_game, player| player.resources.ideas >= 1 && !possible_advances(player).is_empty(),
-        tactics_card,
     )
+    .with_tactics_card(tactics_card)
     .add_advance_request(
         |e| &mut e.on_play_action_card,
         0,

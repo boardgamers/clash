@@ -1,6 +1,6 @@
 use crate::common::{move_action, JsonTest, TestAction};
 use server::action::Action;
-use server::content::custom_phase_actions::CurrentEventResponse;
+use server::content::custom_phase_actions::EventResponse;
 use server::game::Game;
 use server::movement::move_units_destinations;
 use server::position::Position;
@@ -73,10 +73,7 @@ fn test_explore_resolution() {
         "explore_resolution",
         vec![
             TestAction::not_undoable(1, move_action(vec![0], Position::from_offset("D6"))),
-            TestAction::undoable(
-                1,
-                Action::Response(CurrentEventResponse::ExploreResolution(3)),
-            ),
+            TestAction::undoable(1, Action::Response(EventResponse::ExploreResolution(3))),
         ],
     );
 }
@@ -185,7 +182,7 @@ fn test_ship_explore_move_not_possible() {
         "ship_explore_move_not_possible",
         vec![TestAction::undoable(
             1,
-            Action::Response(CurrentEventResponse::ExploreResolution(3)),
+            Action::Response(EventResponse::ExploreResolution(3)),
         )],
     );
 }

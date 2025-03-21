@@ -1,5 +1,5 @@
 use crate::common::*;
-use server::content::custom_phase_actions::CurrentEventResponse;
+use server::content::custom_phase_actions::EventResponse;
 use server::unit::Units;
 use server::{
     action::Action,
@@ -282,9 +282,9 @@ fn test_cultural_influence() {
             TestAction::not_undoable(1, influence_action()),
             TestAction::undoable(
                 1,
-                Action::Response(CurrentEventResponse::Payment(vec![
-                    ResourcePile::culture_tokens(4),
-                ])),
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    4,
+                )])),
             ),
         ],
     );

@@ -43,7 +43,7 @@ fn migration(id: u8) -> Incident {
         .add_decrease_mood(
             IncidentTarget::ActivePlayer,
             MoodModifier::Decrease,
-            |p, _game| (non_angry_cites(p), 1),
+            |p, _game, _| (non_angry_cites(p), 1),
         )
         .build()
 }
@@ -68,7 +68,7 @@ fn civil_war(id: u8) -> Incident {
     .add_decrease_mood(
         IncidentTarget::ActivePlayer,
         MoodModifier::Decrease,
-        |p, _game| {
+        |p, _game, _| {
             if non_happy_cites_with_infantry(p).is_empty() {
                 (non_angry_cites(p), 1)
             } else {
@@ -79,11 +79,9 @@ fn civil_war(id: u8) -> Incident {
     .add_incident_position_request(
         IncidentTarget::ActivePlayer,
         0,
-        |game, player_index, _incident| {
+        |game, player_index, i| {
             let p = game.get_player(player_index);
-            let suffix = if !non_angry_cites(p).is_empty()
-                && game.current_event_player().payment.is_empty()
-            {
+            let suffix = if !non_angry_cites(p).is_empty() && i.player.payment.is_empty() {
                 " and decrease the mood"
             } else {
                 ""
@@ -94,10 +92,10 @@ fn civil_war(id: u8) -> Incident {
                 &format!("Select a non-Happy city with an Infantry to kill the Infantry {suffix}"),
             ))
         },
-        |game, s| {
+        |game, s, i| {
             let position = s.choice[0];
             let mood = game.get_any_city(position).mood_state.clone();
-            if game.current_event_player().payment.is_empty() && !matches!(mood, MoodState::Angry) {
+            if i.player.payment.is_empty() && !matches!(mood, MoodState::Angry) {
                 decrease_mod_and_log(game, s, MoodModifier::Decrease);
             }
             let unit = game
@@ -147,8 +145,8 @@ fn revolution() -> Incident {
         "Kill a unit to avoid losing an action",
         |game, _player| can_loose_action(game),
     );
-    b = b.add_simple_incident_listener(IncidentTarget::ActivePlayer, 2, |game, player, _, _| {
-        if can_loose_action(game) && game.current_event_player().sacrifice == 0 {
+    b = b.add_simple_incident_listener(IncidentTarget::ActivePlayer, 2, |game, player, _, i| {
+        if can_loose_action(game) && i.player.sacrifice == 0 {
             loose_action(game, player);
         }
     });
@@ -177,8 +175,8 @@ fn kill_unit_for_revolution(
     b.add_incident_units_request(
         IncidentTarget::ActivePlayer,
         priority,
-        move |game, player_index, _incident| {
-            game.current_event_mut().player.sacrifice = 0;
+        move |game, player_index, i| {
+            i.player.sacrifice = 0;
             let units = game
                 .get_player(player_index)
                 .units
@@ -197,10 +195,10 @@ fn kill_unit_for_revolution(
                 &description,
             ))
         },
-        |game, s| {
+        |game, s, i| {
             kill_incident_units(game, s);
             if !s.choice.is_empty() {
-                game.current_event_mut().player.sacrifice = 1;
+                i.player.sacrifice = 1;
             }
         },
     )
@@ -251,7 +249,7 @@ fn uprising() -> Incident {
                 false,
             )])
         },
-        |game, s| {
+        |game, s, _| {
             let player = game.get_player_mut(s.player_index);
             let pile = &s.choice[0];
             let v = pile.amount() as f32 / 2_f32;
@@ -298,7 +296,7 @@ fn envoy() -> Incident {
     )
     .add_incident_player_request(
         "Select a player to gain 1 culture token",
-        |_p, _| true,
+        |_p, _, _| true,
         0,
         |game, s, _| {
             let p = s.choice;
