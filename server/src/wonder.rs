@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::card::draw_card_from_pile;
 use crate::content::builtin::Builtin;
@@ -7,6 +8,7 @@ use crate::events::EventOrigin;
 use crate::incident::PermanentIncidentEffect;
 use crate::payment::PaymentOptions;
 use crate::{ability_initializer::AbilityInitializerSetup, game::Game, position::Position};
+use crate::resource_pile::ResourcePile;
 
 type PlacementChecker = Box<dyn Fn(Position, &Game) -> bool>;
 
@@ -17,6 +19,24 @@ pub struct Wonder {
     pub required_advances: Vec<String>,
     pub placement_requirement: Option<PlacementChecker>,
     pub listeners: AbilityListeners,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
+pub struct ConstructWonder {
+    pub city_position: Position,
+    pub wonder: String,
+    pub payment: ResourcePile,
+}
+
+impl ConstructWonder {
+    #[must_use]
+    pub fn new(city_position: Position, wonder: String, payment: ResourcePile) -> Self {
+        Self {
+            city_position,
+            wonder,
+            payment,
+        }
+    }
 }
 
 impl Wonder {

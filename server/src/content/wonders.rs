@@ -3,8 +3,8 @@ use crate::content::advances::IRRIGATION;
 use crate::game::Game;
 use crate::map::Terrain::Fertile;
 use crate::payment::{PaymentConversionType, PaymentOptions};
-use crate::position::Position;
 use crate::utils::remove_element;
+use crate::wonder::ConstructWonder;
 use crate::{resource_pile::ResourcePile, wonder::Wonder};
 use std::collections::HashSet;
 
@@ -62,10 +62,9 @@ pub fn get_wonder(name: &str) -> Wonder {
 pub fn construct_wonder(
     game: &mut Game,
     player_index: usize,
-    city_position: Position,
-    name: &str,
-    payment: ResourcePile,
+    c: &ConstructWonder,
 ) {
+    let name = &c.wonder;
     if remove_element(
         &mut game.get_player_mut(player_index).wonder_cards,
         &name.to_string(),
@@ -76,13 +75,14 @@ pub fn construct_wonder(
     }
     let wonder = get_wonder(name);
 
+    let city_position = c.city_position;
     let city = game.players[player_index].get_city(city_position);
 
     city.can_build_wonder(&wonder, &game.players[player_index], game)
         .map_err(|e| panic!("{e}"))
         .ok();
 
-    game.players[player_index].lose_resources(payment);
+    game.players[player_index].lose_resources(c.payment.clone());
 
     game.build_wonder(wonder, city_position, player_index);
 }

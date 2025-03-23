@@ -161,6 +161,9 @@ impl City {
         if !player.can_afford(&player.wonder_cost(wonder, self, None).cost) {
             return Err("Not enough resources".to_string());
         }
+        if !player.has_advance("Engineering") {
+            return Err("Engineering advance missing".to_string());
+        }
         for advance in &wonder.required_advances {
             if !player.has_advance(advance) {
                 return Err(format!("Advance missing: {advance}"));

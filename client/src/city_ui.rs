@@ -4,7 +4,7 @@ use crate::action_buttons::{
 use crate::cards_ui::wonder_cards;
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::CollectResources;
-use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
+use crate::construct_ui::{can_play_construct_wonder, new_building_positions, open_construct_wonder_dialog, ConstructionPayment, ConstructionProject};
 use crate::custom_phase_ui::{highlight_structures, StructureHighlight};
 use crate::happiness_ui::{
     add_increase_happiness, can_play_increase_happiness, open_increase_happiness_dialog,
@@ -78,8 +78,7 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
 }
 
 fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> {
-    if !city.can_activate() || !rc.can_play_action(&PlayingActionType::Construct) {
-        // is this the right thing to check?
+    if !city.can_activate() || can_play_construct_wonder(rc) {
         return vec![];
     }
     let owner = rc.shown_player;
@@ -93,14 +92,7 @@ fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> 
                 &rc.assets().wonders[&w.name],
                 format!("Build wonder {}", w.name),
                 Box::new(move || {
-                    StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(
-                        ConstructionPayment::new(
-                            rc,
-                            city,
-                            &w.name,
-                            ConstructionProject::Wonder(w.name.clone()),
-                        ),
-                    ))
+                    open_construct_wonder_dialog(rc, city, &w)
                 }),
             );
             a

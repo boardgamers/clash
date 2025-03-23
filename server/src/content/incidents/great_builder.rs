@@ -1,6 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::content::builtin::Builtin;
+use crate::content::custom_actions::CustomActionType;
 use crate::content::incidents::great_persons::{
     great_person_action_card, great_person_description,
 };
@@ -76,4 +77,25 @@ pub(crate) fn use_great_engineer() -> Builtin {
             },
         )
         .build()
+}
+
+pub(crate) fn use_great_architect() -> Builtin {
+    let b = Builtin::builder("great_architect", "-");
+    let key = b.get_key();
+    b.add_ability_initializer(move |game, player_index| {
+        let player = &mut game.players[player_index];
+        if game
+            .permanent_incident_effects
+            .iter()
+            .any(|e| matches!(e, PermanentIncidentEffect::GreatArchitect(p) if *p == player_index))
+        {
+            player
+                .custom_actions
+                .insert(CustomActionType::GreatArchitect, key.clone());
+        }
+    })
+        //todo remove effect after building
+        // todo may discount 3 culture tokens
+        // todo may ignore requirement advances (but not Engineering)
+    .build()
 }

@@ -7,6 +7,7 @@ use crate::player::Player;
 use crate::playing_actions::{
     Collect, Construct, IncreaseHappiness, InfluenceCultureAttempt, Recruit,
 };
+use crate::wonder::ConstructWonder;
 use crate::{
     action::Action,
     game::Game,
@@ -60,6 +61,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             player.get_unit(*settler).position
         ),
         PlayingAction::Construct(c) => format_construct_log_item(game, player, &player_name, c),
+        PlayingAction::ConstructWonder(c) => format_construct_wonder_log_item(&player_name, c),
         PlayingAction::Collect(c) => format_collect_log_item(player, &player_name, c),
         PlayingAction::Recruit(r) => format_recruit_log_item(player, &player_name, r),
         PlayingAction::IncreaseHappiness(i) => format_happiness_increase(player, &player_name, i),
@@ -191,6 +193,16 @@ fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -
     );
     format!(
         "{player_name} paid {payment} to recruit {units}{leader_str} in the city at {city_position}{mood}{replace_str}{replace_pos}"
+    )
+}
+
+pub(crate) fn format_construct_wonder_log_item(
+    player_name: &str,
+    c: &ConstructWonder,
+) -> String {
+    format!(
+        "{player_name} paid {} to construct the {} wonder in the city at {}",
+        c.payment, c.wonder, c.city_position
     )
 }
 

@@ -5,25 +5,19 @@ use crate::content::advances::culture::{execute_sports, execute_theaters};
 use crate::content::advances::economy::collect_taxes;
 use crate::content::wonders::construct_wonder;
 use crate::cultural_influence::influence_culture_attempt;
-use crate::log::{
-    format_city_happiness_increase, format_collect_log_item,
-    format_cultural_influence_attempt_log_item, format_happiness_increase,
-};
+use crate::log::{format_city_happiness_increase, format_collect_log_item, format_construct_wonder_log_item, format_cultural_influence_attempt_log_item, format_happiness_increase};
 use crate::player::Player;
 use crate::playing_actions::{
     increase_happiness, Collect, IncreaseHappiness, InfluenceCultureAttempt, PlayingActionType,
 };
+use crate::wonder::ConstructWonder;
 use crate::{
     game::Game, playing_actions::ActionType, position::Position, resource_pile::ResourcePile,
 };
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub enum CustomAction {
-    ConstructWonder {
-        city_position: Position,
-        wonder: String,
-        payment: ResourcePile,
-    },
+    GreatArchitect(ConstructWonder),
     AbsolutePower,
     ForcedLabor,
     CivilRights,
@@ -63,7 +57,7 @@ impl CustomActionInfo {
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash)]
 pub enum CustomActionType {
-    ConstructWonder,
+    GreatArchitect,
     AbsolutePower,
     ForcedLabor,
     CivilLiberties,
@@ -83,11 +77,7 @@ impl CustomAction {
     /// Panics if action is illegal
     pub fn execute(self, game: &mut Game, player_index: usize) {
         match self {
-            CustomAction::ConstructWonder {
-                city_position,
-                wonder,
-                payment,
-            } => construct_wonder(game, player_index, city_position, &wonder, payment),
+            CustomAction::GreatArchitect(c) => construct_wonder(game, player_index, &c),
             CustomAction::AbsolutePower => game.actions_left += 1,
             CustomAction::ForcedLabor => {
                 // we check that the action was played
@@ -116,7 +106,7 @@ impl CustomAction {
     #[must_use]
     pub fn custom_action_type(&self) -> CustomActionType {
         match self {
-            CustomAction::ConstructWonder { .. } => CustomActionType::ConstructWonder,
+            CustomAction::GreatArchitect(_) => CustomActionType::GreatArchitect,
             CustomAction::AbsolutePower => CustomActionType::AbsolutePower,
             CustomAction::ForcedLabor => CustomActionType::ForcedLabor,
             CustomAction::CivilRights => CustomActionType::CivilLiberties,
@@ -134,8 +124,8 @@ impl CustomAction {
     #[must_use]
     pub fn format_log_item(&self, game: &Game, player: &Player, player_name: &str) -> String {
         match self {
-            CustomAction::ConstructWonder { city_position, wonder, payment } =>
-                format!("{player_name} paid {payment} to construct the {wonder} wonder in the city at {city_position}"),
+            CustomAction::GreatArchitect(c) =>
+                format_construct_wonder_log_item(&player_name, c),
             CustomAction::AbsolutePower =>
                 format!("{player_name} paid 2 mood tokens to get an extra action using Forced Labor"),
             CustomAction::ForcedLabor =>
@@ -168,7 +158,7 @@ impl CustomActionType {
             }
             CustomActionType::CivilLiberties
             | CustomActionType::Sports
-            | CustomActionType::ConstructWonder => self.default(),
+            | CustomActionType::GreatArchitect => self.regular(),
             CustomActionType::ArtsInfluenceCultureAttempt => {
                 self.free_and_once_per_turn(ResourcePile::culture_tokens(1))
             }
@@ -187,7 +177,7 @@ impl CustomActionType {
     }
 
     #[must_use]
-    fn default(&self) -> CustomActionInfo {
+    fn regular(&self) -> CustomActionInfo {
         CustomActionInfo::new(self, false, false, ResourcePile::empty())
     }
 

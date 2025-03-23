@@ -3,7 +3,7 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
 use crate::event_ui::event_help;
 use crate::happiness_ui::{
-    can_play_increase_happiness, can_play_influence_culture, open_increase_happiness_dialog,
+    can_play_increase_happiness,  open_increase_happiness_dialog,
 };
 use crate::layout_ui::{bottom_left_texture, icon_pos};
 use crate::move_ui::MoveIntent;
@@ -17,6 +17,7 @@ use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::game::GameState;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::resource::ResourceType;
+use crate::influence_ui::can_play_influence_culture;
 
 pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     let assets = rc.assets();
@@ -132,7 +133,7 @@ fn generic_custom_action(
     }
 
     match custom_action_type {
-        CustomActionType::ConstructWonder
+        CustomActionType::GreatArchitect
         | CustomActionType::ArtsInfluenceCultureAttempt
         | CustomActionType::VotingIncreaseHappiness
         | CustomActionType::FreeEconomyCollect
@@ -196,7 +197,7 @@ pub fn base_or_custom_action(
             let dialog = execute(BaseOrCustomDialog {
                 custom: BaseOrCustomAction::Custom {
                     custom: a.clone(),
-                    advance: (*advance).to_string(),
+                    advance: (*advance).to_string(), //todo great engineer is not from advance - can we use the origin name instead?
                 },
                 title: format!("{title} with {advance}"),
             });

@@ -24,6 +24,8 @@ use crate::{
     position::Position,
     resource_pile::ResourcePile,
 };
+use crate::content::wonders::construct_wonder;
+use crate::wonder::ConstructWonder;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Construct {
@@ -89,6 +91,7 @@ pub enum PlayingActionType {
     Advance,
     FoundCity,
     Construct,
+    ConstructWonder,
     Collect,
     Recruit,
     MoveUnits,
@@ -174,6 +177,7 @@ pub enum PlayingAction {
         settler: u32,
     },
     Construct(Construct),
+    ConstructWonder(ConstructWonder),
     Collect(Collect),
     Recruit(Recruit),
     IncreaseHappiness(IncreaseHappiness),
@@ -218,6 +222,9 @@ impl PlayingAction {
             Construct(c) => {
                 construct(game, player_index, &c);
             }
+            ConstructWonder(c) => {
+                construct_wonder(game, player_index, &c);
+            }
             Collect(c) => {
                 collect(game, player_index, &c);
             }
@@ -257,11 +264,12 @@ impl PlayingAction {
         match self {
             PlayingAction::Advance { .. } => PlayingActionType::Advance,
             PlayingAction::FoundCity { .. } => PlayingActionType::FoundCity,
-            PlayingAction::Construct { .. } => PlayingActionType::Construct,
-            PlayingAction::Collect { .. } => PlayingActionType::Collect,
-            PlayingAction::Recruit { .. } => PlayingActionType::Recruit,
-            PlayingAction::IncreaseHappiness { .. } => PlayingActionType::IncreaseHappiness,
-            PlayingAction::InfluenceCultureAttempt { .. } => {
+            PlayingAction::Construct(_) => PlayingActionType::Construct,
+            PlayingAction::ConstructWonder(_) => PlayingActionType::ConstructWonder,
+            PlayingAction::Collect(_) => PlayingActionType::Collect,
+            PlayingAction::Recruit (_) => PlayingActionType::Recruit,
+            PlayingAction::IncreaseHappiness (_) => PlayingActionType::IncreaseHappiness,
+            PlayingAction::InfluenceCultureAttempt(_) => {
                 PlayingActionType::InfluenceCultureAttempt
             }
             PlayingAction::ActionCard(a) => PlayingActionType::ActionCard(*a),

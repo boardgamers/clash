@@ -109,6 +109,7 @@ pub enum PermanentIncidentEffect {
     SolarEclipse,
     Anarchy(Anarchy),
     GreatEngineer,
+    GreatArchitect(usize)
 }
 
 #[derive(Clone)]

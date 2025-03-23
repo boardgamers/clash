@@ -1,16 +1,19 @@
+use crate::action_buttons::{base_or_custom_action, base_or_custom_available};
 use crate::cards_ui::wonder_cards;
 use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
 use crate::payment_ui::{payment_dialog, Payment};
 use crate::recruit_unit_ui::RecruitSelection;
 use crate::render_context::RenderContext;
 use server::action::Action;
 use server::city::City;
 use server::city_pieces::Building;
-use server::content::custom_actions::CustomAction;
+use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::map::Terrain;
-use server::playing_actions::{Construct, PlayingAction, Recruit};
+use server::playing_actions::{Construct, PlayingAction, PlayingActionType, Recruit};
 use server::position::Position;
 use server::recruit::recruit_cost;
+use server::wonder::{ConstructWonder, Wonder};
 
 pub fn new_building_positions(
     building: Building,
@@ -46,20 +49,16 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
             new.payment = p;
             ActiveDialog::ConstructionPayment(new)
         },
-        |payment| match &cp.project {
+        |payment| match cp.project.clone() {
             ConstructionProject::Building(b, pos) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Construct(
-                    Construct::new(cp.city_position, *b, payment).with_port_position(*pos),
+                    Construct::new(cp.city_position, b, payment).with_port_position(pos),
                 )),
                 vec![],
                 city,
             ),
-            ConstructionProject::Wonder(w) => StateUpdate::execute_activation(
-                Action::Playing(PlayingAction::Custom(CustomAction::ConstructWonder {
-                    city_position: cp.city_position,
-                    payment,
-                    wonder: w.clone(),
-                })),
+            ConstructionProject::Wonder(w, custom) => StateUpdate::execute_activation(
+                construct_wonder_action(ConstructWonder::new(cp.city_position, w, payment), custom),
                 vec![],
                 city,
             ),
@@ -78,10 +77,19 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
     )
 }
 
+fn construct_wonder_action(c: ConstructWonder, custom: BaseOrCustomDialog) -> Action {
+    match custom.custom {
+        BaseOrCustomAction::Base => Action::Playing(PlayingAction::ConstructWonder(c)),
+        BaseOrCustomAction::Custom { .. } => {
+            Action::Playing(PlayingAction::Custom(CustomAction::GreatArchitect(c)))
+        }
+    }
+}
+
 #[derive(Clone)]
 pub enum ConstructionProject {
     Building(Building, Option<Position>),
-    Wonder(String),
+    Wonder(String, BaseOrCustomDialog),
     Units(RecruitSelection),
 }
 
@@ -103,7 +111,7 @@ impl ConstructionPayment {
         let p = rc.game.get_player(city.player_index);
         let cost = match &project {
             ConstructionProject::Building(b, _) => p.construct_cost(rc.game, *b, None),
-            ConstructionProject::Wonder(name) => p.wonder_cost(
+            ConstructionProject::Wonder(name, _) => p.wonder_cost(
                 wonder_cards(p).iter().find(|w| w.name == *name).unwrap(),
                 city,
                 None,
@@ -128,4 +136,29 @@ impl ConstructionPayment {
             payment,
         }
     }
+}
+
+pub fn can_play_construct_wonder(rc: &RenderContext) -> bool {
+    base_or_custom_available(
+        rc,
+        &PlayingActionType::ConstructWonder,
+        &CustomActionType::GreatArchitect,
+    )
+}
+
+pub fn open_construct_wonder_dialog(rc: &RenderContext, city: &City, w: &Wonder) -> StateUpdate {
+    base_or_custom_action(
+        rc,
+        &PlayingActionType::ConstructWonder,
+        "Construct Wonder",
+        &[("Great Architect", CustomActionType::GreatArchitect)],
+        |custom| {
+            ActiveDialog::ConstructionPayment(ConstructionPayment::new(
+                rc,
+                city,
+                &w.name,
+                ConstructionProject::Wonder(w.name.clone(), custom),
+            ))
+        },
+    )
 }

@@ -2,7 +2,6 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::content::advances::{advance_group_builder, AdvanceGroup, ROADS};
-use crate::content::custom_actions::CustomActionType::ConstructWonder;
 use crate::payment::PaymentConversion;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -25,7 +24,6 @@ fn engineering() -> AdvanceBuilder {
         "Immediately draw 1 wonder card. May Construct wonders in happy cities",
     )
     .add_one_time_ability_initializer(draw_wonder_card)
-    .add_custom_action(ConstructWonder)
 }
 
 fn sanitation() -> AdvanceBuilder {
