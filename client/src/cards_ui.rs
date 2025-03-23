@@ -140,7 +140,21 @@ fn get_card_object(card: &HandCard) -> HandCardObject {
         ),
         HandCard::ActionCard(id) => {
             let a = get_action_card(*id);
-            let mut description = vec![a.civil_card.description.clone()];
+            let mut description = vec![];
+            let action_type = a.civil_card.action_type;
+            description.push(
+                if action_type.free {
+                    "As a free action"
+                } else {
+                    "As a regular action"
+                }
+                .to_string(),
+            );
+            let cost = action_type.cost;
+            if !cost.is_empty() {
+                description.push(format!("Cost: {cost}"));
+            }
+            description.push(a.civil_card.description);
             if let Some(t) = a.tactics_card {
                 description.extend(vec![
                     format!("Tactics: {}", t.name),

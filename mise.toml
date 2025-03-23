@@ -1,7 +1,7 @@
 [tasks.update-tests]
 description = "Run server tests and update json files"
-run = "cargo test"
-env = { RUST_BACKTRACE = "1", UPDATE_EXPECTED = "true" }
+run = 'cargo test {{arg(name="test", default="")}}'
+env = { UPDATE_EXPECTED = "true" }
 dir = "server"
 
 [tasks.server-format-and-lint]

@@ -9,6 +9,7 @@ use crate::content::custom_phase_actions::ResourceRewardRequest;
 use crate::game::Game;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
+use crate::player_events::{CurrentEvent, PersistentEvents};
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
@@ -59,27 +60,51 @@ pub(crate) fn collect_taxes(game: &mut Game, player_index: usize, gain: Resource
 }
 
 fn trade_routes() -> AdvanceBuilder {
-    Advance::builder(
-        "Trade Routes",
-        "At the beginning of your turn, you gain 1 food for every trade route you can make, to a maximum of 4. A trade route is made between one of your Settlers or Ships and a non-Angry enemy player city within 2 spaces (without counting through unrevealed Regions). Each Settler or Ship can only be paired with one enemy player city. Likewise, each enemy player city must be paired with a different Settler or Ship. In other words, to gain X food you must have at least X Units (Settlers or Ships), each paired with X different enemy cities.")
-        .add_resource_request(
-            |event| &mut event.on_turn_start,
-            0,
-            |game, _player_index, ()| {
-                trade_route_reward(game).map(|(reward, routes)| {
-                    gain_market_bonus(game, &routes);
-                    ResourceRewardRequest::new(
-                        reward,
-                         "Collect trade routes reward".to_string(),
-                    )
-                })
-            },
-            |game, p, ()| {
-                let (_, routes) =
-                    trade_route_reward(game).expect("No trade route reward");
-                trade_route_log(game, p.player_index, &routes, &p.choice, p.actively_selected)
-            },
-        )
+    add_trade_routes(
+        Advance::builder(
+            "Trade Routes",
+            "At the beginning of your turn, you gain 1 food for every trade route \
+        you can make, to a maximum of 4. A trade route is made between one of your \
+        Settlers or Ships and a non-Angry enemy player city within 2 spaces \
+        (without counting through unrevealed Regions). Each Settler or Ship can only be paired \
+        with one enemy player city. Likewise, each enemy player city must be paired with \
+        a different Settler or Ship. In other words, to gain X food you must have at least \
+        X Units (Settlers or Ships), each paired with X different enemy cities.",
+        ),
+        |event| &mut event.on_turn_start,
+    )
+}
+
+pub(crate) fn add_trade_routes<E, S, V>(b: S, event: E) -> S
+where
+    E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+    S: AbilityInitializerSetup,
+    V: Clone + PartialEq,
+{
+    b.add_resource_request(
+        event,
+        0,
+        |game, player_index, _| {
+            if !game.get_player(player_index).has_advance("Trade Routes") {
+                return None;
+            }
+
+            trade_route_reward(game).map(|(reward, routes)| {
+                gain_market_bonus(game, &routes);
+                ResourceRewardRequest::new(reward, "Collect trade routes reward".to_string())
+            })
+        },
+        |game, p, _| {
+            let (_, routes) = trade_route_reward(game).expect("No trade route reward");
+            trade_route_log(
+                game,
+                p.player_index,
+                &routes,
+                &p.choice,
+                p.actively_selected,
+            )
+        },
+    )
 }
 
 fn gain_market_bonus(game: &mut Game, routes: &[TradeRoute]) {

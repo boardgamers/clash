@@ -99,7 +99,7 @@ fn philosophy() -> AdvanceBuilder {
     .add_one_time_ability_initializer(|game, player_index| {
         game.players[player_index].gain_resources(ResourcePile::ideas(1));
     })
-    .add_simple_current_event_listener(
+    .add_simple_persistent_event_listener(
         |event| &mut event.on_advance,
         0,
         |game, player_index, player_name, advance| {

@@ -1,36 +1,5 @@
 {
   "state": "Playing",
-  "events": [
-    {
-      "event_type": {
-        "ActionCard": {
-          "id": 118
-        }
-      },
-      "player": 1,
-      "last_priority_used": 9,
-      "handler": {
-        "priority": 9,
-        "request": {
-          "SelectPositions": {
-            "choices": [
-              "D5",
-              "B6",
-              "F6"
-            ],
-            "needed": {
-              "start": 0,
-              "end": 1
-            },
-            "description": "Choose a region to explore"
-          }
-        },
-        "origin": {
-          "CivilCard": 118
-        }
-      }
-    }
-  ],
   "players": [
     {
       "id": 0,
@@ -55,8 +24,8 @@
       ],
       "units": [
         {
-          "position": "D1",
-          "unit_type": "Settler",
+          "position": "C8",
+          "unit_type": "Infantry",
           "id": 0
         }
       ],
@@ -71,12 +40,11 @@
     {
       "id": 1,
       "resources": {
-        "food": 2,
-        "mood_tokens": 2,
-        "culture_tokens": 1
+        "food": 4,
+        "culture_tokens": 2
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -94,18 +62,16 @@
       "units": [
         {
           "position": "D7",
-          "unit_type": "Settler",
+          "unit_type": "Infantry",
           "id": 0
         }
       ],
       "civilization": "test0",
       "advances": [
         "Farming",
-        "Fishing",
-        "Mining",
-        "Storage"
+        "Mining"
       ],
-      "incident_tokens": 3,
+      "incident_tokens": 1,
       "next_unit_id": 1
     }
   ],
@@ -233,9 +199,7 @@
       ],
       [
         "E8",
-        {
-          "Exhausted": "Forest"
-        }
+        "Forest"
       ],
       [
         "F2",
@@ -391,96 +355,11 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Storage",
-            "payment": {
-              "food": 2
-            }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
-            {
-              "culture_tokens": 1
-            }
-          ]
-        }
-      }
-    },
-    {
-      "action": {
-        "Playing": {
-          "ActionCard": 118
-        }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 2
-        },
-        {
-          "op": "add",
-          "path": "/players/1/action_cards",
-          "value": [
-            118
-          ]
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/advances/1",
-          "value": "Mining"
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/advances/2",
-          "value": "Storage"
-        },
-        {
-          "op": "remove",
-          "path": "/players/1/advances/3"
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/resources/mood_tokens",
-          "value": 1
-        },
-        {
-          "op": "remove",
-          "path": "/events"
-        }
-      ]
-    }
-  ],
-  "action_log_index": 3,
-  "log": [
-    [
-      "Player2 paid 2 food to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
-    ],
-    [
-      "A new game event has been triggered: Great Explorer",
-      "Player2 exhausted the land in position E8"
-    ],
-    [
-      "Player2 gained Great Explorer for 1 culture token"
-    ],
-    [
-      "Player2 played the action card Great Explorer",
-      "Player2 gained Fishing",
-      "Player gained 1 mood token as advance bonus"
-    ]
-  ],
-  "undo_limit": 2,
-  "actions_left": 1,
+  "action_log": [],
+  "action_log_index": 0,
+  "log": [],
+  "undo_limit": 0,
+  "actions_left": 3,
   "round": 1,
   "age": 1,
   "messages": [
@@ -693,5 +572,8 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "action_cards_left": []
+  "action_cards_left": [],
+  "incidents_left": [
+    24
+  ]
 }

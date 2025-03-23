@@ -120,7 +120,7 @@ impl TacticsCardBuilder {
         listener: impl Fn(usize, &mut Game, &Combat, &mut CombatStrength) + Clone + 'static,
     ) -> Self {
         let target = self.tactics_card_target;
-        self.add_simple_current_event_listener(
+        self.add_simple_persistent_event_listener(
             |event| &mut event.on_combat_round_start_tactics,
             priority,
             move |game, p, _, s| {
@@ -140,7 +140,7 @@ impl TacticsCardBuilder {
         listener: impl Fn(usize, &mut Game, &mut CombatRoundEnd) + Clone + 'static,
     ) -> Self {
         let target = self.tactics_card_target;
-        self.add_simple_current_event_listener(
+        self.add_simple_persistent_event_listener(
             |event| &mut event.on_combat_round_end_tactics,
             priority,
             move |game, p, _, s| {

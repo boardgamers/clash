@@ -159,7 +159,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         priority: i32,
         listener: impl Fn(&Game, &Combat, &mut CombatStrength, CombatRole) + Clone + 'static,
     ) -> Self {
-        self.add_simple_current_event_listener(
+        self.add_simple_persistent_event_listener(
             |event| &mut event.on_combat_round_start,
             priority,
             move |game, p, _, s| {
@@ -275,7 +275,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         )
     }
 
-    fn add_simple_current_event_listener<V, E, F>(
+    fn add_simple_persistent_event_listener<V, E, F>(
         self,
         event: E,
         priority: i32,

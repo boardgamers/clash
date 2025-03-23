@@ -137,7 +137,7 @@ pub(crate) fn free_advance() -> Builtin {
 
 pub(crate) fn draw_cards() -> Builtin {
     Builtin::builder("Draw Cards", "-")
-        .add_simple_current_event_listener(
+        .add_simple_persistent_event_listener(
             |event| &mut event.on_status_phase,
             0,
             |game, p, _name, _s| {

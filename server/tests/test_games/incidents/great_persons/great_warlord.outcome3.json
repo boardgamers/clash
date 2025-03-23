@@ -1,36 +1,12 @@
 {
-  "state": "Playing",
-  "events": [
-    {
-      "event_type": {
-        "ActionCard": {
-          "id": 118
-        }
-      },
-      "player": 1,
-      "last_priority_used": 9,
-      "handler": {
-        "priority": 9,
-        "request": {
-          "SelectPositions": {
-            "choices": [
-              "D5",
-              "B6",
-              "F6"
-            ],
-            "needed": {
-              "start": 0,
-              "end": 1
-            },
-            "description": "Choose a region to explore"
-          }
-        },
-        "origin": {
-          "CivilCard": 118
-        }
-      }
+  "state": {
+    "Movement": {
+      "movement_actions_left": 2,
+      "moved_units": [
+        0
+      ]
     }
-  ],
+  },
   "players": [
     {
       "id": 0,
@@ -53,13 +29,6 @@
           "position": "D1"
         }
       ],
-      "units": [
-        {
-          "position": "D1",
-          "unit_type": "Settler",
-          "id": 0
-        }
-      ],
       "civilization": "test1",
       "advances": [
         "Farming",
@@ -72,8 +41,8 @@
       "id": 1,
       "resources": {
         "food": 2,
-        "mood_tokens": 2,
-        "culture_tokens": 1
+        "mood_tokens": 1,
+        "culture_tokens": 2
       },
       "resource_limit": {
         "food": 7,
@@ -93,17 +62,20 @@
       ],
       "units": [
         {
-          "position": "D7",
-          "unit_type": "Settler",
+          "position": "C8",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 0
         }
       ],
       "civilization": "test0",
       "advances": [
         "Farming",
-        "Fishing",
         "Mining",
-        "Storage"
+        "Storage",
+        "Tactics"
       ],
       "incident_tokens": 3,
       "next_unit_id": 1
@@ -418,68 +390,55 @@
     {
       "action": {
         "Playing": {
-          "ActionCard": 118
+          "ActionCard": 124
         }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 2
-        },
-        {
-          "op": "add",
-          "path": "/players/1/action_cards",
-          "value": [
-            118
-          ]
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/advances/1",
-          "value": "Mining"
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/advances/2",
-          "value": "Storage"
-        },
-        {
-          "op": "remove",
-          "path": "/players/1/advances/3"
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/resources/mood_tokens",
-          "value": 1
-        },
-        {
-          "op": "remove",
-          "path": "/events"
+      }
+    },
+    {
+      "action": {
+        "Movement": {
+          "Move": {
+            "units": [
+              0
+            ],
+            "destination": "C8"
+          }
         }
-      ]
+      }
     }
   ],
-  "action_log_index": 3,
+  "action_log_index": 4,
   "log": [
     [
       "Player2 paid 2 food to get the Storage advance",
       "Player gained 1 mood token as advance bonus"
     ],
     [
-      "A new game event has been triggered: Great Explorer",
+      "A new game event has been triggered: Great Warlord",
       "Player2 exhausted the land in position E8"
     ],
     [
-      "Player2 gained Great Explorer for 1 culture token"
+      "Player2 gained Great Warlord for 1 culture token"
     ],
     [
-      "Player2 played the action card Great Explorer",
-      "Player2 gained Fishing",
-      "Player gained 1 mood token as advance bonus"
+      "Player2 played the action card Great Warlord",
+      "Player2 gained Tactics",
+      "Player gained 1 culture token as advance bonus"
+    ],
+    [
+      "Player2 marched 1 infantry from D7 to C8"
+    ],
+    [
+      "Combat round 1",
+      "Player2 rolled 5 (Cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units.",
+      "Player1 rolled 2 (Cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
+      "Player2 used the following combat modifiers: Player gets +2 combat value for Great Warlord",
+      "Player1 has to remove all of their defending units",
+      "Player1 removed 1 infantry",
+      "Attacker wins"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 4,
   "actions_left": 1,
   "round": 1,
   "age": 1,
@@ -684,11 +643,12 @@
     10,
     6,
     2,
-    0,
-    2,
-    8
+    0
   ],
-  "dice_roll_log": [],
+  "dice_roll_log": [
+    8,
+    2
+  ],
   "dropped_players": [],
   "wonders_left": [
     "Pyramids"

@@ -48,12 +48,9 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
         },
         |payment| match &cp.project {
             ConstructionProject::Building(b, pos) => StateUpdate::execute_activation(
-                Action::Playing(PlayingAction::Construct(Construct {
-                    city_position: cp.city_position,
-                    city_piece: *b,
-                    payment,
-                    port_position: *pos,
-                })),
+                Action::Playing(PlayingAction::Construct(
+                    Construct::new(cp.city_position, *b, payment).with_port_position(*pos),
+                )),
                 vec![],
                 city,
             ),
@@ -105,7 +102,7 @@ impl ConstructionPayment {
     ) -> ConstructionPayment {
         let p = rc.game.get_player(city.player_index);
         let cost = match &project {
-            ConstructionProject::Building(b, _) => p.construct_cost(*b, city, None),
+            ConstructionProject::Building(b, _) => p.construct_cost(rc.game, *b, None),
             ConstructionProject::Wonder(name) => p.wonder_cost(
                 wonder_cards(p).iter().find(|w| w.name == *name).unwrap(),
                 city,

@@ -96,7 +96,7 @@ fn solar_eclipse() -> Incident {
 
 pub(crate) fn solar_eclipse_end_combat() -> Builtin {
     Builtin::builder("Solar Eclipse", "-")
-        .add_simple_current_event_listener(
+        .add_simple_persistent_event_listener(
             |event| &mut event.on_combat_round_end,
             10,
             |game, _player, name, r| {
@@ -182,7 +182,7 @@ fn anarchy() -> Incident {
 
 pub(crate) fn anarchy_advance() -> Builtin {
     Builtin::builder("Anarchy", "-")
-        .add_simple_current_event_listener(
+        .add_simple_persistent_event_listener(
             |event| &mut event.on_advance,
             10,
             |game, player_index, player_name, i| {

@@ -16,7 +16,7 @@
             {
               "cost": {
                 "default": {
-                  "ideas": 1
+                  "culture_tokens": 1
                 },
                 "conversions": [
                   {
@@ -93,8 +93,8 @@
       "id": 1,
       "resources": {
         "food": 2,
-        "ideas": 2,
-        "mood_tokens": 1
+        "mood_tokens": 1,
+        "culture_tokens": 2
       },
       "resource_limit": {
         "food": 7,

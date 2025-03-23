@@ -99,63 +99,79 @@ impl City {
         self.activations > 0
     }
 
-    #[must_use]
-    pub fn can_construct(&self, building: Building, player: &Player, game: &Game) -> bool {
-        if self.player_index != player.index {
-            return false;
-        }
-        if self.pieces.amount() == MAX_CITY_SIZE {
-            return false;
-        }
+    ///
+    /// # Errors
+    /// Returns an error if the building cannot be built
+    pub fn can_construct(
+        &self,
+        building: Building,
+        player: &Player,
+        game: &Game,
+    ) -> Result<(), String> {
+        self.can_build_anything(player)?;
         if matches!(self.mood_state, Angry) {
-            return false;
+            return Err("City is angry".to_string());
         }
         if !self.pieces.can_add_building(building) {
-            return false;
-        }
-        let size = self.pieces.amount() + 1;
-        if size >= player.cities.len() {
-            return false;
+            return Err("Building already exists".to_string());
         }
         if !player
             .advances
             .iter()
             .any(|a| a.unlocked_building == Some(building))
         {
-            return false;
+            return Err("Building not researched".to_string());
         }
         if !player.is_building_available(building, game) {
-            return false;
+            return Err("All non-destroyed buildings are built".to_string());
         }
-        player.can_afford(&player.construct_cost(building, self, None).cost)
+        if !player.can_afford(&player.construct_cost(game, building, None).cost) {
+            return Err("Not enough resources".to_string());
+        }
+        Ok(())
     }
 
-    #[must_use]
-    pub fn can_build_wonder(&self, wonder: &Wonder, player: &Player, game: &Game) -> bool {
+    fn can_build_anything(&self, player: &Player) -> Result<(), String> {
         if self.player_index != player.index {
-            return false;
+            return Err("Not your city".to_string());
         }
-        if self.pieces.amount() == MAX_CITY_SIZE {
-            return false;
+        if self.pieces.amount() >= MAX_CITY_SIZE {
+            return Err("City is full".to_string());
         }
         if self.pieces.amount() >= player.cities.len() {
-            return false;
+            return Err("Need more cities".to_string());
         }
+
+        Ok(())
+    }
+
+    ///
+    /// # Errors
+    /// Returns an error if the wonder cannot be built
+    pub fn can_build_wonder(
+        &self,
+        wonder: &Wonder,
+        player: &Player,
+        game: &Game,
+    ) -> Result<(), String> {
+        self.can_build_anything(player)?;
         if !matches!(self.mood_state, Happy) {
-            return false;
+            return Err("City is not happy".to_string());
         }
         if !player.can_afford(&player.wonder_cost(wonder, self, None).cost) {
-            return false;
+            return Err("Not enough resources".to_string());
         }
         for advance in &wonder.required_advances {
             if !player.has_advance(advance) {
-                return false;
+                return Err(format!("Advance missing: {advance}"));
             }
         }
         if let Some(placement_requirement) = &wonder.placement_requirement {
-            return placement_requirement(self.position, game);
+            if !placement_requirement(self.position, game) {
+                return Err("Placement requirement not met".to_string());
+            }
         }
-        true
+        Ok(())
     }
 
     ///

@@ -2,7 +2,9 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
 use crate::action_card::ActionCard;
 use crate::content::custom_phase_actions::{EventResponse, PaymentRequest, PositionRequest};
-use crate::content::incidents::great_persons::great_person_action_card;
+use crate::content::incidents::great_persons::{
+    great_person_action_card, great_person_description,
+};
 use crate::explore::move_to_unexplored_block;
 use crate::game::Game;
 use crate::map::{get_map_setup, BlockPosition, UNEXPLORED_BLOCK};
@@ -13,12 +15,18 @@ use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 
 pub(crate) fn great_explorer() -> ActionCard {
+    let groups = &["Seafaring"];
     great_person_action_card(
         18,
         "Great Explorer",
-        "todo",
+        &format!(
+            "{} Then, you may explore a region adjacent to a region \
+            where you have a city. If you do, you may found a city in the explored region,\
+            without using a Settler.",
+            great_person_description(groups)
+        ),
         ActionType::regular(),
-        &["Seafaring"],
+        groups,
         |_game, _player| true,
     )
     .add_position_request(
@@ -82,6 +90,8 @@ pub(crate) fn great_explorer() -> ActionCard {
                     "{} decided to build a city at {pos}",
                     s.player_name
                 ));
+            } else {
+                game.add_info_log_item(&format!("{} decided not to build a city", s.player_name));
             }
             a.selected_position = pos;
         },
@@ -100,7 +110,10 @@ pub(crate) fn great_explorer() -> ActionCard {
         |game, s, a| {
             let pos = a.selected_position.expect("position not found");
             build_city(game.get_player_mut(s.player_index), pos);
-            game.add_info_log_item(&format!("{} built a city at {pos}", s.player_name));
+            game.add_info_log_item(&format!(
+                "{} built a city at {pos} for {}",
+                s.player_name, s.choice[0]
+            ));
         },
     )
     .build()

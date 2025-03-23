@@ -4,8 +4,8 @@ use server::card::HandCard;
 use server::city_pieces::Building::Fortress;
 use server::content::custom_phase_actions::{EventResponse, Structure};
 use server::playing_actions;
-use server::playing_actions::PlayingAction;
 use server::playing_actions::PlayingAction::{Advance, Construct};
+use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::status_phase::{ChangeGovernment, ChangeGovernmentType};
@@ -133,12 +133,11 @@ const FAMINE: JsonTest = JsonTest::child("incidents", "famine");
 
 #[test]
 fn test_pestilence() {
-    let cons = Action::Playing(Construct(playing_actions::Construct {
-        city_position: Position::from_offset("C2"),
-        city_piece: Fortress,
-        payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
-        port_position: None,
-    }));
+    let cons = Action::Playing(Construct(playing_actions::Construct::new(
+        Position::from_offset("C2"),
+        Fortress,
+        ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
+    )));
     FAMINE.test(
         "pestilence",
         vec![
@@ -682,7 +681,9 @@ fn test_great_explorer() {
             ),
             TestAction::not_undoable(
                 1,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::ideas(1)])),
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    1,
+                )])),
             ),
             TestAction::undoable(1, Action::Playing(PlayingAction::ActionCard(118))),
             TestAction::undoable(
@@ -702,6 +703,169 @@ fn test_great_explorer() {
                 1,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::food(2)])),
             ),
+        ],
+    );
+}
+
+#[test]
+fn test_great_artist() {
+    GREAT_PERSONS.test(
+        "great_artist",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::food(2),
+                }),
+            ),
+            TestAction::not_undoable(
+                1,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    2,
+                )])),
+            ),
+            TestAction::not_undoable(0, Action::Playing(PlayingAction::EndTurn)),
+            TestAction::undoable(1, Action::Playing(PlayingAction::ActionCard(119))),
+        ],
+    );
+}
+
+#[test]
+fn test_great_prophet() {
+    GREAT_PERSONS.test(
+        "great_prophet",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::food(2),
+                }),
+            )
+            .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    1,
+                )])),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(120)))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "C1",
+                )])),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::gold(2)])),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_great_warlord() {
+    GREAT_PERSONS.test(
+        "great_warlord",
+        vec![
+            TestAction::not_undoable(
+                1,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::food(2),
+                }),
+            )
+            .without_json_comparison(),
+            TestAction::not_undoable(
+                1,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    1,
+                )])),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(1, Action::Playing(PlayingAction::ActionCard(124)))
+                .without_json_comparison(),
+            TestAction::not_undoable(1, move_action(vec![0], Position::from_offset("C8"))),
+        ],
+    );
+}
+
+#[test]
+fn test_great_merchant() {
+    GREAT_PERSONS.test(
+        "great_merchant",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::food(2),
+                }),
+            )
+            .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    1,
+                )])),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(125)))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::ResourceReward(ResourcePile::gold(1))),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_great_engineer() {
+    GREAT_PERSONS.test(
+        "great_engineer",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::food(2),
+                }),
+            )
+            .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    1,
+                )])),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(126)))
+                .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::SelectAdvance("Engineering".to_string())),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(0, Action::Response(EventResponse::Bool(true)))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Playing(Construct(playing_actions::Construct::new(
+                    Position::from_offset("C2"),
+                    Fortress,
+                    ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
+                ))),
+            )
+            .with_pre_assert(|game| {
+                // must do construct
+                assert!(!PlayingActionType::Advance.is_available(game, 0))
+            }),
         ],
     );
 }

@@ -139,7 +139,7 @@ where
         info: &U,
         details: &V,
         extra_value: &mut W,
-        is_ok: impl Fn(&T) -> bool,
+        mut is_ok: impl FnMut(&T) -> bool,
         set_modifiers: impl Fn(&mut T, Vec<EventOrigin>),
     ) -> T
     where
@@ -147,6 +147,8 @@ where
     {
         let mut initial_value = value.clone();
         let initial_modifiers = self.trigger(&mut initial_value, info, details, extra_value);
+        // to see what's possible
+        is_ok(&initial_value);
 
         initial_modifiers
             .iter()

@@ -73,8 +73,8 @@
       "id": 1,
       "resources": {
         "food": 2,
-        "ideas": 1,
-        "mood_tokens": 2
+        "mood_tokens": 2,
+        "culture_tokens": 1
       },
       "resource_limit": {
         "food": 7,
@@ -410,7 +410,7 @@
         "Response": {
           "Payment": [
             {
-              "ideas": 1
+              "culture_tokens": 1
             }
           ]
         }
@@ -566,7 +566,7 @@
       "Player2 exhausted the land in position E8"
     ],
     [
-      "Player2 gained Great Explorer for 1 idea"
+      "Player2 gained Great Explorer for 1 culture token"
     ],
     [
       "Player2 played the action card Great Explorer",

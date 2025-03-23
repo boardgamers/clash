@@ -87,7 +87,7 @@ fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> 
 
     wonder_cards(owner)
         .into_iter()
-        .filter(|w| city.can_build_wonder(w, owner, game))
+        .filter(|w| city.can_build_wonder(w, owner, game).is_ok())
         .map(|w| {
             let a: IconAction<'a> = (
                 &rc.assets().wonders[&w.name],
@@ -116,7 +116,7 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
     Building::all()
         .iter()
         .filter_map(|b| {
-            if city.can_construct(*b, owner, rc.game) {
+            if city.can_construct(*b, owner, rc.game).is_ok() {
                 Some(*b)
             } else {
                 None
@@ -125,11 +125,17 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
         .flat_map(|b| new_building_positions(b, rc, city))
         .map(|(b, pos)| {
             let name = b.name();
+            let cost_info = owner.construct_cost(rc.game, b, None);
             let tooltip = format!(
-                "Built {}{} for {}",
+                "Built {}{} for {}{}",
                 name,
                 pos.map_or(String::new(), |p| format!(" at {p}")),
-                owner.construct_cost(b, city, None).cost,
+                cost_info.cost,
+                if cost_info.activate_city {
+                    ""
+                } else {
+                    " (without city activation)"
+                }
             );
             let a: IconAction<'a> = (
                 &rc.assets().buildings[&b],

@@ -5,6 +5,7 @@ use crate::map::Terrain::{Forest, Mountain};
 use crate::payment::PaymentOptions;
 use crate::resource_pile::ResourcePile;
 use crate::unit::Unit;
+use crate::utils;
 
 use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, MOVEMENT_ACTIONS, SHIP_CAPACITY, STACK_LIMIT};
 use crate::game::GameState::Movement;
@@ -45,6 +46,9 @@ pub struct MoveState {
     #[serde(default)]
     #[serde(skip_serializing_if = "CurrentMove::is_none")]
     pub current_move: CurrentMove,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "utils::is_false")]
+    pub great_warlord_used: bool,
 }
 
 impl Default for MoveState {
@@ -60,6 +64,7 @@ impl MoveState {
             movement_actions_left: MOVEMENT_ACTIONS,
             moved_units: Vec::new(),
             current_move: CurrentMove::None,
+            great_warlord_used: false,
         }
     }
 }
@@ -68,7 +73,7 @@ pub(crate) fn get_move_state(game: &mut Game) -> &mut MoveState {
     if let Movement(m) = &mut game.state {
         m
     } else {
-        panic!("no move state to pop");
+        panic!("no move state");
     }
 }
 

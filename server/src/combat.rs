@@ -24,6 +24,7 @@ pub enum CombatModifier {
     SteelWeaponsAttacker,
     SteelWeaponsDefender,
     TrojanHorse,
+    GreatWarlord,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Copy)]
@@ -697,8 +698,8 @@ pub mod tests {
         let position = Position::new(0, 0);
         game.players[old].cities.push(City::new(old, position));
         game.build_wonder(wonder, position, old);
-        game.players[old].construct(Academy, position, None);
-        game.players[old].construct(Obelisk, position, None);
+        game.players[old].construct(Academy, position, None, true);
+        game.players[old].construct(Obelisk, position, None, true);
 
         game.players[old].victory_points(&game).assert_eq(7.0);
 
