@@ -1,7 +1,4 @@
-use crate::action_buttons::{base_or_custom_action, base_or_custom_available};
-use crate::cards_ui::wonder_cards;
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
 use crate::payment_ui::{payment_dialog, Payment};
 use crate::recruit_unit_ui::RecruitSelection;
 use crate::render_context::RenderContext;
@@ -9,13 +6,10 @@ use server::action::Action;
 use server::city::City;
 use server::city_pieces::Building;
 use server::construct::Construct;
-use server::content::custom_actions::{CustomAction, CustomActionType};
-use server::events::EventOrigin;
 use server::map::Terrain;
-use server::playing_actions::{PlayingAction, PlayingActionType, Recruit};
+use server::playing_actions::{PlayingAction, Recruit};
 use server::position::Position;
 use server::recruit::recruit_cost;
-use server::wonder::{ConstructWonder, Wonder};
 
 pub fn new_building_positions(
     building: Building,

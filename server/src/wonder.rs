@@ -1,18 +1,17 @@
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::card::draw_card_from_pile;
+use crate::city::{City, MoodState};
+use crate::construct::can_construct_anything;
 use crate::content::builtin::Builtin;
 use crate::content::custom_phase_actions::{CurrentEventType, PaymentRequest, PositionRequest};
 use crate::content::wonders::get_wonder;
 use crate::events::EventOrigin;
 use crate::incident::PermanentIncidentEffect;
 use crate::payment::PaymentOptions;
-use crate::resource_pile::ResourcePile;
+use crate::player::Player;
 use crate::{ability_initializer::AbilityInitializerSetup, game::Game, position::Position};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use crate::city::{City, MoodState};
-use crate::construct::can_construct_anything;
-use crate::player::Player;
 
 type PlacementChecker = Box<dyn Fn(Position, &Game) -> bool>;
 
@@ -253,7 +252,7 @@ pub(crate) struct WonderDiscount {
 
 impl WonderDiscount {
     #[must_use]
-    pub fn new(ignore_required_advances: bool, discount_culture_tokens: u32) -> Self {
+    pub const fn new(ignore_required_advances: bool, discount_culture_tokens: u32) -> Self {
         Self {
             ignore_required_advances,
             culture_tokens: discount_culture_tokens,
@@ -261,7 +260,7 @@ impl WonderDiscount {
     }
     
     #[must_use]
-    pub fn no_discount() -> Self {
+    pub const fn no_discount() -> Self {
         Self::new(false, 0)
     }
 }
@@ -347,7 +346,6 @@ pub(crate) fn construct_wonder(
     (wonder.listeners.one_time_initializer)(game, player_index);
     let player = &mut game.players[player_index];
     player.wonders_build.push(wonder.name.clone());
-    let name = wonder.name.clone();
     player
         .get_city_mut(city_position)
         .pieces

@@ -14,15 +14,15 @@ use crate::playing_actions::{PlayingActionType, Recruit};
 use crate::status_phase::StatusPhaseState;
 use crate::unit::Units;
 use crate::utils;
+use crate::wonder::WonderCardInfo;
 use crate::{
     city::City, city_pieces::Building, player::Player, position::Position,
-    resource_pile::ResourcePile, wonder::Wonder,
+    resource_pile::ResourcePile,
 };
 use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
-use crate::wonder::WonderCardInfo;
 
 pub(crate) type CurrentEvent<V = ()> = Event<Game, CurrentEventInfo, (), V>;
 

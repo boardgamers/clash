@@ -42,7 +42,7 @@ pub fn can_construct(
     building: Building,
     player: &Player,
     game: &Game,
-) -> Result<ResourcePile, String> {
+) -> Result<(), String> {
     can_construct_anything(city, player)?;
     if city.mood_state == MoodState::Angry {
         return Err("City is angry".to_string());
@@ -64,7 +64,6 @@ pub fn can_construct(
         // construct cost event listener?
         return Err("Not enough resources".to_string());
     }
-    //todo check cost
     Ok(())
 }
 
@@ -86,7 +85,7 @@ pub(crate) fn construct(game: &mut Game, player_index: usize, c: &Construct) {
     let player = &game.players[player_index];
     let city = player.get_city(c.city_position);
     let cost = player.construct_cost(game, c.city_piece, Some(&c.payment));
-    let cost can_construct(city, c.city_piece, player, game)
+    can_construct(city, c.city_piece, player, game)
         .map_err(|e| panic!("{e}"))
         .ok();
     if matches!(c.city_piece, Building::Port) {

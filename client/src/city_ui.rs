@@ -1,10 +1,9 @@
 use crate::action_buttons::{
     base_or_custom_action, base_or_custom_available, custom_action_buttons,
 };
-use crate::cards_ui::wonder_cards;
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::CollectResources;
-use crate::construct_ui::{can_play_construct_wonder, new_building_positions, open_construct_wonder_dialog, ConstructionPayment, ConstructionProject};
+use crate::construct_ui::{ new_building_positions,  ConstructionPayment, ConstructionProject};
 use crate::custom_phase_ui::{highlight_structures, StructureHighlight};
 use crate::happiness_ui::{
     add_increase_happiness, can_play_increase_happiness, open_increase_happiness_dialog,
@@ -29,6 +28,7 @@ use server::resource::ResourceType;
 use server::unit::{UnitType, Units};
 use std::collections::HashMap;
 use std::ops::Add;
+use server::construct::can_construct;
 use server::events::EventOrigin;
 
 pub type IconAction<'a> = (&'a Texture2D, String, Box<dyn Fn() -> StateUpdate + 'a>);
@@ -85,7 +85,7 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
     Building::all()
         .iter()
         .filter_map(|b| {
-            if city.can_construct(*b, owner, rc.game).is_ok() {
+            if can_construct(city, *b, owner, rc.game).is_ok() {
                 Some(*b)
             } else {
                 None
