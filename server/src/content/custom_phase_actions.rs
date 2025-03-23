@@ -164,7 +164,7 @@ pub enum CurrentEventType {
     Incident(IncidentInfo),
     ActionCard(ActionCardInfo),
     WonderCard(WonderCardInfo),
-    DrawWonderCard, // todo same for Great Seer
+    DrawWonderCard,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
