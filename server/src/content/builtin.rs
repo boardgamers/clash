@@ -5,6 +5,8 @@ use crate::combat_listeners::{
     choose_carried_units_casualties, choose_fighter_casualties, offer_retreat, place_settler,
 };
 use crate::content::incidents::famine::pestilence_permanent_effect;
+use crate::content::incidents::great_builder::use_great_engineer;
+use crate::content::incidents::great_warlord::use_great_warlord;
 use crate::content::incidents::trojan::{
     anarchy_advance, decide_trojan_horse, solar_eclipse_end_combat,
 };
@@ -86,6 +88,8 @@ pub fn get_all() -> Vec<Builtin> {
         decide_trojan_horse(),
         solar_eclipse_end_combat(),
         anarchy_advance(),
+        use_great_warlord(),
+        use_great_engineer(),
     ]
 }
 

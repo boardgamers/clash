@@ -89,7 +89,7 @@ fn state_religion() -> AdvanceBuilder {
     .add_once_per_turn_listener(
         |event| &mut event.construct_cost,
         |i| &mut i.info.info,
-        |i, _city, b| {
+        |i, b, _| {
             if matches!(b, Temple) {
                 i.cost.conversions.push(PaymentConversion::limited(
                     ResourcePile::of(ResourceType::Food, 1),

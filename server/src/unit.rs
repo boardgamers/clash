@@ -409,7 +409,7 @@ impl Display for Units {
                 format!("{} leaders", self.leaders)
             });
         }
-        write!(f, "{}", utils::format_list(&unit_types, "no units"))
+        write!(f, "{}", utils::format_and(&unit_types, "no units"))
     }
 }
 

@@ -41,7 +41,7 @@
       "id": 1,
       "resources": {
         "food": 4,
-        "ideas": 2
+        "culture_tokens": 2
       },
       "resource_limit": {
         "food": 2,

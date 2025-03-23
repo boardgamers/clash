@@ -422,12 +422,11 @@ fn test_dogma() {
             ),
             TestAction::undoable(
                 1,
-                Action::Playing(Construct(playing_actions::Construct {
-                    city_position: Position::from_offset("C1"),
-                    city_piece: Temple,
-                    payment: ResourcePile::new(0, 1, 1, 0, 0, 0, 0),
-                    port_position: None,
-                })),
+                Action::Playing(Construct(playing_actions::Construct::new(
+                    Position::from_offset("C1"),
+                    Temple,
+                    ResourcePile::new(0, 1, 1, 0, 0, 0, 0),
+                ))),
             ),
             TestAction::undoable(
                 1,

@@ -33,6 +33,24 @@ pub struct Construct {
     pub port_position: Option<Position>,
 }
 
+impl Construct {
+    #[must_use]
+    pub fn new(city_position: Position, city_piece: Building, payment: ResourcePile) -> Self {
+        Self {
+            city_position,
+            city_piece,
+            payment,
+            port_position: None,
+        }
+    }
+
+    #[must_use]
+    pub fn with_port_position(mut self, port_position: Option<Position>) -> Self {
+        self.port_position = port_position;
+        self
+    }
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Collect {
     pub city_position: Position,
@@ -350,14 +368,13 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, i: ActionCa
     );
 }
 
-fn construct(game: &mut Game, player_index: usize, c: &Construct) {
+pub(crate) fn construct(game: &mut Game, player_index: usize, c: &Construct) {
     let player = &game.players[player_index];
     let city = player.get_city(c.city_position);
-    let cost = player.construct_cost(c.city_piece, city, Some(&c.payment));
-    assert!(
-        city.can_construct(c.city_piece, player, game),
-        "Illegal action"
-    );
+    let cost = player.construct_cost(game, c.city_piece, Some(&c.payment));
+    city.can_construct(c.city_piece, player, game)
+        .map_err(|e| panic!("{e}"))
+        .ok();
     if matches!(c.city_piece, Port) {
         let port_position = c.port_position.as_ref().expect("Illegal action");
         assert!(
@@ -367,7 +384,12 @@ fn construct(game: &mut Game, player_index: usize, c: &Construct) {
     } else if c.port_position.is_some() {
         panic!("Illegal action");
     }
-    game.players[player_index].construct(c.city_piece, c.city_position, c.port_position);
+    game.players[player_index].construct(
+        c.city_piece,
+        c.city_position,
+        c.port_position,
+        cost.activate_city,
+    );
     if matches!(c.city_piece, Academy) {
         game.players[player_index].gain_resources(ResourcePile::ideas(2));
         game.add_info_log_item("Academy gained 2 ideas");

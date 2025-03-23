@@ -78,12 +78,11 @@ fn basic_actions() {
         .cities
         .push(City::new(0, Position::new(0, 2)));
 
-    let construct_action = Action::Playing(Construct(playing_actions::Construct {
+    let construct_action = Action::Playing(Construct(playing_actions::Construct::new(
         city_position,
-        city_piece: Observatory,
-        payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
-        port_position: None,
-    }));
+        Observatory,
+        ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
+    )));
     let game = game_api::execute(game, construct_action, 0);
     let player = &game.players[0];
 
@@ -407,12 +406,11 @@ fn test_construct() {
         "construct",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Construct(playing_actions::Construct {
-                city_position: Position::from_offset("C2"),
-                city_piece: Observatory,
-                payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
-                port_position: None,
-            })),
+            Action::Playing(Construct(playing_actions::Construct::new(
+                Position::from_offset("C2"),
+                Observatory,
+                ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
+            ))),
         )],
     );
 }
@@ -423,12 +421,14 @@ fn test_construct_port() {
         "construct_port",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Construct(playing_actions::Construct {
-                city_position: Position::from_offset("A1"),
-                city_piece: Port,
-                payment: ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
-                port_position: Some(Position::from_offset("A2")),
-            })),
+            Action::Playing(Construct(
+                playing_actions::Construct::new(
+                    Position::from_offset("A1"),
+                    Port,
+                    ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
+                )
+                .with_port_position(Some(Position::from_offset("A2"))),
+            )),
         )],
     );
 }

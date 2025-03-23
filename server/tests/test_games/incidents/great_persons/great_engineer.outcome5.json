@@ -1,0 +1,414 @@
+{
+  "state": "Playing",
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "wood": 5,
+        "ore": 5,
+        "gold": 7,
+        "mood_tokens": 1,
+        "culture_tokens": 6
+      },
+      "resource_limit": {
+        "food": 7,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "fortress": 0,
+            "temple": 1
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C2"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B2"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 1
+        },
+        {
+          "position": "C2",
+          "unit_type": "Elephant",
+          "id": 3
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 6
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 7
+        }
+      ],
+      "civilization": "test0",
+      "advances": [
+        "Arts",
+        "Bartering",
+        "Currency",
+        "Engineering",
+        "Farming",
+        "Mining",
+        "Storage",
+        "Tactics"
+      ],
+      "incident_tokens": 3,
+      "wonder_cards": [
+        "Pyramids"
+      ],
+      "next_unit_id": 8
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Angry",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A3"
+        },
+        {
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A4"
+        }
+      ],
+      "civilization": "test1",
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "incident_tokens": 3,
+      "next_unit_id": 2
+    },
+    {
+      "id": 2,
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "civilization": "Barbarians",
+      "incident_tokens": 3,
+      "next_unit_id": 0
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Water"
+      ],
+      [
+        "A3",
+        "Mountain"
+      ],
+      [
+        "A4",
+        "Mountain"
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "D2",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "action": {
+        "Playing": {
+          "Advance": {
+            "advance": "Storage",
+            "payment": {
+              "food": 2
+            }
+          }
+        }
+      }
+    },
+    {
+      "action": {
+        "Response": {
+          "Payment": [
+            {
+              "culture_tokens": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "action": {
+        "Playing": {
+          "ActionCard": 126
+        }
+      }
+    },
+    {
+      "action": {
+        "Response": {
+          "SelectAdvance": "Engineering"
+        }
+      }
+    },
+    {
+      "action": {
+        "Response": {
+          "Bool": true
+        }
+      },
+      "undo": [
+        {
+          "op": "replace",
+          "path": "/actions_left",
+          "value": 1
+        },
+        {
+          "op": "add",
+          "path": "/events",
+          "value": [
+            {
+              "event_type": {
+                "ActionCard": {
+                  "id": 126
+                }
+              },
+              "handler": {
+                "origin": {
+                  "CivilCard": 126
+                },
+                "priority": 0,
+                "request": {
+                  "BoolRequest": "Build a building in a city without spending an action and without activating it?"
+                }
+              },
+              "last_priority_used": 0,
+              "player": 0
+            }
+          ]
+        },
+        {
+          "op": "remove",
+          "path": "/permanent_incident_effects"
+        }
+      ]
+    },
+    {
+      "action": {
+        "Playing": {
+          "Construct": {
+            "city_position": "C2",
+            "city_piece": "Fortress",
+            "payment": {
+              "food": 1,
+              "wood": 1,
+              "ore": 1
+            },
+            "port_position": null
+          }
+        }
+      },
+      "undo": [
+        {
+          "op": "replace",
+          "path": "/actions_left",
+          "value": 2
+        },
+        {
+          "op": "add",
+          "path": "/permanent_incident_effects",
+          "value": [
+            "GreatEngineer"
+          ]
+        },
+        {
+          "op": "remove",
+          "path": "/players/0/cities/0/city_pieces/fortress"
+        },
+        {
+          "op": "add",
+          "path": "/players/0/resources/food",
+          "value": 1
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/ore",
+          "value": 6
+        },
+        {
+          "op": "replace",
+          "path": "/players/0/resources/wood",
+          "value": 6
+        }
+      ]
+    }
+  ],
+  "action_log_index": 6,
+  "log": [
+    [
+      "Player1 paid 2 food to get the Storage advance",
+      "Player gained 1 mood token as advance bonus"
+    ],
+    [
+      "A new game event has been triggered: Great Engineer",
+      "Base effect: Barbarians move",
+      "Barbarians cannot move - will try to spawn a new city instead",
+      "Barbarians cannot spawn a new city"
+    ],
+    [
+      "Player1 gained Great Engineer for 1 culture token"
+    ],
+    [
+      "Player1 played the action card Great Engineer"
+    ],
+    [
+      "Player1 gained Engineering",
+      "Player1 drew a wonder card from the pile"
+    ],
+    [
+      "Great Engineer: You may build a building in a city without spending an action and without activating it."
+    ],
+    [
+      "Player1 paid 1 food, 1 wood and 1 ore to construct a Fortress in the city at C2"
+    ]
+  ],
+  "undo_limit": 4,
+  "actions_left": 1,
+  "round": 1,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+  ],
+  "dice_roll_log": [
+    10
+  ],
+  "dropped_players": [],
+  "wonders_left": [],
+  "action_cards_left": []
+}

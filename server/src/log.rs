@@ -139,11 +139,11 @@ pub fn format_happiness_increase(
                 None
             }
         })
-        .collect::<Vec<String>>();
+        .collect_vec();
     format!(
         "{player_name} paid {} to increase happiness in {}",
         i.payment,
-        utils::format_list(&happiness_increases, "no city")
+        utils::format_and(&happiness_increases, "no city")
     )
 }
 
@@ -181,12 +181,12 @@ fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -
         1 => " and replaces the unit at ",
         _ => " and replaces units at ",
     };
-    let replace_pos = utils::format_list(
+    let replace_pos = utils::format_and(
         &replaced_units
             .iter()
             .map(|unit_id| player.get_unit(*unit_id).position.to_string())
             .unique()
-            .collect::<Vec<String>>(),
+            .collect_vec(),
         "",
     );
     format!(
@@ -196,11 +196,11 @@ fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -
 
 pub(crate) fn format_collect_log_item(player: &Player, player_name: &str, c: &Collect) -> String {
     let collections = &c.collections;
-    let res = utils::format_list(
+    let res = utils::format_and(
         &collections
             .iter()
             .map(|(_, collection)| collection.to_string())
-            .collect::<Vec<String>>(),
+            .collect_vec(),
         "nothing",
     );
     let total = if collections.len() > 1

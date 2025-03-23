@@ -15,6 +15,7 @@ use std::{
     env,
     fs::{self, OpenOptions},
     io::Write,
+    mem,
     path::MAIN_SEPARATOR as SEPARATOR,
     vec,
 };
@@ -33,11 +34,16 @@ impl GamePath {
             name: name.to_string(),
         }
     }
+
+    #[must_use]
+    pub fn path(&self) -> String {
+        format!("{}{SEPARATOR}{}.json", self.directory, self.name)
+    }
 }
 
 impl Display for GamePath {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}{SEPARATOR}{}.json", self.directory, self.name)
+        write!(f, "{}", self.path())
     }
 }
 
@@ -204,16 +210,18 @@ pub(crate) fn test_actions(test: &JsonTest, name: &str, actions: Vec<TestAction>
     };
     let path = test.path(name);
     let mut game = load_game(&path);
+    let mut last_json_compare = false;
     for (i, action) in actions.into_iter().enumerate() {
         let from = if i == 0 {
             path.clone()
         } else {
             outcome(&path, i - 1)
         };
+        let compare = mem::replace(&mut last_json_compare, action.compare_json);
         game = catch_unwind(AssertUnwindSafe(|| {
-            test_action_internal(game, name, &from, &outcome(&path, i), action)
+            test_action_internal(game, name, &from, &outcome(&path, i), action, compare)
         }))
-        .unwrap_or_else(|e| panic!("test action {i} should not panic: {e:?}"))
+        .unwrap_or_else(|e| panic!("test action {i} should not panic: {e:?}"));
     }
 }
 
@@ -223,6 +231,7 @@ fn test_action_internal(
     original: &GamePath,
     outcome: &GamePath,
     test: TestAction,
+    last_json_compare: bool,
 ) -> Game {
     let action = test.action;
     let a = serde_json::to_string(&action).expect("action should be serializable");
@@ -254,11 +263,12 @@ fn test_action_internal(
     for post_assert in test.post_asserts {
         post_assert(&game);
     }
+    let compare_json = test.compare_json && last_json_compare;
     undo_redo(
         name,
         test.player_index,
-        test.compare_json,
-        if test.compare_json {
+        compare_json,
+        if compare_json {
             read_game_str(original)
         } else {
             "".to_string()

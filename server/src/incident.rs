@@ -107,6 +107,7 @@ pub enum PermanentIncidentEffect {
     TrojanHorse,
     SolarEclipse,
     Anarchy(Anarchy),
+    GreatEngineer,
 }
 
 #[derive(Clone)]
@@ -213,7 +214,7 @@ impl IncidentBuilder {
     where
         F: Fn(&mut Game, usize, &str, &mut IncidentInfo) + 'static + Clone,
     {
-        self.add_simple_current_event_listener(
+        self.add_simple_persistent_event_listener(
             |event| &mut event.on_incident,
             priority,
             move |game, player_index, player_name, i| {

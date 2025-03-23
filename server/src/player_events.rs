@@ -39,7 +39,7 @@ pub(crate) struct TransientEvents {
     pub on_influence_culture_success: Event<Game, usize>,
     pub before_move: Event<Game, MoveInfo>,
 
-    pub construct_cost: Event<CostInfo, City, Building>,
+    pub construct_cost: Event<CostInfo, Building, Game>,
     pub wonder_cost: Event<CostInfo, City, Wonder>,
     pub advance_cost: Event<CostInfo, Advance>,
     pub happiness_cost: Event<CostInfo>,
@@ -208,6 +208,7 @@ impl IncidentInfo {
 #[derive(Clone, PartialEq)]
 pub struct CostInfo {
     pub cost: PaymentOptions,
+    pub activate_city: bool,
     pub(crate) info: ActionInfo,
 }
 
@@ -216,6 +217,7 @@ impl CostInfo {
         CostInfo {
             cost,
             info: ActionInfo::new(player),
+            activate_city: true,
         }
     }
 

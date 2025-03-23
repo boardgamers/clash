@@ -1,13 +1,26 @@
+use itertools::Itertools;
+
 #[must_use]
-pub(crate) fn format_list(list: &[String], empty_message: &str) -> String {
+pub(crate) fn format_and<S: AsRef<str>>(list: &[S], empty_message: &str) -> String {
+    format_list(list, empty_message, "and")
+}
+
+#[must_use]
+pub(crate) fn format_list<S: AsRef<str>>(
+    list: &[S],
+    empty_message: &str,
+    conjunction: &str,
+) -> String {
     match list {
         [] => empty_message.to_string(),
-        [element] => element.clone(),
+        [element] => element.as_ref().to_string(),
         _ => format!(
-            "{} and {}",
-            &list[..list.len() - 1].join(", "),
+            "{} {} {}",
+            &list[..list.len() - 1].iter().map(AsRef::as_ref).join(", "),
+            conjunction,
             list.last()
-                .expect("collection should have at least 2 elements"),
+                .expect("collection should have at least 2 elements")
+                .as_ref(),
         ),
     }
 }

@@ -394,8 +394,12 @@ impl Player {
     }
 
     pub(crate) fn pay_cost(&mut self, cost: &PaymentOptions, payment: &ResourcePile) {
-        assert!(cost.can_afford(payment), "invalid payment");
-        assert!(cost.is_valid_payment(payment), "Invalid payment");
+        assert!(cost.can_afford(payment), "invalid payment - got {payment}");
+        assert!(
+            cost.is_valid_payment(payment),
+            "Invalid payment - got {payment} for default cost {}",
+            cost.default
+        );
         self.lose_resources(payment.clone());
     }
 
@@ -563,15 +567,15 @@ impl Player {
     #[must_use]
     pub fn construct_cost(
         &self,
+        game: &Game,
         building: Building,
-        city: &City,
         execute: Option<&ResourcePile>,
     ) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.construct_cost,
             &PaymentOptions::resources(CONSTRUCT_COST),
-            city,
             &building,
+            game,
             execute,
         )
     }
@@ -680,20 +684,18 @@ impl Player {
                 .is_some_and(|city| city.size() == 1)
     }
 
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if city does not exist
-    pub fn construct(
+    pub(crate) fn construct(
         &mut self,
         building: Building,
         city_position: Position,
         port_position: Option<Position>,
+        activate: bool,
     ) {
         let index = self.index;
         let city = self.get_city_mut(city_position);
-        city.activate();
+        if activate {
+            city.activate();
+        }
         city.pieces.set_building(building, index);
         if let Some(port_position) = port_position {
             city.port_position = Some(port_position);
@@ -782,13 +784,23 @@ impl Player {
     ) -> CostInfo {
         let event = get_event(&self.events.transient).get();
         let mut cost_info = CostInfo::new(self, value.clone());
+        let mut can_avoid_activate = false;
         if let Some(execute) = execute {
             event.trigger_with_minimal_modifiers(
                 &cost_info,
                 info,
                 details,
                 &mut (),
-                |i| i.cost.is_valid_payment(execute),
+                |i| {
+                    if can_avoid_activate && i.activate_city {
+                        return false;
+                    }
+                    if !i.activate_city {
+                        can_avoid_activate = true;
+                    }
+
+                    i.cost.is_valid_payment(execute)
+                },
                 |i, m| i.cost.modifiers = m,
             )
         } else {
