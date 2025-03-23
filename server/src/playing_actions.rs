@@ -116,7 +116,7 @@ impl PlayingActionType {
                 }
             }
             PlayingActionType::WonderCard(name) => {
-                if cities_for_wonder(name, game, p, WonderDiscount::no_discount()).is_empty() {
+                if cities_for_wonder(name, game, p, WonderDiscount::default()).is_empty() {
                     return false;
                 }
             }
@@ -233,7 +233,18 @@ impl PlayingAction {
             }
             WonderCard(name) => {
                 remove_element(&mut game.get_player_mut(player_index).wonder_cards, &name);
-                play_wonder_card(game, player_index, WonderCardInfo::new(name));
+                // todo don't check for wonder card availability here
+                play_wonder_card(
+                    game,
+                    player_index,
+                    WonderCardInfo::new(
+                        name,
+                        WonderDiscount {
+                            check_card: false,
+                            ..Default::default()
+                        },
+                    ),
+                );
             }
             Custom(custom_action) => {
                 custom(game, player_index, custom_action);

@@ -183,14 +183,16 @@ pub struct WonderCardInfo {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub selected_position: Option<Position>,
+    pub discount: WonderDiscount,
 }
 
 impl WonderCardInfo {
     #[must_use]
-    pub fn new(name: String) -> Self {
+    pub fn new(name: String, discount: WonderDiscount) -> Self {
         Self {
             name,
             selected_position: None,
+            discount,
         }
     }
 }
@@ -203,7 +205,8 @@ pub(crate) fn can_construct_wonder(
     discount: WonderDiscount,
 ) -> Result<PaymentOptions, String> {
     can_construct_anything(city, player)?;
-    if !player.wonder_cards.contains(&wonder.name) {
+    
+    if discount.check_card && !player.wonder_cards.contains(&wonder.name) {
         return Err("Wonder card not owned".to_string());
     }
     if city.mood_state != MoodState::Happy {
@@ -246,31 +249,38 @@ pub(crate) fn play_wonder_card(game: &mut Game, player_index: usize, i: WonderCa
     );
 }
 
-#[derive(Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub(crate) struct WonderDiscount {
     ignore_required_advances: bool,
     culture_tokens: u32,
+    check_card: bool,
 }
 
 impl WonderDiscount {
     #[must_use]
-    pub const fn new(ignore_required_advances: bool, discount_culture_tokens: u32) -> Self {
+    pub const fn new(
+        ignore_required_advances: bool,
+        discount_culture_tokens: u32,
+        check_card: bool,
+    ) -> Self {
         Self {
             ignore_required_advances,
             culture_tokens: discount_culture_tokens,
+            check_card,
         }
     }
+}
 
-    #[must_use]
-    pub const fn no_discount() -> Self {
-        Self::new(false, 0)
+impl Default for WonderDiscount {
+    fn default() -> Self {
+        Self::new(false, 0, true)
     }
 }
 
 pub(crate) fn build_wonder() -> Builtin {
     add_build_wonder(
         Builtin::builder("Build Wonder", "Build a wonder"),
-        WonderDiscount::no_discount(),
+        WonderDiscount::default(),
     )
     .build()
 }
@@ -333,13 +343,18 @@ pub(crate) fn cities_for_wonder(
     p: &Player,
     discount: WonderDiscount,
 ) -> Vec<Position> {
-    p.cities
+    let vec = p
+        .cities
         .iter()
         .filter_map(|c| {
             let result = can_construct_wonder(c, &get_wonder(name), p, game, discount);
-            result.ok().map(|_| c.position)
+            match result {
+                Ok(_) => Some(c.position),
+                Err(_) => None,
+            }
         })
-        .collect_vec()
+        .collect_vec();
+    vec
 }
 
 pub(crate) fn construct_wonder(
