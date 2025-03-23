@@ -102,10 +102,6 @@ pub(crate) fn construct(game: &mut Game, player_index: usize, c: &Construct) {
         c.port_position,
         cost.activate_city,
     );
-    if matches!(c.city_piece, Building::Academy) {
-        game.players[player_index].gain_resources(ResourcePile::ideas(2)); //todo move to on_construct
-        game.add_info_log_item("Academy gained 2 ideas");
-    }
     cost.pay(game, &c.payment);
     on_construct(game, player_index, c.city_piece);
 }
