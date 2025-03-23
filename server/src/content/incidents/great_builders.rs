@@ -88,7 +88,7 @@ const ARCHITECT_DISCOUNT: WonderDiscount = WonderDiscount::new(true, 3);
 pub(crate) fn great_architect() -> ActionCard {
     great_person_action_card::<_, String>(
         55,
-        "Great Engineer",
+        "Great Architect",
         &format!(
             "{GREAT_PERSON_DESCRIPTION} When constructing a wonder, you may ignore \
                 the requirement advances (but not Engineering). \

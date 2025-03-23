@@ -869,3 +869,35 @@ fn test_great_engineer() {
         ],
     );
 }
+
+#[test]
+fn test_great_architect() {
+    GREAT_PERSONS.test(
+        "great_architect",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::food(2),
+                }),
+            )
+            .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    1,
+                )])),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(155)))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::new(
+                    2, 3, 3, 0, 0, 0, 1,
+                )])),
+            ),
+        ],
+    );
+}
