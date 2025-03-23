@@ -19,7 +19,7 @@ use server::recruit::recruit_cost_without_replaced;
 use server::resource_pile::ResourcePile;
 use server::unit::MovementAction::Move;
 use server::unit::{MoveUnits, Units};
-use server::{construct, playing_actions, wonder};
+use server::{construct, playing_actions};
 
 mod common;
 
@@ -143,13 +143,20 @@ fn test_monuments() {
                 0,
             );
         }
+
+        game = execute_action(game, Action::Playing(WonderCard("Pyramids".to_string())), 0);
         game = execute_action(
             game,
-            Action::Playing(WonderCard(wonder::ConstructWonder::new(
-                Position::from_offset("C2"),
-                String::from("Pyramids"),
-                ResourcePile::new(2, 3, 3, 0, 0, 0, 4),
-            ))),
+            Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                "C2",
+            )])),
+            0,
+        );
+        game = execute_action(
+            game,
+            Action::Response(EventResponse::Payment(vec![ResourcePile::new(
+                2, 3, 3, 0, 0, 0, 4,
+            )])),
             0,
         );
         game = execute_action(game, Action::Playing(EndTurn), 0);

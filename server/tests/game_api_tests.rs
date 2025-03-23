@@ -13,7 +13,6 @@ use server::{
     playing_actions::PlayingAction::*,
     position::Position,
     resource_pile::ResourcePile,
-    wonder,
 };
 use std::{collections::HashMap, vec};
 
@@ -102,19 +101,26 @@ fn basic_actions() {
             happiness_increases: vec![(city_position, 1)],
             payment: ResourcePile::mood_tokens(2),
         }));
-    let game = game_api::execute(game, increase_happiness_action, 0);
+    let mut game = game_api::execute(game, increase_happiness_action, 0);
     let player = &game.players[0];
 
     assert_eq!(ResourcePile::new(1, 3, 3, 0, 2, 0, 4), player.resources);
     assert!(matches!(player.get_city(city_position).mood_state, Happy));
     assert_eq!(2, game.actions_left);
 
-    let construct_wonder_action = Action::Playing(WonderCard(wonder::ConstructWonder::new(
-        city_position,
-        String::from("Pyramids"),
-        ResourcePile::new(1, 3, 3, 0, 2, 0, 4),
-    )));
-    let mut game = game_api::execute(game, construct_wonder_action, 0);
+    game = game_api::execute(game, Action::Playing(WonderCard("Pyramids".to_string())), 0);
+    game = game_api::execute(
+        game,
+        Action::Response(EventResponse::SelectPositions(vec![city_position])),
+        0,
+    );
+    game = game_api::execute(
+        game,
+        Action::Response(EventResponse::Payment(vec![ResourcePile::new(
+            1, 3, 3, 0, 2, 0, 4,
+        )])),
+        0,
+    );
     let player = &game.players[0];
 
     assert_eq!(10.0, player.victory_points(&game));
@@ -305,14 +311,21 @@ fn test_found_city() {
 fn test_wonder() {
     JSON.test(
         "wonder",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(WonderCard(wonder::ConstructWonder::new(
-                Position::from_offset("A1"),
-                String::from("Pyramids"),
-                ResourcePile::new(2, 3, 3, 0, 0, 0, 4),
-            ))),
-        )],
+        vec![
+            TestAction::undoable(0, Action::Playing(WonderCard("Pyramids".to_string()))),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "A1",
+                )])),
+            ),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::new(
+                    2, 3, 3, 0, 0, 0, 4,
+                )])),
+            ),
+        ],
     );
 }
 
