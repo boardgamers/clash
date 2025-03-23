@@ -196,16 +196,7 @@
     {
       "action": {
         "Playing": {
-          "ConstructWonder": {
-            "city_position": "A1",
-            "wonder": "Pyramids",
-            "payment": {
-              "food": 2,
-              "wood": 3,
-              "ore": 3,
-              "culture_tokens": 4
-            }
-          }
+          "WonderCard": "Pyramids"
         }
       },
       "undo": [
@@ -213,6 +204,110 @@
           "op": "replace",
           "path": "/actions_left",
           "value": 2
+        },
+        {
+          "op": "remove",
+          "path": "/events"
+        }
+      ]
+    },
+    {
+      "action": {
+        "Response": {
+          "Payment": [
+            {
+              "food": 2,
+              "wood": 3,
+              "ore": 3,
+              "culture_tokens": 4
+            }
+          ]
+        }
+      },
+      "undo": [
+        {
+          "op": "add",
+          "path": "/events",
+          "value": [
+            {
+              "event_type": {
+                "WonderCard": {
+                  "discount": {
+                    "culture_tokens": 0,
+                    "ignore_required_advances": false
+                  },
+                  "name": "Pyramids",
+                  "selected_position": "A1"
+                }
+              },
+              "handler": {
+                "origin": {
+                  "Builtin": "Build Wonder"
+                },
+                "priority": 0,
+                "request": {
+                  "Payment": [
+                    {
+                      "cost": {
+                        "conversions": [
+                          {
+                            "from": [
+                              {
+                                "food": 1
+                              },
+                              {
+                                "wood": 1
+                              },
+                              {
+                                "ore": 1
+                              },
+                              {
+                                "ideas": 1
+                              }
+                            ],
+                            "to": {
+                              "gold": 1
+                            },
+                            "type": "Unlimited"
+                          },
+                          {
+                            "from": [
+                              {
+                                "food": 1
+                              },
+                              {
+                                "wood": 1
+                              },
+                              {
+                                "ore": 1
+                              },
+                              {
+                                "ideas": 1
+                              }
+                            ],
+                            "to": {},
+                            "type": {
+                              "MayNotOverpay": 1
+                            }
+                          }
+                        ],
+                        "default": {
+                          "culture_tokens": 4,
+                          "food": 3,
+                          "ore": 3,
+                          "wood": 3
+                        }
+                      },
+                      "name": "Pay to build wonder",
+                      "optional": false
+                    }
+                  ]
+                }
+              },
+              "last_priority_used": 0,
+              "player": 0
+            }
+          ]
         },
         {
           "op": "remove",
@@ -252,10 +347,14 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
-      "Player1 paid 2 food, 3 wood, 3 ore and 4 culture tokens to construct the Pyramids wonder in the city at A1"
+      "Player1 played the wonder card Pyramids",
+      "Player1 decided to build Pyramids in city A1"
+    ],
+    [
+      "Player1 built Pyramids in city A1 for 2 food, 3 wood, 3 ore and 4 culture tokens"
     ]
   ],
   "undo_limit": 0,

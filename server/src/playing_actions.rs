@@ -17,7 +17,6 @@ use crate::player::Player;
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::{recruit, recruit_cost};
 use crate::unit::Units;
-use crate::utils::remove_element;
 use crate::wonder::{cities_for_wonder, play_wonder_card, WonderCardInfo, WonderDiscount};
 use crate::{
     city::City,
@@ -116,7 +115,7 @@ impl PlayingActionType {
                 }
             }
             PlayingActionType::WonderCard(name) => {
-                if cities_for_wonder(name, game, p, WonderDiscount::default()).is_empty() {
+                if cities_for_wonder(name, game, p, &WonderDiscount::default()).is_empty() {
                     return false;
                 }
             }
@@ -232,17 +231,12 @@ impl PlayingAction {
                 play_action_card(game, player_index, ActionCardInfo::new(a));
             }
             WonderCard(name) => {
-                remove_element(&mut game.get_player_mut(player_index).wonder_cards, &name);
-                // todo don't check for wonder card availability here
                 play_wonder_card(
                     game,
                     player_index,
                     WonderCardInfo::new(
                         name,
-                        WonderDiscount {
-                            check_card: false,
-                            ..Default::default()
-                        },
+                        WonderDiscount::default(),
                     ),
                 );
             }

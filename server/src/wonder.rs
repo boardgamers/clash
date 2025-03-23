@@ -9,6 +9,7 @@ use crate::events::EventOrigin;
 use crate::incident::PermanentIncidentEffect;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
+use crate::utils::remove_element;
 use crate::{ability_initializer::AbilityInitializerSetup, game::Game, position::Position};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -202,11 +203,11 @@ pub(crate) fn can_construct_wonder(
     wonder: &Wonder,
     player: &Player,
     game: &Game,
-    discount: WonderDiscount,
+    discount: &WonderDiscount,
 ) -> Result<PaymentOptions, String> {
     can_construct_anything(city, player)?;
-    
-    if discount.check_card && !player.wonder_cards.contains(&wonder.name) {
+
+    if !player.wonder_cards.contains(&wonder.name) {
         return Err("Wonder card not owned".to_string());
     }
     if city.mood_state != MoodState::Happy {
@@ -253,108 +254,92 @@ pub(crate) fn play_wonder_card(game: &mut Game, player_index: usize, i: WonderCa
 pub(crate) struct WonderDiscount {
     ignore_required_advances: bool,
     culture_tokens: u32,
-    check_card: bool,
 }
 
 impl WonderDiscount {
     #[must_use]
-    pub const fn new(
-        ignore_required_advances: bool,
-        discount_culture_tokens: u32,
-        check_card: bool,
-    ) -> Self {
+    pub const fn new(ignore_required_advances: bool, discount_culture_tokens: u32) -> Self {
         Self {
             ignore_required_advances,
             culture_tokens: discount_culture_tokens,
-            check_card,
         }
     }
 }
 
 impl Default for WonderDiscount {
     fn default() -> Self {
-        Self::new(false, 0, true)
+        Self::new(false, 0)
     }
 }
 
 pub(crate) fn build_wonder() -> Builtin {
-    add_build_wonder(
-        Builtin::builder("Build Wonder", "Build a wonder"),
-        WonderDiscount::default(),
-    )
-    .build()
-}
+    Builtin::builder("Build Wonder", "Build a wonder")
+        .add_position_request(
+            |e| &mut e.on_play_wonder_card,
+            1,
+            move |game, player_index, i| {
+                let p = game.get_player(player_index);
+                let choices = cities_for_wonder(&i.name, game, p, &i.discount);
 
-pub(crate) fn add_build_wonder<S: AbilityInitializerSetup>(b: S, discount: WonderDiscount) -> S {
-    b.add_position_request(
-        |e| &mut e.on_play_wonder_card,
-        1,
-        move |game, player_index, i| {
-            let p = game.get_player(player_index);
-            let choices = cities_for_wonder(&i.name, game, p, discount);
+                Some(PositionRequest::new(
+                    choices,
+                    1..=1,
+                    "Select city to build wonder",
+                ))
+            },
+            |game, s, i| {
+                let position = s.choice[0];
+                i.selected_position = Some(position);
+                game.add_info_log_item(&format!(
+                    "{} decided to build {} in city {}",
+                    s.player_name, i.name, position
+                ));
+            },
+        )
+        .add_payment_request_listener(
+            |e| &mut e.on_play_wonder_card,
+            0,
+            move |game, player_index, i| {
+                let p = game.get_player(player_index);
+                let city = p.get_city(i.selected_position.expect("city not selected"));
+                let wonder = get_wonder(&i.name);
+                let cost = can_construct_wonder(city, &wonder, p, game, &i.discount)
+                    .expect("can't construct wonder");
+                Some(vec![PaymentRequest::new(
+                    cost,
+                    "Pay to build wonder",
+                    false,
+                )])
+            },
+            |game, s, i| {
+                let pos = i.selected_position.expect("city not selected");
+                let name = &i.name;
 
-            Some(PositionRequest::new(
-                choices,
-                1..=1,
-                "Select city to build wonder",
-            ))
-        },
-        |game, s, i| {
-            let position = s.choice[0];
-            i.selected_position = Some(position);
-            game.add_info_log_item(&format!(
-                "{} decided to build {} in city {}",
-                s.player_name, i.name, position
-            ));
-        },
-    )
-    .add_payment_request_listener(
-        |e| &mut e.on_play_wonder_card,
-        0,
-        move |game, player_index, i| {
-            let p = game.get_player(player_index);
-            let city = p.get_city(i.selected_position.expect("city not selected"));
-            let wonder = get_wonder(&i.name);
-            let cost = can_construct_wonder(city, &wonder, p, game, discount)
-                .expect("can't construct wonder");
-            Some(vec![PaymentRequest::new(
-                cost,
-                "Pay to build wonder",
-                false,
-            )])
-        },
-        |game, s, i| {
-            let pos = i.selected_position.expect("city not selected");
-            let wonder = get_wonder(&i.name);
-
-            game.add_info_log_item(&format!(
-                "{} built {} in city {pos} for {}",
-                s.player_name, i.name, s.choice[0]
-            ));
-
-            construct_wonder(game, wonder, pos, s.player_index);
-        },
-    )
+                game.add_info_log_item(&format!(
+                    "{} built {} in city {pos} for {}",
+                    s.player_name, name, s.choice[0]
+                ));
+                remove_element(&mut game.get_player_mut(s.player_index).wonder_cards, name);
+                construct_wonder(game, get_wonder(name), pos, s.player_index);
+            },
+        )
+        .build()
 }
 
 pub(crate) fn cities_for_wonder(
     name: &str,
     game: &Game,
     p: &Player,
-    discount: WonderDiscount,
+    discount: &WonderDiscount,
 ) -> Vec<Position> {
-    let vec = p
-        .cities
+    p.cities
         .iter()
         .filter_map(|c| {
-            let result = can_construct_wonder(c, &get_wonder(name), p, game, discount);
-            match result {
-                Ok(_) => Some(c.position),
-                Err(_) => None,
-            }
+            can_construct_wonder(c, &get_wonder(name), p, game, discount)
+                .ok()
+                .map(|_| c.position)
         })
-        .collect_vec();
-    vec
+        .collect_vec()
 }
 
 pub(crate) fn construct_wonder(

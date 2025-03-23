@@ -103,7 +103,7 @@ fn basic_actions() {
         }));
     let mut game = game_api::execute(game, increase_happiness_action, 0);
     let player = &game.players[0];
-
+    
     assert_eq!(ResourcePile::new(1, 3, 3, 0, 2, 0, 4), player.resources);
     assert!(matches!(player.get_city(city_position).mood_state, Happy));
     assert_eq!(2, game.actions_left);
@@ -111,20 +111,15 @@ fn basic_actions() {
     game = game_api::execute(game, Action::Playing(WonderCard("Pyramids".to_string())), 0);
     game = game_api::execute(
         game,
-        Action::Response(EventResponse::SelectPositions(vec![city_position])),
-        0,
-    );
-    game = game_api::execute(
-        game,
         Action::Response(EventResponse::Payment(vec![ResourcePile::new(
-            1, 3, 3, 0, 2, 0, 4,
+            0, 3, 3, 0, 2, 0, 4,
         )])),
         0,
     );
     let player = &game.players[0];
 
     assert_eq!(10.0, player.victory_points(&game));
-    assert_eq!(ResourcePile::empty(), player.resources);
+    assert_eq!(ResourcePile::food(1), player.resources);
     assert_eq!(vec![String::from("Pyramids")], player.wonders_build);
     assert_eq!(1, player.get_city(city_position).pieces.wonders.len());
     assert_eq!(4, player.get_city(city_position).mood_modified_size(player));
@@ -139,7 +134,7 @@ fn basic_actions() {
     }));
     let game = game_api::execute(game, collect_action, 0);
     let player = &game.players[0];
-    assert_eq!(ResourcePile::ore(1), player.resources);
+    assert_eq!(ResourcePile::ore(1) + ResourcePile::food(1), player.resources);
     assert!(player
         .try_get_city(city_position)
         .expect("player should have a city at this position")
@@ -147,7 +142,7 @@ fn basic_actions() {
     assert_eq!(0, game.actions_left);
     let mut game = game_api::execute(game, Action::Playing(EndTurn), 0);
     let player = &mut game.players[0];
-    player.gain_resources(ResourcePile::food(2));
+    player.gain_resources(ResourcePile::food(1));
     let recruit_action = Action::Playing(Recruit(playing_actions::Recruit {
         units: Units::new(1, 0, 0, 0, 0, 0),
         city_position,
@@ -312,13 +307,7 @@ fn test_wonder() {
     JSON.test(
         "wonder",
         vec![
-            TestAction::undoable(0, Action::Playing(WonderCard("Pyramids".to_string()))),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
-                    "A1",
-                )])),
-            ),
+            TestAction::undoable(0, Action::Playing(WonderCard("Pyramids".to_string()))).without_json_comparison(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::new(
