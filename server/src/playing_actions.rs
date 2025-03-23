@@ -81,15 +81,14 @@ impl PlayingActionType {
     /// # Panics
     /// Panics if action is illegal
     #[must_use]
-    pub fn is_available(&self, game: &Game, player_index: usize) -> bool {
+    pub fn is_available(&self, game: &Game, player_index: usize) -> Result<(), String> {
         if !game.events.is_empty() || game.state != GameState::Playing {
-            return false;
+            return Err("Game is not in playing state".to_string());
         }
 
+        self.action_type().is_available(game, player_index)?;
+
         let p = game.get_player(player_index);
-        if !self.action_type().is_available(game, player_index) {
-            return false;
-        }
 
         match self {
             PlayingActionType::Custom(c) => {
@@ -97,7 +96,7 @@ impl PlayingActionType {
                     && p.played_once_per_turn_actions
                         .contains(&c.custom_action_type)
                 {
-                    return false;
+                    return Err("Custom action already played this turn".to_string());
                 }
 
                 // todo move to action listner
@@ -105,18 +104,18 @@ impl PlayingActionType {
                     if current_turn_log(game).iter().any(|item| {
                         matches!(item.action, Action::Playing(PlayingAction::Collect(_)))
                     }) {
-                        return false;
+                        return Err("Free economy collect already played this turn".to_string());
                     }
                 }
             }
             PlayingActionType::ActionCard(id) => {
                 if !(get_civil_card(*id).can_play)(game, p) {
-                    return false;
+                    return Err("Cannot play action card".to_string());
                 }
             }
             PlayingActionType::WonderCard(name) => {
                 if cities_for_wonder(name, game, p, &WonderDiscount::default()).is_empty() {
-                    return false;
+                    return Err("no cities for wonder".to_string());
                 }
             }
             _ => {}
@@ -133,7 +132,10 @@ impl PlayingActionType {
             game,
             &info,
         );
-        possible
+        if !possible {
+            return Err("Playing action listener vetoed".to_string());
+        }
+        Ok(())
     }
 
     #[must_use]
@@ -177,10 +179,9 @@ impl PlayingAction {
         use crate::construct;
         use PlayingAction::*;
         let playing_action_type = self.playing_action_type();
-        assert!(
-            playing_action_type.is_available(game, player_index),
-            "Illegal action"
-        );
+        let _ = playing_action_type
+            .is_available(game, player_index)
+            .map_err(|e| panic!("{e}"));
         playing_action_type.action_type().pay(game, player_index);
 
         match self {
@@ -270,13 +271,16 @@ pub struct ActionType {
 
 impl ActionType {
     #[must_use]
-    pub fn is_available(&self, game: &Game, player_index: usize) -> bool {
+    pub fn is_available(&self, game: &Game, player_index: usize) -> Result<(), String> {
         let p = game.get_player(player_index);
         if !p.resources.has_at_least(&self.cost) {
-            return false;
+            return Err("Not enough resources for action type".to_string());
         }
 
-        self.free || game.actions_left > 0
+        if !(self.free || game.actions_left > 0) {
+            return Err("No actions left".to_string());
+        }
+        Ok(())
     }
 
     pub(crate) fn pay(&self, game: &mut Game, player_index: usize) {

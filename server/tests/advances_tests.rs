@@ -1,6 +1,6 @@
 use crate::common::{illegal_action_test, influence_action, JsonTest, TestAction};
 use server::action::{execute_action, Action};
-use server::city_pieces::Building::{Fortress, Temple};
+use server::city_pieces::Building::{Academy, Fortress, Temple};
 use server::content::advances::trade_routes::find_trade_routes;
 use server::content::custom_actions::CustomAction;
 use server::content::custom_actions::CustomAction::{
@@ -20,6 +20,7 @@ use server::resource_pile::ResourcePile;
 use server::unit::MovementAction::Move;
 use server::unit::{MoveUnits, Units};
 use server::{construct, playing_actions};
+use server::consts::CONSTRUCT_COST;
 
 mod common;
 
@@ -479,6 +480,22 @@ fn test_priesthood() {
     );
 }
 
+#[test]
+fn test_writing() {
+    JSON.test(
+        "writing",
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(Construct(construct::Construct::new(
+                    Position::from_offset("A1"),
+                    Academy,
+                    CONSTRUCT_COST.clone(),
+                ))),
+            ),
+        ],
+    );
+}
 #[test]
 fn test_free_education() {
     JSON.test(

@@ -864,7 +864,7 @@ fn test_great_engineer() {
             )
             .with_pre_assert(|game| {
                 // must do construct
-                assert!(!PlayingActionType::Advance.is_available(game, 0))
+                assert!(PlayingActionType::Advance.is_available(game, 0).is_err())
             }),
         ],
     );
