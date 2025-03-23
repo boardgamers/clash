@@ -22,6 +22,7 @@ use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
+use crate::wonder::WonderCardInfo;
 
 pub(crate) type CurrentEvent<V = ()> = Event<Game, CurrentEventInfo, (), V>;
 
@@ -39,7 +40,6 @@ pub(crate) struct TransientEvents {
     pub before_move: Event<Game, MoveInfo>,
 
     pub construct_cost: Event<CostInfo, Building, Game>,
-    pub wonder_cost: Event<CostInfo, City, Wonder>,
     pub advance_cost: Event<CostInfo, Advance>,
     pub happiness_cost: Event<CostInfo>,
     pub recruit_cost: Event<CostInfo, Units, Player>,
@@ -55,13 +55,13 @@ pub(crate) struct TransientEvents {
 #[allow(clippy::struct_field_names)]
 pub(crate) struct PersistentEvents {
     pub on_construct: CurrentEvent<Building>,
-    pub on_construct_wonder: CurrentEvent<String>,
     pub on_draw_wonder_card: CurrentEvent,
     pub on_advance: CurrentEvent<AdvanceInfo>,
     pub on_recruit: CurrentEvent<Recruit>,
     pub on_influence_culture_resolution: CurrentEvent<ResourcePile>,
     pub on_explore_resolution: CurrentEvent<ExploreResolutionState>,
     pub on_play_action_card: CurrentEvent<ActionCardInfo>,
+    pub on_play_wonder_card: CurrentEvent<WonderCardInfo>,
 
     pub on_status_phase: CurrentEvent<StatusPhaseState>,
     pub on_turn_start: CurrentEvent,

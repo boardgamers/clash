@@ -59,11 +59,6 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
                 vec![],
                 city,
             ),
-            ConstructionProject::Wonder(w, custom) => StateUpdate::execute_activation(
-                construct_wonder_action(ConstructWonder::new(cp.city_position, w, payment), custom),
-                vec![],
-                city,
-            ),
             ConstructionProject::Units(r) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Recruit(Recruit {
                     city_position: cp.city_position,
@@ -79,19 +74,9 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
     )
 }
 
-fn construct_wonder_action(c: ConstructWonder, custom: BaseOrCustomDialog) -> Action {
-    match custom.custom {
-        BaseOrCustomAction::Base => Action::Playing(PlayingAction::ConstructWonder(c)),
-        BaseOrCustomAction::Custom { .. } => {
-            Action::Playing(PlayingAction::Custom(CustomAction::GreatArchitect(c)))
-        }
-    }
-}
-
 #[derive(Clone)]
 pub enum ConstructionProject {
     Building(Building, Option<Position>),
-    Wonder(String, BaseOrCustomDialog),
     Units(RecruitSelection),
 }
 
@@ -113,11 +98,6 @@ impl ConstructionPayment {
         let p = rc.game.get_player(city.player_index);
         let cost = match &project {
             ConstructionProject::Building(b, _) => p.construct_cost(rc.game, *b, None),
-            ConstructionProject::Wonder(name, _) => p.wonder_cost(
-                wonder_cards(p).iter().find(|w| w.name == *name).unwrap(),
-                city,
-                None,
-            ),
             ConstructionProject::Units(sel) => recruit_cost(
                 rc.shown_player,
                 &sel.amount.units,
@@ -140,27 +120,3 @@ impl ConstructionPayment {
     }
 }
 
-pub fn can_play_construct_wonder(rc: &RenderContext) -> bool {
-    base_or_custom_available(
-        rc,
-        &PlayingActionType::ConstructWonder,
-        &CustomActionType::GreatArchitect,
-    )
-}
-
-pub fn open_construct_wonder_dialog(rc: &RenderContext, city: &City, w: &Wonder) -> StateUpdate {
-    base_or_custom_action(
-        rc,
-        &PlayingActionType::ConstructWonder,
-        "Construct Wonder",
-        &[(EventOrigin::Builtin("Great Architect".to_string()), CustomActionType::GreatArchitect)],
-        |custom| {
-            ActiveDialog::ConstructionPayment(ConstructionPayment::new(
-                rc,
-                city,
-                &w.name,
-                ConstructionProject::Wonder(w.name.clone(), custom),
-            ))
-        },
-    )
-}

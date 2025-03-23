@@ -1,12 +1,12 @@
-use serde::{Deserialize, Serialize};
+use crate::city::{City, MoodState};
 use crate::city_pieces::Building;
+use crate::consts::MAX_CITY_SIZE;
 use crate::content::custom_phase_actions::CurrentEventType;
-use crate::content::wonders;
 use crate::game::Game;
+use crate::player::Player;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use crate::utils::remove_element;
-use crate::wonder::{ConstructWonder, Wonder};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Construct {
@@ -32,6 +32,54 @@ impl Construct {
         self.port_position = port_position;
         self
     }
+}
+
+///
+/// # Errors
+/// Returns an error if the building cannot be built
+pub fn can_construct(
+    city: &City,
+    building: Building,
+    player: &Player,
+    game: &Game,
+) -> Result<ResourcePile, String> {
+    can_construct_anything(city, player)?;
+    if city.mood_state == MoodState::Angry {
+        return Err("City is angry".to_string());
+    }
+    if !city.pieces.can_add_building(building) {
+        return Err("Building already exists".to_string());
+    }
+    if !player
+        .advances
+        .iter()
+        .any(|a| a.unlocked_building == Some(building))
+    {
+        return Err("Building not researched".to_string());
+    }
+    if !player.is_building_available(building, game) {
+        return Err("All non-destroyed buildings are built".to_string());
+    }
+    if !player.can_afford(&player.construct_cost(game, building, None).cost) {
+        // construct cost event listener?
+        return Err("Not enough resources".to_string());
+    }
+    //todo check cost
+    Ok(())
+}
+
+pub(crate) fn can_construct_anything(city: &City, player: &Player) -> Result<(), String> {
+    if city.player_index != player.index {
+        return Err("Not your city".to_string());
+    }
+    if city.pieces.amount() >= MAX_CITY_SIZE {
+        return Err("City is full".to_string());
+    }
+    if city.pieces.amount() >= player.cities.len() {
+        return Err("Need more cities".to_string());
+    }
+
+    Ok(())
 }
 
 pub(crate) fn construct(game: &mut Game, player_index: usize, c: &Construct) {
@@ -72,64 +120,3 @@ pub(crate) fn on_construct(game: &mut Game, player_index: usize, building: Build
         CurrentEventType::Construct,
     );
 }
-
-pub(crate) fn construct_wonder_with_card(
-    game: &mut Game,
-    player_index: usize,
-    c: &ConstructWonder,
-) {
-    let name = &c.wonder;
-    if remove_element(
-        &mut game.get_player_mut(player_index).wonder_cards,
-        &name.to_string(),
-    )
-    .is_none()
-    {
-        panic!("wonder not found");
-    }
-    let wonder = wonders::get_wonder(name);
-
-    let city_position = c.city_position;
-    let p = game.get_player(player_index);
-    let city = p.get_city(city_position);
-
-    if !player.can_afford(&player.wonder_cost(wonder, self, None).cost) {
-        return Err("Not enough resources".to_string());
-    }
-    
-    let cost = p.wonder_cost().construct_cost(game, c.city_piece, Some(&c.payment));
-
-    city.can_build_wonder(&wonder, &p, game)
-        .map_err(|e| panic!("{e}"))
-        .ok();
-
-    game.players[player_index].lose_resources(c.payment.clone());
-
-    construct_wonder(game, wonder, city_position, player_index);
-}
-
-pub(crate) fn construct_wonder(game: &mut Game, wonder: Wonder, city_position: Position, player_index: usize) {
-    let wonder = wonder;
-    (wonder.listeners.initializer)(game, player_index);
-    (wonder.listeners.one_time_initializer)(game, player_index);
-    let player = &mut game.players[player_index];
-    player.wonders_build.push(wonder.name.clone());
-    let name = wonder.name.clone();
-    player
-        .get_city_mut(city_position)
-        .pieces
-        .wonders
-        .push(wonder);
-
-    on_construct_wonder(game, player_index, name);
-}
-
-pub(crate) fn on_construct_wonder(game: &mut Game, player_index: usize, name: String) {
-    let _ = game.trigger_current_event(
-        &[player_index],
-        |e| &mut e.on_construct_wonder,
-        name,
-        CurrentEventType::ConstructWonder,
-    );
-}
-

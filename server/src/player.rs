@@ -581,22 +581,6 @@ impl Player {
     }
 
     #[must_use]
-    pub fn wonder_cost(
-        &self,
-        wonder: &Wonder,
-        city: &City,
-        execute: Option<&ResourcePile>,
-    ) -> CostInfo {
-        self.trigger_cost_event(
-            |e| &e.wonder_cost,
-            &wonder.cost.clone(),
-            city,
-            wonder,
-            execute,
-        )
-    }
-
-    #[must_use]
     pub fn increase_happiness_cost(&self, city: &City, steps: u32) -> Option<CostInfo> {
         let max_steps = 2 - city.mood_state.clone() as u32;
         let cost = city.size() as u32 * steps;

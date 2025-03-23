@@ -89,9 +89,11 @@ pub(crate) fn great_architect() -> ActionCard {
             the requirement advances (but not Engineering). \
             In addition, the cost of constructing the wonder is reduced by 3 culture tokens.",
         ),
-        ActionType::regular(),
+        ActionType::free(),
         &[],
-        |_game, _player| true,
+        |_game, _player| {
+            //todo check if any wonder can be construct with this action card in place
+        },
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.on_play_action_card,
@@ -141,7 +143,7 @@ pub(crate) fn use_great_architect() -> Builtin {
         |game, _, _, _| {
             let architect_used = game.action_log.iter().rev().find_map(|action| {
                 match action.action {
-                    Action::Playing(PlayingAction::ConstructWonder(_)) => Some(false),
+                    Action::Playing(PlayingAction::WonderCard(_)) => Some(false),
                     Action::Playing(PlayingAction::Custom(CustomAction::GreatArchitect(_))) => Some(true),
                     _ => None
                 }

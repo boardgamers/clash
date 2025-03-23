@@ -49,7 +49,6 @@ pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate 
         base_icons,
         move_units_buttons(rc, city.position),
         building_icons(rc, city),
-        wonder_icons(rc, city),
         custom_action_buttons(rc, Some(city)),
     ]
     .into_iter()
@@ -76,29 +75,6 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
             })
         }),
     ))
-}
-
-fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> {
-    if !city.can_activate() || can_play_construct_wonder(rc) {
-        return vec![];
-    }
-    let owner = rc.shown_player;
-    let game = rc.game;
-
-    wonder_cards(owner)
-        .into_iter()
-        .filter(|w| city.can_build_wonder(w, owner, game).is_ok())
-        .map(|w| {
-            let a: IconAction<'a> = (
-                &rc.assets().wonders[&w.name],
-                format!("Build wonder {}", w.name),
-                Box::new(move || {
-                    open_construct_wonder_dialog(rc, city, &w)
-                }),
-            );
-            a
-        })
-        .collect()
 }
 
 fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> {

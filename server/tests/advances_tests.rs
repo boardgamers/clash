@@ -12,7 +12,7 @@ use server::events::EventOrigin;
 use server::game::Game;
 use server::movement::move_units_destinations;
 use server::playing_actions::PlayingAction::{
-    Advance, Collect, Construct, ConstructWonder, Custom, EndTurn, Recruit,
+    Advance, Collect, Construct, WonderCard, Custom, EndTurn, Recruit,
 };
 use server::position::Position;
 use server::recruit::recruit_cost_without_replaced;
@@ -145,7 +145,7 @@ fn test_monuments() {
         }
         game = execute_action(
             game,
-            Action::Playing(ConstructWonder(wonder::ConstructWonder::new(
+            Action::Playing(WonderCard(wonder::ConstructWonder::new(
                 Position::from_offset("C2"),
                 String::from("Pyramids"),
                 ResourcePile::new(2, 3, 3, 0, 0, 0, 4),

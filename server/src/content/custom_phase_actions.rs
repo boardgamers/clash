@@ -18,6 +18,7 @@ use crate::unit::UnitType;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
+use crate::wonder::WonderCardInfo;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct PaymentRequest {
@@ -159,11 +160,11 @@ pub enum CurrentEventType {
     TurnStart,
     Advance(AdvanceInfo),
     Construct(Building),
-    ConstructWonder(String),
     Recruit(Recruit),
     Incident(IncidentInfo),
     ActionCard(ActionCardInfo),
-    DrawWonderCard,
+    WonderCard(WonderCardInfo),
+    DrawWonderCard, // todo same for Great Seer
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

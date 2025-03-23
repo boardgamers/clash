@@ -20,10 +20,10 @@ use crate::status_phase::play_status_phase;
 use crate::undo::{clean_patch, redo, to_serde_value, undo};
 use crate::unit::MovementAction::{Move, Stop};
 use crate::unit::{get_current_move, MovementAction};
-use crate::wonder::draw_wonder_card;
+use crate::wonder::{draw_wonder_card, play_wonder_card};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use crate::construct::{on_construct, on_construct_wonder};
+use crate::construct::{on_construct};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum Action {
@@ -163,14 +163,12 @@ pub(crate) fn execute_custom_phase_action(
         Construct(b) => {
             on_construct(game, player_index, b);
         }
-        ConstructWonder(name) => {
-            on_construct_wonder(game, player_index, name);
-        }
         Recruit(r) => {
             on_recruit(game, player_index, r);
         }
         Incident(i) => trigger_incident(game, i),
         ActionCard(a) => play_action_card(game, player_index, a),
+        WonderCard(w) => play_wonder_card(game, player_index, w),
     }
 
     if let Some(mut s) = game.events.pop() {

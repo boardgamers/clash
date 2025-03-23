@@ -5,6 +5,7 @@ use crate::action_card::{discard_action_card, ActionCardInfo};
 use crate::advance::gain_advance;
 use crate::city::MoodState;
 use crate::collect::collect;
+use crate::construct::Construct;
 use crate::content::action_cards::get_civil_card;
 use crate::content::advances::get_advance;
 use crate::content::custom_actions::{CustomActionInfo, CustomActionType};
@@ -16,6 +17,8 @@ use crate::player::Player;
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::{recruit, recruit_cost};
 use crate::unit::Units;
+use crate::utils::remove_element;
+use crate::wonder::{cities_for_wonder, play_wonder_card, WonderDiscount};
 use crate::{
     city::City,
     city_pieces::Building::{self},
@@ -24,9 +27,6 @@ use crate::{
     position::Position,
     resource_pile::ResourcePile,
 };
-use crate::construct::Construct;
-use crate::construct::construct_wonder_with_card;
-use crate::wonder::ConstructWonder;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Collect {
@@ -66,13 +66,13 @@ pub enum PlayingActionType {
     Advance,
     FoundCity,
     Construct,
-    ConstructWonder,
     Collect,
     Recruit,
     MoveUnits,
     IncreaseHappiness,
     InfluenceCultureAttempt,
     ActionCard(u8),
+    WonderCard(String),
     Custom(CustomActionInfo),
     EndTurn,
 }
@@ -101,6 +101,7 @@ impl PlayingActionType {
                     return false;
                 }
 
+                // todo move to action listner
                 if let CustomActionType::FreeEconomyCollect = c.custom_action_type {
                     if current_turn_log(game).iter().any(|item| {
                         matches!(item.action, Action::Playing(PlayingAction::Collect(_)))
@@ -111,6 +112,11 @@ impl PlayingActionType {
             }
             PlayingActionType::ActionCard(id) => {
                 if !(get_civil_card(*id).can_play)(game, p) {
+                    return false;
+                }
+            }
+            PlayingActionType::WonderCard(name) => {
+                if cities_for_wonder(name, game, p, WonderDiscount::no_discount()).is_empty() {
                     return false;
                 }
             }
@@ -152,13 +158,13 @@ pub enum PlayingAction {
         settler: u32,
     },
     Construct(Construct),
-    ConstructWonder(ConstructWonder),
     Collect(Collect),
     Recruit(Recruit),
     IncreaseHappiness(IncreaseHappiness),
     InfluenceCultureAttempt(InfluenceCultureAttempt),
     Custom(CustomAction),
     ActionCard(u8),
+    WonderCard(String),
     EndTurn,
 }
 
@@ -169,8 +175,8 @@ impl PlayingAction {
     ///
     /// Panics if action is illegal
     pub fn execute(self, game: &mut Game, player_index: usize) {
-        use PlayingAction::*;
         use crate::construct;
+        use PlayingAction::*;
         let playing_action_type = self.playing_action_type();
         assert!(
             playing_action_type.is_available(game, player_index),
@@ -197,9 +203,6 @@ impl PlayingAction {
             }
             Construct(c) => {
                 construct::construct(game, player_index, &c);
-            }
-            ConstructWonder(c) => {
-                construct_wonder_with_card(game, player_index, &c);
             }
             Collect(c) => {
                 collect(game, player_index, &c);
@@ -228,6 +231,10 @@ impl PlayingAction {
                 discard_action_card(game, player_index, a);
                 play_action_card(game, player_index, ActionCardInfo::new(a));
             }
+            WonderCard(name) => {
+                remove_element(&mut game.get_player_mut(player_index).wonder_cards, &name);
+                play_wonder_card(game, player_index, name, WonderDiscount::no_discount());
+            }
             Custom(custom_action) => {
                 custom(game, player_index, custom_action);
             }
@@ -241,14 +248,12 @@ impl PlayingAction {
             PlayingAction::Advance { .. } => PlayingActionType::Advance,
             PlayingAction::FoundCity { .. } => PlayingActionType::FoundCity,
             PlayingAction::Construct(_) => PlayingActionType::Construct,
-            PlayingAction::ConstructWonder(_) => PlayingActionType::ConstructWonder,
             PlayingAction::Collect(_) => PlayingActionType::Collect,
-            PlayingAction::Recruit (_) => PlayingActionType::Recruit,
-            PlayingAction::IncreaseHappiness (_) => PlayingActionType::IncreaseHappiness,
-            PlayingAction::InfluenceCultureAttempt(_) => {
-                PlayingActionType::InfluenceCultureAttempt
-            }
+            PlayingAction::Recruit(_) => PlayingActionType::Recruit,
+            PlayingAction::IncreaseHappiness(_) => PlayingActionType::IncreaseHappiness,
+            PlayingAction::InfluenceCultureAttempt(_) => PlayingActionType::InfluenceCultureAttempt,
             PlayingAction::ActionCard(a) => PlayingActionType::ActionCard(*a),
+            PlayingAction::WonderCard(name) => PlayingActionType::WonderCard(name.clone()),
             PlayingAction::Custom(c) => PlayingActionType::Custom(c.custom_action_type().info()),
             PlayingAction::EndTurn => PlayingActionType::EndTurn,
         }

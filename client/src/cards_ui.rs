@@ -36,11 +36,6 @@ impl HandCardObject {
     }
 }
 
-#[must_use]
-pub fn wonder_cards(player: &Player) -> Vec<Wonder> {
-    player.wonder_cards.iter().map(|n| get_wonder(n)).collect()
-}
-
 const ACTION_CARD_COLOR: Color = RED;
 const WONDER_CARD_COLOR: Color = YELLOW;
 
@@ -94,12 +89,10 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
 }
 
 fn can_play_card(rc: &RenderContext, card: &HandCard) -> bool {
-    if rc.can_control_shown_player() {
-        if let HandCard::ActionCard(id) = card {
-            return rc.can_play_action(&PlayingActionType::ActionCard(*id));
-        }
-    }
-    false
+    rc.can_play_action(&(match card {
+        HandCard::ActionCard(id) => PlayingActionType::ActionCard(*id),
+        HandCard::Wonder(name) => PlayingActionType::WonderCard(name.clone()),
+    }))
 }
 
 fn play_card(card: &HandCard) -> StateUpdate {

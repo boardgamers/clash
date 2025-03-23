@@ -1,18 +1,15 @@
-use std::ops::{Add, Sub};
-use async_std::stream::Product;
 use serde::{Deserialize, Serialize};
+use std::ops::{Add, Sub};
 
-use crate::consts::MAX_CITY_SIZE;
 use crate::content::custom_actions::CustomActionType::ForcedLabor;
 use crate::{
-    city_pieces::{Building, CityPieces, CityPiecesData},
+    city_pieces::{CityPieces, CityPiecesData},
     game::Game,
     player::Player,
-    position::Position,
-    wonder::Wonder,
+    position::Position
+    ,
 };
 use MoodState::*;
-use crate::resource_pile::ResourcePile;
 
 pub struct City {
     pub pieces: CityPieces,
@@ -98,82 +95,6 @@ impl City {
     #[must_use]
     pub fn is_activated(&self) -> bool {
         self.activations > 0
-    }
-
-    ///
-    /// # Errors
-    /// Returns an error if the building cannot be built
-    pub fn can_construct(
-        &self,
-        building: Building,
-        player: &Player,
-        game: &Game,
-    ) -> Result<ResourcePile, String> {
-        self.can_build_anything(player)?;
-        if matches!(self.mood_state, Angry) {
-            return Err("City is angry".to_string());
-        }
-        if !self.pieces.can_add_building(building) {
-            return Err("Building already exists".to_string());
-        }
-        if !player
-            .advances
-            .iter()
-            .any(|a| a.unlocked_building == Some(building))
-        {
-            return Err("Building not researched".to_string());
-        }
-        if !player.is_building_available(building, game) {
-            return Err("All non-destroyed buildings are built".to_string());
-        }
-        if !player.can_afford(&player.construct_cost(game, building, None).cost) {
-            // construct cost event listener?
-            return Err("Not enough resources".to_string());
-        }
-        Ok(())
-    }
-
-    fn can_build_anything(&self, player: &Player) -> Result<(), String> {
-        if self.player_index != player.index {
-            return Err("Not your city".to_string());
-        }
-        if self.pieces.amount() >= MAX_CITY_SIZE {
-            return Err("City is full".to_string());
-        }
-        if self.pieces.amount() >= player.cities.len() {
-            return Err("Need more cities".to_string());
-        }
-
-        Ok(())
-    }
-
-    ///
-    /// # Errors
-    /// Returns an error if the wonder cannot be built
-    pub fn can_build_wonder(
-        &self,
-        wonder: &Wonder,
-        player: &Player,
-        game: &Game,
-    ) -> Result<ResourcePile, String> {
-        self.can_build_anything(player)?;
-        if !matches!(self.mood_state, Happy) {
-            return Err("City is not happy".to_string());
-        }
-        if !player.has_advance("Engineering") {
-            return Err("Engineering advance missing".to_string());
-        }
-        for advance in &wonder.required_advances {
-            if !player.has_advance(advance) {
-                return Err(format!("Advance missing: {advance}"));
-            }
-        }
-        if let Some(placement_requirement) = &wonder.placement_requirement {
-            if !placement_requirement(self.position, game) {
-                return Err("Placement requirement not met".to_string());
-            }
-        }
-        Ok(())
     }
 
     ///

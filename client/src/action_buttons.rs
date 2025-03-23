@@ -134,7 +134,6 @@ fn generic_custom_action(
     }
 
     match custom_action_type {
-        CustomActionType::GreatArchitect
         | CustomActionType::ArtsInfluenceCultureAttempt
         | CustomActionType::VotingIncreaseHappiness
         | CustomActionType::FreeEconomyCollect

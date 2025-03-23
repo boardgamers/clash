@@ -3,21 +3,18 @@ use serde::{Deserialize, Serialize};
 use crate::collect::collect;
 use crate::content::advances::culture::{execute_sports, execute_theaters};
 use crate::content::advances::economy::collect_taxes;
-use crate::construct::construct_wonder_with_card;
 use crate::cultural_influence::influence_culture_attempt;
-use crate::log::{format_city_happiness_increase, format_collect_log_item, format_construct_wonder_log_item, format_cultural_influence_attempt_log_item, format_happiness_increase};
+use crate::log::{format_city_happiness_increase, format_collect_log_item,  format_cultural_influence_attempt_log_item, format_happiness_increase};
 use crate::player::Player;
 use crate::playing_actions::{
     increase_happiness, Collect, IncreaseHappiness, InfluenceCultureAttempt, PlayingActionType,
 };
-use crate::wonder::ConstructWonder;
 use crate::{
     game::Game, playing_actions::ActionType, position::Position, resource_pile::ResourcePile,
 };
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub enum CustomAction {
-    GreatArchitect(ConstructWonder),
     AbsolutePower,
     ForcedLabor,
     CivilRights,
@@ -57,7 +54,6 @@ impl CustomActionInfo {
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash)]
 pub enum CustomActionType {
-    GreatArchitect,
     AbsolutePower,
     ForcedLabor,
     CivilLiberties,
@@ -77,7 +73,6 @@ impl CustomAction {
     /// Panics if action is illegal
     pub fn execute(self, game: &mut Game, player_index: usize) {
         match self {
-            CustomAction::GreatArchitect(c) => construct_wonder_with_card(game, player_index, &c),
             CustomAction::AbsolutePower => game.actions_left += 1,
             CustomAction::ForcedLabor => {
                 // we check that the action was played
@@ -106,7 +101,6 @@ impl CustomAction {
     #[must_use]
     pub fn custom_action_type(&self) -> CustomActionType {
         match self {
-            CustomAction::GreatArchitect(_) => CustomActionType::GreatArchitect,
             CustomAction::AbsolutePower => CustomActionType::AbsolutePower,
             CustomAction::ForcedLabor => CustomActionType::ForcedLabor,
             CustomAction::CivilRights => CustomActionType::CivilLiberties,
@@ -124,8 +118,6 @@ impl CustomAction {
     #[must_use]
     pub fn format_log_item(&self, game: &Game, player: &Player, player_name: &str) -> String {
         match self {
-            CustomAction::GreatArchitect(c) =>
-                format_construct_wonder_log_item(&player_name, c),
             CustomAction::AbsolutePower =>
                 format!("{player_name} paid 2 mood tokens to get an extra action using Forced Labor"),
             CustomAction::ForcedLabor =>
@@ -157,8 +149,7 @@ impl CustomActionType {
                 self.free_and_once_per_turn(ResourcePile::mood_tokens(2))
             }
             CustomActionType::CivilLiberties
-            | CustomActionType::Sports
-            | CustomActionType::GreatArchitect => self.regular(),
+            | CustomActionType::Sports => self.regular(),
             CustomActionType::ArtsInfluenceCultureAttempt => {
                 self.free_and_once_per_turn(ResourcePile::culture_tokens(1))
             }

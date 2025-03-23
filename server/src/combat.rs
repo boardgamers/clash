@@ -652,7 +652,7 @@ pub mod tests {
         utils::Rng,
         wonder::Wonder,
     };
-    use crate::construct::construct_wonder;
+    use crate::wonder::construct_wonder;
 
     #[must_use]
     pub fn test_game() -> Game {
