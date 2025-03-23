@@ -6,6 +6,7 @@ use crate::combat_listeners::{
 };
 use crate::content::incidents::famine::pestilence_permanent_effect;
 use crate::content::incidents::great_builders::use_great_engineer;
+use crate::content::incidents::great_diplomat::use_diplomatic_relations;
 use crate::content::incidents::great_warlord::use_great_warlord;
 use crate::content::incidents::trojan::{
     anarchy_advance, decide_trojan_horse, solar_eclipse_end_combat,
@@ -91,6 +92,7 @@ pub fn get_all() -> Vec<Builtin> {
         anarchy_advance(),
         use_great_warlord(),
         use_great_engineer(),
+        use_diplomatic_relations(),
     ]
 }
 

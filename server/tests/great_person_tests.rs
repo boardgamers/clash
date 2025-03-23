@@ -7,6 +7,7 @@ use server::playing_actions::PlayingAction::{Advance, Construct};
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
+use server::unit::{MoveUnits, MovementAction};
 
 mod common;
 
@@ -277,6 +278,38 @@ fn test_great_athlete() {
                     1,
                 )])),
             ),
+        ],
+    );
+}
+
+#[test]
+fn test_great_diplomat() {
+    let units = vec![0];
+    let destination = Position::from_offset("B1");
+    GREAT_PERSONS.test(
+        "great_diplomat",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::food(2),
+                }),
+            )
+            .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    1,
+                )])),
+            )
+            .without_json_comparison(),
+            TestAction::not_undoable(0, Action::Movement(MovementAction::Move(MoveUnits {
+                units,
+                destination,
+                embark_carrier_id: None,
+                payment: ResourcePile::culture_tokens(2),
+            }))),
         ],
     );
 }

@@ -149,6 +149,7 @@ fn good_year(mut builder: IncidentBuilder, amount: u32, good_year_type: &GoodYea
             let n = builder.name.clone();
 
             builder = builder.add_incident_player_request(
+                IncidentTarget::ActivePlayer,
                 "Select a player to gain 1 food",
                 |p, _, _| p.resources.food < p.resource_limit.food,
                 i as i32,
@@ -189,6 +190,7 @@ fn population_boom(id: u8, effect: IncidentBaseEffect) -> Incident {
 
 pub(crate) fn select_player_to_gain_settler(mut b: IncidentBuilder) -> IncidentBuilder {
     b = b.add_incident_player_request(
+        IncidentTarget::ActivePlayer,
         "Select another player to gain 1 settler on one of their cities",
         |p, _, _| p.available_units().settlers > 0 && !p.cities.is_empty(),
         12,

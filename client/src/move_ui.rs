@@ -68,9 +68,7 @@ pub fn possible_destinations(
         .unwrap_or_default()
         .into_iter()
         .map(|route| {
-            if let Some(o) = &route.origin {
-                modifiers.insert(o.clone());
-            }
+            modifiers.extend(route.origins);
             MoveDestination::Tile((route.destination, route.cost))
         })
         .collect::<Vec<_>>();

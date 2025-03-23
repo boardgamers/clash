@@ -8,10 +8,11 @@ use crate::content::advances;
 use crate::content::advances::{economy, get_governments};
 use crate::content::custom_phase_actions::{AdvanceRequest, PaymentRequest, PositionRequest};
 use crate::content::incidents::great_builders::{great_architect, great_engineer};
+use crate::content::incidents::great_diplomat::{choose_diplomat_partner, great_diplomat};
 use crate::content::incidents::great_explorer::great_explorer;
 use crate::content::incidents::great_warlord::great_warlord;
 use crate::game::Game;
-use crate::incident::{Incident, IncidentBaseEffect};
+use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
@@ -30,32 +31,52 @@ pub(crate) const GREAT_PERSON_DESCRIPTION: &str = "You make take the Event Card 
 
 pub(crate) fn great_person_incidents() -> Vec<Incident> {
     vec![
-        great_person_incident(IncidentBaseEffect::ExhaustedLand, great_explorer()),
-        great_person_incident(IncidentBaseEffect::BarbariansMove, great_artist()),
-        great_person_incident(IncidentBaseEffect::BarbariansMove, great_prophet()),
-        great_person_incident(IncidentBaseEffect::BarbariansMove, great_philosopher()),
-        great_person_incident(IncidentBaseEffect::BarbariansMove, great_scientist()),
-        great_person_incident(IncidentBaseEffect::BarbariansMove, elder_statesman()),
-        great_person_incident(IncidentBaseEffect::ExhaustedLand, great_warlord()),
-        great_person_incident(IncidentBaseEffect::BarbariansMove, great_merchant()),
-        great_person_incident(IncidentBaseEffect::BarbariansMove, great_engineer()),
-        great_person_incident(IncidentBaseEffect::PiratesSpawnAndRaid, great_architect()),
-        great_person_incident(IncidentBaseEffect::PiratesSpawnAndRaid, great_athlete()),
+        incident(IncidentBaseEffect::ExhaustedLand, great_explorer(), |b| b),
+        incident(IncidentBaseEffect::BarbariansMove, great_artist(), |b| b),
+        incident(IncidentBaseEffect::BarbariansMove, great_prophet(), |b| b),
+        incident(
+            IncidentBaseEffect::BarbariansMove,
+            great_philosopher(),
+            |b| b,
+        ),
+        incident(IncidentBaseEffect::BarbariansMove, great_scientist(), |b| b),
+        incident(IncidentBaseEffect::BarbariansMove, elder_statesman(), |b| b),
+        incident(IncidentBaseEffect::ExhaustedLand, great_warlord(), |b| b),
+        incident(IncidentBaseEffect::BarbariansMove, great_merchant(), |b| b),
+        incident(IncidentBaseEffect::BarbariansMove, great_engineer(), |b| b),
+        incident(
+            IncidentBaseEffect::PiratesSpawnAndRaid,
+            great_architect(),
+            |b| b,
+        ),
+        incident(
+            IncidentBaseEffect::PiratesSpawnAndRaid,
+            great_athlete(),
+            |b| b,
+        ),
+        incident(IncidentBaseEffect::BarbariansSpawn, great_diplomat(), |b| {
+            choose_diplomat_partner(b)
+        }),
+        //todo add great seer when objective cards are implemented
     ]
 }
 
-fn great_person_incident(base: IncidentBaseEffect, action_card: ActionCard) -> Incident {
+fn incident(
+    base: IncidentBaseEffect,
+    action_card: ActionCard,
+    on_gain: impl Fn(IncidentBuilder) -> IncidentBuilder,
+) -> Incident {
     let card_id = action_card.id;
     let id = card_id - GREAT_PERSON_OFFSET;
     let civil_card = &action_card.civil_card;
     let name = civil_card.name.clone();
     let name2 = name.clone();
 
-    Incident::builder(id, &name, &civil_card.description.clone(), base)
+    let b = Incident::builder(id, &name, &civil_card.description.clone(), base)
         .with_action_card(action_card)
         .add_incident_payment_request(
             IncidentTarget::AllPlayers,
-            0,
+            10,
             move |game, player_index, incident| {
                 let cost = if incident.active_player == player_index {
                     1
@@ -91,10 +112,20 @@ fn great_person_incident(base: IncidentBaseEffect, action_card: ActionCard) -> I
                 game.get_player_mut(s.player_index)
                     .action_cards
                     .push(card_id);
-                i.consumed = true;
+                i.selected_player = Some(s.player_index);
             },
         )
-        .build()
+        // can add listeners in between for on_gain effect
+        .add_simple_incident_listener(
+            IncidentTarget::AllPlayers,
+            0,
+            move |_game, _player_index, _player_name, i| {
+                if i.selected_player.is_some() {
+                    i.consumed = true;
+                }
+            },
+        );
+    on_gain(b).build()
 }
 
 pub(crate) fn great_person_action_card<F, S: AsRef<str> + Clone>(
