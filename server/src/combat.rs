@@ -642,6 +642,7 @@ pub mod tests {
     use crate::game::GameState;
     use crate::payment::PaymentOptions;
     use crate::utils::tests::FloatEq;
+    use crate::wonder::construct_wonder;
     use crate::{
         city::{City, MoodState::*},
         city_pieces::Building::*,
@@ -697,7 +698,7 @@ pub mod tests {
 
         let position = Position::new(0, 0);
         game.players[old].cities.push(City::new(old, position));
-        game.build_wonder(wonder, position, old);
+        construct_wonder(&mut game, wonder, position, old);
         game.players[old].construct(Academy, position, None, true);
         game.players[old].construct(Obelisk, position, None, true);
 

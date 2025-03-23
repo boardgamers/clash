@@ -581,22 +581,6 @@ impl Player {
     }
 
     #[must_use]
-    pub fn wonder_cost(
-        &self,
-        wonder: &Wonder,
-        city: &City,
-        execute: Option<&ResourcePile>,
-    ) -> CostInfo {
-        self.trigger_cost_event(
-            |e| &e.wonder_cost,
-            &wonder.cost.clone(),
-            city,
-            wonder,
-            execute,
-        )
-    }
-
-    #[must_use]
     pub fn increase_happiness_cost(&self, city: &City, steps: u32) -> Option<CostInfo> {
         let max_steps = 2 - city.mood_state.clone() as u32;
         let cost = city.size() as u32 * steps;
@@ -808,17 +792,6 @@ impl Player {
             cost_info.cost.modifiers = m;
             cost_info
         }
-    }
-
-    pub(crate) fn trigger_player_event<U, V>(
-        &mut self,
-        event: impl Fn(&mut TransientEvents) -> &mut Event<Player, U, V>,
-        info: &U,
-        details: &V,
-    ) {
-        let e = event(&mut self.events.transient).take();
-        let _ = e.trigger(self, info, details, &mut ());
-        event(&mut self.events.transient).set(e);
     }
 }
 

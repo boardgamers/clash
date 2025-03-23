@@ -1,12 +1,11 @@
 #![allow(clippy::if_not_else)]
 
+use crate::construct::Construct;
 use crate::content::action_cards::get_civil_card;
 use crate::cultural_influence::influence_culture_boost_cost;
 use crate::game::ActionLogItem;
 use crate::player::Player;
-use crate::playing_actions::{
-    Collect, Construct, IncreaseHappiness, InfluenceCultureAttempt, Recruit,
-};
+use crate::playing_actions::{Collect, IncreaseHappiness, InfluenceCultureAttempt, Recruit};
 use crate::{
     action::Action,
     game::Game,
@@ -71,6 +70,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             "{player_name} played the action card {}",
             get_civil_card(*a).name
         ),
+        PlayingAction::WonderCard(name) => format!("{player_name} played the wonder card {name}",),
         PlayingAction::EndTurn => format!(
             "{player_name} ended their turn{}",
             match game.actions_left {

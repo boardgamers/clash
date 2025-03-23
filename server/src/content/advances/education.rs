@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder};
-use crate::city_pieces::Building::Academy;
+use crate::city_pieces::Building;
 use crate::content::advances::{advance_group_builder, get_group, AdvanceGroup};
 use crate::content::custom_phase_actions::PaymentRequest;
 use crate::payment::PaymentOptions;
@@ -22,7 +22,17 @@ pub(crate) fn education() -> AdvanceGroup {
 fn writing() -> AdvanceBuilder {
     Advance::builder("Writing", "todo")
         .with_advance_bonus(CultureToken)
-        .with_unlocked_building(Academy)
+        .with_unlocked_building(Building::Academy)
+        .add_simple_persistent_event_listener(
+            |event| &mut event.on_construct,
+            3,
+            |game, player_index, _player_name, b| {
+                if matches!(b, Building::Academy) {
+                    game.players[player_index].gain_resources(ResourcePile::ideas(2));
+                    game.add_info_log_item("Academy gained 2 ideas");
+                }
+            },
+        )
 }
 
 fn public_education() -> AdvanceBuilder {

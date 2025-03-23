@@ -24,6 +24,7 @@ mod civilization;
 pub mod collect;
 pub mod combat;
 mod combat_listeners;
+pub mod construct;
 pub mod consts;
 pub mod content;
 pub mod cultural_influence;

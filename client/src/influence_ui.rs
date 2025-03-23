@@ -1,3 +1,4 @@
+use crate::action_buttons::base_or_custom_available;
 use crate::city_ui::{building_position, BUILDING_SIZE};
 use crate::client_state::{CameraMode, StateUpdate};
 use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
@@ -10,11 +11,11 @@ use macroquad::math::Vec2;
 use macroquad::prelude::{draw_circle_lines, WHITE};
 use server::action::Action;
 use server::city::City;
-use server::content::custom_actions::CustomAction;
+use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::cultural_influence::influence_culture_boost_cost;
 use server::player::Player;
 use server::player_events::InfluenceCulturePossible;
-use server::playing_actions::{InfluenceCultureAttempt, PlayingAction};
+use server::playing_actions::{InfluenceCultureAttempt, PlayingAction, PlayingActionType};
 use server::position::Position;
 
 fn closest_city(player: &Player, position: Position) -> Position {
@@ -102,4 +103,12 @@ fn show_city(
         }
     }
     None
+}
+
+pub fn can_play_influence_culture(rc: &RenderContext) -> bool {
+    base_or_custom_available(
+        rc,
+        &PlayingActionType::InfluenceCultureAttempt,
+        &CustomActionType::ArtsInfluenceCultureAttempt,
+    )
 }

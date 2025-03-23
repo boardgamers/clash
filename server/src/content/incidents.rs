@@ -2,7 +2,7 @@ mod civil_war;
 mod earthquake;
 pub(crate) mod famine;
 mod good_year;
-pub(crate) mod great_builder;
+pub(crate) mod great_builders;
 mod great_explorer;
 pub(crate) mod great_persons;
 pub(crate) mod great_warlord;

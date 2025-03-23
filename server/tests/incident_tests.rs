@@ -2,8 +2,8 @@ use crate::common::{move_action, JsonTest, TestAction};
 use server::action::Action;
 use server::card::HandCard;
 use server::city_pieces::Building::Fortress;
+use server::construct;
 use server::content::custom_phase_actions::{EventResponse, Structure};
-use server::playing_actions;
 use server::playing_actions::PlayingAction::{Advance, Construct};
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
@@ -133,7 +133,7 @@ const FAMINE: JsonTest = JsonTest::child("incidents", "famine");
 
 #[test]
 fn test_pestilence() {
-    let cons = Action::Playing(Construct(playing_actions::Construct::new(
+    let cons = Action::Playing(Construct(construct::Construct::new(
         Position::from_offset("C2"),
         Fortress,
         ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
@@ -856,7 +856,7 @@ fn test_great_engineer() {
                 .without_json_comparison(),
             TestAction::undoable(
                 0,
-                Action::Playing(Construct(playing_actions::Construct::new(
+                Action::Playing(Construct(construct::Construct::new(
                     Position::from_offset("C2"),
                     Fortress,
                     ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
@@ -864,8 +864,40 @@ fn test_great_engineer() {
             )
             .with_pre_assert(|game| {
                 // must do construct
-                assert!(!PlayingActionType::Advance.is_available(game, 0))
+                assert!(PlayingActionType::Advance.is_available(game, 0).is_err())
             }),
+        ],
+    );
+}
+
+#[test]
+fn test_great_architect() {
+    GREAT_PERSONS.test(
+        "great_architect",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Storage"),
+                    payment: ResourcePile::food(2),
+                }),
+            )
+            .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    1,
+                )])),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(155)))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::new(
+                    2, 3, 3, 0, 0, 0, 1,
+                )])),
+            ),
         ],
     );
 }

@@ -4,12 +4,13 @@
     {
       "id": 0,
       "resources": {
-        "wood": 4,
-        "ore": 4,
-        "ideas": 5,
+        "food": 4,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 3,
         "gold": 7,
         "mood_tokens": 7,
-        "culture_tokens": 3
+        "culture_tokens": 7
       },
       "resource_limit": {
         "food": 2,
@@ -22,22 +23,11 @@
       },
       "cities": [
         {
-          "city_pieces": {
-            "wonders": [
-              "Pyramids"
-            ]
-          },
+          "city_pieces": {},
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
           "position": "A1"
-        },
-        {
-          "city_pieces": {},
-          "mood_state": "Neutral",
-          "activations": 8,
-          "angry_activation": false,
-          "position": "C2"
         }
       ],
       "units": [
@@ -86,12 +76,13 @@
       "advances": [
         "Engineering",
         "Farming",
-        "Mining"
+        "Mining",
+        "Tactics"
       ],
-      "wonders_build": [
+      "incident_tokens": 1,
+      "wonder_cards": [
         "Pyramids"
       ],
-      "incident_tokens": 2,
       "next_unit_id": 8
     },
     {
@@ -116,11 +107,20 @@
       },
       "cities": [
         {
-          "city_pieces": {},
+          "city_pieces": {
+            "temple": 1
+          },
           "mood_state": "Angry",
-          "activations": 2,
+          "activations": 0,
           "angry_activation": false,
           "position": "C1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C2"
         }
       ],
       "units": [
@@ -137,11 +137,26 @@
       ],
       "civilization": "test1",
       "advances": [
+        "Fanaticism",
         "Farming",
-        "Mining"
+        "Mining",
+        "Tactics"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
+    },
+    {
+      "id": 2,
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "civilization": "Pirates",
+      "incident_tokens": 3,
+      "next_unit_id": 0
     }
   ],
   "map": {
@@ -149,10 +164,6 @@
       [
         "A1",
         "Fertile"
-      ],
-      [
-        "A2",
-        "Water"
       ],
       [
         "A3",
@@ -179,90 +190,17 @@
       [
         "C2",
         "Forest"
-      ],
-      [
-        "C3",
-        "Water"
-      ],
-      [
-        "D2",
-        "Water"
       ]
     ]
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "action": {
-        "Playing": {
-          "Custom": {
-            "ConstructWonder": {
-              "city_position": "A1",
-              "wonder": "Pyramids",
-              "payment": {
-                "food": 2,
-                "wood": 3,
-                "ore": 3,
-                "culture_tokens": 4
-              }
-            }
-          }
-        }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 2
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/cities/0/city_pieces/wonders"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/culture_tokens",
-          "value": 7
-        },
-        {
-          "op": "add",
-          "path": "/players/0/resources/food",
-          "value": 2
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/ore",
-          "value": 7
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/wood",
-          "value": 7
-        },
-        {
-          "op": "add",
-          "path": "/players/0/wonder_cards",
-          "value": [
-            "Pyramids"
-          ]
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/wonders_build"
-        }
-      ]
-    }
-  ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1 paid 2 food, 3 wood, 3 ore and 4 culture tokens to construct the Pyramids wonder in the city at A1"
-    ]
-  ],
+  "action_log": [],
+  "action_log_index": 0,
+  "log": [],
   "undo_limit": 0,
-  "actions_left": 1,
-  "round": 1,
+  "actions_left": 3,
+  "round": 2,
   "age": 1,
   "messages": [
     "The game has started"
@@ -270,17 +208,19 @@
   "dice_roll_outcomes": [
     1,
     1,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10
+    1,
+    1,
+    1,
+    11,
+    11,
+    11,
+    11
   ],
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [],
-  "action_cards_left": []
+  "action_cards_left": [],
+  "incidents_left": [
+    55
+  ]
 }

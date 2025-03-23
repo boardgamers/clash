@@ -15,6 +15,7 @@ use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{ChangeGovernmentType, StatusPhaseState};
 use crate::unit::UnitType;
+use crate::wonder::WonderCardInfo;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
@@ -162,6 +163,7 @@ pub enum CurrentEventType {
     Recruit(Recruit),
     Incident(IncidentInfo),
     ActionCard(ActionCardInfo),
+    WonderCard(WonderCardInfo),
     DrawWonderCard,
 }
 

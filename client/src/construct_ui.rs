@@ -1,4 +1,3 @@
-use crate::cards_ui::wonder_cards;
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::payment_ui::{payment_dialog, Payment};
 use crate::recruit_unit_ui::RecruitSelection;
@@ -6,9 +5,9 @@ use crate::render_context::RenderContext;
 use server::action::Action;
 use server::city::City;
 use server::city_pieces::Building;
-use server::content::custom_actions::CustomAction;
+use server::construct::Construct;
 use server::map::Terrain;
-use server::playing_actions::{Construct, PlayingAction, Recruit};
+use server::playing_actions::{PlayingAction, Recruit};
 use server::position::Position;
 use server::recruit::recruit_cost;
 
@@ -46,20 +45,11 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
             new.payment = p;
             ActiveDialog::ConstructionPayment(new)
         },
-        |payment| match &cp.project {
+        |payment| match cp.project.clone() {
             ConstructionProject::Building(b, pos) => StateUpdate::execute_activation(
                 Action::Playing(PlayingAction::Construct(
-                    Construct::new(cp.city_position, *b, payment).with_port_position(*pos),
+                    Construct::new(cp.city_position, b, payment).with_port_position(pos),
                 )),
-                vec![],
-                city,
-            ),
-            ConstructionProject::Wonder(w) => StateUpdate::execute_activation(
-                Action::Playing(PlayingAction::Custom(CustomAction::ConstructWonder {
-                    city_position: cp.city_position,
-                    payment,
-                    wonder: w.clone(),
-                })),
                 vec![],
                 city,
             ),
@@ -81,7 +71,6 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
 #[derive(Clone)]
 pub enum ConstructionProject {
     Building(Building, Option<Position>),
-    Wonder(String),
     Units(RecruitSelection),
 }
 
@@ -103,11 +92,6 @@ impl ConstructionPayment {
         let p = rc.game.get_player(city.player_index);
         let cost = match &project {
             ConstructionProject::Building(b, _) => p.construct_cost(rc.game, *b, None),
-            ConstructionProject::Wonder(name) => p.wonder_cost(
-                wonder_cards(p).iter().find(|w| w.name == *name).unwrap(),
-                city,
-                None,
-            ),
             ConstructionProject::Units(sel) => recruit_cost(
                 rc.shown_player,
                 &sel.amount.units,

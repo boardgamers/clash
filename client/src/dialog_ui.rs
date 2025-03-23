@@ -3,6 +3,7 @@ use crate::layout_ui::{bottom_centered_text, bottom_right_texture, icon_pos};
 use crate::render_context::RenderContext;
 use macroquad::math::Vec2;
 use server::content::custom_actions::CustomActionType;
+use server::events::EventOrigin;
 
 #[derive(Clone)]
 pub enum OkTooltip {
@@ -15,7 +16,7 @@ pub enum BaseOrCustomAction {
     Base,
     Custom {
         custom: CustomActionType,
-        advance: String,
+        origin: EventOrigin,
     },
 }
 

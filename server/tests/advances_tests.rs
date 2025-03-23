@@ -1,25 +1,26 @@
 use crate::common::{illegal_action_test, influence_action, JsonTest, TestAction};
 use server::action::{execute_action, Action};
-use server::city_pieces::Building::{Fortress, Temple};
+use server::city_pieces::Building::{Academy, Fortress, Temple};
+use server::consts::CONSTRUCT_COST;
 use server::content::advances::trade_routes::find_trade_routes;
 use server::content::custom_actions::CustomAction;
 use server::content::custom_actions::CustomAction::{
-    AbsolutePower, ArtsInfluenceCultureAttempt, CivilRights, ConstructWonder, ForcedLabor, Sports,
-    Taxes, Theaters, VotingIncreaseHappiness,
+    AbsolutePower, ArtsInfluenceCultureAttempt, CivilRights, ForcedLabor, Sports, Taxes, Theaters,
+    VotingIncreaseHappiness,
 };
 use server::content::custom_phase_actions::EventResponse;
 use server::events::EventOrigin;
 use server::game::Game;
 use server::movement::move_units_destinations;
-use server::playing_actions;
 use server::playing_actions::PlayingAction::{
-    Advance, Collect, Construct, Custom, EndTurn, Recruit,
+    Advance, Collect, Construct, Custom, EndTurn, Recruit, WonderCard,
 };
 use server::position::Position;
 use server::recruit::recruit_cost_without_replaced;
 use server::resource_pile::ResourcePile;
 use server::unit::MovementAction::Move;
 use server::unit::{MoveUnits, Units};
+use server::{construct, playing_actions};
 
 mod common;
 
@@ -143,13 +144,20 @@ fn test_monuments() {
                 0,
             );
         }
+
+        game = execute_action(game, Action::Playing(WonderCard("Pyramids".to_string())), 0);
         game = execute_action(
             game,
-            Action::Playing(Custom(ConstructWonder {
-                city_position: Position::from_offset("C2"),
-                wonder: String::from("Pyramids"),
-                payment: ResourcePile::new(2, 3, 3, 0, 0, 0, 4),
-            })),
+            Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                "C2",
+            )])),
+            0,
+        );
+        game = execute_action(
+            game,
+            Action::Response(EventResponse::Payment(vec![ResourcePile::new(
+                2, 3, 3, 0, 0, 0, 4,
+            )])),
             0,
         );
         game = execute_action(game, Action::Playing(EndTurn), 0);
@@ -422,7 +430,7 @@ fn test_dogma() {
             ),
             TestAction::undoable(
                 1,
-                Action::Playing(Construct(playing_actions::Construct::new(
+                Action::Playing(Construct(construct::Construct::new(
                     Position::from_offset("C1"),
                     Temple,
                     ResourcePile::new(0, 1, 1, 0, 0, 0, 0),
@@ -472,6 +480,20 @@ fn test_priesthood() {
     );
 }
 
+#[test]
+fn test_writing() {
+    JSON.test(
+        "writing",
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(Construct(construct::Construct::new(
+                Position::from_offset("A1"),
+                Academy,
+                CONSTRUCT_COST.clone(),
+            ))),
+        )],
+    );
+}
 #[test]
 fn test_free_education() {
     JSON.test(

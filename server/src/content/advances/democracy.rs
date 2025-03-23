@@ -1,11 +1,13 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action::Action;
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::city::MoodState;
 use crate::content::advances::{advance_group_builder, AdvanceGroup};
 use crate::content::custom_actions::CustomActionType::{
     CivilLiberties, FreeEconomyCollect, VotingIncreaseHappiness,
 };
-use crate::playing_actions::PlayingActionType;
+use crate::log::current_turn_log;
+use crate::playing_actions::{PlayingAction, PlayingActionType};
 
 pub(crate) fn democracy() -> AdvanceGroup {
     advance_group_builder(
@@ -52,16 +54,33 @@ fn civil_liberties() -> AdvanceBuilder {
 }
 
 fn free_economy() -> AdvanceBuilder {
-    Advance::builder("Free Economy", "As a free action, you may spend 1 mood token to collect resources in one city. This must be your only collect action this turn")
-        .add_custom_action(FreeEconomyCollect)
-        .add_transient_event_listener(
-            |event| &mut event.is_playing_action_available,
-            0,
-            |available, game, i| {
-                let p = game.get_player(i.player);
-                if matches!(i.action_type, PlayingActionType::Collect) && p.played_once_per_turn_actions.contains(&FreeEconomyCollect) {
+    Advance::builder(
+        "Free Economy",
+        "As a free action, you may spend 1 mood token to collect \
+                  resources in one city. This must be your only collect action this turn",
+    )
+    .add_custom_action(FreeEconomyCollect)
+    .add_transient_event_listener(
+        |event| &mut event.is_playing_action_available,
+        0,
+        |available, game, i| {
+            let p = game.get_player(i.player);
+            match &i.action_type {
+                PlayingActionType::Collect
+                    if p.played_once_per_turn_actions.contains(&FreeEconomyCollect) =>
+                {
                     *available = false;
                 }
-            },
-        )
+                PlayingActionType::Custom(i)
+                    if matches!(i.custom_action_type, FreeEconomyCollect)
+                        && current_turn_log(game).iter().any(|item| {
+                            matches!(item.action, Action::Playing(PlayingAction::Collect(_)))
+                        }) =>
+                {
+                    *available = false;
+                }
+                _ => {}
+            }
+        },
+    )
 }

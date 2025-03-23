@@ -123,9 +123,9 @@ impl ActiveDialog {
             ActiveDialog::MoveUnits(m) => Self::move_units_help(rc, m),
             ActiveDialog::CulturalInfluence(b) => {
                 let v = vec!["Click on a building to influence its culture".to_string()];
-                if let BaseOrCustomAction::Custom { advance, custom: _ } = &b.custom {
+                if let BaseOrCustomAction::Custom { origin, custom: _ } = &b.custom {
                     let mut r = v.clone();
-                    r.extend(event_help(rc, &EventOrigin::Advance(advance.clone()), true));
+                    r.extend(event_help(rc, origin, true));
                 }
                 v
             }

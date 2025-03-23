@@ -1,7 +1,6 @@
 use crate::action_buttons::{
     base_or_custom_action, base_or_custom_available, custom_action_buttons,
 };
-use crate::cards_ui::wonder_cards;
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
@@ -20,8 +19,10 @@ use macroquad::prelude::*;
 use server::city::{City, MoodState};
 use server::city_pieces::Building;
 use server::collect::possible_resource_collections;
+use server::construct::can_construct;
 use server::content::custom_actions::CustomActionType;
 use server::content::custom_phase_actions::{SelectedStructure, Structure};
+use server::events::EventOrigin;
 use server::game::Game;
 use server::playing_actions::PlayingActionType;
 use server::position::Position;
@@ -48,7 +49,6 @@ pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate 
         base_icons,
         move_units_buttons(rc, city.position),
         building_icons(rc, city),
-        wonder_icons(rc, city),
         custom_action_buttons(rc, Some(city)),
     ]
     .into_iter()
@@ -77,37 +77,6 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
     ))
 }
 
-fn wonder_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> {
-    if !city.can_activate() || !rc.can_play_action(&PlayingActionType::Construct) {
-        // is this the right thing to check?
-        return vec![];
-    }
-    let owner = rc.shown_player;
-    let game = rc.game;
-
-    wonder_cards(owner)
-        .into_iter()
-        .filter(|w| city.can_build_wonder(w, owner, game).is_ok())
-        .map(|w| {
-            let a: IconAction<'a> = (
-                &rc.assets().wonders[&w.name],
-                format!("Build wonder {}", w.name),
-                Box::new(move || {
-                    StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(
-                        ConstructionPayment::new(
-                            rc,
-                            city,
-                            &w.name,
-                            ConstructionProject::Wonder(w.name.clone()),
-                        ),
-                    ))
-                }),
-            );
-            a
-        })
-        .collect()
-}
-
 fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a> {
     if !city.can_activate() || !rc.can_play_action(&PlayingActionType::Construct) {
         return vec![];
@@ -116,7 +85,7 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
     Building::all()
         .iter()
         .filter_map(|b| {
-            if city.can_construct(*b, owner, rc.game).is_ok() {
+            if can_construct(city, *b, owner, rc.game).is_ok() {
                 Some(*b)
             } else {
                 None
@@ -194,7 +163,10 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
                 rc,
                 &PlayingActionType::Collect,
                 "Collect resources",
-                &[("Free Economy", CustomActionType::FreeEconomyCollect)],
+                &[(
+                    EventOrigin::advance("Free Economy"),
+                    CustomActionType::FreeEconomyCollect,
+                )],
                 |custom| {
                     let i = possible_resource_collections(
                         rc.game,

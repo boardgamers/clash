@@ -1,6 +1,7 @@
 use crate::advance::on_advance;
 use crate::combat::{combat_loop, move_with_possible_combat, start_combat};
 use crate::combat_listeners::{combat_round_end, combat_round_start, end_combat};
+use crate::construct::on_construct;
 use crate::content::custom_phase_actions::{CurrentEventType, EventResponse};
 use crate::cultural_influence::ask_for_cultural_influence_payment;
 use crate::explore::{ask_explore_resolution, move_to_unexplored_tile};
@@ -12,7 +13,7 @@ use crate::map::Terrain::Unexplored;
 use crate::movement::{
     get_move_state, has_movable_units, move_units_destinations, CurrentMove, MoveState,
 };
-use crate::playing_actions::{on_construct, play_action_card, PlayingAction};
+use crate::playing_actions::{play_action_card, PlayingAction};
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
 use crate::resource_pile::ResourcePile;
@@ -20,7 +21,7 @@ use crate::status_phase::play_status_phase;
 use crate::undo::{clean_patch, redo, to_serde_value, undo};
 use crate::unit::MovementAction::{Move, Stop};
 use crate::unit::{get_current_move, MovementAction};
-use crate::wonder::draw_wonder_card;
+use crate::wonder::{draw_wonder_card, play_wonder_card};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -167,6 +168,7 @@ pub(crate) fn execute_custom_phase_action(
         }
         Incident(i) => trigger_incident(game, i),
         ActionCard(a) => play_action_card(game, player_index, a),
+        WonderCard(w) => play_wonder_card(game, player_index, w),
     }
 
     if let Some(mut s) = game.events.pop() {

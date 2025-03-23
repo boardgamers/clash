@@ -10,6 +10,7 @@ use crate::content::custom_phase_actions::{
     UnitsRequest,
 };
 use crate::content::incidents;
+use crate::content::incidents::great_persons::GREAT_PERSON_OFFSET;
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::map::Terrain;
@@ -567,7 +568,18 @@ pub(crate) fn trigger_incident(game: &mut Game, mut info: IncidentInfo) {
             true,
             |g| &mut g.incidents_left,
             || incidents::get_all().iter().map(|i| i.id).collect_vec(),
-            |_| vec![],
+            |p| {
+                p.action_cards
+                    .iter()
+                    .filter_map(|a| {
+                        if *a >= GREAT_PERSON_OFFSET {
+                            Some(a - GREAT_PERSON_OFFSET)
+                        } else {
+                            None
+                        }
+                    })
+                    .collect()
+            },
         )
         .expect("incident should exist"),
     );
