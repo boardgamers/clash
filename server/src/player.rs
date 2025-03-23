@@ -809,17 +809,6 @@ impl Player {
             cost_info
         }
     }
-
-    pub(crate) fn trigger_player_event<U, V>(
-        &mut self,
-        event: impl Fn(&mut TransientEvents) -> &mut Event<Player, U, V>,
-        info: &U,
-        details: &V,
-    ) {
-        let e = event(&mut self.events.transient).take();
-        let _ = e.trigger(self, info, details, &mut ());
-        event(&mut self.events.transient).set(e);
-    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq)]

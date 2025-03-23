@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::collect::collect;
 use crate::content::advances::culture::{execute_sports, execute_theaters};
 use crate::content::advances::economy::collect_taxes;
-use crate::content::wonders::construct_wonder;
+use crate::construct::construct_wonder_with_card;
 use crate::cultural_influence::influence_culture_attempt;
 use crate::log::{format_city_happiness_increase, format_collect_log_item, format_construct_wonder_log_item, format_cultural_influence_attempt_log_item, format_happiness_increase};
 use crate::player::Player;
@@ -77,7 +77,7 @@ impl CustomAction {
     /// Panics if action is illegal
     pub fn execute(self, game: &mut Game, player_index: usize) {
         match self {
-            CustomAction::GreatArchitect(c) => construct_wonder(game, player_index, &c),
+            CustomAction::GreatArchitect(c) => construct_wonder_with_card(game, player_index, &c),
             CustomAction::AbsolutePower => game.actions_left += 1,
             CustomAction::ForcedLabor => {
                 // we check that the action was played

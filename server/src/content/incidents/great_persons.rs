@@ -6,7 +6,7 @@ use crate::city_pieces::Building;
 use crate::content::advances;
 use crate::content::advances::{economy, get_governments};
 use crate::content::custom_phase_actions::{AdvanceRequest, PaymentRequest, PositionRequest};
-use crate::content::incidents::great_builder::great_engineer;
+use crate::content::incidents::great_builders::{great_architect, great_engineer};
 use crate::content::incidents::great_explorer::great_explorer;
 use crate::content::incidents::great_warlord::great_warlord;
 use crate::game::Game;
@@ -14,11 +14,12 @@ use crate::incident::{Incident, IncidentBaseEffect};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
-use crate::playing_actions::{construct, ActionType, Construct};
+use crate::playing_actions::ActionType;
 use crate::resource_pile::ResourcePile;
 use crate::utils::format_list;
 use itertools::Itertools;
 use std::vec;
+use crate::construct::{construct, Construct};
 
 pub(crate) const GREAT_PERSON_OFFSET: u8 = 100;
 
@@ -37,6 +38,7 @@ pub(crate) fn great_person_incidents() -> Vec<Incident> {
         great_person_incident(IncidentBaseEffect::ExhaustedLand, great_warlord()),
         great_person_incident(IncidentBaseEffect::BarbariansMove, great_merchant()),
         great_person_incident(IncidentBaseEffect::BarbariansMove, great_engineer()),
+        great_person_incident(IncidentBaseEffect::PiratesSpawnAndRaid, great_architect()),
     ]
 }
 
@@ -267,7 +269,7 @@ fn temple_cost(game: &Game, player: &Player) -> PaymentOptions {
 
 pub(crate) fn great_person_description<S: AsRef<str>>(free_advance_groups: &[S]) -> String {
     format!(
-        "{GREAT_PERSON_DESCRIPTION} As a regular action, you may advance \
+        "{GREAT_PERSON_DESCRIPTION} You may advance \
         in any {} technology for free and without changing the Game Event counter.",
         format_list(free_advance_groups, "no", "or")
     )

@@ -652,6 +652,7 @@ pub mod tests {
         utils::Rng,
         wonder::Wonder,
     };
+    use crate::construct::construct_wonder;
 
     #[must_use]
     pub fn test_game() -> Game {
@@ -697,7 +698,7 @@ pub mod tests {
 
         let position = Position::new(0, 0);
         game.players[old].cities.push(City::new(old, position));
-        game.build_wonder(wonder, position, old);
+        construct_wonder(&mut game, wonder, position, old);
         game.players[old].construct(Academy, position, None, true);
         game.players[old].construct(Obelisk, position, None, true);
 

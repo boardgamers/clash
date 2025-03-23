@@ -28,7 +28,6 @@ use crate::{
     map::{Map, MapData},
     player::{Player, PlayerData},
     position::Position,
-    wonder::Wonder,
 };
 use itertools::Itertools;
 use json_patch::PatchOperation;
@@ -757,29 +756,6 @@ impl Game {
             .take_city(position)
             .expect("player should have this city");
         city.raze(self, player_index);
-    }
-
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if city does not exist
-    pub fn build_wonder(&mut self, wonder: Wonder, city_position: Position, player_index: usize) {
-        self.players[player_index].trigger_player_event(
-            |events| &mut events.on_construct_wonder,
-            &city_position,
-            &wonder,
-        );
-        let wonder = wonder;
-        (wonder.listeners.initializer)(self, player_index);
-        (wonder.listeners.one_time_initializer)(self, player_index);
-        let player = &mut self.players[player_index];
-        player.wonders_build.push(wonder.name.clone());
-        player
-            .get_city_mut(city_position)
-            .pieces
-            .wonders
-            .push(wonder);
     }
 
     ///

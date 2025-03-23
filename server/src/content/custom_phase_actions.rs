@@ -159,6 +159,7 @@ pub enum CurrentEventType {
     TurnStart,
     Advance(AdvanceInfo),
     Construct(Building),
+    ConstructWonder(String),
     Recruit(Recruit),
     Incident(IncidentInfo),
     ActionCard(ActionCardInfo),

@@ -1,13 +1,14 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action::Action;
 use crate::action_card::ActionCard;
 use crate::content::builtin::Builtin;
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::{CustomAction, CustomActionType};
 use crate::content::incidents::great_persons::{
-    great_person_action_card, great_person_description,
+    great_person_action_card, great_person_description, GREAT_PERSON_DESCRIPTION,
 };
 use crate::incident::PermanentIncidentEffect;
-use crate::playing_actions::{ActionType, PlayingActionType};
-use crate::utils::remove_element;
+use crate::playing_actions::{ActionType, PlayingAction, PlayingActionType};
+use crate::utils::{remove_element, remove_element_by};
 
 pub(crate) fn great_engineer() -> ActionCard {
     let groups = &["Construction"];
@@ -79,6 +80,30 @@ pub(crate) fn use_great_engineer() -> Builtin {
         .build()
 }
 
+pub(crate) fn great_architect() -> ActionCard {
+    great_person_action_card::<_, String>(
+        55,
+        "Great Engineer",
+        &format!(
+            "{GREAT_PERSON_DESCRIPTION} When constructing a wonder, you may ignore \
+            the requirement advances (but not Engineering). \
+            In addition, the cost of constructing the wonder is reduced by 3 culture tokens.",
+        ),
+        ActionType::regular(),
+        &[],
+        |_game, _player| true,
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.on_play_action_card,
+        0,
+        |game, player, _, _| {
+            game.permanent_incident_effects
+                .push(PermanentIncidentEffect::GreatArchitect(player));
+        },
+    )
+    .build()
+}
+
 pub(crate) fn use_great_architect() -> Builtin {
     let b = Builtin::builder("Great Architect", "-");
     let key = b.get_key();
@@ -94,8 +119,41 @@ pub(crate) fn use_great_architect() -> Builtin {
                 .insert(CustomActionType::GreatArchitect, key.clone());
         }
     })
-        //todo remove effect after building
-        // todo may discount 3 culture tokens
-        // todo may ignore requirement advances (but not Engineering)
+    //todo remove effect after building
+    // todo may discount 3 culture tokens
+    // todo may ignore requirement advances (but not Engineering)
+        .add_transient_event_listener(
+            |event| &mut event.wonder_cost,
+            0,
+            |c, _, game| {
+                if game
+                    .permanent_incident_effects
+                    .iter()
+                    .any(|e| matches!(e, PermanentIncidentEffect::GreatArchitect(_)))
+                {
+                    c.cost.culture -= 3;
+                }
+            },
+        )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.on_construct_wonder,
+        0,
+        |game, _, _, _| {
+            let architect_used = game.action_log.iter().rev().find_map(|action| {
+                match action.action {
+                    Action::Playing(PlayingAction::ConstructWonder(_)) => Some(false),
+                    Action::Playing(PlayingAction::Custom(CustomAction::GreatArchitect(_))) => Some(true),
+                    _ => None
+                }
+            }).expect("No wonder constructed");
+            
+            if architect_used {
+                remove_element_by(
+                    &mut game.permanent_incident_effects,
+                    |e| matches!(e, PermanentIncidentEffect::GreatArchitect(_)),
+                );
+            }
+        },
+    )
     .build()
 }

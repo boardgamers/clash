@@ -5,7 +5,7 @@ use crate::cultural_influence::influence_culture_boost_cost;
 use crate::game::ActionLogItem;
 use crate::player::Player;
 use crate::playing_actions::{
-    Collect, Construct, IncreaseHappiness, InfluenceCultureAttempt, Recruit,
+    Collect, IncreaseHappiness, InfluenceCultureAttempt, Recruit,
 };
 use crate::wonder::ConstructWonder;
 use crate::{
@@ -19,6 +19,7 @@ use crate::{
 };
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use crate::construct::Construct;
 
 #[derive(Serialize, Deserialize)]
 pub struct LogSliceOptions {

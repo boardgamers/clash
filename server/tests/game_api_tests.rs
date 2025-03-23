@@ -1,7 +1,7 @@
 use crate::common::*;
 use server::content::custom_phase_actions::EventResponse;
 use server::unit::Units;
-use server::{action::Action, city::{City, MoodState::*}, city_pieces::Building::*, game::Game, game_api, map::Terrain::*, playing_actions, playing_actions::PlayingAction::*, position::Position, resource_pile::ResourcePile, wonder};
+use server::{action::Action, city::{City, MoodState::*}, city_pieces::Building::*, construct, game::Game, game_api, map::Terrain::*, playing_actions, playing_actions::PlayingAction::*, position::Position, resource_pile::ResourcePile, wonder};
 use std::{collections::HashMap, vec};
 
 mod common;
@@ -66,7 +66,7 @@ fn basic_actions() {
         .cities
         .push(City::new(0, Position::new(0, 2)));
 
-    let construct_action = Action::Playing(Construct(playing_actions::Construct::new(
+    let construct_action = Action::Playing(Construct(construct::Construct::new(
         city_position,
         Observatory,
         ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
@@ -394,7 +394,7 @@ fn test_construct() {
         "construct",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Construct(playing_actions::Construct::new(
+            Action::Playing(Construct(construct::Construct::new(
                 Position::from_offset("C2"),
                 Observatory,
                 ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
@@ -410,7 +410,7 @@ fn test_construct_port() {
         vec![TestAction::undoable(
             0,
             Action::Playing(Construct(
-                playing_actions::Construct::new(
+                construct::Construct::new(
                     Position::from_offset("A1"),
                     Port,
                     ResourcePile::new(1, 1, 1, 0, 0, 0, 0),

@@ -18,40 +18,15 @@ use crate::recruit::{recruit, recruit_cost};
 use crate::unit::Units;
 use crate::{
     city::City,
-    city_pieces::Building::{self, *},
+    city_pieces::Building::{self},
     content::custom_actions::CustomAction,
     game::Game,
     position::Position,
     resource_pile::ResourcePile,
 };
-use crate::content::wonders::construct_wonder;
+use crate::construct::Construct;
+use crate::construct::construct_wonder_with_card;
 use crate::wonder::ConstructWonder;
-
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
-pub struct Construct {
-    pub city_position: Position,
-    pub city_piece: Building,
-    pub payment: ResourcePile,
-    pub port_position: Option<Position>,
-}
-
-impl Construct {
-    #[must_use]
-    pub fn new(city_position: Position, city_piece: Building, payment: ResourcePile) -> Self {
-        Self {
-            city_position,
-            city_piece,
-            payment,
-            port_position: None,
-        }
-    }
-
-    #[must_use]
-    pub fn with_port_position(mut self, port_position: Option<Position>) -> Self {
-        self.port_position = port_position;
-        self
-    }
-}
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Collect {
@@ -195,6 +170,7 @@ impl PlayingAction {
     /// Panics if action is illegal
     pub fn execute(self, game: &mut Game, player_index: usize) {
         use PlayingAction::*;
+        use crate::construct;
         let playing_action_type = self.playing_action_type();
         assert!(
             playing_action_type.is_available(game, player_index),
@@ -220,10 +196,10 @@ impl PlayingAction {
                 build_city(game.get_player_mut(player_index), settler.position);
             }
             Construct(c) => {
-                construct(game, player_index, &c);
+                construct::construct(game, player_index, &c);
             }
             ConstructWonder(c) => {
-                construct_wonder(game, player_index, &c);
+                construct_wonder_with_card(game, player_index, &c);
             }
             Collect(c) => {
                 collect(game, player_index, &c);
@@ -373,45 +349,6 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, i: ActionCa
         CurrentEventType::ActionCard,
         None,
         |_| {},
-    );
-}
-
-pub(crate) fn construct(game: &mut Game, player_index: usize, c: &Construct) {
-    let player = &game.players[player_index];
-    let city = player.get_city(c.city_position);
-    let cost = player.construct_cost(game, c.city_piece, Some(&c.payment));
-    city.can_construct(c.city_piece, player, game)
-        .map_err(|e| panic!("{e}"))
-        .ok();
-    if matches!(c.city_piece, Port) {
-        let port_position = c.port_position.as_ref().expect("Illegal action");
-        assert!(
-            city.position.neighbors().contains(port_position),
-            "Illegal action"
-        );
-    } else if c.port_position.is_some() {
-        panic!("Illegal action");
-    }
-    game.players[player_index].construct(
-        c.city_piece,
-        c.city_position,
-        c.port_position,
-        cost.activate_city,
-    );
-    if matches!(c.city_piece, Academy) {
-        game.players[player_index].gain_resources(ResourcePile::ideas(2));
-        game.add_info_log_item("Academy gained 2 ideas");
-    }
-    cost.pay(game, &c.payment);
-    on_construct(game, player_index, c.city_piece);
-}
-
-pub(crate) fn on_construct(game: &mut Game, player_index: usize, building: Building) {
-    let _ = game.trigger_current_event(
-        &[player_index],
-        |e| &mut e.on_construct,
-        building,
-        CurrentEventType::Construct,
     );
 }
 

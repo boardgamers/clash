@@ -12,7 +12,7 @@ use crate::map::Terrain::Unexplored;
 use crate::movement::{
     get_move_state, has_movable_units, move_units_destinations, CurrentMove, MoveState,
 };
-use crate::playing_actions::{on_construct, play_action_card, PlayingAction};
+use crate::playing_actions::{play_action_card, PlayingAction};
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
 use crate::resource_pile::ResourcePile;
@@ -23,6 +23,7 @@ use crate::unit::{get_current_move, MovementAction};
 use crate::wonder::draw_wonder_card;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use crate::construct::{on_construct, on_construct_wonder};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum Action {
@@ -161,6 +162,9 @@ pub(crate) fn execute_custom_phase_action(
         }
         Construct(b) => {
             on_construct(game, player_index, b);
+        }
+        ConstructWonder(name) => {
+            on_construct_wonder(game, player_index, name);
         }
         Recruit(r) => {
             on_recruit(game, player_index, r);

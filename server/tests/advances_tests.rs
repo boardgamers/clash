@@ -19,7 +19,7 @@ use server::recruit::recruit_cost_without_replaced;
 use server::resource_pile::ResourcePile;
 use server::unit::MovementAction::Move;
 use server::unit::{MoveUnits, Units};
-use server::{playing_actions, wonder};
+use server::{construct, playing_actions, wonder};
 
 mod common;
 
@@ -422,7 +422,7 @@ fn test_dogma() {
             ),
             TestAction::undoable(
                 1,
-                Action::Playing(Construct(playing_actions::Construct::new(
+                Action::Playing(Construct(construct::Construct::new(
                     Position::from_offset("C1"),
                     Temple,
                     ResourcePile::new(0, 1, 1, 0, 0, 0, 0),

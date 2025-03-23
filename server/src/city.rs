@@ -1,5 +1,5 @@
 use std::ops::{Add, Sub};
-
+use async_std::stream::Product;
 use serde::{Deserialize, Serialize};
 
 use crate::consts::MAX_CITY_SIZE;
@@ -12,6 +12,7 @@ use crate::{
     wonder::Wonder,
 };
 use MoodState::*;
+use crate::resource_pile::ResourcePile;
 
 pub struct City {
     pub pieces: CityPieces,
@@ -107,7 +108,7 @@ impl City {
         building: Building,
         player: &Player,
         game: &Game,
-    ) -> Result<(), String> {
+    ) -> Result<ResourcePile, String> {
         self.can_build_anything(player)?;
         if matches!(self.mood_state, Angry) {
             return Err("City is angry".to_string());
@@ -126,6 +127,7 @@ impl City {
             return Err("All non-destroyed buildings are built".to_string());
         }
         if !player.can_afford(&player.construct_cost(game, building, None).cost) {
+            // construct cost event listener?
             return Err("Not enough resources".to_string());
         }
         Ok(())
@@ -153,13 +155,10 @@ impl City {
         wonder: &Wonder,
         player: &Player,
         game: &Game,
-    ) -> Result<(), String> {
+    ) -> Result<ResourcePile, String> {
         self.can_build_anything(player)?;
         if !matches!(self.mood_state, Happy) {
             return Err("City is not happy".to_string());
-        }
-        if !player.can_afford(&player.wonder_cost(wonder, self, None).cost) {
-            return Err("Not enough resources".to_string());
         }
         if !player.has_advance("Engineering") {
             return Err("Engineering advance missing".to_string());
