@@ -251,7 +251,7 @@ pub(crate) fn play_wonder_card(game: &mut Game, player_index: usize, i: WonderCa
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub(crate) struct WonderDiscount {
+pub struct WonderDiscount {
     ignore_required_advances: bool,
     culture_tokens: u32,
 }

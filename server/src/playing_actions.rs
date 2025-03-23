@@ -234,10 +234,7 @@ impl PlayingAction {
                 play_wonder_card(
                     game,
                     player_index,
-                    WonderCardInfo::new(
-                        name,
-                        WonderDiscount::default(),
-                    ),
+                    WonderCardInfo::new(name, WonderDiscount::default()),
                 );
             }
             Custom(custom_action) => {

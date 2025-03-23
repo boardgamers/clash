@@ -103,7 +103,7 @@ fn basic_actions() {
         }));
     let mut game = game_api::execute(game, increase_happiness_action, 0);
     let player = &game.players[0];
-    
+
     assert_eq!(ResourcePile::new(1, 3, 3, 0, 2, 0, 4), player.resources);
     assert!(matches!(player.get_city(city_position).mood_state, Happy));
     assert_eq!(2, game.actions_left);
@@ -134,7 +134,10 @@ fn basic_actions() {
     }));
     let game = game_api::execute(game, collect_action, 0);
     let player = &game.players[0];
-    assert_eq!(ResourcePile::ore(1) + ResourcePile::food(1), player.resources);
+    assert_eq!(
+        ResourcePile::ore(1) + ResourcePile::food(1),
+        player.resources
+    );
     assert!(player
         .try_get_city(city_position)
         .expect("player should have a city at this position")
@@ -307,7 +310,8 @@ fn test_wonder() {
     JSON.test(
         "wonder",
         vec![
-            TestAction::undoable(0, Action::Playing(WonderCard("Pyramids".to_string()))).without_json_comparison(),
+            TestAction::undoable(0, Action::Playing(WonderCard("Pyramids".to_string())))
+                .without_json_comparison(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::new(
