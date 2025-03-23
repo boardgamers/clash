@@ -268,17 +268,17 @@ pub struct MoveRoute {
     pub cost: PaymentOptions,
     pub stack_size_used: usize,
     pub ignore_terrain_movement_restrictions: bool,
-    pub origins: Vec<EventOrigin>,
 }
 
 impl MoveRoute {
     fn free(destination: Position, origins: Vec<EventOrigin>) -> Self {
+        let mut options = PaymentOptions::free();
+        options.modifiers = origins;
         Self {
             destination,
-            cost: PaymentOptions::free(),
+            cost: options,
             stack_size_used: 0,
             ignore_terrain_movement_restrictions: false,
-            origins,
         }
     }
 }
@@ -334,7 +334,7 @@ fn add_diplomatic_relations(player: &Player, game: &Game, base: &mut Vec<MoveRou
         for r in base {
             if !partner.get_units(r.destination).is_empty() {
                 r.cost.default += ResourcePile::culture_tokens(2);
-                r.origins.push(EventOrigin::Incident(DIPLOMAT_ID));
+                r.cost.modifiers.push(EventOrigin::Incident(DIPLOMAT_ID));
             }
         }
     }
@@ -404,7 +404,6 @@ fn reachable_with_roads(player: &Player, units: &[u32], game: &Game) -> Vec<Move
                         cost,
                         stack_size_used,
                         ignore_terrain_movement_restrictions: true,
-                        origins: vec![origin],
                     };
                     Some(route)
                 } else {

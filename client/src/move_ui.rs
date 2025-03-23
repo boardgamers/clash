@@ -68,8 +68,8 @@ pub fn possible_destinations(
         .unwrap_or_default()
         .into_iter()
         .map(|route| {
-            modifiers.extend(route.origins);
-            MoveDestination::Tile((route.destination, route.cost))
+            modifiers.extend(route.cost.modifiers.clone());
+            MoveDestination::Tile(route.destination, route.cost)
         })
         .collect::<Vec<_>>();
 
@@ -97,7 +97,7 @@ pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Ve
         .list
         .into_iter()
         .find_map(|d| match d {
-            MoveDestination::Tile((p, cost)) if p == pos => Some((p, None, cost)),
+            MoveDestination::Tile(p, cost) if p == pos => Some((p, None, cost)),
             MoveDestination::Carrier(id) if carrier.is_some_and(|u| u == id) => {
                 Some((pos, Some(id), PaymentOptions::free()))
             }
@@ -197,7 +197,7 @@ pub struct MoveDestinations {
 
 #[derive(Clone, Debug)]
 pub enum MoveDestination {
-    Tile((Position, PaymentOptions)),
+    Tile(Position, PaymentOptions),
     Carrier(u32),
 }
 
