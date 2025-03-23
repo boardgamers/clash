@@ -80,7 +80,7 @@ pub(crate) fn use_great_engineer() -> Builtin {
 }
 
 pub(crate) fn use_great_architect() -> Builtin {
-    let b = Builtin::builder("great_architect", "-");
+    let b = Builtin::builder("Great Architect", "-");
     let key = b.get_key();
     b.add_ability_initializer(move |game, player_index| {
         let player = &mut game.players[player_index];

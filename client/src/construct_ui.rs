@@ -9,6 +9,7 @@ use server::action::Action;
 use server::city::City;
 use server::city_pieces::Building;
 use server::content::custom_actions::{CustomAction, CustomActionType};
+use server::events::EventOrigin;
 use server::map::Terrain;
 use server::playing_actions::{Construct, PlayingAction, PlayingActionType, Recruit};
 use server::position::Position;
@@ -151,7 +152,7 @@ pub fn open_construct_wonder_dialog(rc: &RenderContext, city: &City, w: &Wonder)
         rc,
         &PlayingActionType::ConstructWonder,
         "Construct Wonder",
-        &[("Great Architect", CustomActionType::GreatArchitect)],
+        &[(EventOrigin::Builtin("Great Architect".to_string()), CustomActionType::GreatArchitect)],
         |custom| {
             ActiveDialog::ConstructionPayment(ConstructionPayment::new(
                 rc,

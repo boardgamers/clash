@@ -29,6 +29,7 @@ use server::resource::ResourceType;
 use server::unit::{UnitType, Units};
 use std::collections::HashMap;
 use std::ops::Add;
+use server::events::EventOrigin;
 
 pub type IconAction<'a> = (&'a Texture2D, String, Box<dyn Fn() -> StateUpdate + 'a>);
 
@@ -186,7 +187,7 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
                 rc,
                 &PlayingActionType::Collect,
                 "Collect resources",
-                &[("Free Economy", CustomActionType::FreeEconomyCollect)],
+                &[(EventOrigin::advance("Free Economy"), CustomActionType::FreeEconomyCollect)],
                 |custom| {
                     let i = possible_resource_collections(
                         rc.game,

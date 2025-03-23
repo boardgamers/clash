@@ -6,6 +6,7 @@ use crate::render_context::RenderContext;
 use server::action::Action;
 use server::city::City;
 use server::content::custom_actions::{CustomAction, CustomActionType};
+use server::events::EventOrigin;
 use server::player::Player;
 use server::playing_actions::{IncreaseHappiness, PlayingAction, PlayingActionType};
 use server::position::Position;
@@ -60,7 +61,7 @@ pub fn open_increase_happiness_dialog(
         rc,
         &PlayingActionType::IncreaseHappiness,
         "Increase happiness",
-        &[("Voting", CustomActionType::VotingIncreaseHappiness)],
+        &[(EventOrigin::advance("Voting"), CustomActionType::VotingIncreaseHappiness)],
         |custom| {
             ActiveDialog::IncreaseHappiness(init(IncreaseHappinessConfig::new(
                 rc.shown_player,

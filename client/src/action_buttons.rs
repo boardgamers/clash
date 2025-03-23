@@ -14,6 +14,7 @@ use server::city::City;
 use server::content::advances::culture::{sports_options, theaters_options};
 use server::content::advances::economy::tax_options;
 use server::content::custom_actions::{CustomAction, CustomActionType};
+use server::events::EventOrigin;
 use server::game::GameState;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::resource::ResourceType;
@@ -56,7 +57,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
             rc,
             &PlayingActionType::InfluenceCultureAttempt,
             "Influence culture",
-            &[("Arts", CustomActionType::ArtsInfluenceCultureAttempt)],
+            &[(EventOrigin::advance("Arts"), CustomActionType::ArtsInfluenceCultureAttempt)],
             ActiveDialog::CulturalInfluence,
         );
     }
@@ -174,7 +175,7 @@ pub fn base_or_custom_action(
     rc: &RenderContext,
     action: &PlayingActionType,
     title: &str,
-    custom: &[(&str, CustomActionType)],
+    custom: &[(EventOrigin, CustomActionType)],
     execute: impl Fn(BaseOrCustomDialog) -> ActiveDialog,
 ) -> StateUpdate {
     let base = if rc.can_play_action(action) {
@@ -193,17 +194,17 @@ pub fn base_or_custom_action(
             let player_index = rc.shown_player.index;
             a.is_available(self1, player_index)
         })
-        .map(|(advance, a)| {
+        .map(|(origin, a)| {
             let dialog = execute(BaseOrCustomDialog {
                 custom: BaseOrCustomAction::Custom {
                     custom: a.clone(),
-                    advance: (*advance).to_string(), //todo great engineer is not from advance - can we use the origin name instead?
+                    origin: origin.clone(),
                 },
-                title: format!("{title} with {advance}"),
+                title: format!("{title} with {}", origin.name()),
             });
 
             StateUpdate::dialog_chooser(
-                &format!("Use special action from {advance}?"),
+                &format!("Use special action from {}?", origin.name()),
                 Some(dialog),
                 base.clone(),
             )
