@@ -304,12 +304,15 @@ fn test_great_diplomat() {
                 )])),
             )
             .without_json_comparison(),
-            TestAction::not_undoable(0, Action::Movement(MovementAction::Move(MoveUnits {
-                units,
-                destination,
-                embark_carrier_id: None,
-                payment: ResourcePile::culture_tokens(2),
-            }))),
+            TestAction::not_undoable(
+                0,
+                Action::Movement(MovementAction::Move(MoveUnits {
+                    units,
+                    destination,
+                    embark_carrier_id: None,
+                    payment: ResourcePile::culture_tokens(2),
+                })),
+            ),
         ],
     );
 }
