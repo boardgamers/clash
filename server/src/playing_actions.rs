@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::action::Action;
 use crate::action_card::{discard_action_card, ActionCardInfo};
 use crate::advance::gain_advance;
 use crate::city::MoodState;
@@ -8,11 +7,10 @@ use crate::collect::collect;
 use crate::construct::Construct;
 use crate::content::action_cards::get_civil_card;
 use crate::content::advances::get_advance;
-use crate::content::custom_actions::{CustomActionInfo, CustomActionType};
+use crate::content::custom_actions::CustomActionInfo;
 use crate::content::custom_phase_actions::CurrentEventType;
 use crate::cultural_influence::influence_culture_attempt;
 use crate::game::GameState;
-use crate::log::current_turn_log;
 use crate::player::Player;
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::{recruit, recruit_cost};
@@ -78,9 +76,8 @@ pub enum PlayingActionType {
 
 impl PlayingActionType {
     ///
-    /// # Panics
-    /// Panics if action is illegal
-    #[must_use]
+    /// # Errors
+    /// Returns an error if the action is not available
     pub fn is_available(&self, game: &Game, player_index: usize) -> Result<(), String> {
         if !game.events.is_empty() || game.state != GameState::Playing {
             return Err("Game is not in playing state".to_string());
@@ -97,15 +94,6 @@ impl PlayingActionType {
                         .contains(&c.custom_action_type)
                 {
                     return Err("Custom action already played this turn".to_string());
-                }
-
-                // todo move to action listner
-                if let CustomActionType::FreeEconomyCollect = c.custom_action_type {
-                    if current_turn_log(game).iter().any(|item| {
-                        matches!(item.action, Action::Playing(PlayingAction::Collect(_)))
-                    }) {
-                        return Err("Free economy collect already played this turn".to_string());
-                    }
                 }
             }
             PlayingActionType::ActionCard(id) => {
@@ -270,8 +258,7 @@ pub struct ActionType {
 }
 
 impl ActionType {
-    #[must_use]
-    pub fn is_available(&self, game: &Game, player_index: usize) -> Result<(), String> {
+    pub(crate) fn is_available(&self, game: &Game, player_index: usize) -> Result<(), String> {
         let p = game.get_player(player_index);
         if !p.resources.has_at_least(&self.cost) {
             return Err("Not enough resources for action type".to_string());

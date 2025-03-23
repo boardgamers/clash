@@ -181,7 +181,9 @@ impl CustomActionType {
 
     #[must_use]
     pub fn is_available(&self, game: &Game, player_index: usize) -> bool {
-        PlayingActionType::Custom(self.info()).is_available(game, player_index).is_ok()
+        PlayingActionType::Custom(self.info())
+            .is_available(game, player_index)
+            .is_ok()
     }
 
     #[must_use]

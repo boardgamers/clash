@@ -64,7 +64,10 @@ impl RenderContext<'_> {
     }
 
     pub fn can_play_action(&self, action: &PlayingActionType) -> bool {
-        self.can_control_shown_player() && action.is_available(self.game, self.shown_player.index).is_ok()
+        self.can_control_shown_player()
+            && action
+                .is_available(self.game, self.shown_player.index)
+                .is_ok()
     }
 
     pub fn can_control_shown_player(&self) -> bool {
