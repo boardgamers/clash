@@ -12,7 +12,7 @@ use server::events::EventOrigin;
 use server::game::Game;
 use server::movement::move_units_destinations;
 use server::playing_actions::PlayingAction::{
-    Advance, Collect, Construct, WonderCard, Custom, EndTurn, Recruit,
+    Advance, Collect, Construct, Custom, EndTurn, Recruit, WonderCard,
 };
 use server::position::Position;
 use server::recruit::recruit_cost_without_replaced;

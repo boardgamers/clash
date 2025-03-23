@@ -87,10 +87,12 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
 }
 
 fn can_play_card(rc: &RenderContext, card: &HandCard) -> bool {
-    rc.can_play_action(&(match card {
-        HandCard::ActionCard(id) => PlayingActionType::ActionCard(*id),
-        HandCard::Wonder(name) => PlayingActionType::WonderCard(name.clone()),
-    }))
+    rc.can_play_action(
+        &(match card {
+            HandCard::ActionCard(id) => PlayingActionType::ActionCard(*id),
+            HandCard::Wonder(name) => PlayingActionType::WonderCard(name.clone()),
+        }),
+    )
 }
 
 fn play_card(card: &HandCard) -> StateUpdate {

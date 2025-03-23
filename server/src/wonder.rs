@@ -195,7 +195,6 @@ impl WonderCardInfo {
     }
 }
 
-
 pub(crate) fn can_construct_wonder(
     city: &City,
     wonder: &Wonder,
@@ -226,7 +225,10 @@ pub(crate) fn can_construct_wonder(
         }
     }
     let mut cost = wonder.cost.clone();
-    cost.default.culture_tokens = cost.default.culture_tokens.saturating_sub(discount.culture_tokens);
+    cost.default.culture_tokens = cost
+        .default
+        .culture_tokens
+        .saturating_sub(discount.culture_tokens);
 
     if !player.can_afford(&cost) {
         return Err("Not enough resources".to_string());
@@ -258,7 +260,7 @@ impl WonderDiscount {
             culture_tokens: discount_culture_tokens,
         }
     }
-    
+
     #[must_use]
     pub const fn no_discount() -> Self {
         Self::new(false, 0)
@@ -325,9 +327,13 @@ pub(crate) fn add_build_wonder<S: AbilityInitializerSetup>(b: S, discount: Wonde
     )
 }
 
-pub(crate) fn cities_for_wonder(name: &str, game: &Game, p: &Player, discount: WonderDiscount) -> Vec<Position> {
-    p
-        .cities
+pub(crate) fn cities_for_wonder(
+    name: &str,
+    game: &Game,
+    p: &Player,
+    discount: WonderDiscount,
+) -> Vec<Position> {
+    p.cities
         .iter()
         .filter_map(|c| {
             let result = can_construct_wonder(c, &get_wonder(name), p, game, discount);

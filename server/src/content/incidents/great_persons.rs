@@ -3,6 +3,7 @@ use crate::action_card::{gain_action_card_from_pile, ActionCard, ActionCardBuild
 use crate::advance::gain_advance;
 use crate::city::MoodState;
 use crate::city_pieces::Building;
+use crate::construct::{construct, Construct};
 use crate::content::advances;
 use crate::content::advances::{economy, get_governments};
 use crate::content::custom_phase_actions::{AdvanceRequest, PaymentRequest, PositionRequest};
@@ -19,7 +20,6 @@ use crate::resource_pile::ResourcePile;
 use crate::utils::format_list;
 use itertools::Itertools;
 use std::vec;
-use crate::construct::{construct, Construct};
 
 pub(crate) const GREAT_PERSON_OFFSET: u8 = 100;
 

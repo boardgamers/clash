@@ -61,7 +61,10 @@ pub fn open_increase_happiness_dialog(
         rc,
         &PlayingActionType::IncreaseHappiness,
         "Increase happiness",
-        &[(EventOrigin::advance("Voting"), CustomActionType::VotingIncreaseHappiness)],
+        &[(
+            EventOrigin::advance("Voting"),
+            CustomActionType::VotingIncreaseHappiness,
+        )],
         |custom| {
             ActiveDialog::IncreaseHappiness(init(IncreaseHappinessConfig::new(
                 rc.shown_player,

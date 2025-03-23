@@ -50,4 +50,3 @@ pub fn get_wonder(name: &str) -> Wonder {
         .find(|wonder| wonder.name == name)
         .expect("wonder not found")
 }
-

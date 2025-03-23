@@ -2,9 +2,8 @@ use crate::city_ui::{IconAction, IconActionVec};
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
 use crate::event_ui::event_help;
-use crate::happiness_ui::{
-    can_play_increase_happiness,  open_increase_happiness_dialog,
-};
+use crate::happiness_ui::{can_play_increase_happiness, open_increase_happiness_dialog};
+use crate::influence_ui::can_play_influence_culture;
 use crate::layout_ui::{bottom_left_texture, icon_pos};
 use crate::move_ui::MoveIntent;
 use crate::payment_ui::Payment;
@@ -18,7 +17,6 @@ use server::events::EventOrigin;
 use server::game::GameState;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::resource::ResourceType;
-use crate::influence_ui::can_play_influence_culture;
 
 pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     let assets = rc.assets();
@@ -57,7 +55,10 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
             rc,
             &PlayingActionType::InfluenceCultureAttempt,
             "Influence culture",
-            &[(EventOrigin::advance("Arts"), CustomActionType::ArtsInfluenceCultureAttempt)],
+            &[(
+                EventOrigin::advance("Arts"),
+                CustomActionType::ArtsInfluenceCultureAttempt,
+            )],
             ActiveDialog::CulturalInfluence,
         );
     }
@@ -134,7 +135,7 @@ fn generic_custom_action(
     }
 
     match custom_action_type {
-        | CustomActionType::ArtsInfluenceCultureAttempt
+        CustomActionType::ArtsInfluenceCultureAttempt
         | CustomActionType::VotingIncreaseHappiness
         | CustomActionType::FreeEconomyCollect
         | CustomActionType::Sports => {

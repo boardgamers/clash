@@ -6,8 +6,7 @@ use crate::{
     city_pieces::{CityPieces, CityPiecesData},
     game::Game,
     player::Player,
-    position::Position
-    ,
+    position::Position,
 };
 use MoodState::*;
 

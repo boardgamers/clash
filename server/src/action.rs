@@ -1,6 +1,7 @@
 use crate::advance::on_advance;
 use crate::combat::{combat_loop, move_with_possible_combat, start_combat};
 use crate::combat_listeners::{combat_round_end, combat_round_start, end_combat};
+use crate::construct::on_construct;
 use crate::content::custom_phase_actions::{CurrentEventType, EventResponse};
 use crate::cultural_influence::ask_for_cultural_influence_payment;
 use crate::explore::{ask_explore_resolution, move_to_unexplored_tile};
@@ -23,7 +24,6 @@ use crate::unit::{get_current_move, MovementAction};
 use crate::wonder::{draw_wonder_card, play_wonder_card};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use crate::construct::{on_construct};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum Action {

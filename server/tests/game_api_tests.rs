@@ -1,7 +1,20 @@
 use crate::common::*;
 use server::content::custom_phase_actions::EventResponse;
 use server::unit::Units;
-use server::{action::Action, city::{City, MoodState::*}, city_pieces::Building::*, construct, game::Game, game_api, map::Terrain::*, playing_actions, playing_actions::PlayingAction::*, position::Position, resource_pile::ResourcePile, wonder};
+use server::{
+    action::Action,
+    city::{City, MoodState::*},
+    city_pieces::Building::*,
+    construct,
+    game::Game,
+    game_api,
+    map::Terrain::*,
+    playing_actions,
+    playing_actions::PlayingAction::*,
+    position::Position,
+    resource_pile::ResourcePile,
+    wonder,
+};
 use std::{collections::HashMap, vec};
 
 mod common;
@@ -96,7 +109,7 @@ fn basic_actions() {
     assert!(matches!(player.get_city(city_position).mood_state, Happy));
     assert_eq!(2, game.actions_left);
 
-    let construct_wonder_action = Action::Playing(WonderCard(wonder::ConstructWonder::new( 
+    let construct_wonder_action = Action::Playing(WonderCard(wonder::ConstructWonder::new(
         city_position,
         String::from("Pyramids"),
         ResourcePile::new(1, 3, 3, 0, 2, 0, 4),
@@ -296,8 +309,8 @@ fn test_wonder() {
             0,
             Action::Playing(WonderCard(wonder::ConstructWonder::new(
                 Position::from_offset("A1"),
-                 String::from("Pyramids"),
-                 ResourcePile::new(2, 3, 3, 0, 0, 0, 4),
+                String::from("Pyramids"),
+                ResourcePile::new(2, 3, 3, 0, 0, 0, 4),
             ))),
         )],
     );

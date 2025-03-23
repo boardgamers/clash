@@ -642,6 +642,7 @@ pub mod tests {
     use crate::game::GameState;
     use crate::payment::PaymentOptions;
     use crate::utils::tests::FloatEq;
+    use crate::wonder::construct_wonder;
     use crate::{
         city::{City, MoodState::*},
         city_pieces::Building::*,
@@ -652,7 +653,6 @@ pub mod tests {
         utils::Rng,
         wonder::Wonder,
     };
-    use crate::wonder::construct_wonder;
 
     #[must_use]
     pub fn test_game() -> Game {

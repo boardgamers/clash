@@ -1,3 +1,4 @@
+use crate::action_buttons::base_or_custom_available;
 use crate::city_ui::{building_position, BUILDING_SIZE};
 use crate::client_state::{CameraMode, StateUpdate};
 use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
@@ -16,7 +17,6 @@ use server::player::Player;
 use server::player_events::InfluenceCulturePossible;
 use server::playing_actions::{InfluenceCultureAttempt, PlayingAction, PlayingActionType};
 use server::position::Position;
-use crate::action_buttons::base_or_custom_available;
 
 fn closest_city(player: &Player, position: Position) -> Position {
     player

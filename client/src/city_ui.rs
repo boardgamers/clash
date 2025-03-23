@@ -3,7 +3,7 @@ use crate::action_buttons::{
 };
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::CollectResources;
-use crate::construct_ui::{ new_building_positions,  ConstructionPayment, ConstructionProject};
+use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
 use crate::custom_phase_ui::{highlight_structures, StructureHighlight};
 use crate::happiness_ui::{
     add_increase_happiness, can_play_increase_happiness, open_increase_happiness_dialog,
@@ -19,8 +19,10 @@ use macroquad::prelude::*;
 use server::city::{City, MoodState};
 use server::city_pieces::Building;
 use server::collect::possible_resource_collections;
+use server::construct::can_construct;
 use server::content::custom_actions::CustomActionType;
 use server::content::custom_phase_actions::{SelectedStructure, Structure};
+use server::events::EventOrigin;
 use server::game::Game;
 use server::playing_actions::PlayingActionType;
 use server::position::Position;
@@ -28,8 +30,6 @@ use server::resource::ResourceType;
 use server::unit::{UnitType, Units};
 use std::collections::HashMap;
 use std::ops::Add;
-use server::construct::can_construct;
-use server::events::EventOrigin;
 
 pub type IconAction<'a> = (&'a Texture2D, String, Box<dyn Fn() -> StateUpdate + 'a>);
 
@@ -163,7 +163,10 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
                 rc,
                 &PlayingActionType::Collect,
                 "Collect resources",
-                &[(EventOrigin::advance("Free Economy"), CustomActionType::FreeEconomyCollect)],
+                &[(
+                    EventOrigin::advance("Free Economy"),
+                    CustomActionType::FreeEconomyCollect,
+                )],
                 |custom| {
                     let i = possible_resource_collections(
                         rc.game,

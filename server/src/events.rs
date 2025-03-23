@@ -39,7 +39,7 @@ impl EventOrigin {
             EventOrigin::Incident(id) => get_incident(*id).name,
         }
     }
-    
+
     #[must_use]
     pub fn advance(name: &str) -> Self {
         EventOrigin::Advance(name.to_string())
