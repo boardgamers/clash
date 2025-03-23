@@ -1,19 +1,7 @@
 use crate::common::*;
 use server::content::custom_phase_actions::EventResponse;
 use server::unit::Units;
-use server::{
-    action::Action,
-    city::{City, MoodState::*},
-    city_pieces::Building::*,
-    content::custom_actions::CustomAction::*,
-    game::Game,
-    game_api,
-    map::Terrain::*,
-    playing_actions,
-    playing_actions::PlayingAction::*,
-    position::Position,
-    resource_pile::ResourcePile,
-};
+use server::{action::Action, city::{City, MoodState::*}, city_pieces::Building::*, game::Game, game_api, map::Terrain::*, playing_actions, playing_actions::PlayingAction::*, position::Position, resource_pile::ResourcePile, wonder};
 use std::{collections::HashMap, vec};
 
 mod common;
@@ -108,11 +96,11 @@ fn basic_actions() {
     assert!(matches!(player.get_city(city_position).mood_state, Happy));
     assert_eq!(2, game.actions_left);
 
-    let construct_wonder_action = Action::Playing(Custom(ConstructWonder {
+    let construct_wonder_action = Action::Playing(ConstructWonder(wonder::ConstructWonder::new( 
         city_position,
-        wonder: String::from("Pyramids"),
-        payment: ResourcePile::new(1, 3, 3, 0, 2, 0, 4),
-    }));
+        String::from("Pyramids"),
+        ResourcePile::new(1, 3, 3, 0, 2, 0, 4),
+    )));
     let mut game = game_api::execute(game, construct_wonder_action, 0);
     let player = &game.players[0];
 
@@ -141,7 +129,7 @@ fn basic_actions() {
     let mut game = game_api::execute(game, Action::Playing(EndTurn), 0);
     let player = &mut game.players[0];
     player.gain_resources(ResourcePile::food(2));
-    let recruit_action = Action::Playing(Recruit(server::playing_actions::Recruit {
+    let recruit_action = Action::Playing(Recruit(playing_actions::Recruit {
         units: Units::new(1, 0, 0, 0, 0, 0),
         city_position,
         payment: ResourcePile::food(2),
@@ -306,11 +294,11 @@ fn test_wonder() {
         "wonder",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Custom(ConstructWonder {
-                city_position: Position::from_offset("A1"),
-                wonder: String::from("Pyramids"),
-                payment: ResourcePile::new(2, 3, 3, 0, 0, 0, 4),
-            })),
+            Action::Playing(ConstructWonder(wonder::ConstructWonder::new(
+                Position::from_offset("A1"),
+                 String::from("Pyramids"),
+                 ResourcePile::new(2, 3, 3, 0, 0, 0, 4),
+            ))),
         )],
     );
 }
@@ -338,7 +326,7 @@ fn test_recruit() {
         "recruit",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Recruit(server::playing_actions::Recruit {
+            Action::Playing(Recruit(playing_actions::Recruit {
                 units: Units::new(1, 1, 0, 0, 0, 0),
                 city_position: Position::from_offset("A1"),
                 payment: ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2),
@@ -355,7 +343,7 @@ fn test_recruit_leader() {
         "recruit_leader",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Recruit(server::playing_actions::Recruit {
+            Action::Playing(Recruit(playing_actions::Recruit {
                 units: Units::new(0, 0, 0, 0, 0, 1),
                 city_position: Position::from_offset("A1"),
                 payment: ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
@@ -372,7 +360,7 @@ fn test_replace_leader() {
         "replace_leader",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Recruit(server::playing_actions::Recruit {
+            Action::Playing(Recruit(playing_actions::Recruit {
                 units: Units::new(0, 0, 0, 0, 0, 1),
                 city_position: Position::from_offset("A1"),
                 payment: ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),

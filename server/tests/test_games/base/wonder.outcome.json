@@ -196,16 +196,14 @@
     {
       "action": {
         "Playing": {
-          "Custom": {
-            "ConstructWonder": {
-              "city_position": "A1",
-              "wonder": "Pyramids",
-              "payment": {
-                "food": 2,
-                "wood": 3,
-                "ore": 3,
-                "culture_tokens": 4
-              }
+          "ConstructWonder": {
+            "city_position": "A1",
+            "wonder": "Pyramids",
+            "payment": {
+              "food": 2,
+              "wood": 3,
+              "ore": 3,
+              "culture_tokens": 4
             }
           }
         }

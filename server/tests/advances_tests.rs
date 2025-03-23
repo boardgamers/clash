@@ -4,22 +4,22 @@ use server::city_pieces::Building::{Fortress, Temple};
 use server::content::advances::trade_routes::find_trade_routes;
 use server::content::custom_actions::CustomAction;
 use server::content::custom_actions::CustomAction::{
-    AbsolutePower, ArtsInfluenceCultureAttempt, CivilRights, ConstructWonder, ForcedLabor, Sports,
-    Taxes, Theaters, VotingIncreaseHappiness,
+    AbsolutePower, ArtsInfluenceCultureAttempt, CivilRights, ForcedLabor, Sports, Taxes, Theaters,
+    VotingIncreaseHappiness,
 };
 use server::content::custom_phase_actions::EventResponse;
 use server::events::EventOrigin;
 use server::game::Game;
 use server::movement::move_units_destinations;
-use server::playing_actions;
 use server::playing_actions::PlayingAction::{
-    Advance, Collect, Construct, Custom, EndTurn, Recruit,
+    Advance, Collect, Construct, ConstructWonder, Custom, EndTurn, Recruit,
 };
 use server::position::Position;
 use server::recruit::recruit_cost_without_replaced;
 use server::resource_pile::ResourcePile;
 use server::unit::MovementAction::Move;
 use server::unit::{MoveUnits, Units};
+use server::{playing_actions, wonder};
 
 mod common;
 
@@ -145,11 +145,11 @@ fn test_monuments() {
         }
         game = execute_action(
             game,
-            Action::Playing(Custom(ConstructWonder {
-                city_position: Position::from_offset("C2"),
-                wonder: String::from("Pyramids"),
-                payment: ResourcePile::new(2, 3, 3, 0, 0, 0, 4),
-            })),
+            Action::Playing(ConstructWonder(wonder::ConstructWonder::new(
+                Position::from_offset("C2"),
+                String::from("Pyramids"),
+                ResourcePile::new(2, 3, 3, 0, 0, 0, 4),
+            ))),
             0,
         );
         game = execute_action(game, Action::Playing(EndTurn), 0);
