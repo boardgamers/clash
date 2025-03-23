@@ -112,7 +112,7 @@ impl PaymentOptions {
     }
 
     #[must_use]
-    pub fn sum(cost: u32, types_by_preference: &[ResourceType]) -> Self {
+    pub(crate) fn sum(cost: u32, types_by_preference: &[ResourceType]) -> Self {
         let mut conversions = vec![];
         types_by_preference.windows(2).for_each(|pair| {
             conversions.push(PaymentConversion::unlimited(
@@ -128,7 +128,7 @@ impl PaymentOptions {
     }
 
     #[must_use]
-    pub fn single_type(t: ResourceType, r: RangeInclusive<u32>) -> PaymentOptions {
+    pub(crate) fn single_type(t: ResourceType, r: RangeInclusive<u32>) -> PaymentOptions {
         let max = r.clone().max().expect("range empty");
         let d = max - r.min().expect("range empty");
         PaymentOptions {
@@ -143,7 +143,7 @@ impl PaymentOptions {
     }
 
     #[must_use]
-    pub fn tokens(cost: u32) -> Self {
+    pub(crate) fn tokens(cost: u32) -> Self {
         Self::sum(
             cost,
             &[ResourceType::MoodTokens, ResourceType::CultureTokens],
@@ -151,7 +151,7 @@ impl PaymentOptions {
     }
 
     #[must_use]
-    pub fn resources_with_discount(
+    pub(crate) fn resources_with_discount(
         cost: ResourcePile,
         discount_type: PaymentConversionType,
     ) -> Self {
@@ -183,7 +183,7 @@ impl PaymentOptions {
     }
 
     #[must_use]
-    pub fn resources(cost: ResourcePile) -> Self {
+    pub(crate) fn resources(cost: ResourcePile) -> Self {
         Self::resources_with_discount(cost, PaymentConversionType::Unlimited)
     }
 
