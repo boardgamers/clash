@@ -4,6 +4,7 @@ use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
+use std::ops::RangeInclusive;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum PaymentConversionType {
@@ -122,6 +123,21 @@ impl PaymentOptions {
         PaymentOptions {
             default: ResourcePile::of(types_by_preference[0], cost),
             conversions,
+            modifiers: vec![],
+        }
+    }
+
+    #[must_use]
+    pub fn single_type(t: ResourceType, r: RangeInclusive<u32>) -> PaymentOptions {
+        let max = r.clone().max().expect("range empty");
+        let d = max - r.min().expect("range empty");
+        PaymentOptions {
+            default: ResourcePile::of(t, max),
+            conversions: vec![PaymentConversion::new(
+                vec![ResourcePile::of(t, 1)],
+                ResourcePile::empty(),
+                PaymentConversionType::MayOverpay(d),
+            )],
             modifiers: vec![],
         }
     }

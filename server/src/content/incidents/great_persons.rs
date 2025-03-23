@@ -16,6 +16,7 @@ use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::playing_actions::ActionType;
+use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::utils::format_list;
 use itertools::Itertools;
@@ -39,6 +40,7 @@ pub(crate) fn great_person_incidents() -> Vec<Incident> {
         great_person_incident(IncidentBaseEffect::BarbariansMove, great_merchant()),
         great_person_incident(IncidentBaseEffect::BarbariansMove, great_engineer()),
         great_person_incident(IncidentBaseEffect::PiratesSpawnAndRaid, great_architect()),
+        great_person_incident(IncidentBaseEffect::PiratesSpawnAndRaid, great_athlete()),
     ]
 }
 
@@ -365,6 +367,86 @@ fn great_merchant() -> ActionCard {
             |_game, _player| true,
         ),
         |e| &mut e.on_play_action_card,
+    )
+    .build()
+}
+
+fn great_athlete() -> ActionCard {
+    let groups = &["Culture"];
+    great_person_action_card(
+        56,
+        "Great Athlete",
+        &format!(
+            "{} Then, you may convert any amount of culture tokens to mood tokens or vice versa.",
+            great_person_description(groups)
+        ),
+        ActionType::regular(),
+        groups,
+        |_game, player| player.resources.culture_tokens > 0 || player.resources.mood_tokens > 0,
+    )
+    .add_bool_request(
+        |e| &mut e.on_play_action_card,
+        1,
+        |game, player_index, _| {
+            let p = game.get_player(player_index);
+            if p.resources.culture_tokens > 0 && p.resources.mood_tokens > 0 {
+                Some("Convert culture to mood tokens?".to_string())
+            } else {
+                None
+            }
+        },
+        |_game, s, a| {
+            a.answer = Some(s.choice);
+        },
+    )
+    .add_payment_request_listener(
+        |e| &mut e.on_play_action_card,
+        0,
+        |game, player, a| {
+            let p = game.get_player(player);
+            let culture_to_mood = if p.resources.culture_tokens > 0 && p.resources.mood_tokens > 0 {
+                a.answer.expect("answer not found")
+            } else {
+                p.resources.culture_tokens > 0
+            };
+            let options = if culture_to_mood {
+                PaymentOptions::single_type(
+                    ResourceType::CultureTokens,
+                    0..=p.resources.culture_tokens,
+                )
+            } else {
+                PaymentOptions::single_type(ResourceType::MoodTokens, 0..=p.resources.mood_tokens)
+            };
+
+            Some(vec![PaymentRequest::new(
+                options,
+                "Convert resources",
+                true,
+            )])
+        },
+        |game, s, _| {
+            let pile = &s.choice[0];
+            if pile.is_empty() {
+                game.add_info_log_item(&format!(
+                    "{} declined to convert culture to mood",
+                    s.player_name
+                ));
+                return;
+            }
+            if pile.culture_tokens > 0 {
+                game.add_info_log_item(&format!(
+                    "{} converted {} culture to mood",
+                    s.player_name, pile
+                ));
+                game.get_player_mut(s.player_index).gain_resources(ResourcePile::mood_tokens(pile.culture_tokens));
+            } else {
+                game.add_info_log_item(&format!(
+                    "{} converted {} mood to culture",
+                    s.player_name, pile
+                ));
+                game.get_player_mut(s.player_index).gain_resources(ResourcePile::culture_tokens(pile.mood_tokens));
+            }
+        },
     )
     .build()
 }

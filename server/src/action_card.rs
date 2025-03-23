@@ -143,6 +143,9 @@ pub struct ActionCardInfo {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub selected_position: Option<Position>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub answer: Option<bool>,
 }
 
 impl ActionCardInfo {
@@ -151,6 +154,7 @@ impl ActionCardInfo {
         Self {
             id,
             selected_position: None,
+            answer: None,
         }
     }
 }
