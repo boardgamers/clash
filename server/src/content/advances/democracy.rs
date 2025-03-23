@@ -69,7 +69,8 @@ fn free_economy() -> AdvanceBuilder {
                 PlayingActionType::Collect
                     if p.played_once_per_turn_actions.contains(&FreeEconomyCollect) =>
                 {
-                    *available = Err("Cannot collect when Free Economy Collect was used".to_string());
+                    *available =
+                        Err("Cannot collect when Free Economy Collect was used".to_string());
                 }
                 PlayingActionType::Custom(i)
                     if matches!(i.custom_action_type, FreeEconomyCollect)
@@ -77,7 +78,8 @@ fn free_economy() -> AdvanceBuilder {
                             matches!(item.action, Action::Playing(PlayingAction::Collect(_)))
                         }) =>
                 {
-                    *available = Err("Cannot use Free Economy Collect when Collect was used".to_string());
+                    *available =
+                        Err("Cannot use Free Economy Collect when Collect was used".to_string());
                 }
                 _ => {}
             }

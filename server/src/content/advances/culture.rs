@@ -58,7 +58,10 @@ pub fn sports_options(city: &City) -> Option<PaymentOptions> {
     match city.mood_state {
         MoodState::Happy => None,
         MoodState::Neutral => Some(PaymentOptions::sum(1, &[ResourceType::CultureTokens])),
-        MoodState::Angry => Some(PaymentOptions::single_type(ResourceType::CultureTokens, 1..=2)),
+        MoodState::Angry => Some(PaymentOptions::single_type(
+            ResourceType::CultureTokens,
+            1..=2,
+        )),
     }
 }
 

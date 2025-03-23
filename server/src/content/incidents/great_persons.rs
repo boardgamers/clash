@@ -395,8 +395,19 @@ fn great_athlete() -> ActionCard {
                 None
             }
         },
-        |_game, s, a| {
+        |game, s, a| {
             a.answer = Some(s.choice);
+            if s.choice {
+                game.add_info_log_item(&format!(
+                    "{} decided to convert culture to mood tokens",
+                    s.player_name
+                ));
+            } else {
+                game.add_info_log_item(&format!(
+                    "{} decided to convert mood to culture tokens",
+                    s.player_name
+                ));
+            }
         },
     )
     .add_payment_request_listener(
@@ -425,27 +436,21 @@ fn great_athlete() -> ActionCard {
             )])
         },
         |game, s, _| {
-            let pile = &s.choice[0];
-            if pile.is_empty() {
+            let from = &s.choice[0];
+            if from.is_empty() {
                 game.add_info_log_item(&format!(
                     "{} declined to convert culture to mood",
                     s.player_name
                 ));
                 return;
             }
-            if pile.culture_tokens > 0 {
-                game.add_info_log_item(&format!(
-                    "{} converted {} culture to mood",
-                    s.player_name, pile
-                ));
-                game.get_player_mut(s.player_index).gain_resources(ResourcePile::mood_tokens(pile.culture_tokens));
+            let to = if from.culture_tokens > 0 {
+                ResourcePile::mood_tokens(from.culture_tokens)
             } else {
-                game.add_info_log_item(&format!(
-                    "{} converted {} mood to culture",
-                    s.player_name, pile
-                ));
-                game.get_player_mut(s.player_index).gain_resources(ResourcePile::culture_tokens(pile.mood_tokens));
-            }
+                ResourcePile::culture_tokens(from.mood_tokens)
+            };
+            game.add_info_log_item(&format!("{} converted {from} mood to {to}", s.player_name));
+            game.get_player_mut(s.player_index).gain_resources(to);
         },
     )
     .build()
