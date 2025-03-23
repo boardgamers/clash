@@ -18,7 +18,7 @@ use crate::player_events::PlayingActionInfo;
 use crate::recruit::{recruit, recruit_cost};
 use crate::unit::Units;
 use crate::utils::remove_element;
-use crate::wonder::{cities_for_wonder, play_wonder_card, WonderDiscount};
+use crate::wonder::{cities_for_wonder, play_wonder_card, WonderCardInfo, WonderDiscount};
 use crate::{
     city::City,
     city_pieces::Building::{self},
@@ -233,7 +233,7 @@ impl PlayingAction {
             }
             WonderCard(name) => {
                 remove_element(&mut game.get_player_mut(player_index).wonder_cards, &name);
-                play_wonder_card(game, player_index, name, WonderDiscount::no_discount());
+                play_wonder_card(game, player_index, WonderCardInfo::new(name));
             }
             Custom(custom_action) => {
                 custom(game, player_index, custom_action);

@@ -184,7 +184,6 @@ pub struct WonderCardInfo {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub selected_position: Option<Position>,
-    pub discount: WonderDiscount,
 }
 
 impl WonderCardInfo {
@@ -281,7 +280,7 @@ pub(crate) fn add_build_wonder<S: AbilityInitializerSetup>(b: S, discount: Wonde
         1,
         move |game, player_index, i| {
             let p = game.get_player(player_index);
-            let choices = cities_for_wonder(&i, game, p, discount);
+            let choices = cities_for_wonder(&i.name, game, p, discount);
 
             Some(PositionRequest::new(
                 choices,

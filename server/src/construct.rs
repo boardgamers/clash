@@ -86,7 +86,7 @@ pub(crate) fn construct(game: &mut Game, player_index: usize, c: &Construct) {
     let player = &game.players[player_index];
     let city = player.get_city(c.city_position);
     let cost = player.construct_cost(game, c.city_piece, Some(&c.payment));
-    city.can_construct(c.city_piece, player, game)
+    let cost can_construct(city, c.city_piece, player, game)
         .map_err(|e| panic!("{e}"))
         .ok();
     if matches!(c.city_piece, Building::Port) {
@@ -98,7 +98,7 @@ pub(crate) fn construct(game: &mut Game, player_index: usize, c: &Construct) {
     } else if c.port_position.is_some() {
         panic!("Illegal action");
     }
-    game.players[player_index].construct(
+    game.get_player_mut(player_index).construct(
         c.city_piece,
         c.city_position,
         c.port_position,
