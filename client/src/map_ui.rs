@@ -151,7 +151,7 @@ fn overlay_color(rc: &RenderContext, pos: Position) -> Color {
                     .destinations
                     .list
                     .iter()
-                    .any(|d| matches!(d, MoveDestination::Tile((p, _)) if *p == pos))
+                    .any(|d| matches!(d, MoveDestination::Tile(p, _) if *p == pos))
                 {
                     MOVE_DESTINATION
                 } else {

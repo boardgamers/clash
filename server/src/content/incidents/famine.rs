@@ -79,7 +79,10 @@ pub(crate) fn pestilence_permanent_effect() -> Builtin {
                 && matches!(i.action_type, PlayingActionType::Construct)
                 && !player.has_advance("Sanitation")
             {
-                *available = false;
+                *available = Err(
+                    "Cannot construct buildings or wonders until you research Sanitation."
+                        .to_string(),
+                );
             }
         },
     )

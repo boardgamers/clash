@@ -6,7 +6,7 @@ use crate::city_pieces::Building::Obelisk;
 use crate::content::advances::{advance_group_builder, AdvanceGroup};
 use crate::content::custom_actions::CustomActionType;
 use crate::game::Game;
-use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions};
+use crate::payment::PaymentOptions;
 use crate::playing_actions::increase_happiness;
 use crate::position::Position;
 use crate::resource::ResourceType;
@@ -58,15 +58,10 @@ pub fn sports_options(city: &City) -> Option<PaymentOptions> {
     match city.mood_state {
         MoodState::Happy => None,
         MoodState::Neutral => Some(PaymentOptions::sum(1, &[ResourceType::CultureTokens])),
-        MoodState::Angry => Some(PaymentOptions {
-            default: ResourcePile::culture_tokens(2),
-            conversions: vec![PaymentConversion::new(
-                vec![ResourcePile::culture_tokens(1)],
-                ResourcePile::empty(),
-                PaymentConversionType::MayOverpay(1),
-            )],
-            modifiers: vec![],
-        }),
+        MoodState::Angry => Some(PaymentOptions::single_type(
+            ResourceType::CultureTokens,
+            1..=2,
+        )),
     }
 }
 

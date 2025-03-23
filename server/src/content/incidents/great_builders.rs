@@ -54,7 +54,8 @@ pub(crate) fn use_great_engineer() -> Builtin {
                     .contains(&PermanentIncidentEffect::GreatEngineer)
                     && !matches!(i.action_type, PlayingActionType::Construct)
                 {
-                    *available = false;
+                    *available =
+                        Err("Great Engineer: You may only construct buildings.".to_string());
                 }
             },
         )

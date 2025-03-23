@@ -10,6 +10,7 @@ use crate::content::custom_phase_actions::{
     UnitsRequest,
 };
 use crate::content::incidents;
+use crate::content::incidents::great_diplomat::DiplomaticRelations;
 use crate::content::incidents::great_persons::GREAT_PERSON_OFFSET;
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -109,6 +110,7 @@ pub enum PermanentIncidentEffect {
     SolarEclipse,
     Anarchy(Anarchy),
     GreatEngineer,
+    DiplomaticRelations(DiplomaticRelations),
 }
 
 #[derive(Clone)]
@@ -422,12 +424,13 @@ impl IncidentBuilder {
     #[must_use]
     pub(crate) fn add_incident_player_request(
         self,
+        target: IncidentTarget,
         description: &str,
         player_pred: impl Fn(&Player, &Game, &IncidentInfo) -> bool + 'static + Clone,
         priority: i32,
         gain_reward: impl Fn(&mut Game, &SelectedChoice<usize>, &mut IncidentInfo) + 'static + Clone,
     ) -> Self {
-        let f = self.new_filter(IncidentTarget::ActivePlayer, priority);
+        let f = self.new_filter(target, priority);
         let d = description.to_string();
         self.add_player_request(
             |event| &mut event.on_incident,

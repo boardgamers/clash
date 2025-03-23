@@ -8,9 +8,9 @@
         }
       },
       "player": 1,
-      "last_priority_used": 0,
+      "last_priority_used": 10,
       "handler": {
-        "priority": 0,
+        "priority": 10,
         "request": {
           "Payment": [
             {

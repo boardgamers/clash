@@ -182,7 +182,7 @@ impl ActiveDialog {
             }
             if destinations
                 .iter()
-                .any(|d| matches!(d, MoveDestination::Tile(_)))
+                .any(|d| matches!(d, MoveDestination::Tile(_, _)))
             {
                 result.push("Click on a highlighted tile to move units".to_string());
             };

@@ -109,21 +109,17 @@ impl PlayingActionType {
             _ => {}
         }
 
-        let mut possible = true;
-        let info = PlayingActionInfo {
-            player: player_index,
-            action_type: self.clone(),
-        };
+        let mut possible = Ok(());
         let _ = p.trigger_event(
             |e| &e.is_playing_action_available,
             &mut possible,
             game,
-            &info,
+            &PlayingActionInfo {
+                player: player_index,
+                action_type: self.clone(),
+            },
         );
-        if !possible {
-            return Err("Playing action listener vetoed".to_string());
-        }
-        Ok(())
+        possible
     }
 
     #[must_use]

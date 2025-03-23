@@ -146,6 +146,7 @@ fn reformation() -> Incident {
     )
     // select a player to execute the incident
     .add_incident_player_request(
+        IncidentTarget::ActivePlayer,
         "Select a player to execute the event",
         |p, game, i| has_temple(game, p.index) && i.selected_player.is_none(),
         3,
@@ -161,6 +162,7 @@ fn reformation() -> Incident {
     )
     // select a player to gain a temple
     .add_incident_player_request(
+        IncidentTarget::ActivePlayer,
         "Select a player to gain a Temple",
         |p, game, _| can_gain_temple(game, p),
         2,

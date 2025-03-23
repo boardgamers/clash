@@ -1,71 +1,17 @@
 {
   "state": "Playing",
-  "events": [
-    {
-      "event_type": {
-        "Incident": {
-          "active_player": 0,
-          "barbarians": {}
-        }
-      },
-      "players_used": [
-        0
-      ],
-      "player": 1,
-      "last_priority_used": 10,
-      "handler": {
-        "priority": 10,
-        "request": {
-          "Payment": [
-            {
-              "cost": {
-                "default": {
-                  "culture_tokens": 2
-                },
-                "conversions": [
-                  {
-                    "from": [
-                      {
-                        "food": 1
-                      },
-                      {
-                        "wood": 1
-                      },
-                      {
-                        "ore": 1
-                      },
-                      {
-                        "ideas": 1
-                      }
-                    ],
-                    "to": {
-                      "gold": 1
-                    },
-                    "type": "Unlimited"
-                  }
-                ]
-              },
-              "name": "Pay to gain the Action Card",
-              "optional": true
-            }
-          ]
-        },
-        "origin": {
-          "Incident": 19
-        }
-      }
-    }
-  ],
   "players": [
     {
       "id": 0,
       "resources": {
+        "food": 3,
         "wood": 6,
         "ore": 6,
-        "mood_tokens": 8
+        "gold": 7,
+        "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -76,7 +22,6 @@
       "cities": [
         {
           "city_pieces": {
-            "fortress": 0,
             "temple": 1
           },
           "mood_state": "Neutral",
@@ -149,14 +94,13 @@
       "civilization": "test0",
       "advances": [
         "Arts",
+        "Bartering",
+        "Currency",
         "Farming",
         "Mining",
-        "State Religion",
-        "Storage",
-        "Tactics",
-        "Voting"
+        "Tactics"
       ],
-      "incident_tokens": 3,
+      "incident_tokens": 1,
       "next_unit_id": 8
     },
     {
@@ -204,6 +148,13 @@
           "activations": 0,
           "angry_activation": false,
           "position": "A4"
+        }
+      ],
+      "units": [
+        {
+          "position": "B1",
+          "unit_type": "Infantry",
+          "id": 0
         }
       ],
       "civilization": "test1",
@@ -278,36 +229,11 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Storage",
-            "payment": {
-              "food": 2
-            }
-          }
-        }
-      }
-    }
-  ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1 paid 2 food to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
-    ],
-    [
-      "A new game event has been triggered: Great Artist",
-      "Base effect: Barbarians move",
-      "Barbarians cannot move - will try to spawn a new city instead",
-      "Barbarians cannot spawn a new city",
-      "Player1 cannot afford to buy Great Artist"
-    ]
-  ],
-  "undo_limit": 1,
-  "actions_left": 2,
+  "action_log": [],
+  "action_log_index": 0,
+  "log": [],
+  "undo_limit": 0,
+  "actions_left": 3,
   "round": 1,
   "age": 1,
   "messages": [
@@ -333,6 +259,6 @@
   ],
   "action_cards_left": [],
   "incidents_left": [
-    19
+    57
   ]
 }

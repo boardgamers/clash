@@ -8,6 +8,7 @@ use crate::unit::Unit;
 use crate::utils;
 
 use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, MOVEMENT_ACTIONS, SHIP_CAPACITY, STACK_LIMIT};
+use crate::content::incidents::great_diplomat::{diplomatic_relations_partner, DIPLOMAT_ID};
 use crate::game::GameState::Movement;
 use crate::game::{Game, GameState};
 use crate::player::Player;
@@ -267,17 +268,17 @@ pub struct MoveRoute {
     pub cost: PaymentOptions,
     pub stack_size_used: usize,
     pub ignore_terrain_movement_restrictions: bool,
-    pub origin: Option<EventOrigin>,
 }
 
 impl MoveRoute {
-    fn free(destination: Position, origin: Option<EventOrigin>) -> Self {
+    fn free(destination: Position, origins: Vec<EventOrigin>) -> Self {
+        let mut options = PaymentOptions::free();
+        options.modifiers = origins;
         Self {
             destination,
-            cost: PaymentOptions::free(),
+            cost: options,
             stack_size_used: 0,
             ignore_terrain_movement_restrictions: false,
-            origin,
         }
     }
 }
@@ -314,7 +315,7 @@ pub(crate) fn move_routes(
         .neighbors()
         .iter()
         .filter(|&n| game.map.is_inside(*n))
-        .map(|&n| MoveRoute::free(n, None))
+        .map(|&n| MoveRoute::free(n, vec![]))
         .collect();
     if player.has_advance(NAVIGATION) {
         base.extend(reachable_with_navigation(player, units, &game.map));
@@ -322,7 +323,21 @@ pub(crate) fn move_routes(
     if player.has_advance(ROADS) && embark_carrier_id.is_none() {
         base.extend(reachable_with_roads(player, units, game));
     }
+    add_diplomatic_relations(player, game, &mut base);
     base
+}
+
+fn add_diplomatic_relations(player: &Player, game: &Game, base: &mut Vec<MoveRoute>) {
+    let partner = diplomatic_relations_partner(game, player.index);
+    if let Some(partner) = partner {
+        let partner = game.get_player(partner);
+        for r in base {
+            if !partner.get_units(r.destination).is_empty() {
+                r.cost.default += ResourcePile::culture_tokens(2);
+                r.cost.modifiers.push(EventOrigin::Incident(DIPLOMAT_ID));
+            }
+        }
+    }
 }
 
 #[must_use]
@@ -389,7 +404,6 @@ fn reachable_with_roads(player: &Player, units: &[u32], game: &Game) -> Vec<Move
                         cost,
                         stack_size_used,
                         ignore_terrain_movement_restrictions: true,
-                        origin: Some(origin),
                     };
                     Some(route)
                 } else {
@@ -431,7 +445,7 @@ fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<M
                 .map(|destination| {
                     MoveRoute::free(
                         destination,
-                        Some(EventOrigin::Advance(NAVIGATION.to_string())),
+                        vec![EventOrigin::Advance(NAVIGATION.to_string())],
                     )
                 })
                 .collect();
