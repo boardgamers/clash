@@ -89,6 +89,17 @@ pub enum CombatResult {
     Draw,
 }
 
+impl CombatResult {
+    #[must_use]
+    pub fn winner(&self) -> Option<CombatRole> {
+        match self {
+            CombatResult::AttackerWins => Some(CombatRole::Attacker),
+            CombatResult::DefenderWins => Some(CombatRole::Defender),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatEnd {
     pub result: CombatResult,
@@ -307,11 +318,6 @@ fn attacker_wins(game: &mut Game, c: Combat) {
     game.add_info_log_item("Attacker wins");
     move_units(game, c.attacker, &c.attackers, c.defender_position, None);
     capture_position(game, c.defender, c.defender_position, c.attacker);
-    if !c.is_sea_battle(game) {
-        game.get_player_mut(c.attacker)
-            .event_info
-            .insert("Land Battle Won".to_string(), "true".to_string());
-    }
     end_combat(game, CombatEnd::new(CombatResult::AttackerWins, c));
 }
 
@@ -661,4 +667,25 @@ fn save_carried_units(killed_unit_ids: &[u32], game: &mut Game, player: usize, p
             unit.carrier_id = Some(carrier_id);
         }
     }
+}
+
+pub(crate) fn combat_stats() -> Builtin {
+    Builtin::builder("Combat stats", "")
+        .add_simple_persistent_event_listener(
+            |event| &mut event.on_combat_round_end,
+            11,
+            |game, _player, _name, e| {
+                if let Some(r) = &e.final_result {
+                    let c = &e.combat;
+                    if let Some(winner) = r.winner() {
+                        if !c.is_sea_battle(game) {
+                            game.get_player_mut(c.player(winner))
+                                .event_info
+                                .insert("Land Battle Won".to_string(), "true".to_string());
+                        }
+                    }
+                }
+            },
+        )
+        .build()
 }
