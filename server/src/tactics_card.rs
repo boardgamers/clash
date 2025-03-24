@@ -17,6 +17,7 @@ use action_cards::get_action_card;
 #[derive(Clone, PartialEq, Eq, Copy)]
 pub enum TacticsCardTarget {
     ActivePlayer,
+    Opponent,
     AllPlayers,
 }
 
@@ -29,11 +30,8 @@ impl TacticsCardTarget {
         round_type: &CombatEventPhase,
     ) -> bool {
         match &self {
-            TacticsCardTarget::ActivePlayer => match round_type {
-                CombatEventPhase::TacticsCardAttacker => combat.attacker == player,
-                CombatEventPhase::TacticsCardDefender => combat.defender == player,
-                _ => panic!("TacticsCardTarget::ActivePlayer is not valid"),
-            },
+            TacticsCardTarget::ActivePlayer => round_type.player(combat) == player,
+            TacticsCardTarget::Opponent => round_type.player(combat) == combat.opponent(player),
             TacticsCardTarget::AllPlayers => true,
         }
     }
@@ -77,7 +75,7 @@ impl TacticsCard {
 pub struct TacticsCardBuilder {
     pub name: String,
     description: String,
-    pub tactics_card_target: TacticsCardTarget,
+    pub target: TacticsCardTarget,
     pub fighter_requirement: Option<FighterRequirement>,
     pub role_requirement: Option<CombatRole>,
     builder: AbilityInitializerBuilder,
@@ -89,10 +87,15 @@ impl TacticsCardBuilder {
             name: name.to_string(),
             description: description.to_string(),
             fighter_requirement: None,
-            tactics_card_target: TacticsCardTarget::ActivePlayer,
+            target: TacticsCardTarget::ActivePlayer,
             role_requirement: None,
             builder: AbilityInitializerBuilder::new(),
         }
+    }
+
+    pub(crate) fn target(mut self, target: TacticsCardTarget) -> Self {
+        self.target = target;
+        self
     }
 
     pub(crate) fn role_requirement(mut self, role_requirement: CombatRole) -> Self {
@@ -110,7 +113,7 @@ impl TacticsCardBuilder {
         priority: i32,
         listener: impl Fn(usize, &mut Game, &Combat, &mut CombatStrength) + Clone + 'static,
     ) -> Self {
-        let target = self.tactics_card_target;
+        let target = self.target;
         self.add_simple_persistent_event_listener(
             |event| &mut event.on_combat_round_start_tactics,
             priority,
@@ -130,7 +133,7 @@ impl TacticsCardBuilder {
         priority: i32,
         listener: impl Fn(usize, &mut Game, &mut CombatRoundEnd) + Clone + 'static,
     ) -> Self {
-        let target = self.tactics_card_target;
+        let target = self.target;
         self.add_simple_persistent_event_listener(
             |event| &mut event.on_combat_round_end_tactics,
             priority,

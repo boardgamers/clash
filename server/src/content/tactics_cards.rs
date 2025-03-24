@@ -1,9 +1,15 @@
-use crate::tactics_card::{CombatRole, FighterRequirement, TacticsCard};
+use crate::tactics_card::{CombatRole, FighterRequirement, TacticsCard, TacticsCardTarget};
 use itertools::Itertools;
 
 #[must_use]
 pub(crate) fn get_all() -> Vec<TacticsCard> {
-    let all: Vec<TacticsCard> = vec![peltasts(), encircled(), wedge_formation(), high_morale()];
+    let all: Vec<TacticsCard> = vec![
+        peltasts(),
+        encircled(),
+        wedge_formation(),
+        high_morale(),
+        heavy_resistance(),
+    ];
     assert_eq!(
         all.iter().unique_by(|i| &i.name).count(),
         all.len(),
@@ -90,7 +96,7 @@ pub(crate) fn wedge_formation() -> TacticsCard {
     .fighter_requirement(FighterRequirement::Army)
     .role_requirement(CombatRole::Attacker)
     .add_reveal_listener(0, |_player, game, c, s| {
-        let v = c.fighting_units(game, c.defender).len() as u8;
+        let v = c.fighting_units(game, c.defender).len() as i8;
         s.extra_combat_value += v;
         s.roll_log
             .push(format!("Wedge Formation added {v} combat value",));
@@ -106,4 +112,20 @@ pub(crate) fn high_morale() -> TacticsCard {
                 .push("High Morale added 2 combat value".to_string());
         })
         .build()
+}
+
+fn heavy_resistance() -> TacticsCard {
+    TacticsCard::builder(
+        "Heavy Resistance",
+        "Attacker gets -1 combat value for each fighting unit.",
+    )
+    .target(TacticsCardTarget::Opponent)
+    .role_requirement(CombatRole::Defender)
+    .add_reveal_listener(0, |player, game, c, s| {
+        let v = c.fighting_units(game, player).len() as i8;
+        s.extra_combat_value -= v;
+        s.roll_log
+            .push(format!("Heavy resistance added -{v} to combat value for each unit"));
+    })
+    .build()
 }

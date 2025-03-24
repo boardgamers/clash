@@ -215,7 +215,7 @@ fn use_steel_weapons(game: &Game, c: &Combat, s: &mut CombatStrength, role: Comb
     };
 
     let add_combat_value = |s: &mut CombatStrength, value: u8| {
-        s.extra_combat_value += value;
+        s.extra_combat_value += value as i8;
         s.roll_log
             .push(format!("steel weapons added {value} combat value"));
     };

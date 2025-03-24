@@ -89,6 +89,10 @@ impl PlayingActionType {
 
         match self {
             PlayingActionType::Custom(c) => {
+                if !p.custom_actions.contains_key(&c.custom_action_type) {
+                    return Err("Custom action not available".to_string());
+                }
+                
                 if c.once_per_turn
                     && p.played_once_per_turn_actions
                         .contains(&c.custom_action_type)
@@ -97,11 +101,19 @@ impl PlayingActionType {
                 }
             }
             PlayingActionType::ActionCard(id) => {
+                if !p.action_cards.contains(id) {
+                    return Err("Action card not available".to_string());
+                }
+                
                 if !(get_civil_card(*id).can_play)(game, p) {
                     return Err("Cannot play action card".to_string());
                 }
             }
             PlayingActionType::WonderCard(name) => {
+                if !p.wonder_cards.contains(name) {
+                    return Err("Wonder card not available".to_string());
+                }
+                
                 if cities_for_wonder(name, game, p, &WonderDiscount::default()).is_empty() {
                     return Err("no cities for wonder".to_string());
                 }

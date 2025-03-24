@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityListeners;
 use crate::action_card::gain_action_card_from_pile;
-use crate::combat::{CombatDieRoll, COMBAT_DIE_SIDES};
+use crate::combat_roll::{CombatDieRoll, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
 use crate::content::civilizations::{BARBARIANS, PIRATES};
 use crate::content::custom_phase_actions::{

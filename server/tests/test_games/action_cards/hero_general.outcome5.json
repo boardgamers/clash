@@ -105,9 +105,6 @@
         "Tactics"
       ],
       "incident_tokens": 2,
-      "action_cards": [
-        3
-      ],
       "next_unit_id": 8,
       "event_info": {
         "Land Battle Won": "true"
@@ -225,6 +222,13 @@
         }
       },
       "undo": [
+        {
+          "op": "add",
+          "path": "/players/0/action_cards",
+          "value": [
+            5
+          ]
+        },
         {
           "op": "remove",
           "path": "/events"

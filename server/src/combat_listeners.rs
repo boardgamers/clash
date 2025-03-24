@@ -17,7 +17,7 @@ use std::collections::HashMap;
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatStrength {
     pub extra_dies: u8,
-    pub extra_combat_value: u8,
+    pub extra_combat_value: i8,
     pub hit_cancels: u8,
     pub roll_log: Vec<String>,
     #[serde(default)]
@@ -57,6 +57,15 @@ impl CombatEventPhase {
     #[must_use]
     pub fn is_default(&self) -> bool {
         matches!(self, CombatEventPhase::Default)
+    }
+    
+    #[must_use]
+    pub fn player(&self, combat: &Combat) -> usize {
+        match self {
+            CombatEventPhase::TacticsCardAttacker => combat.attacker,
+            CombatEventPhase::TacticsCardDefender => combat.defender,
+            _ => panic!("Invalid phase"),
+        }
     }
 }
 
