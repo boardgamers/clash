@@ -18,6 +18,7 @@ use crate::status_phase::{
 use crate::unit::UnitType;
 use crate::wonder::draw_wonder_from_pile;
 use itertools::Itertools;
+use crate::incident::PermanentIncidentEffect::LoseAction;
 
 pub(crate) fn civil_war_incidents() -> Vec<Incident> {
     vec![
@@ -135,19 +136,19 @@ fn revolution() -> Incident {
         38,
         "Revolution",
         "You may kill one of your Army units each to avoid the following steps: \
-        Step 1: Loose one action (from your next turn if in Status phase). \
+        Step 1: Lose one action (from your next turn if in Status phase). \
         Step 2: Change your government for free if possible.",
         IncidentBaseEffect::GoldDeposits,
-    );
+    ).with_associated_permanent_effect(LoseAction(0));
     b = kill_unit_for_revolution(
         b,
         3,
         "Kill a unit to avoid losing an action",
-        |game, _player| can_loose_action(game),
+        |game, _player| can_lose_action(game),
     );
     b = b.add_simple_incident_listener(IncidentTarget::ActivePlayer, 2, |game, player, _, i| {
-        if can_loose_action(game) && i.player.sacrifice == 0 {
-            loose_action(game, player);
+        if can_lose_action(game) && i.player.sacrifice == 0 {
+            lose_action(game, player);
         }
     });
     b = kill_unit_for_revolution(
@@ -204,16 +205,16 @@ fn kill_unit_for_revolution(
     )
 }
 
-fn can_loose_action(game: &Game) -> bool {
+fn can_lose_action(game: &Game) -> bool {
     get_status_phase(game).is_some() || game.actions_left > 0
 }
 
-fn loose_action(game: &mut Game, player: usize) {
+fn lose_action(game: &mut Game, player: usize) {
     let name = game.player_name(player);
     if get_status_phase(game).is_some() {
         game.add_info_log_item(&format!("{name} lost an action for the next turn"));
         game.permanent_incident_effects
-            .push(PermanentIncidentEffect::LooseAction(player));
+            .push(PermanentIncidentEffect::LoseAction(player));
     } else {
         game.add_info_log_item(&format!("{name} lost an action"));
         game.actions_left -= 1;

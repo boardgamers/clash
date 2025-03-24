@@ -104,7 +104,7 @@ pub enum PassedIncident {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum PermanentIncidentEffect {
     Pestilence,
-    LooseAction(usize),
+    LoseAction(usize),
     PublicWonderCard(String),
     TrojanHorse,
     SolarEclipse,
@@ -155,6 +155,7 @@ pub struct IncidentBuilder {
     base_effect: IncidentBaseEffect,
     protection_advance: Option<String>,
     action_card: Option<ActionCard>,
+    associated_permanent_effect: Option<PermanentIncidentEffect>,
     builder: AbilityInitializerBuilder,
 }
 
@@ -168,6 +169,7 @@ impl IncidentBuilder {
             builder: AbilityInitializerBuilder::new(),
             protection_advance: None,
             action_card: None,
+            associated_permanent_effect: None,
         }
     }
 
@@ -204,6 +206,12 @@ impl IncidentBuilder {
     #[must_use]
     pub fn with_action_card(mut self, action_card: ActionCard) -> Self {
         self.action_card = Some(action_card);
+        self
+    }
+    
+    #[must_use]
+    pub fn with_associated_permanent_effect(mut self, effect: PermanentIncidentEffect) -> Self {
+        self.associated_permanent_effect = Some(effect);
         self
     }
 

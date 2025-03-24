@@ -232,7 +232,7 @@ fn fire() -> Incident {
         "Fire",
         "Select one of your cities that is placed on a Forest. \
         Decrease the mood in that city, and all cities adjacent that are part of the same forest, \
-        regardless of who owns them. If you have no cities on a Forest, loose 1 wood.",
+        regardless of who owns them. If you have no cities on a Forest, lose 1 wood.",
         IncidentBaseEffect::GoldDeposits,
     )
     .add_incident_position_request(

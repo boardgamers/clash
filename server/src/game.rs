@@ -579,7 +579,7 @@ impl Game {
         ));
         self.actions_left = ACTIONS;
         let lost_action = self.permanent_incident_effects.iter().position(
-            |e| matches!(e, PermanentIncidentEffect::LooseAction(p) if *p == self.current_player_index),
+            |e| matches!(e, PermanentIncidentEffect::LoseAction(p) if *p == self.current_player_index),
         ).map(|i| self.permanent_incident_effects.remove(i));
         if lost_action.is_some() {
             self.add_info_log_item("Remove 1 action for Revolution");
