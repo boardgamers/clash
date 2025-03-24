@@ -58,7 +58,7 @@ impl CombatEventPhase {
     pub fn is_default(&self) -> bool {
         matches!(self, CombatEventPhase::Default)
     }
-    
+
     #[must_use]
     pub fn player(&self, combat: &Combat) -> usize {
         match self {
@@ -602,7 +602,11 @@ pub(crate) fn place_settler() -> Builtin {
             {
                 let choices: Vec<Position> = p.cities.iter().map(|c| c.position).collect();
                 let needed = 1..=1;
-                Some(PositionRequest::new(choices, needed, "Select a city to place the free Settler Unit"))
+                Some(PositionRequest::new(
+                    choices,
+                    needed,
+                    "Select a city to place the free Settler Unit",
+                ))
             } else {
                 None
             }

@@ -183,7 +183,11 @@ fn reformation() -> Incident {
                 .map(|c| c.position)
                 .collect();
             let needed = 1..=1;
-            Some(PositionRequest::new(choices, needed, "Select a city to gain a Temple"))
+            Some(PositionRequest::new(
+                choices,
+                needed,
+                "Select a city to gain a Temple",
+            ))
         },
         |game, s, _| {
             let &p = game

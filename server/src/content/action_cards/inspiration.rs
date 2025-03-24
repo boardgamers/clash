@@ -4,9 +4,7 @@ use crate::advance::gain_advance;
 use crate::city::MoodState;
 use crate::content::action_cards::spy::spy;
 use crate::content::advances;
-use crate::content::custom_phase_actions::{
-    AdvanceRequest, PaymentRequest, PositionRequest,
-};
+use crate::content::custom_phase_actions::{AdvanceRequest, PaymentRequest, PositionRequest};
 use crate::content::tactics_cards::{
     encircled, heavy_resistance, high_morale, peltasts, wedge_formation,
 };
@@ -29,6 +27,7 @@ pub(crate) fn inspiration_action_cards() -> Vec<ActionCard> {
         hero_general(5, wedge_formation()),
         hero_general(6, high_morale()),
         spy(7, heavy_resistance()),
+        spy(8, high_morale()),
     ]
 }
 

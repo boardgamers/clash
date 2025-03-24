@@ -214,7 +214,11 @@ fn select_settler(b: IncidentBuilder, priority: i32, target: IncidentTarget) -> 
             if p.available_units().settlers > 0 {
                 let choices = p.cities.iter().map(|c| c.position).collect();
                 let needed = 1..=1;
-                Some(PositionRequest::new(choices, needed, "Select a city to gain 1 settler"))
+                Some(PositionRequest::new(
+                    choices,
+                    needed,
+                    "Select a city to gain 1 settler",
+                ))
             } else {
                 None
             }

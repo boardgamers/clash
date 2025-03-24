@@ -282,7 +282,11 @@ pub(crate) fn build_wonder() -> Builtin {
                 let choices = cities_for_wonder(&i.name, game, p, &i.discount);
 
                 let needed = 1..=1;
-                Some(PositionRequest::new(choices, needed, "Select city to build wonder"))
+                Some(PositionRequest::new(
+                    choices,
+                    needed,
+                    "Select city to build wonder",
+                ))
             },
             |game, s, i| {
                 let position = s.choice[0];

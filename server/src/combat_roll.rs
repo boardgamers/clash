@@ -64,10 +64,7 @@ impl CombatStats {
         game.add_info_log_item(&format!(
             "{name} rolled {} for combined combat value of {} and gets {} hits \
             against {} units.",
-            self.log_str,
-            self.combat_value,
-            self.hits,
-            self.opponent_str,
+            self.log_str, self.combat_value, self.hits, self.opponent_str,
         ));
 
         if !self.strength.roll_log.is_empty() {

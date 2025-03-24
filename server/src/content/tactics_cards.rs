@@ -124,8 +124,9 @@ pub(crate) fn heavy_resistance() -> TacticsCard {
     .add_reveal_listener(0, |player, game, c, s| {
         let v = c.fighting_units(game, player).len() as i8;
         s.extra_combat_value -= v;
-        s.roll_log
-            .push(format!("Heavy resistance added -{v} to combat value for each unit"));
+        s.roll_log.push(format!(
+            "Heavy resistance added -{v} to combat value for each unit"
+        ));
     })
     .build()
 }

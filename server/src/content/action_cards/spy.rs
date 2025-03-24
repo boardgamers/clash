@@ -76,7 +76,8 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCard) -> ActionCard {
                 &s.choice,
                 s.player_index,
                 a.selected_player.expect("player not found"),
-            ).map_err(|e| panic!("Failed to swap cards: {e}"));
+            )
+            .map_err(|e| panic!("Failed to swap cards: {e}"));
         },
     )
     .with_tactics_card(tactics_card)
@@ -91,7 +92,12 @@ fn players_with_cards(game: &Game, player: usize) -> Vec<usize> {
         .collect_vec()
 }
 
-fn swap_cards(game: &mut Game, swap: &[HandCard], player: usize, other: usize) -> Result<(), String> {
+fn swap_cards(
+    game: &mut Game,
+    swap: &[HandCard],
+    player: usize,
+    other: usize,
+) -> Result<(), String> {
     if swap.is_empty() {
         game.add_info_log_item(&format!(
             "{} decided not to swap a card",
@@ -99,7 +105,7 @@ fn swap_cards(game: &mut Game, swap: &[HandCard], player: usize, other: usize) -
         ));
         return Ok(());
     }
-    
+
     if swap.len() != 2 {
         return Err("must select 2 cards".to_string());
     }
@@ -132,7 +138,7 @@ fn swap_cards(game: &mut Game, swap: &[HandCard], player: usize, other: usize) -
         game.player_name(player),
         game.player_name(other)
     ));
-    
+
     Ok(())
 }
 
@@ -197,6 +203,7 @@ fn get_swap_secrets(other: &Player) -> Vec<String> {
     ]
 }
 
+#[must_use] 
 pub fn validate_if_spy(cards: &Vec<HandCard>, game: &Game) -> bool {
     let s = game.current_event();
     let h = &s.player.handler.as_ref().expect("handler not found");
@@ -212,7 +219,8 @@ pub fn validate_if_spy(cards: &Vec<HandCard>, game: &Game) -> bool {
                 cards,
                 s.player.index,
                 c.selected_player.expect("no player found"),
-            ).is_ok()
+            )
+            .is_ok()
         }
         _ => true,
     }

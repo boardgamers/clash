@@ -4,9 +4,9 @@ use crate::action_card::ActionCard;
 use crate::barbarians::{barbarians_move, barbarians_spawn};
 use crate::card::{draw_card_from_pile, HandCard};
 use crate::city::MoodState;
-use crate::content::custom_phase_actions::{CurrentEventType, HandCardsRequest, PaymentRequest, PlayerRequest,
-                                           PositionRequest, ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitTypeRequest,
-                                           UnitsRequest,
+use crate::content::custom_phase_actions::{
+    CurrentEventType, HandCardsRequest, PaymentRequest, PlayerRequest, PositionRequest,
+    ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitTypeRequest, UnitsRequest,
 };
 use crate::content::incidents;
 use crate::content::incidents::great_diplomat::{DiplomaticRelations, DIPLOMAT_ID};
@@ -695,7 +695,11 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
                 })
                 .collect_vec();
             let needed = 1..=1;
-            Some(PositionRequest::new(positions, needed, "Select a land position to exhaust"))
+            Some(PositionRequest::new(
+                positions,
+                needed,
+                "Select a land position to exhaust",
+            ))
         },
         |game, s, _| {
             let pos = s.choice[0];

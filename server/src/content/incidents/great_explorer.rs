@@ -1,8 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
 use crate::action_card::ActionCard;
-use crate::content::custom_phase_actions::{EventResponse, PaymentRequest, PositionRequest,
-};
+use crate::content::custom_phase_actions::{EventResponse, PaymentRequest, PositionRequest};
 use crate::content::incidents::great_persons::{
     great_person_action_card, great_person_description,
 };
@@ -79,7 +78,11 @@ pub(crate) fn great_explorer() -> ActionCard {
                 .expect("position not found");
 
             let needed = 0..=1;
-            Some(PositionRequest::new(choices, needed, "Place a city for 2 food"))
+            Some(PositionRequest::new(
+                choices,
+                needed,
+                "Place a city for 2 food",
+            ))
         },
         |game, s, a| {
             let pos = s.choice.first().copied();

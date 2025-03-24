@@ -92,7 +92,7 @@ impl PlayingActionType {
                 if !p.custom_actions.contains_key(&c.custom_action_type) {
                     return Err("Custom action not available".to_string());
                 }
-                
+
                 if c.once_per_turn
                     && p.played_once_per_turn_actions
                         .contains(&c.custom_action_type)
@@ -104,7 +104,7 @@ impl PlayingActionType {
                 if !p.action_cards.contains(id) {
                     return Err("Action card not available".to_string());
                 }
-                
+
                 if !(get_civil_card(*id).can_play)(game, p) {
                     return Err("Cannot play action card".to_string());
                 }
@@ -113,7 +113,7 @@ impl PlayingActionType {
                 if !p.wonder_cards.contains(name) {
                     return Err("Wonder card not available".to_string());
                 }
-                
+
                 if cities_for_wonder(name, game, p, &WonderDiscount::default()).is_empty() {
                     return Err("no cities for wonder".to_string());
                 }
@@ -309,7 +309,7 @@ impl ActionType {
     pub fn regular_with_cost(cost: ResourcePile) -> Self {
         Self::new(false, cost)
     }
-    
+
     #[must_use]
     pub fn free() -> Self {
         Self::new(true, ResourcePile::empty())

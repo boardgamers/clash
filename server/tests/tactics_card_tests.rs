@@ -80,7 +80,8 @@ fn test_heavy_resistance() {
     JSON.test(
         "heavy_resistance",
         vec![
-            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1"))).without_json_comparison(),
+            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1")))
+                .without_json_comparison(),
             TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(

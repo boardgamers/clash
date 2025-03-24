@@ -88,7 +88,8 @@ fn civil_war(id: u8) -> Incident {
             };
             let choices = non_happy_cites_with_infantry(p);
             let needed = 1..=1;
-            let description = &format!("Select a non-Happy city with an Infantry to kill the Infantry {suffix}");
+            let description =
+                &format!("Select a non-Happy city with an Infantry to kill the Infantry {suffix}");
             Some(PositionRequest::new(choices, needed, description))
         },
         |game, s, i| {

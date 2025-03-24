@@ -480,7 +480,11 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             |request, action| {
                 if let CurrentEventRequest::SelectPositions(request) = &request {
                     if let EventResponse::SelectPositions(reward) = action {
-                        return (request.request.choices.clone(), reward, request.request.needed.clone());
+                        return (
+                            request.request.choices.clone(),
+                            reward,
+                            request.request.needed.clone(),
+                        );
                     }
                 }
                 panic!("Position request expected");
@@ -567,7 +571,11 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             |request, action| {
                 if let CurrentEventRequest::SelectHandCards(request) = &request {
                     if let EventResponse::SelectHandCards(choices) = action {
-                        return (request.request.choices.clone(), choices, request.request.needed.clone());
+                        return (
+                            request.request.choices.clone(),
+                            choices,
+                            request.request.needed.clone(),
+                        );
                     }
                 }
                 panic!("Hand Cards request expected");
