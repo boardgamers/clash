@@ -10,6 +10,7 @@ use crate::resource_pile::ResourcePile;
 use crate::tactics_card::TacticsCard;
 use crate::utils::remove_element;
 use itertools::Itertools;
+use crate::events::EventOrigin;
 
 pub(crate) fn spy(id: u8, tactics_card: TacticsCard) -> ActionCard {
     ActionCard::builder(
@@ -18,18 +19,14 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCard) -> ActionCard {
         "Look at all Wonder, Action, and Objective cards of another player. \
         You may swap one card of the same type.",
         ActionType::regular_with_cost(ResourcePile::culture_tokens(1)),
-        |_game, player| has_any_card(player),
+        |game, player| !players_with_cards(game, player.index).is_empty(),
     )
     .add_player_request(
         |e| &mut e.on_play_action_card,
         1,
         |game, player, _| {
             Some(PlayerRequest::new(
-                game.players
-                    .iter()
-                    .filter(|p| p.index != player && has_any_card(p))
-                    .map(|p| p.index)
-                    .collect_vec(),
+                players_with_cards(game, player),
                 "Select a player to look at all Wonder, Action, and Objective cards of",
             ))
         },
@@ -48,7 +45,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCard) -> ActionCard {
         0,
         |game, player, a| {
             game.lock_undo(); // you've seen the cards
-            
+
             let p = game.get_player(player);
             let other = game.get_player(a.selected_player.expect("player not found"));
 
@@ -72,14 +69,9 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCard) -> ActionCard {
             ))
         },
         |game, s, a| {
-            game.lock_undo(); // can't undo swap - other other player saw your card
-            
-            let swap = &s.choice;
-            if swap.is_empty() {
-                game.add_info_log_item(&format!("{} decided not to swap a card", s.player_name));
-                return;
-            }
+            game.lock_undo(); // can't undo swap - the other player saw your card
 
+            let swap = &s.choice;
             swap_cards(
                 game,
                 swap,
@@ -92,7 +84,20 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCard) -> ActionCard {
     .build()
 }
 
+fn players_with_cards(game: &Game, player: usize) -> Vec<usize> {
+    game.players
+        .iter()
+        .filter(|p| p.index != player && has_any_card(p))
+        .map(|p| p.index)
+        .collect_vec()
+}
+
 fn swap_cards(game: &mut Game, swap: &[HandCard], player: usize, other: usize) {
+    if swap.is_empty() {
+        game.add_info_log_item(&format!("{} decided not to swap a card", game.player_name(other)));
+        return;
+    }
+    
     assert_eq!(swap.len(), 2, "must select 2 cards");
     let p = game.get_player(player);
     let o = game.get_player(other);
@@ -179,4 +184,20 @@ fn get_swap_secrets(other: &Player) -> Vec<String> {
             other.wonder_cards.iter().map(std::string::ToString::to_string).join(", ")
         ),
     ]
+}
+
+pub fn validate_if_spy(cards: &Vec<HandCard>, game: &Game) -> bool {
+    match game
+            .current_event_handler()
+            .as_ref()
+            .unwrap()
+            .origin {
+        EventOrigin::CivilCard(id) if id == 7 || id == 8 => {
+             if cards.len() != 2 && cards.len() != 0 {
+                 return false;
+             }
+            
+        },
+        _ => true,
+    }
 }
