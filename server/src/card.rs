@@ -4,6 +4,7 @@ use crate::utils::Shuffle;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
+#[derive(Clone, Copy)]
 pub enum HandCardType {
     Action,
     Wonder,

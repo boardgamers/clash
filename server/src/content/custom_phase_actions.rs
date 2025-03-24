@@ -67,29 +67,19 @@ pub type SelectedStructure = (Position, Structure);
 
 pub type StructuresRequest = MultiRequest<SelectedStructure>;
 
+///
+/// If a player does not own a hand card, then it means that it's a swap card from another player
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct HandCardsRequest {
     #[serde(flatten)]
-    cards: MultiRequest<HandCard>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    swap: Option<MultiRequest<HandCard>>,
+    pub request: MultiRequest<HandCard>,
 }
 
 impl HandCardsRequest {
     #[must_use]
     pub fn new(cards: Vec<HandCard>, needed: RangeInclusive<u8>, description: &str) -> Self {
         HandCardsRequest {
-            cards: MultiRequest::new(cards, needed, description),
-            swap: None,
-        }
-    }
-
-    #[must_use]
-    pub fn swap(self, cards: Vec<HandCard>, needed: RangeInclusive<u8>, description: &str) -> Self {
-        HandCardsRequest {
-            cards: self.cards,
-            swap: Some(MultiRequest::new(cards, needed, description)),
+            request: MultiRequest::new(cards, needed, description),
         }
     }
 }

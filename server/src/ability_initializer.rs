@@ -567,7 +567,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             |request, action| {
                 if let CurrentEventRequest::SelectHandCards(request) = &request {
                     if let EventResponse::SelectHandCards(choices) = action {
-                        return (request.choices.clone(), choices, request.needed.clone());
+                        return (request.request.choices.clone(), choices, request.request.needed.clone());
                     }
                 }
                 panic!("Hand Cards request expected");
