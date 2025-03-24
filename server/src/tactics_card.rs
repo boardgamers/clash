@@ -89,7 +89,7 @@ impl TacticsCardBuilder {
             name: name.to_string(),
             description: description.to_string(),
             fighter_requirement: None,
-            tactics_card_target: TacticsCardTarget::AllPlayers,
+            tactics_card_target: TacticsCardTarget::ActivePlayer,
             role_requirement: None,
             builder: AbilityInitializerBuilder::new(),
         }

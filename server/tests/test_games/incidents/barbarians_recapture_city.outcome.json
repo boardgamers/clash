@@ -77,7 +77,10 @@
         "Tactics"
       ],
       "incident_tokens": 3,
-      "next_unit_id": 9
+      "next_unit_id": 9,
+      "event_info": {
+        "Land Battle Won": "true"
+      }
     },
     {
       "id": 1,

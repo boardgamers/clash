@@ -14,8 +14,8 @@
         "request": {
           "SelectPositions": {
             "choices": [
-              "C2",
-              "B2"
+              "B2",
+              "C2"
             ],
             "needed": {
               "start": 1,

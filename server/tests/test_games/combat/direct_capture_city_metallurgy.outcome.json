@@ -120,7 +120,10 @@
       "captured_leaders": [
         "Alexander"
       ],
-      "next_unit_id": 8
+      "next_unit_id": 8,
+      "event_info": {
+        "Land Battle Won": "true"
+      }
     },
     {
       "id": 1,

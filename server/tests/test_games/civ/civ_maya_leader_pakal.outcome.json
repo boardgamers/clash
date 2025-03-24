@@ -186,7 +186,10 @@
       "wonder_cards": [
         "Great Gardens"
       ],
-      "next_unit_id": 11
+      "next_unit_id": 11,
+      "event_info": {
+        "Land Battle Won": "true"
+      }
     },
     {
       "id": 1,

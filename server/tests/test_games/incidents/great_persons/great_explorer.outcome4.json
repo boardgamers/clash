@@ -14,10 +14,10 @@
         "request": {
           "SelectPositions": {
             "choices": [
-              "B6",
               "A7",
-              "C7",
-              "B7"
+              "B6",
+              "B7",
+              "C7"
             ],
             "needed": {
               "start": 0,
@@ -480,8 +480,8 @@
             "request": {
               "SelectPositions": {
                 "choices": [
-                  "D5",
                   "B6",
+                  "D5",
                   "F6"
                 ],
                 "description": "Choose a region to explore",

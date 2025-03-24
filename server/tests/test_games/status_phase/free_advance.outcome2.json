@@ -159,7 +159,7 @@
         "Great Gardens"
       ],
       "action_cards": [
-        1
+        6
       ],
       "next_unit_id": 10
     },
@@ -227,7 +227,7 @@
       ],
       "incident_tokens": 2,
       "action_cards": [
-        3
+        1
       ],
       "next_unit_id": 2
     }
@@ -375,14 +375,16 @@
     10,
     10
   ],
-  "rng": "100237538834022306369023762152574892205",
+  "rng": "203446970618003129807713801980673289225",
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [
     "Pyramids"
   ],
   "action_cards_left": [
+    3,
     4,
-    2
+    2,
+    5
   ]
 }

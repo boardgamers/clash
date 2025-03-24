@@ -454,8 +454,8 @@
             "request": {
               "SelectPositions": {
                 "choices": [
-                  "D5",
                   "B6",
+                  "D5",
                   "F6"
                 ],
                 "description": "Choose a region to explore",
@@ -551,10 +551,10 @@
           "path": "/events/0/handler/request/SelectPositions",
           "value": {
             "choices": [
-              "B6",
               "A7",
-              "C7",
-              "B7"
+              "B6",
+              "B7",
+              "C7"
             ],
             "description": "Place a city for 2 food",
             "needed": {

@@ -379,9 +379,9 @@
           "path": "/events/0/handler/request/SelectPositions",
           "value": {
             "choices": [
-              "C1",
               "B2",
-              "B3"
+              "B3",
+              "C1"
             ],
             "description": "Build a Temple",
             "needed": {

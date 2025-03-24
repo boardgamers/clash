@@ -87,6 +87,9 @@
         "Tactics"
       ],
       "incident_tokens": 2,
+      "action_cards": [
+        5
+      ],
       "next_unit_id": 8
     },
     {
@@ -198,13 +201,6 @@
         }
       },
       "undo": [
-        {
-          "op": "add",
-          "path": "/players/0/action_cards",
-          "value": [
-            3
-          ]
-        },
         {
           "op": "replace",
           "path": "/players/0/advances/2",

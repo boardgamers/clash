@@ -14,8 +14,8 @@
         "request": {
           "SelectPositions": {
             "choices": [
-              "D5",
               "B6",
+              "D5",
               "F6"
             ],
             "needed": {
