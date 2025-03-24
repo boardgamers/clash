@@ -194,15 +194,28 @@ impl CurrentEventState {
     }
 }
 
-pub type PositionRequest = MultiRequest<Position>;
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct PositionRequest(MultiRequest<Position>);
+
+impl PositionRequest {
+    #[must_use]
+    pub fn new(mut choices: Vec<Position>, needed: RangeInclusive<u8>, description: &str) -> Self {
+        choices.sort();
+        PositionRequest(MultiRequest::new(choices, needed, description))
+    }
+
+    #[must_use]
+    pub fn is_valid(&self, selected: &[Position]) -> bool {
+        self.0.is_valid(selected)
+    }
+}
 
 pub(crate) fn new_position_request(
     mut choices: Vec<Position>,
     needed: RangeInclusive<u8>,
     description: &str,
 ) -> PositionRequest {
-    choices.sort();
-    MultiRequest::new(choices, needed, description)
+   PositionRequest::new()
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

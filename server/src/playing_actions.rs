@@ -299,6 +299,11 @@ impl ActionType {
     }
 
     #[must_use]
+    pub fn regular_with_cost(cost: ResourcePile) -> Self {
+        Self::new(false, cost)
+    }
+    
+    #[must_use]
     pub fn free() -> Self {
         Self::new(true, ResourcePile::empty())
     }

@@ -114,7 +114,7 @@ pub(crate) fn high_morale() -> TacticsCard {
         .build()
 }
 
-fn heavy_resistance() -> TacticsCard {
+pub(crate) fn heavy_resistance() -> TacticsCard {
     TacticsCard::builder(
         "Heavy Resistance",
         "Attacker gets -1 combat value for each fighting unit.",

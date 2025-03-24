@@ -3,8 +3,10 @@ use crate::action_card::{ActionCard, ActionCardBuilder};
 use crate::advance::gain_advance;
 use crate::city::MoodState;
 use crate::content::advances;
-use crate::content::custom_phase_actions::{new_position_request, AdvanceRequest, PaymentRequest};
-use crate::content::tactics_cards::{encircled, high_morale, peltasts, wedge_formation};
+use crate::content::custom_phase_actions::{new_position_request, AdvanceRequest, HandCardsRequest, PaymentRequest, PlayerRequest};
+use crate::content::tactics_cards::{
+    encircled, heavy_resistance, high_morale, peltasts, wedge_formation,
+};
 use crate::game::Game;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
@@ -13,6 +15,8 @@ use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::TacticsCard;
 use itertools::Itertools;
+use std::iter::Filter;
+use std::slice::Iter;
 use std::vec;
 
 pub(crate) fn inspiration_action_cards() -> Vec<ActionCard> {
@@ -23,6 +27,7 @@ pub(crate) fn inspiration_action_cards() -> Vec<ActionCard> {
         inspiration(4, peltasts()),
         hero_general(5, wedge_formation()),
         hero_general(6, high_morale()),
+        spy(7, heavy_resistance()),
     ]
 }
 
@@ -230,4 +235,77 @@ fn cities_where_mood_can_increase(player: &Player) -> Vec<Position> {
         .filter(|c| c.mood_state != MoodState::Happy)
         .map(|c| c.position)
         .collect()
+}
+
+fn spy(id: u8, tactics_card: TacticsCard) -> ActionCard {
+    ActionCard::builder(
+        id,
+        "Spy",
+        "Look at all Wonder, Action, and Objective cards of another player. \
+        You may swap one card of the same type.",
+        ActionType::regular_with_cost(ResourcePile::culture_tokens(1)),
+        |game, player| !swap_partners(game, player).is_empty(),
+    )
+    .add_player_request(
+        |e| &mut e.on_play_action_card,
+        1,
+        |game, player, _| {
+            Some(PlayerRequest::new(
+                swap_partners(game, game.get_player(player)),
+                "Select a player to look at all Wonder, Action, and Objective cards of",
+            ))
+        },
+        |game, s, a| {
+            let p = s.choice;
+            game.add_info_log_item(&format!(
+                "{} decided to looked at all Wonder, Action, and Objective cards of {}",
+                s.player_name,
+                game.player_name(p)
+            ));
+            a.selected_player = Some(p);
+        },
+    )
+        .add_hand_card_request(
+            |e| &mut e.on_play_action_card,
+            2,
+            |game, player, _| {
+                //todo must be able to see the cards in the other players are here
+               
+                
+                
+                Some(HandCardsRequest::new(cards, 0..=1, "Select a Wonder, Action, or Objective card to swap"))
+            },
+            |game, sel, _| {
+                let other = game.get_player(sel.player_index.selected_player.unwrap());
+                let player = sel.player_index.player_index;
+                let card = sel.choice[0].clone();
+                game.add_info_log_item(&format!(
+                    "{} decided to swap a card with {}",
+                    sel.player_name,
+                    game.player_name(other.index)
+                ));
+                swap_card(game, player, other.index, &card);
+            },
+        )
+    .with_tactics_card(tactics_card)
+    .build()
+}
+
+fn swap_partners(game: &Game, player: &Player) -> Vec<usize> {
+    game.players
+        .iter()
+        .filter(|p| p.index != player.index && swappable_cards_of_same_kind(player, p))
+        .map(|p| p.index)
+        .collect()
+}
+
+fn swappable_cards_of_same_kind(src: &Player, dst: &Player) -> bool {
+    swappable(1, &src.wonder_cards, &dst.wonder_cards)
+        // can't swap the Spy card that triggers this effect
+        || swappable(2, &src.action_cards, &dst.action_cards)
+    // todo objective cards
+}
+
+fn swappable<T>(src_min_len: usize, src: &[T], dst: &[T]) -> bool {
+    src.len() >= src_min_len && !dst.is_empty()
 }

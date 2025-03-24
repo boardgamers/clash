@@ -145,6 +145,9 @@ pub struct ActionCardInfo {
     pub selected_position: Option<Position>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub selected_player: Option<usize>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub answer: Option<bool>,
 }
 
