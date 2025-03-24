@@ -95,7 +95,7 @@ impl CombatResult {
         match self {
             CombatResult::AttackerWins => Some(CombatRole::Attacker),
             CombatResult::DefenderWins => Some(CombatRole::Defender),
-            _ => None,
+            CombatResult::Draw => None,
         }
     }
 }

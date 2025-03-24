@@ -1,7 +1,10 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::barbarians::barbarians_bonus;
-use crate::combat_listeners::{choose_carried_units_casualties, choose_fighter_casualties, combat_stats, offer_retreat, place_settler};
+use crate::combat_listeners::{
+    choose_carried_units_casualties, choose_fighter_casualties, combat_stats, offer_retreat,
+    place_settler,
+};
 use crate::content::incidents::famine::pestilence_permanent_effect;
 use crate::content::incidents::great_builders::use_great_engineer;
 use crate::content::incidents::great_diplomat::use_diplomatic_relations;

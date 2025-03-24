@@ -179,7 +179,7 @@ fn hero_general(id: u8, tactics_card: TacticsCard) -> ActionCard {
                 game.add_info_log_item(&format!("{} did not pay 1 mood token", s.player_name));
             } else {
                 game.add_info_log_item(&format!("{} paid 1 mood token", s.player_name));
-                a.answer = Some(true)
+                a.answer = Some(true);
             }
         },
     );
@@ -192,7 +192,7 @@ fn increase_mood(b: ActionCardBuilder, priority: i32, need_payment: bool) -> Act
     b.add_position_request(
         |e| &mut e.on_play_action_card,
         priority,
-        move|game, player, a| {
+        move |game, player, a| {
             if need_payment && a.answer.is_none() {
                 return None;
             }
@@ -209,7 +209,9 @@ fn increase_mood(b: ActionCardBuilder, priority: i32, need_payment: bool) -> Act
                 "{} selected city {} to increase the mood by 1",
                 s.player_name, pos
             ));
-            game.get_player_mut(player).get_city_mut(pos).increase_mood_state();
+            game.get_player_mut(player)
+                .get_city_mut(pos)
+                .increase_mood_state();
         },
     )
 }

@@ -62,21 +62,15 @@ impl CombatRole {
 pub struct TacticsCard {
     pub name: String,
     pub description: String,
-    pub card_target: TacticsCardTarget,
-    pub fighter_requirement: FighterRequirement,
+    pub fighter_requirement: Option<FighterRequirement>,
     pub role_requirement: Option<CombatRole>,
     pub listeners: AbilityListeners,
 }
 
 impl TacticsCard {
     #[must_use]
-    pub fn builder(
-        name: &str,
-        description: &str,
-        tactics_card_target: TacticsCardTarget,
-        fighter_requirement: FighterRequirement,
-    ) -> TacticsCardBuilder {
-        TacticsCardBuilder::new(name, description, tactics_card_target, fighter_requirement)
+    pub fn builder(name: &str, description: &str) -> TacticsCardBuilder {
+        TacticsCardBuilder::new(name, description)
     }
 }
 
@@ -84,30 +78,30 @@ pub struct TacticsCardBuilder {
     pub name: String,
     description: String,
     pub tactics_card_target: TacticsCardTarget,
-    pub fighter_requirement: FighterRequirement,
+    pub fighter_requirement: Option<FighterRequirement>,
     pub role_requirement: Option<CombatRole>,
     builder: AbilityInitializerBuilder,
 }
 
 impl TacticsCardBuilder {
-    fn new(
-        name: &str,
-        description: &str,
-        tactics_card_target: TacticsCardTarget,
-        fighter_requirement: FighterRequirement,
-    ) -> Self {
+    fn new(name: &str, description: &str) -> Self {
         Self {
             name: name.to_string(),
             description: description.to_string(),
-            fighter_requirement,
-            tactics_card_target,
+            fighter_requirement: None,
+            tactics_card_target: TacticsCardTarget::AllPlayers,
             role_requirement: None,
             builder: AbilityInitializerBuilder::new(),
         }
     }
 
-    pub(crate) fn set_role_requirement(mut self, role_requirement: CombatRole) -> Self {
+    pub(crate) fn role_requirement(mut self, role_requirement: CombatRole) -> Self {
         self.role_requirement = Some(role_requirement);
+        self
+    }
+
+    pub(crate) fn fighter_requirement(mut self, fighter_requirement: FighterRequirement) -> Self {
+        self.fighter_requirement = Some(fighter_requirement);
         self
     }
 
@@ -153,7 +147,6 @@ impl TacticsCardBuilder {
         TacticsCard {
             name: self.name,
             description: self.description,
-            card_target: self.tactics_card_target,
             fighter_requirement: self.fighter_requirement,
             role_requirement: self.role_requirement,
             listeners: self.builder.build(),
@@ -239,11 +232,12 @@ fn can_play_tactics_card(game: &Game, player: usize, card: &ActionCard, combat: 
             .is_none_or(|&r| combat.role(player) == r);
 
         let fighter_met = match card.fighter_requirement {
-            FighterRequirement::Army => !combat.is_sea_battle(game),
-            FighterRequirement::Fortress => {
+            Some(FighterRequirement::Army) => !combat.is_sea_battle(game),
+            Some(FighterRequirement::Fortress) => {
                 combat.defender_fortress(game) && combat.defender == player
             }
-            FighterRequirement::Ship => combat.is_sea_battle(game),
+            Some(FighterRequirement::Ship) => combat.is_sea_battle(game),
+            None => true,
         };
 
         position_met && fighter_met

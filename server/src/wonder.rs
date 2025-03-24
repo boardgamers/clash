@@ -3,7 +3,9 @@ use crate::card::draw_card_from_pile;
 use crate::city::{City, MoodState};
 use crate::construct::can_construct_anything;
 use crate::content::builtin::Builtin;
-use crate::content::custom_phase_actions::{new_position_request, CurrentEventType, PaymentRequest};
+use crate::content::custom_phase_actions::{
+    new_position_request, CurrentEventType, PaymentRequest,
+};
 use crate::content::wonders::get_wonder;
 use crate::events::EventOrigin;
 use crate::incident::PermanentIncidentEffect;

@@ -1,6 +1,8 @@
 use crate::card::{hand_cards, HandCard, HandCardType};
 use crate::city::City;
-use crate::content::custom_phase_actions::{new_position_request, HandCardsRequest, PaymentRequest, ResourceRewardRequest, UnitsRequest};
+use crate::content::custom_phase_actions::{
+    new_position_request, HandCardsRequest, PaymentRequest, ResourceRewardRequest, UnitsRequest,
+};
 use crate::content::incidents::famine::{
     additional_sanitation_damage, famine, kill_incident_units,
 };

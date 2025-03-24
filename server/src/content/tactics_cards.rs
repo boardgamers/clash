@@ -1,9 +1,9 @@
-use crate::tactics_card::{CombatRole, FighterRequirement, TacticsCard, TacticsCardTarget};
+use crate::tactics_card::{CombatRole, FighterRequirement, TacticsCard};
 use itertools::Itertools;
 
 #[must_use]
 pub(crate) fn get_all() -> Vec<TacticsCard> {
-    let all: Vec<TacticsCard> = vec![peltasts(), encircled(), wedge_formation()];
+    let all: Vec<TacticsCard> = vec![peltasts(), encircled(), wedge_formation(), high_morale()];
     assert_eq!(
         all.iter().unique_by(|i| &i.name).count(),
         all.len(),
@@ -28,9 +28,8 @@ pub(crate) fn peltasts() -> TacticsCard {
         "Peltasts",
         "On reveal: Roll a die for each of your Army units. \
         If you rolled a 5 or 6, ignore 1 hit",
-        TacticsCardTarget::ActivePlayer,
-        FighterRequirement::Army,
     )
+    .fighter_requirement(FighterRequirement::Army)
     .add_reveal_listener(0, |player, game, combat, s| {
         for _ in &combat.fighting_units(game, player) {
             let roll = game.get_next_dice_roll().value;
@@ -51,9 +50,8 @@ pub(crate) fn encircled() -> TacticsCard {
         "Encircled",
         "Before removing casualties: If your opponent loses the same number of units \
         as you or more: Roll a die. On a 5 or 6, add 1 hit, which cannot be ignored",
-        TacticsCardTarget::ActivePlayer,
-        FighterRequirement::Army,
     )
+    .fighter_requirement(FighterRequirement::Army)
     .add_resolve_listener(0, |player, game, e| {
         let combat = &e.combat;
         let opponent = combat.opponent(player);
@@ -88,10 +86,9 @@ pub(crate) fn wedge_formation() -> TacticsCard {
     TacticsCard::builder(
         "Wedge Formation",
         "As attacker: Receive 1 combat value for each defending Army unit",
-        TacticsCardTarget::ActivePlayer,
-        FighterRequirement::Army,
     )
-    .set_role_requirement(CombatRole::Attacker)
+    .fighter_requirement(FighterRequirement::Army)
+    .role_requirement(CombatRole::Attacker)
     .add_reveal_listener(0, |_player, game, c, s| {
         let v = c.fighting_units(game, c.defender).len() as u8;
         s.extra_combat_value += v;
@@ -99,4 +96,14 @@ pub(crate) fn wedge_formation() -> TacticsCard {
             .push(format!("Wedge Formation added {v} combat value",));
     })
     .build()
+}
+
+pub(crate) fn high_morale() -> TacticsCard {
+    TacticsCard::builder("High Morale", "Gain 2 combat value.")
+        .add_reveal_listener(0, |_player, _game, _c, s| {
+            s.extra_combat_value += 2;
+            s.roll_log
+                .push("High Morale added 2 combat value".to_string());
+        })
+        .build()
 }
