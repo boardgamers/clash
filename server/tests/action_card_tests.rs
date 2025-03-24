@@ -21,3 +21,13 @@ fn test_advance() {
         ],
     );
 }
+
+#[test]
+fn test_inspiration() {
+    JSON.test(
+        "inspiration",
+        vec![
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(3)))
+        ],
+    );
+}

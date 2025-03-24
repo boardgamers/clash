@@ -9,11 +9,11 @@
         "ore": 7,
         "ideas": 3,
         "gold": 7,
-        "mood_tokens": 8,
+        "mood_tokens": 7,
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -83,10 +83,12 @@
       "advances": [
         "Farming",
         "Mining",
-        "Storage",
         "Tactics"
       ],
       "incident_tokens": 2,
+      "action_cards": [
+        3
+      ],
       "next_unit_id": 8
     },
     {
@@ -135,6 +137,7 @@
         "Fanaticism",
         "Farming",
         "Mining",
+        "Storage",
         "Tactics"
       ],
       "incident_tokens": 3,
@@ -189,108 +192,9 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "action": {
-        "Playing": {
-          "ActionCard": 2
-        }
-      },
-      "undo": [
-        {
-          "op": "add",
-          "path": "/players/0/action_cards",
-          "value": [
-            2
-          ]
-        },
-        {
-          "op": "remove",
-          "path": "/events"
-        }
-      ]
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectAdvance": "Storage"
-        }
-      },
-      "undo": [
-        {
-          "op": "add",
-          "path": "/events",
-          "value": [
-            {
-              "event_type": {
-                "ActionCard": {
-                  "id": 2
-                }
-              },
-              "handler": {
-                "origin": {
-                  "CivilCard": 2
-                },
-                "priority": 0,
-                "request": {
-                  "SelectAdvance": {
-                    "choices": [
-                      "Storage",
-                      "Irrigation",
-                      "Husbandry",
-                      "Engineering",
-                      "Sanitation",
-                      "Roads",
-                      "Fishing",
-                      "Writing",
-                      "Siegecraft",
-                      "Steel Weapons",
-                      "Draft",
-                      "Myths",
-                      "Bartering",
-                      "Arts",
-                      "Math"
-                    ]
-                  }
-                }
-              },
-              "last_priority_used": 0,
-              "player": 0
-            }
-          ]
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/advances/2",
-          "value": "Tactics"
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/advances/3"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resource_limit/food",
-          "value": 2
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/mood_tokens",
-          "value": 7
-        }
-      ]
-    }
-  ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1 played the action card Advance"
-    ],
-    [
-      "Player gained 1 mood token as advance bonus",
-      "Player1 gained Storage for 1 culture token using the Advance action card."
-    ]
-  ],
+  "action_log": [],
+  "action_log_index": 0,
+  "log": [],
   "undo_limit": 0,
   "actions_left": 3,
   "round": 2,
