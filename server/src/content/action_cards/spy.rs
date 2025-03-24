@@ -203,8 +203,11 @@ fn get_swap_secrets(other: &Player) -> Vec<String> {
     ]
 }
 
-#[must_use] 
-pub fn validate_if_spy(cards: &Vec<HandCard>, game: &Game) -> bool {
+/// # Panics
+///
+/// Panics if the game is in an invalid state
+#[must_use]
+pub fn validate_if_spy(cards: &[HandCard], game: &Game) -> bool {
     let s = game.current_event();
     let h = &s.player.handler.as_ref().expect("handler not found");
     match h.origin {

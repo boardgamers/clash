@@ -22,7 +22,9 @@ use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::content::custom_phase_actions::CurrentEventType;
 use server::game::{Game, GameState};
 use server::movement::CurrentMove;
+use server::player::Player;
 use server::playing_actions::PlayingAction;
+use server::position::Position;
 use server::resource::ResourceType;
 use server::status_phase::get_status_phase;
 use server::unit::MovementAction;
@@ -229,41 +231,54 @@ pub fn show_top_left(rc: &RenderContext) {
     }
 
     if let Some(position) = state.focused_tile {
-        label(&format!(
-            "{}/{}",
-            position,
-            game.map
-                .get(position)
-                .map_or("outside the map", terrain_name),
-        ));
-
-        if let Some(c) = game.try_get_any_city(position) {
-            for l in city_labels(game, c) {
-                label(&l);
-            }
-        }
-
-        for (p, unit) in unit_ui::units_on_tile(game, position) {
-            let army_move = game
-                .get_player(p)
-                .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
-            label(&unit_ui::unit_label(&unit, army_move));
-        }
+        show_focused_tile(&mut label, game, position);
     }
 
     if rc.state.show_permanent_effects {
-        let s = &player.secrets;
-        if !s.is_empty() {
-            label("Secrets:");
-            for e in s {
-                label(e);
-            }
+        show_permanent_effects(rc, &mut label, game, player);
+    }
+}
+
+fn show_focused_tile(label: &mut impl FnMut(&str), game: &Game, position: Position) {
+    label(&format!(
+        "{}/{}",
+        position,
+        game.map
+            .get(position)
+            .map_or("outside the map", terrain_name),
+    ));
+
+    if let Some(c) = game.try_get_any_city(position) {
+        for l in city_labels(game, c) {
+            label(&l);
         }
-        label("Permanent effects:");
-        for e in &game.permanent_incident_effects {
-            for m in event_help(rc, &e.event_origin()) {
-                label(&m);
-            }
+    }
+
+    for (p, unit) in unit_ui::units_on_tile(game, position) {
+        let army_move = game
+            .get_player(p)
+            .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
+        label(&unit_ui::unit_label(&unit, army_move));
+    }
+}
+
+fn show_permanent_effects(
+    rc: &RenderContext,
+    label: &mut impl FnMut(&str),
+    game: &Game,
+    player: &Player,
+) {
+    let s = &player.secrets;
+    if !s.is_empty() {
+        label("Secrets:");
+        for e in s {
+            label(e);
+        }
+    }
+    label("Permanent effects:");
+    for e in &game.permanent_incident_effects {
+        for m in event_help(rc, &e.event_origin()) {
+            label(&m);
         }
     }
 }
