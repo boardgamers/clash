@@ -2,7 +2,8 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::card::{hand_cards, HandCard, HandCardType};
 use crate::content::action_cards::get_action_card;
-use crate::content::custom_phase_actions::{HandCardsRequest, PlayerRequest};
+use crate::content::custom_phase_actions::{CurrentEventType, HandCardsRequest, PlayerRequest};
+use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::player::Player;
 use crate::playing_actions::ActionType;
@@ -10,7 +11,6 @@ use crate::resource_pile::ResourcePile;
 use crate::tactics_card::TacticsCard;
 use crate::utils::remove_element;
 use itertools::Itertools;
-use crate::events::EventOrigin;
 
 pub(crate) fn spy(id: u8, tactics_card: TacticsCard) -> ActionCard {
     ActionCard::builder(
@@ -71,13 +71,12 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCard) -> ActionCard {
         |game, s, a| {
             game.lock_undo(); // can't undo swap - the other player saw your card
 
-            let swap = &s.choice;
-            swap_cards(
+            let _ = swap_cards(
                 game,
-                swap,
+                &s.choice,
                 s.player_index,
                 a.selected_player.expect("player not found"),
-            );
+            ).map_err(|e| panic!("Failed to swap cards: {e}"));
         },
     )
     .with_tactics_card(tactics_card)
@@ -92,13 +91,19 @@ fn players_with_cards(game: &Game, player: usize) -> Vec<usize> {
         .collect_vec()
 }
 
-fn swap_cards(game: &mut Game, swap: &[HandCard], player: usize, other: usize) {
+fn swap_cards(game: &mut Game, swap: &[HandCard], player: usize, other: usize) -> Result<(), String> {
     if swap.is_empty() {
-        game.add_info_log_item(&format!("{} decided not to swap a card", game.player_name(other)));
-        return;
+        game.add_info_log_item(&format!(
+            "{} decided not to swap a card",
+            game.player_name(other)
+        ));
+        return Ok(());
     }
     
-    assert_eq!(swap.len(), 2, "must select 2 cards");
+    if swap.len() != 2 {
+        return Err("must select 2 cards".to_string());
+    }
+
     let p = game.get_player(player);
     let o = game.get_player(other);
     let our_card = get_swap_card(swap, p);
@@ -107,14 +112,14 @@ fn swap_cards(game: &mut Game, swap: &[HandCard], player: usize, other: usize) {
     let t = match our_card {
         HandCard::ActionCard(id) => {
             let HandCard::ActionCard(other_id) = other_card else {
-                panic!("wrong card type");
+                return Err("wrong card type".to_string());
             };
             swap_card(game, player, other, &id, &other_id, |p| &mut p.action_cards);
             "action"
         }
         HandCard::Wonder(name) => {
             let HandCard::Wonder(other_name) = other_card else {
-                panic!("wrong card type");
+                return Err("wrong card type".to_string());
             };
             swap_card(game, player, other, &name, &other_name, |p| {
                 &mut p.wonder_cards
@@ -127,6 +132,8 @@ fn swap_cards(game: &mut Game, swap: &[HandCard], player: usize, other: usize) {
         game.player_name(player),
         game.player_name(other)
     ));
+    
+    Ok(())
 }
 
 fn swap_card<T: PartialEq + Ord>(
@@ -181,23 +188,32 @@ fn get_swap_secrets(other: &Player) -> Vec<String> {
         format!(
             "{} has the following wonder cards: {}",
             other.get_name(),
-            other.wonder_cards.iter().map(std::string::ToString::to_string).join(", ")
+            other
+                .wonder_cards
+                .iter()
+                .map(std::string::ToString::to_string)
+                .join(", ")
         ),
     ]
 }
 
 pub fn validate_if_spy(cards: &Vec<HandCard>, game: &Game) -> bool {
-    match game
-            .current_event_handler()
-            .as_ref()
-            .unwrap()
-            .origin {
+    let s = game.current_event();
+    let h = &s.player.handler.as_ref().expect("handler not found");
+    match h.origin {
         EventOrigin::CivilCard(id) if id == 7 || id == 8 => {
-             if cards.len() != 2 && cards.len() != 0 {
-                 return false;
-             }
-            
-        },
+            let mut g = game.clone();
+            let CurrentEventType::ActionCard(c) = &s.event_type else {
+                panic!("wrong event type");
+            };
+
+            swap_cards(
+                &mut g,
+                cards,
+                s.player.index,
+                c.selected_player.expect("no player found"),
+            ).is_ok()
+        }
         _ => true,
     }
 }
