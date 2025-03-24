@@ -80,6 +80,18 @@ fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
         }
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     };
+    if top_right_texture(
+        rc,
+        &rc.assets().show_permanent_effects,
+        icon_pos(-3, 0),
+        if state.show_permanent_effects {
+            "Hide permanent effects"
+        } else {
+            "Show permanent effects"
+        },
+    ) {
+        return StateUpdate::ToggleShowPermanentEffects;
+    };
 
     let can_control = rc.can_control_shown_player();
     if can_control {

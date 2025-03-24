@@ -3,6 +3,7 @@ use crate::city_ui::city_labels;
 use crate::client::Features;
 use crate::client_state::StateUpdate;
 use crate::dialog_ui::{ok_button, OkTooltip};
+use crate::event_ui::event_help;
 use crate::layout_ui::{
     bottom_center_texture, bottom_centered_text, bottom_right_texture, icon_pos,
     left_mouse_button_pressed_in_rect, top_center_texture, ICON_SIZE,
@@ -245,6 +246,15 @@ pub fn show_top_left(rc: &RenderContext) {
                 .get_player(p)
                 .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
             label(&unit_ui::unit_label(&unit, army_move));
+        }
+    }
+
+    if rc.state.show_permanent_effects {
+        label("Permanent effects:");
+        for e in &game.permanent_incident_effects {
+            for m in event_help(rc, &e.event_origin(), true) {
+                label(&m);
+            }
         }
     }
 }

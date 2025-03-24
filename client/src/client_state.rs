@@ -252,6 +252,7 @@ pub enum StateUpdate {
     Export,
     SetShownPlayer(usize),
     SetFocusedTile(Position),
+    ToggleShowPermanentEffects,
 }
 
 impl StateUpdate {
@@ -398,6 +399,7 @@ pub struct State {
     pub mouse_positions: Vec<MousePosition>,
     pub log_scroll: f32,
     pub focused_tile: Option<Position>,
+    pub show_permanent_effects: bool,
     pub pan_map: bool,
 }
 
@@ -424,6 +426,7 @@ impl State {
             log_scroll: 0.0,
             focused_tile: None,
             pan_map: false,
+            show_permanent_effects: false,
         }
     }
 
@@ -494,6 +497,10 @@ impl State {
             }
             StateUpdate::SetFocusedTile(p) => {
                 self.focused_tile = Some(p);
+                GameSyncRequest::None
+            }
+            StateUpdate::ToggleShowPermanentEffects => {
+                self.show_permanent_effects = !self.show_permanent_effects;
                 GameSyncRequest::None
             }
         }

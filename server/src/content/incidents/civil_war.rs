@@ -18,7 +18,6 @@ use crate::status_phase::{
 use crate::unit::UnitType;
 use crate::wonder::draw_wonder_from_pile;
 use itertools::Itertools;
-use crate::incident::PermanentIncidentEffect::LoseAction;
 
 pub(crate) fn civil_war_incidents() -> Vec<Incident> {
     vec![
@@ -139,7 +138,7 @@ fn revolution() -> Incident {
         Step 1: Lose one action (from your next turn if in Status phase). \
         Step 2: Change your government for free if possible.",
         IncidentBaseEffect::GoldDeposits,
-    ).with_associated_permanent_effect(LoseAction(0));
+    );
     b = kill_unit_for_revolution(
         b,
         3,

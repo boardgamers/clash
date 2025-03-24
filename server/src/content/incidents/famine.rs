@@ -31,7 +31,6 @@ fn pestilence() -> Incident {
         IncidentBaseEffect::None,
     )
     .with_protection_advance("Sanitation")
-    .with_associated_permanent_effect(PermanentIncidentEffect::Pestilence)
     .add_decrease_mood(
         IncidentTarget::AllPlayers,
         MoodModifier::Decrease,

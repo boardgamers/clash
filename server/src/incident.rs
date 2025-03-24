@@ -10,7 +10,7 @@ use crate::content::custom_phase_actions::{
     UnitsRequest,
 };
 use crate::content::incidents;
-use crate::content::incidents::great_diplomat::DiplomaticRelations;
+use crate::content::incidents::great_diplomat::{DiplomaticRelations, DIPLOMAT_ID};
 use crate::content::incidents::great_persons::GREAT_PERSON_OFFSET;
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -113,6 +113,22 @@ pub enum PermanentIncidentEffect {
     DiplomaticRelations(DiplomaticRelations),
 }
 
+impl PermanentIncidentEffect {
+    #[must_use]
+    pub fn event_origin(&self) -> EventOrigin {
+        match self {
+            PermanentIncidentEffect::Pestilence => EventOrigin::Incident(1),
+            PermanentIncidentEffect::GreatEngineer => EventOrigin::Incident(26),
+            PermanentIncidentEffect::LoseAction(_) => EventOrigin::Incident(38),
+            PermanentIncidentEffect::PublicWonderCard(_) => EventOrigin::Incident(40),
+            PermanentIncidentEffect::SolarEclipse => EventOrigin::Incident(41),
+            PermanentIncidentEffect::TrojanHorse => EventOrigin::Incident(42),
+            PermanentIncidentEffect::Anarchy(_) => EventOrigin::Incident(44),
+            PermanentIncidentEffect::DiplomaticRelations(_) => EventOrigin::Incident(DIPLOMAT_ID),
+        }
+    }
+}
+
 #[derive(Clone)]
 pub(crate) struct IncidentFilter {
     role: IncidentTarget,
@@ -155,7 +171,6 @@ pub struct IncidentBuilder {
     base_effect: IncidentBaseEffect,
     protection_advance: Option<String>,
     action_card: Option<ActionCard>,
-    associated_permanent_effect: Option<PermanentIncidentEffect>,
     builder: AbilityInitializerBuilder,
 }
 
@@ -169,7 +184,6 @@ impl IncidentBuilder {
             builder: AbilityInitializerBuilder::new(),
             protection_advance: None,
             action_card: None,
-            associated_permanent_effect: None,
         }
     }
 
@@ -206,12 +220,6 @@ impl IncidentBuilder {
     #[must_use]
     pub fn with_action_card(mut self, action_card: ActionCard) -> Self {
         self.action_card = Some(action_card);
-        self
-    }
-    
-    #[must_use]
-    pub fn with_associated_permanent_effect(mut self, effect: PermanentIncidentEffect) -> Self {
-        self.associated_permanent_effect = Some(effect);
         self
     }
 
