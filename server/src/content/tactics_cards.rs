@@ -1,9 +1,9 @@
-use crate::tactics_card::{FighterRequirement, TacticsCard, TacticsCardTarget};
+use crate::tactics_card::{CombatRole, FighterRequirement, TacticsCard, TacticsCardTarget};
 use itertools::Itertools;
 
 #[must_use]
 pub(crate) fn get_all() -> Vec<TacticsCard> {
-    let all: Vec<TacticsCard> = vec![peltasts(), encircled()];
+    let all: Vec<TacticsCard> = vec![peltasts(), encircled(), wedge_formation()];
     assert_eq!(
         all.iter().unique_by(|i| &i.name).count(),
         all.len(),
@@ -80,6 +80,23 @@ pub(crate) fn encircled() -> TacticsCard {
         } else {
             game.add_info_log_item("Encircled cannot do damage - opponent has fewer losses");
         }
+    })
+    .build()
+}
+
+pub(crate) fn wedge_formation() -> TacticsCard {
+    TacticsCard::builder(
+        "Wedge Formation",
+        "As attacker: Receive 1 combat value for each defending Army unit",
+        TacticsCardTarget::ActivePlayer,
+        FighterRequirement::Army,
+    )
+    .set_role_requirement(CombatRole::Attacker)
+    .add_reveal_listener(0, |_player, game, c, s| {
+        let v = c.fighting_units(game, c.defender).len() as u8;
+        s.extra_combat_value += v;
+        s.roll_log
+            .push(format!("Wedge Formation added {v} combat value",));
     })
     .build()
 }

@@ -1,8 +1,10 @@
-use crate::common::TestAction;
+use crate::common::{move_action, TestAction};
 use common::JsonTest;
 use server::action::Action;
 use server::content::custom_phase_actions::EventResponse;
 use server::playing_actions::PlayingAction;
+use server::position::Position;
+use server::resource_pile::ResourcePile;
 
 mod common;
 
@@ -26,8 +28,31 @@ fn test_advance() {
 fn test_inspiration() {
     JSON.test(
         "inspiration",
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(PlayingAction::ActionCard(3)),
+        )],
+    );
+}
+
+#[test]
+fn test_hero_general() {
+    JSON.test(
+        "hero_general",
         vec![
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(3)))
+            TestAction::not_undoable(
+                0,
+                move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
+            )
+            .without_json_comparison(),
+            TestAction::not_undoable(0, Action::Response(EventResponse::SelectHandCards(vec![])))
+                .without_json_comparison(),
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(5))).without_json_comparison(),
+            TestAction::undoable(0, Action::Response(EventResponse::SelectPositions(vec![Position::from_offset("C1")])))
+                .without_json_comparison(),
+            TestAction::undoable(0, Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])))
+                .without_json_comparison(),
+            TestAction::undoable(0, Action::Response(EventResponse::SelectPositions(vec![Position::from_offset("C2")])))
         ],
     );
 }

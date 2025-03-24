@@ -307,6 +307,11 @@ fn attacker_wins(game: &mut Game, c: Combat) {
     game.add_info_log_item("Attacker wins");
     move_units(game, c.attacker, &c.attackers, c.defender_position, None);
     capture_position(game, c.defender, c.defender_position, c.attacker);
+    if !c.is_sea_battle(game) {
+        game.get_player_mut(c.attacker)
+            .event_info
+            .insert("Land Battle Won".to_string(), "true".to_string());
+    }
     end_combat(game, CombatEnd::new(CombatResult::AttackerWins, c));
 }
 

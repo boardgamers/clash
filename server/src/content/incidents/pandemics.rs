@@ -1,8 +1,6 @@
 use crate::card::{hand_cards, HandCard, HandCardType};
 use crate::city::City;
-use crate::content::custom_phase_actions::{
-    HandCardsRequest, PaymentRequest, PositionRequest, ResourceRewardRequest, UnitsRequest,
-};
+use crate::content::custom_phase_actions::{new_position_request, HandCardsRequest, PaymentRequest, ResourceRewardRequest, UnitsRequest};
 use crate::content::incidents::famine::{
     additional_sanitation_damage, famine, kill_incident_units,
 };
@@ -257,7 +255,7 @@ fn fire() -> Incident {
                 ));
                 return None;
             }
-            Some(PositionRequest::new(
+            Some(new_position_request(
                 cities,
                 1..=1,
                 "Select a city to set on fire",

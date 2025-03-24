@@ -85,7 +85,7 @@ pub struct TacticsCardBuilder {
     description: String,
     pub tactics_card_target: TacticsCardTarget,
     pub fighter_requirement: FighterRequirement,
-    pub position_requirement: Option<CombatRole>,
+    pub role_requirement: Option<CombatRole>,
     builder: AbilityInitializerBuilder,
 }
 
@@ -101,18 +101,15 @@ impl TacticsCardBuilder {
             description: description.to_string(),
             fighter_requirement,
             tactics_card_target,
-            position_requirement: None,
+            role_requirement: None,
             builder: AbilityInitializerBuilder::new(),
         }
     }
 
-    // pub(crate) fn set_position_requirement(
-    //     &mut self,
-    //     position_requirement: PositionRequirement,
-    // ) -> &mut Self {
-    //     self.position_requirement = Some(position_requirement);
-    //     self
-    // }
+    pub(crate) fn set_role_requirement(mut self, role_requirement: CombatRole) -> Self {
+        self.role_requirement = Some(role_requirement);
+        self
+    }
 
     pub(crate) fn add_reveal_listener(
         self,
@@ -158,7 +155,7 @@ impl TacticsCardBuilder {
             description: self.description,
             card_target: self.tactics_card_target,
             fighter_requirement: self.fighter_requirement,
-            role_requirement: self.position_requirement,
+            role_requirement: self.role_requirement,
             listeners: self.builder.build(),
         }
     }

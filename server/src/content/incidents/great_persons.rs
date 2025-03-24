@@ -6,7 +6,7 @@ use crate::city_pieces::Building;
 use crate::construct::{construct, Construct};
 use crate::content::advances;
 use crate::content::advances::{economy, get_governments};
-use crate::content::custom_phase_actions::{AdvanceRequest, PaymentRequest, PositionRequest};
+use crate::content::custom_phase_actions::{new_position_request, AdvanceRequest, PaymentRequest};
 use crate::content::incidents::great_builders::{great_architect, great_engineer};
 use crate::content::incidents::great_diplomat::{choose_diplomat_partner, great_diplomat};
 use crate::content::incidents::great_explorer::great_explorer;
@@ -199,7 +199,7 @@ fn great_artist() -> ActionCard {
             if cities.is_empty() {
                 game.add_info_log_item("No cities to make happy");
             }
-            Some(PositionRequest::new(cities, 1..=1, "Make a city Happy"))
+            Some(new_position_request(cities, 1..=1, "Make a city Happy"))
         },
         |game, s, _| {
             let position = s.choice[0];
@@ -249,7 +249,7 @@ fn great_prophet() -> ActionCard {
             if cities.is_empty() {
                 game.add_info_log_item("No cities can build a Temple");
             }
-            Some(PositionRequest::new(cities, 0..=1, "Build a Temple"))
+            Some(new_position_request(cities, 0..=1, "Build a Temple"))
         },
         |game, s, a| {
             let pos = s.choice.first().copied();

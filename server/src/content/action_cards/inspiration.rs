@@ -1,16 +1,19 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::ActionCard;
+use crate::action_card::{ActionCard, ActionCardBuilder};
 use crate::advance::gain_advance;
+use crate::city::MoodState;
 use crate::content::advances;
-use crate::content::custom_phase_actions::AdvanceRequest;
-use crate::content::tactics_cards::{encircled, peltasts};
+use crate::content::custom_phase_actions::{new_position_request, AdvanceRequest, PaymentRequest};
+use crate::content::tactics_cards::{encircled, peltasts, wedge_formation};
 use crate::game::Game;
+use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::playing_actions::ActionType;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::TacticsCard;
 use itertools::Itertools;
+use std::vec;
 
 pub(crate) fn inspiration_action_cards() -> Vec<ActionCard> {
     vec![
@@ -18,6 +21,8 @@ pub(crate) fn inspiration_action_cards() -> Vec<ActionCard> {
         advance(2, encircled()),
         inspiration(3, encircled()),
         inspiration(4, peltasts()),
+        hero_general(5, wedge_formation()),
+        //todo hero_general(6, high_moral()),
     ]
 }
 
@@ -140,5 +145,87 @@ fn positions(player: &Player) -> Vec<Position> {
         .iter()
         .map(|u| u.position)
         .chain(player.cities.iter().map(|c| c.position))
+        .collect()
+}
+
+fn hero_general(id: u8, tactics_card: TacticsCard) -> ActionCard {
+    let mut b = ActionCard::builder(
+        id,
+        "Hero General",
+        "If you won a land battle this turn: Increase the mood in a city by 1. \
+        You may pay 1 mood token to increase the mood in a city by 1.",
+        ActionType::free(),
+        land_battle_won_this_turn,
+    )
+    .with_tactics_card(tactics_card);
+
+    b = increase_mood(b, 2, false);
+    b = b.add_payment_request_listener(
+        |e| &mut e.on_play_action_card,
+        1,
+        |game, player, _| {
+            if cities_where_mood_can_increase(game.get_player(player)).is_empty() {
+                return None;
+            }
+
+            Some(vec![PaymentRequest::new(
+                PaymentOptions::resources(ResourcePile::mood_tokens(1)),
+                "Pay 1 mood token to increase the mood in a city by 1",
+                true,
+            )])
+        },
+        |game, s, a| {
+            if s.choice[0].is_empty() {
+                game.add_info_log_item(&format!("{} did not pay 1 mood token", s.player_name));
+            } else {
+                game.add_info_log_item(&format!("{} paid 1 mood token", s.player_name));
+                a.answer = Some(true)
+            }
+        },
+    );
+    b = increase_mood(b, 0, true);
+
+    b.build()
+}
+
+fn increase_mood(b: ActionCardBuilder, priority: i32, need_payment: bool) -> ActionCardBuilder {
+    b.add_position_request(
+        |e| &mut e.on_play_action_card,
+        priority,
+        move|game, player, a| {
+            if need_payment && a.answer.is_none() {
+                return None;
+            }
+            Some(new_position_request(
+                cities_where_mood_can_increase(game.get_player(player)),
+                1..=1,
+                "Select a city to increase the mood by 1",
+            ))
+        },
+        |game, s, _| {
+            let pos = s.choice[0];
+            let player = s.player_index;
+            game.add_info_log_item(&format!(
+                "{} selected city {} to increase the mood by 1",
+                s.player_name, pos
+            ));
+            game.get_player_mut(player).get_city_mut(pos).increase_mood_state();
+        },
+    )
+}
+
+fn land_battle_won_this_turn(_game: &Game, player: &Player) -> bool {
+    if cities_where_mood_can_increase(player).is_empty() {
+        return false;
+    }
+    player.event_info.contains_key("Land Battle Won")
+}
+
+fn cities_where_mood_can_increase(player: &Player) -> Vec<Position> {
+    player
+        .cities
+        .iter()
+        .filter(|c| c.mood_state != MoodState::Happy)
+        .map(|c| c.position)
         .collect()
 }
