@@ -1,6 +1,7 @@
 use crate::common::{move_action, TestAction};
 use common::JsonTest;
 use server::action::Action;
+use server::card::HandCard;
 use server::content::custom_phase_actions::EventResponse;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
@@ -66,6 +67,24 @@ fn test_hero_general() {
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
                     "C2",
                 )])),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_spy() {
+    JSON.test(
+        "spy",
+        vec![
+            TestAction::not_undoable(0, Action::Playing(PlayingAction::ActionCard(7)))
+                .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ActionCard(1),
+                    HandCard::ActionCard(2),
+                ])),
             ),
         ],
     );

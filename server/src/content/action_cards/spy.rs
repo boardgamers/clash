@@ -8,8 +8,8 @@ use crate::player::Player;
 use crate::playing_actions::ActionType;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::TacticsCard;
-use itertools::Itertools;
 use crate::utils::remove_element;
+use itertools::Itertools;
 
 pub(crate) fn spy(id: u8, tactics_card: TacticsCard) -> ActionCard {
     ActionCard::builder(
@@ -47,6 +47,8 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCard) -> ActionCard {
         |e| &mut e.on_play_action_card,
         0,
         |game, player, a| {
+            game.lock_undo(); // you've seen the cards
+            
             let p = game.get_player(player);
             let other = game.get_player(a.selected_player.expect("player not found"));
 
@@ -70,73 +72,75 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCard) -> ActionCard {
             ))
         },
         |game, s, a| {
+            game.lock_undo(); // can't undo swap - other other player saw your card
+            
             let swap = &s.choice;
             if swap.is_empty() {
                 game.add_info_log_item(&format!("{} decided not to swap a card", s.player_name));
                 return;
             }
 
-            swap_cards(game, swap, s.player_index, a.selected_player.expect("player not found"));
+            swap_cards(
+                game,
+                swap,
+                s.player_index,
+                a.selected_player.expect("player not found"),
+            );
         },
     )
     .with_tactics_card(tactics_card)
     .build()
 }
 
-fn swap_cards(game: &mut Game, swap: &Vec<HandCard>, player: usize, other: usize) {
+fn swap_cards(game: &mut Game, swap: &[HandCard], player: usize, other: usize) {
     assert_eq!(swap.len(), 2, "must select 2 cards");
     let p = game.get_player(player);
     let o = game.get_player(other);
     let our_card = get_swap_card(swap, p);
     let other_card = get_swap_card(swap, o);
-    
-    match our_card {
-        HandCard::ActionCard(id) => {
-            game.add_info_log_item(&format!(
-                "{} decided to swap an action card with {}",
-                p.get_name(),
-                o.get_name()
-            ));
-            swap_action_card(game, player, other, id, other_card);
-        }
-        HandCard::Wonder(n) => {
-            game.add_info_log_item(&format!(
-                "{} decided to swap a wonder card with {}",
-                p.get_name(),
-                o.get_name()
-            ));
-            // swap_wonder_card(game, player, other, n, other_card);
-        }
-    }
 
-    // let other = game.get_player(sel.player_index.selected_player.unwrap());
-    // let player = sel.player_index.player_index;
-    // let card = sel.choice[0].clone();
-    // game.add_info_log_item(&format!(
-    //     "{} decided to swap a card with {}",
-    //     sel.player_name,
-    //     game.player_name(other.index)
-    // ));
-    // swap_card(game, player, other.index, &card);
+    let t = match our_card {
+        HandCard::ActionCard(id) => {
+            let HandCard::ActionCard(other_id) = other_card else {
+                panic!("wrong card type");
+            };
+            swap_card(game, player, other, &id, &other_id, |p| &mut p.action_cards);
+            "action"
+        }
+        HandCard::Wonder(name) => {
+            let HandCard::Wonder(other_name) = other_card else {
+                panic!("wrong card type");
+            };
+            swap_card(game, player, other, &name, &other_name, |p| {
+                &mut p.wonder_cards
+            });
+            "wonder"
+        }
+    };
+    game.add_info_log_item(&format!(
+        "{} decided to swap an {t} card with {}",
+        game.player_name(player),
+        game.player_name(other)
+    ));
 }
 
-fn swap_action_card(
+fn swap_card<T: PartialEq + Ord>(
     game: &mut Game,
     player: usize,
     other: usize,
-    id: u8,
-    other_card: HandCard,
+    id: &T,
+    other_id: &T,
+    get_list: impl Fn(&mut Player) -> &mut Vec<T>,
 ) {
-    let p = game.get_player_mut(player);
-    let card =
-        remove_element(&mut p.action_cards, &id).expect("card not found");
-    let HandCard::ActionCard(other_id) = other_card else {
-        panic!("wrong card type");
-    };
+    let card = remove_element(get_list(game.get_player_mut(player)), id).expect("card not found");
     let o = game.get_player_mut(other);
-    let other_card = remove_element(&mut o.action_cards, &other_id).expect("card not found");
-    o.action_cards.push(card);
-    game.get_player_mut(p).action_cards.push(other_card);
+    let other_card = remove_element(get_list(o), other_id).expect("card not found");
+
+    get_list(o).push(card);
+    get_list(o).sort();
+    let p = game.get_player_mut(player);
+    get_list(p).push(other_card);
+    get_list(p).sort();
 }
 
 fn get_swap_card(swap: &[HandCard], p: &Player) -> HandCard {
@@ -172,7 +176,7 @@ fn get_swap_secrets(other: &Player) -> Vec<String> {
         format!(
             "{} has the following wonder cards: {}",
             other.get_name(),
-            other.wonder_cards.iter().map(|n| n.to_string()).join(", ")
+            other.wonder_cards.iter().map(std::string::ToString::to_string).join(", ")
         ),
     ]
 }
