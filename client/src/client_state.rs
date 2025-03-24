@@ -125,7 +125,7 @@ impl ActiveDialog {
                 let v = vec!["Click on a building to influence its culture".to_string()];
                 if let BaseOrCustomAction::Custom { origin, custom: _ } = &b.custom {
                     let mut r = v.clone();
-                    r.extend(event_help(rc, origin, true));
+                    r.extend(event_help(rc, origin));
                 }
                 v
             }
@@ -143,20 +143,14 @@ impl ActiveDialog {
                 vec!["Click on an advance to choose it".to_string()]
             }
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
-            ActiveDialog::Sports(_) => {
-                event_help(rc, &EventOrigin::Advance("Sports".to_string()), true)
-            }
-            ActiveDialog::Taxes(_) => {
-                event_help(rc, &EventOrigin::Advance("Taxes".to_string()), true)
-            }
+            ActiveDialog::Sports(_) => event_help(rc, &EventOrigin::Advance("Sports".to_string())),
+            ActiveDialog::Taxes(_) => event_help(rc, &EventOrigin::Advance("Taxes".to_string())),
             ActiveDialog::Theaters(_) => {
-                event_help(rc, &EventOrigin::Advance("Theaters".to_string()), true)
+                event_help(rc, &EventOrigin::Advance("Theaters".to_string()))
             }
             ActiveDialog::ResourceRewardRequest(_)
             | ActiveDialog::AdvanceRequest(_)
-            | ActiveDialog::PaymentRequest(_) => {
-                event_help(rc, &custom_phase_event_origin(rc), true)
-            }
+            | ActiveDialog::PaymentRequest(_) => event_help(rc, &custom_phase_event_origin(rc)),
             ActiveDialog::BoolRequest(d) => custom_phase_event_help(rc, d),
             ActiveDialog::UnitTypeRequest(r) => custom_phase_event_help(rc, &r.description),
             ActiveDialog::UnitsRequest(r) => {
@@ -193,7 +187,7 @@ impl ActiveDialog {
                 result.push("Click on a carrier to embark units".to_string());
             };
             m.destinations.modifiers.iter().for_each(|m| {
-                result.extend(event_help(rc, m, true));
+                result.extend(event_help(rc, m));
             });
             result
         } else {

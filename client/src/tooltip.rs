@@ -25,7 +25,12 @@ fn is_rect_tooltip_active(rc: &RenderContext, rect: Rect) -> bool {
         .all(|mp| rect.contains(rc.screen_to_world(mp.position)))
 }
 
-pub fn show_tooltip_for_rect(rc: &RenderContext, tooltip: &[String], rect: Rect, right_offset: f32) {
+pub fn show_tooltip_for_rect(
+    rc: &RenderContext,
+    tooltip: &[String],
+    rect: Rect,
+    right_offset: f32,
+) {
     let origin = rect.point();
     let screen_origin = rc.world_to_screen(rect.point());
     if is_rect_tooltip_active(rc, rect) {

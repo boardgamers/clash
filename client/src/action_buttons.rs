@@ -69,7 +69,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
                 rc,
                 &assets.custom_actions[a],
                 icon_pos(i as i8, -1),
-                &event_help(rc, origin, false)[0],
+                &event_help(rc, origin)[0],
             ) {
                 return action;
             }
@@ -95,7 +95,7 @@ pub fn custom_action_buttons<'a>(
             generic_custom_action(rc, &a, city).map(|action| {
                 let a: IconAction<'a> = (
                     &rc.assets().custom_actions[&a],
-                    event_help(rc, &origin, false)[0].clone(),
+                    event_help(rc, &origin)[0].clone(),
                     Box::new(move || action.clone()),
                 );
                 a

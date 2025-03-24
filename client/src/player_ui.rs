@@ -8,6 +8,7 @@ use crate::layout_ui::{
     bottom_center_texture, bottom_centered_text, bottom_right_texture, icon_pos,
     left_mouse_button_pressed_in_rect, top_center_texture, ICON_SIZE,
 };
+use crate::log_ui::multiline_label;
 use crate::map_ui::terrain_name;
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name};
@@ -150,11 +151,13 @@ pub fn show_top_left(rc: &RenderContext) {
     let state = rc.state;
     let mut p = vec2(10., 10.);
     let mut label = |label: &str| {
-        p = vec2(p.x, p.y + 25.);
-        if p.y > state.screen_size.y - 150. {
-            p = vec2(p.x + 350., 85.);
-        }
-        state.draw_text(label, p.x, p.y);
+        multiline_label(label, 30, |label: &str| {
+            p = vec2(p.x, p.y + 25.);
+            if p.y > state.screen_size.y - 150. {
+                p = vec2(p.x + 350., 85.);
+            }
+            state.draw_text(label, p.x, p.y);
+        });
     };
 
     let game = rc.game;
@@ -192,7 +195,6 @@ pub fn show_top_left(rc: &RenderContext) {
             let movement_actions_left = moves.movement_actions_left;
             label(&format!("Move units: {movement_actions_left} moves left"));
             match moves.current_move {
-                // todo break label
                 CurrentMove::Fleet { .. } => label(
                     "May continue to move the fleet in the same sea without using movement actions",
                 ),
@@ -252,7 +254,7 @@ pub fn show_top_left(rc: &RenderContext) {
     if rc.state.show_permanent_effects {
         label("Permanent effects:");
         for e in &game.permanent_incident_effects {
-            for m in event_help(rc, &e.event_origin(), true) {
+            for m in event_help(rc, &e.event_origin()) {
                 label(&m);
             }
         }

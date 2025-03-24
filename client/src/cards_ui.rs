@@ -2,6 +2,7 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::custom_phase_ui::MultiSelection;
 use crate::dialog_ui::ok_button;
 use crate::layout_ui::{bottom_centered_text, left_mouse_button_pressed_in_rect};
+use crate::log_ui::break_text;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
 use crate::tooltip::show_tooltip_for_rect;
@@ -15,7 +16,6 @@ use server::content::custom_phase_actions::EventResponse;
 use server::content::wonders::get_wonder;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::tactics_card::CombatRole;
-use crate::log_ui::break_text;
 
 pub struct HandCardObject {
     id: HandCard,
