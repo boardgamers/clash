@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::combat::{capture_position, Combat, CombatRetreatState};
 use crate::consts::SHIP_CAPACITY;
 use crate::content::builtin::{Builtin, BuiltinBuilder};
-use crate::content::custom_phase_actions::{new_position_request, CurrentEventType, UnitsRequest};
+use crate::content::custom_phase_actions::{CurrentEventType, PositionRequest, UnitsRequest};
 use crate::content::tactics_cards;
 use crate::game::Game;
 use crate::movement::move_units;
@@ -601,11 +601,8 @@ pub(crate) fn place_settler() -> Builtin {
                 && p.is_human()
             {
                 let choices: Vec<Position> = p.cities.iter().map(|c| c.position).collect();
-                Some(new_position_request(
-                    choices,
-                    1..=1,
-                    "Select a city to place the free Settler Unit",
-                ))
+                let needed = 1..=1;
+                Some(PositionRequest::new(choices, needed, "Select a city to place the free Settler Unit"))
             } else {
                 None
             }

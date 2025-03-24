@@ -3,7 +3,7 @@ use crate::advance::{gain_advance, Advance, AdvanceBuilder};
 use crate::city_pieces::Building::Temple;
 use crate::consts::STACK_LIMIT;
 use crate::content::advances::{advance_group_builder, get_group, AdvanceGroup};
-use crate::content::custom_phase_actions::{new_position_request, AdvanceRequest};
+use crate::content::custom_phase_actions::{AdvanceRequest, PositionRequest};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -123,7 +123,8 @@ fn fanaticism() -> AdvanceBuilder {
                         .filter(|c| p.get_units(c.position).iter().filter(|u| u.unit_type.is_army_unit()).count() < STACK_LIMIT)
                         .map(|c| c.position)
                         .collect();
-                    Some(new_position_request(choices, 1..=1, "Select a city to place the free Infantry Unit"))
+                    let needed = 1..=1;
+                    Some(PositionRequest::new(choices, needed, "Select a city to place the free Infantry Unit"))
                 } else {
                     None
                 }

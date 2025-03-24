@@ -3,9 +3,7 @@ use crate::card::draw_card_from_pile;
 use crate::city::{City, MoodState};
 use crate::construct::can_construct_anything;
 use crate::content::builtin::Builtin;
-use crate::content::custom_phase_actions::{
-    new_position_request, CurrentEventType, PaymentRequest,
-};
+use crate::content::custom_phase_actions::{CurrentEventType, PaymentRequest, PositionRequest};
 use crate::content::wonders::get_wonder;
 use crate::events::EventOrigin;
 use crate::incident::PermanentIncidentEffect;
@@ -283,11 +281,8 @@ pub(crate) fn build_wonder() -> Builtin {
                 let p = game.get_player(player_index);
                 let choices = cities_for_wonder(&i.name, game, p, &i.discount);
 
-                Some(new_position_request(
-                    choices,
-                    1..=1,
-                    "Select city to build wonder",
-                ))
+                let needed = 1..=1;
+                Some(PositionRequest::new(choices, needed, "Select city to build wonder"))
             },
             |game, s, i| {
                 let position = s.choice[0];

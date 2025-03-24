@@ -252,6 +252,13 @@ pub fn show_top_left(rc: &RenderContext) {
     }
 
     if rc.state.show_permanent_effects {
+        let s = &player.secrets;
+        if !s.is_empty() {
+            label("Secrets:");
+            for e in s {
+                label(e);
+            }
+        }
         label("Permanent effects:");
         for e in &game.permanent_incident_effects {
             for m in event_help(rc, &e.event_origin()) {

@@ -1,8 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
 use crate::action_card::ActionCard;
-use crate::content::custom_phase_actions::{
-    new_position_request, EventResponse, PaymentRequest, PositionRequest,
+use crate::content::custom_phase_actions::{EventResponse, PaymentRequest, PositionRequest,
 };
 use crate::content::incidents::great_persons::{
     great_person_action_card, great_person_description,
@@ -79,11 +78,8 @@ pub(crate) fn great_explorer() -> ActionCard {
                 })
                 .expect("position not found");
 
-            Some(new_position_request(
-                choices,
-                0..=1,
-                "Place a city for 2 food",
-            ))
+            let needed = 0..=1;
+            Some(PositionRequest::new(choices, needed, "Place a city for 2 food"))
         },
         |game, s, a| {
             let pos = s.choice.first().copied();
@@ -147,7 +143,8 @@ fn explore_choices(game: &mut Game, player_index: usize) -> PositionRequest {
     if choices.is_empty() {
         game.add_info_log_item("No valid positions to explore");
     }
-    new_position_request(choices, 0..=1, "Choose a region to explore")
+    let needed = 0..=1;
+    PositionRequest::new(choices, needed, "Choose a region to explore")
 }
 
 fn block_adjacent(p1: &BlockPosition, p2: &BlockPosition) -> bool {

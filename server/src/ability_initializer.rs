@@ -475,12 +475,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.add_multi_choice_reward_request_listener::<E, Position, PositionRequest, V>(
             event,
             priority,
-            |r| r,
+            |r| &r.request,
             CurrentEventRequest::SelectPositions,
             |request, action| {
                 if let CurrentEventRequest::SelectPositions(request) = &request {
                     if let EventResponse::SelectPositions(reward) = action {
-                        return (request.choices.clone(), reward, request.needed.clone());
+                        return (request.request.choices.clone(), reward, request.request.needed.clone());
                     }
                 }
                 panic!("Position request expected");
@@ -562,7 +562,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.add_multi_choice_reward_request_listener::<E, HandCard, HandCardsRequest, V>(
             event,
             priority,
-            |r| r,
+            |r| &r.request,
             CurrentEventRequest::SelectHandCards,
             |request, action| {
                 if let CurrentEventRequest::SelectHandCards(request) = &request {

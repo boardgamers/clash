@@ -4,10 +4,9 @@ use crate::action_card::ActionCard;
 use crate::barbarians::{barbarians_move, barbarians_spawn};
 use crate::card::{draw_card_from_pile, HandCard};
 use crate::city::MoodState;
-use crate::content::custom_phase_actions::{
-    new_position_request, CurrentEventType, HandCardsRequest, PaymentRequest, PlayerRequest,
-    PositionRequest, ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitTypeRequest,
-    UnitsRequest,
+use crate::content::custom_phase_actions::{CurrentEventType, HandCardsRequest, PaymentRequest, PlayerRequest,
+                                           PositionRequest, ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitTypeRequest,
+                                           UnitsRequest,
 };
 use crate::content::incidents;
 use crate::content::incidents::great_diplomat::{DiplomaticRelations, DIPLOMAT_ID};
@@ -556,11 +555,9 @@ impl IncidentBuilder {
                     MoodModifier::MakeAngry => "make Angry",
                 };
 
-                Some(new_position_request(
-                    cities,
-                    needed..=needed,
-                    &format!("Select a city to {action}"),
-                ))
+                let needed1 = needed..=needed;
+                let description = &format!("Select a city to {action}");
+                Some(PositionRequest::new(cities, needed1, description))
             },
             move |game, s, _| {
                 decrease_mod_and_log(game, s, mood_modifier);
@@ -697,11 +694,8 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
                         })
                 })
                 .collect_vec();
-            Some(new_position_request(
-                positions,
-                1..=1,
-                "Select a land position to exhaust",
-            ))
+            let needed = 1..=1;
+            Some(PositionRequest::new(positions, needed, "Select a land position to exhaust"))
         },
         |game, s, _| {
             let pos = s.choice[0];

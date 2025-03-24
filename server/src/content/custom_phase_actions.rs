@@ -67,7 +67,32 @@ pub type SelectedStructure = (Position, Structure);
 
 pub type StructuresRequest = MultiRequest<SelectedStructure>;
 
-pub type HandCardsRequest = MultiRequest<HandCard>;
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct HandCardsRequest {
+    #[serde(flatten)]
+    cards: MultiRequest<HandCard>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    swap: Option<MultiRequest<HandCard>>,
+}
+
+impl HandCardsRequest {
+    #[must_use]
+    pub fn new(cards: Vec<HandCard>, needed: RangeInclusive<u8>, description: &str) -> Self {
+        HandCardsRequest {
+            cards: MultiRequest::new(cards, needed, description),
+            swap: None,
+        }
+    }
+
+    #[must_use]
+    pub fn swap(self, cards: Vec<HandCard>, needed: RangeInclusive<u8>, description: &str) -> Self {
+        HandCardsRequest {
+            cards: self.cards,
+            swap: Some(MultiRequest::new(cards, needed, description)),
+        }
+    }
+}
 
 #[must_use]
 pub fn is_selected_structures_valid(game: &Game, selected: &[SelectedStructure]) -> bool {
@@ -195,27 +220,19 @@ impl CurrentEventState {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct PositionRequest(MultiRequest<Position>);
+pub struct PositionRequest {
+    #[serde(flatten)]
+    pub request: MultiRequest<Position>,
+}
 
 impl PositionRequest {
     #[must_use]
     pub fn new(mut choices: Vec<Position>, needed: RangeInclusive<u8>, description: &str) -> Self {
         choices.sort();
-        PositionRequest(MultiRequest::new(choices, needed, description))
+        PositionRequest {
+            request: MultiRequest::new(choices, needed, description),
+        }
     }
-
-    #[must_use]
-    pub fn is_valid(&self, selected: &[Position]) -> bool {
-        self.0.is_valid(selected)
-    }
-}
-
-pub(crate) fn new_position_request(
-    mut choices: Vec<Position>,
-    needed: RangeInclusive<u8>,
-    description: &str,
-) -> PositionRequest {
-   PositionRequest::new()
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

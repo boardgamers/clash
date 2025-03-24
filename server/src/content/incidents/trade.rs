@@ -1,6 +1,6 @@
 use crate::city::City;
 use crate::city_pieces::Building;
-use crate::content::custom_phase_actions::{new_position_request, ResourceRewardRequest};
+use crate::content::custom_phase_actions::{PositionRequest, ResourceRewardRequest};
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, PassedIncident};
 use crate::payment::PaymentOptions;
@@ -182,11 +182,8 @@ fn reformation() -> Incident {
                 .filter(|c| city_has_temple(c, donor))
                 .map(|c| c.position)
                 .collect();
-            Some(new_position_request(
-                choices,
-                1..=1,
-                "Select a city to gain a Temple",
-            ))
+            let needed = 1..=1;
+            Some(PositionRequest::new(choices, needed, "Select a city to gain a Temple"))
         },
         |game, s, _| {
             let &p = game

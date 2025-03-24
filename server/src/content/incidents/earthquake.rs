@@ -2,10 +2,7 @@ use crate::ability_initializer::SelectedChoice;
 use crate::city::{City, MoodState};
 use crate::city_pieces::Building;
 use crate::consts::WONDER_VICTORY_POINTS;
-use crate::content::custom_phase_actions::{
-    is_selected_structures_valid, new_position_request, SelectedStructure, Structure,
-    StructuresRequest,
-};
+use crate::content::custom_phase_actions::{is_selected_structures_valid, PositionRequest, SelectedStructure, Structure, StructuresRequest};
 use crate::content::wonders::get_wonder;
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, MoodModifier};
@@ -42,11 +39,8 @@ fn volcano() -> Incident {
         |game, player_index, _incident| {
             let p = game.get_player(player_index);
             let cities = p.cities.iter().map(|c| c.position).collect_vec();
-            (cities.len() >= 4).then_some(new_position_request(
-                cities,
-                1..=1,
-                "Select a city to be destroyed",
-            ))
+            let needed = 1..=1;
+            (cities.len() >= 4).then_some(PositionRequest::new(cities, needed, "Select a city to be destroyed"))
         },
         |game, s, _| {
             let pos = s.choice[0];

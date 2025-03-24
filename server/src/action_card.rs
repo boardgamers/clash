@@ -157,6 +157,7 @@ impl ActionCardInfo {
         Self {
             id,
             selected_position: None,
+            selected_player: None,
             answer: None,
         }
     }

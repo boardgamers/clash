@@ -1,5 +1,5 @@
 use crate::city::MoodState;
-use crate::content::custom_phase_actions::{new_position_request, PaymentRequest, UnitsRequest};
+use crate::content::custom_phase_actions::{PaymentRequest, PositionRequest, UnitsRequest};
 use crate::content::incidents::famine::kill_incident_units;
 use crate::content::incidents::good_year::select_player_to_gain_settler;
 use crate::game::Game;
@@ -86,11 +86,10 @@ fn civil_war(id: u8) -> Incident {
             } else {
                 ""
             };
-            Some(new_position_request(
-                non_happy_cites_with_infantry(p),
-                1..=1,
-                &format!("Select a non-Happy city with an Infantry to kill the Infantry {suffix}"),
-            ))
+            let choices = non_happy_cites_with_infantry(p);
+            let needed = 1..=1;
+            let description = &format!("Select a non-Happy city with an Infantry to kill the Infantry {suffix}");
+            Some(PositionRequest::new(choices, needed, description))
         },
         |game, s, i| {
             let position = s.choice[0];

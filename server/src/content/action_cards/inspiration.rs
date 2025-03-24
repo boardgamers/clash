@@ -3,7 +3,7 @@ use crate::action_card::{ActionCard, ActionCardBuilder};
 use crate::advance::gain_advance;
 use crate::city::MoodState;
 use crate::content::advances;
-use crate::content::custom_phase_actions::{new_position_request, AdvanceRequest, HandCardsRequest, PaymentRequest, PlayerRequest};
+use crate::content::custom_phase_actions::{AdvanceRequest, HandCardsRequest, PaymentRequest, PlayerRequest, PositionRequest};
 use crate::content::tactics_cards::{
     encircled, heavy_resistance, high_morale, peltasts, wedge_formation,
 };
@@ -201,11 +201,9 @@ fn increase_mood(b: ActionCardBuilder, priority: i32, need_payment: bool) -> Act
             if need_payment && a.answer.is_none() {
                 return None;
             }
-            Some(new_position_request(
-                cities_where_mood_can_increase(game.get_player(player)),
-                1..=1,
-                "Select a city to increase the mood by 1",
-            ))
+            let choices = cities_where_mood_can_increase(game.get_player(player));
+            let needed = 1..=1;
+            Some(PositionRequest::new(choices, needed, "Select a city to increase the mood by 1"))
         },
         |game, s, _| {
             let pos = s.choice[0];
@@ -271,20 +269,20 @@ fn spy(id: u8, tactics_card: TacticsCard) -> ActionCard {
             |game, player, _| {
                 //todo must be able to see the cards in the other players are here
                
+None                
                 
-                
-                Some(HandCardsRequest::new(cards, 0..=1, "Select a Wonder, Action, or Objective card to swap"))
+                // Some(HandCardsRequest::new(cards, 0..=1, "Select a Wonder, Action, or Objective card to swap"))
             },
             |game, sel, _| {
-                let other = game.get_player(sel.player_index.selected_player.unwrap());
-                let player = sel.player_index.player_index;
-                let card = sel.choice[0].clone();
-                game.add_info_log_item(&format!(
-                    "{} decided to swap a card with {}",
-                    sel.player_name,
-                    game.player_name(other.index)
-                ));
-                swap_card(game, player, other.index, &card);
+                // let other = game.get_player(sel.player_index.selected_player.unwrap());
+                // let player = sel.player_index.player_index;
+                // let card = sel.choice[0].clone();
+                // game.add_info_log_item(&format!(
+                //     "{} decided to swap a card with {}",
+                //     sel.player_name,
+                //     game.player_name(other.index)
+                // ));
+                // swap_card(game, player, other.index, &card);
             },
         )
     .with_tactics_card(tactics_card)
