@@ -106,7 +106,7 @@ pub fn show_advance_menu(
                     );
                 } else {
                     // tooltip should be shown on top of everything
-                    show_tooltip_for_rect(rc, &description(p, a), rect);
+                    show_tooltip_for_rect(rc, &description(p, a), rect, 50.);
 
                     if rc.can_control_shown_player()
                         && matches!(

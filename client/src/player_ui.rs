@@ -68,7 +68,7 @@ pub fn player_select(rc: &RenderContext) -> StateUpdate {
         } else {
             pl.get_name()
         };
-        show_tooltip_for_rect(rc, &[tooltip], rect);
+        show_tooltip_for_rect(rc, &[tooltip], rect, 50.);
         if !shown && left_mouse_button_pressed_in_rect(rect, rc) {
             return StateUpdate::SetShownPlayer(pl.index);
         }

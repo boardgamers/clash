@@ -25,7 +25,7 @@ fn is_rect_tooltip_active(rc: &RenderContext, rect: Rect) -> bool {
         .all(|mp| rect.contains(rc.screen_to_world(mp.position)))
 }
 
-pub fn show_tooltip_for_rect(rc: &RenderContext, tooltip: &[String], rect: Rect) {
+pub fn show_tooltip_for_rect(rc: &RenderContext, tooltip: &[String], rect: Rect, right_offset: f32) {
     let origin = rect.point();
     let screen_origin = rc.world_to_screen(rect.point());
     if is_rect_tooltip_active(rc, rect) {
@@ -37,7 +37,7 @@ pub fn show_tooltip_for_rect(rc: &RenderContext, tooltip: &[String], rect: Rect)
             Color::new(0.0, 0.0, 0.0, 0.5),
         );
         let _ = rc.with_camera(CameraMode::Screen, |rc| {
-            show_tooltip_text(rc, tooltip, screen_origin);
+            show_tooltip_text(rc, tooltip, screen_origin, right_offset);
             StateUpdate::None
         });
     }
@@ -59,13 +59,14 @@ pub fn show_tooltip_for_circle(rc: &RenderContext, tooltip: &str, center: Vec2, 
                 rc,
                 &[tooltip.to_string()],
                 screen_center + vec2(radius, radius),
+                50.,
             );
             StateUpdate::None
         });
     }
 }
 
-fn show_tooltip_text(rc: &RenderContext, tooltip: &[String], origin: Vec2) {
+fn show_tooltip_text(rc: &RenderContext, tooltip: &[String], origin: Vec2, right_offset: f32) {
     let state = rc.state;
     let dim = tooltip.iter().map(|t| state.measure_text(t));
     let total = dim.fold(Vec2::new(0., 0.), |acc, d| {
@@ -74,7 +75,7 @@ fn show_tooltip_text(rc: &RenderContext, tooltip: &[String], origin: Vec2) {
 
     let tooltip_rect = Rect::new(origin.x, origin.y, total.x, total.y);
     let w = tooltip_rect.size().x + 10.;
-    let sx = state.screen_size.x;
+    let sx = state.screen_size.x - right_offset;
     let x = tooltip_rect.left().min(sx - w);
     let y = (tooltip_rect.top() - 10.).max(40.);
     draw_rectangle(x, y, w, tooltip_rect.size().y + 10., GRAY);

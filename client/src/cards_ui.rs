@@ -15,6 +15,7 @@ use server::content::custom_phase_actions::EventResponse;
 use server::content::wonders::get_wonder;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::tactics_card::CombatRole;
+use crate::log_ui::break_text;
 
 pub struct HandCardObject {
     id: HandCard,
@@ -66,7 +67,7 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
                 let rect = Rect::new(pos.x, pos.y, size.x, size.y);
 
                 // tooltip should be shown on top of everything
-                show_tooltip_for_rect(rc, &c.description, rect);
+                show_tooltip_for_rect(rc, &c.description, rect, 150.);
 
                 if left_mouse_button_pressed_in_rect(rect, rc) {
                     if let Some(s) = selection {
@@ -147,7 +148,7 @@ fn get_card_object(card: &HandCard) -> HandCardObject {
             if !cost.is_empty() {
                 description.push(format!("Cost: {cost}"));
             }
-            description.push(a.civil_card.description);
+            break_text(a.civil_card.description.as_str(), 30, &mut description);
             if let Some(t) = a.tactics_card {
                 description.extend(vec![
                     format!("Tactics: {}", t.name),
@@ -162,8 +163,8 @@ fn get_card_object(card: &HandCard) -> HandCardObject {
                             },
                         }
                     ),
-                    t.description.clone(),
                 ]);
+                break_text(t.description.as_str(), 30, &mut description);
             }
             HandCardObject::new(
                 card.clone(),
