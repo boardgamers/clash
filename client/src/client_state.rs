@@ -532,7 +532,7 @@ impl State {
                 }
                 CurrentEventRequest::SelectAdvance(r) => ActiveDialog::AdvanceRequest(r.clone()),
                 CurrentEventRequest::SelectPositions(r) => {
-                    ActiveDialog::PositionRequest(MultiSelection::new(r.clone()))
+                    ActiveDialog::PositionRequest(MultiSelection::new(r.request.clone()))
                 }
                 CurrentEventRequest::SelectUnitType(r) => ActiveDialog::UnitTypeRequest(r.clone()),
                 CurrentEventRequest::SelectUnits(r) => {
@@ -558,7 +558,7 @@ impl State {
                     }
                 }
                 CurrentEventRequest::SelectHandCards(r) => {
-                    ActiveDialog::HandCardsRequest(MultiSelection::new(r.clone()))
+                    ActiveDialog::HandCardsRequest(MultiSelection::new(r.request.clone()))
                 }
             };
         }
