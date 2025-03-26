@@ -57,11 +57,14 @@ impl CombatRole {
     }
 }
 
+type TacticsChecker = Box<dyn Fn(usize, &Game, &Combat) -> bool>;
+
 pub struct TacticsCard {
     pub name: String,
     pub description: String,
     pub fighter_requirement: Option<FighterRequirement>,
     pub role_requirement: Option<CombatRole>,
+    pub checker: Option<TacticsChecker>,
     pub listeners: AbilityListeners,
 }
 
@@ -76,8 +79,9 @@ pub struct TacticsCardBuilder {
     pub name: String,
     description: String,
     pub target: TacticsCardTarget,
-    pub fighter_requirement: Option<FighterRequirement>,
+    pub fighter_requirement: Vec<FighterRequirement>,
     pub role_requirement: Option<CombatRole>,
+    pub checker: Option<TacticsChecker>,
     builder: AbilityInitializerBuilder,
 }
 
@@ -89,6 +93,7 @@ impl TacticsCardBuilder {
             fighter_requirement: None,
             target: TacticsCardTarget::ActivePlayer,
             role_requirement: None,
+            checker: None,
             builder: AbilityInitializerBuilder::new(),
         }
     }
@@ -104,7 +109,20 @@ impl TacticsCardBuilder {
     }
 
     pub(crate) fn fighter_requirement(mut self, fighter_requirement: FighterRequirement) -> Self {
-        self.fighter_requirement = Some(fighter_requirement);
+        self.fighter_requirement.push(fighter_requirement)
+        self
+    }
+
+    pub(crate) fn fighter_any_requirement(mut self, fighter_requirement: &[FighterRequirement]) -> Self {
+        self.fighter_requirement.extend(fighter_requirement);
+        self
+    }
+
+    pub(crate) fn add_checker(
+        mut self,
+        checker: impl Fn(usize, &Game, &Combat) -> bool + Clone + 'static,
+    ) -> Self {
+        self.checker = Some(Box::new(checker));
         self
     }
 
@@ -152,6 +170,7 @@ impl TacticsCardBuilder {
             description: self.description,
             fighter_requirement: self.fighter_requirement,
             role_requirement: self.role_requirement,
+            checker: self.checker,
             listeners: self.builder.build(),
         }
     }
@@ -243,7 +262,12 @@ fn can_play_tactics_card(game: &Game, player: usize, card: &ActionCard, combat: 
             None => true,
         };
 
-        position_met && fighter_met
+        let checker_met = card
+            .checker
+            .as_ref()
+            .is_none_or(|c| c(player, game, combat));
+
+        position_met && fighter_met && checker_met
     } else {
         false
     }

@@ -18,7 +18,7 @@ pub type CanPlayCard = Box<dyn Fn(&Game, &Player) -> bool>;
 pub struct CivilCard {
     pub name: String,
     pub description: String,
-    pub can_play: CanPlayCard,
+    pub can_play: CanPlayCard, 
     pub listeners: AbilityListeners,
     pub action_type: ActionType,
 }
@@ -45,7 +45,7 @@ impl ActionCard {
         name: &str,
         description: &str,
         action_type: ActionType,
-        can_play: F,
+        can_play: F, //todo add to builder instead
     ) -> ActionCardBuilder
     where
         F: Fn(&Game, &Player) -> bool + 'static,

@@ -9,6 +9,7 @@ pub(crate) fn get_all() -> Vec<TacticsCard> {
         wedge_formation(),
         high_morale(),
         heavy_resistance(),
+        elevated_position(),
     ];
     assert_eq!(
         all.iter().unique_by(|i| &i.name).count(),
@@ -126,6 +127,31 @@ pub(crate) fn heavy_resistance() -> TacticsCard {
         s.extra_combat_value -= v;
         s.roll_log.push(format!(
             "Heavy resistance added -{v} to combat value for each unit"
+        ));
+    })
+    .build()
+}
+
+pub(crate) fn elevated_position() -> TacticsCard {
+    TacticsCard::builder(
+        "Elevated Position",
+        "Unless you attack a city: Your opponent can't use tactics cards.",
+    )
+    .add_checker(
+        |player, game, combat| {
+            if combat.role(player) == CombatRole::Defender {
+                return true;
+            }
+            combat.defender_city(game).is_none()
+        },
+    )
+    .fighter_any_requirement(&[FighterRequirement::Army, FighterRequirement::Fortress])
+    .target(TacticsCardTarget::Opponent) // todo can't play tactics
+    .add_reveal_listener(0, |player, game, c, s| {
+        let opponent = c.opponent(player);
+        let opponent_name = game.player_name(opponent);
+        s.roll_log.push(format!(
+            "{opponent_name} can't play tactics cards",
         ));
     })
     .build()

@@ -68,6 +68,7 @@ pub(crate) struct PersistentEvents {
     pub on_incident: CurrentEvent<IncidentInfo>,
     pub on_combat_start: CurrentEvent<Combat>,
     pub on_combat_round_start: CurrentEvent<CombatRoundStart>,
+    pub on_combat_round_start_veto_tactics: CurrentEvent<CombatRoundStart>,
     pub on_combat_round_start_tactics: CurrentEvent<CombatRoundStart>,
     pub on_combat_round_end: CurrentEvent<CombatRoundEnd>,
     pub on_combat_round_end_tactics: CurrentEvent<CombatRoundEnd>,
