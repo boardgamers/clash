@@ -1,4 +1,3 @@
-use crate::utils;
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::combat::{capture_position, Combat, CombatRetreatState};
 use crate::consts::SHIP_CAPACITY;
@@ -22,9 +21,6 @@ pub struct CombatStrength {
     pub hit_cancels: u8,
     pub roll_log: Vec<String>,
     #[serde(default)]
-    #[serde(skip_serializing_if = "utils::is_false")]
-    pub veto_tactics_card: bool,
-    #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tactics_card: Option<String>,
 }
@@ -43,7 +39,6 @@ impl CombatStrength {
             extra_combat_value: 0,
             hit_cancels: 0,
             roll_log: vec![],
-            veto_tactics_card: false,
             tactics_card: None,
         }
     }
@@ -313,12 +308,12 @@ pub(crate) fn combat_round_end(game: &mut Game, r: CombatRoundEnd) -> Option<Com
         CurrentEventType::CombatRoundEnd,
         ROUND_END_TYPES,
         |phase| match phase {
-                    CombatEventPhase::Default => |e| &mut e.on_combat_round_end,
-                    CombatEventPhase::TacticsCardAttacker | CombatEventPhase::TacticsCardDefender => {
-                        |e| &mut e.on_combat_round_end_tactics
-                    }
-                    _ => panic!("Invalid round type"),
-                },
+            CombatEventPhase::Default => |e| &mut e.on_combat_round_end,
+            CombatEventPhase::TacticsCardAttacker | CombatEventPhase::TacticsCardDefender => {
+                |e| &mut e.on_combat_round_end_tactics
+            }
+            _ => panic!("Invalid round type"),
+        },
         |s| &mut s.phase,
         |s| &s.combat,
         |s| s.attacker_casualties.tactics_card.as_ref(),

@@ -200,9 +200,13 @@ fn get_card_object(card: &HandCard) -> HandCardObject {
             if let Some(t) = a.tactics_card {
                 description.extend(vec![
                     format!("Tactics: {}", t.name),
-                    format!("Unit Types: {}", t.fighter_requirement.into_iter()
-                        .map(|f| format!("{f:?}"))
-                        .join(", ")),
+                    format!(
+                        "Unit Types: {}",
+                        t.fighter_requirement
+                            .into_iter()
+                            .map(|f| format!("{f:?}"))
+                            .join(", ")
+                    ),
                     format!(
                         "Role: {:?}",
                         match t.role_requirement {

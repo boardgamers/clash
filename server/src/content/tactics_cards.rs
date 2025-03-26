@@ -1,3 +1,6 @@
+use crate::ability_initializer::AbilityInitializerSetup;
+use crate::combat::update_combat_strength;
+use crate::combat_listeners::{CombatEventPhase, CombatStrength};
 use crate::tactics_card::{CombatRole, FighterRequirement, TacticsCard, TacticsCardTarget};
 use itertools::Itertools;
 
@@ -137,22 +140,34 @@ pub(crate) fn elevated_position() -> TacticsCard {
         "Elevated Position",
         "Unless you attack a city: Your opponent can't use tactics cards.",
     )
-    .add_checker(
-        |player, game, combat| {
-            if combat.role(player) == CombatRole::Defender {
-                return true;
+    .add_checker(|player, game, combat| {
+        combat.role(player) == CombatRole::Defender || combat.defender_city(game).is_none()
+    })
+    .fighter_any_requirement(&[FighterRequirement::Army, FighterRequirement::Fortress])
+    .add_simple_persistent_event_listener(
+        |event| &mut event.on_combat_round_start_reveal_tactics,
+        0,
+        |game, p, _, s| {
+            let role = match s.phase {
+                CombatEventPhase::RevealTacticsCardAttacker => CombatRole::Attacker,
+                CombatEventPhase::RevealTacticsCardDefender => CombatRole::Defender,
+                _ => panic!("unexpected phase"),
+            };
+            let opponent = s.combat.opponent(p);
+            if s.combat.role(opponent) != role {
+                return;
             }
-            combat.defender_city(game).is_none()
+
+            let opponent_name = game.player_name(opponent);
+            game.add_info_log_item(&format!("{opponent_name} can't play tactics cards"));
+
+            update_combat_strength(
+                game,
+                opponent,
+                s,
+                |_game, _combat, s: &mut CombatStrength, _role| s.tactics_card = None,
+            );
         },
     )
-    .fighter_any_requirement(&[FighterRequirement::Army, FighterRequirement::Fortress])
-    .target(TacticsCardTarget::Opponent) // todo can't play tactics
-    .add_reveal_listener(0, |player, game, c, s| {
-        let opponent = c.opponent(player);
-        let opponent_name = game.player_name(opponent);
-        s.roll_log.push(format!(
-            "{opponent_name} can't play tactics cards",
-        ));
-    })
     .build()
 }

@@ -18,7 +18,7 @@ pub type CanPlayCard = Box<dyn Fn(&Game, &Player) -> bool>;
 pub struct CivilCard {
     pub name: String,
     pub description: String,
-    pub can_play: CanPlayCard, 
+    pub can_play: CanPlayCard,
     pub listeners: AbilityListeners,
     pub action_type: ActionType,
 }
