@@ -1,4 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action_card::gain_action_card_from_pile;
 use crate::combat::update_combat_strength;
 use crate::combat_listeners::{CombatEventPhase, CombatStrength};
 use crate::tactics_card::{CombatRole, FighterRequirement, TacticsCard, TacticsCardTarget};
@@ -13,6 +14,7 @@ pub(crate) fn get_all() -> Vec<TacticsCard> {
         high_morale(),
         heavy_resistance(),
         elevated_position(),
+        surprise(),
     ];
     assert_eq!(
         all.iter().unique_by(|i| &i.name).count(),
@@ -169,5 +171,27 @@ pub(crate) fn elevated_position() -> TacticsCard {
             );
         },
     )
+    .build()
+}
+
+pub(crate) fn surprise() -> TacticsCard {
+    TacticsCard::builder(
+        "Surprise",
+        "Add 1 to combat value. Draw 1 action card if you killed at least 1 unit.",
+    )
+    .target(TacticsCardTarget::ActivePlayer)
+    .add_reveal_listener(0, |_player, _game, _c, s| {
+        s.extra_combat_value += 1;
+        s.roll_log
+            .push("Surprise added 1 to combat value".to_string());
+    })
+    .add_resolve_listener(0, |player, game, e| {
+        let c = &e.combat;
+        if e.casualties(c.role(c.opponent(player))).fighters > 0 {
+            game.add_info_log_item(&format!("{} draws 1 action card for Surprise tactics",
+            game.player_name(player)));
+            gain_action_card_from_pile(game, player);
+        }
+    })
     .build()
 }
