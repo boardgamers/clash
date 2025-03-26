@@ -6,7 +6,7 @@ use crate::content::action_cards::spy::spy;
 use crate::content::advances;
 use crate::content::custom_phase_actions::{AdvanceRequest, PaymentRequest, PositionRequest};
 use crate::content::tactics_cards::{
-    encircled, heavy_resistance, high_morale, peltasts, wedge_formation,
+    elevated_position, encircled, heavy_resistance, high_morale, peltasts, wedge_formation,
 };
 use crate::game::Game;
 use crate::payment::PaymentOptions;
@@ -28,6 +28,7 @@ pub(crate) fn inspiration_action_cards() -> Vec<ActionCard> {
         hero_general(6, high_morale()),
         spy(7, heavy_resistance()),
         spy(8, high_morale()),
+        ideas(9, elevated_position()),
     ]
 }
 
@@ -41,7 +42,7 @@ fn advance(id: u8, tactics_card: TacticsCard) -> ActionCard {
             player.resources.culture_tokens >= 1 && !possible_advances(player).is_empty()
         },
     )
-    .with_tactics_card(tactics_card)
+    .tactics_card(tactics_card)
     .add_advance_request(
         |e| &mut e.on_play_action_card,
         0,
@@ -85,7 +86,7 @@ fn inspiration(id: u8, tactics_card: TacticsCard) -> ActionCard {
         ActionType::free(),
         |game, player| !possible_inspiration_advances(game, player).is_empty(),
     )
-    .with_tactics_card(tactics_card)
+    .tactics_card(tactics_card)
     .add_advance_request(
         |e| &mut e.on_play_action_card,
         0,
@@ -162,7 +163,7 @@ fn hero_general(id: u8, tactics_card: TacticsCard) -> ActionCard {
         ActionType::free(),
         land_battle_won_this_turn,
     )
-    .with_tactics_card(tactics_card);
+    .tactics_card(tactics_card);
 
     b = increase_mood(b, 2, false);
     b = b.add_payment_request_listener(
@@ -237,4 +238,34 @@ fn cities_where_mood_can_increase(player: &Player) -> Vec<Position> {
         .filter(|c| c.mood_state != MoodState::Happy)
         .map(|c| c.position)
         .collect()
+}
+
+fn ideas(id: u8, tactics_card: TacticsCard) -> ActionCard {
+    ActionCard::builder(
+        id,
+        "Ideas",
+        "Gain 1 idea per Academy you own.",
+        ActionType::free(),
+        |_game, player| academies(player) > 0,
+    )
+    .tactics_card(tactics_card)
+    .add_simple_persistent_event_listener(
+        |e| &mut e.on_play_action_card,
+        0,
+        |game, player, name, _| {
+            let p = game.get_player_mut(player);
+            let pile = ResourcePile::ideas(academies(p));
+            p.gain_resources(pile.clone());
+            game.add_info_log_item(&format!("{name} gained {pile}"));
+        },
+    )
+    .build()
+}
+
+fn academies(player: &Player) -> u32 {
+    player
+        .cities
+        .iter()
+        .filter(|c| c.pieces.academy.is_some())
+        .count() as u32
 }

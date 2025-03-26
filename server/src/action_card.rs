@@ -45,7 +45,7 @@ impl ActionCard {
         name: &str,
         description: &str,
         action_type: ActionType,
-        can_play: F, //todo add to builder instead
+        can_play: F, 
     ) -> ActionCardBuilder
     where
         F: Fn(&Game, &Player) -> bool + 'static,
@@ -74,7 +74,7 @@ pub struct ActionCardBuilder {
 
 impl ActionCardBuilder {
     #[must_use]
-    pub fn with_tactics_card(mut self, tactics_card: TacticsCard) -> Self {
+    pub fn tactics_card(mut self, tactics_card: TacticsCard) -> Self {
         self.tactics_card = Some(tactics_card);
         self
     }

@@ -80,7 +80,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCard) -> ActionCard {
             .map_err(|e| panic!("Failed to swap cards: {e}"));
         },
     )
-    .with_tactics_card(tactics_card)
+    .tactics_card(tactics_card)
     .build()
 }
 
