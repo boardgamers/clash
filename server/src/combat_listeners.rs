@@ -374,6 +374,7 @@ pub(crate) fn end_combat(game: &mut Game, info: CombatEnd) {
     );
 }
 
+#[allow(clippy::type_complexity)]
 pub(crate) fn event_with_tactics<T: Clone + PartialEq>(
     game: &mut Game,
     mut event_type: T,
