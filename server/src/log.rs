@@ -66,10 +66,25 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             format_cultural_influence_attempt_log_item(game, player.index, &player_name, c)
         }
         PlayingAction::Custom(action) => action.format_log_item(game, player, &player_name),
-        PlayingAction::ActionCard(a) => format!(
-            "{player_name} played the action card {}",
-            get_civil_card(*a).name
-        ),
+        PlayingAction::ActionCard(a) => {
+            let card = get_civil_card(*a);
+            let pile = card.action_type.cost;
+            let cost = if !pile.is_empty() {
+                &format!(" for {pile}")
+            } else {
+                ""
+            };
+            let action = if card.action_type.free {
+                ""
+            } else {
+                " as a regular action"
+            };
+
+            format!(
+                "{player_name} played the action card {}{cost}{action}",
+                card.name,
+            )
+        }
         PlayingAction::WonderCard(name) => format!("{player_name} played the wonder card {name}",),
         PlayingAction::EndTurn => format!(
             "{player_name} ended their turn{}",

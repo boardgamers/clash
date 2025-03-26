@@ -282,12 +282,6 @@ impl ActionType {
         let p = game.get_player_mut(player_index);
         let cost = self.cost.clone();
         p.lose_resources(cost.clone());
-        if !cost.is_empty() {
-            game.add_info_log_item(&format!(
-                "{name} paid {cost} for the action",
-                name = game.player_name(player_index),
-            ));
-        }
         if !self.free {
             game.actions_left -= 1;
         }

@@ -159,7 +159,7 @@
         "Great Gardens"
       ],
       "action_cards": [
-        6
+        2
       ],
       "next_unit_id": 10
     },
@@ -351,7 +351,6 @@
     [
       "Player1 advanced Philosophy for free",
       "Player gained 1 mood token as advance bonus",
-      "Reshuffling Action Card pile",
       "Player2 gained an action card from the pile",
       "Player1 gained an action card from the pile"
     ]
@@ -375,16 +374,11 @@
     10,
     10
   ],
-  "rng": "203446970618003129807713801980673289225",
+  "rng": "46312381643103681595563341886777350953",
   "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [
     "Pyramids"
   ],
-  "action_cards_left": [
-    3,
-    4,
-    2,
-    5
-  ]
+  "action_cards_left": []
 }
