@@ -149,8 +149,8 @@ pub(crate) fn elevated_position() -> TacticsCard {
         0,
         |game, p, _, s| {
             let role = match s.phase {
-                CombatEventPhase::RevealTacticsCardAttacker => CombatRole::Attacker,
-                CombatEventPhase::RevealTacticsCardDefender => CombatRole::Defender,
+                CombatEventPhase::RevealTacticsCardAttacker => CombatRole::Defender,
+                CombatEventPhase::RevealTacticsCardDefender => CombatRole::Attacker,
                 _ => panic!("unexpected phase"),
             };
             let opponent = s.combat.opponent(p);

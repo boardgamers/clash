@@ -91,3 +91,26 @@ fn test_heavy_resistance() {
         ],
     );
 }
+
+#[test]
+fn test_elevated_position() {
+    JSON.test(
+        "elevated_position",
+        vec![
+            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1")))
+                .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
+                    1,
+                )])),
+            ).without_json_comparison(),
+            TestAction::not_undoable(
+                1,
+                Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
+                    9,
+                )])),
+            ),
+        ],
+    );
+}
