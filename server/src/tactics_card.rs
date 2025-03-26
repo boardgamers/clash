@@ -37,7 +37,7 @@ impl TacticsCardTarget {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum FighterRequirement {
     Army,
     Fortress,
@@ -62,7 +62,7 @@ type TacticsChecker = Box<dyn Fn(usize, &Game, &Combat) -> bool>;
 pub struct TacticsCard {
     pub name: String,
     pub description: String,
-    pub fighter_requirement: Option<FighterRequirement>,
+    pub fighter_requirement: Vec<FighterRequirement>,
     pub role_requirement: Option<CombatRole>,
     pub checker: Option<TacticsChecker>,
     pub listeners: AbilityListeners,
@@ -90,7 +90,7 @@ impl TacticsCardBuilder {
         Self {
             name: name.to_string(),
             description: description.to_string(),
-            fighter_requirement: None,
+            fighter_requirement: vec![],
             target: TacticsCardTarget::ActivePlayer,
             role_requirement: None,
             checker: None,
@@ -109,12 +109,16 @@ impl TacticsCardBuilder {
     }
 
     pub(crate) fn fighter_requirement(mut self, fighter_requirement: FighterRequirement) -> Self {
-        self.fighter_requirement.push(fighter_requirement)
+        self.fighter_requirement.push(fighter_requirement);
         self
     }
 
-    pub(crate) fn fighter_any_requirement(mut self, fighter_requirement: &[FighterRequirement]) -> Self {
-        self.fighter_requirement.extend(fighter_requirement);
+    pub(crate) fn fighter_any_requirement(
+        mut self,
+        fighter_requirement: &[FighterRequirement],
+    ) -> Self {
+        self.fighter_requirement
+            .extend_from_slice(fighter_requirement);
         self
     }
 
@@ -253,14 +257,14 @@ fn can_play_tactics_card(game: &Game, player: usize, card: &ActionCard, combat: 
             .as_ref()
             .is_none_or(|&r| combat.role(player) == r);
 
-        let fighter_met = match card.fighter_requirement {
-            Some(FighterRequirement::Army) => !combat.is_sea_battle(game),
-            Some(FighterRequirement::Fortress) => {
-                combat.defender_fortress(game) && combat.defender == player
-            }
-            Some(FighterRequirement::Ship) => combat.is_sea_battle(game),
-            None => true,
-        };
+        let fighter_met = card.fighter_requirement.is_empty()
+            || card.fighter_requirement.iter().any(|r| match r {
+                FighterRequirement::Army => !combat.is_sea_battle(game),
+                FighterRequirement::Fortress => {
+                    combat.defender_fortress(game) && combat.defender == player
+                }
+                FighterRequirement::Ship => combat.is_sea_battle(game),
+            });
 
         let checker_met = card
             .checker
