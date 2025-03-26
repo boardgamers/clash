@@ -256,7 +256,7 @@ fn ideas(id: u8, tactics_card: TacticsCard) -> ActionCard {
             let p = game.get_player_mut(player);
             let pile = ResourcePile::ideas(academies(p));
             p.gain_resources(pile.clone());
-            game.add_info_log_item(&format!("{name} gained {pile}"));
+            game.add_info_log_item(&format!("{name} gained {pile} (1 for each Academy)"));
         },
     )
     .build()
