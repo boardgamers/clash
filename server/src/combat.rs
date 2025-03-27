@@ -1,3 +1,4 @@
+use crate::action_card::{CivilCardMatch, CivilCardOpportunity};
 use crate::city::City;
 use crate::city::MoodState::Angry;
 use crate::city_pieces::Building;
@@ -322,6 +323,15 @@ pub(crate) fn conquer_city(
     let size = city.mood_modified_size(&game.players[new_player_index]);
     if attacker_is_human {
         game.players[new_player_index].gain_resources(ResourcePile::gold(size as u32));
+
+        let mut m = game.action_log
+            .last_mut()
+            .expect("no action log")
+            .civil_card_match.as_mut();
+        if m.is_none() {
+            // no battle for capturing city
+            m.replace(&mut CivilCardMatch::new(CivilCardOpportunity::CaptureCity));
+        }
     }
     let take_over = game.get_player(new_player_index).is_city_available();
 
@@ -380,7 +390,7 @@ pub fn capture_position(game: &mut Game, old_player: usize, position: Position, 
     }
 }
 
-fn move_to_defended_tile(
+fn move_to_enemy_player_tile(
     game: &mut Game,
     player_index: usize,
     units: &Vec<u32>,
@@ -435,7 +445,7 @@ pub(crate) fn move_with_possible_combat(
 ) -> bool {
     let enemy = game.enemy_player(player_index, m.destination);
     if let Some(defender) = enemy {
-        if move_to_defended_tile(
+        if move_to_enemy_player_tile(
             game,
             player_index,
             &m.units,

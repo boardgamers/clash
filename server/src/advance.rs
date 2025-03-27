@@ -6,7 +6,7 @@ use crate::content::advances::get_advance;
 use crate::content::custom_phase_actions::CurrentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::incident::trigger_incident;
+use crate::incident::on_trigger_incident;
 use crate::player_events::{AdvanceInfo, IncidentInfo};
 use crate::special_advance::SpecialAdvance;
 use Bonus::*;
@@ -203,7 +203,7 @@ pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: AdvanceInfo
         player.incident_tokens -= 1;
         if player.incident_tokens == 0 {
             player.incident_tokens = 3;
-            trigger_incident(game, IncidentInfo::new(player_index));
+            on_trigger_incident(game, IncidentInfo::new(player_index));
         }
     }
 }

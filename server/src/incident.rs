@@ -576,7 +576,7 @@ impl AbilityInitializerSetup for IncidentBuilder {
     }
 }
 
-pub(crate) fn trigger_incident(game: &mut Game, mut info: IncidentInfo) {
+pub(crate) fn on_trigger_incident(game: &mut Game, mut info: IncidentInfo) {
     let incident = incidents::get_incident(
         draw_card_from_pile(
             game,

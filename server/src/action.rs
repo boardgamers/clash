@@ -7,13 +7,13 @@ use crate::cultural_influence::ask_for_cultural_influence_payment;
 use crate::explore::{ask_explore_resolution, move_to_unexplored_tile};
 use crate::game::GameState::{Finished, Movement, Playing};
 use crate::game::{ActionLogItem, Game, GameState};
-use crate::incident::trigger_incident;
+use crate::incident::on_trigger_incident;
 use crate::log;
 use crate::map::Terrain::Unexplored;
 use crate::movement::{
     get_move_state, has_movable_units, move_units_destinations, CurrentMove, MoveState,
 };
-use crate::playing_actions::{play_action_card, PlayingAction};
+use crate::playing_actions::{PlayingAction};
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
 use crate::resource_pile::ResourcePile;
@@ -21,9 +21,10 @@ use crate::status_phase::play_status_phase;
 use crate::undo::{clean_patch, redo, to_serde_value, undo};
 use crate::unit::MovementAction::{Move, Stop};
 use crate::unit::{get_current_move, MovementAction};
-use crate::wonder::{draw_wonder_card, play_wonder_card};
+use crate::wonder::{draw_wonder_card, on_play_wonder_card};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use crate::action_card::on_play_action_card;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum Action {
@@ -166,9 +167,9 @@ pub(crate) fn execute_custom_phase_action(
         Recruit(r) => {
             on_recruit(game, player_index, r);
         }
-        Incident(i) => trigger_incident(game, i),
-        ActionCard(a) => play_action_card(game, player_index, a),
-        WonderCard(w) => play_wonder_card(game, player_index, w),
+        Incident(i) => on_trigger_incident(game, i),
+        ActionCard(a) => on_play_action_card(game, player_index, a),
+        WonderCard(w) => on_play_wonder_card(game, player_index, w),
     }
 
     if let Some(mut s) = game.events.pop() {

@@ -1,11 +1,14 @@
+use std::slice::from_ref;
 use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
 use crate::card::draw_card_from_pile;
 use crate::content::action_cards;
+use crate::content::action_cards::get_civil_card;
+use crate::content::custom_phase_actions::CurrentEventType;
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::events::EventOrigin;
-use crate::game::Game;
+use crate::game::{ActionLogItem, Game};
 use crate::player::Player;
 use crate::playing_actions::ActionType;
 use crate::position::Position;
@@ -15,17 +18,6 @@ use action_cards::get_action_card;
 use serde::{Deserialize, Serialize};
 
 pub type CanPlayCard = Box<dyn Fn(&Game, &Player) -> bool>;
-
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
-pub enum CivilCardOpportunity {
-    CaptureCity,
-    WinLandBattle
-}
-
-pub enum CivilCardRequirement {
-    WinLandBattleOrCaptureCityThisTurn,
-    WinLandBattleThisTurn,
-}
 
 pub struct CivilCard {
     pub name: String,
@@ -93,7 +85,7 @@ impl ActionCardBuilder {
         self.tactics_card = Some(tactics_card(self.id));
         self
     }
-    
+
     #[must_use]
     pub fn requirement(mut self, requirement: CivilCardRequirement) -> Self {
         self.requirement = Some(requirement);
@@ -125,6 +117,33 @@ impl AbilityInitializerSetup for ActionCardBuilder {
     fn get_key(&self) -> EventOrigin {
         EventOrigin::CivilCard(self.id)
     }
+}
+
+pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
+    discard_action_card(game, player_index, id);
+    if let Some(requirement) = get_civil_card(id).requirement {
+        if let Some(action_log_index) = requirement.satisfying_action(game, id, true) {
+            game.action_log[action_log_index]
+                .civil_card_match
+                .as_mut()
+                .expect("civil card match")
+                .played_cards
+                .push(id);
+        }
+    }
+    on_play_action_card(game, player_index, ActionCardInfo::new(id));
+}
+
+pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: ActionCardInfo) {
+    let _ = game.trigger_current_event_with_listener(
+        &[player_index],
+        |e| &mut e.on_play_action_card,
+        &get_civil_card(i.id).listeners,
+        i,
+        CurrentEventType::ActionCard,
+        None,
+        |_| {},
+    );
 }
 
 pub(crate) fn gain_action_card_from_pile(game: &mut Game, player: usize) {
@@ -182,5 +201,75 @@ impl ActionCardInfo {
             selected_player: None,
             answer: None,
         }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub enum CivilCardOpportunity {
+    CaptureCity,
+    WinLandBattle,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub struct CivilCardMatch {
+    pub opportunity: CivilCardOpportunity,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub played_cards: Vec<u8>,
+}
+
+impl CivilCardMatch {
+    #[must_use]
+    pub fn new(opportunity: CivilCardOpportunity) -> Self {
+        Self {
+            opportunity,
+            played_cards: Vec::new(),
+        }
+    }
+}
+
+pub struct CivilCardRequirement {
+    pub opportunities: Vec<CivilCardOpportunity>, // by order of preference
+    pub just_before: bool,
+}
+
+impl CivilCardRequirement {
+    #[must_use]
+    pub fn new(opportunities: Vec<CivilCardOpportunity>, just_before: bool) -> Self {
+        Self {
+            opportunities,
+            just_before,
+        }
+    }
+
+    #[must_use]
+    pub fn satisfying_action(
+        &self,
+        game: &Game,
+        action_card_id: u8,
+        execute: bool,
+    ) -> Option<usize> {
+        let slice: &[ActionLogItem] = if self.just_before {
+            let delta = if execute { 2 } else { 1 };
+            if game.action_log.len() >= delta {
+                from_ref(&game.action_log[game.action_log.len() - delta])
+            } else {
+                &[]
+            }
+        } else {
+            &game.action_log
+        };
+        self.opportunities.iter().find_map(|o| {
+            slice.iter().position(|a| {
+                if let Some(civil_card_match) = &a.civil_card_match {
+                    if civil_card_match.opportunity == *o
+                        && !civil_card_match.played_cards.contains(&action_card_id)
+                    {
+                        return true;
+                    }
+                }
+                false
+            })
+        })
     }
 }

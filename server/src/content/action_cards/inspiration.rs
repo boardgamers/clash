@@ -1,5 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{ActionCard, ActionCardBuilder, CivilCardRequirement};
+use crate::action_card::{
+    ActionCard, ActionCardBuilder, CivilCardOpportunity, CivilCardRequirement,
+};
 use crate::advance::gain_advance;
 use crate::city::MoodState;
 use crate::content::action_cards::spy::spy;
@@ -163,9 +165,12 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "If you won a land battle this turn: Increase the mood in a city by 1. \
         You may pay 1 mood token to increase the mood in a city by 1.",
         ActionType::free(),
-        |_game, player| !cities_where_mood_can_increase(player).is_empty()
+        |_game, player| !cities_where_mood_can_increase(player).is_empty(),
     )
-    .requirement(CivilCardRequirement::WinLandBattleThisTurn)
+    .requirement(CivilCardRequirement::new(
+        vec![CivilCardOpportunity::WinLandBattle],
+        false,
+    ))
     .tactics_card(tactics_card);
 
     b = increase_mood(b, 2, false);
@@ -274,7 +279,10 @@ fn great_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         ActionType::free(),
         |_game, player| player.resources.ideas < player.resource_limit.ideas,
     )
-        .requirement(CivilCardRequirement::WinLandBattleOrCaptureCityThisTurn)
+    .requirement(CivilCardRequirement::new(vec!{
+        CivilCardOpportunity::CaptureCity,
+        CivilCardOpportunity::WinLandBattle,
+    }, false))
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
         |e| &mut e.on_play_action_card,

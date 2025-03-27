@@ -1,4 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action_card::{CivilCardMatch, CivilCardOpportunity};
 use crate::combat::{capture_position, Combat, CombatRetreatState};
 use crate::consts::SHIP_CAPACITY;
 use crate::content::builtin::{Builtin, BuiltinBuilder};
@@ -744,10 +745,13 @@ pub(crate) fn combat_stats() -> Builtin {
                 if let Some(r) = &e.final_result {
                     let c = &e.combat;
                     if let Some(winner) = r.winner() {
-                        if !c.is_sea_battle(game) {
-                            game.get_player_mut(c.player(winner))
-                                .event_info
-                                .insert("Land Battle Won".to_string(), "true".to_string());
+                        let p = c.player(winner);
+                        if p == game.current_player_index && !c.is_sea_battle(game) {
+                            game.action_log
+                                .last_mut()
+                                .expect("no action log")
+                                .civil_card_match =
+                                Some(CivilCardMatch::new(CivilCardOpportunity::WinLandBattle));
                         }
                     }
                 }

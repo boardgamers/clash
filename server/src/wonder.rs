@@ -241,7 +241,7 @@ pub(crate) fn can_construct_wonder(
     Ok(cost)
 }
 
-pub(crate) fn play_wonder_card(game: &mut Game, player_index: usize, i: WonderCardInfo) {
+pub(crate) fn on_play_wonder_card(game: &mut Game, player_index: usize, i: WonderCardInfo) {
     let _ = game.trigger_current_event(
         &[player_index],
         |e| &mut e.on_play_wonder_card,
