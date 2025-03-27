@@ -477,7 +477,7 @@ pub mod tests {
 
     use super::{conquer_city, Game};
 
-    use crate::game::GameState;
+    use crate::game::{ActionLogItem, GameState};
     use crate::payment::PaymentOptions;
     use crate::utils::tests::FloatEq;
     use crate::wonder::construct_wonder;
@@ -491,6 +491,8 @@ pub mod tests {
         utils::Rng,
         wonder::Wonder,
     };
+    use crate::action::Action;
+    use crate::unit::{MoveUnits, MovementAction};
 
     #[must_use]
     pub fn test_game() -> Game {
@@ -501,7 +503,9 @@ pub mod tests {
             map: Map::new(HashMap::new()),
             starting_player_index: 0,
             current_player_index: 0,
-            action_log: Vec::new(),
+            action_log: vec![
+                ActionLogItem::new(Action::Movement(MovementAction::Stop)), //just need any action here
+            ],
             action_log_index: 0,
             log: Vec::new(),
             undo_limit: 0,

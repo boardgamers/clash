@@ -109,7 +109,7 @@ impl PlayingActionType {
                     return Err("Cannot play action card".to_string());
                 }
                 if let Some(requirement) = civil_card.requirement {
-                    if requirement.satisfying_action(game, *id, false).is_some() {
+                    if requirement.satisfying_action(game, *id, false).is_none() {
                         return Err("Requirement not met".to_string());
                     }
                 }
@@ -176,13 +176,15 @@ impl PlayingAction {
     /// # Panics
     ///
     /// Panics if action is illegal
-    pub fn execute(self, game: &mut Game, player_index: usize) {
+    pub fn execute(self, game: &mut Game, player_index: usize, redo: bool) {
         use crate::construct;
         use PlayingAction::*;
         let playing_action_type = self.playing_action_type();
-        let _ = playing_action_type
-            .is_available(game, player_index)
-            .map_err(|e| panic!("{e}"));
+        if !redo {
+            let _ = playing_action_type
+                .is_available(game, player_index)
+                .map_err(|e| panic!("{e}"));
+        }
         playing_action_type.action_type().pay(game, player_index);
 
         match self {

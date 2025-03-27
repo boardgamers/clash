@@ -205,7 +205,7 @@ fn execute_regular_action(game: &mut Game, action: Action, player_index: usize) 
                 execute_movement_action(game, m, player_index);
             } else {
                 let action = action.playing().expect("action should be a playing action");
-                action.execute(game, player_index);
+                action.execute(game, player_index, false);
             }
         }
         Movement(_) => {

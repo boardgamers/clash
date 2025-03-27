@@ -53,7 +53,7 @@ pub fn redo(game: &mut Game, player_index: usize) {
     let copy = game.action_log[game.action_log_index].clone();
     add_log_item_from_action(game, &copy.action);
     match &game.action_log[game.action_log_index].action.clone() {
-        Action::Playing(action) => action.clone().execute(game, player_index),
+        Action::Playing(action) => action.clone().execute(game, player_index, true),
         Action::Movement(action) => {
             execute_movement_action(game, action.clone(), player_index);
         }
