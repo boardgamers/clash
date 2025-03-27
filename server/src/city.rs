@@ -103,7 +103,7 @@ impl City {
     /// Panics if the city does not have a builder
     pub fn raze(self, game: &mut Game, player_index: usize) {
         for wonder in &self.pieces.wonders {
-            (wonder.listeners.deinitializer)(game, player_index);
+            wonder.listeners.deinit(game, player_index);
         }
         for wonder in &self.pieces.wonders {
             for p in &mut game.players {

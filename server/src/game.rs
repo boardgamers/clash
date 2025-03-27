@@ -374,7 +374,7 @@ impl Game {
         V: Clone + PartialEq,
     {
         for p in players {
-            (listeners.initializer)(self, *p);
+            listeners.init(self, *p);
         }
 
         let result = self.trigger_current_event_ext(
@@ -387,7 +387,7 @@ impl Game {
         );
 
         for p in players {
-            (listeners.deinitializer)(self, *p);
+            listeners.deinit(self, *p);
         }
         result
     }
@@ -770,7 +770,7 @@ impl Game {
                 .take()
                 .expect("A player should have an active leader when having a leader unit");
             Player::with_leader(&leader, self, player_index, |game, leader| {
-                (leader.listeners.deinitializer)(game, player_index);
+                leader.listeners.deinit(game, player_index);
             });
             if let Some(killer) = killer {
                 self.players[killer].captured_leaders.push(leader);

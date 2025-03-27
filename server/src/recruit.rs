@@ -18,7 +18,7 @@ pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) {
                 game,
                 player_index,
                 |game, previous_leader| {
-                    (previous_leader.listeners.deinitializer)(game, player_index);
+                    previous_leader.listeners.deinit(game, player_index);
                 },
             );
         }
@@ -58,8 +58,8 @@ fn set_active_leader(game: &mut Game, leader_name: String, player_index: usize) 
         .available_leaders
         .retain(|name| name != &leader_name);
     Player::with_leader(&leader_name, game, player_index, |game, leader| {
-        (leader.listeners.initializer)(game, player_index);
-        (leader.listeners.one_time_initializer)(game, player_index);
+        leader.listeners.init(game, player_index);
+        leader.listeners.one_time_init(game, player_index);
     });
     game.get_player_mut(player_index).active_leader = Some(leader_name);
 }

@@ -133,6 +133,6 @@ pub(crate) fn status_phase_handler(phase: &StatusPhaseState) -> Builtin {
 
 pub(crate) fn init_player(game: &mut Game, player_index: usize) {
     for b in get_all() {
-        (b.listeners.initializer)(game, player_index);
+        b.listeners.init(game, player_index);
     }
 }

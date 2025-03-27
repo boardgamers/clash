@@ -99,7 +99,7 @@ impl Player {
         builtin::init_player(game, player_index);
         let advances = mem::take(&mut game.players[player_index].advances);
         for advance in &advances {
-            (advance.listeners.initializer)(game, player_index);
+            advance.listeners.init(game, player_index);
             for i in 0..game.players[player_index]
                 .civilization
                 .special_advances
@@ -112,7 +112,7 @@ impl Player {
                         .civilization
                         .special_advances
                         .remove(i);
-                    (special_advance.listeners.initializer)(game, player_index);
+                    special_advance.listeners.init(game, player_index);
                     game.players[player_index]
                         .civilization
                         .special_advances
@@ -123,13 +123,13 @@ impl Player {
         }
         if let Some(leader) = leader {
             Self::with_leader(&leader, game, player_index, |game, leader| {
-                (leader.listeners.initializer)(game, player_index);
+                leader.listeners.init(game, player_index);
             });
         }
         let mut cities = mem::take(&mut game.players[player_index].cities);
         for city in &mut cities {
             for wonder in &city.pieces.wonders {
-                (wonder.listeners.initializer)(game, player_index);
+                wonder.listeners.init(game, player_index);
             }
         }
         game.players[player_index].cities = cities;

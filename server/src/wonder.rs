@@ -349,8 +349,8 @@ pub(crate) fn construct_wonder(
     city_position: Position,
     player_index: usize,
 ) {
-    (wonder.listeners.initializer)(game, player_index);
-    (wonder.listeners.one_time_initializer)(game, player_index);
+    wonder.listeners.init(game, player_index);
+    wonder.listeners.one_time_init(game, player_index);
     let player = &mut game.players[player_index];
     player.wonders_build.push(wonder.name.clone());
     player

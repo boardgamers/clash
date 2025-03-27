@@ -139,8 +139,8 @@ impl Bonus {
 ///
 /// Panics if advance does not exist
 pub fn do_advance(game: &mut Game, advance: &Advance, player_index: usize) {
-    (advance.listeners.initializer)(game, player_index);
-    (advance.listeners.one_time_initializer)(game, player_index);
+    advance.listeners.init(game, player_index);
+    advance.listeners.one_time_init(game, player_index);
     let name = advance.name.clone();
     for i in 0..game.players[player_index]
         .civilization
@@ -210,8 +210,7 @@ pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: AdvanceInfo
 }
 
 pub(crate) fn remove_advance(game: &mut Game, advance: &Advance, player_index: usize) {
-    (advance.listeners.deinitializer)(game, player_index);
-    (advance.listeners.undo_deinitializer)(game, player_index);
+    advance.listeners.undo(game, player_index);
 
     for i in 0..game.players[player_index]
         .civilization
@@ -241,8 +240,8 @@ pub(crate) fn remove_advance(game: &mut Game, advance: &Advance, player_index: u
 }
 
 fn unlock_special_advance(game: &mut Game, special_advance: &SpecialAdvance, player_index: usize) {
-    (special_advance.listeners.initializer)(game, player_index);
-    (special_advance.listeners.one_time_initializer)(game, player_index);
+    special_advance.listeners.init(game, player_index);
+    special_advance.listeners.one_time_init(game, player_index);
     game.players[player_index]
         .unlocked_special_advances
         .push(special_advance.name.clone());
@@ -253,7 +252,6 @@ fn undo_unlock_special_advance(
     special_advance: &SpecialAdvance,
     player_index: usize,
 ) {
-    (special_advance.listeners.deinitializer)(game, player_index);
-    (special_advance.listeners.undo_deinitializer)(game, player_index);
+    special_advance.listeners.undo(game, player_index);
     game.players[player_index].unlocked_special_advances.pop();
 }
