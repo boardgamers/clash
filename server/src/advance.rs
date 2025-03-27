@@ -139,7 +139,6 @@ impl Bonus {
 ///
 /// Panics if advance does not exist
 pub fn do_advance(game: &mut Game, advance: &Advance, player_index: usize) {
-    advance.listeners.init(game, player_index);
     advance.listeners.one_time_init(game, player_index);
     let name = advance.name.clone();
     for i in 0..game.players[player_index]
@@ -240,7 +239,6 @@ pub(crate) fn remove_advance(game: &mut Game, advance: &Advance, player_index: u
 }
 
 fn unlock_special_advance(game: &mut Game, special_advance: &SpecialAdvance, player_index: usize) {
-    special_advance.listeners.init(game, player_index);
     special_advance.listeners.one_time_init(game, player_index);
     game.players[player_index]
         .unlocked_special_advances

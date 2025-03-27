@@ -58,7 +58,6 @@ fn set_active_leader(game: &mut Game, leader_name: String, player_index: usize) 
         .available_leaders
         .retain(|name| name != &leader_name);
     Player::with_leader(&leader_name, game, player_index, |game, leader| {
-        leader.listeners.init(game, player_index);
         leader.listeners.one_time_init(game, player_index);
     });
     game.get_player_mut(player_index).active_leader = Some(leader_name);

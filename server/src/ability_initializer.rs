@@ -64,6 +64,7 @@ impl AbilityListeners {
     }
     
     pub fn one_time_init(&self, game: &mut Game, player_index: usize) {
+        self.init(game, player_index);
         (self.one_time_initializer)(game, player_index);
     }
 }
