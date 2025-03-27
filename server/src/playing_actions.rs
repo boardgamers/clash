@@ -108,6 +108,8 @@ impl PlayingActionType {
                 if !(get_civil_card(*id).can_play)(game, p) {
                     return Err("Cannot play action card".to_string());
                 }
+                
+                //todo check requirement
             }
             PlayingActionType::WonderCard(name) => {
                 if !p.wonder_cards.contains(name) {

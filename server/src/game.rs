@@ -1,5 +1,5 @@
 use crate::ability_initializer::AbilityListeners;
-use crate::action_card::gain_action_card_from_pile;
+use crate::action_card::{gain_action_card_from_pile, CivilCardOpportunity};
 use crate::combat_roll::{CombatDieRoll, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
 use crate::content::civilizations::{BARBARIANS, PIRATES};
@@ -844,6 +844,9 @@ pub struct ActionLogItem {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub undo: Vec<PatchOperation>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub opportunities: Vec<CivilCardOpportunity>,
 }
 
 impl ActionLogItem {
@@ -852,6 +855,7 @@ impl ActionLogItem {
         Self {
             action,
             undo: Vec::new(),
+            opportunities: Vec::new(),
         }
     }
 }

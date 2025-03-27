@@ -16,12 +16,24 @@ use serde::{Deserialize, Serialize};
 
 pub type CanPlayCard = Box<dyn Fn(&Game, &Player) -> bool>;
 
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub enum CivilCardOpportunity {
+    CaptureCity,
+    WinLandBattle
+}
+
+pub enum CivilCardRequirement {
+    WinLandBattleOrCaptureCityThisTurn,
+    WinLandBattleThisTurn,
+}
+
 pub struct CivilCard {
     pub name: String,
     pub description: String,
     pub can_play: CanPlayCard,
     pub listeners: AbilityListeners,
     pub action_type: ActionType,
+    pub requirement: Option<CivilCardRequirement>,
 }
 
 pub struct ActionCard {
@@ -56,6 +68,7 @@ impl ActionCard {
             name: name.to_string(),
             description: description.to_string(),
             can_play: Box::new(can_play),
+            requirement: None,
             builder: AbilityInitializerBuilder::new(),
             tactics_card: None,
             action_type,
@@ -69,6 +82,7 @@ pub struct ActionCardBuilder {
     description: String,
     action_type: ActionType,
     can_play: CanPlayCard,
+    requirement: Option<CivilCardRequirement>,
     tactics_card: Option<TacticsCard>,
     builder: AbilityInitializerBuilder,
 }
@@ -77,6 +91,12 @@ impl ActionCardBuilder {
     #[must_use]
     pub fn tactics_card(mut self, tactics_card: TacticsCardFactory) -> Self {
         self.tactics_card = Some(tactics_card(self.id));
+        self
+    }
+    
+    #[must_use]
+    pub fn requirement(mut self, requirement: CivilCardRequirement) -> Self {
+        self.requirement = Some(requirement);
         self
     }
 
@@ -88,6 +108,7 @@ impl ActionCardBuilder {
                 name: self.name,
                 description: self.description,
                 can_play: self.can_play,
+                requirement: self.requirement,
                 listeners: self.builder.build(),
                 action_type: self.action_type,
             },

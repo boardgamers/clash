@@ -1,11 +1,14 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{ActionCard, ActionCardBuilder};
+use crate::action_card::{ActionCard, ActionCardBuilder, CivilCardRequirement};
 use crate::advance::gain_advance;
 use crate::city::MoodState;
 use crate::content::action_cards::spy::spy;
 use crate::content::advances;
 use crate::content::custom_phase_actions::{AdvanceRequest, PaymentRequest, PositionRequest};
-use crate::content::tactics_cards::{encircled, heavy_resistance, high_ground, high_morale, peltasts, siege, surprise, wedge_formation, TacticsCardFactory};
+use crate::content::tactics_cards::{
+    encircled, heavy_resistance, high_ground, high_morale, peltasts, siege, surprise,
+    wedge_formation, TacticsCardFactory,
+};
 use crate::game::Game;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
@@ -27,7 +30,7 @@ pub(crate) fn inspiration_action_cards() -> Vec<ActionCard> {
         spy(8, high_morale()),
         ideas(9, high_ground()),
         ideas(10, surprise()),
-        great_ideas(11, siege())
+        great_ideas(11, siege()),
     ]
 }
 
@@ -160,8 +163,9 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "If you won a land battle this turn: Increase the mood in a city by 1. \
         You may pay 1 mood token to increase the mood in a city by 1.",
         ActionType::free(),
-        land_battle_won_this_turn,
+        |_game, player| !cities_where_mood_can_increase(player).is_empty()
     )
+    .requirement(CivilCardRequirement::WinLandBattleThisTurn)
     .tactics_card(tactics_card);
 
     b = increase_mood(b, 2, false);
@@ -223,13 +227,6 @@ fn increase_mood(b: ActionCardBuilder, priority: i32, need_payment: bool) -> Act
     )
 }
 
-fn land_battle_won_this_turn(_game: &Game, player: &Player) -> bool {
-    if cities_where_mood_can_increase(player).is_empty() {
-        return false;
-    }
-    player.event_info.contains_key("Land Battle Won")
-}
-
 fn cities_where_mood_can_increase(player: &Player) -> Vec<Position> {
     player
         .cities
@@ -275,8 +272,9 @@ fn great_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Great Ideas",
         "After capturing a city or winning a land battle: Gain 2 ideas.",
         ActionType::free(),
-        |_game, player| todo!(),
+        |_game, player| player.resources.ideas < player.resource_limit.ideas,
     )
+        .requirement(CivilCardRequirement::WinLandBattleOrCaptureCityThisTurn)
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
         |e| &mut e.on_play_action_card,
