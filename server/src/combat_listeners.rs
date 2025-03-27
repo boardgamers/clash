@@ -453,14 +453,14 @@ where
     add_tactics_listener(
         game,
         reveal_card,
-        &attacker_card,
+        attacker_card.as_ref(),
         combat,
         CombatRole::Attacker,
     );
     add_tactics_listener(
         game,
         reveal_card,
-        &defender_card,
+        defender_card.as_ref(),
         combat,
         CombatRole::Defender,
     );
@@ -485,7 +485,7 @@ where
 fn add_tactics_listener(
     game: &mut Game,
     reveal_card: bool,
-    card: &Option<TacticsCard>,
+    card: Option<&TacticsCard>,
     combat: &Combat,
     role: CombatRole,
 ) {
