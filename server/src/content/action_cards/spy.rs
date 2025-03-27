@@ -3,16 +3,16 @@ use crate::action_card::ActionCard;
 use crate::card::{hand_cards, HandCard, HandCardType};
 use crate::content::action_cards::get_action_card;
 use crate::content::custom_phase_actions::{CurrentEventType, HandCardsRequest, PlayerRequest};
+use crate::content::tactics_cards::TacticsCardFactory;
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::player::Player;
 use crate::playing_actions::ActionType;
 use crate::resource_pile::ResourcePile;
-use crate::tactics_card::TacticsCard;
 use crate::utils::remove_element;
 use itertools::Itertools;
 
-pub(crate) fn spy(id: u8, tactics_card: TacticsCard) -> ActionCard {
+pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
         id,
         "Spy",

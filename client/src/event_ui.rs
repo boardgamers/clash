@@ -16,7 +16,7 @@ pub fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
         EventOrigin::Wonder(w) => vec![get_wonder(w).description],
         EventOrigin::Builtin(b) => vec![get_builtin(rc.game, b).description],
         EventOrigin::CivilCard(id) => vec![get_civil_card(*id).description],
-        EventOrigin::TacticsCard(name) => vec![get_tactics_card(name).description],
+        EventOrigin::TacticsCard(id) => vec![get_tactics_card(*id).description],
         EventOrigin::Incident(id) => get_incident(*id).description(),
         EventOrigin::Leader(l) => vec![{
             let l = rc.shown_player.get_leader(l).unwrap();

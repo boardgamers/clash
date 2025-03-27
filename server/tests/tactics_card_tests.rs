@@ -104,7 +104,8 @@ fn test_high_ground() {
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
                     1,
                 )])),
-            ).without_json_comparison(),
+            )
+            .without_json_comparison(),
             TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(

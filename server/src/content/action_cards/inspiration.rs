@@ -5,14 +5,16 @@ use crate::city::MoodState;
 use crate::content::action_cards::spy::spy;
 use crate::content::advances;
 use crate::content::custom_phase_actions::{AdvanceRequest, PaymentRequest, PositionRequest};
-use crate::content::tactics_cards::{high_ground, encircled, heavy_resistance, high_morale, peltasts, surprise, wedge_formation};
+use crate::content::tactics_cards::{
+    encircled, heavy_resistance, high_ground, high_morale, peltasts, surprise, wedge_formation,
+    TacticsCardFactory,
+};
 use crate::game::Game;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::playing_actions::ActionType;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use crate::tactics_card::TacticsCard;
 use itertools::Itertools;
 use std::vec;
 
@@ -31,7 +33,7 @@ pub(crate) fn inspiration_action_cards() -> Vec<ActionCard> {
     ]
 }
 
-fn advance(id: u8, tactics_card: TacticsCard) -> ActionCard {
+fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
         id,
         "Advance",
@@ -76,7 +78,7 @@ fn possible_advances(player: &Player) -> Vec<String> {
         .collect()
 }
 
-fn inspiration(id: u8, tactics_card: TacticsCard) -> ActionCard {
+fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
         id,
         "Inspiration",
@@ -153,7 +155,7 @@ fn positions(player: &Player) -> Vec<Position> {
         .collect()
 }
 
-fn hero_general(id: u8, tactics_card: TacticsCard) -> ActionCard {
+fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     let mut b = ActionCard::builder(
         id,
         "Hero General",
@@ -239,7 +241,7 @@ fn cities_where_mood_can_increase(player: &Player) -> Vec<Position> {
         .collect()
 }
 
-fn ideas(id: u8, tactics_card: TacticsCard) -> ActionCard {
+fn ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
         id,
         "Ideas",

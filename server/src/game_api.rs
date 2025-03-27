@@ -116,7 +116,7 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
         if let CurrentEventType::CombatRoundStart(r) = &mut s.event_type {
             if r.attacker_strength.tactics_card.is_some() {
                 // defender shouldn't see attacker's tactics card
-                r.attacker_strength.tactics_card = Some(String::new());
+                r.attacker_strength.tactics_card = Some(0);
             }
         }
     }

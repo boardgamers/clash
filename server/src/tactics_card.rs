@@ -11,9 +11,9 @@ use crate::content::action_cards;
 use crate::content::custom_phase_actions::HandCardsRequest;
 use crate::events::EventOrigin;
 use crate::game::Game;
+use crate::player_events::{CurrentEvent, PersistentEvents};
 use action_card::discard_action_card;
 use action_cards::get_action_card;
-use crate::player_events::{CurrentEvent, PersistentEvents};
 
 #[derive(Clone, PartialEq, Eq, Copy)]
 pub enum TacticsCardTarget {
@@ -28,14 +28,13 @@ impl TacticsCardTarget {
         self,
         player: usize,
         combat: &Combat,
-        expect_card: &str,
-        attacker_card: Option<&String>,
+        expect_card: u8,
+        attacker_card: Option<&u8>,
     ) -> bool {
-        let card_player_role = attacker_card.is_some_and(|c| c == expect_card)
-            .then(|| CombatRole::Attacker)
-            .unwrap_or(CombatRole::Defender);
+        let card_player_role = if attacker_card
+            .is_some_and(|c| *c == expect_card) { CombatRole::Attacker } else { CombatRole::Defender };
         let card_player = combat.player(card_player_role);
-        
+
         match &self {
             TacticsCardTarget::ActivePlayer => card_player == player,
             TacticsCardTarget::Opponent => card_player == combat.opponent(player),
@@ -67,6 +66,7 @@ impl CombatRole {
 type TacticsChecker = Box<dyn Fn(usize, &Game, &Combat) -> bool>;
 
 pub struct TacticsCard {
+    pub id: u8,
     pub name: String,
     pub description: String,
     pub fighter_requirement: Vec<FighterRequirement>,
@@ -77,12 +77,13 @@ pub struct TacticsCard {
 
 impl TacticsCard {
     #[must_use]
-    pub fn builder(name: &str, description: &str) -> TacticsCardBuilder {
-        TacticsCardBuilder::new(name, description)
+    pub fn builder(id: u8, name: &str, description: &str) -> TacticsCardBuilder {
+        TacticsCardBuilder::new(id, name, description)
     }
 }
 
 pub struct TacticsCardBuilder {
+    pub id: u8,
     pub name: String,
     description: String,
     pub target: TacticsCardTarget,
@@ -93,8 +94,9 @@ pub struct TacticsCardBuilder {
 }
 
 impl TacticsCardBuilder {
-    fn new(name: &str, description: &str) -> Self {
+    fn new(id: u8, name: &str, description: &str) -> Self {
         Self {
+            id,
             name: name.to_string(),
             description: description.to_string(),
             fighter_requirement: vec![],
@@ -143,10 +145,10 @@ impl TacticsCardBuilder {
         listener: impl Fn(usize, &mut Game, &Combat, &mut CombatStrength) + Clone + 'static,
     ) -> Self {
         self.add_combat_strength_listener(
-             |event| &mut event.on_combat_round_start_reveal_tactics,
-             priority,
-             listener,
-         )
+            |event| &mut event.on_combat_round_start_reveal_tactics,
+            priority,
+            listener,
+        )
     }
 
     pub(crate) fn add_reveal_listener(
@@ -154,35 +156,32 @@ impl TacticsCardBuilder {
         priority: i32,
         listener: impl Fn(usize, &mut Game, &Combat, &mut CombatStrength) + Clone + 'static,
     ) -> Self {
-       self.add_combat_strength_listener(
+        self.add_combat_strength_listener(
             |event| &mut event.on_combat_round_start_tactics,
             priority,
             listener,
         )
     }
-    
+
     fn add_combat_strength_listener<E>(
         self,
         event: E,
         priority: i32,
         listener: impl Fn(usize, &mut Game, &Combat, &mut CombatStrength) + Clone + 'static,
-    ) -> Self where
-        E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<CombatRoundStart> + 'static + Clone
+    ) -> Self
+    where
+        E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<CombatRoundStart> + 'static + Clone,
     {
         let target = self.target;
-        let name = self.name.clone();
-        self.add_simple_persistent_event_listener(
-            event,
-            priority,
-            move |game, p, _, s| {
-                if s.is_active(p, &name, target) {
-                    update_combat_strength(game, p, s, {
-                        let l = listener.clone();
-                        move |game, combat, s, _role| l(p, game, combat, s)
-                    });
-                }
-            },
-        )
+        let id = self.id;
+        self.add_simple_persistent_event_listener(event, priority, move |game, p, _, s| {
+            if s.is_active(p, id, target) {
+                update_combat_strength(game, p, s, {
+                    let l = listener.clone();
+                    move |game, combat, s, _role| l(p, game, combat, s)
+                });
+            }
+        })
     }
 
     pub(crate) fn add_resolve_listener(
@@ -191,12 +190,12 @@ impl TacticsCardBuilder {
         listener: impl Fn(usize, &mut Game, &mut CombatRoundEnd) + Clone + 'static,
     ) -> Self {
         let target = self.target;
-        let name = self.name.clone();
+        let id = self.id;
         self.add_simple_persistent_event_listener(
             |event| &mut event.on_combat_round_end_tactics,
             priority,
             move |game, p, _, s| {
-                if s.is_active(p, &name, target) {
+                if s.is_active(p, id, target) {
                     listener(p, game, s);
                 }
             },
@@ -206,6 +205,7 @@ impl TacticsCardBuilder {
     #[must_use]
     pub fn build(self) -> TacticsCard {
         TacticsCard {
+            id: self.id,
             name: self.name,
             description: self.description,
             fighter_requirement: self.fighter_requirement,
@@ -222,7 +222,7 @@ impl AbilityInitializerSetup for TacticsCardBuilder {
     }
 
     fn get_key(&self) -> EventOrigin {
-        EventOrigin::TacticsCard(self.name.clone())
+        EventOrigin::TacticsCard(self.id)
     }
 }
 
@@ -262,13 +262,7 @@ pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
                     panic!("Expected ActionCard, got {:?}", sel.choice[0]);
                 };
                 update_combat_strength(game, player, s, move |_game, _c, s, _role| {
-                    s.tactics_card = Some(
-                        get_action_card(card)
-                            .tactics_card
-                            .expect("Expected Tactics Card")
-                            .name
-                            .clone(),
-                    );
+                    s.tactics_card = Some(card);
                 });
                 discard_action_card(game, player, card);
             }
@@ -295,12 +289,12 @@ fn can_play_tactics_card(game: &Game, player: usize, card: &ActionCard, combat: 
 
         let fighter_met = card.fighter_requirement.is_empty()
             || card.fighter_requirement.iter().any(|r| match r {
-            FighterRequirement::Army => !combat.is_sea_battle(game),
-            FighterRequirement::Fortress => {
-                combat.defender_fortress(game) && combat.defender == player
-            }
-            FighterRequirement::Ship => combat.is_sea_battle(game),
-        });
+                FighterRequirement::Army => !combat.is_sea_battle(game),
+                FighterRequirement::Fortress => {
+                    combat.defender_fortress(game) && combat.defender == player
+                }
+                FighterRequirement::Ship => combat.is_sea_battle(game),
+            });
 
         let checker_met = card
             .checker

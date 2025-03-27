@@ -94,8 +94,9 @@ fn test_spy() {
 fn test_ideas() {
     JSON.test(
         "ideas",
-        vec![
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(9)))
-        ],
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(PlayingAction::ActionCard(9)),
+        )],
     );
 }

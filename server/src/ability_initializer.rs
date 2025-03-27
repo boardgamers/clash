@@ -49,20 +49,20 @@ impl AbilityListeners {
     pub fn init(&self, game: &mut Game, player_index: usize) {
         self.init_with_prio_delta(game, player_index, 0);
     }
-    
+
     pub fn init_with_prio_delta(&self, game: &mut Game, player_index: usize, prio_delta: i32) {
         (self.initializer)(game, player_index, prio_delta);
     }
-    
+
     pub fn deinit(&self, game: &mut Game, player_index: usize) {
         (self.deinitializer)(game, player_index);
     }
-    
+
     pub fn undo(&self, game: &mut Game, player_index: usize) {
         self.deinit(game, player_index);
         (self.undo_deinitializer)(game, player_index);
     }
-    
+
     pub fn one_time_init(&self, game: &mut Game, player_index: usize) {
         self.init(game, player_index);
         (self.one_time_initializer)(game, player_index);

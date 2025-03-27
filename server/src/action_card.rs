@@ -3,6 +3,7 @@ use crate::ability_initializer::{
 };
 use crate::card::draw_card_from_pile;
 use crate::content::action_cards;
+use crate::content::tactics_cards::TacticsCardFactory;
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::player::Player;
@@ -45,7 +46,7 @@ impl ActionCard {
         name: &str,
         description: &str,
         action_type: ActionType,
-        can_play: F, 
+        can_play: F,
     ) -> ActionCardBuilder
     where
         F: Fn(&Game, &Player) -> bool + 'static,
@@ -74,8 +75,8 @@ pub struct ActionCardBuilder {
 
 impl ActionCardBuilder {
     #[must_use]
-    pub fn tactics_card(mut self, tactics_card: TacticsCard) -> Self {
-        self.tactics_card = Some(tactics_card);
+    pub fn tactics_card(mut self, tactics_card: TacticsCardFactory) -> Self {
+        self.tactics_card = Some(tactics_card(self.id));
         self
     }
 
