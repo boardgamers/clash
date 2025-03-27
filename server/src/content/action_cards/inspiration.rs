@@ -5,10 +5,7 @@ use crate::city::MoodState;
 use crate::content::action_cards::spy::spy;
 use crate::content::advances;
 use crate::content::custom_phase_actions::{AdvanceRequest, PaymentRequest, PositionRequest};
-use crate::content::tactics_cards::{
-    encircled, heavy_resistance, high_ground, high_morale, peltasts, surprise, wedge_formation,
-    TacticsCardFactory,
-};
+use crate::content::tactics_cards::{encircled, heavy_resistance, high_ground, high_morale, peltasts, siege, surprise, wedge_formation, TacticsCardFactory};
 use crate::game::Game;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
@@ -30,6 +27,7 @@ pub(crate) fn inspiration_action_cards() -> Vec<ActionCard> {
         spy(8, high_morale()),
         ideas(9, high_ground()),
         ideas(10, surprise()),
+        great_ideas(11, siege())
     ]
 }
 
@@ -269,4 +267,26 @@ fn academies(player: &Player) -> u32 {
         .iter()
         .filter(|c| c.pieces.academy.is_some())
         .count() as u32
+}
+
+fn great_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
+    ActionCard::builder(
+        id,
+        "Great Ideas",
+        "After capturing a city or winning a land battle: Gain 2 ideas.",
+        ActionType::free(),
+        |_game, player| todo!(),
+    )
+    .tactics_card(tactics_card)
+    .add_simple_persistent_event_listener(
+        |e| &mut e.on_play_action_card,
+        0,
+        |game, player, name, _| {
+            let p = game.get_player_mut(player);
+            let pile = ResourcePile::ideas(2);
+            p.gain_resources(pile.clone());
+            game.add_info_log_item(&format!("{name} gained {pile} for ... todo"));
+        },
+    )
+    .build()
 }

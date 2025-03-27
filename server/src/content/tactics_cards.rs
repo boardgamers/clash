@@ -185,7 +185,7 @@ pub(crate) fn surprise() -> TacticsCardFactory {
     }
 }
 
-fn siege() -> TacticsCardFactory {
+pub(crate) fn siege() -> TacticsCardFactory {
     |id| {
         TacticsCard::builder(
             id,
