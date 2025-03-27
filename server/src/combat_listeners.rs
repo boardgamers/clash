@@ -498,7 +498,6 @@ fn add_tactics_listener(
                 CombatRole::Attacker => card.listeners.init_with_prio_delta(game, *p, 100),
                 CombatRole::Defender => card.listeners.init(game, *p),
             }
-            card.listeners.init_with_prio_delta(game, *p, 100);
         }
         if reveal_card {
             game.add_info_log_item(&format!(

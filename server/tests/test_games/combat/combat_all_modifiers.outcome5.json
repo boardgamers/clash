@@ -18,11 +18,11 @@
         "CombatRoundEnd": {
           "attacker_casualties": {
             "fighters": 1,
-            "tactics_card": "Peltasts"
+            "tactics_card": 1
           },
           "defender_casualties": {
             "fighters": 2,
-            "tactics_card": "Encircled"
+            "tactics_card": 2
           },
           "can_retreat": false,
           "final_result": "AttackerWins",
