@@ -238,9 +238,9 @@
     [
       "Player2 played a Tactics Card",
       "Player1 reveals Tactics Card Peltasts",
-      "Player2 reveals Tactics Card Elevated Position",
-      "Player1 can't play tactics cards",
-      "Player1 rolled 6 (Infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
+      "Player2 reveals Tactics Card High Ground",
+      "Player1 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against defending units.",
+      "Player1 used the following combat modifiers: Peltasts rolled a 6 and ignored a hit, High Ground prevents opponent from using combat abilities",
       "Player2 rolled 6 (Infantry, +1 combat value), 6 (Infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units.",
       "Player1 has to remove all of their attacking units",
       "Player1 removed 1 infantry",
@@ -261,10 +261,10 @@
     1,
     1,
     1,
-    1,
-    11
+    1
   ],
   "dice_roll_log": [
+    11,
     11,
     11,
     11

@@ -93,9 +93,9 @@ fn test_heavy_resistance() {
 }
 
 #[test]
-fn test_elevated_position() {
+fn test_high_ground() {
     JSON.test(
-        "elevated_position",
+        "high_ground",
         vec![
             TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1")))
                 .without_json_comparison(),
