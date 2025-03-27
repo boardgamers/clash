@@ -1,13 +1,11 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
 use crate::combat::update_combat_strength;
-use crate::combat_listeners::{CombatEventPhase, CombatStrength};
+use crate::combat_listeners::CombatStrength;
 use crate::content::custom_phase_actions::PaymentRequest;
 use crate::payment::PaymentOptions;
 use crate::resource_pile::ResourcePile;
-use crate::tactics_card::{
-    CombatRole, FighterRequirement, TacticsCard, TacticsCardTarget,
-};
+use crate::tactics_card::{CombatRole, FighterRequirement, TacticsCard, TacticsCardTarget};
 use itertools::Itertools;
 use std::vec;
 
@@ -188,7 +186,7 @@ pub(crate) fn surprise() -> TacticsCard {
 }
 
 fn siege() -> TacticsCard {
-    let b = TacticsCard::builder(
+    TacticsCard::builder(
         "Siege",
         "When attacking a city: Gain 1 to your combat value. \
             Your opponent can't use combat abilities unless they pay 2 food.",
@@ -199,12 +197,12 @@ fn siege() -> TacticsCard {
     .add_reveal_listener(0, |_player, _game, _combat, s| {
         s.extra_combat_value += 1;
         s.roll_log.push("Siege added 1 to combat value".to_string());
-    });
-    b.add_payment_request_listener(
+    })
+    .add_payment_request_listener(
         |event| &mut event.on_combat_round_start_tactics,
         0,
         move |_game, p, s| {
-            s.is_active(p, TacticsCardTarget::Opponent)
+            s.is_active(p, "Siege", TacticsCardTarget::Opponent)
                 .then_some(vec![PaymentRequest::new(
                     PaymentOptions::resources(ResourcePile::food(2)),
                     "Pay 2 food to use combat abilities this round",
@@ -219,8 +217,9 @@ fn siege() -> TacticsCard {
                     s.player_index,
                     r,
                     |_game, _combat, s: &mut CombatStrength, _role| {
-                        s.roll_log
-                            .push("Siege prevents opponent from using combat abilities".to_string());
+                        s.roll_log.push(
+                            "Siege prevents opponent from using combat abilities".to_string(),
+                        );
                         s.deny_combat_abilities = true;
                     },
                 );
@@ -237,32 +236,10 @@ fn siege() -> TacticsCard {
 
 pub(crate) fn martyr() -> TacticsCard {
     TacticsCard::builder("Martyr", "todo")
-        .add_simple_persistent_event_listener(
-            |event| &mut event.on_combat_round_start_reveal_tactics,
-            0,
-            move |game, p, _name, s| {
-                let role = match s.phase {
-                    CombatEventPhase::RevealTacticsCardAttacker => CombatRole::Defender,
-                    CombatEventPhase::RevealTacticsCardDefender => CombatRole::Attacker,
-                    _ => panic!("unexpected phase"),
-                };
-                let opponent = s.combat.opponent(p);
-                if s.combat.role(opponent) != role {
-                    return;
-                }
-
-                let opponent_name = game.player_name(opponent);
-                game.add_info_log_item(&format!("{opponent_name} can't play tactics cards"));
-
-                update_combat_strength(
-                    game,
-                    opponent,
-                    s,
-                    |_game, _combat, s: &mut CombatStrength, _role| {
-                        s.tactics_card = None;
-                    },
-                );
-            },
-        )
+        .target(TacticsCardTarget::Opponent)
+        .add_veto_tactics_listener(0, move |p, game, _c, s| {
+            game.add_info_log_item(&format!("{} can't play tactics cards", game.player_name(p)));
+            s.tactics_card = None;
+        })
         .build()
 }

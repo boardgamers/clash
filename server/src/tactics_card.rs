@@ -6,13 +6,14 @@ use crate::action_card::ActionCard;
 use crate::advance::AdvanceBuilder;
 use crate::card::HandCard;
 use crate::combat::{update_combat_strength, Combat, CombatModifier};
-use crate::combat_listeners::{CombatEventPhase, CombatRoundEnd, CombatStrength};
+use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart, CombatStrength};
 use crate::content::action_cards;
 use crate::content::custom_phase_actions::HandCardsRequest;
 use crate::events::EventOrigin;
 use crate::game::Game;
 use action_card::discard_action_card;
 use action_cards::get_action_card;
+use crate::player_events::{CurrentEvent, PersistentEvents};
 
 #[derive(Clone, PartialEq, Eq, Copy)]
 pub enum TacticsCardTarget {
@@ -27,11 +28,17 @@ impl TacticsCardTarget {
         self,
         player: usize,
         combat: &Combat,
-        round_type: &CombatEventPhase,
+        expect_card: &str,
+        attacker_card: Option<&String>,
     ) -> bool {
+        let card_player_role = attacker_card.is_some_and(|c| c == expect_card)
+            .then(|| CombatRole::Attacker)
+            .unwrap_or(CombatRole::Defender);
+        let card_player = combat.player(card_player_role);
+        
         match &self {
-            TacticsCardTarget::ActivePlayer => round_type.player(combat) == player,
-            TacticsCardTarget::Opponent => round_type.player(combat) == combat.opponent(player),
+            TacticsCardTarget::ActivePlayer => card_player == player,
+            TacticsCardTarget::Opponent => card_player == combat.opponent(player),
             TacticsCardTarget::AllPlayers => true,
         }
     }
@@ -130,17 +137,45 @@ impl TacticsCardBuilder {
         self
     }
 
+    pub(crate) fn add_veto_tactics_listener(
+        self,
+        priority: i32,
+        listener: impl Fn(usize, &mut Game, &Combat, &mut CombatStrength) + Clone + 'static,
+    ) -> Self {
+        self.add_combat_strength_listener(
+             |event| &mut event.on_combat_round_start_reveal_tactics,
+             priority,
+             listener,
+         )
+    }
+
     pub(crate) fn add_reveal_listener(
         self,
         priority: i32,
         listener: impl Fn(usize, &mut Game, &Combat, &mut CombatStrength) + Clone + 'static,
     ) -> Self {
-        let target = self.target;
-        self.add_simple_persistent_event_listener(
+       self.add_combat_strength_listener(
             |event| &mut event.on_combat_round_start_tactics,
             priority,
+            listener,
+        )
+    }
+    
+    fn add_combat_strength_listener<E>(
+        self,
+        event: E,
+        priority: i32,
+        listener: impl Fn(usize, &mut Game, &Combat, &mut CombatStrength) + Clone + 'static,
+    ) -> Self where
+        E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<CombatRoundStart> + 'static + Clone
+    {
+        let target = self.target;
+        let name = self.name.clone();
+        self.add_simple_persistent_event_listener(
+            event,
+            priority,
             move |game, p, _, s| {
-                if s.is_active(p, target) {
+                if s.is_active(p, &name, target) {
                     update_combat_strength(game, p, s, {
                         let l = listener.clone();
                         move |game, combat, s, _role| l(p, game, combat, s)
@@ -156,11 +191,12 @@ impl TacticsCardBuilder {
         listener: impl Fn(usize, &mut Game, &mut CombatRoundEnd) + Clone + 'static,
     ) -> Self {
         let target = self.target;
+        let name = self.name.clone();
         self.add_simple_persistent_event_listener(
             |event| &mut event.on_combat_round_end_tactics,
             priority,
             move |game, p, _, s| {
-                if s.is_active(p, target) {
+                if s.is_active(p, &name, target) {
                     listener(p, game, s);
                 }
             },
@@ -259,12 +295,12 @@ fn can_play_tactics_card(game: &Game, player: usize, card: &ActionCard, combat: 
 
         let fighter_met = card.fighter_requirement.is_empty()
             || card.fighter_requirement.iter().any(|r| match r {
-                FighterRequirement::Army => !combat.is_sea_battle(game),
-                FighterRequirement::Fortress => {
-                    combat.defender_fortress(game) && combat.defender == player
-                }
-                FighterRequirement::Ship => combat.is_sea_battle(game),
-            });
+            FighterRequirement::Army => !combat.is_sea_battle(game),
+            FighterRequirement::Fortress => {
+                combat.defender_fortress(game) && combat.defender == player
+            }
+            FighterRequirement::Ship => combat.is_sea_battle(game),
+        });
 
         let checker_met = card
             .checker
