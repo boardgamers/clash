@@ -1,9 +1,16 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
 use crate::combat::update_combat_strength;
-use crate::combat_listeners::{CombatEventPhase, CombatStrength};
-use crate::tactics_card::{CombatRole, FighterRequirement, TacticsCard, TacticsCardTarget};
+use crate::combat_listeners::{CombatEventPhase, CombatRoundStart, CombatStrength};
+use crate::content::custom_phase_actions::PaymentRequest;
+use crate::game::Game;
+use crate::payment::PaymentOptions;
+use crate::resource_pile::ResourcePile;
+use crate::tactics_card::{
+    CombatRole, FighterRequirement, TacticsCard, TacticsCardBuilder, TacticsCardTarget,
+};
 use itertools::Itertools;
+use std::vec;
 
 #[must_use]
 pub(crate) fn get_all() -> Vec<TacticsCard> {
@@ -15,6 +22,7 @@ pub(crate) fn get_all() -> Vec<TacticsCard> {
         heavy_resistance(),
         elevated_position(),
         surprise(),
+        siege(),
     ];
     assert_eq!(
         all.iter().unique_by(|i| &i.name).count(),
@@ -138,40 +146,79 @@ pub(crate) fn heavy_resistance() -> TacticsCard {
 }
 
 pub(crate) fn elevated_position() -> TacticsCard {
-    TacticsCard::builder(
+    add_deny_tactics(
+        TacticsCard::builder(
+            "Elevated Position",
+            "Unless you attack a city: Your opponent can't use tactics cards.",
+        )
+        .checker(|player, game, combat| {
+            combat.role(player) == CombatRole::Defender || combat.defender_city(game).is_none()
+        })
+        .fighter_any_requirement(&[FighterRequirement::Army, FighterRequirement::Fortress]),
+        ResourcePile::empty(),
         "Elevated Position",
-        "Unless you attack a city: Your opponent can't use tactics cards.",
-    )
-    .add_checker(|player, game, combat| {
-        combat.role(player) == CombatRole::Defender || combat.defender_city(game).is_none()
-    })
-    .fighter_any_requirement(&[FighterRequirement::Army, FighterRequirement::Fortress])
-    .add_simple_persistent_event_listener(
-        |event| &mut event.on_combat_round_start_reveal_tactics,
-        0,
-        |game, p, _, s| {
-            let role = match s.phase {
-                CombatEventPhase::RevealTacticsCardAttacker => CombatRole::Defender,
-                CombatEventPhase::RevealTacticsCardDefender => CombatRole::Attacker,
-                _ => panic!("unexpected phase"),
-            };
-            let opponent = s.combat.opponent(p);
-            if s.combat.role(opponent) != role {
-                return;
-            }
-
-            let opponent_name = game.player_name(opponent);
-            game.add_info_log_item(&format!("{opponent_name} can't play tactics cards"));
-
-            update_combat_strength(
-                game,
-                opponent,
-                s,
-                |_game, _combat, s: &mut CombatStrength, _role| s.tactics_card = None,
-            );
-        },
     )
     .build()
+}
+
+fn add_deny_tactics(b: TacticsCardBuilder, prevent: ResourcePile, cause: &str) -> TacticsCardBuilder {
+    let cause2 = cause.to_string();
+    let cause3 = cause.to_string();
+    b.add_payment_request_listener(
+        |event| &mut event.on_combat_round_start_reveal_tactics,
+        0,
+        move |game, p, s| {
+            if prevent.is_empty() {
+                deny_tactics(game, p, s, &cause2);
+                return None;
+            }
+            Some(vec![PaymentRequest::new(
+                PaymentOptions::resources(prevent.clone()),
+                "Pay 2 food to prevent opponent using combat abilities",
+                true,
+            )])
+        },
+        move |game, s, r| {
+            let pile = &s.choice[0];
+            if pile.is_empty() {
+                deny_tactics(game, s.player_index, r, &cause3);
+            } else {
+                game.add_info_log_item(&format!(
+                    "{} paid {pile} to use combat abilities",
+                    s.player_name
+                ));
+            }
+        },
+    )
+}
+
+fn deny_tactics(game: &mut Game, p: usize, s: &mut CombatRoundStart, cause: &str) {
+    let role = match s.phase {
+        CombatEventPhase::RevealTacticsCardAttacker => CombatRole::Defender,
+        CombatEventPhase::RevealTacticsCardDefender => CombatRole::Attacker,
+        _ => panic!("unexpected phase"),
+    };
+    let opponent = s.combat.opponent(p);
+    if s.combat.role(opponent) != role {
+        return;
+    }
+
+    let opponent_name = game.player_name(opponent);
+    game.add_info_log_item(&format!("{opponent_name} can't play tactics cards"));
+
+    update_combat_strength(
+        game,
+        opponent,
+        s,
+        |_game, _combat, s: &mut CombatStrength, _role| {
+            s.extra_combat_value = 0;
+            s.extra_dies = 0;
+            s.hit_cancels = 0;
+            s.roll_log.clear();
+            s.roll_log.push(format!("All combat abilities are cancelled by {cause}"));
+            s.tactics_card = None
+        },
+    );
 }
 
 pub(crate) fn surprise() -> TacticsCard {
@@ -188,10 +235,32 @@ pub(crate) fn surprise() -> TacticsCard {
     .add_resolve_listener(0, |player, game, e| {
         let c = &e.combat;
         if e.casualties(c.role(c.opponent(player))).fighters > 0 {
-            game.add_info_log_item(&format!("{} draws 1 action card for Surprise tactics",
-            game.player_name(player)));
+            game.add_info_log_item(&format!(
+                "{} draws 1 action card for Surprise tactics",
+                game.player_name(player)
+            ));
             gain_action_card_from_pile(game, player);
         }
     })
+    .build()
+}
+
+fn siege() -> TacticsCard {
+    add_deny_tactics(
+        TacticsCard::builder(
+            "Siege",
+            "When attacking a city: Gain 1 to your combat value. \
+            Your opponent can't use tactics cards unless they pay 2 food.",
+        )
+        .fighter_requirement(FighterRequirement::Army)
+        .role_requirement(CombatRole::Attacker)
+        .checker(|_player, game, combat| combat.defender_city(game).is_some())
+        .add_reveal_listener(0, |_player, _game, _combat, s| {
+            s.extra_combat_value += 1;
+            s.roll_log.push("Siege added 1 to combat value".to_string());
+        }),
+        ResourcePile::food(2),
+        "Siege",
+    )
     .build()
 }

@@ -122,7 +122,7 @@ impl TacticsCardBuilder {
         self
     }
 
-    pub(crate) fn add_checker(
+    pub(crate) fn checker(
         mut self,
         checker: impl Fn(usize, &Game, &Combat) -> bool + Clone + 'static,
     ) -> Self {
