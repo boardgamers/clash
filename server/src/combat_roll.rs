@@ -30,6 +30,7 @@ impl CombatStats {
             &fighting,
             strength.extra_dies,
             strength.extra_combat_value,
+            strength.deny_combat_abilities,
             &mut log,
         );
         let log_str = roll_log_str(&log);
@@ -122,6 +123,7 @@ fn roll(
     units: &Vec<u32>,
     extra_dies: u8,
     extra_combat_value: i8,
+    deny_combat_abilities: bool,
     roll_log: &mut Vec<String>,
 ) -> CombatRolls {
     let mut dice_rolls = extra_dies;
@@ -137,10 +139,11 @@ fn roll(
         hit_cancels: 0,
     };
     for _ in 0..dice_rolls {
-        let dice_roll = dice_roll_with_leader_reroll(game, &mut unit_types, roll_log);
+        let dice_roll =
+            dice_roll_with_leader_reroll(game, &mut unit_types, deny_combat_abilities, roll_log);
         let value = dice_roll.value;
         rolls.combat_value += value as i8;
-        if unit_types.has_unit(&dice_roll.bonus) {
+        if unit_types.has_unit(&dice_roll.bonus) && !deny_combat_abilities {
             unit_types -= &dice_roll.bonus;
 
             match dice_roll.bonus {
@@ -172,11 +175,12 @@ fn roll(
 fn dice_roll_with_leader_reroll(
     game: &mut Game,
     unit_types: &mut Units,
+    deny_combat_abilities: bool,
     roll_log: &mut Vec<String>,
 ) -> CombatDieRoll {
     let side = roll_die(game, roll_log);
 
-    if side.bonus != Leader || !unit_types.has_unit(&Leader) {
+    if deny_combat_abilities || side.bonus != Leader || !unit_types.has_unit(&Leader) {
         return side;
     }
 

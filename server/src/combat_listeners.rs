@@ -8,11 +8,12 @@ use crate::game::Game;
 use crate::movement::move_units;
 use crate::player_events::{CurrentEvent, PersistentEvents};
 use crate::position::Position;
-use crate::tactics_card::CombatRole;
+use crate::tactics_card::{CombatRole, TacticsCardTarget};
 use crate::unit::{UnitType, Units};
 use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use crate::utils;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatStrength {
@@ -23,6 +24,9 @@ pub struct CombatStrength {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tactics_card: Option<String>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "utils::is_false")]
+    pub deny_combat_abilities: bool,
 }
 
 impl Default for CombatStrength {
@@ -40,6 +44,7 @@ impl CombatStrength {
             hit_cancels: 0,
             roll_log: vec![],
             tactics_card: None,
+            deny_combat_abilities: false,
         }
     }
 }
@@ -90,6 +95,11 @@ impl CombatRoundStart {
             defender_strength: CombatStrength::new(),
             phase: CombatEventPhase::Default,
         }
+    }
+         
+    #[must_use]
+    pub fn is_active(&self, player: usize, target: TacticsCardTarget) -> bool {
+        target.is_active(player, &self.combat, &self.phase)
     }
 }
 
@@ -237,6 +247,11 @@ impl CombatRoundEnd {
             combat,
             phase: CombatEventPhase::TacticsCardAttacker,
         }
+    }
+    
+    #[must_use]
+    pub fn is_active(&self, player: usize, target: TacticsCardTarget) -> bool {
+        target.is_active(player, &self.combat, &self.phase)
     }
 }
 

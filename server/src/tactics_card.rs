@@ -140,7 +140,7 @@ impl TacticsCardBuilder {
             |event| &mut event.on_combat_round_start_tactics,
             priority,
             move |game, p, _, s| {
-                if target.is_active(p, &s.combat, &s.phase) {
+                if s.is_active(p, target) {
                     update_combat_strength(game, p, s, {
                         let l = listener.clone();
                         move |game, combat, s, _role| l(p, game, combat, s)
@@ -160,7 +160,7 @@ impl TacticsCardBuilder {
             |event| &mut event.on_combat_round_end_tactics,
             priority,
             move |game, p, _, s| {
-                if target.is_active(p, &s.combat, &s.phase) {
+                if s.is_active(p, target) {
                     listener(p, game, s);
                 }
             },
