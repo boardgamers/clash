@@ -1,6 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder};
 use crate::barbarians::get_barbarians_player;
+use crate::combat::move_with_possible_combat;
 use crate::content::action_cards::inspiration::player_positions;
 use crate::content::custom_phase_actions::{PaymentRequest, PositionRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
@@ -11,16 +12,16 @@ use crate::player::Player;
 use crate::playing_actions::ActionType;
 use crate::position::Position;
 use crate::resource::ResourceType;
-use crate::utils::remove_element;
-use itertools::Itertools;
-use crate::combat::move_with_possible_combat;
 use crate::resource_pile::ResourcePile;
 use crate::unit::MoveUnits;
+use crate::utils::remove_element;
+use itertools::Itertools;
 
-pub(crate) fn mercenary(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
+pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
+    //todo resupply
     let mut b = ActionCard::builder(
         id,
-        "Mercenary",
+        "Mercenaries",
         "You may move any number of Barbarian armies 1 space each, which may start combat. \
         The armies must be within range 2 of your cities or army units. \
         Pay 1 food, wood, ore, or culture token for each army up front. \
@@ -51,9 +52,9 @@ pub(crate) fn mercenary(id: u8, tactics_card: TacticsCardFactory) -> ActionCard 
             game.add_info_log_item(&format!(
                 "{} selected Barbarian armies to move: {}",
                 s.player_name,
-                s.choice.iter().map(|p| p.to_string()).join(", "),
+                s.choice.iter().map(ToString::to_string).join(", "),
             ));
-            a.selected_positions = s.choice.clone();
+            a.selected_positions.clone_from(&s.choice);
         },
     )
     .add_payment_request_listener(
@@ -124,8 +125,9 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
 
             let destinations = move_units_destinations(b, game, &units, pos, None)
                 .ok()
-                .map(|d| d.iter().map(|r| r.destination).collect_vec())
-                .unwrap_or(Vec::new());
+                .map_or(Vec::new(), |d| {
+                    d.iter().map(|r| r.destination).collect_vec()
+                });
 
             Some(PositionRequest::new(
                 destinations,
@@ -139,11 +141,11 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
                 "{} selected destination for Barbarian army: {}",
                 s.player_name, to
             ));
-            
+
             let from = a.selected_position.expect("position not found");
             let b = get_barbarians_player(game);
             let units = b.get_units(from).iter().map(|u| u.id).collect_vec();
-            
+
             move_with_possible_combat(
                 game,
                 b.index,

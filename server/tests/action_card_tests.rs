@@ -116,3 +116,13 @@ fn test_great_ideas() {
         ],
     );
 }
+
+#[test]
+fn test_mercenaries() {
+    JSON.test(
+        "mercenaries",
+        vec![
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(11))),
+        ],
+    );
+}
