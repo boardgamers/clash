@@ -378,13 +378,15 @@ pub(crate) fn end_combat(game: &mut Game, info: CombatEnd) {
     );
 }
 
-#[allow(clippy::type_complexity)]
+pub(crate) type GetCombatEvent<T> = fn(&mut PersistentEvents) -> &mut CurrentEvent<T>;
+
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn event_with_tactics<T: Clone + PartialEq>(
     game: &mut Game,
     mut event_type: T,
     store_type: impl Fn(T) -> CurrentEventType + Clone + 'static,
     round_types: &[CombatEventPhase],
-    event: fn(&CombatEventPhase) -> fn(&mut PersistentEvents) -> &mut CurrentEvent<T>,
+    event: fn(&CombatEventPhase) -> GetCombatEvent<T>,
     get_round_type: impl Fn(&mut T) -> &mut CombatEventPhase,
     get_combat: impl Fn(&T) -> &Combat + Clone + 'static,
     attacker_tactics_card: impl Fn(&T) -> Option<&u8>,

@@ -248,7 +248,12 @@ pub fn move_units_destinations(
     Ok(destinations)
 }
 
-fn check_can_move(player: &Player, start: Position, embark_carrier_id: Option<u32>, unit: &Unit) -> Result<(), String> {
+fn check_can_move(
+    player: &Player,
+    start: Position,
+    embark_carrier_id: Option<u32>,
+    unit: &Unit,
+) -> Result<(), String> {
     if unit.position != start {
         return Err("the unit should be at the starting position".to_string());
     }
