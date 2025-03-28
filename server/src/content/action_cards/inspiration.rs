@@ -294,7 +294,7 @@ fn great_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             let p = game.get_player_mut(player);
             let pile = ResourcePile::ideas(2);
             p.gain_resources(pile.clone());
-            game.add_info_log_item(&format!("{name} gained {pile} for ... todo"));
+            game.add_info_log_item(&format!("{name} gained {pile} for Great Ideas"));
         },
     )
     .build()
