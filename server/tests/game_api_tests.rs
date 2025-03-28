@@ -17,7 +17,6 @@ use server::{
 };
 use std::{collections::HashMap, vec};
 
-
 mod common;
 
 const JSON: JsonTest = JsonTest::new("base");

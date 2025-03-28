@@ -414,7 +414,7 @@ pub(crate) fn add_action_log_item(game: &mut Game, item: Action) {
 ///
 /// # Panics
 /// Panics if the log entry does not exist
-#[must_use] 
+#[must_use]
 pub fn current_player_turn_log(game: &Game) -> &ActionLogPlayer {
     game.action_log
         .last()

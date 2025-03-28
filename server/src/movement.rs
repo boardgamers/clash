@@ -167,22 +167,8 @@ pub fn move_units_destinations(
     let mut movement_restrictions = vec![];
 
     for unit in &units {
-        if unit.position != start {
-            return Err("the unit should be at the starting position".to_string());
-        }
         movement_restrictions.extend(unit.movement_restrictions.iter());
-        if let Some(embark_carrier_id) = embark_carrier_id {
-            if !unit.unit_type.is_land_based() {
-                return Err("the unit should be land based to embark".to_string());
-            }
-            let carrier = player.get_unit(embark_carrier_id);
-            if !carrier.unit_type.is_ship() {
-                return Err("the carrier should be a ship".to_string());
-            }
-        }
-        if unit.unit_type.is_army_unit() && !player.has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE) {
-            return Err("army movement advance missing".to_string());
-        }
+        check_can_move(player, start, embark_carrier_id, unit)?;
         if unit.unit_type.is_army_unit() && !unit.unit_type.is_settler() {
             stack_size += 1;
         }
@@ -260,6 +246,25 @@ pub fn move_units_destinations(
         return Err("no valid destinations".to_string());
     }
     Ok(destinations)
+}
+
+fn check_can_move(player: &Player, start: Position, embark_carrier_id: Option<u32>, unit: &Unit) -> Result<(), String> {
+    if unit.position != start {
+        return Err("the unit should be at the starting position".to_string());
+    }
+    if let Some(embark_carrier_id) = embark_carrier_id {
+        if !unit.unit_type.is_land_based() {
+            return Err("the unit should be land based to embark".to_string());
+        }
+        let carrier = player.get_unit(embark_carrier_id);
+        if !carrier.unit_type.is_ship() {
+            return Err("the carrier should be a ship".to_string());
+        }
+    }
+    if unit.unit_type.is_army_unit() && !player.has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE) {
+        return Err("army movement advance missing".to_string());
+    }
+    Ok(())
 }
 
 #[derive(Debug, Clone)]
