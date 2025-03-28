@@ -9,7 +9,10 @@ use crate::content::custom_phase_actions::{
 use crate::content::{action_cards, advances, builtin, incidents};
 use crate::events::{Event, EventOrigin};
 use crate::incident::PermanentIncidentEffect;
-use crate::log::{current_player_turn_log, current_player_turn_log_mut, ActionLogAge, ActionLogPlayer, ActionLogRound};
+use crate::log::{
+    current_player_turn_log, current_player_turn_log_mut, ActionLogAge, ActionLogPlayer,
+    ActionLogRound,
+};
 use crate::movement::{CurrentMove, MoveState};
 use crate::pirates::get_pirates_player;
 use crate::player_events::{
@@ -573,10 +576,10 @@ impl Game {
             .last_mut()
             .expect("round should exist")
             .players
-            .push(ActionLogPlayer::new(self.current_player_index)); 
+            .push(ActionLogPlayer::new(self.current_player_index));
         self.action_log_index = 0;
         self.undo_limit = 0;
-        
+
         self.add_info_log_group(format!(
             "It's {}'s turn",
             self.player_name(self.current_player_index)

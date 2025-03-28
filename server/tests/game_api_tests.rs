@@ -1,5 +1,6 @@
 use crate::common::*;
 use server::content::custom_phase_actions::EventResponse;
+use server::log::current_player_turn_log;
 use server::unit::Units;
 use server::{
     action::Action,
@@ -15,9 +16,7 @@ use server::{
     resource_pile::ResourcePile,
 };
 use std::{collections::HashMap, vec};
-use server::log::current_player_turn_log;
 
-use server::game_api::current_player;
 
 mod common;
 
@@ -188,7 +187,11 @@ fn assert_undo(
 ) {
     assert_eq!(can_undo, game.can_undo(), "can_undo");
     assert_eq!(can_redo, game.can_redo(), "can_redo");
-    assert_eq!(action_log_len, current_player_turn_log (game).items.len(), "action_log_len");
+    assert_eq!(
+        action_log_len,
+        current_player_turn_log(game).items.len(),
+        "action_log_len"
+    );
     assert_eq!(action_log_index, game.action_log_index, "action_log_index");
     assert_eq!(undo_limit, game.undo_limit, "undo_limit");
 }
