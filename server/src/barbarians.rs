@@ -4,7 +4,7 @@ use crate::combat::move_with_possible_combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::builtin::Builtin;
 use crate::content::custom_phase_actions::{
-    new_position_request, ResourceRewardRequest, UnitTypeRequest,
+    PositionRequest, ResourceRewardRequest, UnitTypeRequest,
 };
 use crate::game::Game;
 use crate::incident::{play_base_effect, IncidentBuilder, BASE_EFFECT_PRIORITY};
@@ -107,9 +107,10 @@ pub(crate) fn barbarians_spawn(mut builder: IncidentBuilder) -> IncidentBuilder 
                 if r.is_empty() {
                     game.add_info_log_item("Barbarians cannot reinforce");
                 }
-                Some(new_position_request(
+                let needed = 1..=1;
+                Some(PositionRequest::new(
                     r,
-                    1..=1,
+                    needed,
                     "Select a position for the additional Barbarian unit",
                 ))
             },
@@ -161,9 +162,10 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                 BASE_EFFECT_PRIORITY + (army * 2) + 2,
                 |game, player_index, i| {
                     let armies = get_movable_units(game, player_index, i.get_barbarian_state());
-                    Some(new_position_request(
+                    let needed = 1..=1;
+                    Some(PositionRequest::new(
                         armies,
-                        1..=1,
+                        needed,
                         "Select a Barbarian Army to move next",
                     ))
                 },
@@ -184,9 +186,10 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                             0, // stack size was already checked in last step
                         );
 
-                        Some(new_position_request(
+                        let needed = 1..=1;
+                        Some(PositionRequest::new(
                             choices,
-                            1..=1,
+                            needed,
                             "Select a position to move the Barbarian Army",
                         ))
                     } else {
@@ -331,9 +334,10 @@ fn add_barbarians_city(builder: IncidentBuilder) -> IncidentBuilder {
             if choices.is_empty() {
                 game.add_info_log_item("Barbarians cannot spawn a new city");
             }
-            Some(new_position_request(
+            let needed = 1..=1;
+            Some(PositionRequest::new(
                 choices,
-                1..=1,
+                needed,
                 "Select a position for the new city and infantry unit",
             ))
         },

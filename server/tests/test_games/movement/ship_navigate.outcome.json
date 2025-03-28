@@ -301,42 +301,55 @@
   "current_player_index": 1,
   "action_log": [
     {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              1
-            ],
-            "destination": "A7"
-          }
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "remove",
-          "path": "/players/1/resources/culture_tokens"
-        },
-        {
-          "op": "remove",
-          "path": "/players/1/resources/ideas"
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/units/0/position",
-          "value": "B5"
-        },
-        {
-          "op": "remove",
-          "path": "/players/1/event_info"
-        },
-        {
-          "op": "replace",
-          "path": "/state",
-          "value": {
-            "Movement": {
-              "movement_actions_left": 2
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          1
+                        ],
+                        "destination": "A7"
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "remove",
+                      "path": "/players/1/resources/culture_tokens"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/1/resources/ideas"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/units/0/position",
+                      "value": "B5"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/1/event_info"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/state",
+                      "value": {
+                        "Movement": {
+                          "movement_actions_left": 2
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
             }
-          }
+          ]
         }
       ]
     }

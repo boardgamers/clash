@@ -5,12 +5,11 @@ use crate::barbarians::{barbarians_move, barbarians_spawn};
 use crate::card::{draw_card_from_pile, HandCard};
 use crate::city::MoodState;
 use crate::content::custom_phase_actions::{
-    new_position_request, CurrentEventType, HandCardsRequest, PaymentRequest, PlayerRequest,
-    PositionRequest, ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitTypeRequest,
-    UnitsRequest,
+    CurrentEventType, HandCardsRequest, PaymentRequest, PlayerRequest, PositionRequest,
+    ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitTypeRequest, UnitsRequest,
 };
 use crate::content::incidents;
-use crate::content::incidents::great_diplomat::DiplomaticRelations;
+use crate::content::incidents::great_diplomat::{DiplomaticRelations, DIPLOMAT_ID};
 use crate::content::incidents::great_persons::GREAT_PERSON_OFFSET;
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -104,13 +103,29 @@ pub enum PassedIncident {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum PermanentIncidentEffect {
     Pestilence,
-    LooseAction(usize),
+    LoseAction(usize),
     PublicWonderCard(String),
     TrojanHorse,
     SolarEclipse,
     Anarchy(Anarchy),
     GreatEngineer,
     DiplomaticRelations(DiplomaticRelations),
+}
+
+impl PermanentIncidentEffect {
+    #[must_use]
+    pub fn event_origin(&self) -> EventOrigin {
+        match self {
+            PermanentIncidentEffect::Pestilence => EventOrigin::Incident(1),
+            PermanentIncidentEffect::GreatEngineer => EventOrigin::Incident(26),
+            PermanentIncidentEffect::LoseAction(_) => EventOrigin::Incident(38),
+            PermanentIncidentEffect::PublicWonderCard(_) => EventOrigin::Incident(40),
+            PermanentIncidentEffect::SolarEclipse => EventOrigin::Incident(41),
+            PermanentIncidentEffect::TrojanHorse => EventOrigin::Incident(42),
+            PermanentIncidentEffect::Anarchy(_) => EventOrigin::Incident(44),
+            PermanentIncidentEffect::DiplomaticRelations(_) => EventOrigin::Incident(DIPLOMAT_ID),
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -540,11 +555,9 @@ impl IncidentBuilder {
                     MoodModifier::MakeAngry => "make Angry",
                 };
 
-                Some(new_position_request(
-                    cities,
-                    needed..=needed,
-                    &format!("Select a city to {action}"),
-                ))
+                let needed1 = needed..=needed;
+                let description = &format!("Select a city to {action}");
+                Some(PositionRequest::new(cities, needed1, description))
             },
             move |game, s, _| {
                 decrease_mod_and_log(game, s, mood_modifier);
@@ -563,7 +576,7 @@ impl AbilityInitializerSetup for IncidentBuilder {
     }
 }
 
-pub(crate) fn trigger_incident(game: &mut Game, mut info: IncidentInfo) {
+pub(crate) fn on_trigger_incident(game: &mut Game, mut info: IncidentInfo) {
     let incident = incidents::get_incident(
         draw_card_from_pile(
             game,
@@ -681,9 +694,10 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
                         })
                 })
                 .collect_vec();
-            Some(new_position_request(
+            let needed = 1..=1;
+            Some(PositionRequest::new(
                 positions,
-                1..=1,
+                needed,
                 "Select a land position to exhaust",
             ))
         },

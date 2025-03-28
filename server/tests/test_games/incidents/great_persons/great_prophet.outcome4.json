@@ -280,222 +280,235 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Storage",
-            "payment": {
-              "food": 2
-            }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
+      "rounds": [
+        {
+          "players": [
             {
-              "culture_tokens": 1
-            }
-          ]
-        }
-      }
-    },
-    {
-      "action": {
-        "Playing": {
-          "ActionCard": 120
-        }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 2
-        },
-        {
-          "op": "add",
-          "path": "/players/0/action_cards",
-          "value": [
-            120
-          ]
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/advances/3",
-          "value": "State Religion"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/advances/4",
-          "value": "Storage"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/advances/5",
-          "value": "Tactics"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/advances/6",
-          "value": "Voting"
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/advances/7"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/mood_tokens",
-          "value": 8
-        },
-        {
-          "op": "remove",
-          "path": "/events"
-        }
-      ]
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectPositions": [
-            "C1"
-          ]
-        }
-      },
-      "undo": [
-        {
-          "op": "remove",
-          "path": "/events/0/event_type/ActionCard/selected_position"
-        },
-        {
-          "op": "replace",
-          "path": "/events/0/handler/priority",
-          "value": 1
-        },
-        {
-          "op": "add",
-          "path": "/events/0/handler/request/SelectPositions",
-          "value": {
-            "choices": [
-              "C1",
-              "B2",
-              "B3"
-            ],
-            "description": "Build a Temple",
-            "needed": {
-              "end": 1,
-              "start": 0
-            }
-          }
-        },
-        {
-          "op": "remove",
-          "path": "/events/0/handler/request/Payment"
-        },
-        {
-          "op": "replace",
-          "path": "/events/0/last_priority_used",
-          "value": 1
-        }
-      ]
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
-            {
-              "gold": 2
-            }
-          ]
-        }
-      },
-      "undo": [
-        {
-          "op": "add",
-          "path": "/events/0/handler",
-          "value": {
-            "origin": {
-              "CivilCard": 120
-            },
-            "priority": 0,
-            "request": {
-              "Payment": [
+              "index": 0,
+              "items": [
                 {
-                  "cost": {
-                    "conversions": [
-                      {
-                        "from": [
-                          {
-                            "food": 1
-                          },
-                          {
-                            "wood": 1
-                          },
-                          {
-                            "ore": 1
-                          },
-                          {
-                            "ideas": 1
-                          }
-                        ],
-                        "to": {
-                          "gold": 1
-                        },
-                        "type": "Unlimited"
-                      },
-                      {
-                        "from": [
-                          {
-                            "food": 1
-                          }
-                        ],
-                        "to": {},
-                        "type": {
-                          "MayNotOverpay": 1
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "food": 2
                         }
                       }
-                    ],
-                    "default": {
-                      "food": 1,
-                      "ore": 1,
-                      "wood": 1
-                    },
-                    "modifiers": [
-                      {
-                        "Advance": "State Religion"
-                      }
-                    ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 120
+                    }
                   },
-                  "name": "Pay to build the Temple",
-                  "optional": true
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 2
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/action_cards",
+                      "value": [
+                        120
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/3",
+                      "value": "State Religion"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/4",
+                      "value": "Storage"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/5",
+                      "value": "Tactics"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/6",
+                      "value": "Voting"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/advances/7"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 8
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": [
+                        "C1"
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "remove",
+                      "path": "/events/0/event_type/ActionCard/selected_position"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/events/0/handler/priority",
+                      "value": 1
+                    },
+                    {
+                      "op": "add",
+                      "path": "/events/0/handler/request/SelectPositions",
+                      "value": {
+                        "choices": [
+                          "B2",
+                          "B3",
+                          "C1"
+                        ],
+                        "description": "Build a Temple",
+                        "needed": {
+                          "end": 1,
+                          "start": 0
+                        }
+                      }
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/0/handler/request/Payment"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/events/0/last_priority_used",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "gold": 2
+                        }
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events/0/handler",
+                      "value": {
+                        "origin": {
+                          "CivilCard": 120
+                        },
+                        "priority": 0,
+                        "request": {
+                          "Payment": [
+                            {
+                              "cost": {
+                                "conversions": [
+                                  {
+                                    "from": [
+                                      {
+                                        "food": 1
+                                      },
+                                      {
+                                        "wood": 1
+                                      },
+                                      {
+                                        "ore": 1
+                                      },
+                                      {
+                                        "ideas": 1
+                                      }
+                                    ],
+                                    "to": {
+                                      "gold": 1
+                                    },
+                                    "type": "Unlimited"
+                                  },
+                                  {
+                                    "from": [
+                                      {
+                                        "food": 1
+                                      }
+                                    ],
+                                    "to": {},
+                                    "type": {
+                                      "MayNotOverpay": 1
+                                    }
+                                  }
+                                ],
+                                "default": {
+                                  "food": 1,
+                                  "ore": 1,
+                                  "wood": 1
+                                },
+                                "modifiers": [
+                                  {
+                                    "Advance": "State Religion"
+                                  }
+                                ]
+                              },
+                              "name": "Pay to build the Temple",
+                              "optional": true
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/1"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/1/activations",
+                      "value": 0
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/cities/1/city_pieces/temple"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/gold",
+                      "value": 7
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/event_info"
+                    }
+                  ]
                 }
               ]
             }
-          }
-        },
-        {
-          "op": "remove",
-          "path": "/events/1"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/1/activations",
-          "value": 0
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/cities/1/city_pieces/temple"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/gold",
-          "value": 7
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/event_info"
+          ]
         }
       ]
     }
@@ -516,7 +529,7 @@
       "Player1 gained Great Prophet for 1 culture token"
     ],
     [
-      "Player1 played the action card Great Prophet",
+      "Player1 played the action card Great Prophet as a regular action",
       "Player1 gained Myths",
       "Player gained 1 mood token as advance bonus"
     ],

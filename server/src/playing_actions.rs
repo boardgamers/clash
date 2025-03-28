@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::action_card::{discard_action_card, ActionCardInfo};
+use crate::action_card::play_action_card;
 use crate::advance::gain_advance;
 use crate::city::MoodState;
 use crate::collect::collect;
@@ -8,14 +8,13 @@ use crate::construct::Construct;
 use crate::content::action_cards::get_civil_card;
 use crate::content::advances::get_advance;
 use crate::content::custom_actions::CustomActionInfo;
-use crate::content::custom_phase_actions::CurrentEventType;
 use crate::cultural_influence::influence_culture_attempt;
 use crate::game::GameState;
 use crate::player::Player;
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::{recruit, recruit_cost};
 use crate::unit::Units;
-use crate::wonder::{cities_for_wonder, play_wonder_card, WonderCardInfo, WonderDiscount};
+use crate::wonder::{cities_for_wonder, on_play_wonder_card, WonderCardInfo, WonderDiscount};
 use crate::{
     city::City,
     city_pieces::Building::{self},
@@ -89,6 +88,10 @@ impl PlayingActionType {
 
         match self {
             PlayingActionType::Custom(c) => {
+                if !p.custom_actions.contains_key(&c.custom_action_type) {
+                    return Err("Custom action not available".to_string());
+                }
+
                 if c.once_per_turn
                     && p.played_once_per_turn_actions
                         .contains(&c.custom_action_type)
@@ -97,11 +100,25 @@ impl PlayingActionType {
                 }
             }
             PlayingActionType::ActionCard(id) => {
-                if !(get_civil_card(*id).can_play)(game, p) {
+                if !p.action_cards.contains(id) {
+                    return Err("Action card not available".to_string());
+                }
+
+                let civil_card = get_civil_card(*id);
+                if !(civil_card.can_play)(game, p) {
                     return Err("Cannot play action card".to_string());
+                }
+                if let Some(requirement) = civil_card.requirement {
+                    if requirement.satisfying_action(game, *id, false).is_none() {
+                        return Err("Requirement not met".to_string());
+                    }
                 }
             }
             PlayingActionType::WonderCard(name) => {
+                if !p.wonder_cards.contains(name) {
+                    return Err("Wonder card not available".to_string());
+                }
+
                 if cities_for_wonder(name, game, p, &WonderDiscount::default()).is_empty() {
                     return Err("no cities for wonder".to_string());
                 }
@@ -159,13 +176,15 @@ impl PlayingAction {
     /// # Panics
     ///
     /// Panics if action is illegal
-    pub fn execute(self, game: &mut Game, player_index: usize) {
+    pub fn execute(self, game: &mut Game, player_index: usize, redo: bool) {
         use crate::construct;
         use PlayingAction::*;
         let playing_action_type = self.playing_action_type();
-        let _ = playing_action_type
-            .is_available(game, player_index)
-            .map_err(|e| panic!("{e}"));
+        if !redo {
+            let _ = playing_action_type
+                .is_available(game, player_index)
+                .map_err(|e| panic!("{e}"));
+        }
         playing_action_type.action_type().pay(game, player_index);
 
         match self {
@@ -212,11 +231,10 @@ impl PlayingAction {
             }
             InfluenceCultureAttempt(c) => influence_culture_attempt(game, player_index, &c),
             ActionCard(a) => {
-                discard_action_card(game, player_index, a);
-                play_action_card(game, player_index, ActionCardInfo::new(a));
+                play_action_card(game, player_index, a);
             }
             WonderCard(name) => {
-                play_wonder_card(
+                on_play_wonder_card(
                     game,
                     player_index,
                     WonderCardInfo::new(name, WonderDiscount::default()),
@@ -268,7 +286,8 @@ impl ActionType {
 
     pub(crate) fn pay(&self, game: &mut Game, player_index: usize) {
         let p = game.get_player_mut(player_index);
-        p.lose_resources(self.cost.clone());
+        let cost = self.cost.clone();
+        p.lose_resources(cost.clone());
         if !self.free {
             game.actions_left -= 1;
         }
@@ -284,6 +303,11 @@ impl ActionType {
     #[must_use]
     pub fn regular() -> Self {
         Self::new(false, ResourcePile::empty())
+    }
+
+    #[must_use]
+    pub fn regular_with_cost(cost: ResourcePile) -> Self {
+        Self::new(false, cost)
     }
 
     #[must_use]
@@ -332,18 +356,6 @@ pub(crate) fn increase_happiness(
 
 pub(crate) fn roll_boost_cost(roll: u8) -> ResourcePile {
     ResourcePile::culture_tokens(5 - roll as u32)
-}
-
-pub(crate) fn play_action_card(game: &mut Game, player_index: usize, i: ActionCardInfo) {
-    let _ = game.trigger_current_event_with_listener(
-        &[player_index],
-        |e| &mut e.on_play_action_card,
-        &get_civil_card(i.id).listeners,
-        i,
-        CurrentEventType::ActionCard,
-        None,
-        |_| {},
-    );
 }
 
 fn custom(game: &mut Game, player_index: usize, custom_action: CustomAction) {

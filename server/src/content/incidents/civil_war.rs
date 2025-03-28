@@ -1,5 +1,5 @@
 use crate::city::MoodState;
-use crate::content::custom_phase_actions::{new_position_request, PaymentRequest, UnitsRequest};
+use crate::content::custom_phase_actions::{PaymentRequest, PositionRequest, UnitsRequest};
 use crate::content::incidents::famine::kill_incident_units;
 use crate::content::incidents::good_year::select_player_to_gain_settler;
 use crate::game::Game;
@@ -86,11 +86,11 @@ fn civil_war(id: u8) -> Incident {
             } else {
                 ""
             };
-            Some(new_position_request(
-                non_happy_cites_with_infantry(p),
-                1..=1,
-                &format!("Select a non-Happy city with an Infantry to kill the Infantry {suffix}"),
-            ))
+            let choices = non_happy_cites_with_infantry(p);
+            let needed = 1..=1;
+            let description =
+                &format!("Select a non-Happy city with an Infantry to kill the Infantry {suffix}");
+            Some(PositionRequest::new(choices, needed, description))
         },
         |game, s, i| {
             let position = s.choice[0];
@@ -135,7 +135,7 @@ fn revolution() -> Incident {
         38,
         "Revolution",
         "You may kill one of your Army units each to avoid the following steps: \
-        Step 1: Loose one action (from your next turn if in Status phase). \
+        Step 1: Lose one action (from your next turn if in Status phase). \
         Step 2: Change your government for free if possible.",
         IncidentBaseEffect::GoldDeposits,
     );
@@ -143,11 +143,11 @@ fn revolution() -> Incident {
         b,
         3,
         "Kill a unit to avoid losing an action",
-        |game, _player| can_loose_action(game),
+        |game, _player| can_lose_action(game),
     );
     b = b.add_simple_incident_listener(IncidentTarget::ActivePlayer, 2, |game, player, _, i| {
-        if can_loose_action(game) && i.player.sacrifice == 0 {
-            loose_action(game, player);
+        if can_lose_action(game) && i.player.sacrifice == 0 {
+            lose_action(game, player);
         }
     });
     b = kill_unit_for_revolution(
@@ -204,16 +204,16 @@ fn kill_unit_for_revolution(
     )
 }
 
-fn can_loose_action(game: &Game) -> bool {
+fn can_lose_action(game: &Game) -> bool {
     get_status_phase(game).is_some() || game.actions_left > 0
 }
 
-fn loose_action(game: &mut Game, player: usize) {
+fn lose_action(game: &mut Game, player: usize) {
     let name = game.player_name(player);
     if get_status_phase(game).is_some() {
         game.add_info_log_item(&format!("{name} lost an action for the next turn"));
         game.permanent_incident_effects
-            .push(PermanentIncidentEffect::LooseAction(player));
+            .push(PermanentIncidentEffect::LoseAction(player));
     } else {
         game.add_info_log_item(&format!("{name} lost an action"));
         game.actions_left -= 1;

@@ -236,20 +236,33 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Custom": "ForcedLabor"
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "replace",
-          "path": "/players/0/resources/mood_tokens",
-          "value": 9
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/played_once_per_turn_actions"
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": "ForcedLabor"
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 9
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/played_once_per_turn_actions"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       ]
     }

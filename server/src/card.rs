@@ -4,6 +4,7 @@ use crate::utils::Shuffle;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
+#[derive(Clone, Copy)]
 pub enum HandCardType {
     Action,
     Wonder,
@@ -51,7 +52,9 @@ where
         return None;
     }
 
-    game.lock_undo(); // new information is revealed
+    if game.age > 0 {
+        game.lock_undo(); // new information is revealed
+    }
 
     if leave_card {
         get_pile(game).first().cloned()

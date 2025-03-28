@@ -277,40 +277,53 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Collect": {
-            "city_position": "B3",
-            "collections": [
-              [
-                "B5",
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
                 {
-                  "food": 1
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "city_position": "B3",
+                        "collections": [
+                          [
+                            "B5",
+                            {
+                              "food": 1
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 2
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/3/activations",
+                      "value": 4
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/3/mood_state",
+                      "value": "Happy"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/event_info"
+                    }
+                  ]
                 }
               ]
-            ]
-          }
-        }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 2
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/3/activations",
-          "value": 4
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/3/mood_state",
-          "value": "Happy"
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/event_info"
+            }
+          ]
         }
       ]
     }

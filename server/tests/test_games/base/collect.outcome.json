@@ -194,51 +194,64 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Collect": {
-            "city_position": "C2",
-            "collections": [
-              [
-                "B1",
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
                 {
-                  "ore": 1
-                }
-              ],
-              [
-                "B2",
-                {
-                  "wood": 1
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "city_position": "C2",
+                        "collections": [
+                          [
+                            "B1",
+                            {
+                              "ore": 1
+                            }
+                          ],
+                          [
+                            "B2",
+                            {
+                              "wood": 1
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 3
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/1/activations",
+                      "value": 0
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/ideas",
+                      "value": 5
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/wood",
+                      "value": 6
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/event_info"
+                    }
+                  ]
                 }
               ]
-            ]
-          }
-        }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 3
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/1/activations",
-          "value": 0
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/ideas",
-          "value": 5
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/wood",
-          "value": 6
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/event_info"
+            }
+          ]
         }
       ]
     }

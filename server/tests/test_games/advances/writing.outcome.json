@@ -269,54 +269,67 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Construct": {
-            "city_position": "A1",
-            "city_piece": "Academy",
-            "payment": {
-              "food": 1,
-              "wood": 1,
-              "ore": 1
-            },
-            "port_position": null
-          }
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 1
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/0/activations",
-          "value": 0
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/cities/0/city_pieces/academy"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/food",
-          "value": 7
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/ideas",
-          "value": 1
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/ore",
-          "value": 6
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/wood",
-          "value": 6
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Construct": {
+                        "city_position": "A1",
+                        "city_piece": "Academy",
+                        "payment": {
+                          "food": 1,
+                          "wood": 1,
+                          "ore": 1
+                        },
+                        "port_position": null
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 1
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/0/activations",
+                      "value": 0
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/cities/0/city_pieces/academy"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/food",
+                      "value": 7
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/ideas",
+                      "value": 1
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/ore",
+                      "value": 6
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/wood",
+                      "value": 6
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       ]
     }

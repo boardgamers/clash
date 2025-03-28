@@ -199,19 +199,35 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "destination": "C1"
-          }
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0,
+                          1,
+                          2,
+                          3
+                        ],
+                        "destination": "C1"
+                      }
+                    }
+                  },
+                  "civil_card_match": {
+                    "opportunity": "WinLandBattle"
+                  }
+                }
+              ]
+            }
+          ]
         }
-      }
+      ]
     }
   ],
   "action_log_index": 1,

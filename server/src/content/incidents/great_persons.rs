@@ -199,7 +199,8 @@ fn great_artist() -> ActionCard {
             if cities.is_empty() {
                 game.add_info_log_item("No cities to make happy");
             }
-            Some(PositionRequest::new(cities, 1..=1, "Make a city Happy"))
+            let needed = 1..=1;
+            Some(PositionRequest::new(cities, needed, "Make a city Happy"))
         },
         |game, s, _| {
             let position = s.choice[0];
@@ -249,7 +250,8 @@ fn great_prophet() -> ActionCard {
             if cities.is_empty() {
                 game.add_info_log_item("No cities can build a Temple");
             }
-            Some(PositionRequest::new(cities, 0..=1, "Build a Temple"))
+            let needed = 0..=1;
+            Some(PositionRequest::new(cities, needed, "Build a Temple"))
         },
         |game, s, a| {
             let pos = s.choice.first().copied();

@@ -20,6 +20,7 @@ pub struct Assets {
     // action icons
     pub move_units: Texture2D,
     pub log: Texture2D,
+    pub show_permanent_effects: Texture2D,
     pub end_turn: Texture2D,
     pub advances: Texture2D,
     pub rotate_explore: Texture2D,
@@ -66,6 +67,7 @@ impl Assets {
             advances: load_png(include_bytes!("../assets/lab-svgrepo-com.png")),
             end_turn: load_png(include_bytes!("../assets/hour-glass-svgrepo-com.png")),
             log: load_png(include_bytes!("../assets/scroll-svgrepo-com.png")),
+            show_permanent_effects: load_png(include_bytes!("../assets/trojan.png")),
             move_units: load_png(include_bytes!("../assets/route-start-svgrepo-com.png")),
             rotate_explore: load_png(include_bytes!("../assets/rotate-svgrepo-com.png")),
 

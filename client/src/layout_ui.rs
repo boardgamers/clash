@@ -116,7 +116,7 @@ pub fn draw_scaled_icon(
     if !tooltip.is_empty() {
         let mut parts: Vec<String> = vec![];
         break_text(tooltip, 70, &mut parts);
-        tooltip::show_tooltip_for_rect(rc, &parts, rect);
+        tooltip::show_tooltip_for_rect(rc, &parts, rect, 50.);
     }
     left_mouse_button_pressed_in_rect(rect, rc)
 }

@@ -217,73 +217,86 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Storage",
-            "payment": {
-              "gold": 2
-            }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectStructures": [
-            [
-              "B2",
-              "CityCenter"
-            ],
-            [
-              "C2",
-              {
-                "Building": "Fortress"
-              }
-            ],
-            [
-              "C2",
-              {
-                "Wonder": "Pyramids"
-              }
-            ]
-          ]
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
+      "rounds": [
+        {
+          "players": [
             {
-              "mood_tokens": 1
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "gold": 2
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectStructures": [
+                        [
+                          "B2",
+                          "CityCenter"
+                        ],
+                        [
+                          "C2",
+                          {
+                            "Building": "Fortress"
+                          }
+                        ],
+                        [
+                          "C2",
+                          {
+                            "Wonder": "Pyramids"
+                          }
+                        ]
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "mood_tokens": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectStructures": [
+                        [
+                          "A1",
+                          "CityCenter"
+                        ],
+                        [
+                          "A1",
+                          {
+                            "Building": "Fortress"
+                          }
+                        ],
+                        [
+                          "A3",
+                          "CityCenter"
+                        ]
+                      ]
+                    }
+                  }
+                }
+              ]
             }
           ]
         }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectStructures": [
-            [
-              "A1",
-              "CityCenter"
-            ],
-            [
-              "A1",
-              {
-                "Building": "Fortress"
-              }
-            ],
-            [
-              "A3",
-              "CityCenter"
-            ]
-          ]
-        }
-      }
+      ]
     }
   ],
   "action_log_index": 4,

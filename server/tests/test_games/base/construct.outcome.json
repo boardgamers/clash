@@ -190,54 +190,67 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Construct": {
-            "city_position": "C2",
-            "city_piece": "Observatory",
-            "payment": {
-              "food": 1,
-              "wood": 1,
-              "ore": 1
-            },
-            "port_position": null
-          }
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 1
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/1/activations",
-          "value": 8
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/cities/1/city_pieces/observatory"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/1/mood_state",
-          "value": "Happy"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/food",
-          "value": 2
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/ore",
-          "value": 7
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/wood",
-          "value": 7
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Construct": {
+                        "city_position": "C2",
+                        "city_piece": "Observatory",
+                        "payment": {
+                          "food": 1,
+                          "wood": 1,
+                          "ore": 1
+                        },
+                        "port_position": null
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 1
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/1/activations",
+                      "value": 8
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/cities/1/city_pieces/observatory"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/1/mood_state",
+                      "value": "Happy"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/food",
+                      "value": 2
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/ore",
+                      "value": 7
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/wood",
+                      "value": 7
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       ]
     }

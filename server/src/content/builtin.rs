@@ -2,7 +2,8 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::barbarians::barbarians_bonus;
 use crate::combat_listeners::{
-    choose_carried_units_casualties, choose_fighter_casualties, offer_retreat, place_settler,
+    choose_carried_units_casualties, choose_fighter_casualties, combat_stats, offer_retreat,
+    place_settler,
 };
 use crate::content::incidents::famine::pestilence_permanent_effect;
 use crate::content::incidents::great_builders::use_great_engineer;
@@ -82,6 +83,7 @@ pub fn get_all() -> Vec<Builtin> {
         choose_fighter_casualties(),
         choose_carried_units_casualties(),
         offer_retreat(),
+        combat_stats(),
         // incident related
         barbarians_bonus(),
         pirates_bonus(),
@@ -131,6 +133,6 @@ pub(crate) fn status_phase_handler(phase: &StatusPhaseState) -> Builtin {
 
 pub(crate) fn init_player(game: &mut Game, player_index: usize) {
     for b in get_all() {
-        (b.listeners.initializer)(game, player_index);
+        b.listeners.init(game, player_index);
     }
 }

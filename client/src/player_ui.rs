@@ -3,10 +3,12 @@ use crate::city_ui::city_labels;
 use crate::client::Features;
 use crate::client_state::StateUpdate;
 use crate::dialog_ui::{ok_button, OkTooltip};
+use crate::event_ui::event_help;
 use crate::layout_ui::{
     bottom_center_texture, bottom_centered_text, bottom_right_texture, icon_pos,
     left_mouse_button_pressed_in_rect, top_center_texture, ICON_SIZE,
 };
+use crate::log_ui::multiline_label;
 use crate::map_ui::terrain_name;
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name};
@@ -20,7 +22,9 @@ use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::content::custom_phase_actions::CurrentEventType;
 use server::game::{Game, GameState};
 use server::movement::CurrentMove;
+use server::player::Player;
 use server::playing_actions::PlayingAction;
+use server::position::Position;
 use server::resource::ResourceType;
 use server::status_phase::get_status_phase;
 use server::unit::MovementAction;
@@ -68,7 +72,7 @@ pub fn player_select(rc: &RenderContext) -> StateUpdate {
         } else {
             pl.get_name()
         };
-        show_tooltip_for_rect(rc, &[tooltip], rect);
+        show_tooltip_for_rect(rc, &[tooltip], rect, 50.);
         if !shown && left_mouse_button_pressed_in_rect(rect, rc) {
             return StateUpdate::SetShownPlayer(pl.index);
         }
@@ -149,11 +153,13 @@ pub fn show_top_left(rc: &RenderContext) {
     let state = rc.state;
     let mut p = vec2(10., 10.);
     let mut label = |label: &str| {
-        p = vec2(p.x, p.y + 25.);
-        if p.y > state.screen_size.y - 150. {
-            p = vec2(p.x + 350., 85.);
-        }
-        state.draw_text(label, p.x, p.y);
+        multiline_label(label, 30, |label: &str| {
+            p = vec2(p.x, p.y + 25.);
+            if p.y > state.screen_size.y - 150. {
+                p = vec2(p.x + 350., 85.);
+            }
+            state.draw_text(label, p.x, p.y);
+        });
     };
 
     let game = rc.game;
@@ -191,7 +197,6 @@ pub fn show_top_left(rc: &RenderContext) {
             let movement_actions_left = moves.movement_actions_left;
             label(&format!("Move units: {movement_actions_left} moves left"));
             match moves.current_move {
-                // todo break label
                 CurrentMove::Fleet { .. } => label(
                     "May continue to move the fleet in the same sea without using movement actions",
                 ),
@@ -226,25 +231,54 @@ pub fn show_top_left(rc: &RenderContext) {
     }
 
     if let Some(position) = state.focused_tile {
-        label(&format!(
-            "{}/{}",
-            position,
-            game.map
-                .get(position)
-                .map_or("outside the map", terrain_name),
-        ));
+        show_focused_tile(&mut label, game, position);
+    }
 
-        if let Some(c) = game.try_get_any_city(position) {
-            for l in city_labels(game, c) {
-                label(&l);
-            }
+    if rc.state.show_permanent_effects {
+        show_permanent_effects(rc, &mut label, game, player);
+    }
+}
+
+fn show_focused_tile(label: &mut impl FnMut(&str), game: &Game, position: Position) {
+    label(&format!(
+        "{}/{}",
+        position,
+        game.map
+            .get(position)
+            .map_or("outside the map", terrain_name),
+    ));
+
+    if let Some(c) = game.try_get_any_city(position) {
+        for l in city_labels(game, c) {
+            label(&l);
         }
+    }
 
-        for (p, unit) in unit_ui::units_on_tile(game, position) {
-            let army_move = game
-                .get_player(p)
-                .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
-            label(&unit_ui::unit_label(&unit, army_move));
+    for (p, unit) in unit_ui::units_on_tile(game, position) {
+        let army_move = game
+            .get_player(p)
+            .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
+        label(&unit_ui::unit_label(&unit, army_move));
+    }
+}
+
+fn show_permanent_effects(
+    rc: &RenderContext,
+    label: &mut impl FnMut(&str),
+    game: &Game,
+    player: &Player,
+) {
+    let s = &player.secrets;
+    if !s.is_empty() {
+        label("Secrets:");
+        for e in s {
+            label(e);
+        }
+    }
+    label("Permanent effects:");
+    for e in &game.permanent_incident_effects {
+        for m in event_help(rc, &e.event_origin()) {
+            label(&m);
         }
     }
 }

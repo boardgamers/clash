@@ -201,19 +201,35 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "destination": "C1"
-          }
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0,
+                          1,
+                          2,
+                          3
+                        ],
+                        "destination": "C1"
+                      }
+                    }
+                  },
+                  "civil_card_match": {
+                    "opportunity": "WinLandBattle"
+                  }
+                }
+              ]
+            }
+          ]
         }
-      }
+      ]
     }
   ],
   "action_log_index": 1,
@@ -224,8 +240,8 @@
     [
       "Combat round 1",
       "Player1 rolled 2 (Elephant, -1 hits, no combat value), 2 (Elephant, no bonus), 2 (Elephant, no bonus), 1 (Leader, re-roll), 1 (Leader, re-roll), 6 (Infantry, +1 combat value) for combined combat value of 13 and gets 1 hits against defending units.",
-      "Player2 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 0 hits against attacking units.",
       "Player1 used the following combat modifiers: steel weapons added 2 combat value",
+      "Player2 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 0 hits against attacking units.",
       "Player2 has to remove all of their defending units",
       "Player2 removed a leader",
       "Attacker wins and captured Player2's city at C1",

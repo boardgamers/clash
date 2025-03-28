@@ -125,7 +125,7 @@ impl ActiveDialog {
                 let v = vec!["Click on a building to influence its culture".to_string()];
                 if let BaseOrCustomAction::Custom { origin, custom: _ } = &b.custom {
                     let mut r = v.clone();
-                    r.extend(event_help(rc, origin, true));
+                    r.extend(event_help(rc, origin));
                 }
                 v
             }
@@ -143,20 +143,14 @@ impl ActiveDialog {
                 vec!["Click on an advance to choose it".to_string()]
             }
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
-            ActiveDialog::Sports(_) => {
-                event_help(rc, &EventOrigin::Advance("Sports".to_string()), true)
-            }
-            ActiveDialog::Taxes(_) => {
-                event_help(rc, &EventOrigin::Advance("Taxes".to_string()), true)
-            }
+            ActiveDialog::Sports(_) => event_help(rc, &EventOrigin::Advance("Sports".to_string())),
+            ActiveDialog::Taxes(_) => event_help(rc, &EventOrigin::Advance("Taxes".to_string())),
             ActiveDialog::Theaters(_) => {
-                event_help(rc, &EventOrigin::Advance("Theaters".to_string()), true)
+                event_help(rc, &EventOrigin::Advance("Theaters".to_string()))
             }
             ActiveDialog::ResourceRewardRequest(_)
             | ActiveDialog::AdvanceRequest(_)
-            | ActiveDialog::PaymentRequest(_) => {
-                event_help(rc, &custom_phase_event_origin(rc), true)
-            }
+            | ActiveDialog::PaymentRequest(_) => event_help(rc, &custom_phase_event_origin(rc)),
             ActiveDialog::BoolRequest(d) => custom_phase_event_help(rc, d),
             ActiveDialog::UnitTypeRequest(r) => custom_phase_event_help(rc, &r.description),
             ActiveDialog::UnitsRequest(r) => {
@@ -193,7 +187,7 @@ impl ActiveDialog {
                 result.push("Click on a carrier to embark units".to_string());
             };
             m.destinations.modifiers.iter().for_each(|m| {
-                result.extend(event_help(rc, m, true));
+                result.extend(event_help(rc, m));
             });
             result
         } else {
@@ -252,6 +246,7 @@ pub enum StateUpdate {
     Export,
     SetShownPlayer(usize),
     SetFocusedTile(Position),
+    ToggleShowPermanentEffects,
 }
 
 impl StateUpdate {
@@ -398,6 +393,7 @@ pub struct State {
     pub mouse_positions: Vec<MousePosition>,
     pub log_scroll: f32,
     pub focused_tile: Option<Position>,
+    pub show_permanent_effects: bool,
     pub pan_map: bool,
 }
 
@@ -424,6 +420,7 @@ impl State {
             log_scroll: 0.0,
             focused_tile: None,
             pan_map: false,
+            show_permanent_effects: false,
         }
     }
 
@@ -496,6 +493,10 @@ impl State {
                 self.focused_tile = Some(p);
                 GameSyncRequest::None
             }
+            StateUpdate::ToggleShowPermanentEffects => {
+                self.show_permanent_effects = !self.show_permanent_effects;
+                GameSyncRequest::None
+            }
         }
     }
 
@@ -531,7 +532,7 @@ impl State {
                 }
                 CurrentEventRequest::SelectAdvance(r) => ActiveDialog::AdvanceRequest(r.clone()),
                 CurrentEventRequest::SelectPositions(r) => {
-                    ActiveDialog::PositionRequest(MultiSelection::new(r.clone()))
+                    ActiveDialog::PositionRequest(MultiSelection::new(r.request.clone()))
                 }
                 CurrentEventRequest::SelectUnitType(r) => ActiveDialog::UnitTypeRequest(r.clone()),
                 CurrentEventRequest::SelectUnits(r) => {
@@ -557,7 +558,7 @@ impl State {
                     }
                 }
                 CurrentEventRequest::SelectHandCards(r) => {
-                    ActiveDialog::HandCardsRequest(MultiSelection::new(r.clone()))
+                    ActiveDialog::HandCardsRequest(MultiSelection::new(r.request.clone()))
                 }
             };
         }

@@ -2,14 +2,11 @@
 #![warn(clippy::unwrap_used)]
 #![allow(clippy::similar_names)]
 #![allow(clippy::enum_glob_use)]
-#![allow(clippy::too_many_lines)]
-#![allow(clippy::module_name_repetitions)]
 #![allow(clippy::cast_possible_truncation)]
 #![allow(clippy::cast_lossless)]
 #![allow(clippy::cast_sign_loss)]
 #![allow(clippy::cast_precision_loss)]
 #![allow(clippy::cast_possible_wrap)]
-#![allow(clippy::too_many_arguments)]
 #![allow(clippy::implicit_hasher)]
 
 pub mod ability_initializer;
@@ -24,6 +21,7 @@ mod civilization;
 pub mod collect;
 pub mod combat;
 mod combat_listeners;
+mod combat_roll;
 pub mod construct;
 pub mod consts;
 pub mod content;

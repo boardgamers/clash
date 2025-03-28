@@ -217,47 +217,60 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Storage",
-            "payment": {
-              "gold": 2
-            }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
+      "rounds": [
+        {
+          "players": [
             {
-              "mood_tokens": 1
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "gold": 2
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "mood_tokens": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": [
+                        "A1"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "mood_tokens": 1
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
             }
           ]
         }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectPositions": [
-            "A1"
-          ]
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
-            {
-              "mood_tokens": 1
-            }
-          ]
-        }
-      }
+      ]
     }
   ],
   "action_log_index": 4,

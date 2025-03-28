@@ -198,62 +198,75 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Custom": "CivilRights"
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 3
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/mood_tokens",
-          "value": 6
-        }
-      ]
-    },
-    {
-      "action": {
-        "Playing": {
-          "Recruit": {
-            "units": {
-              "infantry": 1
-            },
-            "city_position": "A1",
-            "payment": {
-              "mood_tokens": 2
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": "CivilRights"
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 3
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 6
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Recruit": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "city_position": "A1",
+                        "payment": {
+                          "mood_tokens": 2
+                        }
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 2
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/0/activations",
+                      "value": 0
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/next_unit_id",
+                      "value": 8
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 9
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/8"
+                    }
+                  ]
+                }
+              ]
             }
-          }
-        }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 2
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/0/activations",
-          "value": 0
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/next_unit_id",
-          "value": 8
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/mood_tokens",
-          "value": 9
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/units/8"
+          ]
         }
       ]
     }

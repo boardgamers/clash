@@ -4,6 +4,7 @@ use crate::city_pieces::Building;
 use crate::content::builtin::Builtin;
 use crate::content::custom_phase_actions::{CurrentEventType, PaymentRequest};
 use crate::game::Game;
+use crate::log::current_player_turn_log;
 use crate::payment::PaymentOptions;
 use crate::player_events::{ActionInfo, InfluenceCultureInfo, InfluenceCulturePossible};
 use crate::playing_actions::{roll_boost_cost, InfluenceCultureAttempt, PlayingAction};
@@ -115,8 +116,8 @@ pub(crate) fn cultural_influence_resolution() -> Builtin {
                 s.player_name
             ));
 
-            let a = game
-                .action_log
+            let a = current_player_turn_log(game)
+                .items
                 .iter()
                 .rev()
                 .find_map(|l| {

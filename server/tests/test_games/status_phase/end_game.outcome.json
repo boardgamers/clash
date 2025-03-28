@@ -279,18 +279,28 @@
   "current_player_index": 1,
   "action_log": [
     {
-      "action": {
-        "Playing": "EndTurn"
-      }
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "action_log_index": 1,
   "log": [
     [
       "Player1 ended their turn"
-    ],
-    [
-      "It's Player2's turn"
     ],
     [
       "The game has entered the 6th status phase"
@@ -300,7 +310,7 @@
     ]
   ],
   "undo_limit": 1,
-  "actions_left": 3,
+  "actions_left": 0,
   "round": 1,
   "age": 6,
   "messages": [

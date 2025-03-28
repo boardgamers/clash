@@ -277,7 +277,20 @@
   },
   "starting_player_index": 1,
   "current_player_index": 0,
-  "action_log": [],
+  "action_log": [
+    {
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "action_log_index": 0,
   "log": [],
   "undo_limit": 14,
@@ -305,5 +318,8 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "action_cards_left": []
+  "action_cards_left": [
+    1,
+    2
+  ]
 }

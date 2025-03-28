@@ -69,6 +69,7 @@ pub struct Player {
     pub next_unit_id: u32,
     pub played_once_per_turn_actions: Vec<CustomActionType>,
     pub event_info: HashMap<String, String>,
+    pub secrets: Vec<String>,
 }
 
 impl Clone for Player {
@@ -98,7 +99,7 @@ impl Player {
         builtin::init_player(game, player_index);
         let advances = mem::take(&mut game.players[player_index].advances);
         for advance in &advances {
-            (advance.listeners.initializer)(game, player_index);
+            advance.listeners.init(game, player_index);
             for i in 0..game.players[player_index]
                 .civilization
                 .special_advances
@@ -111,7 +112,7 @@ impl Player {
                         .civilization
                         .special_advances
                         .remove(i);
-                    (special_advance.listeners.initializer)(game, player_index);
+                    special_advance.listeners.init(game, player_index);
                     game.players[player_index]
                         .civilization
                         .special_advances
@@ -122,13 +123,13 @@ impl Player {
         }
         if let Some(leader) = leader {
             Self::with_leader(&leader, game, player_index, |game, leader| {
-                (leader.listeners.initializer)(game, player_index);
+                leader.listeners.init(game, player_index);
             });
         }
         let mut cities = mem::take(&mut game.players[player_index].cities);
         for city in &mut cities {
             for wonder in &city.pieces.wonders {
-                (wonder.listeners.initializer)(game, player_index);
+                wonder.listeners.init(game, player_index);
             }
         }
         game.players[player_index].cities = cities;
@@ -183,6 +184,7 @@ impl Player {
             next_unit_id: data.next_unit_id,
             played_once_per_turn_actions: data.played_once_per_turn_actions,
             event_info: data.event_info,
+            secrets: data.secrets,
         };
         player
     }
@@ -220,6 +222,7 @@ impl Player {
             next_unit_id: self.next_unit_id,
             played_once_per_turn_actions: self.played_once_per_turn_actions,
             event_info: self.event_info,
+            secrets: self.secrets,
         }
     }
 
@@ -260,6 +263,7 @@ impl Player {
             next_unit_id: self.next_unit_id,
             played_once_per_turn_actions: self.played_once_per_turn_actions.clone(),
             event_info: self.event_info.clone(),
+            secrets: self.secrets.clone(),
         }
     }
 
@@ -298,6 +302,7 @@ impl Player {
             next_unit_id: 0,
             played_once_per_turn_actions: Vec::new(),
             event_info: HashMap::new(),
+            secrets: Vec::new(),
         }
     }
 
@@ -532,6 +537,7 @@ impl Player {
     pub fn strip_secret(&mut self) {
         self.wonder_cards = self.wonder_cards.iter().map(|_| String::new()).collect();
         self.action_cards = self.action_cards.iter().map(|_| 0).collect();
+        self.secrets = Vec::new();
         //todo strip information about other hand cards
     }
 
@@ -857,4 +863,7 @@ pub struct PlayerData {
     #[serde(default)]
     #[serde(skip_serializing_if = "HashMap::is_empty")]
     event_info: HashMap<String, String>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    secrets: Vec<String>,
 }

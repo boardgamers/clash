@@ -288,44 +288,57 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "destination": "C1"
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
+      "rounds": [
+        {
+          "players": [
             {
-              "ore": 1
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5
+                        ],
+                        "destination": "C1"
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "ore": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {},
+                        {
+                          "ore": 2
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
             }
           ]
         }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
-            {},
-            {
-              "ore": 2
-            }
-          ]
-        }
-      }
+      ]
     }
   ],
   "action_log_index": 3,

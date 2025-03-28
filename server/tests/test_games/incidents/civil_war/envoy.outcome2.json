@@ -232,118 +232,131 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Storage",
-            "payment": {
-              "gold": 2
-            }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Monuments",
-            "payment": {
-              "gold": 2
-            }
-          }
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 2
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/advances/3",
-          "value": "State Religion"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/advances/4",
-          "value": "Storage"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/advances/5",
-          "value": "Tactics"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/advances/6",
-          "value": "Voting"
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/advances/7"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/incident_tokens",
-          "value": 3
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/culture_tokens",
-          "value": 8
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/gold",
-          "value": 5
-        },
-        {
-          "op": "remove",
-          "path": "/events"
-        }
-      ]
-    },
-    {
-      "action": {
-        "Response": {
-          "Bool": true
-        }
-      },
-      "undo": [
-        {
-          "op": "add",
-          "path": "/events",
-          "value": [
+          "players": [
             {
-              "event_type": "DrawWonderCard",
-              "handler": {
-                "origin": {
-                  "Builtin": "Draw Wonder Card"
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "gold": 2
+                        }
+                      }
+                    }
+                  }
                 },
-                "priority": 0,
-                "request": {
-                  "BoolRequest": "Do you want to draw the public wonder card Pyramids?"
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Monuments",
+                        "payment": {
+                          "gold": 2
+                        }
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 2
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/3",
+                      "value": "State Religion"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/4",
+                      "value": "Storage"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/5",
+                      "value": "Tactics"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/6",
+                      "value": "Voting"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/advances/7"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/incident_tokens",
+                      "value": 3
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/culture_tokens",
+                      "value": 8
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/gold",
+                      "value": 5
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Bool": true
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": "DrawWonderCard",
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Draw Wonder Card"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "BoolRequest": "Do you want to draw the public wonder card Pyramids?"
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "path": "/permanent_incident_effects",
+                      "value": [
+                        {
+                          "PublicWonderCard": "Pyramids"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/wonder_cards"
+                    }
+                  ]
                 }
-              },
-              "last_priority_used": 0,
-              "player": 0
+              ]
             }
           ]
-        },
-        {
-          "op": "add",
-          "path": "/permanent_incident_effects",
-          "value": [
-            {
-              "PublicWonderCard": "Pyramids"
-            }
-          ]
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/wonder_cards"
         }
       ]
     }

@@ -67,7 +67,22 @@ pub type SelectedStructure = (Position, Structure);
 
 pub type StructuresRequest = MultiRequest<SelectedStructure>;
 
-pub type HandCardsRequest = MultiRequest<HandCard>;
+///
+/// If a player does not own a hand card, then it means that it's a swap card from another player
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct HandCardsRequest {
+    #[serde(flatten)]
+    pub request: MultiRequest<HandCard>,
+}
+
+impl HandCardsRequest {
+    #[must_use]
+    pub fn new(cards: Vec<HandCard>, needed: RangeInclusive<u8>, description: &str) -> Self {
+        HandCardsRequest {
+            request: MultiRequest::new(cards, needed, description),
+        }
+    }
+}
 
 #[must_use]
 pub fn is_selected_structures_valid(game: &Game, selected: &[SelectedStructure]) -> bool {
@@ -194,15 +209,20 @@ impl CurrentEventState {
     }
 }
 
-pub type PositionRequest = MultiRequest<Position>;
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct PositionRequest {
+    #[serde(flatten)]
+    pub request: MultiRequest<Position>,
+}
 
-pub(crate) fn new_position_request(
-    mut choices: Vec<Position>,
-    needed: RangeInclusive<u8>,
-    description: &str,
-) -> PositionRequest {
-    choices.sort();
-    MultiRequest::new(choices, needed, description)
+impl PositionRequest {
+    #[must_use]
+    pub fn new(mut choices: Vec<Position>, needed: RangeInclusive<u8>, description: &str) -> Self {
+        choices.sort();
+        PositionRequest {
+            request: MultiRequest::new(choices, needed, description),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

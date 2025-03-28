@@ -192,53 +192,66 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Construct": {
-            "city_position": "A1",
-            "city_piece": "Port",
-            "payment": {
-              "food": 1,
-              "wood": 1,
-              "ore": 1
-            },
-            "port_position": "A2"
-          }
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 3
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/0/activations",
-          "value": 0
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/cities/0/city_pieces/port"
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/cities/0/port_position"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/food",
-          "value": 2
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/ore",
-          "value": 7
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/wood",
-          "value": 7
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Construct": {
+                        "city_position": "A1",
+                        "city_piece": "Port",
+                        "payment": {
+                          "food": 1,
+                          "wood": 1,
+                          "ore": 1
+                        },
+                        "port_position": "A2"
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 3
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/0/activations",
+                      "value": 0
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/cities/0/city_pieces/port"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/cities/0/port_position"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/food",
+                      "value": 2
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/ore",
+                      "value": 7
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/wood",
+                      "value": 7
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       ]
     }

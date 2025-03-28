@@ -257,55 +257,68 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "IncreaseHappiness": {
-            "happiness_increases": [
-              [
-                "C2",
-                1
-              ],
-              [
-                "B3",
-                2
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "IncreaseHappiness": {
+                        "happiness_increases": [
+                          [
+                            "C2",
+                            1
+                          ],
+                          [
+                            "B3",
+                            2
+                          ]
+                        ],
+                        "payment": {
+                          "mood_tokens": 5
+                        }
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 3
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/1/angry_activation",
+                      "value": true
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/1/mood_state",
+                      "value": "Angry"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/3/angry_activation",
+                      "value": true
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/3/mood_state",
+                      "value": "Angry"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 9
+                    }
+                  ]
+                }
               ]
-            ],
-            "payment": {
-              "mood_tokens": 5
             }
-          }
-        }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 3
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/1/angry_activation",
-          "value": true
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/1/mood_state",
-          "value": "Angry"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/3/angry_activation",
-          "value": true
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/3/mood_state",
-          "value": "Angry"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/mood_tokens",
-          "value": 9
+          ]
         }
       ]
     }

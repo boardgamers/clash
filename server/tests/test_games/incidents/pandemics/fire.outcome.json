@@ -14,8 +14,8 @@
         "request": {
           "SelectPositions": {
             "choices": [
-              "C2",
-              "B2"
+              "B2",
+              "C2"
             ],
             "needed": {
               "start": 1,
@@ -242,16 +242,29 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Storage",
-            "payment": {
-              "gold": 2
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "gold": 2
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
             }
-          }
+          ]
         }
-      }
+      ]
     }
   ],
   "action_log_index": 1,

@@ -195,43 +195,56 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Custom": {
-            "FreeEconomyCollect": {
-              "city_position": "C2",
-              "collections": [
-                [
-                  "B1",
-                  {
-                    "ore": 1
-                  }
-                ],
-                [
-                  "B2",
-                  {
-                    "ore": 1
-                  }
-                ]
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "FreeEconomyCollect": {
+                          "city_position": "C2",
+                          "collections": [
+                            [
+                              "B1",
+                              {
+                                "ore": 1
+                              }
+                            ],
+                            [
+                              "B2",
+                              {
+                                "ore": 1
+                              }
+                            ]
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/1/activations",
+                      "value": 0
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 6
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/played_once_per_turn_actions"
+                    }
+                  ]
+                }
               ]
             }
-          }
-        }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/players/0/cities/1/activations",
-          "value": 0
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/mood_tokens",
-          "value": 6
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/played_once_per_turn_actions"
+          ]
         }
       ]
     }

@@ -4,8 +4,8 @@ use crate::advance::{do_advance, gain_advance, remove_advance};
 use crate::consts::AGES;
 use crate::content::builtin::{status_phase_handler, Builtin};
 use crate::content::custom_phase_actions::{
-    new_position_request, AdvanceRequest, ChangeGovernmentRequest, CurrentEventRequest,
-    CurrentEventType, EventResponse, PlayerRequest,
+    AdvanceRequest, ChangeGovernmentRequest, CurrentEventRequest, CurrentEventType, EventResponse,
+    PlayerRequest, PositionRequest,
 };
 use crate::payment::PaymentOptions;
 use crate::player_events::{CurrentEvent, PersistentEvents};
@@ -164,9 +164,10 @@ pub(crate) fn raze_city() -> Builtin {
                 if cities.is_empty() {
                     return None;
                 }
-                Some(new_position_request(
+                let needed = 0..=1;
+                Some(PositionRequest::new(
                     cities,
-                    0..=1,
+                    needed,
                     "May raze a size 1 city for 1 gold",
                 ))
             },

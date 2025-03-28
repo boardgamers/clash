@@ -334,85 +334,98 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Draft",
-            "payment": {
-              "food": 1,
-              "gold": 1
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Draft",
+                        "payment": {
+                          "food": 1,
+                          "gold": 1
+                        }
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 1
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/0",
+                      "value": "Farming"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/1",
+                      "value": "Free Economy"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/2",
+                      "value": "Free Education"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/3",
+                      "value": "Mining"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/4",
+                      "value": "Storage"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/5",
+                      "value": "Tactics"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/6",
+                      "value": "Voting"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/7",
+                      "value": "Writing"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/advances/8"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/culture_tokens",
+                      "value": 10
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/food",
+                      "value": 7
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/gold",
+                      "value": 5
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                }
+              ]
             }
-          }
-        }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 1
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/advances/0",
-          "value": "Farming"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/advances/1",
-          "value": "Free Economy"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/advances/2",
-          "value": "Free Education"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/advances/3",
-          "value": "Mining"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/advances/4",
-          "value": "Storage"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/advances/5",
-          "value": "Tactics"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/advances/6",
-          "value": "Voting"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/advances/7",
-          "value": "Writing"
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/advances/8"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/culture_tokens",
-          "value": 10
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/food",
-          "value": 7
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/gold",
-          "value": 5
-        },
-        {
-          "op": "remove",
-          "path": "/events"
+          ]
         }
       ]
     }

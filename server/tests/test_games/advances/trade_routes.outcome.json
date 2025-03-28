@@ -386,29 +386,50 @@
   "current_player_index": 1,
   "action_log": [
     {
-      "action": {
-        "Playing": "EndTurn"
-      }
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "players": [
+            {
+              "index": 1,
+              "items": []
+            }
+          ]
+        }
+      ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 0,
   "log": [
     [
       "Player1 ended their turn with 3 actions left"
+    ],
+    [
+      "Round 3/3"
     ],
     [
       "It's Player2's turn",
       "Player1 gains 1 gold for using a Market in a trade route",
       "Ship at E7 traded with city at D6",
       "Settler at E7 traded with city at E6",
-      "Total reward is 2 food"
-    ],
-    [
-      "Round 3/3",
+      "Total reward is 2 food",
       "Player2 could not store 1 food"
     ]
   ],
-  "undo_limit": 1,
+  "undo_limit": 0,
   "actions_left": 3,
   "round": 3,
   "age": 2,

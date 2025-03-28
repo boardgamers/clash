@@ -293,25 +293,41 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              10
-            ],
-            "destination": "B1"
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectPositions": [
-            "B2"
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          10
+                        ],
+                        "destination": "B1"
+                      }
+                    }
+                  },
+                  "civil_card_match": {
+                    "opportunity": "WinLandBattle"
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": [
+                        "B2"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
           ]
         }
-      }
+      ]
     }
   ],
   "action_log_index": 2,
@@ -322,8 +338,8 @@
     [
       "Combat round 1",
       "Player1 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 0 hits against defending units.",
-      "Player2 rolled no dice for combined combat value of 0 and gets 0 hits against attacking units.",
       "Player1 used the following combat modifiers: Kʼinich Janaab Pakal I ignores the first hit in a battle with an Obelisk",
+      "Player2 rolled no dice for combined combat value of 0 and gets 0 hits against attacking units.",
       "Attacker wins and captured Player2's city at B1",
       "Player1 could not store 3 gold"
     ],

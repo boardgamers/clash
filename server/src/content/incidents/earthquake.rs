@@ -3,8 +3,7 @@ use crate::city::{City, MoodState};
 use crate::city_pieces::Building;
 use crate::consts::WONDER_VICTORY_POINTS;
 use crate::content::custom_phase_actions::{
-    is_selected_structures_valid, new_position_request, SelectedStructure, Structure,
-    StructuresRequest,
+    is_selected_structures_valid, PositionRequest, SelectedStructure, Structure, StructuresRequest,
 };
 use crate::content::wonders::get_wonder;
 use crate::game::Game;
@@ -42,9 +41,10 @@ fn volcano() -> Incident {
         |game, player_index, _incident| {
             let p = game.get_player(player_index);
             let cities = p.cities.iter().map(|c| c.position).collect_vec();
-            (cities.len() >= 4).then_some(new_position_request(
+            let needed = 1..=1;
+            (cities.len() >= 4).then_some(PositionRequest::new(
                 cities,
-                1..=1,
+                needed,
                 "Select a city to be destroyed",
             ))
         },
@@ -217,7 +217,7 @@ fn destroy_building(game: &mut Game, b: Building, position: Position) {
 fn destroy_wonder(game: &mut Game, position: Position, name: &str) {
     let owner = game.get_any_city(position).player_index;
     let wonder = get_wonder(name);
-    (wonder.listeners.deinitializer)(game, owner);
+    wonder.listeners.deinit(game, owner);
 
     let a = WONDER_VICTORY_POINTS / 2.0;
     let p = game.get_player_mut(owner);

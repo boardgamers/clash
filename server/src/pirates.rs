@@ -3,7 +3,7 @@ use crate::barbarians;
 use crate::city::MoodState;
 use crate::content::builtin::Builtin;
 use crate::content::custom_phase_actions::{
-    new_position_request, PaymentRequest, ResourceRewardRequest, UnitsRequest,
+    PaymentRequest, PositionRequest, ResourceRewardRequest, UnitsRequest,
 };
 use crate::game::Game;
 use crate::incident::{IncidentBuilder, BASE_EFFECT_PRIORITY};
@@ -139,9 +139,10 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                     player.get_name()
                 ));
 
-                Some(new_position_request(
+                let needed = 1..=1;
+                Some(PositionRequest::new(
                     choices,
-                    1..=1,
+                    needed,
                     "Select a city to reduce Mood",
                 ))
             },
@@ -237,9 +238,10 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
                 game.add_info_log_item("No valid positions for Pirate Ship");
             }
 
-            Some(new_position_request(
+            let needed = 1..=1;
+            Some(PositionRequest::new(
                 sea_spaces,
-                1..=1,
+                needed,
                 "Select a position for the Pirate Ship",
             ))
         },

@@ -1,15 +1,18 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action_card::{CivilCardMatch, CivilCardOpportunity};
 use crate::combat::{capture_position, Combat, CombatRetreatState};
 use crate::consts::SHIP_CAPACITY;
 use crate::content::builtin::{Builtin, BuiltinBuilder};
-use crate::content::custom_phase_actions::{new_position_request, CurrentEventType, UnitsRequest};
+use crate::content::custom_phase_actions::{CurrentEventType, PositionRequest, UnitsRequest};
 use crate::content::tactics_cards;
 use crate::game::Game;
+use crate::log::current_player_turn_log_mut;
 use crate::movement::move_units;
 use crate::player_events::{CurrentEvent, PersistentEvents};
 use crate::position::Position;
-use crate::tactics_card::CombatRole;
+use crate::tactics_card::{CombatRole, TacticsCard, TacticsCardTarget};
 use crate::unit::{UnitType, Units};
+use crate::utils;
 use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -17,12 +20,15 @@ use std::collections::HashMap;
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatStrength {
     pub extra_dies: u8,
-    pub extra_combat_value: u8,
+    pub extra_combat_value: i8,
     pub hit_cancels: u8,
     pub roll_log: Vec<String>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tactics_card: Option<String>,
+    pub tactics_card: Option<u8>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "utils::is_false")]
+    pub deny_combat_abilities: bool,
 }
 
 impl Default for CombatStrength {
@@ -40,6 +46,7 @@ impl CombatStrength {
             hit_cancels: 0,
             roll_log: vec![],
             tactics_card: None,
+            deny_combat_abilities: false,
         }
     }
 }
@@ -48,8 +55,8 @@ impl CombatStrength {
 pub enum CombatEventPhase {
     #[default]
     Default,
-    TacticsCardAttacker,
-    TacticsCardDefender,
+    RevealTacticsCard,
+    TacticsCard,
     Done,
 }
 
@@ -80,6 +87,16 @@ impl CombatRoundStart {
             phase: CombatEventPhase::Default,
         }
     }
+
+    #[must_use]
+    pub fn is_active(&self, player: usize, action_card: u8, target: TacticsCardTarget) -> bool {
+        target.is_active(
+            player,
+            &self.combat,
+            action_card,
+            self.attacker_strength.tactics_card.as_ref(),
+        )
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -87,6 +104,17 @@ pub enum CombatResult {
     AttackerWins,
     DefenderWins,
     Draw,
+}
+
+impl CombatResult {
+    #[must_use]
+    pub fn winner(&self) -> Option<CombatRole> {
+        match self {
+            CombatResult::AttackerWins => Some(CombatRole::Attacker),
+            CombatResult::DefenderWins => Some(CombatRole::Defender),
+            CombatResult::Draw => None,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -155,12 +183,12 @@ pub struct Casualties {
     pub fighters: u8,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tactics_card: Option<String>,
+    pub tactics_card: Option<u8>,
 }
 
 impl Casualties {
     #[must_use]
-    pub fn new(fighters: u8, tactics_card: Option<String>) -> Self {
+    pub fn new(fighters: u8, tactics_card: Option<u8>) -> Self {
         Self {
             fighters,
             tactics_card,
@@ -213,8 +241,18 @@ impl CombatRoundEnd {
             can_retreat,
             final_result,
             combat,
-            phase: CombatEventPhase::TacticsCardAttacker,
+            phase: CombatEventPhase::TacticsCard,
         }
+    }
+
+    #[must_use]
+    pub fn is_active(&self, player: usize, card: u8, target: TacticsCardTarget) -> bool {
+        target.is_active(
+            player,
+            &self.combat,
+            card,
+            self.attacker_casualties.tactics_card.as_ref(),
+        )
     }
 }
 
@@ -240,8 +278,8 @@ impl CombatRoundEnd {
 
 const ROUND_START_TYPES: &[CombatEventPhase; 3] = &[
     CombatEventPhase::Default,
-    CombatEventPhase::TacticsCardAttacker,
-    CombatEventPhase::TacticsCardDefender,
+    CombatEventPhase::RevealTacticsCard,
+    CombatEventPhase::TacticsCard,
 ];
 
 pub(crate) fn combat_round_start(
@@ -253,21 +291,21 @@ pub(crate) fn combat_round_start(
         start,
         CurrentEventType::CombatRoundStart,
         ROUND_START_TYPES,
-        |events| &mut events.on_combat_round_start,
-        |events| &mut events.on_combat_round_start_tactics,
+        |phase| match phase {
+            CombatEventPhase::Default => |e| &mut e.on_combat_round_start,
+            CombatEventPhase::RevealTacticsCard => |e| &mut e.on_combat_round_start_reveal_tactics,
+            CombatEventPhase::TacticsCard => |e| &mut e.on_combat_round_start_tactics,
+            CombatEventPhase::Done => panic!("Invalid round type"),
+        },
         |s| &mut s.phase,
         |s| &s.combat,
         |s| s.attacker_strength.tactics_card.as_ref(),
         |s| s.defender_strength.tactics_card.as_ref(),
-        true,
     )
 }
 
-const ROUND_END_TYPES: &[CombatEventPhase; 3] = &[
-    CombatEventPhase::TacticsCardAttacker,
-    CombatEventPhase::TacticsCardDefender,
-    CombatEventPhase::Default,
-];
+const ROUND_END_TYPES: &[CombatEventPhase; 2] =
+    &[CombatEventPhase::TacticsCard, CombatEventPhase::Default];
 
 pub(crate) fn combat_round_end(game: &mut Game, r: CombatRoundEnd) -> Option<Combat> {
     let e = event_with_tactics(
@@ -275,13 +313,15 @@ pub(crate) fn combat_round_end(game: &mut Game, r: CombatRoundEnd) -> Option<Com
         r,
         CurrentEventType::CombatRoundEnd,
         ROUND_END_TYPES,
-        |events| &mut events.on_combat_round_end,
-        |events| &mut events.on_combat_round_end_tactics,
+        |phase| match phase {
+            CombatEventPhase::Default => |e| &mut e.on_combat_round_end,
+            CombatEventPhase::TacticsCard => |e| &mut e.on_combat_round_end_tactics,
+            _ => panic!("Invalid round type"),
+        },
         |s| &mut s.phase,
         |s| &s.combat,
         |s| s.attacker_casualties.tactics_card.as_ref(),
         |s| s.defender_casualties.tactics_card.as_ref(),
-        false,
     );
     let e = e?;
 
@@ -338,18 +378,19 @@ pub(crate) fn end_combat(game: &mut Game, info: CombatEnd) {
     );
 }
 
+pub(crate) type GetCombatEvent<T> = fn(&mut PersistentEvents) -> &mut CurrentEvent<T>;
+
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn event_with_tactics<T: Clone + PartialEq>(
     game: &mut Game,
     mut event_type: T,
     store_type: impl Fn(T) -> CurrentEventType + Clone + 'static,
-    round_types: &[CombatEventPhase; 3],
-    event: fn(&mut PersistentEvents) -> &mut CurrentEvent<T>,
-    tactics_event: fn(&mut PersistentEvents) -> &mut CurrentEvent<T>,
+    round_types: &[CombatEventPhase],
+    event: fn(&CombatEventPhase) -> GetCombatEvent<T>,
     get_round_type: impl Fn(&mut T) -> &mut CombatEventPhase,
     get_combat: impl Fn(&T) -> &Combat + Clone + 'static,
-    attacker_tactics_card: impl Fn(&T) -> Option<&String>,
-    defender_tactics_card: impl Fn(&T) -> Option<&String>,
-    reveal_card: bool,
+    attacker_tactics_card: impl Fn(&T) -> Option<&u8>,
+    defender_tactics_card: impl Fn(&T) -> Option<&u8>,
 ) -> Option<T> {
     let from = round_types
         .iter()
@@ -360,6 +401,8 @@ pub(crate) fn event_with_tactics<T: Clone + PartialEq>(
 
         let store_type = store_type.clone();
         let get_combat = get_combat.clone();
+        let event = event(t);
+        let reveal_card = matches!(t, CombatEventPhase::RevealTacticsCard);
 
         event_type = (match t {
             CombatEventPhase::Default => game.trigger_current_event(
@@ -368,26 +411,18 @@ pub(crate) fn event_with_tactics<T: Clone + PartialEq>(
                 event_type,
                 store_type,
             ),
-            CombatEventPhase::TacticsCardAttacker => trigger_tactics_event(
-                game,
-                event_type,
-                tactics_event,
-                get_combat,
-                |s| attacker_tactics_card(s),
-                store_type,
-                CombatRole::Attacker,
-                reveal_card,
-            ),
-            CombatEventPhase::TacticsCardDefender => trigger_tactics_event(
-                game,
-                event_type,
-                tactics_event,
-                get_combat,
-                |s| defender_tactics_card(s),
-                store_type,
-                CombatRole::Defender,
-                reveal_card,
-            ),
+            CombatEventPhase::RevealTacticsCard | CombatEventPhase::TacticsCard => {
+                trigger_tactics_event(
+                    game,
+                    event_type,
+                    event,
+                    get_combat,
+                    |s| attacker_tactics_card(s),
+                    |s| defender_tactics_card(s),
+                    store_type,
+                    reveal_card,
+                )
+            }
             CombatEventPhase::Done => panic!("Invalid round type"),
         })?;
     }
@@ -400,37 +435,82 @@ pub(crate) fn trigger_tactics_event<T>(
     event_type: T,
     event: fn(&mut PersistentEvents) -> &mut CurrentEvent<T>,
     get_combat: impl Fn(&T) -> &Combat,
-    get_tactics_card: impl Fn(&T) -> Option<&String>,
+    get_attacker_tactics_card: impl Fn(&T) -> Option<&u8>,
+    get_defender_tactics_card: impl Fn(&T) -> Option<&u8>,
     store_type: impl Fn(T) -> CurrentEventType,
-    role: CombatRole,
     reveal_card: bool,
 ) -> Option<T>
 where
     T: Clone + PartialEq,
 {
-    if let Some(card) = get_tactics_card(&event_type) {
-        let combat = get_combat(&event_type);
+    let attacker_card =
+        get_attacker_tactics_card(&event_type).map(|c| tactics_cards::get_tactics_card(*c));
+    let defender_card =
+        get_defender_tactics_card(&event_type).map(|c| tactics_cards::get_tactics_card(*c));
 
+    if attacker_card.is_none() && defender_card.is_none() {
+        return Some(event_type);
+    }
+
+    let combat = get_combat(&event_type);
+
+    add_tactics_listener(
+        game,
+        reveal_card,
+        attacker_card.as_ref(),
+        combat,
+        CombatRole::Attacker,
+    );
+    add_tactics_listener(
+        game,
+        reveal_card,
+        defender_card.as_ref(),
+        combat,
+        CombatRole::Defender,
+    );
+
+    let players = &combat.players();
+    let result = game.trigger_current_event(players, event, event_type, store_type);
+
+    if let Some(card) = attacker_card {
+        for p in players {
+            card.listeners.deinit(game, *p);
+        }
+    }
+    if let Some(card) = defender_card {
+        for p in players {
+            card.listeners.deinit(game, *p);
+        }
+    }
+
+    result
+}
+
+fn add_tactics_listener(
+    game: &mut Game,
+    reveal_card: bool,
+    card: Option<&TacticsCard>,
+    combat: &Combat,
+    role: CombatRole,
+) {
+    let players = &combat.players();
+
+    if let Some(card) = card {
+        for p in players {
+            match role {
+                // avoid clash in priority - and attacker card requests should come first anyway
+                CombatRole::Attacker => card.listeners.init_with_prio_delta(game, *p, 100),
+                CombatRole::Defender => card.listeners.init(game, *p),
+            }
+        }
         if reveal_card {
             game.add_info_log_item(&format!(
                 "{} reveals Tactics Card {}",
                 game.player_name(combat.player(role)),
-                tactics_cards::get_tactics_card(card).name
+                card.name
             ));
         }
-
-        game.trigger_current_event_with_listener(
-            &combat.players(),
-            event,
-            &tactics_cards::get_tactics_card(card).listeners,
-            event_type,
-            store_type,
-            None,
-            |_| {},
-        )
-    } else {
-        Some(event_type)
-    }
+    };
 }
 
 pub(crate) fn choose_fighter_casualties() -> Builtin {
@@ -581,9 +661,10 @@ pub(crate) fn place_settler() -> Builtin {
                 && p.is_human()
             {
                 let choices: Vec<Position> = p.cities.iter().map(|c| c.position).collect();
-                Some(new_position_request(
+                let needed = 1..=1;
+                Some(PositionRequest::new(
                     choices,
-                    1..=1,
+                    needed,
                     "Select a city to place the free Settler Unit",
                 ))
             } else {
@@ -656,4 +737,29 @@ fn save_carried_units(killed_unit_ids: &[u32], game: &mut Game, player: usize, p
             unit.carrier_id = Some(carrier_id);
         }
     }
+}
+
+pub(crate) fn combat_stats() -> Builtin {
+    Builtin::builder("Combat stats", "")
+        .add_simple_persistent_event_listener(
+            |event| &mut event.on_combat_round_end,
+            11,
+            |game, _player, _name, e| {
+                if let Some(r) = &e.final_result {
+                    let c = &e.combat;
+                    if let Some(winner) = r.winner() {
+                        let p = c.player(winner);
+                        if p == game.current_player_index && !c.is_sea_battle(game) {
+                            current_player_turn_log_mut(game)
+                                .items
+                                .last_mut()
+                                .expect("no action log")
+                                .civil_card_match =
+                                Some(CivilCardMatch::new(CivilCardOpportunity::WinLandBattle));
+                        }
+                    }
+                }
+            },
+        )
+        .build()
 }

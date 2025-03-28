@@ -309,174 +309,187 @@
   "current_player_index": 1,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Dogma",
-            "payment": {
-              "ideas": 2
-            }
-          }
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 3
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/advances/0",
-          "value": "Farming"
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/advances/1",
-          "value": "Fishing"
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/advances/2",
-          "value": "Mining"
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/advances/3",
-          "value": "Myths"
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/advances/4",
-          "value": "State Religion"
-        },
-        {
-          "op": "remove",
-          "path": "/players/1/advances/5"
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/incident_tokens",
-          "value": 3
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/resource_limit/ideas",
-          "value": 7
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/resources/ideas",
-          "value": 6
-        }
-      ]
-    },
-    {
-      "action": {
-        "Playing": {
-          "Construct": {
-            "city_position": "C1",
-            "city_piece": "Temple",
-            "payment": {
-              "wood": 1,
-              "ore": 1
-            },
-            "port_position": null
-          }
-        }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 2
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/cities/0/activations",
-          "value": 0
-        },
-        {
-          "op": "remove",
-          "path": "/players/1/cities/0/city_pieces/temple"
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/resources/ore",
-          "value": 5
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/resources/wood",
-          "value": 5
-        },
-        {
-          "op": "remove",
-          "path": "/players/1/event_info"
-        },
-        {
-          "op": "remove",
-          "path": "/events"
-        }
-      ]
-    },
-    {
-      "action": {
-        "Response": {
-          "ResourceReward": {
-            "culture_tokens": 1
-          }
-        }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/events/0/handler/origin/Advance",
-          "value": "Myths"
-        },
-        {
-          "op": "replace",
-          "path": "/events/0/handler/priority",
-          "value": 1
-        },
-        {
-          "op": "add",
-          "path": "/events/0/handler/request/ResourceReward",
-          "value": {
-            "name": "Select Temple bonus",
-            "reward": {
-              "conversions": [
+          "players": [
+            {
+              "index": 0,
+              "items": [
                 {
-                  "from": [
-                    {
-                      "mood_tokens": 1
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Dogma",
+                        "payment": {
+                          "ideas": 2
+                        }
+                      }
                     }
-                  ],
-                  "to": {
-                    "culture_tokens": 1
                   },
-                  "type": "Unlimited"
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 3
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/0",
+                      "value": "Farming"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/1",
+                      "value": "Fishing"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/2",
+                      "value": "Mining"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/3",
+                      "value": "Myths"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/4",
+                      "value": "State Religion"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/1/advances/5"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/incident_tokens",
+                      "value": 3
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/resource_limit/ideas",
+                      "value": 7
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/resources/ideas",
+                      "value": 6
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Construct": {
+                        "city_position": "C1",
+                        "city_piece": "Temple",
+                        "payment": {
+                          "wood": 1,
+                          "ore": 1
+                        },
+                        "port_position": null
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 2
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/cities/0/activations",
+                      "value": 0
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/1/cities/0/city_pieces/temple"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/resources/ore",
+                      "value": 5
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/resources/wood",
+                      "value": 5
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/1/event_info"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ResourceReward": {
+                        "culture_tokens": 1
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/events/0/handler/origin/Advance",
+                      "value": "Myths"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/events/0/handler/priority",
+                      "value": 1
+                    },
+                    {
+                      "op": "add",
+                      "path": "/events/0/handler/request/ResourceReward",
+                      "value": {
+                        "name": "Select Temple bonus",
+                        "reward": {
+                          "conversions": [
+                            {
+                              "from": [
+                                {
+                                  "mood_tokens": 1
+                                }
+                              ],
+                              "to": {
+                                "culture_tokens": 1
+                              },
+                              "type": "Unlimited"
+                            }
+                          ],
+                          "default": {
+                            "mood_tokens": 1
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/0/handler/request/SelectAdvance"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/events/0/last_priority_used",
+                      "value": 1
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/resources/culture_tokens",
+                      "value": 9
+                    }
+                  ]
                 }
-              ],
-              "default": {
-                "mood_tokens": 1
-              }
+              ]
             }
-          }
-        },
-        {
-          "op": "remove",
-          "path": "/events/0/handler/request/SelectAdvance"
-        },
-        {
-          "op": "replace",
-          "path": "/events/0/last_priority_used",
-          "value": 1
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/resources/culture_tokens",
-          "value": 9
+          ]
         }
       ]
     }

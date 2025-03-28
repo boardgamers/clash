@@ -18,6 +18,8 @@ use std::ops::RangeInclusive;
 
 pub(crate) type AbilityInitializer = Box<dyn Fn(&mut Game, usize)>;
 
+pub(crate) type AbilityInitializerWithPrioDelta = Box<dyn Fn(&mut Game, usize, i32)>;
+
 pub struct SelectedChoice<C> {
     pub player_index: usize,
     pub player_name: String,
@@ -37,14 +39,38 @@ impl<C> SelectedChoice<C> {
 }
 
 pub struct AbilityListeners {
-    pub initializer: AbilityInitializer,
-    pub deinitializer: AbilityInitializer,
-    pub one_time_initializer: AbilityInitializer,
-    pub undo_deinitializer: AbilityInitializer,
+    initializer: AbilityInitializerWithPrioDelta,
+    deinitializer: AbilityInitializer,
+    one_time_initializer: AbilityInitializer,
+    undo_deinitializer: AbilityInitializer,
+}
+
+impl AbilityListeners {
+    pub fn init(&self, game: &mut Game, player_index: usize) {
+        self.init_with_prio_delta(game, player_index, 0);
+    }
+
+    pub fn init_with_prio_delta(&self, game: &mut Game, player_index: usize, prio_delta: i32) {
+        (self.initializer)(game, player_index, prio_delta);
+    }
+
+    pub fn deinit(&self, game: &mut Game, player_index: usize) {
+        (self.deinitializer)(game, player_index);
+    }
+
+    pub fn undo(&self, game: &mut Game, player_index: usize) {
+        self.deinit(game, player_index);
+        (self.undo_deinitializer)(game, player_index);
+    }
+
+    pub fn one_time_init(&self, game: &mut Game, player_index: usize) {
+        self.init(game, player_index);
+        (self.one_time_initializer)(game, player_index);
+    }
 }
 
 pub(crate) struct AbilityInitializerBuilder {
-    initializers: Vec<AbilityInitializer>,
+    initializers: Vec<AbilityInitializerWithPrioDelta>,
     deinitializers: Vec<AbilityInitializer>,
     one_time_initializers: Vec<AbilityInitializer>,
     undo_deinitializers: Vec<AbilityInitializer>,
@@ -62,7 +88,7 @@ impl AbilityInitializerBuilder {
 
     pub(crate) fn add_ability_initializer<F>(&mut self, initializer: F)
     where
-        F: Fn(&mut Game, usize) + 'static,
+        F: Fn(&mut Game, usize, i32) + 'static,
     {
         self.initializers.push(Box::new(initializer));
     }
@@ -90,7 +116,7 @@ impl AbilityInitializerBuilder {
 
     pub(crate) fn build(self) -> AbilityListeners {
         AbilityListeners {
-            initializer: join_ability_initializers(self.initializers),
+            initializer: join_ability_initializers_with_prio_delta(self.initializers),
             deinitializer: join_ability_initializers(self.deinitializers),
             one_time_initializer: join_ability_initializers(self.one_time_initializers),
             undo_deinitializer: join_ability_initializers(self.undo_deinitializers),
@@ -105,7 +131,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
 
     fn add_ability_initializer<F>(mut self, initializer: F) -> Self
     where
-        F: Fn(&mut Game, usize) + 'static,
+        F: Fn(&mut Game, usize, i32) + 'static,
     {
         self.builder().add_ability_initializer(initializer);
         self
@@ -475,12 +501,16 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.add_multi_choice_reward_request_listener::<E, Position, PositionRequest, V>(
             event,
             priority,
-            |r| r,
+            |r| &r.request,
             CurrentEventRequest::SelectPositions,
             |request, action| {
                 if let CurrentEventRequest::SelectPositions(request) = &request {
                     if let EventResponse::SelectPositions(reward) = action {
-                        return (request.choices.clone(), reward, request.needed.clone());
+                        return (
+                            request.request.choices.clone(),
+                            reward,
+                            request.request.needed.clone(),
+                        );
                     }
                 }
                 panic!("Position request expected");
@@ -562,12 +592,16 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.add_multi_choice_reward_request_listener::<E, HandCard, HandCardsRequest, V>(
             event,
             priority,
-            |r| r,
+            |r| &r.request,
             CurrentEventRequest::SelectHandCards,
             |request, action| {
                 if let CurrentEventRequest::SelectHandCards(request) = &request {
                     if let EventResponse::SelectHandCards(choices) = action {
-                        return (request.choices.clone(), choices, request.needed.clone());
+                        return (
+                            request.request.choices.clone(),
+                            choices,
+                            request.request.needed.clone(),
+                        );
                     }
                 }
                 panic!("Hand Cards request expected");
@@ -765,7 +799,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     fn add_custom_action(self, action: CustomActionType) -> Self {
         let deinitializer_action = action.clone();
         let key = self.get_key().clone();
-        self.add_ability_initializer(move |game, player_index| {
+        self.add_ability_initializer(move |game, player_index, _prio_delta| {
             let player = &mut game.players[player_index];
             player.custom_actions.insert(action.clone(), key.clone());
         })
@@ -784,6 +818,18 @@ fn join_ability_initializers(setup: Vec<AbilityInitializer>) -> AbilityInitializ
     })
 }
 
+fn join_ability_initializers_with_prio_delta(
+    setup: Vec<AbilityInitializerWithPrioDelta>,
+) -> AbilityInitializerWithPrioDelta {
+    Box::new(
+        move |game: &mut Game, player_index: usize, prio_delta: i32| {
+            for initializer in &setup {
+                initializer(game, player_index, prio_delta);
+            }
+        },
+    )
+}
+
 fn add_player_event_listener<S, T, U, V, W, E, F>(
     setup: S,
     event: E,
@@ -799,12 +845,12 @@ where
 {
     let key = setup.get_key().clone();
     let deinitialize_event = event.clone();
-    let initializer = move |game: &mut Game, player_index: usize| {
+    let initializer = move |game: &mut Game, player_index: usize, prio_delta: i32| {
         event(&mut game.players[player_index].events)
             .inner
             .as_mut()
             .expect("events should be set")
-            .add_listener_mut(listener.clone(), priority, key.clone());
+            .add_listener_mut(listener.clone(), priority + prio_delta, key.clone());
     };
     let key = setup.get_key().clone();
     let deinitializer = move |game: &mut Game, player_index: usize| {

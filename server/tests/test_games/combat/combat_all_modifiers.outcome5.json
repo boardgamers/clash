@@ -18,11 +18,11 @@
         "CombatRoundEnd": {
           "attacker_casualties": {
             "fighters": 1,
-            "tactics_card": "Peltasts"
+            "tactics_card": 1
           },
           "defender_casualties": {
             "fighters": 2,
-            "tactics_card": "Encircled"
+            "tactics_card": 2
           },
           "can_retreat": false,
           "final_result": "AttackerWins",
@@ -282,77 +282,93 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "destination": "C1"
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
+      "rounds": [
+        {
+          "players": [
             {
-              "ore": 1
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5
+                        ],
+                        "destination": "C1"
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "ore": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {},
+                        {
+                          "ore": 2
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "ore": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ActionCard": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ActionCard": 2
+                        }
+                      ]
+                    }
+                  },
+                  "civil_card_match": {
+                    "opportunity": "WinLandBattle"
+                  }
+                }
+              ]
             }
           ]
         }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
-            {},
-            {
-              "ore": 2
-            }
-          ]
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
-            {
-              "ore": 1
-            }
-          ]
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectHandCards": [
-            {
-              "ActionCard": 1
-            }
-          ]
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectHandCards": [
-            {
-              "ActionCard": 2
-            }
-          ]
-        }
-      }
+      ]
     }
   ],
   "action_log_index": 6,
@@ -380,8 +396,8 @@
       "Player1 reveals Tactics Card Peltasts",
       "Player2 reveals Tactics Card Encircled",
       "Player1 rolled 6 (Infantry, +1 combat value), 6 (Infantry, no bonus), 6 (Infantry, no bonus), 1 (Leader, re-roll), 1 (Leader, re-roll), 1 (Leader, re-roll), 1 (Leader, re-roll), 1 (Leader, re-roll), 2 (Cavalry, +2 combat value) for combined combat value of 24 and gets 2 hits against defending units.",
-      "Player2 rolled 6 (Infantry, +1 combat value), 1 (Leader, no bonus), 3 (Elephant, no bonus) for combined combat value of 12 and gets 1 hits against attacking units.",
       "Player1 used the following combat modifiers: steel weapons added 1 combat value, Peltasts rolled a 6 and ignored a hit",
+      "Player2 rolled 6 (Infantry, +1 combat value), 1 (Leader, no bonus), 3 (Elephant, no bonus) for combined combat value of 12 and gets 1 hits against attacking units.",
       "Player2 used the following combat modifiers: fortress added one extra die, steel weapons added 1 combat value",
       "Encircled cannot do damage - opponent has fewer losses",
       "Player1 has to remove 1 of their attacking units"

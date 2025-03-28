@@ -1,10 +1,9 @@
-#![allow(clippy::if_not_else)]
-
 use crate::construct::Construct;
 use crate::content::action_cards::get_civil_card;
 use crate::cultural_influence::influence_culture_boost_cost;
-use crate::game::ActionLogItem;
 use crate::player::Player;
+
+use crate::action_card::CivilCardMatch;
 use crate::playing_actions::{Collect, IncreaseHappiness, InfluenceCultureAttempt, Recruit};
 use crate::{
     action::Action,
@@ -16,7 +15,82 @@ use crate::{
     utils,
 };
 use itertools::Itertools;
+use json_patch::PatchOperation;
 use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub struct ActionLogAge {
+    pub rounds: Vec<ActionLogRound>,
+}
+
+impl ActionLogAge {
+    #[must_use]
+    pub(crate) fn new() -> Self {
+        Self { rounds: Vec::new() }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub struct ActionLogRound {
+    pub players: Vec<ActionLogPlayer>,
+}
+
+impl ActionLogRound {
+    #[must_use]
+    pub(crate) fn new() -> Self {
+        Self {
+            players: Vec::new(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub struct ActionLogPlayer {
+    pub index: usize,
+    pub items: Vec<ActionLogItem>,
+}
+
+impl ActionLogPlayer {
+    #[must_use]
+    pub(crate) fn new(player: usize) -> Self {
+        Self {
+            items: Vec::new(),
+            index: player,
+        }
+    }
+
+    pub(crate) fn item(&self, game: &Game) -> &ActionLogItem {
+        &self.items[game.action_log_index]
+    }
+
+    pub(crate) fn clear_undo(&mut self) {
+        for item in &mut self.items {
+            item.undo.clear();
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub struct ActionLogItem {
+    pub action: Action,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub undo: Vec<PatchOperation>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub civil_card_match: Option<CivilCardMatch>,
+}
+
+impl ActionLogItem {
+    #[must_use]
+    pub fn new(action: Action) -> Self {
+        Self {
+            action,
+            undo: Vec::new(),
+            civil_card_match: None,
+        }
+    }
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct LogSliceOptions {
@@ -66,10 +140,25 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             format_cultural_influence_attempt_log_item(game, player.index, &player_name, c)
         }
         PlayingAction::Custom(action) => action.format_log_item(game, player, &player_name),
-        PlayingAction::ActionCard(a) => format!(
-            "{player_name} played the action card {}",
-            get_civil_card(*a).name
-        ),
+        PlayingAction::ActionCard(a) => {
+            let card = get_civil_card(*a);
+            let pile = card.action_type.cost;
+            let cost = if pile.is_empty() {
+                ""
+            } else {
+                &format!(" for {pile}")
+            };
+            let action = if card.action_type.free {
+                ""
+            } else {
+                " as a regular action"
+            };
+
+            format!(
+                "{player_name} played the action card {}{cost}{action}",
+                card.name,
+            )
+        }
         PlayingAction::WonderCard(name) => format!("{player_name} played the wonder card {name}",),
         PlayingAction::EndTurn => format!(
             "{player_name} ended their turn{}",
@@ -96,10 +185,10 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     } else {
         game.player_name(target_player_index)
     };
-    let city = if starting_city_position != target_city_position {
-        format!(" with the city at {starting_city_position}")
-    } else {
+    let city = if starting_city_position == target_city_position {
         String::new()
+    } else {
+        format!(" with the city at {starting_city_position}")
     };
     let range_boost_cost = influence_culture_boost_cost(
         game,
@@ -111,10 +200,10 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     )
     .range_boost_cost;
     // this cost can't be changed by the player
-    let cost = if !range_boost_cost.is_free() {
-        format!(" and paid {} to boost the range", range_boost_cost.default)
-    } else {
+    let cost = if range_boost_cost.is_free() {
         String::new()
+    } else {
+        format!(" and paid {} to boost the range", range_boost_cost.default)
     };
     format!("{player_name} tried to influence culture the {city_piece:?} in the city at {target_city_position} by {player}{city}{cost}")
 }
@@ -311,11 +400,44 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
     }
 }
 
+pub(crate) fn add_action_log_item(game: &mut Game, item: Action) {
+    let i = game.action_log_index;
+    let l = &mut current_player_turn_log_mut(game).items;
+    if i < l.len() {
+        // remove items from undo
+        l.drain(i..);
+    }
+    l.push(ActionLogItem::new(item));
+    game.action_log_index += 1;
+}
+
+///
+/// # Panics
+/// Panics if the log entry does not exist
 #[must_use]
-pub fn current_turn_log(game: &Game) -> Vec<ActionLogItem> {
-    let from = game.action_log[0..game.action_log_index]
-        .iter()
-        .rposition(|item| matches!(item.action, Action::Playing(PlayingAction::EndTurn)))
-        .unwrap_or(0);
-    game.action_log[from..game.action_log_index].to_vec()
+pub fn current_player_turn_log(game: &Game) -> &ActionLogPlayer {
+    game.action_log
+        .last()
+        .expect("state should exist")
+        .rounds
+        .last()
+        .expect("state should exist")
+        .players
+        .last()
+        .expect("state should exist")
+}
+
+///
+/// # Panics
+/// Panics if the log entry does not exist
+pub fn current_player_turn_log_mut(game: &mut Game) -> &mut ActionLogPlayer {
+    game.action_log
+        .last_mut()
+        .expect("age log should exist")
+        .rounds
+        .last_mut()
+        .expect("round log should exist")
+        .players
+        .last_mut()
+        .expect("player log should exist")
 }

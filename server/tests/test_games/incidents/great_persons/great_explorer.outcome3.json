@@ -406,108 +406,121 @@
   "current_player_index": 1,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Storage",
-            "payment": {
-              "food": 2
-            }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
+      "rounds": [
+        {
+          "players": [
             {
-              "culture_tokens": 1
-            }
-          ]
-        }
-      }
-    },
-    {
-      "action": {
-        "Playing": {
-          "ActionCard": 118
-        }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 2
-        },
-        {
-          "op": "add",
-          "path": "/players/1/action_cards",
-          "value": [
-            118
-          ]
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/advances/1",
-          "value": "Mining"
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/advances/2",
-          "value": "Storage"
-        },
-        {
-          "op": "remove",
-          "path": "/players/1/advances/3"
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/resources/mood_tokens",
-          "value": 1
-        },
-        {
-          "op": "remove",
-          "path": "/events"
-        }
-      ]
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectPositions": [
-            "B6"
-          ]
-        }
-      },
-      "undo": [
-        {
-          "op": "add",
-          "path": "/events/0/handler",
-          "value": {
-            "origin": {
-              "CivilCard": 118
-            },
-            "priority": 9,
-            "request": {
-              "SelectPositions": {
-                "choices": [
-                  "D5",
-                  "B6",
-                  "F6"
-                ],
-                "description": "Choose a region to explore",
-                "needed": {
-                  "end": 1,
-                  "start": 0
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "food": 2
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 118
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 2
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/1/action_cards",
+                      "value": [
+                        118
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/1",
+                      "value": "Mining"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/2",
+                      "value": "Storage"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/1/advances/3"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/resources/mood_tokens",
+                      "value": 1
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": [
+                        "B6"
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events/0/handler",
+                      "value": {
+                        "origin": {
+                          "CivilCard": 118
+                        },
+                        "priority": 9,
+                        "request": {
+                          "SelectPositions": {
+                            "choices": [
+                              "B6",
+                              "D5",
+                              "F6"
+                            ],
+                            "description": "Choose a region to explore",
+                            "needed": {
+                              "end": 1,
+                              "start": 0
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/1"
+                    }
+                  ]
                 }
-              }
+              ]
             }
-          }
-        },
-        {
-          "op": "remove",
-          "path": "/events/1"
+          ]
         }
       ]
     }
@@ -526,7 +539,7 @@
       "Player2 gained Great Explorer for 1 culture token"
     ],
     [
-      "Player2 played the action card Great Explorer",
+      "Player2 played the action card Great Explorer as a regular action",
       "Player2 gained Fishing",
       "Player gained 1 mood token as advance bonus"
     ],

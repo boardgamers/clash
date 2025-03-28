@@ -1,0 +1,287 @@
+{
+  "state": {
+    "Movement": {
+      "movement_actions_left": 2,
+      "moved_units": [
+        0
+      ]
+    }
+  },
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 3,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C2"
+        }
+      ],
+      "units": [
+        {
+          "position": "C2",
+          "unit_type": "Cavalry",
+          "id": 1
+        },
+        {
+          "position": "C2",
+          "unit_type": "Leader",
+          "id": 2
+        },
+        {
+          "position": "C2",
+          "unit_type": "Elephant",
+          "id": 3
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 6
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 7
+        }
+      ],
+      "civilization": "test0",
+      "advances": [
+        "Farming",
+        "Mining",
+        "Tactics"
+      ],
+      "incident_tokens": 1,
+      "next_unit_id": 8
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Angry",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C1"
+        }
+      ],
+      "units": [
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 1
+        }
+      ],
+      "civilization": "test1",
+      "advances": [
+        "Fanaticism",
+        "Farming",
+        "Mining",
+        "Tactics"
+      ],
+      "incident_tokens": 3,
+      "next_unit_id": 2
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Water"
+      ],
+      [
+        "A3",
+        {
+          "Exhausted": "Forest"
+        }
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "D2",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0
+                        ],
+                        "destination": "C1"
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ActionCard": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ActionCard": 9
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "action_log_index": 3,
+  "log": [
+    [
+      "Player1 marched 1 infantry from C2 to C1"
+    ],
+    [
+      "Combat round 1"
+    ],
+    [
+      "Player1 played a Tactics Card"
+    ],
+    [
+      "Player2 played a Tactics Card",
+      "Player1 reveals Tactics Card Peltasts",
+      "Player2 reveals Tactics Card High Ground",
+      "Player1 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against defending units.",
+      "Player1 used the following combat modifiers: Peltasts rolled a 6 and ignored a hit, High Ground prevents opponent from using combat abilities",
+      "Player2 rolled 6 (Infantry, +1 combat value), 6 (Infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units.",
+      "Player1 has to remove all of their attacking units",
+      "Player1 removed 1 infantry",
+      "Player2 has to remove 1 of their defending units",
+      "Player2 removed 1 infantry",
+      "Defender wins"
+    ]
+  ],
+  "undo_limit": 3,
+  "actions_left": 2,
+  "round": 2,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "dice_roll_log": [
+    11,
+    11,
+    11,
+    11
+  ],
+  "dropped_players": [],
+  "wonders_left": [
+    "Pyramids"
+  ],
+  "action_cards_left": []
+}

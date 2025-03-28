@@ -340,6 +340,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn test_is_valid_payment() {
         let test_cases = vec![
             ValidPaymentTestCase {

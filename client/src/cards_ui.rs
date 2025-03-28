@@ -2,14 +2,17 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::custom_phase_ui::MultiSelection;
 use crate::dialog_ui::ok_button;
 use crate::layout_ui::{bottom_centered_text, left_mouse_button_pressed_in_rect};
+use crate::log_ui::break_text;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
 use crate::tooltip::show_tooltip_for_rect;
+use itertools::Itertools;
 use macroquad::color::BLACK;
-use macroquad::math::{vec2, Rect};
+use macroquad::math::{vec2, Rect, Vec2};
 use macroquad::prelude::{draw_rectangle, draw_rectangle_lines, Color, GREEN, RED, YELLOW};
 use server::action::Action;
 use server::card::{hand_cards, HandCard, HandCardType};
+use server::content::action_cards::spy::validate_if_spy;
 use server::content::action_cards::{get_action_card, get_civil_card};
 use server::content::custom_phase_actions::EventResponse;
 use server::content::wonders::get_wonder;
@@ -48,42 +51,88 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
         None
     };
 
+    let swap_cards = selection
+        .iter()
+        .flat_map(|s| {
+            s.request
+                .choices
+                .clone()
+                .into_iter()
+                .filter(|c| !cards.contains(c))
+        })
+        .collect_vec();
+
+    if let Some(value) = draw_cards(rc, &cards, selection, size, 0.) {
+        return value;
+    }
+    if let Some(value) = draw_cards(rc, &swap_cards, selection, size, -300.) {
+        return value;
+    }
+    StateUpdate::None
+}
+
+fn draw_cards(
+    rc: &RenderContext,
+    cards: &Vec<HandCard>,
+    selection: Option<&MultiSelection<HandCard>>,
+    size: Vec2,
+    x_offset: f32,
+) -> Option<StateUpdate> {
+    let screen = rc.state.screen_size;
     for pass in 0..2 {
         let mut y = (cards.len() as f32 * -size.y) / 2.;
-        for card in &cards {
-            let screen = rc.state.screen_size;
-            let pos = vec2(screen.x, screen.y / 2.0) + vec2(-size.x, y);
-
-            let c = get_card_object(card);
-
-            if pass == 0 {
-                draw_rectangle(pos.x, pos.y, size.x, size.y, c.color);
-                let (thickness, border) = highlight(rc, &c, selection);
-                draw_rectangle_lines(pos.x, pos.y, size.x, size.y, thickness, border);
-
-                rc.state.draw_text(&c.name, pos.x + 10., pos.y + 22.);
-            } else {
-                let rect = Rect::new(pos.x, pos.y, size.x, size.y);
-
-                // tooltip should be shown on top of everything
-                show_tooltip_for_rect(rc, &c.description, rect);
-
-                if left_mouse_button_pressed_in_rect(rect, rc) {
-                    if let Some(s) = selection {
-                        return StateUpdate::OpenDialog(ActiveDialog::HandCardsRequest(
-                            s.clone().toggle(c.id),
-                        ));
-                    }
-                    if can_play_card(rc, card) {
-                        return play_card(card);
-                    }
-                }
+        for card in cards {
+            if let Some(value) = draw_card(
+                rc,
+                size,
+                selection,
+                pass,
+                vec2(screen.x, screen.y / 2.0) + vec2(-size.x + x_offset, y),
+                card,
+            ) {
+                return Some(value);
             }
 
             y += size.y;
         }
     }
-    StateUpdate::None
+    None
+}
+
+fn draw_card(
+    rc: &RenderContext,
+    size: Vec2,
+    selection: Option<&MultiSelection<HandCard>>,
+    pass: i32,
+    pos: Vec2,
+    card: &HandCard,
+) -> Option<StateUpdate> {
+    let c = get_card_object(card);
+
+    if pass == 0 {
+        draw_rectangle(pos.x, pos.y, size.x, size.y, c.color);
+        let (thickness, border) = highlight(rc, &c, selection);
+        draw_rectangle_lines(pos.x, pos.y, size.x, size.y, thickness, border);
+
+        rc.state.draw_text(&c.name, pos.x + 10., pos.y + 22.);
+    } else {
+        let rect = Rect::new(pos.x, pos.y, size.x, size.y);
+
+        // tooltip should be shown on top of everything
+        show_tooltip_for_rect(rc, &c.description, rect, 150.);
+
+        if left_mouse_button_pressed_in_rect(rect, rc) {
+            if let Some(s) = selection {
+                return Some(StateUpdate::OpenDialog(ActiveDialog::HandCardsRequest(
+                    s.clone().toggle(c.id),
+                )));
+            }
+            if can_play_card(rc, card) {
+                return Some(play_card(card));
+            }
+        }
+    }
+    None
 }
 
 fn can_play_card(rc: &RenderContext, card: &HandCard) -> bool {
@@ -147,23 +196,36 @@ fn get_card_object(card: &HandCard) -> HandCardObject {
             if !cost.is_empty() {
                 description.push(format!("Cost: {cost}"));
             }
-            description.push(a.civil_card.description);
+            break_text(a.civil_card.description.as_str(), 30, &mut description);
             if let Some(t) = a.tactics_card {
                 description.extend(vec![
                     format!("Tactics: {}", t.name),
-                    format!("Unit Type: {:?}", t.fighter_requirement),
+                    format!(
+                        "Unit Types: {}",
+                        t.fighter_requirement
+                            .into_iter()
+                            .map(|f| format!("{f:?}"))
+                            .join(", ")
+                    ),
                     format!(
                         "Role: {:?}",
                         match t.role_requirement {
-                            None => "None".to_string(),
+                            None => "Attacker or Defender".to_string(),
                             Some(r) => match r {
                                 CombatRole::Attacker => "Attacker".to_string(),
                                 CombatRole::Defender => "Defender".to_string(),
                             },
                         }
                     ),
-                    t.description.clone(),
+                    format!(
+                        "Location: {:?}",
+                        match t.location_requirement {
+                            None => "Any".to_string(),
+                            Some(l) => format!("{l:?}"),
+                        }
+                    ),
                 ]);
+                break_text(t.description.as_str(), 30, &mut description);
             }
             HandCardObject::new(
                 card.clone(),
@@ -207,7 +269,11 @@ pub fn select_cards_dialog(rc: &RenderContext, s: &MultiSelection<HandCard>) -> 
 
     if ok_button(
         rc,
-        crate::custom_phase_ui::multi_select_tooltip(s, s.request.is_valid(&s.selected), "cards"),
+        crate::custom_phase_ui::multi_select_tooltip(
+            s,
+            s.request.is_valid(&s.selected) && validate_if_spy(&s.selected, rc.game),
+            "cards",
+        ),
     ) {
         StateUpdate::response(EventResponse::SelectHandCards(s.selected.clone()))
     } else {

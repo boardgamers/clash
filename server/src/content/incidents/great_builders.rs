@@ -11,7 +11,7 @@ use crate::incident::PermanentIncidentEffect;
 use crate::player::Player;
 use crate::playing_actions::{ActionType, PlayingActionType};
 use crate::utils::remove_element;
-use crate::wonder::{cities_for_wonder, play_wonder_card, WonderCardInfo, WonderDiscount};
+use crate::wonder::{cities_for_wonder, on_play_wonder_card, WonderCardInfo, WonderDiscount};
 
 pub(crate) fn great_engineer() -> ActionCard {
     let groups = &["Construction"];
@@ -116,7 +116,7 @@ pub(crate) fn great_architect() -> ActionCard {
             let HandCard::Wonder(name) = &s.choice[0] else {
                 panic!("Invalid choice");
             };
-            play_wonder_card(
+            on_play_wonder_card(
                 game,
                 s.player_index,
                 WonderCardInfo::new(name.clone(), ARCHITECT_DISCOUNT),

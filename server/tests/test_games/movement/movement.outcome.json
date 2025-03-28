@@ -192,30 +192,43 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              4
-            ],
-            "destination": "B3"
-          }
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "replace",
-          "path": "/players/0/units/4/position",
-          "value": "B2"
-        },
-        {
-          "op": "replace",
-          "path": "/state/Movement/movement_actions_left",
-          "value": 2
-        },
-        {
-          "op": "remove",
-          "path": "/state/Movement/moved_units"
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          4
+                        ],
+                        "destination": "B3"
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/4/position",
+                      "value": "B2"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/state/Movement/movement_actions_left",
+                      "value": 2
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/state/Movement/moved_units"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       ]
     }

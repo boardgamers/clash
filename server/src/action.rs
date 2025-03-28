@@ -1,3 +1,4 @@
+use crate::action_card::on_play_action_card;
 use crate::advance::on_advance;
 use crate::combat::{combat_loop, move_with_possible_combat, start_combat};
 use crate::combat_listeners::{combat_round_end, combat_round_start, end_combat};
@@ -6,14 +7,15 @@ use crate::content::custom_phase_actions::{CurrentEventType, EventResponse};
 use crate::cultural_influence::ask_for_cultural_influence_payment;
 use crate::explore::{ask_explore_resolution, move_to_unexplored_tile};
 use crate::game::GameState::{Finished, Movement, Playing};
-use crate::game::{ActionLogItem, Game, GameState};
-use crate::incident::trigger_incident;
+use crate::game::{Game, GameState};
+use crate::incident::on_trigger_incident;
 use crate::log;
+use crate::log::{add_action_log_item, current_player_turn_log_mut};
 use crate::map::Terrain::Unexplored;
 use crate::movement::{
     get_move_state, has_movable_units, move_units_destinations, CurrentMove, MoveState,
 };
-use crate::playing_actions::{play_action_card, PlayingAction};
+use crate::playing_actions::PlayingAction;
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
 use crate::resource_pile::ResourcePile;
@@ -21,7 +23,7 @@ use crate::status_phase::play_status_phase;
 use crate::undo::{clean_patch, redo, to_serde_value, undo};
 use crate::unit::MovementAction::{Move, Stop};
 use crate::unit::{get_current_move, MovementAction};
-use crate::wonder::{draw_wonder_card, play_wonder_card};
+use crate::wonder::{draw_wonder_card, on_play_wonder_card};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -80,7 +82,8 @@ pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Ga
     if old_player != new_player {
         game.lock_undo(); // don't undo player change
     } else if add_undo && game.can_undo() {
-        game.action_log[game.action_log_index - 1].undo = clean_patch(patch.0);
+        let i = game.action_log_index - 1;
+        current_player_turn_log_mut(&mut game).items[i].undo = clean_patch(patch.0);
     }
     game
 }
@@ -113,14 +116,6 @@ fn execute_without_undo(mut game: Game, action: Action, player_index: usize) -> 
     }
     check_for_waste(&mut game);
     game
-}
-
-fn add_action_log_item(game: &mut Game, item: Action) {
-    if game.action_log_index < game.action_log.len() {
-        game.action_log.drain(game.action_log_index..);
-    }
-    game.action_log.push(ActionLogItem::new(item));
-    game.action_log_index += 1;
 }
 
 pub(crate) fn execute_custom_phase_action(
@@ -156,7 +151,7 @@ pub(crate) fn execute_custom_phase_action(
             end_combat(game, r);
         }
         StatusPhase(s) => play_status_phase(game, s),
-        TurnStart => game.start_turn(),
+        TurnStart => game.on_start_turn(),
         Advance(a) => {
             on_advance(game, player_index, a);
         }
@@ -166,9 +161,9 @@ pub(crate) fn execute_custom_phase_action(
         Recruit(r) => {
             on_recruit(game, player_index, r);
         }
-        Incident(i) => trigger_incident(game, i),
-        ActionCard(a) => play_action_card(game, player_index, a),
-        WonderCard(w) => play_wonder_card(game, player_index, w),
+        Incident(i) => on_trigger_incident(game, i),
+        ActionCard(a) => on_play_action_card(game, player_index, a),
+        WonderCard(w) => on_play_wonder_card(game, player_index, w),
     }
 
     if let Some(mut s) = game.events.pop() {
@@ -204,7 +199,7 @@ fn execute_regular_action(game: &mut Game, action: Action, player_index: usize) 
                 execute_movement_action(game, m, player_index);
             } else {
                 let action = action.playing().expect("action should be a playing action");
-                action.execute(game, player_index);
+                action.execute(game, player_index, false);
             }
         }
         Movement(_) => {

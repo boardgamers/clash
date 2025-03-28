@@ -241,7 +241,7 @@ pub(crate) fn can_construct_wonder(
     Ok(cost)
 }
 
-pub(crate) fn play_wonder_card(game: &mut Game, player_index: usize, i: WonderCardInfo) {
+pub(crate) fn on_play_wonder_card(game: &mut Game, player_index: usize, i: WonderCardInfo) {
     let _ = game.trigger_current_event(
         &[player_index],
         |e| &mut e.on_play_wonder_card,
@@ -281,9 +281,10 @@ pub(crate) fn build_wonder() -> Builtin {
                 let p = game.get_player(player_index);
                 let choices = cities_for_wonder(&i.name, game, p, &i.discount);
 
+                let needed = 1..=1;
                 Some(PositionRequest::new(
                     choices,
-                    1..=1,
+                    needed,
                     "Select city to build wonder",
                 ))
             },
@@ -348,8 +349,7 @@ pub(crate) fn construct_wonder(
     city_position: Position,
     player_index: usize,
 ) {
-    (wonder.listeners.initializer)(game, player_index);
-    (wonder.listeners.one_time_initializer)(game, player_index);
+    wonder.listeners.one_time_init(game, player_index);
     let player = &mut game.players[player_index];
     player.wonders_build.push(wonder.name.clone());
     player

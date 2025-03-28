@@ -258,38 +258,51 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Custom": {
-            "Sports": {
-              "city_position": "C2",
-              "payment": {
-                "culture_tokens": 1
-              }
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "Sports": {
+                          "city_position": "C2",
+                          "payment": {
+                            "culture_tokens": 1
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 3
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/1/angry_activation",
+                      "value": true
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/1/mood_state",
+                      "value": "Angry"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/culture_tokens",
+                      "value": 9
+                    }
+                  ]
+                }
+              ]
             }
-          }
-        }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 3
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/1/angry_activation",
-          "value": true
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/1/mood_state",
-          "value": "Angry"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/culture_tokens",
-          "value": 9
+          ]
         }
       ]
     }
