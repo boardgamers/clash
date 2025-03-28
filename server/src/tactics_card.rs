@@ -53,6 +53,13 @@ pub enum FighterRequirement {
     Ship,
 }
 
+#[derive(Debug, Clone)]
+pub enum CombatLocation {
+    City,
+    Sea,
+    Land,
+}
+
 #[derive(Clone, PartialEq, Eq, Copy)]
 pub enum CombatRole {
     Attacker,
@@ -74,6 +81,7 @@ pub struct TacticsCard {
     pub description: String,
     pub fighter_requirement: Vec<FighterRequirement>,
     pub role_requirement: Option<CombatRole>,
+    pub location_requirement: Option<CombatLocation>,
     pub checker: Option<TacticsChecker>,
     pub listeners: AbilityListeners,
 }
@@ -92,6 +100,7 @@ pub struct TacticsCardBuilder {
     pub target: TacticsCardTarget,
     pub fighter_requirement: Vec<FighterRequirement>,
     pub role_requirement: Option<CombatRole>,
+    pub location_requirement: Option<CombatLocation>,
     pub checker: Option<TacticsChecker>,
     builder: AbilityInitializerBuilder,
 }
@@ -105,6 +114,7 @@ impl TacticsCardBuilder {
             fighter_requirement: vec![],
             target: TacticsCardTarget::ActivePlayer,
             role_requirement: None,
+            location_requirement: None,
             checker: None,
             builder: AbilityInitializerBuilder::new(),
         }
@@ -122,6 +132,11 @@ impl TacticsCardBuilder {
 
     pub(crate) fn fighter_requirement(mut self, fighter_requirement: FighterRequirement) -> Self {
         self.fighter_requirement.push(fighter_requirement);
+        self
+    }
+    
+    pub(crate) fn location_requirement(mut self, location_requirement: CombatLocation) -> Self {
+        self.location_requirement = Some(location_requirement);
         self
     }
 
@@ -213,6 +228,7 @@ impl TacticsCardBuilder {
             description: self.description,
             fighter_requirement: self.fighter_requirement,
             role_requirement: self.role_requirement,
+            location_requirement: self.location_requirement,
             checker: self.checker,
             listeners: self.builder.build(),
         }
@@ -299,12 +315,22 @@ fn can_play_tactics_card(game: &Game, player: usize, card: &ActionCard, combat: 
                 FighterRequirement::Ship => combat.is_sea_battle(game),
             });
 
+        let location_met = card
+            .location_requirement
+            .as_ref()
+            .is_none_or(|l| match l {
+                // city is also land!
+                CombatLocation::City => combat.defender_city(game).is_none(),
+                CombatLocation::Sea => combat.is_sea_battle(game),
+                CombatLocation::Land => !combat.is_sea_battle(game),
+            });
+        
         let checker_met = card
             .checker
             .as_ref()
             .is_none_or(|c| c(player, game, combat));
 
-        position_met && fighter_met && checker_met
+        position_met && fighter_met && location_met && checker_met
     } else {
         false
     }

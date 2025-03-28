@@ -210,11 +210,18 @@ fn get_card_object(card: &HandCard) -> HandCardObject {
                     format!(
                         "Role: {:?}",
                         match t.role_requirement {
-                            None => "None".to_string(),
+                            None => "Attacker or Defender".to_string(),
                             Some(r) => match r {
                                 CombatRole::Attacker => "Attacker".to_string(),
                                 CombatRole::Defender => "Defender".to_string(),
                             },
+                        }
+                    ),
+                    format!(
+                        "Location: {:?}",
+                        match t.location_requirement {
+                            None => "Any".to_string(),
+                            Some(l) => format!("{l:?}"),
                         }
                     ),
                 ]);

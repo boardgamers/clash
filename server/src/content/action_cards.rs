@@ -1,3 +1,4 @@
+mod development;
 mod inspiration;
 pub mod spy;
 
@@ -6,14 +7,19 @@ use crate::content::action_cards::inspiration::inspiration_action_cards;
 use crate::content::incidents;
 use crate::content::tactics_cards::martyr;
 use crate::playing_actions::ActionType;
+use development::development_action_cards;
 use itertools::Itertools;
 
 #[must_use]
 pub(crate) fn get_all() -> Vec<ActionCard> {
-    let all = vec![inspiration_action_cards(), park_here()]
-        .into_iter()
-        .flatten()
-        .collect_vec();
+    let all = vec![
+        inspiration_action_cards(),
+        development_action_cards(),
+        park_here(),
+    ]
+    .into_iter()
+    .flatten()
+    .collect_vec();
     assert_eq!(
         all.iter().unique_by(|i| i.id).count(),
         all.len(),
