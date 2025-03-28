@@ -6,6 +6,7 @@ use crate::content::builtin::{Builtin, BuiltinBuilder};
 use crate::content::custom_phase_actions::{CurrentEventType, PositionRequest, UnitsRequest};
 use crate::content::tactics_cards;
 use crate::game::Game;
+use crate::log::current_player_turn_log_mut;
 use crate::movement::move_units;
 use crate::player_events::{CurrentEvent, PersistentEvents};
 use crate::position::Position;
@@ -747,7 +748,8 @@ pub(crate) fn combat_stats() -> Builtin {
                     if let Some(winner) = r.winner() {
                         let p = c.player(winner);
                         if p == game.current_player_index && !c.is_sea_battle(game) {
-                            game.action_log
+                            current_player_turn_log_mut(game)
+                                .items
                                 .last_mut()
                                 .expect("no action log")
                                 .civil_card_match =

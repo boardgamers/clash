@@ -1,5 +1,5 @@
 use crate::ability_initializer::AbilityListeners;
-use crate::action_card::{gain_action_card_from_pile, CivilCardMatch};
+use crate::action_card::gain_action_card_from_pile;
 use crate::combat_roll::{CombatDieRoll, COMBAT_DIE_SIDES};
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
 use crate::content::civilizations::{BARBARIANS, PIRATES};
@@ -9,6 +9,7 @@ use crate::content::custom_phase_actions::{
 use crate::content::{action_cards, advances, builtin, incidents};
 use crate::events::{Event, EventOrigin};
 use crate::incident::PermanentIncidentEffect;
+use crate::log::{current_player_turn_log_mut, ActionLogAge, ActionLogPlayer, ActionLogRound};
 use crate::movement::{CurrentMove, MoveState};
 use crate::pirates::get_pirates_player;
 use crate::player_events::{
@@ -22,7 +23,6 @@ use crate::utils;
 use crate::utils::Rng;
 use crate::utils::Shuffle;
 use crate::{
-    action::Action,
     city::City,
     content::{civilizations, custom_actions::CustomActionType, wonders},
     map::{Map, MapData},
@@ -30,7 +30,6 @@ use crate::{
     position::Position,
 };
 use itertools::Itertools;
-use json_patch::PatchOperation;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::vec;
@@ -43,7 +42,7 @@ pub struct Game {
     pub map: Map,
     pub starting_player_index: usize,
     pub current_player_index: usize,
-    pub action_log: Vec<ActionLogItem>,
+    pub action_log: Vec<ActionLogAge>,
     pub action_log_index: usize,
     pub log: Vec<Vec<String>>,
     pub undo_limit: usize,
@@ -160,7 +159,7 @@ impl Game {
             actions_left: ACTIONS,
             successful_cultural_influence: false,
             round: 1,
-            age: 1,
+            age: 0,
             messages: vec![String::from("The game has started")],
             rng,
             dice_roll_outcomes: Vec::new(),
@@ -186,8 +185,8 @@ impl Game {
             // todo draw 1 objective card
         }
 
-        game.add_info_log_group("Age 1 has started".into());
-        game.add_info_log_group("Round 1/3".into());
+        game.next_age();
+        game.start_turn();
         game
     }
 
@@ -331,9 +330,7 @@ impl Game {
 
     pub(crate) fn lock_undo(&mut self) {
         self.undo_limit = self.action_log_index;
-        for a in &mut self.action_log {
-            a.undo.clear();
-        }
+        current_player_turn_log_mut(self).clear_undo();
     }
 
     ///
@@ -528,6 +525,7 @@ impl Game {
     pub fn can_redo(&self) -> bool {
         self.action_log_index < self.action_log.len()
     }
+
     pub(crate) fn is_pirate_zone(&self, position: Position) -> bool {
         if self.map.is_sea(position) {
             let pirate = get_pirates_player(self);
@@ -567,12 +565,15 @@ impl Game {
         vec[l] += edit;
     }
 
-    ///
-    /// # Panics
-    /// Panics if the player does not have events
-    pub fn next_player(&mut self) {
-        check_for_waste(self);
-        self.increment_player_index();
+    pub(crate) fn start_turn(&mut self) {
+        self.action_log
+            .last_mut()
+            .expect("action log should exist")
+            .rounds
+            .last_mut()
+            .expect("round should exist")
+            .players
+            .push(ActionLogPlayer::new(self.current_player_index)); 
         self.add_info_log_group(format!(
             "It's {}'s turn",
             self.player_name(self.current_player_index)
@@ -587,10 +588,10 @@ impl Game {
         }
         self.successful_cultural_influence = false;
 
-        self.start_turn();
+        self.on_start_turn();
     }
 
-    pub(crate) fn start_turn(&mut self) {
+    pub(crate) fn on_start_turn(&mut self) {
         let _ = self.trigger_current_event(
             &[self.current_player_index],
             |e| &mut e.on_turn_start,
@@ -661,8 +662,14 @@ impl Game {
     }
 
     pub fn next_turn(&mut self) {
-        self.players[self.current_player_index].end_turn();
-        self.next_player();
+        self.get_player_mut(self.current_player_index).end_turn();
+        for i in &mut current_player_turn_log_mut(self).items {
+            i.undo.clear();
+            i.civil_card_match = None;
+        }
+        check_for_waste(self);
+        self.increment_player_index();
+        self.start_turn();
         self.skip_dropped_players();
         if self.current_player_index == self.starting_player_index {
             self.next_round();
@@ -678,13 +685,20 @@ impl Game {
             return;
         }
         self.add_info_log_group(format!("Round {}/3", self.round));
+        self.action_log
+            .last_mut()
+            .expect("action log should exist")
+            .rounds
+            .push(ActionLogRound::new());
     }
 
     pub fn next_age(&mut self) {
         self.age += 1;
+        self.round = 0;
         self.current_player_index = self.starting_player_index;
         self.add_info_log_group(format!("Age {} has started", self.age));
-        self.add_info_log_group(String::from("Round 1/3"));
+        self.action_log.push(ActionLogAge::new());
+        self.next_round();
     }
 
     pub(crate) fn end_game(&mut self) {
@@ -738,7 +752,7 @@ impl Game {
         &self,
         player_index: usize,
     ) -> Vec<(CustomActionType, EventOrigin)> {
-        self.players[self.current_player_index]
+        self.get_player(self.current_player_index)
             .custom_actions
             .clone()
             .into_iter()
@@ -798,7 +812,7 @@ pub struct GameData {
     map: MapData,
     starting_player_index: usize,
     current_player_index: usize,
-    action_log: Vec<ActionLogItem>,
+    action_log: Vec<ActionLogAge>,
     action_log_index: usize,
     log: Vec<Vec<String>>,
     undo_limit: usize,
@@ -836,28 +850,6 @@ pub enum GameState {
     Playing,
     Movement(MoveState),
     Finished,
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
-pub struct ActionLogItem {
-    pub action: Action,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub undo: Vec<PatchOperation>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub civil_card_match: Option<CivilCardMatch>,
-}
-
-impl ActionLogItem {
-    #[must_use]
-    pub fn new(action: Action) -> Self {
-        Self {
-            action,
-            undo: Vec::new(),
-            civil_card_match: None,
-        }
-    }
 }
 
 #[derive(Serialize, Deserialize)]

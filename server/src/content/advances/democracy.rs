@@ -6,7 +6,7 @@ use crate::content::advances::{advance_group_builder, AdvanceGroup};
 use crate::content::custom_actions::CustomActionType::{
     CivilLiberties, FreeEconomyCollect, VotingIncreaseHappiness,
 };
-use crate::log::current_turn_log;
+use crate::log::current_player_turn_log;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 
 pub(crate) fn democracy() -> AdvanceGroup {
@@ -74,7 +74,7 @@ fn free_economy() -> AdvanceBuilder {
                 }
                 PlayingActionType::Custom(i)
                     if matches!(i.custom_action_type, FreeEconomyCollect)
-                        && current_turn_log(game).iter().any(|item| {
+                        && current_player_turn_log(game).items.iter().any(|item| {
                             matches!(item.action, Action::Playing(PlayingAction::Collect(_)))
                         }) =>
                 {

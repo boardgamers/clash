@@ -52,7 +52,9 @@ where
         return None;
     }
 
-    game.lock_undo(); // new information is revealed
+    if game.age > 0 {
+        game.lock_undo(); // new information is revealed
+    }
 
     if leave_card {
         get_pile(game).first().cloned()

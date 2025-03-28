@@ -31,8 +31,11 @@ impl TacticsCardTarget {
         expect_card: u8,
         attacker_card: Option<&u8>,
     ) -> bool {
-        let card_player_role = if attacker_card
-            .is_some_and(|c| *c == expect_card) { CombatRole::Attacker } else { CombatRole::Defender };
+        let card_player_role = if attacker_card.is_some_and(|c| *c == expect_card) {
+            CombatRole::Attacker
+        } else {
+            CombatRole::Defender
+        };
         let card_player = combat.player(card_player_role);
 
         match &self {

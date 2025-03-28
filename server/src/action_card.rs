@@ -1,4 +1,3 @@
-use std::slice::from_ref;
 use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
@@ -8,7 +7,8 @@ use crate::content::action_cards::get_civil_card;
 use crate::content::custom_phase_actions::CurrentEventType;
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::events::EventOrigin;
-use crate::game::{ActionLogItem, Game};
+use crate::game::Game;
+use crate::log::{current_player_turn_log, current_player_turn_log_mut, ActionLogItem};
 use crate::player::Player;
 use crate::playing_actions::ActionType;
 use crate::position::Position;
@@ -16,6 +16,7 @@ use crate::tactics_card::TacticsCard;
 use crate::utils::remove_element_by;
 use action_cards::get_action_card;
 use serde::{Deserialize, Serialize};
+use std::slice::from_ref;
 
 pub type CanPlayCard = Box<dyn Fn(&Game, &Player) -> bool>;
 
@@ -123,7 +124,7 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
     discard_action_card(game, player_index, id);
     if let Some(requirement) = get_civil_card(id).requirement {
         if let Some(action_log_index) = requirement.satisfying_action(game, id, true) {
-            game.action_log[action_log_index]
+            current_player_turn_log_mut(game).items[action_log_index]
                 .civil_card_match
                 .as_mut()
                 .expect("civil card match")
@@ -249,15 +250,16 @@ impl CivilCardRequirement {
         action_card_id: u8,
         execute: bool,
     ) -> Option<usize> {
+        let l = &current_player_turn_log(game).items;
         let slice: &[ActionLogItem] = if self.just_before {
             let delta = if execute { 2 } else { 1 };
-            if game.action_log.len() >= delta {
-                from_ref(&game.action_log[game.action_log.len() - delta])
+            if l.len() >= delta {
+                from_ref(&l[l.len() - delta])
             } else {
                 &[]
             }
         } else {
-            &game.action_log
+            l
         };
         self.opportunities.iter().find_map(|o| {
             slice.iter().position(|a| {

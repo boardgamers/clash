@@ -10,6 +10,7 @@ use crate::combat_roll::CombatStats;
 use crate::consts::SHIP_CAPACITY;
 use crate::content::custom_phase_actions::CurrentEventType;
 use crate::game::Game;
+use crate::log::current_player_turn_log_mut;
 use crate::movement::{move_units, stop_current_move};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -324,10 +325,12 @@ pub(crate) fn conquer_city(
     if attacker_is_human {
         game.players[new_player_index].gain_resources(ResourcePile::gold(size as u32));
 
-        let mut m = game.action_log
+        let mut m = current_player_turn_log_mut(game)
+            .items
             .last_mut()
             .expect("no action log")
-            .civil_card_match.as_mut();
+            .civil_card_match
+            .as_mut();
         if m.is_none() {
             // no battle for capturing city
             m.replace(&mut CivilCardMatch::new(CivilCardOpportunity::CaptureCity));
@@ -477,8 +480,11 @@ pub mod tests {
 
     use super::{conquer_city, Game};
 
-    use crate::game::{ActionLogItem, GameState};
+    use crate::action::Action;
+    use crate::game::GameState;
+    use crate::log::{ActionLogAge, ActionLogItem, ActionLogPlayer, ActionLogRound};
     use crate::payment::PaymentOptions;
+    use crate::unit::MovementAction;
     use crate::utils::tests::FloatEq;
     use crate::wonder::construct_wonder;
     use crate::{
@@ -491,11 +497,16 @@ pub mod tests {
         utils::Rng,
         wonder::Wonder,
     };
-    use crate::action::Action;
-    use crate::unit::{MoveUnits, MovementAction};
 
     #[must_use]
     pub fn test_game() -> Game {
+        let mut age = ActionLogAge::new();
+        let mut round = ActionLogRound::new();
+        let mut log = ActionLogPlayer::new(0);
+        log.items
+            .push(ActionLogItem::new(Action::Movement(MovementAction::Stop)));
+        round.players.push(log);
+        age.rounds.push(round);
         Game {
             state: GameState::Playing,
             events: Vec::new(),
@@ -503,9 +514,7 @@ pub mod tests {
             map: Map::new(HashMap::new()),
             starting_player_index: 0,
             current_player_index: 0,
-            action_log: vec![
-                ActionLogItem::new(Action::Movement(MovementAction::Stop)), //just need any action here
-            ],
+            action_log: vec![age],
             action_log_index: 0,
             log: Vec::new(),
             undo_limit: 0,

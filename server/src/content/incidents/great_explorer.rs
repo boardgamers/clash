@@ -7,6 +7,7 @@ use crate::content::incidents::great_persons::{
 };
 use crate::explore::move_to_unexplored_block;
 use crate::game::Game;
+use crate::log::current_player_turn_log;
 use crate::map::{get_map_setup, BlockPosition, UNEXPLORED_BLOCK};
 use crate::payment::PaymentOptions;
 use crate::playing_actions::{build_city, ActionType};
@@ -54,8 +55,8 @@ pub(crate) fn great_explorer() -> ActionCard {
                 game.add_info_log_item("Player cannot afford to build a city");
             }
 
-            let a = game
-                .action_log
+            let a = current_player_turn_log(game)
+                .items
                 .iter()
                 .rev()
                 .find_map(|l| {

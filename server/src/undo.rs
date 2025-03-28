@@ -1,5 +1,6 @@
 use crate::action::{add_log_item_from_action, execute_movement_action, Action};
 use crate::game::Game;
+use crate::log::{current_player_turn_log, current_player_turn_log_mut};
 use crate::resource::check_for_waste;
 use json_patch::{patch, PatchOperation};
 use serde_json::Value;
@@ -19,16 +20,13 @@ pub(crate) fn undo(mut game: Game) -> Game {
     game.action_log_index -= 1;
     game.log.remove(game.log.len() - 1);
 
-    let option = game
-        .action_log
+    let l = &mut current_player_turn_log_mut(&mut game).items;
+    let option = l
         .iter()
         .rposition(|a| !a.undo.is_empty())
         .expect("should have undoable action");
 
-    let item = game
-        .action_log
-        .get_mut(option)
-        .expect("should have undoable action");
+    let item = l.get_mut(option).expect("should have undoable action");
     let p = std::mem::take(&mut item.undo);
 
     match &item.action {
@@ -50,9 +48,9 @@ pub(crate) fn to_serde_value(game: &Game) -> Value {
 }
 
 pub fn redo(game: &mut Game, player_index: usize) {
-    let copy = game.action_log[game.action_log_index].clone();
+    let copy = current_player_turn_log(game).item(game).clone();
     add_log_item_from_action(game, &copy.action);
-    match &game.action_log[game.action_log_index].action.clone() {
+    match &current_player_turn_log(game).item(game).action.clone() {
         Action::Playing(action) => action.clone().execute(game, player_index, true),
         Action::Movement(action) => {
             execute_movement_action(game, action.clone(), player_index);

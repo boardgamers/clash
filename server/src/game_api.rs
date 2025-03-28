@@ -2,6 +2,7 @@ use std::{cmp::Ordering::*, mem};
 
 use crate::action::execute_action;
 use crate::content::custom_phase_actions::CurrentEventType;
+use crate::log::current_player_turn_log_mut;
 use crate::utils::Shuffle;
 use crate::{
     action::Action,
@@ -120,7 +121,7 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
             }
         }
     }
-    for l in &mut game.action_log {
+    for l in &mut current_player_turn_log_mut(&mut game).items {
         // undo has secret information, like gained and discarded action cards
         l.undo.clear();
     }

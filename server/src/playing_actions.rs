@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::action_card::{play_action_card};
+use crate::action_card::play_action_card;
 use crate::advance::gain_advance;
 use crate::city::MoodState;
 use crate::collect::collect;

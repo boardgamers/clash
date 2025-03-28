@@ -279,10 +279,13 @@ fn great_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         ActionType::free(),
         |_game, player| player.resources.ideas < player.resource_limit.ideas,
     )
-    .requirement(CivilCardRequirement::new(vec!{
-        CivilCardOpportunity::CaptureCity,
-        CivilCardOpportunity::WinLandBattle,
-    }, false))
+    .requirement(CivilCardRequirement::new(
+        vec![
+            CivilCardOpportunity::CaptureCity,
+            CivilCardOpportunity::WinLandBattle,
+        ],
+        false,
+    ))
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
         |e| &mut e.on_play_action_card,
