@@ -134,7 +134,7 @@ impl TacticsCardBuilder {
         self.fighter_requirement.push(fighter_requirement);
         self
     }
-    
+
     pub(crate) fn location_requirement(mut self, location_requirement: CombatLocation) -> Self {
         self.location_requirement = Some(location_requirement);
         self
@@ -315,16 +315,13 @@ fn can_play_tactics_card(game: &Game, player: usize, card: &ActionCard, combat: 
                 FighterRequirement::Ship => combat.is_sea_battle(game),
             });
 
-        let location_met = card
-            .location_requirement
-            .as_ref()
-            .is_none_or(|l| match l {
-                // city is also land!
-                CombatLocation::City => combat.defender_city(game).is_some(),
-                CombatLocation::Sea => combat.is_sea_battle(game),
-                CombatLocation::Land => !combat.is_sea_battle(game),
-            });
-        
+        let location_met = card.location_requirement.as_ref().is_none_or(|l| match l {
+            // city is also land!
+            CombatLocation::City => combat.defender_city(game).is_some(),
+            CombatLocation::Sea => combat.is_sea_battle(game),
+            CombatLocation::Land => !combat.is_sea_battle(game),
+        });
+
         let checker_met = card
             .checker
             .as_ref()

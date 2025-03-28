@@ -7,7 +7,9 @@ use crate::content::custom_phase_actions::PaymentRequest;
 use crate::game::Game;
 use crate::payment::PaymentOptions;
 use crate::resource_pile::ResourcePile;
-use crate::tactics_card::{CombatLocation, CombatRole, FighterRequirement, TacticsCard, TacticsCardTarget};
+use crate::tactics_card::{
+    CombatLocation, CombatRole, FighterRequirement, TacticsCard, TacticsCardTarget,
+};
 use std::vec;
 
 ///
@@ -134,7 +136,7 @@ pub(crate) fn high_ground(id: u8) -> TacticsCard {
         "Unless you attack a city: Your opponent can't use combat abilities.",
     )
     .fighter_any_requirement(&[FighterRequirement::Army, FighterRequirement::Fortress])
-        .checker(|player, game, combat| {
+    .checker(|player, game, combat| {
         combat.role(player) == CombatRole::Defender || combat.defender_city(game).is_none()
     })
     .target(TacticsCardTarget::Opponent)
@@ -180,7 +182,7 @@ pub(crate) fn siege(id: u8) -> TacticsCard {
     )
     .fighter_requirement(FighterRequirement::Army)
     .role_requirement(CombatRole::Attacker)
-        .location_requirement(CombatLocation::City)
+    .location_requirement(CombatLocation::City)
     .add_reveal_listener(1, |_player, _game, _combat, s| {
         s.extra_combat_value += 1;
         s.roll_log.push("Siege added 1 to combat value".to_string());
@@ -231,17 +233,21 @@ fn apply_siege(game: &mut Game, r: &mut CombatRoundStart, player: usize) {
 }
 
 pub(crate) fn for_the_people(id: u8) -> TacticsCard {
-    TacticsCard::builder(id, "For the People", "When defending a city: Add 1 die to your roll.")
-        .fighter_any_requirement(&[FighterRequirement::Army, FighterRequirement::Fortress])
-        .role_requirement(CombatRole::Defender)
-        .location_requirement(CombatLocation::City)
-        .target(TacticsCardTarget::ActivePlayer)
-        .add_reveal_listener(0, |_player, _game, _c, s| {
-            s.extra_dies += 1;
-            s.roll_log
-                .push("For The People added 1 extra die".to_string());
-        })
-        .build()
+    TacticsCard::builder(
+        id,
+        "For the People",
+        "When defending a city: Add 1 die to your roll.",
+    )
+    .fighter_any_requirement(&[FighterRequirement::Army, FighterRequirement::Fortress])
+    .role_requirement(CombatRole::Defender)
+    .location_requirement(CombatLocation::City)
+    .target(TacticsCardTarget::ActivePlayer)
+    .add_reveal_listener(0, |_player, _game, _c, s| {
+        s.extra_dies += 1;
+        s.roll_log
+            .push("For The People added 1 extra die".to_string());
+    })
+    .build()
 }
 
 pub(crate) fn martyr(id: u8) -> TacticsCard {
