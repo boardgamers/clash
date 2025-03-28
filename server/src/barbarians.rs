@@ -477,7 +477,7 @@ fn cities_in_range(
 }
 
 #[must_use]
-fn get_barbarians_player(game: &Game) -> &Player {
+pub(crate) fn get_barbarians_player(game: &Game) -> &Player {
     game.players
         .iter()
         .find(|p| p.civilization.is_barbarian())
