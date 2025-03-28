@@ -233,8 +233,12 @@ fn apply_siege(game: &mut Game, r: &mut CombatRoundStart, player: usize) {
 pub(crate) fn martyr(id: u8) -> TacticsCard {
     TacticsCard::builder(id, "Martyr", "todo")
         .target(TacticsCardTarget::Opponent)
+        //todo add sacrifice effect, add test
         .add_veto_tactics_listener(0, move |p, game, _c, s| {
-            game.add_info_log_item(&format!("{} can't play tactics cards", game.player_name(p)));
+            game.add_info_log_item(&format!(
+                "{} ignores the enemy tactics",
+                game.player_name(p)
+            ));
             s.tactics_card = None;
         })
         .build()

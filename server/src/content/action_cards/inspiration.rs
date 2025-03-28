@@ -33,6 +33,7 @@ pub(crate) fn inspiration_action_cards() -> Vec<ActionCard> {
         ideas(9, high_ground),
         ideas(10, surprise),
         great_ideas(11, siege),
+        great_ideas(12, high_ground),
     ]
 }
 

@@ -111,10 +111,8 @@ fn test_great_ideas() {
             )
             .without_json_comparison(),
             TestAction::not_undoable(0, Action::Response(EventResponse::SelectHandCards(vec![])))
-            .without_json_comparison(),
-            TestAction::undoable(
-            0,
-            Action::Playing(PlayingAction::ActionCard(11)),
-        )],
+                .without_json_comparison(),
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(11))),
+        ],
     );
 }
