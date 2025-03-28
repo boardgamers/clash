@@ -143,10 +143,10 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         PlayingAction::ActionCard(a) => {
             let card = get_civil_card(*a);
             let pile = card.action_type.cost;
-            let cost = if !pile.is_empty() {
-                &format!(" for {pile}")
-            } else {
+            let cost = if pile.is_empty() {
                 ""
+            } else {
+                &format!(" for {pile}")
             };
             let action = if card.action_type.free {
                 ""
@@ -185,10 +185,10 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     } else {
         game.player_name(target_player_index)
     };
-    let city = if starting_city_position != target_city_position {
-        format!(" with the city at {starting_city_position}")
-    } else {
+    let city = if starting_city_position == target_city_position {
         String::new()
+    } else {
+        format!(" with the city at {starting_city_position}")
     };
     let range_boost_cost = influence_culture_boost_cost(
         game,
@@ -200,10 +200,10 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     )
     .range_boost_cost;
     // this cost can't be changed by the player
-    let cost = if !range_boost_cost.is_free() {
-        format!(" and paid {} to boost the range", range_boost_cost.default)
-    } else {
+    let cost = if range_boost_cost.is_free() {
         String::new()
+    } else {
+        format!(" and paid {} to boost the range", range_boost_cost.default)
     };
     format!("{player_name} tried to influence culture the {city_piece:?} in the city at {target_city_position} by {player}{city}{cost}")
 }
@@ -414,6 +414,7 @@ pub(crate) fn add_action_log_item(game: &mut Game, item: Action) {
 ///
 /// # Panics
 /// Panics if the log entry does not exist
+#[must_use] 
 pub fn current_player_turn_log(game: &Game) -> &ActionLogPlayer {
     game.action_log
         .last()

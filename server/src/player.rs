@@ -6,7 +6,7 @@ use crate::content::builtin;
 use crate::events::{Event, EventOrigin};
 use crate::payment::PaymentOptions;
 use crate::player_events::{CostInfo, TransientEvents};
-use crate::resource::{check_for_waste, ResourceType};
+use crate::resource::ResourceType;
 use crate::unit::{carried_units, UnitData, UnitType};
 use crate::{
     city::{City, CityData},
