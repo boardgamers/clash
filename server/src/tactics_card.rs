@@ -320,7 +320,7 @@ fn can_play_tactics_card(game: &Game, player: usize, card: &ActionCard, combat: 
             .as_ref()
             .is_none_or(|l| match l {
                 // city is also land!
-                CombatLocation::City => combat.defender_city(game).is_none(),
+                CombatLocation::City => combat.defender_city(game).is_some(),
                 CombatLocation::Sea => combat.is_sea_battle(game),
                 CombatLocation::Land => !combat.is_sea_battle(game),
             });

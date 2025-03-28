@@ -222,7 +222,53 @@
   },
   "starting_player_index": 0,
   "current_player_index": 1,
-  "action_log": [],
+  "action_log": [
+    {
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "food": 2
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 2
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  }
+                }
+              ]
+            },
+            {
+              "index": 1,
+              "items": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "action_log_index": 0,
   "log": [
     [

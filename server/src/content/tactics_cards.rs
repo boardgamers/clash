@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
-use crate::combat::{update_combat_strength, Combat};
+use crate::combat::update_combat_strength;
 use crate::combat_listeners::{CombatRoundStart, CombatStrength};
 use crate::content::action_cards::get_action_card;
 use crate::content::custom_phase_actions::PaymentRequest;

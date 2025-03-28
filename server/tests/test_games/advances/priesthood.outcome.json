@@ -283,7 +283,80 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [],
+  "action_log": [
+    {
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Math",
+                        "payment": {}
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 2
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/3",
+                      "value": "Mining"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/4",
+                      "value": "Myths"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/5",
+                      "value": "Philosophy"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/6",
+                      "value": "Priesthood"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/1/advances/7"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/incident_tokens",
+                      "value": 3
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/resources/culture_tokens",
+                      "value": 9
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/1/resources/ideas"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/1/event_info"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "action_log_index": 1,
   "log": [
     [

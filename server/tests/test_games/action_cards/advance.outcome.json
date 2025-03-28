@@ -226,7 +226,41 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [],
+  "action_log": [
+    {
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 2
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/players/0/action_cards",
+                      "value": [
+                        2
+                      ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "action_log_index": 1,
   "log": [
     [

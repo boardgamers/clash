@@ -427,7 +427,10 @@ pub fn current_player_turn_log(game: &Game) -> &ActionLogPlayer {
         .expect("state should exist")
 }
 
-pub(crate) fn current_player_turn_log_mut(game: &mut Game) -> &mut ActionLogPlayer {
+///
+/// # Panics
+/// Panics if the log entry does not exist
+pub fn current_player_turn_log_mut(game: &mut Game) -> &mut ActionLogPlayer {
     game.action_log
         .last_mut()
         .expect("age log should exist")

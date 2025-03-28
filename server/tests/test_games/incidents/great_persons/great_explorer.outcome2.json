@@ -391,7 +391,88 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [],
+  "action_log": [
+    {
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "food": 2
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 118
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 2
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/1/action_cards",
+                      "value": [
+                        118
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/1",
+                      "value": "Mining"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/2",
+                      "value": "Storage"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/1/advances/3"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/resources/mood_tokens",
+                      "value": 1
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "action_log_index": 3,
   "log": [
     [

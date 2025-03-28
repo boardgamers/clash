@@ -3,6 +3,7 @@
 use server::action::Action;
 use server::city_pieces::Building::Temple;
 use server::game::Game;
+use server::log::current_player_turn_log_mut;
 use server::playing_actions::PlayingAction::InfluenceCultureAttempt;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
@@ -339,7 +340,7 @@ fn undo_redo(
     let game = game_api::execute(game, Action::Undo, player_index);
     if compare_json {
         let mut trimmed_game = game.clone();
-        trimmed_game.action_log.pop();
+        current_player_turn_log_mut(&mut trimmed_game).items.pop();
         assert_eq_game_json(
             &original_game,
             &to_json(&trimmed_game),

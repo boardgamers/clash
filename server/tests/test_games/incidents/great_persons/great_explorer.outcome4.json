@@ -392,7 +392,182 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [],
+  "action_log": [
+    {
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "food": 2
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 118
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 2
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/1/action_cards",
+                      "value": [
+                        118
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/1",
+                      "value": "Mining"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/2",
+                      "value": "Storage"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/1/advances/3"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/resources/mood_tokens",
+                      "value": 1
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": [
+                        "B6"
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events/0/handler",
+                      "value": {
+                        "origin": {
+                          "CivilCard": 118
+                        },
+                        "priority": 9,
+                        "request": {
+                          "SelectPositions": {
+                            "choices": [
+                              "B6",
+                              "D5",
+                              "F6"
+                            ],
+                            "description": "Choose a region to explore",
+                            "needed": {
+                              "end": 1,
+                              "start": 0
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/1"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ExploreResolution": 0
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/events/0/last_priority_used",
+                      "value": 9
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/0/handler"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/events/1",
+                      "value": {
+                        "event_type": {
+                          "ExploreResolution": {
+                            "block": {
+                              "block": {
+                                "terrain": [
+                                  "Fertile",
+                                  "Fertile",
+                                  "Fertile",
+                                  "Barren"
+                                ]
+                              },
+                              "position": {
+                                "rotation": 0,
+                                "top_tile": "B6"
+                              }
+                            },
+                            "destination": null,
+                            "ship_can_teleport": false,
+                            "start": "B6",
+                            "units": []
+                          }
+                        },
+                        "handler": {
+                          "origin": {
+                            "Builtin": "Explore Resolution"
+                          },
+                          "priority": 0,
+                          "request": "ExploreResolution"
+                        },
+                        "last_priority_used": 0,
+                        "player": 1
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "action_log_index": 5,
   "log": [
     [
