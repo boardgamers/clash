@@ -282,29 +282,42 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Custom": {
-            "Theaters": {
-              "culture_tokens": 1
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "Theaters": {
+                          "culture_tokens": 1
+                        }
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/culture_tokens",
+                      "value": 10
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 10
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/played_once_per_turn_actions"
+                    }
+                  ]
+                }
+              ]
             }
-          }
-        }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/players/0/resources/culture_tokens",
-          "value": 10
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/mood_tokens",
-          "value": 10
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/played_once_per_turn_actions"
+          ]
         }
       ]
     }

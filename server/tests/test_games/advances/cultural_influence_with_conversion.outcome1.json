@@ -205,97 +205,110 @@
   "current_player_index": 1,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "InfluenceCultureAttempt": {
-            "starting_city_position": "B3",
-            "target_player_index": 0,
-            "target_city_position": "C2",
-            "city_piece": "Temple"
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
-            {
-              "culture_tokens": 3
-            }
-          ]
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "add",
-          "path": "/events",
-          "value": [
+          "players": [
             {
-              "event_type": {
-                "InfluenceCultureResolution": {
-                  "culture_tokens": 3
-                }
-              },
-              "handler": {
-                "origin": {
-                  "Builtin": "Influence Culture"
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "InfluenceCultureAttempt": {
+                        "starting_city_position": "B3",
+                        "target_player_index": 0,
+                        "target_city_position": "C2",
+                        "city_piece": "Temple"
+                      }
+                    }
+                  }
                 },
-                "priority": 0,
-                "request": {
-                  "Payment": [
-                    {
-                      "cost": {
-                        "conversions": [
-                          {
-                            "from": [
-                              {
-                                "food": 1
-                              },
-                              {
-                                "wood": 1
-                              },
-                              {
-                                "ore": 1
-                              },
-                              {
-                                "ideas": 1
-                              }
-                            ],
-                            "to": {
-                              "gold": 1
-                            },
-                            "type": "Unlimited"
-                          }
-                        ],
-                        "default": {
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
                           "culture_tokens": 3
                         }
-                      },
-                      "name": "Pay 3 culture tokens to increase the dice roll",
-                      "optional": true
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "InfluenceCultureResolution": {
+                              "culture_tokens": 3
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Influence Culture"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "Payment": [
+                                {
+                                  "cost": {
+                                    "conversions": [
+                                      {
+                                        "from": [
+                                          {
+                                            "food": 1
+                                          },
+                                          {
+                                            "wood": 1
+                                          },
+                                          {
+                                            "ore": 1
+                                          },
+                                          {
+                                            "ideas": 1
+                                          }
+                                        ],
+                                        "to": {
+                                          "gold": 1
+                                        },
+                                        "type": "Unlimited"
+                                      }
+                                    ],
+                                    "default": {
+                                      "culture_tokens": 3
+                                    }
+                                  },
+                                  "name": "Pay 3 culture tokens to increase the dice roll",
+                                  "optional": true
+                                }
+                              ]
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 1
+                        }
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/2/city_pieces/temple",
+                      "value": 0
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/resources/culture_tokens",
+                      "value": 6
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/successful_cultural_influence"
                     }
                   ]
                 }
-              },
-              "last_priority_used": 0,
-              "player": 1
+              ]
             }
           ]
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/2/city_pieces/temple",
-          "value": 0
-        },
-        {
-          "op": "replace",
-          "path": "/players/1/resources/culture_tokens",
-          "value": 6
-        },
-        {
-          "op": "remove",
-          "path": "/successful_cultural_influence"
         }
       ]
     }

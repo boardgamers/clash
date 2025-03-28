@@ -193,23 +193,36 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "ActionCard": 9
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "add",
-          "path": "/players/0/action_cards",
-          "value": [
-            9
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 9
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/players/0/action_cards",
+                      "value": [
+                        9
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/ideas",
+                      "value": 3
+                    }
+                  ]
+                }
+              ]
+            }
           ]
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/ideas",
-          "value": 3
         }
       ]
     }

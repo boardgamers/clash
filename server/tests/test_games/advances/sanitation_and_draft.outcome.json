@@ -277,54 +277,67 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Recruit": {
-            "units": {
-              "settlers": 1,
-              "infantry": 1
-            },
-            "city_position": "A1",
-            "payment": {
-              "gold": 2,
-              "mood_tokens": 1
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Recruit": {
+                        "units": {
+                          "settlers": 1,
+                          "infantry": 1
+                        },
+                        "city_position": "A1",
+                        "payment": {
+                          "gold": 2,
+                          "mood_tokens": 1
+                        }
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 1
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/0/activations",
+                      "value": 0
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/next_unit_id",
+                      "value": 10
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/gold",
+                      "value": 5
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 11
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/6"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/6"
+                    }
+                  ]
+                }
+              ]
             }
-          }
-        }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 1
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/0/activations",
-          "value": 0
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/next_unit_id",
-          "value": 10
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/gold",
-          "value": 5
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/mood_tokens",
-          "value": 11
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/units/6"
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/units/6"
+          ]
         }
       ]
     }

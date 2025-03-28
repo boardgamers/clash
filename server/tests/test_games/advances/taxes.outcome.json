@@ -282,47 +282,60 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Custom": {
-            "Taxes": {
-              "food": 1,
-              "wood": 1,
-              "ore": 1,
-              "gold": 1
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "Taxes": {
+                          "food": 1,
+                          "wood": 1,
+                          "ore": 1,
+                          "gold": 1
+                        }
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 1
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/gold",
+                      "value": 5
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 11
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/ore",
+                      "value": 5
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/wood",
+                      "value": 5
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/played_once_per_turn_actions"
+                    }
+                  ]
+                }
+              ]
             }
-          }
-        }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 1
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/gold",
-          "value": 5
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/mood_tokens",
-          "value": 11
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/ore",
-          "value": 5
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/wood",
-          "value": 5
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/played_once_per_turn_actions"
+          ]
         }
       ]
     }

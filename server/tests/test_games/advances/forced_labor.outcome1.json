@@ -236,60 +236,73 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Custom": "ForcedLabor"
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "replace",
-          "path": "/players/0/resources/mood_tokens",
-          "value": 9
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/played_once_per_turn_actions"
-        }
-      ]
-    },
-    {
-      "action": {
-        "Playing": {
-          "Collect": {
-            "city_position": "A1",
-            "collections": [
-              [
-                "A1",
+          "players": [
+            {
+              "index": 0,
+              "items": [
                 {
-                  "food": 1
-                }
-              ],
-              [
-                "A2",
+                  "action": {
+                    "Playing": {
+                      "Custom": "ForcedLabor"
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 9
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/played_once_per_turn_actions"
+                    }
+                  ]
+                },
                 {
-                  "wood": 1
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "city_position": "A1",
+                        "collections": [
+                          [
+                            "A1",
+                            {
+                              "food": 1
+                            }
+                          ],
+                          [
+                            "A2",
+                            {
+                              "wood": 1
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 1
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/0/activations",
+                      "value": 0
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/0/angry_activation",
+                      "value": false
+                    }
+                  ]
                 }
               ]
-            ]
-          }
-        }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 1
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/0/activations",
-          "value": 0
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/0/angry_activation",
-          "value": false
+            }
+          ]
         }
       ]
     }

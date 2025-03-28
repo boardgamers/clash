@@ -192,37 +192,50 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "ActionCard": 3
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "add",
-          "path": "/players/0/action_cards",
-          "value": [
-            3
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 3
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/players/0/action_cards",
+                      "value": [
+                        3
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/2",
+                      "value": "Tactics"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/advances/3"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resource_limit/food",
+                      "value": 2
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 7
+                    }
+                  ]
+                }
+              ]
+            }
           ]
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/advances/2",
-          "value": "Tactics"
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/advances/3"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resource_limit/food",
-          "value": 2
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/mood_tokens",
-          "value": 7
         }
       ]
     }

@@ -222,7 +222,20 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [],
+  "action_log": [
+    {
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "action_log_index": 0,
   "log": [],
   "undo_limit": 0,

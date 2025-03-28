@@ -191,92 +191,105 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "ActionCard": 2
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "add",
-          "path": "/players/0/action_cards",
-          "value": [
-            2
-          ]
-        },
-        {
-          "op": "remove",
-          "path": "/events"
-        }
-      ]
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectAdvance": "Storage"
-        }
-      },
-      "undo": [
-        {
-          "op": "add",
-          "path": "/events",
-          "value": [
+          "players": [
             {
-              "event_type": {
-                "ActionCard": {
-                  "id": 2
-                }
-              },
-              "handler": {
-                "origin": {
-                  "CivilCard": 2
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 2
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/players/0/action_cards",
+                      "value": [
+                        2
+                      ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
                 },
-                "priority": 0,
-                "request": {
-                  "SelectAdvance": {
-                    "choices": [
-                      "Storage",
-                      "Irrigation",
-                      "Husbandry",
-                      "Engineering",
-                      "Sanitation",
-                      "Roads",
-                      "Fishing",
-                      "Writing",
-                      "Siegecraft",
-                      "Steel Weapons",
-                      "Draft",
-                      "Myths",
-                      "Bartering",
-                      "Arts",
-                      "Math"
-                    ]
-                  }
+                {
+                  "action": {
+                    "Response": {
+                      "SelectAdvance": "Storage"
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "ActionCard": {
+                              "id": 2
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "CivilCard": 2
+                            },
+                            "priority": 0,
+                            "request": {
+                              "SelectAdvance": {
+                                "choices": [
+                                  "Storage",
+                                  "Irrigation",
+                                  "Husbandry",
+                                  "Engineering",
+                                  "Sanitation",
+                                  "Roads",
+                                  "Fishing",
+                                  "Writing",
+                                  "Siegecraft",
+                                  "Steel Weapons",
+                                  "Draft",
+                                  "Myths",
+                                  "Bartering",
+                                  "Arts",
+                                  "Math"
+                                ]
+                              }
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/2",
+                      "value": "Tactics"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/advances/3"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resource_limit/food",
+                      "value": 2
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 7
+                    }
+                  ]
                 }
-              },
-              "last_priority_used": 0,
-              "player": 0
+              ]
             }
           ]
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/advances/2",
-          "value": "Tactics"
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/advances/3"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resource_limit/food",
-          "value": 2
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/mood_tokens",
-          "value": 7
         }
       ]
     }

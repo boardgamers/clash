@@ -9,7 +9,7 @@ use crate::content::custom_phase_actions::{
 use crate::content::{action_cards, advances, builtin, incidents};
 use crate::events::{Event, EventOrigin};
 use crate::incident::PermanentIncidentEffect;
-use crate::log::{current_player_turn_log_mut, ActionLogAge, ActionLogPlayer, ActionLogRound};
+use crate::log::{current_player_turn_log, current_player_turn_log_mut, ActionLogAge, ActionLogPlayer, ActionLogRound};
 use crate::movement::{CurrentMove, MoveState};
 use crate::pirates::get_pirates_player;
 use crate::player_events::{
@@ -523,7 +523,7 @@ impl Game {
 
     #[must_use]
     pub fn can_redo(&self) -> bool {
-        self.action_log_index < self.action_log.len()
+        self.action_log_index < current_player_turn_log(self).items.len()
     }
 
     pub(crate) fn is_pirate_zone(&self, position: Position) -> bool {
