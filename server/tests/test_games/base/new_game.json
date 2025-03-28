@@ -385,6 +385,10 @@
             {
               "index": 0,
               "items": []
+            },
+            {
+              "index": 0,
+              "items": []
             }
           ]
         }
@@ -409,6 +413,9 @@
     ],
     [
       "Round 1/3"
+    ],
+    [
+      "It's Player1's turn"
     ],
     [
       "It's Player1's turn"

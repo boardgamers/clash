@@ -329,90 +329,103 @@
   "current_player_index": 1,
   "action_log": [
     {
-      "action": {
-        "Response": {
-          "ExploreResolution": 3
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "add",
-          "path": "/events",
-          "value": [
+          "players": [
             {
-              "event_type": {
-                "ExploreResolution": {
-                  "block": {
-                    "block": {
-                      "terrain": [
-                        "Fertile",
-                        "Mountain",
-                        "Forest",
-                        "Fertile"
-                      ]
-                    },
-                    "position": {
-                      "rotation": 0,
-                      "top_tile": "F4"
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Response": {
+                      "ExploreResolution": 3
                     }
                   },
-                  "destination": "E5",
-                  "ship_can_teleport": false,
-                  "start": "D5",
-                  "units": [
-                    1
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "ExploreResolution": {
+                              "block": {
+                                "block": {
+                                  "terrain": [
+                                    "Fertile",
+                                    "Mountain",
+                                    "Forest",
+                                    "Fertile"
+                                  ]
+                                },
+                                "position": {
+                                  "rotation": 0,
+                                  "top_tile": "F4"
+                                }
+                              },
+                              "destination": "E5",
+                              "ship_can_teleport": false,
+                              "start": "D5",
+                              "units": [
+                                1
+                              ]
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Explore Resolution"
+                            },
+                            "priority": 0,
+                            "request": "ExploreResolution"
+                          },
+                          "last_priority_used": 0,
+                          "player": 1
+                        }
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/map/tiles/27/1",
+                      "value": "Unexplored"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/map/tiles/33/1",
+                      "value": "Unexplored"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/map/tiles/34/1",
+                      "value": "Unexplored"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/map/tiles/38/1",
+                      "value": "Unexplored"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/map/unexplored_blocks/4",
+                      "value": {
+                        "block": {
+                          "terrain": [
+                            "Fertile",
+                            "Mountain",
+                            "Forest",
+                            "Fertile"
+                          ]
+                        },
+                        "position": {
+                          "rotation": 0,
+                          "top_tile": "F4"
+                        }
+                      }
+                    }
                   ]
                 }
-              },
-              "handler": {
-                "origin": {
-                  "Builtin": "Explore Resolution"
-                },
-                "priority": 0,
-                "request": "ExploreResolution"
-              },
-              "last_priority_used": 0,
-              "player": 1
+              ]
             }
           ]
-        },
-        {
-          "op": "replace",
-          "path": "/map/tiles/27/1",
-          "value": "Unexplored"
-        },
-        {
-          "op": "replace",
-          "path": "/map/tiles/33/1",
-          "value": "Unexplored"
-        },
-        {
-          "op": "replace",
-          "path": "/map/tiles/34/1",
-          "value": "Unexplored"
-        },
-        {
-          "op": "replace",
-          "path": "/map/tiles/38/1",
-          "value": "Unexplored"
-        },
-        {
-          "op": "add",
-          "path": "/map/unexplored_blocks/4",
-          "value": {
-            "block": {
-              "terrain": [
-                "Fertile",
-                "Mountain",
-                "Forest",
-                "Fertile"
-              ]
-            },
-            "position": {
-              "rotation": 0,
-              "top_tile": "F4"
-            }
-          }
         }
       ]
     }

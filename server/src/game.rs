@@ -574,6 +574,9 @@ impl Game {
             .expect("round should exist")
             .players
             .push(ActionLogPlayer::new(self.current_player_index)); 
+        self.action_log_index = 0;
+        self.undo_limit = 0;
+        
         self.add_info_log_group(format!(
             "It's {}'s turn",
             self.player_name(self.current_player_index)
@@ -669,10 +672,11 @@ impl Game {
         }
         check_for_waste(self);
         self.increment_player_index();
-        self.start_turn();
         self.skip_dropped_players();
         if self.current_player_index == self.starting_player_index {
             self.next_round();
+        } else {
+            self.start_turn();
         }
     }
 
@@ -690,6 +694,7 @@ impl Game {
             .expect("action log should exist")
             .rounds
             .push(ActionLogRound::new());
+        self.start_turn();
     }
 
     pub fn next_age(&mut self) {

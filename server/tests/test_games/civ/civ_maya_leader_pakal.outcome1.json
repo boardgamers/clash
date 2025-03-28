@@ -142,10 +142,7 @@
       "wonder_cards": [
         "Great Gardens"
       ],
-      "next_unit_id": 11,
-      "event_info": {
-        "Land Battle Won": "true"
-      }
+      "next_unit_id": 11
     },
     {
       "id": 1,
@@ -296,25 +293,41 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              10
-            ],
-            "destination": "B1"
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectPositions": [
-            "B2"
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          10
+                        ],
+                        "destination": "B1"
+                      }
+                    }
+                  },
+                  "civil_card_match": {
+                    "opportunity": "WinLandBattle"
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": [
+                        "B2"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
           ]
         }
-      }
+      ]
     }
   ],
   "action_log_index": 2,

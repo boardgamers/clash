@@ -224,18 +224,31 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Response": {
-          "ChangeGovernmentType": {
-            "ChangeGovernment": {
-              "new_government": "Theocracy",
-              "additional_advances": [
-                "Devotion"
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Response": {
+                      "ChangeGovernmentType": {
+                        "ChangeGovernment": {
+                          "new_government": "Theocracy",
+                          "additional_advances": [
+                            "Devotion"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
               ]
             }
-          }
+          ]
         }
-      }
+      ]
     }
   ],
   "action_log_index": 1,

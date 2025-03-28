@@ -78,10 +78,7 @@
         "Tactics"
       ],
       "incident_tokens": 3,
-      "next_unit_id": 1,
-      "event_info": {
-        "Land Battle Won": "true"
-      }
+      "next_unit_id": 1
     }
   ],
   "map": {
@@ -368,46 +365,62 @@
   "current_player_index": 1,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Storage",
-            "payment": {
-              "food": 2
-            }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
+      "rounds": [
+        {
+          "players": [
             {
-              "culture_tokens": 1
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "food": 2
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 124
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0
+                        ],
+                        "destination": "C8"
+                      }
+                    }
+                  },
+                  "civil_card_match": {
+                    "opportunity": "WinLandBattle"
+                  }
+                }
+              ]
             }
           ]
         }
-      }
-    },
-    {
-      "action": {
-        "Playing": {
-          "ActionCard": 124
-        }
-      }
-    },
-    {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              0
-            ],
-            "destination": "C8"
-          }
-        }
-      }
+      ]
     }
   ],
   "action_log_index": 4,

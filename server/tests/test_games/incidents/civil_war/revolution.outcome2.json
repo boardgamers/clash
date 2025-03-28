@@ -251,32 +251,45 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Storage",
-            "payment": {
-              "gold": 2
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "gold": 2
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectUnits": [
+                        3
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectUnits": []
+                    }
+                  }
+                }
+              ]
             }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectUnits": [
-            3
           ]
         }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectUnits": []
-        }
-      }
+      ]
     }
   ],
   "action_log_index": 3,

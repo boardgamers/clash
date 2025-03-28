@@ -260,27 +260,40 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Response": {
-          "SelectAdvance": "Storage"
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectPositions": [
-            "B3"
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Response": {
+                      "SelectAdvance": "Storage"
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": [
+                        "B3"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectUnitType": "Elephant"
+                    }
+                  }
+                }
+              ]
+            }
           ]
         }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectUnitType": "Elephant"
-        }
-      }
+      ]
     }
   ],
   "action_log_index": 3,

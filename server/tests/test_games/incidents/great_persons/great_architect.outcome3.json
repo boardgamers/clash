@@ -201,188 +201,201 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Storage",
-            "payment": {
-              "food": 2
-            }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
-            {
-              "culture_tokens": 1
-            }
-          ]
-        }
-      }
-    },
-    {
-      "action": {
-        "Playing": {
-          "ActionCard": 155
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "add",
-          "path": "/players/0/action_cards",
-          "value": [
-            155
-          ]
-        },
-        {
-          "op": "remove",
-          "path": "/events"
-        }
-      ]
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
+          "players": [
             {
-              "food": 2,
-              "wood": 3,
-              "ore": 3,
-              "culture_tokens": 1
-            }
-          ]
-        }
-      },
-      "undo": [
-        {
-          "op": "add",
-          "path": "/events",
-          "value": [
-            {
-              "event_type": {
-                "ActionCard": {
-                  "id": 155
-                }
-              },
-              "player": 0
-            },
-            {
-              "event_type": {
-                "WonderCard": {
-                  "discount": {
-                    "culture_tokens": 3,
-                    "ignore_required_advances": true
-                  },
-                  "name": "Pyramids",
-                  "selected_position": "A1"
-                }
-              },
-              "handler": {
-                "origin": {
-                  "Builtin": "Build Wonder"
-                },
-                "priority": 0,
-                "request": {
-                  "Payment": [
-                    {
-                      "cost": {
-                        "conversions": [
-                          {
-                            "from": [
-                              {
-                                "food": 1
-                              },
-                              {
-                                "wood": 1
-                              },
-                              {
-                                "ore": 1
-                              },
-                              {
-                                "ideas": 1
-                              }
-                            ],
-                            "to": {
-                              "gold": 1
-                            },
-                            "type": "Unlimited"
-                          },
-                          {
-                            "from": [
-                              {
-                                "food": 1
-                              },
-                              {
-                                "wood": 1
-                              },
-                              {
-                                "ore": 1
-                              },
-                              {
-                                "ideas": 1
-                              }
-                            ],
-                            "to": {},
-                            "type": {
-                              "MayNotOverpay": 1
-                            }
-                          }
-                        ],
-                        "default": {
-                          "culture_tokens": 1,
-                          "food": 3,
-                          "ore": 3,
-                          "wood": 3
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "food": 2
                         }
-                      },
-                      "name": "Pay to build wonder",
-                      "optional": false
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 155
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/players/0/action_cards",
+                      "value": [
+                        155
+                      ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "food": 2,
+                          "wood": 3,
+                          "ore": 3,
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "ActionCard": {
+                              "id": 155
+                            }
+                          },
+                          "player": 0
+                        },
+                        {
+                          "event_type": {
+                            "WonderCard": {
+                              "discount": {
+                                "culture_tokens": 3,
+                                "ignore_required_advances": true
+                              },
+                              "name": "Pyramids",
+                              "selected_position": "A1"
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Build Wonder"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "Payment": [
+                                {
+                                  "cost": {
+                                    "conversions": [
+                                      {
+                                        "from": [
+                                          {
+                                            "food": 1
+                                          },
+                                          {
+                                            "wood": 1
+                                          },
+                                          {
+                                            "ore": 1
+                                          },
+                                          {
+                                            "ideas": 1
+                                          }
+                                        ],
+                                        "to": {
+                                          "gold": 1
+                                        },
+                                        "type": "Unlimited"
+                                      },
+                                      {
+                                        "from": [
+                                          {
+                                            "food": 1
+                                          },
+                                          {
+                                            "wood": 1
+                                          },
+                                          {
+                                            "ore": 1
+                                          },
+                                          {
+                                            "ideas": 1
+                                          }
+                                        ],
+                                        "to": {},
+                                        "type": {
+                                          "MayNotOverpay": 1
+                                        }
+                                      }
+                                    ],
+                                    "default": {
+                                      "culture_tokens": 1,
+                                      "food": 3,
+                                      "ore": 3,
+                                      "wood": 3
+                                    }
+                                  },
+                                  "name": "Pay to build wonder",
+                                  "optional": false
+                                }
+                              ]
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/cities/0/city_pieces/wonders"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/culture_tokens",
+                      "value": 6
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/resources/food",
+                      "value": 2
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/ore",
+                      "value": 7
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/wood",
+                      "value": 7
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/wonder_cards",
+                      "value": [
+                        "Pyramids"
+                      ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/wonders_build"
                     }
                   ]
                 }
-              },
-              "last_priority_used": 0,
-              "player": 0
+              ]
             }
           ]
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/cities/0/city_pieces/wonders"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/culture_tokens",
-          "value": 6
-        },
-        {
-          "op": "add",
-          "path": "/players/0/resources/food",
-          "value": 2
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/ore",
-          "value": 7
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/wood",
-          "value": 7
-        },
-        {
-          "op": "add",
-          "path": "/players/0/wonder_cards",
-          "value": [
-            "Pyramids"
-          ]
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/wonders_build"
         }
       ]
     }

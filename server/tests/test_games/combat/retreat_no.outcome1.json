@@ -132,10 +132,7 @@
         "Mining"
       ],
       "incident_tokens": 3,
-      "next_unit_id": 2,
-      "event_info": {
-        "Land Battle Won": "true"
-      }
+      "next_unit_id": 2
     }
   ],
   "map": {
@@ -188,23 +185,36 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              0
-            ],
-            "destination": "C1"
-          }
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0
+                        ],
+                        "destination": "C1"
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Bool": false
+                    }
+                  }
+                }
+              ]
+            }
+          ]
         }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Bool": false
-        }
-      }
+      ]
     }
   ],
   "action_log_index": 2,

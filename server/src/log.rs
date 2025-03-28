@@ -1,5 +1,3 @@
-#![allow(clippy::if_not_else)]
-
 use crate::construct::Construct;
 use crate::content::action_cards::get_civil_card;
 use crate::cultural_influence::influence_culture_boost_cost;
@@ -413,7 +411,10 @@ pub(crate) fn add_action_log_item(game: &mut Game, item: Action) {
     game.action_log_index += 1;
 }
 
-pub(crate) fn current_player_turn_log(game: &Game) -> &ActionLogPlayer {
+///
+/// # Panics
+/// Panics if the log entry does not exist
+pub fn current_player_turn_log(game: &Game) -> &ActionLogPlayer {
     game.action_log
         .last()
         .expect("state should exist")

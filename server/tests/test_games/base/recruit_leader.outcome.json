@@ -262,64 +262,77 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Recruit": {
-            "units": {
-              "leaders": 1
-            },
-            "city_position": "A1",
-            "payment": {
-              "mood_tokens": 1,
-              "culture_tokens": 1
-            },
-            "leader_name": "Alexander"
-          }
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 3
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/available_leaders/0",
-          "value": "Alexander"
-        },
-        {
-          "op": "add",
-          "path": "/players/0/available_leaders/1",
-          "value": "Kleopatra"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/0/activations",
-          "value": 0
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/next_unit_id",
-          "value": 10
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/culture_tokens",
-          "value": 9
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/mood_tokens",
-          "value": 9
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/units/10"
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/active_leader"
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Recruit": {
+                        "units": {
+                          "leaders": 1
+                        },
+                        "city_position": "A1",
+                        "payment": {
+                          "mood_tokens": 1,
+                          "culture_tokens": 1
+                        },
+                        "leader_name": "Alexander"
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 3
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/available_leaders/0",
+                      "value": "Alexander"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/available_leaders/1",
+                      "value": "Kleopatra"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/0/activations",
+                      "value": 0
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/next_unit_id",
+                      "value": 10
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/culture_tokens",
+                      "value": 9
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 9
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/10"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/active_leader"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       ]
     }

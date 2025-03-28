@@ -240,11 +240,24 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Response": {
-          "SelectAdvance": "Storage"
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Response": {
+                      "SelectAdvance": "Storage"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
         }
-      }
+      ]
     }
   ],
   "action_log_index": 1,

@@ -303,17 +303,30 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              7,
-              8
-            ],
-            "destination": "D2"
-          }
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          7,
+                          8
+                        ],
+                        "destination": "D2"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
         }
-      }
+      ]
     }
   ],
   "action_log_index": 1,

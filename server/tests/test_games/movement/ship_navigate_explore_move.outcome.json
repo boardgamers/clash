@@ -281,16 +281,29 @@
   "current_player_index": 1,
   "action_log": [
     {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              1
-            ],
-            "destination": "F2"
-          }
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          1
+                        ],
+                        "destination": "F2"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
         }
-      }
+      ]
     }
   ],
   "action_log_index": 1,

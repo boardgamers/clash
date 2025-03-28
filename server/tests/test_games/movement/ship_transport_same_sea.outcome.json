@@ -258,21 +258,34 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              7
-            ],
-            "destination": "C3"
-          }
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "replace",
-          "path": "/players/0/units/7/position",
-          "value": "D2"
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          7
+                        ],
+                        "destination": "C3"
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/7/position",
+                      "value": "D2"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       ]
     }

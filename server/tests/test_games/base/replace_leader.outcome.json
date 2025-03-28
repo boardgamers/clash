@@ -259,71 +259,84 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Recruit": {
-            "units": {
-              "leaders": 1
-            },
-            "city_position": "A1",
-            "payment": {
-              "mood_tokens": 1,
-              "culture_tokens": 1
-            },
-            "leader_name": "Kleopatra",
-            "replaced_units": [
-              10
-            ]
-          }
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 2
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/active_leader",
-          "value": "Alexander"
-        },
-        {
-          "op": "add",
-          "path": "/players/0/available_leaders",
-          "value": [
-            "Kleopatra"
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Recruit": {
+                        "units": {
+                          "leaders": 1
+                        },
+                        "city_position": "A1",
+                        "payment": {
+                          "mood_tokens": 1,
+                          "culture_tokens": 1
+                        },
+                        "leader_name": "Kleopatra",
+                        "replaced_units": [
+                          10
+                        ]
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 2
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/active_leader",
+                      "value": "Alexander"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/available_leaders",
+                      "value": [
+                        "Kleopatra"
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/0/activations",
+                      "value": 1
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/0/mood_state",
+                      "value": "Happy"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/next_unit_id",
+                      "value": 11
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/culture_tokens",
+                      "value": 8
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 8
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/10/id",
+                      "value": 10
+                    }
+                  ]
+                }
+              ]
+            }
           ]
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/0/activations",
-          "value": 1
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/0/mood_state",
-          "value": "Happy"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/next_unit_id",
-          "value": 11
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/culture_tokens",
-          "value": 8
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/mood_tokens",
-          "value": 8
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/units/10/id",
-          "value": 10
         }
       ]
     }

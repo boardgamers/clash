@@ -300,134 +300,147 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Recruit": {
-            "units": {
-              "ships": 3
-            },
-            "city_position": "C2",
-            "payment": {
-              "wood": 5,
-              "gold": 1
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Recruit": {
+                        "units": {
+                          "ships": 3
+                        },
+                        "city_position": "C2",
+                        "payment": {
+                          "wood": 5,
+                          "gold": 1
+                        }
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 2
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/1/activations",
+                      "value": 4
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/1/mood_state",
+                      "value": "Happy"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/next_unit_id",
+                      "value": 10
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/gold",
+                      "value": 7
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/wood",
+                      "value": 7
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/4"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/4"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/4"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ResourceReward": {
+                        "mood_tokens": 1
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/events/0/handler/origin/Advance",
+                      "value": "Nationalism"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/events/0/handler/priority",
+                      "value": 1
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/events/0/handler/request/ResourceReward/name",
+                      "value": "Select token to gain"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/events/0/handler/request/ResourceReward/reward/conversions/0/from/0/mood_tokens",
+                      "value": 1
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/0/handler/request/ResourceReward/reward/conversions/0/from/0/wood"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/events/0/handler/request/ResourceReward/reward/conversions/0/to/culture_tokens",
+                      "value": 1
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/0/handler/request/ResourceReward/reward/conversions/0/to/gold"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/events/0/handler/request/ResourceReward/reward/default/mood_tokens",
+                      "value": 1
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/0/handler/request/ResourceReward/reward/default/wood"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/events/0/last_priority_used",
+                      "value": 1
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/food",
+                      "value": 6
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 9
+                    }
+                  ]
+                }
+              ]
             }
-          }
-        }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/actions_left",
-          "value": 2
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/1/activations",
-          "value": 4
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/cities/1/mood_state",
-          "value": "Happy"
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/next_unit_id",
-          "value": 10
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/gold",
-          "value": 7
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/wood",
-          "value": 7
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/units/4"
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/units/4"
-        },
-        {
-          "op": "remove",
-          "path": "/players/0/units/4"
-        },
-        {
-          "op": "remove",
-          "path": "/events"
-        }
-      ]
-    },
-    {
-      "action": {
-        "Response": {
-          "ResourceReward": {
-            "mood_tokens": 1
-          }
-        }
-      },
-      "undo": [
-        {
-          "op": "replace",
-          "path": "/events/0/handler/origin/Advance",
-          "value": "Nationalism"
-        },
-        {
-          "op": "replace",
-          "path": "/events/0/handler/priority",
-          "value": 1
-        },
-        {
-          "op": "replace",
-          "path": "/events/0/handler/request/ResourceReward/name",
-          "value": "Select token to gain"
-        },
-        {
-          "op": "add",
-          "path": "/events/0/handler/request/ResourceReward/reward/conversions/0/from/0/mood_tokens",
-          "value": 1
-        },
-        {
-          "op": "remove",
-          "path": "/events/0/handler/request/ResourceReward/reward/conversions/0/from/0/wood"
-        },
-        {
-          "op": "add",
-          "path": "/events/0/handler/request/ResourceReward/reward/conversions/0/to/culture_tokens",
-          "value": 1
-        },
-        {
-          "op": "remove",
-          "path": "/events/0/handler/request/ResourceReward/reward/conversions/0/to/gold"
-        },
-        {
-          "op": "add",
-          "path": "/events/0/handler/request/ResourceReward/reward/default/mood_tokens",
-          "value": 1
-        },
-        {
-          "op": "remove",
-          "path": "/events/0/handler/request/ResourceReward/reward/default/wood"
-        },
-        {
-          "op": "replace",
-          "path": "/events/0/last_priority_used",
-          "value": 1
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/food",
-          "value": 6
-        },
-        {
-          "op": "replace",
-          "path": "/players/0/resources/mood_tokens",
-          "value": 9
+          ]
         }
       ]
     }

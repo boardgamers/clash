@@ -299,33 +299,46 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Storage",
-            "payment": {
-              "gold": 2
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "gold": 2
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5
+                        ],
+                        "destination": "C1"
+                      }
+                    }
+                  }
+                }
+              ]
             }
-          }
+          ]
         }
-      }
-    },
-    {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "destination": "C1"
-          }
-        }
-      }
+      ]
     }
   ],
   "action_log_index": 2,

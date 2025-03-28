@@ -423,26 +423,20 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
-    {
-      "action": {
-        "Playing": "EndTurn"
-      }
-    }
-  ],
-  "action_log_index": 1,
+  "action_log": [],
+  "action_log_index": 0,
   "log": [
     [
       "Player1 ended their turn with 3 actions left"
     ],
     [
-      "It's Player2's turn"
+      "Round 3/3"
     ],
     [
-      "Round 3/3"
+      "It's Player2's turn"
     ]
   ],
-  "undo_limit": 1,
+  "undo_limit": 0,
   "actions_left": 3,
   "round": 3,
   "age": 2,

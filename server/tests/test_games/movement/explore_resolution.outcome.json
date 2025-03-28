@@ -434,20 +434,7 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
-    {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              0
-            ],
-            "destination": "D6"
-          }
-        }
-      }
-    }
-  ],
+  "action_log": [],
   "action_log_index": 1,
   "log": [
     [

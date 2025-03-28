@@ -227,27 +227,40 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Playing": {
-          "Advance": {
-            "advance": "Storage",
-            "payment": {
-              "food": 2
-            }
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
+      "rounds": [
+        {
+          "players": [
             {
-              "culture_tokens": 2
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "food": 2
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 2
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
             }
           ]
         }
-      }
+      ]
     }
   ],
   "action_log_index": 2,

@@ -198,58 +198,71 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              0
-            ],
-            "destination": "C1"
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Bool": true
-        }
-      },
-      "undo": [
+      "rounds": [
         {
-          "op": "add",
-          "path": "/events",
-          "value": [
+          "players": [
             {
-              "event_type": {
-                "CombatRoundEnd": {
-                  "attacker_casualties": {},
-                  "can_retreat": true,
-                  "combat": {
-                    "attacker": 0,
-                    "attacker_position": "C2",
-                    "attackers": [
-                      0
-                    ],
-                    "defender": 1,
-                    "defender_position": "C1",
-                    "retreat": "CanRetreat",
-                    "round": 1
-                  },
-                  "defender_casualties": {}
-                }
-              },
-              "handler": {
-                "origin": {
-                  "Builtin": "Offer Retreat"
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0
+                        ],
+                        "destination": "C1"
+                      }
+                    }
+                  }
                 },
-                "priority": 0,
-                "request": {
-                  "BoolRequest": "Do you want to retreat?"
+                {
+                  "action": {
+                    "Response": {
+                      "Bool": true
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "CombatRoundEnd": {
+                              "attacker_casualties": {},
+                              "can_retreat": true,
+                              "combat": {
+                                "attacker": 0,
+                                "attacker_position": "C2",
+                                "attackers": [
+                                  0
+                                ],
+                                "defender": 1,
+                                "defender_position": "C1",
+                                "retreat": "CanRetreat",
+                                "round": 1
+                              },
+                              "defender_casualties": {}
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Offer Retreat"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "BoolRequest": "Do you want to retreat?"
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    }
+                  ]
                 }
-              },
-              "last_priority_used": 0,
-              "player": 0
+              ]
             }
           ]
         }

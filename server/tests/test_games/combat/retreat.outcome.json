@@ -229,20 +229,7 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
-    {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              0
-            ],
-            "destination": "C1"
-          }
-        }
-      }
-    }
-  ],
+  "action_log": [],
   "action_log_index": 1,
   "log": [
     [

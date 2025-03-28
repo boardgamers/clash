@@ -175,10 +175,7 @@
         "Tactics"
       ],
       "incident_tokens": 1,
-      "next_unit_id": 8,
-      "event_info": {
-        "Land Battle Won": "true"
-      }
+      "next_unit_id": 8
     },
     {
       "id": 1,
@@ -285,77 +282,93 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "destination": "C1"
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
+      "rounds": [
+        {
+          "players": [
             {
-              "ore": 1
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5
+                        ],
+                        "destination": "C1"
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "ore": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {},
+                        {
+                          "ore": 2
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "ore": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ActionCard": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ActionCard": 2
+                        }
+                      ]
+                    }
+                  },
+                  "civil_card_match": {
+                    "opportunity": "WinLandBattle"
+                  }
+                }
+              ]
             }
           ]
         }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
-            {},
-            {
-              "ore": 2
-            }
-          ]
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
-            {
-              "ore": 1
-            }
-          ]
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectHandCards": [
-            {
-              "ActionCard": 1
-            }
-          ]
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectHandCards": [
-            {
-              "ActionCard": 2
-            }
-          ]
-        }
-      }
+      ]
     }
   ],
   "action_log_index": 6,

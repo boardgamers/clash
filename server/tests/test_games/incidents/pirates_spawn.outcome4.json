@@ -248,49 +248,62 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Response": {
-          "SelectAdvance": "Storage"
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectUnits": [
-            7
-          ]
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectPositions": [
-            "A2"
-          ]
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectPositions": [
-            "D2"
-          ]
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "Payment": [
+      "rounds": [
+        {
+          "players": [
             {
-              "ore": 1
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Response": {
+                      "SelectAdvance": "Storage"
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectUnits": [
+                        7
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": [
+                        "A2"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": [
+                        "D2"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "ore": 1
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
             }
           ]
         }
-      }
+      ]
     }
   ],
   "action_log_index": 5,

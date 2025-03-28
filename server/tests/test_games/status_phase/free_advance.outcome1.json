@@ -321,25 +321,35 @@
   "current_player_index": 1,
   "action_log": [
     {
-      "action": {
-        "Playing": "EndTurn"
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectAdvance": "Storage"
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectAdvance": "Storage"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
         }
-      }
+      ]
     }
   ],
   "action_log_index": 2,
   "log": [
     [
       "Player1 ended their turn"
-    ],
-    [
-      "It's Player2's turn"
     ],
     [
       "The game has entered the 2nd status phase"
@@ -350,7 +360,7 @@
     ]
   ],
   "undo_limit": 2,
-  "actions_left": 3,
+  "actions_left": 0,
   "round": 1,
   "age": 2,
   "messages": [

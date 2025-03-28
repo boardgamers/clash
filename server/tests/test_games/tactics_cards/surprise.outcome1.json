@@ -137,10 +137,7 @@
       "action_cards": [
         1
       ],
-      "next_unit_id": 2,
-      "event_info": {
-        "Land Battle Won": "true"
-      }
+      "next_unit_id": 2
     }
   ],
   "map": {
@@ -193,27 +190,40 @@
   "current_player_index": 0,
   "action_log": [
     {
-      "action": {
-        "Movement": {
-          "Move": {
-            "units": [
-              0
-            ],
-            "destination": "C1"
-          }
-        }
-      }
-    },
-    {
-      "action": {
-        "Response": {
-          "SelectHandCards": [
+      "rounds": [
+        {
+          "players": [
             {
-              "ActionCard": 10
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0
+                        ],
+                        "destination": "C1"
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ActionCard": 10
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
             }
           ]
         }
-      }
+      ]
     }
   ],
   "action_log_index": 2,
