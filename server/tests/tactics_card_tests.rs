@@ -132,3 +132,20 @@ fn test_surprise() {
         ],
     );
 }
+
+#[test]
+fn test_siege() {
+    JSON.test(
+        "siege",
+        vec![
+            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1")))
+                .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
+                    11,
+                )])),
+            ),
+        ],
+    );
+}

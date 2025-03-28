@@ -22,17 +22,17 @@ use std::vec;
 
 pub(crate) fn inspiration_action_cards() -> Vec<ActionCard> {
     vec![
-        advance(1, peltasts()),
-        advance(2, encircled()),
-        inspiration(3, encircled()),
-        inspiration(4, peltasts()),
-        hero_general(5, wedge_formation()),
-        hero_general(6, high_morale()),
-        spy(7, heavy_resistance()),
-        spy(8, high_morale()),
-        ideas(9, high_ground()),
-        ideas(10, surprise()),
-        great_ideas(11, siege()),
+        advance(1, peltasts),
+        advance(2, encircled),
+        inspiration(3, encircled),
+        inspiration(4, peltasts),
+        hero_general(5, wedge_formation),
+        hero_general(6, high_morale),
+        spy(7, heavy_resistance),
+        spy(8, high_morale),
+        ideas(9, high_ground),
+        ideas(10, surprise),
+        great_ideas(11, siege),
     ]
 }
 
