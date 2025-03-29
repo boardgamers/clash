@@ -211,7 +211,7 @@ pub fn influence_culture_boost_cost(
 
     if !matches!(city_piece, Building::Obelisk)
         && starting_city.player_index == player_index
-        && info.is_possible(range_boost)
+        && info.is_possible(range_boost, defender)
         && attacker.can_afford(&info.range_boost_cost)
         && start_city_is_eligible
         && !game.successful_cultural_influence

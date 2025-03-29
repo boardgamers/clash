@@ -279,6 +279,7 @@ pub enum InfluenceCulturePossible {
 #[derive(Clone, PartialEq)]
 pub struct InfluenceCultureInfo {
     pub is_defender: bool,
+    pub allow_barbarian: bool,
     pub possible: InfluenceCulturePossible,
     pub range_boost_cost: PaymentOptions,
     pub(crate) info: ActionInfo,
@@ -294,11 +295,16 @@ impl InfluenceCultureInfo {
             info,
             roll_boost: 0,
             is_defender: false,
+            allow_barbarian: false,
         }
     }
 
     #[must_use]
-    pub fn is_possible(&self, range_boost: u32) -> bool {
+    pub fn is_possible(&self, range_boost: u32, target_player: &Player) -> bool {
+        if !self.allow_barbarian && target_player.civilization.is_barbarian() {
+            return false;
+        } 
+        
         match self.possible {
             InfluenceCulturePossible::NoRestrictions => true,
             InfluenceCulturePossible::NoBoost => range_boost == 0,

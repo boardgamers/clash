@@ -108,6 +108,7 @@ pub enum PermanentIncidentEffect {
     SolarEclipse,
     Anarchy(Anarchy),
     GreatEngineer,
+    CulturalTakeover,
     DiplomaticRelations(DiplomaticRelations),
 }
 
@@ -123,6 +124,8 @@ impl PermanentIncidentEffect {
             PermanentIncidentEffect::TrojanHorse => EventOrigin::Incident(42),
             PermanentIncidentEffect::Anarchy(_) => EventOrigin::Incident(44),
             PermanentIncidentEffect::DiplomaticRelations(_) => EventOrigin::Incident(DIPLOMAT_ID),
+            // can also be 16, but that doesn't matter for the help text
+            PermanentIncidentEffect::CulturalTakeover => EventOrigin::CivilCard(15), 
         }
     }
 }
