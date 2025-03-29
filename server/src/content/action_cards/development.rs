@@ -48,6 +48,7 @@ pub(crate) fn use_cultural_takeover() -> Builtin {
             |event| &mut event.is_playing_action_available,
             2,
             |available, game, i| {
+                //todo also allow arts custom action
                 if game
                     .permanent_incident_effects
                     .contains(&PermanentIncidentEffect::CulturalTakeover)
@@ -89,3 +90,5 @@ fn convert_barbarian_city() {
     //todo add resolution effect on_influence_culture_success
     todo!()
 }
+
+//todo how to select the city center?
