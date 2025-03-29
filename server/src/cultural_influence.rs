@@ -35,7 +35,7 @@ pub(crate) fn influence_culture_attempt(
     let self_influence = starting_city_position == target_city_position;
 
     // currently, there is no way to have different costs for this
-    game.players[player_index].lose_resources(info.range_boost_cost.default);
+    game.players[player_index].lose_resources(info.range_boost_cost.default.clone());
     let roll = game.get_next_dice_roll().value + info.roll_boost;
     let success = roll >= 5;
     if success {
@@ -54,6 +54,7 @@ pub(crate) fn influence_culture_attempt(
     if self_influence || matches!(info.possible, InfluenceCulturePossible::NoBoost) {
         game.add_to_last_log_item(&format!(" and failed (rolled {roll})"));
         info.info.execute(game);
+        attempt_failed(game, player_index);
         return;
     }
     if let Some(roll_boost_cost) = PaymentOptions::resources(roll_boost_cost(roll))
@@ -68,6 +69,7 @@ pub(crate) fn influence_culture_attempt(
             " but rolled a {roll} and has not enough culture tokens to increase the roll "
         ));
         info.info.execute(game);
+        attempt_failed(game, player_index);
     }
 }
 
@@ -107,6 +109,7 @@ pub(crate) fn cultural_influence_resolution() -> Builtin {
                         cultural influence",
                     s.player_name
                 ));
+                attempt_failed(game, s.player_index);
                 return;
             }
 
@@ -246,8 +249,17 @@ pub fn influence_culture(
 
     game.trigger_transient_event_with_game_value(
         influencer_index,
-        |e| &mut e.on_influence_culture_success,
+        |e| &mut e.on_influence_culture_resolve,
+        &true,
         &influencer_index,
-        &(),
+    );
+}
+
+fn attempt_failed(game: &mut Game, player: usize) {
+    game.trigger_transient_event_with_game_value(
+        player,
+        |e| &mut e.on_influence_culture_resolve,
+        &false,
+        &player,
     );
 }

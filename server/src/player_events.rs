@@ -36,7 +36,7 @@ pub(crate) struct PlayerEvents {
 pub(crate) struct TransientEvents {
     pub on_collect: Event<CollectInfo, Game>,
     pub on_influence_culture_attempt: Event<InfluenceCultureInfo, City, Game>,
-    pub on_influence_culture_success: Event<Game, usize>,
+    pub on_influence_culture_resolve: Event<Game, InfluenceCultureOutcome>,
     pub before_move: Event<Game, MoveInfo>,
 
     pub construct_cost: Event<CostInfo, Building, Game>,
@@ -322,4 +322,11 @@ impl InfluenceCultureInfo {
         }
         self.possible = InfluenceCulturePossible::NoBoost;
     }
+}
+
+#[derive(Clone, PartialEq)]
+pub struct InfluenceCultureOutcome {
+    pub success: bool,
+    pub player: usize,
+    pub position: Position,
 }

@@ -25,20 +25,21 @@ fn cultural_takeover(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         Replace one of the Barbarian units with a Settler or Infantry of your color. \
         Remove the other Barbarian units.",
         ActionType::free(),
-        |game, p| {
-            true
+        |game, p| true,
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.on_play_action_card,
+        0,
+        |game, _player, _name, _a| {
+            game.permanent_incident_effects
+                .push(PermanentIncidentEffect::CulturalTakeover);
+            game.add_info_log_item(
+                "Cultural Takeover: You may influence Barbarian cities of size 1.",
+            );
         },
     )
-        .add_simple_persistent_event_listener(
-            |event| &mut event.on_play_action_card,
-            0,
-            |game, _player, _name, _a| {
-                game.permanent_incident_effects.push(PermanentIncidentEffect::CulturalTakeover);
-                game.add_info_log_item("Cultural Takeover: You may influence Barbarian cities of size 1.");
-            },
-        )
-        .tactics_card(tactics_card)
-        .build()
+    .tactics_card(tactics_card)
+    .build()
 }
 
 pub(crate) fn use_cultural_takeover() -> Builtin {
@@ -59,27 +60,32 @@ pub(crate) fn use_cultural_takeover() -> Builtin {
         )
         .add_transient_event_listener(
             |event| &mut event.on_influence_culture_attempt,
-            1,
+            5,
             |c, _, game| {
-                //todo add resolution effect on_influence_culture_success
-                if                 remove_element(
-                                    &mut game.permanent_incident_effects,
-                                    &PermanentIncidentEffect::CulturalTakeover,
-                                )
+                if game
+                    .permanent_incident_effects
+                    .contains(&PermanentIncidentEffect::CulturalTakeover)
                 {
                     c.allow_barbarian = true;
                 }
             },
         )
         .add_transient_event_listener(
-            |event| &mut event.on_influence_culture_success,
-            2,
-            |game, _, _, _| {
-                remove_element(
+            |event| &mut event.on_influence_culture_resolve,
+            1,
+            |game, outcome, ()| {
+                if remove_element(
                     &mut game.permanent_incident_effects,
                     &PermanentIncidentEffect::CulturalTakeover,
-                );
+                ).is_some() {
+                    convert_barbarian_city();
+                }
             },
         )
         .build()
+}
+
+fn convert_barbarian_city() {
+    //todo add resolution effect on_influence_culture_success
+    todo!()
 }

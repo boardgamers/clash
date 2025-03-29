@@ -23,6 +23,7 @@ use crate::{
     position::Position,
     resource_pile::ResourcePile,
 };
+use crate::content::custom_phase_actions::Structure;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Collect {
@@ -48,7 +49,7 @@ pub struct InfluenceCultureAttempt {
     pub starting_city_position: Position,
     pub target_player_index: usize,
     pub target_city_position: Position,
-    pub city_piece: Building,
+    pub city_piece: Structure,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]

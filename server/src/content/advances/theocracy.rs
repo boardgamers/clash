@@ -81,25 +81,37 @@ fn devotion() -> AdvanceBuilder {
 }
 
 fn conversion() -> AdvanceBuilder {
-    Advance::builder("Conversion", "You add +1 to your Influence Culture roll and gain 1 culture token when you make a successful Influence Culture attempt.")
-        .add_transient_event_listener(
-            |event| &mut event.on_influence_culture_attempt,
-            3,
-            |info, _, _| {
-                if !info.is_defender {
-                    info.roll_boost += 1;
-                    info.info.log.push("Player gets +1 to Influence Culture roll for Conversion Advance".to_string());
-                }
-            },
-        )
-        .add_transient_event_listener(
-            |event| &mut event.on_influence_culture_success,
-            0,
-            |game, player, ()| {
-                game.get_player_mut(*player).gain_resources(ResourcePile::culture_tokens(1));
-                game.add_info_log_item("Player gained 1 culture token for a successful Influence Culture attempt for Conversion Advance");
-            },
-        )
+    Advance::builder(
+        "Conversion",
+        "You add +1 to your Influence Culture roll \
+        and gain 1 culture token when you make a successful Influence Culture attempt.",
+    )
+    .add_transient_event_listener(
+        |event| &mut event.on_influence_culture_attempt,
+        3,
+        |info, _, _| {
+            if !info.is_defender {
+                info.roll_boost += 1;
+                info.info.log.push(
+                    "Player gets +1 to Influence Culture roll for Conversion Advance".to_string(),
+                );
+            }
+        },
+    )
+    .add_transient_event_listener(
+        |event| &mut event.on_influence_culture_resolve,
+        0,
+        |game, outcome, ()| {
+            if outcome.success {
+                game.get_player_mut(outcome.player)
+                    .gain_resources(ResourcePile::culture_tokens(1));
+                game.add_info_log_item(
+                    "Player gained 1 culture token for a successful \
+                    Influence Culture attempt for Conversion Advance",
+                );
+            }
+        },
+    )
 }
 
 fn fanaticism() -> AdvanceBuilder {
