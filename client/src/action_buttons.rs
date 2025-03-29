@@ -59,7 +59,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
                 EventOrigin::advance("Arts"),
                 CustomActionType::ArtsInfluenceCultureAttempt,
             )],
-            |d| new_cultural_influence_dialog(rc.game, d),
+            |d| new_cultural_influence_dialog(rc.game, rc.shown_player.index, d),
         );
     }
     let mut i = 0;
@@ -83,7 +83,6 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     }
     StateUpdate::None
 }
-
 
 pub fn custom_action_buttons<'a>(
     rc: &'a RenderContext,

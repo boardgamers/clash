@@ -125,7 +125,7 @@ impl PermanentIncidentEffect {
             PermanentIncidentEffect::Anarchy(_) => EventOrigin::Incident(44),
             PermanentIncidentEffect::DiplomaticRelations(_) => EventOrigin::Incident(DIPLOMAT_ID),
             // can also be 16, but that doesn't matter for the help text
-            PermanentIncidentEffect::CulturalTakeover => EventOrigin::CivilCard(15), 
+            PermanentIncidentEffect::CulturalTakeover => EventOrigin::CivilCard(15),
         }
     }
 }

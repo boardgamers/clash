@@ -10,6 +10,7 @@ use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
 use crate::unit_ui;
 use crate::unit_ui::{draw_unit_type, UnitSelection};
+use itertools::Itertools;
 use macroquad::math::vec2;
 use server::action::Action;
 use server::content::custom_actions::CustomAction;
@@ -176,7 +177,7 @@ impl<T: Clone + PartialEq> MultiSelection<T> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct SelectedStructureWithInfo {
     pub position: Position,
     pub structure: Structure,
@@ -201,12 +202,16 @@ impl SelectedStructureWithInfo {
             tooltip,
         }
     }
+
+    pub fn selected(&self) -> SelectedStructure {
+        (self.position, self.structure.clone())
+    }
 }
 
 pub fn select_structures_dialog(
     rc: &RenderContext,
-    d: Option<BaseOrCustomDialog>,
-    s: &MultiSelection<SelectedStructure>,
+    d: &Option<BaseOrCustomDialog>,
+    s: &MultiSelection<SelectedStructureWithInfo>,
 ) -> StateUpdate {
     bottom_centered_text(
         rc,
@@ -218,30 +223,34 @@ pub fn select_structures_dialog(
         .as_str(),
     );
 
+    let sel = s
+        .selected
+        .iter()
+        .map(|s| s.selected())
+        .collect_vec();
     if ok_button(
         rc,
         multi_select_tooltip(
             s,
-            s.request.is_valid(&s.selected) && is_selected_structures_valid(rc.game, &s.selected),
+            s.request.is_valid(&s.selected) && is_selected_structures_valid(rc.game, &sel),
             "structures (city center must be the last one)",
         ),
     ) {
         if let Some(d) = d {
-            let c = s.selected[0].clone();
+            if s.selected.is_empty() {
+                return StateUpdate::CloseDialog;
+            }
+            let s = s.selected[0].selected();
             match d.custom {
                 BaseOrCustomAction::Base => {
-                    StateUpdate::execute(Action::Playing(PlayingAction::InfluenceCultureAttempt(
-                        c,
-                    )))
+                    StateUpdate::execute(Action::Playing(PlayingAction::InfluenceCultureAttempt(s)))
                 }
-                BaseOrCustomAction::Custom { .. } => {
-                    StateUpdate::execute(Action::Playing(PlayingAction::Custom(
-                        CustomAction::ArtsInfluenceCultureAttempt(c),
-                    )))
-                }
+                BaseOrCustomAction::Custom { .. } => StateUpdate::execute(Action::Playing(
+                    PlayingAction::Custom(CustomAction::ArtsInfluenceCultureAttempt(s)),
+                )),
             }
         } else {
-            StateUpdate::response(EventResponse::SelectStructures(s.selected.clone()))
+            StateUpdate::response(EventResponse::SelectStructures(sel))
         }
     } else {
         StateUpdate::None
@@ -286,18 +295,18 @@ pub fn player_request_dialog(rc: &RenderContext, r: &PlayerRequest) -> StateUpda
 }
 
 pub struct StructureHighlight {
-    pub structure: Structure,
+    pub selected: SelectedStructureWithInfo,
     pub highlight_type: HighlightType,
 }
 
 pub fn highlight_structures(
-    structures: &[Structure],
+    structures: &[SelectedStructureWithInfo],
     highlight_type: HighlightType,
 ) -> Vec<StructureHighlight> {
     structures
         .iter()
         .map(move |s| StructureHighlight {
-            structure: s.clone(),
+            selected: s.clone(),
             highlight_type,
         })
         .collect()

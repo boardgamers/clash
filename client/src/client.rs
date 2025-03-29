@@ -24,7 +24,7 @@ use crate::player_ui::{player_select, show_global_controls, show_top_center, sho
 use crate::render_context::RenderContext;
 use crate::unit_ui::unit_selection_click;
 use crate::{
-    cards_ui, custom_actions_ui, custom_phase_ui, dialog_ui, influence_ui, map_ui, move_ui,
+    cards_ui, custom_actions_ui, custom_phase_ui, dialog_ui, map_ui, move_ui,
     recruit_unit_ui, status_phase_ui, tooltip,
 };
 
@@ -142,7 +142,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
     match &state.active_dialog {
         ActiveDialog::None
         | ActiveDialog::WaitingForUpdate
-        | ActiveDialog::CulturalInfluence(_) => StateUpdate::None,
+         => StateUpdate::None,
         ActiveDialog::DialogChooser(d) => dialog_chooser(rc, d),
         ActiveDialog::Log => show_log(rc),
 
@@ -177,7 +177,9 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         }
         ActiveDialog::UnitTypeRequest(r) => custom_phase_ui::unit_request_dialog(rc, r),
         ActiveDialog::UnitsRequest(r) => custom_phase_ui::select_units_dialog(rc, r),
-        ActiveDialog::StructuresRequest(d, r) => custom_phase_ui::select_structures_dialog(rc, d, r),
+        ActiveDialog::StructuresRequest(d, r) => {
+            custom_phase_ui::select_structures_dialog(rc, d, r)
+        }
         ActiveDialog::BoolRequest(d) => custom_phase_ui::bool_request_dialog(rc, d),
         ActiveDialog::PositionRequest(r) => custom_phase_ui::position_request_dialog(rc, r),
         ActiveDialog::HandCardsRequest(r) => cards_ui::select_cards_dialog(rc, r),
@@ -199,12 +201,6 @@ pub fn try_click(rc: &RenderContext) -> StateUpdate {
     let game = rc.game;
     let mouse_pos = rc.mouse_pos();
     let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));
-
-    if rc.can_control_shown_player() {
-        if let ActiveDialog::CulturalInfluence(b) = &rc.state.active_dialog {
-            return influence_ui::hover(rc, mouse_pos, b);
-        }
-    }
 
     if !game.map.tiles.contains_key(&pos) {
         return StateUpdate::None;

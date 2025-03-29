@@ -3,19 +3,18 @@ use serde::{Deserialize, Serialize};
 use crate::collect::collect;
 use crate::content::advances::culture::{execute_sports, execute_theaters};
 use crate::content::advances::economy::collect_taxes;
-use crate::cultural_influence::{format_cultural_influence_attempt_log_item, influence_culture_attempt};
+use crate::content::custom_phase_actions::SelectedStructure;
+use crate::cultural_influence::{
+    format_cultural_influence_attempt_log_item, influence_culture_attempt,
+};
 use crate::log::{
-    format_city_happiness_increase, format_collect_log_item,
-     format_happiness_increase,
+    format_city_happiness_increase, format_collect_log_item, format_happiness_increase,
 };
 use crate::player::Player;
-use crate::playing_actions::{
-    increase_happiness, Collect, IncreaseHappiness,  PlayingActionType,
-};
+use crate::playing_actions::{increase_happiness, Collect, IncreaseHappiness, PlayingActionType};
 use crate::{
     game::Game, playing_actions::ActionType, position::Position, resource_pile::ResourcePile,
 };
-use crate::content::custom_phase_actions::SelectedStructure;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub enum CustomAction {

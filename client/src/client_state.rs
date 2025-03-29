@@ -3,7 +3,7 @@ use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::ConstructionPayment;
 use crate::custom_phase_ui::{MultiSelection, SelectedStructureWithInfo, UnitsSelection};
-use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
+use crate::dialog_ui::BaseOrCustomDialog;
 use crate::event_ui::{custom_phase_event_help, custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
@@ -19,7 +19,7 @@ use server::card::HandCard;
 use server::city::{City, MoodState};
 use server::content::custom_phase_actions::{
     AdvanceRequest, ChangeGovernmentRequest, CurrentEventRequest, CurrentEventType, EventResponse,
-    MultiRequest, PlayerRequest, SelectedStructure, UnitTypeRequest,
+    MultiRequest, PlayerRequest, UnitTypeRequest,
 };
 use server::events::EventOrigin;
 use server::game::{Game, GameState};
@@ -43,7 +43,6 @@ pub enum ActiveDialog {
     ReplaceUnits(RecruitSelection),
     MoveUnits(MoveSelection),
     MovePayment(MovePayment),
-    CulturalInfluence(BaseOrCustomDialog),
     ExploreResolution(ExploreResolutionConfig),
 
     // custom
@@ -57,7 +56,10 @@ pub enum ActiveDialog {
     PositionRequest(MultiSelection<Position>),
     UnitTypeRequest(UnitTypeRequest),
     UnitsRequest(UnitsSelection),
-    StructuresRequest(Option<BaseOrCustomDialog>, MultiSelection<SelectedStructureWithInfo>),
+    StructuresRequest(
+        Option<BaseOrCustomDialog>,
+        MultiSelection<SelectedStructureWithInfo>,
+    ),
     HandCardsRequest(MultiSelection<HandCard>),
     BoolRequest(String),
     ChangeGovernmentType(ChangeGovernmentRequest),
@@ -81,7 +83,6 @@ impl ActiveDialog {
             ActiveDialog::ReplaceUnits(_) => "replace units",
             ActiveDialog::MoveUnits(_) => "move units",
             ActiveDialog::MovePayment(_) => "move payment",
-            ActiveDialog::CulturalInfluence(_) => "cultural influence",
             ActiveDialog::ExploreResolution(_) => "explore resolution",
             ActiveDialog::ChangeGovernmentType(_) => "change government type",
             ActiveDialog::ChooseAdditionalAdvances(_) => "choose additional advances",
@@ -95,7 +96,7 @@ impl ActiveDialog {
             ActiveDialog::PositionRequest(_) => "custom phase position request",
             ActiveDialog::UnitTypeRequest(_) => "custom phase unit request",
             ActiveDialog::UnitsRequest(_) => "custom phase units request",
-            ActiveDialog::StructuresRequest(_) => "custom phase structures request",
+            ActiveDialog::StructuresRequest(_, _) => "custom phase structures request",
             ActiveDialog::BoolRequest(_) => "custom phase bool request",
             ActiveDialog::HandCardsRequest(_) => "custom phase hand cards request",
         }
@@ -121,14 +122,6 @@ impl ActiveDialog {
             ActiveDialog::RecruitUnitSelection(_) => vec!["Click on a unit to recruit".to_string()],
             ActiveDialog::ReplaceUnits(_) => vec!["Click on a unit to replace".to_string()],
             ActiveDialog::MoveUnits(m) => Self::move_units_help(rc, m),
-            ActiveDialog::CulturalInfluence(b) => {
-                let v = vec!["Click on a building to influence its culture".to_string()];
-                if let BaseOrCustomAction::Custom { origin, custom: _ } = &b.custom {
-                    let mut r = v.clone();
-                    r.extend(event_help(rc, origin));
-                }
-                v
-            }
             ActiveDialog::ExploreResolution(_) => {
                 vec!["Click on the new tile to rotate it".to_string()]
             }
@@ -156,7 +149,7 @@ impl ActiveDialog {
             ActiveDialog::UnitsRequest(r) => {
                 custom_phase_event_help(rc, &r.selection.request.description)
             }
-            ActiveDialog::StructuresRequest(r) => {
+            ActiveDialog::StructuresRequest(_, r) => {
                 custom_phase_event_help(rc, &r.request.description)
             }
             ActiveDialog::PositionRequest(r) => custom_phase_event_help(rc, &r.request.description),
@@ -539,7 +532,7 @@ impl State {
                     ActiveDialog::UnitsRequest(UnitsSelection::new(r))
                 }
                 CurrentEventRequest::SelectStructures(r) => {
-                    ActiveDialog::StructuresRequest(MultiSelection::new(MultiRequest::new(
+                    ActiveDialog::StructuresRequest(None, MultiSelection::new(MultiRequest::new(
                         r.choices
                             .iter()
                             .map(|s| {

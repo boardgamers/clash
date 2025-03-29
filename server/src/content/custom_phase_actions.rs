@@ -9,6 +9,7 @@ use crate::explore::ExploreResolutionState;
 use crate::game::Game;
 use crate::map::Rotation;
 use crate::payment::PaymentOptions;
+use crate::player::Player;
 use crate::player_events::{AdvanceInfo, IncidentInfo};
 use crate::playing_actions::Recruit;
 use crate::position::Position;
@@ -19,7 +20,6 @@ use crate::wonder::WonderCardInfo;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
-use crate::player::Player;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct PaymentRequest {
@@ -279,7 +279,7 @@ impl Structure {
         match self {
             Structure::CityCenter => player.is_city_available(),
             Structure::Building(b) => player.is_building_available(*b, game),
-            Structure::Wonder(w) => false,
+            Structure::Wonder(_) => false,
         }
     }
 }

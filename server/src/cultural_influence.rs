@@ -24,7 +24,7 @@ pub(crate) fn influence_culture_attempt(
 ) {
     let target_city_position = c.0;
     let target_city = game.get_any_city(target_city_position);
-    let starting_city_position = start_city(&game, player_index, target_city);
+    let starting_city_position = start_city(game, player_index, target_city);
 
     let info = influence_culture_boost_cost(game, player_index, c);
     if matches!(info.possible, InfluenceCulturePossible::Impossible) {
@@ -109,7 +109,8 @@ pub(crate) fn cultural_influence_resolution() -> Builtin {
                 .expect(
                     "there should be a cultural influence attempt action log item before \
                     a cultural influence resolution action log item",
-                ).clone();
+                )
+                .clone();
 
             let roll_boost_cost = s.choice[0].clone();
             if roll_boost_cost.is_empty() {
@@ -168,7 +169,7 @@ pub fn influence_culture_boost_cost(
     let structure = &selected.1;
     let target_city = game.get_any_city(target_city_position);
     let target_player_index = target_city.player_index;
-    let starting_city_position = start_city(&game, player_index, target_city);
+    let starting_city_position = start_city(game, player_index, target_city);
     let starting_city = game.get_any_city(starting_city_position);
 
     let range_boost =
@@ -190,6 +191,7 @@ pub fn influence_culture_boost_cost(
     let mut info = InfluenceCultureInfo::new(
         PaymentOptions::resources(ResourcePile::culture_tokens(range_boost)),
         ActionInfo::new(attacker),
+        structure.clone(),
     );
     let _ = attacker.trigger_event(
         |e| &e.on_influence_culture_attempt,
@@ -207,7 +209,7 @@ pub fn influence_culture_boost_cost(
 
     if !matches!(structure, Structure::Building(Building::Obelisk))
         && starting_city.player_index == player_index
-        && info.is_possible(range_boost, defender)
+        && info.is_possible(range_boost)
         && attacker.can_afford(&info.range_boost_cost)
         && start_city_is_eligible
         && !game.successful_cultural_influence
@@ -263,7 +265,7 @@ fn start_city(game: &Game, player_index: usize, target_city: &City) -> Position 
     let starting_city_position = if target_city.player_index == player_index {
         target_city.position
     } else {
-        closest_city(&game.get_player(player_index), target_city.position)
+        closest_city(game.get_player(player_index), target_city.position)
     };
     starting_city_position
 }
@@ -286,7 +288,7 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     let target_city_position = c.0;
     let target_city = game.get_any_city(target_city_position);
     let target_player_index = target_city.player_index;
-    let starting_city_position = start_city(&game, player_index, target_city);
+    let starting_city_position = start_city(game, player_index, target_city);
 
     let player = if target_player_index == game.active_player() {
         String::from("themselves")

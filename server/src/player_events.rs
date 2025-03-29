@@ -4,6 +4,7 @@ use crate::barbarians::BarbariansEventState;
 use crate::collect::{CollectContext, CollectInfo};
 use crate::combat::Combat;
 use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
+use crate::content::custom_phase_actions::Structure;
 use crate::events::Event;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
@@ -23,7 +24,6 @@ use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
-use crate::content::custom_phase_actions::Structure;
 
 pub(crate) type CurrentEvent<V = ()> = Event<Game, CurrentEventInfo, (), V>;
 
@@ -289,7 +289,11 @@ pub struct InfluenceCultureInfo {
 
 impl InfluenceCultureInfo {
     #[must_use]
-    pub(crate) fn new(range_boost_cost: PaymentOptions, info: ActionInfo, structure: Structure) -> InfluenceCultureInfo {
+    pub(crate) fn new(
+        range_boost_cost: PaymentOptions,
+        info: ActionInfo,
+        structure: Structure,
+    ) -> InfluenceCultureInfo {
         InfluenceCultureInfo {
             possible: InfluenceCulturePossible::NoRestrictions,
             structure,
@@ -301,11 +305,7 @@ impl InfluenceCultureInfo {
     }
 
     #[must_use]
-    pub fn is_possible(&self, range_boost: u32, target_player: &Player) -> bool {
-        // if !self.allow_barbarian && target_player.civilization.is_barbarian() {
-        //     return false;
-        // }
-
+    pub fn is_possible(&self, range_boost: u32) -> bool {
         match self.possible {
             InfluenceCulturePossible::NoRestrictions => true,
             InfluenceCulturePossible::NoBoost => range_boost == 0,

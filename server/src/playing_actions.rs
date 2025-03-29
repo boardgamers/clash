@@ -8,6 +8,7 @@ use crate::construct::Construct;
 use crate::content::action_cards::get_civil_card;
 use crate::content::advances::get_advance;
 use crate::content::custom_actions::CustomActionInfo;
+use crate::content::custom_phase_actions::SelectedStructure;
 use crate::cultural_influence::influence_culture_attempt;
 use crate::game::GameState;
 use crate::player::Player;
@@ -16,14 +17,9 @@ use crate::recruit::{recruit, recruit_cost};
 use crate::unit::Units;
 use crate::wonder::{cities_for_wonder, on_play_wonder_card, WonderCardInfo, WonderDiscount};
 use crate::{
-    city::City,
-    city_pieces::Building::{self},
-    content::custom_actions::CustomAction,
-    game::Game,
-    position::Position,
+    city::City, content::custom_actions::CustomAction, game::Game, position::Position,
     resource_pile::ResourcePile,
 };
-use crate::content::custom_phase_actions::{SelectedStructure, Structure};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Collect {
