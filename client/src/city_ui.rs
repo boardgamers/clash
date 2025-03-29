@@ -232,11 +232,11 @@ fn structure_selected(
 ) -> Option<StateUpdate> {
     draw_circle_lines(center.x, center.y, size, 3., h.highlight_type.color());
     if is_mouse_button_pressed(MouseButton::Left) && is_in_circle(rc.mouse_pos(), center, size) {
-        let ActiveDialog::StructuresRequest(r) = &rc.state.active_dialog else {
+        let ActiveDialog::StructuresRequest(d, r) = &rc.state.active_dialog else {
             panic!("Expected StructuresRequest");
         };
         Some(StateUpdate::OpenDialog(ActiveDialog::StructuresRequest(
-            r.clone().toggle((position, h.structure.clone())),
+            d.clone(), r.clone().toggle((position, h.structure.clone())),
         )))
     } else {
         None
@@ -248,7 +248,7 @@ pub fn draw_city(rc: &RenderContext, city: &City) -> Option<StateUpdate> {
     let owner = city.player_index;
 
     let highlighted = match rc.state.active_dialog {
-        ActiveDialog::StructuresRequest(ref s) => highlight_structures(
+        ActiveDialog::StructuresRequest(_, ref s) => highlight_structures(
             &position_structures(city, &s.selected),
             HighlightType::Primary,
         )

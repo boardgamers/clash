@@ -23,6 +23,7 @@ use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
+use crate::content::custom_phase_actions::Structure;
 
 pub(crate) type CurrentEvent<V = ()> = Event<Game, CurrentEventInfo, (), V>;
 
@@ -279,7 +280,7 @@ pub enum InfluenceCulturePossible {
 #[derive(Clone, PartialEq)]
 pub struct InfluenceCultureInfo {
     pub is_defender: bool,
-    pub allow_barbarian: bool,
+    pub structure: Structure,
     pub possible: InfluenceCulturePossible,
     pub range_boost_cost: PaymentOptions,
     pub(crate) info: ActionInfo,
@@ -288,23 +289,23 @@ pub struct InfluenceCultureInfo {
 
 impl InfluenceCultureInfo {
     #[must_use]
-    pub(crate) fn new(range_boost_cost: PaymentOptions, info: ActionInfo) -> InfluenceCultureInfo {
+    pub(crate) fn new(range_boost_cost: PaymentOptions, info: ActionInfo, structure: Structure) -> InfluenceCultureInfo {
         InfluenceCultureInfo {
             possible: InfluenceCulturePossible::NoRestrictions,
+            structure,
             range_boost_cost,
             info,
             roll_boost: 0,
             is_defender: false,
-            allow_barbarian: false,
         }
     }
 
     #[must_use]
     pub fn is_possible(&self, range_boost: u32, target_player: &Player) -> bool {
-        if !self.allow_barbarian && target_player.civilization.is_barbarian() {
-            return false;
-        } 
-        
+        // if !self.allow_barbarian && target_player.civilization.is_barbarian() {
+        //     return false;
+        // }
+
         match self.possible {
             InfluenceCulturePossible::NoRestrictions => true,
             InfluenceCulturePossible::NoBoost => range_boost == 0,
@@ -329,4 +330,15 @@ pub struct InfluenceCultureOutcome {
     pub success: bool,
     pub player: usize,
     pub position: Position,
+}
+
+impl InfluenceCultureOutcome {
+    #[must_use]
+    pub fn new(success: bool, player: usize, position: Position) -> InfluenceCultureOutcome {
+        InfluenceCultureOutcome {
+            success,
+            player,
+            position,
+        }
+    }
 }

@@ -1,10 +1,10 @@
 use crate::construct::Construct;
 use crate::content::action_cards::get_civil_card;
-use crate::cultural_influence::influence_culture_boost_cost;
+use crate::cultural_influence::format_cultural_influence_attempt_log_item;
 use crate::player::Player;
 
 use crate::action_card::CivilCardMatch;
-use crate::playing_actions::{Collect, IncreaseHappiness, InfluenceCultureAttempt, Recruit};
+use crate::playing_actions::{Collect, IncreaseHappiness, Recruit};
 use crate::unit::MoveUnits;
 use crate::{
     action::Action,
@@ -169,44 +169,6 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             }
         ),
     }
-}
-
-pub(crate) fn format_cultural_influence_attempt_log_item(
-    game: &Game,
-    player_index: usize,
-    player_name: &str,
-    c: &InfluenceCultureAttempt,
-) -> String {
-    let target_player_index = c.target_player_index;
-    let target_city_position = c.target_city_position;
-    let starting_city_position = c.starting_city_position;
-    let city_piece = c.city_piece;
-    let player = if target_player_index == game.active_player() {
-        String::from("themselves")
-    } else {
-        game.player_name(target_player_index)
-    };
-    let city = if starting_city_position == target_city_position {
-        String::new()
-    } else {
-        format!(" with the city at {starting_city_position}")
-    };
-    let range_boost_cost = influence_culture_boost_cost(
-        game,
-        player_index,
-        starting_city_position,
-        target_player_index,
-        target_city_position,
-        city_piece,
-    )
-    .range_boost_cost;
-    // this cost can't be changed by the player
-    let cost = if range_boost_cost.is_free() {
-        String::new()
-    } else {
-        format!(" and paid {} to boost the range", range_boost_cost.default)
-    };
-    format!("{player_name} tried to influence culture the {city_piece:?} in the city at {target_city_position} by {player}{city}{cost}")
 }
 
 ///

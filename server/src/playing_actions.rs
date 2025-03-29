@@ -23,7 +23,7 @@ use crate::{
     position::Position,
     resource_pile::ResourcePile,
 };
-use crate::content::custom_phase_actions::Structure;
+use crate::content::custom_phase_actions::{SelectedStructure, Structure};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Collect {
@@ -42,14 +42,6 @@ pub struct Recruit {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub replaced_units: Vec<u32>,
-}
-
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
-pub struct InfluenceCultureAttempt {
-    pub starting_city_position: Position,
-    pub target_player_index: usize,
-    pub target_city_position: Position,
-    pub city_piece: Structure,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
@@ -164,7 +156,7 @@ pub enum PlayingAction {
     Collect(Collect),
     Recruit(Recruit),
     IncreaseHappiness(IncreaseHappiness),
-    InfluenceCultureAttempt(InfluenceCultureAttempt),
+    InfluenceCultureAttempt(SelectedStructure),
     Custom(CustomAction),
     ActionCard(u8),
     WonderCard(String),

@@ -19,6 +19,7 @@ use crate::wonder::WonderCardInfo;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
+use crate::player::Player;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct PaymentRequest {
@@ -270,6 +271,17 @@ pub enum Structure {
     CityCenter,
     Building(Building),
     Wonder(String),
+}
+
+impl Structure {
+    #[must_use]
+    pub fn is_available(&self, player: &Player, game: &Game) -> bool {
+        match self {
+            Structure::CityCenter => player.is_city_available(),
+            Structure::Building(b) => player.is_building_available(*b, game),
+            Structure::Wonder(w) => false,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

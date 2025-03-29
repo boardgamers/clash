@@ -3,7 +3,7 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
 use crate::event_ui::event_help;
 use crate::happiness_ui::{can_play_increase_happiness, open_increase_happiness_dialog};
-use crate::influence_ui::can_play_influence_culture;
+use crate::influence_ui::{can_play_influence_culture, new_cultural_influence_dialog};
 use crate::layout_ui::{bottom_left_texture, icon_pos};
 use crate::move_ui::MoveIntent;
 use crate::payment_ui::Payment;
@@ -59,7 +59,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
                 EventOrigin::advance("Arts"),
                 CustomActionType::ArtsInfluenceCultureAttempt,
             )],
-            ActiveDialog::CulturalInfluence,
+            |d| new_cultural_influence_dialog(rc.game, d),
         );
     }
     let mut i = 0;
@@ -83,6 +83,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     }
     StateUpdate::None
 }
+
 
 pub fn custom_action_buttons<'a>(
     rc: &'a RenderContext,

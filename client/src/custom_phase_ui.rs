@@ -1,6 +1,8 @@
 use crate::advance_ui::{show_advance_menu, AdvanceState};
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
+use crate::dialog_ui::{
+    cancel_button_with_tooltip, ok_button, BaseOrCustomAction, BaseOrCustomDialog, OkTooltip,
+};
 use crate::layout_ui::{bottom_center_anchor, bottom_centered_text, icon_pos};
 use crate::payment_ui::{multi_payment_dialog, payment_dialog, Payment};
 use crate::player_ui::choose_player_dialog;
@@ -10,11 +12,13 @@ use crate::unit_ui;
 use crate::unit_ui::{draw_unit_type, UnitSelection};
 use macroquad::math::vec2;
 use server::action::Action;
+use server::content::custom_actions::CustomAction;
 use server::content::custom_phase_actions::{
     is_selected_structures_valid, AdvanceRequest, EventResponse, MultiRequest, PlayerRequest,
     SelectedStructure, Structure, UnitTypeRequest, UnitsRequest,
 };
 use server::game::Game;
+use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::unit::Unit;
 
@@ -172,8 +176,36 @@ impl<T: Clone + PartialEq> MultiSelection<T> {
     }
 }
 
+#[derive(Clone)]
+pub struct SelectedStructureWithInfo {
+    pub position: Position,
+    pub structure: Structure,
+    pub warn: bool,
+    pub label: String,
+    pub tooltip: String,
+}
+
+impl SelectedStructureWithInfo {
+    pub fn new(
+        position: Position,
+        structure: Structure,
+        warn: bool,
+        label: String,
+        tooltip: String,
+    ) -> Self {
+        SelectedStructureWithInfo {
+            position,
+            structure,
+            warn,
+            label,
+            tooltip,
+        }
+    }
+}
+
 pub fn select_structures_dialog(
     rc: &RenderContext,
+    d: Option<BaseOrCustomDialog>,
     s: &MultiSelection<SelectedStructure>,
 ) -> StateUpdate {
     bottom_centered_text(
@@ -194,7 +226,23 @@ pub fn select_structures_dialog(
             "structures (city center must be the last one)",
         ),
     ) {
-        StateUpdate::response(EventResponse::SelectStructures(s.selected.clone()))
+        if let Some(d) = d {
+            let c = s.selected[0].clone();
+            match d.custom {
+                BaseOrCustomAction::Base => {
+                    StateUpdate::execute(Action::Playing(PlayingAction::InfluenceCultureAttempt(
+                        c,
+                    )))
+                }
+                BaseOrCustomAction::Custom { .. } => {
+                    StateUpdate::execute(Action::Playing(PlayingAction::Custom(
+                        CustomAction::ArtsInfluenceCultureAttempt(c),
+                    )))
+                }
+            }
+        } else {
+            StateUpdate::response(EventResponse::SelectStructures(s.selected.clone()))
+        }
     } else {
         StateUpdate::None
     }

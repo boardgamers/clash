@@ -2,7 +2,7 @@ use crate::assets::Assets;
 use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::ConstructionPayment;
-use crate::custom_phase_ui::{MultiSelection, UnitsSelection};
+use crate::custom_phase_ui::{MultiSelection, SelectedStructureWithInfo, UnitsSelection};
 use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
 use crate::event_ui::{custom_phase_event_help, custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
@@ -19,7 +19,7 @@ use server::card::HandCard;
 use server::city::{City, MoodState};
 use server::content::custom_phase_actions::{
     AdvanceRequest, ChangeGovernmentRequest, CurrentEventRequest, CurrentEventType, EventResponse,
-    PlayerRequest, SelectedStructure, UnitTypeRequest,
+    MultiRequest, PlayerRequest, SelectedStructure, UnitTypeRequest,
 };
 use server::events::EventOrigin;
 use server::game::{Game, GameState};
@@ -57,7 +57,7 @@ pub enum ActiveDialog {
     PositionRequest(MultiSelection<Position>),
     UnitTypeRequest(UnitTypeRequest),
     UnitsRequest(UnitsSelection),
-    StructuresRequest(MultiSelection<SelectedStructure>),
+    StructuresRequest(Option<BaseOrCustomDialog>, MultiSelection<SelectedStructureWithInfo>),
     HandCardsRequest(MultiSelection<HandCard>),
     BoolRequest(String),
     ChangeGovernmentType(ChangeGovernmentRequest),
@@ -539,7 +539,22 @@ impl State {
                     ActiveDialog::UnitsRequest(UnitsSelection::new(r))
                 }
                 CurrentEventRequest::SelectStructures(r) => {
-                    ActiveDialog::StructuresRequest(MultiSelection::new(r.clone()))
+                    ActiveDialog::StructuresRequest(MultiSelection::new(MultiRequest::new(
+                        r.choices
+                            .iter()
+                            .map(|s| {
+                                SelectedStructureWithInfo::new(
+                                    s.0,
+                                    s.1.clone(),
+                                    false,
+                                    "".to_string(),
+                                    "".to_string(),
+                                )
+                            })
+                            .collect(),
+                        r.needed.clone(),
+                        &r.description,
+                    )))
                 }
                 CurrentEventRequest::SelectPlayer(r) => ActiveDialog::PlayerRequest(r.clone()),
                 CurrentEventRequest::BoolRequest(d) => ActiveDialog::BoolRequest(d.clone()),
