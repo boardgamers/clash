@@ -4,7 +4,7 @@ use crate::action_buttons::{
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
-use crate::custom_phase_ui::{highlight_structures, SelectedStructureWithInfo, StructureHighlight};
+use crate::custom_phase_ui::{highlight_structures, SelectedStructureInfo, StructureHighlight};
 use crate::happiness_ui::{
     add_increase_happiness, can_play_increase_happiness, open_increase_happiness_dialog,
 };
@@ -374,10 +374,7 @@ fn draw_wonders(
     Ok(i)
 }
 
-fn position_structures(
-    city: &City,
-    list: &[SelectedStructureWithInfo],
-) -> Vec<SelectedStructureWithInfo> {
+fn position_structures(city: &City, list: &[SelectedStructureInfo]) -> Vec<SelectedStructureInfo> {
     list.iter()
         .filter_map(|s| {
             if s.position == city.position {

@@ -103,7 +103,7 @@ pub(crate) fn use_cultural_takeover() -> Builtin {
                         .permanent_incident_effects
                         .contains(&PermanentIncidentEffect::CulturalTakeover)
                 {
-                    c.set_impossible();
+                    c.add_blocker("City center can't be influenced");
                 }
             },
         )

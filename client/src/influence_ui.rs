@@ -1,6 +1,6 @@
 use crate::action_buttons::base_or_custom_available;
 use crate::client_state::ActiveDialog;
-use crate::custom_phase_ui::{MultiSelection, SelectedStructureWithInfo};
+use crate::custom_phase_ui::{MultiSelection, SelectedStructureInfo};
 use crate::dialog_ui::BaseOrCustomDialog;
 use crate::render_context::RenderContext;
 use itertools::Itertools;
@@ -9,7 +9,6 @@ use server::content::custom_actions::CustomActionType;
 use server::content::custom_phase_actions::{MultiRequest, SelectedStructure, Structure};
 use server::cultural_influence::influence_culture_boost_cost;
 use server::game::Game;
-use server::player_events::InfluenceCulturePossible;
 use server::playing_actions::PlayingActionType;
 
 pub fn new_cultural_influence_dialog(
@@ -28,16 +27,16 @@ pub fn new_cultural_influence_dialog(
                         .iter()
                         .filter_map(|s| {
                             let info = influence_culture_boost_cost(game, player, s);
-                            if matches!(info.possible, InfluenceCulturePossible::Impossible) {
-                                None
-                            } else {
-                                Some(SelectedStructureWithInfo::new(
+                            if info.blockers.is_empty() {
+                                Some(SelectedStructureInfo::new(
                                     s.0,
                                     s.1.clone(),
                                     false,          //todo
-                                    "".to_string(), //todo
-                                    "".to_string(), //todo
+                                    String::new(), //todo
+                                    String::new(), //todo
                                 ))
+                            } else {
+                                None
                             }
                         })
                         .collect_vec()

@@ -9,10 +9,7 @@ use crate::content::custom_phase_actions::{
 use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::payment::PaymentOptions;
-use crate::player::Player;
-use crate::player_events::{
-    ActionInfo, InfluenceCultureInfo, InfluenceCultureOutcome, InfluenceCulturePossible,
-};
+use crate::player_events::{ActionInfo, InfluenceCultureInfo, InfluenceCultureOutcome};
 use crate::playing_actions::{roll_boost_cost, PlayingAction};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -24,12 +21,11 @@ pub(crate) fn influence_culture_attempt(
 ) {
     let target_city_position = c.0;
     let target_city = game.get_any_city(target_city_position);
-    let starting_city_position = start_city(game, player_index, target_city);
 
     let info = influence_culture_boost_cost(game, player_index, c);
-    if matches!(info.possible, InfluenceCulturePossible::Impossible) {
-        panic!("Impossible to influence culture");
-    }
+    assert!(info.blockers.is_empty(), "Impossible to influence culture");
+    let starting_city_position =
+        start_city(game, player_index, target_city).expect("there should be a starting city");
 
     let self_influence = starting_city_position == target_city_position;
 
@@ -44,7 +40,7 @@ pub(crate) fn influence_culture_attempt(
         return;
     }
 
-    if self_influence || matches!(info.possible, InfluenceCulturePossible::NoBoost) {
+    if self_influence || info.prevent_boost {
         game.add_to_last_log_item(&format!(" and failed (rolled {roll})"));
         info.info.execute(game);
         attempt_failed(game, player_index, target_city_position);
@@ -169,7 +165,18 @@ pub fn influence_culture_boost_cost(
     let structure = &selected.1;
     let target_city = game.get_any_city(target_city_position);
     let target_player_index = target_city.player_index;
-    let starting_city_position = start_city(game, player_index, target_city);
+
+    let attacker = game.get_player(player_index);
+
+    let Some(starting_city_position) = start_city(game, player_index, target_city) else {
+        let mut i = InfluenceCultureInfo::new(
+            PaymentOptions::resources(ResourcePile::empty()),
+            ActionInfo::new(attacker),
+            structure.clone(),
+        );
+        i.add_blocker("No starting city available");
+        return i;
+    };
     let starting_city = game.get_any_city(starting_city_position);
 
     let range_boost =
@@ -184,7 +191,6 @@ pub fn influence_culture_boost_cost(
         Structure::Wonder(_) => panic!("Wonder is not allowed here"),
     };
 
-    let attacker = game.get_player(player_index);
     let defender = game.get_player(target_player_index);
     let start_city_is_eligible = !starting_city.influenced() || self_influence;
 
@@ -207,19 +213,32 @@ pub fn influence_culture_boost_cost(
         game,
     );
 
-    if !matches!(structure, Structure::Building(Building::Obelisk))
-        && starting_city.player_index == player_index
-        && info.is_possible(range_boost)
-        && attacker.can_afford(&info.range_boost_cost)
-        && start_city_is_eligible
-        && !game.successful_cultural_influence
-        && structure.is_available(attacker, game)
-        && target_city_owner == target_player_index
-        && target_owner.is_some_and(|o| o != player_index)
-    {
-        return info;
+    if matches!(structure, Structure::Building(Building::Obelisk)) {
+        info.add_blocker("Obelisk can't be influenced");
     }
-    info.set_impossible();
+    if info.prevent_boost && range_boost > 0 {
+        info.add_blocker("Range boost not allowed");
+    }
+    if !attacker.can_afford(&info.range_boost_cost) {
+        info.add_blocker("Not enough culture tokens");
+    }
+
+    if !start_city_is_eligible {
+        info.add_blocker("Starting city is not eligible");
+    }
+
+    if game.successful_cultural_influence {
+        info.add_blocker("Cultural influence already used");
+    }
+
+    if !structure.is_available(attacker, game) {
+        info.add_blocker("Structure is not available");
+    }
+
+    if target_owner == Some(player_index) {
+        info.add_blocker("Target is already owned");
+    }
+
     info
 }
 
@@ -261,22 +280,24 @@ fn attempt_failed(game: &mut Game, player: usize, city_position: Position) {
     );
 }
 
-fn start_city(game: &Game, player_index: usize, target_city: &City) -> Position {
-    let starting_city_position = if target_city.player_index == player_index {
-        target_city.position
+fn start_city(game: &Game, player_index: usize, target_city: &City) -> Option<Position> {
+    if target_city.player_index == player_index {
+        Some(target_city.position)
     } else {
-        closest_city(game.get_player(player_index), target_city.position)
-    };
-    starting_city_position
-}
+        //todo
+        // Influence Culture may cross Sea spaces, but not unrevealed
+        // Regions.
 
-fn closest_city(player: &Player, position: Position) -> Position {
-    player
-        .cities
-        .iter()
-        .min_by_key(|c| c.position.distance(position))
-        .unwrap()
-        .position
+        // todo ✦ You may target Buildings in Barbarian BARBARIAN cities
+        let player = game.get_player(player_index);
+        let position = target_city.position;
+        player
+            .cities
+            .iter()
+            .filter(|c| !c.influenced())
+            .min_by_key(|c| c.position.distance(position))
+            .map(|c| c.position)
+    }
 }
 
 pub(crate) fn format_cultural_influence_attempt_log_item(
@@ -288,7 +309,8 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     let target_city_position = c.0;
     let target_city = game.get_any_city(target_city_position);
     let target_player_index = target_city.player_index;
-    let starting_city_position = start_city(game, player_index, target_city);
+    let starting_city_position =
+        start_city(game, player_index, target_city).expect("there should be a starting city");
 
     let player = if target_player_index == game.active_player() {
         String::from("themselves")

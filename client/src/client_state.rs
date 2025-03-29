@@ -2,8 +2,8 @@ use crate::assets::Assets;
 use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::ConstructionPayment;
-use crate::custom_phase_ui::{MultiSelection, SelectedStructureWithInfo, UnitsSelection};
-use crate::dialog_ui::BaseOrCustomDialog;
+use crate::custom_phase_ui::{MultiSelection, SelectedStructureInfo, UnitsSelection};
+use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
 use crate::event_ui::{custom_phase_event_help, custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
@@ -58,7 +58,7 @@ pub enum ActiveDialog {
     UnitsRequest(UnitsSelection),
     StructuresRequest(
         Option<BaseOrCustomDialog>,
-        MultiSelection<SelectedStructureWithInfo>,
+        MultiSelection<SelectedStructureInfo>,
     ),
     HandCardsRequest(MultiSelection<HandCard>),
     BoolRequest(String),
@@ -149,8 +149,17 @@ impl ActiveDialog {
             ActiveDialog::UnitsRequest(r) => {
                 custom_phase_event_help(rc, &r.selection.request.description)
             }
-            ActiveDialog::StructuresRequest(_, r) => {
-                custom_phase_event_help(rc, &r.request.description)
+            ActiveDialog::StructuresRequest(d, r) => {
+                if let Some(b) = d {
+                    let v = vec!["Click on a building to influence its culture".to_string()];
+                    if let BaseOrCustomAction::Custom { origin, custom: _ } = &b.custom {
+                        let mut r = v.clone();
+                        r.extend(event_help(rc, origin));
+                    }
+                    v
+                } else {
+                    custom_phase_event_help(rc, &r.request.description)
+                }
             }
             ActiveDialog::PositionRequest(r) => custom_phase_event_help(rc, &r.request.description),
             ActiveDialog::HandCardsRequest(r) => {
@@ -531,24 +540,25 @@ impl State {
                 CurrentEventRequest::SelectUnits(r) => {
                     ActiveDialog::UnitsRequest(UnitsSelection::new(r))
                 }
-                CurrentEventRequest::SelectStructures(r) => {
-                    ActiveDialog::StructuresRequest(None, MultiSelection::new(MultiRequest::new(
+                CurrentEventRequest::SelectStructures(r) => ActiveDialog::StructuresRequest(
+                    None,
+                    MultiSelection::new(MultiRequest::new(
                         r.choices
                             .iter()
                             .map(|s| {
-                                SelectedStructureWithInfo::new(
+                                SelectedStructureInfo::new(
                                     s.0,
                                     s.1.clone(),
                                     false,
-                                    "".to_string(),
-                                    "".to_string(),
+                                    String::new(),
+                                    String::new(),
                                 )
                             })
                             .collect(),
                         r.needed.clone(),
                         &r.description,
-                    )))
-                }
+                    )),
+                ),
                 CurrentEventRequest::SelectPlayer(r) => ActiveDialog::PlayerRequest(r.clone()),
                 CurrentEventRequest::BoolRequest(d) => ActiveDialog::BoolRequest(d.clone()),
                 CurrentEventRequest::ChangeGovernment(r) => {

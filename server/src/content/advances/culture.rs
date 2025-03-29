@@ -19,38 +19,55 @@ pub(crate) fn culture() -> AdvanceGroup {
 }
 
 fn arts() -> AdvanceBuilder {
-    Advance::builder("Arts", "Once per turn, as a free action, you may spend 1 culture token to get an influence culture action")
-        .with_advance_bonus(CultureToken)
-        .with_unlocked_building(Obelisk)
-        .add_custom_action(CustomActionType::ArtsInfluenceCultureAttempt)
+    Advance::builder(
+        "Arts",
+        "Once per turn, as a free action, you may spend \
+        1 culture token to get an influence culture action",
+    )
+    .with_advance_bonus(CultureToken)
+    .with_unlocked_building(Obelisk)
+    .add_custom_action(CustomActionType::ArtsInfluenceCultureAttempt)
 }
 
 fn sports() -> AdvanceBuilder {
-    Advance::builder("Sports", "As an action, you may spend 1 or 2 culture tokens to increase the happiness of a city by 1 or 2, respectively")
-        .with_advance_bonus(MoodToken)
-        .add_custom_action(CustomActionType::Sports)
+    Advance::builder(
+        "Sports",
+        "As an action, you may spend \
+        1 or 2 culture tokens to increase the happiness of a city by 1 or 2, respectively",
+    )
+    .with_advance_bonus(MoodToken)
+    .add_custom_action(CustomActionType::Sports)
 }
 
 fn monuments() -> AdvanceBuilder {
-    Advance::builder("Monuments", "Immediately draw 1 wonder card. Your cities with wonders may not be the target of influence culture attempts")
-        .add_one_time_ability_initializer(draw_wonder_card)
-        .with_advance_bonus(CultureToken)
-        .add_transient_event_listener(
-            |event| &mut event.on_influence_culture_attempt,
-            1,
-            |info, city, _| {
-                if info.is_defender && !city.pieces.wonders.is_empty() {
-                    info.set_impossible();
-                }
-            },
-        )
+    Advance::builder(
+        "Monuments",
+        "Immediately draw 1 wonder card. \
+        Your cities with wonders may not be the target of influence culture attempts",
+    )
+    .add_one_time_ability_initializer(draw_wonder_card)
+    .with_advance_bonus(CultureToken)
+    .add_transient_event_listener(
+        |event| &mut event.on_influence_culture_attempt,
+        1,
+        |info, city, _| {
+            if info.is_defender && !city.pieces.wonders.is_empty() {
+                info.add_blocker(
+                    "Monuments prevent influence culture attempts on cities with wonders",
+                );
+            }
+        },
+    )
 }
 
 fn theaters() -> AdvanceBuilder {
-    Advance::builder("Theaters",
-                     "Once per turn, as a free action, you may convert 1 culture token into 1 mood token, or 1 mood token into 1 culture token")
-        .with_advance_bonus(MoodToken)
-        .add_custom_action(CustomActionType::Theaters)
+    Advance::builder(
+        "Theaters",
+        "Once per turn, as a free action, you may convert 1 culture token \
+        into 1 mood token, or 1 mood token into 1 culture token",
+    )
+    .with_advance_bonus(MoodToken)
+    .add_custom_action(CustomActionType::Theaters)
 }
 
 #[must_use]

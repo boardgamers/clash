@@ -24,8 +24,8 @@ use crate::player_ui::{player_select, show_global_controls, show_top_center, sho
 use crate::render_context::RenderContext;
 use crate::unit_ui::unit_selection_click;
 use crate::{
-    cards_ui, custom_actions_ui, custom_phase_ui, dialog_ui, map_ui, move_ui,
-    recruit_unit_ui, status_phase_ui, tooltip,
+    cards_ui, custom_actions_ui, custom_phase_ui, dialog_ui, map_ui, move_ui, recruit_unit_ui,
+    status_phase_ui, tooltip,
 };
 
 fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
@@ -140,9 +140,7 @@ pub fn render_and_update(
 fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
     let state = rc.state;
     match &state.active_dialog {
-        ActiveDialog::None
-        | ActiveDialog::WaitingForUpdate
-         => StateUpdate::None,
+        ActiveDialog::None | ActiveDialog::WaitingForUpdate => StateUpdate::None,
         ActiveDialog::DialogChooser(d) => dialog_chooser(rc, d),
         ActiveDialog::Log => show_log(rc),
 

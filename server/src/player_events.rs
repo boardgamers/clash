@@ -271,17 +271,11 @@ pub struct PlayingActionInfo {
 }
 
 #[derive(Clone, PartialEq)]
-pub enum InfluenceCulturePossible {
-    NoRestrictions,
-    NoBoost,
-    Impossible,
-}
-
-#[derive(Clone, PartialEq)]
 pub struct InfluenceCultureInfo {
     pub is_defender: bool,
     pub structure: Structure,
-    pub possible: InfluenceCulturePossible,
+    pub blockers: Vec<String>,
+    pub prevent_boost: bool,
     pub range_boost_cost: PaymentOptions,
     pub(crate) info: ActionInfo,
     pub roll_boost: u8,
@@ -295,33 +289,22 @@ impl InfluenceCultureInfo {
         structure: Structure,
     ) -> InfluenceCultureInfo {
         InfluenceCultureInfo {
-            possible: InfluenceCulturePossible::NoRestrictions,
+            prevent_boost: false,
             structure,
             range_boost_cost,
             info,
             roll_boost: 0,
             is_defender: false,
+            blockers: Vec::new(),
         }
     }
 
-    #[must_use]
-    pub fn is_possible(&self, range_boost: u32) -> bool {
-        match self.possible {
-            InfluenceCulturePossible::NoRestrictions => true,
-            InfluenceCulturePossible::NoBoost => range_boost == 0,
-            InfluenceCulturePossible::Impossible => false,
-        }
-    }
-
-    pub fn set_impossible(&mut self) {
-        self.possible = InfluenceCulturePossible::Impossible;
+    pub fn add_blocker(&mut self, reason: &str) {
+        self.blockers.push(reason.to_string());
     }
 
     pub fn set_no_boost(&mut self) {
-        if matches!(self.possible, InfluenceCulturePossible::Impossible) {
-            return;
-        }
-        self.possible = InfluenceCulturePossible::NoBoost;
+        self.prevent_boost = true;
     }
 }
 

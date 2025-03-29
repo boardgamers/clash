@@ -178,7 +178,7 @@ impl<T: Clone + PartialEq> MultiSelection<T> {
 }
 
 #[derive(Clone, PartialEq)]
-pub struct SelectedStructureWithInfo {
+pub struct SelectedStructureInfo {
     pub position: Position,
     pub structure: Structure,
     pub warn: bool,
@@ -186,7 +186,7 @@ pub struct SelectedStructureWithInfo {
     pub tooltip: String,
 }
 
-impl SelectedStructureWithInfo {
+impl SelectedStructureInfo {
     pub fn new(
         position: Position,
         structure: Structure,
@@ -194,7 +194,7 @@ impl SelectedStructureWithInfo {
         label: String,
         tooltip: String,
     ) -> Self {
-        SelectedStructureWithInfo {
+        SelectedStructureInfo {
             position,
             structure,
             warn,
@@ -211,7 +211,7 @@ impl SelectedStructureWithInfo {
 pub fn select_structures_dialog(
     rc: &RenderContext,
     d: &Option<BaseOrCustomDialog>,
-    s: &MultiSelection<SelectedStructureWithInfo>,
+    s: &MultiSelection<SelectedStructureInfo>,
 ) -> StateUpdate {
     bottom_centered_text(
         rc,
@@ -223,11 +223,7 @@ pub fn select_structures_dialog(
         .as_str(),
     );
 
-    let sel = s
-        .selected
-        .iter()
-        .map(|s| s.selected())
-        .collect_vec();
+    let sel = s.selected.iter().map(SelectedStructureInfo::selected).collect_vec();
     if ok_button(
         rc,
         multi_select_tooltip(
@@ -295,12 +291,12 @@ pub fn player_request_dialog(rc: &RenderContext, r: &PlayerRequest) -> StateUpda
 }
 
 pub struct StructureHighlight {
-    pub selected: SelectedStructureWithInfo,
+    pub selected: SelectedStructureInfo,
     pub highlight_type: HighlightType,
 }
 
 pub fn highlight_structures(
-    structures: &[SelectedStructureWithInfo],
+    structures: &[SelectedStructureInfo],
     highlight_type: HighlightType,
 ) -> Vec<StructureHighlight> {
     structures
