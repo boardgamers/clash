@@ -6,7 +6,7 @@ use crate::card::{draw_card_from_pile, HandCard};
 use crate::city::MoodState;
 use crate::content::custom_phase_actions::{
     CurrentEventType, HandCardsRequest, PaymentRequest, PlayerRequest, PositionRequest,
-    ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitTypeRequest, UnitsRequest,
+    ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitsRequest,
 };
 use crate::content::incidents;
 use crate::content::incidents::great_diplomat::{DiplomaticRelations, DIPLOMAT_ID};
@@ -21,7 +21,6 @@ use crate::player_events::{IncidentInfo, IncidentPlayerInfo, IncidentTarget};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-use crate::unit::UnitType;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -257,33 +256,6 @@ impl IncidentBuilder {
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_position_request(
-            |event| &mut event.on_incident,
-            priority,
-            move |game, player_index, i| {
-                if f.is_active(game, i, player_index) {
-                    request(game, player_index, i)
-                } else {
-                    None
-                }
-            },
-            move |game, s, i| {
-                gain_reward(game, s, i);
-            },
-        )
-    }
-
-    #[must_use]
-    pub(crate) fn add_incident_unit_type_request(
-        self,
-        role: IncidentTarget,
-        priority: i32,
-        request: impl Fn(&mut Game, usize, &mut IncidentInfo) -> Option<UnitTypeRequest>
-            + 'static
-            + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<UnitType>, &mut IncidentInfo) + 'static + Clone,
-    ) -> Self {
-        let f = self.new_filter(role, priority);
-        self.add_unit_type_request(
             |event| &mut event.on_incident,
             priority,
             move |game, player_index, i| {

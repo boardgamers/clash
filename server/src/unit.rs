@@ -425,6 +425,23 @@ pub struct MoveUnits {
     pub payment: ResourcePile,
 }
 
+impl MoveUnits {
+    #[must_use]
+    pub fn new(
+        units: Vec<u32>,
+        destination: Position,
+        embark_carrier_id: Option<u32>,
+        payment: ResourcePile,
+    ) -> Self {
+        Self {
+            units,
+            destination,
+            embark_carrier_id,
+            payment,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum MovementAction {
     Move(MoveUnits),

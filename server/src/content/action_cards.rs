@@ -1,7 +1,7 @@
 mod development;
 mod inspiration;
-pub mod spy;
 mod mercenaries;
+pub mod spy;
 
 use crate::action_card::{ActionCard, CivilCard};
 use crate::content::action_cards::inspiration::inspiration_action_cards;

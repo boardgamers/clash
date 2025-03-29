@@ -1,12 +1,13 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder};
-use crate::barbarians::get_barbarians_player;
+use crate::barbarians::{barbarian_reinforcement, get_barbarians_player};
 use crate::combat::move_with_possible_combat;
+use crate::consts::STACK_LIMIT;
 use crate::content::action_cards::inspiration::player_positions;
 use crate::content::custom_phase_actions::{PaymentRequest, PositionRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::game::Game;
-use crate::movement::move_units_destinations;
+use crate::log::move_action_log;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::playing_actions::ActionType;
@@ -18,14 +19,13 @@ use crate::utils::remove_element;
 use itertools::Itertools;
 
 pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
-    //todo resupply
     let mut b = ActionCard::builder(
         id,
         "Mercenaries",
         "You may move any number of Barbarian armies 1 space each, which may start combat. \
         The armies must be within range 2 of your cities or army units. \
         Pay 1 food, wood, ore, or culture token for each army up front. \
-        Resupply all Barbarian cities that became empty according to the usual rules.",
+        Reinforce all Barbarian cities where you moved units out of according to the usual rules.",
         ActionType::regular(),
         |game, p| {
             !barbarian_army_positions_in_range2(game, p).is_empty() && max_mercenary_payment(p) > 0
@@ -59,7 +59,7 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
     )
     .add_payment_request_listener(
         |e| &mut e.on_play_action_card,
-        1,
+        99,
         |_game, _player, a| {
             Some(vec![PaymentRequest::new(
                 PaymentOptions::sum(
@@ -93,71 +93,85 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
 }
 
 fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
-    let src_prio = i * 2 + 1;
-    let dst_prio = i * 2;
-    b.add_position_request(
+    let src_prio = i * 3 + 2;
+    let dst_prio = i * 3 + 1;
+    let reinforce_prio = i * 3;
+    let b = b
+        .add_position_request(
+            |e| &mut e.on_play_action_card,
+            src_prio,
+            |_game, _player, a| {
+                a.selected_position = None;
+
+                Some(PositionRequest::new(
+                    a.selected_positions.clone(),
+                    1..=1,
+                    "Select Barbarian army to move",
+                ))
+            },
+            |game, s, a| {
+                let pos = s.choice[0];
+                game.add_info_log_item(&format!(
+                    "{} selected Barbarian army to move: {}",
+                    s.player_name, pos
+                ));
+                remove_element(&mut a.selected_positions, &pos);
+                a.selected_position = Some(pos);
+            },
+        )
+        .add_position_request(
+            |e| &mut e.on_play_action_card,
+            dst_prio,
+            |game, _player, a| {
+                let from = a.selected_position?;
+                let barbarian = get_barbarians_player(game);
+                let units = barbarian.get_units(from).iter().map(|u| u.id).collect_vec();
+
+                let destinations = from
+                    .neighbors()
+                    .into_iter()
+                    .filter(|&to| {
+                        game.map.is_land(to)
+                            && units.len() + barbarian.get_units(to).len() <= STACK_LIMIT
+                    })
+                    .collect_vec();
+
+                Some(PositionRequest::new(
+                    destinations,
+                    1..=1,
+                    "Select destination for Barbarian army",
+                ))
+            },
+            |game, s, a| {
+                let to = s.choice[0];
+                game.add_info_log_item(&format!(
+                    "{} selected destination for Barbarian army: {}",
+                    s.player_name, to
+                ));
+
+                let from = a.selected_position.expect("position not found");
+                let b = get_barbarians_player(game);
+                let barbarian = b.index;
+
+                let units = b.get_units(from).iter().map(|u| u.id).collect_vec();
+
+                let m = MoveUnits::new(units, to, None, ResourcePile::empty());
+                game.add_info_log_item(&move_action_log(game, b, &m));
+
+                move_with_possible_combat(game, barbarian, from, &m);
+            },
+        );
+
+    barbarian_reinforcement(
+        b,
         |e| &mut e.on_play_action_card,
-        src_prio,
-        |_game, _player, a| {
-            Some(PositionRequest::new(
-                a.selected_positions.clone(),
-                1..=1,
-                "Select Barbarian army to move",
-            ))
+        reinforce_prio,
+        |game, _, a| {
+            a.selected_position
+                .and_then(|p| game.try_get_any_city(p))
+                .is_some()
         },
-        |game, s, a| {
-            let pos = s.choice[0];
-            game.add_info_log_item(&format!(
-                "{} selected Barbarian army to move: {}",
-                s.player_name, pos
-            ));
-            remove_element(&mut a.selected_positions, &pos);
-            a.selected_position = Some(pos);
-        },
-    )
-    .add_position_request(
-        |e| &mut e.on_play_action_card,
-        dst_prio,
-        |game, _player, a| {
-            let pos = a.selected_position.expect("position not found");
-            let b = get_barbarians_player(game);
-            let units = b.get_units(pos).iter().map(|u| u.id).collect_vec();
-
-            let destinations = move_units_destinations(b, game, &units, pos, None)
-                .ok()
-                .map_or(Vec::new(), |d| {
-                    d.iter().map(|r| r.destination).collect_vec()
-                });
-
-            Some(PositionRequest::new(
-                destinations,
-                1..=1,
-                "Select destination for Barbarian army",
-            ))
-        },
-        |game, s, a| {
-            let to = s.choice[0];
-            game.add_info_log_item(&format!(
-                "{} selected destination for Barbarian army: {}",
-                s.player_name, to
-            ));
-
-            let from = a.selected_position.expect("position not found");
-            let b = get_barbarians_player(game);
-            let units = b.get_units(from).iter().map(|u| u.id).collect_vec();
-
-            move_with_possible_combat(
-                game,
-                b.index,
-                from,
-                &MoveUnits {
-                    units,
-                    destination: to,
-                    embark_carrier_id: None,
-                    payment: ResourcePile::empty(),
-                },
-            );
-        },
+        |a| a.selected_position.expect("position not found"),
     )
 }
 

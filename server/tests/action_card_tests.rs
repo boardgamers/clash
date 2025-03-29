@@ -122,7 +122,34 @@ fn test_mercenaries() {
     JSON.test(
         "mercenaries",
         vec![
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(11))),
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(13)))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectPositions(vec![
+                    Position::from_offset("A3"),
+                    Position::from_offset("B3"),
+                ])),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::ore(2)])),
+            )
+            .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "A3",
+                )])),
+            )
+            .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "B2",
+                )])),
+            ),
         ],
     );
 }

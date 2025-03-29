@@ -5,6 +5,7 @@ use crate::player::Player;
 
 use crate::action_card::CivilCardMatch;
 use crate::playing_actions::{Collect, IncreaseHappiness, InfluenceCultureAttempt, Recruit};
+use crate::unit::MoveUnits;
 use crate::{
     action::Action,
     game::Game,
@@ -362,42 +363,47 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
         MovementAction::Move(m) if m.units.is_empty() => {
             format!("{player_name} used a movement actions but moved no units")
         }
-        MovementAction::Move(m) => {
-            let units_str = m
-                .units
-                .iter()
-                .map(|unit| player.get_unit(*unit).unit_type)
-                .collect::<Units>();
-            let start = player.get_unit(m.units[0]).position;
-            let start_is_water = game.map.is_sea(start);
-            let dest = m.destination;
-            let t = game
-                .map
-                .get(dest)
-                .expect("the destination position should be on the map");
-            let (verb, suffix) = if start_is_water {
-                if t.is_unexplored() || t.is_water() {
-                    ("sailed", "")
-                } else {
-                    ("disembarked", "")
-                }
-            } else if t.is_water() {
-                ("embarked", "")
-            } else if start.is_neighbor(dest) {
-                ("marched", "")
-            } else {
-                ("marched", " on roads")
-            };
-            let payment = &m.payment;
-            let cost = if payment.is_empty() {
-                String::new()
-            } else {
-                format!(" for {payment}")
-            };
-            format!("{player_name} {verb} {units_str} from {start} to {dest}{suffix}{cost}",)
-        }
+        MovementAction::Move(m) => move_action_log(game, player, m),
         MovementAction::Stop => format!("{player_name} ended the movement action"),
     }
+}
+
+pub(crate) fn move_action_log(game: &Game, player: &Player, m: &MoveUnits) -> String {
+    let units_str = m
+        .units
+        .iter()
+        .map(|unit| player.get_unit(*unit).unit_type)
+        .collect::<Units>();
+    let start = player.get_unit(m.units[0]).position;
+    let start_is_water = game.map.is_sea(start);
+    let dest = m.destination;
+    let t = game
+        .map
+        .get(dest)
+        .expect("the destination position should be on the map");
+    let (verb, suffix) = if start_is_water {
+        if t.is_unexplored() || t.is_water() {
+            ("sailed", "")
+        } else {
+            ("disembarked", "")
+        }
+    } else if t.is_water() {
+        ("embarked", "")
+    } else if start.is_neighbor(dest) {
+        ("marched", "")
+    } else {
+        ("marched", " on roads")
+    };
+    let payment = &m.payment;
+    let cost = if payment.is_empty() {
+        String::new()
+    } else {
+        format!(" for {payment}")
+    };
+    format!(
+        "{} {verb} {units_str} from {start} to {dest}{suffix}{cost}",
+        player.get_name()
+    )
 }
 
 pub(crate) fn add_action_log_item(game: &mut Game, item: Action) {

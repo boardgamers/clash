@@ -105,12 +105,12 @@ pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Ve
         })
     {
         let units = s.units.clone();
-        let action = MovementAction::Move(MoveUnits {
+        let action = MovementAction::Move(MoveUnits::new(
             units,
             destination,
             embark_carrier_id,
-            payment: ResourcePile::empty(),
-        });
+            ResourcePile::empty(),
+        ));
 
         if !cost.is_free() {
             return StateUpdate::OpenDialog(ActiveDialog::MovePayment(MovePayment {
