@@ -12,6 +12,7 @@ use macroquad::math::{vec2, Rect, Vec2};
 use macroquad::prelude::{draw_rectangle, draw_rectangle_lines, Color, GREEN, RED, YELLOW};
 use server::action::Action;
 use server::card::{hand_cards, HandCard, HandCardType};
+use server::combat::get_combat;
 use server::content::action_cards::spy::validate_if_spy;
 use server::content::action_cards::{get_action_card, get_civil_card};
 use server::content::custom_phase_actions::EventResponse;
@@ -107,7 +108,7 @@ fn draw_card(
     pos: Vec2,
     card: &HandCard,
 ) -> Option<StateUpdate> {
-    let c = get_card_object(card);
+    let c = get_card_object(rc, card);
 
     if pass == 0 {
         draw_rectangle(pos.x, pos.y, size.x, size.y, c.color);
@@ -172,7 +173,7 @@ fn highlight(
     (2.0, BLACK)
 }
 
-fn get_card_object(card: &HandCard) -> HandCardObject {
+fn get_card_object(rc: &RenderContext, card: &HandCard) -> HandCardObject {
     match card {
         HandCard::ActionCard(a) if *a == 0 => HandCardObject::new(
             card.clone(),
@@ -180,60 +181,7 @@ fn get_card_object(card: &HandCard) -> HandCardObject {
             "Action Card".to_string(),
             vec!["Hidden Action Card".to_string()],
         ),
-        HandCard::ActionCard(id) => {
-            let a = get_action_card(*id);
-            let mut description = vec![];
-            let action_type = a.civil_card.action_type;
-            description.push(
-                if action_type.free {
-                    "As a free action"
-                } else {
-                    "As a regular action"
-                }
-                .to_string(),
-            );
-            let cost = action_type.cost;
-            if !cost.is_empty() {
-                description.push(format!("Cost: {cost}"));
-            }
-            break_text(a.civil_card.description.as_str(), 30, &mut description);
-            if let Some(t) = a.tactics_card {
-                description.extend(vec![
-                    format!("Tactics: {}", t.name),
-                    format!(
-                        "Unit Types: {}",
-                        t.fighter_requirement
-                            .into_iter()
-                            .map(|f| format!("{f:?}"))
-                            .join(", ")
-                    ),
-                    format!(
-                        "Role: {:?}",
-                        match t.role_requirement {
-                            None => "Attacker or Defender".to_string(),
-                            Some(r) => match r {
-                                CombatRole::Attacker => "Attacker".to_string(),
-                                CombatRole::Defender => "Defender".to_string(),
-                            },
-                        }
-                    ),
-                    format!(
-                        "Location: {:?}",
-                        match t.location_requirement {
-                            None => "Any".to_string(),
-                            Some(l) => format!("{l:?}"),
-                        }
-                    ),
-                ]);
-                break_text(t.description.as_str(), 30, &mut description);
-            }
-            HandCardObject::new(
-                card.clone(),
-                ACTION_CARD_COLOR,
-                a.civil_card.name.clone(),
-                description,
-            )
-        }
+        HandCard::ActionCard(id) => action_card_object(rc, *id),
         HandCard::Wonder(n) if n.is_empty() => HandCardObject::new(
             card.clone(),
             WONDER_CARD_COLOR,
@@ -254,6 +202,72 @@ fn get_card_object(card: &HandCard) -> HandCardObject {
             )
         }
     }
+}
+
+fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
+    let a = get_action_card(id);
+
+    let name = if let Some(t) = &a.tactics_card {
+        if get_combat(rc.game).is_some() {
+            t.name.clone()
+        } else {
+            a.civil_card.name.clone()
+        }
+    } else {
+        a.civil_card.name.clone()
+    };
+
+    let mut description = vec![format!("Civil: {}", a.civil_card.name)];
+    let action_type = a.civil_card.action_type;
+    description.push(
+        if action_type.free {
+            "As a free action"
+        } else {
+            "As a regular action"
+        }
+        .to_string(),
+    );
+    let cost = action_type.cost;
+    if !cost.is_empty() {
+        description.push(format!("Cost: {cost}"));
+    }
+    break_text(a.civil_card.description.as_str(), 30, &mut description);
+    if let Some(t) = a.tactics_card {
+        description.extend(vec![
+            format!("Tactics: {}", t.name),
+            format!(
+                "Unit Types: {}",
+                t.fighter_requirement
+                    .into_iter()
+                    .map(|f| format!("{f:?}"))
+                    .join(", ")
+            ),
+            format!(
+                "Role: {:?}",
+                match t.role_requirement {
+                    None => "Attacker or Defender".to_string(),
+                    Some(r) => match r {
+                        CombatRole::Attacker => "Attacker".to_string(),
+                        CombatRole::Defender => "Defender".to_string(),
+                    },
+                }
+            ),
+            format!(
+                "Location: {:?}",
+                match t.location_requirement {
+                    None => "Any".to_string(),
+                    Some(l) => format!("{l:?}"),
+                }
+            ),
+        ]);
+        break_text(t.description.as_str(), 30, &mut description);
+    }
+    HandCardObject::new(
+        HandCard::ActionCard(id),
+        ACTION_CARD_COLOR,
+        name,
+        description,
+    )
 }
 
 pub fn select_cards_dialog(rc: &RenderContext, s: &MultiSelection<HandCard>) -> StateUpdate {

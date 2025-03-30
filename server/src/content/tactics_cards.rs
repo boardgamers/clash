@@ -291,12 +291,18 @@ pub(crate) fn tactical_retreat(id: u8) -> TacticsCard {
         },
         move |game, s, r| {
             r.final_result = Some(CombatResult::AttackerWins);
+            let to = s.choice[0];
             game.add_info_log_item(&format!(
                 "{} withdraws to {}",
                 game.player_name(s.player_index),
-                s.choice[0]
+                to
             ));
-            // todo move the units
+            for unit in game
+                .get_player_mut(s.player_index)
+                .get_units_mut(r.combat.defender_position)
+            {
+                unit.position = to;
+            }
         },
     )
     .build()

@@ -24,13 +24,13 @@ fn city_development(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "City Development",
         "Construct a building without paying resources.",
         ActionType::regular_with_cost(ResourcePile::culture_tokens(1)),
-        |_game, player| true ,
+        |_game, _player| true ,
     )
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
         |e| &mut e.on_play_action_card,
         0,
-        |game, player, name, _| {
+        |game, _player, _name, _| {
             game.permanent_incident_effects.push(Construct(ConstructEffect::CityDevelopment));
             game.actions_left += 1; // to offset the action spent for building
             game.add_info_log_item("City Development: You may build a building in a city without \

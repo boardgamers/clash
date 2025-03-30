@@ -17,9 +17,8 @@ use crate::unit_ui;
 use macroquad::math::vec2;
 use macroquad::prelude::*;
 use server::action::Action;
-use server::combat::Combat;
+use server::combat::get_combat;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
-use server::content::custom_phase_actions::CurrentEventType;
 use server::game::{Game, GameState};
 use server::movement::CurrentMove;
 use server::player::Player;
@@ -281,16 +280,6 @@ fn show_permanent_effects(
             label(&m);
         }
     }
-}
-
-pub fn get_combat(game: &Game) -> Option<&Combat> {
-    game.events.last().and_then(|e| match &e.event_type {
-        CurrentEventType::CombatStart(c) => Some(c),
-        CurrentEventType::CombatRoundStart(s) => Some(&s.combat),
-        CurrentEventType::CombatRoundEnd(e) => Some(&e.combat),
-        CurrentEventType::CombatEnd(e) => Some(&e.combat),
-        _ => None,
-    })
 }
 
 pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpdate {

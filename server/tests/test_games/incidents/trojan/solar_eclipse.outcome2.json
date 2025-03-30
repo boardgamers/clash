@@ -42,6 +42,13 @@
           "position": "A1"
         },
         {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C2"
+        },
+        {
           "city_pieces": {
             "temple": 0
           },
@@ -136,25 +143,16 @@
         "mood_tokens": 7,
         "culture_tokens": 7
       },
-      "cities": [
-        {
-          "city_pieces": {},
-          "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "C2"
-        }
-      ],
       "units": [
         {
-          "position": "C2",
+          "position": "B1",
           "unit_type": "Infantry",
-          "id": 2
+          "id": 0
         },
         {
-          "position": "C2",
-          "unit_type": "Settler",
-          "id": 3
+          "position": "B1",
+          "unit_type": "Infantry",
+          "id": 1
         }
       ],
       "civilization": "test1",
@@ -165,7 +163,7 @@
         "Tactics"
       ],
       "incident_tokens": 3,
-      "next_unit_id": 4
+      "next_unit_id": 2
     },
     {
       "id": 2,
@@ -297,9 +295,7 @@
       "Player2 reveals Tactics Card Tactical Retreat",
       "Player2 withdraws to B1",
       "Player1 gained 1 victory point for the Solar Eclipse",
-      "Attacker wins and killed 2 settlers of Player2 and captured Player2's city at C1",
-      "Player2 gained 1 free Infantry Unit at C2 for Fanaticism Advance",
-      "Player2 gained 1 free Settler Unit at C2 for losing a city"
+      "Attacker wins and captured Player2's city at C1"
     ]
   ],
   "undo_limit": 3,
