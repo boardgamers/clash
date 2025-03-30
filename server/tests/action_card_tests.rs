@@ -2,7 +2,7 @@ use crate::common::{move_action, TestAction};
 use common::JsonTest;
 use server::action::Action;
 use server::card::HandCard;
-use server::content::custom_phase_actions::{EventResponse, Structure};
+use server::content::custom_phase_actions::{EventResponse, SelectedStructure, Structure};
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
@@ -164,7 +164,7 @@ fn test_cultural_takeover() {
                 .without_json_comparison(),
             TestAction::not_undoable(
                 0,
-                Action::Playing(PlayingAction::InfluenceCultureAttempt((
+                Action::Playing(PlayingAction::InfluenceCultureAttempt(SelectedStructure::new(
                     Position::from_offset("B3"),
                     Structure::CityCenter,
                 ))),

@@ -121,15 +121,16 @@ fn apply_earthquake(
         "structures should be valid"
     );
     let mut l = s.choice.clone();
-    l.sort_by_key(|(_p, s)| {
+    l.sort_by_key(|s| {
         // city center last
-        match s {
+        match s.structure {
             Structure::CityCenter => 1,
             _ => 0,
         }
     });
-    for (position, structure) in l {
-        match structure {
+    for st in l {
+        let position = st.position;
+        match st.structure {
             Structure::Building(b) => destroy_building(game, b, position),
             Structure::Wonder(name) => destroy_wonder(game, position, &name),
             Structure::CityCenter => destroy_city_center(game, position),
@@ -139,9 +140,9 @@ fn apply_earthquake(
     i.player.must_reduce_mood = s
         .choice
         .iter()
-        .chunk_by(|(p, _s)| p)
+        .chunk_by(|s| s.position)
         .into_iter()
-        .map(|(&p, _g)| p)
+        .map(|(p, _g)| p)
         .filter(|p| {
             game.try_get_any_city(*p)
                 .is_some_and(|c| !matches!(c.mood_state, MoodState::Angry))
@@ -159,16 +160,16 @@ fn structures_request(cities: &[City]) -> StructuresRequest {
 
 fn destroyable_structures(city: &City) -> Vec<SelectedStructure> {
     let pieces = &city.pieces;
-    let s = vec![(city.position, Structure::CityCenter)];
+    let s = vec![SelectedStructure::new(city.position, Structure::CityCenter)];
     let w = pieces
         .wonders
         .iter()
-        .map(|w| (city.position, Structure::Wonder(w.name.clone())))
+        .map(|w| SelectedStructure::new(city.position, Structure::Wonder(w.name.clone())))
         .collect_vec();
     let b = pieces
         .buildings(None)
         .iter()
-        .map(|b| (city.position, Structure::Building(*b)))
+        .map(|b| SelectedStructure::new(city.position, Structure::Building(*b)))
         .collect_vec();
     vec![s, b, w].into_iter().flatten().collect_vec()
 }

@@ -17,30 +17,30 @@
         "request": {
           "SelectStructures": {
             "choices": [
-              [
-                "A1",
-                "CityCenter"
-              ],
-              [
-                "A1",
-                {
+              {
+                "position": "A1",
+                "structure": "CityCenter"
+              },
+              {
+                "position": "A1",
+                "structure": {
                   "Building": "Fortress"
                 }
-              ],
-              [
-                "A3",
-                "CityCenter"
-              ],
-              [
-                "A4",
-                "CityCenter"
-              ],
-              [
-                "A4",
-                {
+              },
+              {
+                "position": "A3",
+                "structure": "CityCenter"
+              },
+              {
+                "position": "A4",
+                "structure": "CityCenter"
+              },
+              {
+                "position": "A4",
+                "structure": {
                   "Building": "Fortress"
                 }
-              ]
+              }
             ],
             "needed": {
               "start": 1,
@@ -306,22 +306,22 @@
                   "action": {
                     "Response": {
                       "SelectStructures": [
-                        [
-                          "B2",
-                          "CityCenter"
-                        ],
-                        [
-                          "C2",
-                          {
+                        {
+                          "position": "B2",
+                          "structure": "CityCenter"
+                        },
+                        {
+                          "position": "C2",
+                          "structure": {
                             "Building": "Fortress"
                           }
-                        ],
-                        [
-                          "C2",
-                          {
+                        },
+                        {
+                          "position": "C2",
+                          "structure": {
                             "Wonder": "Pyramids"
                           }
-                        ]
+                        }
                       ]
                     }
                   }

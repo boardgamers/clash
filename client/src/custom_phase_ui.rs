@@ -211,7 +211,7 @@ impl SelectedStructureInfo {
     }
 
     pub fn selected(&self) -> SelectedStructure {
-        (self.position, self.structure.clone())
+        SelectedStructure::new(self.position, self.structure.clone())
     }
 
     pub fn highlight_type(&self) -> HighlightType {

@@ -202,12 +202,12 @@
                   "action": {
                     "Playing": {
                       "Custom": {
-                        "ArtsInfluenceCultureAttempt": [
-                          "C2",
-                          {
+                        "ArtsInfluenceCultureAttempt": {
+                          "position": "C2",
+                          "structure": {
                             "Building": "Fortress"
                           }
-                        ]
+                        }
                       }
                     }
                   }

@@ -2,7 +2,7 @@
 
 use server::action::Action;
 use server::city_pieces::Building::Temple;
-use server::content::custom_phase_actions::Structure;
+use server::content::custom_phase_actions::{SelectedStructure, Structure};
 use server::game::Game;
 use server::game_api;
 use server::log::current_player_turn_log_mut;
@@ -393,7 +393,7 @@ pub fn move_action(units: Vec<u32>, destination: Position) -> Action {
 }
 
 pub fn influence_action() -> Action {
-    Action::Playing(InfluenceCultureAttempt((
+    Action::Playing(InfluenceCultureAttempt(SelectedStructure::new(
         Position::from_offset("C2"),
         Structure::Building(Temple),
     )))

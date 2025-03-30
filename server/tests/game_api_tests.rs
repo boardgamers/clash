@@ -1,5 +1,5 @@
 use crate::common::*;
-use server::content::custom_phase_actions::{EventResponse, Structure};
+use server::content::custom_phase_actions::{EventResponse, SelectedStructure, Structure};
 use server::log::current_player_turn_log;
 use server::unit::Units;
 use server::{
@@ -271,7 +271,7 @@ fn test_cultural_influence_instant() {
         "cultural_influence_instant",
         vec![TestAction::not_undoable(
             1,
-            Action::Playing(InfluenceCultureAttempt((
+            Action::Playing(InfluenceCultureAttempt(SelectedStructure::new(
                 Position::from_offset("C2"),
                 Structure::Building(Fortress),
             ))),

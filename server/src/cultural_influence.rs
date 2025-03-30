@@ -19,7 +19,7 @@ pub(crate) fn influence_culture_attempt(
     player_index: usize,
     c: &SelectedStructure,
 ) {
-    let target_city_position = c.0;
+    let target_city_position = c.position;
     let target_city = game.get_any_city(target_city_position);
 
     let info = influence_culture_boost_cost(game, player_index, c);
@@ -115,7 +115,7 @@ pub(crate) fn cultural_influence_resolution() -> Builtin {
                         cultural influence",
                     s.player_name
                 ));
-                attempt_failed(game, s.player_index, a.0);
+                attempt_failed(game, s.player_index, a.position);
                 return;
             }
 
@@ -165,8 +165,8 @@ pub fn influence_culture_boost_cost(
     player_index: usize,
     selected: &SelectedStructure,
 ) -> InfluenceCultureInfo {
-    let target_city_position = selected.0;
-    let structure = &selected.1;
+    let target_city_position = selected.position;
+    let structure = &selected.structure;
     let target_city = game.get_any_city(target_city_position);
     let target_player_index = target_city.player_index;
 
@@ -245,9 +245,9 @@ pub fn influence_culture_boost_cost(
 }
 
 fn influence_culture(game: &mut Game, influencer_index: usize, structure: &SelectedStructure) {
-    let city_position = structure.0;
+    let city_position = structure.position;
     let city_owner = game.get_any_city(city_position).player_index;
-    match structure.1 {
+    match structure.structure {
         Structure::CityCenter => {
             let mut city = game
                 .get_player_mut(city_owner)
@@ -306,7 +306,7 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     player_name: &str,
     c: &SelectedStructure,
 ) -> String {
-    let target_city_position = c.0;
+    let target_city_position = c.position;
     let target_city = game.get_any_city(target_city_position);
     let target_player_index = target_city.player_index;
     let starting_city_position =
@@ -329,7 +329,7 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     } else {
         format!(" and paid {} to boost the range", range_boost_cost.default)
     };
-    let city_piece = match c.1 {
+    let city_piece = match c.structure {
         Structure::CityCenter => "City Center",
         Structure::Building(b) => b.name(),
         Structure::Wonder(_) => panic!("Wonder is not allowed here"),

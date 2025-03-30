@@ -246,10 +246,10 @@
                 {
                   "action": {
                     "Playing": {
-                      "InfluenceCultureAttempt": [
-                        "B3",
-                        "CityCenter"
-                      ]
+                      "InfluenceCultureAttempt": {
+                        "position": "B3",
+                        "structure": "CityCenter"
+                      }
                     }
                   }
                 }

@@ -68,9 +68,9 @@ pub fn new_cultural_influence_dialog(
 }
 
 fn structures(city: &City) -> Vec<SelectedStructure> {
-    let mut structures: Vec<SelectedStructure> = vec![(city.position, Structure::CityCenter)];
+    let mut structures: Vec<SelectedStructure> = vec![SelectedStructure::new(city.position, Structure::CityCenter)];
     for b in city.pieces.buildings(None) {
-        structures.push((city.position, Structure::Building(b)));
+        structures.push(SelectedStructure::new(city.position, Structure::Building(b)));
     }
     structures
 }

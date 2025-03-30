@@ -297,22 +297,22 @@
                   "action": {
                     "Response": {
                       "SelectStructures": [
-                        [
-                          "B2",
-                          "CityCenter"
-                        ],
-                        [
-                          "C2",
-                          {
+                        {
+                          "position": "B2",
+                          "structure": "CityCenter"
+                        },
+                        {
+                          "position": "C2",
+                          "structure": {
                             "Building": "Fortress"
                           }
-                        ],
-                        [
-                          "C2",
-                          {
+                        },
+                        {
+                          "position": "C2",
+                          "structure": {
                             "Wonder": "Pyramids"
                           }
-                        ]
+                        }
                       ]
                     }
                   }

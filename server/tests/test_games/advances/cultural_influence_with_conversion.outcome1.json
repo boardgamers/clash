@@ -214,12 +214,12 @@
                 {
                   "action": {
                     "Playing": {
-                      "InfluenceCultureAttempt": [
-                        "C2",
-                        {
+                      "InfluenceCultureAttempt": {
+                        "position": "C2",
+                        "structure": {
                           "Building": "Temple"
                         }
-                      ]
+                      }
                     }
                   }
                 },
