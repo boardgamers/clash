@@ -67,12 +67,15 @@ pub(crate) fn cultural_takeover(id: u8, tactics_card: TacticsCardFactory) -> Act
     .add_simple_persistent_event_listener(
         |event| &mut event.on_play_action_card,
         0,
-        |game, _player, _name, _a| {
-            game.permanent_incident_effects
-                .push(PermanentIncidentEffect::CulturalTakeover);
-            game.add_info_log_item(
-                "Cultural Takeover: You may influence Barbarian cities of size 1.",
-            );
+        |game, _player, _name, a| {
+            if a.selected_position.is_none() {
+                // skip this the second time where we only select a unit type to add
+                game.permanent_incident_effects
+                    .push(PermanentIncidentEffect::CulturalTakeover);
+                game.add_info_log_item(
+                    "Cultural Takeover: You may influence Barbarian cities of size 1.",
+                );
+            }
         },
     )
     .tactics_card(tactics_card)

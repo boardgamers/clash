@@ -2,10 +2,11 @@ use crate::common::{move_action, TestAction};
 use common::JsonTest;
 use server::action::Action;
 use server::card::HandCard;
-use server::content::custom_phase_actions::EventResponse;
+use server::content::custom_phase_actions::{EventResponse, Structure};
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
+use server::unit::UnitType;
 
 mod common;
 
@@ -156,12 +157,18 @@ fn test_mercenaries() {
 
 #[test]
 fn test_cultural_takeover() {
-    //todo finish
     JSON.test(
         "cultural_takeover",
         vec![
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(15)))
                 .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Playing(PlayingAction::InfluenceCultureAttempt((
+                    Position::from_offset("B3"),
+                    Structure::CityCenter,
+                ))),
+            ),
         ],
     );
 }

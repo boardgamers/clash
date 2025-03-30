@@ -10,7 +10,7 @@
         "ideas": 5,
         "gold": 7,
         "mood_tokens": 7,
-        "culture_tokens": 7
+        "culture_tokens": 5
       },
       "resource_limit": {
         "food": 2,
@@ -37,6 +37,13 @@
           "activations": 0,
           "angry_activation": false,
           "position": "C2"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
         }
       ],
       "units": [
@@ -79,6 +86,11 @@
           "position": "C2",
           "unit_type": "Settler",
           "id": 7
+        },
+        {
+          "position": "B3",
+          "unit_type": "Infantry",
+          "id": 8
         }
       ],
       "civilization": "test0",
@@ -88,7 +100,7 @@
         "Tactics"
       ],
       "incident_tokens": 1,
-      "next_unit_id": 8
+      "next_unit_id": 9
     },
     {
       "id": 1,
@@ -148,30 +160,11 @@
         "ideas": 7,
         "gold": 7
       },
-      "cities": [
-        {
-          "city_pieces": {},
-          "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "B3"
-        }
-      ],
       "units": [
-        {
-          "position": "B3",
-          "unit_type": "Infantry",
-          "id": 0
-        },
         {
           "position": "A3",
           "unit_type": "Elephant",
           "id": 1
-        },
-        {
-          "position": "B3",
-          "unit_type": "Infantry",
-          "id": 2
         },
         {
           "position": "A3",
@@ -248,20 +241,17 @@
                     "Playing": {
                       "ActionCard": 15
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        15
+                  }
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "InfluenceCultureAttempt": [
+                        "B3",
+                        "CityCenter"
                       ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/permanent_incident_effects"
                     }
-                  ]
+                  }
                 }
               ]
             }
@@ -270,15 +260,20 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
       "Player1 played the action card Cultural Takeover",
       "Cultural Takeover: You may influence Barbarian cities of size 1."
+    ],
+    [
+      "Player1 tried to influence culture the City Center in the city at B3 by Barbarians with the city at A1 and paid 2 culture tokens to boost the range and succeeded (rolled 6)",
+      "Player1 selected unit to gain: Infantry"
     ]
   ],
-  "undo_limit": 0,
-  "actions_left": 3,
+  "undo_limit": 2,
+  "actions_left": 2,
+  "successful_cultural_influence": true,
   "round": 1,
   "age": 1,
   "messages": [
@@ -292,10 +287,10 @@
     10,
     10,
     10,
-    10,
     10
   ],
   "dice_roll_log": [
+    10,
     10
   ],
   "dropped_players": [],
@@ -305,8 +300,5 @@
   "action_cards_left": [],
   "incidents_left": [
     28
-  ],
-  "permanent_incident_effects": [
-    "CulturalTakeover"
   ]
 }
