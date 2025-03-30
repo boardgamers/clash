@@ -4,9 +4,7 @@ use crate::action_buttons::{
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
-use crate::custom_phase_ui::{
-     SelectedStructureInfo, SelectedStructureStatus,
-};
+use crate::custom_phase_ui::{SelectedStructureInfo, SelectedStructureStatus};
 use crate::happiness_ui::{
     add_increase_happiness, can_play_increase_happiness, open_increase_happiness_dialog,
 };
@@ -334,10 +332,10 @@ fn draw_buildings(
     for player_index in 0..4 {
         for b in &city.pieces.buildings(Some(player_index)) {
             let p = building_position(city, center, i, *b);
-            if let Some(h) = highlighted
-                .iter()
-                .find(|s|s.position == city.position && matches!(s.structure, Structure::Building(bb) if bb == *b))
-            {
+            if let Some(h) = highlighted.iter().find(|s| {
+                s.position == city.position
+                    && matches!(s.structure, Structure::Building(bb) if bb == *b)
+            }) {
                 if let Some(u) = draw_selected_state(rc, p, BUILDING_SIZE, h) {
                     return Some(u);
                 }
@@ -370,10 +368,10 @@ fn draw_wonders(
         let p = hex_ui::rotate_around(c, 20.0, 90 * i);
         draw_circle(p.x, p.y, 18.0, rc.player_color(owner));
         let size = 20.;
-        if let Some(h) = highlighted
-            .iter()
-            .find(|s|s.position == city.position && matches!(&s.structure, Structure::Wonder(n) if n == &w.name))
-        {
+        if let Some(h) = highlighted.iter().find(|s| {
+            s.position == city.position
+                && matches!(&s.structure, Structure::Wonder(n) if n == &w.name)
+        }) {
             if let Some(u) = draw_selected_state(rc, p, 18., h) {
                 return Err(u);
             }

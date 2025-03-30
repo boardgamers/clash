@@ -202,12 +202,12 @@
                   "action": {
                     "Playing": {
                       "Custom": {
-                        "ArtsInfluenceCultureAttempt": {
-                          "starting_city_position": "C1",
-                          "target_player_index": 0,
-                          "target_city_position": "C2",
-                          "city_piece": "Fortress"
-                        }
+                        "ArtsInfluenceCultureAttempt": [
+                          "C2",
+                          {
+                            "Building": "Fortress"
+                          }
+                        ]
                       }
                     }
                   }

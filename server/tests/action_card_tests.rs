@@ -144,12 +144,23 @@ fn test_mercenaries() {
                 )])),
             )
             .without_json_comparison(),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
                     "B2",
                 )])),
             ),
+        ],
+    );
+}
+
+#[test]
+fn test_cultural_takeover() {
+    JSON.test(
+        "cultural_takeover",
+        vec![
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(15)))
+                .without_json_comparison(),
         ],
     );
 }

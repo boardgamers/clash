@@ -265,12 +265,12 @@
                 {
                   "action": {
                     "Playing": {
-                      "InfluenceCultureAttempt": {
-                        "starting_city_position": "B3",
-                        "target_player_index": 0,
-                        "target_city_position": "C2",
-                        "city_piece": "Temple"
-                      }
+                      "InfluenceCultureAttempt": [
+                        "C2",
+                        {
+                          "Building": "Temple"
+                        }
+                      ]
                     }
                   }
                 }

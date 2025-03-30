@@ -128,7 +128,7 @@ pub fn select_units_dialog(rc: &RenderContext, s: &UnitsSelection) -> StateUpdat
             s.selection.request.description,
             s.selection.selected.len()
         )
-            .as_str(),
+        .as_str(),
     );
 
     if ok_button(
@@ -235,7 +235,7 @@ pub fn select_structures_dialog(
             s.request.description,
             s.selected.len()
         )
-            .as_str(),
+        .as_str(),
     );
 
     let sel = s

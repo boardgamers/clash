@@ -8,7 +8,7 @@ use server::content::custom_actions::CustomAction::{
     AbsolutePower, ArtsInfluenceCultureAttempt, CivilRights, ForcedLabor, Sports, Taxes, Theaters,
     VotingIncreaseHappiness,
 };
-use server::content::custom_phase_actions::EventResponse;
+use server::content::custom_phase_actions::{EventResponse, Structure};
 use server::events::EventOrigin;
 use server::game::Game;
 use server::movement::move_units_destinations;
@@ -554,14 +554,10 @@ fn test_cultural_influence_instant_with_arts() {
         "cultural_influence_instant_with_arts",
         vec![TestAction::not_undoable(
             1,
-            Action::Playing(Custom(ArtsInfluenceCultureAttempt(
-                playing_actions::InfluenceCultureAttempt {
-                    starting_city_position: Position::from_offset("C1"),
-                    target_player_index: 0,
-                    target_city_position: Position::from_offset("C2"),
-                    city_piece: Fortress,
-                },
-            ))),
+            Action::Playing(Custom(ArtsInfluenceCultureAttempt((
+                Position::from_offset("C2"),
+                Structure::Building(Fortress),
+            )))),
         )],
     )
 }

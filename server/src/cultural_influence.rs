@@ -336,5 +336,5 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
         Structure::Building(b) => b.name(),
         Structure::Wonder(_) => panic!("Wonder is not allowed here"),
     };
-    format!("{player_name} tried to influence culture the {city_piece:?} in the city at {target_city_position} by {player}{city}{cost}")
+    format!("{player_name} tried to influence culture the {city_piece} in the city at {target_city_position} by {player}{city}{cost}")
 }
