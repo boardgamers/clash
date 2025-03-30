@@ -99,6 +99,12 @@ pub enum PassedIncident {
     AlreadyPassed,
 }
 
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub enum ConstructEffect {
+    CityDevelopment,
+    GreatEngineer,
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum PermanentIncidentEffect {
     Pestilence,
@@ -107,7 +113,7 @@ pub enum PermanentIncidentEffect {
     TrojanHorse,
     SolarEclipse,
     Anarchy(Anarchy),
-    GreatEngineer,
+    Construct(ConstructEffect),
     CulturalTakeover,
     DiplomaticRelations(DiplomaticRelations),
 }
@@ -117,7 +123,11 @@ impl PermanentIncidentEffect {
     pub fn event_origin(&self) -> EventOrigin {
         match self {
             PermanentIncidentEffect::Pestilence => EventOrigin::Incident(1),
-            PermanentIncidentEffect::GreatEngineer => EventOrigin::Incident(26),
+            PermanentIncidentEffect::Construct(c) =>
+            match c {
+                ConstructEffect::CityDevelopment => EventOrigin::CivilCard(17), // also 18
+                ConstructEffect::GreatEngineer => EventOrigin::Incident(26)
+            }
             PermanentIncidentEffect::LoseAction(_) => EventOrigin::Incident(38),
             PermanentIncidentEffect::PublicWonderCard(_) => EventOrigin::Incident(40),
             PermanentIncidentEffect::SolarEclipse => EventOrigin::Incident(41),

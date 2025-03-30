@@ -139,6 +139,9 @@
         "Tactics"
       ],
       "incident_tokens": 3,
+      "action_cards": [
+        17
+      ],
       "next_unit_id": 2
     },
     {

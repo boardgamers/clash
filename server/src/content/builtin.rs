@@ -7,7 +7,7 @@ use crate::combat_listeners::{
 };
 use crate::content::action_cards::cultural_takeover::use_cultural_takeover;
 use crate::content::incidents::famine::pestilence_permanent_effect;
-use crate::content::incidents::great_builders::use_great_engineer;
+use crate::content::incidents::great_builders::construct_only;
 use crate::content::incidents::great_diplomat::use_diplomatic_relations;
 use crate::content::incidents::great_warlord::use_great_warlord;
 use crate::content::incidents::trojan::{
@@ -94,7 +94,7 @@ pub fn get_all() -> Vec<Builtin> {
         solar_eclipse_end_combat(),
         anarchy_advance(),
         use_great_warlord(),
-        use_great_engineer(),
+        construct_only(),
         use_diplomatic_relations(),
         // action card related
         use_cultural_takeover(),

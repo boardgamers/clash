@@ -43,12 +43,15 @@ pub fn new_cultural_influence_dialog(
                             if status == SelectedStructureStatus::Invalid {
                                 boost = 0;
                             }
+                            let label = (boost > 0).then_some(boost.to_string());
                             SelectedStructureInfo::new(
                                 s.position,
                                 s.structure.clone(),
                                 status,
-                                (boost > 0).then_some(boost.to_string()),
-                                (!tooltip.is_empty()).then_some(tooltip.join(", ")),
+                                label.clone(),
+                                (!tooltip.is_empty())
+                                    .then_some(tooltip.join(", "))
+                                    .or(label.map(|l| format!("Range boost cost: {}", l))),
                             )
                         })
                         .collect_vec()

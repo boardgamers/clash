@@ -340,7 +340,9 @@
                       "op": "add",
                       "path": "/permanent_incident_effects",
                       "value": [
-                        "GreatEngineer"
+                        {
+                          "Construct": "GreatEngineer"
+                        }
                       ]
                     },
                     {

@@ -7,10 +7,12 @@ use crate::content::incidents::great_persons::{
     great_person_action_card, great_person_description, GREAT_PERSON_DESCRIPTION,
 };
 use crate::game::Game;
-use crate::incident::PermanentIncidentEffect;
+use crate::incident::PermanentIncidentEffect::Construct;
+use crate::incident::ConstructEffect;
 use crate::player::Player;
 use crate::playing_actions::{ActionType, PlayingActionType};
-use crate::utils::remove_element;
+use crate::resource_pile::ResourcePile;
+use crate::utils::remove_element_by;
 use crate::wonder::{cities_for_wonder, on_play_wonder_card, WonderCardInfo, WonderDiscount};
 
 pub(crate) fn great_engineer() -> ActionCard {
@@ -32,9 +34,10 @@ pub(crate) fn great_engineer() -> ActionCard {
             |_, _, _| Some("Build a building in a city without spending an action and without activating it?".to_string()),
             |game, s, _| {
                 if s.choice {
-                    game.permanent_incident_effects.push(PermanentIncidentEffect::GreatEngineer);
+                    game.permanent_incident_effects.push(Construct(ConstructEffect::GreatEngineer));
                     game.actions_left += 1; // to offset the action spent for building
-                    game.add_info_log_item("Great Engineer: You may build a building in a city without spending an action and without activating it.");
+                    game.add_info_log_item("Great Engineer: You may build a building in a city without \
+                    spending an action and without activating it.");
                 } else {
                     game.add_info_log_item("Great Engineer: You decided not to use the ability.");
                 }
@@ -43,7 +46,7 @@ pub(crate) fn great_engineer() -> ActionCard {
     .build()
 }
 
-pub(crate) fn use_great_engineer() -> Builtin {
+pub(crate) fn construct_only() -> Builtin {
     Builtin::builder("great_engineer", "-")
         .add_transient_event_listener(
             |event| &mut event.is_playing_action_available,
@@ -51,7 +54,8 @@ pub(crate) fn use_great_engineer() -> Builtin {
             |available, game, i| {
                 if game
                     .permanent_incident_effects
-                    .contains(&PermanentIncidentEffect::GreatEngineer)
+                    .iter()
+                    .any(|e| matches!(e, &Construct(_)))
                     && !matches!(i.action_type, PlayingActionType::Construct)
                 {
                     *available =
@@ -65,9 +69,15 @@ pub(crate) fn use_great_engineer() -> Builtin {
             |c, _, game| {
                 if game
                     .permanent_incident_effects
-                    .contains(&PermanentIncidentEffect::GreatEngineer)
+                    .contains(&Construct(ConstructEffect::GreatEngineer))
                 {
                     c.activate_city = false;
+                }
+                if game
+                    .permanent_incident_effects
+                    .contains(&Construct(ConstructEffect::CityDevelopment))
+                {
+                    c.cost.default = ResourcePile::empty();
                 }
             },
         )
@@ -75,10 +85,9 @@ pub(crate) fn use_great_engineer() -> Builtin {
             |event| &mut event.on_construct,
             2,
             |game, _, _, _| {
-                remove_element(
-                    &mut game.permanent_incident_effects,
-                    &PermanentIncidentEffect::GreatEngineer,
-                );
+                remove_element_by(&mut game.permanent_incident_effects, |e| {
+                    matches!(e, &Construct(_))
+                });
             },
         )
         .build()
