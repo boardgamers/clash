@@ -1,6 +1,6 @@
 use crate::action_buttons::base_or_custom_available;
 use crate::client_state::ActiveDialog;
-use crate::custom_phase_ui::{MultiSelection, SelectedStructureInfo};
+use crate::custom_phase_ui::{MultiSelection, SelectedStructureInfo, SelectedStructureStatus};
 use crate::dialog_ui::BaseOrCustomDialog;
 use crate::render_context::RenderContext;
 use itertools::Itertools;
@@ -25,19 +25,32 @@ pub fn new_cultural_influence_dialog(
                 .flat_map(|city| {
                     structures(city)
                         .iter()
-                        .filter_map(|s| {
+                        .map(|s| {
                             let info = influence_culture_boost_cost(game, player, s);
-                            if info.blockers.is_empty() {
-                                Some(SelectedStructureInfo::new(
-                                    s.0,
-                                    s.1.clone(),
-                                    false,          //todo
-                                    String::new(), //todo
-                                    String::new(), //todo
-                                ))
+                            let mut tooltip = info.blockers.clone();
+                            let status = if info.blockers.is_empty() {
+                                if info.prevent_boost {
+                                    tooltip.push("You cannot boost the dice roll".to_string());
+                                    SelectedStructureStatus::Warn
+                                } else {
+                                    SelectedStructureStatus::Valid
+                                }
                             } else {
-                                None
-                            }
+                                SelectedStructureStatus::Invalid
+                            };
+                            let label = if info.roll_boost > 0 {
+                                info.roll_boost.to_string()
+                            } else {
+                                String::new()
+                            };
+
+                            SelectedStructureInfo::new(
+                                s.0,
+                                s.1.clone(),
+                                status,
+                                label,
+                                tooltip.join(", "),
+                            )
                         })
                         .collect_vec()
                 })

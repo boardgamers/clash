@@ -253,17 +253,21 @@ pub fn draw_city(rc: &RenderContext, city: &City) -> Option<StateUpdate> {
             HighlightType::Primary,
         )
         .into_iter()
-        .chain(highlight_structures(
-            &position_structures(city, &s.request.choices),
-            HighlightType::Choices,
-        ))
+        .chain(
+            s.request.choices.iter().map(
+                |s| StructureHighlight::new(
+                    s.clone(),
+                    s.highlight_type(),
+                ),
+            ),
+        )
         .collect_vec(),
         _ => vec![],
     };
 
     if let Some(h) = highlighted
         .iter()
-        .find(|s| matches!(s.selected.structure, Structure::CityCenter))
+        .find(|s| matches!(s.selected.structure, Structure::CityCenter if s.is_valid()))
     {
         if let Some(u) = structure_selected(rc, c, 15., h) {
             return Some(u);
@@ -320,7 +324,7 @@ fn draw_buildings(
             let p = building_position(city, center, i, *b);
             if let Some(h) = highlighted
                 .iter()
-                .find(|s| matches!(s.selected.structure, Structure::Building(bb) if bb == *b))
+                .find(|s| matches!(s.selected.structure, Structure::Building(bb) if bb == *b && s.is_valid()))
             {
                 if let Some(u) = structure_selected(rc, p, BUILDING_SIZE, h) {
                     return Some(u);
@@ -356,7 +360,7 @@ fn draw_wonders(
         let size = 20.;
         if let Some(h) = highlighted
             .iter()
-            .find(|s| matches!(&s.selected.structure, Structure::Wonder(n) if n == &w.name))
+            .find(|s| matches!(&s.selected.structure, Structure::Wonder(n) if n == &w.name && s.is_valid()))
         {
             if let Some(u) = structure_selected(rc, p, 18., h) {
                 return Err(u);

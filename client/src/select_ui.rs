@@ -93,6 +93,8 @@ pub enum HighlightType {
     None,
     Primary,
     Choices,
+    Warn,
+    NotAvailable,
 }
 
 impl HighlightType {

@@ -177,11 +177,18 @@ impl<T: Clone + PartialEq> MultiSelection<T> {
     }
 }
 
+#[derive(Clone, PartialEq, Eq)]
+pub enum SelectedStructureStatus {
+    Valid,
+    Warn,
+    Invalid,
+}
+
 #[derive(Clone, PartialEq)]
 pub struct SelectedStructureInfo {
     pub position: Position,
     pub structure: Structure,
-    pub warn: bool,
+    pub status: SelectedStructureStatus,
     pub label: String,
     pub tooltip: String,
 }
@@ -190,14 +197,14 @@ impl SelectedStructureInfo {
     pub fn new(
         position: Position,
         structure: Structure,
-        warn: bool,
+        status: SelectedStructureStatus,
         label: String,
         tooltip: String,
     ) -> Self {
         SelectedStructureInfo {
             position,
             structure,
-            warn,
+            status,
             label,
             tooltip,
         }
@@ -205,6 +212,12 @@ impl SelectedStructureInfo {
 
     pub fn selected(&self) -> SelectedStructure {
         (self.position, self.structure.clone())
+    }
+
+    pub fn highlight_type(&self) -> HighlightType {
+        match self.status {
+     //todo
+        }
     }
 }
 
@@ -223,7 +236,11 @@ pub fn select_structures_dialog(
         .as_str(),
     );
 
-    let sel = s.selected.iter().map(SelectedStructureInfo::selected).collect_vec();
+    let sel = s
+        .selected
+        .iter()
+        .map(SelectedStructureInfo::selected)
+        .collect_vec();
     if ok_button(
         rc,
         multi_select_tooltip(
@@ -293,6 +310,24 @@ pub fn player_request_dialog(rc: &RenderContext, r: &PlayerRequest) -> StateUpda
 pub struct StructureHighlight {
     pub selected: SelectedStructureInfo,
     pub highlight_type: HighlightType,
+    pub label: Option<String>,
+    pub tooltip: Option<String>,
+}
+
+impl StructureHighlight {
+    #[must_use]
+    pub fn new(
+        selected: SelectedStructureInfo,
+        highlight_type: HighlightType) -> Self {
+        StructureHighlight {
+            selected,
+            highlight_type,
+        }
+    }
+
+    pub fn is_valid(&self) -> bool {
+        self.selected.status == SelectedStructureStatus::Valid
+    }
 }
 
 pub fn highlight_structures(
@@ -301,10 +336,7 @@ pub fn highlight_structures(
 ) -> Vec<StructureHighlight> {
     structures
         .iter()
-        .map(move |s| StructureHighlight {
-            selected: s.clone(),
-            highlight_type,
-        })
+        .map(|s| StructureHighlight::new(s.clone(), highlight_type))
         .collect()
 }
 
