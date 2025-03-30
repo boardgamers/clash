@@ -2,9 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::content::action_cards::cultural_takeover::cultural_takeover;
 use crate::content::action_cards::mercenaries::mercenaries;
-use crate::content::tactics_cards::{
-    for_the_people, heavy_resistance, improved_defenses, tactical_retreat, TacticsCardFactory,
-};
+use crate::content::tactics_cards::{for_the_people, heavy_resistance, improved_defenses, peltasts, tactical_retreat, TacticsCardFactory};
 use crate::incident::ConstructEffect;
 use crate::incident::PermanentIncidentEffect::Construct;
 use crate::playing_actions::ActionType;
@@ -17,6 +15,7 @@ pub(crate) fn development_action_cards() -> Vec<ActionCard> {
         cultural_takeover(15, heavy_resistance),
         cultural_takeover(16, improved_defenses),
         city_development(17, tactical_retreat),
+        city_development(18, peltasts),
     ]
 }
 
