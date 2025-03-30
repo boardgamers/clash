@@ -290,6 +290,7 @@ fn start_city(game: &Game, player_index: usize, target_city: &City) -> Option<Po
     if target_city.player_index == player_index {
         Some(target_city.position)
     } else {
+        // todo pick a city that is big enough if possible
         //todo
         // Influence Culture may cross Sea spaces, but not unrevealed
         // Regions.

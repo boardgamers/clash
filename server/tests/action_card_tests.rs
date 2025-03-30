@@ -156,6 +156,7 @@ fn test_mercenaries() {
 
 #[test]
 fn test_cultural_takeover() {
+    //todo finish
     JSON.test(
         "cultural_takeover",
         vec![

@@ -253,7 +253,7 @@ fn draw_selected_state(
         );
     }
 
-    if info.status == SelectedStructureStatus::Valid
+    if info.status != SelectedStructureStatus::Invalid
         && is_mouse_button_pressed(MouseButton::Left)
         && is_in_circle(rc.mouse_pos(), center, size)
     {
@@ -386,18 +386,6 @@ fn draw_wonders(
         i += 1;
     }
     Ok(i)
-}
-
-fn position_structures(city: &City, list: &[SelectedStructureInfo]) -> Vec<SelectedStructureInfo> {
-    list.iter()
-        .filter_map(|s| {
-            if s.position == city.position {
-                Some(s.clone())
-            } else {
-                None
-            }
-        })
-        .collect_vec()
 }
 
 pub fn building_position(city: &City, center: Vec2, i: usize, building: Building) -> Vec2 {
