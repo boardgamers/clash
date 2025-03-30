@@ -294,7 +294,10 @@ fn test_earthquake() {
                 0,
                 Action::Response(EventResponse::SelectStructures(vec![
                     SelectedStructure::new(Position::from_offset("B2"), Structure::CityCenter),
-                    SelectedStructure::new(Position::from_offset("C2"), Structure::Building(Fortress)),
+                    SelectedStructure::new(
+                        Position::from_offset("C2"),
+                        Structure::Building(Fortress),
+                    ),
                     SelectedStructure::new(
                         Position::from_offset("C2"),
                         Structure::Wonder("Pyramids".to_string()),
@@ -309,7 +312,10 @@ fn test_earthquake() {
                 1,
                 Action::Response(EventResponse::SelectStructures(vec![
                     SelectedStructure::new(Position::from_offset("A1"), Structure::CityCenter),
-                    SelectedStructure::new(Position::from_offset("A1"), Structure::Building(Fortress)),
+                    SelectedStructure::new(
+                        Position::from_offset("A1"),
+                        Structure::Building(Fortress),
+                    ),
                     SelectedStructure::new(Position::from_offset("A3"), Structure::CityCenter),
                 ])),
             ),

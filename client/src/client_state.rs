@@ -549,8 +549,8 @@ impl State {
                             .iter()
                             .map(|s| {
                                 SelectedStructureInfo::new(
-                                    s.0,
-                                    s.1.clone(),
+                                    s.position,
+                                    s.structure.clone(),
                                     SelectedStructureStatus::Valid,
                                     None,
                                     None,

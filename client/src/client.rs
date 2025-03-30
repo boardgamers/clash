@@ -176,7 +176,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::UnitTypeRequest(r) => custom_phase_ui::unit_request_dialog(rc, r),
         ActiveDialog::UnitsRequest(r) => custom_phase_ui::select_units_dialog(rc, r),
         ActiveDialog::StructuresRequest(d, r) => {
-            custom_phase_ui::select_structures_dialog(rc, d, r)
+            custom_phase_ui::select_structures_dialog(rc, d.into(), r)
         }
         ActiveDialog::BoolRequest(d) => custom_phase_ui::bool_request_dialog(rc, d),
         ActiveDialog::PositionRequest(r) => custom_phase_ui::position_request_dialog(rc, r),

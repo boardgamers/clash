@@ -73,7 +73,10 @@ pub struct SelectedStructure {
 impl SelectedStructure {
     #[must_use]
     pub fn new(position: Position, structure: Structure) -> Self {
-        Self { position, structure }
+        Self {
+            position,
+            structure,
+        }
     }
 }
 
@@ -105,7 +108,9 @@ pub fn is_selected_structures_valid(game: &Game, selected: &[SelectedStructure])
         .all(|(p, g)| {
             let v = g.collect_vec();
             v.len() == game.get_any_city(p).size()
-                || !v.iter().any(|s| matches!(s.structure, Structure::CityCenter))
+                || !v
+                    .iter()
+                    .any(|s| matches!(s.structure, Structure::CityCenter))
         })
 }
 

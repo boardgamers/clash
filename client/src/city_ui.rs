@@ -15,7 +15,6 @@ use crate::recruit_unit_ui::RecruitAmount;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
 use crate::tooltip::show_tooltip_for_circle;
-use itertools::Itertools;
 use macroquad::math::f32;
 use macroquad::prelude::*;
 use server::city::{City, MoodState};
@@ -282,7 +281,7 @@ pub fn draw_city(rc: &RenderContext, city: &City) -> Option<StateUpdate> {
             return Some(u);
         }
     } else {
-        draw_mood_state(&rc, &city, c);
+        draw_mood_state(rc, city, c);
     }
 
     let i = match draw_wonders(rc, city, c, owner, highlighted) {
@@ -293,7 +292,7 @@ pub fn draw_city(rc: &RenderContext, city: &City) -> Option<StateUpdate> {
     draw_buildings(rc, city, c, highlighted, i)
 }
 
-fn draw_mood_state(rc: &&RenderContext, city: &&City, c: Vec2) {
+fn draw_mood_state(rc: &RenderContext, city: &City, c: Vec2) {
     let state = &rc.state;
     let mood = if let ActiveDialog::IncreaseHappiness(increase) = &state.active_dialog {
         let steps = increase

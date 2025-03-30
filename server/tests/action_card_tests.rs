@@ -6,7 +6,6 @@ use server::content::custom_phase_actions::{EventResponse, SelectedStructure, St
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-use server::unit::UnitType;
 
 mod common;
 
@@ -164,10 +163,9 @@ fn test_cultural_takeover() {
                 .without_json_comparison(),
             TestAction::not_undoable(
                 0,
-                Action::Playing(PlayingAction::InfluenceCultureAttempt(SelectedStructure::new(
-                    Position::from_offset("B3"),
-                    Structure::CityCenter,
-                ))),
+                Action::Playing(PlayingAction::InfluenceCultureAttempt(
+                    SelectedStructure::new(Position::from_offset("B3"), Structure::CityCenter),
+                )),
             ),
         ],
     );

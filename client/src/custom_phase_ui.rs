@@ -225,7 +225,7 @@ impl SelectedStructureInfo {
 
 pub fn select_structures_dialog(
     rc: &RenderContext,
-    d: &Option<BaseOrCustomDialog>,
+    d: Option<&BaseOrCustomDialog>,
     s: &MultiSelection<SelectedStructureInfo>,
 ) -> StateUpdate {
     bottom_centered_text(

@@ -44,8 +44,8 @@ pub fn new_cultural_influence_dialog(
                                 boost = 0;
                             }
                             SelectedStructureInfo::new(
-                                s.0,
-                                s.1.clone(),
+                                s.position,
+                                s.structure.clone(),
                                 status,
                                 (boost > 0).then_some(boost.to_string()),
                                 (!tooltip.is_empty()).then_some(tooltip.join(", ")),
@@ -68,9 +68,13 @@ pub fn new_cultural_influence_dialog(
 }
 
 fn structures(city: &City) -> Vec<SelectedStructure> {
-    let mut structures: Vec<SelectedStructure> = vec![SelectedStructure::new(city.position, Structure::CityCenter)];
+    let mut structures: Vec<SelectedStructure> =
+        vec![SelectedStructure::new(city.position, Structure::CityCenter)];
     for b in city.pieces.buildings(None) {
-        structures.push(SelectedStructure::new(city.position, Structure::Building(b)));
+        structures.push(SelectedStructure::new(
+            city.position,
+            Structure::Building(b),
+        ));
     }
     structures
 }

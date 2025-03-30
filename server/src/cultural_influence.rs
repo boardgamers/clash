@@ -24,8 +24,9 @@ pub(crate) fn influence_culture_attempt(
 
     let info = influence_culture_boost_cost(game, player_index, c);
     assert!(info.blockers.is_empty(), "Impossible to influence culture");
-    let starting_city_position =
-        start_city(game, player_index, target_city).expect("there should be a starting city").0;
+    let starting_city_position = start_city(game, player_index, target_city)
+        .expect("there should be a starting city")
+        .0;
 
     let self_influence = starting_city_position == target_city_position;
 
@@ -172,7 +173,8 @@ pub fn influence_culture_boost_cost(
 
     let attacker = game.get_player(player_index);
 
-    let Some((starting_city_position, range_boost)) = start_city(game, player_index, target_city) else {
+    let Some((starting_city_position, range_boost)) = start_city(game, player_index, target_city)
+    else {
         let mut i = InfluenceCultureInfo::new(
             PaymentOptions::resources(ResourcePile::empty()),
             ActionInfo::new(attacker),
@@ -293,7 +295,8 @@ fn start_city(game: &Game, player_index: usize, target_city: &City) -> Option<(P
             .iter()
             .filter(|c| !c.influenced())
             .map(|c| {
-                let boost = influence_distance(game, c.position, position, &[], 0).saturating_sub(c.size() as u32);
+                let boost = influence_distance(game, c.position, position, &[], 0)
+                    .saturating_sub(c.size() as u32);
                 (c.position, boost)
             })
             .min_by_key(|(_, boost)| *boost)
@@ -309,8 +312,9 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     let target_city_position = c.position;
     let target_city = game.get_any_city(target_city_position);
     let target_player_index = target_city.player_index;
-    let starting_city_position =
-        start_city(game, player_index, target_city).expect("there should be a starting city").0;
+    let starting_city_position = start_city(game, player_index, target_city)
+        .expect("there should be a starting city")
+        .0;
 
     let player = if target_player_index == game.active_player() {
         String::from("themselves")
