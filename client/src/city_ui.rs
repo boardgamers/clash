@@ -246,9 +246,9 @@ fn draw_selected_state(
     if let Some(label) = &info.label {
         draw_text(
             label,
-            center.x - size / 2.,
-            center.y - size / 2.,
-            size,
+            center.x,
+            center.y,
+            25.,
             BLACK,
         );
     }
@@ -275,14 +275,7 @@ pub fn draw_city(rc: &RenderContext, city: &City) -> Option<StateUpdate> {
         _ => &Vec::new(),
     };
 
-    if let Some(h) = highlighted
-        .iter()
-        .find(|s| s.position == city.position && matches!(s.structure, Structure::CityCenter))
-    {
-        if let Some(u) = draw_selected_state(rc, c, 15., h) {
-            return Some(u);
-        }
-    } else if city.is_activated() {
+    if city.is_activated() {
         draw_circle(c.x, c.y, 18.0, WHITE);
     }
     draw_circle(c.x, c.y, 15.0, rc.player_color(owner));
@@ -314,6 +307,15 @@ pub fn draw_city(rc: &RenderContext, city: &City) -> Option<StateUpdate> {
         );
     }
 
+    if let Some(h) = highlighted
+        .iter()
+        .find(|s| s.position == city.position && matches!(s.structure, Structure::CityCenter))
+    {
+        if let Some(u) = draw_selected_state(rc, c, 15., h) {
+            return Some(u);
+        }
+    }
+
     let i = match draw_wonders(rc, city, c, owner, highlighted) {
         Ok(value) => value,
         Err(value) => return Some(value),
@@ -332,6 +334,14 @@ fn draw_buildings(
     for player_index in 0..4 {
         for b in &city.pieces.buildings(Some(player_index)) {
             let p = building_position(city, center, i, *b);
+            draw_circle(p.x, p.y, BUILDING_SIZE, rc.player_color(player_index));
+            draw_scaled_icon(
+                rc,
+                &rc.assets().buildings[b],
+                b.name(),
+                p + vec2(-8., -8.),
+                16.,
+            );
             if let Some(h) = highlighted.iter().find(|s| {
                 s.position == city.position
                     && matches!(s.structure, Structure::Building(bb) if bb == *b)
@@ -340,15 +350,6 @@ fn draw_buildings(
                     return Some(u);
                 }
             }
-            draw_circle(p.x, p.y, BUILDING_SIZE, rc.player_color(player_index));
-            let tooltip = b.name();
-            draw_scaled_icon(
-                rc,
-                &rc.assets().buildings[b],
-                tooltip,
-                p + vec2(-8., -8.),
-                16.,
-            );
             i += 1;
         }
     }
@@ -368,6 +369,13 @@ fn draw_wonders(
         let p = hex_ui::rotate_around(c, 20.0, 90 * i);
         draw_circle(p.x, p.y, 18.0, rc.player_color(owner));
         let size = 20.;
+        draw_scaled_icon(
+            rc,
+            &rc.assets().wonders[&w.name],
+            &w.name,
+            p + vec2(-size / 2., -size / 2.),
+            size,
+        );
         if let Some(h) = highlighted.iter().find(|s| {
             s.position == city.position
                 && matches!(&s.structure, Structure::Wonder(n) if n == &w.name)
@@ -376,13 +384,6 @@ fn draw_wonders(
                 return Err(u);
             }
         }
-        draw_scaled_icon(
-            rc,
-            &rc.assets().wonders[&w.name],
-            &w.name,
-            p + vec2(-size / 2., -size / 2.),
-            size,
-        );
         i += 1;
     }
     Ok(i)
