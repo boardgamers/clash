@@ -5,8 +5,9 @@ use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::custom_phase_actions::{Structure, UnitTypeRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
+use crate::game::Game;
 use crate::incident::PermanentIncidentEffect;
-use crate::player_events::PlayingActionInfo;
+use crate::player_events::{InfluenceCultureInfo, PlayingActionInfo};
 use crate::playing_actions::{ActionType, PlayingActionType};
 use crate::unit::UnitType;
 use crate::utils::remove_element;
@@ -98,11 +99,11 @@ pub(crate) fn use_cultural_takeover() -> Builtin {
             |event| &mut event.on_influence_culture_attempt,
             5,
             |c, _, game| {
-                if matches!(c.structure, Structure::CityCenter)
-                    && !game
-                        .permanent_incident_effects
-                        .contains(&PermanentIncidentEffect::CulturalTakeover)
+                if c.is_defender
+                    && matches!(c.structure, Structure::CityCenter)
+                    && !is_barbarian_takeover(game, c)
                 {
+                    // only add in is_defender to avoid double messages
                     c.add_blocker("City center can't be influenced");
                 }
             },
@@ -124,6 +125,15 @@ pub(crate) fn use_cultural_takeover() -> Builtin {
             },
         )
         .build()
+}
+
+fn is_barbarian_takeover(game: &Game, c: &InfluenceCultureInfo) -> bool {
+    let city = game.get_any_city(c.position);
+    city.player_index == get_barbarians_player(game).index
+        && city.size() == 1
+        && game
+            .permanent_incident_effects
+            .contains(&PermanentIncidentEffect::CulturalTakeover)
 }
 
 fn is_influence(i: &PlayingActionInfo) -> bool {

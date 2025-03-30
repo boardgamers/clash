@@ -279,6 +279,7 @@ pub struct InfluenceCultureInfo {
     pub range_boost_cost: PaymentOptions,
     pub(crate) info: ActionInfo,
     pub roll_boost: u8,
+    pub position: Position,
 }
 
 impl InfluenceCultureInfo {
@@ -286,6 +287,7 @@ impl InfluenceCultureInfo {
     pub(crate) fn new(
         range_boost_cost: PaymentOptions,
         info: ActionInfo,
+        position: Position,
         structure: Structure,
     ) -> InfluenceCultureInfo {
         InfluenceCultureInfo {
@@ -296,6 +298,7 @@ impl InfluenceCultureInfo {
             roll_boost: 0,
             is_defender: false,
             blockers: Vec::new(),
+            position,
         }
     }
 

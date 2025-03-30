@@ -128,7 +128,7 @@ pub fn select_units_dialog(rc: &RenderContext, s: &UnitsSelection) -> StateUpdat
             s.selection.request.description,
             s.selection.selected.len()
         )
-        .as_str(),
+            .as_str(),
     );
 
     if ok_button(
@@ -189,8 +189,8 @@ pub struct SelectedStructureInfo {
     pub position: Position,
     pub structure: Structure,
     pub status: SelectedStructureStatus,
-    pub label: String,
-    pub tooltip: String,
+    pub label: Option<String>,
+    pub tooltip: Option<String>,
 }
 
 impl SelectedStructureInfo {
@@ -198,8 +198,8 @@ impl SelectedStructureInfo {
         position: Position,
         structure: Structure,
         status: SelectedStructureStatus,
-        label: String,
-        tooltip: String,
+        label: Option<String>,
+        tooltip: Option<String>,
     ) -> Self {
         SelectedStructureInfo {
             position,
@@ -216,7 +216,9 @@ impl SelectedStructureInfo {
 
     pub fn highlight_type(&self) -> HighlightType {
         match self.status {
-     //todo
+            SelectedStructureStatus::Valid => HighlightType::Choices,
+            SelectedStructureStatus::Warn => HighlightType::Warn,
+            SelectedStructureStatus::Invalid => HighlightType::Invalid,
         }
     }
 }
@@ -233,7 +235,7 @@ pub fn select_structures_dialog(
             s.request.description,
             s.selected.len()
         )
-        .as_str(),
+            .as_str(),
     );
 
     let sel = s
@@ -305,39 +307,6 @@ pub fn player_request_dialog(rc: &RenderContext, r: &PlayerRequest) -> StateUpda
     choose_player_dialog(rc, &r.choices, |p| {
         Action::Response(EventResponse::SelectPlayer(p))
     })
-}
-
-pub struct StructureHighlight {
-    pub selected: SelectedStructureInfo,
-    pub highlight_type: HighlightType,
-    pub label: Option<String>,
-    pub tooltip: Option<String>,
-}
-
-impl StructureHighlight {
-    #[must_use]
-    pub fn new(
-        selected: SelectedStructureInfo,
-        highlight_type: HighlightType) -> Self {
-        StructureHighlight {
-            selected,
-            highlight_type,
-        }
-    }
-
-    pub fn is_valid(&self) -> bool {
-        self.selected.status == SelectedStructureStatus::Valid
-    }
-}
-
-pub fn highlight_structures(
-    structures: &[SelectedStructureInfo],
-    highlight_type: HighlightType,
-) -> Vec<StructureHighlight> {
-    structures
-        .iter()
-        .map(|s| StructureHighlight::new(s.clone(), highlight_type))
-        .collect()
 }
 
 pub(crate) fn position_request_dialog(

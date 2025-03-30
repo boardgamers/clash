@@ -38,18 +38,14 @@ pub fn new_cultural_influence_dialog(
                             } else {
                                 SelectedStructureStatus::Invalid
                             };
-                            let label = if info.roll_boost > 0 {
-                                info.roll_boost.to_string()
-                            } else {
-                                String::new()
-                            };
 
                             SelectedStructureInfo::new(
                                 s.0,
                                 s.1.clone(),
                                 status,
-                                label,
-                                tooltip.join(", "),
+                                (info.roll_boost > 0)
+                                    .then_some(info.roll_boost.to_string()),
+                                Some(tooltip.join(", ")),
                             )
                         })
                         .collect_vec()

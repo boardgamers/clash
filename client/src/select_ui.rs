@@ -4,7 +4,7 @@ use crate::layout_ui::{bottom_center_anchor, bottom_center_texture, ICON_SIZE};
 use crate::render_context::RenderContext;
 use macroquad::color::{Color, BLACK, BLUE, WHITE};
 use macroquad::math::{bool, vec2, Vec2};
-use macroquad::prelude::TextParams;
+use macroquad::prelude::{TextParams, GRAY, RED};
 use macroquad::text::draw_text_ex;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
@@ -94,7 +94,7 @@ pub enum HighlightType {
     Primary,
     Choices,
     Warn,
-    NotAvailable,
+    Invalid,
 }
 
 impl HighlightType {
@@ -103,6 +103,8 @@ impl HighlightType {
             HighlightType::None => BLACK,
             HighlightType::Primary => WHITE,
             HighlightType::Choices => BLUE,
+            HighlightType::Warn => RED,
+            HighlightType::Invalid => GRAY,
         }
     }
 }

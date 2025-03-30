@@ -4,7 +4,9 @@ use crate::action_buttons::{
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
-use crate::custom_phase_ui::{highlight_structures, SelectedStructureInfo, StructureHighlight};
+use crate::custom_phase_ui::{
+     SelectedStructureInfo, SelectedStructureStatus,
+};
 use crate::happiness_ui::{
     add_increase_happiness, can_play_increase_happiness, open_increase_happiness_dialog,
 };
@@ -14,6 +16,7 @@ use crate::map_ui::{move_units_buttons, show_map_action_buttons};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
+use crate::tooltip::show_tooltip_for_circle;
 use itertools::Itertools;
 use macroquad::math::f32;
 use macroquad::prelude::*;
@@ -223,20 +226,42 @@ pub fn city_labels(game: &Game, city: &City) -> Vec<String> {
 
 pub const BUILDING_SIZE: f32 = 12.0;
 
-fn structure_selected(
+fn draw_selected_state(
     rc: &RenderContext,
     center: Vec2,
     size: f32,
-    h: &StructureHighlight,
+    info: &SelectedStructureInfo,
 ) -> Option<StateUpdate> {
-    draw_circle_lines(center.x, center.y, size, 3., h.highlight_type.color());
-    if is_mouse_button_pressed(MouseButton::Left) && is_in_circle(rc.mouse_pos(), center, size) {
-        let ActiveDialog::StructuresRequest(d, r) = &rc.state.active_dialog else {
-            panic!("Expected StructuresRequest");
-        };
+    let ActiveDialog::StructuresRequest(d, r) = &rc.state.active_dialog else {
+        panic!("Expected StructuresRequest");
+    };
+    let t = if r.selected.contains(info) {
+        HighlightType::Primary
+    } else {
+        info.highlight_type()
+    };
+    draw_circle_lines(center.x, center.y, size, 3., t.color());
+
+    if let Some(tooltip) = &info.tooltip {
+        show_tooltip_for_circle(rc, tooltip, center, size);
+    }
+    if let Some(label) = &info.label {
+        draw_text(
+            label,
+            center.x - size / 2.,
+            center.y - size / 2.,
+            size,
+            BLACK,
+        );
+    }
+
+    if info.status == SelectedStructureStatus::Valid
+        && is_mouse_button_pressed(MouseButton::Left)
+        && is_in_circle(rc.mouse_pos(), center, size)
+    {
         Some(StateUpdate::OpenDialog(ActiveDialog::StructuresRequest(
             d.clone(),
-            r.clone().toggle(h.selected.clone()),
+            r.clone().toggle(info.clone()),
         )))
     } else {
         None
@@ -248,28 +273,15 @@ pub fn draw_city(rc: &RenderContext, city: &City) -> Option<StateUpdate> {
     let owner = city.player_index;
 
     let highlighted = match rc.state.active_dialog {
-        ActiveDialog::StructuresRequest(_, ref s) => highlight_structures(
-            &position_structures(city, &s.selected),
-            HighlightType::Primary,
-        )
-        .into_iter()
-        .chain(
-            s.request.choices.iter().map(
-                |s| StructureHighlight::new(
-                    s.clone(),
-                    s.highlight_type(),
-                ),
-            ),
-        )
-        .collect_vec(),
-        _ => vec![],
+        ActiveDialog::StructuresRequest(_, ref s) => &s.request.choices,
+        _ => &Vec::new(),
     };
 
     if let Some(h) = highlighted
         .iter()
-        .find(|s| matches!(s.selected.structure, Structure::CityCenter if s.is_valid()))
+        .find(|s| s.position == city.position && matches!(s.structure, Structure::CityCenter))
     {
-        if let Some(u) = structure_selected(rc, c, 15., h) {
+        if let Some(u) = draw_selected_state(rc, c, 15., h) {
             return Some(u);
         }
     } else if city.is_activated() {
@@ -316,7 +328,7 @@ fn draw_buildings(
     rc: &RenderContext,
     city: &City,
     center: Vec2,
-    highlighted: &[StructureHighlight],
+    highlighted: &[SelectedStructureInfo],
     mut i: usize,
 ) -> Option<StateUpdate> {
     for player_index in 0..4 {
@@ -324,9 +336,9 @@ fn draw_buildings(
             let p = building_position(city, center, i, *b);
             if let Some(h) = highlighted
                 .iter()
-                .find(|s| matches!(s.selected.structure, Structure::Building(bb) if bb == *b && s.is_valid()))
+                .find(|s|s.position == city.position && matches!(s.structure, Structure::Building(bb) if bb == *b))
             {
-                if let Some(u) = structure_selected(rc, p, BUILDING_SIZE, h) {
+                if let Some(u) = draw_selected_state(rc, p, BUILDING_SIZE, h) {
                     return Some(u);
                 }
             }
@@ -351,7 +363,7 @@ fn draw_wonders(
     city: &City,
     c: Vec2,
     owner: usize,
-    highlighted: &[StructureHighlight],
+    highlighted: &[SelectedStructureInfo],
 ) -> Result<usize, StateUpdate> {
     let mut i = 0;
     for w in &city.pieces.wonders {
@@ -360,9 +372,9 @@ fn draw_wonders(
         let size = 20.;
         if let Some(h) = highlighted
             .iter()
-            .find(|s| matches!(&s.selected.structure, Structure::Wonder(n) if n == &w.name && s.is_valid()))
+            .find(|s|s.position == city.position && matches!(&s.structure, Structure::Wonder(n) if n == &w.name))
         {
-            if let Some(u) = structure_selected(rc, p, 18., h) {
+            if let Some(u) = draw_selected_state(rc, p, 18., h) {
                 return Err(u);
             }
         }

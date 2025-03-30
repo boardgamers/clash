@@ -2,7 +2,7 @@ use crate::assets::Assets;
 use crate::client::{Features, GameSyncRequest};
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::ConstructionPayment;
-use crate::custom_phase_ui::{MultiSelection, SelectedStructureInfo, UnitsSelection};
+use crate::custom_phase_ui::{MultiSelection, SelectedStructureInfo, SelectedStructureStatus, UnitsSelection};
 use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
 use crate::event_ui::{custom_phase_event_help, custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
@@ -549,9 +549,9 @@ impl State {
                                 SelectedStructureInfo::new(
                                     s.0,
                                     s.1.clone(),
-                                    false,
-                                    String::new(),
-                                    String::new(),
+                                    SelectedStructureStatus::Valid,
+                                    None,
+                                    None,
                                 )
                             })
                             .collect(),

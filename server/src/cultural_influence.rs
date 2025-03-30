@@ -172,6 +172,7 @@ pub fn influence_culture_boost_cost(
         let mut i = InfluenceCultureInfo::new(
             PaymentOptions::resources(ResourcePile::empty()),
             ActionInfo::new(attacker),
+            target_city_position,
             structure.clone(),
         );
         i.add_blocker("No starting city available");
@@ -197,6 +198,7 @@ pub fn influence_culture_boost_cost(
     let mut info = InfluenceCultureInfo::new(
         PaymentOptions::resources(ResourcePile::culture_tokens(range_boost)),
         ActionInfo::new(attacker),
+        target_city_position,
         structure.clone(),
     );
     let _ = attacker.trigger_event(
