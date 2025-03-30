@@ -1,3 +1,4 @@
+use num::Saturating;
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
 use crate::city::City;
@@ -25,7 +26,7 @@ pub(crate) fn influence_culture_attempt(
     let info = influence_culture_boost_cost(game, player_index, c);
     assert!(info.blockers.is_empty(), "Impossible to influence culture");
     let starting_city_position =
-        start_city(game, player_index, target_city).expect("there should be a starting city");
+        start_city(game, player_index, target_city).expect("there should be a starting city").0;
 
     let self_influence = starting_city_position == target_city_position;
 
@@ -149,7 +150,7 @@ fn influence_distance(
     }
     src.neighbors()
         .into_iter()
-        .filter(|&p| game.map.is_sea(p) || game.map.is_land(p))
+        .filter(|&p| game.map.is_inside(p))
         .map(|n| influence_distance(game, n, dst, &visited, len + 1))
         .min()
         .expect("there should be a path")
@@ -172,7 +173,7 @@ pub fn influence_culture_boost_cost(
 
     let attacker = game.get_player(player_index);
 
-    let Some(starting_city_position) = start_city(game, player_index, target_city) else {
+    let Some((starting_city_position, range_boost)) = start_city(game, player_index, target_city) else {
         let mut i = InfluenceCultureInfo::new(
             PaymentOptions::resources(ResourcePile::empty()),
             ActionInfo::new(attacker),
@@ -183,10 +184,6 @@ pub fn influence_culture_boost_cost(
         return i;
     };
     let starting_city = game.get_any_city(starting_city_position);
-
-    let range_boost =
-        influence_distance(game, starting_city_position, target_city_position, &[], 0)
-            .saturating_sub(starting_city.size() as u32);
 
     let self_influence = starting_city_position == target_city_position;
     let target_city_owner = target_city.player_index;
@@ -286,24 +283,21 @@ fn attempt_failed(game: &mut Game, player: usize, city_position: Position) {
     );
 }
 
-fn start_city(game: &Game, player_index: usize, target_city: &City) -> Option<Position> {
+fn start_city(game: &Game, player_index: usize, target_city: &City) -> Option<(Position, u32)> {
     if target_city.player_index == player_index {
-        Some(target_city.position)
+        Some((target_city.position, 0))
     } else {
-        // todo pick a city that is big enough if possible
-        //todo
-        // Influence Culture may cross Sea spaces, but not unrevealed
-        // Regions.
-
-        // todo ✦ You may target Buildings in Barbarian BARBARIAN cities
         let player = game.get_player(player_index);
         let position = target_city.position;
         player
             .cities
             .iter()
             .filter(|c| !c.influenced())
-            .min_by_key(|c| c.position.distance(position))
-            .map(|c| c.position)
+            .map(|c| {
+                let boost = influence_distance(game, c.position, position, &[], 0).saturating_sub(c.size() as u32);
+                (c.position, boost)
+            })
+            .min_by_key(|(_, boost)| *boost)
     }
 }
 
@@ -317,7 +311,7 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     let target_city = game.get_any_city(target_city_position);
     let target_player_index = target_city.player_index;
     let starting_city_position =
-        start_city(game, player_index, target_city).expect("there should be a starting city");
+        start_city(game, player_index, target_city).expect("there should be a starting city").0;
 
     let player = if target_player_index == game.active_player() {
         String::from("themselves")
