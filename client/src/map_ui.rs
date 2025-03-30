@@ -3,13 +3,14 @@ use crate::client_state::{ActiveDialog, State, StateUpdate, MAX_OFFSET, MIN_OFFS
 use crate::dialog_ui::{cancel_button_pos, ok_button, OkTooltip};
 use crate::layout_ui::{bottom_center_texture, bottom_right_texture, icon_pos};
 use crate::move_ui::{movable_units, MoveDestination, MoveIntent};
+use crate::player_ui::get_combat;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
 use crate::{collect_ui, hex_ui, unit_ui};
 use macroquad::math::{f32, vec2};
 use macroquad::prelude::*;
 use server::action::Action;
-use server::combat::{get_combat, Combat};
+use server::combat::Combat;
 use server::content::custom_phase_actions::EventResponse;
 use server::map::{Rotation, Terrain, UnexploredBlock};
 use server::playing_actions::{PlayingAction, PlayingActionType};

@@ -7,8 +7,8 @@ use crate::content::incidents::great_persons::{
     great_person_action_card, great_person_description, GREAT_PERSON_DESCRIPTION,
 };
 use crate::game::Game;
-use crate::incident::PermanentIncidentEffect::Construct;
 use crate::incident::ConstructEffect;
+use crate::incident::PermanentIncidentEffect::Construct;
 use crate::player::Player;
 use crate::playing_actions::{ActionType, PlayingActionType};
 use crate::resource_pile::ResourcePile;

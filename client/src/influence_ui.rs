@@ -51,7 +51,7 @@ pub fn new_cultural_influence_dialog(
                                 label.clone(),
                                 (!tooltip.is_empty())
                                     .then_some(tooltip.join(", "))
-                                    .or(label.map(|l| format!("Range boost cost: {}", l))),
+                                    .or(label.map(|l| format!("Range boost cost: {l}"))),
                             )
                         })
                         .collect_vec()

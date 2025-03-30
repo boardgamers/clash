@@ -123,11 +123,10 @@ impl PermanentIncidentEffect {
     pub fn event_origin(&self) -> EventOrigin {
         match self {
             PermanentIncidentEffect::Pestilence => EventOrigin::Incident(1),
-            PermanentIncidentEffect::Construct(c) =>
-            match c {
+            PermanentIncidentEffect::Construct(c) => match c {
                 ConstructEffect::CityDevelopment => EventOrigin::CivilCard(17), // also 18
-                ConstructEffect::GreatEngineer => EventOrigin::Incident(26)
-            }
+                ConstructEffect::GreatEngineer => EventOrigin::Incident(26),
+            },
             PermanentIncidentEffect::LoseAction(_) => EventOrigin::Incident(38),
             PermanentIncidentEffect::PublicWonderCard(_) => EventOrigin::Incident(40),
             PermanentIncidentEffect::SolarEclipse => EventOrigin::Incident(41),

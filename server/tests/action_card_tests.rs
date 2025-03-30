@@ -188,7 +188,7 @@ fn test_city_development() {
                     Fortress,
                     ResourcePile::empty(),
                 ))),
-            )
+            ),
         ],
     );
 }
