@@ -4,13 +4,13 @@ use server::action::Action;
 use server::city_pieces::Building::Temple;
 use server::content::custom_phase_actions::Structure;
 use server::game::Game;
+use server::game_api;
 use server::log::current_player_turn_log_mut;
 use server::playing_actions::PlayingAction::InfluenceCultureAttempt;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::MoveUnits;
 use server::unit::MovementAction::Move;
-use server::game_api;
 use std::fmt::Display;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::{

@@ -132,7 +132,6 @@ pub(crate) fn barbarians_spawn(mut builder: IncidentBuilder) -> IncidentBuilder 
                 .as_ref()
                 .expect("barbarians should exist")
                 .selected_position
-                .expect("selected position should exist")
         },
     )
 }
@@ -142,7 +141,7 @@ pub(crate) fn barbarian_reinforcement<E, S, V>(
     event: E,
     prio: i32,
     filter: impl Fn(&Game, usize, &V) -> bool + 'static + Clone,
-    get_barbarian_city: impl Fn(&V) -> Position + 'static + Clone,
+    get_barbarian_city: impl Fn(&V) -> Option<Position> + 'static + Clone,
 ) -> S
 where
     E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<V> + 'static + Clone,
@@ -166,7 +165,7 @@ where
             ))
         },
         move |game, s, v| {
-            let position = get_barbarian_city2(v);
+            let position = get_barbarian_city2(v).expect("barbarians should exist");
             let units = Units::from_iter(vec![s.choice]);
             game.add_info_log_item(&format!("Barbarians reinforced with {units} at {position}",));
             game.get_player_mut(get_barbarians_player(game).index)
@@ -422,8 +421,12 @@ fn possible_barbarians_reinforcements(game: &Game) -> Vec<Position> {
         .collect()
 }
 
-fn get_barbarian_reinforcement_choices(game: &Game, pos: Position) -> Vec<UnitType> {
+fn get_barbarian_reinforcement_choices(game: &Game, pos: Option<Position>) -> Vec<UnitType> {
     let barbarian = get_barbarians_player(game);
+    let Some(pos) = pos else {
+        return vec![];
+    };
+
     let possible = if barbarian
         .get_units(pos)
         .iter()

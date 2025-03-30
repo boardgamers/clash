@@ -314,12 +314,12 @@ pub fn draw_city(rc: &RenderContext, city: &City) -> Option<StateUpdate> {
         );
     }
 
-    let i = match draw_wonders(rc, city, c, owner, &highlighted) {
+    let i = match draw_wonders(rc, city, c, owner, highlighted) {
         Ok(value) => value,
         Err(value) => return Some(value),
     };
 
-    draw_buildings(rc, city, c, &highlighted, i)
+    draw_buildings(rc, city, c, highlighted, i)
 }
 
 fn draw_buildings(

@@ -1,5 +1,5 @@
 use crate::common::*;
-use server::content::custom_phase_actions::{EventResponse, SelectedStructure, Structure};
+use server::content::custom_phase_actions::{EventResponse, Structure};
 use server::log::current_player_turn_log;
 use server::unit::Units;
 use server::{

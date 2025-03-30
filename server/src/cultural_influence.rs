@@ -155,6 +155,10 @@ fn influence_distance(
         .expect("there should be a path")
 }
 
+///
+/// # Panics
+///
+/// This function panics if the selected structure is not a building or city center.
 #[must_use]
 pub fn influence_culture_boost_cost(
     game: &Game,

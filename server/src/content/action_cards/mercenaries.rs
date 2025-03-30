@@ -171,7 +171,7 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
                 .and_then(|p| game.try_get_any_city(p))
                 .is_some()
         },
-        |a| a.selected_position.expect("position not found"),
+        |a| a.selected_position,
     )
 }
 
