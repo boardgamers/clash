@@ -244,13 +244,7 @@ fn draw_selected_state(
         show_tooltip_for_circle(rc, tooltip, center, size);
     }
     if let Some(label) = &info.label {
-        draw_text(
-            label,
-            center.x,
-            center.y,
-            25.,
-            BLACK,
-        );
+        draw_text(label, center.x - 5., center.y + 5., 25., BLACK);
     }
 
     if info.status != SelectedStructureStatus::Invalid
@@ -280,6 +274,26 @@ pub fn draw_city(rc: &RenderContext, city: &City) -> Option<StateUpdate> {
     }
     draw_circle(c.x, c.y, 15.0, rc.player_color(owner));
 
+    if let Some(h) = highlighted
+        .iter()
+        .find(|s| s.position == city.position && matches!(s.structure, Structure::CityCenter))
+    {
+        if let Some(u) = draw_selected_state(rc, c, 15., h) {
+            return Some(u);
+        }
+    } else {
+        draw_mood_state(&rc, &city, c);
+    }
+
+    let i = match draw_wonders(rc, city, c, owner, highlighted) {
+        Ok(value) => value,
+        Err(value) => return Some(value),
+    };
+
+    draw_buildings(rc, city, c, highlighted, i)
+}
+
+fn draw_mood_state(rc: &&RenderContext, city: &&City, c: Vec2) {
     let state = &rc.state;
     let mood = if let ActiveDialog::IncreaseHappiness(increase) = &state.active_dialog {
         let steps = increase
@@ -306,22 +320,6 @@ pub fn draw_city(rc: &RenderContext, city: &City) -> Option<StateUpdate> {
             size,
         );
     }
-
-    if let Some(h) = highlighted
-        .iter()
-        .find(|s| s.position == city.position && matches!(s.structure, Structure::CityCenter))
-    {
-        if let Some(u) = draw_selected_state(rc, c, 15., h) {
-            return Some(u);
-        }
-    }
-
-    let i = match draw_wonders(rc, city, c, owner, highlighted) {
-        Ok(value) => value,
-        Err(value) => return Some(value),
-    };
-
-    draw_buildings(rc, city, c, highlighted, i)
 }
 
 fn draw_buildings(
@@ -335,13 +333,6 @@ fn draw_buildings(
         for b in &city.pieces.buildings(Some(player_index)) {
             let p = building_position(city, center, i, *b);
             draw_circle(p.x, p.y, BUILDING_SIZE, rc.player_color(player_index));
-            draw_scaled_icon(
-                rc,
-                &rc.assets().buildings[b],
-                b.name(),
-                p + vec2(-8., -8.),
-                16.,
-            );
             if let Some(h) = highlighted.iter().find(|s| {
                 s.position == city.position
                     && matches!(s.structure, Structure::Building(bb) if bb == *b)
@@ -349,6 +340,14 @@ fn draw_buildings(
                 if let Some(u) = draw_selected_state(rc, p, BUILDING_SIZE, h) {
                     return Some(u);
                 }
+            } else {
+                draw_scaled_icon(
+                    rc,
+                    &rc.assets().buildings[b],
+                    b.name(),
+                    p + vec2(-8., -8.),
+                    16.,
+                );
             }
             i += 1;
         }
@@ -369,13 +368,6 @@ fn draw_wonders(
         let p = hex_ui::rotate_around(c, 20.0, 90 * i);
         draw_circle(p.x, p.y, 18.0, rc.player_color(owner));
         let size = 20.;
-        draw_scaled_icon(
-            rc,
-            &rc.assets().wonders[&w.name],
-            &w.name,
-            p + vec2(-size / 2., -size / 2.),
-            size,
-        );
         if let Some(h) = highlighted.iter().find(|s| {
             s.position == city.position
                 && matches!(&s.structure, Structure::Wonder(n) if n == &w.name)
@@ -383,6 +375,14 @@ fn draw_wonders(
             if let Some(u) = draw_selected_state(rc, p, 18., h) {
                 return Err(u);
             }
+        } else {
+            draw_scaled_icon(
+                rc,
+                &rc.assets().wonders[&w.name],
+                &w.name,
+                p + vec2(-size / 2., -size / 2.),
+                size,
+            );
         }
         i += 1;
     }

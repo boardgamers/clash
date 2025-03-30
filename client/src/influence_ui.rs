@@ -39,13 +39,16 @@ pub fn new_cultural_influence_dialog(
                                 SelectedStructureStatus::Invalid
                             };
 
-                            let boost = info.range_boost_cost.default.amount();
+                            let mut boost = info.range_boost_cost.default.amount();
+                            if status == SelectedStructureStatus::Invalid {
+                                boost = 0;
+                            }
                             SelectedStructureInfo::new(
                                 s.0,
                                 s.1.clone(),
                                 status,
                                 (boost > 0).then_some(boost.to_string()),
-                                Some(tooltip.join(", ")),
+                                (!tooltip.is_empty()).then_some(tooltip.join(", ")),
                             )
                         })
                         .collect_vec()
