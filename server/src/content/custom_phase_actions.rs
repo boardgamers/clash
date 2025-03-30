@@ -9,6 +9,7 @@ use crate::explore::ExploreResolutionState;
 use crate::game::Game;
 use crate::map::Rotation;
 use crate::payment::PaymentOptions;
+use crate::player::Player;
 use crate::player_events::{AdvanceInfo, IncidentInfo};
 use crate::playing_actions::Recruit;
 use crate::position::Position;
@@ -63,7 +64,21 @@ impl AdvanceRequest {
     }
 }
 
-pub type SelectedStructure = (Position, Structure);
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct SelectedStructure {
+    pub position: Position,
+    pub structure: Structure,
+}
+
+impl SelectedStructure {
+    #[must_use]
+    pub fn new(position: Position, structure: Structure) -> Self {
+        Self {
+            position,
+            structure,
+        }
+    }
+}
 
 pub type StructuresRequest = MultiRequest<SelectedStructure>;
 
@@ -88,12 +103,14 @@ impl HandCardsRequest {
 pub fn is_selected_structures_valid(game: &Game, selected: &[SelectedStructure]) -> bool {
     selected
         .iter()
-        .chunk_by(|(p, _s)| p)
+        .chunk_by(|s| s.position)
         .into_iter()
-        .all(|(&p, g)| {
+        .all(|(p, g)| {
             let v = g.collect_vec();
             v.len() == game.get_any_city(p).size()
-                || !v.iter().any(|(_p, s)| matches!(s, &Structure::CityCenter))
+                || !v
+                    .iter()
+                    .any(|s| matches!(s.structure, Structure::CityCenter))
         })
 }
 
@@ -270,6 +287,17 @@ pub enum Structure {
     CityCenter,
     Building(Building),
     Wonder(String),
+}
+
+impl Structure {
+    #[must_use]
+    pub fn is_available(&self, player: &Player, game: &Game) -> bool {
+        match self {
+            Structure::CityCenter => player.is_city_available(),
+            Structure::Building(b) => player.is_building_available(*b, game),
+            Structure::Wonder(_) => false,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

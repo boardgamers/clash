@@ -1,6 +1,8 @@
 use crate::advance_ui::{show_advance_menu, AdvanceState};
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
+use crate::dialog_ui::{
+    cancel_button_with_tooltip, ok_button, BaseOrCustomAction, BaseOrCustomDialog, OkTooltip,
+};
 use crate::layout_ui::{bottom_center_anchor, bottom_centered_text, icon_pos};
 use crate::payment_ui::{multi_payment_dialog, payment_dialog, Payment};
 use crate::player_ui::choose_player_dialog;
@@ -8,13 +10,16 @@ use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
 use crate::unit_ui;
 use crate::unit_ui::{draw_unit_type, UnitSelection};
+use itertools::Itertools;
 use macroquad::math::vec2;
 use server::action::Action;
+use server::content::custom_actions::CustomAction;
 use server::content::custom_phase_actions::{
     is_selected_structures_valid, AdvanceRequest, EventResponse, MultiRequest, PlayerRequest,
     SelectedStructure, Structure, UnitTypeRequest, UnitsRequest,
 };
 use server::game::Game;
+use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::unit::Unit;
 
@@ -172,9 +177,56 @@ impl<T: Clone + PartialEq> MultiSelection<T> {
     }
 }
 
+#[derive(Clone, PartialEq, Eq)]
+pub enum SelectedStructureStatus {
+    Valid,
+    Warn,
+    Invalid,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct SelectedStructureInfo {
+    pub position: Position,
+    pub structure: Structure,
+    pub status: SelectedStructureStatus,
+    pub label: Option<String>,
+    pub tooltip: Option<String>,
+}
+
+impl SelectedStructureInfo {
+    pub fn new(
+        position: Position,
+        structure: Structure,
+        status: SelectedStructureStatus,
+        label: Option<String>,
+        tooltip: Option<String>,
+    ) -> Self {
+        SelectedStructureInfo {
+            position,
+            structure,
+            status,
+            label,
+            tooltip,
+        }
+    }
+
+    pub fn selected(&self) -> SelectedStructure {
+        SelectedStructure::new(self.position, self.structure.clone())
+    }
+
+    pub fn highlight_type(&self) -> HighlightType {
+        match self.status {
+            SelectedStructureStatus::Valid => HighlightType::Choices,
+            SelectedStructureStatus::Warn => HighlightType::Warn,
+            SelectedStructureStatus::Invalid => HighlightType::Invalid,
+        }
+    }
+}
+
 pub fn select_structures_dialog(
     rc: &RenderContext,
-    s: &MultiSelection<SelectedStructure>,
+    d: Option<&BaseOrCustomDialog>,
+    s: &MultiSelection<SelectedStructureInfo>,
 ) -> StateUpdate {
     bottom_centered_text(
         rc,
@@ -186,15 +238,35 @@ pub fn select_structures_dialog(
         .as_str(),
     );
 
+    let sel = s
+        .selected
+        .iter()
+        .map(SelectedStructureInfo::selected)
+        .collect_vec();
     if ok_button(
         rc,
         multi_select_tooltip(
             s,
-            s.request.is_valid(&s.selected) && is_selected_structures_valid(rc.game, &s.selected),
+            s.request.is_valid(&s.selected) && is_selected_structures_valid(rc.game, &sel),
             "structures (city center must be the last one)",
         ),
     ) {
-        StateUpdate::response(EventResponse::SelectStructures(s.selected.clone()))
+        if let Some(d) = d {
+            if s.selected.is_empty() {
+                return StateUpdate::CloseDialog;
+            }
+            let s = s.selected[0].selected();
+            match d.custom {
+                BaseOrCustomAction::Base => {
+                    StateUpdate::execute(Action::Playing(PlayingAction::InfluenceCultureAttempt(s)))
+                }
+                BaseOrCustomAction::Custom { .. } => StateUpdate::execute(Action::Playing(
+                    PlayingAction::Custom(CustomAction::ArtsInfluenceCultureAttempt(s)),
+                )),
+            }
+        } else {
+            StateUpdate::response(EventResponse::SelectStructures(sel))
+        }
     } else {
         StateUpdate::None
     }
@@ -235,24 +307,6 @@ pub fn player_request_dialog(rc: &RenderContext, r: &PlayerRequest) -> StateUpda
     choose_player_dialog(rc, &r.choices, |p| {
         Action::Response(EventResponse::SelectPlayer(p))
     })
-}
-
-pub struct StructureHighlight {
-    pub structure: Structure,
-    pub highlight_type: HighlightType,
-}
-
-pub fn highlight_structures(
-    structures: &[Structure],
-    highlight_type: HighlightType,
-) -> Vec<StructureHighlight> {
-    structures
-        .iter()
-        .map(move |s| StructureHighlight {
-            structure: s.clone(),
-            highlight_type,
-        })
-        .collect()
 }
 
 pub(crate) fn position_request_dialog(

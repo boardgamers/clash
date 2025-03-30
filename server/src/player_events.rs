@@ -4,6 +4,7 @@ use crate::barbarians::BarbariansEventState;
 use crate::collect::{CollectContext, CollectInfo};
 use crate::combat::Combat;
 use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
+use crate::content::custom_phase_actions::Structure;
 use crate::events::Event;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
@@ -36,7 +37,7 @@ pub(crate) struct PlayerEvents {
 pub(crate) struct TransientEvents {
     pub on_collect: Event<CollectInfo, Game>,
     pub on_influence_culture_attempt: Event<InfluenceCultureInfo, City, Game>,
-    pub on_influence_culture_success: Event<Game, usize>,
+    pub on_influence_culture_resolve: Event<Game, InfluenceCultureOutcome>,
     pub before_move: Event<Game, MoveInfo>,
 
     pub construct_cost: Event<CostInfo, Building, Game>,
@@ -270,50 +271,60 @@ pub struct PlayingActionInfo {
 }
 
 #[derive(Clone, PartialEq)]
-pub enum InfluenceCulturePossible {
-    NoRestrictions,
-    NoBoost,
-    Impossible,
-}
-
-#[derive(Clone, PartialEq)]
 pub struct InfluenceCultureInfo {
     pub is_defender: bool,
-    pub possible: InfluenceCulturePossible,
+    pub structure: Structure,
+    pub blockers: Vec<String>,
+    pub prevent_boost: bool,
     pub range_boost_cost: PaymentOptions,
     pub(crate) info: ActionInfo,
     pub roll_boost: u8,
+    pub position: Position,
 }
 
 impl InfluenceCultureInfo {
     #[must_use]
-    pub(crate) fn new(range_boost_cost: PaymentOptions, info: ActionInfo) -> InfluenceCultureInfo {
+    pub(crate) fn new(
+        range_boost_cost: PaymentOptions,
+        info: ActionInfo,
+        position: Position,
+        structure: Structure,
+    ) -> InfluenceCultureInfo {
         InfluenceCultureInfo {
-            possible: InfluenceCulturePossible::NoRestrictions,
+            prevent_boost: false,
+            structure,
             range_boost_cost,
             info,
             roll_boost: 0,
             is_defender: false,
+            blockers: Vec::new(),
+            position,
         }
     }
 
-    #[must_use]
-    pub fn is_possible(&self, range_boost: u32) -> bool {
-        match self.possible {
-            InfluenceCulturePossible::NoRestrictions => true,
-            InfluenceCulturePossible::NoBoost => range_boost == 0,
-            InfluenceCulturePossible::Impossible => false,
-        }
-    }
-
-    pub fn set_impossible(&mut self) {
-        self.possible = InfluenceCulturePossible::Impossible;
+    pub fn add_blocker(&mut self, reason: &str) {
+        self.blockers.push(reason.to_string());
     }
 
     pub fn set_no_boost(&mut self) {
-        if matches!(self.possible, InfluenceCulturePossible::Impossible) {
-            return;
+        self.prevent_boost = true;
+    }
+}
+
+#[derive(Clone, PartialEq)]
+pub struct InfluenceCultureOutcome {
+    pub success: bool,
+    pub player: usize,
+    pub position: Position,
+}
+
+impl InfluenceCultureOutcome {
+    #[must_use]
+    pub fn new(success: bool, player: usize, position: Position) -> InfluenceCultureOutcome {
+        InfluenceCultureOutcome {
+            success,
+            player,
+            position,
         }
-        self.possible = InfluenceCulturePossible::NoBoost;
     }
 }

@@ -1,108 +1,82 @@
 use crate::action_buttons::base_or_custom_available;
-use crate::city_ui::{building_position, BUILDING_SIZE};
-use crate::client_state::{CameraMode, StateUpdate};
-use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
-use crate::hex_ui;
-use crate::layout_ui::is_in_circle;
+use crate::client_state::ActiveDialog;
+use crate::custom_phase_ui::{MultiSelection, SelectedStructureInfo, SelectedStructureStatus};
+use crate::dialog_ui::BaseOrCustomDialog;
 use crate::render_context::RenderContext;
-use crate::tooltip::show_tooltip_for_circle;
-use macroquad::input::{is_mouse_button_pressed, MouseButton};
-use macroquad::math::Vec2;
-use macroquad::prelude::{draw_circle_lines, WHITE};
-use server::action::Action;
+use itertools::Itertools;
 use server::city::City;
-use server::content::custom_actions::{CustomAction, CustomActionType};
+use server::content::custom_actions::CustomActionType;
+use server::content::custom_phase_actions::{MultiRequest, SelectedStructure, Structure};
 use server::cultural_influence::influence_culture_boost_cost;
-use server::player::Player;
-use server::player_events::InfluenceCulturePossible;
-use server::playing_actions::{InfluenceCultureAttempt, PlayingAction, PlayingActionType};
-use server::position::Position;
+use server::game::Game;
+use server::playing_actions::PlayingActionType;
 
-fn closest_city(player: &Player, position: Position) -> Position {
-    player
-        .cities
+pub fn new_cultural_influence_dialog(
+    game: &Game,
+    player: usize,
+    d: BaseOrCustomDialog,
+) -> ActiveDialog {
+    let a = game
+        .players
         .iter()
-        .min_by_key(|c| c.position.distance(position))
-        .unwrap()
-        .position
+        .flat_map(|p| {
+            p.cities
+                .iter()
+                .flat_map(|city| {
+                    structures(city)
+                        .iter()
+                        .map(|s| {
+                            let info = influence_culture_boost_cost(game, player, s);
+                            let mut tooltip = info.blockers.clone();
+                            let status = if info.blockers.is_empty() {
+                                if info.prevent_boost {
+                                    tooltip.push("You cannot boost the dice roll".to_string());
+                                    SelectedStructureStatus::Warn
+                                } else {
+                                    SelectedStructureStatus::Valid
+                                }
+                            } else {
+                                SelectedStructureStatus::Invalid
+                            };
+
+                            let mut boost = info.range_boost_cost.default.amount();
+                            if status == SelectedStructureStatus::Invalid {
+                                boost = 0;
+                            }
+                            SelectedStructureInfo::new(
+                                s.position,
+                                s.structure.clone(),
+                                status,
+                                (boost > 0).then_some(boost.to_string()),
+                                (!tooltip.is_empty()).then_some(tooltip.join(", ")),
+                            )
+                        })
+                        .collect_vec()
+                })
+                .collect_vec()
+        })
+        .collect_vec();
+
+    ActiveDialog::StructuresRequest(
+        Some(d),
+        MultiSelection::new(MultiRequest::new(
+            a,
+            0..=1,
+            "Select structure to influence culture",
+        )),
+    )
 }
 
-pub fn hover(rc: &RenderContext, mouse_pos: Vec2, b: &BaseOrCustomDialog) -> StateUpdate {
-    for p in &rc.game.players {
-        for city in &p.cities {
-            if let Some(value) = show_city(rc, mouse_pos, city, b) {
-                return value;
-            }
-        }
+fn structures(city: &City) -> Vec<SelectedStructure> {
+    let mut structures: Vec<SelectedStructure> =
+        vec![SelectedStructure::new(city.position, Structure::CityCenter)];
+    for b in city.pieces.buildings(None) {
+        structures.push(SelectedStructure::new(
+            city.position,
+            Structure::Building(b),
+        ));
     }
-
-    StateUpdate::None
-}
-
-fn show_city(
-    rc: &RenderContext,
-    mouse_pos: Vec2,
-    city: &City,
-    custom: &BaseOrCustomDialog,
-) -> Option<StateUpdate> {
-    let player = rc.shown_player;
-    let c = hex_ui::center(city.position);
-    let mut i = city.pieces.wonders.len();
-    for player_index in 0..4 {
-        for b in &city.pieces.buildings(Some(player_index)) {
-            let center = building_position(city, c, i, *b);
-            let closest_city_pos = closest_city(player, city.position);
-            let start_position = if city.player_index == player.index {
-                city.position
-            } else {
-                closest_city_pos
-            };
-
-            let info = influence_culture_boost_cost(
-                rc.game,
-                player.index,
-                start_position,
-                city.player_index,
-                city.position,
-                *b,
-            );
-            if !matches!(info.possible, InfluenceCulturePossible::Impossible) {
-                let name = b.name();
-                let _ = rc.with_camera(CameraMode::World, |rc| {
-                    draw_circle_lines(center.x, center.y, BUILDING_SIZE, 1., WHITE);
-                    show_tooltip_for_circle(
-                        rc,
-                        &format!("Attempt Influence {name} for {}", info.range_boost_cost),
-                        center,
-                        BUILDING_SIZE,
-                    );
-                    StateUpdate::None
-                });
-
-                if is_in_circle(mouse_pos, center, BUILDING_SIZE)
-                    && is_mouse_button_pressed(MouseButton::Left)
-                {
-                    let attempt = InfluenceCultureAttempt {
-                        starting_city_position: start_position,
-                        target_player_index: city.player_index,
-                        target_city_position: city.position,
-                        city_piece: *b,
-                    };
-                    let action = match custom.custom {
-                        BaseOrCustomAction::Base => PlayingAction::InfluenceCultureAttempt(attempt),
-                        BaseOrCustomAction::Custom { .. } => PlayingAction::Custom(
-                            CustomAction::ArtsInfluenceCultureAttempt(attempt),
-                        ),
-                    };
-
-                    return Some(StateUpdate::Execute(Action::Playing(action)));
-                }
-            }
-
-            i += 1;
-        }
-    }
-    None
+    structures
 }
 
 pub fn can_play_influence_culture(rc: &RenderContext) -> bool {

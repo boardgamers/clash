@@ -41,7 +41,7 @@
       ],
       "units": [
         {
-          "position": "C2",
+          "position": "B2",
           "unit_type": "Infantry",
           "id": 0
         },
@@ -87,7 +87,10 @@
         "Mining",
         "Tactics"
       ],
-      "incident_tokens": 2,
+      "incident_tokens": 1,
+      "action_cards": [
+        13
+      ],
       "next_unit_id": 8
     },
     {
@@ -114,7 +117,7 @@
         {
           "city_pieces": {},
           "mood_state": "Angry",
-          "activations": 2,
+          "activations": 0,
           "angry_activation": false,
           "position": "C1"
         }
@@ -138,6 +141,55 @@
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
+    },
+    {
+      "id": 2,
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "B3",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "A3",
+          "unit_type": "Elephant",
+          "id": 1
+        },
+        {
+          "position": "B3",
+          "unit_type": "Infantry",
+          "id": 2
+        },
+        {
+          "position": "A3",
+          "unit_type": "Infantry",
+          "id": 3
+        },
+        {
+          "position": "A3",
+          "unit_type": "Infantry",
+          "id": 4
+        }
+      ],
+      "civilization": "Barbarians",
+      "incident_tokens": 3,
+      "next_unit_id": 5
     }
   ],
   "map": {
@@ -185,7 +237,7 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 1,
+  "current_player_index": 0,
   "action_log": [
     {
       "rounds": [
@@ -193,35 +245,17 @@
           "players": [
             {
               "index": 0,
-              "items": [
-                {
-                  "action": {
-                    "Playing": {
-                      "InfluenceCultureAttempt": {
-                        "position": "C2",
-                        "structure": {
-                          "Building": "Fortress"
-                        }
-                      }
-                    }
-                  }
-                }
-              ]
+              "items": []
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1 and succeeded (rolled 6)"
-    ]
-  ],
-  "undo_limit": 1,
-  "actions_left": 2,
-  "successful_cultural_influence": true,
+  "action_log_index": 0,
+  "log": [],
+  "undo_limit": 0,
+  "actions_left": 3,
   "round": 1,
   "age": 1,
   "messages": [
@@ -245,5 +279,8 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "action_cards_left": []
+  "action_cards_left": [],
+  "incidents_left": [
+    28
+  ]
 }

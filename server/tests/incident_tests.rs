@@ -3,7 +3,7 @@ use server::action::Action;
 use server::card::HandCard;
 use server::city_pieces::Building::Fortress;
 use server::construct;
-use server::content::custom_phase_actions::{EventResponse, Structure};
+use server::content::custom_phase_actions::{EventResponse, SelectedStructure, Structure};
 use server::playing_actions::PlayingAction::{Advance, Construct};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
@@ -293,9 +293,12 @@ fn test_earthquake() {
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectStructures(vec![
-                    (Position::from_offset("B2"), Structure::CityCenter),
-                    (Position::from_offset("C2"), Structure::Building(Fortress)),
-                    (
+                    SelectedStructure::new(Position::from_offset("B2"), Structure::CityCenter),
+                    SelectedStructure::new(
+                        Position::from_offset("C2"),
+                        Structure::Building(Fortress),
+                    ),
+                    SelectedStructure::new(
                         Position::from_offset("C2"),
                         Structure::Wonder("Pyramids".to_string()),
                     ),
@@ -308,9 +311,12 @@ fn test_earthquake() {
             TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::SelectStructures(vec![
-                    (Position::from_offset("A1"), Structure::CityCenter),
-                    (Position::from_offset("A1"), Structure::Building(Fortress)),
-                    (Position::from_offset("A3"), Structure::CityCenter),
+                    SelectedStructure::new(Position::from_offset("A1"), Structure::CityCenter),
+                    SelectedStructure::new(
+                        Position::from_offset("A1"),
+                        Structure::Building(Fortress),
+                    ),
+                    SelectedStructure::new(Position::from_offset("A3"), Structure::CityCenter),
                 ])),
             ),
         ],

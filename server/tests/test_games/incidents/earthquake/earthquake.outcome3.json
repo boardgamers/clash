@@ -239,22 +239,22 @@
                   "action": {
                     "Response": {
                       "SelectStructures": [
-                        [
-                          "B2",
-                          "CityCenter"
-                        ],
-                        [
-                          "C2",
-                          {
+                        {
+                          "position": "B2",
+                          "structure": "CityCenter"
+                        },
+                        {
+                          "position": "C2",
+                          "structure": {
                             "Building": "Fortress"
                           }
-                        ],
-                        [
-                          "C2",
-                          {
+                        },
+                        {
+                          "position": "C2",
+                          "structure": {
                             "Wonder": "Pyramids"
                           }
-                        ]
+                        }
                       ]
                     }
                   }
@@ -274,20 +274,20 @@
                   "action": {
                     "Response": {
                       "SelectStructures": [
-                        [
-                          "A1",
-                          "CityCenter"
-                        ],
-                        [
-                          "A1",
-                          {
+                        {
+                          "position": "A1",
+                          "structure": "CityCenter"
+                        },
+                        {
+                          "position": "A1",
+                          "structure": {
                             "Building": "Fortress"
                           }
-                        ],
-                        [
-                          "A3",
-                          "CityCenter"
-                        ]
+                        },
+                        {
+                          "position": "A3",
+                          "structure": "CityCenter"
+                        }
                       ]
                     }
                   }

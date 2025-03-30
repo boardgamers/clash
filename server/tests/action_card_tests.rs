@@ -2,7 +2,7 @@ use crate::common::{move_action, TestAction};
 use common::JsonTest;
 use server::action::Action;
 use server::card::HandCard;
-use server::content::custom_phase_actions::EventResponse;
+use server::content::custom_phase_actions::{EventResponse, SelectedStructure, Structure};
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
@@ -113,6 +113,60 @@ fn test_great_ideas() {
             TestAction::not_undoable(0, Action::Response(EventResponse::SelectHandCards(vec![])))
                 .without_json_comparison(),
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(11))),
+        ],
+    );
+}
+
+#[test]
+fn test_mercenaries() {
+    JSON.test(
+        "mercenaries",
+        vec![
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(13)))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectPositions(vec![
+                    Position::from_offset("A3"),
+                    Position::from_offset("B3"),
+                ])),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::ore(2)])),
+            )
+            .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "A3",
+                )])),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "B2",
+                )])),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_cultural_takeover() {
+    JSON.test(
+        "cultural_takeover",
+        vec![
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(15)))
+                .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Playing(PlayingAction::InfluenceCultureAttempt(
+                    SelectedStructure::new(Position::from_offset("B3"), Structure::CityCenter),
+                )),
+            ),
         ],
     );
 }

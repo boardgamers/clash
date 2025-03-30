@@ -4,7 +4,7 @@ use crate::action_buttons::{
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
-use crate::custom_phase_ui::{highlight_structures, StructureHighlight};
+use crate::custom_phase_ui::{SelectedStructureInfo, SelectedStructureStatus};
 use crate::happiness_ui::{
     add_increase_happiness, can_play_increase_happiness, open_increase_happiness_dialog,
 };
@@ -14,18 +14,18 @@ use crate::map_ui::{move_units_buttons, show_map_action_buttons};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
-use itertools::Itertools;
+use crate::tooltip::show_tooltip_for_circle;
+use macroquad::math::f32;
 use macroquad::prelude::*;
 use server::city::{City, MoodState};
 use server::city_pieces::Building;
 use server::collect::possible_resource_collections;
 use server::construct::can_construct;
 use server::content::custom_actions::CustomActionType;
-use server::content::custom_phase_actions::{SelectedStructure, Structure};
+use server::content::custom_phase_actions::Structure;
 use server::events::EventOrigin;
 use server::game::Game;
 use server::playing_actions::PlayingActionType;
-use server::position::Position;
 use server::resource::ResourceType;
 use server::unit::{UnitType, Units};
 use std::collections::HashMap;
@@ -223,20 +223,36 @@ pub fn city_labels(game: &Game, city: &City) -> Vec<String> {
 
 pub const BUILDING_SIZE: f32 = 12.0;
 
-fn structure_selected(
+fn draw_selected_state(
     rc: &RenderContext,
-    position: Position,
     center: Vec2,
     size: f32,
-    h: &StructureHighlight,
+    info: &SelectedStructureInfo,
 ) -> Option<StateUpdate> {
-    draw_circle_lines(center.x, center.y, size, 3., h.highlight_type.color());
-    if is_mouse_button_pressed(MouseButton::Left) && is_in_circle(rc.mouse_pos(), center, size) {
-        let ActiveDialog::StructuresRequest(r) = &rc.state.active_dialog else {
-            panic!("Expected StructuresRequest");
-        };
+    let ActiveDialog::StructuresRequest(d, r) = &rc.state.active_dialog else {
+        panic!("Expected StructuresRequest");
+    };
+    let t = if r.selected.contains(info) {
+        HighlightType::Primary
+    } else {
+        info.highlight_type()
+    };
+    draw_circle_lines(center.x, center.y, size, 3., t.color());
+
+    if let Some(tooltip) = &info.tooltip {
+        show_tooltip_for_circle(rc, tooltip, center, size);
+    }
+    if let Some(label) = &info.label {
+        draw_text(label, center.x - 5., center.y + 5., 25., BLACK);
+    }
+
+    if info.status != SelectedStructureStatus::Invalid
+        && is_mouse_button_pressed(MouseButton::Left)
+        && is_in_circle(rc.mouse_pos(), center, size)
+    {
         Some(StateUpdate::OpenDialog(ActiveDialog::StructuresRequest(
-            r.clone().toggle((position, h.structure.clone())),
+            d.clone(),
+            r.clone().toggle(info.clone()),
         )))
     } else {
         None
@@ -248,31 +264,35 @@ pub fn draw_city(rc: &RenderContext, city: &City) -> Option<StateUpdate> {
     let owner = city.player_index;
 
     let highlighted = match rc.state.active_dialog {
-        ActiveDialog::StructuresRequest(ref s) => highlight_structures(
-            &position_structures(city, &s.selected),
-            HighlightType::Primary,
-        )
-        .into_iter()
-        .chain(highlight_structures(
-            &position_structures(city, &s.request.choices),
-            HighlightType::Choices,
-        ))
-        .collect_vec(),
-        _ => vec![],
+        ActiveDialog::StructuresRequest(_, ref s) => &s.request.choices,
+        _ => &Vec::new(),
     };
 
-    if let Some(h) = highlighted
-        .iter()
-        .find(|s| matches!(s.structure, Structure::CityCenter))
-    {
-        if let Some(u) = structure_selected(rc, city.position, c, 15., h) {
-            return Some(u);
-        }
-    } else if city.is_activated() {
+    if city.is_activated() {
         draw_circle(c.x, c.y, 18.0, WHITE);
     }
     draw_circle(c.x, c.y, 15.0, rc.player_color(owner));
 
+    if let Some(h) = highlighted
+        .iter()
+        .find(|s| s.position == city.position && matches!(s.structure, Structure::CityCenter))
+    {
+        if let Some(u) = draw_selected_state(rc, c, 15., h) {
+            return Some(u);
+        }
+    } else {
+        draw_mood_state(rc, city, c);
+    }
+
+    let i = match draw_wonders(rc, city, c, owner, highlighted) {
+        Ok(value) => value,
+        Err(value) => return Some(value),
+    };
+
+    draw_buildings(rc, city, c, highlighted, i)
+}
+
+fn draw_mood_state(rc: &RenderContext, city: &City, c: Vec2) {
     let state = &rc.state;
     let mood = if let ActiveDialog::IncreaseHappiness(increase) = &state.active_dialog {
         let steps = increase
@@ -299,47 +319,35 @@ pub fn draw_city(rc: &RenderContext, city: &City) -> Option<StateUpdate> {
             size,
         );
     }
-
-    let i = match draw_wonders(rc, city, c, owner, &highlighted) {
-        Ok(value) => value,
-        Err(value) => return Some(value),
-    };
-
-    draw_buildings(rc, city, c, &highlighted, i)
 }
 
 fn draw_buildings(
     rc: &RenderContext,
     city: &City,
     center: Vec2,
-    highlighted: &[StructureHighlight],
+    highlighted: &[SelectedStructureInfo],
     mut i: usize,
 ) -> Option<StateUpdate> {
-    let state = &rc.state;
     for player_index in 0..4 {
         for b in &city.pieces.buildings(Some(player_index)) {
             let p = building_position(city, center, i, *b);
-            if let Some(h) = highlighted
-                .iter()
-                .find(|s| matches!(s.structure, Structure::Building(bb) if bb == *b))
-            {
-                if let Some(u) = structure_selected(rc, city.position, p, BUILDING_SIZE, h) {
+            draw_circle(p.x, p.y, BUILDING_SIZE, rc.player_color(player_index));
+            if let Some(h) = highlighted.iter().find(|s| {
+                s.position == city.position
+                    && matches!(s.structure, Structure::Building(bb) if bb == *b)
+            }) {
+                if let Some(u) = draw_selected_state(rc, p, BUILDING_SIZE, h) {
                     return Some(u);
                 }
-            }
-            draw_circle(p.x, p.y, BUILDING_SIZE, rc.player_color(player_index));
-            let tooltip = if matches!(state.active_dialog, ActiveDialog::CulturalInfluence(_)) {
-                ""
             } else {
-                b.name()
-            };
-            draw_scaled_icon(
-                rc,
-                &rc.assets().buildings[b],
-                tooltip,
-                p + vec2(-8., -8.),
-                16.,
-            );
+                draw_scaled_icon(
+                    rc,
+                    &rc.assets().buildings[b],
+                    b.name(),
+                    p + vec2(-8., -8.),
+                    16.,
+                );
+            }
             i += 1;
         }
     }
@@ -352,43 +360,32 @@ fn draw_wonders(
     city: &City,
     c: Vec2,
     owner: usize,
-    highlighted: &[StructureHighlight],
+    highlighted: &[SelectedStructureInfo],
 ) -> Result<usize, StateUpdate> {
     let mut i = 0;
     for w in &city.pieces.wonders {
         let p = hex_ui::rotate_around(c, 20.0, 90 * i);
         draw_circle(p.x, p.y, 18.0, rc.player_color(owner));
         let size = 20.;
-        if let Some(h) = highlighted
-            .iter()
-            .find(|s| matches!(&s.structure, Structure::Wonder(n) if n == &w.name))
-        {
-            if let Some(u) = structure_selected(rc, city.position, p, 18., h) {
+        if let Some(h) = highlighted.iter().find(|s| {
+            s.position == city.position
+                && matches!(&s.structure, Structure::Wonder(n) if n == &w.name)
+        }) {
+            if let Some(u) = draw_selected_state(rc, p, 18., h) {
                 return Err(u);
             }
+        } else {
+            draw_scaled_icon(
+                rc,
+                &rc.assets().wonders[&w.name],
+                &w.name,
+                p + vec2(-size / 2., -size / 2.),
+                size,
+            );
         }
-        draw_scaled_icon(
-            rc,
-            &rc.assets().wonders[&w.name],
-            &w.name,
-            p + vec2(-size / 2., -size / 2.),
-            size,
-        );
         i += 1;
     }
     Ok(i)
-}
-
-fn position_structures(city: &City, list: &[SelectedStructure]) -> Vec<Structure> {
-    list.iter()
-        .filter_map(|(pos, st)| {
-            if pos == &city.position {
-                Some(st.clone())
-            } else {
-                None
-            }
-        })
-        .collect_vec()
 }
 
 pub fn building_position(city: &City, center: Vec2, i: usize, building: Building) -> Vec2 {

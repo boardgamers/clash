@@ -27,7 +27,7 @@ pub(crate) fn peltasts(id: u8) -> TacticsCard {
     TacticsCard::builder(
         id,
         "Peltasts",
-        "On reveal: Roll a die for each of your Army units. \
+        "Roll a die for each of your Army units. \
         If you rolled a 5 or 6, ignore 1 hit",
     )
     .fighter_requirement(FighterRequirement::Army)
@@ -50,8 +50,8 @@ pub(crate) fn encircled(id: u8) -> TacticsCard {
     TacticsCard::builder(
         id,
         "Encircled",
-        "Before removing casualties: If your opponent loses the same number of units \
-        as you or more: Roll a die. On a 5 or 6, add 1 hit, which cannot be ignored",
+        "If your opponent loses the same number of units as you or more: \
+        Roll a die. On a 5 or 6, add 1 hit, which cannot be ignored",
     )
     .fighter_requirement(FighterRequirement::Army)
     .add_resolve_listener(0, |player, game, e| {
@@ -88,7 +88,7 @@ pub(crate) fn wedge_formation(id: u8) -> TacticsCard {
     TacticsCard::builder(
         id,
         "Wedge Formation",
-        "As attacker: Receive 1 combat value for each defending Army unit",
+        "Receive 1 combat value for each defending Army unit",
     )
     .fighter_requirement(FighterRequirement::Army)
     .role_requirement(CombatRole::Attacker)
@@ -135,7 +135,7 @@ pub(crate) fn high_ground(id: u8) -> TacticsCard {
         "High Ground",
         "Unless you attack a city: Your opponent can't use combat abilities.",
     )
-    .fighter_any_requirement(&[FighterRequirement::Army, FighterRequirement::Fortress])
+    .location_requirement(CombatLocation::Land)
     .checker(|player, game, combat| {
         combat.role(player) == CombatRole::Defender || combat.defender_city(game).is_none()
     })
@@ -177,7 +177,7 @@ pub(crate) fn siege(id: u8) -> TacticsCard {
     TacticsCard::builder(
         id,
         "Siege",
-        "When attacking a city: Gain 1 to your combat value. \
+        "Gain 1 to your combat value. \
             Your opponent can't use combat abilities unless they pay 2 food.",
     )
     .fighter_requirement(FighterRequirement::Army)
@@ -238,7 +238,6 @@ pub(crate) fn for_the_people(id: u8) -> TacticsCard {
         "For the People",
         "When defending a city: Add 1 die to your roll.",
     )
-    .fighter_any_requirement(&[FighterRequirement::Army, FighterRequirement::Fortress])
     .role_requirement(CombatRole::Defender)
     .location_requirement(CombatLocation::City)
     .target(TacticsCardTarget::ActivePlayer)
@@ -252,6 +251,7 @@ pub(crate) fn for_the_people(id: u8) -> TacticsCard {
 
 pub(crate) fn martyr(id: u8) -> TacticsCard {
     TacticsCard::builder(id, "Martyr", "todo")
+        .fighter_any_requirement(&[FighterRequirement::Army, FighterRequirement::Ship])
         .target(TacticsCardTarget::Opponent)
         //todo add sacrifice effect, add test
         .add_veto_tactics_listener(0, move |p, game, _c, s| {

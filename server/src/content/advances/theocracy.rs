@@ -16,52 +16,57 @@ pub(crate) fn theocracy() -> AdvanceGroup {
 }
 
 fn dogma() -> AdvanceBuilder {
-    Advance::builder("Dogma", "Whenever you Construct a new Temple, either through the Construct Action or through playing of cards, you may immediately get a Theocracy Advance for free, marking it with a cube from your Event tracker as normal.
-    You are now limited to a maximum of 2 ideas. If you have more than 2 ideas when
-    getting this Advance, you must immediately reduce down to 2.
-    Note: Dogma Advance does not apply when you conquer a city with a Temple.")
-        .add_one_time_ability_initializer(|game, player_index| {
-            let p = &mut game.players[player_index];
-            p.resource_limit.ideas = 2;
-            p.gain_resources(ResourcePile::ideas(0)); // to trigger the limit
-            let name = p.get_name();
-            game.add_info_log_item(&format!(
-                "{name} is now limited to a maximum of 2 ideas for Dogma Advance",
-            ));
-        })
-        .add_ability_undo_deinitializer(|game, player_index| {
-            game.players[player_index].resource_limit.ideas = 7;
-        })
-        .add_advance_request(
-            |event| &mut event.on_construct,
-            0,
-            |game, player_index, building| {
-                if matches!(building, Temple) {
-                    let player = game.get_player(player_index);
-                    let choices: Vec<String> = get_group("Theocracy").advances
-                        .iter()
-                        .filter(|a| player.can_advance_free(a))
-                        .map(|a| a.name.clone())
-                        .collect();
-                    if choices.is_empty() {
-                        return None;
-                    }
-                    return Some(AdvanceRequest::new(choices));
+    Advance::builder(
+        "Dogma",
+        "Whenever you Construct a new Temple, \
+        you may immediately get a Theocracy Advance for free, \
+        You are now limited to a maximum of 2 ideas (discard if necessary) \
+        Note: Dogma Advance does not apply when you conquer a city with a Temple.",
+    )
+    .add_one_time_ability_initializer(|game, player_index| {
+        let p = &mut game.players[player_index];
+        p.resource_limit.ideas = 2;
+        p.gain_resources(ResourcePile::ideas(0)); // to trigger the limit
+        let name = p.get_name();
+        game.add_info_log_item(&format!(
+            "{name} is now limited to a maximum of 2 ideas for Dogma Advance",
+        ));
+    })
+    .add_ability_undo_deinitializer(|game, player_index| {
+        game.players[player_index].resource_limit.ideas = 7;
+    })
+    .add_advance_request(
+        |event| &mut event.on_construct,
+        0,
+        |game, player_index, building| {
+            if matches!(building, Temple) {
+                let player = game.get_player(player_index);
+                let choices: Vec<String> = get_group("Theocracy")
+                    .advances
+                    .iter()
+                    .filter(|a| player.can_advance_free(a))
+                    .map(|a| a.name.clone())
+                    .collect();
+                if choices.is_empty() {
+                    return None;
                 }
-                None
-            },
-            |game, c,_| {
-                let verb = if c.actively_selected {
-                    "selected"
-                } else {
-                    "got"
-                };
-                game.add_info_log_item(&format!(
-                    "{} {verb} {} as a reward for constructing a Temple", c.player_name, c.choice
-                ));
-                gain_advance(game, &c.choice, c.player_index, ResourcePile::empty(), true);
-            },
-        )
+                return Some(AdvanceRequest::new(choices));
+            }
+            None
+        },
+        |game, c, _| {
+            let verb = if c.actively_selected {
+                "selected"
+            } else {
+                "got"
+            };
+            game.add_info_log_item(&format!(
+                "{} {verb} {} as a reward for constructing a Temple",
+                c.player_name, c.choice
+            ));
+            gain_advance(game, &c.choice, c.player_index, ResourcePile::empty(), true);
+        },
+    )
 }
 
 fn devotion() -> AdvanceBuilder {
@@ -81,25 +86,37 @@ fn devotion() -> AdvanceBuilder {
 }
 
 fn conversion() -> AdvanceBuilder {
-    Advance::builder("Conversion", "You add +1 to your Influence Culture roll and gain 1 culture token when you make a successful Influence Culture attempt.")
-        .add_transient_event_listener(
-            |event| &mut event.on_influence_culture_attempt,
-            3,
-            |info, _, _| {
-                if !info.is_defender {
-                    info.roll_boost += 1;
-                    info.info.log.push("Player gets +1 to Influence Culture roll for Conversion Advance".to_string());
-                }
-            },
-        )
-        .add_transient_event_listener(
-            |event| &mut event.on_influence_culture_success,
-            0,
-            |game, player, ()| {
-                game.get_player_mut(*player).gain_resources(ResourcePile::culture_tokens(1));
-                game.add_info_log_item("Player gained 1 culture token for a successful Influence Culture attempt for Conversion Advance");
-            },
-        )
+    Advance::builder(
+        "Conversion",
+        "You add +1 to your Influence Culture roll \
+        and gain 1 culture token when you make a successful Influence Culture attempt.",
+    )
+    .add_transient_event_listener(
+        |event| &mut event.on_influence_culture_attempt,
+        3,
+        |info, _, _| {
+            if !info.is_defender {
+                info.roll_boost += 1;
+                info.info.log.push(
+                    "Player gets +1 to Influence Culture roll for Conversion Advance".to_string(),
+                );
+            }
+        },
+    )
+    .add_transient_event_listener(
+        |event| &mut event.on_influence_culture_resolve,
+        0,
+        |game, outcome, ()| {
+            if outcome.success {
+                game.get_player_mut(outcome.player)
+                    .gain_resources(ResourcePile::culture_tokens(1));
+                game.add_info_log_item(
+                    "Player gained 1 culture token for a successful \
+                    Influence Culture attempt for Conversion Advance",
+                );
+            }
+        },
+    )
 }
 
 fn fanaticism() -> AdvanceBuilder {

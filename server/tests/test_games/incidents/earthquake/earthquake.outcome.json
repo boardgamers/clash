@@ -14,40 +14,40 @@
         "request": {
           "SelectStructures": {
             "choices": [
-              [
-                "C2",
-                "CityCenter"
-              ],
-              [
-                "C2",
-                {
+              {
+                "position": "C2",
+                "structure": "CityCenter"
+              },
+              {
+                "position": "C2",
+                "structure": {
                   "Building": "Fortress"
                 }
-              ],
-              [
-                "C2",
-                {
+              },
+              {
+                "position": "C2",
+                "structure": {
                   "Building": "Temple"
                 }
-              ],
-              [
-                "C2",
-                {
+              },
+              {
+                "position": "C2",
+                "structure": {
                   "Wonder": "Pyramids"
                 }
-              ],
-              [
-                "C1",
-                "CityCenter"
-              ],
-              [
-                "B2",
-                "CityCenter"
-              ],
-              [
-                "B3",
-                "CityCenter"
-              ]
+              },
+              {
+                "position": "C1",
+                "structure": "CityCenter"
+              },
+              {
+                "position": "B2",
+                "structure": "CityCenter"
+              },
+              {
+                "position": "B3",
+                "structure": "CityCenter"
+              }
             ],
             "needed": {
               "start": 1,

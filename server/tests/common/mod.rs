@@ -2,14 +2,15 @@
 
 use server::action::Action;
 use server::city_pieces::Building::Temple;
+use server::content::custom_phase_actions::{SelectedStructure, Structure};
 use server::game::Game;
+use server::game_api;
 use server::log::current_player_turn_log_mut;
 use server::playing_actions::PlayingAction::InfluenceCultureAttempt;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::MoveUnits;
 use server::unit::MovementAction::Move;
-use server::{game_api, playing_actions};
 use std::fmt::Display;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::{
@@ -392,12 +393,8 @@ pub fn move_action(units: Vec<u32>, destination: Position) -> Action {
 }
 
 pub fn influence_action() -> Action {
-    Action::Playing(InfluenceCultureAttempt(
-        playing_actions::InfluenceCultureAttempt {
-            starting_city_position: Position::from_offset("B3"),
-            target_player_index: 0,
-            target_city_position: Position::from_offset("C2"),
-            city_piece: Temple,
-        },
-    ))
+    Action::Playing(InfluenceCultureAttempt(SelectedStructure::new(
+        Position::from_offset("C2"),
+        Structure::Building(Temple),
+    )))
 }

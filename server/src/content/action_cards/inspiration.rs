@@ -133,7 +133,7 @@ fn possible_inspiration_advances(game: &Game, player: &Player) -> Vec<String> {
 }
 
 fn players_in_range2(game: &Game, player: &Player) -> Vec<usize> {
-    let my = positions(player);
+    let my = player_positions(player);
 
     game.players
         .iter()
@@ -141,7 +141,7 @@ fn players_in_range2(game: &Game, player: &Player) -> Vec<usize> {
             if p.index == player.index || !p.is_human() {
                 return false;
             }
-            let other = positions(p);
+            let other = player_positions(p);
             other
                 .iter()
                 .any(|pos| my.iter().any(|my_pos| my_pos.distance(*pos) <= 2))
@@ -150,7 +150,7 @@ fn players_in_range2(game: &Game, player: &Player) -> Vec<usize> {
         .collect()
 }
 
-fn positions(player: &Player) -> Vec<Position> {
+pub(crate) fn player_positions(player: &Player) -> Vec<Position> {
     player
         .units
         .iter()

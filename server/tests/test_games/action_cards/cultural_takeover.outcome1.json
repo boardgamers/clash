@@ -1,51 +1,5 @@
 {
   "state": "Playing",
-  "events": [
-    {
-      "event_type": {
-        "Incident": {
-          "active_player": 0,
-          "must_reduce_mood": [
-            "C2"
-          ]
-        }
-      },
-      "player": 0,
-      "last_priority_used": 10,
-      "handler": {
-        "priority": 10,
-        "request": {
-          "Payment": [
-            {
-              "cost": {
-                "default": {
-                  "mood_tokens": 1
-                },
-                "conversions": [
-                  {
-                    "from": [
-                      {
-                        "mood_tokens": 1
-                      }
-                    ],
-                    "to": {},
-                    "type": {
-                      "MayOverpay": 1
-                    }
-                  }
-                ]
-              },
-              "name": "You may pay 1 mood token for each city to avoid reducing the mood",
-              "optional": false
-            }
-          ]
-        },
-        "origin": {
-          "Incident": 31
-        }
-      }
-    }
-  ],
   "players": [
     {
       "id": 0,
@@ -54,12 +8,12 @@
         "wood": 6,
         "ore": 6,
         "ideas": 5,
-        "gold": 5,
-        "mood_tokens": 8,
-        "culture_tokens": 7
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 5
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -69,36 +23,32 @@
       },
       "cities": [
         {
-          "city_pieces": {
-            "temple": 1
-          },
+          "city_pieces": {},
           "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A1"
+        },
+        {
+          "city_pieces": {
+            "fortress": 1
+          },
+          "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
           "position": "C2"
         },
         {
           "city_pieces": {},
-          "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "C1"
-        },
-        {
-          "city_pieces": {},
-          "mood_state": "Happy",
+          "mood_state": "Neutral",
           "activations": 0,
           "angry_activation": false,
           "position": "B3"
         }
       ],
-      "destroyed_structures": {
-        "fortress": 1,
-        "cities": 1
-      },
       "units": [
         {
-          "position": "C2",
+          "position": "B2",
           "unit_type": "Infantry",
           "id": 0
         },
@@ -136,22 +86,21 @@
           "position": "C2",
           "unit_type": "Settler",
           "id": 7
+        },
+        {
+          "position": "B3",
+          "unit_type": "Infantry",
+          "id": 8
         }
       ],
       "civilization": "test0",
       "advances": [
         "Farming",
         "Mining",
-        "Myths",
-        "Storage",
         "Tactics"
       ],
-      "wonders_build": [
-        "Pyramids"
-      ],
-      "incident_tokens": 3,
-      "event_victory_points": 6.0,
-      "next_unit_id": 8
+      "incident_tokens": 1,
+      "next_unit_id": 9
     },
     {
       "id": 1,
@@ -175,36 +124,29 @@
       },
       "cities": [
         {
-          "city_pieces": {
-            "fortress": 0
-          },
-          "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "A1"
-        },
-        {
           "city_pieces": {},
-          "mood_state": "Happy",
+          "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
-          "position": "A3"
+          "position": "C1"
+        }
+      ],
+      "units": [
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 0
         },
         {
-          "city_pieces": {
-            "fortress": 0
-          },
-          "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "A4"
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 1
         }
       ],
       "civilization": "test1",
       "advances": [
         "Farming",
-        "Mining",
-        "Myths"
+        "Mining"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
@@ -218,9 +160,26 @@
         "ideas": 7,
         "gold": 7
       },
+      "units": [
+        {
+          "position": "A3",
+          "unit_type": "Elephant",
+          "id": 1
+        },
+        {
+          "position": "A3",
+          "unit_type": "Infantry",
+          "id": 3
+        },
+        {
+          "position": "A3",
+          "unit_type": "Infantry",
+          "id": 4
+        }
+      ],
       "civilization": "Barbarians",
       "incident_tokens": 3,
-      "next_unit_id": 0
+      "next_unit_id": 5
     }
   ],
   "map": {
@@ -235,10 +194,6 @@
       ],
       [
         "A3",
-        "Mountain"
-      ],
-      [
-        "A4",
         "Mountain"
       ],
       [
@@ -284,36 +239,17 @@
                 {
                   "action": {
                     "Playing": {
-                      "Advance": {
-                        "advance": "Storage",
-                        "payment": {
-                          "gold": 2
-                        }
-                      }
+                      "ActionCard": 15
                     }
                   }
                 },
                 {
                   "action": {
-                    "Response": {
-                      "SelectStructures": [
-                        {
-                          "position": "B2",
-                          "structure": "CityCenter"
-                        },
-                        {
-                          "position": "C2",
-                          "structure": {
-                            "Building": "Fortress"
-                          }
-                        },
-                        {
-                          "position": "C2",
-                          "structure": {
-                            "Wonder": "Pyramids"
-                          }
-                        }
-                      ]
+                    "Playing": {
+                      "InfluenceCultureAttempt": {
+                        "position": "B3",
+                        "structure": "CityCenter"
+                      }
                     }
                   }
                 }
@@ -327,20 +263,17 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 paid 2 gold to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
+      "Player1 played the action card Cultural Takeover",
+      "Cultural Takeover: You may influence Barbarian cities of size 1."
     ],
     [
-      "A new game event has been triggered: Heavy Earthquake"
-    ],
-    [
-      "Player1 gained 2 points for the Fortress at C2",
-      "Player1 gained 2 points for the Pyramids at C2",
-      "Player1 gained 2 points for the city center at B2"
+      "Player1 tried to influence culture the City Center in the city at B3 by Barbarians with the city at A1 and paid 2 culture tokens to boost the range and succeeded (rolled 6)",
+      "Player1 selected unit to gain: Infantry"
     ]
   ],
   "undo_limit": 2,
   "actions_left": 2,
+  "successful_cultural_influence": true,
   "round": 1,
   "age": 1,
   "messages": [
@@ -354,16 +287,18 @@
     10,
     10,
     10,
-    10,
     10
   ],
   "dice_roll_log": [
+    10,
     10
   ],
   "dropped_players": [],
-  "wonders_left": [],
+  "wonders_left": [
+    "Pyramids"
+  ],
   "action_cards_left": [],
   "incidents_left": [
-    31
+    28
   ]
 }

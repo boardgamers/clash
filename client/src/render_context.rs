@@ -5,7 +5,7 @@ use macroquad::camera::set_default_camera;
 use macroquad::color::{Color, PINK, YELLOW};
 use macroquad::input::mouse_position;
 use macroquad::math::{bool, Vec2};
-use macroquad::prelude::{set_camera, WHITE};
+use macroquad::prelude::{set_camera, GRAY, WHITE};
 use server::game::Game;
 use server::payment::PaymentOptions;
 use server::player::Player;
@@ -88,7 +88,11 @@ impl RenderContext<'_> {
     }
 
     pub fn player_color(&self, player_index: usize) -> Color {
-        if !self.game.get_player(player_index).is_human() {
+        let c = &self.game.get_player(player_index).civilization;
+        if c.is_barbarian() {
+            return GRAY;
+        }
+        if c.is_barbarian() {
             return WHITE;
         }
         match player_index {

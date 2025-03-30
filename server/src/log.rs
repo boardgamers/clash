@@ -1,10 +1,11 @@
 use crate::construct::Construct;
 use crate::content::action_cards::get_civil_card;
-use crate::cultural_influence::influence_culture_boost_cost;
+use crate::cultural_influence::format_cultural_influence_attempt_log_item;
 use crate::player::Player;
 
 use crate::action_card::CivilCardMatch;
-use crate::playing_actions::{Collect, IncreaseHappiness, InfluenceCultureAttempt, Recruit};
+use crate::playing_actions::{Collect, IncreaseHappiness, Recruit};
+use crate::unit::MoveUnits;
 use crate::{
     action::Action,
     game::Game,
@@ -170,44 +171,6 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
     }
 }
 
-pub(crate) fn format_cultural_influence_attempt_log_item(
-    game: &Game,
-    player_index: usize,
-    player_name: &str,
-    c: &InfluenceCultureAttempt,
-) -> String {
-    let target_player_index = c.target_player_index;
-    let target_city_position = c.target_city_position;
-    let starting_city_position = c.starting_city_position;
-    let city_piece = c.city_piece;
-    let player = if target_player_index == game.active_player() {
-        String::from("themselves")
-    } else {
-        game.player_name(target_player_index)
-    };
-    let city = if starting_city_position == target_city_position {
-        String::new()
-    } else {
-        format!(" with the city at {starting_city_position}")
-    };
-    let range_boost_cost = influence_culture_boost_cost(
-        game,
-        player_index,
-        starting_city_position,
-        target_player_index,
-        target_city_position,
-        city_piece,
-    )
-    .range_boost_cost;
-    // this cost can't be changed by the player
-    let cost = if range_boost_cost.is_free() {
-        String::new()
-    } else {
-        format!(" and paid {} to boost the range", range_boost_cost.default)
-    };
-    format!("{player_name} tried to influence culture the {city_piece:?} in the city at {target_city_position} by {player}{city}{cost}")
-}
-
 ///
 /// # Panics
 ///
@@ -362,42 +325,47 @@ fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> Stri
         MovementAction::Move(m) if m.units.is_empty() => {
             format!("{player_name} used a movement actions but moved no units")
         }
-        MovementAction::Move(m) => {
-            let units_str = m
-                .units
-                .iter()
-                .map(|unit| player.get_unit(*unit).unit_type)
-                .collect::<Units>();
-            let start = player.get_unit(m.units[0]).position;
-            let start_is_water = game.map.is_sea(start);
-            let dest = m.destination;
-            let t = game
-                .map
-                .get(dest)
-                .expect("the destination position should be on the map");
-            let (verb, suffix) = if start_is_water {
-                if t.is_unexplored() || t.is_water() {
-                    ("sailed", "")
-                } else {
-                    ("disembarked", "")
-                }
-            } else if t.is_water() {
-                ("embarked", "")
-            } else if start.is_neighbor(dest) {
-                ("marched", "")
-            } else {
-                ("marched", " on roads")
-            };
-            let payment = &m.payment;
-            let cost = if payment.is_empty() {
-                String::new()
-            } else {
-                format!(" for {payment}")
-            };
-            format!("{player_name} {verb} {units_str} from {start} to {dest}{suffix}{cost}",)
-        }
+        MovementAction::Move(m) => move_action_log(game, player, m),
         MovementAction::Stop => format!("{player_name} ended the movement action"),
     }
+}
+
+pub(crate) fn move_action_log(game: &Game, player: &Player, m: &MoveUnits) -> String {
+    let units_str = m
+        .units
+        .iter()
+        .map(|unit| player.get_unit(*unit).unit_type)
+        .collect::<Units>();
+    let start = player.get_unit(m.units[0]).position;
+    let start_is_water = game.map.is_sea(start);
+    let dest = m.destination;
+    let t = game
+        .map
+        .get(dest)
+        .expect("the destination position should be on the map");
+    let (verb, suffix) = if start_is_water {
+        if t.is_unexplored() || t.is_water() {
+            ("sailed", "")
+        } else {
+            ("disembarked", "")
+        }
+    } else if t.is_water() {
+        ("embarked", "")
+    } else if start.is_neighbor(dest) {
+        ("marched", "")
+    } else {
+        ("marched", " on roads")
+    };
+    let payment = &m.payment;
+    let cost = if payment.is_empty() {
+        String::new()
+    } else {
+        format!(" for {payment}")
+    };
+    format!(
+        "{} {verb} {units_str} from {start} to {dest}{suffix}{cost}",
+        player.get_name()
+    )
 }
 
 pub(crate) fn add_action_log_item(game: &mut Game, item: Action) {
