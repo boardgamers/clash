@@ -1,11 +1,12 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::content::builtin::Builtin;
+use crate::content::effects::PermanentEffect;
 use crate::content::incidents::great_persons::{
     great_person_action_card, GREAT_PERSON_DESCRIPTION,
 };
 use crate::game::Game;
-use crate::incident::{IncidentBuilder, PermanentIncidentEffect};
+use crate::incident::IncidentBuilder;
 use crate::player_events::IncidentTarget;
 use crate::playing_actions::ActionType;
 use crate::utils::remove_element_by;
@@ -32,8 +33,8 @@ pub(crate) fn great_diplomat() -> ActionCard {
         0,
         |game, _player_index, player_name, _| {
             game.add_info_log_item(&format!("{player_name} ended diplomatic relations.",));
-            remove_element_by(&mut game.permanent_incident_effects, |e| {
-                matches!(e, PermanentIncidentEffect::DiplomaticRelations(_))
+            remove_element_by(&mut game.permanent_effects, |e| {
+                matches!(e, PermanentEffect::DiplomaticRelations(_))
             });
         },
     )
@@ -70,13 +71,11 @@ pub(crate) fn choose_diplomat_partner(b: IncidentBuilder) -> IncidentBuilder {
                 s.player_name,
                 game.player_name(s.choice),
             ));
-            game.permanent_incident_effects
-                .push(PermanentIncidentEffect::DiplomaticRelations(
-                    DiplomaticRelations {
-                        active_player: s.player_index,
-                        passive_player: s.choice,
-                    },
-                ));
+            game.permanent_effects
+                .push(PermanentEffect::DiplomaticRelations(DiplomaticRelations {
+                    active_player: s.player_index,
+                    passive_player: s.choice,
+                }));
         },
     )
 }
@@ -94,8 +93,8 @@ pub(crate) fn use_diplomatic_relations() -> Builtin {
                         player_name,
                         game.player_name(partner),
                     ));
-                    remove_element_by(&mut game.permanent_incident_effects, |e| {
-                        matches!(e, PermanentIncidentEffect::DiplomaticRelations(_))
+                    remove_element_by(&mut game.permanent_effects, |e| {
+                        matches!(e, PermanentEffect::DiplomaticRelations(_))
                     });
                 }
             },
@@ -104,8 +103,8 @@ pub(crate) fn use_diplomatic_relations() -> Builtin {
 }
 
 pub(crate) fn diplomatic_relations_partner(game: &Game, p: usize) -> Option<usize> {
-    game.permanent_incident_effects.iter().find_map(|e| {
-        if let PermanentIncidentEffect::DiplomaticRelations(d) = e {
+    game.permanent_effects.iter().find_map(|e| {
+        if let PermanentEffect::DiplomaticRelations(d) = e {
             d.partner(p)
         } else {
             None

@@ -266,18 +266,20 @@
                       "Collect": {
                         "city_position": "A1",
                         "collections": [
-                          [
-                            "A1",
-                            {
+                          {
+                            "position": "A1",
+                            "pile": {
                               "food": 1
-                            }
-                          ],
-                          [
-                            "A2",
-                            {
+                            },
+                            "times": 1
+                          },
+                          {
+                            "position": "A2",
+                            "pile": {
                               "wood": 1
-                            }
-                          ]
+                            },
+                            "times": 1
+                          }
                         ]
                       }
                     }

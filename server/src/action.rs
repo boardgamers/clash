@@ -1,5 +1,6 @@
 use crate::action_card::on_play_action_card;
 use crate::advance::on_advance;
+use crate::collect::on_collect;
 use crate::combat::{combat_loop, move_with_possible_combat, start_combat};
 use crate::combat_listeners::{combat_round_end, combat_round_start, end_combat};
 use crate::construct::on_construct;
@@ -125,6 +126,7 @@ pub(crate) fn execute_custom_phase_action(
 ) {
     use CurrentEventType::*;
     match details {
+        Collect(i) => on_collect(game, player_index, i),
         DrawWonderCard => {
             draw_wonder_card(game, player_index);
         }

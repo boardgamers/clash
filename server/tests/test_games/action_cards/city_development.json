@@ -4,16 +4,14 @@
     {
       "id": 0,
       "resources": {
-        "food": 2,
-        "wood": 7,
-        "ore": 7,
-        "ideas": 3,
-        "gold": 5,
-        "mood_tokens": 8,
+        "food": 3,
+        "wood": 6,
+        "ore": 6,
+        "gold": 7,
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -23,11 +21,34 @@
       },
       "cities": [
         {
+          "city_pieces": {
+            "temple": 1
+          },
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C2"
+        },
+        {
           "city_pieces": {},
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "position": "A1"
+          "position": "C1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B2"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
         }
       ],
       "units": [
@@ -38,13 +59,11 @@
         },
         {
           "position": "C2",
-          "unit_type": "Cavalry",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 1
-        },
-        {
-          "position": "C2",
-          "unit_type": "Leader",
-          "id": 2
         },
         {
           "position": "C2",
@@ -74,12 +93,17 @@
       ],
       "civilization": "test0",
       "advances": [
+        "Arts",
+        "Bartering",
+        "Currency",
         "Farming",
         "Mining",
-        "Storage",
         "Tactics"
       ],
-      "incident_tokens": 3,
+      "incident_tokens": 1,
+      "action_cards": [
+        17
+      ],
       "next_unit_id": 8
     },
     {
@@ -105,39 +129,34 @@
       "cities": [
         {
           "city_pieces": {
-            "temple": 1
+            "fortress": 0
           },
           "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
-          "position": "C1"
+          "position": "A1"
         },
         {
           "city_pieces": {},
-          "mood_state": "Neutral",
+          "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
-          "position": "C2"
-        }
-      ],
-      "units": [
-        {
-          "position": "C1",
-          "unit_type": "Infantry",
-          "id": 0
+          "position": "A3"
         },
         {
-          "position": "C1",
-          "unit_type": "Infantry",
-          "id": 1
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A4"
         }
       ],
       "civilization": "test1",
       "advances": [
-        "Fanaticism",
         "Farming",
-        "Mining",
-        "Tactics"
+        "Mining"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
@@ -151,7 +170,7 @@
         "ideas": 7,
         "gold": 7
       },
-      "civilization": "Pirates",
+      "civilization": "Barbarians",
       "incident_tokens": 3,
       "next_unit_id": 0
     }
@@ -163,10 +182,16 @@
         "Fertile"
       ],
       [
+        "A2",
+        "Water"
+      ],
+      [
         "A3",
-        {
-          "Exhausted": "Forest"
-        }
+        "Mountain"
+      ],
+      [
+        "A4",
+        "Mountain"
       ],
       [
         "B1",
@@ -187,6 +212,14 @@
       [
         "C2",
         "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "D2",
+        "Water"
       ]
     ]
   },
@@ -199,41 +232,18 @@
           "players": [
             {
               "index": 0,
-              "items": [
-                {
-                  "action": {
-                    "Playing": {
-                      "Advance": {
-                        "advance": "Storage",
-                        "payment": {
-                          "gold": 2
-                        }
-                      }
-                    }
-                  }
-                }
-              ]
+              "items": []
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1 paid 2 gold to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
-    ],
-    [
-      "A new game event has been triggered: Solar Eclipse",
-      "Base effect: Pirates spawn",
-      "No valid positions for Pirate Ship"
-    ]
-  ],
-  "undo_limit": 1,
-  "actions_left": 2,
-  "round": 2,
+  "action_log_index": 0,
+  "log": [],
+  "undo_limit": 0,
+  "actions_left": 3,
+  "round": 1,
   "age": 1,
   "messages": [
     "The game has started"
@@ -241,21 +251,23 @@
   "dice_roll_outcomes": [
     1,
     1,
-    1,
-    1,
-    1,
-    11,
-    11,
-    11,
-    11
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
   ],
-  "dice_roll_log": [],
+  "dice_roll_log": [
+    10
+  ],
   "dropped_players": [],
   "wonders_left": [
     "Pyramids"
   ],
   "action_cards_left": [],
-  "permanent_incident_effects": [
-    "SolarEclipse"
+  "incidents_left": [
+    26
   ]
 }

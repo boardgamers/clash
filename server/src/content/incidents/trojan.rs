@@ -4,8 +4,9 @@ use crate::combat_listeners::CombatResult;
 use crate::content::advances::get_advance;
 use crate::content::builtin::Builtin;
 use crate::content::custom_phase_actions::PaymentRequest;
+use crate::content::effects::{Anarchy, PermanentEffect};
 use crate::game::Game;
-use crate::incident::{Anarchy, Incident, IncidentBaseEffect, PermanentIncidentEffect};
+use crate::incident::{Incident, IncidentBaseEffect};
 use crate::payment::PaymentOptions;
 use crate::player_events::IncidentTarget;
 use crate::resource_pile::ResourcePile;
@@ -25,8 +26,7 @@ fn trojan_horse() -> Incident {
         IncidentBaseEffect::BarbariansMove,
     )
     .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _, _| {
-        game.permanent_incident_effects
-            .push(PermanentIncidentEffect::TrojanHorse);
+        game.permanent_effects.push(PermanentEffect::TrojanHorse);
     })
     .build()
 }
@@ -42,8 +42,8 @@ pub(crate) fn decide_trojan_horse() -> Builtin {
             10,
             |game, player_index, c| {
                 if is_land_battle_against_defended_city(game, player_index, c) {
-                    game.permanent_incident_effects.iter().find_map(|e| {
-                        matches!(e, PermanentIncidentEffect::TrojanHorse).then_some(vec![
+                    game.permanent_effects.iter().find_map(|e| {
+                        matches!(e, PermanentEffect::TrojanHorse).then_some(vec![
                             PaymentRequest::new(trojan_cost(), "Activate the Trojan Horse?", true),
                         ])
                     })
@@ -64,8 +64,8 @@ pub(crate) fn decide_trojan_horse() -> Builtin {
                         "{} activated the Trojan Horse and gained 1 victory point",
                         s.player_name
                     ));
-                    game.permanent_incident_effects
-                        .retain(|e| !matches!(e, PermanentIncidentEffect::TrojanHorse));
+                    game.permanent_effects
+                        .retain(|e| !matches!(e, PermanentEffect::TrojanHorse));
                     c.modifiers.push(CombatModifier::TrojanHorse);
                 }
             },
@@ -88,8 +88,7 @@ fn solar_eclipse() -> Incident {
         IncidentBaseEffect::PiratesSpawnAndRaid,
     )
     .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _, _| {
-        game.permanent_incident_effects
-            .push(PermanentIncidentEffect::SolarEclipse);
+        game.permanent_effects.push(PermanentEffect::SolarEclipse);
     })
     .build()
 }
@@ -101,12 +100,12 @@ pub(crate) fn solar_eclipse_end_combat() -> Builtin {
             10,
             |game, _player, name, r| {
                 if let Some(p) = game
-                    .permanent_incident_effects
+                    .permanent_effects
                     .iter()
-                    .position(|e| matches!(e, PermanentIncidentEffect::SolarEclipse))
+                    .position(|e| matches!(e, PermanentEffect::SolarEclipse))
                 {
                     if r.combat.round == 1 && !r.combat.is_sea_battle(game) {
-                        game.permanent_incident_effects.remove(p);
+                        game.permanent_effects.remove(p);
                         r.combat.retreat = CombatRetreatState::EndAfterCurrentRound;
 
                         let p = match &r.final_result {
@@ -136,7 +135,7 @@ pub(crate) fn solar_eclipse_end_combat() -> Builtin {
 // IncidentBaseEffect::BarbariansSpawn,
 // )
 // .add_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _player_index| {
-//     game.permanent_incident_effects
+//     game.permanent_effects
 //         .push(PermanentIncidentEffect::Guillotine);
 // })
 // .build()
@@ -170,8 +169,8 @@ fn anarchy() -> Incident {
                 ));
             }
 
-            game.permanent_incident_effects
-                .push(PermanentIncidentEffect::Anarchy(Anarchy {
+            game.permanent_effects
+                .push(PermanentEffect::Anarchy(Anarchy {
                     player: player_index,
                     advances_lost: lost,
                 }));
@@ -190,15 +189,13 @@ pub(crate) fn anarchy_advance() -> Builtin {
                     return;
                 }
 
-                if let Some(mut a) =
-                    remove_and_map_element_by(&mut game.permanent_incident_effects, |e| {
-                        if let PermanentIncidentEffect::Anarchy(a) = e {
-                            Some(a.clone())
-                        } else {
-                            None
-                        }
-                    })
-                {
+                if let Some(mut a) = remove_and_map_element_by(&mut game.permanent_effects, |e| {
+                    if let PermanentEffect::Anarchy(a) = e {
+                        Some(a.clone())
+                    } else {
+                        None
+                    }
+                }) {
                     if player_index == a.player {
                         game.add_info_log_item(&format!(
                             "{player_name} gained a government advance, taking a game event token \
@@ -209,8 +206,7 @@ pub(crate) fn anarchy_advance() -> Builtin {
                         p.event_victory_points -= 1_f32;
                         a.advances_lost -= 1;
                         if a.advances_lost > 0 {
-                            game.permanent_incident_effects
-                                .push(PermanentIncidentEffect::Anarchy(a));
+                            game.permanent_effects.push(PermanentEffect::Anarchy(a));
                         }
                     }
                 }

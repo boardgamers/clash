@@ -42,6 +42,13 @@
           "position": "A1"
         },
         {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "C2"
+        },
+        {
           "city_pieces": {
             "temple": 0
           },
@@ -136,25 +143,16 @@
         "mood_tokens": 7,
         "culture_tokens": 7
       },
-      "cities": [
-        {
-          "city_pieces": {},
-          "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "C2"
-        }
-      ],
       "units": [
         {
-          "position": "C2",
+          "position": "B1",
           "unit_type": "Infantry",
-          "id": 2
+          "id": 0
         },
         {
-          "position": "C2",
-          "unit_type": "Settler",
-          "id": 3
+          "position": "B1",
+          "unit_type": "Infantry",
+          "id": 1
         }
       ],
       "civilization": "test1",
@@ -165,7 +163,7 @@
         "Tactics"
       ],
       "incident_tokens": 3,
-      "next_unit_id": 4
+      "next_unit_id": 2
     },
     {
       "id": 2,
@@ -252,6 +250,17 @@
                         "destination": "C1"
                       }
                     }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ActionCard": 17
+                        }
+                      ]
+                    }
                   },
                   "civil_card_match": {
                     "opportunity": "WinLandBattle"
@@ -264,7 +273,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 3,
   "log": [
     [
       "Player1 paid 2 gold to get the Storage advance",
@@ -279,19 +288,17 @@
       "Player1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1"
     ],
     [
-      "Combat round 1",
-      "Player1 rolled 6 (Infantry, +1 combat value), 6 (Infantry, no bonus), 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 25 and gets 2 hits against defending units.",
-      "Player2 rolled 1 (Leader, no bonus), 1 (Leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units.",
-      "Player2 used the following combat modifiers: Player gets +2 combat value for Fanaticism Advance",
+      "Combat round 1"
+    ],
+    [
+      "Player2 played a Tactics Card",
+      "Player2 reveals Tactics Card Tactical Retreat",
+      "Player2 withdraws to B1",
       "Player1 gained 1 victory point for the Solar Eclipse",
-      "Player2 has to remove all of their defending units",
-      "Player2 removed 2 infantry",
-      "Attacker wins and captured Player2's city at C1",
-      "Player2 gained 1 free Infantry Unit at C2 for Fanaticism Advance",
-      "Player2 gained 1 free Settler Unit at C2 for losing a city"
+      "Attacker wins and captured Player2's city at C1"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 3,
   "actions_left": 1,
   "round": 2,
   "age": 1,
@@ -301,16 +308,15 @@
   "dice_roll_outcomes": [
     1,
     1,
-    1
-  ],
-  "dice_roll_log": [
-    11,
-    11,
-    11,
-    11,
     1,
-    1
+    1,
+    1,
+    11,
+    11,
+    11,
+    11
   ],
+  "dice_roll_log": [],
   "dropped_players": [],
   "wonders_left": [
     "Pyramids"

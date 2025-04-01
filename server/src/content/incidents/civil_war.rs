@@ -1,11 +1,11 @@
 use crate::city::MoodState;
 use crate::content::custom_phase_actions::{PaymentRequest, PositionRequest, UnitsRequest};
+use crate::content::effects::PermanentEffect;
 use crate::content::incidents::famine::kill_incident_units;
 use crate::content::incidents::good_year::select_player_to_gain_settler;
 use crate::game::Game;
 use crate::incident::{
     decrease_mod_and_log, Incident, IncidentBaseEffect, IncidentBuilder, MoodModifier,
-    PermanentIncidentEffect,
 };
 use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions};
 use crate::player::Player;
@@ -212,8 +212,8 @@ fn lose_action(game: &mut Game, player: usize) {
     let name = game.player_name(player);
     if get_status_phase(game).is_some() {
         game.add_info_log_item(&format!("{name} lost an action for the next turn"));
-        game.permanent_incident_effects
-            .push(PermanentIncidentEffect::LoseAction(player));
+        game.permanent_effects
+            .push(PermanentEffect::LoseAction(player));
     } else {
         game.add_info_log_item(&format!("{name} lost an action"));
         game.actions_left -= 1;
@@ -289,8 +289,8 @@ fn envoy() -> Incident {
                     "{} is now available to be taken by anyone",
                     wonder.name
                 ));
-                game.permanent_incident_effects
-                    .push(PermanentIncidentEffect::PublicWonderCard(wonder.name));
+                game.permanent_effects
+                    .push(PermanentEffect::PublicWonderCard(wonder.name));
             }
         },
     )

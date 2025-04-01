@@ -1,7 +1,7 @@
 use std::{cmp::Ordering::*, mem};
 
 use crate::action::execute_action;
-use crate::content::custom_phase_actions::CurrentEventType;
+use crate::content::custom_phase_actions::{CurrentEventRequest, CurrentEventType, EventResponse};
 use crate::log::current_player_turn_log_mut;
 use crate::utils::Shuffle;
 use crate::{
@@ -120,11 +120,32 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
                 r.attacker_strength.tactics_card = Some(0);
             }
         }
+        let current_event_player = &mut s.player;
+        if player_index != Some(current_event_player.index) {
+            if let Some(handler) = &mut current_event_player.handler {
+                if let CurrentEventRequest::SelectHandCards(c) = &mut handler.request {
+                    // player shouldn't see other player's hand cards
+                    c.request.choices.clear();
+                }
+                if let Some(EventResponse::SelectHandCards(c)) = &mut handler.response {
+                    // player shouldn't see other player's hand cards
+                    c.clear();
+                }
+            }
+        }
     }
-    for l in &mut current_player_turn_log_mut(&mut game).items {
-        // undo has secret information, like gained and discarded action cards
-        l.undo.clear();
+    let player_log = current_player_turn_log_mut(&mut game);
+    if player_index != Some(player_log.index) {
+        for l in &mut player_log.items {
+            // undo has secret information, like gained and discarded action cards
+            l.undo.clear();
+            if let Action::Response(EventResponse::SelectHandCards(c)) = &mut l.action {
+                // player shouldn't see other player's hand cards
+                c.clear();
+            }
+        }
     }
+
     game
 }
 

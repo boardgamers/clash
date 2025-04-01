@@ -3,6 +3,7 @@ use crate::content::action_cards::get_civil_card;
 use crate::cultural_influence::format_cultural_influence_attempt_log_item;
 use crate::player::Player;
 
+use super::collect::PositionCollection;
 use crate::action_card::CivilCardMatch;
 use crate::playing_actions::{Collect, IncreaseHappiness, Recruit};
 use crate::unit::MoveUnits;
@@ -251,7 +252,7 @@ pub(crate) fn format_collect_log_item(player: &Player, player_name: &str, c: &Co
     let res = utils::format_and(
         &collections
             .iter()
-            .map(|(_, collection)| collection.to_string())
+            .map(|c| c.total().to_string())
             .collect_vec(),
         "nothing",
     );
@@ -260,13 +261,16 @@ pub(crate) fn format_collect_log_item(player: &Player, player_name: &str, c: &Co
             .iter()
             .permutations(2)
             .unique()
-            .any(|permutation| permutation[0].1.has_common_resource(&permutation[1].1))
-    {
+            .any(|permutation| {
+                permutation[0]
+                    .pile
+                    .has_common_resource(&permutation[1].pile)
+            }) {
         format!(
             " for a total of {}",
             collections
                 .iter()
-                .map(|(_, collection)| collection.clone())
+                .map(PositionCollection::total)
                 .sum::<ResourcePile>()
         )
     } else {

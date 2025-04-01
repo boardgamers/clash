@@ -9,7 +9,6 @@ use crate::content::custom_phase_actions::{
     ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitsRequest,
 };
 use crate::content::incidents;
-use crate::content::incidents::great_diplomat::{DiplomaticRelations, DIPLOMAT_ID};
 use crate::content::incidents::great_persons::GREAT_PERSON_OFFSET;
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -87,47 +86,10 @@ impl std::fmt::Display for IncidentBaseEffect {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
-pub struct Anarchy {
-    pub player: usize,
-    pub advances_lost: usize,
-}
-
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum PassedIncident {
     NewPlayer(usize),
     AlreadyPassed,
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
-pub enum PermanentIncidentEffect {
-    Pestilence,
-    LoseAction(usize),
-    PublicWonderCard(String),
-    TrojanHorse,
-    SolarEclipse,
-    Anarchy(Anarchy),
-    GreatEngineer,
-    CulturalTakeover,
-    DiplomaticRelations(DiplomaticRelations),
-}
-
-impl PermanentIncidentEffect {
-    #[must_use]
-    pub fn event_origin(&self) -> EventOrigin {
-        match self {
-            PermanentIncidentEffect::Pestilence => EventOrigin::Incident(1),
-            PermanentIncidentEffect::GreatEngineer => EventOrigin::Incident(26),
-            PermanentIncidentEffect::LoseAction(_) => EventOrigin::Incident(38),
-            PermanentIncidentEffect::PublicWonderCard(_) => EventOrigin::Incident(40),
-            PermanentIncidentEffect::SolarEclipse => EventOrigin::Incident(41),
-            PermanentIncidentEffect::TrojanHorse => EventOrigin::Incident(42),
-            PermanentIncidentEffect::Anarchy(_) => EventOrigin::Incident(44),
-            PermanentIncidentEffect::DiplomaticRelations(_) => EventOrigin::Incident(DIPLOMAT_ID),
-            // can also be 16, but that doesn't matter for the help text
-            PermanentIncidentEffect::CulturalTakeover => EventOrigin::CivilCard(15),
-        }
-    }
 }
 
 #[derive(Clone)]

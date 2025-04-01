@@ -311,7 +311,7 @@
                     },
                     {
                       "op": "remove",
-                      "path": "/permanent_incident_effects"
+                      "path": "/permanent_effects"
                     }
                   ]
                 },
@@ -338,9 +338,11 @@
                     },
                     {
                       "op": "add",
-                      "path": "/permanent_incident_effects",
+                      "path": "/permanent_effects",
                       "value": [
-                        "GreatEngineer"
+                        {
+                          "Construct": "GreatEngineer"
+                        }
                       ]
                     },
                     {

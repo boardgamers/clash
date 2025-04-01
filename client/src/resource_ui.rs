@@ -35,11 +35,11 @@ fn add_resource(m: &mut HashMap<ResourceType, u32>, amount: u32, resource_type: 
     m.insert(resource_type, amount);
 }
 
-pub fn show_resource_pile(rc: &RenderContext, p: &ResourcePile, must_show: &[ResourceType]) {
+pub fn show_resource_pile(rc: &RenderContext, p: &ResourcePile) {
     let resource_map = new_resource_map(p);
     let show: Vec<ResourceType> = ResourceType::all()
         .into_iter()
-        .filter(|r| resource_map[r] > 0 || must_show.contains(r))
+        .filter(|r| resource_map[r] > 0)
         .collect();
     for (i, r) in show.iter().rev().enumerate() {
         let x = (show.len() - i) as i8 - 3;

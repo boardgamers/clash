@@ -75,6 +75,9 @@ pub struct CombatRoundStart {
     pub phase: CombatEventPhase,
     pub attacker_strength: CombatStrength,
     pub defender_strength: CombatStrength,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub final_result: Option<CombatResult>,
 }
 
 impl CombatRoundStart {
@@ -85,6 +88,7 @@ impl CombatRoundStart {
             attacker_strength: CombatStrength::new(),
             defender_strength: CombatStrength::new(),
             phase: CombatEventPhase::Default,
+            final_result: None,
         }
     }
 

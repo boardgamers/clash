@@ -120,38 +120,59 @@ fn conversion() -> AdvanceBuilder {
 }
 
 fn fanaticism() -> AdvanceBuilder {
-    Advance::builder("Fanaticism", "During a battle in a city with a Temple, whether you are the attacker or defender, you add +2 combat value to your first combat roll. If you lose the battle, you get 1 free Infantry Unit after the battle and place it in one of your cities.")
-        .add_combat_round_start_listener(1, |game, c, s, _role| {
-                if c.round == 1 && c.defender_temple(game) {
-                    s.extra_combat_value += 2;
-                    s.roll_log.push("Player gets +2 combat value for Fanaticism Advance".to_string());
-                }
-            },
-        )
-        .add_position_request(
-            |event| &mut event.on_combat_end,
-            4,
-            |game, player_index, i| {
-                if i.is_loser(player_index)
-                    && !game.get_player(player_index).cities.is_empty()
-                    && game.get_player(player_index).available_units().infantry > 0 {
-                    let p = game.get_player(player_index);
-                    let choices: Vec<Position> = p.cities.iter()
-                        .filter(|c| p.get_units(c.position).iter().filter(|u| u.unit_type.is_army_unit()).count() < STACK_LIMIT)
-                        .map(|c| c.position)
-                        .collect();
-                    let needed = 1..=1;
-                    Some(PositionRequest::new(choices, needed, "Select a city to place the free Infantry Unit"))
-                } else {
-                    None
-                }
-            },
-            |game, s,_| {
-                let pos = s.choice[0];
-                game.add_info_log_item(&format!(
-                    "{} gained 1 free Infantry Unit at {} for Fanaticism Advance", s.player_name, pos
-                ));
-                game.get_player_mut(s.player_index).add_unit(pos, UnitType::Infantry);
-            },
-        )
+    Advance::builder(
+        "Fanaticism",
+        "During a battle in a city with a Temple, \
+        whether you are the attacker or defender, you add +2 combat value to your first combat roll. \
+        If you lose the battle, you get 1 free Infantry Unit after the battle and \
+        place it in one of your cities.",
+    )
+    .add_combat_round_start_listener(1, |game, c, s, _role| {
+        if c.round == 1 && c.defender_temple(game) {
+            s.extra_combat_value += 2;
+            s.roll_log
+                .push("Player gets +2 combat value for Fanaticism Advance".to_string());
+        }
+    })
+    .add_position_request(
+        |event| &mut event.on_combat_end,
+        4,
+        |game, player_index, i| {
+            if i.is_loser(player_index)
+                && !game.get_player(player_index).cities.is_empty()
+                && game.get_player(player_index).available_units().infantry > 0
+            {
+                let p = game.get_player(player_index);
+                let choices: Vec<Position> = p
+                    .cities
+                    .iter()
+                    .filter(|c| {
+                        p.get_units(c.position)
+                            .iter()
+                            .filter(|u| u.unit_type.is_army_unit())
+                            .count()
+                            < STACK_LIMIT
+                    })
+                    .map(|c| c.position)
+                    .collect();
+                let needed = 1..=1;
+                Some(PositionRequest::new(
+                    choices,
+                    needed,
+                    "Select a city to place the free Infantry Unit",
+                ))
+            } else {
+                None
+            }
+        },
+        |game, s, _| {
+            let pos = s.choice[0];
+            game.add_info_log_item(&format!(
+                "{} gained 1 free Infantry Unit at {} for Fanaticism Advance",
+                s.player_name, pos
+            ));
+            game.get_player_mut(s.player_index)
+                .add_unit(pos, UnitType::Infantry);
+        },
+    )
 }

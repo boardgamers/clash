@@ -256,7 +256,7 @@
     "Pyramids"
   ],
   "action_cards_left": [],
-  "permanent_incident_effects": [
+  "permanent_effects": [
     {
       "Anarchy": {
         "player": 0,

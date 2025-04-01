@@ -293,7 +293,7 @@
   "dropped_players": [],
   "wonders_left": [],
   "action_cards_left": [],
-  "permanent_incident_effects": [
+  "permanent_effects": [
     {
       "PublicWonderCard": "Pyramids"
     }

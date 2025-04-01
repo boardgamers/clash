@@ -1,11 +1,12 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
-use crate::combat::update_combat_strength;
-use crate::combat_listeners::{CombatRoundStart, CombatStrength};
+use crate::combat::{update_combat_strength, Combat};
+use crate::combat_listeners::{CombatResult, CombatRoundStart, CombatStrength};
 use crate::content::action_cards::get_action_card;
-use crate::content::custom_phase_actions::PaymentRequest;
+use crate::content::custom_phase_actions::{PaymentRequest, PositionRequest};
 use crate::game::Game;
 use crate::payment::PaymentOptions;
+use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::{
     CombatLocation, CombatRole, FighterRequirement, TacticsCard, TacticsCardTarget,
@@ -247,6 +248,73 @@ pub(crate) fn for_the_people(id: u8) -> TacticsCard {
             .push("For The People added 1 extra die".to_string());
     })
     .build()
+}
+
+pub(crate) fn improved_defenses(id: u8) -> TacticsCard {
+    TacticsCard::builder(
+        id,
+        "Improved Defenses",
+        "When defending a city: Ignore 1 hit.",
+    )
+    .role_requirement(CombatRole::Defender)
+    .location_requirement(CombatLocation::City)
+    .target(TacticsCardTarget::ActivePlayer)
+    .add_reveal_listener(0, |_player, _game, _c, s| {
+        s.hit_cancels += 1;
+        s.roll_log
+            .push("Improved Defenses ignored 1 hit.".to_string());
+    })
+    .build()
+}
+
+pub(crate) fn tactical_retreat(id: u8) -> TacticsCard {
+    TacticsCard::builder(
+        id,
+        "Tactical Retreat",
+        "The battle ends after all On Reveal effects are resolved. \
+        Withdraw to an adjacent field without enemies. \
+        The opponent is considered to have won the battle.",
+    )
+    .fighter_requirement(FighterRequirement::Army)
+    .role_requirement(CombatRole::Defender)
+    .checker(|_, game, c| !tactical_retreat_targets(c, game).is_empty())
+    .target(TacticsCardTarget::ActivePlayer)
+    .add_position_request(
+        |event| &mut event.on_combat_round_start_tactics,
+        0,
+        move |game, p, s| {
+            (p == s.combat.defender).then_some(PositionRequest::new(
+                tactical_retreat_targets(&s.combat, game),
+                1..=1,
+                "Select a position to withdraw to",
+            ))
+        },
+        move |game, s, r| {
+            r.final_result = Some(CombatResult::AttackerWins);
+            let to = s.choice[0];
+            game.add_info_log_item(&format!(
+                "{} withdraws to {}",
+                game.player_name(s.player_index),
+                to
+            ));
+            for unit in game
+                .get_player_mut(s.player_index)
+                .get_units_mut(r.combat.defender_position)
+            {
+                unit.position = to;
+            }
+        },
+    )
+    .build()
+}
+
+fn tactical_retreat_targets(c: &Combat, game: &Game) -> Vec<Position> {
+    let player = c.defender;
+    c.defender_position
+        .neighbors()
+        .into_iter()
+        .filter(|&p| game.map.is_land(p) && game.enemy_player(player, p).is_none())
+        .collect()
 }
 
 pub(crate) fn martyr(id: u8) -> TacticsCard {

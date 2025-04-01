@@ -271,23 +271,37 @@ pub(crate) fn combat_loop(game: &mut Game, mut s: CombatRoundStart) {
 
         let a_t = s.attacker_strength.tactics_card.take();
         let d_t = s.defender_strength.tactics_card.take();
-        let mut a = CombatStats::roll(c.attacker, &c, game, s.attacker_strength);
-        let mut d = CombatStats::roll(c.defender, &c, game, s.defender_strength);
 
-        a.determine_hits(&d, game);
-        d.determine_hits(&a, game);
+        let result = if let Some(result) = s.final_result {
+            let mut round_end = CombatRoundEnd::new(
+                Casualties::new(0, None),
+                Casualties::new(0, None),
+                false,
+                c,
+                game,
+            );
+            round_end.final_result = Some(result);
+            round_end.phase = CombatEventPhase::Default;
+            round_end
+        } else {
+            let mut a = CombatStats::roll(c.attacker, &c, game, s.attacker_strength);
+            let mut d = CombatStats::roll(c.defender, &c, game, s.defender_strength);
 
-        let can_retreat = matches!(c.retreat, CombatRetreatState::CanRetreat)
-            && a.hits < d.fighters
-            && d.hits < a.fighters;
+            a.determine_hits(&d, game);
+            d.determine_hits(&a, game);
 
-        let result = CombatRoundEnd::new(
-            Casualties::new(d.hits, a_t),
-            Casualties::new(a.hits, d_t),
-            can_retreat,
-            c,
-            game,
-        );
+            let can_retreat = matches!(c.retreat, CombatRetreatState::CanRetreat)
+                && a.hits < d.fighters
+                && d.hits < a.fighters;
+
+            CombatRoundEnd::new(
+                Casualties::new(d.hits, a_t),
+                Casualties::new(a.hits, d_t),
+                can_retreat,
+                c,
+                game,
+            )
+        };
 
         if let Some(r) = combat_round_end(game, result) {
             s = CombatRoundStart::new(r);
@@ -530,7 +544,7 @@ pub mod tests {
             wonders_left: Vec::new(),
             action_cards_left: Vec::new(),
             incidents_left: Vec::new(),
-            permanent_incident_effects: Vec::new(),
+            permanent_effects: Vec::new(),
         }
     }
 

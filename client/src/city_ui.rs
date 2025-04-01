@@ -28,7 +28,6 @@ use server::game::Game;
 use server::playing_actions::PlayingActionType;
 use server::resource::ResourceType;
 use server::unit::{UnitType, Units};
-use std::collections::HashMap;
 use std::ops::Add;
 
 pub type IconAction<'a> = (&'a Texture2D, String, Box<dyn Fn() -> StateUpdate + 'a>);
@@ -172,7 +171,7 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
                         rc.game,
                         city.position,
                         city.player_index,
-                        &HashMap::new(),
+                        &Vec::new(),
                         &[],
                     );
                     ActiveDialog::CollectResources(CollectResources::new(
@@ -243,7 +242,7 @@ fn draw_selected_state(
         show_tooltip_for_circle(rc, tooltip, center, size);
     }
     if let Some(label) = &info.label {
-        draw_text(label, center.x - 5., center.y + 5., 25., BLACK);
+        rc.state.draw_text(label, center.x - 5., center.y + 5.);
     }
 
     if info.status != SelectedStructureStatus::Invalid

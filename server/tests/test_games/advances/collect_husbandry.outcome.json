@@ -289,12 +289,13 @@
                       "Collect": {
                         "city_position": "B3",
                         "collections": [
-                          [
-                            "B5",
-                            {
+                          {
+                            "position": "B5",
+                            "pile": {
                               "food": 1
-                            }
-                          ]
+                            },
+                            "times": 1
+                          }
                         ]
                       }
                     }

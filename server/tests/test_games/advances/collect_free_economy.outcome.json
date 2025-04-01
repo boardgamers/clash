@@ -208,18 +208,20 @@
                         "FreeEconomyCollect": {
                           "city_position": "C2",
                           "collections": [
-                            [
-                              "B1",
-                              {
+                            {
+                              "position": "B1",
+                              "pile": {
                                 "ore": 1
-                              }
-                            ],
-                            [
-                              "B2",
-                              {
+                              },
+                              "times": 1
+                            },
+                            {
+                              "position": "B2",
+                              "pile": {
                                 "ore": 1
-                              }
-                            ]
+                              },
+                              "times": 1
+                            }
                           ]
                         }
                       }
