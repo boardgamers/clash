@@ -4,6 +4,7 @@ pub mod builtin;
 pub mod civilizations;
 pub mod custom_actions;
 pub mod custom_phase_actions;
+pub mod effects;
 pub mod incidents;
 pub mod tactics_cards;
 pub mod wonders;

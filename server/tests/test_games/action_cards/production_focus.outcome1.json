@@ -4,14 +4,16 @@
     {
       "id": 0,
       "resources": {
-        "food": 3,
+        "food": 1,
         "wood": 6,
-        "ore": 6,
+        "ore": 7,
+        "ideas": 5,
         "gold": 7,
-        "culture_tokens": 6
+        "mood_tokens": 10,
+        "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 2,
+        "food": 7,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -21,56 +23,26 @@
       },
       "cities": [
         {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "A1"
+        },
+        {
           "city_pieces": {
             "fortress": 0,
-            "temple": 1
+            "port": 0,
+            "temple": 0
           },
-          "mood_state": "Neutral",
+          "mood_state": "Happy",
           "activations": 1,
           "angry_activation": false,
-          "position": "C2"
-        },
-        {
-          "city_pieces": {},
-          "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "C1"
-        },
-        {
-          "city_pieces": {},
-          "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "B2"
-        },
-        {
-          "city_pieces": {},
-          "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "B3"
+          "position": "C2",
+          "port_position": "C3"
         }
       ],
       "units": [
-        {
-          "position": "C2",
-          "unit_type": "Infantry",
-          "id": 0
-        },
-        {
-          "position": "C2",
-          "unit_type": "Infantry",
-          "movement_restrictions": [
-            "Battle"
-          ],
-          "id": 1
-        },
-        {
-          "position": "C2",
-          "unit_type": "Elephant",
-          "id": 3
-        },
         {
           "position": "C2",
           "unit_type": "Settler",
@@ -94,26 +66,20 @@
       ],
       "civilization": "test0",
       "advances": [
-        "Arts",
-        "Bartering",
-        "Currency",
         "Farming",
+        "Fishing",
         "Mining",
+        "Storage",
         "Tactics"
       ],
-      "incident_tokens": 1,
+      "incident_tokens": 3,
       "next_unit_id": 8
     },
     {
       "id": 1,
       "resources": {
-        "food": 2,
-        "wood": 7,
-        "ore": 7,
-        "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 7,
-        "culture_tokens": 7
+        "food": 1,
+        "mood_tokens": 1
       },
       "resource_limit": {
         "food": 2,
@@ -126,37 +92,35 @@
       },
       "cities": [
         {
-          "city_pieces": {
-            "fortress": 0
-          },
+          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
-          "position": "A1"
+          "position": "C1"
+        }
+      ],
+      "units": [
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 0
         },
         {
-          "city_pieces": {},
-          "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "A3"
-        },
-        {
-          "city_pieces": {
-            "fortress": 0
-          },
-          "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "A4"
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 1
         }
       ],
       "civilization": "test1",
       "advances": [
         "Farming",
+        "Fishing",
         "Mining"
       ],
-      "incident_tokens": 3,
+      "incident_tokens": 2,
+      "action_cards": [
+        18
+      ],
       "next_unit_id": 2
     },
     {
@@ -168,9 +132,35 @@
         "ideas": 7,
         "gold": 7
       },
-      "civilization": "Barbarians",
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "D1",
+          "unit_type": "Ship",
+          "id": 5
+        },
+        {
+          "position": "D1",
+          "unit_type": "Ship",
+          "id": 6
+        },
+        {
+          "position": "A2",
+          "unit_type": "Ship",
+          "id": 9
+        }
+      ],
+      "civilization": "Pirates",
       "incident_tokens": 3,
-      "next_unit_id": 0
+      "next_unit_id": 11
     }
   ],
   "map": {
@@ -185,10 +175,6 @@
       ],
       [
         "A3",
-        "Mountain"
-      ],
-      [
-        "A4",
         "Mountain"
       ],
       [
@@ -216,6 +202,10 @@
         "Water"
       ],
       [
+        "D1",
+        "Water"
+      ],
+      [
         "D2",
         "Water"
       ]
@@ -234,7 +224,7 @@
                 {
                   "action": {
                     "Playing": {
-                      "ActionCard": 17
+                      "ActionCard": 19
                     }
                   },
                   "undo": [
@@ -242,13 +232,8 @@
                       "op": "add",
                       "path": "/players/0/action_cards",
                       "value": [
-                        17
+                        19
                       ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 7
                     },
                     {
                       "op": "remove",
@@ -259,11 +244,31 @@
                 {
                   "action": {
                     "Playing": {
-                      "Construct": {
+                      "Collect": {
                         "city_position": "C2",
-                        "city_piece": "Fortress",
-                        "payment": {},
-                        "port_position": null
+                        "collections": [
+                          {
+                            "position": "B1",
+                            "pile": {
+                              "ore": 1
+                            },
+                            "times": 2
+                          },
+                          {
+                            "position": "C3",
+                            "pile": {
+                              "mood_tokens": 1
+                            },
+                            "times": 2
+                          },
+                          {
+                            "position": "C3",
+                            "pile": {
+                              "gold": 1
+                            },
+                            "times": 1
+                          }
+                        ]
                       }
                     }
                   },
@@ -278,18 +283,24 @@
                       "path": "/permanent_effects",
                       "value": [
                         {
-                          "Construct": "CityDevelopment"
+                          "Collect": "ProductionFocus"
                         }
                       ]
                     },
                     {
                       "op": "replace",
-                      "path": "/players/0/cities/0/activations",
+                      "path": "/players/0/cities/1/activations",
                       "value": 0
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/city_pieces/fortress"
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 8
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/ore",
+                      "value": 5
                     }
                   ]
                 }
@@ -303,17 +314,18 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 played the action card City Development for 1 culture token as a regular action",
-      "City Development: You may build a building in a city without spending an action and without paying for it."
+      "Player1 played the action card Production Focus as a regular action",
+      "Production Focus: You may collect multiple times from the same tile."
     ],
     [
-      "Player1 paid nothing to construct a Fortress in the city at C2"
+      "Player1 collects 2 ore, 2 mood tokens and 1 gold in the city at C2",
+      "Player1 could not store 1 gold"
     ]
   ],
   "undo_limit": 0,
   "actions_left": 2,
   "round": 1,
-  "age": 1,
+  "age": 2,
   "messages": [
     "The game has started"
   ],

@@ -2,6 +2,7 @@ use crate::action::execute_custom_phase_action;
 use crate::action_card::ActionCardInfo;
 use crate::card::HandCard;
 use crate::city_pieces::Building;
+use crate::collect::CollectInfo;
 use crate::combat::Combat;
 use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
 use crate::events::EventOrigin;
@@ -182,6 +183,7 @@ impl CurrentEventPlayer {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum CurrentEventType {
+    Collect(CollectInfo),
     ExploreResolution(ExploreResolutionState),
     InfluenceCultureResolution(ResourcePile),
     CombatStart(Combat),

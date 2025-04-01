@@ -1,4 +1,5 @@
 use crate::common::*;
+use server::collect::PositionCollection;
 use server::content::custom_phase_actions::{EventResponse, SelectedStructure, Structure};
 use server::log::current_player_turn_log;
 use server::unit::Units;
@@ -131,7 +132,7 @@ fn basic_actions() {
     game.map.tiles.insert(city_position, Fertile);
     let collect_action = Action::Playing(Collect(playing_actions::Collect {
         city_position,
-        collections: vec![(tile_position, ResourcePile::ore(1))],
+        collections: vec![PositionCollection::new(tile_position, ResourcePile::ore(1))],
     }));
     let game = game_api::execute(game, collect_action, 0);
     let player = &game.players[0];
@@ -400,8 +401,8 @@ fn test_collect() {
             Action::Playing(Collect(playing_actions::Collect {
                 city_position: Position::from_offset("C2"),
                 collections: vec![
-                    (Position::from_offset("B1"), ResourcePile::ore(1)),
-                    (Position::from_offset("B2"), ResourcePile::wood(1)),
+                    PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),
+                    PositionCollection::new(Position::from_offset("B2"), ResourcePile::wood(1)),
                 ],
             })),
         )],

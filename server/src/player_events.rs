@@ -35,7 +35,6 @@ pub(crate) struct PlayerEvents {
 
 #[derive(Default)]
 pub(crate) struct TransientEvents {
-    pub on_collect: Event<CollectInfo, Game>,
     pub on_influence_culture_attempt: Event<InfluenceCultureInfo, City, Game>,
     pub on_influence_culture_resolve: Event<Game, InfluenceCultureOutcome>,
     pub before_move: Event<Game, MoveInfo>,
@@ -55,6 +54,7 @@ pub(crate) struct TransientEvents {
 #[derive(Default)]
 #[allow(clippy::struct_field_names)]
 pub(crate) struct PersistentEvents {
+    pub on_collect: CurrentEvent<CollectInfo>,
     pub on_construct: CurrentEvent<Building>,
     pub on_draw_wonder_card: CurrentEvent,
     pub on_advance: CurrentEvent<AdvanceInfo>,
@@ -82,7 +82,7 @@ impl PlayerEvents {
     }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub(crate) struct ActionInfo {
     pub(crate) player: usize,
     pub(crate) info: HashMap<String, String>,

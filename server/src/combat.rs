@@ -544,7 +544,7 @@ pub mod tests {
             wonders_left: Vec::new(),
             action_cards_left: Vec::new(),
             incidents_left: Vec::new(),
-            permanent_incident_effects: Vec::new(),
+            permanent_effects: Vec::new(),
         }
     }
 

@@ -2,11 +2,17 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::content::action_cards::cultural_takeover::cultural_takeover;
 use crate::content::action_cards::mercenaries::mercenaries;
-use crate::content::tactics_cards::{for_the_people, heavy_resistance, improved_defenses, peltasts, tactical_retreat, TacticsCardFactory};
-use crate::incident::ConstructEffect;
-use crate::incident::PermanentIncidentEffect::Construct;
-use crate::playing_actions::ActionType;
+use crate::content::builtin::Builtin;
+use crate::content::custom_actions::CustomActionType;
+use crate::content::effects::{CollectEffect, ConstructEffect, PermanentEffect};
+use crate::content::tactics_cards::{
+    for_the_people, heavy_resistance, improved_defenses, peltasts, tactical_retreat,
+    TacticsCardFactory,
+};
+use crate::player_events::PlayingActionInfo;
+use crate::playing_actions::{ActionType, PlayingActionType};
 use crate::resource_pile::ResourcePile;
+use crate::utils::remove_element_by;
 
 pub(crate) fn development_action_cards() -> Vec<ActionCard> {
     vec![
@@ -16,6 +22,8 @@ pub(crate) fn development_action_cards() -> Vec<ActionCard> {
         cultural_takeover(16, improved_defenses),
         city_development(17, tactical_retreat),
         city_development(18, peltasts),
+        production_focus(19, tactical_retreat),
+        production_focus(20, peltasts),
     ]
 }
 
@@ -32,14 +40,95 @@ fn city_development(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |e| &mut e.on_play_action_card,
         0,
         |game, _player, _name, _| {
-            game.permanent_incident_effects
-                .push(Construct(ConstructEffect::CityDevelopment));
+            game.permanent_effects
+                .push(PermanentEffect::Construct(ConstructEffect::CityDevelopment));
             game.actions_left += 1; // to offset the action spent for building
             game.add_info_log_item(
                 "City Development: You may build a building in a city without \
-            spending an action and without paying for it.",
+                spending an action and without paying for it.",
             );
         },
     )
     .build()
+}
+
+fn production_focus(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
+    ActionCard::builder(
+        id,
+        "Production Focus",
+        "For the next collect action, you may collect multiple times from the same tile. \
+        The total amount of resources does not change.",
+        ActionType::regular(),
+        |_game, _player| true,
+    )
+    .tactics_card(tactics_card)
+    .add_simple_persistent_event_listener(
+        |e| &mut e.on_play_action_card,
+        0,
+        |game, _player, _name, _| {
+            game.permanent_effects
+                .push(PermanentEffect::Collect(CollectEffect::ProductionFocus));
+            game.actions_left += 1; // to offset the action spent for collecting
+            game.add_info_log_item(
+                "Production Focus: You may collect multiple times from the same tile.",
+            );
+        },
+    )
+    .build()
+}
+
+pub(crate) fn collect_only() -> Builtin {
+    Builtin::builder("collect only", "-")
+        .add_transient_event_listener(
+            |event| &mut event.is_playing_action_available,
+            4,
+            |available, game, i| {
+                if game
+                    .permanent_effects
+                    .iter()
+                    .any(|e| matches!(e, &PermanentEffect::Collect(_)))
+                    && !is_collect(i)
+                {
+                    *available = Err("You may only collect.".to_string());
+                }
+            },
+        )
+        .add_transient_event_listener(
+            |event| &mut event.collect_options,
+            2,
+            |c, context, game| {
+                if game
+                    .permanent_effects
+                    .iter()
+                    .any(|e| matches!(e, &PermanentEffect::Collect(CollectEffect::ProductionFocus)))
+                {
+                    c.max_per_tile = game
+                        .get_any_city(context.city_position)
+                        .mood_modified_size(game.get_player(context.player_index))
+                        as u32;
+                }
+            },
+        )
+        .add_simple_persistent_event_listener(
+            |event| &mut event.on_collect,
+            2,
+            |game, _, _, _| {
+                remove_element_by(&mut game.permanent_effects, |e| {
+                    matches!(e, &PermanentEffect::Collect(_))
+                });
+            },
+        )
+        .build()
+}
+
+fn is_collect(i: &PlayingActionInfo) -> bool {
+    match &i.action_type {
+        PlayingActionType::Collect => true,
+        PlayingActionType::Custom(c)
+            if c.custom_action_type == CustomActionType::FreeEconomyCollect =>
+        {
+            true
+        }
+        _ => false,
+    }
 }

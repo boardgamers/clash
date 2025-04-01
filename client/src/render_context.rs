@@ -92,7 +92,7 @@ impl RenderContext<'_> {
         if c.is_barbarian() {
             return GRAY;
         }
-        if c.is_barbarian() {
+        if c.is_pirates() {
             return WHITE;
         }
         match player_index {

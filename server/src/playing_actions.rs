@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::action_card::play_action_card;
 use crate::advance::gain_advance;
 use crate::city::MoodState;
-use crate::collect::collect;
+use crate::collect::{collect, PositionCollection};
 use crate::construct::Construct;
 use crate::content::action_cards::get_civil_card;
 use crate::content::advances::get_advance;
@@ -24,7 +24,7 @@ use crate::{
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Collect {
     pub city_position: Position,
-    pub collections: Vec<(Position, ResourcePile)>,
+    pub collections: Vec<PositionCollection>,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

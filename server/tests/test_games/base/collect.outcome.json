@@ -7,7 +7,7 @@
         "food": 1,
         "wood": 7,
         "ore": 7,
-        "ideas": 6,
+        "ideas": 5,
         "gold": 7,
         "mood_tokens": 6,
         "culture_tokens": 7
@@ -206,18 +206,20 @@
                       "Collect": {
                         "city_position": "C2",
                         "collections": [
-                          [
-                            "B1",
-                            {
+                          {
+                            "position": "B1",
+                            "pile": {
                               "ore": 1
-                            }
-                          ],
-                          [
-                            "B2",
-                            {
+                            },
+                            "times": 1
+                          },
+                          {
+                            "position": "B2",
+                            "pile": {
                               "wood": 1
-                            }
-                          ]
+                            },
+                            "times": 1
+                          }
                         ]
                       }
                     }
@@ -232,11 +234,6 @@
                       "op": "replace",
                       "path": "/players/0/cities/1/activations",
                       "value": 0
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ideas",
-                      "value": 5
                     },
                     {
                       "op": "replace",

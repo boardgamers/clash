@@ -200,9 +200,9 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     fn add_once_per_turn_listener<T, U, V, E, F>(
         self,
         event: E,
-        get_info: impl Fn(&mut T) -> &mut HashMap<String, String> + 'static + Clone,
-        listener: F,
         priority: i32,
+        listener: F,
+        get_info: impl Fn(&mut T) -> &mut HashMap<String, String> + 'static + Clone,
     ) -> Self
     where
         T: Clone + PartialEq,
@@ -211,10 +211,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     {
         let id = self.get_key().id();
         self.add_transient_event_listener(event, priority, move |value, u, v| {
-            if !get_info(value).contains_key(&id) {
-                listener(value, u, v);
-                get_info(value).insert(id.clone(), "used".to_string());
-            }
+            do_once_per_turn(&id, value, u, v, get_info.clone(), listener.clone());
         })
     }
 
@@ -863,4 +860,20 @@ where
     setup
         .add_ability_initializer(initializer)
         .add_ability_deinitializer(deinitializer)
+}
+
+pub(crate) fn do_once_per_turn<F, T, U, V>(
+    id: &str,
+    value: &mut T,
+    u: &U,
+    v: &V,
+    get_info: impl Fn(&mut T) -> &mut HashMap<String, String> + Clone + 'static,
+    listener: F,
+) where
+    F: Fn(&mut T, &U, &V) + 'static + Clone,
+{
+    if !get_info(value).contains_key(id) {
+        listener(value, u, v);
+        get_info(value).insert(id.to_string(), "used".to_string());
+    }
 }

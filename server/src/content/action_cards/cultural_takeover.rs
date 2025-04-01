@@ -4,9 +4,9 @@ use crate::barbarians::get_barbarians_player;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::custom_phase_actions::{Structure, UnitTypeRequest};
+use crate::content::effects::PermanentEffect;
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::game::Game;
-use crate::incident::PermanentIncidentEffect;
 use crate::player_events::{InfluenceCultureInfo, PlayingActionInfo};
 use crate::playing_actions::{ActionType, PlayingActionType};
 use crate::unit::UnitType;
@@ -70,8 +70,8 @@ pub(crate) fn cultural_takeover(id: u8, tactics_card: TacticsCardFactory) -> Act
         |game, _player, _name, a| {
             if a.selected_position.is_none() {
                 // skip this the second time where we only select a unit type to add
-                game.permanent_incident_effects
-                    .push(PermanentIncidentEffect::CulturalTakeover);
+                game.permanent_effects
+                    .push(PermanentEffect::CulturalTakeover);
                 game.add_info_log_item(
                     "Cultural Takeover: You may influence Barbarian cities of size 1.",
                 );
@@ -89,8 +89,8 @@ pub(crate) fn use_cultural_takeover() -> Builtin {
             3,
             |available, game, i| {
                 if game
-                    .permanent_incident_effects
-                    .contains(&PermanentIncidentEffect::CulturalTakeover)
+                    .permanent_effects
+                    .contains(&PermanentEffect::CulturalTakeover)
                     && !is_influence(i)
                 {
                     *available =
@@ -116,8 +116,8 @@ pub(crate) fn use_cultural_takeover() -> Builtin {
             1,
             |game, outcome, ()| {
                 if remove_element(
-                    &mut game.permanent_incident_effects,
-                    &PermanentIncidentEffect::CulturalTakeover,
+                    &mut game.permanent_effects,
+                    &PermanentEffect::CulturalTakeover,
                 )
                 .is_some_and(|_| outcome.success)
                 {
@@ -135,8 +135,8 @@ fn is_barbarian_takeover(game: &Game, c: &InfluenceCultureInfo) -> bool {
     city.player_index == get_barbarians_player(game).index
         && city.size() == 1
         && game
-            .permanent_incident_effects
-            .contains(&PermanentIncidentEffect::CulturalTakeover)
+            .permanent_effects
+            .contains(&PermanentEffect::CulturalTakeover)
 }
 
 fn is_influence(i: &PlayingActionInfo) -> bool {

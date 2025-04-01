@@ -4,9 +4,9 @@ use crate::city::{City, MoodState};
 use crate::construct::can_construct_anything;
 use crate::content::builtin::Builtin;
 use crate::content::custom_phase_actions::{CurrentEventType, PaymentRequest, PositionRequest};
+use crate::content::effects::PermanentEffect;
 use crate::content::wonders::get_wonder;
 use crate::events::EventOrigin;
-use crate::incident::PermanentIncidentEffect;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::utils::remove_element;
@@ -149,8 +149,8 @@ pub(crate) fn on_draw_wonder_card() -> Builtin {
                         s.player_name, name
                     ));
                     gain_wonder(game, s.player_index, get_wonder(&name));
-                    game.permanent_incident_effects
-                        .retain(|e| !matches!(e, PermanentIncidentEffect::PublicWonderCard(_)));
+                    game.permanent_effects
+                        .retain(|e| !matches!(e, PermanentEffect::PublicWonderCard(_)));
                 } else {
                     gain_wonder_from_pile(game, s.player_index);
                 }
@@ -170,12 +170,10 @@ fn gain_wonder_from_pile(game: &mut Game, player: usize) {
 }
 
 fn find_public_wonder(game: &Game) -> Option<&String> {
-    game.permanent_incident_effects
-        .iter()
-        .find_map(|e| match e {
-            PermanentIncidentEffect::PublicWonderCard(name) => Some(name),
-            _ => None,
-        })
+    game.permanent_effects.iter().find_map(|e| match e {
+        PermanentEffect::PublicWonderCard(name) => Some(name),
+        _ => None,
+    })
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

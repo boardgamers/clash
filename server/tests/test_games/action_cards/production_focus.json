@@ -6,14 +6,14 @@
       "resources": {
         "food": 1,
         "wood": 6,
-        "ore": 7,
+        "ore": 5,
         "ideas": 5,
         "gold": 7,
-        "mood_tokens": 5,
+        "mood_tokens": 8,
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 2,
+        "food": 7,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -31,35 +31,18 @@
         },
         {
           "city_pieces": {
-            "observatory": 0
+            "fortress": 0,
+            "port": 0,
+            "temple": 0
           },
-          "mood_state": "Neutral",
-          "activations": 1,
+          "mood_state": "Happy",
+          "activations": 0,
           "angry_activation": false,
-          "position": "C2"
+          "position": "C2",
+          "port_position": "C3"
         }
       ],
       "units": [
-        {
-          "position": "C2",
-          "unit_type": "Infantry",
-          "id": 0
-        },
-        {
-          "position": "C2",
-          "unit_type": "Cavalry",
-          "id": 1
-        },
-        {
-          "position": "C2",
-          "unit_type": "Leader",
-          "id": 2
-        },
-        {
-          "position": "C2",
-          "unit_type": "Elephant",
-          "id": 3
-        },
         {
           "position": "C2",
           "unit_type": "Settler",
@@ -84,27 +67,22 @@
       "civilization": "test0",
       "advances": [
         "Farming",
-        "Free Economy",
-        "Math",
-        "Metallurgy",
-        "Mining"
+        "Fishing",
+        "Mining",
+        "Storage",
+        "Tactics"
       ],
-      "incident_tokens": 2,
-      "next_unit_id": 8,
-      "played_once_per_turn_actions": [
-        "FreeEconomyCollect"
-      ]
+      "incident_tokens": 3,
+      "action_cards": [
+        19
+      ],
+      "next_unit_id": 8
     },
     {
       "id": 1,
       "resources": {
-        "food": 2,
-        "wood": 7,
-        "ore": 7,
-        "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 7,
-        "culture_tokens": 7
+        "food": 1,
+        "mood_tokens": 1
       },
       "resource_limit": {
         "food": 2,
@@ -139,10 +117,53 @@
       "civilization": "test1",
       "advances": [
         "Farming",
+        "Fishing",
         "Mining"
       ],
-      "incident_tokens": 3,
+      "incident_tokens": 2,
+      "action_cards": [
+        18
+      ],
       "next_unit_id": 2
+    },
+    {
+      "id": 2,
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "D1",
+          "unit_type": "Ship",
+          "id": 5
+        },
+        {
+          "position": "D1",
+          "unit_type": "Ship",
+          "id": 6
+        },
+        {
+          "position": "A2",
+          "unit_type": "Ship",
+          "id": 9
+        }
+      ],
+      "civilization": "Pirates",
+      "incident_tokens": 3,
+      "next_unit_id": 11
     }
   ],
   "map": {
@@ -157,9 +178,7 @@
       ],
       [
         "A3",
-        {
-          "Exhausted": "Forest"
-        }
+        "Mountain"
       ],
       [
         "B1",
@@ -167,7 +186,7 @@
       ],
       [
         "B2",
-        "Mountain"
+        "Forest"
       ],
       [
         "B3",
@@ -186,6 +205,10 @@
         "Water"
       ],
       [
+        "D1",
+        "Water"
+      ],
+      [
         "D2",
         "Water"
       ]
@@ -200,69 +223,19 @@
           "players": [
             {
               "index": 0,
-              "items": [
-                {
-                  "action": {
-                    "Playing": {
-                      "Custom": {
-                        "FreeEconomyCollect": {
-                          "city_position": "C2",
-                          "collections": [
-                            {
-                              "position": "B1",
-                              "pile": {
-                                "ore": 1
-                              },
-                              "times": 1
-                            },
-                            {
-                              "position": "B2",
-                              "pile": {
-                                "ore": 1
-                              },
-                              "times": 1
-                            }
-                          ]
-                        }
-                      }
-                    }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/1/activations",
-                      "value": 0
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 6
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/played_once_per_turn_actions"
-                    }
-                  ]
-                }
-              ]
+              "items": []
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1 collects 1 ore and 1 ore for a total of 2 ore in the city at C2 using Free Economy",
-      "Metallurgy converted 1 ore to 1 gold",
-      "Player1 could not store 1 ore and 1 gold"
-    ]
-  ],
+  "action_log_index": 0,
+  "log": [],
   "undo_limit": 0,
   "actions_left": 3,
-  "round": 2,
-  "age": 1,
+  "round": 1,
+  "age": 2,
   "messages": [
     "The game has started"
   ],
@@ -275,13 +248,17 @@
     10,
     10,
     10,
-    10,
     10
   ],
-  "dice_roll_log": [],
+  "dice_roll_log": [
+    10
+  ],
   "dropped_players": [],
   "wonders_left": [
     "Pyramids"
   ],
-  "action_cards_left": []
+  "action_cards_left": [],
+  "incidents_left": [
+    26
+  ]
 }

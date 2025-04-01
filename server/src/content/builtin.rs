@@ -6,6 +6,7 @@ use crate::combat_listeners::{
     place_settler,
 };
 use crate::content::action_cards::cultural_takeover::use_cultural_takeover;
+use crate::content::action_cards::development::collect_only;
 use crate::content::incidents::famine::pestilence_permanent_effect;
 use crate::content::incidents::great_builders::construct_only;
 use crate::content::incidents::great_diplomat::use_diplomatic_relations;
@@ -95,6 +96,7 @@ pub fn get_all() -> Vec<Builtin> {
         anarchy_advance(),
         use_great_warlord(),
         construct_only(),
+        collect_only(),
         use_diplomatic_relations(),
         // action card related
         use_cultural_takeover(),

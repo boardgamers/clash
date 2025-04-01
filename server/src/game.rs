@@ -6,9 +6,9 @@ use crate::content::civilizations::{BARBARIANS, PIRATES};
 use crate::content::custom_phase_actions::{
     CurrentEventHandler, CurrentEventPlayer, CurrentEventState, CurrentEventType,
 };
+use crate::content::effects::PermanentEffect;
 use crate::content::{action_cards, advances, builtin, incidents};
 use crate::events::{Event, EventOrigin};
-use crate::incident::PermanentIncidentEffect;
 use crate::log::{
     current_player_turn_log, current_player_turn_log_mut, ActionLogAge, ActionLogPlayer,
     ActionLogRound,
@@ -61,7 +61,7 @@ pub struct Game {
     pub wonders_left: Vec<String>,
     pub action_cards_left: Vec<u8>,
     pub incidents_left: Vec<u8>,
-    pub permanent_incident_effects: Vec<PermanentIncidentEffect>,
+    pub permanent_effects: Vec<PermanentEffect>,
 }
 
 impl Clone for Game {
@@ -171,7 +171,7 @@ impl Game {
             wonders_left,
             action_cards_left,
             incidents_left,
-            permanent_incident_effects: Vec::new(),
+            permanent_effects: Vec::new(),
         };
         for i in 0..game.players.len() {
             builtin::init_player(&mut game, i);
@@ -222,7 +222,7 @@ impl Game {
             wonders_left: data.wonders_left,
             action_cards_left: data.action_cards_left,
             incidents_left: data.incidents_left,
-            permanent_incident_effects: data.permanent_incident_effects,
+            permanent_effects: data.permanent_effects,
             events: data.events,
         };
         for player in data.players {
@@ -256,7 +256,7 @@ impl Game {
             wonders_left: self.wonders_left,
             action_cards_left: self.action_cards_left,
             incidents_left: self.incidents_left,
-            permanent_incident_effects: self.permanent_incident_effects,
+            permanent_effects: self.permanent_effects,
         }
     }
 
@@ -285,7 +285,7 @@ impl Game {
             wonders_left: self.wonders_left.clone(),
             action_cards_left: self.action_cards_left.clone(),
             incidents_left: self.incidents_left.clone(),
-            permanent_incident_effects: self.permanent_incident_effects.clone(),
+            permanent_effects: self.permanent_effects.clone(),
         }
     }
 
@@ -585,9 +585,13 @@ impl Game {
             self.player_name(self.current_player_index)
         ));
         self.actions_left = ACTIONS;
-        let lost_action = self.permanent_incident_effects.iter().position(
-            |e| matches!(e, PermanentIncidentEffect::LoseAction(p) if *p == self.current_player_index),
-        ).map(|i| self.permanent_incident_effects.remove(i));
+        let lost_action = self
+            .permanent_effects
+            .iter()
+            .position(
+                |e| matches!(e, PermanentEffect::LoseAction(p) if *p == self.current_player_index),
+            )
+            .map(|i| self.permanent_effects.remove(i));
         if lost_action.is_some() {
             self.add_info_log_item("Remove 1 action for Revolution");
             self.actions_left -= 1;
@@ -846,7 +850,7 @@ pub struct GameData {
     incidents_left: Vec<u8>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    permanent_incident_effects: Vec<PermanentIncidentEffect>,
+    permanent_effects: Vec<PermanentEffect>,
 }
 
 fn is_string_zero(s: &String) -> bool {

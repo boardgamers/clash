@@ -51,15 +51,18 @@ fn irrigation() -> AdvanceBuilder {
 fn husbandry() -> AdvanceBuilder {
     Advance::builder(
         "Husbandry",
-        "During a Collect Resources Action, you may collect from a Land space that is 2 Land spaces away, rather than 1. If you have the Roads Advance you may collect from two Land spaces that are 2 Land spaces away. This Advance can only be used once per turn.",
+        "During a Collect Resources Action, \
+        you may collect from a Land space that is 2 Land spaces away, rather than 1. \
+        If you have the Roads Advance you may collect from two Land spaces that are 2 Land \
+        spaces away. This Advance can only be used once per turn.",
     )
-        .with_advance_bonus(MoodToken)
-        .add_once_per_turn_listener(
-            |event| &mut event.collect_options,
-            |i| &mut i.info.info,
-            husbandry_collect,
-            0,
-        )
+    .with_advance_bonus(MoodToken)
+    .add_once_per_turn_listener(
+        |event| &mut event.collect_options,
+        0,
+        husbandry_collect,
+        |i| &mut i.info.info,
+    )
 }
 
 fn husbandry_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
@@ -68,7 +71,7 @@ fn husbandry_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
 
     if c.used
         .iter()
-        .filter(|(pos, _)| pos.distance(c.city_position) == 2)
+        .filter(|u| u.position.distance(c.city_position) == 2)
         .count()
         == allowed
     {

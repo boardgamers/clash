@@ -66,7 +66,7 @@ fn priesthood() -> AdvanceBuilder {
     Advance::builder("Priesthood", "Once per turn, a science advance is free")
         .add_once_per_turn_listener(
             |event| &mut event.advance_cost,
-            |i| &mut i.info.info,
+            2,
             |i, advance, ()| {
                 if get_group("Science").advances.iter().any(|a| a == advance) {
                     i.set_zero();
@@ -75,7 +75,7 @@ fn priesthood() -> AdvanceBuilder {
                         .push("Priesthood reduced the cost to 0".to_string());
                 }
             },
-            2,
+            |i| &mut i.info.info,
         )
 }
 
@@ -88,7 +88,7 @@ fn state_religion() -> AdvanceBuilder {
     .with_advance_bonus(MoodToken)
     .add_once_per_turn_listener(
         |event| &mut event.construct_cost,
-        |i| &mut i.info.info,
+        0,
         |i, b, _| {
             if matches!(b, Temple) {
                 i.cost.conversions.push(PaymentConversion::limited(
@@ -101,6 +101,6 @@ fn state_religion() -> AdvanceBuilder {
                     .push("State Religion reduced the food cost to 0".to_string());
             }
         },
-        0,
+        |i| &mut i.info.info,
     )
 }

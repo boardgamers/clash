@@ -233,7 +233,7 @@
                     },
                     {
                       "op": "add",
-                      "path": "/permanent_incident_effects",
+                      "path": "/permanent_effects",
                       "value": [
                         {
                           "Anarchy": {

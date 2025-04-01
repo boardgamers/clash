@@ -4,8 +4,7 @@ use crate::layout_ui::{bottom_center_anchor, bottom_center_texture, ICON_SIZE};
 use crate::render_context::RenderContext;
 use macroquad::color::{Color, BLACK, BLUE, WHITE};
 use macroquad::math::{bool, vec2, Vec2};
-use macroquad::prelude::{TextParams, GRAY, RED};
-use macroquad::text::draw_text_ex;
+use macroquad::prelude::{GRAY, RED};
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct CountSelector {
@@ -44,17 +43,11 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
 
         draw(o, vec2(x + 7., -60.) + anchor + offset);
         let current_pos = vec2(x + 13., -ICON_SIZE) + anchor + offset;
-        draw_text_ex(
+        rc.state.draw_text_with_color(
             &format!("{}", c.current),
             current_pos.x,
             current_pos.y,
-            TextParams {
-                font_size: 20,
-                font_scale: 1.,
-                font: Some(&rc.assets().font),
-                color: BLACK,
-                ..Default::default()
-            },
+            BLACK,
         );
         if c.current > c.min
             && bottom_center_texture(

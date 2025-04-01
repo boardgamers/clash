@@ -229,6 +229,19 @@ impl ResourcePile {
         }
         types
     }
+
+    #[must_use]
+    pub fn times(&self, t: u32) -> Self {
+        ResourcePile::new(
+            self.food * t,
+            self.wood * t,
+            self.ore * t,
+            self.ideas * t,
+            self.gold * t,
+            self.mood_tokens * t,
+            self.culture_tokens * t,
+        )
+    }
 }
 
 impl AddAssign for ResourcePile {

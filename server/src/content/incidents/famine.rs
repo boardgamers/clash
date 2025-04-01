@@ -2,9 +2,10 @@ use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::city::{City, MoodState};
 use crate::content::builtin::Builtin;
 use crate::content::custom_phase_actions::UnitsRequest;
+use crate::content::effects::PermanentEffect;
 use crate::content::incidents::civil_war::non_angry_cites;
 use crate::game::Game;
-use crate::incident::{Incident, IncidentBaseEffect, MoodModifier, PermanentIncidentEffect};
+use crate::incident::{Incident, IncidentBaseEffect, MoodModifier};
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::playing_actions::PlayingActionType;
@@ -49,8 +50,7 @@ fn pestilence() -> Incident {
         },
     )
     .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _, _| {
-        game.permanent_incident_effects
-            .push(PermanentIncidentEffect::Pestilence);
+        game.permanent_effects.push(PermanentEffect::Pestilence);
     })
     .build()
 }
@@ -74,8 +74,8 @@ pub(crate) fn pestilence_permanent_effect() -> Builtin {
         |available, game, i| {
             let player = game.get_player(i.player);
             if game
-                .permanent_incident_effects
-                .contains(&PermanentIncidentEffect::Pestilence)
+                .permanent_effects
+                .contains(&PermanentEffect::Pestilence)
                 && matches!(i.action_type, PlayingActionType::Construct)
                 && !player.has_advance("Sanitation")
             {

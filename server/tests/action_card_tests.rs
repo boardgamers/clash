@@ -3,12 +3,13 @@ use common::JsonTest;
 use server::action::Action;
 use server::card::HandCard;
 use server::city_pieces::Building::Fortress;
-use server::construct;
+use server::collect::PositionCollection;
 use server::content::custom_phase_actions::{EventResponse, SelectedStructure, Structure};
 use server::playing_actions::PlayingAction;
 use server::playing_actions::PlayingAction::Construct;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
+use server::{construct, playing_actions};
 
 mod common;
 
@@ -188,6 +189,33 @@ fn test_city_development() {
                     Fortress,
                     ResourcePile::empty(),
                 ))),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_production_focus() {
+    JSON.test(
+        "production_focus",
+        vec![
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(19)))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Playing(PlayingAction::Collect(playing_actions::Collect {
+                    city_position: Position::from_offset("C2"),
+                    collections: vec![
+                        PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1))
+                            .times(2),
+                        PositionCollection::new(
+                            Position::from_offset("C3"),
+                            ResourcePile::mood_tokens(1),
+                        )
+                        .times(2),
+                        PositionCollection::new(Position::from_offset("C3"), ResourcePile::gold(1)),
+                    ],
+                })),
             ),
         ],
     );

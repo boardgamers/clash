@@ -1,6 +1,7 @@
 use crate::common::{illegal_action_test, influence_action, JsonTest, TestAction};
 use server::action::{execute_action, Action};
 use server::city_pieces::Building::{Academy, Fortress, Temple};
+use server::collect::PositionCollection;
 use server::consts::CONSTRUCT_COST;
 use server::content::advances::trade_routes::find_trade_routes;
 use server::content::custom_actions::CustomAction;
@@ -254,8 +255,8 @@ fn test_forced_labor() {
                 Action::Playing(Collect(playing_actions::Collect {
                     city_position: Position::from_offset("A1"),
                     collections: vec![
-                        (Position::from_offset("A1"), ResourcePile::food(1)),
-                        (Position::from_offset("A2"), ResourcePile::wood(1)),
+                        PositionCollection::new(Position::from_offset("A1"), ResourcePile::food(1)),
+                        PositionCollection::new(Position::from_offset("A2"), ResourcePile::wood(1)),
                     ],
                 })),
             ),
@@ -518,7 +519,10 @@ fn test_free_education() {
 fn test_collect_husbandry() {
     let action = Action::Playing(Collect(playing_actions::Collect {
         city_position: Position::from_offset("B3"),
-        collections: vec![(Position::from_offset("B5"), ResourcePile::food(1))],
+        collections: vec![PositionCollection::new(
+            Position::from_offset("B5"),
+            ResourcePile::food(1),
+        )],
     }));
     JSON.test(
         "collect_husbandry",
@@ -539,8 +543,8 @@ fn test_collect_free_economy() {
                 playing_actions::Collect {
                     city_position: Position::from_offset("C2"),
                     collections: vec![
-                        (Position::from_offset("B1"), ResourcePile::ore(1)),
-                        (Position::from_offset("B2"), ResourcePile::ore(1)),
+                        PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),
+                        PositionCollection::new(Position::from_offset("B2"), ResourcePile::ore(1)),
                     ],
                 },
             ))),
