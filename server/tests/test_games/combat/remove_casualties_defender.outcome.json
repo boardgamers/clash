@@ -217,6 +217,8 @@
     ],
     [
       "Combat round 1",
+      "Attackers: 1 infantry",
+      "Defenders: 2 infantry",
       "Player1 rolled 6 (Infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
       "Player2 rolled 6 (Infantry, +1 combat value), 6 (Infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units.",
       "Player1 has to remove all of their attacking units",

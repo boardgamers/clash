@@ -15,7 +15,7 @@ use crate::movement::{MoveUnits, MovementRestriction, move_units, stop_current_m
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::CombatRole;
-use crate::unit::UnitType;
+use crate::unit::{UnitType, Units};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -214,6 +214,20 @@ pub fn initiate_combat(
 
 pub(crate) fn log_round(game: &mut Game, c: &Combat) {
     game.add_info_log_group(format!("Combat round {}", c.round));
+    game.add_info_log_item(&format!(
+        "Attackers: {}",
+        c.attackers
+            .iter()
+            .map(|u| game.players[c.attacker].get_unit(*u).unit_type)
+            .collect::<Units>()));
+    game.add_info_log_item(&format!(
+        "Defenders: {}",
+        game.players[c.defender]
+            .get_units(c.defender_position)
+            .iter()
+            .map(|u| u.unit_type)
+            .collect::<Units>()
+    ));
 }
 
 pub(crate) fn start_combat(game: &mut Game, combat: Combat) {

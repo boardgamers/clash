@@ -303,6 +303,8 @@
     ],
     [
       "Combat round 1",
+      "Attackers: 1 infantry",
+      "Defenders: 1 infantry",
       "Player1 paid 2 culture tokens to end diplomatic relations with Player2 using a surprise attack.",
       "Player1 rolled 6 (Infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
       "Player2 rolled 6 (Infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units.",

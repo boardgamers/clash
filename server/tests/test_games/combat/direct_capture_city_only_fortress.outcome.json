@@ -237,6 +237,8 @@
     ],
     [
       "Combat round 1",
+      "Attackers: 1 infantry, 1 cavalry, 1 elephant and a leader",
+      "Defenders: no units",
       "Player1 rolled 6 (Infantry, +1 combat value), 6 (Infantry, no bonus), 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 25 and gets 0 hits against defending units.",
       "Player2 rolled 1 (Leader, no bonus) for combined combat value of 1 and gets 0 hits against attacking units.",
       "Player2 used the following combat modifiers: fortress added one extra die, fortress cancelled one hit",

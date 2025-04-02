@@ -325,7 +325,9 @@
       "Player1 sailed 2 ships from C3 to D2"
     ],
     [
-      "Combat round 1"
+      "Combat round 1",
+      "Attackers: 2 ships",
+      "Defenders: 1 ship"
     ],
     [
       "Player1 played a Tactics Card"

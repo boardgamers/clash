@@ -5,7 +5,7 @@ use crate::content::builtin::Builtin;
 use crate::content::effects::PermanentEffect;
 use crate::content::incidents::great_diplomat::{DiplomaticRelations, Negotiations};
 use crate::content::persistent_events::PlayerRequest;
-use crate::content::tactics_cards::{TacticsCardFactory, martyr, scout};
+use crate::content::tactics_cards::{TacticsCardFactory, high_ground, martyr, scout, archers};
 use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::playing_actions::{ActionType, PlayingAction};
@@ -13,7 +13,12 @@ use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element_by;
 
 pub(crate) fn negotiation_action_cards() -> Vec<ActionCard> {
-    vec![negotiations(23, scout), negotiations(24, martyr)]
+    vec![
+        negotiations(23, scout),
+        negotiations(24, martyr),
+        leadership(25, high_ground),
+        leadership(26, archers),
+    ]
 }
 
 fn negotiations(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
@@ -104,4 +109,24 @@ pub(crate) fn negotiations_partner(game: &Game, p: usize) -> Option<usize> {
             None
         }
     })
+}
+
+fn leadership(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
+    ActionCard::builder(
+        id,
+        "Leadership",
+        "Gain 1 action.",
+        ActionType::cost(ResourcePile::culture_tokens(1)),
+        move |_game, _player| true,
+    )
+    .tactics_card(tactics_card)
+    .add_simple_persistent_event_listener(
+        |e| &mut e.play_action_card,
+        0,
+        |game, _player_index, player_name, _| {
+            game.add_info_log_item(&format!("{player_name} used Leadership to gain an action."));
+            game.actions_left += 1;
+        },
+    )
+    .build()
 }
