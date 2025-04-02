@@ -24,5 +24,5 @@ dir = "client"
 depends = ["server-format-and-lint", "client-format-and-lint"]
 
 [tools]
-rust = "latest"
+rust = { version = "latest", components = "clippy" }
 
