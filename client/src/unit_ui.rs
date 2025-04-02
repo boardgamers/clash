@@ -1,9 +1,9 @@
-use macroquad::math::{u32, vec2, Vec2};
+use macroquad::math::{Vec2, u32, vec2};
 use macroquad::shapes::draw_circle;
 
 use server::game::Game;
 use server::position::Position;
-use server::unit::{carried_units, MovementRestriction, Unit, UnitType};
+use server::unit::{Unit, UnitType, carried_units};
 
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::hex_ui;
@@ -15,6 +15,7 @@ use crate::render_context::RenderContext;
 use crate::tooltip::show_tooltip_for_circle;
 use itertools::Itertools;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
+use server::movement::MovementRestriction;
 use server::player::Player;
 
 pub struct UnitPlace {
@@ -48,7 +49,7 @@ pub fn draw_unit_type(
     let icon_size = size * 1.1;
     draw_scaled_icon(
         rc,
-        &rc.assets().units[&unit_type],
+        rc.assets().unit(unit_type, rc.game.player(player_index)),
         tooltip,
         vec2(center.x - icon_size / 2., center.y - icon_size / 2.),
         icon_size,
@@ -110,16 +111,6 @@ pub fn click_unit(
         })
 }
 
-pub fn non_leader_names() -> [(UnitType, &'static str); 5] {
-    [
-        (UnitType::Settler, "Settler"),
-        (UnitType::Infantry, "Infantry"),
-        (UnitType::Ship, "Ship"),
-        (UnitType::Elephant, "Elephant"),
-        (UnitType::Cavalry, "Cavalry"),
-    ]
-}
-
 pub fn draw_units(rc: &RenderContext, tooltip: bool) {
     let player = rc.shown_player.index;
     let highlighted_units = match rc.state.active_dialog {
@@ -176,7 +167,7 @@ pub fn draw_units(rc: &RenderContext, tooltip: bool) {
 
                 draw_unit(rc, tooltip, &highlighted_units, *p, u, &place);
 
-                let player = rc.game.get_player(*p);
+                let player = rc.game.player(*p);
                 let game = rc.game;
                 let player_index = *p;
                 let carrier = u.id;
@@ -223,7 +214,7 @@ fn draw_unit(
     let game = &rc.game;
     if tooltip {
         let army_move = game
-            .get_player(player_index)
+            .player(player_index)
             .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
         show_tooltip_for_circle(rc, &unit_label(unit, army_move), center, radius);
     } else {
@@ -257,7 +248,7 @@ pub fn unit_selection_click<T: UnitSelection + Clone>(
     sel: &T,
     on_change: impl Fn(T) -> StateUpdate,
 ) -> StateUpdate {
-    let p = rc.game.get_player(sel.player_index());
+    let p = rc.game.player(sel.player_index());
     if let Some(unit_id) = click_unit(rc, pos, mouse_pos, p, true) {
         if sel.can_select(rc.game, p.get_unit(unit_id)) {
             let mut new = sel.clone();
@@ -284,11 +275,7 @@ pub fn name(u: &UnitType) -> &str {
     if let UnitType::Leader = u {
         return "Leader";
     }
-    non_leader_names()
-        .into_iter()
-        .find(|(unit_type, _)| unit_type == u)
-        .unwrap()
-        .1
+    u.name()
 }
 
 pub fn unit_label(unit: &Unit, army_move: bool) -> String {

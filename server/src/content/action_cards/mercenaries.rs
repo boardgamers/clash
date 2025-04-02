@@ -4,17 +4,17 @@ use crate::barbarians::{barbarian_reinforcement, get_barbarians_player};
 use crate::combat::move_with_possible_combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::action_cards::inspiration::player_positions;
-use crate::content::custom_phase_actions::{PaymentRequest, PositionRequest};
+use crate::content::persistent_events::{PaymentRequest, PositionRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::game::Game;
 use crate::log::move_action_log;
+use crate::movement::MoveUnits;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::playing_actions::ActionType;
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-use crate::unit::MoveUnits;
 use crate::utils::remove_element;
 use itertools::Itertools;
 
@@ -33,10 +33,10 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
     )
     .tactics_card(tactics_card)
     .add_position_request(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         100,
         |game, player, _| {
-            let p = game.get_player(player);
+            let p = game.player(player);
             let r = barbarian_army_positions_in_range2(game, p);
             if r.is_empty() {
                 return None;
@@ -58,7 +58,7 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
         },
     )
     .add_payment_request_listener(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         99,
         |_game, _player, a| {
             Some(vec![PaymentRequest::new(
@@ -98,7 +98,7 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
     let reinforce_prio = i * 3;
     let b = b
         .add_position_request(
-            |e| &mut e.on_play_action_card,
+            |e| &mut e.play_action_card,
             src_prio,
             |_game, _player, a| {
                 a.selected_position = None;
@@ -120,7 +120,7 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
             },
         )
         .add_position_request(
-            |e| &mut e.on_play_action_card,
+            |e| &mut e.play_action_card,
             dst_prio,
             |game, _player, a| {
                 let from = a.selected_position?;
@@ -164,7 +164,7 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
 
     barbarian_reinforcement(
         b,
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         reinforce_prio,
         |game, _, a| {
             a.selected_position

@@ -4,7 +4,7 @@ pub(crate) mod famine;
 mod good_year;
 pub(crate) mod great_builders;
 pub(crate) mod great_diplomat;
-mod great_explorer;
+pub(crate) mod great_explorer;
 pub(crate) mod great_persons;
 pub(crate) mod great_warlord;
 mod pandemics;

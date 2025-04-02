@@ -2,13 +2,13 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::{do_advance, gain_advance, remove_advance};
 use crate::consts::AGES;
-use crate::content::builtin::{status_phase_handler, Builtin};
-use crate::content::custom_phase_actions::{
-    AdvanceRequest, ChangeGovernmentRequest, CurrentEventRequest, CurrentEventType, EventResponse,
-    PlayerRequest, PositionRequest,
+use crate::content::builtin::{Builtin, status_phase_handler};
+use crate::content::persistent_events::{
+    AdvanceRequest, ChangeGovernmentRequest, EventResponse, PersistentEventRequest,
+    PersistentEventType, PlayerRequest, PositionRequest,
 };
 use crate::payment::PaymentOptions;
-use crate::player_events::{CurrentEvent, PersistentEvents};
+use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::{content::advances, game::Game, player::Player, resource_pile::ResourcePile, utils};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -40,12 +40,9 @@ pub const CHANGE_GOVERNMENT_COST: ResourcePile = ResourcePile::new(0, 0, 0, 0, 0
 
 #[must_use]
 pub fn get_status_phase(game: &Game) -> Option<&StatusPhaseState> {
-    game.events.iter().find_map(|e| {
-        if let CurrentEventType::StatusPhase(s) = &e.event_type {
-            Some(s)
-        } else {
-            None
-        }
+    game.events.iter().find_map(|e| match &e.event_type {
+        PersistentEventType::StatusPhase(s) => Some(s),
+        _ => None,
     })
 }
 
@@ -61,12 +58,12 @@ pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
     use StatusPhaseState::*;
 
     loop {
-        phase = match game.trigger_current_event_with_listener(
+        phase = match game.trigger_persistent_event_with_listener(
             &game.human_players(game.starting_player_index),
-            |events| &mut events.on_status_phase,
+            |events| &mut events.status_phase,
             &status_phase_handler(&phase).listeners,
             phase,
-            CurrentEventType::StatusPhase,
+            PersistentEventType::StatusPhase,
             None,
             |_| {},
         ) {
@@ -95,7 +92,7 @@ pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
                 &game
                     .human_players(game.starting_player_index)
                     .into_iter()
-                    .map(|p| game.get_player(p))
+                    .map(|p| game.player(p))
                     .collect_vec(),
             )),
             DetermineFirstPlayer(_) => {
@@ -114,12 +111,12 @@ pub(crate) fn complete_objectives() -> Builtin {
 pub(crate) fn free_advance() -> Builtin {
     Builtin::builder("Free Advance", "Advance for free")
         .add_advance_request(
-            |event| &mut event.on_status_phase,
+            |event| &mut event.status_phase,
             0,
             |game, player_index, _player_name| {
                 let choices = advances::get_all()
                     .into_iter()
-                    .filter(|advance| game.get_player(player_index).can_advance_free(advance))
+                    .filter(|advance| game.player(player_index).can_advance_free(advance))
                     .map(|a| a.name)
                     .collect_vec();
                 Some(AdvanceRequest::new(choices))
@@ -138,7 +135,7 @@ pub(crate) fn free_advance() -> Builtin {
 pub(crate) fn draw_cards() -> Builtin {
     Builtin::builder("Draw Cards", "-")
         .add_simple_persistent_event_listener(
-            |event| &mut event.on_status_phase,
+            |event| &mut event.status_phase,
             0,
             |game, p, _name, _s| {
                 gain_action_card_from_pile(game, p);
@@ -151,10 +148,10 @@ pub(crate) fn draw_cards() -> Builtin {
 pub(crate) fn raze_city() -> Builtin {
     Builtin::builder("Raze city", "Raze size 1 city for 1 gold")
         .add_position_request(
-            |event| &mut event.on_status_phase,
+            |event| &mut event.status_phase,
             0,
             |game, player_index, _player_name| {
-                let player = game.get_player(player_index);
+                let player = game.player(player_index);
                 let cities = player
                     .cities
                     .iter()
@@ -191,7 +188,7 @@ pub(crate) fn raze_city() -> Builtin {
 pub(crate) fn may_change_government() -> Builtin {
     add_change_government(
         Builtin::builder("Change Government", "Change your government"),
-        |event| &mut event.on_status_phase,
+        |event| &mut event.status_phase,
         true,
         CHANGE_GOVERNMENT_COST,
     )
@@ -205,24 +202,24 @@ pub(crate) fn add_change_government<A, E, V>(
     cost: ResourcePile,
 ) -> A
 where
-    E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+    E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
     A: AbilityInitializerSetup,
     V: Clone + PartialEq,
 {
     let cost2 = cost.clone();
-    a.add_current_event_listener(
+    a.add_persistent_event_listener(
         event,
         0,
         move |game, player_index, _, _| {
-            let p = game.get_player(player_index);
+            let p = game.player(player_index);
             (can_change_government_for_free(p)
                 && p.can_afford(&PaymentOptions::resources(cost.clone())))
-            .then_some(CurrentEventRequest::ChangeGovernment(
+            .then_some(PersistentEventRequest::ChangeGovernment(
                 ChangeGovernmentRequest::new(optional, cost.clone()),
             ))
         },
         move |game, player_index, player_name, action, request, _| {
-            if let CurrentEventRequest::ChangeGovernment(r) = &request {
+            if let PersistentEventRequest::ChangeGovernment(r) = &request {
                 if let EventResponse::ChangeGovernmentType(t) = action {
                     match t {
                         ChangeGovernmentType::ChangeGovernment(c) => {
@@ -319,7 +316,7 @@ pub(crate) fn can_change_government_for_free(player: &Player) -> bool {
 pub(crate) fn determine_first_player() -> Builtin {
     Builtin::builder("Determine First Player", "Determine the first player")
         .add_player_request(
-            |event| &mut event.on_status_phase,
+            |event| &mut event.status_phase,
             0,
             |game, player_index, phase| {
                 if let StatusPhaseState::DetermineFirstPlayer(want) = phase {

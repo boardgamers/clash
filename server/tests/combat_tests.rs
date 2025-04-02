@@ -1,10 +1,10 @@
 // combat
 
-use crate::common::{move_action, TestAction};
+use crate::common::{TestAction, move_action};
 use common::JsonTest;
 use server::action::Action;
 use server::card::HandCard;
-use server::content::custom_phase_actions::EventResponse;
+use server::content::persistent_events::EventResponse;
 use server::playing_actions::PlayingAction::Recruit;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
@@ -151,7 +151,7 @@ fn test_ship_combat() {
         "ship_combat",
         vec![
             TestAction::not_undoable(0, move_action(vec![7, 8], Position::from_offset("D2"))),
-            TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![1]))),
+            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![1]))),
         ],
     );
 }

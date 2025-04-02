@@ -1,22 +1,22 @@
-use crate::advance_ui::{show_advance_menu, AdvanceState};
+use crate::advance_ui::{AdvanceState, show_advance_menu};
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{
-    cancel_button_with_tooltip, ok_button, BaseOrCustomAction, BaseOrCustomDialog, OkTooltip,
+    BaseOrCustomAction, BaseOrCustomDialog, OkTooltip, cancel_button_with_tooltip, ok_button,
 };
 use crate::layout_ui::{bottom_center_anchor, bottom_centered_text, icon_pos};
-use crate::payment_ui::{multi_payment_dialog, payment_dialog, Payment};
+use crate::payment_ui::{Payment, multi_payment_dialog, payment_dialog};
 use crate::player_ui::choose_player_dialog;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
 use crate::unit_ui;
-use crate::unit_ui::{draw_unit_type, UnitSelection};
+use crate::unit_ui::{UnitSelection, draw_unit_type};
 use itertools::Itertools;
 use macroquad::math::vec2;
 use server::action::Action;
 use server::content::custom_actions::CustomAction;
-use server::content::custom_phase_actions::{
-    is_selected_structures_valid, AdvanceRequest, EventResponse, MultiRequest, PlayerRequest,
-    SelectedStructure, Structure, UnitTypeRequest, UnitsRequest,
+use server::content::persistent_events::{
+    AdvanceRequest, EventResponse, MultiRequest, PlayerRequest, SelectedStructure, Structure,
+    UnitTypeRequest, UnitsRequest, is_selected_structures_valid,
 };
 use server::game::Game;
 use server::playing_actions::PlayingAction;

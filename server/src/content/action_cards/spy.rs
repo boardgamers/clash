@@ -1,8 +1,8 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
-use crate::card::{hand_cards, HandCard, HandCardType};
+use crate::card::{HandCard, HandCardType, hand_cards};
 use crate::content::action_cards::get_action_card;
-use crate::content::custom_phase_actions::{CurrentEventType, HandCardsRequest, PlayerRequest};
+use crate::content::persistent_events::{HandCardsRequest, PersistentEventType, PlayerRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -22,7 +22,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |game, player| !players_with_cards(game, player.index).is_empty(),
     )
     .add_player_request(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         1,
         |game, player, _| {
             Some(PlayerRequest::new(
@@ -41,13 +41,13 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         },
     )
     .add_hand_card_request(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         0,
         |game, player, a| {
             game.lock_undo(); // you've seen the cards
 
-            let p = game.get_player(player);
-            let other = game.get_player(a.selected_player.expect("player not found"));
+            let p = game.player(player);
+            let other = game.player(a.selected_player.expect("player not found"));
 
             let all = HandCardType::get_all();
             let mut cards = hand_cards(other, &all);
@@ -58,7 +58,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             }
 
             let secrets = get_swap_secrets(other);
-            game.get_player_mut(player).secrets.extend(secrets);
+            game.player_mut(player).secrets.extend(secrets);
 
             Some(HandCardsRequest::new(
                 cards,
@@ -110,8 +110,8 @@ fn swap_cards(
         return Err("must select 2 cards".to_string());
     }
 
-    let p = game.get_player(player);
-    let o = game.get_player(other);
+    let p = game.player(player);
+    let o = game.player(other);
     let our_card = get_swap_card(swap, p);
     let other_card = get_swap_card(swap, o);
 
@@ -150,13 +150,13 @@ fn swap_card<T: PartialEq + Ord>(
     other_id: &T,
     get_list: impl Fn(&mut Player) -> &mut Vec<T>,
 ) {
-    let card = remove_element(get_list(game.get_player_mut(player)), id).expect("card not found");
-    let o = game.get_player_mut(other);
+    let card = remove_element(get_list(game.player_mut(player)), id).expect("card not found");
+    let o = game.player_mut(other);
     let other_card = remove_element(get_list(o), other_id).expect("card not found");
 
     get_list(o).push(card);
     get_list(o).sort();
-    let p = game.get_player_mut(player);
+    let p = game.player_mut(player);
     get_list(p).push(other_card);
     get_list(p).sort();
 }
@@ -213,7 +213,7 @@ pub fn validate_if_spy(cards: &[HandCard], game: &Game) -> bool {
     match h.origin {
         EventOrigin::CivilCard(id) if id == 7 || id == 8 => {
             let mut g = game.clone();
-            let CurrentEventType::ActionCard(c) = &s.event_type else {
+            let PersistentEventType::ActionCard(c) = &s.event_type else {
                 panic!("wrong event type");
             };
 

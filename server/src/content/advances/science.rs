@@ -2,8 +2,8 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::CultureToken;
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::city_pieces::Building::Observatory;
-use crate::content::advances::{advance_group_builder, AdvanceGroup, METALLURGY};
-use crate::content::custom_phase_actions::ResourceRewardRequest;
+use crate::content::advances::{AdvanceGroup, METALLURGY, advance_group_builder};
+use crate::content::persistent_events::ResourceRewardRequest;
 use crate::payment::PaymentOptions;
 use crate::resource::ResourceType;
 
@@ -60,7 +60,7 @@ fn medicine() -> AdvanceBuilder {
     )
     .with_advance_bonus(CultureToken)
     .add_resource_request(
-        |event| &mut event.on_recruit,
+        |event| &mut event.recruit,
         0,
         |_game, _player_index, recruit| {
             let types: Vec<ResourceType> = ResourceType::all()

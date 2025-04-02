@@ -63,7 +63,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
         );
     }
     let mut i = 0;
-    for (a, origin) in &game.get_available_custom_actions(rc.shown_player.index) {
+    for (a, origin) in &game.available_custom_actions(rc.shown_player.index) {
         if let Some(action) = generic_custom_action(rc, a, None) {
             if bottom_left_texture(
                 rc,
@@ -89,7 +89,7 @@ pub fn custom_action_buttons<'a>(
     city: Option<&'a City>,
 ) -> IconActionVec<'a> {
     rc.game
-        .get_available_custom_actions(rc.shown_player.index)
+        .available_custom_actions(rc.shown_player.index)
         .into_iter()
         .filter_map(|(a, origin)| {
             generic_custom_action(rc, &a, city).map(|action| {

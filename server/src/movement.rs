@@ -8,15 +8,58 @@ use crate::unit::Unit;
 use crate::utils;
 
 use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, MOVEMENT_ACTIONS, SHIP_CAPACITY, STACK_LIMIT};
-use crate::content::incidents::great_diplomat::{diplomatic_relations_partner, DIPLOMAT_ID};
+use crate::content::action_cards::negotiation::negotiations_partner;
+use crate::content::incidents::great_diplomat::{DIPLOMAT_ID, diplomatic_relations_partner};
 use crate::game::GameState::Movement;
 use crate::game::{Game, GameState};
 use crate::player::Player;
 use crate::player_events::MoveInfo;
 use crate::position::Position;
-use crate::unit::{carried_units, get_current_move, MovementRestriction};
+use crate::unit::{carried_units, get_current_move};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub struct MoveUnits {
+    pub units: Vec<u32>,
+    pub destination: Position,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub embark_carrier_id: Option<u32>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "ResourcePile::is_empty")]
+    pub payment: ResourcePile,
+}
+
+impl MoveUnits {
+    #[must_use]
+    pub fn new(
+        units: Vec<u32>,
+        destination: Position,
+        embark_carrier_id: Option<u32>,
+        payment: ResourcePile,
+    ) -> Self {
+        Self {
+            units,
+            destination,
+            embark_carrier_id,
+            payment,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub enum MovementAction {
+    Move(MoveUnits),
+    Stop,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
+pub enum MovementRestriction {
+    Battle,
+    Mountain,
+    Forest,
+}
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Default)]
 pub enum CurrentMove {
@@ -96,7 +139,7 @@ pub(crate) fn move_units(
     to: Position,
     embark_carrier_id: Option<u32>,
 ) {
-    let p = game.get_player(player_index);
+    let p = game.player(player_index);
     let from = p.get_unit(units[0]).position;
     let info = MoveInfo::new(player_index, units.to_vec(), from, to);
     game.trigger_transient_event_with_game_value(player_index, |e| &mut e.before_move, &info, &());
@@ -334,19 +377,26 @@ pub(crate) fn move_routes(
         base.extend(reachable_with_roads(player, units, game));
     }
     add_diplomatic_relations(player, game, &mut base);
+    add_negotiations(player, game, &mut base);
     base
 }
 
 fn add_diplomatic_relations(player: &Player, game: &Game, base: &mut Vec<MoveRoute>) {
-    let partner = diplomatic_relations_partner(game, player.index);
-    if let Some(partner) = partner {
-        let partner = game.get_player(partner);
+    if let Some(partner) = diplomatic_relations_partner(game, player.index) {
+        let partner = game.player(partner);
         for r in base {
             if !partner.get_units(r.destination).is_empty() {
                 r.cost.default += ResourcePile::culture_tokens(2);
                 r.cost.modifiers.push(EventOrigin::Incident(DIPLOMAT_ID));
             }
         }
+    }
+}
+
+fn add_negotiations(player: &Player, game: &Game, base: &mut Vec<MoveRoute>) {
+    if let Some(partner) = negotiations_partner(game, player.index) {
+        let partner = game.player(partner);
+        base.retain(|r| partner.get_units(r.destination).is_empty());
     }
 }
 

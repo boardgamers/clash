@@ -140,6 +140,10 @@
           "id": 8,
           "carried_units": [
             {
+              "unit_type": "Elephant",
+              "id": 2
+            },
+            {
               "unit_type": "Cavalry",
               "id": 1
             }

@@ -1,13 +1,13 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::layout_ui::{left_mouse_button_pressed_in_rect, top_centered_text};
 use crate::log_ui::break_text;
-use crate::payment_ui::{payment_dialog, Payment};
+use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
 use crate::tooltip::show_tooltip_for_rect;
 use macroquad::color::Color;
 use macroquad::math::vec2;
 use macroquad::prelude::{
-    draw_rectangle, draw_rectangle_lines, Rect, BLACK, BLUE, GRAY, WHITE, YELLOW,
+    BLACK, BLUE, GRAY, Rect, WHITE, YELLOW, draw_rectangle, draw_rectangle_lines,
 };
 use server::action::Action;
 use server::advance::{Advance, Bonus};
@@ -87,14 +87,15 @@ pub fn show_advance_menu(
                     );
                     state.draw_text(name, pos.x + 10., pos.y + 22.);
 
-                    let thickness = if let ActiveDialog::AdvancePayment(p) = &state.active_dialog {
-                        if p.name == *name {
-                            8.
-                        } else {
-                            4.
+                    let thickness = match &state.active_dialog {
+                        ActiveDialog::AdvancePayment(p) => {
+                            if p.name == *name {
+                                8.
+                            } else {
+                                4.
+                            }
                         }
-                    } else {
-                        4.
+                        _ => 4.,
                     };
                     draw_rectangle_lines(
                         rect.x,

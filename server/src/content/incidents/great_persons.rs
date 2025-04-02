@@ -1,16 +1,16 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{gain_action_card_from_pile, ActionCard, ActionCardBuilder};
+use crate::action_card::{ActionCard, ActionCardBuilder, gain_action_card_from_pile};
 use crate::advance::gain_advance;
 use crate::city::MoodState;
 use crate::city_pieces::Building;
-use crate::construct::{construct, Construct};
+use crate::construct::{Construct, construct};
 use crate::content::advances;
 use crate::content::advances::{economy, get_governments};
-use crate::content::custom_phase_actions::{AdvanceRequest, PaymentRequest, PositionRequest};
 use crate::content::incidents::great_builders::{great_architect, great_engineer};
 use crate::content::incidents::great_diplomat::{choose_diplomat_partner, great_diplomat};
 use crate::content::incidents::great_explorer::great_explorer;
 use crate::content::incidents::great_warlord::great_warlord;
+use crate::content::persistent_events::{AdvanceRequest, PaymentRequest, PositionRequest};
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
 use crate::payment::PaymentOptions;
@@ -84,7 +84,7 @@ fn incident(
                     2
                 };
                 let options = PaymentOptions::resources(ResourcePile::culture_tokens(cost));
-                let p = game.get_player(player_index);
+                let p = game.player(player_index);
                 if p.can_afford(&options) {
                     Some(vec![PaymentRequest::new(
                         options,
@@ -109,9 +109,7 @@ fn incident(
                     return;
                 }
                 game.add_info_log_item(&format!("{} gained {name2} for {pile}", s.player_name));
-                game.get_player_mut(s.player_index)
-                    .action_cards
-                    .push(card_id);
+                game.player_mut(s.player_index).action_cards.push(card_id);
                 i.selected_player = Some(s.player_index);
             },
         )
@@ -152,10 +150,10 @@ where
         can_play,
     )
     .add_advance_request(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         10,
         move |game, player_index, _| {
-            let p = game.get_player(player_index);
+            let p = game.player(player_index);
             let choices = groups
                 .iter()
                 .flat_map(|g| advances::get_group(g.as_ref()).advances)
@@ -186,10 +184,10 @@ fn great_artist() -> ActionCard {
         |_game, _player| true,
     )
     .add_position_request(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         0,
         |game, player_index, _| {
-            let player = game.get_player(player_index);
+            let player = game.player(player_index);
             let cities = player
                 .cities
                 .iter()
@@ -208,7 +206,7 @@ fn great_artist() -> ActionCard {
                 "{} made city at {} Happy",
                 s.player_name, position
             ));
-            game.get_player_mut(s.player_index)
+            game.player_mut(s.player_index)
                 .get_city_mut(position)
                 .mood_state = MoodState::Happy;
         },
@@ -230,10 +228,10 @@ fn great_prophet() -> ActionCard {
         |_game, _player| true,
     )
     .add_position_request(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         1,
         |game, player_index, _| {
-            let player = game.get_player(player_index);
+            let player = game.player(player_index);
             if !player.is_building_available(Building::Temple, game) {
                 return None;
             }
@@ -267,12 +265,12 @@ fn great_prophet() -> ActionCard {
         },
     )
     .add_payment_request_listener(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         0,
         |game, player, a| {
             a.selected_position?;
             Some(vec![PaymentRequest::new(
-                temple_cost(game, game.get_player(player)),
+                temple_cost(game, game.player(player)),
                 "Pay to build the Temple",
                 true,
             )])
@@ -288,11 +286,12 @@ fn great_prophet() -> ActionCard {
             let pos = a.selected_position.expect("position not found");
             game.add_info_log_item(&format!("{name} built a Temple at {pos} for {pile}",));
 
-            construct(
+            let () = construct(
                 game,
                 s.player_index,
                 &Construct::new(pos, Building::Temple, pile),
-            );
+            )
+            .expect("Cannot build Temple");
         },
     )
     .build()
@@ -321,11 +320,11 @@ fn great_philosopher() -> ActionCard {
         |_game, _player| true,
     )
     .add_simple_persistent_event_listener(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         0,
         |game, player_index, player_name, _| {
             game.add_info_log_item(&format!("{player_name} gained 2 ideas",));
-            game.get_player_mut(player_index)
+            game.player_mut(player_index)
                 .gain_resources(ResourcePile::ideas(2));
         },
     )
@@ -346,11 +345,11 @@ fn great_scientist() -> ActionCard {
         |_game, _player| true,
     )
     .add_simple_persistent_event_listener(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         0,
         |game, player_index, player_name, _| {
             game.add_info_log_item(&format!("{player_name} gained 1 idea",));
-            game.get_player_mut(player_index)
+            game.player_mut(player_index)
                 .gain_resources(ResourcePile::ideas(1));
             gain_action_card_from_pile(game, player_index);
         },
@@ -375,7 +374,7 @@ fn elder_statesman() -> ActionCard {
         |_game, _player| true,
     )
     .add_simple_persistent_event_listener(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         0,
         |game, player_index, _player_name, _| {
             gain_action_card_from_pile(game, player_index);
@@ -399,7 +398,7 @@ fn great_merchant() -> ActionCard {
             groups,
             |_game, _player| true,
         ),
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
     )
     .build()
 }
@@ -418,10 +417,10 @@ fn great_athlete() -> ActionCard {
         |_game, player| player.resources.culture_tokens > 0 || player.resources.mood_tokens > 0,
     )
     .add_bool_request(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         1,
         |game, player_index, _| {
-            let p = game.get_player(player_index);
+            let p = game.player(player_index);
             if p.resources.culture_tokens > 0 && p.resources.mood_tokens > 0 {
                 Some("Convert culture to mood tokens?".to_string())
             } else {
@@ -444,10 +443,10 @@ fn great_athlete() -> ActionCard {
         },
     )
     .add_payment_request_listener(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         0,
         |game, player, a| {
-            let p = game.get_player(player);
+            let p = game.player(player);
             let culture_to_mood = if p.resources.culture_tokens > 0 && p.resources.mood_tokens > 0 {
                 a.answer.expect("answer not found")
             } else {
@@ -483,7 +482,7 @@ fn great_athlete() -> ActionCard {
                 ResourcePile::culture_tokens(from.mood_tokens)
             };
             game.add_info_log_item(&format!("{} converted {from} mood to {to}", s.player_name));
-            game.get_player_mut(s.player_index).gain_resources(to);
+            game.player_mut(s.player_index).gain_resources(to);
         },
     )
     .build()

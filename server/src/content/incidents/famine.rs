@@ -1,9 +1,9 @@
 use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::city::{City, MoodState};
 use crate::content::builtin::Builtin;
-use crate::content::custom_phase_actions::UnitsRequest;
 use crate::content::effects::PermanentEffect;
 use crate::content::incidents::civil_war::non_angry_cites;
+use crate::content::persistent_events::UnitsRequest;
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, MoodModifier};
 use crate::player::Player;
@@ -11,6 +11,7 @@ use crate::player_events::IncidentTarget;
 use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
+use crate::unit::kill_units;
 use itertools::Itertools;
 use std::vec;
 
@@ -72,7 +73,7 @@ pub(crate) fn pestilence_permanent_effect() -> Builtin {
         |event| &mut event.is_playing_action_available,
         1,
         |available, game, i| {
-            let player = game.get_player(i.player);
+            let player = game.player(i.player);
             if game
                 .permanent_effects
                 .contains(&PermanentEffect::Pestilence)
@@ -102,7 +103,7 @@ fn epidemics() -> Incident {
         IncidentTarget::AllPlayers,
         0,
         |game, player_index, _incident| {
-            let p = game.get_player(player_index);
+            let p = game.player(player_index);
             let units = p.units.iter().map(|u| u.id).collect_vec();
             let needed = if additional_sanitation_damage(p) {
                 2
@@ -133,7 +134,7 @@ pub(crate) fn kill_incident_units(game: &mut Game, s: &SelectedChoice<Vec<u32>>)
         return;
     }
 
-    let p = game.get_player(s.player_index);
+    let p = game.player(s.player_index);
     game.add_info_log_item(&format!(
         "{} killed units: {}",
         p.get_name(),
@@ -145,9 +146,7 @@ pub(crate) fn kill_incident_units(game: &mut Game, s: &SelectedChoice<Vec<u32>>)
             })
             .join(", ")
     ));
-    for u in &s.choice {
-        game.kill_unit(*u, s.player_index, None);
-    }
+    kill_units(game, &s.choice, s.player_index, None);
 }
 
 fn famines() -> Vec<Incident> {
@@ -199,7 +198,7 @@ pub(crate) fn famine(
         .with_protection_advance("Irrigation")
         .add_simple_incident_listener(target, 11, move |game, player_index, player_name, i| {
             // we lose the food regardless of the outcome
-            let p = game.get_player(player_index);
+            let p = game.player(player_index);
             if !player_pred.clone()(p) {
                 return;
             }
@@ -212,7 +211,7 @@ pub(crate) fn famine(
                 i.player.payment = ResourcePile::food(lost);
             }
 
-            game.get_player_mut(player_index)
+            game.player_mut(player_index)
                 .lose_resources(ResourcePile::food(lost));
 
             game.add_info_log_item(&format!("{player_name} lost {lost} food to Famine",));

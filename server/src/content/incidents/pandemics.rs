@@ -1,10 +1,10 @@
-use crate::card::{hand_cards, HandCard, HandCardType};
+use crate::card::{HandCard, HandCardType, hand_cards};
 use crate::city::City;
-use crate::content::custom_phase_actions::{
-    HandCardsRequest, PaymentRequest, PositionRequest, ResourceRewardRequest, UnitsRequest,
-};
 use crate::content::incidents::famine::{
     additional_sanitation_damage, famine, kill_incident_units,
+};
+use crate::content::persistent_events::{
+    HandCardsRequest, PaymentRequest, PositionRequest, ResourceRewardRequest, UnitsRequest,
 };
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, MoodModifier};
@@ -44,10 +44,10 @@ fn pandemics() -> Incident {
             game.add_info_log_item(&format!(
                 "{} has to lose a total of {} units, cards, and resources",
                 game.player_name(p),
-                pandemics_cost(game.get_player(p))
+                pandemics_cost(game.player(p))
             ));
 
-            let player = game.get_player(p);
+            let player = game.player(p);
             Some(UnitsRequest::new(
                 p,
                 player.units.iter().map(|u| u.id).collect_vec(),
@@ -64,7 +64,7 @@ fn pandemics() -> Incident {
         IncidentTarget::AllPlayers,
         1,
         |game, p, i| {
-            let player = game.get_player(p);
+            let player = game.player(p);
             Some(HandCardsRequest::new(
                 // todo also objective cards
                 hand_cards(player, &[HandCardType::Action]),
@@ -76,7 +76,7 @@ fn pandemics() -> Incident {
             for id in &s.choice {
                 match id {
                     HandCard::ActionCard(a) => {
-                        game.get_player_mut(s.player_index)
+                        game.player_mut(s.player_index)
                             .action_cards
                             .retain(|c| c != a);
                         game.add_info_log_item(&format!(
@@ -94,7 +94,7 @@ fn pandemics() -> Incident {
         IncidentTarget::AllPlayers,
         0,
         |game, p, i| {
-            let player = game.get_player(p);
+            let player = game.player(p);
             let needed = PandemicsContributions::range(player, i, 2)
                 .min()
                 .expect("min not found");
@@ -166,7 +166,7 @@ fn black_death() -> Incident {
         IncidentTarget::AllPlayers,
         0,
         |game, p, _i| {
-            let player = game.get_player(p);
+            let player = game.player(p);
             let units = player.units.iter().map(|u| u.id).collect_vec();
             if units.len() < 4 {
                 return None;
@@ -188,33 +188,41 @@ fn black_death() -> Incident {
             kill_incident_units(game, s);
             let vp = s.choice.len() as f32;
             game.add_info_log_item(&format!("{} gained {} victory points", s.player_name, vp));
-            game.get_player_mut(s.player_index).event_victory_points += vp;
+            game.player_mut(s.player_index).event_victory_points += vp;
         },
     )
     .build()
 }
 
 fn vermin() -> Incident {
-    famine(51,
-           "Famine: Vermin",
-           "Every player with Storage: Pay 1 food (gold not allowed). If you cannot pay, make 1 city Angry.",
-           IncidentTarget::AllPlayers,
-           IncidentBaseEffect::None,
-           |_, _| 1,
-           |p| p.has_advance("Storage"),
-           |_, _| true,
+    famine(
+        51,
+        "Famine: Vermin",
+        "Every player with Storage: Pay 1 food (gold not allowed). If you cannot pay, make 1 city Angry.",
+        IncidentTarget::AllPlayers,
+        IncidentBaseEffect::None,
+        |_, _| 1,
+        |p| p.has_advance("Storage"),
+        |_, _| true,
     )
 }
 
 fn draught() -> Incident {
-    famine(52,
-           "Famine: Draught",
-           "Pay 1 food for every city on or adjacent to Barren Land (up to 3 food, gold not allowed). If you cannot pay the full amount, make 1 of those cities Angry.",
-           IncidentTarget::ActivePlayer,
-           IncidentBaseEffect::None,
-           |p, game| p.cities.iter().filter(|c| on_or_adjacent_to_barren(c, game)).count().min(3) as u8,
-           |_| true,
-           on_or_adjacent_to_barren,
+    famine(
+        52,
+        "Famine: Draught",
+        "Pay 1 food for every city on or adjacent to Barren Land (up to 3 food, gold not allowed). If you cannot pay the full amount, make 1 of those cities Angry.",
+        IncidentTarget::ActivePlayer,
+        IncidentBaseEffect::None,
+        |p, game| {
+            p.cities
+                .iter()
+                .filter(|c| on_or_adjacent_to_barren(c, game))
+                .count()
+                .min(3) as u8
+        },
+        |_| true,
+        on_or_adjacent_to_barren,
     )
 }
 
@@ -239,7 +247,7 @@ fn fire() -> Incident {
         IncidentTarget::ActivePlayer,
         11,
         |game, p, _i| {
-            let player = game.get_player(p);
+            let player = game.player(p);
             let cities = player
                 .cities
                 .iter()

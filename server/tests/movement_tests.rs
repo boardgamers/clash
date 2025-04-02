@@ -1,12 +1,12 @@
-use crate::common::{move_action, JsonTest, TestAction};
+use crate::common::{JsonTest, TestAction, move_action};
 use server::action::Action;
-use server::content::custom_phase_actions::EventResponse;
+use server::content::persistent_events::EventResponse;
 use server::game::Game;
+use server::movement::MoveUnits;
+use server::movement::MovementAction::Move;
 use server::movement::move_units_destinations;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-use server::unit::MoveUnits;
-use server::unit::MovementAction::Move;
 
 mod common;
 
@@ -220,7 +220,7 @@ fn test_ship_navigate_coordinates() {
 
 fn assert_navigate(game: &mut Game, from: Position, to: Position) {
     game.players[1].get_unit_mut(1).position = from;
-    let result = move_units_destinations(game.get_player(1), game, &[1], from, None)
+    let result = move_units_destinations(game.player(1), game, &[1], from, None)
         .is_ok_and(|d| d.iter().any(|route| route.destination == to));
     assert!(
         result,

@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::city::MoodState;
-use crate::content::advances::{advance_group_builder, AdvanceGroup};
+use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::custom_actions::CustomActionType::{
     CivilLiberties, FreeEconomyCollect, VotingIncreaseHappiness,
 };
@@ -64,7 +64,7 @@ fn free_economy() -> AdvanceBuilder {
         |event| &mut event.is_playing_action_available,
         0,
         |available, game, i| {
-            let p = game.get_player(i.player);
+            let p = game.player(i.player);
             match &i.action_type {
                 PlayingActionType::Collect
                     if p.played_once_per_turn_actions.contains(&FreeEconomyCollect) =>

@@ -1,7 +1,9 @@
 use std::{cmp::Ordering::*, mem};
 
 use crate::action::execute_action;
-use crate::content::custom_phase_actions::{CurrentEventRequest, CurrentEventType, EventResponse};
+use crate::content::persistent_events::{
+    EventResponse, PersistentEventRequest, PersistentEventType,
+};
 use crate::log::current_player_turn_log_mut;
 use crate::utils::Shuffle;
 use crate::{
@@ -114,7 +116,7 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
     }
     game.map.strip_secret();
     for s in &mut game.events {
-        if let CurrentEventType::CombatRoundStart(r) = &mut s.event_type {
+        if let PersistentEventType::CombatRoundStart(r) = &mut s.event_type {
             if r.attacker_strength.tactics_card.is_some() {
                 // defender shouldn't see attacker's tactics card
                 r.attacker_strength.tactics_card = Some(0);
@@ -123,7 +125,7 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
         let current_event_player = &mut s.player;
         if player_index != Some(current_event_player.index) {
             if let Some(handler) = &mut current_event_player.handler {
-                if let CurrentEventRequest::SelectHandCards(c) = &mut handler.request {
+                if let PersistentEventRequest::SelectHandCards(c) = &mut handler.request {
                     // player shouldn't see other player's hand cards
                     c.request.choices.clear();
                 }

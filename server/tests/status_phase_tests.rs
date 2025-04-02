@@ -1,7 +1,7 @@
 use crate::common::TestAction;
 use common::JsonTest;
 use server::action::Action;
-use server::content::custom_phase_actions::EventResponse;
+use server::content::persistent_events::EventResponse;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::status_phase::{ChangeGovernment, ChangeGovernmentType};

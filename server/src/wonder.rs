@@ -3,8 +3,8 @@ use crate::card::draw_card_from_pile;
 use crate::city::{City, MoodState};
 use crate::construct::can_construct_anything;
 use crate::content::builtin::Builtin;
-use crate::content::custom_phase_actions::{CurrentEventType, PaymentRequest, PositionRequest};
 use crate::content::effects::PermanentEffect;
+use crate::content::persistent_events::{PaymentRequest, PersistentEventType, PositionRequest};
 use crate::content::wonders::get_wonder;
 use crate::events::EventOrigin;
 use crate::payment::PaymentOptions;
@@ -99,11 +99,11 @@ impl AbilityInitializerSetup for WonderBuilder {
 }
 
 pub(crate) fn draw_wonder_card(game: &mut Game, player_index: usize) {
-    let _ = game.trigger_current_event(
+    let _ = game.trigger_persistent_event(
         &[player_index],
-        |e| &mut e.on_draw_wonder_card,
+        |e| &mut e.draw_wonder_card,
         (),
-        |()| CurrentEventType::DrawWonderCard,
+        |()| PersistentEventType::DrawWonderCard,
     );
 }
 
@@ -126,7 +126,7 @@ fn gain_wonder(game: &mut Game, player_index: usize, wonder: Wonder) {
 pub(crate) fn on_draw_wonder_card() -> Builtin {
     Builtin::builder("Draw Wonder Card", "Draw a wonder card")
         .add_bool_request(
-            |e| &mut e.on_draw_wonder_card,
+            |e| &mut e.draw_wonder_card,
             0,
             |game, player_index, ()| {
                 let public_wonder = find_public_wonder(game);
@@ -240,11 +240,11 @@ pub(crate) fn can_construct_wonder(
 }
 
 pub(crate) fn on_play_wonder_card(game: &mut Game, player_index: usize, i: WonderCardInfo) {
-    let _ = game.trigger_current_event(
+    let _ = game.trigger_persistent_event(
         &[player_index],
-        |e| &mut e.on_play_wonder_card,
+        |e| &mut e.play_wonder_card,
         i,
-        CurrentEventType::WonderCard,
+        PersistentEventType::WonderCard,
     );
 }
 
@@ -273,10 +273,10 @@ impl Default for WonderDiscount {
 pub(crate) fn build_wonder() -> Builtin {
     Builtin::builder("Build Wonder", "Build a wonder")
         .add_position_request(
-            |e| &mut e.on_play_wonder_card,
+            |e| &mut e.play_wonder_card,
             1,
             move |game, player_index, i| {
-                let p = game.get_player(player_index);
+                let p = game.player(player_index);
                 let choices = cities_for_wonder(&i.name, game, p, &i.discount);
 
                 let needed = 1..=1;
@@ -296,10 +296,10 @@ pub(crate) fn build_wonder() -> Builtin {
             },
         )
         .add_payment_request_listener(
-            |e| &mut e.on_play_wonder_card,
+            |e| &mut e.play_wonder_card,
             0,
             move |game, player_index, i| {
-                let p = game.get_player(player_index);
+                let p = game.player(player_index);
                 let city = p.get_city(i.selected_position.expect("city not selected"));
                 let wonder = get_wonder(&i.name);
                 let cost = can_construct_wonder(city, &wonder, p, game, &i.discount)
@@ -318,7 +318,7 @@ pub(crate) fn build_wonder() -> Builtin {
                     "{} built {} in city {pos} for {}",
                     s.player_name, name, s.choice[0]
                 ));
-                remove_element(&mut game.get_player_mut(s.player_index).wonder_cards, name);
+                remove_element(&mut game.player_mut(s.player_index).wonder_cards, name);
                 construct_wonder(game, get_wonder(name), pos, s.player_index);
             },
         )

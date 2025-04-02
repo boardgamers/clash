@@ -1,9 +1,9 @@
 use crate::client_state::StateUpdate;
-use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
-use crate::layout_ui::{bottom_center_anchor, bottom_center_texture, ICON_SIZE};
+use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
+use crate::layout_ui::{ICON_SIZE, bottom_center_anchor, bottom_center_texture};
 use crate::render_context::RenderContext;
-use macroquad::color::{Color, BLACK, BLUE, WHITE};
-use macroquad::math::{bool, vec2, Vec2};
+use macroquad::color::{BLACK, BLUE, Color, WHITE};
+use macroquad::math::{Vec2, bool, vec2};
 use macroquad::prelude::{GRAY, RED};
 
 #[derive(PartialEq, Eq, Debug, Clone)]

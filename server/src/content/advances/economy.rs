@@ -2,14 +2,14 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::city_pieces::Building::Market;
-use crate::content::advances::trade_routes::{trade_route_log, trade_route_reward, TradeRoute};
-use crate::content::advances::{advance_group_builder, AdvanceGroup, CURRENCY};
+use crate::content::advances::trade_routes::{TradeRoute, trade_route_log, trade_route_reward};
+use crate::content::advances::{AdvanceGroup, CURRENCY, advance_group_builder};
 use crate::content::custom_actions::CustomActionType::Taxes;
-use crate::content::custom_phase_actions::ResourceRewardRequest;
+use crate::content::persistent_events::ResourceRewardRequest;
 use crate::game::Game;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
-use crate::player_events::{CurrentEvent, PersistentEvents};
+use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
@@ -53,7 +53,7 @@ pub fn tax_options(player: &Player) -> PaymentOptions {
 
 pub(crate) fn collect_taxes(game: &mut Game, player_index: usize, gain: ResourcePile) {
     assert!(
-        tax_options(game.get_player(player_index)).is_valid_payment(&gain),
+        tax_options(game.player(player_index)).is_valid_payment(&gain),
         "Invalid gain for Taxes"
     );
     game.players[player_index].gain_resources(gain);
@@ -71,13 +71,13 @@ fn trade_routes() -> AdvanceBuilder {
         a different Settler or Ship. In other words, to gain X food you must have at least \
         X Units (Settlers or Ships), each paired with X different enemy cities.",
         ),
-        |event| &mut event.on_turn_start,
+        |event| &mut event.turn_start,
     )
 }
 
 pub(crate) fn add_trade_routes<E, S, V>(b: S, event: E) -> S
 where
-    E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<V> + 'static + Clone,
+    E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
     S: AbilityInitializerSetup,
     V: Clone + PartialEq,
 {
@@ -85,7 +85,7 @@ where
         event,
         0,
         |game, player_index, _| {
-            if !game.get_player(player_index).has_advance("Trade Routes") {
+            if !game.player(player_index).has_advance("Trade Routes") {
                 return None;
             }
 
@@ -126,6 +126,6 @@ fn gain_market_bonus(game: &mut Game, routes: &[TradeRoute]) {
         game.add_info_log_item(&format!(
             "{name} gains 1 gold for using a Market in a trade route",
         ));
-        game.get_player_mut(p).gain_resources(ResourcePile::gold(1));
+        game.player_mut(p).gain_resources(ResourcePile::gold(1));
     }
 }

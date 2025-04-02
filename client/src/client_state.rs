@@ -19,9 +19,9 @@ use macroquad::prelude::*;
 use server::action::Action;
 use server::card::HandCard;
 use server::city::{City, MoodState};
-use server::content::custom_phase_actions::{
-    AdvanceRequest, ChangeGovernmentRequest, CurrentEventRequest, CurrentEventType, EventResponse,
-    MultiRequest, PlayerRequest, UnitTypeRequest,
+use server::content::persistent_events::{
+    AdvanceRequest, ChangeGovernmentRequest, EventResponse, MultiRequest, PersistentEventRequest,
+    PersistentEventType, PlayerRequest, UnitTypeRequest,
 };
 use server::events::EventOrigin;
 use server::game::{Game, GameState};
@@ -303,20 +303,23 @@ impl StateUpdate {
         yes: Option<ActiveDialog>,
         no: Option<ActiveDialog>,
     ) -> StateUpdate {
-        if let Some(yes) = yes {
-            if let Some(no) = no {
-                StateUpdate::OpenDialog(ActiveDialog::DialogChooser(Box::new(DialogChooser {
-                    title: title.to_string(),
-                    yes,
-                    no,
-                })))
-            } else {
-                StateUpdate::OpenDialog(yes)
-            }
-        } else if let Some(no) = no {
-            StateUpdate::OpenDialog(no)
-        } else {
-            panic!("no dialog to open")
+        match yes {
+            Some(yes) => match no {
+                Some(no) => {
+                    StateUpdate::OpenDialog(ActiveDialog::DialogChooser(Box::new(DialogChooser {
+                        title: title.to_string(),
+                        yes,
+                        no,
+                    })))
+                }
+                _ => StateUpdate::OpenDialog(yes),
+            },
+            _ => match no {
+                Some(no) => StateUpdate::OpenDialog(no),
+                _ => {
+                    panic!("no dialog to open")
+                }
+            },
         }
     }
 
@@ -431,7 +434,7 @@ impl State {
     #[must_use]
     pub fn render_context<'a>(&'a self, game: &'a Game) -> RenderContext<'a> {
         RenderContext {
-            shown_player: game.get_player(self.show_player),
+            shown_player: game.player(self.show_player),
             game,
             state: self,
             camera_mode: CameraMode::Screen,
@@ -519,30 +522,32 @@ impl State {
     pub fn game_state_dialog(&self, game: &Game) -> ActiveDialog {
         if let Some(e) = &game.current_event_handler() {
             return match &e.request {
-                CurrentEventRequest::Payment(r) => ActiveDialog::PaymentRequest(
+                PersistentEventRequest::Payment(r) => ActiveDialog::PaymentRequest(
                     r.iter()
                         .map(|p| {
                             Payment::new(
                                 &p.cost,
-                                &game.get_player(game.active_player()).resources,
+                                &game.player(game.active_player()).resources,
                                 &p.name,
                                 p.optional,
                             )
                         })
                         .collect(),
                 ),
-                CurrentEventRequest::ResourceReward(r) => {
+                PersistentEventRequest::ResourceReward(r) => {
                     ActiveDialog::ResourceRewardRequest(Payment::new_gain(&r.reward, &r.name))
                 }
-                CurrentEventRequest::SelectAdvance(r) => ActiveDialog::AdvanceRequest(r.clone()),
-                CurrentEventRequest::SelectPositions(r) => {
+                PersistentEventRequest::SelectAdvance(r) => ActiveDialog::AdvanceRequest(r.clone()),
+                PersistentEventRequest::SelectPositions(r) => {
                     ActiveDialog::PositionRequest(MultiSelection::new(r.request.clone()))
                 }
-                CurrentEventRequest::SelectUnitType(r) => ActiveDialog::UnitTypeRequest(r.clone()),
-                CurrentEventRequest::SelectUnits(r) => {
+                PersistentEventRequest::SelectUnitType(r) => {
+                    ActiveDialog::UnitTypeRequest(r.clone())
+                }
+                PersistentEventRequest::SelectUnits(r) => {
                     ActiveDialog::UnitsRequest(UnitsSelection::new(r))
                 }
-                CurrentEventRequest::SelectStructures(r) => ActiveDialog::StructuresRequest(
+                PersistentEventRequest::SelectStructures(r) => ActiveDialog::StructuresRequest(
                     None,
                     MultiSelection::new(MultiRequest::new(
                         r.choices
@@ -561,23 +566,25 @@ impl State {
                         &r.description,
                     )),
                 ),
-                CurrentEventRequest::SelectPlayer(r) => ActiveDialog::PlayerRequest(r.clone()),
-                CurrentEventRequest::BoolRequest(d) => ActiveDialog::BoolRequest(d.clone()),
-                CurrentEventRequest::ChangeGovernment(r) => {
+                PersistentEventRequest::SelectPlayer(r) => ActiveDialog::PlayerRequest(r.clone()),
+                PersistentEventRequest::BoolRequest(d) => ActiveDialog::BoolRequest(d.clone()),
+                PersistentEventRequest::ChangeGovernment(r) => {
                     ActiveDialog::ChangeGovernmentType(r.clone())
                 }
-                CurrentEventRequest::ExploreResolution => {
-                    if let CurrentEventType::ExploreResolution(r) = &game.current_event().event_type
-                    {
-                        ActiveDialog::ExploreResolution(ExploreResolutionConfig {
-                            block: r.block.clone(),
-                            rotation: r.block.position.rotation,
-                        })
-                    } else {
-                        panic!("ExploreResolution expected");
+                PersistentEventRequest::ExploreResolution => {
+                    match &game.current_event().event_type {
+                        PersistentEventType::ExploreResolution(r) => {
+                            ActiveDialog::ExploreResolution(ExploreResolutionConfig {
+                                block: r.block.clone(),
+                                rotation: r.block.position.rotation,
+                            })
+                        }
+                        _ => {
+                            panic!("ExploreResolution expected");
+                        }
                     }
                 }
-                CurrentEventRequest::SelectHandCards(r) => {
+                PersistentEventRequest::SelectHandCards(r) => {
                     ActiveDialog::HandCardsRequest(MultiSelection::new(r.request.clone()))
                 }
             };

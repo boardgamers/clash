@@ -1,27 +1,26 @@
 use crate::ability_initializer::AbilityListeners;
 use crate::action_card::gain_action_card_from_pile;
-use crate::combat_roll::{CombatDieRoll, COMBAT_DIE_SIDES};
+use crate::combat_roll::{COMBAT_DIE_SIDES, CombatDieRoll};
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
 use crate::content::civilizations::{BARBARIANS, PIRATES};
-use crate::content::custom_phase_actions::{
-    CurrentEventHandler, CurrentEventPlayer, CurrentEventState, CurrentEventType,
-};
 use crate::content::effects::PermanentEffect;
+use crate::content::persistent_events::{
+    PersistentEventHandler, PersistentEventPlayer, PersistentEventState, PersistentEventType,
+};
 use crate::content::{action_cards, advances, builtin, incidents};
 use crate::events::{Event, EventOrigin};
 use crate::log::{
-    current_player_turn_log, current_player_turn_log_mut, ActionLogAge, ActionLogPlayer,
-    ActionLogRound,
+    ActionLogAge, ActionLogPlayer, ActionLogRound, current_player_turn_log,
+    current_player_turn_log_mut,
 };
-use crate::movement::{CurrentMove, MoveState};
+use crate::movement::MoveState;
 use crate::pirates::get_pirates_player;
 use crate::player_events::{
-    CurrentEvent, CurrentEventInfo, PersistentEvents, PlayerEvents, TransientEvents,
+    PersistentEvent, PersistentEventInfo, PersistentEvents, PlayerEvents, TransientEvents,
 };
 use crate::resource::check_for_waste;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::enter_status_phase;
-use crate::unit::UnitType;
 use crate::utils;
 use crate::utils::Rng;
 use crate::utils::Shuffle;
@@ -39,7 +38,7 @@ use std::vec;
 
 pub struct Game {
     pub state: GameState,
-    pub events: Vec<CurrentEventState>,
+    pub events: Vec<PersistentEventState>,
     // in turn order starting from starting_player_index and wrapping around
     pub players: Vec<Player>,
     pub map: Map,
@@ -178,7 +177,7 @@ impl Game {
         }
 
         for player_index in 0..player_amount {
-            let p = game.get_player(player_index);
+            let p = game.player(player_index);
             game.add_info_log_group(format!(
                 "{} is playing as {}",
                 p.get_name(),
@@ -290,17 +289,17 @@ impl Game {
     }
 
     #[must_use]
-    pub fn get_player(&self, player_index: usize) -> &Player {
+    pub fn player(&self, player_index: usize) -> &Player {
         &self.players[player_index]
     }
 
     #[must_use]
     pub fn player_name(&self, player_index: usize) -> String {
-        self.get_player(player_index).get_name()
+        self.player(player_index).get_name()
     }
 
     #[must_use]
-    pub fn get_player_mut(&mut self, player_index: usize) -> &mut Player {
+    pub fn player_mut(&mut self, player_index: usize) -> &mut Player {
         &mut self.players[player_index]
     }
 
@@ -312,15 +311,15 @@ impl Game {
     ///
     /// if you want to get an option instead, use `Player::get_city` function
     #[must_use]
-    pub fn get_city(&self, player_index: usize, position: Position) -> &City {
-        self.get_player(player_index).get_city(position)
+    pub fn city(&self, player_index: usize, position: Position) -> &City {
+        self.player(player_index).get_city(position)
     }
 
     ///
     /// # Panics
     /// Panics if the city does not exist
     #[must_use]
-    pub fn get_any_city(&self, position: Position) -> &City {
+    pub fn any_city(&self, position: Position) -> &City {
         self.try_get_any_city(position).expect("city not found")
     }
 
@@ -340,33 +339,33 @@ impl Game {
     /// # Panics
     /// Panics if the player does not have events
     #[must_use]
-    pub fn current_event(&self) -> &CurrentEventState {
+    pub fn current_event(&self) -> &PersistentEventState {
         self.events.last().expect("state should exist")
     }
 
     #[must_use]
-    pub(crate) fn current_event_mut(&mut self) -> &mut CurrentEventState {
+    pub(crate) fn current_event_mut(&mut self) -> &mut PersistentEventState {
         self.events.last_mut().expect("state should exist")
     }
 
     #[must_use]
-    pub fn current_event_handler(&self) -> Option<&CurrentEventHandler> {
+    pub fn current_event_handler(&self) -> Option<&PersistentEventHandler> {
         self.events.last().and_then(|s| s.player.handler.as_ref())
     }
 
-    pub fn current_event_handler_mut(&mut self) -> Option<&mut CurrentEventHandler> {
+    pub fn current_event_handler_mut(&mut self) -> Option<&mut PersistentEventHandler> {
         self.events
             .last_mut()
             .and_then(|s| s.player.handler.as_mut())
     }
 
-    pub(crate) fn trigger_current_event_with_listener<V>(
+    pub(crate) fn trigger_persistent_event_with_listener<V>(
         &mut self,
         players: &[usize],
-        event: fn(&mut PersistentEvents) -> &mut CurrentEvent<V>,
+        event: fn(&mut PersistentEvents) -> &mut PersistentEvent<V>,
         listeners: &AbilityListeners,
         event_type: V,
-        store_type: impl Fn(V) -> CurrentEventType,
+        store_type: impl Fn(V) -> PersistentEventType,
         log: Option<&str>,
         next_player: fn(&mut V) -> (),
     ) -> Option<V>
@@ -377,7 +376,7 @@ impl Game {
             listeners.init(self, *p);
         }
 
-        let result = self.trigger_current_event_ext(
+        let result = self.trigger_persistent_event_ext(
             players,
             event,
             event_type,
@@ -393,26 +392,26 @@ impl Game {
     }
 
     #[must_use]
-    pub(crate) fn trigger_current_event<V>(
+    pub(crate) fn trigger_persistent_event<V>(
         &mut self,
         players: &[usize],
-        event: fn(&mut PersistentEvents) -> &mut CurrentEvent<V>,
+        event: fn(&mut PersistentEvents) -> &mut PersistentEvent<V>,
         value: V,
-        to_event_type: impl Fn(V) -> CurrentEventType,
+        to_event_type: impl Fn(V) -> PersistentEventType,
     ) -> Option<V>
     where
         V: Clone + PartialEq,
     {
-        self.trigger_current_event_ext(players, event, value, to_event_type, None, |_| {})
+        self.trigger_persistent_event_ext(players, event, value, to_event_type, None, |_| {})
     }
 
     #[must_use]
-    pub(crate) fn trigger_current_event_ext<V>(
+    pub(crate) fn trigger_persistent_event_ext<V>(
         &mut self,
         players: &[usize],
-        event: fn(&mut PersistentEvents) -> &mut CurrentEvent<V>,
+        event: fn(&mut PersistentEvents) -> &mut PersistentEvent<V>,
         mut value: V,
-        to_event_type: impl Fn(V) -> CurrentEventType,
+        to_event_type: impl Fn(V) -> PersistentEventType,
         log: Option<&str>,
         next_player: fn(&mut V) -> (),
     ) -> Option<V>
@@ -429,18 +428,19 @@ impl Game {
                 self.add_info_log_group(log.to_string());
             }
             self.events
-                .push(CurrentEventState::new(players[0], current_event_type));
+                .push(PersistentEventState::new(players[0], current_event_type));
         }
 
         let event_index = self.events.len() - 1;
 
-        for player_index in Self::remaining_current_event_players(players, self.current_event()) {
-            let info = CurrentEventInfo {
+        for player_index in Self::remaining_persistent_event_players(players, self.current_event())
+        {
+            let info = PersistentEventInfo {
                 player: player_index,
             };
-            self.trigger_persistent_event_with_game_value(
+            self.trigger_event_with_game_value(
                 player_index,
-                event,
+                move |e| event(&mut e.persistent),
                 &info,
                 &(),
                 &mut value,
@@ -452,8 +452,8 @@ impl Game {
             }
             let state = self.current_event_mut();
             state.players_used.push(player_index);
-            if let Some(&p) = Self::remaining_current_event_players(players, state).first() {
-                state.player = CurrentEventPlayer::new(p);
+            if let Some(&p) = Self::remaining_persistent_event_players(players, state).first() {
+                state.player = PersistentEventPlayer::new(p);
                 next_player(&mut value);
             }
         }
@@ -461,31 +461,15 @@ impl Game {
         Some(value)
     }
 
-    fn remaining_current_event_players(players: &[usize], state: &CurrentEventState) -> Vec<usize> {
+    fn remaining_persistent_event_players(
+        players: &[usize],
+        state: &PersistentEventState,
+    ) -> Vec<usize> {
         players
             .iter()
             .filter(|p| !state.players_used.contains(p))
             .copied()
             .collect_vec()
-    }
-
-    fn trigger_persistent_event_with_game_value<U, V, W>(
-        &mut self,
-        player_index: usize,
-        event: fn(&mut PersistentEvents) -> &mut Event<Game, U, V, W>,
-        info: &U,
-        details: &V,
-        extra_value: &mut W,
-    ) where
-        W: Clone + PartialEq,
-    {
-        self.trigger_event_with_game_value(
-            player_index,
-            move |e| event(&mut e.persistent),
-            info,
-            details,
-            extra_value,
-        );
     }
 
     pub(crate) fn trigger_transient_event_with_game_value<U, V>(
@@ -515,7 +499,7 @@ impl Game {
         W: Clone + PartialEq,
     {
         let e = event(&mut self.players[player_index].events).take();
-        let _ = e.trigger(self, info, details, extra_value);
+        e.trigger(self, info, details, extra_value);
         event(&mut self.players[player_index].events).set(e);
     }
 
@@ -602,11 +586,11 @@ impl Game {
     }
 
     pub(crate) fn on_start_turn(&mut self) {
-        let _ = self.trigger_current_event(
+        let _ = self.trigger_persistent_event(
             &[self.current_player_index],
-            |e| &mut e.on_turn_start,
+            |e| &mut e.turn_start,
             (),
-            |()| CurrentEventType::TurnStart,
+            |()| PersistentEventType::TurnStart,
         );
     }
 
@@ -672,7 +656,7 @@ impl Game {
     }
 
     pub fn next_turn(&mut self) {
-        self.get_player_mut(self.current_player_index).end_turn();
+        self.player_mut(self.current_player_index).end_turn();
         for i in &mut current_player_turn_log_mut(self).items {
             i.undo.clear();
             i.civil_card_match = None;
@@ -726,7 +710,7 @@ impl Game {
         self.add_message("The game has ended");
     }
 
-    pub(crate) fn get_next_dice_roll(&mut self) -> CombatDieRoll {
+    pub(crate) fn next_dice_roll(&mut self) -> CombatDieRoll {
         self.lock_undo(); // dice rolls are not undoable
         let dice_roll = if self.dice_roll_outcomes.is_empty() {
             self.rng.range(0, 12) as u8
@@ -760,11 +744,11 @@ impl Game {
     }
 
     #[must_use]
-    pub fn get_available_custom_actions(
+    pub fn available_custom_actions(
         &self,
         player_index: usize,
     ) -> Vec<(CustomActionType, EventOrigin)> {
-        self.get_player(self.current_player_index)
+        self.player(self.current_player_index)
             .custom_actions
             .clone()
             .into_iter()
@@ -783,35 +767,6 @@ impl Game {
             .expect("player should have this city");
         city.raze(self, player_index);
     }
-
-    ///
-    /// # Panics
-    ///
-    /// Panics if the player does not have the unit
-    pub fn kill_unit(&mut self, unit_id: u32, player_index: usize, killer: Option<usize>) {
-        let unit = self.players[player_index].remove_unit(unit_id);
-        if matches!(unit.unit_type, UnitType::Leader) {
-            let leader = self.players[player_index]
-                .active_leader
-                .take()
-                .expect("A player should have an active leader when having a leader unit");
-            Player::with_leader(&leader, self, player_index, |game, leader| {
-                leader.listeners.deinit(game, player_index);
-            });
-            if let Some(killer) = killer {
-                self.players[killer].captured_leaders.push(leader);
-            }
-        }
-        if let GameState::Movement(m) = &mut self.state {
-            if let CurrentMove::Fleet { units } = &mut m.current_move {
-                units.retain(|&id| id != unit_id);
-            }
-        }
-    }
-
-    pub fn set_player_index(&mut self, current_player_index: usize) {
-        self.current_player_index = current_player_index;
-    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq)]
@@ -819,7 +774,7 @@ pub struct GameData {
     state: GameState,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    events: Vec<CurrentEventState>,
+    events: Vec<PersistentEventState>,
     players: Vec<PlayerData>,
     map: MapData,
     starting_player_index: usize,

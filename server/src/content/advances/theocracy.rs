@@ -1,9 +1,9 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::{gain_advance, Advance, AdvanceBuilder};
+use crate::advance::{Advance, AdvanceBuilder, gain_advance};
 use crate::city_pieces::Building::Temple;
 use crate::consts::STACK_LIMIT;
-use crate::content::advances::{advance_group_builder, get_group, AdvanceGroup};
-use crate::content::custom_phase_actions::{AdvanceRequest, PositionRequest};
+use crate::content::advances::{AdvanceGroup, advance_group_builder, get_group};
+use crate::content::persistent_events::{AdvanceRequest, PositionRequest};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -36,11 +36,11 @@ fn dogma() -> AdvanceBuilder {
         game.players[player_index].resource_limit.ideas = 7;
     })
     .add_advance_request(
-        |event| &mut event.on_construct,
+        |event| &mut event.construct,
         0,
         |game, player_index, building| {
             if matches!(building, Temple) {
-                let player = game.get_player(player_index);
+                let player = game.player(player_index);
                 let choices: Vec<String> = get_group("Theocracy")
                     .advances
                     .iter()
@@ -108,7 +108,7 @@ fn conversion() -> AdvanceBuilder {
         0,
         |game, outcome, ()| {
             if outcome.success {
-                game.get_player_mut(outcome.player)
+                game.player_mut(outcome.player)
                     .gain_resources(ResourcePile::culture_tokens(1));
                 game.add_info_log_item(
                     "Player gained 1 culture token for a successful \
@@ -135,14 +135,14 @@ fn fanaticism() -> AdvanceBuilder {
         }
     })
     .add_position_request(
-        |event| &mut event.on_combat_end,
+        |event| &mut event.combat_end,
         4,
         |game, player_index, i| {
             if i.is_loser(player_index)
-                && !game.get_player(player_index).cities.is_empty()
-                && game.get_player(player_index).available_units().infantry > 0
+                && !game.player(player_index).cities.is_empty()
+                && game.player(player_index).available_units().infantry > 0
             {
-                let p = game.get_player(player_index);
+                let p = game.player(player_index);
                 let choices: Vec<Position> = p
                     .cities
                     .iter()
@@ -171,7 +171,7 @@ fn fanaticism() -> AdvanceBuilder {
                 "{} gained 1 free Infantry Unit at {} for Fanaticism Advance",
                 s.player_name, pos
             ));
-            game.get_player_mut(s.player_index)
+            game.player_mut(s.player_index)
                 .add_unit(pos, UnitType::Infantry);
         },
     )

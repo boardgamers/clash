@@ -1,4 +1,4 @@
-use crate::content::custom_phase_actions::{PositionRequest, ResourceRewardRequest};
+use crate::content::persistent_events::{PositionRequest, ResourceRewardRequest};
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
 use crate::payment::PaymentOptions;
 use crate::player_events::IncidentTarget;
@@ -159,7 +159,7 @@ fn good_year(mut builder: IncidentBuilder, amount: u32, good_year_type: &GoodYea
                         game.player_name(c.choice),
                         n.clone(),
                     ));
-                    game.get_player_mut(c.choice)
+                    game.player_mut(c.choice)
                         .gain_resources(ResourcePile::food(1));
                 },
             );
@@ -210,7 +210,7 @@ fn select_settler(b: IncidentBuilder, priority: i32, target: IncidentTarget) -> 
         target,
         priority,
         move |game, player_index, _| {
-            let p = game.get_player(player_index);
+            let p = game.player(player_index);
             if p.available_units().settlers > 0 {
                 let choices = p.cities.iter().map(|c| c.position).collect();
                 let needed = 1..=1;
@@ -226,7 +226,7 @@ fn select_settler(b: IncidentBuilder, priority: i32, target: IncidentTarget) -> 
         |game, s, _| {
             let pos = s.choice[0];
             game.add_info_log_item(&format!("{} gained 1 settler in {}", s.player_name, pos));
-            game.get_player_mut(s.player_index)
+            game.player_mut(s.player_index)
                 .add_unit(pos, UnitType::Settler);
         },
     )

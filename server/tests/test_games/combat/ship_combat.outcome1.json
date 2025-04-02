@@ -100,7 +100,17 @@
           "movement_restrictions": [
             "Battle"
           ],
-          "id": 8
+          "id": 8,
+          "carried_units": [
+            {
+              "unit_type": "Elephant",
+              "id": 2
+            },
+            {
+              "unit_type": "Settler",
+              "id": 22
+            }
+          ]
         }
       ],
       "civilization": "test1",
@@ -272,117 +282,7 @@
                         1
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "CombatRoundEnd": {
-                              "attacker_casualties": {
-                                "fighters": 1
-                              },
-                              "can_retreat": false,
-                              "combat": {
-                                "attacker": 0,
-                                "attacker_position": "C3",
-                                "attackers": [
-                                  7,
-                                  8
-                                ],
-                                "defender": 1,
-                                "defender_position": "D2",
-                                "retreat": "CanRetreat",
-                                "round": 1
-                              },
-                              "defender_casualties": {
-                                "fighters": 1
-                              },
-                              "final_result": "AttackerWins"
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Builtin": "Choose Casualties (carried units)"
-                            },
-                            "priority": 2,
-                            "request": {
-                              "SelectUnits": {
-                                "choices": [
-                                  2,
-                                  22,
-                                  1
-                                ],
-                                "description": "Remove 1 attacking units",
-                                "needed": {
-                                  "end": 1,
-                                  "start": 1
-                                },
-                                "player": 0
-                              }
-                            }
-                          },
-                          "last_priority_used": 2,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/units/5/carried_units",
-                      "value": [
-                        {
-                          "id": 2,
-                          "unit_type": "Elephant"
-                        },
-                        {
-                          "id": 22,
-                          "unit_type": "Settler"
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/5/id",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/5/position",
-                      "value": "C3"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/units/6",
-                      "value": {
-                        "carried_units": [
-                          {
-                            "id": 1,
-                            "unit_type": "Cavalry"
-                          }
-                        ],
-                        "id": 8,
-                        "movement_restrictions": [
-                          "Battle"
-                        ],
-                        "position": "C3",
-                        "unit_type": "Ship"
-                      }
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/1/units",
-                      "value": [
-                        {
-                          "id": 1,
-                          "position": "D2",
-                          "unit_type": "Ship"
-                        }
-                      ]
-                    }
-                  ]
+                  }
                 }
               ]
             }
@@ -400,18 +300,17 @@
       "Combat round 1",
       "Player1 rolled 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units.",
       "Player2 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units.",
-      "Player1 has to remove 1 of their attacking units"
+      "Player1 has to remove 1 of their attacking units",
+      "Player1 removed 1 ship"
     ],
     [
-      "Player1 removed 1 cavalry",
-      "Player1 has to remove 1 of their attacking units",
-      "Player1 removed 1 ship",
+      "Player1 killed carried units: 1 cavalry",
       "Player2 has to remove all of their defending units",
       "Player2 removed 1 ship",
       "Attacker wins"
     ]
   ],
-  "undo_limit": 1,
+  "undo_limit": 2,
   "actions_left": 2,
   "round": 6,
   "age": 1,

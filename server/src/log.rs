@@ -5,16 +5,11 @@ use crate::player::Player;
 
 use super::collect::PositionCollection;
 use crate::action_card::CivilCardMatch;
+use crate::movement::{MoveUnits, MovementAction};
 use crate::playing_actions::{Collect, IncreaseHappiness, Recruit};
-use crate::unit::MoveUnits;
 use crate::{
-    action::Action,
-    game::Game,
-    playing_actions::PlayingAction,
-    position::Position,
-    resource_pile::ResourcePile,
-    unit::{MovementAction, Units},
-    utils,
+    action::Action, game::Game, playing_actions::PlayingAction, position::Position,
+    resource_pile::ResourcePile, unit::Units, utils,
 };
 use itertools::Itertools;
 use json_patch::PatchOperation;
@@ -308,7 +303,9 @@ fn format_construct_log_item(
     let city_position = c.city_position;
 
     let mood = format_mood_change(player, city_position);
-    format!("{player_name} paid {payment} to construct a {city_piece:?} in the city at {city_position}{port_pos}{mood}")
+    format!(
+        "{player_name} paid {payment} to construct a {city_piece:?} in the city at {city_position}{port_pos}{mood}"
+    )
 }
 
 fn format_mood_change(player: &Player, city_position: Position) -> String {

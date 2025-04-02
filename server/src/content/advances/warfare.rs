@@ -8,14 +8,14 @@ use crate::combat::CombatModifier::{
 use crate::combat::{Combat, CombatModifier};
 use crate::combat_listeners::CombatStrength;
 use crate::content::advances::{
-    advance_group_builder, AdvanceGroup, METALLURGY, STEEL_WEAPONS, TACTICS,
+    AdvanceGroup, METALLURGY, STEEL_WEAPONS, TACTICS, advance_group_builder,
 };
-use crate::content::custom_phase_actions::PaymentRequest;
+use crate::content::persistent_events::PaymentRequest;
 use crate::game::Game;
 use crate::payment::{PaymentConversion, PaymentOptions};
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-use crate::tactics_card::{play_tactics_card, CombatRole};
+use crate::tactics_card::{CombatRole, play_tactics_card};
 use crate::unit::UnitType;
 
 pub(crate) fn warfare() -> AdvanceGroup {
@@ -43,7 +43,7 @@ fn siegecraft() -> AdvanceBuilder {
         "When attacking a city with a Fortress, pay 2 wood to cancel the Fortress’ ability to add +1 die and/or pay 2 ore to ignore its ability to cancel a hit.",
     )
         .add_payment_request_listener(
-            |e| &mut e.on_combat_start,
+            |e| &mut e.combat_start,
             0,
             |game, player, c| {
                 let extra_die = PaymentOptions::sum(2, &[ResourceType::Wood, ResourceType::Gold]);
@@ -104,7 +104,7 @@ fn steel_weapons() -> AdvanceBuilder {
         "Immediately before a Land battle starts, you may pay 1 ore to get +2 combat value in every Combat Round against an enemy that does not have the Steel Weapons advance, but only +1 combat value against an enemy that does have it (regardless if they use it or not this battle).",
     )
         .add_payment_request_listener(
-            |e| &mut e.on_combat_start,
+            |e| &mut e.combat_start,
             1,
             |game, player_index, c| {
                 let player = &game.players[player_index];
@@ -206,8 +206,8 @@ fn fortress(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole) {
 }
 
 fn use_steel_weapons(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole) {
-    let steel_weapon_value = if game.get_player(c.attacker).has_advance(STEEL_WEAPONS)
-        && game.get_player(c.defender).has_advance(STEEL_WEAPONS)
+    let steel_weapon_value = if game.player(c.attacker).has_advance(STEEL_WEAPONS)
+        && game.player(c.defender).has_advance(STEEL_WEAPONS)
     {
         1
     } else {

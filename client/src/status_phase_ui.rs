@@ -1,9 +1,9 @@
-use crate::advance_ui::{show_advance_menu, AdvanceState};
+use crate::advance_ui::{AdvanceState, show_advance_menu};
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::dialog_ui::{cancel_button_with_tooltip, ok_button, OkTooltip};
+use crate::dialog_ui::{OkTooltip, cancel_button_with_tooltip, ok_button};
 use crate::render_context::RenderContext;
 use server::content::advances::{get_government, get_governments};
-use server::content::custom_phase_actions::{ChangeGovernmentRequest, EventResponse};
+use server::content::persistent_events::{ChangeGovernmentRequest, EventResponse};
 use server::status_phase::{ChangeGovernment, ChangeGovernmentType};
 
 #[derive(Clone)]

@@ -1,8 +1,8 @@
-use crate::common::{move_action, TestAction};
+use crate::common::{TestAction, move_action};
 use common::JsonTest;
 use server::action::Action;
 use server::card::HandCard;
-use server::content::custom_phase_actions::EventResponse;
+use server::content::persistent_events::EventResponse;
 use server::position::Position;
 
 mod common;
@@ -146,6 +146,58 @@ fn test_siege() {
                     11,
                 )])),
             ),
+        ],
+    );
+}
+
+#[test]
+fn test_scout() {
+    JSON.test(
+        "scout",
+        vec![
+            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1")))
+                .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
+                    1,
+                )])),
+            )
+            .without_json_comparison(),
+            TestAction::not_undoable(
+                1,
+                Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
+                    23,
+                )])),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_martyr() {
+    JSON.test(
+        "martyr",
+        vec![
+            TestAction::not_undoable(0, move_action(vec![7, 8], Position::from_offset("D2")))
+                .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
+                    6,
+                )])),
+            )
+            .without_json_comparison(),
+            TestAction::not_undoable(
+                1,
+                Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
+                    24,
+                )])),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![7])))
+                .without_json_comparison(),
+            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![2]))),
         ],
     );
 }

@@ -3,19 +3,19 @@ use serde::{Deserialize, Serialize};
 use crate::action_card::play_action_card;
 use crate::advance::gain_advance;
 use crate::city::MoodState;
-use crate::collect::{collect, PositionCollection};
+use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
 use crate::content::action_cards::get_civil_card;
 use crate::content::advances::get_advance;
 use crate::content::custom_actions::CustomActionInfo;
-use crate::content::custom_phase_actions::SelectedStructure;
+use crate::content::persistent_events::SelectedStructure;
 use crate::cultural_influence::influence_culture_attempt;
 use crate::game::GameState;
 use crate::player::Player;
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::{recruit, recruit_cost};
 use crate::unit::Units;
-use crate::wonder::{cities_for_wonder, on_play_wonder_card, WonderCardInfo, WonderDiscount};
+use crate::wonder::{WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card};
 use crate::{
     city::City, content::custom_actions::CustomAction, game::Game, position::Position,
     resource_pile::ResourcePile,
@@ -73,7 +73,7 @@ impl PlayingActionType {
 
         self.action_type().is_available(game, player_index)?;
 
-        let p = game.get_player(player_index);
+        let p = game.player(player_index);
 
         match self {
             PlayingActionType::Custom(c) => {
@@ -116,7 +116,7 @@ impl PlayingActionType {
         }
 
         let mut possible = Ok(());
-        let _ = p.trigger_event(
+        p.trigger_event(
             |e| &e.is_playing_action_available,
             &mut possible,
             game,
@@ -160,44 +160,43 @@ pub enum PlayingAction {
 }
 
 impl PlayingAction {
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if action is illegal
-    pub fn execute(self, game: &mut Game, player_index: usize, redo: bool) {
+    pub(crate) fn execute(
+        self,
+        game: &mut Game,
+        player_index: usize,
+        redo: bool,
+    ) -> Result<(), String> {
         use crate::construct;
         use PlayingAction::*;
         let playing_action_type = self.playing_action_type();
         if !redo {
-            let _ = playing_action_type
-                .is_available(game, player_index)
-                .map_err(|e| panic!("{e}"));
+            playing_action_type.is_available(game, player_index)?;
         }
         playing_action_type.action_type().pay(game, player_index);
 
         match self {
             Advance { advance, payment } => {
                 let a = get_advance(&advance);
-                assert!(
-                    game.get_player(player_index).can_advance(&a),
-                    "Illegal action"
-                );
-                game.get_player(player_index)
+                if !game.player(player_index).can_advance(&a) {
+                    return Err("Cannot advance".to_string());
+                }
+                game.player(player_index)
                     .advance_cost(&a, Some(&payment))
                     .pay(game, &payment);
                 gain_advance(game, &advance, player_index, payment, true);
             }
             FoundCity { settler } => {
                 let settler = game.players[player_index].remove_unit(settler);
-                assert!(settler.can_found_city(game), "Illegal action");
-                build_city(game.get_player_mut(player_index), settler.position);
+                if !settler.can_found_city(game) {
+                    return Err("Cannot found city".to_string());
+                }
+                build_city(game.player_mut(player_index), settler.position);
             }
             Construct(c) => {
-                construct::construct(game, player_index, &c);
+                construct::construct(game, player_index, &c)?;
             }
             Collect(c) => {
-                collect(game, player_index, &c);
+                collect(game, player_index, &c)?;
             }
             Recruit(r) => {
                 let player = &mut game.players[player_index];
@@ -211,7 +210,7 @@ impl PlayingAction {
                 ) {
                     cost.pay(game, &r.payment);
                 } else {
-                    panic!("Cannot pay for units")
+                    return Err("Cannot pay for units".to_string());
                 }
                 recruit(game, player_index, r);
             }
@@ -230,10 +229,11 @@ impl PlayingAction {
                 );
             }
             Custom(custom_action) => {
-                custom(game, player_index, custom_action);
+                custom(game, player_index, custom_action)?;
             }
             EndTurn => game.next_turn(),
         }
+        Ok(())
     }
 
     #[must_use]
@@ -262,7 +262,7 @@ pub struct ActionType {
 
 impl ActionType {
     pub(crate) fn is_available(&self, game: &Game, player_index: usize) -> Result<(), String> {
-        let p = game.get_player(player_index);
+        let p = game.player(player_index);
         if !p.resources.has_at_least(&self.cost) {
             return Err("Not enough resources for action type".to_string());
         }
@@ -274,7 +274,7 @@ impl ActionType {
     }
 
     pub(crate) fn pay(&self, game: &mut Game, player_index: usize) {
-        let p = game.get_player_mut(player_index);
+        let p = game.player_mut(player_index);
         let cost = self.cost.clone();
         p.lose_resources(cost.clone());
         if !self.free {
@@ -347,14 +347,14 @@ pub(crate) fn roll_boost_cost(roll: u8) -> ResourcePile {
     ResourcePile::culture_tokens(5 - roll as u32)
 }
 
-fn custom(game: &mut Game, player_index: usize, custom_action: CustomAction) {
+fn custom(game: &mut Game, player_index: usize, custom_action: CustomAction) -> Result<(), String> {
     let c = custom_action.custom_action_type();
     if c.info().once_per_turn {
         game.players[player_index]
             .played_once_per_turn_actions
             .push(c);
     }
-    custom_action.execute(game, player_index);
+    custom_action.execute(game, player_index)
 }
 
 pub(crate) fn build_city(player: &mut Player, position: Position) {

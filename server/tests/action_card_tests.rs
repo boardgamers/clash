@@ -1,10 +1,11 @@
-use crate::common::{move_action, TestAction};
+use crate::common::{TestAction, move_action};
 use common::JsonTest;
 use server::action::Action;
 use server::card::HandCard;
 use server::city_pieces::Building::Fortress;
 use server::collect::PositionCollection;
-use server::content::custom_phase_actions::{EventResponse, SelectedStructure, Structure};
+use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
+use server::movement::move_units_destinations;
 use server::playing_actions::PlayingAction;
 use server::playing_actions::PlayingAction::Construct;
 use server::position::Position;
@@ -217,6 +218,78 @@ fn test_production_focus() {
                     ],
                 })),
             ),
+        ],
+    );
+}
+
+#[test]
+fn test_explorer() {
+    JSON.test(
+        "explorer",
+        vec![
+            TestAction::undoable(1, Action::Playing(PlayingAction::ActionCard(21)))
+                .without_json_comparison(),
+            TestAction::undoable(
+                1,
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "B6",
+                )])),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(1, Action::Response(EventResponse::ExploreResolution(0)))
+                .without_json_comparison(),
+            TestAction::undoable(
+                1,
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "D8",
+                )])),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_negotiations() {
+    JSON.test(
+        "negotiations",
+        vec![
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(23)))
+                .without_json_comparison(),
+            TestAction::not_undoable(0, Action::Playing(PlayingAction::EndTurn))
+                .with_pre_assert(|game| {
+                    assert!(
+                        !move_units_destinations(
+                            game.player(0),
+                            game,
+                            &[0],
+                            Position::from_offset("C2"),
+                            None,
+                        )
+                        .iter()
+                        .any(|r| r
+                            .iter()
+                            .any(|r| r.destination == Position::from_offset("B1")))
+                    );
+                })
+                .without_json_comparison(),
+            TestAction::not_undoable(1, Action::Playing(PlayingAction::EndTurn))
+                .with_pre_assert(|game| {
+                    assert!(
+                        !move_units_destinations(
+                            game.player(1),
+                            game,
+                            &[0],
+                            Position::from_offset("B1"),
+                            None,
+                        )
+                        .iter()
+                        .any(|r| r
+                            .iter()
+                            .any(|r| r.destination == Position::from_offset("C2")))
+                    );
+                })
+                .without_json_comparison(),
+            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("B1"))),
         ],
     );
 }

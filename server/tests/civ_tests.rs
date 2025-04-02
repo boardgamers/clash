@@ -1,6 +1,6 @@
-use crate::common::{move_action, JsonTest, TestAction};
+use crate::common::{JsonTest, TestAction, move_action};
 use server::action::Action;
-use server::content::custom_phase_actions::EventResponse;
+use server::content::persistent_events::EventResponse;
 use server::position::Position;
 
 mod common;

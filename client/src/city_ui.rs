@@ -3,7 +3,7 @@ use crate::action_buttons::{
 };
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::CollectResources;
-use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
+use crate::construct_ui::{ConstructionPayment, ConstructionProject, new_building_positions};
 use crate::custom_phase_ui::{SelectedStructureInfo, SelectedStructureStatus};
 use crate::happiness_ui::{
     add_increase_happiness, can_play_increase_happiness, open_increase_happiness_dialog,
@@ -22,7 +22,7 @@ use server::city_pieces::Building;
 use server::collect::possible_resource_collections;
 use server::construct::can_construct;
 use server::content::custom_actions::CustomActionType;
-use server::content::custom_phase_actions::Structure;
+use server::content::persistent_events::Structure;
 use server::events::EventOrigin;
 use server::game::Game;
 use server::playing_actions::PlayingActionType;
@@ -129,7 +129,7 @@ fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconActio
         return None;
     }
     Some((
-        &rc.assets().units[&UnitType::Infantry],
+        rc.assets().unit(UnitType::Infantry, rc.shown_player),
         "Recruit Units".to_string(),
         Box::new(|| {
             RecruitAmount::new_selection(
@@ -293,15 +293,16 @@ pub fn draw_city(rc: &RenderContext, city: &City) -> Option<StateUpdate> {
 
 fn draw_mood_state(rc: &RenderContext, city: &City, c: Vec2) {
     let state = &rc.state;
-    let mood = if let ActiveDialog::IncreaseHappiness(increase) = &state.active_dialog {
-        let steps = increase
-            .steps
-            .iter()
-            .find(|(p, _)| p == &city.position)
-            .map_or(&0, |(_, s)| s);
-        &city.mood_state.clone().add(*steps)
-    } else {
-        &city.mood_state
+    let mood = match &state.active_dialog {
+        ActiveDialog::IncreaseHappiness(increase) => {
+            let steps = increase
+                .steps
+                .iter()
+                .find(|(p, _)| p == &city.position)
+                .map_or(&0, |(_, s)| s);
+            &city.mood_state.clone().add(*steps)
+        }
+        _ => &city.mood_state,
     };
     let t = match mood {
         MoodState::Happy => Some(&rc.assets().resources[&ResourceType::MoodTokens]),

@@ -1,5 +1,5 @@
-use crate::common::{illegal_action_test, influence_action, JsonTest, TestAction};
-use server::action::{execute_action, Action};
+use crate::common::{JsonTest, TestAction, illegal_action_test, influence_action};
+use server::action::{Action, execute_action};
 use server::city_pieces::Building::{Academy, Fortress, Temple};
 use server::collect::PositionCollection;
 use server::consts::CONSTRUCT_COST;
@@ -9,18 +9,18 @@ use server::content::custom_actions::CustomAction::{
     AbsolutePower, ArtsInfluenceCultureAttempt, CivilRights, ForcedLabor, Sports, Taxes, Theaters,
     VotingIncreaseHappiness,
 };
-use server::content::custom_phase_actions::{EventResponse, SelectedStructure, Structure};
+use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
 use server::events::EventOrigin;
 use server::game::Game;
-use server::movement::move_units_destinations;
+use server::movement::MovementAction::Move;
+use server::movement::{MoveUnits, move_units_destinations};
 use server::playing_actions::PlayingAction::{
     Advance, Collect, Construct, Custom, EndTurn, Recruit, WonderCard,
 };
 use server::position::Position;
 use server::recruit::recruit_cost_without_replaced;
 use server::resource_pile::ResourcePile;
-use server::unit::MovementAction::Move;
-use server::unit::{MoveUnits, Units};
+use server::unit::Units;
 use server::{construct, playing_actions};
 
 mod common;
@@ -34,32 +34,39 @@ fn test_sanitation_and_draft() {
     let city_position = Position::from_offset("A1");
     JSON.test(
         "sanitation_and_draft",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(Recruit(server::playing_actions::Recruit {
-                units: units.clone(),
-                city_position,
-                payment: ResourcePile::mood_tokens(1) + ResourcePile::gold(2),
-                leader_name: None,
-                replaced_units: vec![],
-            })),
-        )
-        .with_pre_assert(move |game| {
-            let options =
-                recruit_cost_without_replaced(&game.players[0], &units, city_position, None, None)
-                    .unwrap()
-                    .cost;
-            assert_eq!(3, options.conversions.len());
-            assert_eq!(ResourcePile::mood_tokens(1), options.conversions[0].to);
-            assert_eq!(ResourcePile::mood_tokens(1), options.conversions[1].to);
-            assert_eq!(
-                vec![
-                    EventOrigin::Advance("Sanitation".to_string()),
-                    EventOrigin::Advance("Draft".to_string())
-                ],
-                options.modifiers
-            );
-        })],
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(Recruit(server::playing_actions::Recruit {
+                    units: units.clone(),
+                    city_position,
+                    payment: ResourcePile::mood_tokens(1) + ResourcePile::gold(2),
+                    leader_name: None,
+                    replaced_units: vec![],
+                })),
+            )
+            .with_pre_assert(move |game| {
+                let options = recruit_cost_without_replaced(
+                    &game.players[0],
+                    &units,
+                    city_position,
+                    None,
+                    None,
+                )
+                .unwrap()
+                .cost;
+                assert_eq!(3, options.conversions.len());
+                assert_eq!(ResourcePile::mood_tokens(1), options.conversions[0].to);
+                assert_eq!(ResourcePile::mood_tokens(1), options.conversions[1].to);
+                assert_eq!(
+                    vec![
+                        EventOrigin::Advance("Sanitation".to_string()),
+                        EventOrigin::Advance("Draft".to_string())
+                    ],
+                    options.modifiers
+                );
+            }),
+        ],
     );
 }
 
@@ -348,7 +355,7 @@ fn test_road_coordinates() {
 }
 
 fn get_destinations(game: &Game, units: &[u32], position: &str) -> Vec<String> {
-    let player = game.get_player(1);
+    let player = game.player(1);
     move_units_destinations(player, game, units, Position::from_offset(position), None)
         .unwrap()
         .into_iter()
@@ -389,7 +396,7 @@ fn test_trade_route_coordinates() {
     // 1 settler is at C8, but the path is not explored (or blocked by a pirate at C7)
     // 1 ship is at A7, but the pirate at A8 blocks trading in its zone of control
 
-    let found = find_trade_routes(game, game.get_player(1));
+    let found = find_trade_routes(game, game.player(1));
     assert_eq!(found.len(), 2);
 }
 

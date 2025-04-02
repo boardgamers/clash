@@ -1,6 +1,6 @@
 use crate::combat;
 use crate::consts::STACK_LIMIT;
-use crate::content::custom_phase_actions::CurrentEventType;
+use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
@@ -8,9 +8,13 @@ use crate::player_events::CostInfo;
 use crate::playing_actions::Recruit;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use crate::unit::{UnitType, Units};
+use crate::unit::{UnitType, Units, kill_units};
 
 pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) {
+    for unit in &r.replaced_units {
+        // kill separately, because they may be on different positions
+        kill_units(game, &[*unit], player_index, None);
+    }
     if let Some(leader_name) = &r.leader_name {
         if let Some(previous_leader) = game.players[player_index].active_leader.take() {
             Player::with_leader(
@@ -24,18 +28,7 @@ pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) {
         }
         set_active_leader(game, leader_name.clone(), player_index);
     }
-    let mut replaced_units_undo_context = Vec::new();
-    for unit in &r.replaced_units {
-        let player = game.get_player_mut(player_index);
-        let u = player.remove_unit(*unit);
-        if u.carrier_id.is_some_and(|c| r.replaced_units.contains(&c)) {
-            // will be removed when the carrier is removed
-            continue;
-        }
-        let unit = u.data(game.get_player(player_index));
-        replaced_units_undo_context.push(unit);
-    }
-    let player = game.get_player_mut(player_index);
+    let player = game.player_mut(player_index);
     let vec = r.units.clone().to_vec();
     player.units.reserve_exact(vec.len());
     for unit_type in vec {
@@ -60,17 +53,17 @@ fn set_active_leader(game: &mut Game, leader_name: String, player_index: usize) 
     Player::with_leader(&leader_name, game, player_index, |game, leader| {
         leader.listeners.one_time_init(game, player_index);
     });
-    game.get_player_mut(player_index).active_leader = Some(leader_name);
+    game.player_mut(player_index).active_leader = Some(leader_name);
 }
 
 pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
     let city_position = r.city_position;
     if game
-        .trigger_current_event(
+        .trigger_persistent_event(
             &[player_index],
-            |events| &mut events.on_recruit,
+            |events| &mut events.recruit,
             r,
-            CurrentEventType::Recruit,
+            PersistentEventType::Recruit,
         )
         .is_none()
     {

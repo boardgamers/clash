@@ -2,11 +2,11 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::barbarians::barbarians_bonus;
 use crate::combat_listeners::{
-    choose_carried_units_casualties, choose_fighter_casualties, combat_stats, offer_retreat,
-    place_settler,
+    choose_fighter_casualties, combat_stats, offer_retreat, place_settler,
 };
 use crate::content::action_cards::cultural_takeover::use_cultural_takeover;
 use crate::content::action_cards::development::collect_only;
+use crate::content::action_cards::negotiation::use_negotiations;
 use crate::content::incidents::famine::pestilence_permanent_effect;
 use crate::content::incidents::great_builders::construct_only;
 use crate::content::incidents::great_diplomat::use_diplomatic_relations;
@@ -20,9 +20,10 @@ use crate::explore::explore_resolution;
 use crate::game::Game;
 use crate::pirates::{pirates_bonus, pirates_round_bonus};
 use crate::status_phase::{
-    complete_objectives, determine_first_player, draw_cards, free_advance, get_status_phase,
-    may_change_government, raze_city, StatusPhaseState,
+    StatusPhaseState, complete_objectives, determine_first_player, draw_cards, free_advance,
+    get_status_phase, may_change_government, raze_city,
 };
+use crate::unit::choose_carried_units_casualties;
 use crate::wonder::{build_wonder, on_draw_wonder_card};
 
 pub struct Builtin {
@@ -96,10 +97,11 @@ pub fn get_all() -> Vec<Builtin> {
         anarchy_advance(),
         use_great_warlord(),
         construct_only(),
-        collect_only(),
         use_diplomatic_relations(),
         // action card related
+        collect_only(),
         use_cultural_takeover(),
+        use_negotiations(),
     ]
 }
 

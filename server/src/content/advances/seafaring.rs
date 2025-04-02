@@ -3,7 +3,7 @@ use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::city_pieces::Building::Port;
 use crate::collect::{CollectContext, CollectInfo};
-use crate::content::advances::{advance_group_builder, AdvanceGroup, NAVIGATION};
+use crate::content::advances::{AdvanceGroup, NAVIGATION, advance_group_builder};
 use crate::game::Game;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -60,13 +60,13 @@ fn cartography() -> AdvanceBuilder {
             |game,  i, ()| {
                 // info is the action that we last used this ability for
                 let key = game.actions_left.to_string();
-                if game.get_player(i.player).event_info.get("Cartography").is_some_and(|info| info == &key) {
+                if game.player(i.player).event_info.get("Cartography").is_some_and(|info| info == &key) {
                     return;
                 }
                 let mut ship = false;
                 let mut navigation = false;
                 for id in &i.units {
-                    let unit = game.get_player(i.player).get_unit(*id);
+                    let unit = game.player(i.player).get_unit(*id);
                     if unit.unit_type.is_ship() {
                         ship = true;
                         if !unit.position.is_neighbor(i.to) {
@@ -75,12 +75,12 @@ fn cartography() -> AdvanceBuilder {
                     }
                 }
                 if ship {
-                    let player = game.get_player_mut(i.player);
+                    let player = game.player_mut(i.player);
                     player.event_info.insert("Cartography".to_string(), key);
                     player.gain_resources(ResourcePile::ideas(1));
                     game.add_info_log_item("Cartography gained 1 idea");
                     if navigation {
-                        game.get_player_mut(i.player).gain_resources(ResourcePile::culture_tokens(1));
+                        game.player_mut(i.player).gain_resources(ResourcePile::culture_tokens(1));
                         game.add_info_log_item(" and 1 culture token (for using navigation)");
                     }
                 }
@@ -94,7 +94,7 @@ fn is_enemy_player_or_pirate_zone(game: &Game, player_index: usize, position: Po
 }
 
 fn fishing_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
-    let city = game.get_any_city(c.city_position);
+    let city = game.any_city(c.city_position);
     let port = city.port_position;
     if let Some(position) = port
         .filter(|p| !is_enemy_player_or_pirate_zone(game, c.player_index, *p))

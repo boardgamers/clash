@@ -2,8 +2,8 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::city_pieces::Building::Temple;
-use crate::content::advances::{advance_group_builder, get_group, AdvanceGroup};
-use crate::content::custom_phase_actions::ResourceRewardRequest;
+use crate::content::advances::{AdvanceGroup, advance_group_builder, get_group};
+use crate::content::persistent_events::ResourceRewardRequest;
 use crate::payment::{PaymentConversion, PaymentOptions};
 use crate::resource::ResourceType;
 use crate::resource::ResourceType::{CultureTokens, MoodTokens};
@@ -21,7 +21,7 @@ fn myths() -> AdvanceBuilder {
         .with_advance_bonus(MoodToken)
         .with_unlocked_building(Temple)
         .add_resource_request(
-            |event| &mut event.on_construct,
+            |event| &mut event.construct,
             1,
             |_game, _player_index, building| {
                 if matches!(building, Temple) {

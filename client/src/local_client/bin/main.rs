@@ -1,6 +1,6 @@
 #![allow(clippy::missing_panics_doc)]
 
-use client::client::{init, render_and_update, Features, GameSyncRequest, GameSyncResult};
+use client::client::{Features, GameSyncRequest, GameSyncResult, init, render_and_update};
 use macroquad::miniquad::window::set_window_size;
 use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
@@ -80,7 +80,7 @@ pub fn setup_local_game() -> Game {
     game.round = 6;
     game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];
     let add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {
-        game.get_player_mut(player_index)
+        game.player_mut(player_index)
             .add_unit(Position::from_offset(pos), unit_type);
     };
 

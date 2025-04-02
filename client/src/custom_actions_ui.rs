@@ -1,5 +1,5 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::payment_ui::{payment_dialog, Payment};
+use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
 use server::action::Action;
 use server::content::custom_actions::CustomAction;

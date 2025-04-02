@@ -1,6 +1,6 @@
 use crate::common::*;
 use server::collect::PositionCollection;
-use server::content::custom_phase_actions::{EventResponse, SelectedStructure, Structure};
+use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
 use server::log::current_player_turn_log;
 use server::unit::Units;
 use server::{
@@ -140,10 +140,12 @@ fn basic_actions() {
         ResourcePile::ore(1) + ResourcePile::food(1),
         player.resources
     );
-    assert!(player
-        .try_get_city(city_position)
-        .expect("player should have a city at this position")
-        .is_activated());
+    assert!(
+        player
+            .try_get_city(city_position)
+            .expect("player should have a city at this position")
+            .is_activated()
+    );
     assert_eq!(0, game.actions_left);
     let mut game = game_api::execute(game, Action::Playing(EndTurn), 0);
     let player = &mut game.players[0];
