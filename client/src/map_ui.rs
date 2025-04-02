@@ -1,8 +1,8 @@
-use crate::city_ui::{draw_city, show_city_menu, IconAction, IconActionVec};
-use crate::client_state::{ActiveDialog, State, StateUpdate, MAX_OFFSET, MIN_OFFSET, ZOOM};
-use crate::dialog_ui::{cancel_button_pos, ok_button, OkTooltip};
+use crate::city_ui::{IconAction, IconActionVec, draw_city, show_city_menu};
+use crate::client_state::{ActiveDialog, MAX_OFFSET, MIN_OFFSET, State, StateUpdate, ZOOM};
+use crate::dialog_ui::{OkTooltip, cancel_button_pos, ok_button};
 use crate::layout_ui::{bottom_center_texture, bottom_right_texture, icon_pos};
-use crate::move_ui::{movable_units, MoveDestination, MoveIntent};
+use crate::move_ui::{MoveDestination, MoveIntent, movable_units};
 use crate::player_ui::get_combat;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
@@ -11,7 +11,7 @@ use macroquad::math::{f32, vec2};
 use macroquad::prelude::*;
 use server::action::Action;
 use server::combat::Combat;
-use server::content::custom_phase_actions::EventResponse;
+use server::content::persistent_events::EventResponse;
 use server::map::{Rotation, Terrain, UnexploredBlock};
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
@@ -94,15 +94,15 @@ pub fn draw_map(rc: &RenderContext) -> StateUpdate {
 }
 
 fn get_overlay(rc: &RenderContext) -> HashMap<Position, Terrain> {
-    if let ActiveDialog::ExploreResolution(r) = &rc.state.active_dialog {
-        r.block
+    match &rc.state.active_dialog {
+        ActiveDialog::ExploreResolution(r) => r
+            .block
             .block
             .tiles(&r.block.position, r.rotation)
             .iter()
             .map(|(pos, t)| (*pos, t.clone()))
-            .collect()
-    } else {
-        HashMap::new()
+            .collect(),
+        _ => HashMap::new(),
     }
 }
 
@@ -235,7 +235,7 @@ fn found_city_button<'a>(rc: &'a RenderContext<'a>, pos: Position) -> Option<Ico
         .find(|(_, unit)| unit.can_found_city(game))
         .map(|(_index, unit)| {
             let action: IconAction<'a> = (
-                &rc.assets().units[&UnitType::Settler],
+                rc.assets().unit(UnitType::Settler, rc.shown_player),
                 "Found a new city".to_string(),
                 Box::new(move || {
                     StateUpdate::execute(Action::Playing(PlayingAction::FoundCity {

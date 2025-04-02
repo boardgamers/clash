@@ -7,7 +7,7 @@ use crate::events::{Event, EventOrigin};
 use crate::payment::PaymentOptions;
 use crate::player_events::{CostInfo, TransientEvents};
 use crate::resource::ResourceType;
-use crate::unit::{carried_units, UnitData, UnitType};
+use crate::unit::{UnitData, UnitType};
 use crate::{
     city::{City, CityData},
     city_pieces::Building::{self},
@@ -616,10 +616,11 @@ impl Player {
     pub fn advance_cost(&self, advance: &Advance, execute: Option<&ResourcePile>) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
-            &PaymentOptions::sum(
-                ADVANCE_COST,
-                &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
-            ),
+            &PaymentOptions::sum(ADVANCE_COST, &[
+                ResourceType::Ideas,
+                ResourceType::Food,
+                ResourceType::Gold,
+            ]),
             advance,
             &(),
             execute,
@@ -698,6 +699,11 @@ impl Player {
         self.next_unit_id += 1;
     }
 
+    #[must_use]
+    pub fn try_get_unit(&self, id: u32) -> Option<&Unit> {
+        self.units.iter().find(|unit| unit.id == id)
+    }
+
     ///
     /// # Panics
     /// Panics if unit does not exist
@@ -706,7 +712,7 @@ impl Player {
         self.units
             .iter()
             .find(|unit| unit.id == id)
-            .expect("unit should exist")
+            .unwrap_or_else(|| panic!("unit should exist {id}"))
     }
 
     ///
@@ -717,14 +723,11 @@ impl Player {
         self.units
             .iter_mut()
             .find(|unit| unit.id == id)
-            .expect("unit should exist")
+            .unwrap_or_else(|| panic!("unit should exist {id}"))
     }
 
     pub(crate) fn remove_unit(&mut self, id: u32) -> Unit {
-        for id in carried_units(id, self) {
-            self.remove_unit(id);
-        }
-
+        // carried units can be transferred to another ship - which has to be selected later
         self.units.remove(
             self.units
                 .iter()
@@ -749,19 +752,17 @@ impl Player {
             .collect()
     }
 
-    #[must_use]
     pub(crate) fn trigger_event<T, U, V>(
         &self,
         event: fn(&TransientEvents) -> &Event<T, U, V, ()>,
         value: &mut T,
         info: &U,
         details: &V,
-    ) -> Vec<EventOrigin>
-    where
+    ) where
         T: Clone + PartialEq,
     {
         let e = event(&self.events.transient);
-        e.get().trigger(value, info, details, &mut ())
+        e.get().trigger(value, info, details, &mut ());
     }
 
     pub(crate) fn trigger_cost_event<U, V>(
@@ -794,7 +795,7 @@ impl Player {
                 |i, m| i.cost.modifiers = m,
             )
         } else {
-            let m = event.trigger(&mut cost_info, info, details, &mut ());
+            let m = event.trigger_with_modifiers(&mut cost_info, info, details, &mut ());
             cost_info.cost.modifiers = m;
             cost_info
         }

@@ -2,18 +2,18 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::card::HandCard;
 use crate::content::builtin::Builtin;
-use crate::content::custom_phase_actions::HandCardsRequest;
 use crate::content::effects::ConstructEffect;
 use crate::content::effects::PermanentEffect::Construct;
 use crate::content::incidents::great_persons::{
-    great_person_action_card, great_person_description, GREAT_PERSON_DESCRIPTION,
+    GREAT_PERSON_DESCRIPTION, great_person_action_card, great_person_description,
 };
+use crate::content::persistent_events::HandCardsRequest;
 use crate::game::Game;
 use crate::player::Player;
 use crate::playing_actions::{ActionType, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element_by;
-use crate::wonder::{cities_for_wonder, on_play_wonder_card, WonderCardInfo, WonderDiscount};
+use crate::wonder::{WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card};
 
 pub(crate) fn great_engineer() -> ActionCard {
     let groups = &["Construction"];
@@ -29,7 +29,7 @@ pub(crate) fn great_engineer() -> ActionCard {
         |_game, _player| true,
     )
         .add_bool_request(
-            |e| &mut e.on_play_action_card,
+            |e| &mut e.play_action_card,
             0,
             |_, _, _| Some("Build a building in a city without spending an action and without activating it?".to_string()),
             |game, s, _| {
@@ -81,7 +81,7 @@ pub(crate) fn construct_only() -> Builtin {
             },
         )
         .add_simple_persistent_event_listener(
-            |event| &mut event.on_construct,
+            |event| &mut event.construct,
             2,
             |game, _, _, _| {
                 remove_element_by(&mut game.permanent_effects, |e| matches!(e, &Construct(_)));
@@ -106,11 +106,11 @@ pub(crate) fn great_architect() -> ActionCard {
         |game, player| !playable_wonders(game, player).is_empty(),
     )
     .add_hand_card_request(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         0,
         |game, player, _| {
             Some(HandCardsRequest::new(
-                playable_wonders(game, game.get_player(player))
+                playable_wonders(game, game.player(player))
                     .iter()
                     .map(|name| HandCard::Wonder(name.clone()))
                     .collect(),

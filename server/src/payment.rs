@@ -144,10 +144,10 @@ impl PaymentOptions {
 
     #[must_use]
     pub(crate) fn tokens(cost: u32) -> Self {
-        Self::sum(
-            cost,
-            &[ResourceType::MoodTokens, ResourceType::CultureTokens],
-        )
+        Self::sum(cost, &[
+            ResourceType::MoodTokens,
+            ResourceType::CultureTokens,
+        ])
     }
 
     #[must_use]

@@ -1,4 +1,4 @@
-use crate::content::custom_phase_actions::CurrentEventType;
+use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::map::Terrain;
@@ -95,7 +95,7 @@ pub fn get_total_collection(
         .reduce(std::ops::Add::add)
         .map(|pile| {
             i.total = pile;
-            let _ = player.trigger_event(|e| &e.collect_total, &mut i, &(), &());
+            player.trigger_event(|e| &e.collect_total, &mut i, &(), &());
             i
         })
         .ok_or("Nothing collected".to_string())
@@ -106,23 +106,25 @@ pub fn tiles_used(collections: &[PositionCollection]) -> u32 {
     collections.iter().map(|c| c.times).sum()
 }
 
-pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) {
-    let i = get_total_collection(game, player_index, c.city_position, &c.collections)
-        .unwrap_or_else(|e| panic!("{e}"));
+pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) -> Result<(), String> {
+    let i = get_total_collection(game, player_index, c.city_position, &c.collections)?;
     let city = game.players[player_index].get_city_mut(c.city_position);
-    assert!(city.can_activate(), "Illegal action");
+    if !city.can_activate() {
+        return Err("City can't be activated".to_string());
+    }
     city.activate();
     game.players[player_index].gain_resources(i.total.clone());
 
     on_collect(game, player_index, i);
+    Ok(())
 }
 
 pub(crate) fn on_collect(game: &mut Game, player_index: usize, i: CollectInfo) {
-    let Some(info) = game.trigger_current_event(
+    let Some(info) = game.trigger_persistent_event(
         &[player_index],
-        |e| &mut e.on_collect,
+        |e| &mut e.collect,
         i,
-        CurrentEventType::Collect,
+        PersistentEventType::Collect,
     ) else {
         return;
     };
@@ -181,12 +183,14 @@ pub fn possible_resource_collections(
         (Forest, HashSet::from([ResourcePile::wood(1)])),
     ];
     let mut terrain_options = HashMap::from(set);
-    let modifiers = game.get_player(player_index).trigger_event(
-        |e| &e.terrain_collect_options,
-        &mut terrain_options,
-        &(),
-        &(),
-    );
+    let event = &game
+        .player(player_index)
+        .events
+        .transient
+        .terrain_collect_options;
+    let modifiers = event
+        .get()
+        .trigger_with_modifiers(&mut terrain_options, &(), &(), &mut ());
 
     let collect_options = city_pos
         .neighbors()

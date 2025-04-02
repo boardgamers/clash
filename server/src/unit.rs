@@ -1,16 +1,21 @@
+use UnitType::*;
 use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::iter;
 use std::{
     fmt::Display,
     ops::{AddAssign, SubAssign},
 };
 
-use UnitType::*;
-
+use crate::ability_initializer::AbilityInitializerSetup;
+use crate::consts::SHIP_CAPACITY;
+use crate::content::builtin::Builtin;
+use crate::content::persistent_events::{KilledUnits, PersistentEventType, UnitsRequest};
 use crate::explore::is_any_ship;
-use crate::movement::CurrentMove;
+use crate::game::GameState;
+use crate::movement::{CurrentMove, MovementRestriction};
 use crate::player::Player;
 use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
 
@@ -149,6 +154,23 @@ pub enum UnitType {
 
 impl UnitType {
     #[must_use]
+    pub fn get_all() -> Vec<Self> {
+        vec![Settler, Infantry, Ship, Cavalry, Elephant, Leader]
+    }
+
+    #[must_use]
+    pub fn name(&self) -> &str {
+        match self {
+            Settler => "settler",
+            Infantry => "infantry",
+            Ship => "ship",
+            Cavalry => "cavalry",
+            Elephant => "elephant",
+            Leader => "leader",
+        }
+    }
+
+    #[must_use]
     pub fn cost(&self) -> ResourcePile {
         match self {
             Settler | Elephant => ResourcePile::food(2),
@@ -181,13 +203,6 @@ impl UnitType {
     pub fn is_settler(&self) -> bool {
         matches!(self, Self::Settler)
     }
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
-pub enum MovementRestriction {
-    Battle,
-    Mountain,
-    Forest,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -413,41 +428,6 @@ impl Display for Units {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
-pub struct MoveUnits {
-    pub units: Vec<u32>,
-    pub destination: Position,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub embark_carrier_id: Option<u32>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "ResourcePile::is_empty")]
-    pub payment: ResourcePile,
-}
-
-impl MoveUnits {
-    #[must_use]
-    pub fn new(
-        units: Vec<u32>,
-        destination: Position,
-        embark_carrier_id: Option<u32>,
-        payment: ResourcePile,
-    ) -> Self {
-        Self {
-            units,
-            destination,
-            embark_carrier_id,
-            payment,
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
-pub enum MovementAction {
-    Move(MoveUnits),
-    Stop,
-}
-
 #[must_use]
 pub fn carried_units(carrier: u32, player: &Player) -> Vec<u32> {
     player
@@ -479,6 +459,152 @@ pub(crate) fn get_current_move(
     }
 }
 
+pub(crate) fn kill_units(
+    game: &mut Game,
+    unit_ids: &[u32],
+    player_index: usize,
+    killer: Option<usize>,
+) {
+    let pos = game
+        .player(player_index)
+        .get_unit(*unit_ids.first().expect("no units"))
+        .position;
+    kill_units_without_event(game, unit_ids, player_index, killer);
+    units_killed(game, player_index, KilledUnits::new(pos, killer));
+}
+
+pub(crate) fn kill_units_without_event(
+    game: &mut Game,
+    unit_ids: &[u32],
+    player_index: usize,
+    killer: Option<usize>,
+) {
+    for unit in unit_ids {
+        kill_unit(game, *unit, player_index, killer);
+    }
+}
+
+pub(crate) fn units_killed(game: &mut Game, player_index: usize, killed_units: KilledUnits) {
+    match game.trigger_persistent_event(
+        &[player_index],
+        |e| &mut e.units_killed,
+        killed_units,
+        PersistentEventType::UnitsKilled,
+    ) {
+        None => (),
+        Some(killed_units) => save_carried_units(game, player_index, killed_units.position),
+    }
+}
+
+fn kill_unit(game: &mut Game, unit_id: u32, player_index: usize, killer: Option<usize>) {
+    let unit = game.players[player_index].remove_unit(unit_id);
+    if matches!(unit.unit_type, UnitType::Leader) {
+        let leader = game.players[player_index]
+            .active_leader
+            .take()
+            .expect("A player should have an active leader when having a leader unit");
+        Player::with_leader(&leader, game, player_index, |game, leader| {
+            leader.listeners.deinit(game, player_index);
+        });
+        if let Some(killer) = killer {
+            game.players[killer].captured_leaders.push(leader);
+        }
+    }
+    if let GameState::Movement(m) = &mut game.state {
+        if let CurrentMove::Fleet { units } = &mut m.current_move {
+            units.retain(|&id| id != unit_id);
+        }
+    }
+}
+
+fn save_carried_units(game: &mut Game, player: usize, pos: Position) {
+    let mut carried_units: HashMap<u32, u8> = HashMap::new();
+
+    let units = game
+        .player(player)
+        .get_units(pos)
+        .iter()
+        .map(|u| (u.id, u.carrier_id))
+        .collect_vec();
+
+    for (id, carrier_id) in units.clone() {
+        if let Some(carrier) = carrier_id {
+            carried_units
+                .entry(carrier)
+                .and_modify(|e| *e += 1)
+                .or_insert(1);
+        } else {
+            carried_units.entry(id).or_insert(0);
+        }
+    }
+
+    // embark to surviving ships
+    for (id, carrier_id) in units {
+        if carrier_id.is_some_and(|id| game.player(player).try_get_unit(id).is_none()) {
+            let (&carrier_id, &carried) = carried_units
+                .iter()
+                .find(|(_carrier_id, carried)| **carried < SHIP_CAPACITY)
+                .expect("no carrier found to save carried units");
+            carried_units.insert(carrier_id, carried + 1);
+            game.player_mut(player).get_unit_mut(id).carrier_id = Some(carrier_id);
+        }
+    }
+}
+
+pub(crate) fn choose_carried_units_casualties() -> Builtin {
+    Builtin::builder(
+        "Choose Casualties (carried units)",
+        "Choose which carried units to remove.",
+    )
+    .add_units_request(
+        |event| &mut event.units_killed,
+        0,
+        |game, player, k| {
+            let p = game.player(player);
+            let pos = k.position;
+            if game.map.is_land(pos) {
+                return None;
+            }
+            let carried: Vec<u32> = p
+                .get_units(pos)
+                .into_iter()
+                .filter(|u| u.carrier_id.is_some())
+                .map(|u| u.id)
+                .collect();
+            let capacity = p
+                .get_units(pos)
+                .iter()
+                .filter(|u| u.unit_type.is_ship())
+                .count()
+                * SHIP_CAPACITY as usize;
+            let to_kill = carried.len().saturating_sub(capacity) as u8;
+
+            Some(UnitsRequest::new(
+                player,
+                carried,
+                to_kill..=to_kill,
+                "Choose which carried units to remove",
+            ))
+        },
+        |game, units, e| {
+            if !units.choice.is_empty() {
+                let p = game.player(units.player_index);
+                game.add_info_log_item(&format!(
+                    "{} killed carried units: {}",
+                    units.player_name,
+                    units
+                        .choice
+                        .iter()
+                        .map(|id| p.get_unit(*id).unit_type)
+                        .collect::<Units>()
+                ));
+            }
+            kill_units_without_event(game, &units.choice, units.player_index, e.killer);
+        },
+    )
+    .build()
+}
+
 #[cfg(test)]
 mod tests {
     use crate::unit::UnitType::*;
@@ -487,26 +613,22 @@ mod tests {
     #[test]
     fn into_iter() {
         let units = Units::new(0, 1, 0, 2, 1, 1);
-        assert_eq!(
-            units.into_iter().collect::<Vec<_>>(),
-            vec![
-                (Settler, 0),
-                (Infantry, 1),
-                (Ship, 0),
-                (Cavalry, 2),
-                (Elephant, 1),
-                (Leader, 1),
-            ]
-        );
+        assert_eq!(units.into_iter().collect::<Vec<_>>(), vec![
+            (Settler, 0),
+            (Infantry, 1),
+            (Ship, 0),
+            (Cavalry, 2),
+            (Elephant, 1),
+            (Leader, 1),
+        ]);
     }
 
     #[test]
     fn to_vec() {
         let units = Units::new(0, 1, 0, 2, 1, 1);
-        assert_eq!(
-            units.to_vec(),
-            vec![Infantry, Cavalry, Cavalry, Elephant, Leader]
-        );
+        assert_eq!(units.to_vec(), vec![
+            Infantry, Cavalry, Cavalry, Elephant, Leader
+        ]);
     }
 
     #[test]

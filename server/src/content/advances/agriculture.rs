@@ -2,17 +2,19 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::MoodToken;
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::collect::{CollectContext, CollectInfo};
-use crate::content::advances::{advance_group_builder, AdvanceGroup, IRRIGATION, ROADS};
+use crate::content::advances::{AdvanceGroup, IRRIGATION, ROADS, advance_group_builder};
 use crate::game::Game;
 use crate::map::Terrain::Barren;
 use crate::resource_pile::ResourcePile;
 use std::collections::HashSet;
 
 pub(crate) fn agriculture() -> AdvanceGroup {
-    advance_group_builder(
-        "Agriculture",
-        vec![farming(), storage(), irrigation(), husbandry()],
-    )
+    advance_group_builder("Agriculture", vec![
+        farming(),
+        storage(),
+        irrigation(),
+        husbandry(),
+    ])
 }
 
 fn farming() -> AdvanceBuilder {

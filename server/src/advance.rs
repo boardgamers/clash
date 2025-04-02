@@ -3,7 +3,7 @@ use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::Resourc
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::city_pieces::Building;
 use crate::content::advances::get_advance;
-use crate::content::custom_phase_actions::CurrentEventType;
+use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::incident::on_trigger_incident;
@@ -176,30 +176,26 @@ pub(crate) fn gain_advance(
     take_incident_token: bool,
 ) {
     do_advance(game, &get_advance(name), player_index);
-    on_advance(
-        game,
-        player_index,
-        AdvanceInfo {
-            name: name.to_string(),
-            payment,
-            take_incident_token,
-        },
-    );
+    on_advance(game, player_index, AdvanceInfo {
+        name: name.to_string(),
+        payment,
+        take_incident_token,
+    });
 }
 
 pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: AdvanceInfo) {
-    let info = match game.trigger_current_event(
+    let info = match game.trigger_persistent_event(
         &[player_index],
-        |e| &mut e.on_advance,
+        |e| &mut e.advance,
         info,
-        CurrentEventType::Advance,
+        PersistentEventType::Advance,
     ) {
         None => return,
         Some(i) => i,
     };
 
     if info.take_incident_token {
-        let player = game.get_player_mut(player_index);
+        let player = game.player_mut(player_index);
         player.incident_tokens -= 1;
         if player.incident_tokens == 0 {
             player.incident_tokens = 3;

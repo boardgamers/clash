@@ -5,13 +5,13 @@ use crate::action_card;
 use crate::action_card::ActionCard;
 use crate::advance::AdvanceBuilder;
 use crate::card::HandCard;
-use crate::combat::{update_combat_strength, Combat, CombatModifier};
+use crate::combat::{Combat, CombatModifier, update_combat_strength};
 use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart, CombatStrength};
 use crate::content::action_cards;
-use crate::content::custom_phase_actions::HandCardsRequest;
+use crate::content::persistent_events::HandCardsRequest;
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::player_events::{CurrentEvent, PersistentEvents};
+use crate::player_events::{PersistentEvent, PersistentEvents};
 use action_card::discard_action_card;
 use action_cards::get_action_card;
 
@@ -157,25 +157,13 @@ impl TacticsCardBuilder {
         self
     }
 
-    pub(crate) fn add_veto_tactics_listener(
-        self,
-        priority: i32,
-        listener: impl Fn(usize, &mut Game, &Combat, &mut CombatStrength) + Clone + 'static,
-    ) -> Self {
-        self.add_combat_strength_listener(
-            |event| &mut event.on_combat_round_start_reveal_tactics,
-            priority,
-            listener,
-        )
-    }
-
     pub(crate) fn add_reveal_listener(
         self,
         priority: i32,
         listener: impl Fn(usize, &mut Game, &Combat, &mut CombatStrength) + Clone + 'static,
     ) -> Self {
         self.add_combat_strength_listener(
-            |event| &mut event.on_combat_round_start_tactics,
+            |event| &mut event.combat_round_start_tactics,
             priority,
             listener,
         )
@@ -188,7 +176,7 @@ impl TacticsCardBuilder {
         listener: impl Fn(usize, &mut Game, &Combat, &mut CombatStrength) + Clone + 'static,
     ) -> Self
     where
-        E: Fn(&mut PersistentEvents) -> &mut CurrentEvent<CombatRoundStart> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<CombatRoundStart> + 'static + Clone,
     {
         let target = self.target;
         let id = self.id;
@@ -210,7 +198,7 @@ impl TacticsCardBuilder {
         let target = self.target;
         let id = self.id;
         self.add_simple_persistent_event_listener(
-            |event| &mut event.on_combat_round_end_tactics,
+            |event| &mut event.combat_round_end_tactics,
             priority,
             move |game, p, _, s| {
                 if s.is_active(p, id, target) {
@@ -247,7 +235,7 @@ impl AbilityInitializerSetup for TacticsCardBuilder {
 
 pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
     b.add_hand_card_request(
-        |e| &mut e.on_combat_round_start,
+        |e| &mut e.combat_round_start,
         0,
         |game, player, s| {
             let cards = available_tactics_cards(game, player, &s.combat);
@@ -300,35 +288,36 @@ fn available_tactics_cards(game: &Game, player: usize, combat: &Combat) -> Vec<H
 }
 
 fn can_play_tactics_card(game: &Game, player: usize, card: &ActionCard, combat: &Combat) -> bool {
-    if let Some(card) = &card.tactics_card {
-        let position_met = card
-            .role_requirement
-            .as_ref()
-            .is_none_or(|&r| combat.role(player) == r);
+    match &card.tactics_card {
+        Some(card) => {
+            let position_met = card
+                .role_requirement
+                .as_ref()
+                .is_none_or(|&r| combat.role(player) == r);
 
-        let fighter_met = card.fighter_requirement.is_empty()
-            || card.fighter_requirement.iter().any(|r| match r {
-                FighterRequirement::Army => !combat.is_sea_battle(game),
-                FighterRequirement::Fortress => {
-                    combat.defender_fortress(game) && combat.defender == player
-                }
-                FighterRequirement::Ship => combat.is_sea_battle(game),
+            let fighter_met = card.fighter_requirement.is_empty()
+                || card.fighter_requirement.iter().any(|r| match r {
+                    FighterRequirement::Army => !combat.is_sea_battle(game),
+                    FighterRequirement::Fortress => {
+                        combat.defender_fortress(game) && combat.defender == player
+                    }
+                    FighterRequirement::Ship => combat.is_sea_battle(game),
+                });
+
+            let location_met = card.location_requirement.as_ref().is_none_or(|l| match l {
+                // city is also land!
+                CombatLocation::City => combat.defender_city(game).is_some(),
+                CombatLocation::Sea => combat.is_sea_battle(game),
+                CombatLocation::Land => !combat.is_sea_battle(game),
             });
 
-        let location_met = card.location_requirement.as_ref().is_none_or(|l| match l {
-            // city is also land!
-            CombatLocation::City => combat.defender_city(game).is_some(),
-            CombatLocation::Sea => combat.is_sea_battle(game),
-            CombatLocation::Land => !combat.is_sea_battle(game),
-        });
+            let checker_met = card
+                .checker
+                .as_ref()
+                .is_none_or(|c| c(player, game, combat));
 
-        let checker_met = card
-            .checker
-            .as_ref()
-            .is_none_or(|c| c(player, game, combat));
-
-        position_met && fighter_met && location_met && checker_met
-    } else {
-        false
+            position_met && fighter_met && location_met && checker_met
+        }
+        _ => false,
     }
 }

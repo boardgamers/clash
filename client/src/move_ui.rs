@@ -1,19 +1,19 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::cancel_button_with_tooltip;
-use crate::payment_ui::{payment_dialog, Payment};
+use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
 use crate::unit_ui::{click_unit, unit_selection_clicked};
-use macroquad::math::{u32, Vec2};
+use macroquad::math::{Vec2, u32};
 use macroquad::prelude::Texture2D;
 use server::action::Action;
 use server::events::EventOrigin;
 use server::game::{Game, GameState};
-use server::movement::{move_units_destinations, CurrentMove};
+use server::movement::{CurrentMove, MoveUnits, MovementAction, move_units_destinations};
 use server::payment::PaymentOptions;
 use server::player::Player;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-use server::unit::{MoveUnits, MovementAction, Unit, UnitType};
+use server::unit::{Unit, UnitType};
 use std::collections::HashSet;
 
 #[derive(Clone, Copy)]
@@ -49,7 +49,7 @@ impl MoveIntent {
     pub fn icon<'a>(self, rc: &'a RenderContext) -> &'a Texture2D {
         match self {
             MoveIntent::Land => &rc.assets().move_units,
-            MoveIntent::Sea => &rc.assets().units[&UnitType::Ship],
+            MoveIntent::Sea => rc.assets().unit(UnitType::Ship, rc.shown_player),
             MoveIntent::Disembark => &rc.assets().export,
         }
     }
@@ -61,7 +61,7 @@ pub fn possible_destinations(
     player_index: usize,
     units: &[u32],
 ) -> MoveDestinations {
-    let player = game.get_player(player_index);
+    let player = game.player(player_index);
     let mut modifiers = HashSet::new();
 
     let mut res = move_units_destinations(player, game, units, start, None)
@@ -89,9 +89,9 @@ pub fn possible_destinations(
 
 pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Vec2) -> StateUpdate {
     let game = rc.game;
-    let p = game.get_player(s.player_index);
+    let p = game.player(s.player_index);
     let carrier = click_unit(rc, pos, mouse_pos, p, false);
-    if let Some((destination, embark_carrier_id, cost)) = s
+    match s
         .clone()
         .destinations
         .list
@@ -102,31 +102,35 @@ pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Ve
                 Some((pos, Some(id), PaymentOptions::free()))
             }
             _ => None,
-        })
-    {
-        let units = s.units.clone();
-        let action = MovementAction::Move(MoveUnits::new(
-            units,
-            destination,
-            embark_carrier_id,
-            ResourcePile::empty(),
-        ));
+        }) {
+        Some((destination, embark_carrier_id, cost)) => {
+            let units = s.units.clone();
+            let action = MovementAction::Move(MoveUnits::new(
+                units,
+                destination,
+                embark_carrier_id,
+                ResourcePile::empty(),
+            ));
 
-        if !cost.is_free() {
-            return StateUpdate::OpenDialog(ActiveDialog::MovePayment(MovePayment {
-                action,
-                payment: rc.new_payment(&cost, "Move units", true),
-            }));
+            if !cost.is_free() {
+                return StateUpdate::OpenDialog(ActiveDialog::MovePayment(MovePayment {
+                    action,
+                    payment: rc.new_payment(&cost, "Move units", true),
+                }));
+            }
+            StateUpdate::execute(Action::Movement(action))
         }
-        StateUpdate::execute(Action::Movement(action))
-    } else if s.start.is_some_and(|p| p != pos) {
-        // first need to deselect units
-        StateUpdate::None
-    } else {
-        click_unit(rc, pos, mouse_pos, p, true).map_or_else(
-            || tile_clicked(pos, s, game, p),
-            |unit_id| unit_clicked(pos, s, game, p, unit_id),
-        )
+        _ => {
+            if s.start.is_some_and(|p| p != pos) {
+                // first need to deselect units
+                StateUpdate::None
+            } else {
+                click_unit(rc, pos, mouse_pos, p, true).map_or_else(
+                    || tile_clicked(pos, s, game, p),
+                    |unit_id| unit_clicked(pos, s, game, p, unit_id),
+                )
+            }
+        }
     }
 }
 
@@ -218,7 +222,7 @@ impl MoveSelection {
         current_move: &CurrentMove,
     ) -> MoveSelection {
         if let CurrentMove::Fleet { units } = current_move {
-            let fleet_pos = game.get_player(player_index).get_unit(units[0]).position;
+            let fleet_pos = game.player(player_index).get_unit(units[0]).position;
             return MoveSelection {
                 player_index,
                 start: Some(fleet_pos),
@@ -232,7 +236,7 @@ impl MoveSelection {
                 let movable_units = movable_units(
                     pos,
                     game,
-                    game.get_player(player_index),
+                    game.player(player_index),
                     move_intent.to_predicate(),
                 );
                 if movable_units.is_empty() {

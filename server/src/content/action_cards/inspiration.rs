@@ -6,10 +6,10 @@ use crate::advance::gain_advance;
 use crate::city::MoodState;
 use crate::content::action_cards::spy::spy;
 use crate::content::advances;
-use crate::content::custom_phase_actions::{AdvanceRequest, PaymentRequest, PositionRequest};
+use crate::content::persistent_events::{AdvanceRequest, PaymentRequest, PositionRequest};
 use crate::content::tactics_cards::{
-    encircled, heavy_resistance, high_ground, high_morale, peltasts, siege, surprise,
-    wedge_formation, TacticsCardFactory,
+    TacticsCardFactory, encircled, heavy_resistance, high_ground, high_morale, peltasts, siege,
+    surprise, wedge_formation,
 };
 use crate::game::Game;
 use crate::payment::PaymentOptions;
@@ -49,13 +49,9 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     )
     .tactics_card(tactics_card)
     .add_advance_request(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         0,
-        |game, player, _| {
-            Some(AdvanceRequest::new(possible_advances(
-                game.get_player(player),
-            )))
-        },
+        |game, player, _| Some(AdvanceRequest::new(possible_advances(game.player(player)))),
         |game, sel, _| {
             let advance = sel.choice.clone();
             gain_advance(
@@ -93,12 +89,12 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     )
     .tactics_card(tactics_card)
     .add_advance_request(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         0,
         |game, player, _| {
             Some(AdvanceRequest::new(possible_inspiration_advances(
                 game,
-                game.get_player(player),
+                game.player(player),
             )))
         },
         |game, sel, _| {
@@ -122,7 +118,7 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
 fn possible_inspiration_advances(game: &Game, player: &Player) -> Vec<String> {
     let players = players_in_range2(game, player)
         .iter()
-        .map(|&i| game.get_player(i))
+        .map(|&i| game.player(i))
         .collect_vec();
 
     advances::get_all()
@@ -176,10 +172,10 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
 
     b = increase_mood(b, 2, false);
     b = b.add_payment_request_listener(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         1,
         |game, player, _| {
-            if cities_where_mood_can_increase(game.get_player(player)).is_empty() {
+            if cities_where_mood_can_increase(game.player(player)).is_empty() {
                 return None;
             }
 
@@ -205,13 +201,13 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
 
 fn increase_mood(b: ActionCardBuilder, priority: i32, need_payment: bool) -> ActionCardBuilder {
     b.add_position_request(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         priority,
         move |game, player, a| {
             if need_payment && a.answer.is_none() {
                 return None;
             }
-            let choices = cities_where_mood_can_increase(game.get_player(player));
+            let choices = cities_where_mood_can_increase(game.player(player));
             let needed = 1..=1;
             Some(PositionRequest::new(
                 choices,
@@ -226,7 +222,7 @@ fn increase_mood(b: ActionCardBuilder, priority: i32, need_payment: bool) -> Act
                 "{} selected city {} to increase the mood by 1",
                 s.player_name, pos
             ));
-            game.get_player_mut(player)
+            game.player_mut(player)
                 .get_city_mut(pos)
                 .increase_mood_state();
         },
@@ -252,10 +248,10 @@ fn ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     )
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         0,
         |game, player, name, _| {
-            let p = game.get_player_mut(player);
+            let p = game.player_mut(player);
             let pile = ResourcePile::ideas(academies(p));
             p.gain_resources(pile.clone());
             game.add_info_log_item(&format!("{name} gained {pile} (1 for each Academy)"));
@@ -289,10 +285,10 @@ fn great_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ))
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         0,
         |game, player, name, _| {
-            let p = game.get_player_mut(player);
+            let p = game.player_mut(player);
             let pile = ResourcePile::ideas(2);
             p.gain_resources(pile.clone());
             game.add_info_log_item(&format!("{name} gained {pile} for Great Ideas"));

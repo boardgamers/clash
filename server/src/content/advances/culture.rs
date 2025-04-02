@@ -3,7 +3,7 @@ use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::city::{City, MoodState};
 use crate::city_pieces::Building::Obelisk;
-use crate::content::advances::{advance_group_builder, AdvanceGroup};
+use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::custom_actions::CustomActionType;
 use crate::game::Game;
 use crate::payment::PaymentOptions;
@@ -88,7 +88,7 @@ pub(crate) fn execute_sports(
     pos: Position,
     payment: &ResourcePile,
 ) {
-    let options = sports_options(game.get_city(player_index, pos));
+    let options = sports_options(game.city(player_index, pos));
     game.players[player_index].pay_cost(&options.expect("sports not possible"), payment);
     increase_happiness(game, player_index, &[(pos, payment.culture_tokens)], None);
 }

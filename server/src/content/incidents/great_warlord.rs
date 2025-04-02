@@ -26,7 +26,7 @@ pub(crate) fn great_warlord() -> ActionCard {
         |_game, _player| true,
     )
     .add_simple_persistent_event_listener(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         0,
         |game, _player_index, _player_name, _| {
             game.state = GameState::Movement(MoveState {
@@ -41,7 +41,7 @@ pub(crate) fn great_warlord() -> ActionCard {
 pub(crate) fn use_great_warlord() -> Builtin {
     Builtin::builder("great_warlord", "-")
         .add_simple_persistent_event_listener(
-            |event| &mut event.on_combat_start,
+            |event| &mut event.combat_start,
             9,
             |game, _player_index, _name, c| {
                 if let Movement(m) = &mut game.state {
@@ -52,7 +52,7 @@ pub(crate) fn use_great_warlord() -> Builtin {
             },
         )
         .add_simple_persistent_event_listener(
-            |event| &mut event.on_combat_round_start,
+            |event| &mut event.combat_round_start,
             9,
             |_game, player_index, _name, r| {
                 if r.combat.modifiers.contains(&CombatModifier::GreatWarlord)

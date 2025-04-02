@@ -5,16 +5,11 @@ use crate::player::Player;
 
 use super::collect::PositionCollection;
 use crate::action_card::CivilCardMatch;
+use crate::movement::{MoveUnits, MovementAction};
 use crate::playing_actions::{Collect, IncreaseHappiness, Recruit};
-use crate::unit::MoveUnits;
 use crate::{
-    action::Action,
-    game::Game,
-    playing_actions::PlayingAction,
-    position::Position,
-    resource_pile::ResourcePile,
-    unit::{MovementAction, Units},
-    utils,
+    action::Action, game::Game, playing_actions::PlayingAction, position::Position,
+    resource_pile::ResourcePile, unit::Units, utils,
 };
 use itertools::Itertools;
 use json_patch::PatchOperation;
@@ -162,13 +157,12 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             )
         }
         PlayingAction::WonderCard(name) => format!("{player_name} played the wonder card {name}",),
-        PlayingAction::EndTurn => format!(
-            "{player_name} ended their turn{}",
-            match game.actions_left {
-                0 => String::new(),
-                actions_left => format!(" with {actions_left} actions left"),
-            }
-        ),
+        PlayingAction::EndTurn => format!("{player_name} ended their turn{}", match game
+            .actions_left
+        {
+            0 => String::new(),
+            actions_left => format!(" with {actions_left} actions left"),
+        }),
     }
 }
 
@@ -308,7 +302,9 @@ fn format_construct_log_item(
     let city_position = c.city_position;
 
     let mood = format_mood_change(player, city_position);
-    format!("{player_name} paid {payment} to construct a {city_piece:?} in the city at {city_position}{port_pos}{mood}")
+    format!(
+        "{player_name} paid {payment} to construct a {city_piece:?} in the city at {city_position}{port_pos}{mood}"
+    )
 }
 
 fn format_mood_change(player: &Player, city_position: Position) -> String {

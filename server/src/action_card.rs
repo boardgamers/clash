@@ -4,11 +4,11 @@ use crate::ability_initializer::{
 use crate::card::draw_card_from_pile;
 use crate::content::action_cards;
 use crate::content::action_cards::get_civil_card;
-use crate::content::custom_phase_actions::CurrentEventType;
+use crate::content::persistent_events::PersistentEventType;
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::log::{current_player_turn_log, current_player_turn_log_mut, ActionLogItem};
+use crate::log::{ActionLogItem, current_player_turn_log, current_player_turn_log_mut};
 use crate::player::Player;
 use crate::playing_actions::ActionType;
 use crate::position::Position;
@@ -136,12 +136,12 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
 }
 
 pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: ActionCardInfo) {
-    let _ = game.trigger_current_event_with_listener(
+    let _ = game.trigger_persistent_event_with_listener(
         &[player_index],
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         &get_civil_card(i.id).listeners,
         i,
-        CurrentEventType::ActionCard,
+        PersistentEventType::ActionCard,
         None,
         |_| {},
     );
@@ -169,14 +169,12 @@ fn draw_action_card_from_pile(game: &mut Game) -> Option<ActionCard> {
     .map(get_action_card)
 }
 
-fn gain_action_card(game: &mut Game, player_index: usize, action_card: &ActionCard) {
+pub(crate) fn gain_action_card(game: &mut Game, player_index: usize, action_card: &ActionCard) {
     game.players[player_index].action_cards.push(action_card.id);
 }
 
 pub(crate) fn discard_action_card(game: &mut Game, player: usize, card: u8) {
-    remove_element_by(&mut game.get_player_mut(player).action_cards, |&id| {
-        id == card
-    });
+    remove_element_by(&mut game.player_mut(player).action_cards, |&id| id == card);
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

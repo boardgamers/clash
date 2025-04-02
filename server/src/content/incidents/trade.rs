@@ -1,6 +1,6 @@
 use crate::city::City;
 use crate::city_pieces::Building;
-use crate::content::custom_phase_actions::{PositionRequest, ResourceRewardRequest};
+use crate::content::persistent_events::{PositionRequest, ResourceRewardRequest};
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, PassedIncident};
 use crate::payment::PaymentOptions;
@@ -26,7 +26,7 @@ fn scientific_trade() -> Incident {
         IncidentBaseEffect::PiratesSpawnAndRaid,
     )
     .add_simple_incident_listener(IncidentTarget::AllPlayers, 0, |game, p, name, i| {
-        let player = game.get_player_mut(p);
+        let player = game.player_mut(p);
         let mut ideas = player
             .cities
             .iter()
@@ -55,7 +55,7 @@ fn flourishing_trade() -> Incident {
         IncidentBaseEffect::PiratesSpawnAndRaid,
     )
     .add_simple_incident_listener(IncidentTarget::AllPlayers, 0, |game, p, name, i| {
-        let player = game.get_player_mut(p);
+        let player = game.player_mut(p);
         let mut gold = player
             .cities
             .iter()
@@ -91,7 +91,7 @@ fn era_of_stability() -> Incident {
         IncidentTarget::AllPlayers,
         0,
         |game, p, i| {
-            let player = game.get_player(p);
+            let player = game.player(p);
             let mut tokens = player
                 .cities
                 .iter()
@@ -176,7 +176,7 @@ fn reformation() -> Incident {
         |game, _p, i| {
             let donor = i.active_player;
             let choices = game
-                .get_player(donor)
+                .player(donor)
                 .cities
                 .iter()
                 .filter(|c| city_has_temple(c, donor))
@@ -194,7 +194,7 @@ fn reformation() -> Incident {
                 .current_event()
                 .active_player()
                 .expect("should have active player");
-            let donor = game.get_player_mut(p);
+            let donor = game.player_mut(p);
             let pos = s.choice[0];
             donor
                 .get_city_mut(pos)
@@ -211,7 +211,7 @@ fn reformation() -> Incident {
 }
 
 fn has_temple(game: &Game, player: usize) -> bool {
-    game.get_player(player)
+    game.player(player)
         .cities
         .iter()
         .any(|c| city_has_temple(c, player))

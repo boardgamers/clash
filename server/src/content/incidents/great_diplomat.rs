@@ -3,7 +3,7 @@ use crate::action_card::ActionCard;
 use crate::content::builtin::Builtin;
 use crate::content::effects::PermanentEffect;
 use crate::content::incidents::great_persons::{
-    great_person_action_card, GREAT_PERSON_DESCRIPTION,
+    GREAT_PERSON_DESCRIPTION, great_person_action_card,
 };
 use crate::game::Game;
 use crate::incident::IncidentBuilder;
@@ -29,7 +29,7 @@ pub(crate) fn great_diplomat() -> ActionCard {
         |_game, _player| true,
     )
     .add_simple_persistent_event_listener(
-        |e| &mut e.on_play_action_card,
+        |e| &mut e.play_action_card,
         0,
         |game, _player_index, player_name, _| {
             game.add_info_log_item(&format!("{player_name} ended diplomatic relations.",));
@@ -48,6 +48,13 @@ pub struct DiplomaticRelations {
 }
 
 impl DiplomaticRelations {
+    pub fn new(active_player: usize, passive_player: usize) -> Self {
+        Self {
+            active_player,
+            passive_player,
+        }
+    }
+
     pub fn partner(&self, player: usize) -> Option<usize> {
         if player == self.passive_player {
             Some(self.active_player)
@@ -57,6 +64,13 @@ impl DiplomaticRelations {
             None
         }
     }
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+pub struct Negotiations {
+    #[serde(flatten)]
+    pub relations: DiplomaticRelations,
+    pub remaining_turns: usize,
 }
 
 pub(crate) fn choose_diplomat_partner(b: IncidentBuilder) -> IncidentBuilder {
@@ -72,10 +86,9 @@ pub(crate) fn choose_diplomat_partner(b: IncidentBuilder) -> IncidentBuilder {
                 game.player_name(s.choice),
             ));
             game.permanent_effects
-                .push(PermanentEffect::DiplomaticRelations(DiplomaticRelations {
-                    active_player: s.player_index,
-                    passive_player: s.choice,
-                }));
+                .push(PermanentEffect::DiplomaticRelations(
+                    DiplomaticRelations::new(s.player_index, s.choice),
+                ));
         },
     )
 }
@@ -83,11 +96,10 @@ pub(crate) fn choose_diplomat_partner(b: IncidentBuilder) -> IncidentBuilder {
 pub(crate) fn use_diplomatic_relations() -> Builtin {
     Builtin::builder("Diplomatic Relations", "")
         .add_simple_persistent_event_listener(
-            |e| &mut e.on_combat_start,
+            |e| &mut e.combat_start,
             2,
             |game, player_index, player_name, _| {
-                let partner = diplomatic_relations_partner(game, player_index);
-                if let Some(partner) = partner {
+                if let Some(partner) = diplomatic_relations_partner(game, player_index) {
                     game.add_info_log_item(&format!(
                         "{} paid 2 culture tokens to end diplomatic relations with {} using a surprise attack.",
                         player_name,

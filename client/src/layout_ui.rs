@@ -2,7 +2,7 @@ use crate::log_ui::break_text;
 use crate::render_context::RenderContext;
 use crate::tooltip;
 use macroquad::color::WHITE;
-use macroquad::math::{f32, vec2, Vec2};
+use macroquad::math::{Vec2, f32, vec2};
 use macroquad::prelude::*;
 
 pub const ICON_SIZE: f32 = 30.;
@@ -101,16 +101,10 @@ pub fn draw_scaled_icon(
     origin: Vec2,
     size: f32,
 ) -> bool {
-    draw_texture_ex(
-        texture,
-        origin.x,
-        origin.y,
-        WHITE,
-        DrawTextureParams {
-            dest_size: Some(vec2(size, size)),
-            ..Default::default()
-        },
-    );
+    draw_texture_ex(texture, origin.x, origin.y, WHITE, DrawTextureParams {
+        dest_size: Some(vec2(size, size)),
+        ..Default::default()
+    });
 
     let rect = Rect::new(origin.x, origin.y, size, size);
     if !tooltip.is_empty() {

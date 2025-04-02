@@ -1,17 +1,19 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder};
-use crate::content::advances::{advance_group_builder, AdvanceGroup, ROADS};
+use crate::content::advances::{AdvanceGroup, ROADS, advance_group_builder};
 use crate::payment::PaymentConversion;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 use crate::wonder::draw_wonder_card;
 
 pub(crate) fn construction() -> AdvanceGroup {
-    advance_group_builder(
-        "Construction",
-        vec![mining(), engineering(), sanitation(), roads()],
-    )
+    advance_group_builder("Construction", vec![
+        mining(),
+        engineering(),
+        sanitation(),
+        roads(),
+    ])
 }
 
 fn mining() -> AdvanceBuilder {

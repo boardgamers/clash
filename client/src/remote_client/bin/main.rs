@@ -3,7 +3,7 @@ use server::game::Game;
 use macroquad::prelude::next_frame;
 
 extern crate console_error_panic_hook;
-use client::client::{init, render_and_update, Features, GameSyncRequest, GameSyncResult};
+use client::client::{Features, GameSyncRequest, GameSyncResult, init, render_and_update};
 use client::client_state::State;
 use macroquad::math::vec2;
 use server::action::Action;

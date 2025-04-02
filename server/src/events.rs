@@ -106,7 +106,7 @@ where
     }
 
     #[must_use]
-    pub(crate) fn trigger(
+    pub(crate) fn trigger_with_modifiers(
         &self,
         value: &mut T,
         info: &U,
@@ -114,6 +114,12 @@ where
         extra_value: &mut W,
     ) -> Vec<EventOrigin> {
         self.trigger_with_exclude(value, info, details, extra_value, &[])
+    }
+
+    pub(crate) fn trigger(&self, value: &mut T, info: &U, details: &V, extra_value: &mut W) {
+        for (listener, _, _, _) in &self.listeners {
+            listener(value, info, details, extra_value);
+        }
     }
 
     #[must_use]
@@ -153,7 +159,8 @@ where
         T: Clone + PartialEq,
     {
         let mut initial_value = value.clone();
-        let initial_modifiers = self.trigger(&mut initial_value, info, details, extra_value);
+        let initial_modifiers =
+            self.trigger_with_modifiers(&mut initial_value, info, details, extra_value);
         // to see what's possible
         is_ok(&initial_value);
 
@@ -234,7 +241,7 @@ mod tests {
         let mut item = 0;
         let addend = 2;
         let multiplier = 3;
-        let modifiers = event.trigger(&mut item, &addend, &multiplier, &mut ());
+        let modifiers = event.trigger_with_modifiers(&mut item, &addend, &multiplier, &mut ());
         assert_eq!(6, item);
         assert_eq!(
             vec![
@@ -247,7 +254,7 @@ mod tests {
         event.remove_listener_mut_by_key(&EventOrigin::Advance("multiply value".to_string()));
         let mut item = 0;
         let addend = 3;
-        let modifiers = event.trigger(&mut item, &addend, &0, &mut ());
+        let modifiers = event.trigger_with_modifiers(&mut item, &addend, &0, &mut ());
         assert_eq!(3, item);
         assert_eq!(
             vec![EventOrigin::Advance("add constant".to_string())],

@@ -2,11 +2,11 @@ use crate::action_buttons::action_buttons;
 use crate::city_ui::city_labels;
 use crate::client::Features;
 use crate::client_state::StateUpdate;
-use crate::dialog_ui::{ok_button, OkTooltip};
+use crate::dialog_ui::{OkTooltip, ok_button};
 use crate::event_ui::event_help;
 use crate::layout_ui::{
-    bottom_center_texture, bottom_centered_text, bottom_right_texture, icon_pos,
-    left_mouse_button_pressed_in_rect, top_center_texture, ICON_SIZE,
+    ICON_SIZE, bottom_center_texture, bottom_centered_text, bottom_right_texture, icon_pos,
+    left_mouse_button_pressed_in_rect, top_center_texture,
 };
 use crate::log_ui::multiline_label;
 use crate::map_ui::terrain_name;
@@ -14,20 +14,20 @@ use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name};
 use crate::tooltip::show_tooltip_for_rect;
 use crate::unit_ui;
+use itertools::Itertools;
 use macroquad::math::vec2;
 use macroquad::prelude::*;
 use server::action::Action;
 use server::combat::Combat;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
-use server::content::custom_phase_actions::CurrentEventType;
+use server::content::persistent_events::PersistentEventType;
 use server::game::{Game, GameState};
-use server::movement::CurrentMove;
+use server::movement::{CurrentMove, MovementAction};
 use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource::ResourceType;
 use server::status_phase::get_status_phase;
-use server::unit::MovementAction;
 
 pub fn player_select(rc: &RenderContext) -> StateUpdate {
     let game = rc.game;
@@ -37,7 +37,7 @@ pub fn player_select(rc: &RenderContext) -> StateUpdate {
     let mut y = (players.len() as f32 * -size) / 2.;
 
     for player_index in players {
-        let pl = game.get_player(player_index);
+        let pl = game.player(player_index);
         let shown = rc.shown_player.index == pl.index;
         let screen = rc.state.screen_size;
         let pos = vec2(screen.x, screen.y / 2.0) + vec2(-size, y);
@@ -254,10 +254,13 @@ fn show_focused_tile(label: &mut impl FnMut(&str), game: &Game, position: Positi
         }
     }
 
-    for (p, unit) in unit_ui::units_on_tile(game, position) {
-        let army_move = game
-            .get_player(p)
-            .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
+    let units = unit_ui::units_on_tile(game, position).collect_vec();
+    if !units.is_empty() {
+        label(&format!("Controlled by: {}", game.player_name(units[0].0)));
+    }
+
+    for (p, unit) in units {
+        let army_move = game.player(p).has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
         label(&unit_ui::unit_label(&unit, army_move));
     }
 }
@@ -285,10 +288,10 @@ fn show_permanent_effects(
 
 pub fn get_combat(game: &Game) -> Option<&Combat> {
     game.events.last().and_then(|e| match &e.event_type {
-        CurrentEventType::CombatStart(c) => Some(c),
-        CurrentEventType::CombatRoundStart(s) => Some(&s.combat),
-        CurrentEventType::CombatRoundEnd(e) => Some(&e.combat),
-        CurrentEventType::CombatEnd(e) => Some(&e.combat),
+        PersistentEventType::CombatStart(c) => Some(c),
+        PersistentEventType::CombatRoundStart(s) => Some(&s.combat),
+        PersistentEventType::CombatRoundEnd(e) => Some(&e.combat),
+        PersistentEventType::CombatEnd(e) => Some(&e.combat),
         _ => None,
     })
 }

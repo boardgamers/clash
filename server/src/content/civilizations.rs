@@ -13,14 +13,10 @@ pub fn get_all() -> Vec<Civilization> {
     vec![
         Civilization::new(BARBARIANS, vec![], vec![]),
         Civilization::new(PIRATES, vec![], vec![]),
-        Civilization::new(
-            "test0",
-            vec![],
-            vec![
-                Leader::builder("Alexander", "", "", "", "").build(),
-                Leader::builder("Kleopatra", "", "", "", "").build(),
-            ],
-        ),
+        Civilization::new("test0", vec![], vec![
+            Leader::builder("Alexander", "", "", "", "").build(),
+            Leader::builder("Kleopatra", "", "", "", "").build(),
+        ]),
         Civilization::new("test1", vec![], vec![]),
         Civilization::new(
             "Maya",
@@ -43,27 +39,29 @@ pub fn get_all() -> Vec<Civilization> {
                     )
                     .build(),
             ],
-            vec![Leader::builder(
-                "Kʼinich Janaab Pakal I",
-                "Shield of the sun",
-                "ignore the first hit in a battle with an Obelisk",
-                "",
-                "",
-            )
-            .add_combat_round_start_listener(4, |game, c, s, _role| {
-                if c.round == 1
-                    && game
-                        .try_get_any_city(c.defender_position)
-                        .is_some_and(|city| city.pieces.obelisk.is_some())
-                {
-                    s.roll_log.push(
+            vec![
+                Leader::builder(
+                    "Kʼinich Janaab Pakal I",
+                    "Shield of the sun",
+                    "ignore the first hit in a battle with an Obelisk",
+                    "",
+                    "",
+                )
+                .add_combat_round_start_listener(4, |game, c, s, _role| {
+                    if c.round == 1
+                        && game
+                            .try_get_any_city(c.defender_position)
+                            .is_some_and(|city| city.pieces.obelisk.is_some())
+                    {
+                        s.roll_log.push(
                         "Kʼinich Janaab Pakal I ignores the first hit in a battle with an Obelisk"
                             .to_string(),
                     );
-                    s.hit_cancels += 1;
-                }
-            })
-            .build()],
+                        s.hit_cancels += 1;
+                    }
+                })
+                .build(),
+            ],
         ),
     ]
 }

@@ -1,11 +1,11 @@
 use crate::city::MoodState;
-use crate::content::custom_phase_actions::{PaymentRequest, PositionRequest, UnitsRequest};
 use crate::content::effects::PermanentEffect;
 use crate::content::incidents::famine::kill_incident_units;
 use crate::content::incidents::good_year::select_player_to_gain_settler;
+use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitsRequest};
 use crate::game::Game;
 use crate::incident::{
-    decrease_mod_and_log, Incident, IncidentBaseEffect, IncidentBuilder, MoodModifier,
+    Incident, IncidentBaseEffect, IncidentBuilder, MoodModifier, decrease_mod_and_log,
 };
 use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions};
 use crate::player::Player;
@@ -15,7 +15,7 @@ use crate::resource_pile::ResourcePile;
 use crate::status_phase::{
     add_change_government, can_change_government_for_free, get_status_phase,
 };
-use crate::unit::UnitType;
+use crate::unit::{UnitType, kill_units};
 use crate::wonder::draw_wonder_from_pile;
 use itertools::Itertools;
 
@@ -80,7 +80,7 @@ fn civil_war(id: u8) -> Incident {
         IncidentTarget::ActivePlayer,
         0,
         |game, player_index, i| {
-            let p = game.get_player(player_index);
+            let p = game.player(player_index);
             let suffix = if !non_angry_cites(p).is_empty() && i.player.payment.is_empty() {
                 " and decrease the mood"
             } else {
@@ -94,12 +94,12 @@ fn civil_war(id: u8) -> Incident {
         },
         |game, s, i| {
             let position = s.choice[0];
-            let mood = game.get_any_city(position).mood_state.clone();
+            let mood = game.any_city(position).mood_state.clone();
             if i.player.payment.is_empty() && !matches!(mood, MoodState::Angry) {
                 decrease_mod_and_log(game, s, MoodModifier::Decrease);
             }
             let unit = game
-                .get_player(s.player_index)
+                .player(s.player_index)
                 .get_units(position)
                 .iter()
                 .filter(|u| matches!(u.unit_type, UnitType::Infantry))
@@ -111,7 +111,7 @@ fn civil_war(id: u8) -> Incident {
                 "{} killed an Infantry in {}",
                 s.player_name, position
             ));
-            game.kill_unit(unit, s.player_index, None);
+            kill_units(game, &[unit], s.player_index, None);
         },
     )
     .build()
@@ -156,12 +156,7 @@ fn revolution() -> Incident {
         "Kill a unit to avoid changing government",
         |_game, player| can_change_government_for_free(player),
     );
-    b = add_change_government(
-        b,
-        |event| &mut event.on_incident,
-        false,
-        ResourcePile::empty(),
-    );
+    b = add_change_government(b, |event| &mut event.incident, false, ResourcePile::empty());
     b.build()
 }
 
@@ -178,7 +173,7 @@ fn kill_unit_for_revolution(
         move |game, player_index, i| {
             i.player.sacrifice = 0;
             let units = game
-                .get_player(player_index)
+                .player(player_index)
                 .units
                 .iter()
                 .filter(|u| u.unit_type.is_army_unit())
@@ -186,7 +181,7 @@ fn kill_unit_for_revolution(
                 .collect_vec();
             Some(UnitsRequest::new(
                 player_index,
-                if pred(game, game.get_player(player_index)) {
+                if pred(game, game.player(player_index)) {
                     units
                 } else {
                     vec![]
@@ -233,7 +228,7 @@ fn uprising() -> Incident {
         IncidentTarget::ActivePlayer,
         0,
         |game, player_index, _incident| {
-            let player = game.get_player(player_index);
+            let player = game.player(player_index);
             let mut cost = PaymentOptions::tokens(4);
             cost.conversions.push(PaymentConversion::new(
                 vec![
@@ -250,7 +245,7 @@ fn uprising() -> Incident {
             )])
         },
         |game, s, _| {
-            let player = game.get_player_mut(s.player_index);
+            let player = game.player_mut(s.player_index);
             let pile = &s.choice[0];
             let v = pile.amount() as f32 / 2_f32;
             player.event_victory_points += v;
@@ -281,7 +276,7 @@ fn envoy() -> Incident {
         1,
         |game, player, player_name, _| {
             game.add_info_log_item(&format!("{player_name} gained 1 idea and 1 culture token"));
-            game.get_player_mut(player)
+            game.player_mut(player)
                 .gain_resources(ResourcePile::culture_tokens(1) + ResourcePile::ideas(1));
 
             if let Some(wonder) = draw_wonder_from_pile(game) {
@@ -305,7 +300,7 @@ fn envoy() -> Incident {
                 "{} was selected to gain 1 culture token.",
                 game.player_name(p)
             ));
-            game.get_player_mut(p)
+            game.player_mut(p)
                 .gain_resources(ResourcePile::culture_tokens(1));
         },
     )

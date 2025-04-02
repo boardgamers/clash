@@ -1,20 +1,17 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::{Advance, AdvanceBuilder};
-use crate::content::advances::{advance_group_builder, AdvanceGroup};
+use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::custom_actions::CustomActionType::{AbsolutePower, ForcedLabor};
-use crate::content::custom_phase_actions::ResourceRewardRequest;
+use crate::content::persistent_events::ResourceRewardRequest;
 use crate::payment::PaymentOptions;
 
 pub(crate) fn autocracy() -> AdvanceGroup {
-    advance_group_builder(
-        "Autocracy",
-        vec![
-            nationalism(),
-            totalitarianism(),
-            absolute_power(),
-            forced_labor(),
-        ],
-    )
+    advance_group_builder("Autocracy", vec![
+        nationalism(),
+        totalitarianism(),
+        absolute_power(),
+        forced_labor(),
+    ])
 }
 
 fn nationalism() -> AdvanceBuilder {
@@ -23,7 +20,7 @@ fn nationalism() -> AdvanceBuilder {
         "Gain 1 mood or culture token when you recruit an army or ship unit.",
     )
     .add_resource_request(
-        |event| &mut event.on_recruit,
+        |event| &mut event.recruit,
         1,
         |_game, _player_index, recruit| {
             if recruit
@@ -61,7 +58,7 @@ fn totalitarianism() -> AdvanceBuilder {
         |info, city, game| {
             if info.is_defender
                 && game
-                    .get_player(city.player_index)
+                    .player(city.player_index)
                     .get_units(city.position)
                     .iter()
                     .any(|u| u.unit_type.is_army_unit())

@@ -4,7 +4,7 @@ use crate::barbarians::BarbariansEventState;
 use crate::collect::{CollectContext, CollectInfo};
 use crate::combat::Combat;
 use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
-use crate::content::custom_phase_actions::Structure;
+use crate::content::persistent_events::{KilledUnits, Structure};
 use crate::events::Event;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
@@ -25,7 +25,7 @@ use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
-pub(crate) type CurrentEvent<V = ()> = Event<Game, CurrentEventInfo, (), V>;
+pub(crate) type PersistentEvent<V = ()> = Event<Game, PersistentEventInfo, (), V>;
 
 #[derive(Default)]
 pub(crate) struct PlayerEvents {
@@ -52,28 +52,28 @@ pub(crate) struct TransientEvents {
 }
 
 #[derive(Default)]
-#[allow(clippy::struct_field_names)]
 pub(crate) struct PersistentEvents {
-    pub on_collect: CurrentEvent<CollectInfo>,
-    pub on_construct: CurrentEvent<Building>,
-    pub on_draw_wonder_card: CurrentEvent,
-    pub on_advance: CurrentEvent<AdvanceInfo>,
-    pub on_recruit: CurrentEvent<Recruit>,
-    pub on_influence_culture_resolution: CurrentEvent<ResourcePile>,
-    pub on_explore_resolution: CurrentEvent<ExploreResolutionState>,
-    pub on_play_action_card: CurrentEvent<ActionCardInfo>,
-    pub on_play_wonder_card: CurrentEvent<WonderCardInfo>,
+    pub collect: PersistentEvent<CollectInfo>,
+    pub construct: PersistentEvent<Building>,
+    pub draw_wonder_card: PersistentEvent,
+    pub advance: PersistentEvent<AdvanceInfo>,
+    pub recruit: PersistentEvent<Recruit>,
+    pub influence_culture_resolution: PersistentEvent<ResourcePile>,
+    pub explore_resolution: PersistentEvent<ExploreResolutionState>,
+    pub play_action_card: PersistentEvent<ActionCardInfo>,
+    pub play_wonder_card: PersistentEvent<WonderCardInfo>,
 
-    pub on_status_phase: CurrentEvent<StatusPhaseState>,
-    pub on_turn_start: CurrentEvent,
-    pub on_incident: CurrentEvent<IncidentInfo>,
-    pub on_combat_start: CurrentEvent<Combat>,
-    pub on_combat_round_start: CurrentEvent<CombatRoundStart>,
-    pub on_combat_round_start_reveal_tactics: CurrentEvent<CombatRoundStart>,
-    pub on_combat_round_start_tactics: CurrentEvent<CombatRoundStart>,
-    pub on_combat_round_end: CurrentEvent<CombatRoundEnd>,
-    pub on_combat_round_end_tactics: CurrentEvent<CombatRoundEnd>,
-    pub on_combat_end: CurrentEvent<CombatEnd>,
+    pub status_phase: PersistentEvent<StatusPhaseState>,
+    pub turn_start: PersistentEvent,
+    pub incident: PersistentEvent<IncidentInfo>,
+    pub combat_start: PersistentEvent<Combat>,
+    pub combat_round_start: PersistentEvent<CombatRoundStart>,
+    pub combat_round_start_reveal_tactics: PersistentEvent<CombatRoundStart>,
+    pub combat_round_start_tactics: PersistentEvent<CombatRoundStart>,
+    pub combat_round_end: PersistentEvent<CombatRoundEnd>,
+    pub combat_round_end_tactics: PersistentEvent<CombatRoundEnd>,
+    pub combat_end: PersistentEvent<CombatEnd>,
+    pub units_killed: PersistentEvent<KilledUnits>,
 }
 
 impl PlayerEvents {
@@ -102,7 +102,7 @@ impl ActionInfo {
         for l in self.log.iter().unique() {
             game.add_info_log_item(l);
         }
-        let player = game.get_player_mut(self.player);
+        let player = game.player_mut(self.player);
         for (k, v) in self.info.clone() {
             player.event_info.insert(k, v);
         }
@@ -241,7 +241,7 @@ pub struct AdvanceInfo {
 }
 
 #[derive(Clone, PartialEq)]
-pub struct CurrentEventInfo {
+pub struct PersistentEventInfo {
     pub player: usize, // player currently handling the event
 }
 

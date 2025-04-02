@@ -1,17 +1,21 @@
 use crate::client::Features;
-use macroquad::prelude::{load_texture, load_ttf_font, Font, ImageFormat};
+use macroquad::prelude::{Font, ImageFormat, load_texture, load_ttf_font};
 use macroquad::texture::Texture2D;
 use server::city_pieces::Building;
 use server::content::custom_actions::CustomActionType;
 use server::map::Terrain;
+use server::player::Player;
 use server::resource::ResourceType;
 use server::unit::UnitType;
 use std::collections::HashMap;
 
+pub struct CivAssets {
+    pub units: HashMap<UnitType, Texture2D>,
+}
+
 pub struct Assets {
     pub terrain: HashMap<Terrain, Texture2D>,
     pub exhausted: Texture2D,
-    pub units: HashMap<UnitType, Texture2D>,
     pub font: Font,
 
     // mood icons
@@ -46,6 +50,8 @@ pub struct Assets {
     pub buildings: HashMap<Building, Texture2D>,
     pub wonders: HashMap<String, Texture2D>,
     pub custom_actions: HashMap<CustomActionType, Texture2D>,
+    pub civ: HashMap<String, CivAssets>,
+    pub default_civ: CivAssets,
 }
 
 impl Assets {
@@ -55,11 +61,12 @@ impl Assets {
             font: load_ttf_font(&font_name).await.unwrap(), // can't share font - causes panic
             terrain: Self::terrain(features).await,
             exhausted: load_png(include_bytes!("../assets/cross-svgrepo-com.png")),
-            units: Self::units(),
 
             angry: load_png(include_bytes!("../assets/angry-face-svgrepo-com.png")),
             resources: Self::resources(),
             buildings: Self::buildings(),
+            civ: Self::new_civ_assets(),
+            default_civ: Self::new_default_civ(),
             wonders: Self::wonders(),
             custom_actions: Self::custom_actions(),
 
@@ -107,36 +114,46 @@ impl Assets {
         .collect()
     }
 
-    fn units() -> HashMap<UnitType, Texture2D> {
-        [
+    fn units() -> Vec<(UnitType, Option<String>, Texture2D)> {
+        vec![
             (
                 UnitType::Infantry,
+                None,
                 load_png(include_bytes!("../assets/warrior-svgrepo-com.png")),
             ),
             (
                 UnitType::Settler,
+                None,
                 load_png(include_bytes!("../assets/wagon-svgrepo-com.png")),
             ),
             (
                 UnitType::Cavalry,
+                None,
                 load_png(include_bytes!("../assets/horse-head-svgrepo-com.png")),
             ),
             (
                 UnitType::Elephant,
+                None,
                 load_png(include_bytes!("../assets/elephant-svgrepo-com.png")),
             ),
             (
                 UnitType::Ship,
+                None,
                 load_png(include_bytes!("../assets/ship-svgrepo-com.png")),
             ),
             (
+                UnitType::Ship,
+                Some("Pirates".to_string()),
+                load_png(include_bytes!(
+                    "../assets/pirate-symbol-mark-svgrepo-com.png"
+                )),
+            ),
+            (
                 UnitType::Leader,
+                None,
                 load_png(include_bytes!("../assets/flag-svgrepo-com.png")),
             ),
         ]
-        .iter()
-        .cloned()
-        .collect()
     }
 
     fn resources() -> HashMap<ResourceType, Texture2D> {
@@ -264,6 +281,39 @@ impl Assets {
             map.insert(t, load_texture(&features.get_asset(f)).await.unwrap());
         }
         map
+    }
+
+    fn new_civ_assets() -> HashMap<String, CivAssets> {
+        let mut result = HashMap::new();
+        for (unit, civ, t) in Self::units() {
+            if let Some(civ) = civ {
+                result
+                    .entry(civ)
+                    .or_insert_with(|| CivAssets {
+                        units: HashMap::new(),
+                    })
+                    .units
+                    .insert(unit, t);
+            }
+        }
+        result
+    }
+
+    fn new_default_civ() -> CivAssets {
+        let mut units = HashMap::new();
+        for (unit, civ, t) in Self::units() {
+            if civ.is_none() {
+                units.insert(unit, t);
+            }
+        }
+        CivAssets { units }
+    }
+
+    pub fn unit(&self, unit_type: UnitType, player: &Player) -> &Texture2D {
+        self.civ
+            .get(&player.civilization.name)
+            .and_then(|c| c.units.get(&unit_type))
+            .unwrap_or(&self.default_civ.units[&unit_type])
     }
 }
 

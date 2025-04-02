@@ -9,13 +9,13 @@ use crate::select_ui::HighlightType;
 use crate::tooltip::show_tooltip_for_rect;
 use itertools::Itertools;
 use macroquad::color::BLACK;
-use macroquad::math::{vec2, Rect, Vec2};
-use macroquad::prelude::{draw_rectangle, draw_rectangle_lines, Color, GREEN, RED, YELLOW};
+use macroquad::math::{Rect, Vec2, vec2};
+use macroquad::prelude::{Color, GREEN, RED, YELLOW, draw_rectangle, draw_rectangle_lines};
 use server::action::Action;
-use server::card::{hand_cards, HandCard, HandCardType};
+use server::card::{HandCard, HandCardType, hand_cards};
 use server::content::action_cards::spy::validate_if_spy;
 use server::content::action_cards::{get_action_card, get_civil_card};
-use server::content::custom_phase_actions::EventResponse;
+use server::content::persistent_events::EventResponse;
 use server::content::wonders::get_wonder;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::tactics_card::CombatRole;
@@ -46,10 +46,9 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
     let cards = hand_cards(p, &HandCardType::get_all());
     let size = vec2(180., 30.);
 
-    let selection = if let ActiveDialog::HandCardsRequest(r) = &rc.state.active_dialog {
-        Some(r)
-    } else {
-        None
+    let selection = match &rc.state.active_dialog {
+        ActiveDialog::HandCardsRequest(r) => Some(r),
+        _ => None,
     };
 
     let swap_cards = selection
@@ -190,16 +189,11 @@ fn get_card_object(rc: &RenderContext, card: &HandCard) -> HandCardObject {
         ),
         HandCard::Wonder(name) => {
             let w = get_wonder(name);
-            HandCardObject::new(
-                card.clone(),
-                WONDER_CARD_COLOR,
-                w.name.clone(),
-                vec![
-                    w.description.clone(),
-                    format!("Cost: {}", w.cost.to_string()),
-                    format!("Required advances: {}", w.required_advances.join(", ")),
-                ],
-            )
+            HandCardObject::new(card.clone(), WONDER_CARD_COLOR, w.name.clone(), vec![
+                w.description.clone(),
+                format!("Cost: {}", w.cost.to_string()),
+                format!("Required advances: {}", w.required_advances.join(", ")),
+            ])
         }
     }
 }
@@ -207,14 +201,15 @@ fn get_card_object(rc: &RenderContext, card: &HandCard) -> HandCardObject {
 fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
     let a = get_action_card(id);
 
-    let name = if let Some(t) = &a.tactics_card {
-        if get_combat(rc.game).is_some() {
-            t.name.clone()
-        } else {
-            a.civil_card.name.clone()
+    let name = match &a.tactics_card {
+        Some(t) => {
+            if get_combat(rc.game).is_some() {
+                t.name.clone()
+            } else {
+                a.civil_card.name.clone()
+            }
         }
-    } else {
-        a.civil_card.name.clone()
+        _ => a.civil_card.name.clone(),
     };
 
     let mut description = vec![format!("Civil: {}", a.civil_card.name)];
@@ -242,23 +237,17 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
                     .map(|f| format!("{f:?}"))
                     .join(", ")
             ),
-            format!(
-                "Role: {:?}",
-                match t.role_requirement {
-                    None => "Attacker or Defender".to_string(),
-                    Some(r) => match r {
-                        CombatRole::Attacker => "Attacker".to_string(),
-                        CombatRole::Defender => "Defender".to_string(),
-                    },
-                }
-            ),
-            format!(
-                "Location: {:?}",
-                match t.location_requirement {
-                    None => "Any".to_string(),
-                    Some(l) => format!("{l:?}"),
-                }
-            ),
+            format!("Role: {:?}", match t.role_requirement {
+                None => "Attacker or Defender".to_string(),
+                Some(r) => match r {
+                    CombatRole::Attacker => "Attacker".to_string(),
+                    CombatRole::Defender => "Defender".to_string(),
+                },
+            }),
+            format!("Location: {:?}", match t.location_requirement {
+                None => "Any".to_string(),
+                Some(l) => format!("{l:?}"),
+            }),
         ]);
         break_text(t.description.as_str(), 30, &mut description);
     }

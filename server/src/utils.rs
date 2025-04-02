@@ -1,6 +1,19 @@
 use itertools::Itertools;
 
 #[must_use]
+pub(crate) fn a_or_an(word: &str) -> String {
+    if word.is_empty() {
+        return "an".to_string();
+    }
+    let first_char = word.chars().next().expect("empty word");
+    if first_char.is_ascii_alphabetic() && "aeiou".contains(first_char.to_ascii_lowercase()) {
+        format!("an {word}")
+    } else {
+        format!("a {word}")
+    }
+}
+
+#[must_use]
 pub(crate) fn format_and<S: AsRef<str>>(list: &[S], empty_message: &str) -> String {
     format_list(list, empty_message, "and")
 }
@@ -59,15 +72,12 @@ where
 
 #[must_use]
 pub fn ordinal_number(value: u32) -> String {
-    format!(
-        "{value}{}",
-        match value % 10 {
-            1 => "st",
-            2 => "nd",
-            3 => "rd",
-            _ => "th",
-        }
-    )
+    format!("{value}{}", match value % 10 {
+        1 => "st",
+        2 => "nd",
+        3 => "rd",
+        _ => "th",
+    })
 }
 
 #[derive(Clone, Default)]
@@ -193,7 +203,28 @@ pub mod tests {
                 continue;
             }
 
-            panic!("random number generator does not create an even distribution of seeds with modulo 12 on initial seed {initial_seed}.\nHere is the actual distribution (expected count: {EXPECTED_OCCURRENCES}, acceptable range: {} - {}):\nvalue | count\n{}", EXPECTED_OCCURRENCES - TOLERANCE, EXPECTED_OCCURRENCES + TOLERANCE, results.into_iter().sorted_by_key(|(value, _)| *value).map(|(value, count)| format!("{}{value} | {}{count}{}", " ".repeat(5 - value.to_string().len()), " ".repeat(5 - count.to_string().len()), if (count as isize - EXPECTED_OCCURRENCES as isize).unsigned_abs() > TOLERANCE { " <-- outside of range" } else { "" })).collect::<Vec<String>>().join("\n"))
+            panic!(
+                "random number generator does not create an even distribution of seeds with modulo 12 on initial seed {initial_seed}.\nHere is the actual distribution (expected count: {EXPECTED_OCCURRENCES}, acceptable range: {} - {}):\nvalue | count\n{}",
+                EXPECTED_OCCURRENCES - TOLERANCE,
+                EXPECTED_OCCURRENCES + TOLERANCE,
+                results
+                    .into_iter()
+                    .sorted_by_key(|(value, _)| *value)
+                    .map(|(value, count)| format!(
+                        "{}{value} | {}{count}{}",
+                        " ".repeat(5 - value.to_string().len()),
+                        " ".repeat(5 - count.to_string().len()),
+                        if (count as isize - EXPECTED_OCCURRENCES as isize).unsigned_abs()
+                            > TOLERANCE
+                        {
+                            " <-- outside of range"
+                        } else {
+                            ""
+                        }
+                    ))
+                    .collect::<Vec<String>>()
+                    .join("\n")
+            )
         }
     }
 }

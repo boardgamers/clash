@@ -6,7 +6,7 @@ use crate::render_context::RenderContext;
 use itertools::Itertools;
 use server::city::City;
 use server::content::custom_actions::CustomActionType;
-use server::content::custom_phase_actions::{MultiRequest, SelectedStructure, Structure};
+use server::content::persistent_events::{MultiRequest, SelectedStructure, Structure};
 use server::cultural_influence::influence_culture_boost_cost;
 use server::game::Game;
 use server::playing_actions::PlayingActionType;

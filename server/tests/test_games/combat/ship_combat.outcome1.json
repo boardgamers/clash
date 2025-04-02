@@ -289,7 +289,6 @@
                                 "attacker": 0,
                                 "attacker_position": "C3",
                                 "attackers": [
-                                  7,
                                   8
                                 ],
                                 "defender": 1,
@@ -303,11 +302,20 @@
                               "final_result": "AttackerWins"
                             }
                           },
+                          "player": 0
+                        },
+                        {
+                          "event_type": {
+                            "UnitsKilled": {
+                              "killer": 1,
+                              "position": "C3"
+                            }
+                          },
                           "handler": {
                             "origin": {
                               "Builtin": "Choose Casualties (carried units)"
                             },
-                            "priority": 2,
+                            "priority": 0,
                             "request": {
                               "SelectUnits": {
                                 "choices": [
@@ -315,7 +323,7 @@
                                   22,
                                   1
                                 ],
-                                "description": "Remove 1 attacking units",
+                                "description": "Choose which carried units to remove",
                                 "needed": {
                                   "end": 1,
                                   "start": 1
@@ -324,7 +332,7 @@
                               }
                             }
                           },
-                          "last_priority_used": 2,
+                          "last_priority_used": 0,
                           "player": 0
                         }
                       ]
@@ -334,42 +342,15 @@
                       "path": "/players/0/units/5/carried_units",
                       "value": [
                         {
-                          "id": 2,
-                          "unit_type": "Elephant"
-                        },
-                        {
-                          "id": 22,
-                          "unit_type": "Settler"
+                          "id": 1,
+                          "unit_type": "Cavalry"
                         }
                       ]
                     },
                     {
                       "op": "replace",
-                      "path": "/players/0/units/5/id",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
                       "path": "/players/0/units/5/position",
                       "value": "C3"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/units/6",
-                      "value": {
-                        "carried_units": [
-                          {
-                            "id": 1,
-                            "unit_type": "Cavalry"
-                          }
-                        ],
-                        "id": 8,
-                        "movement_restrictions": [
-                          "Battle"
-                        ],
-                        "position": "C3",
-                        "unit_type": "Ship"
-                      }
                     },
                     {
                       "op": "add",
@@ -400,12 +381,11 @@
       "Combat round 1",
       "Player1 rolled 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units.",
       "Player2 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units.",
-      "Player1 has to remove 1 of their attacking units"
+      "Player1 has to remove 1 of their attacking units",
+      "Player1 removed 1 ship"
     ],
     [
-      "Player1 removed 1 cavalry",
-      "Player1 has to remove 1 of their attacking units",
-      "Player1 removed 1 ship",
+      "Player1 killed carried units: 1 cavalry",
       "Player2 has to remove all of their defending units",
       "Player2 removed 1 ship",
       "Attacker wins"

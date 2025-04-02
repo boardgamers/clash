@@ -2,14 +2,14 @@ use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::action_card::ActionCard;
 use crate::barbarians::{barbarians_move, barbarians_spawn};
-use crate::card::{draw_card_from_pile, HandCard};
+use crate::card::{HandCard, draw_card_from_pile};
 use crate::city::MoodState;
-use crate::content::custom_phase_actions::{
-    CurrentEventType, HandCardsRequest, PaymentRequest, PlayerRequest, PositionRequest,
-    ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitsRequest,
-};
 use crate::content::incidents;
 use crate::content::incidents::great_persons::GREAT_PERSON_OFFSET;
+use crate::content::persistent_events::{
+    HandCardsRequest, PaymentRequest, PersistentEventType, PlayerRequest, PositionRequest,
+    ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitsRequest,
+};
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::map::Terrain;
@@ -197,7 +197,7 @@ impl IncidentBuilder {
         F: Fn(&mut Game, usize, &str, &mut IncidentInfo) + 'static + Clone,
     {
         self.add_simple_persistent_event_listener(
-            |event| &mut event.on_incident,
+            |event| &mut event.incident,
             priority,
             move |game, player_index, player_name, i| {
                 if i.is_active(role, player_index) {
@@ -213,15 +213,15 @@ impl IncidentBuilder {
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, usize, &mut IncidentInfo) -> Option<PositionRequest>
-            + 'static
-            + Clone,
+        + 'static
+        + Clone,
         gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<Position>>, &mut IncidentInfo)
-            + 'static
-            + Clone,
+        + 'static
+        + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_position_request(
-            |event| &mut event.on_incident,
+            |event| &mut event.incident,
             priority,
             move |game, player_index, i| {
                 if f.is_active(game, i, player_index) {
@@ -246,7 +246,7 @@ impl IncidentBuilder {
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_units_request(
-            |event| &mut event.on_incident,
+            |event| &mut event.incident,
             priority,
             move |game, player_index, i| {
                 if f.is_active(game, i, player_index) {
@@ -267,13 +267,17 @@ impl IncidentBuilder {
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<StructuresRequest> + 'static + Clone,
-        structures_selected: impl Fn(&mut Game, &SelectedChoice<Vec<SelectedStructure>>, &mut IncidentInfo)
-            + 'static
-            + Clone,
+        structures_selected: impl Fn(
+            &mut Game,
+            &SelectedChoice<Vec<SelectedStructure>>,
+            &mut IncidentInfo,
+        )
+        + 'static
+        + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_structures_request(
-            |event| &mut event.on_incident,
+            |event| &mut event.incident,
             priority,
             move |game, player_index, i| {
                 if f.is_active(game, i, player_index) {
@@ -294,13 +298,13 @@ impl IncidentBuilder {
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<ResourceRewardRequest>
-            + 'static
-            + Clone,
+        + 'static
+        + Clone,
         gain_reward_log: impl Fn(&Game, &SelectedChoice<ResourcePile>) -> Vec<String> + 'static + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_resource_request(
-            |event| &mut event.on_incident,
+            |event| &mut event.incident,
             priority,
             move |game, player_index, i| {
                 if f.is_active(game, i, player_index) {
@@ -323,15 +327,15 @@ impl IncidentBuilder {
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, usize, &mut IncidentInfo) -> Option<Vec<PaymentRequest>>
-            + 'static
-            + Clone,
+        + 'static
+        + Clone,
         gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<ResourcePile>>, &mut IncidentInfo)
-            + 'static
-            + Clone,
+        + 'static
+        + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_payment_request_listener(
-            |event| &mut event.on_incident,
+            |event| &mut event.incident,
             priority,
             move |game, player_index, i| {
                 if f.is_active(game, i, player_index) {
@@ -353,12 +357,12 @@ impl IncidentBuilder {
         priority: i32,
         request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<HandCardsRequest> + 'static + Clone,
         cards_selected: impl Fn(&mut Game, &SelectedChoice<Vec<HandCard>>, &mut IncidentInfo)
-            + 'static
-            + Clone,
+        + 'static
+        + Clone,
     ) -> Self {
         let f = self.new_filter(role, priority);
         self.add_hand_card_request(
-            |event| &mut event.on_incident,
+            |event| &mut event.incident,
             priority,
             move |game, player_index, i| {
                 if f.is_active(game, i, player_index) {
@@ -385,7 +389,7 @@ impl IncidentBuilder {
         let f = self.new_filter(target, priority);
         let d = description.to_string();
         self.add_player_request(
-            |event| &mut event.on_incident,
+            |event| &mut event.incident,
             priority,
             move |game, player_index, i| {
                 if f.is_active(game, i, player_index) {
@@ -436,7 +440,7 @@ impl IncidentBuilder {
             target,
             10,
             move |game, player_index, i| {
-                let p = game.get_player(player_index);
+                let p = game.player(player_index);
                 if p.has_advance("Myths") {
                     let needed = amount(game, p, i);
                     if needed == 0 {
@@ -484,7 +488,7 @@ impl IncidentBuilder {
             target,
             9,
             move |game, p, i| {
-                let (cities, mut needed) = cities(game.get_player(p), game, i);
+                let (cities, mut needed) = cities(game.player(p), game, i);
                 needed -= i.player.myths_payment;
 
                 let action = match mood_modifier {
@@ -542,12 +546,12 @@ pub(crate) fn on_trigger_incident(game: &mut Game, mut info: IncidentInfo) {
             "A new game event has been triggered: {}",
             incident.name
         ));
-        info = match game.trigger_current_event_with_listener(
+        info = match game.trigger_persistent_event_with_listener(
             &game.human_players(info.active_player),
-            |events| &mut events.on_incident,
+            |events| &mut events.incident,
             &incident.listeners,
             info,
-            CurrentEventType::Incident,
+            PersistentEventType::Incident,
             log.as_deref(),
             |i| i.player = IncidentPlayerInfo::new(),
         ) {
@@ -558,7 +562,7 @@ pub(crate) fn on_trigger_incident(game: &mut Game, mut info: IncidentInfo) {
         if !game
             .events
             .iter()
-            .any(|e| matches!(e.event_type, CurrentEventType::Incident(_)))
+            .any(|e| matches!(e.event_type, PersistentEventType::Incident(_)))
         {
             if passed_to_player(game, &mut info) {
                 continue;
@@ -618,7 +622,7 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY,
         |game, player_index, _incident| {
-            let p = game.get_player(player_index);
+            let p = game.player(player_index);
             let positions = p
                 .cities
                 .iter()
@@ -678,10 +682,10 @@ pub(crate) fn decrease_mod_and_log(
         let name = &s.player_name;
         match mood_modifier {
             MoodModifier::Decrease => {
-                game.get_player_mut(s.player_index)
+                game.player_mut(s.player_index)
                     .get_city_mut(pos)
                     .decrease_mood_state();
-                let mood_state = &game.get_player(s.player_index).get_city(pos).mood_state;
+                let mood_state = &game.player(s.player_index).get_city(pos).mood_state;
                 if s.actively_selected {
                     game.add_info_log_item(&format!(
                         "{name} selected to decrease the mood in city {pos} to {mood_state:?}",
@@ -694,9 +698,7 @@ pub(crate) fn decrease_mod_and_log(
             }
             MoodModifier::MakeAngry => {
                 game.add_info_log_item(&format!("{name} made city {pos} Angry"));
-                game.get_player_mut(s.player_index)
-                    .get_city_mut(pos)
-                    .mood_state = MoodState::Angry;
+                game.player_mut(s.player_index).get_city_mut(pos).mood_state = MoodState::Angry;
             }
         }
     }

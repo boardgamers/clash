@@ -1,6 +1,6 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{
-    cancel_button, ok_button, BaseOrCustomAction, BaseOrCustomDialog, OkTooltip,
+    BaseOrCustomAction, BaseOrCustomDialog, OkTooltip, cancel_button, ok_button,
 };
 use crate::event_ui::event_help;
 use crate::hex_ui;
@@ -9,13 +9,13 @@ use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name, show_resource_pile};
 use itertools::Itertools;
 use macroquad::color::BLACK;
-use macroquad::math::{vec2, Vec2};
+use macroquad::math::{Vec2, vec2};
 use macroquad::prelude::WHITE;
 use macroquad::shapes::draw_circle;
 use server::action::Action;
 use server::collect::{
-    get_total_collection, possible_resource_collections, tiles_used, CollectInfo,
-    PositionCollection,
+    CollectInfo, PositionCollection, get_total_collection, possible_resource_collections,
+    tiles_used,
 };
 use server::content::custom_actions::CustomAction;
 use server::game::Game;
@@ -64,8 +64,8 @@ impl CollectResources {
     }
 
     pub fn extra_resources(&self, game: &Game) -> i8 {
-        let city = game.get_city(self.player_index, self.city_position);
-        city.mood_modified_size(game.get_player(self.player_index)) as i8
+        let city = game.city(self.player_index, self.city_position);
+        city.mood_modified_size(game.player(self.player_index)) as i8
             - tiles_used(&self.collections) as i8
     }
 
@@ -82,7 +82,7 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
     show_resource_pile(rc, &collect.collected());
 
     let game = rc.game;
-    let city = game.get_city(collect.player_index, collect.city_position);
+    let city = game.city(collect.player_index, collect.city_position);
 
     let tooltip = get_total_collection(
         game,

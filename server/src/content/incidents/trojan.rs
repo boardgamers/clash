@@ -3,8 +3,8 @@ use crate::combat::{Combat, CombatModifier, CombatRetreatState};
 use crate::combat_listeners::CombatResult;
 use crate::content::advances::get_advance;
 use crate::content::builtin::Builtin;
-use crate::content::custom_phase_actions::PaymentRequest;
 use crate::content::effects::{Anarchy, PermanentEffect};
+use crate::content::persistent_events::PaymentRequest;
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect};
 use crate::payment::PaymentOptions;
@@ -38,7 +38,7 @@ fn trojan_cost() -> PaymentOptions {
 pub(crate) fn decide_trojan_horse() -> Builtin {
     Builtin::builder("Trojan Horse", TROJAN_DESCRIPTION)
         .add_payment_request_listener(
-            |event| &mut event.on_combat_start,
+            |event| &mut event.combat_start,
             10,
             |game, player_index, c| {
                 if is_land_battle_against_defended_city(game, player_index, c) {
@@ -58,7 +58,7 @@ pub(crate) fn decide_trojan_horse() -> Builtin {
                         s.player_name
                     ));
                 } else {
-                    let player = game.get_player_mut(s.player_index);
+                    let player = game.player_mut(s.player_index);
                     player.event_victory_points += 1_f32;
                     game.add_info_log_item(&format!(
                         "{} activated the Trojan Horse and gained 1 victory point",
@@ -96,7 +96,7 @@ fn solar_eclipse() -> Incident {
 pub(crate) fn solar_eclipse_end_combat() -> Builtin {
     Builtin::builder("Solar Eclipse", "-")
         .add_simple_persistent_event_listener(
-            |event| &mut event.on_combat_round_end,
+            |event| &mut event.combat_round_end,
             10,
             |game, _player, name, r| {
                 if let Some(p) = game
@@ -112,7 +112,7 @@ pub(crate) fn solar_eclipse_end_combat() -> Builtin {
                             Some(CombatResult::AttackerWins) => r.combat.attacker,
                             _ => r.combat.defender,
                         };
-                        let p = game.get_player_mut(p);
+                        let p = game.player_mut(p);
                         p.event_victory_points += 1_f32;
                         game.add_info_log_item(&format!(
                             "{name} gained 1 victory point for the Solar Eclipse",
@@ -157,7 +157,7 @@ fn anarchy() -> Incident {
         IncidentTarget::ActivePlayer,
         0,
         |game, player_index, player_name, _| {
-            let p = game.get_player_mut(player_index);
+            let p = game.player_mut(player_index);
             let old = p.advances.len();
             p.advances.retain(|a| a.government.is_none());
             let lost = old - p.advances.len();
@@ -182,7 +182,7 @@ fn anarchy() -> Incident {
 pub(crate) fn anarchy_advance() -> Builtin {
     Builtin::builder("Anarchy", "-")
         .add_simple_persistent_event_listener(
-            |event| &mut event.on_advance,
+            |event| &mut event.advance,
             10,
             |game, player_index, player_name, i| {
                 if get_advance(&i.name).government.is_none() {
@@ -201,7 +201,7 @@ pub(crate) fn anarchy_advance() -> Builtin {
                             "{player_name} gained a government advance, taking a game event token \
                             instead of triggering a game event (and losing 1 victory point)",
                         ));
-                        let p = game.get_player_mut(player_index);
+                        let p = game.player_mut(player_index);
                         p.incident_tokens += 1;
                         p.event_victory_points -= 1_f32;
                         a.advances_lost -= 1;

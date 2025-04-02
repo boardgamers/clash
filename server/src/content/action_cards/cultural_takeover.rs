@@ -1,10 +1,10 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{on_play_action_card, ActionCard, ActionCardInfo};
+use crate::action_card::{ActionCard, ActionCardInfo, on_play_action_card};
 use crate::barbarians::get_barbarians_player;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
-use crate::content::custom_phase_actions::{Structure, UnitTypeRequest};
 use crate::content::effects::PermanentEffect;
+use crate::content::persistent_events::{Structure, UnitTypeRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::game::Game;
 use crate::player_events::{InfluenceCultureInfo, PlayingActionInfo};
@@ -25,19 +25,19 @@ pub(crate) fn cultural_takeover(id: u8, tactics_card: TacticsCardFactory) -> Act
         |_game, _p| true,
     )
     .add_unit_type_request(
-        |event| &mut event.on_play_action_card,
+        |event| &mut event.play_action_card,
         1,
         |game, player, a| {
             if let Some(position) = a.selected_position {
                 //set in use_cultural_takeover
-                let b = game.get_player_mut(get_barbarians_player(game).index);
+                let b = game.player_mut(get_barbarians_player(game).index);
                 let units = b.get_units(position).iter().map(|u| u.id).collect_vec();
                 let len = units.len();
                 for id in units {
                     b.remove_unit(id);
                 }
                 if len > 0 {
-                    let p = game.get_player_mut(player);
+                    let p = game.player_mut(player);
                     let u = p.available_units();
                     let mut t = vec![];
                     if u.settlers > 0 {
@@ -60,12 +60,12 @@ pub(crate) fn cultural_takeover(id: u8, tactics_card: TacticsCardFactory) -> Act
                 "{} selected unit to gain: {:?}",
                 s.player_name, s.choice,
             ));
-            game.get_player_mut(s.player_index)
+            game.player_mut(s.player_index)
                 .add_unit(a.selected_position.expect("unit position"), s.choice);
         },
     )
     .add_simple_persistent_event_listener(
-        |event| &mut event.on_play_action_card,
+        |event| &mut event.play_action_card,
         0,
         |game, _player, _name, a| {
             if a.selected_position.is_none() {
@@ -131,7 +131,7 @@ pub(crate) fn use_cultural_takeover() -> Builtin {
 }
 
 fn is_barbarian_takeover(game: &Game, c: &InfluenceCultureInfo) -> bool {
-    let city = game.get_any_city(c.position);
+    let city = game.any_city(c.position);
     city.player_index == get_barbarians_player(game).index
         && city.size() == 1
         && game

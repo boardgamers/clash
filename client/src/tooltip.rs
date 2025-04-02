@@ -2,7 +2,7 @@ use crate::client_state::{CameraMode, MousePosition, State, StateUpdate};
 use crate::render_context::RenderContext;
 use macroquad::color::{Color, GRAY};
 use macroquad::input::mouse_position;
-use macroquad::math::{bool, f32, f64, vec2, Rect, Vec2};
+use macroquad::math::{Rect, Vec2, bool, f32, f64, vec2};
 use macroquad::prelude::{draw_circle, draw_rectangle, get_time};
 
 const TOOLTIP_DELAY: f64 = 0.5;

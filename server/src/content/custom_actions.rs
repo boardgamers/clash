@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::collect::collect;
 use crate::content::advances::culture::{execute_sports, execute_theaters};
 use crate::content::advances::economy::collect_taxes;
-use crate::content::custom_phase_actions::SelectedStructure;
+use crate::content::persistent_events::SelectedStructure;
 use crate::cultural_influence::{
     format_cultural_influence_attempt_log_item, influence_culture_attempt,
 };
@@ -11,7 +11,7 @@ use crate::log::{
     format_city_happiness_increase, format_collect_log_item, format_happiness_increase,
 };
 use crate::player::Player;
-use crate::playing_actions::{increase_happiness, Collect, IncreaseHappiness, PlayingActionType};
+use crate::playing_actions::{Collect, IncreaseHappiness, PlayingActionType, increase_happiness};
 use crate::{
     game::Game, playing_actions::ActionType, position::Position, resource_pile::ResourcePile,
 };
@@ -69,12 +69,7 @@ pub enum CustomActionType {
 }
 
 impl CustomAction {
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if action is illegal
-    pub fn execute(self, game: &mut Game, player_index: usize) {
+    pub(crate) fn execute(self, game: &mut Game, player_index: usize) -> Result<(), String> {
         match self {
             CustomAction::AbsolutePower => game.actions_left += 1,
             CustomAction::ForcedLabor => {
@@ -89,7 +84,7 @@ impl CustomAction {
             CustomAction::VotingIncreaseHappiness(i) => {
                 increase_happiness(game, player_index, &i.happiness_increases, Some(i.payment));
             }
-            CustomAction::FreeEconomyCollect(c) => collect(game, player_index, &c),
+            CustomAction::FreeEconomyCollect(c) => collect(game, player_index, &c)?,
             CustomAction::Sports {
                 city_position,
                 payment,
@@ -99,6 +94,7 @@ impl CustomAction {
             CustomAction::Taxes(r) => collect_taxes(game, player_index, r),
             CustomAction::Theaters(r) => execute_theaters(game, player_index, &r),
         }
+        Ok(())
     }
 
     #[must_use]

@@ -1,4 +1,4 @@
-use macroquad::input::{is_mouse_button_pressed, MouseButton};
+use macroquad::input::{MouseButton, is_mouse_button_pressed};
 use macroquad::prelude::clear_background;
 use macroquad::prelude::*;
 
@@ -13,7 +13,7 @@ use crate::client_state::{
 };
 use crate::collect_ui::collect_dialog;
 use crate::construct_ui::pay_construction_dialog;
-use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
+use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
 use crate::event_ui::custom_phase_event_origin;
 use crate::happiness_ui::{increase_happiness_click, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;

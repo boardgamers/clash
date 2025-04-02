@@ -1,7 +1,7 @@
 use crate::action_buttons::{base_or_custom_action, base_or_custom_available};
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
-use crate::payment_ui::{payment_dialog, Payment};
+use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
 use server::action::Action;
 use server::city::City;

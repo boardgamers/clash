@@ -4,8 +4,8 @@ use crate::payment_ui::Payment;
 use macroquad::camera::set_default_camera;
 use macroquad::color::{Color, PINK, YELLOW};
 use macroquad::input::mouse_position;
-use macroquad::math::{bool, Vec2};
-use macroquad::prelude::{set_camera, GRAY, WHITE};
+use macroquad::math::{Vec2, bool};
+use macroquad::prelude::{BLACK, GRAY, LIME, SKYBLUE, set_camera};
 use server::game::Game;
 use server::payment::PaymentOptions;
 use server::player::Player;
@@ -88,16 +88,18 @@ impl RenderContext<'_> {
     }
 
     pub fn player_color(&self, player_index: usize) -> Color {
-        let c = &self.game.get_player(player_index).civilization;
+        let c = &self.game.player(player_index).civilization;
         if c.is_barbarian() {
             return GRAY;
         }
         if c.is_pirates() {
-            return WHITE;
+            return BLACK;
         }
         match player_index {
             0 => YELLOW,
             1 => PINK,
+            2 => SKYBLUE,
+            3 => LIME,
             _ => panic!("unexpected player index"),
         }
     }

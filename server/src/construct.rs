@@ -1,7 +1,7 @@
 use crate::city::{City, MoodState};
 use crate::city_pieces::Building;
 use crate::consts::MAX_CITY_SIZE;
-use crate::content::custom_phase_actions::CurrentEventType;
+use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::player::Player;
 use crate::position::Position;
@@ -81,11 +81,11 @@ pub(crate) fn can_construct_anything(city: &City, player: &Player) -> Result<(),
     Ok(())
 }
 
-pub(crate) fn construct(game: &mut Game, player_index: usize, c: &Construct) {
+pub(crate) fn construct(game: &mut Game, player_index: usize, c: &Construct) -> Result<(), String> {
     let player = &game.players[player_index];
     let city = player.get_city(c.city_position);
     let cost = player.construct_cost(game, c.city_piece, Some(&c.payment));
-    let _ = can_construct(city, c.city_piece, player, game).map_err(|e| panic!("{e}"));
+    can_construct(city, c.city_piece, player, game)?;
     if matches!(c.city_piece, Building::Port) {
         let port_position = c.port_position.as_ref().expect("Illegal action");
         assert!(
@@ -95,7 +95,7 @@ pub(crate) fn construct(game: &mut Game, player_index: usize, c: &Construct) {
     } else if c.port_position.is_some() {
         panic!("Illegal action");
     }
-    game.get_player_mut(player_index).construct(
+    game.player_mut(player_index).construct(
         c.city_piece,
         c.city_position,
         c.port_position,
@@ -103,13 +103,14 @@ pub(crate) fn construct(game: &mut Game, player_index: usize, c: &Construct) {
     );
     cost.pay(game, &c.payment);
     on_construct(game, player_index, c.city_piece);
+    Ok(())
 }
 
 pub(crate) fn on_construct(game: &mut Game, player_index: usize, building: Building) {
-    let _ = game.trigger_current_event(
+    let _ = game.trigger_persistent_event(
         &[player_index],
-        |e| &mut e.on_construct,
+        |e| &mut e.construct,
         building,
-        CurrentEventType::Construct,
+        PersistentEventType::Construct,
     );
 }

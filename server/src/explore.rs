@@ -1,7 +1,9 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::content::advances::NAVIGATION;
 use crate::content::builtin::Builtin;
-use crate::content::custom_phase_actions::{CurrentEventRequest, CurrentEventType, EventResponse};
+use crate::content::persistent_events::{
+    EventResponse, PersistentEventRequest, PersistentEventType,
+};
 use crate::game::Game;
 use crate::map::{Block, BlockPosition, Map, Rotation, UnexploredBlock};
 use crate::movement::{move_units, stop_current_move};
@@ -143,11 +145,11 @@ pub(crate) fn ask_explore_resolution(
     player_index: usize,
     resolution_state: ExploreResolutionState,
 ) {
-    let _ = game.trigger_current_event(
+    let _ = game.trigger_persistent_event(
         &[player_index],
-        |events| &mut events.on_explore_resolution,
+        |events| &mut events.explore_resolution,
         resolution_state,
-        CurrentEventType::ExploreResolution,
+        PersistentEventType::ExploreResolution,
     );
 }
 
@@ -163,7 +165,7 @@ fn move_to_explored_tile(
     add_block_tiles_with_log(game, &block.position, &block.block, rotation);
 
     if is_any_ship(game, player_index, units) && game.map.is_land(destination) {
-        let player = game.get_player(player_index);
+        let player = game.player(player_index);
         let used_navigation = player.has_advance(NAVIGATION)
             && !player.get_unit(units[0]).position.is_neighbor(destination);
 
@@ -183,7 +185,7 @@ fn move_to_explored_tile(
 }
 
 pub fn is_any_ship(game: &Game, player_index: usize, units: &[u32]) -> bool {
-    let p = game.get_player(player_index);
+    let p = game.player(player_index);
     units.iter().any(|&id| p.get_unit(id).unit_type.is_ship())
 }
 
@@ -273,11 +275,11 @@ pub(crate) fn explore_resolution() -> Builtin {
         "Explore Resolution",
         "Select a rotation for the unexplored tiles",
     )
-    .add_current_event_listener(
-        |e| &mut e.on_explore_resolution,
+    .add_persistent_event_listener(
+        |e| &mut e.explore_resolution,
         0,
         move |_game, _player_index, _player_name, _state| {
-            Some(CurrentEventRequest::ExploreResolution)
+            Some(PersistentEventRequest::ExploreResolution)
         },
         move |game, _player_index, player_name, action, _request, r| {
             let EventResponse::ExploreResolution(rotation) = action else {

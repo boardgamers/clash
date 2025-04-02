@@ -1,5 +1,5 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::payment_ui::{payment_dialog, Payment};
+use crate::payment_ui::{Payment, payment_dialog};
 use crate::recruit_unit_ui::RecruitSelection;
 use crate::render_context::RenderContext;
 use server::action::Action;
@@ -35,7 +35,7 @@ pub fn new_building_positions(
 }
 
 pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> StateUpdate {
-    let city = rc.game.get_any_city(cp.city_position);
+    let city = rc.game.any_city(cp.city_position);
     payment_dialog(
         rc,
         &cp.payment.clone(),
@@ -89,7 +89,7 @@ impl ConstructionPayment {
         name: &str,
         project: ConstructionProject,
     ) -> ConstructionPayment {
-        let p = rc.game.get_player(city.player_index);
+        let p = rc.game.player(city.player_index);
         let cost = match &project {
             ConstructionProject::Building(b, _) => p.construct_cost(rc.game, *b, None),
             ConstructionProject::Units(sel) => recruit_cost(

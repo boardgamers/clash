@@ -4,7 +4,7 @@ use crate::collect::on_collect;
 use crate::combat::{combat_loop, move_with_possible_combat, start_combat};
 use crate::combat_listeners::{combat_round_end, combat_round_start, end_combat};
 use crate::construct::on_construct;
-use crate::content::custom_phase_actions::{CurrentEventType, EventResponse};
+use crate::content::persistent_events::{EventResponse, PersistentEventType};
 use crate::cultural_influence::ask_for_cultural_influence_payment;
 use crate::explore::{ask_explore_resolution, move_to_unexplored_tile};
 use crate::game::GameState::{Finished, Movement, Playing};
@@ -13,8 +13,10 @@ use crate::incident::on_trigger_incident;
 use crate::log;
 use crate::log::{add_action_log_item, current_player_turn_log_mut};
 use crate::map::Terrain::Unexplored;
+use crate::movement::MovementAction::{Move, Stop};
 use crate::movement::{
-    get_move_state, has_movable_units, move_units_destinations, CurrentMove, MoveState,
+    CurrentMove, MoveState, MovementAction, get_move_state, has_movable_units,
+    move_units_destinations,
 };
 use crate::playing_actions::PlayingAction;
 use crate::recruit::on_recruit;
@@ -22,8 +24,7 @@ use crate::resource::check_for_waste;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::play_status_phase;
 use crate::undo::{clean_patch, redo, to_serde_value, undo};
-use crate::unit::MovementAction::{Move, Stop};
-use crate::unit::{get_current_move, MovementAction};
+use crate::unit::{get_current_move, units_killed};
 use crate::wonder::{draw_wonder_card, on_play_wonder_card};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -76,7 +77,7 @@ pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Ga
     let add_undo = !matches!(&action, Action::Undo);
     let old = to_serde_value(&game);
     let old_player = game.active_player();
-    game = execute_without_undo(game, action, player_index);
+    game = execute_without_undo(game, action, player_index).expect("action should be executed");
     let new = to_serde_value(&game);
     let new_player = game.active_player();
     let patch = json_patch::diff(&new, &old);
@@ -89,42 +90,50 @@ pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Ga
     game
 }
 
-fn execute_without_undo(mut game: Game, action: Action, player_index: usize) -> Game {
-    assert!(player_index == game.active_player(), "Illegal action");
+fn execute_without_undo(
+    mut game: Game,
+    action: Action,
+    player_index: usize,
+) -> Result<Game, String> {
+    if player_index != game.active_player() {
+        return Err("Not your turn".to_string());
+    }
     if let Action::Undo = action {
-        assert!(
-            game.can_undo(),
-            "actions revealing new information can't be undone"
-        );
+        if !game.can_undo() {
+            return Err("actions revealing new information can't be undone".to_string());
+        }
         return undo(game);
     }
 
     if matches!(action, Action::Redo) {
-        assert!(game.can_redo(), "action can't be redone");
-        redo(&mut game, player_index);
-        return game;
+        if !game.can_redo() {
+            return Err("action can't be redone".to_string());
+        }
+        redo(&mut game, player_index)?;
+        return Ok(game);
     }
 
     add_log_item_from_action(&mut game, &action);
     add_action_log_item(&mut game, action.clone());
 
-    if let Some(s) = game.current_event_handler_mut() {
-        s.response = action.response();
-        let details = game.current_event().event_type.clone();
-        execute_custom_phase_action(&mut game, player_index, details);
-    } else {
-        execute_regular_action(&mut game, action, player_index);
-    }
+    match game.current_event_handler_mut() {
+        Some(s) => {
+            s.response = action.response();
+            let details = game.current_event().event_type.clone();
+            execute_custom_phase_action(&mut game, player_index, details)
+        }
+        _ => execute_regular_action(&mut game, action, player_index),
+    }?;
     check_for_waste(&mut game);
-    game
+    Ok(game)
 }
 
 pub(crate) fn execute_custom_phase_action(
     game: &mut Game,
     player_index: usize,
-    details: CurrentEventType,
-) {
-    use CurrentEventType::*;
+    details: PersistentEventType,
+) -> Result<(), String> {
+    use PersistentEventType::*;
     match details {
         Collect(i) => on_collect(game, player_index, i),
         DrawWonderCard => {
@@ -136,6 +145,7 @@ pub(crate) fn execute_custom_phase_action(
         InfluenceCultureResolution(r) => {
             ask_for_cultural_influence_payment(game, player_index, r);
         }
+        UnitsKilled(k) => units_killed(game, player_index, k),
         CombatStart(c) => {
             start_combat(game, c);
         }
@@ -172,45 +182,54 @@ pub(crate) fn execute_custom_phase_action(
         if s.player.handler.is_none() {
             if let Some(l) = s.player.last_priority_used.as_mut() {
                 *l -= 1;
+            } else {
+                s.player.skip_first_priority = true;
             }
             let p = s.player.index;
             let event_type = s.event_type.clone();
             game.events.push(s);
-            execute_custom_phase_action(game, p, event_type);
+            execute_custom_phase_action(game, p, event_type)?;
         } else {
             game.events.push(s);
         }
     }
+    Ok(())
 }
 
 pub(crate) fn add_log_item_from_action(game: &mut Game, action: &Action) {
     game.log.push(log::format_action_log_item(action, game));
 }
 
-fn execute_regular_action(game: &mut Game, action: Action, player_index: usize) {
+fn execute_regular_action(
+    game: &mut Game,
+    action: Action,
+    player_index: usize,
+) -> Result<(), String> {
     match game.state {
         Playing => {
             if let Some(m) = action.clone().movement() {
                 if let MovementAction::Move(_) = m {
                 } else {
-                    panic!("Illegal action");
+                    return Err("Expected move action".to_string());
                 }
-                assert_ne!(game.actions_left, 0, "Illegal action");
+                if game.actions_left == 0 {
+                    return Err("No actions left".to_string());
+                }
                 game.actions_left -= 1;
                 game.state = GameState::Movement(MoveState::new());
-                execute_movement_action(game, m, player_index);
+                execute_movement_action(game, m, player_index)
             } else {
                 let action = action.playing().expect("action should be a playing action");
-                action.execute(game, player_index, false);
+                action.execute(game, player_index, false)
             }
         }
         Movement(_) => {
             let action = action
                 .movement()
                 .expect("action should be a movement action");
-            execute_movement_action(game, action, player_index);
+            execute_movement_action(game, action, player_index)
         }
-        Finished => panic!("actions can't be executed when the game is finished"),
+        Finished => Err("actions can't be executed when the game is finished".to_string()),
     }
 }
 
@@ -218,7 +237,7 @@ pub(crate) fn execute_movement_action(
     game: &mut Game,
     action: MovementAction,
     player_index: usize,
-) {
+) -> Result<(), String> {
     match action {
         Move(m) => {
             let player = &game.players[player_index];
@@ -227,28 +246,22 @@ pub(crate) fn execute_movement_action(
                     "instead of providing no units to move a stop movement actions should be done",
                 ))
                 .position;
-            match move_units_destinations(
+            let destinations = move_units_destinations(
                 player,
                 game,
                 &m.units,
                 starting_position,
                 m.embark_carrier_id,
-            ) {
-                Ok(destinations) => {
-                    let c = &destinations
-                        .iter()
-                        .find(|route| route.destination == m.destination)
-                        .expect("destination should be a valid destination")
-                        .cost;
-                    if c.is_free() {
-                        assert_eq!(m.payment, ResourcePile::empty(), "payment should be empty");
-                    } else {
-                        game.players[player_index].pay_cost(c, &m.payment);
-                    }
-                }
-                Err(e) => {
-                    panic!("cannot move units to destination: {e}");
-                }
+            )?;
+            let c = &destinations
+                .iter()
+                .find(|route| route.destination == m.destination)
+                .expect("destination should be a valid destination")
+                .cost;
+            if c.is_free() {
+                assert_eq!(m.payment, ResourcePile::empty(), "payment should be empty");
+            } else {
+                game.players[player_index].pay_cost(c, &m.payment);
             }
 
             let current_move = get_current_move(
@@ -285,23 +298,24 @@ pub(crate) fn execute_movement_action(
                     starting_position,
                     m.destination,
                 );
-                return;
+                return Ok(());
             }
 
             if move_with_possible_combat(game, player_index, starting_position, &m) {
-                return;
+                return Ok(());
             }
         }
         Stop => {
             game.state = GameState::Playing;
-            return;
+            return Ok(());
         }
     };
 
     let state = get_move_state(game);
     let all_moves_used =
         state.movement_actions_left == 0 && state.current_move == CurrentMove::None;
-    if all_moves_used || !has_movable_units(game, game.get_player(game.current_player_index)) {
+    if all_moves_used || !has_movable_units(game, game.player(game.current_player_index)) {
         game.state = GameState::Playing;
     }
+    Ok(())
 }

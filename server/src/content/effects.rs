@@ -1,4 +1,4 @@
-use crate::content::incidents::great_diplomat::{DiplomaticRelations, DIPLOMAT_ID};
+use crate::content::incidents::great_diplomat::{DIPLOMAT_ID, DiplomaticRelations, Negotiations};
 use crate::events::EventOrigin;
 use serde::{Deserialize, Serialize};
 
@@ -31,6 +31,7 @@ pub enum PermanentEffect {
     Collect(CollectEffect),
     CulturalTakeover,
     DiplomaticRelations(DiplomaticRelations),
+    Negotiations(Negotiations),
 }
 
 impl PermanentEffect {
@@ -51,6 +52,7 @@ impl PermanentEffect {
             PermanentEffect::TrojanHorse => EventOrigin::Incident(42),
             PermanentEffect::Anarchy(_) => EventOrigin::Incident(44),
             PermanentEffect::DiplomaticRelations(_) => EventOrigin::Incident(DIPLOMAT_ID),
+            PermanentEffect::Negotiations(_) => EventOrigin::CivilCard(23), // also 24
             // can also be 16, but that doesn't matter for the help text
             PermanentEffect::CulturalTakeover => EventOrigin::CivilCard(15),
         }

@@ -1,9 +1,9 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::gain_action_card_from_pile;
-use crate::combat::{update_combat_strength, Combat};
-use crate::combat_listeners::{CombatResult, CombatRoundStart, CombatStrength};
+use crate::action_card::{gain_action_card, gain_action_card_from_pile};
+use crate::combat::{Combat, update_combat_strength};
+use crate::combat_listeners::{CombatResult, CombatRoundStart, CombatStrength, kill_combat_units};
 use crate::content::action_cards::get_action_card;
-use crate::content::custom_phase_actions::{PaymentRequest, PositionRequest};
+use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitsRequest};
 use crate::game::Game;
 use crate::payment::PaymentOptions;
 use crate::position::Position;
@@ -11,6 +11,7 @@ use crate::resource_pile::ResourcePile;
 use crate::tactics_card::{
     CombatLocation, CombatRole, FighterRequirement, TacticsCard, TacticsCardTarget,
 };
+use crate::utils::a_or_an;
 use std::vec;
 
 ///
@@ -34,7 +35,7 @@ pub(crate) fn peltasts(id: u8) -> TacticsCard {
     .fighter_requirement(FighterRequirement::Army)
     .add_reveal_listener(0, |player, game, combat, s| {
         for _ in &combat.fighting_units(game, player) {
-            let roll = game.get_next_dice_roll().value;
+            let roll = game.next_dice_roll().value;
             if roll >= 5 {
                 s.roll_log
                     .push(format!("Peltasts rolled a {roll} and ignored a hit",));
@@ -69,7 +70,7 @@ pub(crate) fn encircled(id: u8) -> TacticsCard {
                 return;
             }
 
-            let roll = game.get_next_dice_roll().value;
+            let roll = game.next_dice_roll().value;
             if roll >= 5 {
                 game.add_info_log_item(
                     "Encircled rolled a 5 or 6 and added a hit that cannot be ignored",
@@ -189,12 +190,12 @@ pub(crate) fn siege(id: u8) -> TacticsCard {
         s.roll_log.push("Siege added 1 to combat value".to_string());
     })
     .add_payment_request_listener(
-        |event| &mut event.on_combat_round_start_tactics,
+        |event| &mut event.combat_round_start_tactics,
         0,
         move |game, p, s| {
             if s.is_active(p, id, TacticsCardTarget::Opponent) {
                 let cost = PaymentOptions::resources(ResourcePile::food(2));
-                if game.get_player(p).can_afford(&cost) {
+                if game.player(p).can_afford(&cost) {
                     return Some(vec![PaymentRequest::new(
                         cost,
                         "Pay 2 food to use combat abilities this round",
@@ -234,37 +235,29 @@ fn apply_siege(game: &mut Game, r: &mut CombatRoundStart, player: usize) {
 }
 
 pub(crate) fn for_the_people(id: u8) -> TacticsCard {
-    TacticsCard::builder(
-        id,
-        "For the People",
-        "When defending a city: Add 1 die to your roll.",
-    )
-    .role_requirement(CombatRole::Defender)
-    .location_requirement(CombatLocation::City)
-    .target(TacticsCardTarget::ActivePlayer)
-    .add_reveal_listener(0, |_player, _game, _c, s| {
-        s.extra_dies += 1;
-        s.roll_log
-            .push("For The People added 1 extra die".to_string());
-    })
-    .build()
+    TacticsCard::builder(id, "For the People", "Add 1 die to your roll.")
+        .role_requirement(CombatRole::Defender)
+        .location_requirement(CombatLocation::City)
+        .target(TacticsCardTarget::ActivePlayer)
+        .add_reveal_listener(0, |_player, _game, _c, s| {
+            s.extra_dies += 1;
+            s.roll_log
+                .push("For The People added 1 extra die".to_string());
+        })
+        .build()
 }
 
 pub(crate) fn improved_defenses(id: u8) -> TacticsCard {
-    TacticsCard::builder(
-        id,
-        "Improved Defenses",
-        "When defending a city: Ignore 1 hit.",
-    )
-    .role_requirement(CombatRole::Defender)
-    .location_requirement(CombatLocation::City)
-    .target(TacticsCardTarget::ActivePlayer)
-    .add_reveal_listener(0, |_player, _game, _c, s| {
-        s.hit_cancels += 1;
-        s.roll_log
-            .push("Improved Defenses ignored 1 hit.".to_string());
-    })
-    .build()
+    TacticsCard::builder(id, "Improved Defenses", "Ignore 1 hit.")
+        .role_requirement(CombatRole::Defender)
+        .location_requirement(CombatLocation::City)
+        .target(TacticsCardTarget::ActivePlayer)
+        .add_reveal_listener(0, |_player, _game, _c, s| {
+            s.hit_cancels += 1;
+            s.roll_log
+                .push("Improved Defenses ignored 1 hit.".to_string());
+        })
+        .build()
 }
 
 pub(crate) fn tactical_retreat(id: u8) -> TacticsCard {
@@ -280,7 +273,7 @@ pub(crate) fn tactical_retreat(id: u8) -> TacticsCard {
     .checker(|_, game, c| !tactical_retreat_targets(c, game).is_empty())
     .target(TacticsCardTarget::ActivePlayer)
     .add_position_request(
-        |event| &mut event.on_combat_round_start_tactics,
+        |event| &mut event.combat_round_start_tactics,
         0,
         move |game, p, s| {
             (p == s.combat.defender).then_some(PositionRequest::new(
@@ -298,7 +291,7 @@ pub(crate) fn tactical_retreat(id: u8) -> TacticsCard {
                 to
             ));
             for unit in game
-                .get_player_mut(s.player_index)
+                .player_mut(s.player_index)
                 .get_units_mut(r.combat.defender_position)
             {
                 unit.position = to;
@@ -317,17 +310,82 @@ fn tactical_retreat_targets(c: &Combat, game: &Game) -> Vec<Position> {
         .collect()
 }
 
+pub(crate) fn defensive_formation(id: u8) -> TacticsCard {
+    TacticsCard::builder(id, "Defensive Formation", "Roll 1 extra die.")
+        .role_requirement(CombatRole::Defender)
+        .target(TacticsCardTarget::ActivePlayer)
+        .add_reveal_listener(0, |_player, _game, _c, s| {
+            s.extra_dies += 1;
+            s.roll_log
+                .push("Defensive Formation added 1 extra die.".to_string());
+        })
+        .build()
+}
+
+pub(crate) fn scout(id: u8) -> TacticsCard {
+    TacticsCard::builder(
+        id,
+        "Scout",
+        "Ignore the enemy tactics card and take it to your hand.",
+    )
+        .add_simple_persistent_event_listener(
+            |event| &mut event.combat_round_start_reveal_tactics,
+            0,
+            move |game, p, name, s| {
+                if s.is_active(p, id, TacticsCardTarget::ActivePlayer) {
+                    update_combat_strength(game, s.combat.opponent(p), s, |game, _combat, st, _role| {
+                        if let Some(tactics_card) = st.tactics_card.take() {
+                            let card = get_action_card(tactics_card);
+                            gain_action_card(game, p, &card);
+                            game.add_info_log_item(&format!(
+                                "{name} ignores the enemy tactics {} and takes it to their hand using Scout",
+                                card.tactics_card.expect("tactics card not found").name
+                            ));
+                        } else {
+                            game.add_info_log_item(&format!(
+                                "{name} cannot use Scout - opponent didn't play a tactics card",
+                            ));
+                        }
+                    });
+                }
+            },
+        )
+        .build()
+}
+
 pub(crate) fn martyr(id: u8) -> TacticsCard {
     TacticsCard::builder(id, "Martyr", "todo")
         .fighter_any_requirement(&[FighterRequirement::Army, FighterRequirement::Ship])
-        .target(TacticsCardTarget::Opponent)
-        //todo add sacrifice effect, add test
-        .add_veto_tactics_listener(0, move |p, game, _c, s| {
-            game.add_info_log_item(&format!(
-                "{} ignores the enemy tactics",
-                game.player_name(p)
-            ));
-            s.tactics_card = None;
-        })
+        .target(TacticsCardTarget::AllPlayers)
+        .add_units_request(
+            |event| &mut event.combat_round_start_tactics,
+            0,
+            move |game, p, s| {
+                Some(UnitsRequest::new(p, s.combat.fighting_units(game, p), 1..=1, "Select a unit to sacrifice"))
+            },
+            move |game, s, r| {
+                let unit = s.choice[0];
+                game.add_info_log_item(&format!(
+                    "{} sacrifices {} using Martyr",
+                    game.player_name(s.player_index),
+                    a_or_an(game.player(s.player_index).get_unit(unit).unit_type.name())
+                ));
+                kill_combat_units(game, &mut r.combat, s.player_index, &[unit]);
+            },
+        )
+        .add_simple_persistent_event_listener(
+            |event| &mut event.combat_round_start_reveal_tactics,
+            0,
+            move |game, p, name, s| {
+                if s.is_active(p, id, TacticsCardTarget::Opponent) {
+                    update_combat_strength(game, p, s, |game, _combat, st, _role| {
+                        game.add_info_log_item(&format!(
+                            "{name} cannot use their tactics card using Martyr (but it is still discarded)",
+                        ));
+                        st.tactics_card = None;
+                    });
+                }
+            },
+        )
         .build()
 }

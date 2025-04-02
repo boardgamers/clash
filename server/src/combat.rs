@@ -3,19 +3,19 @@ use crate::city::City;
 use crate::city::MoodState::Angry;
 use crate::city_pieces::Building;
 use crate::combat_listeners::{
-    combat_round_end, combat_round_start, Casualties, CombatEventPhase, CombatRoundEnd,
-    CombatRoundStart, CombatStrength,
+    Casualties, CombatEventPhase, CombatRoundEnd, CombatRoundStart, CombatStrength,
+    combat_round_end, combat_round_start,
 };
 use crate::combat_roll::CombatStats;
 use crate::consts::SHIP_CAPACITY;
-use crate::content::custom_phase_actions::CurrentEventType;
+use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::log::current_player_turn_log_mut;
-use crate::movement::{move_units, stop_current_move};
+use crate::movement::{MoveUnits, MovementRestriction, move_units, stop_current_move};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::CombatRole;
-use crate::unit::{MoveUnits, MovementRestriction, UnitType};
+use crate::unit::UnitType;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -139,7 +139,7 @@ impl Combat {
     #[must_use]
     pub fn carried_units_casualties(&self, game: &Game, player: usize, casualties: u8) -> u8 {
         if self.is_sea_battle(game) {
-            let units = game.players[player].get_units(self.position(player));
+            let units = game.player(player).get_units(self.position(player));
             let carried_units = units.iter().filter(|u| u.carrier_id.is_some()).count() as u8;
             let carrier_capacity_left =
                 (units.len() as u8 - carried_units - casualties) * SHIP_CAPACITY;
@@ -220,11 +220,11 @@ pub(crate) fn start_combat(game: &mut Game, combat: Combat) {
     game.lock_undo(); // combat should not be undoable
     stop_current_move(game);
 
-    let c = match game.trigger_current_event(
+    let c = match game.trigger_persistent_event(
         &combat.players(),
-        |events| &mut events.on_combat_start,
+        |events| &mut events.combat_start,
         combat,
-        CurrentEventType::CombatStart,
+        PersistentEventType::CombatStart,
     ) {
         None => return,
         Some(c) => c,
@@ -334,7 +334,7 @@ pub(crate) fn conquer_city(
         " and captured {}'s city at {position}",
         game.player_name(old_player_index)
     ));
-    let attacker_is_human = game.get_player(new_player_index).is_human();
+    let attacker_is_human = game.player(new_player_index).is_human();
     let size = city.mood_modified_size(&game.players[new_player_index]);
     if attacker_is_human {
         game.players[new_player_index].gain_resources(ResourcePile::gold(size as u32));
@@ -350,7 +350,7 @@ pub(crate) fn conquer_city(
             m.replace(&mut CivilCardMatch::new(CivilCardOpportunity::CaptureCity));
         }
     }
-    let take_over = game.get_player(new_player_index).is_city_available();
+    let take_over = game.player(new_player_index).is_city_available();
 
     if take_over {
         city.player_index = new_player_index;
@@ -402,7 +402,7 @@ pub fn capture_position(game: &mut Game, old_player: usize, position: Position, 
     for id in captured_settlers {
         game.players[old_player].remove_unit(id);
     }
-    if game.get_player(old_player).try_get_city(position).is_some() {
+    if game.player(old_player).try_get_city(position).is_some() {
         conquer_city(game, position, new_player, old_player);
     }
 }
@@ -447,7 +447,7 @@ fn move_to_enemy_player_tile(
             player_index,
             starting_position,
             units.clone(),
-            game.get_player(player_index).is_human(),
+            game.player(player_index).is_human(),
         );
         return true;
     }
@@ -492,13 +492,13 @@ pub(crate) fn move_with_possible_combat(
 pub mod tests {
     use std::collections::HashMap;
 
-    use super::{conquer_city, Game};
+    use super::{Game, conquer_city};
 
     use crate::action::Action;
     use crate::game::GameState;
     use crate::log::{ActionLogAge, ActionLogItem, ActionLogPlayer, ActionLogRound};
+    use crate::movement::MovementAction;
     use crate::payment::PaymentOptions;
-    use crate::unit::MovementAction;
     use crate::utils::tests::FloatEq;
     use crate::wonder::construct_wonder;
     use crate::{

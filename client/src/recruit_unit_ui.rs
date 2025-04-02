@@ -8,11 +8,11 @@ use server::unit::{Unit, UnitType, Units};
 
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
-use crate::dialog_ui::{cancel_button, ok_button, OkTooltip};
+use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
 use crate::render_context::RenderContext;
+use crate::select_ui;
 use crate::select_ui::{CountSelector, HasCountSelectableObject, HighlightType};
-use crate::unit_ui::{draw_unit_type, UnitSelection};
-use crate::{select_ui, unit_ui};
+use crate::unit_ui::{UnitSelection, draw_unit_type};
 
 #[derive(Clone)]
 pub struct SelectableUnit {
@@ -46,7 +46,7 @@ impl RecruitAmount {
         leader_name: Option<&String>,
         must_show_units: &[SelectableUnit],
     ) -> StateUpdate {
-        let player = game.get_player(player_index);
+        let player = game.player(player_index);
         let selectable: Vec<SelectableUnit> = new_units(player)
             .into_iter()
             .filter_map(|u| {
@@ -138,9 +138,9 @@ impl NewUnit {
 }
 
 fn new_units(player: &Player) -> Vec<NewUnit> {
-    unit_ui::non_leader_names()
+    UnitType::get_all()
         .into_iter()
-        .map(|(u, n)| NewUnit::new(u, n, None::<String>))
+        .map(|u| NewUnit::new(u, u.name(), None::<String>))
         .chain(
             player
                 .available_leaders
@@ -166,7 +166,7 @@ impl RecruitSelection {
         amount: RecruitAmount,
         replaced_units: Vec<u32>,
     ) -> RecruitSelection {
-        let available_units = game.get_player(amount.player_index).available_units();
+        let available_units = game.player(amount.player_index).available_units();
         let need_replacement = available_units.get_units_to_replace(&amount.units);
 
         RecruitSelection {
@@ -184,7 +184,7 @@ impl RecruitSelection {
 
     pub fn confirm(&self, game: &Game) -> OkTooltip {
         if recruit_cost(
-            game.get_player(self.amount.player_index),
+            game.player(self.amount.player_index),
             &self.amount.units,
             self.amount.city_position,
             self.amount.leader_name.as_ref(),
@@ -278,7 +278,7 @@ fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> Sta
     let p = rc.shown_player.index;
     StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
         rc,
-        rc.game.get_city(p, city),
+        rc.game.city(p, city),
         &format!(
             "Recruit {}{} in {}",
             sel.amount.units,
