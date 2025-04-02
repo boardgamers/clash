@@ -611,11 +611,16 @@ impl State {
     }
 
     pub fn draw_text_with_color(&self, text: &str, x: f32, y: f32, color: Color) {
-        draw_text_ex(text, x, y, TextParams {
-            font: Some(&self.assets.font),
-            font_size: FONT_SIZE,
-            color,
-            ..Default::default()
-        });
+        draw_text_ex(
+            text,
+            x,
+            y,
+            TextParams {
+                font: Some(&self.assets.font),
+                font_size: FONT_SIZE,
+                color,
+                ..Default::default()
+            },
+        );
     }
 }

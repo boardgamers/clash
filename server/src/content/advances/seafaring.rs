@@ -10,12 +10,10 @@ use crate::resource_pile::ResourcePile;
 use std::collections::HashSet;
 
 pub(crate) fn seafaring() -> AdvanceGroup {
-    advance_group_builder("Seafaring", vec![
-        fishing(),
-        navigation(),
-        war_ships(),
-        cartography(),
-    ])
+    advance_group_builder(
+        "Seafaring",
+        vec![fishing(), navigation(), war_ships(), cartography()],
+    )
 }
 
 fn fishing() -> AdvanceBuilder {

@@ -6,12 +6,15 @@ use crate::content::persistent_events::ResourceRewardRequest;
 use crate::payment::PaymentOptions;
 
 pub(crate) fn autocracy() -> AdvanceGroup {
-    advance_group_builder("Autocracy", vec![
-        nationalism(),
-        totalitarianism(),
-        absolute_power(),
-        forced_labor(),
-    ])
+    advance_group_builder(
+        "Autocracy",
+        vec![
+            nationalism(),
+            totalitarianism(),
+            absolute_power(),
+            forced_labor(),
+        ],
+    )
 }
 
 fn nationalism() -> AdvanceBuilder {

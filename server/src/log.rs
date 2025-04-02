@@ -157,12 +157,13 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             )
         }
         PlayingAction::WonderCard(name) => format!("{player_name} played the wonder card {name}",),
-        PlayingAction::EndTurn => format!("{player_name} ended their turn{}", match game
-            .actions_left
-        {
-            0 => String::new(),
-            actions_left => format!(" with {actions_left} actions left"),
-        }),
+        PlayingAction::EndTurn => format!(
+            "{player_name} ended their turn{}",
+            match game.actions_left {
+                0 => String::new(),
+                actions_left => format!(" with {actions_left} actions left"),
+            }
+        ),
     }
 }
 

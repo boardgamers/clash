@@ -503,9 +503,10 @@ fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<M
                 .into_iter()
                 .flatten()
                 .map(|destination| {
-                    MoveRoute::free(destination, vec![EventOrigin::Advance(
-                        NAVIGATION.to_string(),
-                    )])
+                    MoveRoute::free(
+                        destination,
+                        vec![EventOrigin::Advance(NAVIGATION.to_string())],
+                    )
                 })
                 .collect();
         }

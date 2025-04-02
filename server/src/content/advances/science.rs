@@ -8,12 +8,10 @@ use crate::payment::PaymentOptions;
 use crate::resource::ResourceType;
 
 pub(crate) fn science() -> AdvanceGroup {
-    advance_group_builder("Science", vec![
-        math(),
-        astronomy(),
-        medicine(),
-        metallurgy(),
-    ])
+    advance_group_builder(
+        "Science",
+        vec![math(), astronomy(), medicine(), metallurgy()],
+    )
 }
 
 fn math() -> AdvanceBuilder {

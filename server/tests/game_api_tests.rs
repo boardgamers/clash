@@ -270,145 +270,176 @@ fn undo() {
 
 #[test]
 fn test_cultural_influence_instant() {
-    JSON.test("cultural_influence_instant", vec![
-        TestAction::not_undoable(
+    JSON.test(
+        "cultural_influence_instant",
+        vec![TestAction::not_undoable(
             1,
             Action::Playing(InfluenceCultureAttempt(SelectedStructure::new(
                 Position::from_offset("C2"),
                 Structure::Building(Fortress),
             ))),
-        ),
-    ]);
+        )],
+    );
 }
 
 #[test]
 fn test_cultural_influence() {
-    JSON.test("cultural_influence", vec![
-        TestAction::not_undoable(1, influence_action()),
-        TestAction::undoable(
-            1,
-            Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
-                4,
-            )])),
-        ),
-    ]);
+    JSON.test(
+        "cultural_influence",
+        vec![
+            TestAction::not_undoable(1, influence_action()),
+            TestAction::undoable(
+                1,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    4,
+                )])),
+            ),
+        ],
+    );
 }
 
 #[test]
 fn test_found_city() {
-    JSON.test("found_city", vec![TestAction::undoable(
-        0,
-        Action::Playing(FoundCity { settler: 4 }),
-    )]);
+    JSON.test(
+        "found_city",
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(FoundCity { settler: 4 }),
+        )],
+    );
 }
 
 #[test]
 fn test_wonder() {
-    JSON.test("wonder", vec![
-        TestAction::undoable(0, Action::Playing(WonderCard("Pyramids".to_string())))
-            .without_json_comparison(),
-        TestAction::undoable(
-            0,
-            Action::Response(EventResponse::Payment(vec![ResourcePile::new(
-                2, 3, 3, 0, 0, 0, 4,
-            )])),
-        ),
-    ]);
+    JSON.test(
+        "wonder",
+        vec![
+            TestAction::undoable(0, Action::Playing(WonderCard("Pyramids".to_string())))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::new(
+                    2, 3, 3, 0, 0, 0, 4,
+                )])),
+            ),
+        ],
+    );
 }
 
 #[test]
 fn test_increase_happiness() {
-    JSON.test("increase_happiness", vec![TestAction::undoable(
-        0,
-        Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness {
-            happiness_increases: vec![
-                (Position::from_offset("C2"), 1),
-                (Position::from_offset("B3"), 2),
-            ],
-            payment: ResourcePile::mood_tokens(5),
-        })),
-    )]);
+    JSON.test(
+        "increase_happiness",
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness {
+                happiness_increases: vec![
+                    (Position::from_offset("C2"), 1),
+                    (Position::from_offset("B3"), 2),
+                ],
+                payment: ResourcePile::mood_tokens(5),
+            })),
+        )],
+    );
 }
 
 #[test]
 fn test_recruit() {
-    JSON.test("recruit", vec![TestAction::undoable(
-        0,
-        Action::Playing(Recruit(playing_actions::Recruit {
-            units: Units::new(1, 1, 0, 0, 0, 0),
-            city_position: Position::from_offset("A1"),
-            payment: ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2),
-            leader_name: None,
-            replaced_units: vec![4],
-        })),
-    )]);
+    JSON.test(
+        "recruit",
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(Recruit(playing_actions::Recruit {
+                units: Units::new(1, 1, 0, 0, 0, 0),
+                city_position: Position::from_offset("A1"),
+                payment: ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2),
+                leader_name: None,
+                replaced_units: vec![4],
+            })),
+        )],
+    );
 }
 
 #[test]
 fn test_recruit_leader() {
-    JSON.test("recruit_leader", vec![TestAction::undoable(
-        0,
-        Action::Playing(Recruit(playing_actions::Recruit {
-            units: Units::new(0, 0, 0, 0, 0, 1),
-            city_position: Position::from_offset("A1"),
-            payment: ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
-            leader_name: Some("Alexander".to_string()),
-            replaced_units: vec![],
-        })),
-    )]);
+    JSON.test(
+        "recruit_leader",
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(Recruit(playing_actions::Recruit {
+                units: Units::new(0, 0, 0, 0, 0, 1),
+                city_position: Position::from_offset("A1"),
+                payment: ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
+                leader_name: Some("Alexander".to_string()),
+                replaced_units: vec![],
+            })),
+        )],
+    );
 }
 
 #[test]
 fn test_replace_leader() {
-    JSON.test("replace_leader", vec![TestAction::undoable(
-        0,
-        Action::Playing(Recruit(playing_actions::Recruit {
-            units: Units::new(0, 0, 0, 0, 0, 1),
-            city_position: Position::from_offset("A1"),
-            payment: ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
-            leader_name: Some("Kleopatra".to_string()),
-            replaced_units: vec![10],
-        })),
-    )]);
+    JSON.test(
+        "replace_leader",
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(Recruit(playing_actions::Recruit {
+                units: Units::new(0, 0, 0, 0, 0, 1),
+                city_position: Position::from_offset("A1"),
+                payment: ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
+                leader_name: Some("Kleopatra".to_string()),
+                replaced_units: vec![10],
+            })),
+        )],
+    );
 }
 
 #[test]
 fn test_collect() {
-    JSON.test("collect", vec![TestAction::undoable(
-        0,
-        Action::Playing(Collect(playing_actions::Collect {
-            city_position: Position::from_offset("C2"),
-            collections: vec![
-                PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),
-                PositionCollection::new(Position::from_offset("B2"), ResourcePile::wood(1)),
-            ],
-        })),
-    )]);
+    JSON.test(
+        "collect",
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(Collect(playing_actions::Collect {
+                city_position: Position::from_offset("C2"),
+                collections: vec![
+                    PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),
+                    PositionCollection::new(Position::from_offset("B2"), ResourcePile::wood(1)),
+                ],
+            })),
+        )],
+    );
 }
 
 #[test]
 fn test_construct() {
-    JSON.test("construct", vec![TestAction::undoable(
-        0,
-        Action::Playing(Construct(construct::Construct::new(
-            Position::from_offset("C2"),
-            Observatory,
-            ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
-        ))),
-    )]);
+    JSON.test(
+        "construct",
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(Construct(construct::Construct::new(
+                Position::from_offset("C2"),
+                Observatory,
+                ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
+            ))),
+        )],
+    );
 }
 
 #[test]
 fn test_construct_port() {
-    JSON.test("construct_port", vec![TestAction::undoable(
-        0,
-        Action::Playing(Construct(
-            construct::Construct::new(
-                Position::from_offset("A1"),
-                Port,
-                ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
-            )
-            .with_port_position(Some(Position::from_offset("A2"))),
-        )),
-    )]);
+    JSON.test(
+        "construct_port",
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(Construct(
+                construct::Construct::new(
+                    Position::from_offset("A1"),
+                    Port,
+                    ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
+                )
+                .with_port_position(Some(Position::from_offset("A2"))),
+            )),
+        )],
+    );
 }

@@ -9,12 +9,10 @@ use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 
 pub(crate) fn theocracy() -> AdvanceGroup {
-    advance_group_builder("Theocracy", vec![
-        dogma(),
-        devotion(),
-        conversion(),
-        fanaticism(),
-    ])
+    advance_group_builder(
+        "Theocracy",
+        vec![dogma(), devotion(), conversion(), fanaticism()],
+    )
 }
 
 fn dogma() -> AdvanceBuilder {

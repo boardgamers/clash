@@ -13,10 +13,14 @@ pub fn get_all() -> Vec<Civilization> {
     vec![
         Civilization::new(BARBARIANS, vec![], vec![]),
         Civilization::new(PIRATES, vec![], vec![]),
-        Civilization::new("test0", vec![], vec![
-            Leader::builder("Alexander", "", "", "", "").build(),
-            Leader::builder("Kleopatra", "", "", "", "").build(),
-        ]),
+        Civilization::new(
+            "test0",
+            vec![],
+            vec![
+                Leader::builder("Alexander", "", "", "", "").build(),
+                Leader::builder("Kleopatra", "", "", "", "").build(),
+            ],
+        ),
         Civilization::new("test1", vec![], vec![]),
         Civilization::new(
             "Maya",

@@ -10,12 +10,15 @@ use crate::log::current_player_turn_log;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 
 pub(crate) fn democracy() -> AdvanceGroup {
-    advance_group_builder("Democracy", vec![
-        voting(),
-        separation_of_power(),
-        civil_liberties(),
-        free_economy(),
-    ])
+    advance_group_builder(
+        "Democracy",
+        vec![
+            voting(),
+            separation_of_power(),
+            civil_liberties(),
+            free_economy(),
+        ],
+    )
 }
 
 fn voting() -> AdvanceBuilder {

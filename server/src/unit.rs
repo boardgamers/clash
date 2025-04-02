@@ -618,22 +618,26 @@ mod tests {
     #[test]
     fn into_iter() {
         let units = Units::new(0, 1, 0, 2, 1, 1);
-        assert_eq!(units.into_iter().collect::<Vec<_>>(), vec![
-            (Settler, 0),
-            (Infantry, 1),
-            (Ship, 0),
-            (Cavalry, 2),
-            (Elephant, 1),
-            (Leader, 1),
-        ]);
+        assert_eq!(
+            units.into_iter().collect::<Vec<_>>(),
+            vec![
+                (Settler, 0),
+                (Infantry, 1),
+                (Ship, 0),
+                (Cavalry, 2),
+                (Elephant, 1),
+                (Leader, 1),
+            ]
+        );
     }
 
     #[test]
     fn to_vec() {
         let units = Units::new(0, 1, 0, 2, 1, 1);
-        assert_eq!(units.to_vec(), vec![
-            Infantry, Cavalry, Cavalry, Elephant, Leader
-        ]);
+        assert_eq!(
+            units.to_vec(),
+            vec![Infantry, Cavalry, Cavalry, Elephant, Leader]
+        );
     }
 
     #[test]

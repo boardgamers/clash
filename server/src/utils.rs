@@ -72,12 +72,15 @@ where
 
 #[must_use]
 pub fn ordinal_number(value: u32) -> String {
-    format!("{value}{}", match value % 10 {
-        1 => "st",
-        2 => "nd",
-        3 => "rd",
-        _ => "th",
-    })
+    format!(
+        "{value}{}",
+        match value % 10 {
+            1 => "st",
+            2 => "nd",
+            3 => "rd",
+            _ => "th",
+        }
+    )
 }
 
 #[derive(Clone, Default)]
