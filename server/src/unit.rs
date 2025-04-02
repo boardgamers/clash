@@ -539,14 +539,14 @@ fn save_carried_units(game: &mut Game, player: usize, pos: Position) {
     }
 
     // embark to surviving ships
-    for (id, carrier_id) in units {
-        if carrier_id.is_some_and(|id| game.player(player).try_get_unit(id).is_none()) {
-            let (&carrier_id, &carried) = carried_units
+    for (id, old_carrier_id) in units {
+        if old_carrier_id.is_some_and(|id| game.player(player).try_get_unit(id).is_none()) {
+            let (&new_carrier_id, &carried) = carried_units
                 .iter()
                 .find(|(_carrier_id, carried)| **carried < SHIP_CAPACITY)
                 .expect("no carrier found to save carried units");
-            carried_units.insert(carrier_id, carried + 1);
-            game.player_mut(player).get_unit_mut(id).carrier_id = Some(carrier_id);
+            carried_units.insert(new_carrier_id, carried + 1);
+            game.player_mut(player).get_unit_mut(id).carrier_id = Some(new_carrier_id);
         }
     }
 }

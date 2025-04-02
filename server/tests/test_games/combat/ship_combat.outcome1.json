@@ -100,7 +100,17 @@
           "movement_restrictions": [
             "Battle"
           ],
-          "id": 8
+          "id": 8,
+          "carried_units": [
+            {
+              "unit_type": "Elephant",
+              "id": 2
+            },
+            {
+              "unit_type": "Settler",
+              "id": 22
+            }
+          ]
         }
       ],
       "civilization": "test1",
@@ -338,14 +348,18 @@
                       ]
                     },
                     {
-                      "op": "add",
-                      "path": "/players/0/units/5/carried_units",
-                      "value": [
-                        {
-                          "id": 1,
-                          "unit_type": "Cavalry"
-                        }
-                      ]
+                      "op": "replace",
+                      "path": "/players/0/units/5/carried_units/0/id",
+                      "value": 1
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/5/carried_units/0/unit_type",
+                      "value": "Cavalry"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/5/carried_units/1"
                     },
                     {
                       "op": "replace",
