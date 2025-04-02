@@ -380,7 +380,7 @@ impl EventResponse {
         let Some(s) = game.current_event_handler_mut() else {
             panic!("current custom phase event should be set")
         };
-        s.response = Some(self.clone());
+        s.response = Some(self);
         let details = game.current_event().event_type.clone();
         execute_custom_phase_action(game, player_index, details)
     }

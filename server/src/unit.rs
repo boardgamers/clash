@@ -556,7 +556,7 @@ fn save_carried_units(game: &mut Game, player: usize, pos: Position) {
     }
 }
 
-pub(crate) fn choose_carried_units_casualties() -> Builtin {
+pub(crate) fn choose_carried_units_to_remove() -> Builtin {
     Builtin::builder(
         "Choose Casualties (carried units)",
         "Choose which carried units to remove.",
