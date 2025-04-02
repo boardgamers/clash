@@ -2,7 +2,6 @@ use UnitType::*;
 use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::iter;
 use std::{
     fmt::Display,
@@ -518,36 +517,42 @@ fn kill_unit(game: &mut Game, unit_id: u32, player_index: usize, killer: Option<
 }
 
 fn save_carried_units(game: &mut Game, player: usize, pos: Position) {
-    let mut carried_units: HashMap<u32, u8> = HashMap::new();
-
-    let units = game
+    let mut survivors = game
         .player(player)
         .get_units(pos)
         .iter()
-        .map(|u| (u.id, u.carrier_id))
+        .filter(|u| {
+            u.carrier_id
+                .is_some_and(|id| game.player(player).try_get_unit(id).is_none())
+        })
+        .map(|u| (u.id))
         .collect_vec();
-
-    for (id, carrier_id) in units.clone() {
-        if let Some(carrier) = carrier_id {
-            carried_units
-                .entry(carrier)
-                .and_modify(|e| *e += 1)
-                .or_insert(1);
-        } else {
-            carried_units.entry(id).or_insert(0);
-        }
+    
+    if survivors.is_empty() {
+        return;
     }
+    
+    game.lock_undo(); // strange bug when redoing this
 
-    // embark to surviving ships
-    for (id, old_carrier_id) in units {
-        if old_carrier_id.is_some_and(|id| game.player(player).try_get_unit(id).is_none()) {
-            let (&new_carrier_id, &carried) = carried_units
-                .iter()
-                .find(|(_carrier_id, carried)| **carried < SHIP_CAPACITY)
-                .expect("no carrier found to save carried units");
-            carried_units.insert(new_carrier_id, carried + 1);
-            game.player_mut(player).get_unit_mut(id).carrier_id = Some(new_carrier_id);
-        }
+    let mut embark = vec![];
+    
+    game.player(player)
+        .get_units(pos)
+        .iter()
+        .filter(|u| u.unit_type.is_ship())
+        .map(|u| {
+            let mut capacity = SHIP_CAPACITY - carried_units(u.id, game.player(player)).len() as u8;
+            while capacity > 0 {
+                capacity -= 1;
+                if let Some(survivor) = survivors.pop() {
+                    embark.push((survivor, u.id));
+                }
+            }
+        })
+        .collect_vec();
+    
+    for (survivor, carrier) in embark {
+        game.player_mut(player).get_unit_mut(survivor).carrier_id = Some(carrier);
     }
 }
 

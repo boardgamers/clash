@@ -282,102 +282,7 @@
                         1
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "CombatRoundEnd": {
-                              "attacker_casualties": {
-                                "fighters": 1
-                              },
-                              "can_retreat": false,
-                              "combat": {
-                                "attacker": 0,
-                                "attacker_position": "C3",
-                                "attackers": [
-                                  8
-                                ],
-                                "defender": 1,
-                                "defender_position": "D2",
-                                "retreat": "CanRetreat",
-                                "round": 1
-                              },
-                              "defender_casualties": {
-                                "fighters": 1
-                              },
-                              "final_result": "AttackerWins"
-                            }
-                          },
-                          "player": 0
-                        },
-                        {
-                          "event_type": {
-                            "UnitsKilled": {
-                              "killer": 1,
-                              "position": "C3"
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Builtin": "Choose Casualties (carried units)"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "SelectUnits": {
-                                "choices": [
-                                  2,
-                                  22,
-                                  1
-                                ],
-                                "description": "Choose which carried units to remove",
-                                "needed": {
-                                  "end": 1,
-                                  "start": 1
-                                },
-                                "player": 0
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/5/carried_units/0/id",
-                      "value": 1
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/5/carried_units/0/unit_type",
-                      "value": "Cavalry"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/5/carried_units/1"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/5/position",
-                      "value": "C3"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/1/units",
-                      "value": [
-                        {
-                          "id": 1,
-                          "position": "D2",
-                          "unit_type": "Ship"
-                        }
-                      ]
-                    }
-                  ]
+                  }
                 }
               ]
             }
@@ -405,7 +310,7 @@
       "Attacker wins"
     ]
   ],
-  "undo_limit": 1,
+  "undo_limit": 2,
   "actions_left": 2,
   "round": 6,
   "age": 1,

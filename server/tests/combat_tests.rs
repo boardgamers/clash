@@ -127,7 +127,7 @@ fn test_do_not_retreat() {
 fn test_ship_combat() {
     JSON.test("ship_combat", vec![
         TestAction::not_undoable(0, move_action(vec![7, 8], Position::from_offset("D2"))),
-        TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![1]))),
+        TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![1]))),
     ]);
 }
 
