@@ -527,15 +527,15 @@ fn save_carried_units(game: &mut Game, player: usize, pos: Position) {
         })
         .map(|u| (u.id))
         .collect_vec();
-    
+
     if survivors.is_empty() {
         return;
     }
-    
+
     game.lock_undo(); // strange bug when redoing this
 
     let mut embark = vec![];
-    
+
     game.player(player)
         .get_units(pos)
         .iter()
@@ -550,7 +550,7 @@ fn save_carried_units(game: &mut Game, player: usize, pos: Position) {
             }
         })
         .collect_vec();
-    
+
     for (survivor, carrier) in embark {
         game.player_mut(player).get_unit_mut(survivor).carrier_id = Some(carrier);
     }
