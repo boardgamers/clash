@@ -94,11 +94,12 @@ pub(crate) fn use_negotiations() -> Builtin {
                             }
                         }
                     }
-                    for i in delete {
+                    // must be in reverse order to not mess up the indices during deletion
+                    for i in delete.iter().rev() {
                         game.add_info_log_item(&format!(
                             "{player_name} may attack {partner_name} again.",
                         ));
-                        game.permanent_effects.remove(i);
+                        game.permanent_effects.remove(*i);
                     }
                     for _ in remain {
                         game.add_info_log_item(&format!(

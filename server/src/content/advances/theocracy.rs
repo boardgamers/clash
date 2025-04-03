@@ -1,5 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::{Advance, AdvanceBuilder, gain_advance};
+use crate::advance::{Advance, AdvanceBuilder, gain_advance_without_payment};
 use crate::city_pieces::Building::Temple;
 use crate::consts::STACK_LIMIT;
 use crate::content::advances::{AdvanceGroup, advance_group_builder, get_group};
@@ -64,7 +64,7 @@ fn dogma() -> AdvanceBuilder {
                 "{} {verb} {} as a reward for constructing a Temple",
                 c.player_name, c.choice
             ));
-            gain_advance(game, &c.choice, c.player_index, ResourcePile::empty(), true);
+            gain_advance_without_payment(game, &c.choice, c.player_index, ResourcePile::empty(), true);
         },
     )
 }

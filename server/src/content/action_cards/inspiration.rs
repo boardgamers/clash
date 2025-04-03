@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{
     ActionCard, ActionCardBuilder, CivilCardOpportunity, CivilCardRequirement,
 };
-use crate::advance::gain_advance;
+use crate::advance::gain_advance_without_payment;
 use crate::city::MoodState;
 use crate::content::action_cards::spy::spy;
 use crate::content::advances;
@@ -54,7 +54,7 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |game, player, _| Some(AdvanceRequest::new(possible_advances(game.player(player)))),
         |game, sel, _| {
             let advance = sel.choice.clone();
-            gain_advance(
+            gain_advance_without_payment(
                 game,
                 &advance,
                 sel.player_index,
@@ -99,7 +99,7 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         },
         |game, sel, _| {
             let advance = sel.choice.clone();
-            gain_advance(
+            gain_advance_without_payment(
                 game,
                 &advance,
                 sel.player_index,

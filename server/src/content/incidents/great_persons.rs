@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder, gain_action_card_from_pile};
-use crate::advance::gain_advance;
+use crate::advance::gain_advance_without_payment;
 use crate::city::MoodState;
 use crate::city_pieces::Building;
 use crate::construct::{Construct, construct};
@@ -165,7 +165,7 @@ where
         |game, s, _| {
             let name = &s.choice;
             game.add_info_log_item(&format!("{} gained {}", s.player_name, name));
-            gain_advance(game, name, s.player_index, ResourcePile::empty(), false);
+            gain_advance_without_payment(game, name, s.player_index, ResourcePile::empty(), false);
         },
     )
 }

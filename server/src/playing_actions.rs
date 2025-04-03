@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 
 use crate::action_card::play_action_card;
-use crate::advance::gain_advance;
 use crate::city::MoodState;
 use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
@@ -20,6 +19,7 @@ use crate::{
     city::City, content::custom_actions::CustomAction, game::Game, position::Position,
     resource_pile::ResourcePile,
 };
+use crate::advance::gain_advance_without_payment;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Collect {
@@ -183,7 +183,7 @@ impl PlayingAction {
                 game.player(player_index)
                     .advance_cost(&a, Some(&payment))
                     .pay(game, &payment);
-                gain_advance(game, &advance, player_index, payment, true);
+                gain_advance_without_payment(game, &advance, player_index, payment, true);
             }
             FoundCity { settler } => {
                 let settler = game.players[player_index].remove_unit(settler);

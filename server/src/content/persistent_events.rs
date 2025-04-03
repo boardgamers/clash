@@ -194,7 +194,9 @@ pub struct AdvanceRequest {
 
 impl AdvanceRequest {
     #[must_use]
-    pub fn new(choices: Vec<String>) -> Self {
+    pub fn new(mut choices: Vec<String>) -> Self {
+        choices.sort();
+        choices.dedup();
         Self { choices }
     }
 }
@@ -244,8 +246,8 @@ pub fn is_selected_structures_valid(game: &Game, selected: &[SelectedStructure])
             let v = g.collect_vec();
             v.len() == game.any_city(p).size()
                 || !v
-                    .iter()
-                    .any(|s| matches!(s.structure, Structure::CityCenter))
+                .iter()
+                .any(|s| matches!(s.structure, Structure::CityCenter))
         })
 }
 

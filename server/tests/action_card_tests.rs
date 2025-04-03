@@ -294,3 +294,27 @@ fn test_overproduction() {
         ),
     ]);
 }
+
+#[test]
+fn test_synergies() {
+    JSON.test("synergies", vec![
+        TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(34)))
+            .without_json_comparison(),
+        TestAction::undoable(
+            0,
+            Action::Response(EventResponse::SelectAdvance("Cartography".to_string())),
+        ).without_json_comparison(),
+        TestAction::undoable(
+            0,
+            Action::Response(EventResponse::Payment(vec![ResourcePile::ideas(2)])),
+        ).without_json_comparison(),
+        TestAction::undoable(
+            0,
+            Action::Response(EventResponse::SelectAdvance("War Ships".to_string())),
+        ).without_json_comparison(),
+        TestAction::undoable(
+            0,
+            Action::Response(EventResponse::Payment(vec![ResourcePile::ideas(2)])),
+        ),
+    ]);
+}
