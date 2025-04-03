@@ -15,7 +15,7 @@ use crate::movement::{MoveUnits, MovementRestriction, move_units, stop_current_m
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::CombatRole;
-use crate::unit::{UnitType, Units};
+use crate::unit::{UnitType, Units, carried_units};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -218,11 +218,22 @@ pub(crate) fn log_round(game: &mut Game, c: &Combat) {
         "Attackers: {}",
         c.attackers
             .iter()
-            .map(|u| game.players[c.attacker].get_unit(*u).unit_type)
-            .collect::<Units>()));
+            .flat_map(|u| {
+                let p = game.player(c.attacker);
+                let u = p.get_unit(*u);
+                vec![u.unit_type].into_iter()
+                    .chain(
+                        carried_units(u.id, p)
+                            .iter()
+                            .map(|u| p.get_unit(*u).unit_type),
+                    )
+                    .collect_vec()
+            })
+            .collect::<Units>()
+    ));
     game.add_info_log_item(&format!(
         "Defenders: {}",
-        game.players[c.defender]
+        game.player(c.defender)
             .get_units(c.defender_position)
             .iter()
             .map(|u| u.unit_type)
