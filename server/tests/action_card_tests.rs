@@ -272,3 +272,25 @@ fn test_assassination() {
         ),
     ]);
 }
+
+#[test]
+fn test_overproduction() {
+    JSON.test("overproduction", vec![
+        TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(29)))
+            .without_json_comparison(),
+        TestAction::undoable(
+            0,
+            Action::Playing(PlayingAction::Collect(playing_actions::Collect {
+                city_position: Position::from_offset("C2"),
+                collections: vec![
+                    PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),
+                    PositionCollection::new(Position::from_offset("B2"), ResourcePile::wood(1)),
+                    PositionCollection::new(
+                        Position::from_offset("C3"),
+                        ResourcePile::mood_tokens(1),
+                    ),
+                ],
+            })),
+        ),
+    ]);
+}

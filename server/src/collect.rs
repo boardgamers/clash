@@ -11,6 +11,7 @@ use crate::resource_pile::ResourcePile;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::iter;
+use itertools::Itertools;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash)]
 pub struct PositionCollection {
@@ -61,21 +62,25 @@ pub fn get_total_collection(
         return Err("Not your city".to_string());
     }
 
-    if city.mood_modified_size(player) < tiles_used(collections) as usize {
+    let mut i =
+        possible_resource_collections(game, city_position, player_index, &Vec::new(), collections);
+    if i.max_selection < tiles_used(collections) {
         return Err(format!(
             "You can only collect {} resources - got {}",
-            city.mood_modified_size(player),
+            i.max_selection,
             tiles_used(collections)
         ));
     }
-    let mut i =
-        possible_resource_collections(game, city_position, player_index, &Vec::new(), collections);
 
-    if collections.iter().any(|c| c.times > i.max_per_tile) {
-        return Err(format!(
-            "You can only collect {} resources from each tile",
-            i.max_per_tile,
-        ));
+    for (_, group) in &collections.iter().chunk_by(|c| c.position) {
+        let used = group.map(|c| c.times).sum::<u32>();
+        
+        if used > i.max_per_tile {
+            return Err(format!(
+                "You can only collect {} resources from each tile",
+                i.max_per_tile,
+            ));
+        }
     }
 
     for c in collections {
@@ -146,6 +151,7 @@ pub struct CollectInfo {
     pub city: Position,
     pub total: ResourcePile,
     pub max_per_tile: u32,
+    pub max_selection: u32,
     pub(crate) info: ActionInfo,
 }
 
@@ -162,6 +168,7 @@ impl CollectInfo {
             info: ActionInfo::new(player),
             city,
             max_per_tile: 1,
+            max_selection: player.get_city(city).mood_modified_size(player) as u32,
         }
     }
 }

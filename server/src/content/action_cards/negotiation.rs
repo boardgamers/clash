@@ -2,10 +2,10 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
 use crate::action_card::ActionCard;
 use crate::content::builtin::Builtin;
-use crate::content::effects::PermanentEffect;
+use crate::content::effects::{CollectEffect, PermanentEffect};
 use crate::content::incidents::great_diplomat::{DiplomaticRelations, Negotiations};
 use crate::content::persistent_events::PlayerRequest;
-use crate::content::tactics_cards::{TacticsCardFactory, archers, high_ground, martyr, scout};
+use crate::content::tactics_cards::{TacticsCardFactory, archers, high_ground, martyr, scout, defensive_formation, encircled};
 use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::playing_actions::{ActionType, PlayingAction};
@@ -20,6 +20,8 @@ pub(crate) fn negotiation_action_cards() -> Vec<ActionCard> {
         leadership(26, archers),
         assassination(27, high_ground),
         assassination(28, archers),
+        overproduction(29, defensive_formation),
+        overproduction(30, encircled),
     ]
 }
 
@@ -195,7 +197,9 @@ pub(crate) fn use_assassination() -> Builtin {
             |game, player_index, player_name, ()| {
                 if remove_element_by(&mut game.permanent_effects, |e| {
                     is_assassinated(e, player_index)
-                }).is_some() {
+                })
+                .is_some()
+                {
                     game.actions_left -= 1;
                     game.add_info_log_item(&format!(
                         "{player_name} has lost an action due to assassination."
@@ -208,4 +212,33 @@ pub(crate) fn use_assassination() -> Builtin {
 
 fn is_assassinated(e: &PermanentEffect, player: usize) -> bool {
     matches!(e, PermanentEffect::Assassination(p) if player == *p)
+}
+
+fn overproduction(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
+    ActionCard::builder(
+        id,
+        "Overproduction",
+        "You may collect from 2 additional tiles this turn. \
+        (Cannot combine with Production Focus or another Overproduction.)",
+        ActionType::cost(ResourcePile::culture_tokens(1)),
+        move |game, _p| {
+            !game
+                .permanent_effects
+                .iter()
+                .any(|e| matches!(e, PermanentEffect::Collect(_)))
+        },
+    )
+    .tactics_card(tactics_card)
+    .add_simple_persistent_event_listener(
+        |e| &mut e.play_action_card,
+        0,
+        |game, _player_index, player_name, _| {
+            game.permanent_effects
+                .push(PermanentEffect::Collect(CollectEffect::Overproduction));
+            game.add_info_log_item(&format!(
+                "{player_name} can use Overproduction to collect from 2 additional tiles."
+            ));
+        },
+    )
+    .build()
 }

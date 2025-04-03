@@ -101,16 +101,20 @@ pub(crate) fn collect_only() -> Builtin {
         .add_transient_event_listener(
             |event| &mut event.collect_options,
             2,
-            |c, context, game| {
+            |c, _context, game| {
                 if game
                     .permanent_effects
                     .iter()
                     .any(|e| matches!(e, &PermanentEffect::Collect(CollectEffect::ProductionFocus)))
                 {
-                    c.max_per_tile = game
-                        .any_city(context.city_position)
-                        .mood_modified_size(game.player(context.player_index))
-                        as u32;
+                    c.max_per_tile = c.max_selection;
+                }
+                if game
+                    .permanent_effects
+                    .iter()
+                    .any(|e| matches!(e, &PermanentEffect::Collect(CollectEffect::Overproduction)))
+                {
+                    c.max_selection += 2;
                 }
             },
         )

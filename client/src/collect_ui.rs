@@ -18,7 +18,6 @@ use server::collect::{
     tiles_used,
 };
 use server::content::custom_actions::CustomAction;
-use server::game::Game;
 use server::playing_actions::{Collect, PlayingAction};
 use server::position::Position;
 use server::resource::ResourceType;
@@ -50,7 +49,7 @@ impl CollectResources {
     }
 
     pub fn help_text(&self, rc: &RenderContext) -> Vec<String> {
-        let extra = self.extra_resources(rc.game);
+        let extra = self.extra_resources();
         let mut r = vec![
             self.custom.title.clone(),
             "Click on a tile to collect resources".to_string(),
@@ -63,10 +62,8 @@ impl CollectResources {
         r
     }
 
-    pub fn extra_resources(&self, game: &Game) -> i8 {
-        let city = game.city(self.player_index, self.city_position);
-        city.mood_modified_size(game.player(self.player_index)) as i8
-            - tiles_used(&self.collections) as i8
+    pub fn extra_resources(&self) -> i8 {
+        self.info.max_selection as i8 - tiles_used(&self.collections) as i8
     }
 
     pub fn collected(&self) -> ResourcePile {
@@ -96,7 +93,7 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
     );
 
     if ok_button(rc, tooltip) {
-        let extra = collect.extra_resources(game);
+        let extra = collect.extra_resources();
 
         let c = Collect {
             city_position: collect.city_position,

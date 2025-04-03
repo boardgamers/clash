@@ -17,6 +17,7 @@ pub enum ConstructEffect {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum CollectEffect {
     ProductionFocus,
+    Overproduction,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
@@ -46,6 +47,7 @@ impl PermanentEffect {
             },
             PermanentEffect::Collect(c) => match c {
                 CollectEffect::ProductionFocus => EventOrigin::CivilCard(19), // also 20
+                CollectEffect::Overproduction => EventOrigin::Incident(29), // also 30
             },
             PermanentEffect::LoseAction(_) => EventOrigin::Incident(38),
             PermanentEffect::PublicWonderCard(_) => EventOrigin::Incident(40),
