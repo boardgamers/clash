@@ -32,6 +32,7 @@ pub enum PermanentEffect {
     CulturalTakeover,
     DiplomaticRelations(DiplomaticRelations),
     Negotiations(Negotiations),
+    Assassination(usize),
 }
 
 impl PermanentEffect {
@@ -52,9 +53,10 @@ impl PermanentEffect {
             PermanentEffect::TrojanHorse => EventOrigin::Incident(42),
             PermanentEffect::Anarchy(_) => EventOrigin::Incident(44),
             PermanentEffect::DiplomaticRelations(_) => EventOrigin::Incident(DIPLOMAT_ID),
-            PermanentEffect::Negotiations(_) => EventOrigin::CivilCard(23), // also 24
             // can also be 16, but that doesn't matter for the help text
             PermanentEffect::CulturalTakeover => EventOrigin::CivilCard(15),
+            PermanentEffect::Negotiations(_) => EventOrigin::CivilCard(23), // also 24
+            PermanentEffect::Assassination(_) => EventOrigin::CivilCard(27), // also 28
         }
     }
 }
