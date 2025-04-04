@@ -53,7 +53,7 @@ pub fn redo(game: &mut Game, player_index: usize) -> Result<(), String> {
     game.current_action_log_index = Some(game.action_log_index);
     game.action_log_index += 1;
     add_log_item_from_action(game, &copy.action);
-    
+
     match copy.action.clone() {
         Action::Playing(action) => action.execute(game, player_index, true),
         Action::Movement(action) => execute_movement_action(game, action, player_index),

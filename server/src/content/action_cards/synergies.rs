@@ -8,7 +8,7 @@ use crate::advance::gain_advance_without_payment;
 use crate::content::advances;
 use crate::content::advances::get_advance;
 use crate::content::persistent_events::{AdvanceRequest, EventResponse, PaymentRequest};
-use crate::content::tactics_cards::{archers, defensive_formation, TacticsCardFactory};
+use crate::content::tactics_cards::{TacticsCardFactory, archers, defensive_formation};
 use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::player::Player;
@@ -99,7 +99,13 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
                 "{} paid {} for advance {advance}",
                 s.player_name, s.choice[0]
             ));
-            gain_advance_without_payment(game, &advance, s.player_index, s.choice[0].clone(), false)
+            gain_advance_without_payment(
+                game,
+                &advance,
+                s.player_index,
+                s.choice[0].clone(),
+                false,
+            );
         },
     )
 }
@@ -172,7 +178,7 @@ fn teach_us(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             ));
             gain_advance_without_payment(
                 game,
-                &advance,
+                advance,
                 sel.player_index,
                 ResourcePile::empty(),
                 false,

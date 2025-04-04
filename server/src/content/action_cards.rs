@@ -9,10 +9,10 @@ mod synergies;
 use crate::action_card::{ActionCard, CivilCard};
 use crate::content::action_cards::inspiration::inspiration_action_cards;
 use crate::content::action_cards::negotiation::negotiation_action_cards;
+use crate::content::action_cards::synergies::synergies_action_cards;
 use crate::content::incidents;
 use development::development_action_cards;
 use itertools::Itertools;
-use crate::content::action_cards::synergies::synergies_action_cards;
 
 #[must_use]
 pub(crate) fn get_all() -> Vec<ActionCard> {

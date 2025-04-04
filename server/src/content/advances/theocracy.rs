@@ -64,7 +64,13 @@ fn dogma() -> AdvanceBuilder {
                 "{} {verb} {} as a reward for constructing a Temple",
                 c.player_name, c.choice
             ));
-            gain_advance_without_payment(game, &c.choice, c.player_index, ResourcePile::empty(), true);
+            gain_advance_without_payment(
+                game,
+                &c.choice,
+                c.player_index,
+                ResourcePile::empty(),
+                true,
+            );
         },
     )
 }

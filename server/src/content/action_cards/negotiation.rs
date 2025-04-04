@@ -5,7 +5,9 @@ use crate::content::builtin::Builtin;
 use crate::content::effects::{CollectEffect, PermanentEffect};
 use crate::content::incidents::great_diplomat::{DiplomaticRelations, Negotiations};
 use crate::content::persistent_events::PlayerRequest;
-use crate::content::tactics_cards::{TacticsCardFactory, archers, high_ground, martyr, scout, defensive_formation, encircled};
+use crate::content::tactics_cards::{
+    TacticsCardFactory, archers, defensive_formation, encircled, high_ground, martyr, scout,
+};
 use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::playing_actions::{ActionType, PlayingAction};
@@ -32,7 +34,7 @@ fn negotiations(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Select another player. This turn, you may not attack that player. \
         In their next turn, they may not attack you.",
         ActionType::cost(ResourcePile::culture_tokens(1)),
-        move |game, _player,_| {
+        move |game, _player, _| {
             !current_player_turn_log(game)
                 .items
                 .iter()
@@ -128,7 +130,7 @@ fn leadership(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Leadership",
         "Gain 1 action.",
         ActionType::cost(ResourcePile::culture_tokens(1)),
-        move |_game, _player,_| true,
+        move |_game, _player, _| true,
     )
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
@@ -149,7 +151,7 @@ fn assassination(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Select a player (not affected by Assassination already) \
         to lose an action in their next turn.",
         ActionType::cost(ResourcePile::culture_tokens(1)),
-        move |game, p,_| !opponents_not_affected_by_assassination(game, p.index).is_empty(),
+        move |game, p, _| !opponents_not_affected_by_assassination(game, p.index).is_empty(),
     )
     .tactics_card(tactics_card)
     .add_player_request(
@@ -222,7 +224,7 @@ fn overproduction(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "You may collect from 2 additional tiles this turn. \
         (Cannot combine with Production Focus or another Overproduction.)",
         ActionType::cost(ResourcePile::culture_tokens(1)),
-        move |game, _p,_| {
+        move |game, _p, _| {
             !game
                 .permanent_effects
                 .iter()

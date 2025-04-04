@@ -246,9 +246,17 @@ pub(crate) fn test_actions(test: &JsonTest, name: &str, actions: Vec<TestAction>
             outcome(&path, i - 1)
         };
         let compare = mem::replace(&mut last_json_compare, action.compare_json);
-        let mut context = TestContext::new(name, i, "EXECUTE"); 
+        let mut context = TestContext::new(name, i, "EXECUTE");
         game = catch_unwind(AssertUnwindSafe(|| {
-            test_action_internal(game, name, &from, &outcome(&path, i), action, compare, &mut context)
+            test_action_internal(
+                game,
+                name,
+                &from,
+                &outcome(&path, i),
+                action,
+                compare,
+                &mut context,
+            )
         }))
         .unwrap_or_else(|e| panic!("{context}: {e:?}"));
     }

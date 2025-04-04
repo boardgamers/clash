@@ -5,7 +5,6 @@ use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{PersistentEventType, PositionRequest, UnitsRequest};
 use crate::content::tactics_cards;
 use crate::game::Game;
-use crate::log::current_player_turn_log_mut;
 use crate::movement::move_units;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::position::Position;
@@ -173,8 +172,8 @@ impl CombatEnd {
         self.is_attacker(player)
             && self.is_winner(player)
             && game
-            .try_get_any_city(self.combat.defender_position)
-            .is_some()
+                .try_get_any_city(self.combat.defender_position)
+                .is_some()
     }
 }
 
@@ -582,7 +581,7 @@ pub(crate) fn offer_retreat() -> Builtin {
                 let c = &r.combat;
                 if c.attacker == player && r.can_retreat {
                     let name = game.player_name(player);
-                    game.add_info_log_item(&format!("{name} can retreat", ));
+                    game.add_info_log_item(&format!("{name} can retreat",));
                     Some("Do you want to retreat?".to_string())
                 } else {
                     None
@@ -591,9 +590,9 @@ pub(crate) fn offer_retreat() -> Builtin {
             |game, retreat, e| {
                 let player_name = &retreat.player_name;
                 if retreat.choice {
-                    game.add_info_log_item(&format!("{player_name} retreats", ));
+                    game.add_info_log_item(&format!("{player_name} retreats",));
                 } else {
-                    game.add_info_log_item(&format!("{player_name} does not retreat", ));
+                    game.add_info_log_item(&format!("{player_name} does not retreat",));
                 }
                 if retreat.choice {
                     e.combat.retreat = CombatRetreatState::EndAfterCurrentRound;
@@ -608,40 +607,40 @@ pub(crate) fn place_settler() -> Builtin {
         "Place Settler",
         "After losing a city, place a settler in another city.",
     )
-        .add_position_request(
-            |event| &mut event.combat_end,
-            0,
-            |game, player_index, i| {
-                let p = game.player(player_index);
-                if i.is_defender(player_index)
-                    && i.is_loser(player_index)
-                    && game.try_get_any_city(i.combat.defender_position).is_some()
-                    && !p.cities.is_empty()
-                    && p.available_units().settlers > 0
-                    && p.is_human()
-                {
-                    let choices: Vec<Position> = p.cities.iter().map(|c| c.position).collect();
-                    let needed = 1..=1;
-                    Some(PositionRequest::new(
-                        choices,
-                        needed,
-                        "Select a city to place the free Settler Unit",
-                    ))
-                } else {
-                    None
-                }
-            },
-            |game, s, _e| {
-                let pos = s.choice[0];
-                game.add_info_log_item(&format!(
-                    "{} gained 1 free Settler Unit at {} for losing a city",
-                    s.player_name, pos
-                ));
-                game.player_mut(s.player_index)
-                    .add_unit(pos, UnitType::Settler);
-            },
-        )
-        .build()
+    .add_position_request(
+        |event| &mut event.combat_end,
+        0,
+        |game, player_index, i| {
+            let p = game.player(player_index);
+            if i.is_defender(player_index)
+                && i.is_loser(player_index)
+                && game.try_get_any_city(i.combat.defender_position).is_some()
+                && !p.cities.is_empty()
+                && p.available_units().settlers > 0
+                && p.is_human()
+            {
+                let choices: Vec<Position> = p.cities.iter().map(|c| c.position).collect();
+                let needed = 1..=1;
+                Some(PositionRequest::new(
+                    choices,
+                    needed,
+                    "Select a city to place the free Settler Unit",
+                ))
+            } else {
+                None
+            }
+        },
+        |game, s, _e| {
+            let pos = s.choice[0];
+            game.add_info_log_item(&format!(
+                "{} gained 1 free Settler Unit at {} for losing a city",
+                s.player_name, pos
+            ));
+            game.player_mut(s.player_index)
+                .add_unit(pos, UnitType::Settler);
+        },
+    )
+    .build()
 }
 
 fn kill_fighters(game: &mut Game, player: usize, killed_unit_ids: &[u32], c: &mut Combat) {
@@ -686,7 +685,8 @@ pub(crate) fn combat_stats() -> Builtin {
                             CivilCardMatch::new(
                                 CivilCardOpportunity::WinLandBattle,
                                 Some(c.opponent(p)),
-                            ).store(game);
+                            )
+                            .store(game);
                         }
                     }
                 }
@@ -694,4 +694,3 @@ pub(crate) fn combat_stats() -> Builtin {
         )
         .build()
 }
-

@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use crate::action_card::{play_action_card, ActionCardInfo};
+use crate::action_card::{ActionCardInfo, play_action_card};
+use crate::advance::gain_advance_without_payment;
 use crate::city::MoodState;
 use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
@@ -19,7 +20,6 @@ use crate::{
     city::City, content::custom_actions::CustomAction, game::Game, position::Position,
     resource_pile::ResourcePile,
 };
-use crate::advance::gain_advance_without_payment;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Collect {
@@ -101,7 +101,7 @@ impl PlayingActionType {
                     } else {
                         return Err("Requirement not met".to_string());
                     }
-                }                                                                                        
+                }
                 if !(civil_card.can_play)(game, p, &ActionCardInfo::new(*id, satisfying_action)) {
                     return Err("Cannot play action card".to_string());
                 }

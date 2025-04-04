@@ -126,7 +126,13 @@ pub(crate) fn free_advance() -> Builtin {
                     "{} advanced {} for free",
                     c.player_name, c.choice
                 ));
-                gain_advance_without_payment(game, &c.choice, c.player_index, ResourcePile::empty(), true);
+                gain_advance_without_payment(
+                    game,
+                    &c.choice,
+                    c.player_index,
+                    ResourcePile::empty(),
+                    true,
+                );
             },
         )
         .build()

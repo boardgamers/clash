@@ -19,7 +19,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Look at all Wonder, Action, and Objective cards of another player. \
         You may swap one card of the same type.",
         ActionType::regular_with_cost(ResourcePile::culture_tokens(1)),
-        |game, player,_| !players_with_cards(game, player.index).is_empty(),
+        |game, player, _| !players_with_cards(game, player.index).is_empty(),
     )
     .add_player_request(
         |e| &mut e.play_action_card,

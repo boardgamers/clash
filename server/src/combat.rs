@@ -10,7 +10,6 @@ use crate::combat_roll::CombatStats;
 use crate::consts::SHIP_CAPACITY;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
-use crate::log::current_player_turn_log_mut;
 use crate::movement::{MoveUnits, MovementRestriction, move_units, stop_current_move};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;

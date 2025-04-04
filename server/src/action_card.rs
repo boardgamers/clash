@@ -231,7 +231,7 @@ pub struct CivilCardMatch {
     pub played_cards: Vec<u8>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub opponent: Option<usize>  
+    pub opponent: Option<usize>,
 }
 
 impl CivilCardMatch {
@@ -243,7 +243,7 @@ impl CivilCardMatch {
             opponent,
         }
     }
-    
+
     pub(crate) fn store(self, game: &mut Game) {
         current_player_turn_log_mut(game)
             .items
@@ -286,18 +286,16 @@ impl CivilCardRequirement {
             action_card_id + 1
         };
         self.opportunities.iter().find_map(|o| {
-            l
-                .iter()
-                .position(|a| {
-                    if let Some(civil_card_match) = &a.civil_card_match {
-                        if civil_card_match.opportunity == *o
-                            && !civil_card_match.played_cards.contains(&sister_card)
-                        {
-                            return true;
-                        }
+            l.iter().position(|a| {
+                if let Some(civil_card_match) = &a.civil_card_match {
+                    if civil_card_match.opportunity == *o
+                        && !civil_card_match.played_cards.contains(&sister_card)
+                    {
+                        return true;
                     }
-                    false
-                })
+                }
+                false
+            })
         })
     }
 }

@@ -176,11 +176,15 @@ pub(crate) fn gain_advance_without_payment(
     take_incident_token: bool,
 ) {
     do_advance(game, &get_advance(name), player_index);
-    on_advance(game, player_index, AdvanceInfo {
-        name: name.to_string(),
-        payment,
-        take_incident_token,
-    });
+    on_advance(
+        game,
+        player_index,
+        AdvanceInfo {
+            name: name.to_string(),
+            payment,
+            take_incident_token,
+        },
+    );
 }
 
 pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: AdvanceInfo) {

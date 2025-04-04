@@ -48,7 +48,7 @@ pub struct Game {
     // index for the next action log
     pub action_log_index: usize,
     // transient to know what is the current action log
-    pub(crate) current_action_log_index: Option<usize>, 
+    pub(crate) current_action_log_index: Option<usize>,
     pub log: Vec<Vec<String>>,
     pub undo_limit: usize,
     pub actions_left: u32,

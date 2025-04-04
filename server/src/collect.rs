@@ -8,10 +8,10 @@ use crate::player_events::ActionInfo;
 use crate::playing_actions::Collect;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::iter;
-use itertools::Itertools;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash)]
 pub struct PositionCollection {
@@ -74,7 +74,7 @@ pub fn get_total_collection(
 
     for (_, group) in &collections.iter().chunk_by(|c| c.position) {
         let used = group.map(|c| c.times).sum::<u32>();
-        
+
         if used > i.max_per_tile {
             return Err(format!(
                 "You can only collect {} resources from each tile",
