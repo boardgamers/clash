@@ -102,7 +102,7 @@ impl PlayingActionType {
                         return Err("Requirement not met".to_string());
                     }
                 }
-                if !(civil_card.can_play)(game, p, &ActionCardInfo::new(*id, satisfying_action)) {
+                if !(civil_card.can_play)(game, p, &ActionCardInfo::new(*id, satisfying_action, None)) {
                     return Err("Cannot play action card".to_string());
                 }
             }

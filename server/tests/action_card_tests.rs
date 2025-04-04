@@ -391,3 +391,14 @@ fn test_militia() {
         ],
     );
 }
+
+#[test]
+fn test_tech_trade() {
+    JSON.test(
+        "tech_trade",
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(PlayingAction::ActionCard(39)),
+        )],
+    );
+}
