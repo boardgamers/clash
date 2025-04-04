@@ -7,13 +7,17 @@ use crate::action_card::{
 use crate::advance::gain_advance_without_payment;
 use crate::content::advances;
 use crate::content::advances::get_advance;
-use crate::content::persistent_events::{AdvanceRequest, EventResponse, PaymentRequest};
-use crate::content::tactics_cards::{TacticsCardFactory, archers, defensive_formation};
+use crate::content::advances::theocracy::cities_that_can_add_units;
+use crate::content::persistent_events::{
+    AdvanceRequest, EventResponse, PaymentRequest, PositionRequest,
+};
+use crate::content::tactics_cards::{TacticsCardFactory, archers, defensive_formation, wedge_formation, high_morale};
 use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::player::Player;
 use crate::playing_actions::ActionType;
 use crate::resource_pile::ResourcePile;
+use crate::unit::UnitType;
 use itertools::Itertools;
 
 pub(crate) fn synergies_action_cards() -> Vec<ActionCard> {
@@ -23,6 +27,8 @@ pub(crate) fn synergies_action_cards() -> Vec<ActionCard> {
         synergies(34, archers),
         teach_us(35, defensive_formation),
         teach_us(36, archers),
+        militia(37, wedge_formation),
+        militia(38, high_morale),
     ]
 }
 
@@ -208,4 +214,41 @@ fn advances_to_copy_for_loser(game: &Game, winner: &Player, a: &ActionCardInfo) 
         .filter(|a| !winner.has_advance(&a.name) && winner.can_advance_free(a))
         .map(|a| a.name.clone())
         .collect()
+}
+
+fn militia(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
+    ActionCard::builder(
+        id,
+        "Militia",
+        "Gain 1 infantry in one of your cities.",
+        ActionType::cost(ResourcePile::culture_tokens(1)),
+        |_game, player, _a| {
+            player.available_units().infantry > 0 && !cities_that_can_add_units(player).is_empty()
+        },
+    )
+    .tactics_card(tactics_card)
+    .add_position_request(
+        |e| &mut e.play_action_card,
+        0,
+        |game, player_index, _| {
+            let player = game.player(player_index);
+            let cities = cities_that_can_add_units(player);
+            Some(PositionRequest::new(
+                cities,
+                1..=1,
+                "Select city to add infantry",
+            ))
+        },
+        |game, s, _| {
+            let city = s.choice[0];
+            game.add_info_log_item(&format!(
+                "{} selected {} as city for Militia.",
+                s.player_name, city
+            ));
+
+            game.player_mut(s.player_index)
+                .add_unit(city, UnitType::Infantry);
+        },
+    )
+    .build()
 }

@@ -18,6 +18,7 @@ use crate::unit::{UnitType, Units};
 use crate::utils;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use crate::content::advances::theocracy::cities_that_can_add_units;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct BarbariansMoveRequest {
@@ -411,12 +412,7 @@ fn possible_barbarians_reinforcements(game: &Game) -> Vec<Position> {
     if !barbarian_fighters().iter().any(|u| avail.has_unit(u)) {
         return vec![];
     }
-    barbarian
-        .cities
-        .iter()
-        .filter(|c| barbarian.get_units(c.position).len() < STACK_LIMIT)
-        .map(|c| c.position)
-        .collect()
+    cities_that_can_add_units(barbarian)
 }
 
 fn get_barbarian_reinforcement_choices(game: &Game, pos: Option<Position>) -> Vec<UnitType> {

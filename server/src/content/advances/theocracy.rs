@@ -4,6 +4,7 @@ use crate::city_pieces::Building::Temple;
 use crate::consts::STACK_LIMIT;
 use crate::content::advances::{AdvanceGroup, advance_group_builder, get_group};
 use crate::content::persistent_events::{AdvanceRequest, PositionRequest};
+use crate::player::Player;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -149,18 +150,7 @@ fn fanaticism() -> AdvanceBuilder {
                 && game.player(player_index).available_units().infantry > 0
             {
                 let p = game.player(player_index);
-                let choices: Vec<Position> = p
-                    .cities
-                    .iter()
-                    .filter(|c| {
-                        p.get_units(c.position)
-                            .iter()
-                            .filter(|u| u.unit_type.is_army_unit())
-                            .count()
-                            < STACK_LIMIT
-                    })
-                    .map(|c| c.position)
-                    .collect();
+                let choices = cities_that_can_add_units(p);
                 let needed = 1..=1;
                 Some(PositionRequest::new(
                     choices,
@@ -181,4 +171,20 @@ fn fanaticism() -> AdvanceBuilder {
                 .add_unit(pos, UnitType::Infantry);
         },
     )
+}
+
+pub(crate) fn cities_that_can_add_units(p: &Player) -> Vec<Position> {
+    let choices: Vec<Position> = p
+        .cities
+        .iter()
+        .filter(|c| {
+            p.get_units(c.position)
+                .iter()
+                .filter(|u| u.unit_type.is_army_unit())
+                .count()
+                < STACK_LIMIT
+        })
+        .map(|c| c.position)
+        .collect();
+    choices
 }

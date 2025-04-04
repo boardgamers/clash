@@ -8,7 +8,7 @@ mod education;
 mod science;
 mod seafaring;
 mod spirituality;
-mod theocracy;
+pub(crate) mod theocracy;
 pub mod trade_routes;
 mod warfare;
 

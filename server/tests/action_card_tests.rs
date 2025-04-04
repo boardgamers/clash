@@ -381,3 +381,13 @@ fn test_teach_us() {
         ],
     );
 }
+
+#[test]
+fn test_militia() {
+    JSON.test(
+        "militia",
+        vec![
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(37))),
+        ],
+    );
+}
