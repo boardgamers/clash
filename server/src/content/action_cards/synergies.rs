@@ -12,10 +12,7 @@ use crate::content::advances::theocracy::cities_that_can_add_units;
 use crate::content::persistent_events::{
     AdvanceRequest, EventResponse, PaymentRequest, PlayerRequest, PositionRequest,
 };
-use crate::content::tactics_cards::{
-    TacticsCardFactory, archers, defensive_formation, high_ground, high_morale, surprise,
-    wedge_formation,
-};
+use crate::content::tactics_cards::{TacticsCardFactory, archers, defensive_formation, high_ground, high_morale, surprise, wedge_formation, flanking};
 use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::player::Player;
@@ -37,6 +34,7 @@ pub(crate) fn synergies_action_cards() -> Vec<ActionCard> {
         tech_trade(39, surprise),
         tech_trade(40, high_ground),
         new_ideas(41, high_morale),
+        new_ideas(42, flanking),
     ]
 }
 
