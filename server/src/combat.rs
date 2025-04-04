@@ -289,7 +289,7 @@ pub(crate) fn combat_loop(game: &mut Game, mut s: CombatRoundStart) {
             match combat_round_start(game, s) {
                 Some(value) => s = value,
                 None => return,
-            };
+            }
         }
 
         let c = s.combat;

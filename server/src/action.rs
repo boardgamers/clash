@@ -311,7 +311,7 @@ pub(crate) fn execute_movement_action(
             game.state = GameState::Playing;
             return Ok(());
         }
-    };
+    }
 
     let state = get_move_state(game);
     let all_moves_used =

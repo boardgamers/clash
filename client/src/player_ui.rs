@@ -324,10 +324,10 @@ pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpd
     if features.import_export {
         if bottom_right_texture(rc, &assets.export, icon_pos(-1, -3), "Export") {
             return StateUpdate::Export;
-        };
+        }
         if bottom_right_texture(rc, &assets.import, icon_pos(-2, -3), "Import") {
             return StateUpdate::Import;
-        };
+        }
     }
 
     StateUpdate::None

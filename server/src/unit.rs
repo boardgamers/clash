@@ -2,7 +2,6 @@ use UnitType::*;
 use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
-use std::iter;
 use std::{
     fmt::Display,
     ops::{AddAssign, SubAssign},
@@ -288,7 +287,7 @@ impl Units {
     #[must_use]
     pub fn to_vec(self) -> Vec<UnitType> {
         self.into_iter()
-            .flat_map(|(u, c)| iter::repeat(u).take(c as usize))
+            .flat_map(|(u, c)| std::iter::repeat_n(u, c as usize))
             .collect()
     }
 
@@ -315,7 +314,7 @@ impl AddAssign<&UnitType> for Units {
             Cavalry => self.cavalry += 1,
             Elephant => self.elephants += 1,
             Leader => self.leaders += 1,
-        };
+        }
     }
 }
 
@@ -328,7 +327,7 @@ impl SubAssign<&UnitType> for Units {
             Cavalry => self.cavalry -= 1,
             Elephant => self.elephants -= 1,
             Leader => self.leaders -= 1,
-        };
+        }
     }
 }
 

@@ -181,7 +181,7 @@ pub fn pay_advance_dialog(ap: &Payment, rc: &RenderContext) -> StateUpdate {
     if !matches!(update, StateUpdate::None) {
         // select a different advance
         return update;
-    };
+    }
     payment_dialog(rc, ap, true, ActiveDialog::AdvancePayment, |payment| {
         StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
             advance: ap.name.to_string(),

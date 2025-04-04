@@ -279,7 +279,7 @@ impl CivilCardRequirement {
             } else {
                 from_ref(&l[l.len() - 1])
             };
-        };
+        }
         let sister_card = if action_card_id % 2 == 0 {
             action_card_id - 1
         } else {

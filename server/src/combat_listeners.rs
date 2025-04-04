@@ -511,7 +511,7 @@ fn add_tactics_listener(
                 card.name
             ));
         }
-    };
+    }
 }
 
 pub(crate) fn choose_fighter_casualties() -> Builtin {

@@ -170,7 +170,7 @@ fn black_death() -> Incident {
             let units = player.units.iter().map(|u| u.id).collect_vec();
             if units.len() < 4 {
                 return None;
-            };
+            }
 
             let mut needed = (units.len() / 4) as u8;
             if additional_sanitation_damage(player) {

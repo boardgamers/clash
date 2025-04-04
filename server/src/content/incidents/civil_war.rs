@@ -212,7 +212,7 @@ fn lose_action(game: &mut Game, player: usize) {
     } else {
         game.add_info_log_item(&format!("{name} lost an action"));
         game.actions_left -= 1;
-    };
+    }
 }
 
 #[allow(clippy::float_cmp)]

@@ -299,7 +299,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                         response: None,
                         origin: origin.clone(),
                     });
-                };
+                }
             },
         )
     }

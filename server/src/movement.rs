@@ -416,7 +416,7 @@ fn reachable_with_roads(player: &Player, units: &[u32], game: &Game) -> Vec<Move
         if map.is_sea(start) {
             // not for disembarking
             return vec![];
-        };
+        }
 
         return start
             .neighbors()

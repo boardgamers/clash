@@ -68,7 +68,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
             )
         {
             return plus(container, o);
-        };
+        }
     }
 
     if ok_button(rc, is_valid()) {
@@ -76,7 +76,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
     }
     if may_cancel && cancel_button(rc) {
         return StateUpdate::Cancel;
-    };
+    }
 
     StateUpdate::None
 }

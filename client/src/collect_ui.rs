@@ -114,10 +114,10 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
             },
             city,
         );
-    };
+    }
     if cancel_button(rc) {
         return StateUpdate::Cancel;
-    };
+    }
     StateUpdate::None
 }
 

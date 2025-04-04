@@ -215,7 +215,7 @@ pub fn show_tile_menu(rc: &RenderContext, pos: Position) -> StateUpdate {
         if rc.shown_player.index == city.player_index {
             return show_city_menu(rc, city);
         }
-    };
+    }
 
     let mut icons = move_units_buttons(rc, pos);
     if let Some(action) = found_city_button(rc, pos) {
@@ -310,7 +310,7 @@ pub fn explore_dialog(rc: &RenderContext, r: &ExploreResolutionConfig) -> StateU
         let mut new = r.clone();
         new.rotation = (r.rotation + 3).rem(6);
         return StateUpdate::OpenDialog(ActiveDialog::ExploreResolution(new));
-    };
+    }
 
     StateUpdate::None
 }

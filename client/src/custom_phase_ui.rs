@@ -172,7 +172,7 @@ impl<T: Clone + PartialEq + Ord> MultiSelection<T> {
             let mut new = self.clone();
             new.selected.push(value);
             return new;
-        };
+        }
         self
     }
 }

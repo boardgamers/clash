@@ -183,13 +183,13 @@ impl ActiveDialog {
                 .any(|d| matches!(d, MoveDestination::Tile(_, _)))
             {
                 result.push("Click on a highlighted tile to move units".to_string());
-            };
+            }
             if destinations
                 .iter()
                 .any(|d| matches!(d, MoveDestination::Carrier(_)))
             {
                 result.push("Click on a carrier to embark units".to_string());
-            };
+            }
             m.destinations.modifiers.iter().for_each(|m| {
                 result.extend(event_help(rc, m));
             });
