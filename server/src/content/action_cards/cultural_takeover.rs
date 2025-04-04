@@ -121,7 +121,7 @@ pub(crate) fn use_cultural_takeover() -> Builtin {
                 )
                 .is_some_and(|_| outcome.success)
                 {
-                    let mut info = ActionCardInfo::new(15, None);
+                    let mut info = ActionCardInfo::new(15, None, None);
                     info.selected_position = Some(outcome.position);
                     on_play_action_card(game, outcome.player, info);
                 }

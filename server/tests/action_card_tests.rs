@@ -381,3 +381,45 @@ fn test_teach_us() {
         ],
     );
 }
+
+#[test]
+fn test_militia() {
+    JSON.test(
+        "militia",
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(PlayingAction::ActionCard(37)),
+        )],
+    );
+}
+
+#[test]
+fn test_tech_trade() {
+    JSON.test(
+        "tech_trade",
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(PlayingAction::ActionCard(39)),
+        )],
+    );
+}
+
+#[test]
+fn test_new_ideas() {
+    JSON.test(
+        "new_ideas",
+        vec![
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(41)))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectAdvance("Storage".to_string())),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::food(2)])),
+            ),
+        ],
+    );
+}

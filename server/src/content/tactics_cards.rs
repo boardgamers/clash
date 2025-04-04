@@ -156,7 +156,6 @@ pub(crate) fn surprise(id: u8) -> TacticsCard {
         "Surprise",
         "Add 1 to combat value. Draw 1 action card if you killed at least 1 unit.",
     )
-    .target(TacticsCardTarget::ActivePlayer)
     .add_reveal_listener(0, |_player, _game, _c, s| {
         s.extra_combat_value += 1;
         s.roll_log
@@ -238,7 +237,6 @@ pub(crate) fn for_the_people(id: u8) -> TacticsCard {
     TacticsCard::builder(id, "For the People", "Add 1 die to your roll.")
         .role_requirement(CombatRole::Defender)
         .location_requirement(CombatLocation::City)
-        .target(TacticsCardTarget::ActivePlayer)
         .add_reveal_listener(0, |_player, _game, _c, s| {
             s.extra_dies += 1;
             s.roll_log
@@ -251,7 +249,6 @@ pub(crate) fn improved_defenses(id: u8) -> TacticsCard {
     TacticsCard::builder(id, "Improved Defenses", "Ignore 1 hit.")
         .role_requirement(CombatRole::Defender)
         .location_requirement(CombatLocation::City)
-        .target(TacticsCardTarget::ActivePlayer)
         .add_reveal_listener(0, |_player, _game, _c, s| {
             s.hit_cancels += 1;
             s.roll_log
@@ -271,7 +268,6 @@ pub(crate) fn tactical_retreat(id: u8) -> TacticsCard {
     .fighter_requirement(FighterRequirement::Army)
     .role_requirement(CombatRole::Defender)
     .checker(|_, game, c| !tactical_retreat_targets(c, game).is_empty())
-    .target(TacticsCardTarget::ActivePlayer)
     .add_position_request(
         |event| &mut event.combat_round_start_tactics,
         0,
@@ -313,7 +309,6 @@ fn tactical_retreat_targets(c: &Combat, game: &Game) -> Vec<Position> {
 pub(crate) fn defensive_formation(id: u8) -> TacticsCard {
     TacticsCard::builder(id, "Defensive Formation", "Roll 1 extra die.")
         .role_requirement(CombatRole::Defender)
-        .target(TacticsCardTarget::ActivePlayer)
         .add_reveal_listener(0, |_player, _game, _c, s| {
             s.extra_dies += 1;
             s.roll_log
@@ -430,4 +425,14 @@ pub(crate) fn archers(id: u8) -> TacticsCard {
         },
     )
     .build()
+}
+
+pub(crate) fn flanking(id: u8) -> TacticsCard {
+    TacticsCard::builder(id, "Flanking", "Add 1 die to your roll.")
+        .role_requirement(CombatRole::Attacker)
+        .add_reveal_listener(0, |_player, _game, _c, s| {
+            s.extra_dies += 1;
+            s.roll_log.push("Flanking added 1 extra die".to_string());
+        })
+        .build()
 }

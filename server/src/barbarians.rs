@@ -2,6 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::city::City;
 use crate::combat::move_with_possible_combat;
 use crate::consts::STACK_LIMIT;
+use crate::content::advances::theocracy::cities_that_can_add_units;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{PositionRequest, ResourceRewardRequest, UnitTypeRequest};
 use crate::game::Game;
@@ -411,12 +412,7 @@ fn possible_barbarians_reinforcements(game: &Game) -> Vec<Position> {
     if !barbarian_fighters().iter().any(|u| avail.has_unit(u)) {
         return vec![];
     }
-    barbarian
-        .cities
-        .iter()
-        .filter(|c| barbarian.get_units(c.position).len() < STACK_LIMIT)
-        .map(|c| c.position)
-        .collect()
+    cities_that_can_add_units(barbarian)
 }
 
 fn get_barbarian_reinforcement_choices(game: &Game, pos: Option<Position>) -> Vec<UnitType> {

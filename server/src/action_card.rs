@@ -20,6 +20,12 @@ use std::slice::from_ref;
 
 pub type CanPlayCard = Box<dyn Fn(&Game, &Player, &ActionCardInfo) -> bool>;
 
+#[derive(PartialEq, Eq)]
+pub enum CivilCardTarget {
+    ActivePlayer,
+    AllPlayers,
+}
+
 pub struct CivilCard {
     pub name: String,
     pub description: String,
@@ -27,6 +33,7 @@ pub struct CivilCard {
     pub listeners: AbilityListeners,
     pub action_type: ActionType,
     pub requirement: Option<CivilCardRequirement>,
+    pub(crate) target: CivilCardTarget,
 }
 
 pub struct ActionCard {
@@ -65,6 +72,7 @@ impl ActionCard {
             builder: AbilityInitializerBuilder::new(),
             tactics_card: None,
             action_type,
+            target: CivilCardTarget::ActivePlayer,
         }
     }
 }
@@ -78,6 +86,7 @@ pub struct ActionCardBuilder {
     requirement: Option<CivilCardRequirement>,
     tactics_card: Option<TacticsCard>,
     builder: AbilityInitializerBuilder,
+    target: CivilCardTarget,
 }
 
 impl ActionCardBuilder {
@@ -94,6 +103,12 @@ impl ActionCardBuilder {
     }
 
     #[must_use]
+    pub fn target(mut self, target: CivilCardTarget) -> Self {
+        self.target = target;
+        self
+    }
+
+    #[must_use]
     pub fn build(self) -> ActionCard {
         ActionCard::new(
             self.id,
@@ -104,6 +119,7 @@ impl ActionCardBuilder {
                 requirement: self.requirement,
                 listeners: self.builder.build(),
                 action_type: self.action_type,
+                target: self.target,
             },
             self.tactics_card,
         )
@@ -123,7 +139,8 @@ impl AbilityInitializerSetup for ActionCardBuilder {
 pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
     discard_action_card(game, player_index, id);
     let mut satisfying_action: Option<usize> = None;
-    if let Some(requirement) = get_civil_card(id).requirement {
+    let card = get_civil_card(id);
+    if let Some(requirement) = card.requirement {
         if let Some(action_log_index) = requirement.satisfying_action(game, id) {
             satisfying_action = Some(action_log_index);
             current_player_turn_log_mut(game).items[action_log_index]
@@ -137,13 +154,22 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
     on_play_action_card(
         game,
         player_index,
-        ActionCardInfo::new(id, satisfying_action),
+        ActionCardInfo::new(
+            id,
+            satisfying_action,
+            (card.target == CivilCardTarget::AllPlayers).then_some(player_index),
+        ),
     );
 }
 
 pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: ActionCardInfo) {
+    let players = match get_civil_card(i.id).target {
+        CivilCardTarget::ActivePlayer => vec![player_index],
+        CivilCardTarget::AllPlayers => game.human_players(player_index),
+    };
+
     let _ = game.trigger_persistent_event_with_listener(
-        &[player_index],
+        &players,
         |e| &mut e.play_action_card,
         &get_civil_card(i.id).listeners,
         i,
@@ -201,11 +227,14 @@ pub struct ActionCardInfo {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub satisfying_action: Option<usize>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub active_player: Option<usize>, // only set when all players are playing the action card
 }
 
 impl ActionCardInfo {
     #[must_use]
-    pub fn new(id: u8, satisfying_action: Option<usize>) -> Self {
+    pub fn new(id: u8, satisfying_action: Option<usize>, active_player: Option<usize>) -> Self {
         Self {
             id,
             selected_position: None,
@@ -213,6 +242,7 @@ impl ActionCardInfo {
             selected_player: None,
             answer: None,
             satisfying_action,
+            active_player,
         }
     }
 }

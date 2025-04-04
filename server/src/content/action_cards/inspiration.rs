@@ -5,6 +5,7 @@ use crate::action_card::{
 use crate::advance::gain_advance_without_payment;
 use crate::city::MoodState;
 use crate::content::action_cards::spy::spy;
+use crate::content::action_cards::synergies::teachable_advances;
 use crate::content::advances;
 use crate::content::persistent_events::{AdvanceRequest, PaymentRequest, PositionRequest};
 use crate::content::tactics_cards::{
@@ -115,16 +116,15 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .build()
 }
 
-fn possible_inspiration_advances(game: &Game, player: &Player) -> Vec<String> {
+pub(crate) fn possible_inspiration_advances(game: &Game, player: &Player) -> Vec<String> {
     let players = players_in_range2(game, player)
         .iter()
         .map(|&i| game.player(i))
         .collect_vec();
 
-    advances::get_all()
+    players
         .iter()
-        .filter(|a| player.can_advance_free(a) && players.iter().any(|p| p.has_advance(&a.name)))
-        .map(|a| a.name.clone())
+        .flat_map(|p| teachable_advances(p, player))
         .collect()
 }
 
