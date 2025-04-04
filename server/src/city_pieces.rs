@@ -255,7 +255,7 @@ impl DestroyedStructuresData {
     }
 }
 
-#[derive(Serialize, Deserialize, Eq, PartialEq, Hash, Clone, Debug, Copy)]
+#[derive(Serialize, Deserialize, Eq, PartialEq, Hash, Clone, Debug, Copy, PartialOrd, Ord)]
 pub enum Building {
     Academy,
     Market,

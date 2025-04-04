@@ -50,9 +50,9 @@
           "SelectUnits": {
             "player": 0,
             "choices": [
+              1,
               2,
-              22,
-              1
+              22
             ],
             "needed": {
               "start": 1,

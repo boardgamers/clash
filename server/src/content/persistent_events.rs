@@ -201,7 +201,7 @@ impl AdvanceRequest {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, PartialOrd, Ord)]
 pub struct SelectedStructure {
     pub position: Position,
     pub structure: Structure,
@@ -259,8 +259,7 @@ pub struct PositionRequest {
 
 impl PositionRequest {
     #[must_use]
-    pub fn new(mut choices: Vec<Position>, needed: RangeInclusive<u8>, description: &str) -> Self {
-        choices.sort();
+    pub fn new(choices: Vec<Position>, needed: RangeInclusive<u8>, description: &str) -> Self {
         PositionRequest {
             request: MultiRequest::new(choices, needed, description),
         }
@@ -307,7 +306,7 @@ impl UnitsRequest {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, PartialOrd, Ord)]
 pub enum Structure {
     CityCenter,
     Building(Building),
@@ -332,9 +331,12 @@ pub struct MultiRequest<T> {
     pub description: String,
 }
 
-impl<T> MultiRequest<T> {
+impl<T: PartialEq + Ord> MultiRequest<T> {
     #[must_use]
-    pub fn new(choices: Vec<T>, needed: RangeInclusive<u8>, description: &str) -> Self {
+    pub fn new(mut choices: Vec<T>, needed: RangeInclusive<u8>, description: &str) -> Self {
+        choices.sort();
+        choices.dedup();
+        
         Self {
             choices,
             needed,
