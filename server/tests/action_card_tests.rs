@@ -293,3 +293,91 @@ fn test_negotiations() {
         ],
     );
 }
+
+#[test]
+fn test_assassination() {
+    JSON.test(
+        "assassination",
+        vec![
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(27)))
+                .without_json_comparison(),
+            TestAction::not_undoable(0, Action::Playing(PlayingAction::EndTurn))
+                .without_json_comparison(),
+            TestAction::not_undoable(1, Action::Playing(PlayingAction::EndTurn)).with_pre_assert(
+                |game| {
+                    assert_eq!(game.actions_left, 2);
+                },
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_overproduction() {
+    JSON.test(
+        "overproduction",
+        vec![
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(29)))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Playing(PlayingAction::Collect(playing_actions::Collect {
+                    city_position: Position::from_offset("C2"),
+                    collections: vec![
+                        PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),
+                        PositionCollection::new(Position::from_offset("B2"), ResourcePile::wood(1)),
+                        PositionCollection::new(
+                            Position::from_offset("C3"),
+                            ResourcePile::mood_tokens(1),
+                        ),
+                    ],
+                })),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_synergies() {
+    JSON.test(
+        "synergies",
+        vec![
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(34)))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectAdvance("Cartography".to_string())),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::ideas(2)])),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectAdvance("War Ships".to_string())),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::ideas(2)])),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_teach_us() {
+    JSON.test(
+        "teach_us",
+        vec![
+            TestAction::not_undoable(
+                0,
+                move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(35))),
+        ],
+    );
+}

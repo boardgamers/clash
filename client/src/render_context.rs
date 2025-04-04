@@ -44,7 +44,7 @@ impl RenderContext<'_> {
         match self.camera_mode {
             CameraMode::Screen => set_default_camera(),
             CameraMode::World => set_camera(&self.state.camera),
-        };
+        }
     }
 
     #[must_use]

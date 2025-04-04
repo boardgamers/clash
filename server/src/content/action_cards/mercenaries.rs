@@ -27,7 +27,7 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
         Pay 1 food, wood, ore, or culture token for each army up front. \
         Reinforce all Barbarian cities where you moved units out of according to the usual rules.",
         ActionType::regular(),
-        |game, p| {
+        |game, p, _| {
             !barbarian_army_positions_in_range2(game, p).is_empty() && max_mercenary_payment(p) > 0
         },
     )

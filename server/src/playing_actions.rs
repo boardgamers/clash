@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use crate::action_card::play_action_card;
-use crate::advance::gain_advance;
+use crate::action_card::{ActionCardInfo, play_action_card};
+use crate::advance::gain_advance_without_payment;
 use crate::city::MoodState;
 use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
@@ -94,13 +94,16 @@ impl PlayingActionType {
                 }
 
                 let civil_card = get_civil_card(*id);
-                if !(civil_card.can_play)(game, p) {
-                    return Err("Cannot play action card".to_string());
-                }
+                let mut satisfying_action: Option<usize> = None;
                 if let Some(requirement) = civil_card.requirement {
-                    if requirement.satisfying_action(game, *id, false).is_none() {
+                    if let Some(action_log_index) = requirement.satisfying_action(game, *id) {
+                        satisfying_action = Some(action_log_index);
+                    } else {
                         return Err("Requirement not met".to_string());
                     }
+                }
+                if !(civil_card.can_play)(game, p, &ActionCardInfo::new(*id, satisfying_action)) {
+                    return Err("Cannot play action card".to_string());
                 }
             }
             PlayingActionType::WonderCard(name) => {
@@ -183,7 +186,7 @@ impl PlayingAction {
                 game.player(player_index)
                     .advance_cost(&a, Some(&payment))
                     .pay(game, &payment);
-                gain_advance(game, &advance, player_index, payment, true);
+                gain_advance_without_payment(game, &advance, player_index, payment, true);
             }
             FoundCity { settler } => {
                 let settler = game.players[player_index].remove_unit(settler);

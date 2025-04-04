@@ -195,7 +195,13 @@ impl Player {
             .units
             .iter()
             // carried units are added to carriers
-            .filter(|unit| unit.carrier_id.is_none())
+            .filter(|unit| {
+                if let Some(carrier_id) = unit.carrier_id {
+                    // satety check
+                    let _ = self.get_unit(carrier_id);
+                }
+                unit.carrier_id.is_none()
+            })
             .sorted_by_key(|unit| unit.id)
             .map(|u| u.data(&self))
             .collect();

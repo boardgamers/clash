@@ -12,8 +12,8 @@
         "request": {
           "SelectAdvance": {
             "choices": [
-              "Devotion",
               "Conversion",
+              "Devotion",
               "Fanaticism"
             ]
           }

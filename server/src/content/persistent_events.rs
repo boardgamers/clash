@@ -194,12 +194,14 @@ pub struct AdvanceRequest {
 
 impl AdvanceRequest {
     #[must_use]
-    pub fn new(choices: Vec<String>) -> Self {
+    pub fn new(mut choices: Vec<String>) -> Self {
+        choices.sort();
+        choices.dedup();
         Self { choices }
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, PartialOrd, Ord)]
 pub struct SelectedStructure {
     pub position: Position,
     pub structure: Structure,
@@ -219,20 +221,7 @@ pub type StructuresRequest = MultiRequest<SelectedStructure>;
 
 ///
 /// If a player does not own a hand card, then it means that it's a swap card from another player
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct HandCardsRequest {
-    #[serde(flatten)]
-    pub request: MultiRequest<HandCard>,
-}
-
-impl HandCardsRequest {
-    #[must_use]
-    pub fn new(cards: Vec<HandCard>, needed: RangeInclusive<u8>, description: &str) -> Self {
-        HandCardsRequest {
-            request: MultiRequest::new(cards, needed, description),
-        }
-    }
-}
+pub type HandCardsRequest = MultiRequest<HandCard>;
 
 #[must_use]
 pub fn is_selected_structures_valid(game: &Game, selected: &[SelectedStructure]) -> bool {
@@ -249,21 +238,7 @@ pub fn is_selected_structures_valid(game: &Game, selected: &[SelectedStructure])
         })
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct PositionRequest {
-    #[serde(flatten)]
-    pub request: MultiRequest<Position>,
-}
-
-impl PositionRequest {
-    #[must_use]
-    pub fn new(mut choices: Vec<Position>, needed: RangeInclusive<u8>, description: &str) -> Self {
-        choices.sort();
-        PositionRequest {
-            request: MultiRequest::new(choices, needed, description),
-        }
-    }
-}
+pub type PositionRequest = MultiRequest<Position>;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct UnitTypeRequest {
@@ -305,7 +280,7 @@ impl UnitsRequest {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, PartialOrd, Ord)]
 pub enum Structure {
     CityCenter,
     Building(Building),
@@ -330,9 +305,12 @@ pub struct MultiRequest<T> {
     pub description: String,
 }
 
-impl<T> MultiRequest<T> {
+impl<T: PartialEq + Ord> MultiRequest<T> {
     #[must_use]
-    pub fn new(choices: Vec<T>, needed: RangeInclusive<u8>, description: &str) -> Self {
+    pub fn new(mut choices: Vec<T>, needed: RangeInclusive<u8>, description: &str) -> Self {
+        choices.sort();
+        choices.dedup();
+
         Self {
             choices,
             needed,
@@ -380,7 +358,7 @@ impl EventResponse {
         let Some(s) = game.current_event_handler_mut() else {
             panic!("current custom phase event should be set")
         };
-        s.response = Some(self.clone());
+        s.response = Some(self);
         let details = game.current_event().event_type.clone();
         execute_custom_phase_action(game, player_index, details)
     }

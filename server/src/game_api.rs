@@ -127,7 +127,7 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
             if let Some(handler) = &mut current_event_player.handler {
                 if let PersistentEventRequest::SelectHandCards(c) = &mut handler.request {
                     // player shouldn't see other player's hand cards
-                    c.request.choices.clear();
+                    c.choices.clear();
                 }
                 if let Some(EventResponse::SelectHandCards(c)) = &mut handler.response {
                     // player shouldn't see other player's hand cards

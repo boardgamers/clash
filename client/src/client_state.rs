@@ -183,13 +183,13 @@ impl ActiveDialog {
                 .any(|d| matches!(d, MoveDestination::Tile(_, _)))
             {
                 result.push("Click on a highlighted tile to move units".to_string());
-            };
+            }
             if destinations
                 .iter()
                 .any(|d| matches!(d, MoveDestination::Carrier(_)))
             {
                 result.push("Click on a carrier to embark units".to_string());
-            };
+            }
             m.destinations.modifiers.iter().for_each(|m| {
                 result.extend(event_help(rc, m));
             });
@@ -539,7 +539,7 @@ impl State {
                 }
                 PersistentEventRequest::SelectAdvance(r) => ActiveDialog::AdvanceRequest(r.clone()),
                 PersistentEventRequest::SelectPositions(r) => {
-                    ActiveDialog::PositionRequest(MultiSelection::new(r.request.clone()))
+                    ActiveDialog::PositionRequest(MultiSelection::new(r.clone()))
                 }
                 PersistentEventRequest::SelectUnitType(r) => {
                     ActiveDialog::UnitTypeRequest(r.clone())
@@ -585,7 +585,7 @@ impl State {
                     }
                 }
                 PersistentEventRequest::SelectHandCards(r) => {
-                    ActiveDialog::HandCardsRequest(MultiSelection::new(r.request.clone()))
+                    ActiveDialog::HandCardsRequest(MultiSelection::new(r.clone()))
                 }
             };
         }

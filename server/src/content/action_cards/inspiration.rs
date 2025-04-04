@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{
     ActionCard, ActionCardBuilder, CivilCardOpportunity, CivilCardRequirement,
 };
-use crate::advance::gain_advance;
+use crate::advance::gain_advance_without_payment;
 use crate::city::MoodState;
 use crate::content::action_cards::spy::spy;
 use crate::content::advances;
@@ -43,7 +43,7 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Advance",
         "Pay 1 culture token: Gain 1 advance without changing the Game Event counter.",
         ActionType::free(),
-        |_game, player| {
+        |_game, player, _| {
             player.resources.culture_tokens >= 1 && !possible_advances(player).is_empty()
         },
     )
@@ -54,7 +54,7 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |game, player, _| Some(AdvanceRequest::new(possible_advances(game.player(player)))),
         |game, sel, _| {
             let advance = sel.choice.clone();
-            gain_advance(
+            gain_advance_without_payment(
                 game,
                 &advance,
                 sel.player_index,
@@ -85,7 +85,7 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Gain 1 advance for free (without changing the Game Event counter) \
         that a player owns who has a unit or city within range 2 of your units or cities.",
         ActionType::free(),
-        |game, player| !possible_inspiration_advances(game, player).is_empty(),
+        |game, player, _| !possible_inspiration_advances(game, player).is_empty(),
     )
     .tactics_card(tactics_card)
     .add_advance_request(
@@ -99,7 +99,7 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         },
         |game, sel, _| {
             let advance = sel.choice.clone();
-            gain_advance(
+            gain_advance_without_payment(
                 game,
                 &advance,
                 sel.player_index,
@@ -162,10 +162,13 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "If you won a land battle this turn: Increase the mood in a city by 1. \
         You may pay 1 mood token to increase the mood in a city by 1.",
         ActionType::free(),
-        |_game, player| !cities_where_mood_can_increase(player).is_empty(),
+        |_game, player, _| !cities_where_mood_can_increase(player).is_empty(),
     )
     .requirement(CivilCardRequirement::new(
-        vec![CivilCardOpportunity::WinLandBattle],
+        vec![
+            CivilCardOpportunity::WinLandBattle,
+            CivilCardOpportunity::CaptureCity,
+        ],
         false,
     ))
     .tactics_card(tactics_card);
@@ -244,7 +247,7 @@ fn ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Ideas",
         "Gain 1 idea per Academy you own.",
         ActionType::free(),
-        |_game, player| academies(player) > 0,
+        |_game, player, _| academies(player) > 0,
     )
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
@@ -274,7 +277,7 @@ fn great_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Great Ideas",
         "After capturing a city or winning a land battle: Gain 2 ideas.",
         ActionType::free(),
-        |_game, player| player.resources.ideas < player.resource_limit.ideas,
+        |_game, player, _| player.resources.ideas < player.resource_limit.ideas,
     )
     .requirement(CivilCardRequirement::new(
         vec![

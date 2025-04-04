@@ -12,23 +12,23 @@
         "request": {
           "SelectAdvance": {
             "choices": [
-              "Storage",
-              "Irrigation",
-              "Husbandry",
-              "Engineering",
-              "Sanitation",
-              "Roads",
-              "Navigation",
-              "War Ships",
-              "Cartography",
-              "Writing",
-              "Tactics",
-              "Rituals",
-              "Priesthood",
-              "Bartering",
               "Arts",
+              "Bartering",
+              "Cartography",
+              "Dogma",
+              "Engineering",
+              "Husbandry",
+              "Irrigation",
               "Math",
-              "Dogma"
+              "Navigation",
+              "Priesthood",
+              "Rituals",
+              "Roads",
+              "Sanitation",
+              "Storage",
+              "Tactics",
+              "War Ships",
+              "Writing"
             ]
           }
         },

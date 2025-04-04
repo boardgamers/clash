@@ -17,7 +17,7 @@ impl HandCardType {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, Debug, PartialOrd)]
 pub enum HandCard {
     ActionCard(u8),
     Wonder(String),

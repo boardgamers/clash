@@ -10,12 +10,11 @@ use crate::combat_roll::CombatStats;
 use crate::consts::SHIP_CAPACITY;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
-use crate::log::current_player_turn_log_mut;
 use crate::movement::{MoveUnits, MovementRestriction, move_units, stop_current_move};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::CombatRole;
-use crate::unit::UnitType;
+use crate::unit::{UnitType, Units, carried_units};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -214,6 +213,32 @@ pub fn initiate_combat(
 
 pub(crate) fn log_round(game: &mut Game, c: &Combat) {
     game.add_info_log_group(format!("Combat round {}", c.round));
+    game.add_info_log_item(&format!(
+        "Attackers: {}",
+        c.attackers
+            .iter()
+            .flat_map(|u| {
+                let p = game.player(c.attacker);
+                let u = p.get_unit(*u);
+                vec![u.unit_type]
+                    .into_iter()
+                    .chain(
+                        carried_units(u.id, p)
+                            .iter()
+                            .map(|u| p.get_unit(*u).unit_type),
+                    )
+                    .collect_vec()
+            })
+            .collect::<Units>()
+    ));
+    game.add_info_log_item(&format!(
+        "Defenders: {}",
+        game.player(c.defender)
+            .get_units(c.defender_position)
+            .iter()
+            .map(|u| u.unit_type)
+            .collect::<Units>()
+    ));
 }
 
 pub(crate) fn start_combat(game: &mut Game, combat: Combat) {
@@ -264,7 +289,7 @@ pub(crate) fn combat_loop(game: &mut Game, mut s: CombatRoundStart) {
             match combat_round_start(game, s) {
                 Some(value) => s = value,
                 None => return,
-            };
+            }
         }
 
         let c = s.combat;
@@ -339,16 +364,7 @@ pub(crate) fn conquer_city(
     if attacker_is_human {
         game.players[new_player_index].gain_resources(ResourcePile::gold(size as u32));
 
-        let mut m = current_player_turn_log_mut(game)
-            .items
-            .last_mut()
-            .expect("no action log")
-            .civil_card_match
-            .as_mut();
-        if m.is_none() {
-            // no battle for capturing city
-            m.replace(&mut CivilCardMatch::new(CivilCardOpportunity::CaptureCity));
-        }
+        CivilCardMatch::new(CivilCardOpportunity::CaptureCity, Some(old_player_index)).store(game);
     }
     let take_over = game.player(new_player_index).is_city_available();
 
@@ -530,6 +546,7 @@ pub mod tests {
             current_player_index: 0,
             action_log: vec![age],
             action_log_index: 0,
+            current_action_log_index: None,
             log: Vec::new(),
             undo_limit: 0,
             actions_left: 3,

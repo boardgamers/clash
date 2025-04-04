@@ -230,7 +230,7 @@ impl Display for PaymentOptions {
                 PaymentConversionType::MayNotOverpay(i) => {
                     write!(f, " (limit: {i})")?;
                 }
-            };
+            }
         }
         Ok(())
     }

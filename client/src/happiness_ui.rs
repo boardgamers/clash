@@ -103,7 +103,7 @@ pub fn add_increase_happiness(
             if *p == city.position {
                 if let Some(r) = increase_happiness_steps(rc, city, old_steps) {
                     return (*p, r);
-                };
+                }
             }
             (*p, old_steps)
         })

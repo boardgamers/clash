@@ -17,6 +17,7 @@ pub enum ConstructEffect {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum CollectEffect {
     ProductionFocus,
+    Overproduction,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
@@ -32,6 +33,7 @@ pub enum PermanentEffect {
     CulturalTakeover,
     DiplomaticRelations(DiplomaticRelations),
     Negotiations(Negotiations),
+    Assassination(usize),
 }
 
 impl PermanentEffect {
@@ -45,6 +47,7 @@ impl PermanentEffect {
             },
             PermanentEffect::Collect(c) => match c {
                 CollectEffect::ProductionFocus => EventOrigin::CivilCard(19), // also 20
+                CollectEffect::Overproduction => EventOrigin::Incident(29),   // also 30
             },
             PermanentEffect::LoseAction(_) => EventOrigin::Incident(38),
             PermanentEffect::PublicWonderCard(_) => EventOrigin::Incident(40),
@@ -52,9 +55,10 @@ impl PermanentEffect {
             PermanentEffect::TrojanHorse => EventOrigin::Incident(42),
             PermanentEffect::Anarchy(_) => EventOrigin::Incident(44),
             PermanentEffect::DiplomaticRelations(_) => EventOrigin::Incident(DIPLOMAT_ID),
-            PermanentEffect::Negotiations(_) => EventOrigin::CivilCard(23), // also 24
             // can also be 16, but that doesn't matter for the help text
             PermanentEffect::CulturalTakeover => EventOrigin::CivilCard(15),
+            PermanentEffect::Negotiations(_) => EventOrigin::CivilCard(23), // also 24
+            PermanentEffect::Assassination(_) => EventOrigin::CivilCard(27), // also 28
         }
     }
 }

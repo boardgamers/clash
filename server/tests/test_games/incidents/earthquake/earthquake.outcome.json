@@ -15,6 +15,18 @@
           "SelectStructures": {
             "choices": [
               {
+                "position": "B2",
+                "structure": "CityCenter"
+              },
+              {
+                "position": "B3",
+                "structure": "CityCenter"
+              },
+              {
+                "position": "C1",
+                "structure": "CityCenter"
+              },
+              {
                 "position": "C2",
                 "structure": "CityCenter"
               },
@@ -35,18 +47,6 @@
                 "structure": {
                   "Wonder": "Pyramids"
                 }
-              },
-              {
-                "position": "C1",
-                "structure": "CityCenter"
-              },
-              {
-                "position": "B2",
-                "structure": "CityCenter"
-              },
-              {
-                "position": "B3",
-                "structure": "CityCenter"
               }
             ],
             "needed": {

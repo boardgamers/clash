@@ -15,19 +15,19 @@
         "request": {
           "SelectAdvance": {
             "choices": [
-              "Storage",
-              "Irrigation",
-              "Husbandry",
-              "Engineering",
-              "Sanitation",
-              "Roads",
-              "Fishing",
-              "Writing",
-              "Tactics",
-              "Myths",
-              "Bartering",
               "Arts",
-              "Math"
+              "Bartering",
+              "Engineering",
+              "Fishing",
+              "Husbandry",
+              "Irrigation",
+              "Math",
+              "Myths",
+              "Roads",
+              "Sanitation",
+              "Storage",
+              "Tactics",
+              "Writing"
             ]
           }
         },
@@ -283,6 +283,8 @@
     ],
     [
       "Combat round 1",
+      "Attackers: 2 infantry and 1 elephant",
+      "Defenders: 4 settlers",
       "Barbarians rolled 6 (Infantry, +1 combat value), 6 (Infantry, +1 combat value), 6 (Infantry, no bonus) for combined combat value of 20 and gets 0 hits against defending units.",
       "Player1 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units.",
       "Player1 used the following combat modifiers: fortress added one extra die, fortress cancelled one hit",

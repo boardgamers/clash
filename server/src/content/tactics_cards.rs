@@ -356,7 +356,6 @@ pub(crate) fn scout(id: u8) -> TacticsCard {
 pub(crate) fn martyr(id: u8) -> TacticsCard {
     TacticsCard::builder(id, "Martyr", "todo")
         .fighter_any_requirement(&[FighterRequirement::Army, FighterRequirement::Ship])
-        .target(TacticsCardTarget::AllPlayers)
         .add_units_request(
             |event| &mut event.combat_round_start_tactics,
             0,
@@ -388,4 +387,47 @@ pub(crate) fn martyr(id: u8) -> TacticsCard {
             },
         )
         .build()
+}
+
+pub(crate) fn archers(id: u8) -> TacticsCard {
+    TacticsCard::builder(
+        id,
+        "Archers",
+        "Roll a die: On a 5 or 6, the opponent loses 1 unit immediately.",
+    )
+    .fighter_requirement(FighterRequirement::Army)
+    .add_units_request(
+        |event| &mut event.combat_round_start_tactics,
+        0,
+        move |game, p, s| {
+            if !s.is_active(p, id, TacticsCardTarget::Opponent) {
+                return None;
+            }
+
+            let roll = game.next_dice_roll().value;
+            if roll >= 5 {
+                game.add_info_log_item(&format!("Archers rolled a {roll} and scored a hit"));
+            } else {
+                game.add_info_log_item(&format!("Archers rolled a {roll} and did not score a hit"));
+                return None;
+            }
+
+            Some(UnitsRequest::new(
+                p,
+                s.combat.fighting_units(game, p),
+                1..=1,
+                "Select a unit to sacrifice for Archers",
+            ))
+        },
+        move |game, s, r| {
+            let unit = s.choice[0];
+            game.add_info_log_item(&format!(
+                "{} sacrifices {} for Archers",
+                game.player_name(s.player_index),
+                a_or_an(game.player(s.player_index).get_unit(unit).unit_type.name())
+            ));
+            kill_combat_units(game, &mut r.combat, s.player_index, &[unit]);
+        },
+    )
+    .build()
 }

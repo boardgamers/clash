@@ -221,10 +221,11 @@
                     }
                   },
                   "civil_card_match": {
-                    "opportunity": "WinLandBattle",
+                    "opportunity": "CaptureCity",
                     "played_cards": [
                       11
-                    ]
+                    ],
+                    "opponent": 1
                   }
                 },
                 {
@@ -261,7 +262,9 @@
       "Player1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1"
     ],
     [
-      "Combat round 1"
+      "Combat round 1",
+      "Attackers: 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader",
+      "Defenders: 2 infantry"
     ],
     [
       "Player1 did not play a Tactics Card",

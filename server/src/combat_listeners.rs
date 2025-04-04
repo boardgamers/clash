@@ -5,7 +5,6 @@ use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{PersistentEventType, PositionRequest, UnitsRequest};
 use crate::content::tactics_cards;
 use crate::game::Game;
-use crate::log::current_player_turn_log_mut;
 use crate::movement::move_units;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::position::Position;
@@ -512,7 +511,7 @@ fn add_tactics_listener(
                 card.name
             ));
         }
-    };
+    }
 }
 
 pub(crate) fn choose_fighter_casualties() -> Builtin {
@@ -683,12 +682,11 @@ pub(crate) fn combat_stats() -> Builtin {
                     if let Some(winner) = r.winner() {
                         let p = c.player(winner);
                         if p == game.current_player_index && !c.is_sea_battle(game) {
-                            current_player_turn_log_mut(game)
-                                .items
-                                .last_mut()
-                                .expect("no action log")
-                                .civil_card_match =
-                                Some(CivilCardMatch::new(CivilCardOpportunity::WinLandBattle));
+                            CivilCardMatch::new(
+                                CivilCardOpportunity::WinLandBattle,
+                                Some(c.opponent(p)),
+                            )
+                            .store(game);
                         }
                     }
                 }

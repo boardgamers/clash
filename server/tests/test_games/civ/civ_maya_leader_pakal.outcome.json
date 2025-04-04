@@ -350,7 +350,8 @@
                     }
                   },
                   "civil_card_match": {
-                    "opportunity": "WinLandBattle"
+                    "opportunity": "CaptureCity",
+                    "opponent": 1
                   }
                 }
               ]
@@ -367,6 +368,8 @@
     ],
     [
       "Combat round 1",
+      "Attackers: a leader",
+      "Defenders: no units",
       "Player1 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 0 hits against defending units.",
       "Player1 used the following combat modifiers: Kʼinich Janaab Pakal I ignores the first hit in a battle with an Obelisk",
       "Player2 rolled no dice for combined combat value of 0 and gets 0 hits against attacking units.",

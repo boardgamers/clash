@@ -201,7 +201,8 @@
                     }
                   },
                   "civil_card_match": {
-                    "opportunity": "WinLandBattle"
+                    "opportunity": "WinLandBattle",
+                    "opponent": 1
                   }
                 },
                 {
@@ -399,7 +400,8 @@
                     }
                   ],
                   "civil_card_match": {
-                    "opportunity": "WinLandBattle"
+                    "opportunity": "CaptureCity",
+                    "opponent": 1
                   }
                 }
               ]
@@ -416,6 +418,8 @@
     ],
     [
       "Combat round 1",
+      "Attackers: 1 infantry, 1 cavalry, 1 elephant and a leader",
+      "Defenders: 2 infantry",
       "Player1 rolled 6 (Infantry, +1 combat value), 6 (Infantry, no bonus), 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 25 and gets 2 hits against defending units.",
       "Player2 rolled 6 (Infantry, +1 combat value), 6 (Infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against attacking units.",
       "Player1 has to remove 2 of their attacking units"

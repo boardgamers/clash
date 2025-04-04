@@ -144,13 +144,13 @@ pub fn select_units_dialog(rc: &RenderContext, s: &UnitsSelection) -> StateUpdat
 #[derive(Clone)]
 pub struct MultiSelection<T>
 where
-    T: Clone,
+    T: Clone + PartialEq + Ord,
 {
     pub request: MultiRequest<T>,
     pub selected: Vec<T>,
 }
 
-impl<T: Clone + PartialEq> MultiSelection<T> {
+impl<T: Clone + PartialEq + Ord> MultiSelection<T> {
     pub fn new(request: MultiRequest<T>) -> Self {
         MultiSelection {
             request,
@@ -172,19 +172,19 @@ impl<T: Clone + PartialEq> MultiSelection<T> {
             let mut new = self.clone();
             new.selected.push(value);
             return new;
-        };
+        }
         self
     }
 }
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub enum SelectedStructureStatus {
     Valid,
     Warn,
     Invalid,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub struct SelectedStructureInfo {
     pub position: Position,
     pub structure: Structure,
@@ -272,7 +272,7 @@ pub fn select_structures_dialog(
     }
 }
 
-pub(crate) fn multi_select_tooltip<T: Clone>(
+pub(crate) fn multi_select_tooltip<T: Clone + PartialEq + Ord>(
     s: &MultiSelection<T>,
     valid: bool,
     name: &str,

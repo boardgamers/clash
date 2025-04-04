@@ -1,3 +1,8 @@
+[tasks.test]
+description = "Run server tests"
+run = 'cargo test {{arg(name="test", default="")}}'
+dir = "server"
+
 [tasks.update-tests]
 description = "Run server tests and update json files"
 run = 'cargo test {{arg(name="test", default="")}}'

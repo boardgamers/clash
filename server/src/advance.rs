@@ -168,7 +168,7 @@ pub fn do_advance(game: &mut Game, advance: &Advance, player_index: usize) {
     player.advances.push(get_advance(&advance.name));
 }
 
-pub(crate) fn gain_advance(
+pub(crate) fn gain_advance_without_payment(
     game: &mut Game,
     name: &str,
     player_index: usize,

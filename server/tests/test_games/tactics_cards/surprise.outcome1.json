@@ -232,7 +232,9 @@
       "Player1 marched 1 infantry from C2 to C1"
     ],
     [
-      "Combat round 1"
+      "Combat round 1",
+      "Attackers: 1 infantry",
+      "Defenders: 2 infantry"
     ],
     [
       "Player2 played a Tactics Card",

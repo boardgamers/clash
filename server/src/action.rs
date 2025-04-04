@@ -113,6 +113,7 @@ fn execute_without_undo(
         return Ok(game);
     }
 
+    game.current_action_log_index = Some(game.action_log_index);
     add_log_item_from_action(&mut game, &action);
     add_action_log_item(&mut game, action.clone());
 
@@ -125,6 +126,7 @@ fn execute_without_undo(
         _ => execute_regular_action(&mut game, action, player_index),
     }?;
     check_for_waste(&mut game);
+    game.current_action_log_index = None;
     Ok(game)
 }
 
@@ -309,7 +311,7 @@ pub(crate) fn execute_movement_action(
             game.state = GameState::Playing;
             return Ok(());
         }
-    };
+    }
 
     let state = get_move_state(game);
     let all_moves_used =

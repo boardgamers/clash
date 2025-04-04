@@ -73,13 +73,13 @@ fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
             return StateUpdate::CloseDialog;
         }
         return StateUpdate::OpenDialog(ActiveDialog::Log);
-    };
+    }
     if top_right_texture(rc, &rc.assets().advances, icon_pos(-2, 0), "Show advances") {
         if state.active_dialog.is_advance() {
             return StateUpdate::CloseDialog;
         }
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
-    };
+    }
     if top_right_texture(
         rc,
         &rc.assets().show_permanent_effects,
@@ -91,7 +91,7 @@ fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
         },
     ) {
         return StateUpdate::ToggleShowPermanentEffects;
-    };
+    }
 
     let can_control = rc.can_control_shown_player();
     if can_control {

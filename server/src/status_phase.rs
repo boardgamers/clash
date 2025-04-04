@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
-use crate::advance::{do_advance, gain_advance, remove_advance};
+use crate::advance::{do_advance, gain_advance_without_payment, remove_advance};
 use crate::consts::AGES;
 use crate::content::builtin::{Builtin, status_phase_handler};
 use crate::content::persistent_events::{
@@ -126,7 +126,13 @@ pub(crate) fn free_advance() -> Builtin {
                     "{} advanced {} for free",
                     c.player_name, c.choice
                 ));
-                gain_advance(game, &c.choice, c.player_index, ResourcePile::empty(), true);
+                gain_advance_without_payment(
+                    game,
+                    &c.choice,
+                    c.player_index,
+                    ResourcePile::empty(),
+                    true,
+                );
             },
         )
         .build()

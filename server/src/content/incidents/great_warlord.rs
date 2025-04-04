@@ -47,7 +47,7 @@ pub(crate) fn use_great_warlord() -> Builtin {
                 if let Movement(m) = &mut game.state {
                     if mem::replace(&mut m.great_warlord_used, false) {
                         c.modifiers.push(CombatModifier::GreatWarlord);
-                    };
+                    }
                 }
             },
         )

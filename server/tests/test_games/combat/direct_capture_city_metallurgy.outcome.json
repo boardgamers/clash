@@ -222,7 +222,8 @@
                     }
                   },
                   "civil_card_match": {
-                    "opportunity": "WinLandBattle"
+                    "opportunity": "CaptureCity",
+                    "opponent": 1
                   }
                 }
               ]
@@ -239,6 +240,8 @@
     ],
     [
       "Combat round 1",
+      "Attackers: 1 infantry, 1 cavalry, 1 elephant and a leader",
+      "Defenders: a leader",
       "Player1 rolled 2 (Elephant, -1 hits, no combat value), 2 (Elephant, no bonus), 2 (Elephant, no bonus), 1 (Leader, re-roll), 1 (Leader, re-roll), 6 (Infantry, +1 combat value) for combined combat value of 13 and gets 1 hits against defending units.",
       "Player1 used the following combat modifiers: steel weapons added 2 combat value",
       "Player2 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 0 hits against attacking units.",

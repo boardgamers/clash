@@ -198,8 +198,8 @@ fn dice_roll_with_leader_reroll(
 }
 
 fn add_roll_log_effect(roll_log: &mut [String], effect: &str) {
-    let l = roll_log.len();
-    roll_log[l - 1] += &format!("{effect})");
+    use std::fmt::Write as _;
+    let _ = write!(roll_log[roll_log.len() - 1], "{effect})");
 }
 
 fn roll_die(game: &mut Game, roll_log: &mut Vec<String>) -> CombatDieRoll {

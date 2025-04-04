@@ -6,7 +6,7 @@ use crate::combat_listeners::{
 };
 use crate::content::action_cards::cultural_takeover::use_cultural_takeover;
 use crate::content::action_cards::development::collect_only;
-use crate::content::action_cards::negotiation::use_negotiations;
+use crate::content::action_cards::negotiation::{use_assassination, use_negotiations};
 use crate::content::incidents::famine::pestilence_permanent_effect;
 use crate::content::incidents::great_builders::construct_only;
 use crate::content::incidents::great_diplomat::use_diplomatic_relations;
@@ -23,7 +23,7 @@ use crate::status_phase::{
     StatusPhaseState, complete_objectives, determine_first_player, draw_cards, free_advance,
     get_status_phase, may_change_government, raze_city,
 };
-use crate::unit::choose_carried_units_casualties;
+use crate::unit::choose_carried_units_to_remove;
 use crate::wonder::{build_wonder, on_draw_wonder_card};
 
 pub struct Builtin {
@@ -81,10 +81,10 @@ pub fn get_all() -> Vec<Builtin> {
         explore_resolution(),
         on_draw_wonder_card(),
         build_wonder(),
+        choose_carried_units_to_remove(),
         // combat related
         place_settler(),
         choose_fighter_casualties(),
-        choose_carried_units_casualties(),
         offer_retreat(),
         combat_stats(),
         // incident related
@@ -102,6 +102,7 @@ pub fn get_all() -> Vec<Builtin> {
         collect_only(),
         use_cultural_takeover(),
         use_negotiations(),
+        use_assassination(),
     ]
 }
 

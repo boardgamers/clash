@@ -22,7 +22,6 @@
           "SelectPositions": {
             "choices": [
               "B1",
-              "B1",
               "B2"
             ],
             "needed": {
