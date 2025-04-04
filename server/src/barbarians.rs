@@ -2,6 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::city::City;
 use crate::combat::move_with_possible_combat;
 use crate::consts::STACK_LIMIT;
+use crate::content::advances::theocracy::cities_that_can_add_units;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{PositionRequest, ResourceRewardRequest, UnitTypeRequest};
 use crate::game::Game;
@@ -18,7 +19,6 @@ use crate::unit::{UnitType, Units};
 use crate::utils;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use crate::content::advances::theocracy::cities_that_can_add_units;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct BarbariansMoveRequest {

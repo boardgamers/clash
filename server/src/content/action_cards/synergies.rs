@@ -300,7 +300,8 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             let p = s.choice;
             game.add_info_log_item(&format!(
                 "{} selected {} as player for Technology Trade.",
-                s.player_name, game.player_name(p)
+                s.player_name,
+                game.player_name(p)
             ));
             a.selected_player = Some(p);
         },
