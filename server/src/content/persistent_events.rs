@@ -221,20 +221,7 @@ pub type StructuresRequest = MultiRequest<SelectedStructure>;
 
 ///
 /// If a player does not own a hand card, then it means that it's a swap card from another player
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct HandCardsRequest {
-    #[serde(flatten)]
-    pub request: MultiRequest<HandCard>,
-}
-
-impl HandCardsRequest {
-    #[must_use]
-    pub fn new(cards: Vec<HandCard>, needed: RangeInclusive<u8>, description: &str) -> Self {
-        HandCardsRequest {
-            request: MultiRequest::new(cards, needed, description),
-        }
-    }
-}
+pub type HandCardsRequest = MultiRequest<HandCard>;
 
 #[must_use]
 pub fn is_selected_structures_valid(game: &Game, selected: &[SelectedStructure]) -> bool {
@@ -251,20 +238,7 @@ pub fn is_selected_structures_valid(game: &Game, selected: &[SelectedStructure])
         })
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct PositionRequest {
-    #[serde(flatten)]
-    pub request: MultiRequest<Position>,
-}
-
-impl PositionRequest {
-    #[must_use]
-    pub fn new(choices: Vec<Position>, needed: RangeInclusive<u8>, description: &str) -> Self {
-        PositionRequest {
-            request: MultiRequest::new(choices, needed, description),
-        }
-    }
-}
+pub type PositionRequest = MultiRequest<Position>;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct UnitTypeRequest {
@@ -336,7 +310,7 @@ impl<T: PartialEq + Ord> MultiRequest<T> {
     pub fn new(mut choices: Vec<T>, needed: RangeInclusive<u8>, description: &str) -> Self {
         choices.sort();
         choices.dedup();
-        
+
         Self {
             choices,
             needed,

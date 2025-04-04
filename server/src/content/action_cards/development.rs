@@ -150,7 +150,6 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         ActionType::regular_with_cost(ResourcePile::culture_tokens(1)),
         |game, player, _| {
             !action_explore_request(game, player.index)
-                .request
                 .choices
                 .is_empty()
         },

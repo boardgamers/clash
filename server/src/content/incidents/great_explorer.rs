@@ -30,7 +30,6 @@ pub(crate) fn great_explorer() -> ActionCard {
         groups,
         |game, player| {
             !action_explore_request(game, player.index)
-                .request
                 .choices
                 .is_empty()
         },

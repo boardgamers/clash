@@ -504,16 +504,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.add_multi_choice_reward_request_listener::<E, Position, PositionRequest, V>(
             event,
             priority,
-            |r| &r.request,
+            |r| r,
             PersistentEventRequest::SelectPositions,
             |request, action| {
                 if let PersistentEventRequest::SelectPositions(request) = &request {
                     if let EventResponse::SelectPositions(reward) = action {
-                        return (
-                            request.request.choices.clone(),
-                            reward,
-                            request.request.needed.clone(),
-                        );
+                        return (request.choices.clone(), reward, request.needed.clone());
                     }
                 }
                 panic!("Position request expected");
@@ -595,16 +591,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.add_multi_choice_reward_request_listener::<E, HandCard, HandCardsRequest, V>(
             event,
             priority,
-            |r| &r.request,
+            |r| r,
             PersistentEventRequest::SelectHandCards,
             |request, action| {
                 if let PersistentEventRequest::SelectHandCards(request) = &request {
                     if let EventResponse::SelectHandCards(choices) = action {
-                        return (
-                            request.request.choices.clone(),
-                            choices,
-                            request.request.needed.clone(),
-                        );
+                        return (request.choices.clone(), choices, request.needed.clone());
                     }
                 }
                 panic!("Hand Cards request expected");
