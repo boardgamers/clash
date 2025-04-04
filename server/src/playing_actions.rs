@@ -96,7 +96,7 @@ impl PlayingActionType {
                 let civil_card = get_civil_card(*id);
                 let mut satisfying_action: Option<usize> = None;
                 if let Some(requirement) = civil_card.requirement {
-                    if let Some(action_log_index) = requirement.satisfying_action(game, *id, false) {
+                    if let Some(action_log_index) = requirement.satisfying_action(game, *id) {
                         satisfying_action = Some(action_log_index);
                     } else {
                         return Err("Requirement not met".to_string());

@@ -124,7 +124,7 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
     discard_action_card(game, player_index, id);
     let mut satisfying_action: Option<usize> = None;
     if let Some(requirement) = get_civil_card(id).requirement {
-        if let Some(action_log_index) = requirement.satisfying_action(game, id, true) {
+        if let Some(action_log_index) = requirement.satisfying_action(game, id) {
             satisfying_action = Some(action_log_index);
             current_player_turn_log_mut(game).items[action_log_index]
                 .civil_card_match
@@ -268,25 +268,30 @@ impl CivilCardRequirement {
     }
 
     #[must_use]
-    pub fn satisfying_action(&self, game: &Game, action_card_id: u8, execute: bool) -> Option<usize> {
-        let l = &current_player_turn_log(game).items;
-        let slice: &[ActionLogItem] = if self.just_before {
-            let delta = if execute { 2 } else { 1 };
-            if l.len() >= delta {
-                from_ref(&l[l.len() - delta])
-            } else {
+    pub fn satisfying_action(&self, game: &Game, action_card_id: u8) -> Option<usize> {
+        let mut l: &[ActionLogItem] = &current_player_turn_log(game).items;
+        if let Some(c) = game.current_action_log_index {
+            l = &l[..c];
+        }
+        if self.just_before {
+            l = if l.is_empty() {
                 &[]
-            }
+            } else {
+                from_ref(&l[l.len() - 1])
+            };
+        };
+        let sister_card = if action_card_id % 2 == 0 {
+            action_card_id - 1
         } else {
-            l
+            action_card_id + 1
         };
         self.opportunities.iter().find_map(|o| {
-            slice
+            l
                 .iter()
                 .position(|a| {
                     if let Some(civil_card_match) = &a.civil_card_match {
                         if civil_card_match.opportunity == *o
-                            && !civil_card_match.played_cards.contains(&action_card_id)
+                            && !civil_card_match.played_cards.contains(&sister_card)
                         {
                             return true;
                         }

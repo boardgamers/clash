@@ -201,6 +201,32 @@ impl TestAction {
     }
 }
 
+struct TestContext {
+    name: String,
+    index: usize,
+    phase: String,
+}
+
+impl TestContext {
+    fn new(name: &str, index: usize, phase: &str) -> Self {
+        Self {
+            name: name.to_string(),
+            index,
+            phase: phase.to_string(),
+        }
+    }
+}
+
+impl Display for TestContext {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "name: {}, index: {}, phase: {}",
+            self.name, self.index, self.phase
+        )
+    }
+}
+
 pub(crate) fn test_actions(test: &JsonTest, name: &str, actions: Vec<TestAction>) {
     let outcome: fn(name: &GamePath, i: usize) -> GamePath = |name, i| {
         let local = if i == 0 {
@@ -220,10 +246,11 @@ pub(crate) fn test_actions(test: &JsonTest, name: &str, actions: Vec<TestAction>
             outcome(&path, i - 1)
         };
         let compare = mem::replace(&mut last_json_compare, action.compare_json);
+        let mut context = TestContext::new(name, i, "EXECUTE"); 
         game = catch_unwind(AssertUnwindSafe(|| {
-            test_action_internal(game, name, &from, &outcome(&path, i), action, compare)
+            test_action_internal(game, name, &from, &outcome(&path, i), action, compare, &mut context)
         }))
-        .unwrap_or_else(|e| panic!("test action {i} should not panic: {e:?}"));
+        .unwrap_or_else(|e| panic!("{context}: {e:?}"));
     }
 }
 
@@ -234,6 +261,7 @@ fn test_action_internal(
     outcome: &GamePath,
     test: TestAction,
     last_json_compare: bool,
+    context: &mut TestContext,
 ) -> Game {
     let action = test.action;
     let a = serde_json::to_string(&action).expect("action should be serializable");
@@ -283,6 +311,7 @@ fn test_action_internal(
         } else {
             "".to_string()
         },
+        context,
     );
     game
 }
@@ -337,7 +366,9 @@ fn undo_redo(
     original_path: &GamePath,
     outcome_path: &GamePath,
     expected_game: String,
+    context: &mut TestContext,
 ) {
+    context.phase = "UNDO".to_string();
     let game = game_api::execute(game, Action::Undo, player_index);
     if compare_json {
         let mut trimmed_game = game.clone();
@@ -352,6 +383,7 @@ fn undo_redo(
             ),
         );
     }
+    context.phase = "REDO".to_string();
     let game = game_api::execute(game, Action::Redo, player_index);
     if compare_json {
         assert_eq_game_json(

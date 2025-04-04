@@ -328,10 +328,5 @@ fn test_teach_us() {
         )
         .without_json_comparison(),
         TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(35)))
-            .without_json_comparison(),
-        TestAction::undoable(
-            0,
-            Action::Response(EventResponse::SelectAdvance("Storage".to_string())),
-        ),
     ]);
 }

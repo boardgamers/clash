@@ -547,6 +547,7 @@ pub mod tests {
             current_player_index: 0,
             action_log: vec![age],
             action_log_index: 0,
+            current_action_log_index: None,
             log: Vec::new(),
             undo_limit: 0,
             actions_left: 3,
