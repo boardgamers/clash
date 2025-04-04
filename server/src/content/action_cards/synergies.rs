@@ -36,6 +36,7 @@ pub(crate) fn synergies_action_cards() -> Vec<ActionCard> {
         militia(38, high_morale),
         tech_trade(39, surprise),
         tech_trade(40, high_ground),
+        new_ideas(41, high_morale),
     ]
 }
 
@@ -340,4 +341,50 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         },
     )
     .build()
+}
+
+fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
+    let b = ActionCard::builder(
+        id,
+        "New Ideas",
+        "Gain 1 advance for the regular price (without changing the Game Event counter), \
+        then gain 2 ideas.",
+        ActionType::regular(),
+        |_game, player, _a| !advances_that_can_be_gained(player).is_empty(),
+    )
+    .tactics_card(tactics_card)
+    .add_advance_request(
+        |e| &mut e.play_action_card,
+        2,
+        |game, player_index, _| {
+            let player = game.player(player_index);
+            Some(AdvanceRequest::new(advances_that_can_be_gained(player)))
+        },
+        |game, sel, _| {
+            let advance = &sel.choice;
+            game.add_info_log_item(&format!(
+                "{} selected {advance} as advance for New Ideas.",
+                sel.player_name,
+            ));
+        },
+    );
+    pay_for_advance(b, 1)
+        .add_simple_persistent_event_listener(
+            |e| &mut e.play_action_card,
+            0,
+            |game, player_index, player_name, _| {
+                game.add_info_log_item(&format!("{player_name} used gain 2 ideas from New Ideas."));
+                game.player_mut(player_index)
+                    .gain_resources(ResourcePile::ideas(2));
+            },
+        )
+        .build()
+}
+
+fn advances_that_can_be_gained(player: &Player) -> Vec<String> {
+    advances::get_all()
+        .iter()
+        .filter(|a| !player.has_advance(&a.name) && player.can_advance(a))
+        .map(|a| a.name.clone())
+        .collect()
 }
