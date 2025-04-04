@@ -22,7 +22,7 @@ pub(crate) fn cultural_takeover(id: u8, tactics_card: TacticsCardFactory) -> Act
         Replace one of the Barbarian units with a Settler or Infantry of your color. \
         Remove the other Barbarian units.",
         ActionType::free(),
-        |_game, _p| true,
+        |_game, _p, _| true,
     )
     .add_unit_type_request(
         |event| &mut event.play_action_card,
@@ -121,7 +121,7 @@ pub(crate) fn use_cultural_takeover() -> Builtin {
                 )
                 .is_some_and(|_| outcome.success)
                 {
-                    let mut info = ActionCardInfo::new(15);
+                    let mut info = ActionCardInfo::new(15, None);
                     info.selected_position = Some(outcome.position);
                     on_play_action_card(game, outcome.player, info);
                 }

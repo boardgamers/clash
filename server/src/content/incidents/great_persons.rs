@@ -147,7 +147,7 @@ where
         name,
         description,
         action_type,
-        can_play,
+        move|game, player, _|can_play(game, player),
     )
     .add_advance_request(
         |e| &mut e.play_action_card,

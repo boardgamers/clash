@@ -38,7 +38,7 @@ fn city_development(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "City Development",
         "Construct a building without paying resources.",
         ActionType::regular_with_cost(ResourcePile::culture_tokens(1)),
-        |_game, _player| true,
+        |_game, _player, _| true,
     )
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
@@ -64,7 +64,7 @@ fn production_focus(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "For the next collect action, you may collect multiple times from the same tile. \
         The total amount of resources does not change.",
         ActionType::regular(),
-        |_game, _player| true,
+        |_game, _player,_| true,
     )
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
@@ -148,7 +148,7 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Explorer",
         "Construct a building without paying resources.",
         ActionType::regular_with_cost(ResourcePile::culture_tokens(1)),
-        |game, player| {
+        |game, player,_| {
             !action_explore_request(game, player.index)
                 .request
                 .choices

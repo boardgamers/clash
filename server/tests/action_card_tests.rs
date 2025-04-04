@@ -318,3 +318,20 @@ fn test_synergies() {
         ),
     ]);
 }
+
+#[test]
+fn test_teach_us() {
+    JSON.test("teach_us", vec![
+        TestAction::not_undoable(
+            0,
+            move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
+        )
+        .without_json_comparison(),
+        TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(35)))
+            .without_json_comparison(),
+        TestAction::undoable(
+            0,
+            Action::Response(EventResponse::SelectAdvance("Storage".to_string())),
+        ),
+    ]);
+}

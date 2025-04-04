@@ -1,15 +1,19 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
-use crate::action_card::{ActionCard, ActionCardBuilder};
-use crate::advance::{gain_advance_without_payment};
+use crate::action_card::{
+    ActionCard, ActionCardBuilder, ActionCardInfo, CivilCardMatch, CivilCardOpportunity,
+    CivilCardRequirement,
+};
+use crate::advance::gain_advance_without_payment;
 use crate::content::advances;
 use crate::content::advances::get_advance;
 use crate::content::persistent_events::{AdvanceRequest, EventResponse, PaymentRequest};
-use crate::content::tactics_cards::{TacticsCardFactory, archers, defensive_formation};
+use crate::content::tactics_cards::{archers, defensive_formation, TacticsCardFactory};
 use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::player::Player;
 use crate::playing_actions::ActionType;
+use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 
 pub(crate) fn synergies_action_cards() -> Vec<ActionCard> {
@@ -17,6 +21,7 @@ pub(crate) fn synergies_action_cards() -> Vec<ActionCard> {
         //todo add "New Plans" when objective cards are implemented
         synergies(33, defensive_formation),
         synergies(34, archers),
+        teach_us(35, defensive_formation),
     ]
 }
 
@@ -27,7 +32,7 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Gain 2 advances from the same category without changing the Game Event counter. \
         Pay the price as usual.",
         ActionType::regular(),
-        move |_game, p| !categories_with_2_affordable_advances(p).is_empty(),
+        move |_game, p, _| !categories_with_2_affordable_advances(p).is_empty(),
     )
     .tactics_card(tactics_card)
     .add_advance_request(
@@ -90,16 +95,11 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
         },
         |game, s, _| {
             let advance = last_advance(game);
-            game.add_info_log_item(
-                &format!("{} paid {} for advance {advance}", s.player_name, s.choice[0])
-            );
-            gain_advance_without_payment(
-                game,
-                &advance,
-                s.player_index,
-                s.choice[0].clone(),
-                false,
-            )
+            game.add_info_log_item(&format!(
+                "{} paid {} for advance {advance}",
+                s.player_name, s.choice[0]
+            ));
+            gain_advance_without_payment(game, &advance, s.player_index, s.choice[0].clone(), false)
         },
     )
 }
@@ -137,5 +137,68 @@ fn categories_with_2_affordable_advances(p: &Player) -> Vec<String> {
                 .map(|pair| pair[0].name.clone())
                 .collect_vec()
         })
+        .collect()
+}
+
+fn teach_us(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
+    ActionCard::builder(
+        id,
+        "Teach Us",
+        "If you just captured a city: Gain 1 advance from the loser for free \
+         without changing the Game Event counter.",
+        ActionType::free(),
+        |game, player, a| !advances_to_copy_for_loser(game, player, a).is_empty(),
+    )
+    .requirement(CivilCardRequirement::new(
+        vec![CivilCardOpportunity::CaptureCity],
+        true,
+    ))
+    .tactics_card(tactics_card)
+    .add_advance_request(
+        |e| &mut e.play_action_card,
+        0,
+        |game, player, a| {
+            Some(AdvanceRequest::new(advances_to_copy_for_loser(
+                game,
+                game.player(player),
+                a,
+            )))
+        },
+        |game, sel, _| {
+            let advance = &sel.choice;
+            game.add_info_log_item(&format!(
+                "{} selected {advance} as advance for Teach Us.",
+                sel.player_name,
+            ));
+            gain_advance_without_payment(
+                game,
+                &advance,
+                sel.player_index,
+                ResourcePile::empty(),
+                false,
+            );
+        },
+    )
+    .build()
+}
+
+fn advances_to_copy_for_loser(game: &Game, winner: &Player, a: &ActionCardInfo) -> Vec<String> {
+    let Some(action_log_index) = a.satisfying_action else {
+        panic!("Satisfying action not found");
+    };
+    let Some(CivilCardMatch {
+        opportunity: _,
+        played_cards: _,
+        opponent: Some(loser),
+    }) = &current_player_turn_log(game).items[action_log_index].civil_card_match
+    else {
+        panic!("Capture city opportunity not found");
+    };
+
+    game.player(*loser)
+        .advances
+        .iter()
+        .filter(|a| !winner.has_advance(&a.name) && winner.can_advance_free(a))
+        .map(|a| a.name.clone())
         .collect()
 }

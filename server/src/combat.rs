@@ -221,7 +221,8 @@ pub(crate) fn log_round(game: &mut Game, c: &Combat) {
             .flat_map(|u| {
                 let p = game.player(c.attacker);
                 let u = p.get_unit(*u);
-                vec![u.unit_type].into_iter()
+                vec![u.unit_type]
+                    .into_iter()
                     .chain(
                         carried_units(u.id, p)
                             .iter()
@@ -364,16 +365,7 @@ pub(crate) fn conquer_city(
     if attacker_is_human {
         game.players[new_player_index].gain_resources(ResourcePile::gold(size as u32));
 
-        let mut m = current_player_turn_log_mut(game)
-            .items
-            .last_mut()
-            .expect("no action log")
-            .civil_card_match
-            .as_mut();
-        if m.is_none() {
-            // no battle for capturing city
-            m.replace(&mut CivilCardMatch::new(CivilCardOpportunity::CaptureCity));
-        }
+        CivilCardMatch::new(CivilCardOpportunity::CaptureCity, Some(old_player_index)).store(game);
     }
     let take_over = game.player(new_player_index).is_city_available();
 
