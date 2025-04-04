@@ -221,10 +221,11 @@
                     }
                   },
                   "civil_card_match": {
-                    "opportunity": "WinLandBattle",
+                    "opportunity": "CaptureCity",
                     "played_cards": [
                       11
-                    ]
+                    ],
+                    "opponent": 1
                   }
                 },
                 {

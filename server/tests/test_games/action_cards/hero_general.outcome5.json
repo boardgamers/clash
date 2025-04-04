@@ -219,10 +219,11 @@
                     }
                   },
                   "civil_card_match": {
-                    "opportunity": "WinLandBattle",
+                    "opportunity": "CaptureCity",
                     "played_cards": [
                       5
-                    ]
+                    ],
+                    "opponent": 1
                   }
                 },
                 {
@@ -380,7 +381,8 @@
                           "event_type": {
                             "ActionCard": {
                               "answer": true,
-                              "id": 5
+                              "id": 5,
+                              "satisfying_action": 1
                             }
                           },
                           "handler": {

@@ -15,23 +15,23 @@
         "request": {
           "SelectAdvance": {
             "choices": [
-              "Irrigation",
-              "Husbandry",
-              "Engineering",
-              "Sanitation",
-              "Roads",
-              "Navigation",
-              "War Ships",
-              "Cartography",
-              "Public Education",
-              "Philosophy",
-              "Tactics",
-              "Myths",
-              "Bartering",
               "Arts",
+              "Bartering",
+              "Cartography",
+              "Civil Liberties",
+              "Engineering",
+              "Husbandry",
+              "Irrigation",
               "Math",
+              "Myths",
+              "Navigation",
+              "Philosophy",
+              "Public Education",
+              "Roads",
+              "Sanitation",
               "Separation of Power",
-              "Civil Liberties"
+              "Tactics",
+              "War Ships"
             ]
           }
         },

@@ -1,4 +1,4 @@
- use crate::common::{TestAction, move_action};
+use crate::common::{TestAction, move_action};
 use common::JsonTest;
 use server::action::Action;
 use server::card::HandCard;

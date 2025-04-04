@@ -311,7 +311,8 @@
                     }
                   },
                   "civil_card_match": {
-                    "opportunity": "WinLandBattle"
+                    "opportunity": "CaptureCity",
+                    "opponent": 1
                   }
                 },
                 {

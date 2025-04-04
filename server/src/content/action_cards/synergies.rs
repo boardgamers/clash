@@ -22,6 +22,7 @@ pub(crate) fn synergies_action_cards() -> Vec<ActionCard> {
         synergies(33, defensive_formation),
         synergies(34, archers),
         teach_us(35, defensive_formation),
+        teach_us(36, archers),
     ]
 }
 

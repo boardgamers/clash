@@ -285,7 +285,8 @@
                     }
                   },
                   "civil_card_match": {
-                    "opportunity": "WinLandBattle"
+                    "opportunity": "WinLandBattle",
+                    "opponent": 1
                   }
                 }
               ]
