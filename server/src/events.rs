@@ -10,6 +10,7 @@ pub enum EventOrigin {
     Incident(u8),
     CivilCard(u8),
     TacticsCard(u8),
+    ObjectiveCard(String),
 }
 
 impl EventOrigin {

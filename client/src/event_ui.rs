@@ -18,6 +18,7 @@ pub fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
         EventOrigin::CivilCard(id) => vec![get_civil_card(*id).description],
         EventOrigin::TacticsCard(id) => vec![get_tactics_card(*id).description],
         EventOrigin::Incident(id) => get_incident(*id).description(),
+        EventOrigin::ObjectiveCard(name) => get_objective(name).description,
         EventOrigin::Leader(l) => vec![{
             let l = rc.shown_player.get_leader(l).unwrap();
             // todo: leader should have a 2 event sources - no each event source should have a description

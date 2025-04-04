@@ -52,3 +52,4 @@ mod undo;
 pub mod unit;
 pub mod utils;
 pub mod wonder;
+pub mod objective_card;

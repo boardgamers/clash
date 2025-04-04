@@ -138,6 +138,7 @@ pub struct IncidentBuilder {
 }
 
 impl IncidentBuilder {
+    #[must_use]
     fn new(id: u8, name: &str, description: &str, base_effect: IncidentBaseEffect) -> Self {
         Self {
             id,
