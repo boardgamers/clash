@@ -4,6 +4,7 @@ use server::content::action_cards::get_civil_card;
 use server::content::advances::get_advance;
 use server::content::builtin::get_builtin;
 use server::content::incidents::get_incident;
+use server::content::objectives::get_objective;
 use server::content::tactics_cards::get_tactics_card;
 use server::content::wonders::get_wonder;
 use server::events::EventOrigin;
@@ -18,7 +19,7 @@ pub fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
         EventOrigin::CivilCard(id) => vec![get_civil_card(*id).description],
         EventOrigin::TacticsCard(id) => vec![get_tactics_card(*id).description],
         EventOrigin::Incident(id) => get_incident(*id).description(),
-        EventOrigin::ObjectiveCard(name) => get_objective(name).description,
+        EventOrigin::Objective(name) => vec![get_objective(name).description],
         EventOrigin::Leader(l) => vec![{
             let l = rc.shown_player.get_leader(l).unwrap();
             // todo: leader should have a 2 event sources - no each event source should have a description

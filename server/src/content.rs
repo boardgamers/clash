@@ -8,3 +8,5 @@ pub mod incidents;
 pub mod persistent_events;
 pub mod tactics_cards;
 pub mod wonders;
+pub mod objective_cards;
+pub mod objectives;

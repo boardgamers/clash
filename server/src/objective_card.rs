@@ -1,9 +1,6 @@
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityInitializerSetup};
-use crate::action_card::ActionCard;
-use crate::content::incidents::get_all;
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
 use crate::player::Player;
 
 type StatusPhaseCheck = Box<dyn Fn(&Game, &Player) -> bool>;
@@ -62,17 +59,6 @@ impl AbilityInitializerSetup for ObjectiveBuilder {
     }
 
     fn get_key(&self) -> EventOrigin {
-        EventOrigin::ObjectiveCard(self.name.clone())
+        EventOrigin::Objective(self.name.clone())
     }
-}
-
-///
-/// # Panics
-/// Panics if incident does not exist
-#[must_use]
-pub fn get_objective(id: u8) -> Incident {
-    get_all()
-        .into_iter()
-        .find(|incident| incident.id == id)
-        .expect("incident not found")
 }

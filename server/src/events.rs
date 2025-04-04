@@ -10,7 +10,7 @@ pub enum EventOrigin {
     Incident(u8),
     CivilCard(u8),
     TacticsCard(u8),
-    ObjectiveCard(String),
+    Objective(String),
 }
 
 impl EventOrigin {
@@ -21,6 +21,7 @@ impl EventOrigin {
             | EventOrigin::SpecialAdvance(name)
             | EventOrigin::Wonder(name)
             | EventOrigin::Leader(name)
+            | EventOrigin::Objective(name)
             | EventOrigin::Builtin(name) => name.to_string(),
             EventOrigin::CivilCard(id)
             | EventOrigin::TacticsCard(id)
@@ -35,6 +36,7 @@ impl EventOrigin {
             | EventOrigin::SpecialAdvance(name)
             | EventOrigin::Wonder(name)
             | EventOrigin::Leader(name)
+            | EventOrigin::Objective(name)
             | EventOrigin::Builtin(name) => name.to_string(),
             EventOrigin::CivilCard(id) => get_civil_card(*id).name,
             EventOrigin::TacticsCard(id) => get_tactics_card(*id).name,
