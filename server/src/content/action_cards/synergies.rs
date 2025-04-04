@@ -12,7 +12,10 @@ use crate::content::advances::theocracy::cities_that_can_add_units;
 use crate::content::persistent_events::{
     AdvanceRequest, EventResponse, PaymentRequest, PlayerRequest, PositionRequest,
 };
-use crate::content::tactics_cards::{TacticsCardFactory, archers, defensive_formation, high_ground, high_morale, surprise, wedge_formation, flanking};
+use crate::content::tactics_cards::{
+    TacticsCardFactory, archers, defensive_formation, flanking, high_ground, high_morale, surprise,
+    wedge_formation,
+};
 use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::player::Player;
