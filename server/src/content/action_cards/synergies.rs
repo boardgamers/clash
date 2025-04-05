@@ -168,16 +168,14 @@ fn teach_us(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         ActionType::free(),
         |game, player, a| !advances_to_copy_for_loser(game, player, a).is_empty(),
     )
-        .requirement(CivilCardRequirement::new(
-            vec![CivilCardOpportunity::CaptureCity],
-            true,
-        ))
         .tactics_card(tactics_card)
         .build()
 }
 
 pub(crate) fn use_teach_us() -> Builtin {
-    Builtin::builder("Teach us", "")
+    // this action card is special - it's played directly after a battle - like objective cards
+    Builtin::builder("Teach us", "If you just captured a city: Gain 1 advance from the loser for free \
+             without changing the Game Event counter.")
         .add_hand_card_request(
             |e| &mut e.combat_end,
             1,
