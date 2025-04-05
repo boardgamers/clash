@@ -6,7 +6,7 @@ use crate::combat_listeners::{
     Casualties, CombatEventPhase, CombatRoundEnd, CombatRoundStart, CombatStrength,
     combat_round_end, combat_round_start,
 };
-use crate::combat_roll::CombatStats;
+use crate::combat_roll::CombatRoundStats;
 use crate::consts::SHIP_CAPACITY;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
@@ -36,12 +36,20 @@ pub enum CombatRetreatState {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct CombatStats {
+    pub fighters: Vec<UnitType>,
+    pub losses: Vec<UnitType>,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct Combat {
     pub round: u32, //starts with one,
     pub defender: usize,
     pub defender_position: Position,
+    pub defender_stats: CombatStats,
     pub attacker: usize,
     pub attacker_position: Position,
+    pub attacker_stats: CombatStats,
     pub attackers: Vec<u32>,
     pub retreat: CombatRetreatState,
     #[serde(default)]
@@ -55,8 +63,10 @@ impl Combat {
         round: u32,
         defender: usize,
         defender_position: Position,
+        defender_stats: CombatStats,
         attacker: usize,
         attacker_position: Position,
+        attacker_stats: CombatStats,
         attackers: Vec<u32>,
         can_retreat: bool,
     ) -> Self {
@@ -64,8 +74,10 @@ impl Combat {
             round,
             defender,
             defender_position,
+            defender_stats,
             attacker,
             attacker_position,
+            attacker_stats,
             attackers,
             modifiers: vec![],
             retreat: if can_retreat {
@@ -309,8 +321,8 @@ pub(crate) fn combat_loop(game: &mut Game, mut s: CombatRoundStart) {
             round_end.phase = CombatEventPhase::Default;
             round_end
         } else {
-            let mut a = CombatStats::roll(c.attacker, &c, game, s.attacker_strength);
-            let mut d = CombatStats::roll(c.defender, &c, game, s.defender_strength);
+            let mut a = CombatRoundStats::roll(c.attacker, &c, game, s.attacker_strength);
+            let mut d = CombatRoundStats::roll(c.defender, &c, game, s.defender_strength);
 
             a.determine_hits(&d, game);
             d.determine_hits(&a, game);

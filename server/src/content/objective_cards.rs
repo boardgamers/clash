@@ -1,14 +1,15 @@
 use crate::content::objectives::non_combat::{draft};
-use crate::content::objectives::status_phase_objectives::{large_civ, science_lead};
+use crate::content::objectives::status_phase_objectives::{coastal_lead, large_civ, science_lead};
 use crate::objective_card::ObjectiveCard;
 use std::vec;
-use crate::content::objectives::combat::conqueror;
+use crate::content::objectives::combat::{conqueror, warmonger};
 
 #[must_use]
 pub(crate) fn get_all() -> Vec<ObjectiveCard> {
     vec![
         ObjectiveCard::new(1, large_civ(), draft()),
         ObjectiveCard::new(2, science_lead(), conqueror()),
+        ObjectiveCard::new(3, coastal_lead(), warmonger()),
         // todo replace when we have a real repeated objective
         ObjectiveCard::new(99, large_civ(), draft()),
     ]
