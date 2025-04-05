@@ -12,6 +12,7 @@ use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::{content::advances, game::Game, player::Player, resource_pile::ResourcePile, utils};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use crate::objective_card::gain_objective_card_from_pile;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum StatusPhaseState {
@@ -145,7 +146,7 @@ pub(crate) fn draw_cards() -> Builtin {
             0,
             |game, p, _name, _s| {
                 gain_action_card_from_pile(game, p);
-                // todo every player draws 1 objective card
+                gain_objective_card_from_pile(game, p);
             },
         )
         .build()

@@ -222,28 +222,10 @@ fn combinations(cards: &[ObjectiveCard]) -> Vec<Vec<(u8, String)>> {
                     let mut r = vec![o.clone()];
                     r.extend(v.clone());
                     r
-                    
-                    // let mut v = v.clone();
-                    // v.push(o.clone());
-                    // v
                 })
                 .collect_vec()
         })
         .collect_vec()
-
-    // let prod = cards.iter().fold::<Vec<Vec<(u8, String)>>, _>(
-    //     Vec::new(),
-    //     |acc, card| {
-    //         let c = &card.objectives.map(
-    //             |o| (card.id, o.name.clone())
-    //         );
-    //         let p = acc.iter().map(|x| {
-    //             // x.iter().cartesian_product(c.iter()).collect_vec()
-    //             x.iter().cartesian_product(c.iter()).collect_vec()
-    //         }).collect_vec();
-    //     },
-    // );
-    // todo!()
 }
 
 pub(crate) fn gain_objective_card_from_pile(game: &mut Game, player: usize) {

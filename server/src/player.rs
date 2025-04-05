@@ -4,6 +4,7 @@ use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::advances::get_advance;
 use crate::content::builtin;
 use crate::events::{Event, EventOrigin};
+use crate::objective_card::ObjectiveOpportunity;
 use crate::payment::PaymentOptions;
 use crate::player_events::{CostInfo, TransientEvents};
 use crate::resource::ResourceType;
@@ -35,7 +36,6 @@ use std::{
     cmp::Ordering::{self, *},
     mem,
 };
-use crate::objective_card::ObjectiveOpportunity;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayerType {
@@ -552,8 +552,8 @@ impl Player {
     pub fn strip_secret(&mut self) {
         self.wonder_cards = self.wonder_cards.iter().map(|_| String::new()).collect();
         self.action_cards = self.action_cards.iter().map(|_| 0).collect();
+        self.objective_cards = self.objective_cards.iter().map(|_| 0).collect();
         self.secrets = Vec::new();
-        //todo strip information about other hand cards
     }
 
     #[must_use]
@@ -631,10 +631,11 @@ impl Player {
     pub fn advance_cost(&self, advance: &Advance, execute: Option<&ResourcePile>) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
-            &PaymentOptions::sum(
-                ADVANCE_COST,
-                &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
-            ),
+            &PaymentOptions::sum(ADVANCE_COST, &[
+                ResourceType::Ideas,
+                ResourceType::Food,
+                ResourceType::Gold,
+            ]),
             advance,
             &(),
             execute,

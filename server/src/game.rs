@@ -14,6 +14,7 @@ use crate::log::{
     current_player_turn_log_mut,
 };
 use crate::movement::MoveState;
+use crate::objective_card::gain_objective_card_from_pile;
 use crate::pirates::get_pirates_player;
 use crate::player_events::{
     PersistentEvent, PersistentEventInfo, PersistentEvents, PlayerEvents, TransientEvents,
@@ -195,7 +196,7 @@ impl Game {
                 p.civilization.name
             ));
             gain_action_card_from_pile(&mut game, player_index);
-            // todo draw 1 objective card
+            gain_objective_card_from_pile(&mut game, player_index);
         }
 
         game.next_age();
