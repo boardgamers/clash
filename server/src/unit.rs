@@ -305,6 +305,12 @@ impl Units {
     }
 }
 
+impl Default for Units {
+    fn default() -> Self {
+        Self::empty()
+    }
+}
+
 impl AddAssign<&UnitType> for Units {
     fn add_assign(&mut self, rhs: &UnitType) {
         match *rhs {

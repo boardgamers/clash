@@ -38,7 +38,11 @@ pub enum CombatRetreatState {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatPlayerStats {
     pub player: usize,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Units::is_empty")]
     pub fighters: Units,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Units::is_empty")]
     pub losses: Units,
 }
 
@@ -75,6 +79,8 @@ pub struct CombatStats {
     pub battleground: Battleground,
     pub attacker: CombatPlayerStats,
     pub defender: CombatPlayerStats,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub result: Option<CombatResult>,
 }
 

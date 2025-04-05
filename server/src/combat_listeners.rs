@@ -665,13 +665,14 @@ pub(crate) fn kill_combat_units(
     player: usize,
     killed_unit_ids: &[u32],
 ) {
-    kill_units(game, killed_unit_ids, player, Some(c.opponent(player)));
     let p = game.player(player);
-    let units = killed_unit_ids
-        .iter()
-        .map(|id| p.get_unit(*id).unit_type)
-        .collect_vec();
-    c.stats.player_mut(c.role(player)).add_losses(&units);
+    c.stats.player_mut(c.role(player)).add_losses(
+        &killed_unit_ids
+            .iter()
+            .map(|id| p.get_unit(*id).unit_type)
+            .collect_vec(),
+    );
+    kill_units(game, killed_unit_ids, player, Some(c.opponent(player)));
     for unit in killed_unit_ids {
         if player == c.attacker {
             c.attackers.retain(|id| id != unit);
@@ -689,7 +690,9 @@ pub(crate) fn combat_stats() -> Builtin {
                     .items
                     .last_mut()
                     .expect("last item");
-                i.combat_stats = Some(e.combat.stats.clone());
+                let mut stats = e.combat.stats.clone();
+                stats.result = Some(e.result.clone());
+                i.combat_stats = Some(stats);
                 let c = &e.combat;
                 if let Some(winner) = e.result.winner() {
                     let p = c.player(winner);
