@@ -1,3 +1,4 @@
+use std::ops::Deref;
 use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
@@ -19,7 +20,7 @@ pub struct Objective {
     pub name: String,
     pub description: String,
     pub(crate) listeners: AbilityListeners,
-    status_phase_check: Option<StatusPhaseCheck>,
+    pub(crate) status_phase_check: Option<StatusPhaseCheck>,
 }
 
 impl Objective {
@@ -132,12 +133,13 @@ impl SelectObjectivesInfo {
 }
 
 pub(crate) fn objective_is_ready(player: &mut Player, name: &str) {
-    player
-        .objective_opportunities
-        .push(ObjectiveOpportunity::new(name.to_string()));
+    let mut o = &mut player.objective_opportunities;
+    o.push(ObjectiveOpportunity::new(name.to_string()));
+    o.sort();
+    o.dedup(); // can't fulfill 2 objectives with the same name at once
 }
 
-pub(crate) fn present_objective_opportunities(game: &mut Game) {
+pub(crate) fn present_immediate_objective_opportunities(game: &mut Game) {
     let Some(player) = game
         .players
         .iter()
@@ -162,14 +164,18 @@ pub(crate) fn present_objective_opportunities(game: &mut Game) {
                 .then_some(HandCard::ObjectiveCard(card.id))
         })
         .collect::<Vec<_>>();
-    on_objective_cards(
+    on_immediate_objective_cards(
         game,
         player,
         SelectObjectivesInfo::new(opportunities, cards),
     );
 }
 
-pub(crate) fn on_objective_cards(game: &mut Game, player_index: usize, info: SelectObjectivesInfo) {
+pub(crate) fn on_immediate_objective_cards(
+    game: &mut Game,
+    player_index: usize,
+    info: SelectObjectivesInfo,
+) {
     let _ = game.trigger_persistent_event(
         &[player_index],
         |events| &mut events.select_objective_cards,
@@ -178,7 +184,7 @@ pub(crate) fn on_objective_cards(game: &mut Game, player_index: usize, info: Sel
     );
 }
 
-pub(crate) fn select_objectives() -> Builtin {
+pub(crate) fn select_immediate_objectives() -> Builtin {
     Builtin::builder(
         "Select Objective Cards to Complete",
         "Select which Objective and Action Cards to use \
@@ -208,7 +214,20 @@ pub(crate) fn select_objectives() -> Builtin {
     .build()
 }
 
-fn complete_objective_card(game: &mut Game, player: usize, id: u8, objective: String) {
+pub(crate) fn status_phase_completable(game: &mut Game, player: &Player, id: u8) -> Option<String> {
+    get_objective_card(id)
+        .objectives
+        .iter()
+        .find_map(|objective| {
+            (&objective.status_phase_check)
+                .as_ref()
+                .map(|s| s(game, player))
+                .unwrap_or(false)
+                .then_some(objective.name.clone())
+        })
+}
+
+pub(crate) fn complete_objective_card(game: &mut Game, player: usize, id: u8, objective: String) {
     game.add_info_log_item(&format!(
         "{} completed objective {objective}",
         game.player_name(player),
@@ -315,75 +334,63 @@ mod tests {
 
     #[test]
     fn test_combinations() {
-        let o1 = ObjectiveCard::new(
-            0,
-            [
-                Objective::builder("Objective 1", "Description 1").build(),
-                Objective::builder("Objective 2", "Description 2").build(),
-            ],
-        );
-        let o2 = ObjectiveCard::new(
-            1,
-            [
-                Objective::builder("Objective 3", "Description 3").build(),
-                Objective::builder("Objective 4", "Description 4").build(),
-            ],
-        );
-        let o3 = ObjectiveCard::new(
-            2,
-            [
-                Objective::builder("Objective 5", "Description 5").build(),
-                Objective::builder("Objective 6", "Description 6").build(),
-            ],
-        );
+        let o1 = ObjectiveCard::new(0, [
+            Objective::builder("Objective 1", "Description 1").build(),
+            Objective::builder("Objective 2", "Description 2").build(),
+        ]);
+        let o2 = ObjectiveCard::new(1, [
+            Objective::builder("Objective 3", "Description 3").build(),
+            Objective::builder("Objective 4", "Description 4").build(),
+        ]);
+        let o3 = ObjectiveCard::new(2, [
+            Objective::builder("Objective 5", "Description 5").build(),
+            Objective::builder("Objective 6", "Description 6").build(),
+        ]);
         let cards = vec![o1, o2, o3];
 
         let mut got = combinations(&cards);
         got.sort();
-        assert_eq!(
-            got,
+        assert_eq!(got, vec![
             vec![
-                vec![
-                    (0, "Objective 1".to_string()),
-                    (1, "Objective 3".to_string()),
-                    (2, "Objective 5".to_string()),
-                ],
-                vec![
-                    (0, "Objective 1".to_string()),
-                    (1, "Objective 3".to_string()),
-                    (2, "Objective 6".to_string()),
-                ],
-                vec![
-                    (0, "Objective 1".to_string()),
-                    (1, "Objective 4".to_string()),
-                    (2, "Objective 5".to_string()),
-                ],
-                vec![
-                    (0, "Objective 1".to_string()),
-                    (1, "Objective 4".to_string()),
-                    (2, "Objective 6".to_string()),
-                ],
-                vec![
-                    (0, "Objective 2".to_string()),
-                    (1, "Objective 3".to_string()),
-                    (2, "Objective 5".to_string()),
-                ],
-                vec![
-                    (0, "Objective 2".to_string()),
-                    (1, "Objective 3".to_string()),
-                    (2, "Objective 6".to_string()),
-                ],
-                vec![
-                    (0, "Objective 2".to_string()),
-                    (1, "Objective 4".to_string()),
-                    (2, "Objective 5".to_string()),
-                ],
-                vec![
-                    (0, "Objective 2".to_string()),
-                    (1, "Objective 4".to_string()),
-                    (2, "Objective 6".to_string()),
-                ],
-            ]
-        );
+                (0, "Objective 1".to_string()),
+                (1, "Objective 3".to_string()),
+                (2, "Objective 5".to_string()),
+            ],
+            vec![
+                (0, "Objective 1".to_string()),
+                (1, "Objective 3".to_string()),
+                (2, "Objective 6".to_string()),
+            ],
+            vec![
+                (0, "Objective 1".to_string()),
+                (1, "Objective 4".to_string()),
+                (2, "Objective 5".to_string()),
+            ],
+            vec![
+                (0, "Objective 1".to_string()),
+                (1, "Objective 4".to_string()),
+                (2, "Objective 6".to_string()),
+            ],
+            vec![
+                (0, "Objective 2".to_string()),
+                (1, "Objective 3".to_string()),
+                (2, "Objective 5".to_string()),
+            ],
+            vec![
+                (0, "Objective 2".to_string()),
+                (1, "Objective 3".to_string()),
+                (2, "Objective 6".to_string()),
+            ],
+            vec![
+                (0, "Objective 2".to_string()),
+                (1, "Objective 4".to_string()),
+                (2, "Objective 5".to_string()),
+            ],
+            vec![
+                (0, "Objective 2".to_string()),
+                (1, "Objective 4".to_string()),
+                (2, "Objective 6".to_string()),
+            ],
+        ]);
     }
 }

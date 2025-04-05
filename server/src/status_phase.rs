@@ -1,13 +1,17 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::{do_advance, gain_advance_without_payment, remove_advance};
+use crate::card::HandCard;
 use crate::consts::AGES;
 use crate::content::builtin::{Builtin, status_phase_handler};
+use crate::content::objective_cards::get_objective_card;
 use crate::content::persistent_events::{
-    AdvanceRequest, ChangeGovernmentRequest, EventResponse, PersistentEventRequest,
-    PersistentEventType, PlayerRequest, PositionRequest,
+    AdvanceRequest, ChangeGovernmentRequest, EventResponse, HandCardsRequest,
+    PersistentEventRequest, PersistentEventType, PlayerRequest, PositionRequest,
 };
-use crate::objective_card::gain_objective_card_from_pile;
+use crate::objective_card::{
+    complete_objective_card, gain_objective_card_from_pile, status_phase_completable,
+};
 use crate::payment::PaymentOptions;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::{content::advances, game::Game, player::Player, resource_pile::ResourcePile, utils};
@@ -105,8 +109,46 @@ pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
 }
 
 pub(crate) fn complete_objectives() -> Builtin {
-    // todo not implemented
-    Builtin::builder("Complete Objectives", "Complete objectives").build()
+    Builtin::builder(
+        "Complete Objectives",
+        "Select Status Phase Objectives to Complete",
+    )
+    .add_hand_card_request(
+        |event| &mut event.status_phase,
+        0,
+        |game, player_index, _player_name| {
+            let player = game.player(player_index);
+            let objectives = player
+                .objective_cards
+                .iter()
+                .filter(|o| status_phase_completable(game, player, o).is_some())
+                .map(|o| HandCard::ObjectiveCard(*o))
+                .collect_vec();
+            let max = objectives.len() as u8;
+            Some(HandCardsRequest::new(
+                objectives,
+                0..=max,
+                "Select Status Phase Objectives to Complete",
+            ))
+        },
+        |game, s, _| {
+            for c in s.choice {
+                if let HandCard::ObjectiveCard(id) = c {
+                    let p = s.player_index;
+                    complete_objective_card(
+                        game,
+                        p,
+                        id,
+                        status_phase_completable(game, game.player(p), id)
+                            .expect("Objective should be completable"),
+                    );
+                } else {
+                    panic!("Illegal hand card type");
+                }
+            }
+        },
+    )
+    .build()
 }
 
 pub(crate) fn free_advance() -> Builtin {
