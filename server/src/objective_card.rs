@@ -359,12 +359,15 @@ mod tests {
 
         let mut got = combinations(&cards, &opportunities);
         got.sort();
-        assert_eq!(got, vec![
+        assert_eq!(
+            got,
             vec![
-                (0, "Objective 1".to_string()),
-                (1, "Objective 4".to_string()),
-            ],
-            vec![(1, "Objective 1".to_string()),],
-        ]);
+                vec![
+                    (0, "Objective 1".to_string()),
+                    (1, "Objective 4".to_string()),
+                ],
+                vec![(1, "Objective 1".to_string()),],
+            ]
+        );
     }
 }

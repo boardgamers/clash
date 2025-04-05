@@ -2,12 +2,14 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::{do_advance, gain_advance_without_payment, remove_advance};
 use crate::consts::AGES;
-use crate::content::builtin::{status_phase_handler, Builtin};
+use crate::content::builtin::{Builtin, status_phase_handler};
 use crate::content::persistent_events::{
-    AdvanceRequest, ChangeGovernmentRequest, EventResponse,
-    PersistentEventRequest, PersistentEventType, PlayerRequest, PositionRequest,
+    AdvanceRequest, ChangeGovernmentRequest, EventResponse, PersistentEventRequest,
+    PersistentEventType, PlayerRequest, PositionRequest,
 };
-use crate::objective_card::{gain_objective_card_from_pile, present_objective_cards, status_phase_completable};
+use crate::objective_card::{
+    gain_objective_card_from_pile, present_objective_cards, status_phase_completable,
+};
 use crate::payment::PaymentOptions;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::{content::advances, game::Game, player::Player, resource_pile::ResourcePile, utils};
@@ -76,10 +78,10 @@ pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
             CompleteObjectives => {
                 if game.age == AGES
                     || game
-                    .players
-                    .iter()
-                    .filter(|player| player.is_human())
-                    .any(|player| player.cities.is_empty())
+                        .players
+                        .iter()
+                        .filter(|player| player.is_human())
+                        .any(|player| player.cities.is_empty())
                 {
                     game.end_game();
                     return;
@@ -109,20 +111,20 @@ pub(crate) fn complete_objectives() -> Builtin {
         "Complete Objectives",
         "Select Status Phase Objectives to Complete",
     )
-        .add_simple_persistent_event_listener(
-            |event| &mut event.status_phase,
-            0,
-            |game, player_index, _name, _s| {
-                let player = game.player(player_index);
-                let opportunities = player
-                    .objective_cards
-                    .iter()
-                    .flat_map(|o| status_phase_completable(game, player, *o))
-                    .collect_vec();
-                present_objective_cards(game, player_index, opportunities);
-            },
-        )
-        .build()
+    .add_simple_persistent_event_listener(
+        |event| &mut event.status_phase,
+        0,
+        |game, player_index, _name, _s| {
+            let player = game.player(player_index);
+            let opportunities = player
+                .objective_cards
+                .iter()
+                .flat_map(|o| status_phase_completable(game, player, *o))
+                .collect_vec();
+            present_objective_cards(game, player_index, opportunities);
+        },
+    )
+    .build()
 }
 
 pub(crate) fn free_advance() -> Builtin {
@@ -215,7 +217,7 @@ pub(crate) fn may_change_government() -> Builtin {
         true,
         CHANGE_GOVERNMENT_COST,
     )
-        .build()
+    .build()
 }
 
 pub(crate) fn add_change_government<A, E, V>(
@@ -237,9 +239,9 @@ where
             let p = game.player(player_index);
             (can_change_government_for_free(p)
                 && p.can_afford(&PaymentOptions::resources(cost.clone())))
-                .then_some(PersistentEventRequest::ChangeGovernment(
-                    ChangeGovernmentRequest::new(optional, cost.clone()),
-                ))
+            .then_some(PersistentEventRequest::ChangeGovernment(
+                ChangeGovernmentRequest::new(optional, cost.clone()),
+            ))
         },
         move |game, player_index, player_name, action, request, _| {
             if let PersistentEventRequest::ChangeGovernment(r) = &request {
