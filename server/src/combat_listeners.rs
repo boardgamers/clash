@@ -1,18 +1,20 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{CivilCardMatch, CivilCardOpportunity};
-use crate::combat::{Combat, CombatRetreatState, capture_position};
+use crate::combat::{capture_position, Combat, CombatRetreatState};
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{PersistentEventType, PositionRequest, UnitsRequest};
 use crate::content::tactics_cards;
 use crate::game::Game;
+use crate::log::current_player_turn_log_mut;
 use crate::movement::move_units;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::position::Position;
 use crate::tactics_card::{CombatRole, TacticsCard, TacticsCardTarget};
-use crate::unit::{UnitType, Units, kill_units};
+use crate::unit::{kill_units, UnitType, Units};
 use crate::utils;
 use num::Zero;
 use serde::{Deserialize, Serialize};
+use std::mem;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatStrength {
@@ -664,11 +666,16 @@ pub(crate) fn kill_combat_units(
     killed_unit_ids: &[u32],
 ) {
     kill_units(game, killed_unit_ids, player, Some(c.opponent(player)));
+    let s = c.stats.player_mut(c.role(player));
+    let mut units = mem::replace(&mut s.losses, Units::empty());
     for unit in killed_unit_ids {
+        units += &game.player(player).get_unit(*unit).unit_type;
+
         if player == c.attacker {
             c.attackers.retain(|id| id != unit);
         }
     }
+    s.losses = units;
 }
 
 pub(crate) fn combat_stats() -> Builtin {
@@ -677,6 +684,9 @@ pub(crate) fn combat_stats() -> Builtin {
             |event| &mut event.combat_end,
             11,
             |game, _player, _name, e| {
+                let i = current_player_turn_log_mut(game).items.last_mut()
+                    .expect("last item");
+                i.combat_stats = Some(e.combat.stats.clone());
                 let c = &e.combat;
                 if let Some(winner) = e.result.winner() {
                     let p = c.player(winner);

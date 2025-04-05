@@ -603,6 +603,7 @@ pub(crate) fn choose_carried_units_to_remove() -> Builtin {
                         .collect::<Units>()
                 ));
             }
+            // todo update combat stats
             kill_units_without_event(game, &units.choice, units.player_index, e.killer);
         },
     )

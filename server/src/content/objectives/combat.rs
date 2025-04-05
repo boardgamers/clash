@@ -1,6 +1,4 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{CivilCardMatch, CivilCardOpportunity};
-use crate::content::advances::warfare::draft_cost;
 use crate::objective_card::{Objective, objective_is_ready};
 
 pub(crate) fn combat_objectives() -> Vec<Objective> {

@@ -5,6 +5,7 @@ use crate::player::Player;
 
 use super::collect::PositionCollection;
 use crate::action_card::CivilCardMatch;
+use crate::combat::CombatStats;
 use crate::movement::{MoveUnits, MovementAction};
 use crate::playing_actions::{Collect, IncreaseHappiness, Recruit};
 use crate::{
@@ -76,6 +77,9 @@ pub struct ActionLogItem {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub civil_card_match: Option<CivilCardMatch>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub combat_stats: Option<CombatStats>,
 }
 
 impl ActionLogItem {
@@ -85,6 +89,7 @@ impl ActionLogItem {
             action,
             undo: Vec::new(),
             civil_card_match: None,
+            combat_stats: None,
         }
     }
 }
@@ -157,13 +162,12 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             )
         }
         PlayingAction::WonderCard(name) => format!("{player_name} played the wonder card {name}",),
-        PlayingAction::EndTurn => format!(
-            "{player_name} ended their turn{}",
-            match game.actions_left {
-                0 => String::new(),
-                actions_left => format!(" with {actions_left} actions left"),
-            }
-        ),
+        PlayingAction::EndTurn => format!("{player_name} ended their turn{}", match game
+            .actions_left
+        {
+            0 => String::new(),
+            actions_left => format!(" with {actions_left} actions left"),
+        }),
     }
 }
 
