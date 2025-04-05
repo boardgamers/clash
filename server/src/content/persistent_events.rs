@@ -112,7 +112,7 @@ pub enum PersistentEventType {
     ActionCard(ActionCardInfo),
     WonderCard(WonderCardInfo),
     DrawWonderCard,
-    SelectHandCards(Vec<HandCard>)
+    SelectHandCards(Vec<HandCard>),
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

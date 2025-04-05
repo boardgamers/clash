@@ -18,6 +18,7 @@ use crate::movement::{
     CurrentMove, MoveState, MovementAction, get_move_state, has_movable_units,
     move_units_destinations,
 };
+use crate::objective_card::{on_select_hand_cards, present_objective_opportunities};
 use crate::playing_actions::PlayingAction;
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
@@ -28,7 +29,6 @@ use crate::unit::{get_current_move, units_killed};
 use crate::wonder::{draw_wonder_card, on_play_wonder_card};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use crate::objective_card::{on_select_hand_cards, present_objective_opportunities};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum Action {

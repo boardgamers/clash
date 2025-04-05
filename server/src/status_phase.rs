@@ -7,12 +7,12 @@ use crate::content::persistent_events::{
     AdvanceRequest, ChangeGovernmentRequest, EventResponse, PersistentEventRequest,
     PersistentEventType, PlayerRequest, PositionRequest,
 };
+use crate::objective_card::gain_objective_card_from_pile;
 use crate::payment::PaymentOptions;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::{content::advances, game::Game, player::Player, resource_pile::ResourcePile, utils};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use crate::objective_card::gain_objective_card_from_pile;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum StatusPhaseState {
