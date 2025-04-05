@@ -213,20 +213,119 @@
                     }
                   },
                   "civil_card_match": {
-                    "opportunity": "CaptureCity",
-                    "played_cards": [
-                      35
-                    ],
+                    "opportunity": "WinLandBattle",
                     "opponent": 1
+                  },
+                  "combat_stats": {
+                    "position": "C1",
+                    "battleground": "City",
+                    "attacker": {
+                      "player": 0,
+                      "fighters": {
+                        "settlers": 2,
+                        "infantry": 1,
+                        "cavalry": 1,
+                        "elephants": 1,
+                        "leaders": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 1,
+                      "fighters": {
+                        "infantry": 2
+                      },
+                      "losses": {
+                        "infantry": 2
+                      }
+                    },
+                    "result": "AttackerWins"
                   }
                 },
                 {
                   "action": {
-                    "Playing": {
-                      "ActionCard": 35
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ActionCard": 35
+                        }
+                      ]
                     }
                   },
                   "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "CombatEnd": {
+                              "combat": {
+                                "attacker": 0,
+                                "attacker_position": "C2",
+                                "attackers": [
+                                  0,
+                                  1,
+                                  2,
+                                  3,
+                                  4,
+                                  5
+                                ],
+                                "defender": 1,
+                                "defender_position": "C1",
+                                "retreat": "CanRetreat",
+                                "round": 1,
+                                "stats": {
+                                  "attacker": {
+                                    "fighters": {
+                                      "cavalry": 1,
+                                      "elephants": 1,
+                                      "infantry": 1,
+                                      "leaders": 1,
+                                      "settlers": 2
+                                    },
+                                    "player": 0
+                                  },
+                                  "battleground": "City",
+                                  "defender": {
+                                    "fighters": {
+                                      "infantry": 2
+                                    },
+                                    "losses": {
+                                      "infantry": 2
+                                    },
+                                    "player": 1
+                                  },
+                                  "position": "C1"
+                                }
+                              },
+                              "result": "AttackerWins"
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Teach us"
+                            },
+                            "priority": 1,
+                            "request": {
+                              "SelectHandCards": {
+                                "choices": [
+                                  {
+                                    "ActionCard": 35
+                                  }
+                                ],
+                                "description": "Select Teach Us card",
+                                "needed": {
+                                  "end": 1,
+                                  "start": 0
+                                }
+                              }
+                            }
+                          },
+                          "last_priority_used": 1,
+                          "player": 0
+                        }
+                      ]
+                    },
                     {
                       "op": "add",
                       "path": "/players/0/action_cards",
@@ -253,7 +352,35 @@
                       "path": "/players/0/resources/mood_tokens",
                       "value": 7
                     }
-                  ]
+                  ],
+                  "civil_card_match": {
+                    "opportunity": "WinLandBattle",
+                    "opponent": 1
+                  },
+                  "combat_stats": {
+                    "position": "C1",
+                    "battleground": "City",
+                    "attacker": {
+                      "player": 0,
+                      "fighters": {
+                        "settlers": 2,
+                        "infantry": 1,
+                        "cavalry": 1,
+                        "elephants": 1,
+                        "leaders": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 1,
+                      "fighters": {
+                        "infantry": 2
+                      },
+                      "losses": {
+                        "infantry": 2
+                      }
+                    },
+                    "result": "AttackerWins"
+                  }
                 }
               ]
             }
@@ -279,7 +406,7 @@
       "Player1 could not store 1 gold"
     ],
     [
-      "Player1 played the action card Teach Us",
+      "Player1 selected to use Teach Us.",
       "Player1 selected Storage as advance for Teach Us.",
       "Player gained 1 mood token as advance bonus"
     ]

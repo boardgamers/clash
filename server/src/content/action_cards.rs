@@ -4,7 +4,7 @@ mod inspiration;
 mod mercenaries;
 pub(crate) mod negotiation;
 pub(crate) mod spy;
-mod synergies;
+pub(crate) mod synergies;
 
 use crate::action_card::{ActionCard, CivilCard};
 use crate::content::action_cards::inspiration::inspiration_action_cards;

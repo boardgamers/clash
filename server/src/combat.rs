@@ -73,6 +73,13 @@ pub enum Battleground {
     CityWithFortress,
 }
 
+impl Battleground {
+    #[must_use]
+    pub fn is_city(&self) -> bool {
+        matches!(self, Battleground::City | Battleground::CityWithFortress)
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatStats {
     pub position: Position,

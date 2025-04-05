@@ -124,12 +124,15 @@ impl CombatResult {
 pub struct CombatEnd {
     pub result: CombatResult,
     pub combat: Combat,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub selected_card: Option<u8>,
 }
 
 impl CombatEnd {
     #[must_use]
     pub fn new(result: CombatResult, combat: Combat) -> Self {
-        Self { result, combat }
+        Self { result, combat, selected_card: None }
     }
 
     #[must_use]
@@ -611,7 +614,7 @@ pub(crate) fn place_settler() -> Builtin {
     )
     .add_position_request(
         |event| &mut event.combat_end,
-        0,
+        2,
         |game, player_index, i| {
             let p = game.player(player_index);
             if i.is_defender(player_index)

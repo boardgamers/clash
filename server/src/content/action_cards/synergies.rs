@@ -1,20 +1,17 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
-use crate::action_card::{
-    ActionCard, ActionCardBuilder, ActionCardInfo, CivilCardMatch, CivilCardOpportunity,
-    CivilCardRequirement, CivilCardTarget,
-};
+use crate::action_card::{discard_action_card, ActionCard, ActionCardBuilder, ActionCardInfo, CivilCardMatch, CivilCardOpportunity, CivilCardRequirement, CivilCardTarget};
 use crate::advance::gain_advance_without_payment;
-use crate::content::action_cards::inspiration;
+use crate::card::HandCard;
+use crate::content::action_cards::{get_action_card, inspiration};
 use crate::content::advances;
 use crate::content::advances::get_advance;
 use crate::content::advances::theocracy::cities_that_can_add_units;
-use crate::content::persistent_events::{
-    AdvanceRequest, EventResponse, PaymentRequest, PlayerRequest, PositionRequest,
-};
+use crate::content::builtin::Builtin;
+use crate::content::persistent_events::{AdvanceRequest, EventResponse, HandCardsRequest, PaymentRequest, PlayerRequest, PositionRequest};
 use crate::content::tactics_cards::{
-    TacticsCardFactory, archers, defensive_formation, flanking, high_ground, high_morale, surprise,
-    wedge_formation,
+    archers, defensive_formation, flanking, high_ground, high_morale, surprise, wedge_formation,
+    TacticsCardFactory,
 };
 use crate::game::Game;
 use crate::log::current_player_turn_log;
@@ -50,22 +47,22 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         ActionType::regular(),
         move |_game, p, _| !categories_with_2_affordable_advances(p).is_empty(),
     )
-    .tactics_card(tactics_card)
-    .add_advance_request(
-        |e| &mut e.play_action_card,
-        3,
-        |game, p, _| {
-            Some(AdvanceRequest::new(categories_with_2_affordable_advances(
-                game.player(p),
-            )))
-        },
-        |game, sel, _| {
-            game.add_info_log_item(&format!(
-                "{} selected {} as first advance for Synergies.",
-                sel.player_name, sel.choice
-            ));
-        },
-    );
+        .tactics_card(tactics_card)
+        .add_advance_request(
+            |e| &mut e.play_action_card,
+            3,
+            |game, p, _| {
+                Some(AdvanceRequest::new(categories_with_2_affordable_advances(
+                    game.player(p),
+                )))
+            },
+            |game, sel, _| {
+                game.add_info_log_item(&format!(
+                    "{} selected {} as first advance for Synergies.",
+                    sel.player_name, sel.choice
+                ));
+            },
+        );
     b = pay_for_advance(b, 2);
     b = b.add_advance_request(
         |e| &mut e.play_action_card,
@@ -171,37 +168,77 @@ fn teach_us(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         ActionType::free(),
         |game, player, a| !advances_to_copy_for_loser(game, player, a).is_empty(),
     )
-    .requirement(CivilCardRequirement::new(
-        vec![CivilCardOpportunity::CaptureCity],
-        true,
-    ))
-    .tactics_card(tactics_card)
-    .add_advance_request(
-        |e| &mut e.play_action_card,
-        0,
-        |game, player, a| {
-            Some(AdvanceRequest::new(advances_to_copy_for_loser(
-                game,
-                game.player(player),
-                a,
-            )))
-        },
-        |game, sel, _| {
-            let advance = &sel.choice;
-            game.add_info_log_item(&format!(
-                "{} selected {advance} as advance for Teach Us.",
-                sel.player_name,
-            ));
-            gain_advance_without_payment(
-                game,
-                advance,
-                sel.player_index,
-                ResourcePile::empty(),
-                false,
-            );
-        },
-    )
-    .build()
+        .requirement(CivilCardRequirement::new(
+            vec![CivilCardOpportunity::CaptureCity],
+            true,
+        ))
+        .tactics_card(tactics_card)
+        .build()
+}
+
+pub(crate) fn use_teach_us() -> Builtin {
+    Builtin::builder("Teach us", "")
+        .add_hand_card_request(
+            |e| &mut e.combat_end,
+            1,
+            |game, player_index, e| {
+                let stats = &e.combat.stats;
+                if e.result.winner() == Some(e.combat.role(player_index)) && stats.battleground.is_city() {
+                    let p = game.player(player_index);
+                    let cards = p.action_cards.iter().filter(
+                        |a| get_action_card(**a).civil_card.name == "Teach Us"
+                    )
+                        .map(|a| HandCard::ActionCard(*a))
+                        .collect_vec();
+                    return Some(HandCardsRequest::new(
+                        cards,
+                        0..=1,
+                        "Select Teach Us card"));
+                }
+                None
+            },
+            |game, s, e| {
+                if s.choice.is_empty() {
+                    return;
+                }
+                let HandCard::ActionCard(id) = s.choice[0] else {
+                    panic!("Teach Us card not found");
+                };
+                discard_action_card(game, s.player_index, id);
+
+                game.add_info_log_item(&format!(
+                    "{} selected to use Teach Us.",
+                    s.player_name
+                ));
+                e.selected_card = Some(id);
+            },
+        )
+        .add_advance_request(
+            |e| &mut e.combat_end,
+            0,
+            |game, player, e| {
+                e.selected_card.map(|id| {
+                    let vec = teachable_advances(
+                        game.player(e.combat.opponent(player)), game.player(player));
+                    AdvanceRequest::new(vec)
+                })
+            },
+            |game, sel, _| {
+                let advance = &sel.choice;
+                game.add_info_log_item(&format!(
+                    "{} selected {advance} as advance for Teach Us.",
+                    sel.player_name,
+                ));
+                gain_advance_without_payment(
+                    game,
+                    advance,
+                    sel.player_index,
+                    ResourcePile::empty(),
+                    false,
+                );
+            },
+        )
+        .build()
 }
 
 fn advances_to_copy_for_loser(game: &Game, winner: &Player, a: &ActionCardInfo) -> Vec<String> {
@@ -209,10 +246,10 @@ fn advances_to_copy_for_loser(game: &Game, winner: &Player, a: &ActionCardInfo) 
         panic!("Satisfying action not found");
     };
     let Some(CivilCardMatch {
-        opportunity: _,
-        played_cards: _,
-        opponent: Some(loser),
-    }) = &current_player_turn_log(game).items[action_log_index].civil_card_match
+                 opportunity: _,
+                 played_cards: _,
+                 opponent: Some(loser),
+             }) = &current_player_turn_log(game).items[action_log_index].civil_card_match
     else {
         panic!("Capture city opportunity not found");
     };
@@ -239,31 +276,31 @@ fn militia(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             player.available_units().infantry > 0 && !cities_that_can_add_units(player).is_empty()
         },
     )
-    .tactics_card(tactics_card)
-    .add_position_request(
-        |e| &mut e.play_action_card,
-        0,
-        |game, player_index, _| {
-            let player = game.player(player_index);
-            let cities = cities_that_can_add_units(player);
-            Some(PositionRequest::new(
-                cities,
-                1..=1,
-                "Select city to add infantry",
-            ))
-        },
-        |game, s, _| {
-            let city = s.choice[0];
-            game.add_info_log_item(&format!(
-                "{} selected {} as city for Militia.",
-                s.player_name, city
-            ));
+        .tactics_card(tactics_card)
+        .add_position_request(
+            |e| &mut e.play_action_card,
+            0,
+            |game, player_index, _| {
+                let player = game.player(player_index);
+                let cities = cities_that_can_add_units(player);
+                Some(PositionRequest::new(
+                    cities,
+                    1..=1,
+                    "Select city to add infantry",
+                ))
+            },
+            |game, s, _| {
+                let city = s.choice[0];
+                game.add_info_log_item(&format!(
+                    "{} selected {} as city for Militia.",
+                    s.player_name, city
+                ));
 
-            game.player_mut(s.player_index)
-                .add_unit(city, UnitType::Infantry);
-        },
-    )
-    .build()
+                game.player_mut(s.player_index)
+                    .add_unit(city, UnitType::Infantry);
+            },
+        )
+        .build()
 }
 
 fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
@@ -276,72 +313,72 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         ActionType::cost(ResourcePile::culture_tokens(1)),
         |game, player, _a| !possible_inspiration_advances(game, player).is_empty(),
     )
-    .tactics_card(tactics_card)
-    .target(CivilCardTarget::AllPlayers)
-    .add_player_request(
-        |e| &mut e.play_action_card,
-        1,
-        |game, player_index, a| {
-            if a.active_player != Some(player_index) {
-                // only active player can select the target player
-                return None;
-            }
-            let player = game.player(player_index);
-            let choices = game
-                .players
-                .iter()
-                .filter(|teacher| !teachable_advances(teacher, player).is_empty())
-                .map(|p| p.index)
-                .collect();
-            Some(PlayerRequest::new(
-                choices,
-                "Select player to trade advances with",
-            ))
-        },
-        |game, s, a| {
-            let p = s.choice;
-            game.add_info_log_item(&format!(
-                "{} selected {} as player for Technology Trade.",
-                s.player_name,
-                game.player_name(p)
-            ));
-            a.selected_player = Some(p);
-        },
-    )
-    .add_advance_request(
-        |e| &mut e.play_action_card,
-        0,
-        |game, player_index, a| {
-            if a.active_player == Some(player_index) || a.selected_player == Some(player_index) {
-                let trade_partner = if a.active_player == Some(player_index) {
-                    a.selected_player
-                } else {
-                    a.active_player
+        .tactics_card(tactics_card)
+        .target(CivilCardTarget::AllPlayers)
+        .add_player_request(
+            |e| &mut e.play_action_card,
+            1,
+            |game, player_index, a| {
+                if a.active_player != Some(player_index) {
+                    // only active player can select the target player
+                    return None;
                 }
-                .expect("target player not found");
-                return Some(AdvanceRequest::new(teachable_advances(
-                    game.player(trade_partner),
-                    game.player(player_index),
-                )));
-            }
-            None
-        },
-        |game, sel, _| {
-            let advance = &sel.choice;
-            game.add_info_log_item(&format!(
-                "{} selected {advance} as advance for Technology Trade.",
-                sel.player_name,
-            ));
-            gain_advance_without_payment(
-                game,
-                advance,
-                sel.player_index,
-                ResourcePile::empty(),
-                false,
-            );
-        },
-    )
-    .build()
+                let player = game.player(player_index);
+                let choices = game
+                    .players
+                    .iter()
+                    .filter(|teacher| !teachable_advances(teacher, player).is_empty())
+                    .map(|p| p.index)
+                    .collect();
+                Some(PlayerRequest::new(
+                    choices,
+                    "Select player to trade advances with",
+                ))
+            },
+            |game, s, a| {
+                let p = s.choice;
+                game.add_info_log_item(&format!(
+                    "{} selected {} as player for Technology Trade.",
+                    s.player_name,
+                    game.player_name(p)
+                ));
+                a.selected_player = Some(p);
+            },
+        )
+        .add_advance_request(
+            |e| &mut e.play_action_card,
+            0,
+            |game, player_index, a| {
+                if a.active_player == Some(player_index) || a.selected_player == Some(player_index) {
+                    let trade_partner = if a.active_player == Some(player_index) {
+                        a.selected_player
+                    } else {
+                        a.active_player
+                    }
+                        .expect("target player not found");
+                    return Some(AdvanceRequest::new(teachable_advances(
+                        game.player(trade_partner),
+                        game.player(player_index),
+                    )));
+                }
+                None
+            },
+            |game, sel, _| {
+                let advance = &sel.choice;
+                game.add_info_log_item(&format!(
+                    "{} selected {advance} as advance for Technology Trade.",
+                    sel.player_name,
+                ));
+                gain_advance_without_payment(
+                    game,
+                    advance,
+                    sel.player_index,
+                    ResourcePile::empty(),
+                    false,
+                );
+            },
+        )
+        .build()
 }
 
 fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
@@ -353,22 +390,22 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         ActionType::regular(),
         |_game, player, _a| !advances_that_can_be_gained(player).is_empty(),
     )
-    .tactics_card(tactics_card)
-    .add_advance_request(
-        |e| &mut e.play_action_card,
-        2,
-        |game, player_index, _| {
-            let player = game.player(player_index);
-            Some(AdvanceRequest::new(advances_that_can_be_gained(player)))
-        },
-        |game, sel, _| {
-            let advance = &sel.choice;
-            game.add_info_log_item(&format!(
-                "{} selected {advance} as advance for New Ideas.",
-                sel.player_name,
-            ));
-        },
-    );
+        .tactics_card(tactics_card)
+        .add_advance_request(
+            |e| &mut e.play_action_card,
+            2,
+            |game, player_index, _| {
+                let player = game.player(player_index);
+                Some(AdvanceRequest::new(advances_that_can_be_gained(player)))
+            },
+            |game, sel, _| {
+                let advance = &sel.choice;
+                game.add_info_log_item(&format!(
+                    "{} selected {advance} as advance for New Ideas.",
+                    sel.player_name,
+                ));
+            },
+        );
     pay_for_advance(b, 1)
         .add_simple_persistent_event_listener(
             |e| &mut e.play_action_card,
