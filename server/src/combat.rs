@@ -16,6 +16,7 @@ use crate::tactics_card::CombatRole;
 use crate::unit::{UnitType, Units, carried_units};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use std::mem;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Copy)]
 pub enum CombatModifier {
@@ -49,6 +50,14 @@ impl CombatPlayerStats {
             fighters,
             losses: Units::empty(),
         }
+    }
+
+    pub fn add_losses(&mut self, units: &[UnitType]) {
+        let mut losses = mem::replace(&mut self.losses, Units::empty());
+        for t in units {
+            losses += t;
+        }
+        self.losses = losses;
     }
 }
 

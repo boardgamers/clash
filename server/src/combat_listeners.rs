@@ -12,9 +12,9 @@ use crate::position::Position;
 use crate::tactics_card::{CombatRole, TacticsCard, TacticsCardTarget};
 use crate::unit::{UnitType, Units, kill_units};
 use crate::utils;
+use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
-use std::mem;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatStrength {
@@ -666,16 +666,17 @@ pub(crate) fn kill_combat_units(
     killed_unit_ids: &[u32],
 ) {
     kill_units(game, killed_unit_ids, player, Some(c.opponent(player)));
-    let s = c.stats.player_mut(c.role(player));
-    let mut units = mem::replace(&mut s.losses, Units::empty());
+    let p = game.player(player);
+    let units = killed_unit_ids
+        .iter()
+        .map(|id| p.get_unit(*id).unit_type)
+        .collect_vec();
+    c.stats.player_mut(c.role(player)).add_losses(&units);
     for unit in killed_unit_ids {
-        units += &game.player(player).get_unit(*unit).unit_type;
-
         if player == c.attacker {
             c.attackers.retain(|id| id != unit);
         }
     }
-    s.losses = units;
 }
 
 pub(crate) fn combat_stats() -> Builtin {
