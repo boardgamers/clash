@@ -16,6 +16,8 @@ use crate::position::Position;
 use crate::resource::ResourceType;
 use itertools::Itertools;
 use std::ops::RangeInclusive;
+use crate::action_card::discard_action_card;
+use crate::objective_card::discard_objective_card;
 
 pub(crate) fn pandemics_incidents() -> Vec<Incident> {
     vec![
@@ -75,18 +77,14 @@ fn pandemics() -> Incident {
             for id in &s.choice {
                 match id {
                     HandCard::ActionCard(a) => {
-                        game.player_mut(s.player_index)
-                            .action_cards
-                            .retain(|c| c != a);
+                        discard_action_card(game, s.player_index, *a);
                         game.add_info_log_item(&format!(
                             "{} discarded an action card",
                             s.player_name
                         ));
                     }
                     HandCard::ObjectiveCard(o) => {
-                        game.player_mut(s.player_index)
-                            .objective_cards
-                            .retain(|c| c != o);
+                        discard_objective_card(game, s.player_index, *o);
                         game.add_info_log_item(&format!(
                             "{} discarded an objective card",
                             s.player_name

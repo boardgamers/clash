@@ -1,4 +1,4 @@
-use crate::advance::Advance;
+use crate::advance::{ Advance};
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::advances::get_advance;
@@ -9,25 +9,11 @@ use crate::payment::PaymentOptions;
 use crate::player_events::{CostInfo, TransientEvents};
 use crate::resource::ResourceType;
 use crate::unit::{UnitData, UnitType};
-use crate::{
-    city::{City, CityData},
-    city_pieces::Building::{self},
-    civilization::Civilization,
-    consts::{
-        ADVANCE_COST, ADVANCE_VICTORY_POINTS, BUILDING_VICTORY_POINTS,
-        CAPTURED_LEADER_VICTORY_POINTS, CITY_LIMIT, CITY_PIECE_LIMIT, CONSTRUCT_COST,
-        OBJECTIVE_VICTORY_POINTS, UNIT_LIMIT, WONDER_VICTORY_POINTS,
-    },
-    content::{civilizations, custom_actions::CustomActionType},
-    game::Game,
-    leader::Leader,
-    player_events::PlayerEvents,
-    position::Position,
-    resource_pile::ResourcePile,
-    unit::{Unit, Units},
-    utils,
-    wonder::Wonder,
-};
+use crate::{advance, city::{City, CityData}, city_pieces::Building::{self}, civilization::Civilization, consts::{
+    ADVANCE_COST, ADVANCE_VICTORY_POINTS, BUILDING_VICTORY_POINTS,
+    CAPTURED_LEADER_VICTORY_POINTS, CITY_LIMIT, CITY_PIECE_LIMIT, CONSTRUCT_COST,
+    OBJECTIVE_VICTORY_POINTS, UNIT_LIMIT, WONDER_VICTORY_POINTS,
+}, content::{civilizations, custom_actions::CustomActionType}, game::Game, leader::Leader, player_events::PlayerEvents, position::Position, resource_pile::ResourcePile, unit::{Unit, Units}, utils, wonder::Wonder};
 use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
@@ -36,6 +22,7 @@ use std::{
     cmp::Ordering::{self, *},
     mem,
 };
+use crate::content::objective_cards::get_objective_card;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayerType {
@@ -96,39 +83,25 @@ impl Player {
     /// Panics if elements like wonders or advances don't exist
     pub fn initialize_player(data: PlayerData, game: &mut Game) {
         let leader = data.active_leader.clone();
+        let objective_cards = data.objective_cards.clone();
         let player = Self::from_data(data);
         let player_index = player.index;
         game.players.push(player);
         builtin::init_player(game, player_index);
-        let advances = mem::take(&mut game.players[player_index].advances);
-        for advance in &advances {
-            advance.listeners.init(game, player_index);
-            for i in 0..game.players[player_index]
-                .civilization
-                .special_advances
-                .len()
-            {
-                if game.players[player_index].civilization.special_advances[i].required_advance
-                    == advance.name
-                {
-                    let special_advance = game.players[player_index]
-                        .civilization
-                        .special_advances
-                        .remove(i);
-                    special_advance.listeners.init(game, player_index);
-                    game.players[player_index]
-                        .civilization
-                        .special_advances
-                        .insert(i, special_advance);
-                    break;
-                }
-            }
-        }
+        advance::init_player(game, player_index);
+        
         if let Some(leader) = leader {
             Self::with_leader(&leader, game, player_index, |game, leader| {
                 leader.listeners.init(game, player_index);
             });
         }
+
+        for id in objective_cards {
+            for o in get_objective_card(id).objectives {
+                 o.listeners.init(game, player_index);
+            }
+        }
+        
         let mut cities = mem::take(&mut game.players[player_index].cities);
         for city in &mut cities {
             for wonder in &city.pieces.wonders {
@@ -136,8 +109,8 @@ impl Player {
             }
         }
         game.players[player_index].cities = cities;
-        game.players[player_index].advances = advances;
     }
+
 
     fn from_data(data: PlayerData) -> Player {
         let units = data
@@ -156,7 +129,7 @@ impl Player {
                     data.id
                 );
             });
-        let player = Self {
+        Self {
             name: data.name,
             index: data.id,
             resources: data.resources,
@@ -190,8 +163,7 @@ impl Player {
             event_info: data.event_info,
             secrets: data.secrets,
             objective_opportunities: Vec::new(),
-        };
-        player
+        }
     }
 
     #[must_use]

@@ -25,6 +25,7 @@ use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
+use crate::objective_card::SelectObjectivesInfo;
 
 pub(crate) type PersistentEvent<V = ()> = Event<Game, PersistentEventInfo, (), V>;
 
@@ -75,7 +76,7 @@ pub(crate) struct PersistentEvents {
     pub combat_round_end_tactics: PersistentEvent<CombatRoundEnd>,
     pub combat_end: PersistentEvent<CombatEnd>,
     pub units_killed: PersistentEvent<KilledUnits>,
-    pub select_hand_cards: PersistentEvent<Vec<HandCard>>,
+    pub select_objective_cards: PersistentEvent<SelectObjectivesInfo>,
 }
 
 impl PlayerEvents {

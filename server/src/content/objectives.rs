@@ -1,4 +1,4 @@
-mod non_combat;
+pub(crate) mod non_combat;
 
 use crate::content::objectives::non_combat::non_combat_objectives;
 use crate::objective_card::Objective;

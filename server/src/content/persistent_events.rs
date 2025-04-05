@@ -22,6 +22,7 @@ use crate::wonder::WonderCardInfo;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
+use crate::objective_card::SelectObjectivesInfo;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum PersistentEventRequest {
@@ -112,7 +113,7 @@ pub enum PersistentEventType {
     ActionCard(ActionCardInfo),
     WonderCard(WonderCardInfo),
     DrawWonderCard,
-    SelectHandCards(Vec<HandCard>),
+    SelectObjectives(SelectObjectivesInfo),
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

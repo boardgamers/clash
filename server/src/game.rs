@@ -29,6 +29,7 @@ use crate::{
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::vec;
+use crate::objective_card::present_objective_opportunities;
 
 pub struct Game {
     pub state: GameState,
@@ -344,6 +345,11 @@ impl Game {
             }
         }
         self.events.pop();
+        
+        if self.events.is_empty() {
+            present_objective_opportunities(self);
+        }
+        
         Some(value)
     }
 

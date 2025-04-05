@@ -18,7 +18,7 @@ use crate::cultural_influence::cultural_influence_resolution;
 use crate::events::EventOrigin;
 use crate::explore::explore_resolution;
 use crate::game::Game;
-use crate::objective_card::select_hand_cards;
+use crate::objective_card::select_objectives;
 use crate::pirates::{pirates_bonus, pirates_round_bonus};
 use crate::status_phase::{
     StatusPhaseState, complete_objectives, determine_first_player, draw_cards, free_advance,
@@ -83,7 +83,7 @@ pub fn get_all() -> Vec<Builtin> {
         on_draw_wonder_card(),
         build_wonder(),
         choose_carried_units_to_remove(),
-        select_hand_cards(),
+        select_objectives(),
         // combat related
         place_settler(),
         choose_fighter_casualties(),

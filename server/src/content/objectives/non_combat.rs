@@ -6,7 +6,7 @@ pub(crate) fn non_combat_objectives() -> Vec<Objective> {
     vec![draft()]
 }
 
-fn draft() -> Objective {
+pub(crate) fn draft() -> Objective {
     let name = "Draft";
     Objective::builder(name, "You've recruited twice using Draft this turn.")
         .add_simple_persistent_event_listener(

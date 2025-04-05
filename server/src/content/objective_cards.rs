@@ -1,9 +1,13 @@
-use crate::objective_card::ObjectiveCard;
+use crate::content::objectives::non_combat::draft;
+use crate::objective_card::{Objective, ObjectiveCard};
 use std::vec;
 
 #[must_use]
 pub(crate) fn get_all() -> Vec<ObjectiveCard> {
-    vec![]
+    vec![ObjectiveCard::new(1, [
+        Objective::builder("Objective 1", "Description 1").build(), //todo
+        draft(),
+    ])]
 }
 
 ///

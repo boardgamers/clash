@@ -118,11 +118,18 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
     }
     game.map.strip_secret();
     for s in &mut game.events {
-        if let PersistentEventType::CombatRoundStart(r) = &mut s.event_type {
-            if r.attacker_strength.tactics_card.is_some() {
-                // defender shouldn't see attacker's tactics card
-                r.attacker_strength.tactics_card = Some(0);
+        match &mut s.event_type {
+            PersistentEventType::CombatRoundStart(r) => {
+                if r.attacker_strength.tactics_card.is_some() {
+                    // defender shouldn't see attacker's tactics card
+                    r.attacker_strength.tactics_card = Some(0);
+                }
             }
+            PersistentEventType::SelectObjectives(o) if Some(s.player.index) != player_index => {
+                // player shouldn't see other player's objectives
+                o.strip_secret();
+            } 
+            _ => {}
         }
         let current_event_player = &mut s.player;
         if player_index != Some(current_event_player.index) {
