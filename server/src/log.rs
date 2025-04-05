@@ -4,7 +4,6 @@ use crate::cultural_influence::format_cultural_influence_attempt_log_item;
 use crate::player::Player;
 
 use super::collect::PositionCollection;
-use crate::action_card::CivilCardMatch;
 use crate::combat::CombatStats;
 use crate::movement::{MoveUnits, MovementAction};
 use crate::playing_actions::{Collect, IncreaseHappiness, Recruit};
@@ -76,9 +75,6 @@ pub struct ActionLogItem {
     pub undo: Vec<PatchOperation>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub civil_card_match: Option<CivilCardMatch>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub combat_stats: Option<CombatStats>,
 }
 
@@ -88,7 +84,6 @@ impl ActionLogItem {
         Self {
             action,
             undo: Vec::new(),
-            civil_card_match: None,
             combat_stats: None,
         }
     }

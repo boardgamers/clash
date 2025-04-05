@@ -1,4 +1,3 @@
-use crate::action_card::{CivilCardMatch, CivilCardOpportunity};
 use crate::city::City;
 use crate::city::MoodState::Angry;
 use crate::city_pieces::Building;
@@ -75,6 +74,11 @@ pub enum Battleground {
 
 impl Battleground {
     #[must_use]
+    pub(crate) fn is_land(&self) -> bool {
+        !matches!(self, Battleground::Sea)
+    }
+    
+    #[must_use]
     pub fn is_city(&self) -> bool {
         matches!(self, Battleground::City | Battleground::CityWithFortress)
     }
@@ -89,6 +93,9 @@ pub struct CombatStats {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub result: Option<CombatResult>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub claimed_action_cards: Vec<u8>,
 }
 
 impl CombatStats {
@@ -105,6 +112,7 @@ impl CombatStats {
             attacker,
             defender,
             result: None,
+            claimed_action_cards: Vec::new(),
         }
     }
 
@@ -113,6 +121,14 @@ impl CombatStats {
         match role {
             CombatRole::Attacker => &mut self.attacker,
             CombatRole::Defender => &mut self.defender,
+        }
+    }
+
+    #[must_use]
+    pub fn player(&self, role: CombatRole) -> &CombatPlayerStats {
+        match role {
+            CombatRole::Attacker => &self.attacker,
+            CombatRole::Defender => &self.defender,
         }
     }
 }
@@ -471,8 +487,6 @@ pub(crate) fn conquer_city(
     let size = city.mood_modified_size(&game.players[new_player_index]);
     if attacker_is_human {
         game.players[new_player_index].gain_resources(ResourcePile::gold(size as u32));
-
-        CivilCardMatch::new(CivilCardOpportunity::CaptureCity, Some(old_player_index)).store(game);
     }
     let take_over = game.player(new_player_index).is_city_available();
 

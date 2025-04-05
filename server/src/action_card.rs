@@ -2,13 +2,14 @@ use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
 use crate::card::draw_card_from_pile;
+use crate::combat_listeners::CombatResult;
 use crate::content::action_cards;
 use crate::content::action_cards::get_civil_card;
 use crate::content::persistent_events::PersistentEventType;
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::log::{ActionLogItem, current_player_turn_log, current_player_turn_log_mut};
+use crate::log::{current_player_turn_log, current_player_turn_log_mut};
 use crate::player::Player;
 use crate::playing_actions::ActionType;
 use crate::position::Position;
@@ -16,7 +17,6 @@ use crate::tactics_card::TacticsCard;
 use crate::utils::remove_element_by;
 use action_cards::get_action_card;
 use serde::{Deserialize, Serialize};
-use std::slice::from_ref;
 
 pub type CanPlayCard = Box<dyn Fn(&Game, &Player, &ActionCardInfo) -> bool>;
 
@@ -32,7 +32,7 @@ pub struct CivilCard {
     pub can_play: CanPlayCard,
     pub listeners: AbilityListeners,
     pub action_type: ActionType,
-    pub requirement: Option<CivilCardRequirement>,
+    pub requirement_land_battle_won: bool,
     pub(crate) target: CivilCardTarget,
 }
 
@@ -68,7 +68,7 @@ impl ActionCard {
             name: name.to_string(),
             description: description.to_string(),
             can_play: Box::new(can_play),
-            requirement: None,
+            requirement_land_battle_won: false,
             builder: AbilityInitializerBuilder::new(),
             tactics_card: None,
             action_type,
@@ -83,7 +83,7 @@ pub struct ActionCardBuilder {
     description: String,
     action_type: ActionType,
     can_play: CanPlayCard,
-    requirement: Option<CivilCardRequirement>,
+    requirement_land_battle_won: bool,
     tactics_card: Option<TacticsCard>,
     builder: AbilityInitializerBuilder,
     target: CivilCardTarget,
@@ -97,8 +97,8 @@ impl ActionCardBuilder {
     }
 
     #[must_use]
-    pub fn requirement(mut self, requirement: CivilCardRequirement) -> Self {
-        self.requirement = Some(requirement);
+    pub fn requirement_land_battle_won(mut self) -> Self {
+        self.requirement_land_battle_won = true;
         self
     }
 
@@ -116,7 +116,7 @@ impl ActionCardBuilder {
                 name: self.name,
                 description: self.description,
                 can_play: self.can_play,
-                requirement: self.requirement,
+                requirement_land_battle_won: self.requirement_land_battle_won,
                 listeners: self.builder.build(),
                 action_type: self.action_type,
                 target: self.target,
@@ -140,14 +140,14 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
     discard_action_card(game, player_index, id);
     let mut satisfying_action: Option<usize> = None;
     let card = get_civil_card(id);
-    if let Some(requirement) = card.requirement {
-        if let Some(action_log_index) = requirement.satisfying_action(game, id) {
+    if card.requirement_land_battle_won {
+        if let Some(action_log_index) = land_battle_won_action(game, player_index, id) {
             satisfying_action = Some(action_log_index);
             current_player_turn_log_mut(game).items[action_log_index]
-                .civil_card_match
+                .combat_stats
                 .as_mut()
-                .expect("civil card match")
-                .played_cards
+                .expect("combat stats")
+                .claimed_action_cards
                 .push(id);
         }
     }
@@ -248,85 +248,24 @@ impl ActionCardInfo {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
-pub enum CivilCardOpportunity {
-    CaptureCity,
-    WinLandBattle,
-}
+#[must_use]
+pub fn land_battle_won_action(game: &Game, player: usize, action_card_id: u8) -> Option<usize> {
+    let sister_card = if action_card_id % 2 == 0 {
+        action_card_id - 1
+    } else {
+        action_card_id + 1
+    };
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
-pub struct CivilCardMatch {
-    pub opportunity: CivilCardOpportunity,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub played_cards: Vec<u8>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub opponent: Option<usize>,
-}
-
-impl CivilCardMatch {
-    #[must_use]
-    pub fn new(opportunity: CivilCardOpportunity, opponent: Option<usize>) -> Self {
-        Self {
-            opportunity,
-            played_cards: Vec::new(),
-            opponent,
+    current_player_turn_log(game).items.iter().position(|a| {
+        if let Some(stats) = &a.combat_stats {
+            if stats.result == Some(CombatResult::AttackerWins)
+                && stats.battleground.is_land()
+                && stats.attacker.player == player
+                && !stats.claimed_action_cards.contains(&sister_card)
+            {
+                return true;
+            }
         }
-    }
-
-    pub(crate) fn store(self, game: &mut Game) {
-        current_player_turn_log_mut(game)
-            .items
-            .last_mut()
-            .expect("no action log")
-            .civil_card_match = Some(self);
-    }
-}
-
-pub struct CivilCardRequirement {
-    pub opportunities: Vec<CivilCardOpportunity>, // by order of preference
-    pub just_before: bool,
-}
-
-impl CivilCardRequirement {
-    #[must_use]
-    pub fn new(opportunities: Vec<CivilCardOpportunity>, just_before: bool) -> Self {
-        Self {
-            opportunities,
-            just_before,
-        }
-    }
-
-    #[must_use]
-    pub fn satisfying_action(&self, game: &Game, action_card_id: u8) -> Option<usize> {
-        let mut l: &[ActionLogItem] = &current_player_turn_log(game).items;
-        if let Some(c) = game.current_action_log_index {
-            l = &l[..c];
-        }
-        if self.just_before {
-            l = if l.is_empty() {
-                &[]
-            } else {
-                from_ref(&l[l.len() - 1])
-            };
-        }
-        let sister_card = if action_card_id % 2 == 0 {
-            action_card_id - 1
-        } else {
-            action_card_id + 1
-        };
-        self.opportunities.iter().find_map(|o| {
-            l.iter().position(|a| {
-                if let Some(civil_card_match) = &a.civil_card_match {
-                    if civil_card_match.opportunity == *o
-                        && !civil_card_match.played_cards.contains(&sister_card)
-                    {
-                        return true;
-                    }
-                }
-                false
-            })
-        })
-    }
+        false
+    })
 }

@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{
-    ActionCard, ActionCardBuilder, CivilCardOpportunity, CivilCardRequirement,
+    ActionCard, ActionCardBuilder,
 };
 use crate::advance::gain_advance_without_payment;
 use crate::city::MoodState;
@@ -9,8 +9,8 @@ use crate::content::action_cards::synergies::teachable_advances;
 use crate::content::advances;
 use crate::content::persistent_events::{AdvanceRequest, PaymentRequest, PositionRequest};
 use crate::content::tactics_cards::{
-    TacticsCardFactory, encircled, heavy_resistance, high_ground, high_morale, peltasts, siege,
-    surprise, wedge_formation,
+    encircled, heavy_resistance, high_ground, high_morale, peltasts, siege, surprise,
+    wedge_formation, TacticsCardFactory,
 };
 use crate::game::Game;
 use crate::payment::PaymentOptions;
@@ -164,13 +164,7 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         ActionType::free(),
         |_game, player, _| !cities_where_mood_can_increase(player).is_empty(),
     )
-    .requirement(CivilCardRequirement::new(
-        vec![
-            CivilCardOpportunity::WinLandBattle,
-            CivilCardOpportunity::CaptureCity,
-        ],
-        false,
-    ))
+    .requirement_land_battle_won()
     .tactics_card(tactics_card);
 
     b = increase_mood(b, 2, false);
@@ -279,13 +273,7 @@ fn great_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         ActionType::free(),
         |_game, player, _| player.resources.ideas < player.resource_limit.ideas,
     )
-    .requirement(CivilCardRequirement::new(
-        vec![
-            CivilCardOpportunity::CaptureCity,
-            CivilCardOpportunity::WinLandBattle,
-        ],
-        false,
-    ))
+    .requirement_land_battle_won()
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,

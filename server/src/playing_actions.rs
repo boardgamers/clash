@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::action_card::{ActionCardInfo, play_action_card};
+use crate::action_card::{ActionCardInfo, play_action_card, land_battle_won_action};
 use crate::advance::gain_advance_without_payment;
 use crate::city::MoodState;
 use crate::collect::{PositionCollection, collect};
@@ -120,8 +120,8 @@ impl PlayingActionType {
 
                 let civil_card = get_civil_card(*id);
                 let mut satisfying_action: Option<usize> = None;
-                if let Some(requirement) = civil_card.requirement {
-                    if let Some(action_log_index) = requirement.satisfying_action(game, *id) {
+                if civil_card.requirement_land_battle_won {
+                    if let Some(action_log_index) = land_battle_won_action(game, player_index, *id) {
                         satisfying_action = Some(action_log_index);
                     } else {
                         return Err("Requirement not met".to_string());

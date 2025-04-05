@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
-use crate::action_card::{discard_action_card, ActionCard, ActionCardBuilder, ActionCardInfo, CivilCardMatch, CivilCardOpportunity, CivilCardRequirement, CivilCardTarget};
+use crate::action_card::{discard_action_card, ActionCard, ActionCardBuilder, CivilCardTarget};
 use crate::advance::gain_advance_without_payment;
 use crate::card::HandCard;
 use crate::content::action_cards::{get_action_card, inspiration};
@@ -166,7 +166,8 @@ fn teach_us(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "If you just captured a city: Gain 1 advance from the loser for free \
          without changing the Game Event counter.",
         ActionType::free(),
-        |game, player, a| !advances_to_copy_for_loser(game, player, a).is_empty(),
+        // is played by "use_teach_us"
+        |_game, _player, _a| true, 
     )
         .tactics_card(tactics_card)
         .build()
@@ -215,7 +216,7 @@ pub(crate) fn use_teach_us() -> Builtin {
             |e| &mut e.combat_end,
             0,
             |game, player, e| {
-                e.selected_card.map(|id| {
+                e.selected_card.map(|_| {
                     let vec = teachable_advances(
                         game.player(e.combat.opponent(player)), game.player(player));
                     AdvanceRequest::new(vec)
@@ -237,22 +238,6 @@ pub(crate) fn use_teach_us() -> Builtin {
             },
         )
         .build()
-}
-
-fn advances_to_copy_for_loser(game: &Game, winner: &Player, a: &ActionCardInfo) -> Vec<String> {
-    let Some(action_log_index) = a.satisfying_action else {
-        panic!("Satisfying action not found");
-    };
-    let Some(CivilCardMatch {
-                 opportunity: _,
-                 played_cards: _,
-                 opponent: Some(loser),
-             }) = &current_player_turn_log(game).items[action_log_index].civil_card_match
-    else {
-        panic!("Capture city opportunity not found");
-    };
-
-    teachable_advances(game.player(*loser), winner)
 }
 
 pub(crate) fn teachable_advances(teacher: &Player, student: &Player) -> Vec<String> {

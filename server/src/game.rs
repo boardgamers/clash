@@ -551,7 +551,6 @@ impl Game {
         self.player_mut(self.current_player_index).end_turn();
         for i in &mut current_player_turn_log_mut(self).items {
             i.undo.clear();
-            i.civil_card_match = None;
         }
         check_for_waste(self);
         self.increment_player_index();

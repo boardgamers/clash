@@ -1,5 +1,4 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{CivilCardMatch, CivilCardOpportunity};
 use crate::combat::{Combat, CombatRetreatState, capture_position};
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{PersistentEventType, PositionRequest, UnitsRequest};
@@ -696,17 +695,6 @@ pub(crate) fn combat_stats() -> Builtin {
                 let mut stats = e.combat.stats.clone();
                 stats.result = Some(e.result.clone());
                 i.combat_stats = Some(stats);
-                let c = &e.combat;
-                if let Some(winner) = e.result.winner() {
-                    let p = c.player(winner);
-                    if p == game.current_player_index && !c.is_sea_battle(game) {
-                        CivilCardMatch::new(
-                            CivilCardOpportunity::WinLandBattle,
-                            Some(c.opponent(p)),
-                        )
-                        .store(game);
-                    }
-                }
             },
         )
         .build()
