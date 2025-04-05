@@ -36,8 +36,11 @@ pub struct ObjectiveCard {
 
 impl ObjectiveCard {
     #[must_use]
-    pub fn new(id: u8, objectives: [Objective; 2]) -> Self {
-        Self { id, objectives }
+    pub fn new(id: u8, first: Objective, second: Objective) -> Self {
+        Self {
+            id,
+            objectives: [first, second],
+        }
     }
 
     #[must_use]
@@ -198,7 +201,8 @@ pub(crate) fn status_phase_completable(game: &Game, player: &Player, id: u8) -> 
         .objectives
         .iter()
         .find_map(|objective| {
-            objective.status_phase_check
+            objective
+                .status_phase_check
                 .as_ref()
                 .is_some_and(|s| s(game, player))
                 .then_some(objective.name.clone())
@@ -240,26 +244,33 @@ pub(crate) fn match_objective_cards(
 }
 
 fn combinations(cards: &[ObjectiveCard]) -> Vec<Vec<(u8, String)>> {
-    if cards.is_empty() {
+    let Some((first, rest)) = cards.split_first() else {
         return vec![vec![]];
-    }
+    };
 
-    let first = cards[0]
+    let first = first
         .objectives
         .iter()
         .map(|o| (cards[0].id, o.name.clone()))
         .collect_vec();
-    combinations(&cards[1..])
+    combinations(rest)
         .iter()
-        .flat_map(|v| {
-            first
+        .flat_map(|rest_objectives| {
+            let vec1 = first
                 .iter()
-                .map(|o| {
-                    let mut r = vec![o.clone()];
-                    r.extend(v.clone());
+                .map(|first_objective| {
+                    let name = &first_objective.1;
+                    let mut r = rest_objectives.clone();
+                    if !r
+                        .iter()
+                        .any(|(_id, n)| name == n)
+                    {
+                        r.insert(0, first_objective.clone());
+                    }
                     r
                 })
-                .collect_vec()
+                .collect_vec();
+            vec1
         })
         .collect_vec()
 }
@@ -314,73 +325,62 @@ mod tests {
     fn test_combinations() {
         let o1 = ObjectiveCard::new(
             0,
-            [
-                Objective::builder("Objective 1", "Description 1").build(),
-                Objective::builder("Objective 2", "Description 2").build(),
-            ],
+            Objective::builder("Objective 1", "Description 1").build(),
+            Objective::builder("Objective 2", "Description 2").build(),
         );
         let o2 = ObjectiveCard::new(
             1,
-            [
-                Objective::builder("Objective 3", "Description 3").build(),
-                Objective::builder("Objective 4", "Description 4").build(),
-            ],
+            Objective::builder("Objective 1", "Description 3").build(),
+            Objective::builder("Objective 4", "Description 4").build(),
         );
         let o3 = ObjectiveCard::new(
             2,
-            [
-                Objective::builder("Objective 5", "Description 5").build(),
-                Objective::builder("Objective 6", "Description 6").build(),
-            ],
+            Objective::builder("Objective 5", "Description 5").build(),
+            Objective::builder("Objective 6", "Description 6").build(),
         );
         let cards = vec![o1, o2, o3];
 
         let mut got = combinations(&cards);
         got.sort();
-        assert_eq!(
-            got,
+        assert_eq!(got, vec![
             vec![
-                vec![
-                    (0, "Objective 1".to_string()),
-                    (1, "Objective 3".to_string()),
-                    (2, "Objective 5".to_string()),
-                ],
-                vec![
-                    (0, "Objective 1".to_string()),
-                    (1, "Objective 3".to_string()),
-                    (2, "Objective 6".to_string()),
-                ],
-                vec![
-                    (0, "Objective 1".to_string()),
-                    (1, "Objective 4".to_string()),
-                    (2, "Objective 5".to_string()),
-                ],
-                vec![
-                    (0, "Objective 1".to_string()),
-                    (1, "Objective 4".to_string()),
-                    (2, "Objective 6".to_string()),
-                ],
-                vec![
-                    (0, "Objective 2".to_string()),
-                    (1, "Objective 3".to_string()),
-                    (2, "Objective 5".to_string()),
-                ],
-                vec![
-                    (0, "Objective 2".to_string()),
-                    (1, "Objective 3".to_string()),
-                    (2, "Objective 6".to_string()),
-                ],
-                vec![
-                    (0, "Objective 2".to_string()),
-                    (1, "Objective 4".to_string()),
-                    (2, "Objective 5".to_string()),
-                ],
-                vec![
-                    (0, "Objective 2".to_string()),
-                    (1, "Objective 4".to_string()),
-                    (2, "Objective 6".to_string()),
-                ],
-            ]
-        );
+                (0, "Objective 1".to_string()),
+                (1, "Objective 4".to_string()),
+                (2, "Objective 5".to_string()),
+            ],
+            vec![
+                (0, "Objective 1".to_string()),
+                (1, "Objective 4".to_string()),
+                (2, "Objective 6".to_string()),
+            ],
+            vec![
+                (0, "Objective 2".to_string()),
+                (1, "Objective 1".to_string()),
+                (2, "Objective 5".to_string()),
+            ],
+            vec![
+                (0, "Objective 2".to_string()),
+                (1, "Objective 1".to_string()),
+                (2, "Objective 6".to_string()),
+            ],
+            vec![
+                (0, "Objective 2".to_string()),
+                (1, "Objective 4".to_string()),
+                (2, "Objective 5".to_string()),
+            ],
+            vec![
+                (0, "Objective 2".to_string()),
+                (1, "Objective 4".to_string()),
+                (2, "Objective 6".to_string()),
+            ],
+            vec![
+                (1, "Objective 1".to_string()),
+                (2, "Objective 5".to_string()),
+            ],
+            vec![
+                (1, "Objective 1".to_string()),
+                (2, "Objective 6".to_string()),
+            ],
+        ]);
     }
 }
