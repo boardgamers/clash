@@ -40,6 +40,35 @@ pub struct Recruit {
     pub replaced_units: Vec<u32>,
 }
 
+impl Recruit {
+    #[must_use] 
+    pub fn new(
+        units: &Units,
+        city_position: Position,
+        payment: ResourcePile,
+    ) -> Self {
+        Self {
+            units: units.clone(),
+            city_position,
+            payment,
+            leader_name: None,
+            replaced_units: Vec::new(),
+        }
+    }
+    
+    #[must_use]
+    pub fn with_leader(mut self, leader_name: &str) -> Self {
+        self.leader_name = Some(leader_name.to_string());
+        self
+    }
+    
+    #[must_use]
+    pub fn with_replaced_units(mut self, replaced_units: &[u32]) -> Self {
+        self.replaced_units = replaced_units.to_vec();
+        self
+    }
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct IncreaseHappiness {
     pub happiness_increases: Vec<(Position, u32)>,

@@ -105,7 +105,7 @@ pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
 }
 
 pub(crate) fn complete_objectives() -> Builtin {
-    // not implemented
+    // todo not implemented
     Builtin::builder("Complete Objectives", "Complete objectives").build()
 }
 

@@ -37,13 +37,11 @@ fn test_sanitation_and_draft() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Recruit(server::playing_actions::Recruit {
-                    units: units.clone(),
+                Action::Playing(Recruit(server::playing_actions::Recruit::new(
+                    &units,
                     city_position,
-                    payment: ResourcePile::mood_tokens(1) + ResourcePile::gold(2),
-                    leader_name: None,
-                    replaced_units: vec![],
-                })),
+                    ResourcePile::mood_tokens(1) + ResourcePile::gold(2),
+                ))),
             )
             .with_pre_assert(move |game| {
                 let options = recruit_cost_without_replaced(
@@ -279,13 +277,11 @@ fn test_civil_liberties() {
             TestAction::undoable(0, Action::Playing(Custom(CivilRights))),
             TestAction::undoable(
                 0,
-                Action::Playing(Recruit(server::playing_actions::Recruit {
-                    units: Units::new(0, 1, 0, 0, 0, 0),
-                    city_position: Position::from_offset("A1"),
-                    payment: ResourcePile::mood_tokens(2),
-                    leader_name: None,
-                    replaced_units: vec![],
-                })),
+                Action::Playing(Recruit(playing_actions::Recruit::new( 
+                    &Units::new(0, 1, 0, 0, 0, 0),
+                    Position::from_offset("A1"),
+                    ResourcePile::mood_tokens(2),
+                ))),
             ),
         ],
     );
@@ -595,13 +591,11 @@ fn test_overpay() {
         "sanitation_and_draft",
         vec![TestAction::illegal(
             0,
-            Action::Playing(Recruit(server::playing_actions::Recruit {
-                units: Units::new(0, 1, 0, 0, 0, 0),
-                city_position: Position::from_offset("A1"),
-                payment: ResourcePile::mood_tokens(1) + ResourcePile::gold(2), //paid too much
-                leader_name: None,
-                replaced_units: vec![],
-            })),
+            Action::Playing(Recruit(server::playing_actions::Recruit ::new(
+                &Units::new(0, 1, 0, 0, 0, 0),
+                Position::from_offset("A1"),
+                ResourcePile::mood_tokens(1) + ResourcePile::gold(2), //paid too much
+            ))),
         )],
     );
 }

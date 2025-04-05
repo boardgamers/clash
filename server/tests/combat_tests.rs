@@ -174,13 +174,11 @@ fn test_recruit_combat() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Recruit(server::playing_actions::Recruit {
-                    units: Units::new(0, 0, 3, 0, 0, 0),
-                    city_position: Position::from_offset("C2"),
-                    payment: ResourcePile::wood(5) + ResourcePile::gold(1),
-                    leader_name: None,
-                    replaced_units: vec![],
-                })),
+                Action::Playing(Recruit(server::playing_actions::Recruit::new(
+                    &Units::new(0, 0, 3, 0, 0, 0),
+                    Position::from_offset("C2"),
+                    ResourcePile::wood(5) + ResourcePile::gold(1),
+                ))),
             ),
             TestAction::undoable(
                 0,

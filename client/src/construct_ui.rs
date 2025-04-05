@@ -45,25 +45,32 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
             new.payment = p;
             ActiveDialog::ConstructionPayment(new)
         },
-        |payment| match cp.project.clone() {
-            ConstructionProject::Building(b, pos) => StateUpdate::execute_activation(
-                Action::Playing(PlayingAction::Construct(
-                    Construct::new(cp.city_position, b, payment).with_port_position(pos),
-                )),
-                vec![],
-                city,
-            ),
-            ConstructionProject::Units(r) => StateUpdate::execute_activation(
-                Action::Playing(PlayingAction::Recruit(Recruit {
-                    city_position: cp.city_position,
-                    units: r.amount.units.clone(),
-                    payment,
-                    replaced_units: r.replaced_units.clone(),
-                    leader_name: r.amount.leader_name.clone(),
-                })),
-                vec![],
-                city,
-            ),
+        |payment| {
+            match cp.project.clone() {
+                ConstructionProject::Building(b, pos) => StateUpdate::execute_activation(
+                    Action::Playing(PlayingAction::Construct(
+                        Construct::new(cp.city_position, b, payment).with_port_position(pos),
+                    )),
+                    vec![],
+                    city,
+                ),
+                ConstructionProject::Units(r) => {
+                    let mut recruit = Recruit::new(
+                        &r.amount.units,
+                        cp.city_position,
+                        payment,
+                    ).with_replaced_units(&r.replaced_units);
+                    if let Some(l) = r.amount.leader_name {
+                        recruit = recruit.with_leader(l);
+                    }
+
+                    StateUpdate::execute_activation(
+                        Action::Playing(PlayingAction::Recruit(recruit)),
+                        vec![],
+                        city,
+                    )
+                }
+            }
         },
     )
 }
@@ -100,9 +107,9 @@ impl ConstructionPayment {
                 &sel.replaced_units,
                 None,
             )
-            .unwrap(),
+                .unwrap(),
         }
-        .cost;
+            .cost;
 
         let payment = rc.new_payment(&cost, name, false);
         ConstructionPayment {
