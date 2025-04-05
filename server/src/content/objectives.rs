@@ -1,6 +1,6 @@
-mod combat;
-mod non_combat;
-mod status_phase_objectives;
+pub(crate) mod combat;
+pub(crate) mod non_combat;
+pub(crate) mod status_phase_objectives;
 
 use crate::objective_card::Objective;
 use combat::combat_objectives;

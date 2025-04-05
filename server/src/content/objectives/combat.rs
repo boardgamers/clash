@@ -14,18 +14,16 @@ pub(crate) fn conqueror() -> Objective {
         "You conquered a city with at least 1 Army unit or Fortress this turn.",
     )
     .add_simple_persistent_event_listener(
-        |event| &mut event.combat_end,
+        |event| &mut event.combat_round_end,
         2,
         |game, player, _, e| {
             let c = &e.combat;
-            if let Some(winner) = e.result.winner() {
-                let p = c.player(winner);
-                if p == game.current_player_index && !c.is_sea_battle(game) {
-                    CivilCardMatch::new(
-                        CivilCardOpportunity::WinLandBattle,
-                        Some(c.opponent(p)),
-                    )
-                    .store(game);
+            if let Some(r) = &e.final_result {
+                if let Some(winner) = r.winner() {
+                    let p = c.player(winner);
+                    if p == player && c.defender_city(game).is_some() {
+                        objective_is_ready(game.player_mut(player), name);
+                    }
                 }
             }
         },
