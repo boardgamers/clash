@@ -131,7 +131,11 @@ pub struct CombatEnd {
 impl CombatEnd {
     #[must_use]
     pub fn new(result: CombatResult, combat: Combat) -> Self {
-        Self { result, combat, selected_card: None }
+        Self {
+            result,
+            combat,
+            selected_card: None,
+        }
     }
 
     #[must_use]

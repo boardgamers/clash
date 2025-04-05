@@ -1,7 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{
-    ActionCard, ActionCardBuilder,
-};
+use crate::action_card::{ActionCard, ActionCardBuilder};
 use crate::advance::gain_advance_without_payment;
 use crate::city::MoodState;
 use crate::content::action_cards::spy::spy;
@@ -9,8 +7,8 @@ use crate::content::action_cards::synergies::teachable_advances;
 use crate::content::advances;
 use crate::content::persistent_events::{AdvanceRequest, PaymentRequest, PositionRequest};
 use crate::content::tactics_cards::{
-    encircled, heavy_resistance, high_ground, high_morale, peltasts, siege, surprise,
-    wedge_formation, TacticsCardFactory,
+    TacticsCardFactory, encircled, heavy_resistance, high_ground, high_morale, peltasts, siege,
+    surprise, wedge_formation,
 };
 use crate::game::Game;
 use crate::payment::PaymentOptions;

@@ -106,7 +106,7 @@ pub fn get_all() -> Vec<Builtin> {
         use_cultural_takeover(),
         use_negotiations(),
         use_assassination(),
-        use_teach_us()
+        use_teach_us(),
     ]
 }
 

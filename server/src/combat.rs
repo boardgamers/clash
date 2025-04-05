@@ -74,12 +74,12 @@ pub enum Battleground {
 
 impl Battleground {
     #[must_use]
-    pub(crate) fn is_land(&self) -> bool {
+    pub(crate) fn is_land(self) -> bool {
         !matches!(self, Battleground::Sea)
     }
-    
+
     #[must_use]
-    pub fn is_city(&self) -> bool {
+    pub fn is_city(self) -> bool {
         matches!(self, Battleground::City | Battleground::CityWithFortress)
     }
 }
