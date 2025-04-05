@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::content::advances::warfare::draft_cost;
-use crate::objective_card::{Objective, objective_is_ready};
+use crate::objective_card::{objective_is_ready, Objective};
 
 pub(crate) fn non_combat_objectives() -> Vec<Objective> {
     vec![draft()]

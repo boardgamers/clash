@@ -674,20 +674,18 @@ pub(crate) fn kill_combat_units(
 pub(crate) fn combat_stats() -> Builtin {
     Builtin::builder("Combat stats", "")
         .add_simple_persistent_event_listener(
-            |event| &mut event.combat_round_end,
+            |event| &mut event.combat_end,
             11,
             |game, _player, _name, e| {
-                if let Some(r) = &e.final_result {
-                    let c = &e.combat;
-                    if let Some(winner) = r.winner() {
-                        let p = c.player(winner);
-                        if p == game.current_player_index && !c.is_sea_battle(game) {
-                            CivilCardMatch::new(
-                                CivilCardOpportunity::WinLandBattle,
-                                Some(c.opponent(p)),
-                            )
-                            .store(game);
-                        }
+                let c = &e.combat;
+                if let Some(winner) = e.result.winner() {
+                    let p = c.player(winner);
+                    if p == game.current_player_index && !c.is_sea_battle(game) {
+                        CivilCardMatch::new(
+                            CivilCardOpportunity::WinLandBattle,
+                            Some(c.opponent(p)),
+                        )
+                        .store(game);
                     }
                 }
             },
