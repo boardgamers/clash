@@ -128,7 +128,7 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
             PersistentEventType::SelectObjectives(o) if Some(s.player.index) != player_index => {
                 // player shouldn't see other player's objectives
                 o.strip_secret();
-            } 
+            }
             _ => {}
         }
         let current_event_player = &mut s.player;

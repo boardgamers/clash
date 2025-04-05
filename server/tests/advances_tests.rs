@@ -277,7 +277,7 @@ fn test_civil_liberties() {
             TestAction::undoable(0, Action::Playing(Custom(CivilRights))),
             TestAction::undoable(
                 0,
-                Action::Playing(Recruit(playing_actions::Recruit::new( 
+                Action::Playing(Recruit(playing_actions::Recruit::new(
                     &Units::new(0, 1, 0, 0, 0, 0),
                     Position::from_offset("A1"),
                     ResourcePile::mood_tokens(2),
@@ -591,7 +591,7 @@ fn test_overpay() {
         "sanitation_and_draft",
         vec![TestAction::illegal(
             0,
-            Action::Playing(Recruit(server::playing_actions::Recruit ::new(
+            Action::Playing(Recruit(server::playing_actions::Recruit::new(
                 &Units::new(0, 1, 0, 0, 0, 0),
                 Position::from_offset("A1"),
                 ResourcePile::mood_tokens(1) + ResourcePile::gold(2), //paid too much

@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
-use crate::card::{hand_cards, HandCard, HandCardType};
+use crate::card::{HandCard, HandCardType, hand_cards};
 use crate::content::action_cards::get_action_card;
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType, PlayerRequest};
 use crate::content::tactics_cards::TacticsCardFactory;

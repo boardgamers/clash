@@ -1,3 +1,4 @@
+use crate::action_card::discard_action_card;
 use crate::card::{HandCard, HandCardType, hand_cards};
 use crate::city::City;
 use crate::content::incidents::famine::{
@@ -9,6 +10,7 @@ use crate::content::persistent_events::{
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, MoodModifier};
 use crate::map::{Map, Terrain};
+use crate::objective_card::discard_objective_card;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::{IncidentInfo, IncidentTarget};
@@ -16,8 +18,6 @@ use crate::position::Position;
 use crate::resource::ResourceType;
 use itertools::Itertools;
 use std::ops::RangeInclusive;
-use crate::action_card::discard_action_card;
-use crate::objective_card::discard_objective_card;
 
 pub(crate) fn pandemics_incidents() -> Vec<Incident> {
     vec![

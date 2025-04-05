@@ -18,7 +18,7 @@ use crate::movement::{
     CurrentMove, MoveState, MovementAction, get_move_state, has_movable_units,
     move_units_destinations,
 };
-use crate::objective_card::{on_objective_cards};
+use crate::objective_card::on_objective_cards;
 use crate::playing_actions::PlayingAction;
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;

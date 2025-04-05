@@ -19,14 +19,17 @@ fn test_draft() {
         Position::from_offset("A1"),
         ResourcePile::mood_tokens(1),
     )));
-    JSON.test("draft", vec![
-        TestAction::undoable(0, r.clone()).without_json_comparison(),
-        TestAction::undoable(0, r).without_json_comparison(),
-        TestAction::undoable(
-            0,
-            Action::Response(EventResponse::SelectHandCards(vec![
-                HandCard::ObjectiveCard(1),
-            ])),
-        ),
-    ]);
+    JSON.test(
+        "draft",
+        vec![
+            TestAction::undoable(0, r.clone()).without_json_comparison(),
+            TestAction::undoable(0, r).without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ObjectiveCard(1),
+                ])),
+            ),
+        ],
+    );
 }

@@ -4,10 +4,13 @@ use std::vec;
 
 #[must_use]
 pub(crate) fn get_all() -> Vec<ObjectiveCard> {
-    vec![ObjectiveCard::new(1, [
-        Objective::builder("Objective 1", "Description 1").build(), //todo
-        draft(),
-    ])]
+    vec![ObjectiveCard::new(
+        1,
+        [
+            Objective::builder("Objective 1", "Description 1").build(), //todo
+            draft(),
+        ],
+    )]
 }
 
 ///

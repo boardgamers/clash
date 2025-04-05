@@ -199,11 +199,16 @@ fn get_card_object(rc: &RenderContext, card: &HandCard) -> HandCardObject {
         ),
         HandCard::Wonder(name) => {
             let w = get_wonder(name);
-            HandCardObject::new(card.clone(), WONDER_CARD_COLOR, w.name.clone(), vec![
-                w.description.clone(),
-                format!("Cost: {}", w.cost.to_string()),
-                format!("Required advances: {}", w.required_advances.join(", ")),
-            ])
+            HandCardObject::new(
+                card.clone(),
+                WONDER_CARD_COLOR,
+                w.name.clone(),
+                vec![
+                    w.description.clone(),
+                    format!("Cost: {}", w.cost.to_string()),
+                    format!("Required advances: {}", w.required_advances.join(", ")),
+                ],
+            )
         }
     }
 }
@@ -247,17 +252,23 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
                     .map(|f| format!("{f:?}"))
                     .join(", ")
             ),
-            format!("Role: {:?}", match t.role_requirement {
-                None => "Attacker or Defender".to_string(),
-                Some(r) => match r {
-                    CombatRole::Attacker => "Attacker".to_string(),
-                    CombatRole::Defender => "Defender".to_string(),
-                },
-            }),
-            format!("Location: {:?}", match t.location_requirement {
-                None => "Any".to_string(),
-                Some(l) => format!("{l:?}"),
-            }),
+            format!(
+                "Role: {:?}",
+                match t.role_requirement {
+                    None => "Attacker or Defender".to_string(),
+                    Some(r) => match r {
+                        CombatRole::Attacker => "Attacker".to_string(),
+                        CombatRole::Defender => "Defender".to_string(),
+                    },
+                }
+            ),
+            format!(
+                "Location: {:?}",
+                match t.location_requirement {
+                    None => "Any".to_string(),
+                    Some(l) => format!("{l:?}"),
+                }
+            ),
         ]);
         break_text(t.description.as_str(), 30, &mut description);
     }

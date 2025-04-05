@@ -1,4 +1,5 @@
 use crate::content::action_cards::spy::validate_spy_cards;
+use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::objective_card::match_objective_cards;
@@ -6,7 +7,6 @@ use crate::player::Player;
 use crate::utils::Shuffle;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use crate::content::persistent_events::PersistentEventType;
 
 #[derive(Clone, Copy)]
 pub enum HandCardType {
@@ -105,9 +105,8 @@ pub fn validate_card_selection(cards: &[HandCard], game: &Game) -> Result<(), St
             let PersistentEventType::SelectObjectives(c) = &s.event_type else {
                 return Err("no selection handler".to_string());
             };
-            
-            match_objective_cards(cards, &c.objective_opportunities)
-                .map(|_| ())
+
+            match_objective_cards(cards, &c.objective_opportunities).map(|_| ())
         }
         _ => Ok(()),
     }

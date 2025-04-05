@@ -11,6 +11,7 @@ use crate::log::{
     current_player_turn_log_mut,
 };
 use crate::movement::MoveState;
+use crate::objective_card::present_objective_opportunities;
 use crate::pirates::get_pirates_player;
 use crate::player_events::{
     PersistentEvent, PersistentEventInfo, PersistentEvents, PlayerEvents, TransientEvents,
@@ -29,7 +30,6 @@ use crate::{
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::vec;
-use crate::objective_card::present_objective_opportunities;
 
 pub struct Game {
     pub state: GameState,
@@ -345,11 +345,11 @@ impl Game {
             }
         }
         self.events.pop();
-        
+
         if self.events.is_empty() {
             present_objective_opportunities(self);
         }
-        
+
         Some(value)
     }
 

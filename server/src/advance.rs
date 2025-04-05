@@ -1,5 +1,5 @@
-use std::mem;
 use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile, utils};
+use std::mem;
 
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::city_pieces::Building;
@@ -259,7 +259,8 @@ pub(crate) fn init_player(game: &mut Game, player_index: usize) {
     let advances = mem::take(&mut game.player_mut(player_index).advances);
     for advance in &advances {
         advance.listeners.init(game, player_index);
-        for i in 0..game.player(player_index)
+        for i in 0..game
+            .player(player_index)
             .civilization
             .special_advances
             .len()
@@ -267,7 +268,8 @@ pub(crate) fn init_player(game: &mut Game, player_index: usize) {
             if game.players[player_index].civilization.special_advances[i].required_advance
                 == advance.name
             {
-                let special_advance = game.player_mut(player_index)
+                let special_advance = game
+                    .player_mut(player_index)
                     .civilization
                     .special_advances
                     .remove(i);

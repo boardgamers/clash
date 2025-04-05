@@ -206,9 +206,8 @@ pub(crate) fn gain_action_card(game: &mut Game, player_index: usize, action_card
 }
 
 pub(crate) fn discard_action_card(game: &mut Game, player: usize, card: u8) {
-    remove_element_by(&mut game.player_mut(player).action_cards, |&id| id == card).expect(
-        "action card not found",
-    );
+    remove_element_by(&mut game.player_mut(player).action_cards, |&id| id == card)
+        .expect("action card not found");
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
