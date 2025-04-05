@@ -402,11 +402,13 @@
     ],
     [
       "Player1 is playing as Maya",
-      "Player1 gained an action card from the pile"
+      "Player1 gained an action card from the pile",
+      "No Objective Card left to draw"
     ],
     [
       "Player2 is playing as test0",
-      "Player2 gained an action card from the pile"
+      "Player2 gained an action card from the pile",
+      "No Objective Card left to draw"
     ],
     [
       "Age 1 has started"

@@ -362,7 +362,9 @@
       "Player1 advanced Philosophy for free",
       "Player gained 1 mood token as advance bonus",
       "Player2 gained an action card from the pile",
-      "Player1 gained an action card from the pile"
+      "No Objective Card left to draw",
+      "Player1 gained an action card from the pile",
+      "No Objective Card left to draw"
     ]
   ],
   "undo_limit": 3,
