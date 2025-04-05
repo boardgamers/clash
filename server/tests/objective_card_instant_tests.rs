@@ -10,7 +10,7 @@ use server::unit::Units;
 
 mod common;
 
-const JSON: JsonTest = JsonTest::new("objective_cards");
+const JSON: JsonTest = JsonTest::child("objective_cards", "instant");
 
 #[test]
 fn test_draft() {

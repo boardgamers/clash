@@ -18,7 +18,7 @@ use crate::movement::{
     CurrentMove, MoveState, MovementAction, get_move_state, has_movable_units,
     move_units_destinations,
 };
-use crate::objective_card::on_immediate_objective_cards;
+use crate::objective_card::on_instant_objective_cards;
 use crate::playing_actions::PlayingAction;
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
@@ -180,7 +180,7 @@ pub(crate) fn execute_custom_phase_action(
         ActionCard(a) => on_play_action_card(game, player_index, a),
         WonderCard(w) => on_play_wonder_card(game, player_index, w),
         SelectObjectives(c) => {
-            on_immediate_objective_cards(game, player_index, c);
+            on_instant_objective_cards(game, player_index, c);
         }
     }
 

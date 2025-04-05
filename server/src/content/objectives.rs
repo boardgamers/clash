@@ -1,13 +1,15 @@
 pub(crate) mod non_combat;
+pub(crate) mod status_phase_objectives;
 
 use crate::content::objectives::non_combat::non_combat_objectives;
+use crate::content::objectives::status_phase_objectives::status_phase_objectives;
 use crate::objective_card::Objective;
 use itertools::Itertools;
 use std::vec;
 
 #[must_use]
 pub(crate) fn get_all() -> Vec<Objective> {
-    let all = vec![non_combat_objectives()]
+    let all = vec![non_combat_objectives(), status_phase_objectives()]
         .into_iter()
         .flatten()
         .collect_vec();

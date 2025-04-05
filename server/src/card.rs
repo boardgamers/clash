@@ -108,6 +108,13 @@ pub fn validate_card_selection(cards: &[HandCard], game: &Game) -> Result<(), St
 
             match_objective_cards(cards, &c.objective_opportunities).map(|_| ())
         }
+        EventOrigin::Builtin(b) if b == "Complete Objectives" => { // status phase
+            let PersistentEventType::SelectObjectives(c) = &s.event_type else {
+                return Err("no selection handler".to_string());
+            };
+
+            match_objective_cards(cards, &c.objective_opportunities).map(|_| ())
+        }
         _ => Ok(()),
     }
 }

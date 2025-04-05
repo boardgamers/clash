@@ -125,7 +125,7 @@ pub(crate) fn objective_is_ready(player: &mut Player, name: &str) {
     o.dedup(); // can't fulfill 2 objectives with the same name at once
 }
 
-pub(crate) fn present_immediate_objective_opportunities(game: &mut Game) {
+pub(crate) fn present_instant_objective_opportunities(game: &mut Game) {
     let Some(player) = game
         .players
         .iter()
@@ -146,14 +146,14 @@ pub(crate) fn present_immediate_objective_opportunities(game: &mut Game) {
                 .then_some(HandCard::ObjectiveCard(card.id))
         })
         .collect::<Vec<_>>();
-    on_immediate_objective_cards(
+    on_instant_objective_cards(
         game,
         player,
         SelectObjectivesInfo::new(opportunities, cards),
     );
 }
 
-pub(crate) fn on_immediate_objective_cards(
+pub(crate) fn on_instant_objective_cards(
     game: &mut Game,
     player_index: usize,
     info: SelectObjectivesInfo,
@@ -166,7 +166,7 @@ pub(crate) fn on_immediate_objective_cards(
     );
 }
 
-pub(crate) fn select_immediate_objectives() -> Builtin {
+pub(crate) fn select_instant_objectives() -> Builtin {
     Builtin::builder(
         "Select Objective Cards to Complete",
         "Select which Objective and Action Cards to use \
@@ -262,7 +262,7 @@ fn combinations(cards: &[ObjectiveCard], opportunities: &[String]) -> Vec<Vec<(u
     if rest_combinations.is_empty() {
         return vec![first];
     }
-    
+
     rest_combinations
         .iter()
         .flat_map(|rest_objectives| {
@@ -346,7 +346,7 @@ mod tests {
             Objective::builder("Objective 6", "Description 6").build(),
         );
         let cards = vec![o1, o2, o3];
-        
+
         let opportunities = vec![
             "Objective 1".to_string(),
             "Objective 4".to_string(),

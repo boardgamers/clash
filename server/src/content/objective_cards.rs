@@ -1,21 +1,14 @@
 use crate::content::objectives::non_combat::draft;
-use crate::objective_card::{Objective, ObjectiveCard};
+use crate::content::objectives::status_phase_objectives::large_civ;
+use crate::objective_card::ObjectiveCard;
 use std::vec;
 
 #[must_use]
 pub(crate) fn get_all() -> Vec<ObjectiveCard> {
     vec![
-        ObjectiveCard::new(
-            1,
-            Objective::builder("Objective 1", "Description 1").build(), //todo
-            draft(),
-        ),
+        ObjectiveCard::new(1, large_civ(), draft()),
         // todo replace when we have a real repeated objective
-        ObjectiveCard::new(
-            99,
-            Objective::builder("Objective 1", "Description 1").build(), //todo
-            draft(),
-        ),
+        ObjectiveCard::new(99, large_civ(), draft()),
     ]
 }
 
