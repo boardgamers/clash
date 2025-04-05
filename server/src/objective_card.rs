@@ -233,25 +233,37 @@ pub(crate) fn match_objective_cards(
         }
     }
 
-    combinations(&res).into_iter().find(|v| {
-        v.iter().zip(cards).all(|((id, _), card)| match card {
-            HandCard::ObjectiveCard(c) => c == id,
-            _ => false,
+    combinations(&res, opportunities)
+        .into_iter()
+        .find(|v| {
+            v.iter().zip(cards).all(|((id, _), card)| match card {
+                HandCard::ObjectiveCard(c) => c == id,
+                _ => false,
+            })
         })
-    }).ok_or("Invalid selection of objective cards".to_string())
+        .ok_or("Invalid selection of objective cards".to_string())
 }
 
-fn combinations(cards: &[ObjectiveCard]) -> Vec<Vec<(u8, String)>> {
+fn combinations(cards: &[ObjectiveCard], opportunities: &[String]) -> Vec<Vec<(u8, String)>> {
     let Some((first, rest)) = cards.split_first() else {
-        return vec![vec![]];
+        return vec![];
     };
 
     let first = first
         .objectives
         .iter()
-        .map(|o| (cards[0].id, o.name.clone()))
+        .filter_map(|o| {
+            opportunities
+                .contains(&o.name)
+                .then_some((cards[0].id, o.name.clone()))
+        })
         .collect_vec();
-    combinations(rest)
+    let rest_combinations = combinations(rest, opportunities);
+    if rest_combinations.is_empty() {
+        return vec![first];
+    }
+    
+    rest_combinations
         .iter()
         .flat_map(|rest_objectives| {
             let vec1 = first
@@ -334,47 +346,21 @@ mod tests {
             Objective::builder("Objective 6", "Description 6").build(),
         );
         let cards = vec![o1, o2, o3];
+        
+        let opportunities = vec![
+            "Objective 1".to_string(),
+            "Objective 4".to_string(),
+        ];
 
-        let mut got = combinations(&cards);
+        let mut got = combinations(&cards, &opportunities);
         got.sort();
         assert_eq!(got, vec![
             vec![
                 (0, "Objective 1".to_string()),
                 (1, "Objective 4".to_string()),
-                (2, "Objective 5".to_string()),
-            ],
-            vec![
-                (0, "Objective 1".to_string()),
-                (1, "Objective 4".to_string()),
-                (2, "Objective 6".to_string()),
-            ],
-            vec![
-                (0, "Objective 2".to_string()),
-                (1, "Objective 1".to_string()),
-                (2, "Objective 5".to_string()),
-            ],
-            vec![
-                (0, "Objective 2".to_string()),
-                (1, "Objective 1".to_string()),
-                (2, "Objective 6".to_string()),
-            ],
-            vec![
-                (0, "Objective 2".to_string()),
-                (1, "Objective 4".to_string()),
-                (2, "Objective 5".to_string()),
-            ],
-            vec![
-                (0, "Objective 2".to_string()),
-                (1, "Objective 4".to_string()),
-                (2, "Objective 6".to_string()),
             ],
             vec![
                 (1, "Objective 1".to_string()),
-                (2, "Objective 5".to_string()),
-            ],
-            vec![
-                (1, "Objective 1".to_string()),
-                (2, "Objective 6".to_string()),
             ],
         ]);
     }

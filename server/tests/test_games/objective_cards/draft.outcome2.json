@@ -107,6 +107,9 @@
       "completed_objectives": [
         "Draft"
       ],
+      "objective_cards": [
+        99
+      ],
       "next_unit_id": 12,
       "event_info": {
         "Used Draft": "true"
@@ -334,12 +337,13 @@
                               "cards": [
                                 {
                                   "ObjectiveCard": 1
+                                },
+                                {
+                                  "ObjectiveCard": 99
                                 }
                               ],
                               "objective_opportunities": [
-                                {
-                                  "objective": "Draft"
-                                }
+                                "Draft"
                               ]
                             }
                           },
@@ -353,11 +357,14 @@
                                 "choices": [
                                   {
                                     "ObjectiveCard": 1
+                                  },
+                                  {
+                                    "ObjectiveCard": 99
                                   }
                                 ],
                                 "description": "Select cards to complete",
                                 "needed": {
-                                  "end": 1,
+                                  "end": 2,
                                   "start": 0
                                 }
                               }
@@ -369,11 +376,14 @@
                       ]
                     },
                     {
+                      "op": "replace",
+                      "path": "/players/0/objective_cards/0",
+                      "value": 1
+                    },
+                    {
                       "op": "add",
-                      "path": "/players/0/objective_cards",
-                      "value": [
-                        1
-                      ]
+                      "path": "/players/0/objective_cards/1",
+                      "value": 99
                     },
                     {
                       "op": "remove",
