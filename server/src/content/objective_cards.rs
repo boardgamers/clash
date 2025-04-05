@@ -1,8 +1,8 @@
-use crate::content::objectives::non_combat::{draft};
+use crate::content::objectives::combat::{conqueror, warmonger};
+use crate::content::objectives::non_combat::draft;
 use crate::content::objectives::status_phase_objectives::{coastal_lead, large_civ, science_lead};
 use crate::objective_card::ObjectiveCard;
 use std::vec;
-use crate::content::objectives::combat::{conqueror, warmonger};
 
 #[must_use]
 pub(crate) fn get_all() -> Vec<ObjectiveCard> {

@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{CivilCardMatch, CivilCardOpportunity};
-use crate::combat::{capture_position, Combat, CombatRetreatState};
+use crate::combat::{Combat, CombatRetreatState, capture_position};
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{PersistentEventType, PositionRequest, UnitsRequest};
 use crate::content::tactics_cards;
@@ -10,7 +10,7 @@ use crate::movement::move_units;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::position::Position;
 use crate::tactics_card::{CombatRole, TacticsCard, TacticsCardTarget};
-use crate::unit::{kill_units, UnitType, Units};
+use crate::unit::{UnitType, Units, kill_units};
 use crate::utils;
 use num::Zero;
 use serde::{Deserialize, Serialize};
@@ -684,7 +684,9 @@ pub(crate) fn combat_stats() -> Builtin {
             |event| &mut event.combat_end,
             11,
             |game, _player, _name, e| {
-                let i = current_player_turn_log_mut(game).items.last_mut()
+                let i = current_player_turn_log_mut(game)
+                    .items
+                    .last_mut()
                     .expect("last item");
                 i.combat_stats = Some(e.combat.stats.clone());
                 let c = &e.combat;
