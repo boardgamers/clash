@@ -56,7 +56,7 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
             ConstructionProject::Units(r) => {
                 let mut recruit = Recruit::new(&r.amount.units, cp.city_position, payment)
                     .with_replaced_units(&r.replaced_units);
-                if let Some(l) = r.amount.leader_name {
+                if let Some(l) = &r.amount.leader_name {
                     recruit = recruit.with_leader(l);
                 }
 
