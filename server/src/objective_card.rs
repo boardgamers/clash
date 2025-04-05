@@ -125,7 +125,7 @@ pub(crate) fn objective_is_ready(player: &mut Player, name: &str) {
     o.dedup(); // can't fulfill 2 objectives with the same name at once
 }
 
-pub(crate) fn present_instant_objective_opportunities(game: &mut Game) {
+pub(crate) fn present_instant_objective_cards(game: &mut Game) {
     let Some(player) = game
         .players
         .iter()
@@ -136,6 +136,17 @@ pub(crate) fn present_instant_objective_opportunities(game: &mut Game) {
 
     let opportunities = std::mem::take(&mut game.player_mut(player).objective_opportunities);
 
+    present_objective_cards(game, player, opportunities);
+}
+
+pub(crate) fn present_objective_cards(
+    game: &mut Game,
+    player: usize,
+    mut opportunities: Vec<String>,
+) {
+    opportunities.sort();
+    opportunities.dedup(); // can't use 2 objectives with the same name at once
+
     let cards = game
         .player(player)
         .objective_cards
@@ -145,19 +156,15 @@ pub(crate) fn present_instant_objective_opportunities(game: &mut Game) {
             card.has_objective(&opportunities)
                 .then_some(HandCard::ObjectiveCard(card.id))
         })
-        .collect::<Vec<_>>();
-    on_instant_objective_cards(
+        .collect_vec();
+    on_objective_cards(
         game,
         player,
         SelectObjectivesInfo::new(opportunities, cards),
     );
 }
 
-pub(crate) fn on_instant_objective_cards(
-    game: &mut Game,
-    player_index: usize,
-    info: SelectObjectivesInfo,
-) {
+pub(crate) fn on_objective_cards(game: &mut Game, player_index: usize, info: SelectObjectivesInfo) {
     let _ = game.trigger_persistent_event(
         &[player_index],
         |events| &mut events.select_objective_cards,
@@ -166,10 +173,10 @@ pub(crate) fn on_instant_objective_cards(
     );
 }
 
-pub(crate) fn select_instant_objectives() -> Builtin {
+pub(crate) fn select_objectives() -> Builtin {
     Builtin::builder(
         "Select Objective Cards to Complete",
-        "Select which Objective and Action Cards to use \
+        "Select which Objective Cards to use \
         (because the requirements are now met)",
     )
     .add_hand_card_request(
@@ -196,17 +203,18 @@ pub(crate) fn select_instant_objectives() -> Builtin {
     .build()
 }
 
-pub(crate) fn status_phase_completable(game: &Game, player: &Player, id: u8) -> Option<String> {
+pub(crate) fn status_phase_completable(game: &Game, player: &Player, id: u8) -> Vec<String> {
     get_objective_card(id)
         .objectives
         .iter()
-        .find_map(|objective| {
+        .filter_map(|objective| {
             objective
                 .status_phase_check
                 .as_ref()
                 .is_some_and(|s| s(game, player))
                 .then_some(objective.name.clone())
         })
+        .collect()
 }
 
 pub(crate) fn complete_objective_card(game: &mut Game, player: usize, id: u8, objective: String) {
@@ -347,10 +355,7 @@ mod tests {
         );
         let cards = vec![o1, o2, o3];
 
-        let opportunities = vec![
-            "Objective 1".to_string(),
-            "Objective 4".to_string(),
-        ];
+        let opportunities = vec!["Objective 1".to_string(), "Objective 4".to_string()];
 
         let mut got = combinations(&cards, &opportunities);
         got.sort();
@@ -359,9 +364,7 @@ mod tests {
                 (0, "Objective 1".to_string()),
                 (1, "Objective 4".to_string()),
             ],
-            vec![
-                (1, "Objective 1".to_string()),
-            ],
+            vec![(1, "Objective 1".to_string()),],
         ]);
     }
 }

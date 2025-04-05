@@ -1,5 +1,42 @@
 {
   "state": "Playing",
+  "events": [
+    {
+      "event_type": {
+        "StatusPhase": "FreeAdvance"
+      },
+      "player": 0,
+      "last_priority_used": 0,
+      "handler": {
+        "priority": 0,
+        "request": {
+          "SelectAdvance": {
+            "choices": [
+              "Arts",
+              "Astronomy",
+              "Bartering",
+              "Engineering",
+              "Fishing",
+              "Husbandry",
+              "Irrigation",
+              "Medicine",
+              "Metallurgy",
+              "Myths",
+              "Nationalism",
+              "Roads",
+              "Sanitation",
+              "Storage",
+              "Tactics",
+              "Writing"
+            ]
+          }
+        },
+        "origin": {
+          "Builtin": "Free Advance"
+        }
+      }
+    }
+  ],
   "players": [
     {
       "id": 0,
@@ -122,8 +159,10 @@
         "Mining"
       ],
       "incident_tokens": 2,
+      "completed_objectives": [
+        "Large Civilization"
+      ],
       "objective_cards": [
-        1,
         99
       ],
       "next_unit_id": 10
@@ -233,18 +272,120 @@
           "players": [
             {
               "index": 0,
-              "items": []
+              "items": [
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 1
+                        }
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/events/0/event_type/StatusPhase",
+                      "value": "CompleteObjectives"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/0/handler"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/0/last_priority_used"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/events/1",
+                      "value": {
+                        "event_type": {
+                          "SelectObjectives": {
+                            "cards": [
+                              {
+                                "ObjectiveCard": 1
+                              },
+                              {
+                                "ObjectiveCard": 99
+                              }
+                            ],
+                            "objective_opportunities": [
+                              "Large Civilization"
+                            ]
+                          }
+                        },
+                        "handler": {
+                          "origin": {
+                            "Builtin": "Select Objective Cards to Complete"
+                          },
+                          "priority": 0,
+                          "request": {
+                            "SelectHandCards": {
+                              "choices": [
+                                {
+                                  "ObjectiveCard": 1
+                                },
+                                {
+                                  "ObjectiveCard": 99
+                                }
+                              ],
+                              "description": "Select cards to complete",
+                              "needed": {
+                                "end": 2,
+                                "start": 0
+                              }
+                            }
+                          }
+                        },
+                        "last_priority_used": 0,
+                        "player": 0
+                      }
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/objective_cards/0",
+                      "value": 1
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/objective_cards/1",
+                      "value": 99
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/completed_objectives"
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 0,
-  "log": [],
-  "undo_limit": 0,
+  "action_log_index": 2,
+  "log": [
+    [
+      "Player2 ended their turn with 2 actions left"
+    ],
+    [
+      "The game has entered the 1st status phase"
+    ],
+    [
+      "Player1 completed objective Large Civilization"
+    ]
+  ],
+  "undo_limit": 1,
   "actions_left": 2,
-  "round": 2,
+  "round": 1,
   "age": 1,
   "messages": [
     "The game has started"

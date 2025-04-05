@@ -11,7 +11,7 @@ use crate::log::{
     current_player_turn_log_mut,
 };
 use crate::movement::MoveState;
-use crate::objective_card::present_instant_objective_opportunities;
+use crate::objective_card::present_instant_objective_cards;
 use crate::pirates::get_pirates_player;
 use crate::player_events::{
     PersistentEvent, PersistentEventInfo, PersistentEvents, PlayerEvents, TransientEvents,
@@ -347,7 +347,7 @@ impl Game {
         self.events.pop();
 
         if self.events.is_empty() {
-            present_instant_objective_opportunities(self);
+            present_instant_objective_cards(self);
         }
 
         Some(value)
