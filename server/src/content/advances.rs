@@ -10,7 +10,7 @@ mod seafaring;
 mod spirituality;
 pub(crate) mod theocracy;
 pub mod trade_routes;
-mod warfare;
+pub(crate) mod  warfare;
 
 use crate::advance::Advance;
 use crate::advance::AdvanceBuilder;

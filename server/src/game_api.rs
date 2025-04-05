@@ -108,6 +108,7 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
     game.incidents_left.shuffle(&mut game.rng);
     game.wonders_left.shuffle(&mut game.rng);
     game.action_cards_left.shuffle(&mut game.rng);
+    game.objective_cards_left.shuffle(&mut game.rng);
     game.rng = Rng::default();
     for (i, player) in game.players.iter_mut().enumerate() {
         if player_index != Some(i) {

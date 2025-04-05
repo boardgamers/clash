@@ -7,7 +7,7 @@ use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{
     PersistentEventHandler, PersistentEventPlayer, PersistentEventState, PersistentEventType,
 };
-use crate::content::{action_cards, advances, builtin, incidents};
+use crate::content::{action_cards, advances, builtin, incidents, objective_cards};
 use crate::events::{Event, EventOrigin};
 use crate::log::{
     ActionLogAge, ActionLogPlayer, ActionLogRound, current_player_turn_log,
@@ -62,6 +62,7 @@ pub struct Game {
     pub dropped_players: Vec<usize>,
     pub wonders_left: Vec<String>,
     pub action_cards_left: Vec<u8>,
+    pub objective_cards_left: Vec<u8>,
     pub incidents_left: Vec<u8>,
     pub permanent_effects: Vec<PermanentEffect>,
 }
@@ -142,6 +143,11 @@ impl Game {
             .iter()
             .map(|a| a.id)
             .collect();
+        let objective_cards_left = objective_cards::get_all()
+            .shuffled(&mut rng)
+            .iter()
+            .map(|a| a.id)
+            .collect();
         let incidents_left = incidents::get_all()
             .shuffled(&mut rng)
             .iter()
@@ -173,6 +179,7 @@ impl Game {
             dropped_players: Vec::new(),
             wonders_left,
             action_cards_left,
+            objective_cards_left,
             incidents_left,
             permanent_effects: Vec::new(),
         };
@@ -225,6 +232,7 @@ impl Game {
             dropped_players: data.dropped_players,
             wonders_left: data.wonders_left,
             action_cards_left: data.action_cards_left,
+            objective_cards_left: data.objective_cards_left,
             incidents_left: data.incidents_left,
             permanent_effects: data.permanent_effects,
             events: data.events,
@@ -259,6 +267,7 @@ impl Game {
             dropped_players: self.dropped_players,
             wonders_left: self.wonders_left,
             action_cards_left: self.action_cards_left,
+            objective_cards_left: self.objective_cards_left,
             incidents_left: self.incidents_left,
             permanent_effects: self.permanent_effects,
         }
@@ -288,6 +297,7 @@ impl Game {
             dropped_players: self.dropped_players.clone(),
             wonders_left: self.wonders_left.clone(),
             action_cards_left: self.action_cards_left.clone(),
+            objective_cards_left: self.objective_cards_left.clone(),
             incidents_left: self.incidents_left.clone(),
             permanent_effects: self.permanent_effects.clone(),
         }
@@ -784,6 +794,8 @@ pub struct GameData {
     map: MapData,
     starting_player_index: usize,
     current_player_index: usize,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     action_log: Vec<ActionLogAge>,
     action_log_index: usize,
     log: Vec<Vec<String>>,
@@ -801,10 +813,21 @@ pub struct GameData {
     #[serde(default)]
     #[serde(skip_serializing_if = "is_string_zero")]
     rng: String,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     dice_roll_log: Vec<u8>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     dropped_players: Vec<usize>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     wonders_left: Vec<String>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     action_cards_left: Vec<u8>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    objective_cards_left: Vec<u8>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     incidents_left: Vec<u8>,

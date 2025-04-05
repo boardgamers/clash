@@ -132,6 +132,15 @@ fn swap_cards(
             });
             "wonder"
         }
+        HandCard::ObjectiveCard(id) => {
+            let HandCard::ObjectiveCard(other_id) = other_card else {
+                return Err("wrong card type".to_string());
+            };
+            swap_card(game, player, other, &id, &other_id, |p| {
+                &mut p.objective_cards
+            });
+            "objective"
+        }
     };
     game.add_info_log_item(&format!(
         "{} decided to swap an {t} card with {}",

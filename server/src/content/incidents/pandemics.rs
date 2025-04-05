@@ -66,7 +66,6 @@ fn pandemics() -> Incident {
         |game, p, i| {
             let player = game.player(p);
             Some(HandCardsRequest::new(
-                // todo also objective cards
                 hand_cards(player, &[HandCardType::Action]),
                 PandemicsContributions::range(player, i, 1),
                 "Select cards to lose",
@@ -81,6 +80,15 @@ fn pandemics() -> Incident {
                             .retain(|c| c != a);
                         game.add_info_log_item(&format!(
                             "{} discarded an action card",
+                            s.player_name
+                        ));
+                    }
+                    HandCard::ObjectiveCard(o) => {
+                        game.player_mut(s.player_index)
+                            .objective_cards
+                            .retain(|c| c != o);
+                        game.add_info_log_item(&format!(
+                            "{} discarded an objective card",
                             s.player_name
                         ));
                     }

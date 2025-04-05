@@ -28,6 +28,7 @@ use crate::unit::{get_current_move, units_killed};
 use crate::wonder::{draw_wonder_card, on_play_wonder_card};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use crate::objective_card::{on_select_hand_cards, present_objective_opportunities};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum Action {
@@ -178,6 +179,9 @@ pub(crate) fn execute_custom_phase_action(
         Incident(i) => on_trigger_incident(game, i),
         ActionCard(a) => on_play_action_card(game, player_index, a),
         WonderCard(w) => on_play_wonder_card(game, player_index, w),
+        SelectHandCards(c) => {
+            on_select_hand_cards(game, player_index, c);
+        }
     }
 
     if let Some(mut s) = game.events.pop() {
@@ -195,6 +199,7 @@ pub(crate) fn execute_custom_phase_action(
             game.events.push(s);
         }
     }
+    present_objective_opportunities(game, player_index);
     Ok(())
 }
 

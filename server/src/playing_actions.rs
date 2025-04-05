@@ -13,7 +13,7 @@ use crate::cultural_influence::influence_culture_attempt;
 use crate::game::GameState;
 use crate::player::Player;
 use crate::player_events::PlayingActionInfo;
-use crate::recruit::{recruit, recruit_cost};
+use crate::recruit::{recruit};
 use crate::unit::Units;
 use crate::wonder::{WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card};
 use crate::{
@@ -199,35 +199,14 @@ impl PlayingAction {
                 }
                 build_city(game.player_mut(player_index), settler.position);
             }
-            Construct(c) => {
-                construct::construct(game, player_index, &c)?;
-            }
-            Collect(c) => {
-                collect(game, player_index, &c)?;
-            }
-            Recruit(r) => {
-                let player = &mut game.players[player_index];
-                if let Some(cost) = recruit_cost(
-                    player,
-                    &r.units,
-                    r.city_position,
-                    r.leader_name.as_ref(),
-                    &r.replaced_units,
-                    Some(&r.payment),
-                ) {
-                    cost.pay(game, &r.payment);
-                } else {
-                    return Err("Cannot pay for units".to_string());
-                }
-                recruit(game, player_index, r);
-            }
+            Construct(c) => construct::construct(game, player_index, &c)?,
+            Collect(c) => collect(game, player_index, &c)?,
+            Recruit(r) => recruit(game, player_index, r)?,
             IncreaseHappiness(i) => {
                 increase_happiness(game, player_index, &i.happiness_increases, Some(i.payment));
             }
             InfluenceCultureAttempt(c) => influence_culture_attempt(game, player_index, &c),
-            ActionCard(a) => {
-                play_action_card(game, player_index, a);
-            }
+            ActionCard(a) => play_action_card(game, player_index, a),
             WonderCard(name) => {
                 on_play_wonder_card(
                     game,
@@ -235,9 +214,7 @@ impl PlayingAction {
                     WonderCardInfo::new(name, WonderDiscount::default()),
                 );
             }
-            Custom(custom_action) => {
-                custom(game, player_index, custom_action)?;
-            }
+            Custom(custom_action) => custom(game, player_index, custom_action)?,
             EndTurn => game.next_turn(),
         }
         Ok(())

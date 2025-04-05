@@ -10,13 +10,25 @@ use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::{UnitType, Units, kill_units};
 
-pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) {
+pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Result<(), String> {
+    if let Some(cost) = recruit_cost(
+        game.player(player_index),
+        &r.units,
+        r.city_position,
+        r.leader_name.as_ref(),
+        &r.replaced_units,
+        Some(&r.payment),
+    ) {
+        cost.pay(game, &r.payment);
+    } else {
+        return Err("Cannot pay for units".to_string());
+    }
     for unit in &r.replaced_units {
         // kill separately, because they may be on different positions
         kill_units(game, &[*unit], player_index, None);
     }
     if let Some(leader_name) = &r.leader_name {
-        if let Some(previous_leader) = game.players[player_index].active_leader.take() {
+        if let Some(previous_leader) = game.player_mut(player_index).active_leader.take() {
             Player::with_leader(
                 &previous_leader,
                 game,
@@ -44,6 +56,7 @@ pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) {
     let city = player.get_city_mut(r.city_position);
     city.activate();
     on_recruit(game, player_index, r);
+    Ok(())
 }
 
 fn set_active_leader(game: &mut Game, leader_name: String, player_index: usize) {

@@ -35,6 +35,7 @@ use std::{
     cmp::Ordering::{self, *},
     mem,
 };
+use crate::objective_card::ObjectiveOpportunity;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayerType {
@@ -66,10 +67,12 @@ pub struct Player {
     pub custom_actions: HashMap<CustomActionType, EventOrigin>,
     pub wonder_cards: Vec<String>,
     pub action_cards: Vec<u8>,
+    pub objective_cards: Vec<u8>,
     pub next_unit_id: u32,
     pub played_once_per_turn_actions: Vec<CustomActionType>,
     pub event_info: HashMap<String, String>,
     pub secrets: Vec<String>,
+    pub objective_opportunities: Vec<ObjectiveOpportunity>, // transient
 }
 
 impl Clone for Player {
@@ -181,10 +184,12 @@ impl Player {
             custom_actions: HashMap::new(),
             wonder_cards: data.wonder_cards,
             action_cards: data.action_cards,
+            objective_cards: data.objective_cards,
             next_unit_id: data.next_unit_id,
             played_once_per_turn_actions: data.played_once_per_turn_actions,
             event_info: data.event_info,
             secrets: data.secrets,
+            objective_opportunities: Vec::new(),
         };
         player
     }
@@ -225,6 +230,7 @@ impl Player {
             event_victory_points: self.event_victory_points,
             wonder_cards: self.wonder_cards,
             action_cards: self.action_cards,
+            objective_cards: self.objective_cards,
             next_unit_id: self.next_unit_id,
             played_once_per_turn_actions: self.played_once_per_turn_actions,
             event_info: self.event_info,
@@ -266,6 +272,7 @@ impl Player {
             event_victory_points: self.event_victory_points,
             wonder_cards: self.wonder_cards.clone(),
             action_cards: self.action_cards.clone(),
+            objective_cards: self.objective_cards.clone(),
             next_unit_id: self.next_unit_id,
             played_once_per_turn_actions: self.played_once_per_turn_actions.clone(),
             event_info: self.event_info.clone(),
@@ -304,11 +311,13 @@ impl Player {
             custom_actions: HashMap::new(),
             wonder_cards: Vec::new(),
             action_cards: Vec::new(),
+            objective_cards: Vec::new(),
             wonders_build: Vec::new(),
             next_unit_id: 0,
             played_once_per_turn_actions: Vec::new(),
             event_info: HashMap::new(),
             secrets: Vec::new(),
+            objective_opportunities: Vec::new(),
         }
     }
 
@@ -862,6 +871,9 @@ pub struct PlayerData {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     action_cards: Vec<u8>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    objective_cards: Vec<u8>,
     next_unit_id: u32,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
