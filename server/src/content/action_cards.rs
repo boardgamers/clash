@@ -3,7 +3,7 @@ pub(crate) mod development;
 mod inspiration;
 mod mercenaries;
 pub(crate) mod negotiation;
-pub mod spy;
+pub(crate) mod spy;
 mod synergies;
 
 use crate::action_card::{ActionCard, CivilCard};

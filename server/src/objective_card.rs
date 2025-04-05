@@ -183,7 +183,7 @@ fn complete_objective_card(game: &mut Game, player: usize, id: u8, objective: St
 }
 
 pub(crate) fn match_objective_cards(
-    cards: &Vec<HandCard>,
+    cards: &[HandCard],
     opportunities: &[ObjectiveOpportunity],
 ) -> Result<Vec<(u8, String)>, String> {
     let mut res = vec![];

@@ -1,4 +1,5 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::custom_phase_ui;
 use crate::custom_phase_ui::MultiSelection;
 use crate::dialog_ui::ok_button;
 use crate::layout_ui::{bottom_centered_text, left_mouse_button_pressed_in_rect};
@@ -7,13 +8,13 @@ use crate::player_ui::get_combat;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
 use crate::tooltip::show_tooltip_for_rect;
+use custom_phase_ui::multi_select_tooltip;
 use itertools::Itertools;
 use macroquad::color::BLACK;
 use macroquad::math::{Rect, Vec2, vec2};
 use macroquad::prelude::{BLUE, Color, GREEN, RED, YELLOW, draw_rectangle, draw_rectangle_lines};
 use server::action::Action;
-use server::card::{HandCard, HandCardType, hand_cards};
-use server::content::action_cards::spy::validate_if_spy;
+use server::card::{HandCard, HandCardType, hand_cards, validate_card_selection};
 use server::content::action_cards::{get_action_card, get_civil_card};
 use server::content::objective_cards::get_objective_card;
 use server::content::persistent_events::EventResponse;
@@ -198,16 +199,11 @@ fn get_card_object(rc: &RenderContext, card: &HandCard) -> HandCardObject {
         ),
         HandCard::Wonder(name) => {
             let w = get_wonder(name);
-            HandCardObject::new(
-                card.clone(),
-                WONDER_CARD_COLOR,
-                w.name.clone(),
-                vec![
-                    w.description.clone(),
-                    format!("Cost: {}", w.cost.to_string()),
-                    format!("Required advances: {}", w.required_advances.join(", ")),
-                ],
-            )
+            HandCardObject::new(card.clone(), WONDER_CARD_COLOR, w.name.clone(), vec![
+                w.description.clone(),
+                format!("Cost: {}", w.cost.to_string()),
+                format!("Required advances: {}", w.required_advances.join(", ")),
+            ])
         }
     }
 }
@@ -251,23 +247,17 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
                     .map(|f| format!("{f:?}"))
                     .join(", ")
             ),
-            format!(
-                "Role: {:?}",
-                match t.role_requirement {
-                    None => "Attacker or Defender".to_string(),
-                    Some(r) => match r {
-                        CombatRole::Attacker => "Attacker".to_string(),
-                        CombatRole::Defender => "Defender".to_string(),
-                    },
-                }
-            ),
-            format!(
-                "Location: {:?}",
-                match t.location_requirement {
-                    None => "Any".to_string(),
-                    Some(l) => format!("{l:?}"),
-                }
-            ),
+            format!("Role: {:?}", match t.role_requirement {
+                None => "Attacker or Defender".to_string(),
+                Some(r) => match r {
+                    CombatRole::Attacker => "Attacker".to_string(),
+                    CombatRole::Defender => "Defender".to_string(),
+                },
+            }),
+            format!("Location: {:?}", match t.location_requirement {
+                None => "Any".to_string(),
+                Some(l) => format!("{l:?}"),
+            }),
         ]);
         break_text(t.description.as_str(), 30, &mut description);
     }
@@ -309,9 +299,10 @@ pub fn select_cards_dialog(rc: &RenderContext, s: &MultiSelection<HandCard>) -> 
 
     if ok_button(
         rc,
-        crate::custom_phase_ui::multi_select_tooltip(
+        multi_select_tooltip(
             s,
-            s.request.is_valid(&s.selected) && validate_if_spy(&s.selected, rc.game),
+            s.request.is_valid(&s.selected)
+                && validate_card_selection(&s.selected, rc.game).is_ok(),
             "cards",
         ),
     ) {

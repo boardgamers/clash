@@ -1,4 +1,7 @@
+use crate::content::action_cards::spy::validate_spy_cards;
+use crate::events::EventOrigin;
 use crate::game::Game;
+use crate::objective_card::match_objective_cards;
 use crate::player::Player;
 use crate::utils::Shuffle;
 use itertools::Itertools;
@@ -81,4 +84,26 @@ pub fn hand_cards(player: &Player, types: &[HandCardType]) -> Vec<HandCard> {
                 .collect(),
         })
         .collect()
+}
+
+///
+/// Validates the selection of cards in the hand.
+///
+/// # Errors
+///
+/// If the selection is invalid, an error message is returned.
+pub fn validate_card_selection(cards: &[HandCard], game: &Game) -> Result<(), String> {
+    let s = game.current_event();
+    let player = &s.player;
+    let Some(h) = player.handler.as_ref() else {
+        return Err("no selection handler".to_string());
+    };
+    match &h.origin {
+        EventOrigin::CivilCard(id) if *id == 7 || *id == 8 => validate_spy_cards(cards, game),
+        EventOrigin::Builtin(b) if b == "Select Hand Cards" => {
+            match_objective_cards(cards, &game.player(player.index).objective_opportunities)
+                .map(|_| ())
+        }
+        _ => Ok(()),
+    }
 }

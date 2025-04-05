@@ -1,10 +1,9 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
-use crate::card::{HandCard, HandCardType, hand_cards};
+use crate::card::{hand_cards, HandCard, HandCardType};
 use crate::content::action_cards::get_action_card;
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType, PlayerRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
-use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::player::Player;
 use crate::playing_actions::ActionType;
@@ -212,28 +211,16 @@ fn get_swap_secrets(other: &Player) -> Vec<String> {
     ]
 }
 
-/// # Panics
-///
-/// Panics if the game is in an invalid state
-#[must_use]
-pub fn validate_if_spy(cards: &[HandCard], game: &Game) -> bool {
+pub(crate) fn validate_spy_cards(cards: &[HandCard], game: &Game) -> Result<(), String> {
     let s = game.current_event();
-    let h = &s.player.handler.as_ref().expect("handler not found");
-    match h.origin {
-        EventOrigin::CivilCard(id) if id == 7 || id == 8 => {
-            let mut g = game.clone();
-            let PersistentEventType::ActionCard(c) = &s.event_type else {
-                panic!("wrong event type");
-            };
+    let PersistentEventType::ActionCard(c) = &s.event_type else {
+        panic!("wrong event type");
+    };
 
-            swap_cards(
-                &mut g,
-                cards,
-                s.player.index,
-                c.selected_player.expect("no player found"),
-            )
-            .is_ok()
-        }
-        _ => true,
-    }
+    swap_cards(
+        &mut game.clone(),
+        cards,
+        s.player.index,
+        c.selected_player.expect("no player found"),
+    )
 }
