@@ -72,7 +72,7 @@ pub struct Player {
     pub played_once_per_turn_actions: Vec<CustomActionType>,
     pub event_info: HashMap<String, String>,
     pub secrets: Vec<String>,
-    pub objective_opportunities: Vec<ObjectiveOpportunity>, // transient
+    pub(crate) objective_opportunities: Vec<ObjectiveOpportunity>, // transient
 }
 
 impl Clone for Player {

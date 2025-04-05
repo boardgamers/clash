@@ -10,11 +10,12 @@ use crate::tooltip::show_tooltip_for_rect;
 use itertools::Itertools;
 use macroquad::color::BLACK;
 use macroquad::math::{Rect, Vec2, vec2};
-use macroquad::prelude::{Color, GREEN, RED, YELLOW, draw_rectangle, draw_rectangle_lines};
+use macroquad::prelude::{BLUE, Color, GREEN, RED, YELLOW, draw_rectangle, draw_rectangle_lines};
 use server::action::Action;
 use server::card::{HandCard, HandCardType, hand_cards};
 use server::content::action_cards::spy::validate_if_spy;
 use server::content::action_cards::{get_action_card, get_civil_card};
+use server::content::objective_cards::get_objective_card;
 use server::content::persistent_events::EventResponse;
 use server::content::wonders::get_wonder;
 use server::playing_actions::{PlayingAction, PlayingActionType};
@@ -39,6 +40,7 @@ impl HandCardObject {
 }
 
 const ACTION_CARD_COLOR: Color = RED;
+const OBJECTIVE_CARD_COLOR: Color = BLUE;
 const WONDER_CARD_COLOR: Color = YELLOW;
 
 pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
@@ -136,12 +138,11 @@ fn draw_card(
 }
 
 fn can_play_card(rc: &RenderContext, card: &HandCard) -> bool {
-    rc.can_play_action(
-        &(match card {
-            HandCard::ActionCard(id) => PlayingActionType::ActionCard(*id),
-            HandCard::Wonder(name) => PlayingActionType::WonderCard(name.clone()),
-        }),
-    )
+    match card {
+        HandCard::ActionCard(id) => rc.can_play_action(&PlayingActionType::ActionCard(*id)),
+        HandCard::Wonder(name) => rc.can_play_action(&PlayingActionType::WonderCard(name.clone())),
+        HandCard::ObjectiveCard(_) => false,
+    }
 }
 
 fn play_card(card: &HandCard) -> StateUpdate {
@@ -151,6 +152,7 @@ fn play_card(card: &HandCard) -> StateUpdate {
             Action::Playing(PlayingAction::ActionCard(*a)),
         ),
         HandCard::Wonder(_) => panic!("wonders are played in the construct menu"),
+        HandCard::ObjectiveCard(_) => panic!("objective cards are not played as actions"),
     }
 }
 
@@ -181,6 +183,13 @@ fn get_card_object(rc: &RenderContext, card: &HandCard) -> HandCardObject {
             vec!["Hidden Action Card".to_string()],
         ),
         HandCard::ActionCard(id) => action_card_object(rc, *id),
+        HandCard::ObjectiveCard(o) if *o == 0 => HandCardObject::new(
+            card.clone(),
+            OBJECTIVE_CARD_COLOR,
+            "Objective Card".to_string(),
+            vec!["Hidden Objective Card".to_string()],
+        ),
+        HandCard::ObjectiveCard(id) => objective_card_object(*id),
         HandCard::Wonder(n) if n.is_empty() => HandCardObject::new(
             card.clone(),
             WONDER_CARD_COLOR,
@@ -266,6 +275,23 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
         HandCard::ActionCard(id),
         ACTION_CARD_COLOR,
         name,
+        description,
+    )
+}
+
+fn objective_card_object(id: u8) -> HandCardObject {
+    let card = get_objective_card(id);
+
+    let mut description = vec![];
+    for o in &card.objectives {
+        description.push(format!("Objective: {}", o.name));
+        break_text(o.description.as_str(), 30, &mut description);
+    }
+
+    HandCardObject::new(
+        HandCard::ObjectiveCard(id),
+        OBJECTIVE_CARD_COLOR,
+        card.objectives.map(|o| o.name.clone()).join(", "),
         description,
     )
 }
