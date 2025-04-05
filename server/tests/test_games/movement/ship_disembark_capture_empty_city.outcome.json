@@ -319,11 +319,7 @@
                       "op": "remove",
                       "path": "/state/Movement/moved_units"
                     }
-                  ],
-                  "civil_card_match": {
-                    "opportunity": "CaptureCity",
-                    "opponent": 1
-                  }
+                  ]
                 }
               ]
             }

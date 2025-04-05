@@ -222,9 +222,28 @@
                       }
                     }
                   },
-                  "civil_card_match": {
-                    "opportunity": "WinLandBattle",
-                    "opponent": 1
+                  "combat_stats": {
+                    "position": "C1",
+                    "battleground": "CityWithFortress",
+                    "attacker": {
+                      "player": 0,
+                      "fighters": {
+                        "infantry": 1,
+                        "cavalry": 1,
+                        "elephants": 1,
+                        "leaders": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 1,
+                      "fighters": {
+                        "infantry": 2
+                      },
+                      "losses": {
+                        "infantry": 2
+                      }
+                    },
+                    "result": "AttackerWins"
                   }
                 },
                 {

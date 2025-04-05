@@ -205,6 +205,29 @@
                         }
                       ]
                     }
+                  },
+                  "combat_stats": {
+                    "position": "C1",
+                    "battleground": "City",
+                    "attacker": {
+                      "player": 0,
+                      "fighters": {
+                        "infantry": 1
+                      },
+                      "losses": {
+                        "infantry": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 1,
+                      "fighters": {
+                        "infantry": 2
+                      },
+                      "losses": {
+                        "infantry": 2
+                      }
+                    },
+                    "result": "Draw"
                   }
                 }
               ]

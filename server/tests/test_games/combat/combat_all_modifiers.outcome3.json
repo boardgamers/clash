@@ -35,7 +35,27 @@
               "SteelWeaponsAttacker",
               "CancelFortressIgnoreHit",
               "SteelWeaponsDefender"
-            ]
+            ],
+            "stats": {
+              "position": "C1",
+              "battleground": "CityWithFortress",
+              "attacker": {
+                "player": 0,
+                "fighters": {
+                  "settlers": 2,
+                  "infantry": 1,
+                  "cavalry": 1,
+                  "elephants": 1,
+                  "leaders": 1
+                }
+              },
+              "defender": {
+                "player": 1,
+                "fighters": {
+                  "infantry": 2
+                }
+              }
+            }
           },
           "attacker_strength": {
             "extra_dies": 0,

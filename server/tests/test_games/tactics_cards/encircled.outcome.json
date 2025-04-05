@@ -20,7 +20,23 @@
             "attackers": [
               0
             ],
-            "retreat": "CanRetreat"
+            "retreat": "CanRetreat",
+            "stats": {
+              "position": "C1",
+              "battleground": "City",
+              "attacker": {
+                "player": 0,
+                "fighters": {
+                  "infantry": 1
+                }
+              },
+              "defender": {
+                "player": 1,
+                "fighters": {
+                  "infantry": 2
+                }
+              }
+            }
           },
           "attacker_strength": {
             "extra_dies": 0,

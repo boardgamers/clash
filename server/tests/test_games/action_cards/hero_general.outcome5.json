@@ -218,12 +218,32 @@
                       "SelectHandCards": []
                     }
                   },
-                  "civil_card_match": {
-                    "opportunity": "CaptureCity",
-                    "played_cards": [
+                  "combat_stats": {
+                    "position": "C1",
+                    "battleground": "City",
+                    "attacker": {
+                      "player": 0,
+                      "fighters": {
+                        "settlers": 2,
+                        "infantry": 1,
+                        "cavalry": 1,
+                        "elephants": 1,
+                        "leaders": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 1,
+                      "fighters": {
+                        "infantry": 2
+                      },
+                      "losses": {
+                        "infantry": 2
+                      }
+                    },
+                    "result": "AttackerWins",
+                    "claimed_action_cards": [
                       5
-                    ],
-                    "opponent": 1
+                    ]
                   }
                 },
                 {

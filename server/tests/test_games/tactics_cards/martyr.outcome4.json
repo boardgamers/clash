@@ -310,6 +310,29 @@
                         2
                       ]
                     }
+                  },
+                  "combat_stats": {
+                    "position": "D2",
+                    "battleground": "Sea",
+                    "attacker": {
+                      "player": 0,
+                      "fighters": {
+                        "ships": 2
+                      },
+                      "losses": {
+                        "ships": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 1,
+                      "fighters": {
+                        "ships": 1
+                      },
+                      "losses": {
+                        "ships": 1
+                      }
+                    },
+                    "result": "AttackerWins"
                   }
                 }
               ]

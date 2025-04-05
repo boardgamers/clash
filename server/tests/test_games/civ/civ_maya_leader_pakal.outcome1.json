@@ -310,9 +310,19 @@
                       }
                     }
                   },
-                  "civil_card_match": {
-                    "opportunity": "CaptureCity",
-                    "opponent": 1
+                  "combat_stats": {
+                    "position": "B1",
+                    "battleground": "CityWithFortress",
+                    "attacker": {
+                      "player": 0,
+                      "fighters": {
+                        "leaders": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 1
+                    },
+                    "result": "AttackerWins"
                   }
                 },
                 {

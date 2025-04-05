@@ -212,10 +212,6 @@
                       }
                     }
                   },
-                  "civil_card_match": {
-                    "opportunity": "WinLandBattle",
-                    "opponent": 1
-                  },
                   "combat_stats": {
                     "position": "C1",
                     "battleground": "City",
@@ -353,10 +349,6 @@
                       "value": 7
                     }
                   ],
-                  "civil_card_match": {
-                    "opportunity": "WinLandBattle",
-                    "opponent": 1
-                  },
                   "combat_stats": {
                     "position": "C1",
                     "battleground": "City",

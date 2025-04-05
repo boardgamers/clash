@@ -199,10 +199,6 @@
                         "destination": "C1"
                       }
                     }
-                  },
-                  "civil_card_match": {
-                    "opportunity": "WinLandBattle",
-                    "opponent": 1
                   }
                 },
                 {
@@ -238,7 +234,26 @@
                                 "defender": 1,
                                 "defender_position": "C1",
                                 "retreat": "CanRetreat",
-                                "round": 1
+                                "round": 1,
+                                "stats": {
+                                  "attacker": {
+                                    "fighters": {
+                                      "cavalry": 1,
+                                      "elephants": 1,
+                                      "infantry": 1,
+                                      "leaders": 1
+                                    },
+                                    "player": 0
+                                  },
+                                  "battleground": "City",
+                                  "defender": {
+                                    "fighters": {
+                                      "infantry": 2
+                                    },
+                                    "player": 1
+                                  },
+                                  "position": "C1"
+                                }
                               },
                               "defender_casualties": {
                                 "fighters": 2
@@ -399,9 +414,32 @@
                       ]
                     }
                   ],
-                  "civil_card_match": {
-                    "opportunity": "CaptureCity",
-                    "opponent": 1
+                  "combat_stats": {
+                    "position": "C1",
+                    "battleground": "City",
+                    "attacker": {
+                      "player": 0,
+                      "fighters": {
+                        "infantry": 1,
+                        "cavalry": 1,
+                        "elephants": 1,
+                        "leaders": 1
+                      },
+                      "losses": {
+                        "infantry": 1,
+                        "cavalry": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 1,
+                      "fighters": {
+                        "infantry": 2
+                      },
+                      "losses": {
+                        "infantry": 2
+                      }
+                    },
+                    "result": "AttackerWins"
                   }
                 }
               ]

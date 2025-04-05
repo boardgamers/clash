@@ -14,7 +14,29 @@
             "attackers": [
               12
             ],
-            "retreat": "CannotRetreat"
+            "retreat": "CannotRetreat",
+            "stats": {
+              "position": "C3",
+              "battleground": "Sea",
+              "attacker": {
+                "player": 0,
+                "fighters": {
+                  "ships": 3
+                },
+                "losses": {
+                  "ships": 2
+                }
+              },
+              "defender": {
+                "player": 2,
+                "fighters": {
+                  "ships": 2
+                },
+                "losses": {
+                  "ships": 2
+                }
+              }
+            }
           }
         }
       },
@@ -320,6 +342,29 @@
                         "gold": 1
                       }
                     }
+                  },
+                  "combat_stats": {
+                    "position": "C3",
+                    "battleground": "Sea",
+                    "attacker": {
+                      "player": 0,
+                      "fighters": {
+                        "ships": 3
+                      },
+                      "losses": {
+                        "ships": 2
+                      }
+                    },
+                    "defender": {
+                      "player": 2,
+                      "fighters": {
+                        "ships": 2
+                      },
+                      "losses": {
+                        "ships": 2
+                      }
+                    },
+                    "result": "AttackerWins"
                   }
                 }
               ]

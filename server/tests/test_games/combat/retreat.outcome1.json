@@ -241,7 +241,23 @@
                                 "defender": 1,
                                 "defender_position": "C1",
                                 "retreat": "CanRetreat",
-                                "round": 1
+                                "round": 1,
+                                "stats": {
+                                  "attacker": {
+                                    "fighters": {
+                                      "infantry": 1
+                                    },
+                                    "player": 0
+                                  },
+                                  "battleground": "City",
+                                  "defender": {
+                                    "fighters": {
+                                      "infantry": 2
+                                    },
+                                    "player": 1
+                                  },
+                                  "position": "C1"
+                                }
                               },
                               "defender_casualties": {}
                             }

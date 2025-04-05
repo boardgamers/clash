@@ -231,9 +231,28 @@
                       }
                     }
                   },
-                  "civil_card_match": {
-                    "opportunity": "CaptureCity",
-                    "opponent": 2
+                  "combat_stats": {
+                    "position": "C2",
+                    "battleground": "CityWithFortress",
+                    "attacker": {
+                      "player": 0,
+                      "fighters": {
+                        "elephants": 4
+                      },
+                      "losses": {
+                        "elephants": 2
+                      }
+                    },
+                    "defender": {
+                      "player": 2,
+                      "fighters": {
+                        "infantry": 3
+                      },
+                      "losses": {
+                        "infantry": 3
+                      }
+                    },
+                    "result": "AttackerWins"
                   }
                 }
               ]

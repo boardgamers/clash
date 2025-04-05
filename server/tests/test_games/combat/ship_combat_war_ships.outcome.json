@@ -28,7 +28,26 @@
             "attackers": [
               8
             ],
-            "retreat": "CanRetreat"
+            "retreat": "CanRetreat",
+            "stats": {
+              "position": "D2",
+              "battleground": "Sea",
+              "attacker": {
+                "player": 0,
+                "fighters": {
+                  "ships": 2
+                },
+                "losses": {
+                  "ships": 1
+                }
+              },
+              "defender": {
+                "player": 1,
+                "fighters": {
+                  "ships": 2
+                }
+              }
+            }
           }
         }
       },

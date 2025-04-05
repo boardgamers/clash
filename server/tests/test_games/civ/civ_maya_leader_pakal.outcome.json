@@ -21,7 +21,20 @@
             "attackers": [
               10
             ],
-            "retreat": "CanRetreat"
+            "retreat": "CanRetreat",
+            "stats": {
+              "position": "B1",
+              "battleground": "CityWithFortress",
+              "attacker": {
+                "player": 0,
+                "fighters": {
+                  "leaders": 1
+                }
+              },
+              "defender": {
+                "player": 1
+              }
+            }
           }
         }
       },
@@ -29,9 +42,9 @@
         0
       ],
       "player": 1,
-      "last_priority_used": 0,
+      "last_priority_used": 2,
       "handler": {
-        "priority": 0,
+        "priority": 2,
         "request": {
           "SelectPositions": {
             "choices": [
@@ -349,9 +362,19 @@
                       }
                     }
                   },
-                  "civil_card_match": {
-                    "opportunity": "CaptureCity",
-                    "opponent": 1
+                  "combat_stats": {
+                    "position": "B1",
+                    "battleground": "CityWithFortress",
+                    "attacker": {
+                      "player": 0,
+                      "fighters": {
+                        "leaders": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 1
+                    },
+                    "result": "AttackerWins"
                   }
                 }
               ]
