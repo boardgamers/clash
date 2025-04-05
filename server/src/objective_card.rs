@@ -233,14 +233,12 @@ pub(crate) fn match_objective_cards(
         }
     }
 
-    combinations(&res)
-        .into_iter()
-        .find(|v| {
-            v.iter().all(|(id, _)| res.iter().any(|c| c.id == *id))
-                && v.iter()
-                    .all(|(_, o)| opportunities.iter().any(|oo| oo == o))
+    combinations(&res).into_iter().find(|v| {
+        v.iter().zip(cards).all(|((id, _), card)| match card {
+            HandCard::ObjectiveCard(c) => c == id,
+            _ => false,
         })
-        .ok_or("combination is invalid".to_string())
+    }).ok_or("Invalid selection of objective cards".to_string())
 }
 
 fn combinations(cards: &[ObjectiveCard]) -> Vec<Vec<(u8, String)>> {
@@ -261,10 +259,7 @@ fn combinations(cards: &[ObjectiveCard]) -> Vec<Vec<(u8, String)>> {
                 .map(|first_objective| {
                     let name = &first_objective.1;
                     let mut r = rest_objectives.clone();
-                    if !r
-                        .iter()
-                        .any(|(_id, n)| name == n)
-                    {
+                    if !r.iter().any(|(_id, n)| name == n) {
                         r.insert(0, first_objective.clone());
                     }
                     r
