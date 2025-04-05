@@ -9,6 +9,7 @@ use server::advance::do_advance;
 use server::city::City;
 use server::content::advances::get_advance;
 use server::game::{Game, GameData};
+use server::game_setup::setup_game;
 use server::map::Terrain;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
@@ -34,7 +35,7 @@ async fn main() {
         } else {
             "a".repeat(32)
         };
-        Game::new(2, seed, true)
+        setup_game(2, seed, true)
     } else {
         setup_local_game()
     };
@@ -76,7 +77,7 @@ pub async fn run(mut game: Game, features: &Features) {
 
 #[must_use]
 pub fn setup_local_game() -> Game {
-    let mut game = Game::new(2, "0".to_string(), false);
+    let mut game = setup_game(2, "0".to_string(), false);
     game.round = 6;
     game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];
     let add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {

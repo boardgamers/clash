@@ -4,6 +4,7 @@ use crate::action::execute_action;
 use crate::content::persistent_events::{
     EventResponse, PersistentEventRequest, PersistentEventType,
 };
+use crate::game_setup::setup_game;
 use crate::log::current_player_turn_log_mut;
 use crate::utils::Shuffle;
 use crate::{
@@ -16,7 +17,7 @@ use crate::{
 
 #[must_use]
 pub fn init(player_amount: usize, seed: String) -> Game {
-    Game::new(player_amount, seed, true)
+    setup_game(player_amount, seed, true)
 }
 
 #[must_use]

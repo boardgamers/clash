@@ -31,6 +31,7 @@ mod explore;
 pub mod game;
 pub mod game_api;
 pub mod game_api_wrapper;
+pub mod game_setup;
 pub mod incident;
 pub mod leader;
 pub mod log;
